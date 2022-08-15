@@ -1,0 +1,18 @@
+using System;
+using System.Collections.Generic;
+
+namespace MinecraftClient.Commands
+{
+    public class List : Command
+    {
+        public override string CmdName { get { return "list"; } }
+        public override string CmdUsage { get { return "list"; } }
+        public override string CmdDesc { get { return "cmd.list.desc"; } }
+
+        public override string Run(CornClient handler, string command, Dictionary<string, object> localVars)
+        {
+            return Translations.Get("cmd.list.players", String.Join(", ", handler.GetOnlinePlayers()));
+        }
+    }
+}
+
