@@ -47,19 +47,19 @@ namespace MinecraftClient.Protocol.Handlers
         public PacketTypePalette GetTypeHandler(int protocol)
         {
             PacketTypePalette p;
-            if (protocol > Protocol113Handler.MC_1_18_2_Version)
+            if (protocol > ProtocolMinecraft.MC_1_18_2_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.packet"));
-            else if (protocol <= Protocol113Handler.MC_1_14_Version)
+            else if (protocol <= ProtocolMinecraft.MC_1_14_Version)
                 p = new PacketPalette113();
-            else if (protocol <= Protocol113Handler.MC_1_15_Version)
+            else if (protocol <= ProtocolMinecraft.MC_1_15_Version)
                 p = new PacketPalette114();
-            else if (protocol <= Protocol113Handler.MC_1_15_2_Version)
+            else if (protocol <= ProtocolMinecraft.MC_1_15_2_Version)
                 p = new PacketPalette115();
-            else if (protocol <= Protocol113Handler.MC_1_16_1_Version)
+            else if (protocol <= ProtocolMinecraft.MC_1_16_1_Version)
                 p = new PacketPalette116();
-            else if (protocol <= Protocol113Handler.MC_1_16_5_Version)
+            else if (protocol <= ProtocolMinecraft.MC_1_16_5_Version)
                 p = new PacketPalette1162();
-            else if (protocol <= Protocol113Handler.MC_1_17_1_Version)
+            else if (protocol <= ProtocolMinecraft.MC_1_17_1_Version)
                 p = new PacketPalette117();
             else
                 p = new PacketPalette118();

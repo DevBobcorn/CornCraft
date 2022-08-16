@@ -32,7 +32,7 @@ namespace MinecraftClient.Protocol.Handlers
     ///  - Add the packet type palette for that Minecraft version. Please see PacketTypePalette.cs for more information
     ///  - Also see Material.cs and ItemType.cs for updating block and item data inside MCC
     /// </remarks>
-    class Protocol113Handler : IMinecraftCom
+    class ProtocolMinecraft : IMinecraftCom
     {
         internal const int MC_1_13_Version = 393;
         internal const int MC_1_14_Version = 477;
@@ -56,8 +56,8 @@ namespace MinecraftClient.Protocol.Handlers
         private int protocolversion;
         private int currentDimension;
 
-        Protocol113Forge pForge;
-        Protocol113Terrain pTerrain;
+        ProtocolForge pForge;
+        ProtocolTerrain pTerrain;
         IMinecraftComHandler handler;
         EntityPalette entityPalette;
         ItemPalette itemPalette;
@@ -69,15 +69,15 @@ namespace MinecraftClient.Protocol.Handlers
         #nullable disable
         RandomNumberGenerator randomGen;
 
-        public Protocol113Handler(TcpClient Client, int protocolVersion, IMinecraftComHandler handler, ForgeInfo forgeInfo)
+        public ProtocolMinecraft(TcpClient Client, int protocolVersion, IMinecraftComHandler handler, ForgeInfo forgeInfo)
         {
             ChatParser.InitTranslations();
             this.socketWrapper = new SocketWrapper(Client);
             this.dataTypes = new DataTypes(protocolVersion);
             this.protocolversion = protocolVersion;
             this.handler = handler;
-            this.pForge = new Protocol113Forge(forgeInfo, protocolVersion, dataTypes, this, handler);
-            this.pTerrain = new Protocol113Terrain(protocolVersion, dataTypes, handler);
+            this.pForge = new ProtocolForge(forgeInfo, protocolVersion, dataTypes, this, handler);
+            this.pTerrain = new ProtocolTerrain(protocolVersion, dataTypes, handler);
             this.packetPalette = new PacketTypeHandler(protocolVersion, forgeInfo != null).GetTypeHandler();
 
             Debug.Log("Creating block palette...");
@@ -1409,7 +1409,7 @@ namespace MinecraftClient.Protocol.Handlers
                                 protocolversion = int.Parse(versionData.Properties["protocol"].StringValue);
 
                             // Check for forge on the server.
-                            Protocol113Forge.ServerInfoCheckForge(jsonData, ref forgeInfo);
+                            ProtocolForge.ServerInfoCheckForge(jsonData, ref forgeInfo);
 
                             Translations.Log("mcc.server_protocol", version, protocolversion + (forgeInfo != null ? Translations.Get("mcc.with_forge") : ""));
 
