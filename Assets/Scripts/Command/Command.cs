@@ -36,13 +36,15 @@ namespace MinecraftClient.Commands
         /// </summary>
         public abstract string CmdUsage { get; }
 
+        #nullable enable
         /// <summary>
         /// Perform the command
         /// </summary>
         /// <param name="command">The full command, eg: 'mycommand arg1 arg2'</param>
         /// <param name="localVars">Local variables passed along with the command (may be null)</param>
         /// <returns>A confirmation/error message, or "" if no message</returns>
-        public abstract string Run(CornClient handler, string command, Dictionary<string, object> localVars);
+        public abstract string Run(CornClient handler, string command, Dictionary<string, object>? localVars);
+        #nullable disable
 
         /// <summary>
         /// Return a list of aliases for this command.

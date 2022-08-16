@@ -419,17 +419,19 @@ namespace MinecraftClient.Protocol.Handlers
             protocol18.SendPluginChannelPacket("FML|HS", dataTypes.ConcatBytes(new byte[] { (byte)discriminator }, data));
         }
 
+        #nullable enable
         /// <summary>
         /// Server Info: Check for For Forge versions 1 and 2 on a Minecraft server Ping result
         /// </summary>
         /// <param name="jsonData">JSON data returned by the server</param>
         /// <param name="forgeInfo">ForgeInfo to populate</param>
         /// <returns>True if the server is running Forge</returns>
-        public static bool ServerInfoCheckForge(Json.JSONData jsonData, ref ForgeInfo forgeInfo)
+        public static bool ServerInfoCheckForge(Json.JSONData jsonData, ref ForgeInfo? forgeInfo)
         {
             return ServerInfoCheckForgeSub(jsonData, ref forgeInfo, FMLVersion.FML)   // MC 1.12 and lower
                 || ServerInfoCheckForgeSub(jsonData, ref forgeInfo, FMLVersion.FML2); // MC 1.13 and greater
         }
+        #nullable disable
 
         /// <summary>
         /// Server Info: Check if we can force-enable Forge support for this Minecraft version without using server Ping

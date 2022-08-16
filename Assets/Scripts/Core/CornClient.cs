@@ -10,8 +10,9 @@ using MinecraftClient.Commands;
 using MinecraftClient.Control;
 using MinecraftClient.Event;
 using MinecraftClient.Protocol;
-using MinecraftClient.Proxy;
+using MinecraftClient.Protocol.Keys;
 using MinecraftClient.Protocol.Handlers.Forge;
+using MinecraftClient.Proxy;
 using MinecraftClient.Rendering;
 using MinecraftClient.Resource;
 using MinecraftClient.UI;
@@ -25,27 +26,28 @@ namespace MinecraftClient
 {
     public class CornClient : MonoBehaviour, IMinecraftComHandler
     {
-        private static readonly List<string> cmd_names = new List<string>();
-        private static readonly Dictionary<string, Command> cmds = new Dictionary<string, Command>();
+        private static readonly List<string> cmd_names = new();
+        private static readonly Dictionary<string, Command> cmds = new();
         private static bool commandsLoaded = false;
 
-        private Queue<Action> threadTasks = new Queue<Action>();
-        private object threadTasksLock = new object();
+        private Queue<Action> threadTasks = new();
+        private object threadTasksLock = new();
 
-        private Queue<string> chatQueue = new Queue<string>();
+        private Queue<string> chatQueue = new();
         private DateTime nextMessageSendTime = DateTime.MinValue;
 
         #region World Data and Player Movement
         private bool worldAndMovementsRequested = false;
-        private World world = new World();
+        private World world = new();
         private Location location;
-        private object locationLock = new object();
+        private object locationLock = new();
         private bool locationReceived = false;
         private float? _yaw; // Used for calculation ONLY!!! Doesn't reflect the client yaw
         private float? _pitch; // Used for calculation ONLY!!! Doesn't reflect the client pitch
         private float playerYaw;
         private float playerPitch;
         private double motionY;
+        private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
         public Location GetCurrentLocation() { return location; }
 
         public float GetYaw() { return playerYaw; }
@@ -67,6 +69,8 @@ namespace MinecraftClient
         private string username;
         private string uuid;
         private string sessionId;
+        private PlayerKeyPair playerKeyPair;
+        private bool isSupportPreviewsChat;
         public string GetServerHost() { return host; }
         public int GetServerPort() { return port; }
         public int GetProtocolVersion() { return protocolVersion; }
@@ -83,7 +87,7 @@ namespace MinecraftClient
         private int playerFoodSaturation;
         private int playerLevel;
         private int playerTotalExperience;
-        private Dictionary<int, Container> inventories = new Dictionary<int, Container>();
+        private Dictionary<int, Container> inventories = new();
         private byte CurrentSlot = 0;
         public float GetHealth() { return playerHealth; }
         public int GetSaturation() { return playerFoodSaturation; }
@@ -92,22 +96,22 @@ namespace MinecraftClient
         public byte GetCurrentSlot() { return CurrentSlot; }
         public int GetGamemode() { return gamemode; }
         public int GetPlayerEntityID() { return playerEntityID; }
-        private readonly Dictionary<Guid, string> onlinePlayers = new Dictionary<Guid, string>();
-        private Dictionary<int, Entity> entities = new Dictionary<int, Entity>();
+        private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
+        private Dictionary<int, Entity> entities = new();
         #endregion
 
         #region Server Updates
         private DateTime lastKeepAlive;
-        private object lastKeepAliveLock = new object();
+        private object lastKeepAliveLock = new();
         private long lastAge = 0;
         private DateTime lastTime;
         private double serverTPS = 0;
         private double averageTPS = 20;
         private const int maxSamples = 5;
-        private List<double> tpsSamples = new List<double>(maxSamples);
+        private List<double> tpsSamples = new(maxSamples);
         private double sampleSum = 0;
-        private Dictionary<string, int> playersLatency = new Dictionary<string, int>();
         public Double GetServerTPS() { return averageTPS; }
+        public bool GetIsSupportPreviewsChat() { return isSupportPreviewsChat; }
         #endregion
         
         TcpClient tcpClient;
@@ -148,9 +152,9 @@ namespace MinecraftClient
         private static bool connected = false;
         public static bool Connected { get { return connected; } }
 
-        public static void StartClient(string user, string uuid, string sessionID, string serverIp, ushort port, int protocol, ForgeInfo forgeInfo)
+        public static void StartClient(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo forgeInfo)
         {
-            Instance.Connect(user, uuid, sessionID, serverIp, port, protocol, forgeInfo);
+            Instance.Connect(user, uuid, sessionID, playerKeyPair, serverIp, port, protocol, forgeInfo);
         }
 
         public static void StopClient()
@@ -273,7 +277,7 @@ namespace MinecraftClient
             timeoutdetector.Item1.Name = "Connection Timeout Detector";
             timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
 
-            if (handler.Login()) // Login
+            if (handler.Login(this.playerKeyPair)) // Login
             {
                 Translations.Log("mcc.joined", CornCraft.internalCmdChar);
                 connected = true;
@@ -298,7 +302,7 @@ namespace MinecraftClient
         /// <param name="port">The server port to use</param>
         /// <param name="protocol">Minecraft protocol version to use</param>
         /// <param name="uuid">The player's UUID for online-mode authentication</param>
-        private void Connect(string user, string uuid, string sessionID, string serverip, ushort port, int protocol, ForgeInfo forgeInfo)
+        private void Connect(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverip, ushort port, int protocol, ForgeInfo forgeInfo)
         {
             connected = false;
 
@@ -313,6 +317,7 @@ namespace MinecraftClient
             this.host = serverip;
             this.port = port;
             this.protocolVersion = protocol;
+            this.playerKeyPair = playerKeyPair;
             
             /* Load commands from Commands namespace */
             LoadCommands();
@@ -356,7 +361,7 @@ namespace MinecraftClient
                 if (chatQueue.Count > 0 && nextMessageSendTime < DateTime.Now)
                 {
                     string text = chatQueue.Dequeue();
-                    handler.SendChatMessage(text);
+                    handler.SendChatMessage(text, playerKeyPair);
                     nextMessageSendTime = DateTime.Now + TimeSpan.FromSeconds(1);
                 }
             }
@@ -450,7 +455,7 @@ namespace MinecraftClient
 
             // Dispose objects in current client
             Loom.QueueOnMainThread(
-                // This method is called by protocol handler from net read thread
+                // Called by protocol handler from net read thread
                 // so it is neccessary to run it on Unity thread via Loom
                 () => {
                     worldRender?.UnloadWorld();
@@ -608,6 +613,7 @@ namespace MinecraftClient
             catch (NullReferenceException) { }
         }
 
+        #nullable enable
         /// <summary>
         /// Perform an internal MCC command (not a server command, use SendText() instead for that!)
         /// </summary>
@@ -615,7 +621,7 @@ namespace MinecraftClient
         /// <param name="response">May contain a confirmation or error message after processing the command, or "" otherwise.</param>
         /// <param name="localVars">Local variables passed along with the command</param>
         /// <returns>TRUE if the command was indeed an internal MCC command</returns>
-        public bool PerformInternalCommand(string command, ref string response, Dictionary<string, object> localVars = null)
+        public bool PerformInternalCommand(string command, ref string response, Dictionary<string, object>? localVars = null)
         {
             /* Process the provided command */
 
@@ -649,6 +655,7 @@ namespace MinecraftClient
 
             return true;
         }
+        #nullable disable
 
         public void LoadCommands()
         {
@@ -788,13 +795,37 @@ namespace MinecraftClient
         /// <returns>All players latency</returns>
         public Dictionary<string, int> GetPlayersLatency()
         {
+            Dictionary<string, int> playersLatency = new();
+            foreach (var player in onlinePlayers)
+                playersLatency.Add(player.Value.Name, player.Value.Ping);
             return playersLatency;
         }
 
         public int GetOwnLatency()
         {
-            return playersLatency.GetValueOrDefault(username, 0);
+            foreach (var player in onlinePlayers)
+                if (player.Value.Name == username)
+                    return player.Value.Ping;
+            return 0;
         }
+
+        #nullable enable
+        /// <summary>
+        /// Get player info from uuid
+        /// </summary>
+        /// <param name="uuid">Player's UUID</param>
+        /// <returns>Player info</returns>
+        public PlayerInfo? GetPlayerInfo(Guid uuid)
+        {
+            lock (onlinePlayers)
+            {
+                if (onlinePlayers.ContainsKey(uuid))
+                    return onlinePlayers[uuid];
+                else
+                    return null;
+            }
+        }
+        #nullable disable
 
         /// <summary>
         /// Get client player's inventory items
@@ -828,7 +859,11 @@ namespace MinecraftClient
         {
             lock (onlinePlayers)
             {
-                return onlinePlayers.Values.Distinct().ToArray();
+                string[] playerNames = new string[onlinePlayers.Count];
+                int idx = 0;
+                foreach (var player in onlinePlayers)
+                    playerNames[idx++] = player.Value.Name;
+                return playerNames;
             }
         }
 
@@ -843,7 +878,7 @@ namespace MinecraftClient
             {
                 foreach (Guid key in onlinePlayers.Keys)
                 {
-                    uuid2Player.Add(key.ToString(), onlinePlayers[key]);
+                    uuid2Player.Add(key.ToString(), onlinePlayers[key].Name);
                 }
             }
             return uuid2Player;
@@ -914,7 +949,7 @@ namespace MinecraftClient
         /// <returns>TRUE if the item was successfully used</returns>
         public bool UseItemOnHand()
         {
-            return InvokeOnNetReadThread(() => handler.SendUseItem(0));
+            return InvokeOnNetReadThread(() => handler.SendUseItem(0, this.sequenceId));
         }
 
         /// <summary>
@@ -1301,7 +1336,7 @@ namespace MinecraftClient
         /// <returns>TRUE if successfully placed</returns>
         public bool PlaceBlock(Location location, Direction blockFace, Hand hand = Hand.MainHand)
         {
-            return InvokeOnNetReadThread(() => handler.SendPlayerBlockPlacement((int)hand, location, blockFace));
+            return InvokeOnNetReadThread(() => handler.SendPlayerBlockPlacement((int)hand, location, blockFace, this.sequenceId));
         }
 
         /// <summary>
@@ -1324,9 +1359,9 @@ namespace MinecraftClient
 
             // Send dig start and dig end, will need to wait for server response to know dig result
             // See https://wiki.vg/How_to_Write_a_Client#Digging for more details
-            return handler.SendPlayerDigging(0, location, blockFace)
+            return handler.SendPlayerDigging(0, location, blockFace, this.sequenceId)
                 && (!swingArms || DoAnimation((int)Hand.MainHand))
-                && handler.SendPlayerDigging(2, location, blockFace);
+                && handler.SendPlayerDigging(2, location, blockFace, this.sequenceId);
         }
 
         /// <summary>
@@ -1537,25 +1572,34 @@ namespace MinecraftClient
         }
 
         /// <summary>
-        /// Received some text from the server
+        /// Received chat/system message from the server
         /// </summary>
-        /// <param name="text">Text received</param>
-        /// <param name="isJson">TRUE if the text is JSON-Encoded</param>
-        public void OnTextReceived(string text, bool isJson)
+        /// <param name="message">Message received</param>
+        public void OnTextReceived(ChatMessage message)
         {
             UpdateKeepAlive();
 
-            List<string> links = new List<string>();
-            string json = null;
+            List<string> links = new();
+            string messageText;
 
-            if (isJson)
+            if (message.isJson)
             {
-                json = text;
-                text = ChatParser.ParseText(json, links);
+                if (message.isSignedChat)
+                {
+                    if (!CornCraft.ShowIllegalSignedChat && !message.isSystemChat && !(bool)message.isSignatureLegal!)
+                        return;
+                    messageText = ChatParser.ParseSignedChat(message, links);
+                }
+                else
+                    messageText = ChatParser.ParseText(message.content, links);
+            }
+            else
+            {
+                messageText = message.content;
             }
 
             Loom.QueueOnMainThread(
-                () => EventManager.Instance.Broadcast<ChatMessageEvent>(new ChatMessageEvent(text))
+                () => EventManager.Instance.Broadcast<ChatMessageEvent>(new ChatMessageEvent(messageText))
             );
 
             foreach (string link in links)
@@ -1669,39 +1713,46 @@ namespace MinecraftClient
         /// <summary>
         /// Triggered when a new player joins the game
         /// </summary>
-        /// <param name="uuid">UUID of the player</param>
-        /// <param name="name">Name of the player</param>
-        public void OnPlayerJoin(Guid uuid, string name)
+        /// <param name="player">player info</param>
+        public void OnPlayerJoin(PlayerInfo player)
         {
             //Ignore placeholders eg 0000tab# from TabListPlus
-            if (!CornCraft.IsValidName(name))
+            if (!CornCraft.IsValidName(player.Name))
                 return;
+
+            if (player.Name == username)
+            {
+                // 1.19+ offline server is possible to return different uuid
+                this.uuid = player.UUID.ToString().Replace("-", string.Empty);
+            }
 
             lock (onlinePlayers)
             {
-                onlinePlayers[uuid] = name;
+                onlinePlayers[player.UUID] = player;
             }
 
         }
 
+        #nullable enable
         /// <summary>
         /// Triggered when a player has left the game
         /// </summary>
         /// <param name="uuid">UUID of the player</param>
         public void OnPlayerLeave(Guid uuid)
         {
-            string username = null;
+            string? username = null;
 
             lock (onlinePlayers)
             {
                 if (onlinePlayers.ContainsKey(uuid))
                 {
-                    username = onlinePlayers[uuid];
+                    username = onlinePlayers[uuid].Name;
                     onlinePlayers.Remove(uuid);
                 }
             }
 
         }
+        #nullable disable
 
         /// <summary>
         /// Called when an entity spawned
@@ -1715,22 +1766,26 @@ namespace MinecraftClient
             entities.Add(entity.ID, entity);
         }
 
+        #nullable enable
         /// <summary>
         /// Called when an entity effects
         /// </summary>
-        public void OnEntityEffect(int entityid, Effects effect, int amplifier, int duration, byte flags) { }
+        public void OnEntityEffect(int entityid, Effects effect, int amplifier, int duration, byte flags, bool hasFactorData, Dictionary<string, object>? factorCodec) { }
+        #nullable disable
 
+        #nullable enable
         /// <summary>
         /// Called when a player spawns or enters the client's render distance
         /// </summary>
         public void OnSpawnPlayer(int entityID, Guid uuid, Location location, byte Yaw, byte Pitch)
         {
-            string playerName = null;
+            string? playerName = null;
             if (onlinePlayers.ContainsKey(uuid))
-                playerName = onlinePlayers[uuid];
+                playerName = onlinePlayers[uuid].Name;
             Entity playerEntity = new Entity(entityID, EntityType.Player, location, uuid, playerName);
             OnSpawnEntity(playerEntity);
         }
+        #nullable disable
 
         /// <summary>
         /// Called on Entity Equipment
@@ -1765,7 +1820,7 @@ namespace MinecraftClient
             // Further regular gamemode change events
             if (onlinePlayers.ContainsKey(uuid))
             {
-                string playerName = onlinePlayers[uuid];
+                string playerName = onlinePlayers[uuid].Name;
                 if (playerName == this.username)
                     this.gamemode = gamemode;
             }
@@ -1929,11 +1984,11 @@ namespace MinecraftClient
         /// <param name="latency">Latency</param>
         public void OnLatencyUpdate(Guid uuid, int latency)
         {
-            string playerName = null;
             if (onlinePlayers.ContainsKey(uuid))
             {
-                playerName = onlinePlayers[uuid];
-                playersLatency[playerName] = latency;
+                var player = onlinePlayers[uuid];
+                player.Ping = latency;
+                string playerName = player.Name;
                 foreach (KeyValuePair<int, Entity> ent in entities)
                 {
                     if (ent.Value.UUID == uuid && ent.Value.Name == playerName)
@@ -2063,7 +2118,7 @@ namespace MinecraftClient
         public void OnTradeList(int windowID, List<VillagerTrade> trades, VillagerInfo villagerInfo) { }
 
         /// <summary>
-        /// Will be called every player break block in gamemode 0
+        /// Called every player break block in gamemode 0
         /// </summary>
         /// <param name="entityId">Player ID</param>
         /// <param name="location">Block location</param>
@@ -2077,7 +2132,7 @@ namespace MinecraftClient
         }
 
         /// <summary>
-        /// Will be called every animations of the hit and place block
+        /// Called every animations of the hit and place block
         /// </summary>
         /// <param name="entityID">Player ID</param>
         /// <param name="animation">0 = LMB, 1 = RMB (RMB Corrent not work)</param>
@@ -2090,13 +2145,61 @@ namespace MinecraftClient
         }
 
         /// <summary>
-        /// Will be called every time rain(snow) starts or stops
+        /// Called every time rain(snow) starts or stops
         /// </summary>
         /// <param name="begin">true if the rain is starting</param>
         public void OnRainChange(bool begin)
         {
 
         }
+
+        /// <summary>
+        /// Called when a Synchronization sequence is recevied, this sequence need to be sent when breaking or placing blocks
+        /// </summary>
+        /// <param name="sequenceId">Sequence ID</param>
+        public void OnBlockChangeAck(int sequenceId)
+        {
+            this.sequenceId = sequenceId;
+        }
+
+        /// <summary>
+        /// Called when the protocol handler receives server data
+        /// </summary>
+        /// <param name="hasMotd">Indicates if the server has a motd message</param>
+        /// <param name="motd">Server MOTD message</param>
+        /// <param name="hasIcon">Indicates if the server has a an icon</param>
+        /// <param name="iconBase64">Server icon in Base 64 format</param>
+        /// <param name="previewsChat">Indicates if the server previews chat</param>
+        public void OnServerDataReceived(bool hasMotd, string motd, bool hasIcon, string iconBase64, bool previewsChat)
+        {
+            this.isSupportPreviewsChat = previewsChat;
+        }
+
+        /// <summary>
+        /// Called when the protocol handler receives "Set Display Chat Preview" packet
+        /// </summary>
+        /// <param name="previewsChat">Indicates if the server previews chat</param>
+        public void OnChatPreviewSettingUpdate(bool previewsChat)
+        {
+            this.isSupportPreviewsChat = previewsChat;
+        }
+
+        #nullable enable
+        /// <summary>
+        /// Called when the protocol handler receives "Login Success" packet
+        /// </summary>
+        /// <param name="uuid">The player's UUID received from the server</param>
+        /// <param name="userName">The player's username received from the server</param>
+        /// <param name="playerProperty">Tuple<Name, Value, Signature(empty if there is no signature)></param>
+        public void OnLoginSuccess(Guid uuid, string userName, Tuple<string, string, string>[]? playerProperty)
+        {
+            //string UUID = uuid.ToString().Replace("-", String.Empty);
+            //Log.Info("now UUID = " + this.uuid);
+            //Log.Info("new UUID = " + UUID);
+            ////handler.SetUserUUID(UUID);
+
+        }
+        #nullable disable
 
         #endregion
 

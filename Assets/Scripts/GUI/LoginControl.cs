@@ -8,6 +8,7 @@ using TMPro;
 
 using MinecraftClient.Protocol;
 using MinecraftClient.Protocol.Handlers.Forge;
+using MinecraftClient.Protocol.Keys;
 using MinecraftClient.Protocol.Session;
 
 namespace MinecraftClient.UI
@@ -89,6 +90,7 @@ namespace MinecraftClient.UI
             tryingConnect = false;
         }
 
+        #nullable enable
         // Returns true if successfully connected
         public bool ConnectServer()
         {
@@ -109,9 +111,12 @@ namespace MinecraftClient.UI
 
             bool MinecraftRealmsEnabled = false;
 
+            // TODO Move to right place
             ProtocolHandler.AccountType AccountType = ProtocolHandler.AccountType.Microsoft;
 
             SessionToken session = new SessionToken();
+            PlayerKeyPair? playerKeyPair = null;
+
             ProtocolHandler.LoginResult result = ProtocolHandler.LoginResult.LoginRequired;
 
             if (password == "-")
@@ -159,6 +164,36 @@ namespace MinecraftClient.UI
 
             if (result == ProtocolHandler.LoginResult.Success)
             {
+                if (AccountType == ProtocolHandler.AccountType.Microsoft && password != "-" && CornCraft.LoginWithSecureProfile)
+                {
+                    // Load cached profile key from disk if necessary
+                    if (CornCraft.ProfileKeyCaching == CacheType.Disk)
+                    {
+                        bool cacheKeyLoaded = KeysCache.InitializeDiskCache();
+                        if (CornCraft.DebugMode)
+                            Translations.Log(cacheKeyLoaded ? "debug.keys_cache_ok" : "debug.keys_cache_fail");
+                    }
+
+                    if (CornCraft.ProfileKeyCaching != CacheType.None && KeysCache.Contains(account.ToLower()))
+                    {
+                        playerKeyPair = KeysCache.Get(account.ToLower());
+                        if (playerKeyPair.NeedRefresh())
+                            Translations.Log("mcc.profile_key_invalid");
+                        else
+                            Translations.Log("mcc.profile_key_valid", session.PlayerName);
+                    }
+
+                    if (playerKeyPair == null || playerKeyPair.NeedRefresh())
+                    {
+                        Translations.Log("mcc.fetching_key");
+                        playerKeyPair = KeyUtils.GetKeys(session.ID);
+                        if (CornCraft.ProfileKeyCaching != CacheType.None && playerKeyPair != null)
+                        {
+                            KeysCache.Store(account.ToLower(), playerKeyPair);
+                        }
+                    }
+                }
+
                 // Update the in-game user name
                 username = session.PlayerName;
                 bool isRealms = false;
@@ -175,7 +210,7 @@ namespace MinecraftClient.UI
 
                 // Get server version
                 int protocolVersion = 0;
-                ForgeInfo forgeInfo = null;
+                ForgeInfo? forgeInfo = null;
 
                 if (!isRealms)
                 {
@@ -193,7 +228,7 @@ namespace MinecraftClient.UI
                 {
                     try
                     {
-                        CornClient.StartClient(session.PlayerName, session.PlayerID, session.ID, host, port, protocolVersion, forgeInfo);
+                        CornClient.StartClient(session.PlayerName, session.PlayerID, session.ID, playerKeyPair, host, port, protocolVersion, forgeInfo);
                         return true;
                     }
                     catch (NotSupportedException)
@@ -236,6 +271,7 @@ namespace MinecraftClient.UI
 
             return false;
         }
+        #nullable disable
 
         public void QuitGame()
         {
@@ -256,7 +292,7 @@ namespace MinecraftClient.UI
 
             // TODO Initialize with loaded values
             //serverInput.text = "192.168.1.2";
-            serverInput.text = "192.168.1.38";
+            serverInput.text = "192.168.1.7";
             usernameInput.text = "Corn";
             passwordInput.text = "-";
 

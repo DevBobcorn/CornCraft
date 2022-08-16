@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace MinecraftClient.Protocol.Handlers
+﻿namespace MinecraftClient.Protocol.Handlers
 {
     /// <summary>
     /// Outgoing packet types
@@ -62,6 +57,9 @@ namespace MinecraftClient.Protocol.Handlers
         GenerateStructure, // Added in 1.16
         SetDisplayedRecipe, // Added in 1.16.2
         SetRecipeBookState, // Added in 1.16.2
-        Unknown //  For old version packet that have been removed and not used by mcc 
+        Unknown, //  For old version packet that have been removed and not used by mcc 
+        // 1.19 Additions
+        ChatCommand,
+        ChatPreview,
     }
 }
