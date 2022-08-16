@@ -351,7 +351,7 @@ namespace MinecraftClient.Protocol.Handlers
                     case PacketTypesIn.ChatMessage:
                         int messageType = 0;
 
-                        if (protocolversion <= MC_1_18_2_Version) // 1.18 and bellow
+                        if (protocolversion <= MC_1_18_2_Version) // 1.18 and below
                         {
                             string message = dataTypes.ReadNextString(packetData);
 
