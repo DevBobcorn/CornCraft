@@ -88,7 +88,7 @@ namespace MinecraftClient.Protocol
             {
                 try
                 {
-                    if (Protocol113Handler.doPing(serverIP, serverPort, ref protocolversionTmp, ref forgeInfoTmp))
+                    if (ProtocolMinecraft.doPing(serverIP, serverPort, ref protocolversionTmp, ref forgeInfoTmp))
                     {
                         success = true;
                     }
@@ -129,7 +129,7 @@ namespace MinecraftClient.Protocol
             // MC 1.13+ only now...
             int[] supportedVersions = { 393, 401, 404, 477, 480, 485, 490, 498, 573, 575, 578, 735, 736, 751, 753, 754, 755, 756, 757, 758, 759 };
             if (Array.IndexOf(supportedVersions, ProtocolVersion) > -1)
-                return new Protocol113Handler(Client, ProtocolVersion, Handler, forgeInfo);
+                return new ProtocolMinecraft(Client, ProtocolVersion, Handler, forgeInfo);
             throw new NotSupportedException(Translations.Get("exception.version_unsupport", ProtocolVersion));
         }
 
@@ -250,7 +250,7 @@ namespace MinecraftClient.Protocol
         /// <returns>TRUE if we can force-enable Forge support without using server Ping</returns>
         public static bool ProtocolMayForceForge(int protocol)
         {
-            return Protocol113Forge.ServerMayForceForge(protocol);
+            return ProtocolForge.ServerMayForceForge(protocol);
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace MinecraftClient.Protocol
         /// <returns>ForgeInfo item stating that Forge is enabled</returns>
         public static ForgeInfo ProtocolForceForge(int protocol)
         {
-            return Protocol113Forge.ServerForceForge(protocol);
+            return ProtocolForge.ServerForceForge(protocol);
         }
 
         public enum LoginResult { OtherError, ServiceUnavailable, SSLError, Success, WrongPassword, AccountMigrated, NotPremium, LoginRequired, InvalidToken, InvalidResponse, NullError, UserCancel };

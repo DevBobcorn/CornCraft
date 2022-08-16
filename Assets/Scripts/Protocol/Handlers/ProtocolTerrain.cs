@@ -7,9 +7,9 @@ using MinecraftClient.Mapping;
 namespace MinecraftClient.Protocol.Handlers
 {
     /// <summary>
-    /// Terrain Decoding handler for Protocol18
+    /// Terrain Decoding handler for MC 1.13+
     /// </summary>
-    class Protocol113Terrain
+    class ProtocolTerrain
     {
         private int protocolversion;
         private DataTypes dataTypes;
@@ -20,7 +20,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// </summary>
         /// <param name="protocolVersion">Minecraft Protocol Version</param>
         /// <param name="dataTypes">Minecraft Protocol Data Types</param>
-        public Protocol113Terrain(int protocolVersion, DataTypes dataTypes, IMinecraftComHandler handler)
+        public ProtocolTerrain(int protocolVersion, DataTypes dataTypes, IMinecraftComHandler handler)
         {
             this.protocolversion = protocolVersion;
             this.dataTypes = dataTypes;
@@ -45,7 +45,7 @@ namespace MinecraftClient.Protocol.Handlers
                 if ((chunkMask & (1 << chunkY)) != 0)
                 {
                     // 1.14 and above Non-air block count inside chunk section, for lighting purposes
-                    if (protocolversion >= Protocol113Handler.MC_1_14_Version)
+                    if (protocolversion >= ProtocolMinecraft.MC_1_14_Version)
                         dataTypes.ReadNextShort(cache);
 
                     byte bitsPerBlock = dataTypes.ReadNextByte(cache);
@@ -58,7 +58,7 @@ namespace MinecraftClient.Protocol.Handlers
                     // MC 1.9 to 1.12 will set palette length field to 0 when palette
                     // is not used, MC 1.13+ does not send the field at all in this case
                     int paletteLength = 0; // Assume zero when length is absent
-                    if (usePalette || protocolversion < Protocol113Handler.MC_1_13_Version)
+                    if (usePalette || protocolversion < ProtocolMinecraft.MC_1_13_Version)
                         paletteLength = dataTypes.ReadNextVarInt(cache);
 
                     int[] palette = new int[paletteLength];
@@ -97,7 +97,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                                     if ((startOffset + bitsPerBlock) > 64)
                                     {
-                                        if (protocolversion >= Protocol113Handler.MC_1_16_Version)
+                                        if (protocolversion >= ProtocolMinecraft.MC_1_16_Version)
                                         {
                                             // In MC 1.16+, padding is applied to prevent overlapping between Longs:
                                             // [      LONG INTEGER      ][      LONG INTEGER      ]
@@ -170,7 +170,7 @@ namespace MinecraftClient.Protocol.Handlers
                     });
 
                     //Pre-1.14 Lighting data
-                    if (protocolversion < Protocol113Handler.MC_1_14_Version)
+                    if (protocolversion < ProtocolMinecraft.MC_1_14_Version)
                     {
                         //Skip block light
                         dataTypes.ReadData((Chunk.SizeX * Chunk.SizeY * Chunk.SizeZ) / 2, cache);

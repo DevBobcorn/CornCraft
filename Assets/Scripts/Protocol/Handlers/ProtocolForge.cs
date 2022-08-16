@@ -10,11 +10,11 @@ namespace MinecraftClient.Protocol.Handlers
     /// <summary>
     /// Handler for the Minecraft Forge protocol
     /// </summary>
-    class Protocol113Forge
+    class ProtocolForge
     {
         private int protocolversion;
         private DataTypes dataTypes;
-        private Protocol113Handler protocol18;
+        private ProtocolMinecraft protocol18;
         private IMinecraftComHandler mcHandler;
 
         private ForgeInfo forgeInfo;
@@ -27,7 +27,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="forgeInfo">Forge Server Information</param>
         /// <param name="protocolVersion">Minecraft protocol version</param>
         /// <param name="dataTypes">Minecraft data types handler</param>
-        public Protocol113Forge(ForgeInfo forgeInfo, int protocolVersion, DataTypes dataTypes, Protocol113Handler protocol18, IMinecraftComHandler mcHandler)
+        public ProtocolForge(ForgeInfo forgeInfo, int protocolVersion, DataTypes dataTypes, ProtocolMinecraft protocol18, IMinecraftComHandler mcHandler)
         {
             this.forgeInfo = forgeInfo;
             this.protocolversion = protocolVersion;
