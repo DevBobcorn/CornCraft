@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using MinecraftClient.Mapping;
@@ -24,8 +25,10 @@ namespace MinecraftClient.Protocol
         string GetSessionID();
         string[] GetOnlinePlayers();
         Dictionary<string, string> GetOnlinePlayersWithUUID();
+        PlayerInfo? GetPlayerInfo(Guid uuid);
         Location GetCurrentLocation();
         World GetWorld();
+        bool GetIsSupportPreviewsChat();
         int GetProtocolVersion();
         Container GetInventory(int inventoryID);
 
@@ -55,11 +58,12 @@ namespace MinecraftClient.Protocol
         void OnGameJoined();
 
         /// <summary>
-        /// This method is called when the protocol handler receives a chat message
+        /// Called when the protocol handler receives a chat message
         /// </summary>
         /// <param name="text">Text received from the server</param>
         /// <param name="isJson">TRUE if the text is JSON-Encoded</param>
-        void OnTextReceived(string text, bool isJson);
+        /// <param name="message">Message received</param>
+        public void OnTextReceived(ChatMessage message);
 
         /// <summary>
         /// Will be called every animations of the hit and place block
@@ -77,7 +81,7 @@ namespace MinecraftClient.Protocol
         void OnBlockBreakAnimation(int entityID, Location location, byte stage);
 
         /// <summary>
-        /// This method is called when the protocol handler receives a title
+        /// Called when the protocol handler receives a title
         /// </summary>
         void OnTitle(int action, string titletext, string subtitletext, string actionbartext, int fadein, int stay, int fadeout, string json);
         
@@ -85,6 +89,22 @@ namespace MinecraftClient.Protocol
         /// Called when receiving a connection keep-alive from the server
         /// </summary>
         void OnServerKeepAlive();
+
+        /// <summary>
+        /// Called when the protocol handler receives server data
+        /// </summary>
+        /// <param name="hasMotd">Indicates if the server has a motd message</param>
+        /// <param name="motd">Server MOTD message</param>
+        /// <param name="hasIcon">Indicates if the server has a an icon</param>
+        /// <param name="iconBase64">Server icon in Base 64 format</param>
+        /// <param name="previewsChat">Indicates if the server previews chat</param>
+        void OnServerDataReceived(bool hasMotd, string motd, bool hasIcon, string iconBase64, bool previewsChat);
+
+        /// <summary>
+        /// Called when the protocol handler receives "Set Display Chat Preview" packet
+        /// </summary>
+        /// <param name="previewsChat">Indicates if the server previews chat</param>
+        public void OnChatPreviewSettingUpdate(bool previewsChat);
 
         /// <summary>
         /// Called when an inventory is opened
@@ -102,14 +122,13 @@ namespace MinecraftClient.Protocol
         void OnRespawn();
 
         /// <summary>
-        /// This method is called when a new player joins the game
+        /// Called when a new player joins the game
         /// </summary>
-        /// <param name="uuid">UUID of the player</param>
-        /// <param name="name">Name of the player</param>
-        void OnPlayerJoin(Guid uuid, string name);
+        /// <param name="player">player info</param>
+        public void OnPlayerJoin(PlayerInfo player);
 
         /// <summary>
-        /// This method is called when a player has left the game
+        /// Called when a player has left the game
         /// </summary>
         /// <param name="uuid">UUID of the player</param>
         void OnPlayerLeave(Guid uuid);
@@ -123,7 +142,7 @@ namespace MinecraftClient.Protocol
         void UpdateLocation(Location location, float yaw, float pitch);
 
         /// <summary>
-        /// This method is called when the connection has been lost
+        /// Called when the connection has been lost
         /// </summary>
         void OnConnectionLost(DisconnectReason reason, string message);
 
@@ -303,8 +322,10 @@ namespace MinecraftClient.Protocol
         /// <param name="amplifier">effect amplifier</param>
         /// <param name="duration">effect duration</param>
         /// <param name="flags">effect flags</param>
-        void OnEntityEffect(int entityid, Effects effect, int amplifier, int duration, byte flags);
-        
+        /// <param name="hasFactorData">has factor data</param>
+        /// <param name="factorCodec">factorCodec</param>
+        void OnEntityEffect(int entityid, Effects effect, int amplifier, int duration, byte flags, bool hasFactorData, Dictionary<String, object>? factorCodec);
+
         /// <summary>
         /// Called when coreboardObjective
         /// </summary>
@@ -334,6 +355,19 @@ namespace MinecraftClient.Protocol
         /// <param name="canRestock">If the villager can restock his trades at a workstation, True for regular villagers and false for the wandering trader.</param>
         void OnTradeList(int windowID, List<VillagerTrade> trades, VillagerInfo villagerInfo);
 
+        /// <summary>
+        /// Called when rain starts or stops
+        /// </summary>
+        /// <param name="begin">Whether the rain is about to begin</param>
         void OnRainChange(bool begin);
+
+        /// <summary>
+        /// This method is called when the protocol handler receives "Login Success" packet
+        /// </summary>
+        /// <param name="uuid">The player's UUID received from the server</param>
+        /// <param name="userName">The player's username received from the server</param>
+        /// <param name="playerProperty">Tuple<Name, Value, Signature(empty if there is no signature)></param>
+        public void OnLoginSuccess(Guid uuid, string userName, Tuple<string, string, string>[]? playerProperty);
+
     }
 }
