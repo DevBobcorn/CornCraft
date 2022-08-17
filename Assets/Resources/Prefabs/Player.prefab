@@ -61,7 +61,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 0.9
-  runSpeed: 4.2
+  runSpeed: 6
   jumpSpeed: 4
   swimSpeed: 0.8
   swimFastSpeed: 3.2

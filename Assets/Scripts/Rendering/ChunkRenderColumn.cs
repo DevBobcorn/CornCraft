@@ -82,17 +82,6 @@ namespace MinecraftClient.Rendering
 
         public void Unload(ref List<ChunkRender> chunksBeingBuilt, ref PriorityQueue<ChunkRender> chunks2Build)
         {
-            /*string listSnapshot = "\n";
-            foreach (var cb in chunksBeingBuilt)
-                listSnapshot += cb.ToString() + "\t";
-            
-            listSnapshot += "\n";
-
-            foreach (var cb in chunks2Build.GetValues())
-                listSnapshot += cb.ToString() + "\t";
-
-            Debug.Log("Unloading Column " + ToString() + listSnapshot);*/
-
             // Unload this chunk column...
             foreach (var chunk in chunks.Values)
             {
@@ -102,7 +91,7 @@ namespace MinecraftClient.Rendering
                     if (chunksBeingBuilt.Contains(chunk))
                     {
                         chunksBeingBuilt.Remove(chunk);
-                        Debug.Log("Removed " + chunk.ToString() + " from build list");
+                        //Debug.Log("Removed " + chunk.ToString() + " from build list");
                     }
 
                     chunk.Unload();

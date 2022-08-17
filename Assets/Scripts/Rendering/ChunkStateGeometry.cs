@@ -4,7 +4,8 @@ namespace MinecraftClient.Rendering
 {
     public class ChunkStateGeometry
     {
-        public static void Build(ref MeshBuffer buffer, int stateId, bool uv, int x, int y, int z, int cullFlags)
+        // Build without collider
+        public static void Build(ref MeshBuffer buffer, int stateId, int x, int y, int z, int cullFlags)
         {
             var table = CornClient.Instance?.PackManager.finalTable;
 
@@ -17,22 +18,18 @@ namespace MinecraftClient.Rendering
             }
 
             var models = table[stateId].Geometries;
-            //var chosen = (x + y + z) % models.Count;
-            // TODO var model = models[chosen];
-            var model = models[0];
+            var chosen = (x + y + z) % models.Count;
+            var model = models[chosen];
 
             var data = model.GetDataForChunk(buffer.offset, new Vector3(z, y, x), cullFlags);
 
-            //buffer.vert = buffer.vert.Concat(data.Item1).ToArray();
-            //buffer.face = buffer.face.Concat(data.Item4).ToArray();
-            //if (uv) buffer.uv = buffer.uv.Concat(data.Item2).ToArray();
-
             buffer.vert = ArrayUtil.GetConcated(buffer.vert, data.Item1);
             buffer.face = ArrayUtil.GetConcated(buffer.face, data.Item4);
-            if (uv) buffer.uv = ArrayUtil.GetConcated(buffer.uv, data.Item2);
+            buffer.uv = ArrayUtil.GetConcated(buffer.uv, data.Item2);
 
             buffer.offset += data.Item1.Length;
 
         }
+
     }
 }
