@@ -58,12 +58,12 @@ namespace MinecraftClient.Resource
                 {
                     foreach (var wrapperData in variant.Value.DataArray)
                     {
-                        results.Add(new BlockGeometry(BlockModelWrapper.fromJson(manager, wrapperData)));
+                        results.Add(new BlockGeometry(BlockModelWrapper.fromJson(manager, wrapperData)).Finalize());
                     }
                 }
                 else // Only a single item...
                 {
-                    results.Add(new BlockGeometry(BlockModelWrapper.fromJson(manager, variant.Value)));
+                    results.Add(new BlockGeometry(BlockModelWrapper.fromJson(manager, variant.Value)).Finalize());
                 }
 
                 foreach (var stateId in Block.Palette.StateListTable[blockId])
@@ -160,7 +160,7 @@ namespace MinecraftClient.Resource
             // Get the table into manager...
             foreach (var resultItem in resultsList)
             {
-                manager.finalTable.Add(resultItem.Key, new BlockStateModel(new BlockGeometry[]{ resultItem.Value }.ToList()));
+                manager.finalTable.Add(resultItem.Key, new BlockStateModel(new BlockGeometry[]{ resultItem.Value.Finalize() }.ToList()));
             }
 
         }

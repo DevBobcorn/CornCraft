@@ -154,7 +154,16 @@ namespace MinecraftClient
 
         public static void StartClient(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo forgeInfo)
         {
-            Instance.Connect(user, uuid, sessionID, playerKeyPair, serverIp, port, protocol, forgeInfo);
+            var validLogin = Instance.Connect(user, uuid, sessionID, playerKeyPair, serverIp, port, protocol, forgeInfo, true);
+
+            if (validLogin)
+            {
+                Debug.Log("Login valid, load resource...");
+                Instance.LoadRes();
+
+                Instance.Connect(user, uuid, sessionID, playerKeyPair, serverIp, port, protocol, forgeInfo, false);
+            }
+
         }
 
         public static void StopClient()
@@ -220,7 +229,7 @@ namespace MinecraftClient
 
         #endregion
 
-        IEnumerator EnterWorld()
+        void LoadRes()
         {
             // Prepare resources...
             packManager.ClearPacks();
@@ -231,7 +240,11 @@ namespace MinecraftClient
 
             // Load valid packs...
             packManager.LoadPacks(); // TODO Load async
-            
+
+        }
+
+        IEnumerator EnterWorld()
+        {
             // Prepare scene and unity objects
             var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
             op.allowSceneActivation = false;
@@ -302,7 +315,8 @@ namespace MinecraftClient
         /// <param name="port">The server port to use</param>
         /// <param name="protocol">Minecraft protocol version to use</param>
         /// <param name="uuid">The player's UUID for online-mode authentication</param>
-        private void Connect(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverip, ushort port, int protocol, ForgeInfo forgeInfo)
+        /// <returns>True if successfully connected</returns>
+        private bool Connect(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverip, ushort port, int protocol, ForgeInfo forgeInfo, bool checkOnly)
         {
             connected = false;
 
@@ -330,19 +344,21 @@ namespace MinecraftClient
                 handler = Protocol.ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
                 Debug.Log(Translations.Get("mcc.version_supported"));
 
-                StartCoroutine(EnterWorld());
+                if (!checkOnly)
+                    StartCoroutine(EnterWorld());
 
+                return true;
             }
             catch (SocketException)
             {
                 Translations.LogError("error.connect");
-                throw;
+                return false;
             }
             catch (Exception e)
             {
                 Translations.LogError("error.join");
                 Debug.LogError(e.StackTrace);
-                throw;
+                return false;
             }
             finally
             {

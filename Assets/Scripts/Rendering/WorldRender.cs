@@ -214,6 +214,8 @@ namespace MinecraftClient.Rendering
                     //var sw = new System.Diagnostics.Stopwatch();
                     //sw.Start();
 
+                    //double time0 = 0, time1 = 0, time2 = 0, lastTime = sw.ElapsedMilliseconds, startTime = sw.ElapsedMilliseconds;
+
                     // Build chunk mesh block by block
                     for (int x = 0;x < Chunk.SizeX;x++)
                     {
@@ -223,7 +225,7 @@ namespace MinecraftClient.Rendering
                             {
                                 if (ts.IsCancellationRequested)
                                 {
-                                    Debug.Log("Chunk build cancelled. (Building Mesh)" + chunkRender.ToString());
+                                    //Debug.Log("Chunk build cancelled. (Building Mesh)" + chunkRender.ToString());
                                     chunksBeingBuilt.Remove(chunkRender);
                                     return;
                                 }
@@ -233,6 +235,9 @@ namespace MinecraftClient.Rendering
                                 var bloc = chunk[x, y, z];
                                 var state = bloc.State;
                                 var stateId = bloc.StateId;
+
+                                //time0 += sw.ElapsedMilliseconds - lastTime;
+                                //lastTime = sw.ElapsedMilliseconds;
 
                                 if (state.InWater) // Build water here
                                 {
@@ -251,8 +256,15 @@ namespace MinecraftClient.Rendering
                                 
                                 int cullFlags = chunk.GetCullFlags(loc, notFullSolid); // TODO Correct
 
-                                // PlaceboGeometry.Build(ref visualBuffer[layerIndex], layer,   true, x, y, z, cullFlags);
-                                ChunkStateGeometry.Build(ref visualBuffer[layerIndex], stateId, true, x, y, z, cullFlags);
+                                //time1 += sw.ElapsedMilliseconds - lastTime;
+                                //lastTime = sw.ElapsedMilliseconds;
+
+                                // PlaceboGeometry.Build(ref visualBuffer[layerIndex], layer,   !state.NoCollision, x, y, z, cullFlags);
+
+                                // TODO if (state.NoCollision)
+                                    ChunkStateGeometry.Build(ref visualBuffer[layerIndex], stateId, x, y, z, cullFlags);
+                                //else
+                                //    ChunkStateGeometry.Build(ref visualBuffer[layerIndex], ref colliderBuffer, stateId, x, y, z, cullFlags);
                                 
                                 if (cullFlags != 0) // This chunk has at least one visible block of this render type
                                 {
@@ -260,14 +272,14 @@ namespace MinecraftClient.Rendering
                                     isAllEmpty = false;
                                 }
 
-                                if (!state.NoCollision) // Build collider shape
-                                {
-                                    ChunkStateGeometry.Build(ref colliderBuffer, stateId, false, x, y, z, cullFlags);
-                                }
+                                //time2 += sw.ElapsedMilliseconds - lastTime;
+                                //lastTime = sw.ElapsedMilliseconds;
                                 
                             }
                         }
                     }
+
+                    //Debug.Log("T:\t" + time0 + "\t" + time1 + "\t" + time2 + "\t" + (sw.ElapsedMilliseconds - startTime));
 
                     //double procStamp = sw.ElapsedMilliseconds / 1000D;
 
@@ -278,7 +290,7 @@ namespace MinecraftClient.Rendering
                             // Mission cancelled...
                             if (ts.IsCancellationRequested || !chunkRender || !chunkRender.gameObject)
                             {
-                                Debug.Log("Chunk build cancelled. (Skipping Empty Mesh)" + chunkRender?.ToString());
+                                //Debug.Log("Chunk build cancelled. (Skipping Empty Mesh)" + chunkRender?.ToString());
                                 if (chunkRender is not null) chunksBeingBuilt.Remove(chunkRender);
                                 return;
                             }
@@ -305,7 +317,7 @@ namespace MinecraftClient.Rendering
                             // Mission cancelled...
                             if (ts.IsCancellationRequested || !chunkRender || !chunkRender.gameObject)
                             {
-                                Debug.Log("Chunk build cancelled. (Applying Mesh)" + chunkRender?.ToString());
+                                //Debug.Log("Chunk build cancelled. (Applying Mesh)" + chunkRender?.ToString());
                                 if (chunkRender is not null) chunksBeingBuilt.Remove(chunkRender);
                                 return;
                             }
@@ -341,8 +353,7 @@ namespace MinecraftClient.Rendering
                             Mesh colliderMesh = new Mesh()
                             {
                                 vertices  = colliderBuffer.vert,
-                                triangles = colliderBuffer.face,
-                                uv        = colliderBuffer.uv
+                                triangles = colliderBuffer.face
                             };
 
                             chunkRender.UpdateCollider(colliderMesh);
@@ -669,7 +680,7 @@ namespace MinecraftClient.Rendering
                 
                 operationAction = (operationAction + 1) % 3;
 
-                operationCooldown = 2F;
+                operationCooldown = 0.5F;
             }
 
             operationCooldown -= Time.fixedDeltaTime;

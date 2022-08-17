@@ -12,12 +12,12 @@ namespace MinecraftClient.Resource
         public const float MC_VERT_SCALE = 16F;
         public const float MC_UV_SCALE = 16F;
 
-        public readonly Dictionary<CullDir, List<Vector3>> verticies = new Dictionary<CullDir, List<Vector3>>();
-        public readonly Dictionary<CullDir, List<int>> tris = new Dictionary<CullDir, List<int>>();
-        public readonly Dictionary<CullDir, List<Vector2>> uvs = new Dictionary<CullDir, List<Vector2>>();
-        public readonly Dictionary<CullDir, List<int>> tints = new Dictionary<CullDir, List<int>>();
+        public readonly Dictionary<CullDir, List<Vector3>> verticies = new();
+        public readonly Dictionary<CullDir, List<int>> triangles     = new();
+        public readonly Dictionary<CullDir, List<Vector2>> uvs       = new();
+        public readonly Dictionary<CullDir, List<int>> tintIndices   = new();
 
-        public readonly Dictionary<CullDir, int> vertIndexOffset = new Dictionary<CullDir, int>();
+        public readonly Dictionary<CullDir, int> vertIndexOffset     = new();
 
         public BlockGeometry()
         {
@@ -26,8 +26,8 @@ namespace MinecraftClient.Resource
             {
                 verticies.Add(dir, new List<Vector3>());
                 uvs.Add(dir, new List<Vector2>());
-                tints.Add(dir, new List<int>());
-                tris.Add(dir, new List<int>());
+                tintIndices.Add(dir, new List<int>());
+                triangles.Add(dir, new List<int>());
                 vertIndexOffset.Add(dir, 0);
             }
         }
@@ -48,199 +48,98 @@ namespace MinecraftClient.Resource
 
         }
 
+        private Dictionary<CullDir, Vector3[]> vertexArrs = new();
+        private Dictionary<CullDir, int[]>   triangleArrs = new();
+        private Dictionary<CullDir, Vector2[]> txuvArrs   = new();
+        private Dictionary<CullDir, int[]>     tintArrs   = new();
+
+        public BlockGeometry Finalize()
+        {
+            foreach (CullDir dir in Enum.GetValues(typeof (CullDir)))
+            {
+                vertexArrs.Add(dir, verticies[dir].ToArray());
+                triangleArrs.Add(dir, triangles[dir].ToArray());
+                txuvArrs.Add(dir, uvs[dir].ToArray());
+                tintArrs.Add(dir, tintIndices[dir].ToArray());
+            }
+
+            return this;
+        }
+
         // A '1' bit in cullFlags means shown, while a '0' indicates culled...
         public Tuple<Vector3[], Vector2[], int[], int[]> GetDataForChunk(int startVertOffset, Vector3 posOffset, int cullFlags)
         {
-            var verts = new List<Vector3>();
-            var triangles = new List<int>();
-            var txuvs = uvs[CullDir.NONE].ToArray();
-            var tintIndcs = tints[CullDir.NONE].ToArray();
-
-            // These things are never culled:
             int bulkVertIndexOffset = startVertOffset;
 
-            foreach (var vertex in verticies[CullDir.NONE])
-                verts.Add(vertex + posOffset);
-
-            foreach (var vertIndex in tris[CullDir.NONE]) // Apply extra offset when appending tris list
-                triangles.Add(bulkVertIndexOffset + vertIndex);
+            // These things with 'none' cull direction are never culled, so append them first:
+            var txuvs = txuvArrs[CullDir.NONE];
+            var tintIndcs = tintArrs[CullDir.NONE];
+            var verts = ArrayUtil.GetWithOffset(vertexArrs[CullDir.NONE], posOffset);
+            var tris  = ArrayUtil.GetWithOffset(triangleArrs[CullDir.NONE], bulkVertIndexOffset);
             
-            bulkVertIndexOffset = startVertOffset + verts.Count;
+            bulkVertIndexOffset = startVertOffset + verts.Length;
 
             if ((cullFlags & (1 << 0)) != 0) // 1st bit on, Unity +Y Shown (Up)
             {
-                foreach (var vertex in verticies[CullDir.UP])
-                    verts.Add(vertex + posOffset);
+                verts     = ArrayUtil.GetConcatedWithOffset(verts, vertexArrs[CullDir.UP], posOffset);
+                tris      = ArrayUtil.GetConcatedWithOffset(tris, triangleArrs[CullDir.UP], bulkVertIndexOffset);
+                txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.UP]);
+                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.UP]);
 
-                foreach (var vertIndex in tris[CullDir.UP]) // Apply extra offset when appending tris list
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                
-                txuvs     = ArrayUtil.GetConcated(txuvs,     uvs[CullDir.UP].ToArray());
-                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tints[CullDir.UP].ToArray());
-
-                bulkVertIndexOffset = startVertOffset + verts.Count;
+                bulkVertIndexOffset = startVertOffset + verts.Length;
             }
 
             if ((cullFlags & (1 << 1)) != 0) // 2nd bit on, Unity -Y Shown (Down)
             {
-                foreach (var vertex in verticies[CullDir.DOWN])
-                    verts.Add(vertex + posOffset);
+                verts     = ArrayUtil.GetConcatedWithOffset(verts, vertexArrs[CullDir.DOWN], posOffset);
+                tris      = ArrayUtil.GetConcatedWithOffset(tris, triangleArrs[CullDir.DOWN], bulkVertIndexOffset);
+                txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.DOWN]);
+                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.DOWN]);
                 
-                foreach (var vertIndex in tris[CullDir.DOWN])
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                
-                txuvs     = ArrayUtil.GetConcated(txuvs,     uvs[CullDir.DOWN].ToArray());
-                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tints[CullDir.DOWN].ToArray());
-                
-                bulkVertIndexOffset = startVertOffset + verts.Count;
+                bulkVertIndexOffset = startVertOffset + verts.Length;
             }
 
             if ((cullFlags & (1 << 2)) != 0) // 3rd bit on, Unity +X Shown (South)
             {
-                foreach (var vertex in verticies[CullDir.SOUTH])
-                    verts.Add(vertex + posOffset);
-                
-                foreach (var vertIndex in tris[CullDir.SOUTH])
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                
-                txuvs     = ArrayUtil.GetConcated(txuvs,     uvs[CullDir.SOUTH].ToArray());
-                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tints[CullDir.SOUTH].ToArray());
+                verts     = ArrayUtil.GetConcatedWithOffset(verts, vertexArrs[CullDir.SOUTH], posOffset);
+                tris      = ArrayUtil.GetConcatedWithOffset(tris, triangleArrs[CullDir.SOUTH], bulkVertIndexOffset);
+                txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.SOUTH]);
+                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.SOUTH]);
 
-                bulkVertIndexOffset = startVertOffset + verts.Count;
+                bulkVertIndexOffset = startVertOffset + verts.Length;
             }
 
             if ((cullFlags & (1 << 3)) != 0) // 4th bit on, Unity -X Shown (North)
             {
-                foreach (var vertex in verticies[CullDir.NORTH])
-                    verts.Add(vertex + posOffset);
+                verts     = ArrayUtil.GetConcatedWithOffset(verts, vertexArrs[CullDir.NORTH], posOffset);
+                tris      = ArrayUtil.GetConcatedWithOffset(tris, triangleArrs[CullDir.NORTH], bulkVertIndexOffset);
+                txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.NORTH]);
+                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.NORTH]);
                 
-                foreach (var vertIndex in tris[CullDir.NORTH])
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                
-                txuvs     = ArrayUtil.GetConcated(txuvs,     uvs[CullDir.NORTH].ToArray());
-                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tints[CullDir.NORTH].ToArray());
-                
-                bulkVertIndexOffset = startVertOffset + verts.Count;
+                bulkVertIndexOffset = startVertOffset + verts.Length;
             }
 
             if ((cullFlags & (1 << 4)) != 0) // 5th bit on, Unity +Z Shown (East)
             {
-                foreach (var vertex in verticies[CullDir.EAST])
-                    verts.Add(vertex + posOffset);
-                
-                foreach (var vertIndex in tris[CullDir.EAST])
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                
-                txuvs     = ArrayUtil.GetConcated(txuvs,     uvs[CullDir.EAST].ToArray());
-                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tints[CullDir.EAST].ToArray());
+                verts     = ArrayUtil.GetConcatedWithOffset(verts, vertexArrs[CullDir.EAST], posOffset);
+                tris      = ArrayUtil.GetConcatedWithOffset(tris, triangleArrs[CullDir.EAST], bulkVertIndexOffset);
+                txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.EAST]);
+                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.EAST]);
 
-                bulkVertIndexOffset = startVertOffset + verts.Count;
+                bulkVertIndexOffset = startVertOffset + verts.Length;
             }
 
             if ((cullFlags & (1 << 5)) != 0) // 6th bit on, Unity -Z Shown (West)
             {
-                foreach (var vertex in verticies[CullDir.WEST])
-                    verts.Add(vertex + posOffset);
+                verts     = ArrayUtil.GetConcatedWithOffset(verts, vertexArrs[CullDir.WEST], posOffset);
+                tris      = ArrayUtil.GetConcatedWithOffset(tris, triangleArrs[CullDir.WEST], bulkVertIndexOffset);
+                txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.WEST]);
+                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.WEST]);
 
-                foreach (var vertIndex in tris[CullDir.WEST])
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                
-                txuvs     = ArrayUtil.GetConcated(txuvs,     uvs[CullDir.WEST].ToArray());
-                tintIndcs = ArrayUtil.GetConcated(tintIndcs, tints[CullDir.WEST].ToArray());
-
-                bulkVertIndexOffset = startVertOffset + verts.Count;
+                bulkVertIndexOffset = startVertOffset + verts.Length;
             }
 
-            return Tuple.Create(verts.ToArray(), txuvs.ToArray(), tintIndcs.ToArray(), triangles.ToArray());
-
-        }
-
-        // A '1' bit in cullFlags means shown, while a '0' indicates culled...
-        public Tuple<Vector3[], Vector2[], int[], int[]> GetData(int cullFlags)
-        {
-            // These things are never culled:
-            List<Vector3> verts = verticies[CullDir.NONE];
-            List<Vector2> txuvs = uvs[CullDir.NONE];
-            List<int> tintIndcs = tints[CullDir.NONE];
-            List<int> triangles = tris[CullDir.NONE];
-
-            // First bulk is 'verticies[CullDir.NONE]' which has
-            // 'verts.Count' vertices at this time...
-            int bulkVertIndexOffset = verts.Count;
-
-            if ((cullFlags & (1 << 0)) > 0) // 1st bit on, Unity +Y Shown (Up)
-            {
-                verts = verts.Concat(verticies[CullDir.UP]).ToList();
-                txuvs = txuvs.Concat(uvs[CullDir.UP]).ToList();
-                tintIndcs = tintIndcs.Concat(tints[CullDir.UP]).ToList();
-                foreach (var vertIndex in tris[CullDir.UP])
-                {   // Apply extra offset when appending tris list
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                }
-                bulkVertIndexOffset = verts.Count;
-            }
-
-            if ((cullFlags & (1 << 1)) > 0) // 2nd bit on, Unity -Y Shown (Down)
-            {
-                verts = verts.Concat(verticies[CullDir.DOWN]).ToList();
-                txuvs = txuvs.Concat(uvs[CullDir.DOWN]).ToList();
-                tintIndcs = tintIndcs.Concat(tints[CullDir.DOWN]).ToList();
-                foreach (var vertIndex in tris[CullDir.DOWN])
-                {   // Apply extra offset when appending tris list
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                }
-                bulkVertIndexOffset = verts.Count;
-            }
-
-            if ((cullFlags & (1 << 2)) > 0) // 3rd bit on, Unity +X Shown (South)
-            {
-                verts = verts.Concat(verticies[CullDir.SOUTH]).ToList();
-                txuvs = txuvs.Concat(uvs[CullDir.SOUTH]).ToList();
-                tintIndcs = tintIndcs.Concat(tints[CullDir.SOUTH]).ToList();
-                foreach (var vertIndex in tris[CullDir.SOUTH])
-                {   // Apply extra offset when appending tris list
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                }
-                bulkVertIndexOffset = verts.Count;
-            }
-
-            if ((cullFlags & (1 << 3)) > 0) // 4th bit on, Unity -X Shown (North)
-            {
-                verts = verts.Concat(verticies[CullDir.NORTH]).ToList();
-                txuvs = txuvs.Concat(uvs[CullDir.NORTH]).ToList();
-                tintIndcs = tintIndcs.Concat(tints[CullDir.NORTH]).ToList();
-                foreach (var vertIndex in tris[CullDir.NORTH])
-                {   // Apply extra offset when appending tris list
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                }
-                bulkVertIndexOffset = verts.Count;
-            }
-
-            if ((cullFlags & (1 << 4)) > 0) // 5th bit on, Unity +Z Shown (East)
-            {
-                verts = verts.Concat(verticies[CullDir.EAST]).ToList();
-                txuvs = txuvs.Concat(uvs[CullDir.EAST]).ToList();
-                tintIndcs = tintIndcs.Concat(tints[CullDir.EAST]).ToList();
-                foreach (var vertIndex in tris[CullDir.EAST])
-                {   // Apply extra offset when appending tris list
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                }
-                bulkVertIndexOffset = verts.Count;
-            }
-
-            if ((cullFlags & (1 << 5)) > 0) // 6th bit on, Unity -Z Shown (West)
-            {
-                verts = verts.Concat(verticies[CullDir.WEST]).ToList();
-                txuvs = txuvs.Concat(uvs[CullDir.WEST]).ToList();
-                tintIndcs = tintIndcs.Concat(tints[CullDir.WEST]).ToList();
-                foreach (var vertIndex in tris[CullDir.WEST])
-                {   // Apply extra offset when appending tris list
-                    triangles.Add(bulkVertIndexOffset + vertIndex);
-                }
-                bulkVertIndexOffset = verts.Count;
-            }
-
-            return Tuple.Create(verts.ToArray(), txuvs.ToArray(), tintIndcs.ToArray(), triangles.ToArray());
+            return Tuple.Create(verts, txuvs, tintIndcs, tris);
 
         }
 
@@ -356,12 +255,12 @@ namespace MinecraftClient.Resource
                 
                 // And tint indices..
                 for (int i = 0;i < 4;i++)
-                    tints[cullDir].Add(face.tintIndex);
+                    tintIndices[cullDir].Add(face.tintIndex);
 
                 // Update vertex offset to current face's cull direction
                 int offset = vertIndexOffset[cullDir];
 
-                tris[cullDir] = tris[cullDir].Concat(new List<int>(){
+                triangles[cullDir] = triangles[cullDir].Concat(new List<int>(){
                     offset + 0, offset + 1, offset + 2, offset + 2, offset + 1, offset + 3
                 }).ToList();
 
