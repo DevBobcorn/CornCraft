@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Net;
 using System.Net.Sockets;
 using System.Net.Security;
 using MinecraftClient.Protocol.Handlers;
@@ -41,20 +42,13 @@ namespace MinecraftClient.Protocol
                     try
                     {
                         Translations.Log("mcc.resolve", domainVal);
-                        Heijden.DNS.Response response = new Heijden.DNS.Resolver().Query("_minecraft._tcp." + domainVal, Heijden.DNS.QType.SRV);
-                        Heijden.DNS.RecordSRV[] srvRecords = response.RecordsSRV;
-                        if (srvRecords != null && srvRecords.Any())
+                        // TODO Find a DNS lookup better solution
+                        var response = Dns.GetHostEntry(domainVal);
+                        if (response.AddressList.Any())
                         {
-                            //Order SRV records by priority and weight, then randomly
-                            Heijden.DNS.RecordSRV result = srvRecords
-                                .OrderBy(record => record.PRIORITY)
-                                .ThenByDescending(record => record.WEIGHT)
-                                .ThenBy(record => Guid.NewGuid())
-                                .First();
-                            string target = result.TARGET.Trim('.');
-                            Translations.Log("mcc.found", target, result.PORT, domainVal);
-                            domainVal = target;
-                            portVal = result.PORT;
+                            var target = response.AddressList[0];
+                            Translations.Log("mcc.found", target, portVal, domainVal);
+                            domainVal = target.ToString();
                             foundService = true;
                         }
 

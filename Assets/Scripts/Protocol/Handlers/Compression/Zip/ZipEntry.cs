@@ -39,9 +39,6 @@ namespace Ionic.Zip
 
     [Interop.GuidAttribute("ebc25cf6-9120-4283-b972-0e5520d00004")]
     [Interop.ComVisible(true)]
-#if !NETCF
-    [Interop.ClassInterface(Interop.ClassInterfaceType.AutoDispatch)]  // AutoDual
-#endif
     public partial class ZipEntry
     {
         /// <summary>
