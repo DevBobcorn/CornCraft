@@ -19,6 +19,25 @@ namespace MinecraftClient.Rendering
 
         private readonly Dictionary<int, ChunkRender> chunks = new Dictionary<int, ChunkRender>();
 
+        public bool HasDelayed
+        {
+            get {
+                foreach (var chunk in chunks.Values)
+                    if (chunk.State == BuildState.Delayed)
+                        return true;
+                return false;
+            }
+        }
+
+        public List<ChunkRender> GetDelayed()
+        {
+            var delayed = new List<ChunkRender>();
+            foreach (var chunk in chunks.Values)
+                if (chunk.State == BuildState.Delayed)
+                    delayed.Add(chunk);
+            return delayed;
+        }
+
         private ChunkRender CreateChunk(int chunkY)
         {
             // Create this chunk...
@@ -91,9 +110,8 @@ namespace MinecraftClient.Rendering
                     if (chunksBeingBuilt.Contains(chunk))
                     {
                         chunksBeingBuilt.Remove(chunk);
-                        //Debug.Log("Removed " + chunk.ToString() + " from build list");
+                        Debug.Log("Removed " + chunk.ToString() + " from build list");
                     }
-
                     chunk.Unload();
                 }
 

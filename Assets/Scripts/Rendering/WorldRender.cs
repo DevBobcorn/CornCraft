@@ -177,20 +177,24 @@ namespace MinecraftClient.Rendering
 
         public void BuildChunk(ChunkRender chunkRender)
         {
-            var chunkColumn = game.GetWorld()[chunkRender.ChunkX, chunkRender.ChunkZ];
-            if (chunkColumn is null) // Chunk column data unloaded, cancel
+            var chunkColumnData = game.GetWorld()[chunkRender.ChunkX, chunkRender.ChunkZ];
+            if (chunkColumnData is null) // Chunk column data unloaded, cancel
             {
                 UnloadChunkColumn(chunkRender.ChunkX, chunkRender.ChunkZ);
                 return;
             }
 
-            var chunk = chunkColumn[chunkRender.ChunkY];
+            var chunkData = chunkColumnData[chunkRender.ChunkY];
 
-            if (chunk is null) // Chunk not available, cancel
+            if (chunkData is null) // Chunk not available, delay
+            {
+                chunkRender.State = BuildState.Delayed;
                 return;
+            }
 
             var ts    = chunkRender.TokenSource = new CancellationTokenSource();
             chunksBeingBuilt.Add(chunkRender);
+            chunkRender.State = BuildState.Building;
             
             Task.Factory.StartNew(() => {
                 try
@@ -225,14 +229,15 @@ namespace MinecraftClient.Rendering
                             {
                                 if (ts.IsCancellationRequested)
                                 {
-                                    //Debug.Log("Chunk build cancelled. (Building Mesh)" + chunkRender.ToString());
+                                    //Debug.Log(chunkRender.ToString() + " cancelled. (Building Mesh)");
                                     chunksBeingBuilt.Remove(chunkRender);
+                                    chunkRender.State = BuildState.Cancelled;
                                     return;
                                 }
 
                                 var loc = chunkRender.GetGlobalLocation(x, y, z);
 
-                                var bloc = chunk[x, y, z];
+                                var bloc = chunkData[x, y, z];
                                 var state = bloc.State;
                                 var stateId = bloc.StateId;
 
@@ -241,7 +246,7 @@ namespace MinecraftClient.Rendering
 
                                 if (state.InWater) // Build water here
                                 {
-                                    int waterCullFlags = chunk.GetCullFlags(loc, waterSurface);
+                                    int waterCullFlags = chunkData.GetCullFlags(loc, waterSurface);
 
                                     ChunkFluidGeometry.Build(ref visualBuffer[waterLayerIndex], WATER_STILL, true, x, y, z, waterCullFlags);
                                     layerMask |= (1 << waterLayerIndex);
@@ -254,7 +259,7 @@ namespace MinecraftClient.Rendering
                                 var layer = Block.Palette.GetRenderType(stateId);
                                 int layerIndex = ChunkRender.TypeIndex(layer);
                                 
-                                int cullFlags = chunk.GetCullFlags(loc, notFullSolid); // TODO Correct
+                                int cullFlags = chunkData.GetCullFlags(loc, notFullSolid); // TODO Correct
 
                                 //time1 += sw.ElapsedMilliseconds - lastTime;
                                 //lastTime = sw.ElapsedMilliseconds;
@@ -290,8 +295,12 @@ namespace MinecraftClient.Rendering
                             // Mission cancelled...
                             if (ts.IsCancellationRequested || !chunkRender || !chunkRender.gameObject)
                             {
-                                //Debug.Log("Chunk build cancelled. (Skipping Empty Mesh)" + chunkRender?.ToString());
-                                if (chunkRender is not null) chunksBeingBuilt.Remove(chunkRender);
+                                //Debug.Log(chunkRender?.ToString() + " cancelled. (Skipping Empty Mesh)");
+                                if (chunkRender is not null)
+                                {
+                                    chunksBeingBuilt.Remove(chunkRender);
+                                    chunkRender.State = BuildState.Cancelled;
+                                }
                                 return;
                             }
 
@@ -308,6 +317,7 @@ namespace MinecraftClient.Rendering
                             //Debug.Log("Chunk Skipped: " + procStamp + " => " + (sw.ElapsedMilliseconds / 1000D).ToString("#.##"));
 
                             chunksBeingBuilt.Remove(chunkRender);
+                            chunkRender.State = BuildState.Ready;
 
                         });
                     }
@@ -317,8 +327,12 @@ namespace MinecraftClient.Rendering
                             // Mission cancelled...
                             if (ts.IsCancellationRequested || !chunkRender || !chunkRender.gameObject)
                             {
-                                //Debug.Log("Chunk build cancelled. (Applying Mesh)" + chunkRender?.ToString());
-                                if (chunkRender is not null) chunksBeingBuilt.Remove(chunkRender);
+                                //Debug.Log(chunkRender?.ToString() + " cancelled. (Applying Mesh)");
+                                if (chunkRender is not null)
+                                {
+                                    chunksBeingBuilt.Remove(chunkRender);
+                                    chunkRender.State = BuildState.Cancelled;
+                                }
                                 return;
                             }
 
@@ -362,6 +376,7 @@ namespace MinecraftClient.Rendering
                             //Debug.Log("Chunk Built: " + procStamp + " => " + ((sw.ElapsedMilliseconds / 1000D) - procStamp));
 
                             chunksBeingBuilt.Remove(chunkRender);
+                            chunkRender.State = BuildState.Ready;
 
                         });
                     }
@@ -372,7 +387,11 @@ namespace MinecraftClient.Rendering
                     Debug.LogError(e.StackTrace);
 
                     // Remove tuple from list
-                    if (chunkRender) chunksBeingBuilt.Remove(chunkRender);
+                    if (chunkRender) 
+                    {
+                        chunksBeingBuilt.Remove(chunkRender);
+                        chunkRender.State = BuildState.Cancelled;
+                    }
                 }
 
             }, ts.Token);
@@ -394,8 +413,12 @@ namespace MinecraftClient.Rendering
                 for (int cr = chunksBeingBuilt.Count - 1;cr > 0;cr--)
                 {
                     var chunk = chunksBeingBuilt[cr];
-                    if (chunk is null || GetChunkColumn(chunk.ChunkX, chunk.ChunkZ, false) is null)
+                    if (chunk is null)
                         chunksBeingBuilt.RemoveAt(cr);
+                    else if (GetChunkColumn(chunk.ChunkX, chunk.ChunkZ, false) is null)
+                    {
+                        chunksBeingBuilt.RemoveAt(cr);
+                    }
 
                 }
             }
@@ -418,19 +441,32 @@ namespace MinecraftClient.Rendering
                 {
                     int chunkX = location.ChunkX + cx, chunkZ = location.ChunkZ + cz;
                     
-                    if (world.isChunkColumnReady(chunkX, chunkZ) && !GetChunkColumn(chunkX, chunkZ, false))
-                    {   // Chunks data is ready, add the whole column to render list...
-                        int chunkMask = world[chunkX, chunkZ].ChunkMask;
-                        columnRender = GetChunkColumn(chunkX, chunkZ, true);
-                        for (int chunkY = 0;chunkY < ChunkColumn.ColumnSize;chunkY++)
-                        {   // Create chunk renders and queue them...
-                            if ((chunkMask & (1 << chunkY)) != 0)
-                            {   // This chunk is not empty and needs to be added and queued
-                                var chunk = columnRender.GetChunk(chunkY, true);
-                                chunk.UpdatePriority(game.GetCurrentLocation());
-                                QueueChunkBuild(chunk);
+                    if (world.isChunkColumnReady(chunkX, chunkZ))
+                    {
+                        var column = GetChunkColumn(chunkX, chunkZ, false);
+                        if (column is null)
+                        {   // Chunks data is ready, but chunk render column is not
+                            int chunkMask = world[chunkX, chunkZ].ChunkMask;
+                            // Create it and add the whole column to render list...
+                            columnRender = GetChunkColumn(chunkX, chunkZ, true);
+                            for (int chunkY = 0;chunkY < ChunkColumn.ColumnSize;chunkY++)
+                            {   // Create chunk renders and queue them...
+                                if ((chunkMask & (1 << chunkY)) != 0)
+                                {   // This chunk is not empty and needs to be added and queued
+                                    var chunk = columnRender.GetChunk(chunkY, true);
+                                    chunk.UpdatePriority(game.GetCurrentLocation());
+                                    QueueChunkBuild(chunk);
+                                }
+                                
                             }
-                            
+                        }
+                        else if (column.HasDelayed) // Some chunk builds are delayed in this column
+                        {
+                            foreach (var delayed in column.GetDelayed())
+                            {
+                                delayed.UpdatePriority(game.GetCurrentLocation());
+                                QueueChunkBuild(delayed);
+                            }
                         }
                     }
                 }
@@ -445,7 +481,7 @@ namespace MinecraftClient.Rendering
 
             // Add nearby chunks
             var location   = game.GetCurrentLocation();
-            int unloadDist = Mathf.RoundToInt(CornCraft.MCSettings_RenderDistance * 1.5F);
+            int unloadDist = Mathf.RoundToInt(CornCraft.MCSettings_RenderDistance * 2F);
 
             var xs = columns.Keys.ToArray();
 
@@ -475,7 +511,10 @@ namespace MinecraftClient.Rendering
         public void QueueChunkBuild(ChunkRender chunkRender)
         {
             if (!chunks2Build.Contains(chunkRender))
+            {
                 chunks2Build.Enqueue(chunkRender);
+                chunkRender.State = BuildState.Pending;
+            }
 
         }
 

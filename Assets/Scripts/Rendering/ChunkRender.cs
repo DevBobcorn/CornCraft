@@ -28,6 +28,7 @@ namespace MinecraftClient.Rendering
 
         public int ChunkX, ChunkY, ChunkZ;
         public Chunk Chunk;
+        public BuildState State = BuildState.None;
 
         public CancellationTokenSource TokenSource = null;
         private int priority = 0;
@@ -106,7 +107,6 @@ namespace MinecraftClient.Rendering
         public void Unload()
         {
             //Debug.Log("Unloading Chunk " + ToString());
-
             TokenSource?.Cancel();
 
             for (int i = 0;i < TYPES.Length;i++)
@@ -119,6 +119,7 @@ namespace MinecraftClient.Rendering
             }
 
             Destroy(this.gameObject);
+
         }
 
         private static ChunkRenderLayer CreateChunkLayer(ChunkRender chunk, RenderType type)
