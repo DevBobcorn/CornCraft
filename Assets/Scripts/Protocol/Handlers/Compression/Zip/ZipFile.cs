@@ -124,9 +124,6 @@ namespace Ionic.Zip
     /// </remarks>
     [Interop.GuidAttribute("ebc25cf6-9120-4283-b972-0e5520d00005")]
     [Interop.ComVisible(true)]
-#if !NETCF
-    [Interop.ClassInterface(Interop.ClassInterfaceType.AutoDispatch)]
-#endif
     public partial class ZipFile :
     System.Collections.IEnumerable,
     System.Collections.Generic.IEnumerable<ZipEntry>,
