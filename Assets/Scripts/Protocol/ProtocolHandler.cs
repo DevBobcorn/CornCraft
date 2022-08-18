@@ -111,6 +111,14 @@ namespace MinecraftClient.Protocol
         }
         #nullable disable
 
+        // MC 1.13+ only now...
+        private static int[] supportedVersions = { 393, 401, 404, 477, 480, 485, 490, 498, 573, 575, 578, 735, 736, 751, 753, 754, 755, 756, 757, 758, 759 };
+
+        public static bool IsProtocolSupported(int ProtocolVersion)
+        {
+            return Array.IndexOf(supportedVersions, ProtocolVersion) > -1;
+        }
+
         /// <summary>
         /// Get a protocol handler for the specified Minecraft version
         /// </summary>
@@ -120,8 +128,6 @@ namespace MinecraftClient.Protocol
         /// <returns></returns>
         public static IMinecraftCom GetProtocolHandler(TcpClient Client, int ProtocolVersion, ForgeInfo forgeInfo, IMinecraftComHandler Handler)
         {
-            // MC 1.13+ only now...
-            int[] supportedVersions = { 393, 401, 404, 477, 480, 485, 490, 498, 573, 575, 578, 735, 736, 751, 753, 754, 755, 756, 757, 758, 759 };
             if (Array.IndexOf(supportedVersions, ProtocolVersion) > -1)
                 return new ProtocolMinecraft(Client, ProtocolVersion, Handler, forgeInfo);
             throw new NotSupportedException(Translations.Get("exception.version_unsupport", ProtocolVersion));

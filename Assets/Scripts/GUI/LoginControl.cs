@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +16,7 @@ namespace MinecraftClient.UI
 {
     public class LoginControl : MonoBehaviour
     {
+        private CornClient game;
         private TMP_InputField serverInput, usernameInput, passwordInput;
         private Button         loginButton, quitButton;
 
@@ -78,22 +80,13 @@ namespace MinecraftClient.UI
             return false;
         }
 
-        public void TryConnectServer()
-        {
-            if (tryingConnect)
-                return;
-            
-            tryingConnect = true;
-
-            ConnectServer();
-
-            tryingConnect = false;
-        }
-
         #nullable enable
         // Returns true if successfully connected
-        public bool ConnectServer()
+        public void ConnectServer()
         {
+            if (tryingConnect) return;
+            tryingConnect = true;
+
             string serverText = serverInput.text;
             string account = usernameInput.text;
             string password = passwordInput.text;
@@ -106,7 +99,8 @@ namespace MinecraftClient.UI
             if (!ParseServerIP(serverText, out host, ref port))
             {
                 Debug.Log("Failed to parse server name or address!");
-                return false;
+                tryingConnect = false;
+                return;
             }
 
             bool MinecraftRealmsEnabled = false;
@@ -142,8 +136,9 @@ namespace MinecraftClient.UI
                         }
                         if (result != ProtocolHandler.LoginResult.Success && password == string.Empty)
                         {   // Request password
-                            Debug.LogWarning("Please input your password!");
-                            return false;
+                            Translations.LogWarning("Please input your password!");
+                            tryingConnect = false;
+                            return;
                         }
                     }
                     else
@@ -206,7 +201,10 @@ namespace MinecraftClient.UI
                     availableWorlds = ProtocolHandler.RealmsListWorlds(username, session.PlayerID, session.ID);
 
                 if (host == "")
-                    return false;
+                {   // Request host
+                    Translations.LogWarning("Please input your host!");
+                    return;
+                }
 
                 // Get server version
                 int protocolVersion = 0;
@@ -214,31 +212,32 @@ namespace MinecraftClient.UI
 
                 if (!isRealms)
                 {
-                    Translations.Log("mcc.retrieve");
-                    // Retrieve server information
+                    Debug.Log("mcc.retrieve"); // Retrieve server information
                     if (!ProtocolHandler.GetServerInfo(host, port, ref protocolVersion, ref forgeInfo))
                     {
                         Translations.LogError("error.ping");
-                        return false;
+                        tryingConnect = false;
+                        return;
                     }
                 }
 
-                // Proceed to server login
-                if (protocolVersion != 0)
+                if (protocolVersion != 0) // Proceed to server login
                 {
-                    try
+                    if (Protocol.ProtocolHandler.IsProtocolSupported(protocolVersion))
                     {
-                        CornClient.StartClient(session.PlayerName, session.PlayerID, session.ID, playerKeyPair, host, port, protocolVersion, forgeInfo);
-                        return true;
+                        try // Login to Server
+                        {
+                            game.Login(session.PlayerName, session.PlayerID, session.ID, playerKeyPair, host, port, protocolVersion, forgeInfo);
+                            tryingConnect = false;
+                            return;
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogError("Unexpected error: " + e.StackTrace);
+                        }
                     }
-                    catch (NotSupportedException)
-                    {
+                    else
                         Translations.LogError("error.unsupported");
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError("Unexpected error: " + e.StackTrace);
-                    }
                 }
                 else // Unable to determine server version
                     Translations.LogError("error.determine");
@@ -264,12 +263,13 @@ namespace MinecraftClient.UI
                 if (result == ProtocolHandler.LoginResult.SSLError)
                 {
                     Translations.LogError("error.login.ssl_help");
-                    return false;
+                    tryingConnect = false;
+                    return;
                 }
                 Debug.LogError(failureMessage);
             }
 
-            return false;
+            tryingConnect = false;
         }
         #nullable disable
 
@@ -280,6 +280,8 @@ namespace MinecraftClient.UI
 
         void Start()
         {
+            game = CornClient.Instance;
+
             // Initialize controls
             var loginPanel = transform.Find("Login Panel");
 
@@ -297,7 +299,7 @@ namespace MinecraftClient.UI
             passwordInput.text = "-";
 
             // Add listeners
-            loginButton.onClick.AddListener(this.TryConnectServer);
+            loginButton.onClick.AddListener(this.ConnectServer);
             quitButton.onClick.AddListener(this.QuitGame);
 
         }

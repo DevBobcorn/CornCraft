@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -37,7 +39,7 @@ namespace MinecraftClient.Resource
             packs.Clear();
         }
 
-        public void LoadPacks()
+        public IEnumerator LoadPacks(Action callback)
         {
             float startTime = Time.realtimeSinceStartup;
 
@@ -45,7 +47,7 @@ namespace MinecraftClient.Resource
             {
                 if (pack.IsValid)
                 {
-                    pack.LoadResources(this);
+                    yield return pack.LoadResources(this);
                 }
                 
             }
@@ -54,7 +56,7 @@ namespace MinecraftClient.Resource
             {
                 if (pack.IsValid)
                 {
-                    pack.BuildStateGeometries(this);
+                    yield return pack.BuildStateGeometries(this);
                 }
                 
             }
@@ -68,10 +70,16 @@ namespace MinecraftClient.Resource
                 {
                     Debug.LogWarning("Model for " + stateItem.Value.ToString() + "(state Id " + stateItem.Key + ") not loaded!");
                 }
+                yield return null;
             }
+
+            yield return null;
 
             Debug.Log("Resource packs loaded in " + (Time.realtimeSinceStartup - startTime) + " seconds.");
             Debug.Log("Built " + finalTable.Count + " block state geometry lists.");
+
+            if (callback is not null)
+                callback();
 
         }
 

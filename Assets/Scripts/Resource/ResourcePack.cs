@@ -1,3 +1,4 @@
+using System.Collections;
 using System.IO;
 using UnityEngine;
 
@@ -53,7 +54,7 @@ namespace MinecraftClient.Resource
 
         }
 
-        public void LoadResources(ResourcePackManager manager)
+        public IEnumerator LoadResources(ResourcePackManager manager)
         {
             if (isValid)
             {
@@ -81,6 +82,7 @@ namespace MinecraftClient.Resource
                                 // This texture is not provided by previous resource packs, so add it here...
                                 manager.textureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
                             }
+                            yield return null;
                         }
 
                         // Load and store all model files...
@@ -97,7 +99,7 @@ namespace MinecraftClient.Resource
                             // This model loader will load this model, its parent model(if not yet loaded),
                             // and then add them to the manager's model dictionary
                             manager.blockModelLoader.LoadBlockModel(identifier, assetsDir.FullName.Replace('\\', '/'));
-
+                            yield return null;
                         }
 
                     }
@@ -115,10 +117,10 @@ namespace MinecraftClient.Resource
             }
         }
 
-        public void BuildStateGeometries(ResourcePackManager manager)
+        public IEnumerator BuildStateGeometries(ResourcePackManager manager)
         {
             // Load all blockstate files, make and assign their block meshes...
-            if (Block.Palette.BlockStatesReady && isValid)
+            if (Block.Palette is not null && Block.Palette.BlockStatesReady && isValid)
             {
                 // Assets folder...
                 DirectoryInfo assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed(packName) + "/assets");
@@ -140,7 +142,7 @@ namespace MinecraftClient.Resource
                         // Load the state model definition of this block
                         string statePath = assetsDir.FullName + '/' + blockId.nameSpace + "/blockstates/" + blockId.path + ".json";
                         manager.stateModelLoader.LoadBlockStateModel(manager, blockId, statePath);
-
+                        yield return null;
                     }
 
                 }
