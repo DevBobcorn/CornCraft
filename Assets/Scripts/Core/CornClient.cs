@@ -11,12 +11,14 @@ using MinecraftClient.Control;
 using MinecraftClient.Event;
 using MinecraftClient.Protocol;
 using MinecraftClient.Protocol.Keys;
+using MinecraftClient.Protocol.Handlers;
 using MinecraftClient.Protocol.Handlers.Forge;
 using MinecraftClient.Proxy;
 using MinecraftClient.Rendering;
 using MinecraftClient.Resource;
 using MinecraftClient.UI;
 using MinecraftClient.Mapping;
+using MinecraftClient.Mapping.BlockStatePalettes;
 using MinecraftClient.Inventory;
 
 using UnityEngine;
@@ -152,20 +154,6 @@ namespace MinecraftClient
         private static bool connected = false;
         public static bool Connected { get { return connected; } }
 
-        public static void StartClient(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo forgeInfo)
-        {
-            var validLogin = Instance.Connect(user, uuid, sessionID, playerKeyPair, serverIp, port, protocol, forgeInfo, true);
-
-            if (validLogin)
-            {
-                Debug.Log("Login valid, load resource...");
-                Instance.LoadRes();
-
-                Instance.Connect(user, uuid, sessionID, playerKeyPair, serverIp, port, protocol, forgeInfo, false);
-            }
-
-        }
-
         public static void StopClient()
         {
             if (instance is not null)
@@ -229,22 +217,53 @@ namespace MinecraftClient
 
         #endregion
 
-        void LoadRes()
+        private bool resourceLoaded = false;
+
+        public void Login(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo forgeInfo)
         {
-            // Prepare resources...
+            this.sessionId = sessionID;
+            this.uuid = uuid;
+            this.username = user;
+            this.host = serverIp;
+            this.port = port;
+            this.protocolVersion = protocol;
+            this.playerKeyPair = playerKeyPair;
+
+            StartCoroutine(StartClient(user, uuid, sessionID, playerKeyPair, serverIp, port, protocol, forgeInfo));
+        }
+
+        IEnumerator StartClient(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo forgeInfo)
+        {
+            var wait = new WaitForSecondsRealtime(0.1F);
+
+            // Create block palette first to prepare for resource loading
+            if (protocolVersion > ProtocolMinecraft.MC_1_16_5_Version)
+                throw new NotImplementedException(Translations.Get("exception.palette.block"));
+            if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
+                Block.Palette = new Palette116();
+            else
+            {
+                Translations.LogError("exception.palette.block");
+                yield break;
+            }
+            /* TODO Implement More */
+
+            // Load resources...
+            resourceLoaded = false;
             packManager.ClearPacks();
 
-            // TODO Add corresponding pack
+            // TODO Apply pack for corresponding version
             ResourcePack pack = new ResourcePack("vanilla-1.16.5");
             packManager.AddPack(pack);
 
+            ShowNotification("Loading resources for MC " + Protocol.ProtocolHandler.ProtocolVersion2MCVer(protocolVersion));
+
             // Load valid packs...
-            packManager.LoadPacks(); // TODO Load async
+            var resLoad = StartCoroutine(packManager.LoadPacks(() => resourceLoaded = true));
 
-        }
+            while (!resourceLoaded)
+                yield return wait;
 
-        IEnumerator EnterWorld()
-        {
             // Prepare scene and unity objects
             var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
             op.allowSceneActivation = false;
@@ -252,15 +271,41 @@ namespace MinecraftClient
             while (op.progress < 0.9F)
             {
                 //Debug.Log("Loading: " + op.progress);
-                yield return new WaitForSeconds(0.1F);
+                yield return wait;
+            }
+
+            BlockTextureManager.EnsureInitialized();
+
+            try // Setup tcp client
+            {
+                tcpClient = ProxyHandler.newTcpClient(host, port);
+                tcpClient.ReceiveBufferSize = 1024 * 1024;
+                tcpClient.ReceiveTimeout = 30000; // 30 seconds
+            }
+            catch (SocketException)
+            {
+                Translations.LogError("error.connect");
+                Disconnect();
+                yield break;
+            }
+
+            try // Initialize all palettes for resource loading
+            {
+                handler = Protocol.ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.Message);
+                Disconnect();
+                yield break;
             }
 
             // Scene is loaded, activate it
             op.allowSceneActivation = true;
 
             // Wait a little bit...
-            yield return new WaitForSecondsRealtime(0.1F);
-            
+            yield return wait;
+
             // Find Screen Control
             screenControl = Component.FindObjectOfType<ScreenControl>();
             var hudScreen = Component.FindObjectOfType<HUDScreen>();
@@ -285,84 +330,29 @@ namespace MinecraftClient
 
             cameraController.SetTarget(playerObj.transform);
 
-            // Start update loop
-            timeoutdetector = Tuple.Create(new Thread(new ParameterizedThreadStart(TimeoutDetector)), new CancellationTokenSource());
-            timeoutdetector.Item1.Name = "Connection Timeout Detector";
-            timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
-
-            if (handler.Login(this.playerKeyPair)) // Login
-            {
-                Translations.Log("mcc.joined", CornCraft.internalCmdChar);
-                connected = true;
-            }
-            else
-            {
-                Translations.LogError("error.login_failed");
-                timeoutdetector?.Item2.Cancel();
-                timeoutdetector = null;
-            }
-
-            yield return null;
-
-        }
-
-        /// <summary>
-        /// Starts the main chat client, wich will login to the server using the MinecraftCom class.
-        /// </summary>
-        /// <param name="user">The chosen username of a premium Minecraft Account</param>
-        /// <param name="sessionID">A valid sessionID obtained with MinecraftCom.GetLogin()</param>
-        /// <param name="serverip">The server IP</param>
-        /// <param name="port">The server port to use</param>
-        /// <param name="protocol">Minecraft protocol version to use</param>
-        /// <param name="uuid">The player's UUID for online-mode authentication</param>
-        /// <returns>True if successfully connected</returns>
-        private bool Connect(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverip, ushort port, int protocol, ForgeInfo forgeInfo, bool checkOnly)
-        {
-            connected = false;
-
-            // Disconnect the current client
-            if (instance is not null)
-                instance.Disconnect();
-            
-            // Then start a new one
-            this.sessionId = sessionID;
-            this.uuid = uuid;
-            this.username = user;
-            this.host = serverip;
-            this.port = port;
-            this.protocolVersion = protocol;
-            this.playerKeyPair = playerKeyPair;
-            
-            /* Load commands from Commands namespace */
-            LoadCommands();
-
             try
             {
-                tcpClient = ProxyHandler.newTcpClient(host, port);
-                tcpClient.ReceiveBufferSize = 1024 * 1024;
-                tcpClient.ReceiveTimeout = 30000; // 30 seconds
-                handler = Protocol.ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
-                Debug.Log(Translations.Get("mcc.version_supported"));
+                // Start update loop
+                timeoutdetector = Tuple.Create(new Thread(new ParameterizedThreadStart(TimeoutDetector)), new CancellationTokenSource());
+                timeoutdetector.Item1.Name = "Connection Timeout Detector";
+                timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
 
-                if (!checkOnly)
-                    StartCoroutine(EnterWorld());
-
-                return true;
-            }
-            catch (SocketException)
-            {
-                Translations.LogError("error.connect");
-                return false;
+                if (handler.Login(this.playerKeyPair)) // Login
+                {
+                    Translations.Log("mcc.joined", CornCraft.internalCmdChar);
+                    connected = true;
+                }
+                else
+                {
+                    Translations.LogError("error.login_failed");
+                    Disconnect();
+                }
             }
             catch (Exception e)
             {
-                Translations.LogError("error.join");
+                Debug.LogError(e.Message);
                 Debug.LogError(e.StackTrace);
-                return false;
-            }
-            finally
-            {
-                timeoutdetector?.Item2.Cancel();
+                Disconnect();
             }
 
         }
@@ -499,35 +489,17 @@ namespace MinecraftClient
         /// </summary>
         public void Disconnect()
         {
-            Debug.Log("Disconnect() called");
-            try
-            {
-                PrepareDisconnect();
+            PrepareDisconnect();
 
-                if (handler is not null)
-                {
-                    handler.Disconnect();
-                    handler.Dispose();
-                    handler = null;
-                }
+            handler?.Disconnect();
+            handler?.Dispose();
+            handler = null;
 
-                if (timeoutdetector is not null)
-                {
-                    timeoutdetector.Item2.Cancel();
-                    timeoutdetector = null;
-                }
+            timeoutdetector?.Item2.Cancel();
+            timeoutdetector = null;
 
-                if (tcpClient is not null)
-                {
-                    tcpClient.Close();
-                    tcpClient = null;
-                }
-            }
-            catch(Exception e)
-            {
-                Debug.LogError(e.Message);
-                Debug.LogError(e.StackTrace);
-            }
+            tcpClient?.Close();
+            tcpClient = null;
             
         }
 
@@ -536,15 +508,11 @@ namespace MinecraftClient
         /// </summary>
         public void OnConnectionLost(DisconnectReason reason, string message)
         {
-            Debug.Log("OnConnectionLost() called");
             // Ensure Unity objects are cleared first
             PrepareDisconnect();
 
             // Clear world data
             world.Clear();
-
-            timeoutdetector?.Item2.Cancel();
-            timeoutdetector = null;
 
             // Go back to login scene
             Loom.QueueOnMainThread(() => {

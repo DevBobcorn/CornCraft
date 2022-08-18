@@ -80,18 +80,6 @@ namespace MinecraftClient.Protocol.Handlers
             this.pTerrain = new ProtocolTerrain(protocolVersion, dataTypes, handler);
             this.packetPalette = new PacketTypeHandler(protocolVersion, forgeInfo != null).GetTypeHandler();
 
-            Debug.Log("Creating block palette...");
-
-            // Block palette
-            if (protocolVersion > MC_1_16_5_Version)
-                throw new NotImplementedException(Translations.Get("exception.palette.block"));
-            if (protocolVersion >= MC_1_16_Version)
-                Block.Palette = new Palette116();
-            else throw new NotImplementedException(Translations.Get("exception.palette.block"));
-            /* TODO Implement More */
-
-            Debug.Log("Creating entity palette...");
-
             // Entity palette
             if (protocolversion > MC_1_16_5_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.entity"));
@@ -104,8 +92,6 @@ namespace MinecraftClient.Protocol.Handlers
             else if (protocolVersion >= MC_1_14_Version)
                 entityPalette = new EntityPalette114();
             else entityPalette = new EntityPalette113();
-
-            Debug.Log("Creating item palette...");
 
             // Item palette
             if (protocolversion >= MC_1_16_Version)
@@ -1357,7 +1343,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// Ping a Minecraft server to get information about the server
         /// </summary>
         /// <returns>True if ping was successful</returns>
-        public static bool doPing(string host, int port, ref int protocolversion, ref ForgeInfo forgeInfo)
+        public static bool doPing(string host, int port, ref int protocol, ref ForgeInfo forgeInfo)
         {
             string version = "";
             TcpClient tcp = ProxyHandler.newTcpClient(host, port);
@@ -1366,22 +1352,22 @@ namespace MinecraftClient.Protocol.Handlers
             SocketWrapper socketWrapper = new SocketWrapper(tcp);
             DataTypes dataTypes = new DataTypes(MC_1_13_Version);
 
-            byte[] packet_id = dataTypes.GetVarInt(0);
-            byte[] protocol_version = dataTypes.GetVarInt(-1);
-            byte[] server_port = BitConverter.GetBytes((ushort)port); Array.Reverse(server_port);
-            byte[] next_state = dataTypes.GetVarInt(1);
-            byte[] packet = dataTypes.ConcatBytes(packet_id, protocol_version, dataTypes.GetString(host), server_port, next_state);
+            byte[] packetId = dataTypes.GetVarInt(0);
+            byte[] protocolVersion = dataTypes.GetVarInt(-1);
+            byte[] serverPort = BitConverter.GetBytes((ushort)port); Array.Reverse(serverPort);
+            byte[] nextState  = dataTypes.GetVarInt(1);
+            byte[] packet = dataTypes.ConcatBytes(packetId, protocolVersion, dataTypes.GetString(host), serverPort, nextState);
             byte[] tosend = dataTypes.ConcatBytes(dataTypes.GetVarInt(packet.Length), packet);
 
             socketWrapper.SendDataRAW(tosend);
 
-            byte[] status_request = dataTypes.GetVarInt(0);
-            byte[] requestPacket = dataTypes.ConcatBytes(dataTypes.GetVarInt(status_request.Length), status_request);
+            byte[] statusRequest = dataTypes.GetVarInt(0);
+            byte[] requestPacket = dataTypes.ConcatBytes(dataTypes.GetVarInt(statusRequest.Length), statusRequest);
 
             socketWrapper.SendDataRAW(requestPacket);
 
             int packetLength = dataTypes.ReadNextVarIntRAW(socketWrapper);
-            if (packetLength > 0) //Read Response length
+            if (packetLength > 0) // Read Response length
             {
                 Queue<byte> packetData = new Queue<byte>(socketWrapper.ReadDataRAW(packetLength));
                 if (dataTypes.ReadNextVarInt(packetData) == 0x00) //Read Packet Id
@@ -1400,18 +1386,18 @@ namespace MinecraftClient.Protocol.Handlers
                         {
                             Json.JSONData versionData = jsonData.Properties["version"];
 
-                            //Retrieve display name of the Minecraft version
+                            // Retrieve display name of the Minecraft version
                             if (versionData.Properties.ContainsKey("name"))
                                 version = versionData.Properties["name"].StringValue;
 
-                            //Retrieve protocol version number for handling this server
+                            // Retrieve protocol version number for handling this server
                             if (versionData.Properties.ContainsKey("protocol"))
-                                protocolversion = int.Parse(versionData.Properties["protocol"].StringValue);
+                                protocol = int.Parse(versionData.Properties["protocol"].StringValue);
 
                             // Check for forge on the server.
                             ProtocolForge.ServerInfoCheckForge(jsonData, ref forgeInfo);
 
-                            Translations.Log("mcc.server_protocol", version, protocolversion + (forgeInfo != null ? Translations.Get("mcc.with_forge") : ""));
+                            Translations.Log("mcc.server_protocol", version, protocol + (forgeInfo != null ? Translations.Get("mcc.with_forge") : ""));
 
                             return true;
                         }
