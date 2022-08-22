@@ -112,7 +112,7 @@ namespace MinecraftClient.Rendering
 
         public bool IsChunkDataReady(int chunkX, int chunkY, int chunkZ)
         {
-            if (!ChunkRenderColumn.IsValidChunkY(chunkY))
+            if (chunkY < 0 || chunkY * Chunk.SizeY >= World.GetDimension().height)
             {
                 // Above the sky or below the bedrock, treat it as ready empty chunks...
                 return true;
@@ -436,6 +436,8 @@ namespace MinecraftClient.Rendering
 
             int viewDist = CornCraft.MCSettings_RenderDistance;
 
+            int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
+
             for (int cx = -viewDist;cx <= viewDist;cx++)
                 for (int cz = -viewDist;cz <= viewDist;cz++)
                 {
@@ -449,7 +451,7 @@ namespace MinecraftClient.Rendering
                             int chunkMask = world[chunkX, chunkZ].ChunkMask;
                             // Create it and add the whole column to render list...
                             columnRender = GetChunkColumn(chunkX, chunkZ, true);
-                            for (int chunkY = 0;chunkY < ChunkColumn.ColumnSize;chunkY++)
+                            for (int chunkY = 0;chunkY < chunkColumnSize;chunkY++)
                             {   // Create chunk renders and queue them...
                                 if ((chunkMask & (1 << chunkY)) != 0)
                                 {   // This chunk is not empty and needs to be added and queued
@@ -594,11 +596,11 @@ namespace MinecraftClient.Rendering
                     // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                     QueueChunkBuild(chunk);
 
-                    if (loc.ChunkBlockY == 0 && ChunkRenderColumn.IsValidChunkY(chunkY - 1)) // In the bottom layer of this chunk
+                    if (loc.ChunkBlockY == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
                     {   // Queue the chunk below, if it isn't empty
                         QueueChunkBuildIfNotEmpty(column.GetChunk(chunkY - 1, false));
                     }
-                    else if (loc.ChunkBlockY == Chunk.SizeY - 1 && ChunkRenderColumn.IsValidChunkY(chunkY + 1)) // In the top layer of this chunk
+                    else if (loc.ChunkBlockY == Chunk.SizeY - 1 && ((chunkY + 1) * Chunk.SizeY) < World.GetDimension().height) // In the top layer of this chunk
                     {   // Queue the chunk above, if it isn't empty
                         QueueChunkBuildIfNotEmpty(column.GetChunk(chunkY + 1, false));
                     }
@@ -641,11 +643,11 @@ namespace MinecraftClient.Rendering
                         // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                         QueueChunkBuild(chunk);
 
-                        if (loc.ChunkBlockY == 0 && ChunkRenderColumn.IsValidChunkY(chunkY - 1)) // In the bottom layer of this chunk
+                        if (loc.ChunkBlockY == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
                         {   // Queue the chunk below, if it isn't empty
                             QueueChunkBuildIfNotEmpty(column.GetChunk(chunkY - 1, false));
                         }
-                        else if (loc.ChunkBlockY == Chunk.SizeY - 1 && ChunkRenderColumn.IsValidChunkY(chunkY + 1)) // In the top layer of this chunk
+                        else if (loc.ChunkBlockY == Chunk.SizeY - 1 && ((chunkY + 1) * Chunk.SizeY) < World.GetDimension().height) // In the top layer of this chunk
                         {   // Queue the chunk above, if it isn't empty
                             QueueChunkBuildIfNotEmpty(column.GetChunk(chunkY + 1, false));
                         }

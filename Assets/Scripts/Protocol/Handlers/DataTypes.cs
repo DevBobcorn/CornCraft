@@ -383,7 +383,7 @@ namespace MinecraftClient.Protocol.Handlers
         {
             int entityID = ReadNextVarInt(cache);
             Guid entityUUID = Guid.Empty;
-            
+
             entityUUID = ReadNextUUID(cache); // MC 1.8+
 
             EntityType entityType;
@@ -703,10 +703,13 @@ namespace MinecraftClient.Protocol.Handlers
 
                 // NBT root name
                 string rootName = null;
+
                 if (nbt.ContainsKey(""))
                     rootName = nbt[""] as string;
+
                 if (rootName == null)
                     rootName = "";
+
                 bytes.AddRange(GetUShort((ushort)rootName.Length));
                 bytes.AddRange(Encoding.ASCII.GetBytes(rootName));
             }
@@ -997,32 +1000,37 @@ namespace MinecraftClient.Protocol.Handlers
         public byte[] GetItemSlot(Item item, ItemPalette itemPalette)
         {
             List<byte> slotData = new List<byte>();
-            if (protocolversion > ProtocolMinecraft.MC_1_13_Version)
-            {
-                // MC 1.13 and greater
-                if (item == null || item.IsEmpty)
-                    slotData.Add(0); // No item
-                else
-                {
-                    slotData.Add(1); // Item is present
-                    slotData.AddRange(GetVarInt(itemPalette.ToId(item.Type)));
-                    slotData.Add((byte)item.Count);
-                    slotData.AddRange(GetNbt(item.NBT));
-                }
-            }
+
+            // MC 1.13 and greater
+            if (item == null || item.IsEmpty)
+                slotData.AddRange(GetBool(false)); // No item
             else
             {
-                // MC 1.12.2 and lower
-                if (item == null || item.IsEmpty)
-                    slotData.AddRange(GetShort(-1));
-                else
-                {
-                    slotData.AddRange(GetShort((short)itemPalette.ToId(item.Type)));
-                    slotData.Add((byte)item.Count);
-                    slotData.AddRange(GetNbt(item.NBT));
-                }
+                slotData.AddRange(GetBool(true)); // Item is present
+                slotData.AddRange(GetVarInt(itemPalette.ToId(item.Type)));
+                slotData.Add((byte)item.Count);
+                slotData.AddRange(GetNbt(item.NBT));
             }
+
             return slotData.ToArray();
+        }
+
+        /// <summary>
+        /// Get a byte array representing an array of item slots
+        /// </summary>
+        /// <param name="items">Items</param>
+        /// <param name="itemPalette">Item Palette</param>
+        /// <returns>Array of Item slot representations</returns>
+        public byte[] GetSlotsArray(Dictionary<int, Item> items, ItemPalette itemPalette)
+        {
+            byte[] slotsArray = new byte[items.Count];
+
+            foreach (KeyValuePair<int, Item> item in items)
+            {
+                slotsArray = ConcatBytes(slotsArray, GetShort((short)item.Key), GetItemSlot(item.Value, itemPalette));
+            }
+
+            return slotsArray;
         }
 
         /// <summary>
@@ -1067,6 +1075,11 @@ namespace MinecraftClient.Protocol.Handlers
             return result.ToArray();
         }
 
+        /// <summary>
+        /// Convert a byte array to an hexadecimal string representation (for debugging purposes)
+        /// </summary>
+        /// <param name="bytes">Byte array</param>
+        /// <returns>String representation</returns>
         public string ByteArrayToString(byte[] bytes)
         {
             return BitConverter.ToString(bytes).Replace("-", " ");

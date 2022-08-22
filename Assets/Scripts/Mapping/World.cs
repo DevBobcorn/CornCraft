@@ -18,11 +18,22 @@ namespace MinecraftClient.Mapping
         private Dictionary<int, Dictionary<int, ChunkColumn>> chunks = new Dictionary<int, Dictionary<int, ChunkColumn>>();
 
         private Dictionary<Vector3Int, ChunkRender> chunkRenders = new Dictionary<Vector3Int, ChunkRender>();
+        
+        /// <summary>
+        /// The dimension info of the world
+        /// </summary>
+        private static Dimension dimension = new Dimension();
 
         /// <summary>
         /// Lock for thread safety
         /// </summary>
         private readonly ReaderWriterLockSlim chunksLock = new ReaderWriterLockSlim();
+
+        /// <summary>
+        /// Chunk data parsing progress
+        /// </summary>
+        public int chunkCnt = 0;
+        public int chunkLoadNotCompleted = 0;
 
         /// <summary>
         /// Read, set or unload the specified chunk column
@@ -91,7 +102,7 @@ namespace MinecraftClient.Mapping
             {
                 if (chunks.ContainsKey(chunkX))
                     if (chunks[chunkX].ContainsKey(chunkZ) && chunks[chunkX][chunkZ] is not null)
-                        return true;
+                        return chunks[chunkX][chunkZ].FullyLoaded;
                 return false;
             }
             finally
@@ -99,6 +110,26 @@ namespace MinecraftClient.Mapping
                 chunksLock.ExitReadLock();
             }
 
+        }
+
+        /// <summary>
+        /// Set dimension type
+        /// </summary>
+        /// <param name="name">	The name of the dimension type</param>
+        /// <param name="nbt">The dimension type (NBT Tag Compound)</param>
+        public static void SetDimension(string name, Dictionary<string, object> nbt)
+        {
+            // will change in 1.19 and above
+            dimension = new Dimension(name, nbt);
+        }
+
+        /// <summary>
+        /// Get current dimension
+        /// </summary>
+        /// <returns>Current dimension</returns>
+        public static Dimension GetDimension()
+        {
+            return dimension;
         }
 
         /// <summary>
