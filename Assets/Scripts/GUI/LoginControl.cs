@@ -212,7 +212,7 @@ namespace MinecraftClient.UI
 
                 if (!isRealms)
                 {
-                    Debug.Log("mcc.retrieve"); // Retrieve server information
+                    Translations.Log("mcc.retrieve"); // Retrieve server information
                     if (!ProtocolHandler.GetServerInfo(host, port, ref protocolVersion, ref forgeInfo))
                     {
                         Translations.LogError("error.ping");

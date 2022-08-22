@@ -1,5 +1,4 @@
 using UnityEngine;
-using MinecraftClient.UI;
 
 namespace MinecraftClient.Control
 {
