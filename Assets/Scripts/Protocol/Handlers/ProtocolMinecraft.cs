@@ -1258,10 +1258,6 @@ namespace MinecraftClient.Protocol.Handlers
 
             SendPacket(0x00, handshakePacket);
 
-            byte[] loginPacket = dataTypes.GetString(handler.GetUsername());
-
-            SendPacket(0x00, loginPacket);
-
             List<byte> fullLoginPacket = new List<byte>();
             fullLoginPacket.AddRange(dataTypes.GetString(handler.GetUsername()));                             // Username
             if (protocolversion >= MC_1_19_Version)

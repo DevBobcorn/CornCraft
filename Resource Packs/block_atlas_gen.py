@@ -51,7 +51,7 @@ j = lncnt - 1
 
 atlas_dict = { }
 
-packpath = 'vanilla-1.16.5/assets/'
+packpath = 'vanilla-1.17.1/assets/'
 
 namespaces = os.listdir(packpath)
 for nspath in namespaces:

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 using MinecraftClient.Event;
 using MinecraftClient.Mapping;
@@ -149,6 +150,7 @@ namespace MinecraftClient.Protocol.Handlers
             var world = handler.GetWorld();
 
             int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
+            int chunkMask = 0;
 
             if (protocolversion >= ProtocolMinecraft.MC_1_17_Version)
             {
@@ -170,11 +172,15 @@ namespace MinecraftClient.Protocol.Handlers
                         Chunk chunk = new Chunk(handler.GetWorld());
                         ReadBlockStatesField(ref chunk, cache);
 
+                        if (chunk is not null)
+                            chunkMask |= 1 << chunkY;
+
                         //We have our chunk, save the chunk into the world
                         handler.InvokeOnNetReadThread(() =>
                         {
                             if (handler.GetWorld()[chunkX, chunkZ] == null)
                                 handler.GetWorld()[chunkX, chunkZ] = new ChunkColumn(handler.GetWorld(), chunkColumnSize);
+                            chunk.SetParent(handler.GetWorld());
                             handler.GetWorld()[chunkX, chunkZ][chunkY] = chunk;
                         });
 
@@ -202,8 +208,15 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                     }
                 }
+
                 // Don't worry about skipping remaining data since there is no useful data afterwards in 1.9
                 // (plus, it would require parsing the tile entity lists' NBT)
+
+                handler.InvokeOnNetReadThread(() =>
+                {   // Set the column's chunk mask
+                    handler.GetWorld()[chunkX, chunkZ].ChunkMask = chunkMask;
+                    Debug.Log("Chunk Mask: " + Convert.ToString(chunkMask, 2));
+                });
 
                 // Broadcast event to update world render
                 Loom.QueueOnMainThread(() => {
@@ -354,8 +367,6 @@ namespace MinecraftClient.Protocol.Handlers
                     {
                         if (handler.GetWorld()[chunkX, chunkZ] == null)
                             handler.GetWorld()[chunkX, chunkZ] = new ChunkColumn(handler.GetWorld());
-                        // Set the column's chunk mask
-                        handler.GetWorld()[chunkX, chunkZ].ChunkMask = chunkMask;
                         chunk.SetParent(handler.GetWorld());
                         handler.GetWorld()[chunkX, chunkZ][chunkY] = chunk;
                     });
@@ -376,6 +387,11 @@ namespace MinecraftClient.Protocol.Handlers
 
             // Don't worry about skipping remaining data since there is no useful data afterwards in 1.9
             // (plus, it would require parsing the tile entity lists' NBT)
+
+            handler.InvokeOnNetReadThread(() =>
+            {   // Set the column's chunk mask
+                handler.GetWorld()[chunkX, chunkZ].ChunkMask = chunkMask;
+            });
 
             // Broadcast event to update world render
             Loom.QueueOnMainThread(() => {

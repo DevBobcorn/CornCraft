@@ -237,9 +237,12 @@ namespace MinecraftClient
             var wait = new WaitForSecondsRealtime(0.1F);
 
             // Create block palette first to prepare for resource loading
-            if (protocolVersion > ProtocolMinecraft.MC_1_16_5_Version)
+            if (protocolVersion > ProtocolMinecraft.MC_1_17_1_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.block"));
-            if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
+            
+            if (protocolVersion >= ProtocolMinecraft.MC_1_17_Version)
+                Block.Palette = new Palette117();
+            else if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
                 Block.Palette = new Palette116();
             else
             {
@@ -253,7 +256,7 @@ namespace MinecraftClient
             packManager.ClearPacks();
 
             // TODO Apply pack for corresponding version
-            ResourcePack pack = new ResourcePack("vanilla-1.16.5");
+            ResourcePack pack = new ResourcePack("vanilla-1.17.1");
             packManager.AddPack(pack);
 
             ShowNotification("Loading resources for MC " + Protocol.ProtocolHandler.ProtocolVersion2MCVer(protocolVersion));
