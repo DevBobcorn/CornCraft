@@ -9,14 +9,6 @@ namespace MinecraftClient.Rendering
     {
         public int ChunkX, ChunkZ;
 
-        public static bool IsValidChunkY(int chunkY)
-        {
-            // This can be changed in the future...
-            return chunkY >= minChunkY && chunkY < minChunkY + ChunkColumn.ColumnSize;
-        }
-
-        public static int minChunkY = 0;
-
         private readonly Dictionary<int, ChunkRender> chunks = new Dictionary<int, ChunkRender>();
 
         public bool HasDelayed
@@ -78,7 +70,7 @@ namespace MinecraftClient.Rendering
             else
             {
                 // This chunk doesn't currently exist...
-                if (IsValidChunkY(chunkY))
+                if (chunkY >= 0 && chunkY * Chunk.SizeY < World.GetDimension().height)
                 {
                     if (createIfEmpty)
                     {

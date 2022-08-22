@@ -81,9 +81,11 @@ namespace MinecraftClient.Protocol.Handlers
             this.packetPalette = new PacketTypeHandler(protocolVersion, forgeInfo != null).GetTypeHandler();
 
             // Entity palette
-            if (protocolversion > MC_1_16_5_Version)
+            if (protocolversion > MC_1_18_2_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.entity"));
-            if (protocolversion >= MC_1_16_2_Version)
+            if (protocolversion >= MC_1_17_Version)
+                entityPalette = new EntityPalette117();
+            else if (protocolversion >= MC_1_16_2_Version)
                 entityPalette = new EntityPalette1162();
             else if (protocolversion >= MC_1_16_Version)
                 entityPalette = new EntityPalette1161();
@@ -94,11 +96,15 @@ namespace MinecraftClient.Protocol.Handlers
             else entityPalette = new EntityPalette113();
 
             // Item palette
-            if (protocolversion >= MC_1_16_Version)
+            if (protocolversion >= MC_1_16_2_Version)
             {
-                if (protocolversion > MC_1_16_5_Version)
+                if (protocolversion > MC_1_18_2_Version)
                     throw new NotImplementedException(Translations.Get("exception.palette.item"));
-                if (protocolversion >= MC_1_16_2_Version)
+                if (protocolversion >= MC_1_18_1_Version)
+                    itemPalette = new ItemPalette118();
+                else if (protocolversion >= MC_1_17_Version)
+                    itemPalette = new ItemPalette117();
+                else if (protocolversion >= MC_1_16_2_Version)
                     itemPalette = new ItemPalette1162();
                 else itemPalette = new ItemPalette1161();
             }
@@ -274,7 +280,7 @@ namespace MinecraftClient.Protocol.Handlers
                             dataTypes.ReadNextNbt(packetData);                        // Registry Codec (Dimension Codec) - 1.16 and above
                         }
 
-                        //string? currentDimensionName = null;
+                        string? currentDimensionName = null;
                         Dictionary<string, object>? currentDimensionType = null;
 
                         // Current dimension
@@ -285,7 +291,10 @@ namespace MinecraftClient.Protocol.Handlers
                         if (protocolversion >= MC_1_16_Version)
                         {
                             if (protocolversion >= MC_1_19_Version)
+                            {
                                 dataTypes.ReadNextString(packetData); // Dimension Type: Identifier
+                                currentDimensionType = new Dictionary<string, object>();
+                            }
                             else if (protocolversion >= MC_1_16_2_Version)
                                 currentDimensionType = dataTypes.ReadNextNbt(packetData); // Dimension Type: NBT Tag Compound
                             else
@@ -297,8 +306,13 @@ namespace MinecraftClient.Protocol.Handlers
 
                         if (protocolversion < MC_1_14_Version)
                             dataTypes.ReadNextByte(packetData);           // Difficulty - 1.13 and below
+                        
                         if (protocolversion >= MC_1_16_Version)
-                            dataTypes.ReadNextString(packetData);         // World Name - 1.16 and above
+                            currentDimensionName = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
+                        
+                        if (protocolversion >= MC_1_16_2_Version)
+                                World.SetDimension(currentDimensionName, currentDimensionType);
+                        
                         if (protocolversion >= MC_1_15_Version)
                             dataTypes.ReadNextLong(packetData);           // Hashed world seed - 1.15 and above
 
@@ -347,7 +361,10 @@ namespace MinecraftClient.Protocol.Handlers
                             if ((messageType == 1 && !CornCraft.DisplaySystemMessages)
                                 || (messageType == 2 && !CornCraft.DisplayXPBarMessages))
                                 break;
-                            senderUUID = dataTypes.ReadNextUUID(packetData);
+                            
+                            if (protocolversion >= MC_1_16_5_Version)
+                                senderUUID = dataTypes.ReadNextUUID(packetData);
+                            else senderUUID = Guid.Empty;
 
                             handler.OnTextReceived(new(message, true, messageType, senderUUID));
                         }
@@ -383,13 +400,16 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     case PacketTypesIn.Respawn:
                         string? dimensionNameInRespawn = null;
-                        //Dictionary<string, object>? dimensionTypeInRespawn = null;
+                        Dictionary<string, object>? dimensionTypeInRespawn = null;
                         if (protocolversion >= MC_1_16_Version)
                         {
                             if (protocolversion >= MC_1_19_Version)
+                            {
                                 dataTypes.ReadNextString(packetData); // Dimension Type: Identifier
+                                dimensionTypeInRespawn = new Dictionary<string, object>();
+                            }
                             else if (protocolversion >= MC_1_16_2_Version)
-                                currentDimensionType = dataTypes.ReadNextNbt(packetData); // Dimension Type: NBT Tag Compound
+                                dimensionTypeInRespawn = dataTypes.ReadNextNbt(packetData); // Dimension Type: NBT Tag Compound
                             else
                                 dataTypes.ReadNextString(packetData);
                             this.currentDimension = 0;
@@ -402,9 +422,8 @@ namespace MinecraftClient.Protocol.Handlers
                         if (protocolversion >= MC_1_16_Version)
                             dimensionNameInRespawn = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
 
-                        // Implementation in PR#1943
-                        // if (protocolversion >= MC_1_16_2_Version)
-                        //     handler.GetWorld().SetDimension(currentDimensionName, currentDimensionType);
+                        if (protocolversion >= MC_1_16_2_Version)
+                            World.SetDimension(dimensionNameInRespawn, dimensionTypeInRespawn);
 
                         if (protocolversion < MC_1_14_Version)
                             dataTypes.ReadNextByte(packetData);           // Difficulty - 1.13 and below
@@ -452,39 +471,72 @@ namespace MinecraftClient.Protocol.Handlers
                         // Teleport confirm packet
                         SendPacket(PacketTypesOut.TeleportConfirm, dataTypes.GetVarInt(teleportId));
                         
-                        if (protocolversion >= MC_1_17_Version) dataTypes.ReadNextBool(packetData);
+                        if (protocolversion >= MC_1_17_Version)
+                            dataTypes.ReadNextBool(packetData); // Dismount Vehicle - 1.17 and above
                         break;
-                    case PacketTypesIn.ChunkData: //TODO implement for 1.17, bit mask is not limited to 0-15 anymore 
-                        int chunkX1 = dataTypes.ReadNextInt(packetData);
-                        int chunkZ1 = dataTypes.ReadNextInt(packetData);
-                        bool chunksContinuous = dataTypes.ReadNextBool(packetData);
-                        if (protocolversion >= MC_1_16_Version && protocolversion <= MC_1_16_1_Version)
-                            dataTypes.ReadNextBool(packetData); // Ignore old data - 1.16 to 1.16.1 only
-                        ushort chunkMask = (ushort)dataTypes.ReadNextVarInt(packetData);
-
-                        if (protocolversion >= MC_1_14_Version)
-                            dataTypes.ReadNextNbt(packetData);  // Heightmaps - 1.14 and above
-                        int biomesLength = 0;
-                        if (protocolversion >= MC_1_16_2_Version)
-                            if (chunksContinuous)
-                                biomesLength = dataTypes.ReadNextVarInt(packetData); // Biomes length - 1.16.2 and above
-                        if (protocolversion >= MC_1_15_Version && chunksContinuous)
+                    case PacketTypesIn.ChunkData:
+                        int chunkX = dataTypes.ReadNextInt(packetData);
+                        int chunkZ = dataTypes.ReadNextInt(packetData);
+                        if (protocolversion >= MC_1_17_Version)
                         {
-                            if (protocolversion >= MC_1_16_2_Version)
+                            ulong[]? verticalStripBitmask = null;
+
+                            if (protocolversion == MC_1_17_Version || protocolversion == MC_1_17_1_Version)
+                                verticalStripBitmask = dataTypes.ReadNextULongArray(packetData); // Bit Mask Length  and  Primary Bit Mask
+
+                            dataTypes.ReadNextNbt(packetData); // Heightmaps
+
+                            if (protocolversion == MC_1_17_Version || protocolversion == MC_1_17_1_Version)
                             {
+                                int biomesLength = dataTypes.ReadNextVarInt(packetData); // Biomes length
                                 for (int i = 0; i < biomesLength; i++)
                                 {
-                                    // Biomes - 1.16.2 and above
-                                    // Don't use ReadNextVarInt because it cost too much time
-                                    dataTypes.SkipNextVarInt(packetData);
+                                    dataTypes.SkipNextVarInt(packetData); // Biomes
                                 }
                             }
-                            else dataTypes.ReadData(1024 * 4, packetData); // Biomes - 1.15 and above
+
+                            int dataSize = dataTypes.ReadNextVarInt(packetData); // Size
+
+                            Interlocked.Increment(ref handler.GetWorld().chunkCnt);
+                            Interlocked.Increment(ref handler.GetWorld().chunkLoadNotCompleted);
+                            new Task(() =>
+                            {
+                                pTerrain.ProcessChunkColumnData(chunkX, chunkZ, verticalStripBitmask, packetData);
+                                Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
+                            }).Start();
                         }
-                        int dataSize = dataTypes.ReadNextVarInt(packetData);
-                        new Task(() => {
-                            pTerrain.ProcessChunkColumnData(chunkX1, chunkZ1, chunkMask, chunksContinuous, currentDimension, packetData);
-                        }).Start();
+                        else
+                        {
+                            bool chunksContinuous = dataTypes.ReadNextBool(packetData);
+                            if (protocolversion >= MC_1_16_Version && protocolversion <= MC_1_16_1_Version)
+                                dataTypes.ReadNextBool(packetData); // Ignore old data - 1.16 to 1.16.1 only
+                            ushort chunkMask = (ushort)dataTypes.ReadNextVarInt(packetData);
+
+                            if (protocolversion >= MC_1_14_Version)
+                                dataTypes.ReadNextNbt(packetData);  // Heightmaps - 1.14 and above
+                            int biomesLength = 0;
+                            if (protocolversion >= MC_1_16_2_Version)
+                                if (chunksContinuous)
+                                    biomesLength = dataTypes.ReadNextVarInt(packetData); // Biomes length - 1.16.2 and above
+                            if (protocolversion >= MC_1_15_Version && chunksContinuous)
+                            {
+                                if (protocolversion >= MC_1_16_2_Version)
+                                {
+                                    for (int i = 0; i < biomesLength; i++)
+                                    {
+                                        // Biomes - 1.16.2 and above
+                                        // Don't use ReadNextVarInt because it cost too much time
+                                        dataTypes.SkipNextVarInt(packetData);
+                                    }
+                                }
+                                else dataTypes.ReadData(1024 * 4, packetData); // Biomes - 1.15 and above
+                            }
+                            int dataSize = dataTypes.ReadNextVarInt(packetData);
+                            new Task(() =>
+                            {
+                                pTerrain.ProcessChunkColumnData(chunkX, chunkZ, chunkMask, 0, false, chunksContinuous, currentDimension, packetData);
+                            }).Start();
+                        }
                         break;
                     case PacketTypesIn.MapData:
                         int mapid = dataTypes.ReadNextVarInt(packetData);
@@ -623,7 +675,13 @@ namespace MinecraftClient.Protocol.Handlers
                     case PacketTypesIn.UnloadChunk:
                         int chunkX3 = dataTypes.ReadNextInt(packetData);
                         int chunkZ3 = dataTypes.ReadNextInt(packetData);
+
+                        if (handler.GetWorld()[chunkX3, chunkZ3] != null)
+                            Interlocked.Decrement(ref handler.GetWorld().chunkCnt);
+                        // Warning: It is legal to include unloaded chunks in the UnloadChunk packet. Since chunks that have not been loaded are not recorded, this may result in loading chunks that should be unloaded and inaccurate statistics.
+                        
                         handler.GetWorld()[chunkX3, chunkZ3] = null;
+
                         Loom.QueueOnMainThread(() => {
                             EventManager.Instance.Broadcast<UnloadChunkColumnEvent>(new UnloadChunkColumnEvent(chunkX3, chunkZ3));
                         });
@@ -766,21 +824,42 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     case PacketTypesIn.WindowItems:
                         byte windowId3 = dataTypes.ReadNextByte(packetData);
-                        short elements = dataTypes.ReadNextShort(packetData);
+                        int stateId1 = -1;
+                        int elements = 0;
+
+                        if (protocolversion >= MC_1_17_1_Version)
+                        {
+                            // State ID and Elements as VarInt - 1.17.1 and above
+                            stateId1 = dataTypes.ReadNextVarInt(packetData);
+                            elements = dataTypes.ReadNextVarInt(packetData);
+                        }
+                        else
+                        {
+                            // Elements as Short - 1.17 and below
+                            dataTypes.ReadNextShort(packetData);
+                        }
+
                         Dictionary<int, Item> inventorySlots = new Dictionary<int, Item>();
-                        for (short slotId1 = 0; slotId1 < elements; slotId1++)
+                        for (int slotId = 0; slotId < elements; slotId++)
                         {
                             Item item1 = dataTypes.ReadNextItemSlot(packetData, itemPalette);
                             if (item1 != null)
-                                inventorySlots[slotId1] = item1;
+                                inventorySlots[slotId] = item1;
                         }
-                        handler.OnWindowItems(windowId3, inventorySlots);
+
+                        if (protocolversion >= MC_1_17_1_Version) // Carried Item - 1.17.1 and above
+                            dataTypes.ReadNextItemSlot(packetData, itemPalette);
+
+                        handler.OnWindowItems(windowId3, inventorySlots, stateId1);
                         break;
                     case PacketTypesIn.SetSlot:
                         byte windowId4 = dataTypes.ReadNextByte(packetData);
+                        int stateId2 = -1;
+                        if (protocolversion >= MC_1_17_1_Version)
+                            stateId2 = dataTypes.ReadNextVarInt(packetData); // State ID - 1.17.1 and above
                         short slotId2 = dataTypes.ReadNextShort(packetData);
                         Item item2 = dataTypes.ReadNextItemSlot(packetData, itemPalette);
-                        handler.OnSetSlot(windowId4, slotId2, item2);
+                        handler.OnSetSlot(windowId4, slotId2, item2, stateId2);
                         break;
                     case PacketTypesIn.WindowConfirmation:
                         byte windowId5 = dataTypes.ReadNextByte(packetData);
@@ -874,16 +953,15 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                         break;
                     case PacketTypesIn.DestroyEntities:
-                        int EntityCount = dataTypes.ReadNextVarInt(packetData);
-                        int[] EntitiesList = new int[EntityCount];
-                        for (int i = 0; i < EntityCount; i++)
+                        int entityCount = 1; // 1.17.0 has only one entity per packet
+                        if (protocolversion != MC_1_17_Version)
+                            entityCount = dataTypes.ReadNextVarInt(packetData); // All other versions have a "count" field
+                        int[] entityList = new int[entityCount];
+                        for (int i = 0; i < entityCount; i++)
                         {
-                            EntitiesList[i] = dataTypes.ReadNextVarInt(packetData);
+                            entityList[i] = dataTypes.ReadNextVarInt(packetData);
                         }
-                        handler.OnDestroyEntities(EntitiesList);
-                        break;
-                    case PacketTypesIn.DestroyEntity:
-                        handler.OnDestroyEntities(new [] { dataTypes.ReadNextVarInt(packetData) });
+                        handler.OnDestroyEntities(entityList);
                         break;
                     case PacketTypesIn.EntityPosition:
                         int entityId3 = dataTypes.ReadNextVarInt(packetData);
@@ -952,7 +1030,16 @@ namespace MinecraftClient.Protocol.Handlers
                     case PacketTypesIn.EntityMetadata:
                         int entityId7 = dataTypes.ReadNextVarInt(packetData);
                         Dictionary<int, object> metadata = dataTypes.ReadNextMetadata(packetData, itemPalette);
-                        int healthField = protocolversion >= MC_1_14_Version ? 8 : 7; // Health is field no. 7 in 1.10+ and 8 in 1.14+
+
+                        // See https://wiki.vg/Entity_metadata#Living_Entity
+                        int healthField = 7; // From 1.10 to 1.13.2
+                        if (protocolversion >= MC_1_14_Version)
+                            healthField = 8; // 1.14 and above
+                        if (protocolversion >= MC_1_17_Version)
+                            healthField = 9; // 1.17 and above
+                        if (protocolversion > MC_1_18_2_Version)
+                            throw new NotImplementedException(Translations.Get("exception.palette.healthfield"));
+
                         if (metadata.ContainsKey(healthField) && metadata[healthField] != null && metadata[healthField].GetType() == typeof(float))
                             handler.OnEntityHealth(entityId7, (float)metadata[healthField]);
                         handler.OnEntityMetadata(entityId7, metadata);
@@ -1017,7 +1104,9 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     case PacketTypesIn.UpdateScore:
                         string entityname = dataTypes.ReadNextString(packetData);
-                        byte action3 = dataTypes.ReadNextByte(packetData);
+                        int action3 = protocolversion >= MC_1_18_2_Version
+                            ? dataTypes.ReadNextVarInt(packetData)
+                            : dataTypes.ReadNextByte(packetData);
                         string objectivename2 = String.Empty;
                         int value = -1;
                         objectivename2 = dataTypes.ReadNextString(packetData);
@@ -1695,7 +1784,12 @@ namespace MinecraftClient.Protocol.Handlers
                 fields.Add(skinParts);
                 fields.AddRange(dataTypes.GetVarInt(mainHand));
                 if (protocolversion >= MC_1_17_Version)
-                    fields.Add(0); // Enables text filtering. Always false
+                {
+                    if (protocolversion >= MC_1_18_1_Version)
+                        fields.Add(0); // 1.18 and above - Enable text filtering. (Always false)
+                    else
+                        fields.Add(1); // 1.17 and 1.17.1 - Disable text filtering. (Always true)
+                }
                 if (protocolversion >= MC_1_18_1_Version)
                     fields.Add(1); // 1.18 and above - Allow server listings
                 SendPacket(PacketTypesOut.ClientSettings, fields);
@@ -1926,7 +2020,7 @@ namespace MinecraftClient.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool SendWindowAction(int windowId, int slotId, WindowActionType action, Item item)
+        public bool SendWindowAction(int windowId, int slotId, WindowActionType action, Item item, List<Tuple<short, Item>> changedSlots, int stateId)
         {
             try
             {
@@ -1962,10 +2056,46 @@ namespace MinecraftClient.Protocol.Handlers
                 }
 
                 List<byte> packet = new List<byte>();
-                packet.Add((byte)windowId);
-                packet.AddRange(dataTypes.GetShort((short)slotId));
-                packet.Add(button);
-                if (protocolversion < MC_1_17_Version) packet.AddRange(dataTypes.GetShort(actionNumber));
+                packet.Add((byte)windowId); // Window ID
+
+                // 1.18+
+                if (protocolversion >= MC_1_18_1_Version)
+                {
+                    packet.AddRange(dataTypes.GetVarInt(stateId)); // State ID
+                    packet.AddRange(dataTypes.GetShort((short)slotId)); // Slot ID
+                }
+                // 1.17.1
+                else if (protocolversion == MC_1_17_1_Version)
+                {
+                    packet.AddRange(dataTypes.GetShort((short)slotId)); // Slot ID
+                    packet.AddRange(dataTypes.GetVarInt(stateId)); // State ID
+                }
+                // Older
+                else
+                {
+                    packet.AddRange(dataTypes.GetShort((short)slotId)); // Slot ID
+                }
+
+                packet.Add(button); // Button
+
+                if (protocolversion < MC_1_17_Version)
+                    packet.AddRange(dataTypes.GetShort(actionNumber));
+
+                packet.AddRange(dataTypes.GetVarInt(mode)); // MC 1.9+, Mode
+
+                // 1.17+  Array of changed slots
+                if (protocolversion >= MC_1_17_Version)
+                {
+                    packet.AddRange(dataTypes.GetVarInt(changedSlots.Count)); // Length of the array
+                    foreach (var slot in changedSlots)
+                    {
+                        packet.AddRange(dataTypes.GetShort(slot.Item1)); // slot ID
+                        packet.AddRange(dataTypes.GetItemSlot(slot.Item2, itemPalette)); // slot Data
+                    }
+                }
+
+                packet.AddRange(dataTypes.GetItemSlot(item, itemPalette)); // Carried item (Clicked item)
+
                 packet.AddRange(dataTypes.GetVarInt(mode));
                 packet.AddRange(dataTypes.GetItemSlot(item, itemPalette));
                 SendPacket(PacketTypesOut.ClickWindow, packet);

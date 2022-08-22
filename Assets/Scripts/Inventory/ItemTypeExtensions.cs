@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace MinecraftClient.Inventory
 {
@@ -50,11 +48,13 @@ namespace MinecraftClient.Inventory
             ItemType[] t =
             {
                 ItemType.AcaciaBoat,
+                ItemType.AxolotlBucket,
                 ItemType.BirchBoat,
                 ItemType.BlackBed,
                 ItemType.BlackShulkerBox,
                 ItemType.BlueBed,
                 ItemType.BlueShulkerBox,
+                ItemType.Bundle,
                 ItemType.Bow,
                 ItemType.BrownBed,
                 ItemType.BrownShulkerBox,
@@ -142,6 +142,7 @@ namespace MinecraftClient.Inventory
                 ItemType.MusicDiscFar,
                 ItemType.MusicDiscMall,
                 ItemType.MusicDiscMellohi,
+                ItemType.MusicDiscOtherside,
                 ItemType.MusicDiscStal,
                 ItemType.MusicDiscStrad,
                 ItemType.MusicDiscWait,
@@ -152,6 +153,7 @@ namespace MinecraftClient.Inventory
                 ItemType.PinkBed,
                 ItemType.PinkShulkerBox,
                 ItemType.Potion,
+                ItemType.PowderSnowBucket,
                 ItemType.PufferfishBucket,
                 ItemType.PurpleBed,
                 ItemType.PurpleShulkerBox,
@@ -166,6 +168,7 @@ namespace MinecraftClient.Inventory
                 ItemType.SkullBannerPattern,
                 ItemType.SplashPotion,
                 ItemType.SpruceBoat,
+                ItemType.Spyglass,
                 ItemType.StoneAxe,
                 ItemType.StoneHoe,
                 ItemType.StonePickaxe,

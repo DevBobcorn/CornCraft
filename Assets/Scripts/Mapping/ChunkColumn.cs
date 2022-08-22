@@ -8,30 +8,32 @@ namespace MinecraftClient.Mapping
     /// </summary>
     public class ChunkColumn
     {
-        public const int ColumnSize = 16;
+        public int ColumnSize;
+
+        public bool FullyLoaded = false;
 
         private World world;
         public int ChunkMask;
 
-        public ChunkColumn(World parent)
-        {
-            world = parent;
-        }
-
-        public void SetParent(World parent)
-        {
-            world = parent;
-        }
-
         /// <summary>
         /// Blocks contained into the chunk
         /// </summary>
-        private readonly Chunk[] chunks = new Chunk[ColumnSize];
+        private readonly Chunk[] chunks;
 
         /// <summary>
         /// Lock for thread safety
         /// </summary>
         private readonly ReaderWriterLockSlim chunkLock = new ReaderWriterLockSlim();
+
+        /// <summary>
+        /// Create a new ChunkColumn
+        /// </summary>
+        public ChunkColumn(World parent, int size = 16)
+        {
+            world = parent;
+            ColumnSize = size;
+            chunks = new Chunk[size];
+        }
 
         /// <summary>
         /// Get or set the specified chunk column
