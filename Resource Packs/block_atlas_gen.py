@@ -1,6 +1,8 @@
 from PIL import Image, ImageOps
 import os, glob, json
 
+version = '1.17.1'
+
 recolor_dict = {
     'minecraft:block/water_flow': (63, 118, 228),
     'minecraft:block/water_overlay': (63, 118, 228),
@@ -51,7 +53,7 @@ j = lncnt - 1
 
 atlas_dict = { }
 
-packpath = 'vanilla-1.17.1/assets/'
+packpath = 'vanilla-' + version + '/assets/'
 
 namespaces = os.listdir(packpath)
 for nspath in namespaces:
@@ -97,9 +99,9 @@ for nspath in namespaces:
             i = 0
             j -= 1
 
-with open("./block_atlas_dict.json", "w+") as f:
+with open("./block_atlas_" + version + "_dict.json", "w+") as f:
     data = json.dumps(atlas_dict, sort_keys=True, indent=4, separators=(',', ': '))
     f.write(data) 
 
-atlas.save('./block_atlas.png')
+atlas.save('./block_atlas_' + version + '.png')
 print('Done.')

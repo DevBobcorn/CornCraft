@@ -240,10 +240,18 @@ namespace MinecraftClient
             if (protocolVersion > ProtocolMinecraft.MC_1_17_1_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.block"));
             
+            var resourceVersion = string.Empty;
+
             if (protocolVersion >= ProtocolMinecraft.MC_1_17_Version)
+            {
                 Block.Palette = new Palette117();
+                resourceVersion = "1.17.1";
+            }
             else if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
+            {
                 Block.Palette = new Palette116();
+                resourceVersion = "1.16.5";
+            }    
             else
             {
                 Translations.LogError("exception.palette.block");
@@ -255,14 +263,14 @@ namespace MinecraftClient
             resourceLoaded = false;
             packManager.ClearPacks();
 
-            // TODO Apply pack for corresponding version
-            ResourcePack pack = new ResourcePack("vanilla-1.17.1");
+            ResourcePack pack = new ResourcePack("vanilla-" + resourceVersion);
             packManager.AddPack(pack);
-
-            ShowNotification("Loading resources for MC " + Protocol.ProtocolHandler.ProtocolVersion2MCVer(protocolVersion));
 
             // Load valid packs...
             var resLoad = StartCoroutine(packManager.LoadPacks(() => resourceLoaded = true));
+
+            BlockTextureManager.EnsureInitialized();
+            BlockTextureManager.Load(resourceVersion);
 
             while (!resourceLoaded)
                 yield return wait;
@@ -370,6 +378,7 @@ namespace MinecraftClient
                 if (chatQueue.Count > 0 && nextMessageSendTime < DateTime.Now)
                 {
                     string text = chatQueue.Dequeue();
+                    Debug.Log("Sending text: " + text);
                     handler.SendChatMessage(text, playerKeyPair);
                     nextMessageSendTime = DateTime.Now + TimeSpan.FromSeconds(1);
                 }
