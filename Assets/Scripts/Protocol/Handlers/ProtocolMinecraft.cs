@@ -1230,7 +1230,7 @@ namespace MinecraftClient.Protocol.Handlers
                 }
             }
 
-            //Debug.Log("[C -> S] Sending packet " + packetId + " > " + dataTypes.ByteArrayToString(dataTypes.ConcatBytes(dataTypes.GetVarInt(the_packet.Length), the_packet)));
+            //Debug.Log("[C -> S] Sending packet " + packetId + " > " + dataTypes.ByteArrayToString(dataTypes.ConcatBytes(dataTypes.GetVarInt(thePacket.Length), thePacket)));
 
             socketWrapper.SendDataRAW(dataTypes.ConcatBytes(dataTypes.GetVarInt(thePacket.Length), thePacket));
         }
@@ -1668,9 +1668,6 @@ namespace MinecraftClient.Protocol.Handlers
                     fields.AddRange(dataTypes.GetBool(false));
                 }
                 SendPacket(PacketTypesOut.ChatMessage, fields);
-
-                byte[] messagePacket = dataTypes.GetString(message);
-                SendPacket(PacketTypesOut.ChatMessage, messagePacket);
                 return true;
             }
             catch (SocketException) { return false; }
