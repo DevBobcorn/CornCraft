@@ -215,7 +215,7 @@ namespace MinecraftClient.Protocol.Handlers
                 handler.InvokeOnNetReadThread(() =>
                 {   // Set the column's chunk mask
                     handler.GetWorld()[chunkX, chunkZ].ChunkMask = chunkMask;
-                    Debug.Log("Chunk Mask: " + Convert.ToString(chunkMask, 2));
+                    //Debug.Log("Chunk Mask: " + Convert.ToString(chunkMask, 2));
                 });
 
                 // Broadcast event to update world render

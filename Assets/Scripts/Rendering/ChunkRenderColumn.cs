@@ -40,7 +40,7 @@ namespace MinecraftClient.Rendering
             newChunk.ChunkZ = this.ChunkZ;
             // Set its parent to this chunk column...
             chunkObj.transform.parent = this.transform;
-            chunkObj.transform.localPosition = CoordConvert.MC2Unity(this.ChunkX * Chunk.SizeX, chunkY * Chunk.SizeY, this.ChunkZ * Chunk.SizeZ);
+            chunkObj.transform.localPosition = CoordConvert.MC2Unity(this.ChunkX * Chunk.SizeX, chunkY * Chunk.SizeY + World.GetDimension().minY, this.ChunkZ * Chunk.SizeZ);
             newChunk.UpdateLayers(0);
             
             return newChunk;
@@ -54,11 +54,6 @@ namespace MinecraftClient.Rendering
         public Dictionary<int, ChunkRender> GetChunks()
         {
             return chunks;
-        }
-
-        private ChunkRender GetChunkAt(int chunkY)
-        {
-            return chunks[chunkY];
         }
 
         public ChunkRender GetChunk(int chunkY, bool createIfEmpty)

@@ -95,19 +95,9 @@ namespace MinecraftClient.Rendering
             }
         }
 
-        public ChunkRender GetChunk(Location location)
-        {
-            return GetChunk(location.ChunkX, location.ChunkY, location.ChunkZ);
-        }
-
         public ChunkRender GetChunk(int chunkX, int chunkY, int chunkZ)
         {
             return GetChunkColumn(chunkX, chunkZ, false)?.GetChunk(chunkY, false);
-        }
-
-        public bool IsChunkRenderReady(int chunkX, int chunkY, int chunkZ)
-        {
-            return GetChunkColumn(chunkX, chunkZ, false) is not null;
         }
 
         public bool IsChunkDataReady(int chunkX, int chunkY, int chunkZ)
@@ -204,6 +194,7 @@ namespace MinecraftClient.Rendering
 
                     bool isAllEmpty = true;
                     int count = ChunkRender.TYPES.Length, layerMask = 0;
+                    int offsetY = World.GetDimension().minY;
 
                     var visualBuffer = new MeshBuffer[count];
                     for (int i = 0;i < count;i++)
@@ -235,7 +226,7 @@ namespace MinecraftClient.Rendering
                                     return;
                                 }
 
-                                var loc = chunkRender.GetGlobalLocation(x, y, z);
+                                var loc = GetLocationInChunkRender(chunkRender, x, y, z, offsetY);
 
                                 var bloc = chunkData[x, y, z];
                                 var state = bloc.State;
@@ -424,6 +415,23 @@ namespace MinecraftClient.Rendering
             }
         }
 
+        private Location GetLocationInChunkRender(ChunkRender chunk, int x, int y, int z, int offsetY)
+        {   // Offset y coordinate by the current dimension's minY...
+            return new Location(chunk.ChunkX * Chunk.SizeX + x, chunk.ChunkY * Chunk.SizeY + y + offsetY, chunk.ChunkZ * Chunk.SizeZ + z);
+        }
+
+        private const int ChunkCenterX = Chunk.SizeX / 2 + 1;
+        private const int ChunkCenterY = Chunk.SizeY / 2 + 1;
+        private const int ChunkCenterZ = Chunk.SizeZ / 2 + 1;
+
+        private void UpdateBuildPriority(Location currentLocation, ChunkRender chunk, int offsetY)
+        {   // Get this chunk's build priority based on its current distance to the player,
+            // a smaller value means a higher priority...
+            chunk.Priority = (int)(
+                new Location(chunk.ChunkX * Chunk.SizeX + ChunkCenterX, chunk.ChunkY * Chunk.SizeY + ChunkCenterY + offsetY, chunk.ChunkZ * Chunk.SizeZ + ChunkCenterZ)
+                    .DistanceTo(currentLocation) / 16);
+        }
+
         // Add new chunks into render list
         public void UpdateChunkRendersListAdd()
         {
@@ -437,6 +445,7 @@ namespace MinecraftClient.Rendering
             int viewDist = CornCraft.MCSettings_RenderDistance;
 
             int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
+            int offsetY = World.GetDimension().minY;
 
             for (int cx = -viewDist;cx <= viewDist;cx++)
                 for (int cz = -viewDist;cz <= viewDist;cz++)
@@ -456,7 +465,7 @@ namespace MinecraftClient.Rendering
                                 if ((chunkMask & (1 << chunkY)) != 0)
                                 {   // This chunk is not empty and needs to be added and queued
                                     var chunk = columnRender.GetChunk(chunkY, true);
-                                    chunk.UpdatePriority(game.GetCurrentLocation());
+                                    UpdateBuildPriority(location, chunk, offsetY);
                                     QueueChunkBuild(chunk);
                                 }
                                 
@@ -466,7 +475,7 @@ namespace MinecraftClient.Rendering
                         {
                             foreach (var delayed in column.GetDelayed())
                             {
-                                delayed.UpdatePriority(game.GetCurrentLocation());
+                                UpdateBuildPriority(location, delayed, offsetY);
                                 QueueChunkBuild(delayed);
                             }
                         }

@@ -55,13 +55,6 @@ namespace MinecraftClient
         public float GetYaw() { return playerYaw; }
         public float GetPitch() { return playerPitch; }
         public World GetWorld() { return world; }
-
-        public bool EnvironmentLoaded()
-        {
-            if (worldRender is not null)
-                return worldRender.IsChunkRenderReady(location.ChunkX, location.ChunkY, location.ChunkZ);
-            return false;
-        }
         #endregion
 
         #region Login Information

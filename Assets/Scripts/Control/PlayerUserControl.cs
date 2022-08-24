@@ -23,9 +23,7 @@ namespace MinecraftClient.Control
 
         void Update()
         {
-            bool playerReady = player.DisableAnim || game.EnvironmentLoaded();
-
-            if (game.IsPaused() || !playerReady) return;
+            if (game.IsPaused()) return;
 
             float h = getValue(Input.GetKey(KeyCode.D), Input.GetKey(KeyCode.A));
             float v = getValue(Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S));
