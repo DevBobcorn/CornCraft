@@ -31,7 +31,7 @@ namespace MinecraftClient.Rendering
         public BuildState State = BuildState.None;
 
         public CancellationTokenSource TokenSource = null;
-        private int priority = 0;
+        public int Priority = 0;
         // Each bit in the layer mask represents the presence of a render type(layer)
         private int layerMask = 0;
         public int LayerMask { get { return layerMask; } }
@@ -41,25 +41,9 @@ namespace MinecraftClient.Rendering
         // Stores whether its neighbor chunks are present (when self is being built)...
         public bool ZNegDataPresent, ZPosDataPresent, XNegDataPresent, XPosDataPresent;
 
-        public Location GetGlobalLocation(int x, int y, int z)
-        {
-            return new Location(
-                ChunkX * Chunk.SizeX + x,
-                ChunkY * Chunk.SizeY + y,
-                ChunkZ * Chunk.SizeZ + z
-            );
-        }
-
-        public void UpdatePriority(Location viewLocation)
-        {
-            // Get this chunk's build priority based on its current distance to the player,
-            // a smaller value means a higher priority...
-            priority = (int)(GetGlobalLocation(7, 7, 7).DistanceTo(viewLocation) / 16);
-        }
-
         public int CompareTo(ChunkRender chunkRender)
         {
-            return this.priority - chunkRender.priority;
+            return this.Priority - chunkRender.Priority;
         }
 
         public void UpdateNeighborStatus()

@@ -36,8 +36,8 @@ namespace MinecraftClient.Control
             }
         }
 
-        protected bool disableAnim = false;
-        public bool DisableAnim { get { return disableAnim; } }
+        protected bool entityDisabled = false;
+        public bool EntityDisabled { get { return entityDisabled; } }
 
         private CameraController camControl;
         private Transform visual;
@@ -48,7 +48,7 @@ namespace MinecraftClient.Control
 
         public virtual void DisableEntity()
         {
-            disableAnim = true;
+            entityDisabled = true;
             isMoving = false;
             // Reset movement params...
             isOnGround = true;
@@ -58,7 +58,7 @@ namespace MinecraftClient.Control
         public virtual void EnableEntity()
         {
             // Update and control...
-            disableAnim = false;
+            entityDisabled = false;
         }
 
         public virtual void SetPosition(Location pos)
@@ -73,7 +73,7 @@ namespace MinecraftClient.Control
 
         public void Tick(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
-            if (disableAnim)
+            if (entityDisabled)
             {
                 TickSpectator(interval, horInput, verInput, walkMode, attack, up, down);
             }

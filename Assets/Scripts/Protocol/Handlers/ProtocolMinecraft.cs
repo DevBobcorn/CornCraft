@@ -311,7 +311,7 @@ namespace MinecraftClient.Protocol.Handlers
                             currentDimensionName = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
                         
                         if (protocolversion >= MC_1_16_2_Version)
-                                World.SetDimension(currentDimensionName, currentDimensionType);
+                            World.SetDimension(currentDimensionName, currentDimensionType);
                         
                         if (protocolversion >= MC_1_15_Version)
                             dataTypes.ReadNextLong(packetData);           // Hashed world seed - 1.15 and above

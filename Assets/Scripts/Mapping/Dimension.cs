@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using UnityEngine;
 
 namespace MinecraftClient.Mapping
 {
@@ -151,7 +149,14 @@ namespace MinecraftClient.Mapping
             if (nbt.ContainsKey("has_raids"))
                 this.hasRaids = 1 == (byte)nbt["has_raids"];
             if (nbt.ContainsKey("min_y"))
+            {
                 this.minY = (int)nbt["min_y"];
+                Debug.Log("Current MinY: " + this.minY);
+            }
+            else
+            {
+                Debug.Log("Current MinY not set, still 0");
+            }
             if (nbt.ContainsKey("height"))
                 this.height = (int)nbt["height"];
             if (nbt.ContainsKey("min_y") && nbt.ContainsKey("height"))
