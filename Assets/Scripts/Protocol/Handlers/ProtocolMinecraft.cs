@@ -34,20 +34,21 @@ namespace MinecraftClient.Protocol.Handlers
     /// </remarks>
     class ProtocolMinecraft : IMinecraftCom
     {
-        internal const int MC_1_13_Version = 393;
-        internal const int MC_1_14_Version = 477;
-        internal const int MC_1_15_Version = 573;
+        internal const int MC_1_13_Version   = 393;
+        internal const int MC_1_14_Version   = 477;
+        internal const int MC_1_15_Version   = 573;
         internal const int MC_1_15_2_Version = 578;
-        internal const int MC_1_16_Version = 735;
+        internal const int MC_1_16_Version   = 735;
         internal const int MC_1_16_1_Version = 736;
         internal const int MC_1_16_2_Version = 751;
         internal const int MC_1_16_3_Version = 753;
         internal const int MC_1_16_5_Version = 754;
-        internal const int MC_1_17_Version = 755;
+        internal const int MC_1_17_Version   = 755;
         internal const int MC_1_17_1_Version = 756;
         internal const int MC_1_18_1_Version = 757;
         internal const int MC_1_18_2_Version = 758;
-        internal const int MC_1_19_Version = 759;
+        internal const int MC_1_19_Version   = 759;
+        internal const int MC_1_19_2_Version = 760;
 
         private int compression_treshold = 0;
         private int autocompleteTransactionId = 0;
@@ -83,32 +84,32 @@ namespace MinecraftClient.Protocol.Handlers
             // Entity palette
             if (protocolversion > MC_1_18_2_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.entity"));
+            
             if (protocolversion >= MC_1_17_Version)
-                entityPalette = new EntityPalette117();
+                entityPalette = new EntityPalette117();  // 1.17   ~ 1.18.2
             else if (protocolversion >= MC_1_16_2_Version)
-                entityPalette = new EntityPalette1162();
+                entityPalette = new EntityPalette1162(); // 1.16.2 ~ 1.16.5
             else if (protocolversion >= MC_1_16_Version)
-                entityPalette = new EntityPalette1161();
+                entityPalette = new EntityPalette1161(); // 1.16   ~ 1.16.1
             else if (protocolversion >= MC_1_15_Version)
-                entityPalette = new EntityPalette115();
+                entityPalette = new EntityPalette115();  // 1.15   ~ 1.15.2
             else if (protocolVersion >= MC_1_14_Version)
-                entityPalette = new EntityPalette114();
-            else entityPalette = new EntityPalette113();
+                entityPalette = new EntityPalette114();  // 1.14   ~ 1.14.4
+            else entityPalette = new EntityPalette113(); // 1.13   ~ 1.13.2
 
             // Item palette
-            if (protocolversion >= MC_1_16_2_Version)
-            {
-                if (protocolversion > MC_1_18_2_Version)
-                    throw new NotImplementedException(Translations.Get("exception.palette.item"));
-                if (protocolversion >= MC_1_18_1_Version)
-                    itemPalette = new ItemPalette118();
-                else if (protocolversion >= MC_1_17_Version)
-                    itemPalette = new ItemPalette117();
-                else if (protocolversion >= MC_1_16_2_Version)
-                    itemPalette = new ItemPalette1162();
-                else itemPalette = new ItemPalette1161();
-            }
-            else itemPalette = new ItemPalette115();
+            if (protocolversion > MC_1_18_2_Version)
+                throw new NotImplementedException(Translations.Get("exception.palette.item"));
+            
+            if (protocolversion >= MC_1_18_1_Version)
+                itemPalette = new ItemPalette118();   // 1.18   ~ 1.18.2
+            else if (protocolversion >= MC_1_17_Version)
+                itemPalette = new ItemPalette117();   // 1.17   ~ 1.17.1
+            else if (protocolversion >= MC_1_16_2_Version)
+                itemPalette = new ItemPalette1162();  // 1.16.2 ~ 1.16.5
+            else if (protocolversion >= MC_1_16_1_Version)
+                itemPalette = new ItemPalette1161();  // 1.16   ~ 1.16.1
+            else itemPalette = new ItemPalette115();  // 1.13   ~ 1.15.2
         }
 
         /// <summary>
@@ -1141,6 +1142,9 @@ namespace MinecraftClient.Protocol.Handlers
                     default:
                         return false; //Ignored packet
                 }
+                
+                //Debug.Log("[S -> C] Receiving packet " + packetId);
+
                 return true; //Packet processed
             }
             catch (Exception innerException)
@@ -1233,14 +1237,6 @@ namespace MinecraftClient.Protocol.Handlers
             //Debug.Log("[C -> S] Sending packet " + packetId + " > " + dataTypes.ByteArrayToString(dataTypes.ConcatBytes(dataTypes.GetVarInt(thePacket.Length), thePacket)));
 
             socketWrapper.SendDataRAW(dataTypes.ConcatBytes(dataTypes.GetVarInt(thePacket.Length), thePacket));
-        }
-
-        private static void PrintArr(byte[] arr)
-        {   // TODO Remove
-            string s = "";
-            foreach (byte b in arr)
-                s += b.ToString() + "\t";
-            Debug.Log(s);
         }
 
         #nullable enable
@@ -1515,7 +1511,7 @@ namespace MinecraftClient.Protocol.Handlers
 
         /// <summary>
         /// The signable argument names and their values from command
-        /// Signature will used in Vanilla's say, me, msg, teammsg, ban, banip, and kick commands.
+        /// Signature will be used in Vanilla's say, me, msg, teammsg, ban, banip, and kick commands.
         /// https://gist.github.com/kennytv/ed783dd244ca0321bbd882c347892874#signed-command-arguments
         /// </summary>
         /// <param name="command">Command</param>

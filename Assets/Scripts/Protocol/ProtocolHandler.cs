@@ -112,11 +112,16 @@ namespace MinecraftClient.Protocol
         #nullable disable
 
         // MC 1.13+ only now...
-        private static int[] supportedVersions = { 393, 401, 404, 477, 480, 485, 490, 498, 573, 575, 578, 735, 736, 751, 753, 754, 755, 756, 757, 758, 759 };
+        private static int[] supportedVersions = { 393, 401, 404, 477, 480, 485, 490, 498, 573, 575, 578, 735, 736, 751, 753, 754, 755, 756, 757, 758, 759 }; // TODO 1.19.2 (760)
 
-        public static bool IsProtocolSupported(int ProtocolVersion)
+        public static bool IsProtocolSupported(int version)
         {
-            return Array.IndexOf(supportedVersions, ProtocolVersion) > -1;
+            return Array.IndexOf(supportedVersions, version) > -1;
+        }
+
+        public static string GetLatestSupported()
+        {
+            return ProtocolVersion2MCVer(supportedVersions.Max());
         }
 
         /// <summary>
@@ -239,6 +244,7 @@ namespace MinecraftClient.Protocol
                 case 757: return "1.18.1";
                 case 758: return "1.18.2";
                 case 759: return "1.19";
+                case 760: return "1.19.2";
                 default: return "0.0";
             }
         }
@@ -535,7 +541,7 @@ namespace MinecraftClient.Protocol
             try
             {
                 string result = "";
-                string cookies = String.Format("sid=token:{0}:{1};user={2};version={3}", accesstoken, uuid, username, CornCraft.MCHighestVersion);
+                string cookies = String.Format("sid=token:{0}:{1};user={2};version={3}", accesstoken, uuid, username, GetLatestSupported());
                 DoHTTPSGet("pc.realms.minecraft.net", "/worlds", cookies, ref result);
                 Json.JSONData realmsWorlds = Json.ParseJson(result);
                 if (realmsWorlds.Properties.ContainsKey("servers")
@@ -592,7 +598,7 @@ namespace MinecraftClient.Protocol
             try
             {
                 string result = "";
-                string cookies = String.Format("sid=token:{0}:{1};user={2};version={3}", accesstoken, uuid, username, CornCraft.MCHighestVersion);
+                string cookies = String.Format("sid=token:{0}:{1};user={2};version={3}", accesstoken, uuid, username, GetLatestSupported());
                 int statusCode = DoHTTPSGet("pc.realms.minecraft.net", "/worlds/v1/" + worldId + "/join/pc", cookies, ref result);
                 if (statusCode == 200)
                 {

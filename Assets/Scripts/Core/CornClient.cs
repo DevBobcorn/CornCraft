@@ -230,13 +230,13 @@ namespace MinecraftClient
             var wait = new WaitForSecondsRealtime(0.1F);
 
             // Create block palette first to prepare for resource loading
-            if (protocolVersion > ProtocolMinecraft.MC_1_17_1_Version)
+            if (protocolVersion > ProtocolMinecraft.MC_1_18_2_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.block"));
             
             var resourceVersion = string.Empty;
 
             if (protocolVersion >= ProtocolMinecraft.MC_1_17_Version)
-            {
+            {   // Treat 1.18.X as 1.17.X because there ain't a single block changed in 1.18
                 Block.Palette = new Palette117();
                 resourceVersion = "1.17.1";
             }
@@ -245,12 +245,11 @@ namespace MinecraftClient
                 Block.Palette = new Palette116();
                 resourceVersion = "1.16.5";
             }    
-            else
+            else // TODO Implement More
             {
                 Translations.LogError("exception.palette.block");
                 yield break;
             }
-            /* TODO Implement More */
 
             // Load resources...
             resourceLoaded = false;
