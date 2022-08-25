@@ -14,9 +14,6 @@ namespace MinecraftClient
         public const string Version = "1.0.0";
         public const string BrandInfo = "CornCraft/" + Version;
 
-        public const string MCLowestVersion = "1.13.2";
-        public const string MCHighestVersion = "1.16.5";
-
         public const char internalCmdChar = '/';
 
         #region Global Settings and Variables
