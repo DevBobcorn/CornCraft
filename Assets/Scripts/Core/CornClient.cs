@@ -43,7 +43,7 @@ namespace MinecraftClient
         private World world = new();
         private Location location;
         private object locationLock = new();
-        private bool locationReceived = false;
+        private bool locationReceived = false, localLocationUpdated = false;
         private float? _yaw; // Used for calculation ONLY!!! Doesn't reflect the client yaw
         private float? _pitch; // Used for calculation ONLY!!! Doesn't reflect the client pitch
         private float playerYaw;
@@ -251,6 +251,10 @@ namespace MinecraftClient
                 yield break;
             }
 
+            // Load texture atlas... (Will be decently implemented in future)
+            BlockTextureManager.EnsureInitialized();
+            BlockTextureManager.Load(resourceVersion);
+
             // Load resources...
             resourceLoaded = false;
             packManager.ClearPacks();
@@ -260,9 +264,6 @@ namespace MinecraftClient
 
             // Load valid packs...
             var resLoad = StartCoroutine(packManager.LoadPacks(() => resourceLoaded = true));
-
-            BlockTextureManager.EnsureInitialized();
-            BlockTextureManager.Load(resourceVersion);
 
             while (!resourceLoaded)
                 yield return wait;
@@ -376,7 +377,7 @@ namespace MinecraftClient
                 }
             }
 
-            if (locationReceived)
+            if (locationReceived && localLocationUpdated)
             {
                 lock (locationLock)
                 {
@@ -391,6 +392,8 @@ namespace MinecraftClient
                     // Once yaw and pitch have been sent, switch back to location-only updates (without yaw and pitch)
                     _yaw = null;
                     _pitch = null;
+
+                    localLocationUpdated = false;
                 }
             }
 
@@ -1567,12 +1570,13 @@ namespace MinecraftClient
         /// <param name="pitch">Pitch to look at</param>
         public void UpdateLocation(Location location, float yaw, float pitch)
         {
-            this._yaw = yaw;
-            this._pitch = pitch;
-
             lock (locationLock)
             {
+                this._yaw = yaw;
+                this._pitch = pitch;
+
                 this.location = location;
+                localLocationUpdated = false;
                 locationReceived = true;
 
                 Loom.QueueOnMainThread(() => {
@@ -1591,13 +1595,17 @@ namespace MinecraftClient
         /// <param name="pitch">Pitch to look at</param>
         public void SyncLocation(Location location, float yaw, float pitch)
         {
-            this._yaw = yaw;
-            this._pitch = pitch;
-
             lock (locationLock)
             {
-                this.location = location;
-                //locationReceived = true;
+                if (this.location != location || playerYaw != yaw || playerPitch != pitch)
+                {
+                    this._yaw = yaw;
+                    this._pitch = pitch;
+
+                    this.location = location;
+                    localLocationUpdated = true;
+                }
+                
             }
             
         }

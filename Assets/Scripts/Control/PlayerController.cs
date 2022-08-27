@@ -110,7 +110,7 @@ namespace MinecraftClient.Control
 
             // No need to check position validity in spectator mode,
             // just tell server the new position...
-            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), transform.eulerAngles.y - 90F, 0F);
+            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visual.eulerAngles.y - 90F, 0F);
         }
 
         private void TickNormal(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
@@ -140,7 +140,7 @@ namespace MinecraftClient.Control
 
             // No need to check position validity in spectator mode,
             // just tell server the new position...
-            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), transform.eulerAngles.y - 90F, 0F);
+            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visual.eulerAngles.y - 90F, 0F);
         }
 
         Vector3 GetMoveVelocity(float horInput, float verInput, float speed)
