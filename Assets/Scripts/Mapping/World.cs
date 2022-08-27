@@ -147,6 +147,8 @@ namespace MinecraftClient.Mapping
             return this[chunkX, chunkZ];
         }
 
+        private static readonly Block AIR_INSTANCE = new Block(0);
+
         /// <summary>
         /// Get block at the specified location
         /// </summary>
@@ -161,38 +163,7 @@ namespace MinecraftClient.Mapping
                 if (chunk != null)
                     return chunk.GetBlock(location);
             }
-            return new Block(0); // Air
-        }
-
-        private static readonly Block AIR_INSTANCE = new Block(0);
-        private static readonly Block STONE_INSTANCE = new Block(1);
-
-        // Used during chunk building only, used to get
-        // neighbor blocks of a block which is being built...
-        public Block GetBlockForChunkBuilding(Location location)
-        {
-            ChunkColumn column = GetChunkColumn(location);
-            if (column != null)
-            {
-                Chunk chunk = column.GetChunk(location);
-                if (chunk != null)
-                {
-                    return chunk.GetBlock(location);
-                }
-                else
-                {
-                    // This neighbor chunk is loaded, because its chunk column is loaded
-                    // It is null because it is an empty chunk (fill with air)
-                    return AIR_INSTANCE; // Air
-                }                
-            }
-            else
-            {
-                // This neighbor chunk and chunk column is not loaded 
-                // Return an opaque block so that fewer faces are necessary in this mesh build
-                // (It's gonna be rebuilt sometime later, when this neighbor gets ready)...
-                return STONE_INSTANCE; // Stone
-            }
+            return AIR_INSTANCE; // Air
         }
 
         /// <summary>

@@ -116,6 +116,8 @@ namespace MinecraftClient.Resource
         {
             Debug.Log("Preparing block atlas for MC " + version);
 
+            blockAtlasTable.Clear(); // Clear previously loaded table...
+
             string atlasFilePath = PathHelper.GetPacksDirectory() + "/block_atlas_" + version + ".png";
             string atlasJsonPath = PathHelper.GetPacksDirectory() + "/block_atlas_" + version + "_dict.json";
 

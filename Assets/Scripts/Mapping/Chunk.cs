@@ -130,7 +130,7 @@ namespace MinecraftClient.Mapping
         private bool hasUpFace(Location location, BlockCheck check) // MC Y Pos
         {
             if (location.ChunkBlockY == Chunk.SizeY - 1)
-                return check(world.GetBlockForChunkBuilding(location.Up()));
+                return check(world.GetBlock(location.Up()));
             
             return check(GetBlock(location.Up()));
         }
@@ -138,7 +138,7 @@ namespace MinecraftClient.Mapping
         private bool hasDownFace(Location location, BlockCheck check) // MC Y Neg
         {
             if (location.ChunkBlockY == 0)
-                return check(world.GetBlockForChunkBuilding(location.Down()));
+                return check(world.GetBlock(location.Down()));
             
             return check(GetBlock(location.Down()));
         }
@@ -146,7 +146,7 @@ namespace MinecraftClient.Mapping
         private bool hasEastFace(Location location, BlockCheck check) // MC X Pos
         {
             if (location.ChunkBlockX == Chunk.SizeX - 1)
-                return check(world.GetBlockForChunkBuilding(location.East()));
+                return check(world.GetBlock(location.East()));
             
             return check(GetBlock(location.East()));
         }
@@ -154,7 +154,7 @@ namespace MinecraftClient.Mapping
         private bool hasWestFace(Location location, BlockCheck check) // MC X Neg
         {
             if (location.ChunkBlockX == 0)
-                return check(world.GetBlockForChunkBuilding(location.West()));
+                return check(world.GetBlock(location.West()));
             
             return check(GetBlock(location.West()));
         }
@@ -162,7 +162,7 @@ namespace MinecraftClient.Mapping
         private bool hasSouthFace(Location location, BlockCheck check) // MC Z Pos
         {
             if (location.ChunkBlockZ == Chunk.SizeZ - 1)
-                return check(world.GetBlockForChunkBuilding(location.South()));
+                return check(world.GetBlock(location.South()));
             
             return check(GetBlock(location.South()));
         }
@@ -170,7 +170,7 @@ namespace MinecraftClient.Mapping
         private bool hasNorthFace(Location location, BlockCheck check) // MC Z Neg
         {
             if (location.ChunkBlockZ == 0)
-                return check(world.GetBlockForChunkBuilding(location.North()));
+                return check(world.GetBlock(location.North()));
             
             return check(GetBlock(location.North()));
         }
