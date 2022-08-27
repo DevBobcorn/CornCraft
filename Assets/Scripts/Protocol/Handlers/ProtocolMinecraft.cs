@@ -13,7 +13,6 @@ using MinecraftClient.Crypto;
 using MinecraftClient.Event;
 using MinecraftClient.Proxy;
 using MinecraftClient.Mapping;
-using MinecraftClient.Mapping.BlockStatePalettes;
 using MinecraftClient.Mapping.EntityPalettes;
 using MinecraftClient.Inventory;
 using MinecraftClient.Inventory.ItemPalettes;
