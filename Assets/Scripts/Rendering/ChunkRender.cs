@@ -40,6 +40,12 @@ namespace MinecraftClient.Rendering
         
         // Stores whether its neighbor chunks are present (when self is being built)...
         public bool ZNegDataPresent, ZPosDataPresent, XNegDataPresent, XPosDataPresent;
+        public bool AllNeighborDataPresent
+        {
+            get {
+                return ZNegDataPresent && ZPosDataPresent && XNegDataPresent && XPosDataPresent;
+            }
+        }
 
         public int CompareTo(ChunkRender chunkRender)
         {
