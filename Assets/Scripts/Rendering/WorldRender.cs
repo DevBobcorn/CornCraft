@@ -191,6 +191,7 @@ namespace MinecraftClient.Rendering
                 {
                     // Save neighbors' status(present or not) right before mesh building
                     chunkRender.UpdateNeighborStatus();
+                    if (!chunkRender.AllNeighborDataPresent) return; // Not all neighbor data ready, just cancel TODO: Check if this is reasonable
 
                     bool isAllEmpty = true;
                     int count = ChunkRender.TYPES.Length, layerMask = 0;
@@ -590,17 +591,19 @@ namespace MinecraftClient.Rendering
             });
 
             EventManager.Instance.Register<BlockUpdateEvent>(blockCallBack = (e) => {
-                World world = game?.GetWorld();
-                if (world is null) return;
-                
                 var loc = e.location;
                 int chunkX = loc.ChunkX, chunkY = loc.ChunkY, chunkZ = loc.ChunkZ;
+
+                var chunkData = game?.GetWorld()?[chunkX, chunkZ];
+                if (chunkData is null) return;
+                
+                
                 var column = GetChunkColumn(loc.ChunkX, loc.ChunkZ, false);
 
                 if (column is not null) // Queue this chunk to rebuild list...
                 {   // Create the chunk render object if not present (previously empty)
                     var chunk = column.GetChunk(chunkY, true);
-                    world[chunkX, chunkZ].ChunkMask |= 1 << chunkY;
+                    chunkData.ChunkMask |= 1 << chunkY;
 
                     // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                     QueueChunkBuild(chunk);
