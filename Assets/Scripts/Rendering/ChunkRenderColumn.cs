@@ -11,23 +11,23 @@ namespace MinecraftClient.Rendering
 
         private readonly Dictionary<int, ChunkRender> chunks = new Dictionary<int, ChunkRender>();
 
-        public bool HasDelayed
+        public bool HasWorkToDo
         {
             get {
                 foreach (var chunk in chunks.Values)
-                    if (chunk.State == BuildState.Delayed)
+                    if (chunk.State == BuildState.Delayed || chunk.State == BuildState.Cancelled)
                         return true;
                 return false;
             }
         }
 
-        public List<ChunkRender> GetDelayed()
+        public List<ChunkRender> GetWorkToDo()
         {
-            var delayed = new List<ChunkRender>();
+            var work = new List<ChunkRender>();
             foreach (var chunk in chunks.Values)
-                if (chunk.State == BuildState.Delayed)
-                    delayed.Add(chunk);
-            return delayed;
+                if (chunk.State == BuildState.Delayed || chunk.State == BuildState.Cancelled)
+                    work.Add(chunk);
+            return work;
         }
 
         private ChunkRender CreateChunk(int chunkY)
@@ -89,16 +89,19 @@ namespace MinecraftClient.Rendering
         public void Unload(ref List<ChunkRender> chunksBeingBuilt, ref PriorityQueue<ChunkRender> chunks2Build)
         {
             // Unload this chunk column...
-            foreach (var chunk in chunks.Values)
+            foreach (int i in chunks.Keys)
             {
                 // Unload all chunks in this column, except empty chunks...
-                if (chunk is not null)
+                if (chunks[i] is not null)
                 {   // Before destroying the chunk object, do one last thing
-                    if (chunksBeingBuilt.Contains(chunk))
-                    {
-                        chunksBeingBuilt.Remove(chunk);
-                        Debug.Log("Removed " + chunk.ToString() + " from build list");
-                    }
+                    var chunk = chunks[i];
+
+                    if (chunks2Build.Contains(chunk) && chunks2Build.Remove(chunk))
+                        Debug.Log("Removed " + chunk.ToString() + " from build queue");
+
+                    if (chunksBeingBuilt.Remove(chunk))
+                        Debug.Log("Removed " + chunk.ToString() + " from building list");
+                    
                     chunk.Unload();
                 }
 

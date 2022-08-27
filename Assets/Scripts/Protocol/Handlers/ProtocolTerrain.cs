@@ -30,6 +30,7 @@ namespace MinecraftClient.Protocol.Handlers
 
         /// <summary>
         /// Reading the "Block states" field: consists of 4096 entries, representing all the blocks in the chunk section.
+        /// See https://wiki.vg/Chunk_Format#Data_structure
         /// </summary>
         /// <param name="chunk">Blocks will store in this chunk</param>
         /// <param name="cache">Cache for reading data</param>
@@ -38,7 +39,7 @@ namespace MinecraftClient.Protocol.Handlers
             // read Block states (Type: Paletted Container)
             byte bitsPerEntry = dataTypes.ReadNextByte(cache);
 
-            // 1.18(1.18.1) add a pattle named "Single valued" to replace the vertical strip bitmask in the old
+            // 1.18(1.18.1) add a palette named "Single valued" to replace the vertical strip bitmask in the old
             if (bitsPerEntry == 0 && protocolversion >= ProtocolMinecraft.MC_1_18_1_Version)
             {
                 // Palettes: Single valued - 1.18(1.18.1) and above
@@ -47,7 +48,7 @@ namespace MinecraftClient.Protocol.Handlers
                 dataTypes.SkipNextVarInt(cache); // Data Array Length will be zero
 
                 // Empty chunks will not be stored
-                if (value == 0) // TODO Check air in a better way
+                if (value == 0)
                     return null;
 
                 for (int blockY = 0; blockY < Chunk.SizeY; blockY++)
@@ -170,19 +171,20 @@ namespace MinecraftClient.Protocol.Handlers
 
                         // Read Block states (Type: Paletted Container)
                         Chunk chunk = new Chunk(handler.GetWorld());
-                        ReadBlockStatesField(ref chunk, cache);
-
-                        if (chunk is not null)
+                        if (ReadBlockStatesField(ref chunk, cache) is not null) // Chunk not empty(air)
+                        {
                             chunkMask |= 1 << chunkY;
 
-                        //We have our chunk, save the chunk into the world
-                        handler.InvokeOnNetReadThread(() =>
-                        {
-                            if (handler.GetWorld()[chunkX, chunkZ] == null)
-                                handler.GetWorld()[chunkX, chunkZ] = new ChunkColumn(handler.GetWorld(), chunkColumnSize);
-                            chunk.SetParent(handler.GetWorld());
-                            handler.GetWorld()[chunkX, chunkZ][chunkY] = chunk;
-                        });
+                            //We have our chunk, save the chunk into the world
+                            handler.InvokeOnNetReadThread(() =>
+                            {
+                                if (handler.GetWorld()[chunkX, chunkZ] == null)
+                                    handler.GetWorld()[chunkX, chunkZ] = new ChunkColumn(handler.GetWorld(), chunkColumnSize);
+                                chunk.SetParent(handler.GetWorld());
+                                handler.GetWorld()[chunkX, chunkZ][chunkY] = chunk;
+                            });
+
+                        }
 
                         // Skip Read Biomes (Type: Paletted Container) - 1.18(1.18.1) and above
                         if (protocolversion >= ProtocolMinecraft.MC_1_18_1_Version)

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -27,9 +28,10 @@ namespace MinecraftClient.Rendering
             }
         }
 
-        private Dictionary<int, Dictionary<int, ChunkRenderColumn>> columns = new Dictionary<int, Dictionary<int, ChunkRenderColumn>>();
-        private PriorityQueue<ChunkRender> chunks2Build = new PriorityQueue<ChunkRender>();
-        private List<ChunkRender> chunksBeingBuilt = new List<ChunkRender>();
+        private Dictionary<int, Dictionary<int, ChunkRenderColumn>> columns = new();
+        // Operated on Unity main thread only
+        private PriorityQueue<ChunkRender> chunksToBeBuild = new();
+        private List<ChunkRender>         chunksBeingBuilt = new();
 
         private CornClient game;
 
@@ -39,7 +41,7 @@ namespace MinecraftClient.Rendering
             foreach (var chunk in chunksBeingBuilt)
                 works += chunk.ChunkX + ",\t" + chunk.ChunkY + ",\t" + chunk.ChunkZ + "\n";
 
-            return "QueC: " + chunks2Build.Count + "\t" + "BldC: " + chunksBeingBuilt.Count + works;
+            return "QueC: " + chunksToBeBuild.Count + "\t" + "BldC: " + chunksBeingBuilt.Count + works;
         }
 
         #region Chunk management
@@ -133,7 +135,7 @@ namespace MinecraftClient.Rendering
                 foreach (var chunkZ in columns[chunkX].Keys)
                 {
                     // Unload this chunk column (and it'll cancel building by itself)
-                    columns[chunkX][chunkZ].Unload(ref chunksBeingBuilt, ref chunks2Build);
+                    columns[chunkX][chunkZ].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
                 }
 
                 // Clear section (and column indices)
@@ -148,7 +150,7 @@ namespace MinecraftClient.Rendering
             if (columns.ContainsKey(chunkX) && columns[chunkX].ContainsKey(chunkZ))
             {
                 // Unload this chunk column
-                columns[chunkX][chunkZ].Unload(ref chunksBeingBuilt, ref chunks2Build);
+                columns[chunkX][chunkZ].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
 
                 // Remove its index
                 columns[chunkX].Remove(chunkZ);
@@ -171,6 +173,7 @@ namespace MinecraftClient.Rendering
             if (chunkColumnData is null) // Chunk column data unloaded, cancel
             {
                 UnloadChunkColumn(chunkRender.ChunkX, chunkRender.ChunkZ);
+                chunkRender.State = BuildState.Cancelled;
                 return;
             }
 
@@ -182,6 +185,15 @@ namespace MinecraftClient.Rendering
                 return;
             }
 
+            // Save neighbors' status(present or not) right before mesh building
+            chunkRender.UpdateNeighborStatus();
+
+            if (!chunkRender.AllNeighborDataPresent) // TODO: Check if this is reasonable
+            {
+                chunkRender.State = BuildState.Cancelled;
+                return; // Not all neighbor data ready, just cancel
+            }
+
             var ts    = chunkRender.TokenSource = new CancellationTokenSource();
             chunksBeingBuilt.Add(chunkRender);
             chunkRender.State = BuildState.Building;
@@ -189,10 +201,6 @@ namespace MinecraftClient.Rendering
             Task.Factory.StartNew(() => {
                 try
                 {
-                    // Save neighbors' status(present or not) right before mesh building
-                    chunkRender.UpdateNeighborStatus();
-                    if (!chunkRender.AllNeighborDataPresent) return; // Not all neighbor data ready, just cancel TODO: Check if this is reasonable
-
                     bool isAllEmpty = true;
                     int count = ChunkRender.TYPES.Length, layerMask = 0;
                     int offsetY = World.GetDimension().minY;
@@ -375,11 +383,10 @@ namespace MinecraftClient.Rendering
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e.Message);
-                    Debug.LogError(e.StackTrace);
+                    Debug.LogError(e.Message + ":" + e.StackTrace);
 
-                    // Remove tuple from list
-                    if (chunkRender) 
+                    // Remove chunk from list
+                    if (chunkRender is not null)
                     {
                         chunksBeingBuilt.Remove(chunkRender);
                         chunkRender.State = BuildState.Cancelled;
@@ -395,26 +402,6 @@ namespace MinecraftClient.Rendering
         Action<UnloadChunkColumnEvent> columnCallBack2;
         Action<BlockUpdateEvent> blockCallBack;
         Action<BlocksUpdateEvent> blocksCallBack;
-
-        public void RemoveDeadBuilds()
-        {
-            if (chunksBeingBuilt.Count > 0)
-            {
-                // Check if stuck by dead chunk builds(chunks that are already
-                // unloaded but got accidentally added to the build queue)...
-                for (int cr = chunksBeingBuilt.Count - 1;cr > 0;cr--)
-                {
-                    var chunk = chunksBeingBuilt[cr];
-                    if (chunk is null)
-                        chunksBeingBuilt.RemoveAt(cr);
-                    else if (GetChunkColumn(chunk.ChunkX, chunk.ChunkZ, false) is null)
-                    {
-                        chunksBeingBuilt.RemoveAt(cr);
-                    }
-
-                }
-            }
-        }
 
         private Location GetLocationInChunkRender(ChunkRender chunk, int x, int y, int z, int offsetY)
         {   // Offset y coordinate by the current dimension's minY...
@@ -472,9 +459,9 @@ namespace MinecraftClient.Rendering
                                 
                             }
                         }
-                        else if (column.HasDelayed) // Some chunk builds are delayed in this column
+                        else if (column.HasWorkToDo) // Some chunk builds are delayed in this column
                         {
-                            foreach (var delayed in column.GetDelayed())
+                            foreach (var delayed in column.GetWorkToDo())
                             {
                                 UpdateBuildPriority(location, delayed, offsetY);
                                 QueueChunkBuild(delayed);
@@ -522,9 +509,9 @@ namespace MinecraftClient.Rendering
 
         public void QueueChunkBuild(ChunkRender chunkRender)
         {
-            if (!chunks2Build.Contains(chunkRender))
+            if (!chunksToBeBuild.Contains(chunkRender))
             {
-                chunks2Build.Enqueue(chunkRender);
+                chunksToBeBuild.Enqueue(chunkRender);
                 chunkRender.State = BuildState.Pending;
             }
 
@@ -539,13 +526,19 @@ namespace MinecraftClient.Rendering
         public void UnloadWorld()
         {
             // Clear the queue first...
-            chunks2Build.Clear();
+            chunksToBeBuild.Clear();
 
             // And cancel current chunk builds
             foreach (var chunk in chunksBeingBuilt)
                 chunk.TokenSource?.Cancel();
             
             chunksBeingBuilt.Clear();
+
+            // Clear all chunk columns in world
+            var xs = columns.Keys.ToArray();
+
+            foreach (var chunkX in xs)
+                UnloadChunkColumns(chunkX);
 
             // Unregister callbacks
             if (columnCallBack1 is not null)
@@ -699,12 +692,17 @@ namespace MinecraftClient.Rendering
             if (newCount > 0)
             {
                 // Start chunk building tasks...
-                while (chunks2Build.Count > 0 && newCount > 0)
+                while (chunksToBeBuild.Count > 0 && newCount > 0)
                 {
-                    var nextChunk = chunks2Build.Dequeue();
+                    var nextChunk = chunksToBeBuild.Dequeue();
 
-                    if (nextChunk is null || GetChunkColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) is null)
+                    if (nextChunk is null)
                     {   // Chunk is unloaded while waiting in the queue, ignore it...
+                        continue;
+                    }
+                    else if (GetChunkColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) is null)
+                    {   // Chunk column is unloaded while waiting in the queue, ignore it...
+                        nextChunk.State = BuildState.Cancelled;
                         continue;
                     }
                     else
@@ -727,7 +725,7 @@ namespace MinecraftClient.Rendering
                         UpdateChunkRendersListRemove();
                         break;
                     case 2:
-                        RemoveDeadBuilds();
+                        // TODO RemoveDeadBuilds();
                         break;
                 }
                 
