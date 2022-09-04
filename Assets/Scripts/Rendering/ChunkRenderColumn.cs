@@ -11,25 +11,6 @@ namespace MinecraftClient.Rendering
 
         private readonly Dictionary<int, ChunkRender> chunks = new Dictionary<int, ChunkRender>();
 
-        public bool HasWorkToDo
-        {
-            get {
-                foreach (var chunk in chunks.Values)
-                    if (chunk.State == BuildState.Delayed || chunk.State == BuildState.Cancelled)
-                        return true;
-                return false;
-            }
-        }
-
-        public List<ChunkRender> GetWorkToDo()
-        {
-            var work = new List<ChunkRender>();
-            foreach (var chunk in chunks.Values)
-                if (chunk.State == BuildState.Delayed || chunk.State == BuildState.Cancelled)
-                    work.Add(chunk);
-            return work;
-        }
-
         private ChunkRender CreateChunk(int chunkY)
         {
             // Create this chunk...

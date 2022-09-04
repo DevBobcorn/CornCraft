@@ -63,6 +63,7 @@ namespace MinecraftClient
         private int protocolVersion;
         private string username;
         private string uuid;
+        private Guid guid; // Same as uuid, saved for convenience
         private string sessionId;
         private PlayerKeyPair playerKeyPair;
         private bool isSupportPreviewsChat;
@@ -794,10 +795,7 @@ namespace MinecraftClient
 
         public int GetOwnLatency()
         {
-            foreach (var player in onlinePlayers)
-                if (player.Value.Name == username)
-                    return player.Value.Ping;
-            return 0;
+            return onlinePlayers.ContainsKey(guid) ? onlinePlayers[guid].Ping : 0;
         }
 
         #nullable enable
@@ -1767,6 +1765,7 @@ namespace MinecraftClient
             {
                 // 1.19+ offline server is possible to return different uuid
                 this.uuid = player.UUID.ToString().Replace("-", string.Empty);
+                this.guid = player.UUID;
             }
 
             lock (onlinePlayers)
