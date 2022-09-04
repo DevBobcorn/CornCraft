@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -37,11 +37,7 @@ namespace MinecraftClient.Rendering
 
         public string GetDebugInfo()
         {
-            var works = "\n";
-            foreach (var chunk in chunksBeingBuilt)
-                works += chunk.ChunkX + ",\t" + chunk.ChunkY + ",\t" + chunk.ChunkZ + "\n";
-
-            return "QueC: " + chunksToBeBuild.Count + "\t" + "BldC: " + chunksBeingBuilt.Count + works;
+            return "QueC: " + chunksToBeBuild.Count + "\t" + "BldC: " + chunksBeingBuilt.Count;
         }
 
         #region Chunk management
@@ -357,7 +353,7 @@ namespace MinecraftClient.Rendering
                                 };
 
                                 visualMesh.Optimize();
-                                visualMesh.RecalculateNormals();
+                                //visualMesh.RecalculateNormals();
 
                                 chunkRender.Layers[layer].GetComponent<MeshFilter>().sharedMesh = visualMesh;
                                 chunkRender.Layers[layer].GetComponent<MeshRenderer>().sharedMaterial = MaterialManager.GetBlockMaterial(ChunkRender.TYPES[layer]);
@@ -459,12 +455,15 @@ namespace MinecraftClient.Rendering
                                 
                             }
                         }
-                        else if (column.HasWorkToDo) // Some chunk builds are delayed in this column
+                        else
                         {
-                            foreach (var delayed in column.GetWorkToDo())
+                            foreach (var chunk in column.GetChunks().Values)
                             {
-                                UpdateBuildPriority(location, delayed, offsetY);
-                                QueueChunkBuild(delayed);
+                                if (chunk.State == BuildState.Delayed || chunk.State == BuildState.Cancelled)
+                                {   // Queue delayed or cancelled chunk builds...
+                                    UpdateBuildPriority(location, chunk, offsetY);
+                                    QueueChunkBuild(chunk);
+                                }
                             }
                         }
                     }
