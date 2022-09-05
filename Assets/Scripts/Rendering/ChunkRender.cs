@@ -6,6 +6,7 @@ using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Rendering
 {
+    [RequireComponent(typeof (MeshFilter), typeof (MeshRenderer))]
     public class ChunkRender : MonoBehaviour, IComparable<ChunkRender>
     {
         public static readonly RenderType[] TYPES = new RenderType[]
@@ -32,10 +33,6 @@ namespace MinecraftClient.Rendering
 
         public CancellationTokenSource TokenSource = null;
         public int Priority = 0;
-        // Each bit in the layer mask represents the presence of a render type(layer)
-        private int layerMask = 0;
-        public int LayerMask { get { return layerMask; } }
-        public ChunkRenderLayer[] Layers = new ChunkRenderLayer[TYPES.Length];
         public MeshCollider ChunkCollider;
         
         // Stores whether its neighbor chunks are present (when self is being built)...
@@ -63,25 +60,6 @@ namespace MinecraftClient.Rendering
             XPosDataPresent = world.isChunkColumnReady(ChunkX + 1, ChunkZ); // XPos neighbor
         }
 
-        public void UpdateLayers(int layerMask)
-        {
-            this.layerMask = layerMask;
-            for (int i = 0;i < TYPES.Length;i++)
-            {   // This render types presents in this chunk render
-                bool hasLayer = (layerMask & (1 << i)) != 0;
-                if (hasLayer && Layers[i] is null) // Create this layer
-                {
-                    Layers[i] = CreateChunkLayer(this, TYPES[i]);
-                }
-                else if (!hasLayer && Layers[i] is not null) // Destroy this layer
-                {
-                    // Destroy the game object, not just the component
-                    Destroy(Layers[i].gameObject);
-                    Layers[i] = null;
-                }
-            }
-        }
-
         public void UpdateCollider(Mesh colliderMesh)
         {
             if (ChunkCollider is null)
@@ -98,30 +76,7 @@ namespace MinecraftClient.Rendering
         {
             //Debug.Log("Unloading Chunk " + ToString());
             TokenSource?.Cancel();
-
-            for (int i = 0;i < TYPES.Length;i++)
-            {
-                if (Layers[i] is not null) // Destroy this layer
-                {
-                    Destroy(Layers[i].gameObject);
-                    Layers[i] = null;
-                }
-            }
-
             Destroy(this.gameObject);
-
-        }
-
-        private static ChunkRenderLayer CreateChunkLayer(ChunkRender chunk, RenderType type)
-        {
-            // Create new chunk layer...
-            GameObject layerObj = new GameObject(type.ToString());
-            layerObj.layer = UnityEngine.LayerMask.NameToLayer("Terrain");
-            ChunkRenderLayer newLayer = layerObj.AddComponent<ChunkRenderLayer>();
-            // Set its parent to this chunk...
-            layerObj.transform.parent = chunk.transform;
-            layerObj.transform.localPosition = Vector3.zero;
-            return newLayer;
         }
 
         public override string ToString()

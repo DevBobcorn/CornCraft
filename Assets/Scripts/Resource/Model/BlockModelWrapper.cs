@@ -1,14 +1,15 @@
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Resource
 {
     public class BlockModelWrapper
     {
         public readonly BlockModel model;
-        public readonly Vector2Int zyRot;
+        public readonly int2 zyRot;
         public readonly bool uvlock;
 
-        public BlockModelWrapper(BlockModel model, Vector2Int zyRot, bool uvlock)
+        public BlockModelWrapper(BlockModel model, int2 zyRot, bool uvlock)
         {
             this.model = model;
             this.zyRot = zyRot;
@@ -51,7 +52,7 @@ namespace MinecraftClient.Resource
                     if (data.Properties.ContainsKey("uvlock"))
                         bool.TryParse(data.Properties["uvlock"].StringValue, out uvlock);
 
-                    return new BlockModelWrapper(manager.modelsTable[modelIdentifier], new Vector2Int(zr, yr), uvlock);
+                    return new BlockModelWrapper(manager.modelsTable[modelIdentifier], new int2(zr, yr), uvlock);
                 }
 
             }

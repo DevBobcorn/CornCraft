@@ -1,18 +1,19 @@
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Resource
 {
     public class BlockModelFace // A quad face
     {
         // Texture coords for left-upper and right-lower corners
-        public Vector4 uv;
+        public float4 uv;
         public Rotations.UVRot rot = Rotations.UVRot.UV_0;
         public int tintIndex = -1;
         public string texName = string.Empty;
         public CullDir cullDir = CullDir.NONE;
 
         // The last 3 parameters are passed in so that we can generate uvs if they're not there...
-        public static BlockModelFace fromJson(Json.JSONData data, FaceDir dir, Vector3 from, Vector3 to)
+        public static BlockModelFace fromJson(Json.JSONData data, FaceDir dir, float3 from, float3 to)
         {
             BlockModelFace face = new BlockModelFace();
             if (data.Properties.ContainsKey("texture"))
@@ -23,7 +24,7 @@ namespace MinecraftClient.Resource
 
             if (data.Properties.ContainsKey("uv"))
             {
-                face.uv = VectorUtil.Json2Vector4(data.Properties["uv"]);
+                face.uv = VectorUtil.Json2Float4(data.Properties["uv"]);
 
                 // Check uv rotation only when uv is present
                 if (data.Properties.ContainsKey("rotation"))
@@ -45,16 +46,16 @@ namespace MinecraftClient.Resource
 
                 face.uv = dir switch
                 {
-                    FaceDir.UP    => new Vector4(lz, lx, mz, mx),
-                    FaceDir.DOWN  => new Vector4(lz, lx, mz, mx),
+                    FaceDir.UP    => new float4(lz, lx, mz, mx),
+                    FaceDir.DOWN  => new float4(lz, lx, mz, mx),
 
-                    FaceDir.SOUTH => new Vector4(lz, 16F - my, mz, 16F - ly),
-                    FaceDir.NORTH => new Vector4(16F - mz, 16F - my, 16F - lz, 16F - ly),
+                    FaceDir.SOUTH => new float4(lz, 16F - my, mz, 16F - ly),
+                    FaceDir.NORTH => new float4(16F - mz, 16F - my, 16F - lz, 16F - ly),
 
-                    FaceDir.EAST  => new Vector4(lx, 16F - my, mx, 16F - ly),
-                    FaceDir.WEST  => new Vector4(16F - mx, 16F - my, 16F - lx, 16F - ly),
+                    FaceDir.EAST  => new float4(lx, 16F - my, mx, 16F - ly),
+                    FaceDir.WEST  => new float4(16F - mx, 16F - my, 16F - lx, 16F - ly),
 
-                    _             => new Vector4()
+                    _             => new float4()
                 };
 
             }

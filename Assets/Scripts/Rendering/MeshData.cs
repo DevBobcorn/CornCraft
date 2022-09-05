@@ -1,14 +1,14 @@
-using UnityEngine;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Rendering
 {
     public class MeshBuffer
     {
-        public Vector3[] vert = { };
-        public int[]     face = { };
-        public Vector2[] uv   = { };
+        public float3[] vert = { };
+        public float2[] uv   = { };
 
-        public int offset = 0;
+        public uint[]    face = { };
+        public uint offset = 0;
 
     }
 }

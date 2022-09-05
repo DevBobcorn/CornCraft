@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Resource
 {
@@ -18,18 +19,18 @@ namespace MinecraftClient.Resource
             X, Y, Z
         }
 
-        private static Dictionary<Axis, Vector3> MakeAxisVectors()
+        private static Dictionary<Axis, float3> MakeAxisVectors()
         {
-            var vectors = new Dictionary<Axis, Vector3>();
+            var vectors = new Dictionary<Axis, float3>();
             vectors.Add(Axis.X, Vector3.right);   // 1, 0, 0
             vectors.Add(Axis.Y, Vector3.up);      // 0, 1, 0
             vectors.Add(Axis.Z, Vector3.forward); // 0, 0, 1
             return vectors;
         }
 
-        public static Dictionary<Axis, Vector3> axisVectors = MakeAxisVectors();
+        public static Dictionary<Axis, float3> axisVectors = MakeAxisVectors();
 
-        public static void RotateVertices(ref Vector3[] original, Vector3 pivot, Axis axis, float degrees, bool rescale)
+        public static void RotateVertices(ref float3[] original, float3 pivot, Axis axis, float degrees, bool rescale)
         {
             // Set up rotation quaternion...
             Quaternion rot = axis switch
@@ -43,7 +44,7 @@ namespace MinecraftClient.Resource
             // And rotate vertices...
             for (int i = 0;i < original.Length;i++)
             {
-                Vector3 offset = original[i] - pivot;
+                var offset = original[i] - pivot;
                 if (rescale)
                 {
                     var scaleFrac = 1F / Mathf.Cos(Mathf.Deg2Rad * degrees);
@@ -64,14 +65,14 @@ namespace MinecraftClient.Resource
                             break;
                     }
                 }
-                original[i] = rot * (offset) + pivot;
+                original[i] = (float3)(rot * offset) + pivot; // TODO Make this better
             }
 
         }
 
-        private static Vector3 ROTCENTER = Vector3.one * 0.5F;
+        private static float3 ROTCENTER = new float3(0.5F, 0.5F, 0.5F);
 
-        public static void RotateWrapper(ref Vector3[] original, Vector2Int zyRot)
+        public static void RotateWrapper(ref float3[] original, int2 zyRot)
         {
             // Set up rotation quaternion...
             Quaternion rot = Quaternion.Euler(0F, zyRot.y * 90F, zyRot.x * 90F);
@@ -79,7 +80,7 @@ namespace MinecraftClient.Resource
             // And rotate vertices...
             for (int i = 0;i < original.Length;i++)
             {
-                original[i] = rot * (original[i] - ROTCENTER) + ROTCENTER;
+                original[i] = (float3)(rot * (original[i] - ROTCENTER)) + ROTCENTER; // TODO Make this better
             }
 
         }

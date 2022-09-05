@@ -1,20 +1,20 @@
-using UnityEngine;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Rendering
 {
     public static class ArrayUtil
     {
-        public static Vector3[] GetConcated(Vector3[] orgArr, Vector3[] newArr)
+        public static float3[] GetConcated(float3[] orgArr, float3[] newArr)
         {
-            var resArr = new Vector3[orgArr.Length + newArr.Length];
+            var resArr = new float3[orgArr.Length + newArr.Length];
             orgArr.CopyTo(resArr, 0);
             newArr.CopyTo(resArr, orgArr.Length);
             return resArr;
         }
 
-        public static Vector2[] GetConcated(Vector2[] orgArr, Vector2[] newArr)
+        public static float2[] GetConcated(float2[] orgArr, float2[] newArr)
         {
-            var resArr = new Vector2[orgArr.Length + newArr.Length];
+            var resArr = new float2[orgArr.Length + newArr.Length];
             orgArr.CopyTo(resArr, 0);
             newArr.CopyTo(resArr, orgArr.Length);
             return resArr;
@@ -28,9 +28,17 @@ namespace MinecraftClient.Rendering
             return resArr;
         }
 
-        public static Vector3[] GetConcatedWithOffset(Vector3[] orgArr, Vector3[] newArr, Vector3 offset)
+        public static uint[] GetConcated(uint[] orgArr, uint[] newArr)
         {
-            var resArr = new Vector3[orgArr.Length + newArr.Length];
+            var resArr = new uint[orgArr.Length + newArr.Length];
+            orgArr.CopyTo(resArr, 0);
+            newArr.CopyTo(resArr, orgArr.Length);
+            return resArr;
+        }
+
+        public static float3[] GetConcatedWithOffset(float3[] orgArr, float3[] newArr, float3 offset)
+        {
+            var resArr = new float3[orgArr.Length + newArr.Length];
             orgArr.CopyTo(resArr, 0);
             for (int i = 0;i < newArr.Length;i++)
             {
@@ -39,9 +47,9 @@ namespace MinecraftClient.Rendering
             return resArr;
         }
 
-        public static Vector2[] GetConcatedWithOffset(Vector2[] orgArr, Vector2[] newArr, Vector2 offset)
+        public static float2[] GetConcatedWithOffset(float2[] orgArr, float2[] newArr, float2 offset)
         {
-            var resArr = new Vector2[orgArr.Length + newArr.Length];
+            var resArr = new float2[orgArr.Length + newArr.Length];
             orgArr.CopyTo(resArr, 0);
             for (int i = 0;i < newArr.Length;i++)
             {
@@ -61,9 +69,20 @@ namespace MinecraftClient.Rendering
             return resArr;
         }
 
-        public static Vector3[] GetWithOffset(Vector3[] orgArr, Vector3 offset)
+        public static uint[] GetConcatedWithOffset(uint[] orgArr, uint[] newArr, uint offset)
         {
-            var resArr = new Vector3[orgArr.Length];
+            var resArr = new uint[orgArr.Length + newArr.Length];
+            orgArr.CopyTo(resArr, 0);
+            for (int i = 0;i < newArr.Length;i++)
+            {
+                resArr[orgArr.Length + i] = newArr[i] + offset;
+            }
+            return resArr;
+        }
+
+        public static float3[] GetWithOffset(float3[] orgArr, float3 offset)
+        {
+            var resArr = new float3[orgArr.Length];
             for (int i = 0;i < orgArr.Length;i++)
             {
                 resArr[i] = orgArr[i] + offset;
@@ -71,9 +90,9 @@ namespace MinecraftClient.Rendering
             return resArr;
         }
 
-        public static Vector2[] GetWithOffset(Vector2[] orgArr, Vector2 offset)
+        public static float2[] GetWithOffset(float2[] orgArr, float2 offset)
         {
-            var resArr = new Vector2[orgArr.Length];
+            var resArr = new float2[orgArr.Length];
             for (int i = 0;i < orgArr.Length;i++)
             {
                 resArr[i] = orgArr[i] + offset;
@@ -85,6 +104,16 @@ namespace MinecraftClient.Rendering
         {
             var resArr = new int[orgArr.Length];
             for (int i = 0;i < orgArr.Length;i++)
+            {
+                resArr[i] = orgArr[i] + offset;
+            }
+            return resArr;
+        }
+
+        public static uint[] GetWithOffset(uint[] orgArr, uint offset)
+        {
+            var resArr = new uint[orgArr.Length];
+            for (uint i = 0;i < orgArr.Length;i++)
             {
                 resArr[i] = orgArr[i] + offset;
             }

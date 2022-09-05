@@ -139,10 +139,7 @@ namespace MinecraftClient.UI
 
             var bloc = game.GetWorld().GetBlock(game.GetCurrentLocation());
 
-            DebugText.text = "FPS: " + ((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')
-                + "\n" + game.GetPlayerController()?.GetDebugInfo()
-                + "\n" + bloc.State.ToString()
-                + "\n" + game.GetWorldRender()?.GetDebugInfo();
+            DebugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GetPlayerController()?.GetDebugInfo()}\n{bloc.State.ToString()}\n{game.GetWorldRender()?.GetDebugInfo()}";
 
         }
 
