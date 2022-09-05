@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Unity.Mathematics;
 
 using MinecraftClient.Rendering;
 
@@ -12,22 +13,22 @@ namespace MinecraftClient.Resource
         public const float MC_VERT_SCALE = 16F;
         public const float MC_UV_SCALE = 16F;
 
-        public readonly Dictionary<CullDir, List<Vector3>> verticies = new();
-        public readonly Dictionary<CullDir, List<int>> triangles     = new();
-        public readonly Dictionary<CullDir, List<Vector2>> uvs       = new();
-        public readonly Dictionary<CullDir, List<int>> tintIndices   = new();
+        public readonly Dictionary<CullDir, List<float3>> verticies = new();
+        public readonly Dictionary<CullDir, List<float2>> uvs       = new();
+        public readonly Dictionary<CullDir, List<int>> tintIndices  = new();
 
-        public readonly Dictionary<CullDir, int> vertIndexOffset     = new();
+        public readonly Dictionary<CullDir, List<uint>> triangles = new();
+        public readonly Dictionary<CullDir, uint> vertIndexOffset = new();
 
         public BlockGeometry()
         {
             // Initialize these collections...
             foreach (CullDir dir in Enum.GetValues(typeof (CullDir)))
             {
-                verticies.Add(dir, new List<Vector3>());
-                uvs.Add(dir, new List<Vector2>());
+                verticies.Add(dir, new List<float3>());
+                uvs.Add(dir, new List<float2>());
                 tintIndices.Add(dir, new List<int>());
-                triangles.Add(dir, new List<int>());
+                triangles.Add(dir, new List<uint>());
                 vertIndexOffset.Add(dir, 0);
             }
         }
@@ -48,10 +49,10 @@ namespace MinecraftClient.Resource
 
         }
 
-        private Dictionary<CullDir, Vector3[]> vertexArrs = new();
-        private Dictionary<CullDir, int[]>   triangleArrs = new();
-        private Dictionary<CullDir, Vector2[]> txuvArrs   = new();
-        private Dictionary<CullDir, int[]>     tintArrs   = new();
+        private Dictionary<CullDir, float3[]> vertexArrs   = new();
+        private Dictionary<CullDir, float2[]> txuvArrs     = new();
+        private Dictionary<CullDir, int[]>    tintArrs     = new();
+        private Dictionary<CullDir, uint[]>   triangleArrs = new();
 
         public BlockGeometry Finalize()
         {
@@ -66,10 +67,15 @@ namespace MinecraftClient.Resource
             return this;
         }
 
-        // A '1' bit in cullFlags means shown, while a '0' indicates culled...
-        public Tuple<Vector3[], Vector2[], int[], int[]> GetDataForChunk(int startVertOffset, Vector3 posOffset, int cullFlags)
+        public Tuple<float3[], float2[], int[], uint[]> GetData(int cullFlags)
         {
-            int bulkVertIndexOffset = startVertOffset;
+            return GetDataForChunk(0, float3.zero, cullFlags);
+        }
+
+        // A '1' bit in cullFlags means shown, while a '0' indicates culled...
+        public Tuple<float3[], float2[], int[], uint[]> GetDataForChunk(uint startVertOffset, float3 posOffset, int cullFlags)
+        {
+            uint bulkVertIndexOffset = startVertOffset;
 
             // These things with 'none' cull direction are never culled, so append them first:
             var txuvs = txuvArrs[CullDir.NONE];
@@ -77,7 +83,7 @@ namespace MinecraftClient.Resource
             var verts = ArrayUtil.GetWithOffset(vertexArrs[CullDir.NONE], posOffset);
             var tris  = ArrayUtil.GetWithOffset(triangleArrs[CullDir.NONE], bulkVertIndexOffset);
             
-            bulkVertIndexOffset = startVertOffset + verts.Length;
+            bulkVertIndexOffset = startVertOffset + (uint)verts.Length;
 
             if ((cullFlags & (1 << 0)) != 0) // 1st bit on, Unity +Y Shown (Up)
             {
@@ -86,7 +92,7 @@ namespace MinecraftClient.Resource
                 txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.UP]);
                 tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.UP]);
 
-                bulkVertIndexOffset = startVertOffset + verts.Length;
+                bulkVertIndexOffset = startVertOffset + (uint)verts.Length;
             }
 
             if ((cullFlags & (1 << 1)) != 0) // 2nd bit on, Unity -Y Shown (Down)
@@ -96,7 +102,7 @@ namespace MinecraftClient.Resource
                 txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.DOWN]);
                 tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.DOWN]);
                 
-                bulkVertIndexOffset = startVertOffset + verts.Length;
+                bulkVertIndexOffset = startVertOffset + (uint)verts.Length;
             }
 
             if ((cullFlags & (1 << 2)) != 0) // 3rd bit on, Unity +X Shown (South)
@@ -106,7 +112,7 @@ namespace MinecraftClient.Resource
                 txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.SOUTH]);
                 tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.SOUTH]);
 
-                bulkVertIndexOffset = startVertOffset + verts.Length;
+                bulkVertIndexOffset = startVertOffset + (uint)verts.Length;
             }
 
             if ((cullFlags & (1 << 3)) != 0) // 4th bit on, Unity -X Shown (North)
@@ -116,7 +122,7 @@ namespace MinecraftClient.Resource
                 txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.NORTH]);
                 tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.NORTH]);
                 
-                bulkVertIndexOffset = startVertOffset + verts.Length;
+                bulkVertIndexOffset = startVertOffset + (uint)verts.Length;
             }
 
             if ((cullFlags & (1 << 4)) != 0) // 5th bit on, Unity +Z Shown (East)
@@ -126,7 +132,7 @@ namespace MinecraftClient.Resource
                 txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.EAST]);
                 tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.EAST]);
 
-                bulkVertIndexOffset = startVertOffset + verts.Length;
+                bulkVertIndexOffset = startVertOffset + (uint)verts.Length;
             }
 
             if ((cullFlags & (1 << 5)) != 0) // 6th bit on, Unity -Z Shown (West)
@@ -136,14 +142,14 @@ namespace MinecraftClient.Resource
                 txuvs     = ArrayUtil.GetConcated(txuvs,     txuvArrs[CullDir.WEST]);
                 tintIndcs = ArrayUtil.GetConcated(tintIndcs, tintArrs[CullDir.WEST]);
 
-                bulkVertIndexOffset = startVertOffset + verts.Length;
+                bulkVertIndexOffset = startVertOffset + (uint)verts.Length;
             }
 
             return Tuple.Create(verts, txuvs, tintIndcs, tris);
 
         }
 
-        private void AppendElement(BlockModel model, BlockModelElement elem, Vector2Int zyRot, bool uvlock)
+        private void AppendElement(BlockModel model, BlockModelElement elem, int2 zyRot, bool uvlock)
         {
             float lx = Mathf.Min(elem.from.x, elem.to.x) / MC_VERT_SCALE;
             float mx = Mathf.Max(elem.from.x, elem.to.x) / MC_VERT_SCALE;
@@ -152,17 +158,17 @@ namespace MinecraftClient.Resource
             float lz = Mathf.Min(elem.from.z, elem.to.z) / MC_VERT_SCALE;
             float mz = Mathf.Max(elem.from.z, elem.to.z) / MC_VERT_SCALE;
 
-            Vector3[] elemVerts = new Vector3[]{
-                new Vector3(lx, ly, lz), new Vector3(lx, ly, mz),
-                new Vector3(lx, my, lz), new Vector3(lx, my, mz),
-                new Vector3(mx, ly, lz), new Vector3(mx, ly, mz),
-                new Vector3(mx, my, lz), new Vector3(mx, my, mz)
+            float3[] elemVerts = new float3[]{
+                new float3(lx, ly, lz), new float3(lx, ly, mz),
+                new float3(lx, my, lz), new float3(lx, my, mz),
+                new float3(mx, ly, lz), new float3(mx, ly, mz),
+                new float3(mx, my, lz), new float3(mx, my, mz)
             };
 
             if (elem.rotAngle != 0F) // Apply model rotation...
                 Rotations.RotateVertices(ref elemVerts, elem.pivot / MC_VERT_SCALE, elem.axis, -elem.rotAngle, elem.rescale); // TODO Check angle
             
-            bool stateRotated = zyRot != Vector2Int.zero;
+            bool stateRotated = zyRot.x != 0 || zyRot.y != 0;
 
             if (stateRotated) // Apply state rotation...
                 Rotations.RotateWrapper(ref elemVerts, zyRot);
@@ -221,7 +227,7 @@ namespace MinecraftClient.Resource
                 // state rotation, and it rotates the area of texture which is used on the face
                 int uvAreaRot = stateRotated && uvlock ? uvlockMap[zyRot][facePair.Key] : 0;
 
-                Vector2[] remappedUVs = RemapUVs(face.uv / MC_UV_SCALE, texIdentifier, uvAreaRot);
+                float2[] remappedUVs = RemapUVs(face.uv / MC_UV_SCALE, texIdentifier, uvAreaRot);
 
                 // This rotation doesn't change the area of texture used...
                 // See https://minecraft.fandom.com/wiki/Model#Block_models
@@ -258,9 +264,9 @@ namespace MinecraftClient.Resource
                     tintIndices[cullDir].Add(face.tintIndex);
 
                 // Update vertex offset to current face's cull direction
-                int offset = vertIndexOffset[cullDir];
+                uint offset = vertIndexOffset[cullDir];
 
-                triangles[cullDir] = triangles[cullDir].Concat(new List<int>(){
+                triangles[cullDir] = triangles[cullDir].Concat(new List<uint>(){
                     offset + 0, offset + 1, offset + 2, offset + 2, offset + 1, offset + 3
                 }).ToList();
 
@@ -270,14 +276,14 @@ namespace MinecraftClient.Resource
 
         }
 
-        private static Vector2[] RemapUVs(Vector4 uvs, ResourceLocation source, int areaRot)
+        private static float2[] RemapUVs(float4 uvs, ResourceLocation source, int areaRot)
         {
             return BlockTextureManager.GetUVs(source, uvs, areaRot);
         }
 
-        private static Dictionary<Vector2Int, Dictionary<FaceDir, int>> CreateUVLockMap()
+        private static Dictionary<int2, Dictionary<FaceDir, int>> CreateUVLockMap()
         {
-            var areaRotMap = new Dictionary<Vector2Int, Dictionary<FaceDir, int>>();
+            var areaRotMap = new Dictionary<int2, Dictionary<FaceDir, int>>();
 
             for (int roty = 0;roty < 4;roty++)
             {
@@ -327,7 +333,7 @@ namespace MinecraftClient.Resource
                     foreach (FaceDir dir in Enum.GetValues(typeof (FaceDir)))
                         result.Add(dir, (8 - localRot.GetValueOrDefault(dir, 0)) % 4);
 
-                    areaRotMap.Add(new Vector2Int(rotz, roty), result);
+                    areaRotMap.Add(new int2(rotz, roty), result);
 
                 }
                 
@@ -337,11 +343,11 @@ namespace MinecraftClient.Resource
 
         }
 
-        private static readonly Dictionary<Vector2Int, Dictionary<FaceDir, int>> uvlockMap = CreateUVLockMap();
+        private static readonly Dictionary<int2, Dictionary<FaceDir, int>> uvlockMap = CreateUVLockMap();
 
-        private static Dictionary<Vector2Int, Dictionary<CullDir, CullDir>> CreateCullMap()
+        private static Dictionary<int2, Dictionary<CullDir, CullDir>> CreateCullMap()
         {
-            var cullRemap = new Dictionary<Vector2Int, Dictionary<CullDir, CullDir>>();
+            var cullRemap = new Dictionary<int2, Dictionary<CullDir, CullDir>>();
             var rotYMap = new CullDir[]{ CullDir.NORTH, CullDir.EAST, CullDir.SOUTH, CullDir.WEST };
 
             for (int roty = 0;roty < 4;roty++)
@@ -376,7 +382,7 @@ namespace MinecraftClient.Resource
                         remap.Add(original, target);
                     }
 
-                    cullRemap.Add(new Vector2Int(rotz, roty), remap);
+                    cullRemap.Add(new int2(rotz, roty), remap);
 
                 }
             }
@@ -385,7 +391,7 @@ namespace MinecraftClient.Resource
 
         }
 
-        private static readonly Dictionary<Vector2Int, Dictionary<CullDir, CullDir>> cullMap = CreateCullMap();
+        private static readonly Dictionary<int2, Dictionary<CullDir, CullDir>> cullMap = CreateCullMap();
 
     }
 }

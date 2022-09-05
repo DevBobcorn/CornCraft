@@ -27,7 +27,7 @@ namespace MinecraftClient.Rendering
             buffer.face = ArrayUtil.GetConcated(buffer.face, data.Item4);
             buffer.uv = ArrayUtil.GetConcated(buffer.uv, data.Item2);
 
-            buffer.offset += data.Item1.Length;
+            buffer.offset += (uint)data.Item1.Length;
 
         }
 

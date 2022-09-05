@@ -2,80 +2,81 @@ using System.Linq;
 using UnityEngine;
 
 using MinecraftClient.Resource;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Rendering
 {
     public class ChunkFluidGeometry
     {
-        public static Vector3[] GetUpVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetUpVertices(int blockX, int blockY, int blockZ)
         {
-            Vector3[] arr = {
-                new Vector3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 2
-                new Vector3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 3
-                new Vector3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 1
-                new Vector3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 0
+            float3[] arr = {
+                new float3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 2
+                new float3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 3
+                new float3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 1
+                new float3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 0
             };
             return arr;
         }
 
-        public static Vector3[] GetDownVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetDownVertices(int blockX, int blockY, int blockZ)
         {
-            Vector3[] arr = {
-                new Vector3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
-                new Vector3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 1
-                new Vector3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
-                new Vector3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 2
+            float3[] arr = {
+                new float3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
+                new float3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 1
+                new float3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
+                new float3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 2
             };
             return arr;
         }
 
-        public static Vector3[] GetNorthVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetNorthVertices(int blockX, int blockY, int blockZ)
         {
-            Vector3[] arr = {
-                new Vector3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 2
-                new Vector3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 1
-                new Vector3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
-                new Vector3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
+            float3[] arr = {
+                new float3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 2
+                new float3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 1
+                new float3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
+                new float3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
             };
             return arr;
         }
 
-        public static Vector3[] GetSouthVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetSouthVertices(int blockX, int blockY, int blockZ)
         {
-            Vector3[] arr = {
-                new Vector3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 1
-                new Vector3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 2
-                new Vector3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 0
-                new Vector3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 3
+            float3[] arr = {
+                new float3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 1
+                new float3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 2
+                new float3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 0
+                new float3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 3
             };
             return arr;
         }
 
-        public static Vector3[] GetWestVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetWestVertices(int blockX, int blockY, int blockZ)
         {
-            Vector3[] arr = {
-                new Vector3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 3
-                new Vector3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 2
-                new Vector3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
-                new Vector3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 1
+            float3[] arr = {
+                new float3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 3
+                new float3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 2
+                new float3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
+                new float3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 1
             };
             return arr;
         }
 
-        public static Vector3[] GetEastVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetEastVertices(int blockX, int blockY, int blockZ)
         {
-            Vector3[] arr = {
-                new Vector3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 1
-                new Vector3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 0
-                new Vector3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 2
-                new Vector3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
+            float3[] arr = {
+                new float3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 1
+                new float3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 0
+                new float3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 2
+                new float3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
             };
             return arr;
         }
 
-        public static int[] GetQuad(int offset)
+        public static uint[] GetQuad(uint offset)
         {
-            int[] arr = {
+            uint[] arr = {
                 0 + offset, 3 + offset, 2 + offset, // MC: +X <=> Unity: +Z
                 0 + offset, 1 + offset, 3 + offset
             };

@@ -1,15 +1,16 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Resource
 {
     public class BlockModelElement // a box element
     {
-        public static readonly Vector3 FULL   = new Vector3(16, 16, 16);
-        public static readonly Vector3 CENTER = new Vector3( 8,  8,  8);
+        public static readonly float3 FULL   = new float3(16, 16, 16);
+        public static readonly float3 CENTER = new float3( 8,  8,  8);
 
-        public Vector3 from = Vector3.zero, to = FULL, pivot = CENTER;
+        public float3 from = float3.zero, to = FULL, pivot = CENTER;
         public Dictionary<FaceDir, BlockModelFace> faces;
         public float rotAngle = 0F;
         public Rotations.Axis axis;
@@ -21,8 +22,8 @@ namespace MinecraftClient.Resource
             if (data.Properties.ContainsKey("from") && data.Properties.ContainsKey("to") && data.Properties.ContainsKey("faces"))
             {
                 // Read vertex positions with xz values swapped...
-                elem.from = VectorUtil.Json2SwappedVector3(data.Properties["from"]);
-                elem.to = VectorUtil.Json2SwappedVector3(data.Properties["to"]);
+                elem.from = VectorUtil.Json2SwappedFloat3(data.Properties["from"]);
+                elem.to = VectorUtil.Json2SwappedFloat3(data.Properties["to"]);
                 elem.faces = new Dictionary<FaceDir, BlockModelFace>();
                 var facesData = data.Properties["faces"].Properties;
                 foreach (FaceDir faceDir in Enum.GetValues(typeof (FaceDir)))
@@ -41,7 +42,7 @@ namespace MinecraftClient.Resource
                     if (rotData.Properties.ContainsKey("origin") && rotData.Properties.ContainsKey("axis") && rotData.Properties.ContainsKey("angle"))
                     {
                         // Read pivot position with xz values swapped...
-                        elem.pivot = VectorUtil.Json2SwappedVector3(rotData.Properties["origin"]);
+                        elem.pivot = VectorUtil.Json2SwappedFloat3(rotData.Properties["origin"]);
                         elem.axis = rotData.Properties["axis"].StringValue.ToLower() switch
                         {
                             // Swap X and Z axis for Unity...

@@ -1,88 +1,89 @@
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Rendering
 {
     public class PlaceboGeometry
     {
-        public static Vector3[] GetUpVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetUpVertices(int blockX, int blockY, int blockZ)
         {
-            return new Vector3[]
+            return new float3[]
             {
-                new Vector3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 2
-                new Vector3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 3
-                new Vector3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 1
-                new Vector3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 0
+                new float3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 2
+                new float3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 3
+                new float3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 1
+                new float3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 0
             };
         }
 
-        public static Vector3[] GetDownVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetDownVertices(int blockX, int blockY, int blockZ)
         {
-            return new Vector3[]
+            return new float3[]
             {
-                new Vector3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
-                new Vector3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 1
-                new Vector3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
-                new Vector3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 2
+                new float3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
+                new float3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 1
+                new float3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
+                new float3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 2
             };
         }
 
-        public static Vector3[] GetNorthVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetNorthVertices(int blockX, int blockY, int blockZ)
         {
-            return new Vector3[]
+            return new float3[]
             {
-                new Vector3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 2
-                new Vector3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 1
-                new Vector3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
-                new Vector3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
+                new float3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 2
+                new float3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 1
+                new float3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
+                new float3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
             };
         }
 
-        public static Vector3[] GetSouthVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetSouthVertices(int blockX, int blockY, int blockZ)
         {
-            return new Vector3[]
+            return new float3[]
             {
-                new Vector3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 1
-                new Vector3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 2
-                new Vector3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 0
-                new Vector3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 3
+                new float3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 1
+                new float3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 2
+                new float3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 0
+                new float3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 3
             };
         }
 
-        public static Vector3[] GetWestVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetWestVertices(int blockX, int blockY, int blockZ)
         {
-            return new Vector3[]
+            return new float3[]
             {
-                new Vector3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 3
-                new Vector3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 2
-                new Vector3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
-                new Vector3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 1
+                new float3(0 + blockZ, 1 + blockY, 0 + blockX), // 3 => 3
+                new float3(1 + blockZ, 1 + blockY, 0 + blockX), // 2 => 2
+                new float3(0 + blockZ, 0 + blockY, 0 + blockX), // 0 => 0
+                new float3(1 + blockZ, 0 + blockY, 0 + blockX), // 1 => 1
             };
         }
 
-        public static Vector3[] GetEastVertices(int blockX, int blockY, int blockZ)
+        public static float3[] GetEastVertices(int blockX, int blockY, int blockZ)
         {
-            return new Vector3[]
+            return new float3[]
             {
-                new Vector3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 1
-                new Vector3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 0
-                new Vector3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 2
-                new Vector3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
+                new float3(1 + blockZ, 1 + blockY, 1 + blockX), // 5 => 1
+                new float3(0 + blockZ, 1 + blockY, 1 + blockX), // 4 => 0
+                new float3(1 + blockZ, 0 + blockY, 1 + blockX), // 6 => 2
+                new float3(0 + blockZ, 0 + blockY, 1 + blockX), // 7 => 3
             };
         }
 
-        public static int[] GetQuad(int offset)
+        public static uint[] GetQuad(uint offset)
         {
-            return new int[]
+            return new uint[]
             {
-                0 + offset, 3 + offset, 2 + offset, // MC: +X <=> Unity: +Z
-                0 + offset, 1 + offset, 3 + offset
+                0U + offset, 3U + offset, 2U + offset, // MC: +X <=> Unity: +Z
+                0U + offset, 1U + offset, 3U + offset
             };
         }
 
         private const int TexturesInALine = 32;
         private const float One = 1.0F / TexturesInALine; // Size of a single block texture
 
-        public static Vector2[] GetUVs(RenderType type)
+        public static float2[] GetUVs(RenderType type)
         {
             int offset = type switch
             {
@@ -96,9 +97,9 @@ namespace MinecraftClient.Rendering
 
             float blockU = (offset % TexturesInALine) / (float)TexturesInALine;
             float blockV = (offset / TexturesInALine) / (float)TexturesInALine;
-            Vector2 o = new Vector2(blockU, blockV);
+            float2 o = new float2(blockU, blockV);
 
-            return new Vector2[]{ new Vector2(0F, 0F) + o, new Vector2(One, 0F) + o, new Vector2(0F, One) + o, new Vector2(One, One) + o };
+            return new float2[]{ new float2(0F, 0F) + o, new float2(One, 0F) + o, new float2(0F, One) + o, new float2(One, One) + o };
 
         }
 

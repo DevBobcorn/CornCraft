@@ -1,10 +1,13 @@
 using System;
 using System.Linq;
-using System.Text;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
 using UnityEngine;
+using UnityEngine.Rendering;
+using Unity.Collections;
+using Unity.Mathematics;
 
 using MinecraftClient.Event;
 using MinecraftClient.Mapping;
@@ -203,11 +206,7 @@ namespace MinecraftClient.Rendering
 
                     var visualBuffer = new MeshBuffer[count];
                     for (int i = 0;i < count;i++)
-                    {
                         visualBuffer[i] = new MeshBuffer();
-                    }
-
-                    var colliderBuffer = new MeshBuffer();
 
                     int waterLayerIndex = ChunkRender.TypeIndex(RenderType.TRANSLUCENT);
 
@@ -281,7 +280,6 @@ namespace MinecraftClient.Rendering
                     }
 
                     //Debug.Log("T:\t" + time0 + "\t" + time1 + "\t" + time2 + "\t" + (sw.ElapsedMilliseconds - startTime));
-
                     //double procStamp = sw.ElapsedMilliseconds / 1000D;
 
                     if (isAllEmpty)
@@ -298,13 +296,6 @@ namespace MinecraftClient.Rendering
                                     chunkRender.State = BuildState.Cancelled;
                                 }
                                 return;
-                            }
-
-                            if (chunkRender.LayerMask != layerMask)
-                            {
-                                // The chunk render's layers need updating
-                                chunkRender.name = "Empty Chunk " + chunkRender.ChunkY + " " + Convert.ToString(layerMask, 2).PadLeft(6, '0');
-                                chunkRender.UpdateLayers(layerMask);
                             }
 
                             chunkRender.ClearCollider();
@@ -332,41 +323,98 @@ namespace MinecraftClient.Rendering
                                 return;
                             }
 
-                            if (chunkRender.LayerMask != layerMask)
+                            // Count layers, vertices and face indices
+                            int layerCount = 0, totalVertCount = 0, totalFaceIdxCount = 0;
+                            for (int layer = 0;layer < count;layer++)
                             {
-                                // The chunk render's layers need updating
-                                chunkRender.name = "Chunk " + chunkRender.ChunkY + " " + Convert.ToString(layerMask, 2).PadLeft(6, '0');
-                                chunkRender.UpdateLayers(layerMask);
+                                if ((layerMask & (1 << layer)) != 0)
+                                {
+                                    layerCount++;
+                                    totalVertCount    += visualBuffer[layer].vert.Length;
+                                    totalFaceIdxCount += visualBuffer[layer].face.Length;
+                                }
                             }
+                            
+                            var meshDataArr  = Mesh.AllocateWritableMeshData(1);
+                            var materialArr  = new UnityEngine.Material[layerCount];
+                            int vertOffset = 0, faceIdxOffset = 0;
+
+                            var meshData = meshDataArr[0];
+                            meshData.subMeshCount = layerCount;
+
+                            var visVertAttrs = new NativeArray<VertexAttributeDescriptor>(2, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+                            visVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3, stream: 0);
+                            visVertAttrs[1]  = new(VertexAttribute.TexCoord0, dimension: 2, stream: 1);
+
+                            meshData.SetVertexBufferParams(totalVertCount,   visVertAttrs);
+                            meshData.SetIndexBufferParams(totalFaceIdxCount, IndexFormat.UInt32);
+
+                            visVertAttrs.Dispose();
+
+                            // Prepare source data arrays
+                            var allVerts = new float3[totalVertCount];
+                            var allUVs   = new float2[totalVertCount];
+                            var allFaceIndices = new uint[totalFaceIdxCount];
+                            for (int layer = 0;layer < count;layer++)
+                            {
+                                if ((layerMask & (1 << layer)) != 0)
+                                {
+                                    int vertCount    = visualBuffer[layer].vert.Length;
+                                    int faceIdxCount = visualBuffer[layer].face.Length;
+
+                                    visualBuffer[layer].vert.CopyTo(allVerts, vertOffset);
+                                    visualBuffer[layer].uv.CopyTo(allUVs, vertOffset);
+
+                                    //visualBuffer[layer].face.CopyTo(allFaceIndices, faceIdxOffset);
+                                    ArrayUtil.GetWithOffset(visualBuffer[layer].face, (uint)vertOffset).CopyTo(allFaceIndices, faceIdxOffset);
+
+                                    vertOffset    += vertCount;
+                                    faceIdxOffset += faceIdxCount;
+                                }
+                            }
+
+                            // Copy the source arrays to mesh data
+                            var positions  = meshData.GetVertexData<float3>(0);
+                            positions.CopyFrom(allVerts);
+                            var texCoords  = meshData.GetVertexData<float2>(1);
+                            texCoords.CopyFrom(allUVs);
+                            var triIndices = meshData.GetIndexData<uint>();
+                            triIndices.CopyFrom(allFaceIndices);
+
+                            int subMeshIndex = 0;
+                            vertOffset = 0;
+                            faceIdxOffset = 0;
 
                             for (int layer = 0;layer < count;layer++)
                             {
-                                if ((layerMask & (1 << layer)) == 0) // This render layer is not present
-                                    continue;
-                                
-                                // Initialize visual mesh...
-                                Mesh visualMesh = new Mesh()
+                                if ((layerMask & (1 << layer)) != 0)
                                 {
-                                    vertices  = visualBuffer[layer].vert,
-                                    triangles = visualBuffer[layer].face,
-                                    uv        = visualBuffer[layer].uv
-                                };
+                                    materialArr[subMeshIndex] = MaterialManager.GetBlockMaterial(ChunkRender.TYPES[layer]);
 
-                                visualMesh.Optimize();
-                                //visualMesh.RecalculateNormals();
+                                    int vertCount    = visualBuffer[layer].vert.Length;
+                                    int faceIdxCount = visualBuffer[layer].face.Length;
 
-                                chunkRender.Layers[layer].GetComponent<MeshFilter>().sharedMesh = visualMesh;
-                                chunkRender.Layers[layer].GetComponent<MeshRenderer>().sharedMaterial = MaterialManager.GetBlockMaterial(ChunkRender.TYPES[layer]);
-                                
+                                    meshData.SetSubMesh(subMeshIndex, new(faceIdxOffset, faceIdxCount){ vertexCount = vertCount });
+
+                                    vertOffset    += vertCount;
+                                    faceIdxOffset += faceIdxCount;
+
+                                    subMeshIndex++;
+                                }
                             }
 
-                            Mesh colliderMesh = new Mesh()
-                            {
-                                vertices  = colliderBuffer.vert,
-                                triangles = colliderBuffer.face
-                            };
+                            var visualMesh = new Mesh { subMeshCount = layerCount };
 
-                            chunkRender.UpdateCollider(colliderMesh);
+                            Mesh.ApplyAndDisposeWritableMeshData(meshDataArr, visualMesh);
+
+                            //visualMesh.Optimize();
+                            visualMesh.RecalculateNormals();
+                            visualMesh.RecalculateBounds();
+
+                            chunkRender.GetComponent<MeshFilter>().sharedMesh = visualMesh;
+                            chunkRender.GetComponent<MeshRenderer>().sharedMaterials = materialArr;
+
+                            // TODO Collider Mesh
 
                             //sw.Stop();
                             //Debug.Log("Chunk Built: " + procStamp + " => " + ((sw.ElapsedMilliseconds / 1000D) - procStamp));

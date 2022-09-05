@@ -22,7 +22,6 @@ namespace MinecraftClient.Rendering
             // Set its parent to this chunk column...
             chunkObj.transform.parent = this.transform;
             chunkObj.transform.localPosition = CoordConvert.MC2Unity(this.ChunkX * Chunk.SizeX, chunkY * Chunk.SizeY + World.GetDimension().minY, this.ChunkZ * Chunk.SizeZ);
-            newChunk.UpdateLayers(0);
             
             return newChunk;
         }
