@@ -56,7 +56,7 @@ namespace MinecraftClient
 
         public override string ToString()
         {
-            return nameSpace + ":" + path;
+            return $"{nameSpace}:{path}";
         }
 
     }

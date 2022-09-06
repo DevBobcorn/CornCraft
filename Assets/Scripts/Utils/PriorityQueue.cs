@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 // Code taken from a passage on Visual Studio Magazine, by James McCaffrey:
 // https://visualstudiomagazine.com/articles/2012/11/01/priority-queues-with-c.aspx
@@ -122,12 +121,6 @@ public class PriorityQueue<T> where T : IComparable<T>
     public bool Contains(T item)
     {
         return data.Contains(item);
-    }
-
-    // TODO Remove later
-    public List<T> GetValues()
-    {
-        return data;
     }
 
     public void Clear()

@@ -136,7 +136,7 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                 ResourceLocation blockId = ResourceLocation.fromString(item.Key);
 
                 if (stateListTable.ContainsKey(blockId))
-                    throw new InvalidDataException("Duplicate block id " + blockId.ToString() + "!");
+                    throw new InvalidDataException($"Duplicate block id {blockId}!");
                 
                 stateListTable[blockId] = new HashSet<int>();
 
@@ -145,7 +145,7 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                     int stateId = int.Parse(state.Properties["id"].StringValue);
 
                     if (knownStates.Contains(stateId))
-                        throw new InvalidDataException("Duplicate state id " + stateId + "!?");
+                        throw new InvalidDataException($"Duplicate state id {stateId}!?");
 
                     knownStates.Add(stateId);
                     blocksTable[stateId] = blockId;
@@ -192,10 +192,10 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                 }
             }
 
-            Debug.Log(statesTable.Count.ToString() + " block states loaded.");
+            Debug.Log($"{statesTable.Count} block states loaded.");
 
             LoadRenderTypes();
-            Debug.Log("Render type of " + renderTypeTable.Count + " blocks loaded.");
+            Debug.Log($"Render type of {renderTypeTable.Count} blocks loaded.");
 
             blockStatesReady = true;
             buzy = false;

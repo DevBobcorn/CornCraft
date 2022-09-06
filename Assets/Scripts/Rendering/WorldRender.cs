@@ -279,7 +279,7 @@ namespace MinecraftClient.Rendering
                         }
                     }
 
-                    //Debug.Log("T:\t" + time0 + "\t" + time1 + "\t" + time2 + "\t" + (sw.ElapsedMilliseconds - startTime));
+                    //Debug.Log($"T:\t{time0}\t{time1}\t{time2}\t{sw.ElapsedMilliseconds - startTime}");
                     //double procStamp = sw.ElapsedMilliseconds / 1000D;
 
                     if (isAllEmpty)
@@ -301,7 +301,7 @@ namespace MinecraftClient.Rendering
                             chunkRender.ClearCollider();
 
                             //sw.Stop();
-                            //Debug.Log("Chunk Skipped: " + procStamp + " => " + (sw.ElapsedMilliseconds / 1000D).ToString("#.##"));
+                            //Debug.Log($"Chunk Skipped: {procStamp} => {((sw.ElapsedMilliseconds / 1000D) - procStamp).ToString("#.##")}");
 
                             chunksBeingBuilt.Remove(chunkRender);
                             chunkRender.State = BuildState.Ready;
@@ -417,7 +417,7 @@ namespace MinecraftClient.Rendering
                             // TODO Collider Mesh
 
                             //sw.Stop();
-                            //Debug.Log("Chunk Built: " + procStamp + " => " + ((sw.ElapsedMilliseconds / 1000D) - procStamp));
+                            //Debug.Log($"Chunk Built: {procStamp} => {((sw.ElapsedMilliseconds / 1000D) - procStamp).ToString("#.##")}");
 
                             chunksBeingBuilt.Remove(chunkRender);
                             chunkRender.State = BuildState.Ready;

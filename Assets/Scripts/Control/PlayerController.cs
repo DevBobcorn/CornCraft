@@ -186,10 +186,7 @@ namespace MinecraftClient.Control
 
         public string GetDebugInfo()
         {
-            return gameMode.ToString() +
-                "\nPosition:\t" + transform.position.x.ToString("#.##") + "\t" + transform.position.y.ToString("#.##") + "\t" + transform.position.z.ToString("#.##") +
-                "\nGrounded:\t" + isOnGround +
-                "\nIn water:\t" + isInWater;
+            return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{isOnGround}\nIn water:\t{isInWater}";
         }
 
     }

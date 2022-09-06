@@ -172,7 +172,6 @@ namespace MinecraftClient
                     // push color
                     if (lastColor != ' ')
                         prevColors.Push(lastColor);
-                    //Debug.Log("Push at " + ptr + ": " + lastColor);
                     processed += original[ptr]; // Append part of original text
                     lastColor = curColor;
                 }
@@ -185,7 +184,6 @@ namespace MinecraftClient
                         char preserved = prevColors.Pop();
                         if (curColor != preserved) // Then apply(restore to) this color...
                         {   // End prev color if present
-                            //Debug.Log("Pop at " + ptr + ": " + preserved);
                             if ((formatFlag & (1 << 5)) > 0)
                                 suffix = "</color>";
                             // Then apply this color
