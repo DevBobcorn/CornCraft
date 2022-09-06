@@ -211,10 +211,15 @@ namespace MinecraftClient
 
         #endregion
 
-        private bool resourceLoaded = false;
+        private bool resourceLoaded = false, preparing = false;
 
         public void Login(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo forgeInfo)
         {
+            if (preparing)
+                return;
+            
+            preparing = true;
+
             this.sessionId = sessionID;
             this.uuid = uuid;
             this.username = user;
@@ -291,6 +296,7 @@ namespace MinecraftClient
             {
                 Translations.LogError("error.connect");
                 Disconnect();
+                preparing = false;
                 yield break;
             }
 
@@ -302,6 +308,7 @@ namespace MinecraftClient
             {
                 Debug.LogError(e.Message);
                 Disconnect();
+                preparing = false;
                 yield break;
             }
 
@@ -358,6 +365,10 @@ namespace MinecraftClient
                 Debug.LogError(e.Message);
                 Debug.LogError(e.StackTrace);
                 Disconnect();
+            }
+            finally
+            {
+                preparing = false;
             }
 
         }

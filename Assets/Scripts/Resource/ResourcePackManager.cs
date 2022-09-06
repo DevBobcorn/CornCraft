@@ -70,10 +70,7 @@ namespace MinecraftClient.Resource
                 {
                     Debug.LogWarning("Model for " + stateItem.Value.ToString() + "(state Id " + stateItem.Key + ") not loaded!");
                 }
-                yield return null;
             }
-
-            yield return null;
 
             Debug.Log("Resource packs loaded in " + (Time.realtimeSinceStartup - startTime) + " seconds.");
             Debug.Log("Built " + finalTable.Count + " block state geometry lists.");

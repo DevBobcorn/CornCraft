@@ -7,8 +7,8 @@ namespace MinecraftClient.Rendering
         public float3[] vert = { };
         public float2[] uv   = { };
 
-        public uint[]    face = { };
-        public uint offset = 0;
+        public uint[]   face = { };
+        public uint   offset = 0;
 
     }
 }

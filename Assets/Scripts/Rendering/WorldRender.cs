@@ -210,11 +210,6 @@ namespace MinecraftClient.Rendering
 
                     int waterLayerIndex = ChunkRender.TypeIndex(RenderType.TRANSLUCENT);
 
-                    //var sw = new System.Diagnostics.Stopwatch();
-                    //sw.Start();
-
-                    //double time0 = 0, time1 = 0, time2 = 0, lastTime = sw.ElapsedMilliseconds, startTime = sw.ElapsedMilliseconds;
-
                     // Build chunk mesh block by block
                     for (int x = 0;x < Chunk.SizeX;x++)
                     {
@@ -236,14 +231,11 @@ namespace MinecraftClient.Rendering
                                 var state = bloc.State;
                                 var stateId = bloc.StateId;
 
-                                //time0 += sw.ElapsedMilliseconds - lastTime;
-                                //lastTime = sw.ElapsedMilliseconds;
-
                                 if (state.InWater) // Build water here
                                 {
                                     int waterCullFlags = chunkData.GetCullFlags(loc, waterSurface);
 
-                                    ChunkFluidGeometry.Build(ref visualBuffer[waterLayerIndex], WATER_STILL, true, x, y, z, waterCullFlags);
+                                    // TODO ChunkFluidGeometry.Build(ref visualBuffer[waterLayerIndex], WATER_STILL, true, x, y, z, waterCullFlags);
                                     layerMask |= (1 << waterLayerIndex);
                                     isAllEmpty = false;
                                 }
@@ -255,32 +247,18 @@ namespace MinecraftClient.Rendering
                                 int layerIndex = ChunkRender.TypeIndex(layer);
                                 
                                 int cullFlags = chunkData.GetCullFlags(loc, notFullSolid); // TODO Correct
-
-                                //time1 += sw.ElapsedMilliseconds - lastTime;
-                                //lastTime = sw.ElapsedMilliseconds;
-
-                                // PlaceboGeometry.Build(ref visualBuffer[layerIndex], layer,   !state.NoCollision, x, y, z, cullFlags);
-
-                                // TODO if (state.NoCollision)
-                                    ChunkStateGeometry.Build(ref visualBuffer[layerIndex], stateId, x, y, z, cullFlags);
-                                //else
-                                //    ChunkStateGeometry.Build(ref visualBuffer[layerIndex], ref colliderBuffer, stateId, x, y, z, cullFlags);
                                 
                                 if (cullFlags != 0) // This chunk has at least one visible block of this render type
                                 {
+                                    ChunkStateGeometry.Build(ref visualBuffer[layerIndex], stateId, x, y, z, cullFlags);
+                                    
                                     layerMask |= (1 << layerIndex);
                                     isAllEmpty = false;
                                 }
-
-                                //time2 += sw.ElapsedMilliseconds - lastTime;
-                                //lastTime = sw.ElapsedMilliseconds;
                                 
                             }
                         }
                     }
-
-                    //Debug.Log($"T:\t{time0}\t{time1}\t{time2}\t{sw.ElapsedMilliseconds - startTime}");
-                    //double procStamp = sw.ElapsedMilliseconds / 1000D;
 
                     if (isAllEmpty)
                     {
@@ -298,10 +276,10 @@ namespace MinecraftClient.Rendering
                                 return;
                             }
 
-                            chunkRender.ClearCollider();
+                            // TODO Improve below cleaning
+                            chunkRender.GetComponent<MeshFilter>().sharedMesh?.Clear(false);
 
-                            //sw.Stop();
-                            //Debug.Log($"Chunk Skipped: {procStamp} => {((sw.ElapsedMilliseconds / 1000D) - procStamp).ToString("#.##")}");
+                            chunkRender.ClearCollider();
 
                             chunksBeingBuilt.Remove(chunkRender);
                             chunkRender.State = BuildState.Ready;
@@ -407,7 +385,6 @@ namespace MinecraftClient.Rendering
 
                             Mesh.ApplyAndDisposeWritableMeshData(meshDataArr, visualMesh);
 
-                            //visualMesh.Optimize();
                             visualMesh.RecalculateNormals();
                             visualMesh.RecalculateBounds();
 
@@ -415,9 +392,6 @@ namespace MinecraftClient.Rendering
                             chunkRender.GetComponent<MeshRenderer>().sharedMaterials = materialArr;
 
                             // TODO Collider Mesh
-
-                            //sw.Stop();
-                            //Debug.Log($"Chunk Built: {procStamp} => {((sw.ElapsedMilliseconds / 1000D) - procStamp).ToString("#.##")}");
 
                             chunksBeingBuilt.Remove(chunkRender);
                             chunkRender.State = BuildState.Ready;
