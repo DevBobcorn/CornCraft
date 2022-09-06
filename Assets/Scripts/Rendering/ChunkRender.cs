@@ -81,7 +81,7 @@ namespace MinecraftClient.Rendering
 
         public override string ToString()
         {
-            return "[ChunkRender " + ChunkX + ", " + ChunkY + ", " + ChunkZ + "]";
+            return $"[ChunkRender {ChunkX}, {ChunkY}, {ChunkZ}]";
         }
 
     }

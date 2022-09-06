@@ -77,10 +77,10 @@ namespace MinecraftClient.Rendering
                     var chunk = chunks[i];
 
                     if (chunks2Build.Contains(chunk) && chunks2Build.Remove(chunk))
-                        Debug.Log("Removed " + chunk.ToString() + " from build queue");
+                        Debug.Log($"Removed {chunk.ToString()} from build queue");
 
                     if (chunksBeingBuilt.Remove(chunk))
-                        Debug.Log("Removed " + chunk.ToString() + " from building list");
+                        Debug.Log($"Removed {chunk.ToString()} from building list");
                     
                     chunk.Unload();
                 }
@@ -92,7 +92,7 @@ namespace MinecraftClient.Rendering
 
         public override string ToString()
         {
-            return "[ChunkRenderColumn " + ChunkX + ", " + ChunkZ + "]";
+            return "[ChunkRenderColumn {ChunkX}, {ChunkZ}]";
         }
 
     }

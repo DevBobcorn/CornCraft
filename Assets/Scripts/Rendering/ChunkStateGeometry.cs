@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Rendering
 {
@@ -12,7 +13,7 @@ namespace MinecraftClient.Rendering
             if (table is null || !table.ContainsKey(stateId))
             {
                 if (table is not null) // Disconnected already if table is null
-                    Debug.LogWarning("Model for block state with id " + stateId + " is not available!");
+                    Debug.LogWarning($"Model for block state with id {stateId} is not available!");
                 
                 return;
             }
@@ -21,7 +22,7 @@ namespace MinecraftClient.Rendering
             var chosen = (x + y + z) % models.Count;
             var model = models[chosen];
 
-            var data = model.GetDataForChunk(buffer.offset, new Vector3(z, y, x), cullFlags);
+            var data = model.GetDataForChunk(buffer.offset, new float3(z, y, x), cullFlags);
 
             buffer.vert = ArrayUtil.GetConcated(buffer.vert, data.Item1);
             buffer.face = ArrayUtil.GetConcated(buffer.face, data.Item4);
