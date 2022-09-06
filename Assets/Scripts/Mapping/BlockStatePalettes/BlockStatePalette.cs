@@ -240,7 +240,7 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
 
                                 }
                                 else
-                                    Debug.LogWarning("Render type of " + statesTable[stateId].ToString() + " registered more than once!");
+                                    Debug.LogWarning($"Render type of {statesTable[stateId].ToString()} registered more than once!");
 
                             }
                         }

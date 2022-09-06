@@ -5,7 +5,7 @@ namespace MinecraftClient.Rendering
 {
     public class ChunkStateGeometry
     {
-        // Build without collider
+        // TODO Remove this method
         public static void Build(ref MeshBuffer buffer, int stateId, int x, int y, int z, int cullFlags)
         {
             var table = CornClient.Instance?.PackManager.finalTable;

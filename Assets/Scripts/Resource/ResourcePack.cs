@@ -81,9 +81,12 @@ namespace MinecraftClient.Resource
                             {
                                 // This texture is not provided by previous resource packs, so add it here...
                                 manager.textureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
+                                //Debug.Log($"Loading texture {identifier}");
                             }
                             yield return null;
                         }
+
+                        //Debug.Log($"Textures in {packName} loaded");
 
                         // Load and store all model files...
                         DirectoryInfo modelsDir = new DirectoryInfo(nameSpaceDir + "/models/");
@@ -99,8 +102,11 @@ namespace MinecraftClient.Resource
                             // This model loader will load this model, its parent model(if not yet loaded),
                             // and then add them to the manager's model dictionary
                             manager.blockModelLoader.LoadBlockModel(identifier, assetsDir.FullName.Replace('\\', '/'));
+                            //Debug.Log($"Loading block model {identifier}");
                             yield return null;
                         }
+
+                        //Debug.Log($"Block models in {packName} loaded");
 
                     }
 
@@ -142,10 +148,13 @@ namespace MinecraftClient.Resource
                         // Load the state model definition of this block
                         string statePath = assetsDir.FullName + '/' + blockId.nameSpace + "/blockstates/" + blockId.path + ".json";
                         manager.stateModelLoader.LoadBlockStateModel(manager, blockId, statePath);
+                        Debug.Log($"Building model for block {blockId}");
                         yield return null;
                     }
 
                 }
+
+                Debug.Log($"Block models in {packName} built");
 
             }
             else

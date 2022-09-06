@@ -76,11 +76,16 @@ namespace MinecraftClient.Rendering
                 {   // Before destroying the chunk object, do one last thing
                     var chunk = chunks[i];
 
-                    if (chunks2Build.Contains(chunk) && chunks2Build.Remove(chunk))
+                    /*if (chunks2Build.Contains(chunk) && chunks2Build.Remove(chunk))
                         Debug.Log($"Removed {chunk.ToString()} from build queue");
 
                     if (chunksBeingBuilt.Remove(chunk))
-                        Debug.Log($"Removed {chunk.ToString()} from building list");
+                        Debug.Log($"Removed {chunk.ToString()} from building list");*/
+
+                    if (chunks2Build.Contains(chunk))
+                        chunks2Build.Remove(chunk);
+                    
+                    chunksBeingBuilt.Remove(chunk);
                     
                     chunk.Unload();
                 }
