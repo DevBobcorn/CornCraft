@@ -5,7 +5,7 @@ using MinecraftClient.Resource;
 
 namespace MinecraftClient.Rendering
 {
-    public class MaterialManager {
+    public static class MaterialManager {
         private static Dictionary<RenderType, Material> blockMaterials = new Dictionary<RenderType, Material>();
         private static Dictionary<RenderType, Material> plcboMaterials = new Dictionary<RenderType, Material>();
 

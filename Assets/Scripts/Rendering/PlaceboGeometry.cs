@@ -1,9 +1,8 @@
-using UnityEngine;
 using Unity.Mathematics;
 
 namespace MinecraftClient.Rendering
 {
-    public class PlaceboGeometry
+    public static class PlaceboGeometry
     {
         public static float3[] GetUpVertices(int blockX, int blockY, int blockZ)
         {
@@ -103,52 +102,52 @@ namespace MinecraftClient.Rendering
 
         }
 
-        public static void Build(ref MeshBuffer buffer, RenderType type, bool uv, int x, int y, int z, int cullFlags)
+        public static void Build(ref VertexBuffer buffer, RenderType type, bool uv, int x, int y, int z, int cullFlags)
         {
             if ((cullFlags & (1 << 0)) != 0) // Up
             {
                 buffer.vert = ArrayUtil.GetConcated(buffer.vert, PlaceboGeometry.GetUpVertices(x, y, z));
-                buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
+                //buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
                 if (uv) buffer.uv = ArrayUtil.GetConcated(buffer.uv, GetUVs(type));
                 buffer.offset += 4;
             }
             if ((cullFlags & (1 << 1)) != 0) // Down
             {
                 buffer.vert = ArrayUtil.GetConcated(buffer.vert, PlaceboGeometry.GetDownVertices(x, y, z));
-                buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
+                //buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
                 if (uv) buffer.uv = ArrayUtil.GetConcated(buffer.uv, GetUVs(type));
                 buffer.offset += 4;
             }
             if ((cullFlags & (1 << 2)) != 0) // South
             {
                 buffer.vert = ArrayUtil.GetConcated(buffer.vert, PlaceboGeometry.GetSouthVertices(x, y, z));
-                buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
+                //buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
                 if (uv) buffer.uv = ArrayUtil.GetConcated(buffer.uv, GetUVs(type));
                 buffer.offset += 4;
             }
             if ((cullFlags & (1 << 3)) != 0) // North
             {
                 buffer.vert = ArrayUtil.GetConcated(buffer.vert, PlaceboGeometry.GetNorthVertices(x, y, z));
-                buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
+                //buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
                 if (uv) buffer.uv = ArrayUtil.GetConcated(buffer.uv, GetUVs(type));
                 buffer.offset += 4;
             }
             if ((cullFlags & (1 << 4)) != 0) // East
             {
                 buffer.vert = ArrayUtil.GetConcated(buffer.vert, PlaceboGeometry.GetEastVertices(x, y, z));
-                buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
+                //buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
                 if (uv) buffer.uv = ArrayUtil.GetConcated(buffer.uv, GetUVs(type));
                 buffer.offset += 4;
             }
             if ((cullFlags & (1 << 5)) != 0) // West
             {
                 buffer.vert = ArrayUtil.GetConcated(buffer.vert, PlaceboGeometry.GetWestVertices(x, y, z));
-                buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
+                //buffer.face = ArrayUtil.GetConcated(buffer.face, GetQuad(buffer.offset));
                 if (uv) buffer.uv = ArrayUtil.GetConcated(buffer.uv, GetUVs(type));
                 buffer.offset += 4;
             }
         }
-    
+
     }
 
 }

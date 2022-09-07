@@ -6,7 +6,7 @@ using Unity.Mathematics;
 
 namespace MinecraftClient.Rendering
 {
-    public class ChunkFluidGeometry
+    public static class ChunkFluidGeometry
     {
         public static float3[] GetUpVertices(int blockX, int blockY, int blockZ)
         {
@@ -85,47 +85,47 @@ namespace MinecraftClient.Rendering
 
         private static Vector4 FULL = new Vector4(0, 0, 1, 1);
 
-        public static void Build(ref MeshBuffer buffer, ResourceLocation tex, bool uv, int x, int y, int z, int cullFlags)
+        public static void Build(ref VertexBuffer buffer, ResourceLocation tex, bool uv, int x, int y, int z, int cullFlags)
         {
             if ((cullFlags & (1 << 0)) != 0) // Up
             {
                 buffer.vert = buffer.vert.Concat(PlaceboGeometry.GetUpVertices(x, y, z)).ToArray();
-                buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
+                //buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
                 if (uv) buffer.uv = buffer.uv.Concat(BlockTextureManager.GetUVs(tex, FULL, 0)).ToArray();
                 buffer.offset += 4;
             }
             if ((cullFlags & (1 << 1)) != 0) // Down
             {
                 buffer.vert = buffer.vert.Concat(PlaceboGeometry.GetDownVertices(x, y, z)).ToArray();
-                buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
+                //buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
                 if (uv) buffer.uv = buffer.uv.Concat(BlockTextureManager.GetUVs(tex, FULL, 0)).ToArray();
                 buffer.offset += 4;
             }
             if ((cullFlags & (1 << 2)) != 0) // South
             {
                 buffer.vert = buffer.vert.Concat(PlaceboGeometry.GetSouthVertices(x, y, z)).ToArray();
-                buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
+                //buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
                 if (uv) buffer.uv = buffer.uv.Concat(BlockTextureManager.GetUVs(tex, FULL, 0)).ToArray();
                 buffer.offset += 4;
             }
             if ((cullFlags & (1 << 3)) != 0) // North
             {
                 buffer.vert = buffer.vert.Concat(PlaceboGeometry.GetNorthVertices(x, y, z)).ToArray();
-                buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
+                //buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
                 if (uv) buffer.uv = buffer.uv.Concat(BlockTextureManager.GetUVs(tex, FULL, 0)).ToArray();
                 buffer.offset += 4;
             }
             if ((cullFlags & (1 << 4)) != 0) // East
             {
                 buffer.vert = buffer.vert.Concat(PlaceboGeometry.GetEastVertices(x, y, z)).ToArray();
-                buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
+                //buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
                 if (uv) buffer.uv = buffer.uv.Concat(BlockTextureManager.GetUVs(tex, FULL, 0)).ToArray();
                 buffer.offset += 4;
             }
             if ((cullFlags & (1 << 5)) != 0) // West
             {
                 buffer.vert = buffer.vert.Concat(PlaceboGeometry.GetWestVertices(x, y, z)).ToArray();
-                buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
+                //buffer.face = buffer.face.Concat(GetQuad(buffer.offset)).ToArray();
                 if (uv) buffer.uv = buffer.uv.Concat(BlockTextureManager.GetUVs(tex, FULL, 0)).ToArray();
                 buffer.offset += 4;
             }

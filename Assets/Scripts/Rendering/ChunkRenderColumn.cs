@@ -79,11 +79,7 @@ namespace MinecraftClient.Rendering
                     if (chunks2Build.Contains(chunk))
                         chunks2Build.Remove(chunk);
                     
-                    lock (chunksBeingBuilt)
-                    {
-                        chunksBeingBuilt.Remove(chunk);
-                    }
-                    
+                    chunksBeingBuilt.Remove(chunk);
                     chunk.Unload();
                 }
 

@@ -32,7 +32,7 @@ namespace MinecraftClient.Rendering
         }
 
         private Dictionary<int, Dictionary<int, ChunkRenderColumn>> columns = new();
-        // Operated on Unity main thread only
+        // Both manipulated on Unity main thread only
         private PriorityQueue<ChunkRender> chunksToBeBuild = new();
         private List<ChunkRender>         chunksBeingBuilt = new();
 
@@ -40,10 +40,7 @@ namespace MinecraftClient.Rendering
 
         public string GetDebugInfo()
         {
-            lock (chunksBeingBuilt)
-            {
-                return $"QueC: {chunksToBeBuild.Count}\t BldC: {chunksBeingBuilt.Count}";
-            }
+            return $"QueC: {chunksToBeBuild.Count}\t BldC: {chunksBeingBuilt.Count}";
         }
 
         #region Chunk management
@@ -196,13 +193,9 @@ namespace MinecraftClient.Rendering
                 return; // Not all neighbor data ready, just cancel
             }
 
-            var ts    = chunkRender.TokenSource = new CancellationTokenSource();
+            var ts = chunkRender.TokenSource = new CancellationTokenSource();
 
-            lock (chunksBeingBuilt)
-            {
-                chunksBeingBuilt.Add(chunkRender);
-            }
-
+            chunksBeingBuilt.Add(chunkRender);
             chunkRender.State = BuildState.Building;
             
             Task.Factory.StartNew(() => {
@@ -212,11 +205,19 @@ namespace MinecraftClient.Rendering
                     int count = ChunkRender.TYPES.Length, layerMask = 0;
                     int offsetY = World.GetDimension().minY;
 
-                    var visualBuffer = new MeshBuffer[count];
+                    var visualBuffer = new VertexBuffer[count];
                     for (int i = 0;i < count;i++)
-                        visualBuffer[i] = new MeshBuffer();
+                        visualBuffer[i] = new VertexBuffer();
 
                     int waterLayerIndex = ChunkRender.TypeIndex(RenderType.TRANSLUCENT);
+
+                    var table = CornClient.Instance?.PackManager?.finalTable;
+                    if (table is null)
+                    {
+                        chunksBeingBuilt.Remove(chunkRender);
+                        chunkRender.State = BuildState.Cancelled;
+                        return;
+                    }
 
                     // Build chunk mesh block by block
                     for (int x = 0;x < Chunk.SizeX;x++)
@@ -228,11 +229,7 @@ namespace MinecraftClient.Rendering
                                 if (ts.IsCancellationRequested)
                                 {
                                     //Debug.Log(chunkRender.ToString() + " cancelled. (Building Mesh)");
-                                    lock (chunksBeingBuilt)
-                                    {
-                                        chunksBeingBuilt.Remove(chunkRender);
-                                    }
-                                    
+                                    chunksBeingBuilt.Remove(chunkRender);
                                     chunkRender.State = BuildState.Cancelled;
                                     return;
                                 }
@@ -260,9 +257,18 @@ namespace MinecraftClient.Rendering
                                 
                                 int cullFlags = chunkData.GetCullFlags(loc, notFullSolid); // TODO Correct
                                 
-                                if (cullFlags != 0) // This chunk has at least one visible block of this render type
+                                if (cullFlags != 0 && table is not null && table.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                                 {
-                                    ChunkStateGeometry.Build(ref visualBuffer[layerIndex], stateId, x, y, z, cullFlags);
+                                    var models = table[stateId].Geometries;
+                                    var chosen = (x + y + z) % models.Count;
+                                    var model  = models[chosen];
+
+                                    var data = model.GetDataForChunk(visualBuffer[layerIndex].offset, new float3(z, y, x), cullFlags);
+
+                                    visualBuffer[layerIndex].vert = ArrayUtil.GetConcated(visualBuffer[layerIndex].vert, data.Item1);
+                                    visualBuffer[layerIndex].uv   = ArrayUtil.GetConcated(visualBuffer[layerIndex].uv,   data.Item2);
+
+                                    visualBuffer[layerIndex].offset += (uint)data.Item1.Length;
                                     
                                     layerMask |= (1 << layerIndex);
                                     isAllEmpty = false;
@@ -282,10 +288,7 @@ namespace MinecraftClient.Rendering
                                 //Debug.Log(chunkRender?.ToString() + " cancelled. (Skipping Empty Mesh)");
                                 if (chunkRender is not null)
                                 {
-                                    lock (chunksBeingBuilt)
-                                    {
-                                        chunksBeingBuilt.Remove(chunkRender);
-                                    }
+                                    chunksBeingBuilt.Remove(chunkRender);
                                     chunkRender.State = BuildState.Cancelled;
                                 }
                                 return;
@@ -296,10 +299,7 @@ namespace MinecraftClient.Rendering
 
                             chunkRender.ClearCollider();
 
-                            lock (chunksBeingBuilt)
-                            {
-                                chunksBeingBuilt.Remove(chunkRender);
-                            }
+                            chunksBeingBuilt.Remove(chunkRender);
                             chunkRender.State = BuildState.Ready;
 
                         });
@@ -313,62 +313,51 @@ namespace MinecraftClient.Rendering
                                 //Debug.Log(chunkRender?.ToString() + " cancelled. (Applying Mesh)");
                                 if (chunkRender is not null)
                                 {
-                                    lock (chunksBeingBuilt)
-                                    {
-                                        chunksBeingBuilt.Remove(chunkRender);
-                                    }
+                                    chunksBeingBuilt.Remove(chunkRender);
                                     chunkRender.State = BuildState.Cancelled;
                                 }
                                 return;
                             }
 
                             // Count layers, vertices and face indices
-                            int layerCount = 0, totalVertCount = 0, totalFaceIdxCount = 0;
+                            int layerCount = 0, totalVertCount = 0;
                             for (int layer = 0;layer < count;layer++)
                             {
                                 if ((layerMask & (1 << layer)) != 0)
                                 {
                                     layerCount++;
-                                    totalVertCount    += visualBuffer[layer].vert.Length;
-                                    totalFaceIdxCount += visualBuffer[layer].face.Length;
+                                    totalVertCount += visualBuffer[layer].vert.Length;
                                 }
                             }
                             
                             var meshDataArr  = Mesh.AllocateWritableMeshData(1);
                             var materialArr  = new UnityEngine.Material[layerCount];
-                            int vertOffset = 0, faceIdxOffset = 0;
+                            int vertOffset = 0;
 
                             var meshData = meshDataArr[0];
                             meshData.subMeshCount = layerCount;
 
+                            // Set mesh attributes
                             var visVertAttrs = new NativeArray<VertexAttributeDescriptor>(2, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
                             visVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3, stream: 0);
                             visVertAttrs[1]  = new(VertexAttribute.TexCoord0, dimension: 2, stream: 1);
 
-                            meshData.SetVertexBufferParams(totalVertCount,   visVertAttrs);
-                            meshData.SetIndexBufferParams(totalFaceIdxCount, IndexFormat.UInt32);
+                            meshData.SetVertexBufferParams(totalVertCount,          visVertAttrs);
+                            meshData.SetIndexBufferParams((totalVertCount / 2) * 3, IndexFormat.UInt32);
 
                             visVertAttrs.Dispose();
 
                             // Prepare source data arrays
                             var allVerts = new float3[totalVertCount];
                             var allUVs   = new float2[totalVertCount];
-                            var allFaceIndices = new uint[totalFaceIdxCount];
                             for (int layer = 0;layer < count;layer++)
                             {
                                 if ((layerMask & (1 << layer)) != 0)
                                 {
-                                    int vertCount    = visualBuffer[layer].vert.Length;
-                                    int faceIdxCount = visualBuffer[layer].face.Length;
-
                                     visualBuffer[layer].vert.CopyTo(allVerts, vertOffset);
                                     visualBuffer[layer].uv.CopyTo(allUVs, vertOffset);
 
-                                    //visualBuffer[layer].face.CopyTo(allFaceIndices, faceIdxOffset);
-                                    ArrayUtil.GetWithOffset(visualBuffer[layer].face, (uint)vertOffset).CopyTo(allFaceIndices, faceIdxOffset);
-
-                                    vertOffset    += vertCount;
-                                    faceIdxOffset += faceIdxCount;
+                                    vertOffset += visualBuffer[layer].vert.Length;
                                 }
                             }
 
@@ -377,12 +366,21 @@ namespace MinecraftClient.Rendering
                             positions.CopyFrom(allVerts);
                             var texCoords  = meshData.GetVertexData<float2>(1);
                             texCoords.CopyFrom(allUVs);
+                            // Generate triangle arrays
                             var triIndices = meshData.GetIndexData<uint>();
-                            triIndices.CopyFrom(allFaceIndices);
+                            uint vi = 0; int ti = 0;
+                            for (;vi < totalVertCount;vi += 4U, ti += 6)
+                            {
+                                triIndices[ti]     = vi;
+                                triIndices[ti + 1] = vi + 3U;
+                                triIndices[ti + 2] = vi + 2U;
+                                triIndices[ti + 3] = vi;
+                                triIndices[ti + 4] = vi + 1U;
+                                triIndices[ti + 5] = vi + 3U;
+                            }
 
                             int subMeshIndex = 0;
                             vertOffset = 0;
-                            faceIdxOffset = 0;
 
                             for (int layer = 0;layer < count;layer++)
                             {
@@ -390,14 +388,11 @@ namespace MinecraftClient.Rendering
                                 {
                                     materialArr[subMeshIndex] = MaterialManager.GetBlockMaterial(ChunkRender.TYPES[layer]);
 
-                                    int vertCount    = visualBuffer[layer].vert.Length;
-                                    int faceIdxCount = visualBuffer[layer].face.Length;
+                                    int vertCount = visualBuffer[layer].vert.Length;
 
-                                    meshData.SetSubMesh(subMeshIndex, new(faceIdxOffset, faceIdxCount){ vertexCount = vertCount });
+                                    meshData.SetSubMesh(subMeshIndex, new((vertOffset / 2) * 3, (vertCount / 2) * 3){ vertexCount = vertCount });
 
-                                    vertOffset    += vertCount;
-                                    faceIdxOffset += faceIdxCount;
-
+                                    vertOffset += vertCount;
                                     subMeshIndex++;
                                 }
                             }
@@ -414,10 +409,7 @@ namespace MinecraftClient.Rendering
 
                             // TODO Collider Mesh
 
-                            lock (chunksBeingBuilt)
-                            {
-                                chunksBeingBuilt.Remove(chunkRender);
-                            }
+                            chunksBeingBuilt.Remove(chunkRender);
                             chunkRender.State = BuildState.Ready;
 
                         });
@@ -430,10 +422,9 @@ namespace MinecraftClient.Rendering
                     // Remove chunk from list
                     if (chunkRender is not null)
                     {
-                        lock (chunksBeingBuilt)
-                        {
+                        Loom.QueueOnMainThread(() => {
                             chunksBeingBuilt.Remove(chunkRender);
-                        }
+                        });
                         chunkRender.State = BuildState.Cancelled;
                     }
                 }
@@ -580,10 +571,7 @@ namespace MinecraftClient.Rendering
             foreach (var chunk in chunksBeingBuilt)
                 chunk.TokenSource?.Cancel();
             
-            lock (chunksBeingBuilt)
-            {
-                chunksBeingBuilt.Clear();
-            }
+            chunksBeingBuilt.Clear();
 
             // Clear all chunk columns in world
             var xs = columns.Keys.ToArray();
@@ -738,12 +726,7 @@ namespace MinecraftClient.Rendering
 
         void FixedUpdate()
         {
-            int newCount;
-
-            lock (chunksBeingBuilt)
-            {
-                newCount = BuildCountLimit - chunksBeingBuilt.Count;
-            }
+            int newCount = BuildCountLimit - chunksBeingBuilt.Count;
 
             // Build chunks in queue...
             if (newCount > 0)
