@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace MinecraftClient.Protocol
+namespace MinecraftClient.Protocol.Message
 {
     public class ChatMessage
     {
@@ -14,7 +14,7 @@ namespace MinecraftClient.Protocol
 
         //  0: chat (chat box), 1: system message (chat box), 2: game info (above hotbar), 3: say command,
         //  4: msg command,     5: team msg command,          6: emote command,            7: tellraw command
-        public readonly int chatType;
+        public readonly int chatTypeId;
 
         public readonly Guid senderUUID;
 
@@ -28,31 +28,44 @@ namespace MinecraftClient.Protocol
 
         public readonly DateTime? timestamp;
 
+        public readonly byte[]? signature;
+
         public readonly bool? isSignatureLegal;
 
-        public ChatMessage(string content, bool isJson, int chatType, Guid senderUUID, string? unsignedContent, string displayName, string? teamName, long timestamp, bool isSignatureLegal)
+        public ChatMessage(string content, bool isJson, int chatType, Guid senderUUID, string? unsignedContent, string displayName, string? teamName, long timestamp, byte[] signature, bool isSignatureLegal)
         {
-            this.isSignedChat = true;
-            this.isSystemChat = false;
+            isSignedChat = true;
+            isSystemChat = false;
             this.content = content;
             this.isJson = isJson;
-            this.chatType = chatType;
+            this.chatTypeId = chatType;
             this.senderUUID = senderUUID;
             this.unsignedContent = unsignedContent;
             this.displayName = displayName;
             this.teamName = teamName;
-            this.timestamp = DateTimeOffset.FromUnixTimeMilliseconds(timestamp).DateTime; 
+            this.timestamp = DateTimeOffset.FromUnixTimeMilliseconds(timestamp).DateTime;
+            this.signature = signature;
             this.isSignatureLegal = isSignatureLegal;
         }
 
         public ChatMessage(string content, bool isJson, int chatType, Guid senderUUID, bool isSystemChat = false)
         {
-            this.isSignedChat = isSystemChat;
+            isSignedChat = isSystemChat;
             this.isSystemChat = isSystemChat;
             this.content = content;
             this.isJson = isJson;
-            this.chatType = chatType;
+            this.chatTypeId = chatType;
             this.senderUUID = senderUUID;
+        }
+
+        public LastSeenMessageList.Entry? toLastSeenMessageEntry()
+        {
+            return signature != null ? new LastSeenMessageList.Entry(senderUUID, signature) : null;
+        }
+
+        public bool lacksSender()
+        {
+            return this.senderUUID == Guid.Empty;
         }
     }
 }

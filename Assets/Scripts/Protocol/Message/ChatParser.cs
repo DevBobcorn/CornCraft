@@ -1,7 +1,9 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using MinecraftClient.Protocol.Message;
 
 namespace MinecraftClient.Protocol
 {
@@ -11,7 +13,20 @@ namespace MinecraftClient.Protocol
 
     static class ChatParser
     {
-        #nullable enable
+        public enum MessageType
+        {
+            CHAT,
+            SAY_COMMAND,
+            MSG_COMMAND_INCOMING,
+            MSG_COMMAND_OUTGOING,
+            TEAM_MSG_COMMAND_INCOMING,
+            TEAM_MSG_COMMAND_OUTGOING,
+            EMOTE_COMMAND,
+            RAW_MSG
+        };
+
+        public static Dictionary<int, MessageType>? ChatId2Type;
+
         /// <summary>
         /// The main function to convert text from MC 1.6+ JSON to MC 1.5.2 formatted text
         /// </summary>
@@ -31,56 +46,64 @@ namespace MinecraftClient.Protocol
         /// <returns>Returns the translated text</returns>
         public static string ParseSignedChat(ChatMessage message, List<string>? links = null)
         {
-            string content;
-            if (CornCraft.ShowModifiedChat && message.unsignedContent != null)
-                content = ChatParser.ParseText(message.unsignedContent, links);
-            else
-                content = ChatParser.ParseText(message.content, links);
+            string chatContent = CornCraft.ShowModifiedChat && message.unsignedContent != null ? message.unsignedContent : message.content;
+            string content = message.isJson ? ParseText(chatContent, links) : chatContent;
             string sender = message.displayName!;
+
             string text;
             List<string> usingData = new();
-            switch (message.chatType)
+
+            MessageType chatType;
+            if (message.isSystemChat)
+                chatType = MessageType.RAW_MSG;
+            else if (!ChatId2Type!.TryGetValue(message.chatTypeId, out chatType))
+                chatType = MessageType.CHAT;
+            switch (chatType)
             {
-                case 0:  // chat (chat box)
+                case MessageType.CHAT:
                     usingData.Add(sender);
                     usingData.Add(content);
                     text = TranslateString("chat.type.text", usingData);
                     break;
-                case 1:  // system message (chat box)
-                    text = content;
-                    break;
-                case 2:  // game info (above hotbar)
-                    text = content;
-                    break;
-                case 3:  // say command
+                case MessageType.SAY_COMMAND:
                     usingData.Add(sender);
                     usingData.Add(content);
                     text = TranslateString("chat.type.announcement", usingData);
                     break;
-                case 4:  // msg command
+                case MessageType.MSG_COMMAND_INCOMING:
                     usingData.Add(sender);
                     usingData.Add(content);
                     text = TranslateString("commands.message.display.incoming", usingData);
                     break;
-                case 5:  // team msg command (/teammsg)
+                case MessageType.MSG_COMMAND_OUTGOING:
+                    usingData.Add(sender);
+                    usingData.Add(content);
+                    text = TranslateString("commands.message.display.outgoing", usingData);
+                    break;
+                case MessageType.TEAM_MSG_COMMAND_INCOMING:
                     usingData.Add(message.teamName!);
                     usingData.Add(sender);
                     usingData.Add(content);
                     text = TranslateString("chat.type.team.text", usingData);
                     break;
-                case 6:  // emote command (/me)
+                case MessageType.TEAM_MSG_COMMAND_OUTGOING:
+                    usingData.Add(message.teamName!);
+                    usingData.Add(sender);
+                    usingData.Add(content);
+                    text = TranslateString("chat.type.team.sent", usingData);
+                    break;
+                case MessageType.EMOTE_COMMAND:
                     usingData.Add(sender);
                     usingData.Add(content);
                     text = TranslateString("chat.type.emote", usingData);
                     break;
-                case 7: // tellraw command
+                case MessageType.RAW_MSG:
                     text = content;
                     break;
                 default:
-                    text = $"{sender}: {content}";
-                    break;
+                    goto case MessageType.CHAT;
             }
-            string color = String.Empty;
+            string color = string.Empty;
             if (message.isSystemChat)
             {
                 if (CornCraft.MarkSystemMessage)
@@ -109,7 +132,6 @@ namespace MinecraftClient.Protocol
             }
             return color + text;
         }
-        #nullable disable
 
         /// <summary>
         /// Get the classic color tag corresponding to a color name
@@ -173,13 +195,13 @@ namespace MinecraftClient.Protocol
             TranslationRules["commands.message.display.outgoing"] = "§7You whisper to %s: %s";
 
             //Language file in a subfolder, depending on the language setting
-            if (!System.IO.Directory.Exists("lang"))
-                System.IO.Directory.CreateDirectory("lang");
+            if (!Directory.Exists("lang"))
+                Directory.CreateDirectory("lang");
 
-            string Language_File = "lang" + Path.DirectorySeparatorChar + CornCraft.Language + ".lang";
+            string langFile = "lang" + Path.DirectorySeparatorChar + CornCraft.Language + ".lang";
 
             //File not found? Try downloading language file from Mojang's servers?
-            if (!System.IO.File.Exists(Language_File))
+            if (!File.Exists(langFile))
             {
                 Translations.Log("chat.download", CornCraft.Language);
                 try
@@ -198,8 +220,8 @@ namespace MinecraftClient.Protocol
                         stringBuilder.Append(entry.Key + "=" + entry.Value.StringValue + Environment.NewLine);
                     }
 
-                    System.IO.File.WriteAllText(Language_File, stringBuilder.ToString());
-                    Translations.Log("chat.done", Language_File);
+                    File.WriteAllText(langFile, stringBuilder.ToString());
+                    Translations.Log("chat.done", langFile);
                 }
                 catch
                 {
@@ -208,17 +230,17 @@ namespace MinecraftClient.Protocol
             }
 
             //Download Failed? Defaulting to en_GB.lang if the game is installed
-            if (!System.IO.File.Exists(Language_File) //Try en_GB.lang
-              && System.IO.File.Exists(Translations.TranslationsFile_FromMCDir))
+            if (!File.Exists(langFile) //Try en_GB.lang
+              && File.Exists(Translations.TranslationsFile_FromMCDir))
             {
-                Language_File = Translations.TranslationsFile_FromMCDir;
+                langFile = Translations.TranslationsFile_FromMCDir;
                 Translations.Log("chat.from_dir");
             }
 
             //Load the external dictionnary of translation rules or display an error message
-            if (System.IO.File.Exists(Language_File))
+            if (File.Exists(langFile))
             {
-                string[] translations = System.IO.File.ReadAllLines(Language_File);
+                string[] translations = File.ReadAllLines(langFile);
                 foreach (string line in translations)
                 {
                     if (line.Length > 0)
@@ -236,7 +258,7 @@ namespace MinecraftClient.Protocol
             }
             else //No external dictionary found.
             {
-                Translations.Log("chat.not_found", Language_File);
+                Translations.Log("chat.not_found", langFile);
             }
         }
 
@@ -300,7 +322,7 @@ namespace MinecraftClient.Protocol
         /// <param name="colorcode">Allow parent color code to affect child elements (set to "" for function init)</param>
         /// <param name="links">Container for links from JSON serialized text</param>
         /// <returns>returns the Minecraft-formatted string</returns>
-        private static string JSONData2String(Json.JSONData data, string colorcode, List<string> links)
+        private static string JSONData2String(Json.JSONData data, string colorcode, List<string>? links)
         {
             string extra_result = "";
             switch (data.Type)

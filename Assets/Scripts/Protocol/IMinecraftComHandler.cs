@@ -1,7 +1,9 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using MinecraftClient.Mapping;
+using MinecraftClient.Protocol.Message;
 using MinecraftClient.Inventory;
 
 namespace MinecraftClient.Protocol
@@ -21,13 +23,15 @@ namespace MinecraftClient.Protocol
         int GetServerPort();
         string GetServerHost();
         string GetUsername();
-        string GetUserUUID();
+        Guid GetUserUUID();
+        string GetUserUUIDStr();
         string GetSessionID();
         string[] GetOnlinePlayers();
         Dictionary<string, string> GetOnlinePlayersWithUUID();
         PlayerInfo? GetPlayerInfo(Guid uuid);
         Location GetCurrentLocation();
         World GetWorld();
+        public CancellationToken GetChunkProcessCancelToken();
         bool GetIsSupportPreviewsChat();
         int GetProtocolVersion();
         Container GetInventory(int inventoryID);

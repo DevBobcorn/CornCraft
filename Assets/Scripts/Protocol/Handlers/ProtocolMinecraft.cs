@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,7 @@ using MinecraftClient.Inventory;
 using MinecraftClient.Inventory.ItemPalettes;
 using MinecraftClient.Protocol.Handlers.PacketPalettes;
 using MinecraftClient.Protocol.Handlers.Forge;
+using MinecraftClient.Protocol.Message;
 
 namespace MinecraftClient.Protocol.Handlers
 {
@@ -28,8 +30,6 @@ namespace MinecraftClient.Protocol.Handlers
     /// Typical update steps for implementing protocol changes for a new Minecraft version:
     ///  - Perform a diff between latest supported version in MCC and new stable version to support on https://wiki.vg/Protocol
     ///  - If there are any changes in packets implemented by MCC, add MCXXXVersion field below and implement new packet layouts
-    ///  - Add the packet type palette for that Minecraft version. Please see PacketTypePalette.cs for more information
-    ///  - Also see Material.cs and ItemType.cs for updating block and item data inside MCC
     /// </remarks>
     class ProtocolMinecraft : IMinecraftCom
     {
@@ -53,8 +53,12 @@ namespace MinecraftClient.Protocol.Handlers
         private int autocompleteTransactionId = 0;
         private readonly Dictionary<int, short> windowActions = new Dictionary<int, short>();
         private bool login_phase = true;
-        private int protocolversion;
+        private int protocolVersion;
         private int currentDimension;
+
+        private int pendingAcknowledgments = 0;
+        private LastSeenMessagesCollector lastSeenMessagesCollector = new(5);
+        private LastSeenMessageList.Entry? lastReceivedMessage = null;
 
         ProtocolForge pForge;
         ProtocolTerrain pTerrain;
@@ -64,9 +68,7 @@ namespace MinecraftClient.Protocol.Handlers
         PacketTypePalette packetPalette;
         SocketWrapper socketWrapper;
         DataTypes dataTypes;
-        #nullable enable
-        Tuple<Thread, CancellationTokenSource>? netRead = null; // main thread
-        #nullable disable
+        Tuple<Thread, CancellationTokenSource>? netRead = null;
         RandomNumberGenerator randomGen;
 
         public ProtocolMinecraft(TcpClient Client, int protocolVersion, IMinecraftComHandler handler, ForgeInfo forgeInfo)
@@ -74,47 +76,81 @@ namespace MinecraftClient.Protocol.Handlers
             ChatParser.InitTranslations();
             this.socketWrapper = new SocketWrapper(Client);
             this.dataTypes = new DataTypes(protocolVersion);
-            this.protocolversion = protocolVersion;
+            this.protocolVersion = protocolVersion;
             this.handler = handler;
             this.pForge = new ProtocolForge(forgeInfo, protocolVersion, dataTypes, this, handler);
             this.pTerrain = new ProtocolTerrain(protocolVersion, dataTypes, handler);
             this.packetPalette = new PacketTypeHandler(protocolVersion, forgeInfo != null).GetTypeHandler();
+            this.randomGen = RandomNumberGenerator.Create();
 
             // Entity palette
-            if (protocolversion > MC_1_18_2_Version)
+            if (this.protocolVersion > MC_1_19_2_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.entity"));
             
-            if (protocolversion >= MC_1_17_Version)
+            if (this.protocolVersion >= MC_1_19_Version)
+                entityPalette = new EntityPalette119();  // 1.19   ~ 1.19.2
+            if (this.protocolVersion >= MC_1_17_Version)
                 entityPalette = new EntityPalette117();  // 1.17   ~ 1.18.2
-            else if (protocolversion >= MC_1_16_2_Version)
+            else if (this.protocolVersion >= MC_1_16_2_Version)
                 entityPalette = new EntityPalette1162(); // 1.16.2 ~ 1.16.5
-            else if (protocolversion >= MC_1_16_Version)
+            else if (this.protocolVersion >= MC_1_16_Version)
                 entityPalette = new EntityPalette1161(); // 1.16   ~ 1.16.1
-            else if (protocolversion >= MC_1_15_Version)
+            else if (this.protocolVersion >= MC_1_15_Version)
                 entityPalette = new EntityPalette115();  // 1.15   ~ 1.15.2
             else if (protocolVersion >= MC_1_14_Version)
                 entityPalette = new EntityPalette114();  // 1.14   ~ 1.14.4
             else entityPalette = new EntityPalette113(); // 1.13   ~ 1.13.2
 
             // Item palette
-            if (protocolversion > MC_1_18_2_Version)
+            if (this.protocolVersion > MC_1_19_2_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.item"));
             
-            if (protocolversion >= MC_1_18_1_Version)
+            if (this.protocolVersion >= MC_1_19_Version)
+                itemPalette = new ItemPalette119();   // 1.19   ~ 1.19.2
+            if (this.protocolVersion >= MC_1_18_1_Version)
                 itemPalette = new ItemPalette118();   // 1.18   ~ 1.18.2
-            else if (protocolversion >= MC_1_17_Version)
+            else if (this.protocolVersion >= MC_1_17_Version)
                 itemPalette = new ItemPalette117();   // 1.17   ~ 1.17.1
-            else if (protocolversion >= MC_1_16_2_Version)
+            else if (this.protocolVersion >= MC_1_16_2_Version)
                 itemPalette = new ItemPalette1162();  // 1.16.2 ~ 1.16.5
-            else if (protocolversion >= MC_1_16_1_Version)
+            else if (this.protocolVersion >= MC_1_16_1_Version)
                 itemPalette = new ItemPalette1161();  // 1.16   ~ 1.16.1
             else itemPalette = new ItemPalette115();  // 1.13   ~ 1.15.2
+
+            // MessageType 
+            // You can find it in https://wiki.vg/Protocol#Player_Chat_Message or /net/minecraft/network/message/MessageType.java
+            if (protocolVersion >= MC_1_19_2_Version)
+            {
+                ChatParser.ChatId2Type = new()
+                {
+                    { 0,  ChatParser.MessageType.CHAT },
+                    { 1,  ChatParser.MessageType.SAY_COMMAND },
+                    { 2,  ChatParser.MessageType.MSG_COMMAND_INCOMING },
+                    { 3,  ChatParser.MessageType.MSG_COMMAND_OUTGOING },
+                    { 4,  ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING },
+                    { 5,  ChatParser.MessageType.TEAM_MSG_COMMAND_OUTGOING },
+                    { 6,  ChatParser.MessageType.EMOTE_COMMAND },
+                };
+            }
+            else if (protocolVersion >= MC_1_19_Version)
+            {
+                ChatParser.ChatId2Type = new()
+                {
+                    { 0,  ChatParser.MessageType.CHAT },
+                    { 1,  ChatParser.MessageType.RAW_MSG },
+                    { 2,  ChatParser.MessageType.RAW_MSG },
+                    { 3,  ChatParser.MessageType.SAY_COMMAND },
+                    { 4,  ChatParser.MessageType.MSG_COMMAND_INCOMING },
+                    { 5,  ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING },
+                    { 6,  ChatParser.MessageType.EMOTE_COMMAND },
+                    { 7,  ChatParser.MessageType.RAW_MSG },
+                };
+            }
         }
 
         /// <summary>
         /// Separate thread. Network reading loop.
         /// </summary>
-        #nullable enable
         private void Updater(object? o)
         {
             Debug.Log("Netread updater start");
@@ -152,7 +188,6 @@ namespace MinecraftClient.Protocol.Handlers
             }
 
         }
-        #nullable disable
 
         /// <summary>
         /// Read data from the network. Should be called on a separate thread.
@@ -210,7 +245,6 @@ namespace MinecraftClient.Protocol.Handlers
             packetId = dataTypes.ReadNextVarInt(packetData); // Packet Id
         }
 
-        #nullable enable
         /// <summary>
         /// Handle the given packet
         /// </summary>
@@ -266,12 +300,12 @@ namespace MinecraftClient.Protocol.Handlers
                         int playerEntityId = dataTypes.ReadNextInt(packetData);
                         handler.OnReceivePlayerEntityID(playerEntityId);
 
-                        if (protocolversion >= MC_1_16_2_Version)
+                        if (protocolVersion >= MC_1_16_2_Version)
                             dataTypes.ReadNextBool(packetData);                       // Is hardcore - 1.16.2 and above
 
                         handler.OnGamemodeUpdate(Guid.Empty, dataTypes.ReadNextByte(packetData));
 
-                        if (protocolversion >= MC_1_16_Version)
+                        if (protocolVersion >= MC_1_16_Version)
                         {
                             dataTypes.ReadNextByte(packetData);                       // Previous Gamemode - 1.16 and above
                             int worldCount = dataTypes.ReadNextVarInt(packetData);    // Dimension Count (World Count) - 1.16 and above
@@ -288,14 +322,14 @@ namespace MinecraftClient.Protocol.Handlers
                         //   String identifier: 1.16 and 1.16.1
                         //   varInt: [1.9.1 to 1.15.2]
                         //   byte: below 1.9.1
-                        if (protocolversion >= MC_1_16_Version)
+                        if (protocolVersion >= MC_1_16_Version)
                         {
-                            if (protocolversion >= MC_1_19_Version)
+                            if (protocolVersion >= MC_1_19_Version)
                             {
                                 dataTypes.ReadNextString(packetData); // Dimension Type: Identifier
                                 currentDimensionType = new Dictionary<string, object>();
                             }
-                            else if (protocolversion >= MC_1_16_2_Version)
+                            else if (protocolVersion >= MC_1_16_2_Version)
                                 currentDimensionType = dataTypes.ReadNextNbt(packetData); // Dimension Type: NBT Tag Compound
                             else
                                 dataTypes.ReadNextString(packetData);
@@ -304,41 +338,41 @@ namespace MinecraftClient.Protocol.Handlers
                         else
                             this.currentDimension = dataTypes.ReadNextInt(packetData);
 
-                        if (protocolversion < MC_1_14_Version)
+                        if (protocolVersion < MC_1_14_Version)
                             dataTypes.ReadNextByte(packetData);           // Difficulty - 1.13 and below
                         
-                        if (protocolversion >= MC_1_16_Version)
+                        if (protocolVersion >= MC_1_16_Version)
                             currentDimensionName = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
                         
-                        if (protocolversion >= MC_1_16_2_Version)
+                        if (protocolVersion >= MC_1_16_2_Version)
                             World.SetDimension(currentDimensionName, currentDimensionType);
                         
-                        if (protocolversion >= MC_1_15_Version)
+                        if (protocolVersion >= MC_1_15_Version)
                             dataTypes.ReadNextLong(packetData);           // Hashed world seed - 1.15 and above
 
-                        if (protocolversion >= MC_1_16_2_Version)
+                        if (protocolVersion >= MC_1_16_2_Version)
                             dataTypes.ReadNextVarInt(packetData);         // Max Players - 1.16.2 and above
                         else
                             dataTypes.ReadNextByte(packetData);           // Max Players - 1.16.1 and below
 
-                        if (protocolversion < MC_1_16_Version)
+                        if (protocolVersion < MC_1_16_Version)
                             dataTypes.ReadNextString(packetData);         // Level Type - 1.15 and below
-                        if (protocolversion >= MC_1_14_Version)
+                        if (protocolVersion >= MC_1_14_Version)
                             dataTypes.ReadNextVarInt(packetData);         // View distance - 1.14 and above
-                        if (protocolversion >= MC_1_18_1_Version)
+                        if (protocolVersion >= MC_1_18_1_Version)
                             dataTypes.ReadNextVarInt(packetData);         // Simulation Distance - 1.18 and above
                         
                         dataTypes.ReadNextBool(packetData);           // Reduced debug info - 1.8 and above
 
-                        if (protocolversion >= MC_1_15_Version)
+                        if (protocolVersion >= MC_1_15_Version)
                             dataTypes.ReadNextBool(packetData);           // Enable respawn screen - 1.15 and above
 
-                        if (protocolversion >= MC_1_16_Version)
+                        if (protocolVersion >= MC_1_16_Version)
                         {
                             dataTypes.ReadNextBool(packetData);           // Is Debug - 1.16 and above
                             dataTypes.ReadNextBool(packetData);           // Is Flat - 1.16 and above
                         }
-                        if (protocolversion >= MC_1_19_Version)
+                        if (protocolVersion >= MC_1_19_Version)
                         {
                             bool hasDeathLocation = dataTypes.ReadNextBool(packetData); // Has death location
                             if (hasDeathLocation)
@@ -351,7 +385,7 @@ namespace MinecraftClient.Protocol.Handlers
                     case PacketTypesIn.ChatMessage:
                         int messageType = 0;
 
-                        if (protocolversion <= MC_1_18_2_Version) // 1.18 and below
+                        if (protocolVersion <= MC_1_18_2_Version) // 1.18 and below
                         {
                             string message = dataTypes.ReadNextString(packetData);
 
@@ -362,13 +396,13 @@ namespace MinecraftClient.Protocol.Handlers
                                 || (messageType == 2 && !CornCraft.DisplayXPBarMessages))
                                 break;
                             
-                            if (protocolversion >= MC_1_16_5_Version)
+                            if (protocolVersion >= MC_1_16_5_Version)
                                 senderUUID = dataTypes.ReadNextUUID(packetData);
                             else senderUUID = Guid.Empty;
 
                             handler.OnTextReceived(new(message, true, messageType, senderUUID));
                         }
-                        else // 1.19+
+                        else if (protocolVersion == MC_1_19_Version) // 1.19
                         {
                             string signedChat = dataTypes.ReadNextString(packetData);
 
@@ -392,23 +426,117 @@ namespace MinecraftClient.Protocol.Handlers
 
                             byte[] messageSignature = dataTypes.ReadNextByteArray(packetData);
 
-                            PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
-                            bool verifyResult = player == null ? false : player.VerifyMessage(signedChat, senderUUID, timestamp, salt, ref messageSignature);
+                            bool verifyResult;
+                            if (senderUUID.ToString().Replace("-", String.Empty) == handler.GetUserUUIDStr())
+                                verifyResult = true;
+                            else
+                            {
+                                PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
+                                verifyResult = player == null ? false : player.VerifyMessage(signedChat, timestamp, salt, ref messageSignature);
+                            }
 
-                            handler.OnTextReceived(new(signedChat, true, messageType, senderUUID, unsignedChatContent, senderDisplayName, senderTeamName, timestamp, verifyResult));
+                            handler.OnTextReceived(new(signedChat, true, messageType, senderUUID, unsignedChatContent, senderDisplayName, senderTeamName, timestamp, messageSignature, verifyResult));
+                        }
+                        else // 1.19.1 +
+                        {
+                            byte[]? precedingSignature = dataTypes.ReadNextBool(packetData) ? dataTypes.ReadNextByteArray(packetData) : null;
+                            Guid senderUUID = dataTypes.ReadNextUUID(packetData);
+                            byte[] headerSignature = dataTypes.ReadNextByteArray(packetData);
+
+                            string signedChat = dataTypes.ReadNextString(packetData);
+                            string? decorated = dataTypes.ReadNextBool(packetData) ? dataTypes.ReadNextString(packetData) : null;
+
+                            long timestamp = dataTypes.ReadNextLong(packetData);
+                            long salt = dataTypes.ReadNextLong(packetData);
+
+                            int lastSeenMessageListLen = dataTypes.ReadNextVarInt(packetData);
+                            LastSeenMessageList.Entry[] lastSeenMessageList = new LastSeenMessageList.Entry[lastSeenMessageListLen];
+                            for (int i = 0; i < lastSeenMessageListLen; ++i)
+                            {
+                                Guid user = dataTypes.ReadNextUUID(packetData);
+                                byte[] lastSignature = dataTypes.ReadNextByteArray(packetData);
+                                lastSeenMessageList[i] = new(user, lastSignature);
+                            }
+                            LastSeenMessageList lastSeenMessages = new(lastSeenMessageList);
+
+                            string? unsignedChatContent = dataTypes.ReadNextBool(packetData) ? dataTypes.ReadNextString(packetData) : null;
+
+                            int filterEnum = dataTypes.ReadNextVarInt(packetData);
+                            if (filterEnum == 2) // PARTIALLY_FILTERED
+                                dataTypes.ReadNextULongArray(packetData);
+
+                            int chatTypeId = dataTypes.ReadNextVarInt(packetData);
+                            string chatName = dataTypes.ReadNextString(packetData);
+                            string? targetName = dataTypes.ReadNextBool(packetData) ? dataTypes.ReadNextString(packetData) : null;
+
+                            bool verifyResult;
+                            if (senderUUID.ToString().Replace("-", String.Empty) == handler.GetUserUUIDStr())
+                                verifyResult = true;
+                            else
+                            {
+                                PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
+                                if (player == null)
+                                    verifyResult = false;
+                                else
+                                {
+                                    bool lastVerifyResult = player.IsMessageChainLegal();
+                                    verifyResult = player.VerifyMessage(signedChat, timestamp, salt, ref headerSignature, ref precedingSignature, lastSeenMessages);
+                                    if (lastVerifyResult && !verifyResult)
+                                        Debug.Log("Player {player.DisplayName} message chains broken!");
+                                }
+                            }
+
+                            Dictionary<string, Json.JSONData> chatInfo = Json.ParseJson(chatName).Properties;
+                            string senderDisplayName = (chatInfo.ContainsKey("insertion") ? chatInfo["insertion"] : chatInfo["text"]).StringValue;
+                            string? senderTeamName = null;
+                            ChatParser.MessageType messageTypeEnum = ChatParser.ChatId2Type![chatTypeId];
+                            if (targetName != null && 
+                                (messageTypeEnum == ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING || messageTypeEnum == ChatParser.MessageType.TEAM_MSG_COMMAND_OUTGOING))
+                                senderTeamName = Json.ParseJson(targetName).Properties["with"].DataArray[0].Properties["text"].StringValue;
+
+                            ChatMessage chat = new(signedChat, false, chatTypeId, senderUUID, unsignedChatContent, senderDisplayName, senderTeamName, timestamp, headerSignature, verifyResult);
+                            if (!chat.lacksSender())
+                                this.acknowledge(chat);
+                            handler.OnTextReceived(chat);
+                        }
+                        break;
+                    case PacketTypesIn.MessageHeader:
+                        if (protocolVersion >= MC_1_19_2_Version)
+                        {
+                            byte[]? precedingSignature = dataTypes.ReadNextBool(packetData) ? dataTypes.ReadNextByteArray(packetData) : null;
+                            Guid senderUUID = dataTypes.ReadNextUUID(packetData);
+                            byte[] headerSignature = dataTypes.ReadNextByteArray(packetData);
+                            byte[] bodyDigest = dataTypes.ReadNextByteArray(packetData);
+
+                            bool verifyResult;
+                            if (senderUUID.ToString().Replace("-", String.Empty) == handler.GetUserUUIDStr())
+                                verifyResult = true;
+                            else
+                            {
+                                PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
+                                if (player == null)
+                                    verifyResult = false;
+                                else
+                                {
+                                    bool lastVerifyResult = player.IsMessageChainLegal();
+                                    verifyResult = player.VerifyMessageHead(ref precedingSignature, ref headerSignature, ref bodyDigest);
+                                    if (lastVerifyResult && !verifyResult)
+                                        Debug.LogWarning($"Player {player.DisplayName} message chains broken!");
+                                }
+                            }
                         }
                         break;
                     case PacketTypesIn.Respawn:
                         string? dimensionNameInRespawn = null;
                         Dictionary<string, object>? dimensionTypeInRespawn = null;
-                        if (protocolversion >= MC_1_16_Version)
+                        if (protocolVersion >= MC_1_16_Version)
                         {
-                            if (protocolversion >= MC_1_19_Version)
+                            if (protocolVersion >= MC_1_19_Version)
                             {
                                 dataTypes.ReadNextString(packetData); // Dimension Type: Identifier
                                 dimensionTypeInRespawn = new Dictionary<string, object>();
                             }
-                            else if (protocolversion >= MC_1_16_2_Version)
+                            else if (protocolVersion >= MC_1_16_2_Version)
                                 dimensionTypeInRespawn = dataTypes.ReadNextNbt(packetData); // Dimension Type: NBT Tag Compound
                             else
                                 dataTypes.ReadNextString(packetData);
@@ -419,28 +547,28 @@ namespace MinecraftClient.Protocol.Handlers
                             // 1.15 and below
                             this.currentDimension = dataTypes.ReadNextInt(packetData);
                         }
-                        if (protocolversion >= MC_1_16_Version)
+                        if (protocolVersion >= MC_1_16_Version)
                             dimensionNameInRespawn = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
 
-                        if (protocolversion >= MC_1_16_2_Version)
+                        if (protocolVersion >= MC_1_16_2_Version)
                             World.SetDimension(dimensionNameInRespawn, dimensionTypeInRespawn);
 
-                        if (protocolversion < MC_1_14_Version)
+                        if (protocolVersion < MC_1_14_Version)
                             dataTypes.ReadNextByte(packetData);           // Difficulty - 1.13 and below
-                        if (protocolversion >= MC_1_15_Version)
+                        if (protocolVersion >= MC_1_15_Version)
                             dataTypes.ReadNextLong(packetData);           // Hashed world seed - 1.15 and above
                         dataTypes.ReadNextByte(packetData);               // Gamemode
-                        if (protocolversion >= MC_1_16_Version)
+                        if (protocolVersion >= MC_1_16_Version)
                             dataTypes.ReadNextByte(packetData);           // Previous Game mode - 1.16 and above
-                        if (protocolversion < MC_1_16_Version)
+                        if (protocolVersion < MC_1_16_Version)
                             dataTypes.ReadNextString(packetData);         // Level Type - 1.15 and below
-                        if (protocolversion >= MC_1_16_Version)
+                        if (protocolVersion >= MC_1_16_Version)
                         {
                             dataTypes.ReadNextBool(packetData);           // Is Debug - 1.16 and above
                             dataTypes.ReadNextBool(packetData);           // Is Flat - 1.16 and above
                             dataTypes.ReadNextBool(packetData);           // Copy metadata - 1.16 and above
                         }
-                        if (protocolversion >= MC_1_19_Version)
+                        if (protocolVersion >= MC_1_19_Version)
                         {
                             bool hasDeathLocation = dataTypes.ReadNextBool(packetData); // Has death location
                             if (hasDeathLocation)
@@ -471,56 +599,61 @@ namespace MinecraftClient.Protocol.Handlers
                         // Teleport confirm packet
                         SendPacket(PacketTypesOut.TeleportConfirm, dataTypes.GetVarInt(teleportId));
                         
-                        if (protocolversion >= MC_1_17_Version)
+                        if (protocolVersion >= MC_1_17_Version)
                             dataTypes.ReadNextBool(packetData); // Dismount Vehicle - 1.17 and above
                         break;
                     case PacketTypesIn.ChunkData:
+                        CancellationToken cancellationToken = handler.GetChunkProcessCancelToken();
+
+                        Interlocked.Increment(ref handler.GetWorld().chunkCnt);
+                        Interlocked.Increment(ref handler.GetWorld().chunkLoadNotCompleted);
+                        
                         int chunkX = dataTypes.ReadNextInt(packetData);
                         int chunkZ = dataTypes.ReadNextInt(packetData);
-                        if (protocolversion >= MC_1_17_Version)
+                        if (protocolVersion >= MC_1_17_Version)
                         {
                             ulong[]? verticalStripBitmask = null;
 
-                            if (protocolversion == MC_1_17_Version || protocolversion == MC_1_17_1_Version)
+                            if (protocolVersion == MC_1_17_Version || protocolVersion == MC_1_17_1_Version)
                                 verticalStripBitmask = dataTypes.ReadNextULongArray(packetData); // Bit Mask Length  and  Primary Bit Mask
 
                             dataTypes.ReadNextNbt(packetData); // Heightmaps
 
-                            if (protocolversion == MC_1_17_Version || protocolversion == MC_1_17_1_Version)
+                            if (protocolVersion == MC_1_17_Version || protocolVersion == MC_1_17_1_Version)
                             {
                                 int biomesLength = dataTypes.ReadNextVarInt(packetData); // Biomes length
                                 for (int i = 0; i < biomesLength; i++)
-                                {
                                     dataTypes.SkipNextVarInt(packetData); // Biomes
-                                }
                             }
 
                             int dataSize = dataTypes.ReadNextVarInt(packetData); // Size
 
-                            Interlocked.Increment(ref handler.GetWorld().chunkCnt);
-                            Interlocked.Increment(ref handler.GetWorld().chunkLoadNotCompleted);
-                            new Task(() =>
+                            Parallel.Invoke(() =>
                             {
-                                pTerrain.ProcessChunkColumnData(chunkX, chunkZ, verticalStripBitmask, packetData);
-                                Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
-                            }).Start();
+                                bool loaded = pTerrain.ProcessChunkColumnData(chunkX, chunkZ, verticalStripBitmask, packetData, cancellationToken);
+                                if (loaded)
+                                    Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
+                            });
+
+                            // Block Entity data: ignored
+                            // Light data: ignored
                         }
                         else
                         {
                             bool chunksContinuous = dataTypes.ReadNextBool(packetData);
-                            if (protocolversion >= MC_1_16_Version && protocolversion <= MC_1_16_1_Version)
+                            if (protocolVersion >= MC_1_16_Version && protocolVersion <= MC_1_16_1_Version)
                                 dataTypes.ReadNextBool(packetData); // Ignore old data - 1.16 to 1.16.1 only
                             ushort chunkMask = (ushort)dataTypes.ReadNextVarInt(packetData);
 
-                            if (protocolversion >= MC_1_14_Version)
+                            if (protocolVersion >= MC_1_14_Version)
                                 dataTypes.ReadNextNbt(packetData);  // Heightmaps - 1.14 and above
                             int biomesLength = 0;
-                            if (protocolversion >= MC_1_16_2_Version)
+                            if (protocolVersion >= MC_1_16_2_Version)
                                 if (chunksContinuous)
                                     biomesLength = dataTypes.ReadNextVarInt(packetData); // Biomes length - 1.16.2 and above
-                            if (protocolversion >= MC_1_15_Version && chunksContinuous)
+                            if (protocolVersion >= MC_1_15_Version && chunksContinuous)
                             {
-                                if (protocolversion >= MC_1_16_2_Version)
+                                if (protocolVersion >= MC_1_16_2_Version)
                                 {
                                     for (int i = 0; i < biomesLength; i++)
                                     {
@@ -532,22 +665,24 @@ namespace MinecraftClient.Protocol.Handlers
                                 else dataTypes.ReadData(1024 * 4, packetData); // Biomes - 1.15 and above
                             }
                             int dataSize = dataTypes.ReadNextVarInt(packetData);
-                            new Task(() =>
+                            Parallel.Invoke(() =>
                             {
-                                pTerrain.ProcessChunkColumnData(chunkX, chunkZ, chunkMask, 0, false, chunksContinuous, currentDimension, packetData);
-                            }).Start();
+                                bool loaded = pTerrain.ProcessChunkColumnData(chunkX, chunkZ, chunkMask, 0, false, chunksContinuous, currentDimension, packetData, cancellationToken);
+                                if (loaded)
+                                    Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
+                            });
                         }
                         break;
                     case PacketTypesIn.MapData:
                         int mapid = dataTypes.ReadNextVarInt(packetData);
                         byte scale = dataTypes.ReadNextByte(packetData);
-                        bool trackingposition = protocolversion >= MC_1_17_Version ? false : dataTypes.ReadNextBool(packetData);
+                        bool trackingposition = protocolVersion >= MC_1_17_Version ? false : dataTypes.ReadNextBool(packetData);
                         bool locked = false;
-                        if (protocolversion >= MC_1_14_Version)
+                        if (protocolVersion >= MC_1_14_Version)
                         {
                             locked = dataTypes.ReadNextBool(packetData);
                         }
-                        if (protocolversion >= MC_1_17_Version)
+                        if (protocolVersion >= MC_1_17_Version)
                         {
                             trackingposition = dataTypes.ReadNextBool(packetData);
                         }
@@ -555,7 +690,7 @@ namespace MinecraftClient.Protocol.Handlers
                         handler.OnMapData(mapid, scale, trackingposition, locked, iconcount);
                         break;
                     case PacketTypesIn.TradeList:
-                        if ((protocolversion >= MC_1_14_Version)) // MC 1.14 or greater
+                        if ((protocolVersion >= MC_1_14_Version)) // MC 1.14 or greater
                         {
                             int windowId = dataTypes.ReadNextVarInt(packetData);
                             int size = dataTypes.ReadNextByte(packetData);
@@ -613,7 +748,7 @@ namespace MinecraftClient.Protocol.Handlers
                         {
                             var locs = new List<Location>();
 
-                            if (protocolversion >= MC_1_16_2_Version)
+                            if (protocolVersion >= MC_1_16_2_Version)
                             {
                                 long chunkSection = dataTypes.ReadNextLong(packetData);
                                 int sectionX = (int)(chunkSection >> 42);
@@ -665,12 +800,19 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                         break;
                     case PacketTypesIn.BlockChange:
-                        var loc2 = dataTypes.ReadNextLocation(packetData);
-                        handler.GetWorld().SetBlock(loc2, new Block((ushort)dataTypes.ReadNextVarInt(packetData)));
-                        //Debug.Log("Block change: " + loc2);
-                        Loom.QueueOnMainThread(() => {
-                            EventManager.Instance.Broadcast<BlockUpdateEvent>(new BlockUpdateEvent(loc2));
-                        });
+                        if (protocolVersion < MC_1_19_Version)
+                        {
+                            var loc2 = dataTypes.ReadNextLocation(packetData);
+                            handler.GetWorld().SetBlock(loc2, new Block((ushort)dataTypes.ReadNextVarInt(packetData)));
+                            //Debug.Log("Block change: " + loc2);
+                            Loom.QueueOnMainThread(() => {
+                                EventManager.Instance.Broadcast<BlockUpdateEvent>(new BlockUpdateEvent(loc2));
+                            });
+                        }
+                        else
+                        {
+                            // 1.19 disabled due to crashing
+                        }
                         break;
                     case PacketTypesIn.UnloadChunk:
                         int chunkX3 = dataTypes.ReadNextInt(packetData);
@@ -728,7 +870,7 @@ namespace MinecraftClient.Protocol.Handlers
                                     // 1.19 Additions
                                     long? keyExpiration = null;
                                     byte[]? publicKey = null, signature = null;
-                                    if (protocolversion >= MC_1_19_Version)
+                                    if (protocolVersion >= MC_1_19_Version)
                                     {
                                         if (dataTypes.ReadNextBool(packetData))                                 // Has Sig Data (if true, red the following fields)
                                         {
@@ -778,7 +920,7 @@ namespace MinecraftClient.Protocol.Handlers
                         for (int i = 0; i < resultCount; i++)
                         {
                             completeResults.Add(dataTypes.ReadNextString(packetData));
-                            if (protocolversion >= MC_1_13_Version)
+                            if (protocolVersion >= MC_1_13_Version)
                             {
                                 // Skip optional tooltip for each tab-complete result
                                 if (dataTypes.ReadNextBool(packetData))
@@ -798,7 +940,7 @@ namespace MinecraftClient.Protocol.Handlers
                         handler.OnConnectionLost(DisconnectReason.InGameKick, ChatParser.ParseText(dataTypes.ReadNextString(packetData)));
                         return false;
                     case PacketTypesIn.OpenWindow:
-                        if (protocolversion < MC_1_14_Version)
+                        if (protocolVersion < MC_1_14_Version)
                         {   // MC 1.13 or lower
                             byte windowId1 = dataTypes.ReadNextByte(packetData);
                             string type = dataTypes.ReadNextString(packetData).Replace("minecraft:", "").ToUpper();
@@ -827,7 +969,7 @@ namespace MinecraftClient.Protocol.Handlers
                         int stateId1 = -1;
                         int elements = 0;
 
-                        if (protocolversion >= MC_1_17_1_Version)
+                        if (protocolVersion >= MC_1_17_1_Version)
                         {
                             // State ID and Elements as VarInt - 1.17.1 and above
                             stateId1 = dataTypes.ReadNextVarInt(packetData);
@@ -847,7 +989,7 @@ namespace MinecraftClient.Protocol.Handlers
                                 inventorySlots[slotId] = item1;
                         }
 
-                        if (protocolversion >= MC_1_17_1_Version) // Carried Item - 1.17.1 and above
+                        if (protocolVersion >= MC_1_17_1_Version) // Carried Item - 1.17.1 and above
                             dataTypes.ReadNextItemSlot(packetData, itemPalette);
 
                         handler.OnWindowItems(windowId3, inventorySlots, stateId1);
@@ -855,7 +997,7 @@ namespace MinecraftClient.Protocol.Handlers
                     case PacketTypesIn.SetSlot:
                         byte windowId4 = dataTypes.ReadNextByte(packetData);
                         int stateId2 = -1;
-                        if (protocolversion >= MC_1_17_1_Version)
+                        if (protocolVersion >= MC_1_17_1_Version)
                             stateId2 = dataTypes.ReadNextVarInt(packetData); // State ID - 1.17.1 and above
                         short slotId2 = dataTypes.ReadNextShort(packetData);
                         Item item2 = dataTypes.ReadNextItemSlot(packetData, itemPalette);
@@ -874,7 +1016,7 @@ namespace MinecraftClient.Protocol.Handlers
                         string url = dataTypes.ReadNextString(packetData);
                         string hash = dataTypes.ReadNextString(packetData);
                         bool forced = true; // Assume forced for MC 1.16 and below
-                        if (protocolversion >= MC_1_17_Version)
+                        if (protocolVersion >= MC_1_17_Version)
                         {
                             forced = dataTypes.ReadNextBool(packetData);
                             String forcedMessage = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
@@ -893,7 +1035,7 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     case PacketTypesIn.EntityEquipment:
                         int entityId = dataTypes.ReadNextVarInt(packetData);
-                        if (protocolversion >= MC_1_16_Version)
+                        if (protocolVersion >= MC_1_16_Version)
                         {
                             bool hasNext;
                             do
@@ -943,7 +1085,7 @@ namespace MinecraftClient.Protocol.Handlers
                             bool hasFactorData = false;
                             Dictionary<string, object>? factorCodec = null;
 
-                            if (protocolversion >= MC_1_19_Version)
+                            if (protocolVersion >= MC_1_19_Version)
                             {
                                 hasFactorData = dataTypes.ReadNextBool(packetData);
                                 factorCodec = dataTypes.ReadNextNbt(packetData);
@@ -954,7 +1096,7 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     case PacketTypesIn.DestroyEntities:
                         int entityCount = 1; // 1.17.0 has only one entity per packet
-                        if (protocolversion != MC_1_17_Version)
+                        if (protocolVersion != MC_1_17_Version)
                             entityCount = dataTypes.ReadNextVarInt(packetData); // All other versions have a "count" field
                         int[] entityList = new int[entityCount];
                         for (int i = 0; i < entityCount; i++)
@@ -997,7 +1139,7 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     case PacketTypesIn.EntityProperties:
                         int entityId6 = dataTypes.ReadNextVarInt(packetData);
-                        int NumberOfProperties = protocolversion >= MC_1_17_Version ? dataTypes.ReadNextVarInt(packetData) : dataTypes.ReadNextInt(packetData);
+                        int NumberOfProperties = protocolVersion >= MC_1_17_Version ? dataTypes.ReadNextVarInt(packetData) : dataTypes.ReadNextInt(packetData);
                         Dictionary<string, Double> keys = new Dictionary<string, Double>();
                         for (int i = 0; i < NumberOfProperties; i++)
                         {
@@ -1033,11 +1175,11 @@ namespace MinecraftClient.Protocol.Handlers
 
                         // See https://wiki.vg/Entity_metadata#Living_Entity
                         int healthField = 7; // From 1.10 to 1.13.2
-                        if (protocolversion >= MC_1_14_Version)
+                        if (protocolVersion >= MC_1_14_Version)
                             healthField = 8; // 1.14 and above
-                        if (protocolversion >= MC_1_17_Version)
+                        if (protocolVersion >= MC_1_17_Version)
                             healthField = 9; // 1.17 and above
-                        if (protocolversion > MC_1_18_2_Version)
+                        if (protocolVersion > MC_1_18_2_Version)
                             throw new NotImplementedException(Translations.Get("exception.palette.healthfield"));
 
                         if (metadata.ContainsKey(healthField) && metadata[healthField] != null && metadata[healthField].GetType() == typeof(float))
@@ -1080,7 +1222,7 @@ namespace MinecraftClient.Protocol.Handlers
                     case PacketTypesIn.Explosion:
                         Location explosionLocation = new Location(dataTypes.ReadNextFloat(packetData), dataTypes.ReadNextFloat(packetData), dataTypes.ReadNextFloat(packetData));
                         float explosionStrength = dataTypes.ReadNextFloat(packetData);
-                        int explosionBlockCount = protocolversion >= MC_1_17_Version
+                        int explosionBlockCount = protocolVersion >= MC_1_17_Version
                             ? dataTypes.ReadNextVarInt(packetData)
                             : dataTypes.ReadNextInt(packetData);
                         // Ignoring additional fields (records, pushback)
@@ -1104,7 +1246,7 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     case PacketTypesIn.UpdateScore:
                         string entityname = dataTypes.ReadNextString(packetData);
-                        int action3 = protocolversion >= MC_1_18_2_Version
+                        int action3 = protocolVersion >= MC_1_18_2_Version
                             ? dataTypes.ReadNextVarInt(packetData)
                             : dataTypes.ReadNextByte(packetData);
                         string objectivename2 = String.Empty;
@@ -1154,13 +1296,12 @@ namespace MinecraftClient.Protocol.Handlers
                     Translations.Get("exception.packet_process",
                         packetPalette.GetIncommingTypeById(packetId),
                         packetId,
-                        protocolversion,
+                        protocolVersion,
                         login_phase,
                         innerException.GetType()),
                     innerException);
             }
         }
-        #nullable disable
 
         /// <summary>
         /// Start the updating thread. Should be called after login success.
@@ -1238,14 +1379,13 @@ namespace MinecraftClient.Protocol.Handlers
             socketWrapper.SendDataRAW(dataTypes.ConcatBytes(dataTypes.GetVarInt(thePacket.Length), thePacket));
         }
 
-        #nullable enable
         /// <summary>
         /// Do the Minecraft login.
         /// </summary>
         /// <returns>True if login successful</returns>
         public bool Login(PlayerKeyPair? playerKeyPair)
         {
-            byte[] protocol_version = dataTypes.GetVarInt(protocolversion);
+            byte[] protocol_version = dataTypes.GetVarInt(protocolVersion);
             string server_address = pForge.GetServerAddress(handler.GetServerHost());
             byte[] server_port = dataTypes.GetUShort((ushort)handler.GetServerPort());
             byte[] next_state = dataTypes.GetVarInt(2);
@@ -1255,16 +1395,30 @@ namespace MinecraftClient.Protocol.Handlers
 
             List<byte> fullLoginPacket = new List<byte>();
             fullLoginPacket.AddRange(dataTypes.GetString(handler.GetUsername()));                             // Username
-            if (protocolversion >= MC_1_19_Version)
+            if (protocolVersion >= MC_1_19_Version)
             {
-                if (playerKeyPair is null)
+                if (playerKeyPair == null)
                     fullLoginPacket.AddRange(dataTypes.GetBool(false));                                       // Has Sig Data
                 else
                 {
                     fullLoginPacket.AddRange(dataTypes.GetBool(true));                                        // Has Sig Data
                     fullLoginPacket.AddRange(dataTypes.GetLong(playerKeyPair.GetExpirationMilliseconds()));   // Expiration time
                     fullLoginPacket.AddRange(dataTypes.GetArray(playerKeyPair.PublicKey.Key));                // Public key received from Microsoft API
-                    fullLoginPacket.AddRange(dataTypes.GetArray(playerKeyPair.PublicKey.Signature));          // Public key signature received from Microsoft API
+                    if (protocolVersion >= MC_1_19_2_Version)
+                        fullLoginPacket.AddRange(dataTypes.GetArray(playerKeyPair.PublicKey.SignatureV2!));   // Public key signature received from Microsoft API
+                    else
+                        fullLoginPacket.AddRange(dataTypes.GetArray(playerKeyPair.PublicKey.Signature!));     // Public key signature received from Microsoft API
+                }
+            }
+            if (protocolVersion >= MC_1_19_2_Version)
+            {
+                string uuid = handler.GetUserUUIDStr();
+                if (uuid == "0")
+                    fullLoginPacket.AddRange(dataTypes.GetBool(false));                                       // Has UUID
+                else
+                {
+                    fullLoginPacket.AddRange(dataTypes.GetBool(true));                                        // Has UUID
+                    fullLoginPacket.AddRange(dataTypes.GetUUID(Guid.Parse(uuid)));                            // UUID
                 }
             }
             SendPacket(0x00, fullLoginPacket);
@@ -1284,7 +1438,7 @@ namespace MinecraftClient.Protocol.Handlers
                     string serverId = dataTypes.ReadNextString(packetData);
                     byte[] serverPublicKey = dataTypes.ReadNextByteArray(packetData);
                     byte[] token = dataTypes.ReadNextByteArray(packetData);
-                    return StartEncryption(handler.GetUserUUID(), handler.GetSessionID(), token, serverId, serverPublicKey, playerKeyPair);
+                    return StartEncryption(handler.GetUserUUIDStr(), handler.GetSessionID(), token, serverId, serverPublicKey, playerKeyPair);
                 }
                 else if (packetId == 0x02) // Login successful
                 {
@@ -1332,7 +1486,7 @@ namespace MinecraftClient.Protocol.Handlers
             // Encryption Response packet
             List<byte> encryptionResponse = new();
             encryptionResponse.AddRange(dataTypes.GetArray(RSAService.Encrypt(secretKey, false)));     // Shared Secret
-            if (protocolversion >= MC_1_19_Version)
+            if (protocolVersion >= MC_1_19_Version)
             {
                 if (playerKeyPair is null)
                 {
@@ -1380,7 +1534,7 @@ namespace MinecraftClient.Protocol.Handlers
                     Guid uuidReceived = dataTypes.ReadNextUUID(packetData);
                     string userName = dataTypes.ReadNextString(packetData);
                     Tuple<string, string, string>[]? playerProperty = null;
-                    if (protocolversion >= MC_1_19_Version)
+                    if (protocolVersion >= MC_1_19_Version)
                     {
                         int count = dataTypes.ReadNextVarInt(packetData); // Number Of Properties
                         playerProperty = new Tuple<string, string, string>[count];
@@ -1409,7 +1563,6 @@ namespace MinecraftClient.Protocol.Handlers
                 else HandlePacket(packetId, packetData);
             }
         }
-        #nullable disable
 
         /// <summary>
         /// Disconnect from the server
@@ -1423,7 +1576,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// Ping a Minecraft server to get information about the server
         /// </summary>
         /// <returns>True if ping was successful</returns>
-        public static bool doPing(string host, int port, ref int protocol, ref ForgeInfo forgeInfo)
+        public static bool doPing(string host, int port, ref int protocol, ref ForgeInfo? forgeInfo)
         {
             string version = "";
             TcpClient tcp = ProxyHandler.newTcpClient(host, port);
@@ -1505,17 +1658,59 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>Minecraft Protocol version number</returns>
         public int GetProtocolVersion()
         {
-            return protocolversion;
+            return protocolVersion;
+        }
+
+        /// <summary>
+        /// Send MessageAcknowledgment packet
+        /// </summary>
+        /// <param name="acknowledgment">Message acknowledgment</param>
+        /// <returns>True if properly sent</returns>
+        public bool SendMessageAcknowledgment(LastSeenMessageList.Acknowledgment acknowledgment)
+        {
+            try
+            {
+                byte[] fields = dataTypes.GetAcknowledgment(acknowledgment);
+
+                SendPacket(PacketTypesOut.MessageAcknowledgment, fields);
+
+                return true;
+            }
+            catch (SocketException) { return false; }
+            catch (System.IO.IOException) { return false; }
+            catch (ObjectDisposedException) { return false; }
+        }
+
+        public LastSeenMessageList.Acknowledgment consumeAcknowledgment()
+        {
+            this.pendingAcknowledgments = 0;
+            return new LastSeenMessageList.Acknowledgment(this.lastSeenMessagesCollector.GetLastSeenMessages(), this.lastReceivedMessage);
+        }
+
+        public void acknowledge(ChatMessage message)
+        {
+            LastSeenMessageList.Entry? entry = message.toLastSeenMessageEntry();
+
+            if (entry != null)
+            {
+                lastSeenMessagesCollector.Add(entry);
+                lastReceivedMessage = null;
+
+                if (pendingAcknowledgments++ > 64)
+                    SendMessageAcknowledgment(this.consumeAcknowledgment());
+            }
         }
 
         /// <summary>
         /// The signable argument names and their values from command
         /// Signature will be used in Vanilla's say, me, msg, teammsg, ban, banip, and kick commands.
         /// https://gist.github.com/kennytv/ed783dd244ca0321bbd882c347892874#signed-command-arguments
+        /// You can find all the commands that need to be signed by searching for "MessageArgumentType.getSignedMessage" in the source code.
+        /// Don't forget to handle the redirected commands, e.g. /tm, /w
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns> List< Argument Name, Argument Value > </returns>
-        private List<Tuple<string, string>> collectCommandArguments(string command)
+        private static List<Tuple<string, string>> CollectCommandArguments(string command)
         {
             List<Tuple<string, string>> needSigned = new();
 
@@ -1527,21 +1722,25 @@ namespace MinecraftClient.Protocol.Handlers
             {
                 /* /me      <action>
                    /say     <message>
-                   /teammsg <message> */
+                   /teammsg <message>
+                   /tm      <message> */
                 if (argStage1[0] == "me")
                     needSigned.Add(new("action", argStage1[1]));
-                else if (argStage1[0] == "say" || argStage1[0] == "teammsg")
+                else if (argStage1[0] == "say" || argStage1[0] == "teammsg" || argStage1[0] == "tm")
                     needSigned.Add(new("message", argStage1[1]));
-                else if (argStage1[0] == "msg" || argStage1[0] == "ban" || argStage1[0] == "ban-ip" || argStage1[0] == "kick")
+                else if (argStage1[0] == "msg" || argStage1[0] == "tell" || argStage1[0] == "w" || 
+                    argStage1[0] == "ban" || argStage1[0] == "ban-ip" || argStage1[0] == "kick")
                 {
                     /* /msg    <targets> <message>
+                       /tell   <targets> <message>
+                       /w      <targets> <message>
                        /ban    <target>  [<reason>]
                        /ban-ip <target>  [<reason>]
                        /kick   <target>  [<reason>] */
                     string[] argStage2 = argStage1[1].Split(' ', 2, StringSplitOptions.None);
                     if (argStage2.Length == 2)
                     {
-                        if (argStage1[0] == "msg")
+                        if (argStage1[0] == "msg" || argStage1[0] == "tell" || argStage1[0] == "w")
                             needSigned.Add(new("message", argStage2[1]));
                         else if (argStage1[0] == "ban" || argStage1[0] == "ban-ip" || argStage1[0] == "kick")
                             needSigned.Add(new("reason", argStage2[1]));
@@ -1552,7 +1751,6 @@ namespace MinecraftClient.Protocol.Handlers
             return needSigned;
         }
 
-        #nullable enable
         /// <summary>
         /// Send a chat command to the server
         /// </summary>
@@ -1571,6 +1769,8 @@ namespace MinecraftClient.Protocol.Handlers
 
             try
             {
+                var acknowledgment = (protocolVersion >= MC_1_19_2_Version) ? this.consumeAcknowledgment() : null;
+
                 List<byte> fields = new();
 
                 // Command: String
@@ -1580,9 +1780,7 @@ namespace MinecraftClient.Protocol.Handlers
                 DateTimeOffset timeNow = DateTimeOffset.UtcNow;
                 fields.AddRange(dataTypes.GetLong(timeNow.ToUnixTimeMilliseconds()));
 
-                List<Tuple<string, string>> needSigned = collectCommandArguments(command); // List< Argument Name, Argument Value >
-                // foreach (var msg in needSigned)
-                //     log.Info("<" + msg.Item1 + ">: " + msg.Item2);
+                List<Tuple<string, string>> needSigned = CollectCommandArguments(command); // List< Argument Name, Argument Value >
                 if (needSigned.Count == 0 || playerKeyPair == null || !CornCraft.SignMessageInCommand)
                 {
                     fields.AddRange(dataTypes.GetLong(0));                    // Salt: Long
@@ -1590,14 +1788,16 @@ namespace MinecraftClient.Protocol.Handlers
                 }
                 else
                 {
-                    string uuid = handler.GetUserUUID()!;
+                    Guid uuid = handler.GetUserUUID();
                     byte[] salt = GenerateSalt();
                     fields.AddRange(salt);                                    // Salt: Long
                     fields.AddRange(dataTypes.GetVarInt(needSigned.Count));   // Signature Length: VarInt
                     foreach (var argument in needSigned)
                     {
                         fields.AddRange(dataTypes.GetString(argument.Item1)); // Argument name: String
-                        byte[] sign = playerKeyPair.PrivateKey.SignMessage(argument.Item2, uuid, timeNow, ref salt);
+                        byte[] sign = (protocolVersion >= MC_1_19_2_Version) ?
+                            playerKeyPair.PrivateKey.SignMessage(argument.Item2, uuid, timeNow, ref salt, acknowledgment!.lastSeen) :
+                            playerKeyPair.PrivateKey.SignMessage(argument.Item2, uuid, timeNow, ref salt);
                         fields.AddRange(dataTypes.GetVarInt(sign.Length));    // Signature length: VarInt
                         fields.AddRange(sign);                                // Signature: Byte Array
                     }
@@ -1605,6 +1805,12 @@ namespace MinecraftClient.Protocol.Handlers
 
                 // Signed Preview: Boolean
                 fields.AddRange(dataTypes.GetBool(false));
+
+                if (protocolVersion >= MC_1_19_2_Version)
+                {
+                    // Message Acknowledgment
+                    fields.AddRange(dataTypes.GetAcknowledgment(acknowledgment!));
+                }
 
                 SendPacket(PacketTypesOut.ChatCommand, fields);
                 return true;
@@ -1625,17 +1831,19 @@ namespace MinecraftClient.Protocol.Handlers
                 return true;
             
             // Process Chat Command - 1.19 and above
-            if (protocolversion >= MC_1_19_Version && message.StartsWith('/'))
+            if (protocolVersion >= MC_1_19_Version && message.StartsWith('/'))
                 return SendChatCommand(message[1..], playerKeyPair);
             
             try
             {
+                var acknowledgment = (protocolVersion >= MC_1_19_2_Version) ? this.consumeAcknowledgment() : null;
+
                 List<byte> fields = new();
 
                 // 	Message: String (up to 256 chars)
                 fields.AddRange(dataTypes.GetString(message));
 
-                if (protocolversion >= MC_1_19_Version)
+                if (protocolVersion >= MC_1_19_Version)
                 {
                     // Timestamp: Instant(Long)
                     DateTimeOffset timeNow = DateTimeOffset.UtcNow;
@@ -1653,14 +1861,22 @@ namespace MinecraftClient.Protocol.Handlers
                         fields.AddRange(salt);
 
                         // Signature Length & Signature: (VarInt) and Byte Array
-                        string uuid = handler.GetUserUUID()!;
-                        byte[] sign = playerKeyPair.PrivateKey.SignMessage(message, uuid, timeNow, ref salt);
+                        Guid uuid = handler.GetUserUUID();
+                        byte[] sign = (protocolVersion >= MC_1_19_2_Version) ?
+                            playerKeyPair.PrivateKey.SignMessage(message, uuid, timeNow, ref salt, acknowledgment!.lastSeen) :
+                            playerKeyPair.PrivateKey.SignMessage(message, uuid, timeNow, ref salt);
                         fields.AddRange(dataTypes.GetVarInt(sign.Length));
                         fields.AddRange(sign);
                     }
 
                     // Signed Preview: Boolean
                     fields.AddRange(dataTypes.GetBool(false));
+
+                    if (protocolVersion >= MC_1_19_2_Version)
+                    {
+                        // Message Acknowledgment
+                        fields.AddRange(dataTypes.GetAcknowledgment(acknowledgment!));
+                    }
                 }
                 SendPacket(PacketTypesOut.ChatMessage, fields);
                 return true;
@@ -1669,7 +1885,6 @@ namespace MinecraftClient.Protocol.Handlers
             catch (System.IO.IOException) { return false; }
             catch (ObjectDisposedException) { return false; }
         }
-        #nullable disable
 
         /// <summary>
         /// Autocomplete text while typing commands
@@ -1739,7 +1954,7 @@ namespace MinecraftClient.Protocol.Handlers
                 return false;
             // Plugin channels were significantly changed between Minecraft 1.12 and 1.13
             // https://wiki.vg/index.php?title=Pre-release_protocol&oldid=14132#Plugin_Channels
-            if (protocolversion >= MC_1_13_Version)
+            if (protocolVersion >= MC_1_13_Version)
             {
                 return SendPluginChannelPacket("minecraft:brand", dataTypes.GetString(brandInfo));
             }
@@ -1771,14 +1986,14 @@ namespace MinecraftClient.Protocol.Handlers
                 fields.Add(chatColors ? (byte)1 : (byte)0);
                 fields.Add(skinParts);
                 fields.AddRange(dataTypes.GetVarInt(mainHand));
-                if (protocolversion >= MC_1_17_Version)
+                if (protocolVersion >= MC_1_17_Version)
                 {
-                    if (protocolversion >= MC_1_18_1_Version)
+                    if (protocolVersion >= MC_1_18_1_Version)
                         fields.Add(0); // 1.18 and above - Enable text filtering. (Always false)
                     else
                         fields.Add(1); // 1.17 and 1.17.1 - Disable text filtering. (Always true)
                 }
-                if (protocolversion >= MC_1_18_1_Version)
+                if (protocolVersion >= MC_1_18_1_Version)
                     fields.Add(1); // 1.18 and above - Allow server listings
                 SendPacket(PacketTypesOut.ClientSettings, fields);
             }
@@ -1876,7 +2091,7 @@ namespace MinecraftClient.Protocol.Handlers
                 // Is player Sneaking (Only 1.16 and above)
                 // Currently hardcoded to false
                 // TODO: Update to reflect the real player state
-                if (protocolversion >= MC_1_16_Version)
+                if (protocolVersion >= MC_1_16_Version)
                     fields.AddRange(dataTypes.GetBool(false));
 
                 SendPacket(PacketTypesOut.InteractEntity, fields);
@@ -1902,7 +2117,7 @@ namespace MinecraftClient.Protocol.Handlers
                 // Is player Sneaking (Only 1.16 and above)
                 // Currently hardcoded to false
                 // TODO: Update to reflect the real player state
-                if (protocolversion >= MC_1_16_Version)
+                if (protocolVersion >= MC_1_16_Version)
                     fields.AddRange(dataTypes.GetBool(false));
                 SendPacket(PacketTypesOut.InteractEntity, fields);
                 return true;
@@ -1922,7 +2137,7 @@ namespace MinecraftClient.Protocol.Handlers
                 // Is player Sneaking (Only 1.16 and above)
                 // Currently hardcoded to false
                 // TODO: Update to reflect the real player state
-                if (protocolversion >= MC_1_16_Version)
+                if (protocolVersion >= MC_1_16_Version)
                     fields.AddRange(dataTypes.GetBool(false));
                 SendPacket(PacketTypesOut.InteractEntity, fields);
                 return true;
@@ -1942,7 +2157,7 @@ namespace MinecraftClient.Protocol.Handlers
             {
                 List<byte> packet = new List<byte>();
                 packet.AddRange(dataTypes.GetVarInt(hand));
-                if (protocolversion >= MC_1_19_Version)
+                if (protocolVersion >= MC_1_19_Version)
                     packet.AddRange(dataTypes.GetVarInt(sequenceId));
                 SendPacket(PacketTypesOut.UseItem, packet);
                 return true;
@@ -1960,7 +2175,7 @@ namespace MinecraftClient.Protocol.Handlers
                 packet.AddRange(dataTypes.GetVarInt(status));
                 packet.AddRange(dataTypes.GetLocation(location));
                 packet.AddRange(dataTypes.GetVarInt(dataTypes.GetBlockFace(face)));
-                if (protocolversion >= MC_1_19_Version)
+                if (protocolVersion >= MC_1_19_Version)
                     packet.AddRange(dataTypes.GetVarInt(sequenceId));
                 SendPacket(PacketTypesOut.PlayerDigging, packet);
                 return true;
@@ -1972,7 +2187,7 @@ namespace MinecraftClient.Protocol.Handlers
 
         public bool SendPlayerBlockPlacement(int hand, Location location, Direction face, int sequenceId)
         {
-            if (protocolversion < MC_1_14_Version)
+            if (protocolVersion < MC_1_14_Version)
                 return false; // NOT IMPLEMENTED for older MC versions
             try
             {
@@ -1984,7 +2199,7 @@ namespace MinecraftClient.Protocol.Handlers
                 packet.AddRange(dataTypes.GetFloat(0.5f)); // cursorY
                 packet.AddRange(dataTypes.GetFloat(0.5f)); // cursorZ
                 packet.Add(0); // insideBlock = false;
-                if (protocolversion >= MC_1_19_Version)
+                if (protocolVersion >= MC_1_19_Version)
                     packet.AddRange(dataTypes.GetVarInt(sequenceId));
                 SendPacket(PacketTypesOut.PlayerBlockPlacement, packet);
                 return true;
@@ -2047,13 +2262,13 @@ namespace MinecraftClient.Protocol.Handlers
                 packet.Add((byte)windowId); // Window ID
 
                 // 1.18+
-                if (protocolversion >= MC_1_18_1_Version)
+                if (protocolVersion >= MC_1_18_1_Version)
                 {
                     packet.AddRange(dataTypes.GetVarInt(stateId)); // State ID
                     packet.AddRange(dataTypes.GetShort((short)slotId)); // Slot ID
                 }
                 // 1.17.1
-                else if (protocolversion == MC_1_17_1_Version)
+                else if (protocolVersion == MC_1_17_1_Version)
                 {
                     packet.AddRange(dataTypes.GetShort((short)slotId)); // Slot ID
                     packet.AddRange(dataTypes.GetVarInt(stateId)); // State ID
@@ -2066,13 +2281,13 @@ namespace MinecraftClient.Protocol.Handlers
 
                 packet.Add(button); // Button
 
-                if (protocolversion < MC_1_17_Version)
+                if (protocolVersion < MC_1_17_Version)
                     packet.AddRange(dataTypes.GetShort(actionNumber));
 
                 packet.AddRange(dataTypes.GetVarInt(mode)); // MC 1.9+, Mode
 
                 // 1.17+  Array of changed slots
-                if (protocolversion >= MC_1_17_Version)
+                if (protocolVersion >= MC_1_17_Version)
                 {
                     packet.AddRange(dataTypes.GetVarInt(changedSlots.Count)); // Length of the array
                     foreach (var slot in changedSlots)
@@ -2094,7 +2309,7 @@ namespace MinecraftClient.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool SendCreativeInventoryAction(int slot, ItemType itemType, int count, Dictionary<string, object> nbt)
+        public bool SendCreativeInventoryAction(int slot, ItemType itemType, int count, Dictionary<string, object>? nbt)
         {
             try
             {
@@ -2176,7 +2391,7 @@ namespace MinecraftClient.Protocol.Handlers
         
         public bool UpdateCommandBlock(Location location, string command, CommandBlockMode mode, CommandBlockFlags flags)
         {
-            if (protocolversion <= MC_1_13_Version)
+            if (protocolVersion <= MC_1_13_Version)
             {
                 try
                 {
@@ -2214,7 +2429,7 @@ namespace MinecraftClient.Protocol.Handlers
         public bool SelectTrade(int selectedSlot)
         {
             // MC 1.13 or greater
-            if (protocolversion >= MC_1_13_Version)
+            if (protocolVersion >= MC_1_13_Version)
             {
                 try
                 {

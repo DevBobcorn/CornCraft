@@ -1,9 +1,7 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Threading;
-using UnityEngine;
-
-using MinecraftClient.Rendering;
 
 namespace MinecraftClient.Mapping
 {
@@ -15,14 +13,12 @@ namespace MinecraftClient.Mapping
         /// <summary>
         /// The chunks contained into the Minecraft world
         /// </summary>
-        private Dictionary<int, Dictionary<int, ChunkColumn>> chunks = new Dictionary<int, Dictionary<int, ChunkColumn>>();
-
-        private Dictionary<Vector3Int, ChunkRender> chunkRenders = new Dictionary<Vector3Int, ChunkRender>();
+        private Dictionary<int, Dictionary<int, ChunkColumn>> chunks = new();
         
         /// <summary>
         /// The dimension info of the world
         /// </summary>
-        private static Dimension dimension = new Dimension();
+        private static Dimension dimension = new();
 
         /// <summary>
         /// Lock for thread safety
@@ -39,9 +35,9 @@ namespace MinecraftClient.Mapping
         /// Read, set or unload the specified chunk column
         /// </summary>
         /// <param name="chunkX">ChunkColumn X</param>
-        /// <param name="chunkY">ChunkColumn Y</param>
+        /// <param name="chunkZ">ChunkColumn Z</param>
         /// <returns>chunk at the given location</returns>
-        public ChunkColumn this[int chunkX, int chunkZ]
+        public ChunkColumn? this[int chunkX, int chunkZ]
         {
             get
             {
@@ -117,7 +113,7 @@ namespace MinecraftClient.Mapping
         /// </summary>
         /// <param name="name">	The name of the dimension type</param>
         /// <param name="nbt">The dimension type (NBT Tag Compound)</param>
-        public static void SetDimension(string name, Dictionary<string, object> nbt)
+        public static void SetDimension(string? name, Dictionary<string, object>? nbt)
         {
             // will change in 1.19 and above
             dimension = new Dimension(name, nbt);
@@ -137,12 +133,12 @@ namespace MinecraftClient.Mapping
         /// </summary>
         /// <param name="location">Location to retrieve chunk column</param>
         /// <returns>The chunk column</returns>
-        public ChunkColumn GetChunkColumn(Location location)
+        public ChunkColumn? GetChunkColumn(Location location)
         {
             return this[location.ChunkX, location.ChunkZ];
         }
 
-        public ChunkColumn GetChunkColumn(int chunkX, int chunkZ)
+        public ChunkColumn? GetChunkColumn(int chunkX, int chunkZ)
         {
             return this[chunkX, chunkZ];
         }
@@ -156,10 +152,10 @@ namespace MinecraftClient.Mapping
         /// <returns>Block at specified location or Air if the location is not loaded</returns>
         public Block GetBlock(Location location)
         {
-            ChunkColumn column = GetChunkColumn(location);
+            var column = GetChunkColumn(location);
             if (column != null)
             {
-                Chunk chunk = column.GetChunk(location);
+                var chunk = column.GetChunk(location);
                 if (chunk != null)
                     return chunk.GetBlock(location);
             }
@@ -218,10 +214,10 @@ namespace MinecraftClient.Mapping
         /// <param name="block">Block to set</param>
         public void SetBlock(Location location, Block block)
         {
-            ChunkColumn column = this[location.ChunkX, location.ChunkZ];
-            if (column != null)
+            var column = this[location.ChunkX, location.ChunkZ];
+            if (column != null && column.ColumnSize >= location.ChunkY)
             {
-                Chunk chunk = column[location.ChunkY];
+                var chunk = column.GetChunk(location);
                 if (chunk == null)
                     column[location.ChunkY] = chunk = new Chunk(this);
                 chunk[location.ChunkBlockX, location.ChunkBlockY, location.ChunkBlockZ] = block;
@@ -238,6 +234,7 @@ namespace MinecraftClient.Mapping
             try
             {
                 chunks = new Dictionary<int, Dictionary<int, ChunkColumn>>();
+                chunkCnt = chunkLoadNotCompleted = 0;
             }
             finally
             {

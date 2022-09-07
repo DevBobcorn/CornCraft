@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Mathematics;
 
 namespace MinecraftClient.Rendering
@@ -70,15 +71,6 @@ namespace MinecraftClient.Rendering
             };
         }
 
-        public static uint[] GetQuad(uint offset)
-        {
-            return new uint[]
-            {
-                0U + offset, 3U + offset, 2U + offset, // MC: +X <=> Unity: +Z
-                0U + offset, 1U + offset, 3U + offset
-            };
-        }
-
         private const int TexturesInALine = 32;
         private const float One = 1.0F / TexturesInALine; // Size of a single block texture
 
@@ -146,6 +138,36 @@ namespace MinecraftClient.Rendering
                 if (uv) buffer.uv = ArrayUtil.GetConcated(buffer.uv, GetUVs(type));
                 buffer.offset += 4;
             }
+        }
+
+        private static bool prepareFlag = PrepareGeometryData();
+
+        private static Dictionary<int, float3[]> vertexArrayTable = new();
+
+        private static bool PrepareGeometryData()
+        {
+            for (int cullFlags = 0b000000;cullFlags <= 0b111111;cullFlags++)
+            {
+                int vertexCount = 0;
+                int triIdxCount = 0;
+
+                for (int i = 0;i < 6;i++)
+                {
+                    if ((cullFlags & (1 << i)) != 0) // This face(side) presents
+                    {
+                        vertexCount += 4;
+                        triIdxCount += 6;
+                    }
+                }
+
+                // Prepare vertex & triIndex arrays
+                var verts  = new float3[vertexCount];
+                var tris   = new uint[triIdxCount];
+
+            }
+
+            return true;
+
         }
 
     }
