@@ -7,7 +7,7 @@ using MinecraftClient.Rendering;
 
 namespace MinecraftClient.Resource
 {
-    public class BlockTextureManager
+    public static class BlockTextureManager
     {
         private static Dictionary<ResourceLocation, int> blockAtlasTable = new Dictionary<ResourceLocation, int>();
         private static Dictionary<RenderType, int> plcboAtlasTable       = new Dictionary<RenderType, int>();
