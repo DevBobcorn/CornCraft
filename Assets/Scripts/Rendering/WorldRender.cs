@@ -629,7 +629,6 @@ namespace MinecraftClient.Rendering
                 var chunkData = game?.GetWorld()?[chunkX, chunkZ];
                 if (chunkData is null) return;
                 
-                
                 var column = GetChunkColumn(loc.ChunkX, loc.ChunkZ, false);
 
                 if (column is not null) // Queue this chunk to rebuild list...
@@ -677,12 +676,16 @@ namespace MinecraftClient.Rendering
                 foreach (var loc in e.locations)
                 {
                     int chunkX = loc.ChunkX, chunkY = loc.ChunkY, chunkZ = loc.ChunkZ;
+
+                    var chunkData = world[chunkX, chunkZ];
+                    if (chunkData is null) continue;
+                    
                     var column = GetChunkColumn(loc.ChunkX, loc.ChunkZ, false);
 
                     if (column is not null) // Queue this chunk to rebuild list...
                     {   // Create the chunk render object if not present (previously empty)
                         var chunk = column.GetChunk(chunkY, true);
-                        world[chunkX, chunkZ].ChunkMask |= 1 << chunkY;
+                        chunkData.ChunkMask |= 1 << chunkY;
 
                         // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                         QueueChunkBuild(chunk);

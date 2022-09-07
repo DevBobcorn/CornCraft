@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Net.Sockets;
 using MinecraftClient.Mapping;
-using MinecraftClient.Crypto;
 using MinecraftClient.Inventory;
 using MinecraftClient.Mapping.EntityPalettes;
 using MinecraftClient.Inventory.ItemPalettes;
@@ -400,13 +397,13 @@ namespace MinecraftClient.Protocol.Handlers
             Double entityX = ReadNextDouble(cache);
             Double entityY = ReadNextDouble(cache);
             Double entityZ = ReadNextDouble(cache);
-            byte entityYaw = ReadNextByte(cache);
             byte entityPitch = ReadNextByte(cache);
+            byte entityYaw = ReadNextByte(cache);
 
             int metadata = -1;
             if (living)
             {
-                if (protocolversion >= ProtocolMinecraft.MC_1_18_2_Version)
+                if (protocolversion == ProtocolMinecraft.MC_1_18_2_Version)
                     entityYaw = ReadNextByte(cache);
                 else
                     entityPitch = ReadNextByte(cache);
@@ -415,15 +412,17 @@ namespace MinecraftClient.Protocol.Handlers
             {
                 if (protocolversion >= ProtocolMinecraft.MC_1_19_Version)
                 {
-                    metadata = ReadNextVarInt(cache);
                     entityYaw = ReadNextByte(cache);
+                    metadata = ReadNextVarInt(cache);
                 }
                 else
                     metadata = ReadNextInt(cache);
             }
+
             short velocityX = ReadNextShort(cache);
             short velocityY = ReadNextShort(cache);
             short velocityZ = ReadNextShort(cache);
+
             return new Entity(entityID, entityType, new Location(entityX, entityY, entityZ), entityYaw, entityPitch, metadata);
         }
 
@@ -1075,14 +1074,58 @@ namespace MinecraftClient.Protocol.Handlers
             return result.ToArray();
         }
 
+        #nullable enable
         /// <summary>
         /// Convert a byte array to an hexadecimal string representation (for debugging purposes)
         /// </summary>
         /// <param name="bytes">Byte array</param>
         /// <returns>String representation</returns>
-        public string ByteArrayToString(byte[] bytes)
+        public string ByteArrayToString(byte[]? bytes)
         {
-            return BitConverter.ToString(bytes).Replace("-", " ");
+            if (bytes == null)
+                return "null";
+            else
+                return BitConverter.ToString(bytes).Replace("-", " ");
+        }
+        #nullable disable
+
+        /// <summary>
+        /// Write LastSeenMessageList
+        /// </summary>
+        /// <param name="msgList">Message.LastSeenMessageList</param>
+        /// <returns>Message.LastSeenMessageList Packet Data</returns>
+        public byte[] GetLastSeenMessageList(Message.LastSeenMessageList msgList)
+        {
+            List<byte> fields = new List<byte>();
+            fields.AddRange(GetVarInt(msgList.entries.Length));
+            foreach (Message.LastSeenMessageList.Entry entry in msgList.entries)
+            {
+                fields.AddRange(entry.profileId.ToBigEndianBytes());
+                fields.AddRange(GetVarInt(entry.lastSignature.Length));
+                fields.AddRange(entry.lastSignature);
+            }
+            return fields.ToArray();
+        }
+
+        /// <summary>
+        /// Write LastSeenMessageList.Acknowledgment
+        /// </summary>
+        /// <param name="ack">Acknowledgment</param>
+        /// <returns>Acknowledgment Packet Data</returns>
+        public byte[] GetAcknowledgment(Message.LastSeenMessageList.Acknowledgment ack)
+        {
+            List<byte> fields = new List<byte>();
+            fields.AddRange(GetLastSeenMessageList(ack.lastSeen));
+            if (ack.lastReceived == null)
+                fields.AddRange(GetBool(false));
+            else
+            {
+                fields.AddRange(GetBool(true));
+                fields.AddRange(ack.lastReceived.profileId.ToBigEndianBytes());
+                fields.AddRange(GetVarInt(ack.lastReceived.lastSignature.Length));
+                fields.AddRange(ack.lastReceived.lastSignature);
+            }
+            return fields.ToArray();
         }
     }
 }

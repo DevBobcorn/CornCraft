@@ -13,6 +13,7 @@ using MinecraftClient.Protocol;
 using MinecraftClient.Protocol.Keys;
 using MinecraftClient.Protocol.Handlers;
 using MinecraftClient.Protocol.Handlers.Forge;
+using MinecraftClient.Protocol.Message;
 using MinecraftClient.Proxy;
 using MinecraftClient.Rendering;
 using MinecraftClient.Resource;
@@ -49,12 +50,14 @@ namespace MinecraftClient
         private float playerYaw;
         private float playerPitch;
         private double motionY;
+        private CancellationTokenSource chunkProcessCancelSource = new();
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
         public Location GetCurrentLocation() { return location; }
 
         public float GetYaw() { return playerYaw; }
         public float GetPitch() { return playerPitch; }
         public World GetWorld() { return world; }
+        public CancellationToken GetChunkProcessCancelToken() { return chunkProcessCancelSource.Token; }
         #endregion
 
         #region Login Information
@@ -62,8 +65,8 @@ namespace MinecraftClient
         private int port;
         private int protocolVersion;
         private string username;
-        private string uuid;
-        private Guid guid; // Same as uuid, saved for convenience
+        private string uuidStr;
+        private Guid uuid;
         private string sessionId;
         private PlayerKeyPair playerKeyPair;
         private bool isSupportPreviewsChat;
@@ -71,7 +74,8 @@ namespace MinecraftClient
         public int GetServerPort() { return port; }
         public int GetProtocolVersion() { return protocolVersion; }
         public string GetUsername() { return username; }
-        public string GetUserUUID() { return uuid; }
+        public Guid GetUserUUID() { return uuid; }
+        public string GetUserUUIDStr() { return uuidStr; }
         public string GetSessionID() { return sessionId; }
         #endregion
 
@@ -213,7 +217,8 @@ namespace MinecraftClient
 
         private bool resourceLoaded = false, preparing = false;
 
-        public void Login(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo forgeInfo)
+        #nullable enable
+        public void Login(string user, string uuid, string sessionID, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo)
         {
             if (preparing)
                 return;
@@ -221,7 +226,9 @@ namespace MinecraftClient
             preparing = true;
 
             this.sessionId = sessionID;
-            this.uuid = uuid;
+            // TODO this.uuid = new Guid(uuid);
+            // TODO this.uuidStr = uuid;
+            Debug.Log("Passed uuid: " + uuid);
             this.username = user;
             this.host = serverIp;
             this.port = port;
@@ -231,7 +238,7 @@ namespace MinecraftClient
             StartCoroutine(StartClient(user, uuid, sessionID, playerKeyPair, serverIp, port, protocol, forgeInfo));
         }
 
-        IEnumerator StartClient(string user, string uuid, string sessionID, PlayerKeyPair playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo forgeInfo)
+        IEnumerator StartClient(string user, string uuid, string sessionID, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo)
         {
             var wait = new WaitForSecondsRealtime(0.1F);
 
@@ -241,7 +248,12 @@ namespace MinecraftClient
             
             var resourceVersion = string.Empty;
 
-            if (protocolVersion >= ProtocolMinecraft.MC_1_17_Version)
+            if (protocolVersion >= ProtocolMinecraft.MC_1_19_Version)
+            {   // Treat 1.18.X as 1.17.X because there ain't a single block changed in 1.18
+                Block.Palette = new Palette119();
+                resourceVersion = "1.19.2";
+            }
+            else if (protocolVersion >= ProtocolMinecraft.MC_1_17_Version)
             {   // Treat 1.18.X as 1.17.X because there ain't a single block changed in 1.18
                 Block.Palette = new Palette117();
                 resourceVersion = "1.17.1";
@@ -372,6 +384,7 @@ namespace MinecraftClient
             }
 
         }
+        #nullable disable
 
         /// <summary>
         /// Called ~20 times per second by the protocol handler (on net read thread)
@@ -383,7 +396,6 @@ namespace MinecraftClient
                 if (chatQueue.Count > 0 && nextMessageSendTime < DateTime.Now)
                 {
                     string text = chatQueue.Dequeue();
-                    Debug.Log("Sending text: " + text);
                     handler.SendChatMessage(text, playerKeyPair);
                     nextMessageSendTime = DateTime.Now + TimeSpan.FromSeconds(1);
                 }
@@ -531,7 +543,9 @@ namespace MinecraftClient
             PrepareDisconnect();
 
             // Clear world data
+            chunkProcessCancelSource.Cancel();
             world.Clear();
+            chunkProcessCancelSource = new();
 
             // Go back to login scene
             Loom.QueueOnMainThread(() => {
@@ -732,6 +746,17 @@ namespace MinecraftClient
         }
 
         /// <summary>
+        /// Clear all tasks
+        /// </summary>
+        public void ClearTasks()
+        {
+            lock (threadTasksLock)
+            {
+                threadTasks.Clear();
+            }
+        }
+
+        /// <summary>
         /// Check if running on a different thread and InvokeOnNetReadThread is required
         /// </summary>
         /// <returns>True if calling thread is not the main thread</returns>
@@ -806,7 +831,7 @@ namespace MinecraftClient
 
         public int GetOwnLatency()
         {
-            return onlinePlayers.ContainsKey(guid) ? onlinePlayers[guid].Ping : 0;
+            return onlinePlayers.ContainsKey(uuid) ? onlinePlayers[uuid].Ping : 0;
         }
 
         #nullable enable
@@ -1540,13 +1565,18 @@ namespace MinecraftClient
         /// </summary>
         public void OnRespawn()
         {
+            ClearTasks();
+
             if (worldAndMovementsRequested)
             {
                 worldAndMovementsRequested = false;
                 Debug.Log(Translations.Get("extra.terrainandmovement_enabled"));
             }
 
+            chunkProcessCancelSource.Cancel();
             world.Clear();
+            chunkProcessCancelSource = new();
+            
             entities.Clear();
             ClearInventories();
         }
@@ -1630,20 +1660,18 @@ namespace MinecraftClient
             List<string> links = new();
             string messageText;
 
-            if (message.isJson)
+            if (message.isSignedChat)
             {
-                if (message.isSignedChat)
-                {
-                    if (!CornCraft.ShowIllegalSignedChat && !message.isSystemChat && !(bool)message.isSignatureLegal!)
-                        return;
-                    messageText = ChatParser.ParseSignedChat(message, links);
-                }
-                else
-                    messageText = ChatParser.ParseText(message.content, links);
+                if (!CornCraft.ShowIllegalSignedChat && !message.isSystemChat && !(bool)message.isSignatureLegal!)
+                    return;
+                messageText = ChatParser.ParseSignedChat(message, links);
             }
             else
             {
-                messageText = message.content;
+                if (message.isJson)
+                    messageText = ChatParser.ParseText(message.content, links);
+                else
+                    messageText = message.content;
             }
 
             Loom.QueueOnMainThread(
@@ -1775,8 +1803,8 @@ namespace MinecraftClient
             if (player.Name == username)
             {
                 // 1.19+ offline server is possible to return different uuid
-                this.uuid = player.UUID.ToString().Replace("-", string.Empty);
-                this.guid = player.UUID;
+                this.uuidStr = player.UUID.ToString().Replace("-", string.Empty);
+                this.uuid = player.UUID;
             }
 
             lock (onlinePlayers)

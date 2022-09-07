@@ -8,14 +8,9 @@ namespace MinecraftClient.Mapping
     /// </summary>
     public class Chunk
     {
-        private World world;
+        private readonly World world;
 
         public Chunk(World parent)
-        {
-            world = parent;
-        }
-
-        public void SetParent(World parent)
         {
             world = parent;
         }

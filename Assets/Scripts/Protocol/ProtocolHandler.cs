@@ -112,7 +112,7 @@ namespace MinecraftClient.Protocol
         #nullable disable
 
         // MC 1.13+ only now...
-        private static int[] supportedVersions = { 393, 401, 404, 477, 480, 485, 490, 498, 573, 575, 578, 735, 736, 751, 753, 754, 755, 756, 757, 758, 759 }; // TODO 1.19.2 (760)
+        private static int[] supportedVersions = { 393, 401, 404, 477, 480, 485, 490, 498, 573, 575, 578, 735, 736, 751, 753, 754, 755, 756, 757, 758, 759, 760 };
 
         public static bool IsProtocolSupported(int version)
         {

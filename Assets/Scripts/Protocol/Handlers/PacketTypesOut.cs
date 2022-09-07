@@ -57,9 +57,9 @@
         GenerateStructure, // Added in 1.16
         SetDisplayedRecipe, // Added in 1.16.2
         SetRecipeBookState, // Added in 1.16.2
-        Unknown, //  For old version packet that have been removed and not used by mcc 
-        // 1.19 Additions
-        ChatCommand,
+        Unknown, //  For old version packet that have been removed and not used by mcc
+        ChatCommand, // Added in 1.19
         ChatPreview,
+        MessageAcknowledgment
     }
 }

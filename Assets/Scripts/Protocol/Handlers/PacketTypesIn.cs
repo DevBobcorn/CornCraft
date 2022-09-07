@@ -121,11 +121,13 @@
         UpdateEntityNBT, // For 1.8 or below
         Unknown, // For old version packet that have been removed and not used by mcc 
         UpdateSimulationDistance,
-        // 1.19 Additions
-        BlockChangedAck,
+        BlockChangedAck, // Added in 1.19
         ChatPreview,
         ServerData,
         SetDisplayChatPreview,
         SystemChat,
+        ChatSuggestions,
+        HideMessage,
+        MessageHeader
     }
 }
