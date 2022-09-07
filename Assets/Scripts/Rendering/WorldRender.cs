@@ -40,7 +40,10 @@ namespace MinecraftClient.Rendering
 
         public string GetDebugInfo()
         {
-            return "QueC: " + chunksToBeBuild.Count + "\t" + "BldC: " + chunksBeingBuilt.Count;
+            lock (chunksBeingBuilt)
+            {
+                return $"QueC: {chunksToBeBuild.Count}\t BldC: {chunksBeingBuilt.Count}";
+            }
         }
 
         #region Chunk management
@@ -194,7 +197,12 @@ namespace MinecraftClient.Rendering
             }
 
             var ts    = chunkRender.TokenSource = new CancellationTokenSource();
-            chunksBeingBuilt.Add(chunkRender);
+
+            lock (chunksBeingBuilt)
+            {
+                chunksBeingBuilt.Add(chunkRender);
+            }
+
             chunkRender.State = BuildState.Building;
             
             Task.Factory.StartNew(() => {
@@ -220,7 +228,11 @@ namespace MinecraftClient.Rendering
                                 if (ts.IsCancellationRequested)
                                 {
                                     //Debug.Log(chunkRender.ToString() + " cancelled. (Building Mesh)");
-                                    chunksBeingBuilt.Remove(chunkRender);
+                                    lock (chunksBeingBuilt)
+                                    {
+                                        chunksBeingBuilt.Remove(chunkRender);
+                                    }
+                                    
                                     chunkRender.State = BuildState.Cancelled;
                                     return;
                                 }
@@ -270,7 +282,10 @@ namespace MinecraftClient.Rendering
                                 //Debug.Log(chunkRender?.ToString() + " cancelled. (Skipping Empty Mesh)");
                                 if (chunkRender is not null)
                                 {
-                                    chunksBeingBuilt.Remove(chunkRender);
+                                    lock (chunksBeingBuilt)
+                                    {
+                                        chunksBeingBuilt.Remove(chunkRender);
+                                    }
                                     chunkRender.State = BuildState.Cancelled;
                                 }
                                 return;
@@ -281,7 +296,10 @@ namespace MinecraftClient.Rendering
 
                             chunkRender.ClearCollider();
 
-                            chunksBeingBuilt.Remove(chunkRender);
+                            lock (chunksBeingBuilt)
+                            {
+                                chunksBeingBuilt.Remove(chunkRender);
+                            }
                             chunkRender.State = BuildState.Ready;
 
                         });
@@ -295,7 +313,10 @@ namespace MinecraftClient.Rendering
                                 //Debug.Log(chunkRender?.ToString() + " cancelled. (Applying Mesh)");
                                 if (chunkRender is not null)
                                 {
-                                    chunksBeingBuilt.Remove(chunkRender);
+                                    lock (chunksBeingBuilt)
+                                    {
+                                        chunksBeingBuilt.Remove(chunkRender);
+                                    }
                                     chunkRender.State = BuildState.Cancelled;
                                 }
                                 return;
@@ -393,7 +414,10 @@ namespace MinecraftClient.Rendering
 
                             // TODO Collider Mesh
 
-                            chunksBeingBuilt.Remove(chunkRender);
+                            lock (chunksBeingBuilt)
+                            {
+                                chunksBeingBuilt.Remove(chunkRender);
+                            }
                             chunkRender.State = BuildState.Ready;
 
                         });
@@ -406,7 +430,10 @@ namespace MinecraftClient.Rendering
                     // Remove chunk from list
                     if (chunkRender is not null)
                     {
-                        chunksBeingBuilt.Remove(chunkRender);
+                        lock (chunksBeingBuilt)
+                        {
+                            chunksBeingBuilt.Remove(chunkRender);
+                        }
                         chunkRender.State = BuildState.Cancelled;
                     }
                 }
@@ -553,7 +580,10 @@ namespace MinecraftClient.Rendering
             foreach (var chunk in chunksBeingBuilt)
                 chunk.TokenSource?.Cancel();
             
-            chunksBeingBuilt.Clear();
+            lock (chunksBeingBuilt)
+            {
+                chunksBeingBuilt.Clear();
+            }
 
             // Clear all chunk columns in world
             var xs = columns.Keys.ToArray();
@@ -703,12 +733,18 @@ namespace MinecraftClient.Rendering
         }
 
         public const int BuildCountLimit = 8;
-        private float operationCooldown = 0;
-        private int operationAction = 0;
+        private float operationCooldown  = 0;
+        private int   operationAction    = 0;
 
         void FixedUpdate()
         {
-            int newCount = BuildCountLimit - chunksBeingBuilt.Count;
+            int newCount;
+
+            lock (chunksBeingBuilt)
+            {
+                newCount = BuildCountLimit - chunksBeingBuilt.Count;
+            }
+
             // Build chunks in queue...
             if (newCount > 0)
             {

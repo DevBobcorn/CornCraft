@@ -148,7 +148,7 @@ namespace MinecraftClient.Resource
                         // Load the state model definition of this block
                         string statePath = assetsDir.FullName + '/' + blockId.nameSpace + "/blockstates/" + blockId.path + ".json";
                         manager.stateModelLoader.LoadBlockStateModel(manager, blockId, statePath);
-                        Debug.Log($"Building model for block {blockId}");
+                        //Debug.Log($"Building model for block {blockId}");
                         yield return null;
                     }
 
