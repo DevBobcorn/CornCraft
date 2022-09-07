@@ -311,26 +311,22 @@ namespace MinecraftClient.Protocol.Handlers
                             int worldCount = dataTypes.ReadNextVarInt(packetData);    // Dimension Count (World Count) - 1.16 and above
                             for (int i = 0; i < worldCount; i++)
                                 dataTypes.ReadNextString(packetData);                 // Dimension Names (World Names) - 1.16 and above
-                            dataTypes.ReadNextNbt(packetData);                        // Registry Codec (Dimension Codec) - 1.16 and above
+                            var registryCodec = dataTypes.ReadNextNbt(packetData);    // Registry Codec (Dimension Codec) - 1.16 and above
+                                World.StoreDimensionList(registryCodec);
                         }
 
-                        string? currentDimensionName = null;
-                        Dictionary<string, object>? currentDimensionType = null;
-
                         // Current dimension
-                        //   NBT Tag Compound: 1.16.2 and above
+                        //   String: 1.19 and above
+                        //   NBT Tag Compound: [1.16.2 to 1.18.2]
                         //   String identifier: 1.16 and 1.16.1
                         //   varInt: [1.9.1 to 1.15.2]
                         //   byte: below 1.9.1
                         if (protocolVersion >= MC_1_16_Version)
                         {
                             if (protocolVersion >= MC_1_19_Version)
-                            {
-                                dataTypes.ReadNextString(packetData); // Dimension Type: Identifier
-                                currentDimensionType = new Dictionary<string, object>();
-                            }
+                                dataTypes.ReadNextString(packetData);     // Dimension Type: Identifier
                             else if (protocolVersion >= MC_1_16_2_Version)
-                                currentDimensionType = dataTypes.ReadNextNbt(packetData); // Dimension Type: NBT Tag Compound
+                                dataTypes.ReadNextNbt(packetData);        // Dimension Type: NBT Tag Compound
                             else
                                 dataTypes.ReadNextString(packetData);
                             this.currentDimension = 0;
@@ -342,11 +338,11 @@ namespace MinecraftClient.Protocol.Handlers
                             dataTypes.ReadNextByte(packetData);           // Difficulty - 1.13 and below
                         
                         if (protocolVersion >= MC_1_16_Version)
-                            currentDimensionName = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
-                        
-                        if (protocolVersion >= MC_1_16_2_Version)
-                            World.SetDimension(currentDimensionName, currentDimensionType);
-                        
+                        {
+                            string dimensionName = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
+                            World.SetDimension(dimensionName);
+                        }
+
                         if (protocolVersion >= MC_1_15_Version)
                             dataTypes.ReadNextLong(packetData);           // Hashed world seed - 1.15 and above
 
@@ -356,7 +352,7 @@ namespace MinecraftClient.Protocol.Handlers
                             dataTypes.ReadNextByte(packetData);           // Max Players - 1.16.1 and below
 
                         if (protocolVersion < MC_1_16_Version)
-                            dataTypes.ReadNextString(packetData);         // Level Type - 1.15 and below
+                            dataTypes.SkipNextString(packetData);         // Level Type - 1.15 and below
                         if (protocolVersion >= MC_1_14_Version)
                             dataTypes.ReadNextVarInt(packetData);         // View distance - 1.14 and above
                         if (protocolVersion >= MC_1_18_1_Version)
@@ -377,7 +373,7 @@ namespace MinecraftClient.Protocol.Handlers
                             bool hasDeathLocation = dataTypes.ReadNextBool(packetData); // Has death location
                             if (hasDeathLocation)
                             {
-                                dataTypes.ReadNextString(packetData);     // Death dimension name: Identifier
+                                dataTypes.SkipNextString(packetData);     // Death dimension name: Identifier
                                 dataTypes.ReadNextLocation(packetData);   // Death location
                             }
                         }
@@ -427,7 +423,7 @@ namespace MinecraftClient.Protocol.Handlers
                             byte[] messageSignature = dataTypes.ReadNextByteArray(packetData);
 
                             bool verifyResult;
-                            if (senderUUID.ToString().Replace("-", String.Empty) == handler.GetUserUUIDStr())
+                            if (senderUUID == handler.GetUserUUID())
                                 verifyResult = true;
                             else
                             {
@@ -470,19 +466,19 @@ namespace MinecraftClient.Protocol.Handlers
                             string? targetName = dataTypes.ReadNextBool(packetData) ? dataTypes.ReadNextString(packetData) : null;
 
                             bool verifyResult;
-                            if (senderUUID.ToString().Replace("-", String.Empty) == handler.GetUserUUIDStr())
+                            if (senderUUID == handler.GetUserUUID())
                                 verifyResult = true;
                             else
                             {
                                 PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
-                                if (player == null)
+                                if (player == null || !player.IsMessageChainLegal())
                                     verifyResult = false;
                                 else
                                 {
                                     bool lastVerifyResult = player.IsMessageChainLegal();
                                     verifyResult = player.VerifyMessage(signedChat, timestamp, salt, ref headerSignature, ref precedingSignature, lastSeenMessages);
                                     if (lastVerifyResult && !verifyResult)
-                                        Debug.Log("Player {player.DisplayName} message chains broken!");
+                                        Debug.LogWarning("Player {player.DisplayName}'s message chain is broken!");
                                 }
                             }
 
@@ -509,49 +505,44 @@ namespace MinecraftClient.Protocol.Handlers
                             byte[] bodyDigest = dataTypes.ReadNextByteArray(packetData);
 
                             bool verifyResult;
-                            if (senderUUID.ToString().Replace("-", String.Empty) == handler.GetUserUUIDStr())
+                            if (senderUUID == handler.GetUserUUID())
                                 verifyResult = true;
                             else
                             {
                                 PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
-                                if (player == null)
+                                if (player == null || !player.IsMessageChainLegal())
                                     verifyResult = false;
                                 else
                                 {
                                     bool lastVerifyResult = player.IsMessageChainLegal();
                                     verifyResult = player.VerifyMessageHead(ref precedingSignature, ref headerSignature, ref bodyDigest);
                                     if (lastVerifyResult && !verifyResult)
-                                        Debug.LogWarning($"Player {player.DisplayName} message chains broken!");
+                                        Debug.LogWarning($"Player {player.DisplayName}'s message chain is broken!");
                                 }
                             }
                         }
                         break;
                     case PacketTypesIn.Respawn:
-                        string? dimensionNameInRespawn = null;
-                        Dictionary<string, object>? dimensionTypeInRespawn = null;
                         if (protocolVersion >= MC_1_16_Version)
                         {
                             if (protocolVersion >= MC_1_19_Version)
-                            {
-                                dataTypes.ReadNextString(packetData); // Dimension Type: Identifier
-                                dimensionTypeInRespawn = new Dictionary<string, object>();
-                            }
+                                dataTypes.ReadNextString(packetData);     // Dimension Type: Identifier
                             else if (protocolVersion >= MC_1_16_2_Version)
-                                dimensionTypeInRespawn = dataTypes.ReadNextNbt(packetData); // Dimension Type: NBT Tag Compound
+                                dataTypes.ReadNextNbt(packetData);        // Dimension Type: NBT Tag Compound
                             else
                                 dataTypes.ReadNextString(packetData);
                             this.currentDimension = 0;
                         }
-                        else
-                        {
-                            // 1.15 and below
+                        else 
+                        {   // 1.15 and below
                             this.currentDimension = dataTypes.ReadNextInt(packetData);
                         }
-                        if (protocolVersion >= MC_1_16_Version)
-                            dimensionNameInRespawn = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
 
-                        if (protocolVersion >= MC_1_16_2_Version)
-                            World.SetDimension(dimensionNameInRespawn, dimensionTypeInRespawn);
+                        if (protocolVersion >= MC_1_16_Version)
+                        {
+                            string dimensionName = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
+                            World.SetDimension(dimensionName);
+                        }
 
                         if (protocolVersion < MC_1_14_Version)
                             dataTypes.ReadNextByte(packetData);           // Difficulty - 1.13 and below
@@ -561,7 +552,7 @@ namespace MinecraftClient.Protocol.Handlers
                         if (protocolVersion >= MC_1_16_Version)
                             dataTypes.ReadNextByte(packetData);           // Previous Game mode - 1.16 and above
                         if (protocolVersion < MC_1_16_Version)
-                            dataTypes.ReadNextString(packetData);         // Level Type - 1.15 and below
+                            dataTypes.SkipNextString(packetData);         // Level Type - 1.15 and below
                         if (protocolVersion >= MC_1_16_Version)
                         {
                             dataTypes.ReadNextBool(packetData);           // Is Debug - 1.16 and above
@@ -848,25 +839,25 @@ namespace MinecraftClient.Protocol.Handlers
                                     string name = dataTypes.ReadNextString(packetData);                         // Player name
                                     int propNum = dataTypes.ReadNextVarInt(packetData);                         // Number of properties in the following array
 
-                                    Tuple<string, string, string>[]? property = null; // Property: Tuple<Name, Value, Signature(empty if there is no signature)
+                                    // Property: Tuple<Name, Value, Signature(empty if there is no signature)
+                                    // The Property field looks as in the response of https://wiki.vg/Mojang_API#UUID_to_Profile_and_Skin.2FCape
+                                    Tuple<string, string, string?>[]? properties = new Tuple<string, string, string?>[propNum];
                                     for (int p = 0; p < propNum; p++)
                                     {
-                                        string key = dataTypes.ReadNextString(packetData);                      // Name
-                                        string val = dataTypes.ReadNextString(packetData);                      // Value
-
+                                        string propertyName = dataTypes.ReadNextString(packetData);             // Name: String (32767)
+                                        string val = dataTypes.ReadNextString(packetData);                      // Value: String (32767)
+                                        string? propertySignature = null;
                                         if (dataTypes.ReadNextBool(packetData))                                 // Is Signed
-                                            dataTypes.ReadNextString(packetData);                               // Signature
+                                            propertySignature = dataTypes.ReadNextString(packetData);           // Signature: String (32767)
+                                        properties![p] = new(propertyName, val, propertySignature);
                                     }
 
                                     int gameMode = dataTypes.ReadNextVarInt(packetData);                        // Gamemode
                                     handler.OnGamemodeUpdate(uuid, gameMode);
-
                                     int ping = dataTypes.ReadNextVarInt(packetData);                            // Ping
                                     string? displayName = null;
-                                    
                                     if (dataTypes.ReadNextBool(packetData))                                     // Has display name
                                         displayName = dataTypes.ReadNextString(packetData);                     // Display name
-
                                     // 1.19 Additions
                                     long? keyExpiration = null;
                                     byte[]? publicKey = null, signature = null;
@@ -875,18 +866,16 @@ namespace MinecraftClient.Protocol.Handlers
                                         if (dataTypes.ReadNextBool(packetData))                                 // Has Sig Data (if true, red the following fields)
                                         {
                                             keyExpiration = dataTypes.ReadNextLong(packetData);                 // Timestamp
-
                                             int publicKeyLength = dataTypes.ReadNextVarInt(packetData);         // Public Key Length 
                                             if (publicKeyLength > 0)
                                                 publicKey = dataTypes.ReadData(publicKeyLength, packetData);    // Public key
-
                                             int signatureLength = dataTypes.ReadNextVarInt(packetData);         // Signature Length 
                                             if (signatureLength > 0)
                                                 signature = dataTypes.ReadData(signatureLength, packetData);    // Public key
                                         }
                                     }
 
-                                    handler.OnPlayerJoin(new PlayerInfo(uuid, name, property, gameMode, ping, displayName, keyExpiration, publicKey, signature));
+                                    handler.OnPlayerJoin(new PlayerInfo(uuid, name, properties, gameMode, ping, displayName, keyExpiration, publicKey, signature));
                                     break;
                                 case 0x01: // Update gamemode
                                     handler.OnGamemodeUpdate(uuid, dataTypes.ReadNextVarInt(packetData));
@@ -896,8 +885,13 @@ namespace MinecraftClient.Protocol.Handlers
                                     handler.OnLatencyUpdate(uuid, latency); //Update latency;
                                     break;
                                 case 0x03: // Update display name
-                                    if (dataTypes.ReadNextBool(packetData))
-                                        dataTypes.ReadNextString(packetData);
+                                    {
+                                        PlayerInfo? player = handler.GetPlayerInfo(uuid);
+                                        if (player != null)
+                                            player.DisplayName = dataTypes.ReadNextString(packetData);
+                                        else
+                                            dataTypes.SkipNextString(packetData);
+                                    }
                                     break;
                                 case 0x04: // Player Leave
                                     handler.OnPlayerLeave(uuid);
@@ -924,7 +918,7 @@ namespace MinecraftClient.Protocol.Handlers
                             {
                                 // Skip optional tooltip for each tab-complete result
                                 if (dataTypes.ReadNextBool(packetData))
-                                    dataTypes.ReadNextString(packetData);
+                                    dataTypes.SkipNextString(packetData);
                             }
                         }
                         // TODO Trigger Corn events...
@@ -1019,7 +1013,10 @@ namespace MinecraftClient.Protocol.Handlers
                         if (protocolVersion >= MC_1_17_Version)
                         {
                             forced = dataTypes.ReadNextBool(packetData);
-                            String forcedMessage = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                            string forcedMessage = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                            bool hasPromptMessage = dataTypes.ReadNextBool(packetData);   // Has Prompt Message (Boolean) - 1.17 and above
+                            if (hasPromptMessage)
+                                dataTypes.SkipNextString(packetData); // Prompt Message (Optional Chat) - 1.17 and above
                         }
                         // Some server plugins may send invalid resource packs to probe the client and we need to ignore them (issue #1056)
                         if (!url.StartsWith("http") && hash.Length != 40) // Some server may have null hash value

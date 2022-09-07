@@ -1,7 +1,8 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Mapping
 {
@@ -13,17 +14,14 @@ namespace MinecraftClient.Mapping
         /// <summary>
         /// The chunks contained into the Minecraft world
         /// </summary>
-        private Dictionary<int, Dictionary<int, ChunkColumn>> chunks = new();
+        private ConcurrentDictionary<int2, ChunkColumn> chunks = new();
         
         /// <summary>
         /// The dimension info of the world
         /// </summary>
-        private static Dimension dimension = new();
+        private static Dimension curDimension = new();
 
-        /// <summary>
-        /// Lock for thread safety
-        /// </summary>
-        private readonly ReaderWriterLockSlim chunksLock = new ReaderWriterLockSlim();
+        private static Dictionary<string, Dimension> dimensionList = new();
 
         /// <summary>
         /// Chunk data parsing progress
@@ -41,51 +39,16 @@ namespace MinecraftClient.Mapping
         {
             get
             {
-                chunksLock.EnterReadLock();
-                try
-                {
-                    //Read a chunk
-                    if (chunks.ContainsKey(chunkX))
-                        if (chunks[chunkX].ContainsKey(chunkZ))
-                            return chunks[chunkX][chunkZ];
-                    return null;
-                }
-                finally
-                {
-                    chunksLock.ExitReadLock();
-                }
+                chunks.TryGetValue(new(chunkX, chunkZ), out ChunkColumn? chunkColumn);
+                return chunkColumn;
             }
-            
             set
             {
-                chunksLock.EnterWriteLock();
-                try
-                {
-                    if (value != null)
-                    {
-                        //Update a chunk column
-                        if (!chunks.ContainsKey(chunkX))
-                            chunks[chunkX] = new Dictionary<int, ChunkColumn>();
-                        chunks[chunkX][chunkZ] = value;
-                    }
-                    else
-                    {
-                        //Unload a chunk column
-                        if (chunks.ContainsKey(chunkX))
-                        {
-                            if (chunks[chunkX].ContainsKey(chunkZ))
-                            {
-                                chunks[chunkX].Remove(chunkZ);
-                                if (chunks[chunkX].Count == 0)
-                                    chunks.Remove(chunkX);
-                            }
-                        }
-                    }
-                }
-                finally
-                {
-                    chunksLock.ExitWriteLock();
-                }
+                int2 chunkCoord = new(chunkX, chunkZ);
+                if (value is null)
+                    chunks.TryRemove(chunkCoord, out _);
+                else
+                    chunks.AddOrUpdate(chunkCoord, value, (_, _) => value);
             }
         }
 
@@ -93,30 +56,49 @@ namespace MinecraftClient.Mapping
         // a whole air chunk is represent by null
         public bool isChunkColumnReady(int chunkX, int chunkZ)
         {
-            chunksLock.EnterReadLock();
-            try
-            {
-                if (chunks.ContainsKey(chunkX))
-                    if (chunks[chunkX].ContainsKey(chunkZ) && chunks[chunkX][chunkZ] is not null)
-                        return chunks[chunkX][chunkZ].FullyLoaded;
-                return false;
-            }
-            finally
-            {
-                chunksLock.ExitReadLock();
-            }
-
+            if (chunks.TryGetValue(new(chunkX, chunkZ), out ChunkColumn? chunkColumn))
+                return (chunkColumn is not null && chunkColumn.FullyLoaded);
+            return false;
         }
 
         /// <summary>
-        /// Set dimension type
+        /// Storage of all dimensional data - 1.19.1 and above
+        /// </summary>
+        /// <param name="registryCodec">Registry Codec nbt data</param>
+        public static void StoreDimensionList(Dictionary<string, object> registryCodec)
+        {
+            dimensionList = new();
+            var dimensionListNbt = (object[])(((Dictionary<string, object>)registryCodec["minecraft:dimension_type"])["value"]);
+            foreach (Dictionary<string, object> dimensionNbt in dimensionListNbt)
+            {
+                string dimensionName = (string)dimensionNbt["name"];
+                Dictionary<string, object> element = (Dictionary<string, object>)dimensionNbt["element"];
+                dimensionList.Add(dimensionName, new Dimension(dimensionName, element));
+            }
+        }
+
+        /// <summary>
+        /// Store one dimension - Directly used from 1.16.2 to 1.18.2
+        /// </summary>
+        /// <param name="dimensionName">Dimension name</param>
+        /// <param name="dimensionType">Dimension Type nbt data</param>
+        public static void StoreOneDimension(string dimensionName, Dictionary<string, object> dimensionType)
+        {
+            if (dimensionList.ContainsKey(dimensionName))
+                dimensionList.Remove(dimensionName);
+            dimensionList.Add(dimensionName, new Dimension(dimensionName, dimensionType));
+        }
+
+        /// <summary>
+        /// Set current dimension - 1.16 and above
         /// </summary>
         /// <param name="name">	The name of the dimension type</param>
-        /// <param name="nbt">The dimension type (NBT Tag Compound)</param>
-        public static void SetDimension(string? name, Dictionary<string, object>? nbt)
+        public static void SetDimension(string name)
         {
-            // will change in 1.19 and above
-            dimension = new Dimension(name, nbt);
+            if (dimensionList!.TryGetValue(name, out Dimension? dimension))
+                curDimension = dimension;
+            else
+                Console.WriteLine("Can't find dimension \"" + name + "\"");
         }
 
         /// <summary>
@@ -125,7 +107,7 @@ namespace MinecraftClient.Mapping
         /// <returns>Current dimension</returns>
         public static Dimension GetDimension()
         {
-            return dimension;
+            return curDimension;
         }
 
         /// <summary>
@@ -230,16 +212,8 @@ namespace MinecraftClient.Mapping
         /// </summary>
         public void Clear()
         {
-            chunksLock.EnterWriteLock();
-            try
-            {
-                chunks = new Dictionary<int, Dictionary<int, ChunkColumn>>();
-                chunkCnt = chunkLoadNotCompleted = 0;
-            }
-            finally
-            {
-                chunksLock.ExitWriteLock();
-            }
+            chunks = new();
+            chunkCnt = chunkLoadNotCompleted = 0;
         }
 
         /// <summary>
