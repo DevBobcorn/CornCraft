@@ -132,7 +132,15 @@ namespace MinecraftClient.UI
                         // Try to refresh access token
                         if (!string.IsNullOrWhiteSpace(session.RefreshToken))
                         {
-                            result = ProtocolHandler.MicrosoftLoginRefresh(session.RefreshToken, out session, ref account);
+                            try
+                            {
+                                result = ProtocolHandler.MicrosoftLoginRefresh(session.RefreshToken, out session, ref account);
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.LogError("Refresh access token fail: " + ex.Message);
+                                result = ProtocolHandler.LoginResult.InvalidResponse;
+                            }
                         }
                         if (result != ProtocolHandler.LoginResult.Success && password == string.Empty)
                         {   // Request password

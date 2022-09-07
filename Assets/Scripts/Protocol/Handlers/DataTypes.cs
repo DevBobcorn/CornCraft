@@ -42,6 +42,17 @@ namespace MinecraftClient.Protocol.Handlers
         }
 
         /// <summary>
+        /// Remove some data from the cache
+        /// </summary>
+        /// <param name="offset">Amount of bytes to drop</param>
+        /// <param name="cache">Cache of bytes to drop</param>
+        public void DropData(int offset, Queue<byte> cache)
+        {
+            while (offset-- > 0)
+                cache.Dequeue();
+        }
+
+        /// <summary>
         /// Read a string from a cache of bytes and remove it from the cache
         /// </summary>
         /// <param name="cache">Cache of bytes to read from</param>
@@ -54,6 +65,16 @@ namespace MinecraftClient.Protocol.Handlers
                 return Encoding.UTF8.GetString(ReadData(length, cache));
             }
             else return "";
+        }
+
+        /// <summary>
+        /// Skip a string from a cache of bytes and remove it from the cache
+        /// </summary>
+        /// <param name="cache">Cache of bytes to read from</param>
+        public void SkipNextString(Queue<byte> cache)
+        {
+            int length = ReadNextVarInt(cache);
+            DropData(length, cache);
         }
 
         /// <summary>

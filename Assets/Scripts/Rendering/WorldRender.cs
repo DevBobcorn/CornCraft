@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace MinecraftClient.Rendering
     {
         private static ResourceLocation WATER_STILL = new ResourceLocation("block/water_still");
 
-        private static WorldRender instance;
+        private static WorldRender? instance;
         public static WorldRender Instance
         {
             get {
@@ -31,12 +32,12 @@ namespace MinecraftClient.Rendering
             }
         }
 
-        private Dictionary<int, Dictionary<int, ChunkRenderColumn>> columns = new();
+        private Dictionary<int2, ChunkRenderColumn> columns = new();
         // Both manipulated on Unity main thread only
         private PriorityQueue<ChunkRender> chunksToBeBuild = new();
         private List<ChunkRender>         chunksBeingBuilt = new();
 
-        private CornClient game;
+        private CornClient? game;
 
         public string GetDebugInfo()
         {
@@ -58,45 +59,23 @@ namespace MinecraftClient.Rendering
             return newColumn;
         }
 
-        private ChunkRenderColumn GetChunkColumn(int chunkX, int chunkZ, bool createIfEmpty)
+        private ChunkRenderColumn? GetChunkColumn(int chunkX, int chunkZ, bool createIfEmpty)
         {
-            if (columns.ContainsKey(chunkX))
+            int2 chunkCoord = new(chunkX, chunkZ);
+            if (columns.ContainsKey(chunkCoord))
+                return columns[chunkCoord];
+
+            if (createIfEmpty)
             {
-                if (columns[chunkX].ContainsKey(chunkZ))
-                {
-                    return columns[chunkX][chunkZ];
-                }
-                else
-                {
-                    if (createIfEmpty)
-                    {
-                        ChunkRenderColumn newColumn = CreateColumn(chunkX, chunkZ);
-                        columns[chunkX].Add(chunkZ, newColumn);
-                        return newColumn;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
+                ChunkRenderColumn newColumn = CreateColumn(chunkX, chunkZ);
+                columns.Add(chunkCoord, newColumn);
+                return newColumn;
             }
-            else
-            {
-                if (createIfEmpty)
-                {
-                    columns.Add(chunkX, new Dictionary<int, ChunkRenderColumn>());
-                    ChunkRenderColumn newColumn = CreateColumn(chunkX, chunkZ);
-                    columns[chunkX].Add(chunkZ, newColumn);
-                    return newColumn;
-                }
-                else
-                {
-                    return null;
-                }
-            }
+
+            return null;
         }
 
-        public ChunkRender GetChunk(int chunkX, int chunkY, int chunkZ)
+        public ChunkRender? GetChunk(int chunkX, int chunkY, int chunkZ)
         {
             return GetChunkColumn(chunkX, chunkZ, false)?.GetChunk(chunkY, false);
         }
@@ -110,7 +89,7 @@ namespace MinecraftClient.Rendering
             }
             else
             {
-                ChunkColumn column = game.GetWorld().GetChunkColumn(chunkX, chunkZ);
+                var column = game!.GetWorld().GetChunkColumn(chunkX, chunkZ);
                 if (column is not null)
                 {
                     // Chunk position is valid. If this chunk we're getting
@@ -126,40 +105,6 @@ namespace MinecraftClient.Rendering
             }
         }
 
-        public void UnloadChunkColumns(int chunkX)
-        {
-            // Short-circuit here
-            if (columns.ContainsKey(chunkX))
-            {
-                foreach (var chunkZ in columns[chunkX].Keys)
-                {
-                    // Unload this chunk column (and it'll cancel building by itself)
-                    columns[chunkX][chunkZ].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
-                }
-
-                // Clear section (and column indices)
-                columns.Remove(chunkX);
-            }
-
-        }
-
-        public void UnloadChunkColumn(int chunkX, int chunkZ)
-        {
-            // Short-circuit here
-            if (columns.ContainsKey(chunkX) && columns[chunkX].ContainsKey(chunkZ))
-            {
-                // Unload this chunk column
-                columns[chunkX][chunkZ].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
-
-                // Remove its index
-                columns[chunkX].Remove(chunkZ);
-
-                // And clean up if section is now empty
-                if (columns[chunkX].Count == 0)
-                    columns.Remove(chunkX);
-            }
-
-        }
         #endregion
 
         #region Chunk building
@@ -168,10 +113,15 @@ namespace MinecraftClient.Rendering
 
         public void BuildChunk(ChunkRender chunkRender)
         {
-            var chunkColumnData = game.GetWorld()[chunkRender.ChunkX, chunkRender.ChunkZ];
+            var chunkColumnData = game!.GetWorld()[chunkRender.ChunkX, chunkRender.ChunkZ];
             if (chunkColumnData is null) // Chunk column data unloaded, cancel
             {
-                UnloadChunkColumn(chunkRender.ChunkX, chunkRender.ChunkZ);
+                int2 chunkCoord = new(chunkRender.ChunkX, chunkRender.ChunkZ);
+                if (columns.ContainsKey(chunkCoord))
+                {
+                    columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
+                    columns.Remove(chunkCoord);
+                }
                 chunkRender.State = BuildState.Cancelled;
                 return;
             }
@@ -434,10 +384,10 @@ namespace MinecraftClient.Rendering
         #endregion
 
         #region Chunk updates
-        Action<ReceiveChunkColumnEvent> columnCallBack1;
-        Action<UnloadChunkColumnEvent> columnCallBack2;
-        Action<BlockUpdateEvent> blockCallBack;
-        Action<BlocksUpdateEvent> blocksCallBack;
+        Action<ReceiveChunkColumnEvent>? columnCallBack1;
+        Action<UnloadChunkColumnEvent>? columnCallBack2;
+        Action<BlockUpdateEvent>? blockCallBack;
+        Action<BlocksUpdateEvent>? blocksCallBack;
 
         private Location GetLocationInChunkRender(ChunkRender chunk, int x, int y, int z, int offsetY)
         {   // Offset y coordinate by the current dimension's minY...
@@ -459,11 +409,11 @@ namespace MinecraftClient.Rendering
         // Add new chunks into render list
         public void UpdateChunkRendersListAdd()
         {
-            World world = game?.GetWorld();
+            World world = game!.GetWorld();
             if (world is null) return;
 
             // Add nearby chunks
-            var location = game.GetCurrentLocation();
+            var location = game!.GetCurrentLocation();
             ChunkRenderColumn columnRender;
 
             int viewDist = CornCraft.MCSettings_RenderDistance;
@@ -481,9 +431,9 @@ namespace MinecraftClient.Rendering
                         var column = GetChunkColumn(chunkX, chunkZ, false);
                         if (column is null)
                         {   // Chunks data is ready, but chunk render column is not
-                            int chunkMask = world[chunkX, chunkZ].ChunkMask;
+                            int chunkMask = world[chunkX, chunkZ]!.ChunkMask;
                             // Create it and add the whole column to render list...
-                            columnRender = GetChunkColumn(chunkX, chunkZ, true);
+                            columnRender = GetChunkColumn(chunkX, chunkZ, true)!;
                             for (int chunkY = 0;chunkY < chunkColumnSize;chunkY++)
                             {   // Create chunk renders and queue them...
                                 if ((chunkMask & (1 << chunkY)) != 0)
@@ -514,32 +464,21 @@ namespace MinecraftClient.Rendering
         // Remove far chunks from render list
         public void UpdateChunkRendersListRemove()
         {
-            World world = game?.GetWorld();
+            World world = game!.GetWorld();
             if (world is null) return;
 
             // Add nearby chunks
             var location   = game.GetCurrentLocation();
             int unloadDist = Mathf.RoundToInt(CornCraft.MCSettings_RenderDistance * 2F);
 
-            var xs = columns.Keys.ToArray();
+            var chunkCoords = columns.Keys.ToArray();
 
-            foreach (var chunkX in xs)
+            foreach (var chunkCoord in chunkCoords)
             {
-                if (Mathf.Abs(location.ChunkX - chunkX) > unloadDist)
+                if (Mathf.Abs(location.ChunkX - chunkCoord.x) > unloadDist || Mathf.Abs(location.ChunkZ - chunkCoord.y) > unloadDist)
                 {
-                    UnloadChunkColumns(chunkX);
-                }
-                else
-                {
-                    var zs = columns[chunkX].Keys.ToArray();
-
-                    foreach (var chunkZ in zs)
-                    {
-                        if (Mathf.Abs(location.ChunkX - chunkX) > unloadDist)
-                        {
-                            UnloadChunkColumn(chunkX, chunkZ);
-                        }
-                    }
+                    columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
+                    columns.Remove(chunkCoord);
                 }
 
             }
@@ -556,7 +495,7 @@ namespace MinecraftClient.Rendering
 
         }
 
-        public void QueueChunkBuildIfNotEmpty(ChunkRender chunkRender)
+        public void QueueChunkBuildIfNotEmpty(ChunkRender? chunkRender)
         {
             if (chunkRender is not null) // Not empty(air) chunk
                 QueueChunkBuild(chunkRender);
@@ -574,10 +513,14 @@ namespace MinecraftClient.Rendering
             chunksBeingBuilt.Clear();
 
             // Clear all chunk columns in world
-            var xs = columns.Keys.ToArray();
+            var chunkCoords = columns.Keys.ToArray();
 
-            foreach (var chunkX in xs)
-                UnloadChunkColumns(chunkX);
+            foreach (var chunkCoord in chunkCoords)
+            {
+                columns.Remove(chunkCoord);
+            }
+
+            columns.Clear();
 
             // Unregister callbacks
             if (columnCallBack1 is not null)
@@ -619,7 +562,12 @@ namespace MinecraftClient.Rendering
             });
 
             EventManager.Instance.Register<UnloadChunkColumnEvent>(columnCallBack2 = (e) => {
-                UnloadChunkColumn(e.chunkX, e.chunkZ);
+                int2 chunkCoord = new(e.chunkX, e.chunkZ);
+                if (columns.ContainsKey(chunkCoord))
+                {
+                    columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
+                    columns.Remove(chunkCoord);
+                }
             });
 
             EventManager.Instance.Register<BlockUpdateEvent>(blockCallBack = (e) => {
@@ -670,7 +618,7 @@ namespace MinecraftClient.Rendering
             });
 
             EventManager.Instance.Register<BlocksUpdateEvent>(blocksCallBack = (e) => {
-                World world = game?.GetWorld();
+                World world = game!.GetWorld();
                 if (world is null) return;
                 
                 foreach (var loc in e.locations)

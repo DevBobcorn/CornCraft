@@ -22,12 +22,7 @@ namespace MinecraftClient.Mapping
         /// <summary>
         /// Blocks contained into the chunk
         /// </summary>
-        private readonly Block[,,] blocks  = new Block[SizeX, SizeY, SizeZ];
-
-        /// <summary>
-        /// Lock for thread safety
-        /// </summary>
-        private readonly ReaderWriterLockSlim blockLock = new ReaderWriterLockSlim();
+        private readonly Block[] blocks = new Block[SizeY * SizeZ * SizeX];
 
         /// <summary>
         /// Read, or set the specified block
@@ -47,15 +42,7 @@ namespace MinecraftClient.Mapping
                 if (blockZ < 0 || blockZ >= SizeZ)
                     throw new ArgumentOutOfRangeException("blockZ", "Must be between 0 and " + (SizeZ - 1) + " (inclusive)");
 
-                blockLock.EnterReadLock();
-                try
-                {
-                    return blocks[blockX, blockY, blockZ];
-                }
-                finally
-                {
-                    blockLock.ExitReadLock();
-                }
+                return blocks[(blockY << 8) | (blockZ << 4) | blockX];
             }
 
             set
@@ -67,16 +54,20 @@ namespace MinecraftClient.Mapping
                 if (blockZ < 0 || blockZ >= SizeZ)
                     throw new ArgumentOutOfRangeException("blockZ", "Must be between 0 and " + (SizeZ - 1) + " (inclusive)");
 
-                blockLock.EnterWriteLock();
-                try
-                {
-                    blocks[blockX, blockY, blockZ]              = value;
-                }
-                finally
-                {
-                    blockLock.ExitWriteLock();
-                }
+                blocks[(blockY << 8) | (blockZ << 4) | blockX] = value;
             }
+        }
+
+        /// <summary>
+        /// Used when parsing chunks
+        /// </summary>
+        /// <param name="blockX">Block X</param>
+        /// <param name="blockY">Block Y</param>
+        /// <param name="blockZ">Block Z</param>
+        /// <param name="block">Block</param>
+        public void SetWithoutCheck(int blockX, int blockY, int blockZ, Block block)
+        {
+            blocks[(blockY << 8) | (blockZ << 4) | blockX] = block;
         }
 
         /// <summary>

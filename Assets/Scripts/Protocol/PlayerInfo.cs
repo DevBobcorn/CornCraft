@@ -13,7 +13,7 @@ namespace MinecraftClient.Protocol
         public readonly string Name;
 
         // Tuple<Name, Value, Signature(empty if there is no signature)
-        public readonly Tuple<string, string, string>[]? Property;
+        public readonly Tuple<string, string, string?>[]? Property;
 
         public int Gamemode;
 
@@ -29,7 +29,7 @@ namespace MinecraftClient.Protocol
 
         private byte[]? precedingSignature;
 
-        public PlayerInfo(Guid uuid, string name, Tuple<string, string, string>[]? property, int gamemode, int ping, string? displayName, long? timeStamp, byte[]? publicKey, byte[]? signature)
+        public PlayerInfo(Guid uuid, string name, Tuple<string, string, string?>[]? property, int gamemode, int ping, string? displayName, long? timeStamp, byte[]? publicKey, byte[]? signature)
         {
             UUID = uuid;
             Name = name;

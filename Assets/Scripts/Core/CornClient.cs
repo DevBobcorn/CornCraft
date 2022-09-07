@@ -226,9 +226,9 @@ namespace MinecraftClient
             preparing = true;
 
             this.sessionId = sessionID;
-            // TODO this.uuid = new Guid(uuid);
-            // TODO this.uuidStr = uuid;
-            Debug.Log("Passed uuid: " + uuid);
+            if (!Guid.TryParse(uuid, out this.uuid))
+                this.uuid = Guid.Empty;
+            this.uuidStr = uuid;
             this.username = user;
             this.host = serverIp;
             this.port = port;
