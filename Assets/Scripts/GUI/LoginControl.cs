@@ -1,6 +1,6 @@
+#nullable enable
 using System;
 using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,30 +16,14 @@ namespace MinecraftClient.UI
 {
     public class LoginControl : MonoBehaviour
     {
-        private CornClient game;
-        private TMP_InputField serverInput, usernameInput, passwordInput;
-        private Button         loginButton, quitButton;
-
-        private readonly Dictionary<string, KeyValuePair<string, string>> Accounts = new Dictionary<string, KeyValuePair<string, string>>();
-        private readonly Dictionary<string, KeyValuePair<string, ushort>> Servers = new Dictionary<string, KeyValuePair<string, ushort>>();
+        private CornClient? game;
+        private TMP_InputField? serverInput, usernameInput, passwordInput;
+        private Button?         loginButton, quitButton;
+        private TMP_Text?       loadStateInfoText;
 
         private bool tryingConnect = false;
 
-        /// <summary>
-        /// Load login/password using an account alias
-        /// </summary>
-        /// <returns>True if the account was found and loaded</returns>
-        public bool SetAccount(string accountAlias)
-        {
-            accountAlias = accountAlias.ToLower();
-            if (usernameInput is not null && passwordInput is not null && Accounts.ContainsKey(accountAlias))
-            {
-                usernameInput.text = Accounts[accountAlias].Key;
-                passwordInput.text = Accounts[accountAlias].Value;
-                return true;
-            }
-            else return false;
-        }
+        private readonly CornClient.LoadStateInfo loadStateInfo = new();
 
         /// <summary>
         /// Load server information in ServerIP and ServerPort variables from a "serverip:port" couple or server alias
@@ -69,27 +53,19 @@ namespace MinecraftClient.UI
                     ProtocolHandler.MinecraftServiceLookup(ref host, ref port);
                 return true;
             }
-            else if (Servers.ContainsKey(server))
-            {
-                // Server Alias (if no dot then treat the server as an alias)
-                host = Servers[server].Key;
-                port = Servers[server].Value;
-                return true;
-            }
 
             return false;
         }
 
-        #nullable enable
         // Returns true if successfully connected
         public void ConnectServer()
         {
             if (tryingConnect) return;
             tryingConnect = true;
 
-            string serverText = serverInput.text;
-            string account = usernameInput.text;
-            string password = passwordInput.text;
+            string serverText = serverInput!.text;
+            string account = usernameInput!.text;
+            string password = passwordInput!.text;
 
             string username; // In-game display name, will be set after connection
 
@@ -98,15 +74,16 @@ namespace MinecraftClient.UI
 
             if (!ParseServerIP(serverText, out host, ref port))
             {
-                Debug.Log("Failed to parse server name or address!");
+                CornClient.ShowNotification("Failed to parse server name or address!", Notification.Type.Warning);
                 tryingConnect = false;
+                loadStateInfo.infoText = string.Empty;
                 return;
             }
 
             bool MinecraftRealmsEnabled = false;
 
             // TODO Move to right place
-            ProtocolHandler.AccountType AccountType = ProtocolHandler.AccountType.Microsoft;
+            ProtocolHandler.AccountType accountType = ProtocolHandler.AccountType.Microsoft;
 
             SessionToken session = new SessionToken();
             PlayerKeyPair? playerKeyPair = null;
@@ -114,7 +91,16 @@ namespace MinecraftClient.UI
             ProtocolHandler.LoginResult result = ProtocolHandler.LoginResult.LoginRequired;
 
             if (password == "-")
-            {   // Enter offline mode
+            {
+                if (!CornCraft.IsValidName(account))
+                {
+                    CornClient.ShowNotification("The username is not valid!", Notification.Type.Warning);
+                    tryingConnect = false;
+                    loadStateInfo.infoText = string.Empty;
+                    return;
+                }
+
+                // Enter offline mode
                 Translations.Notify("mcc.offline");
                 result = ProtocolHandler.LoginResult.Success;
                 session.PlayerID = "0";
@@ -146,6 +132,7 @@ namespace MinecraftClient.UI
                         {   // Request password
                             CornClient.ShowNotification("Please input your password!", Notification.Type.Warning);
                             tryingConnect = false;
+                            loadStateInfo.infoText = string.Empty;
                             return;
                         }
                     }
@@ -155,8 +142,8 @@ namespace MinecraftClient.UI
 
                 if (result != ProtocolHandler.LoginResult.Success)
                 {
-                    Translations.Log("mcc.connecting", AccountType == ProtocolHandler.AccountType.Mojang ? "Minecraft.net" : "Microsoft");
-                    result = ProtocolHandler.GetLogin(account, password, AccountType, out session, ref account);
+                    Translations.Log("mcc.connecting", accountType == ProtocolHandler.AccountType.Mojang ? "Minecraft.net" : "Microsoft");
+                    result = ProtocolHandler.GetLogin(account, password, accountType, out session, ref account);
                 }
             }
 
@@ -167,7 +154,7 @@ namespace MinecraftClient.UI
 
             if (result == ProtocolHandler.LoginResult.Success)
             {
-                if (AccountType == ProtocolHandler.AccountType.Microsoft && password != "-" && CornCraft.LoginWithSecureProfile)
+                if (accountType == ProtocolHandler.AccountType.Microsoft && password != "-" && CornCraft.LoginWithSecureProfile)
                 {
                     // Load cached profile key from disk if necessary
                     if (CornCraft.ProfileKeyCaching == CacheType.Disk)
@@ -223,8 +210,9 @@ namespace MinecraftClient.UI
                     Translations.Log("mcc.retrieve"); // Retrieve server information
                     if (!ProtocolHandler.GetServerInfo(host, port, ref protocolVersion, ref forgeInfo))
                     {
-                        Translations.LogError("error.ping");
+                        Translations.NotifyError("error.ping");
                         tryingConnect = false;
+                        loadStateInfo.infoText = string.Empty;
                         return;
                     }
                 }
@@ -235,7 +223,7 @@ namespace MinecraftClient.UI
                     {
                         try // Login to Server
                         {
-                            game.Login(session.PlayerName, session.PlayerID, session.ID, playerKeyPair, host, port, protocolVersion, forgeInfo);
+                            game!.Login(session.PlayerName, session.PlayerID, session.ID, playerKeyPair, host, port, protocolVersion, forgeInfo, loadStateInfo);
                             tryingConnect = false;
                             return;
                         }
@@ -245,10 +233,10 @@ namespace MinecraftClient.UI
                         }
                     }
                     else
-                        Translations.LogError("error.unsupported");
+                        Translations.NotifyError("error.unsupported");
                 }
                 else // Unable to determine server version
-                    Translations.LogError("error.determine");
+                    Translations.NotifyError("error.determine");
             }
             else
             {
@@ -270,16 +258,17 @@ namespace MinecraftClient.UI
 
                 if (result == ProtocolHandler.LoginResult.SSLError)
                 {
-                    Translations.LogError("error.login.ssl_help");
+                    Translations.NotifyError("error.login.ssl_help");
                     tryingConnect = false;
+                    loadStateInfo.infoText = string.Empty;
                     return;
                 }
                 Debug.LogError(failureMessage);
             }
 
             tryingConnect = false;
+            loadStateInfo.infoText = string.Empty;
         }
-        #nullable disable
 
         public void QuitGame()
         {
@@ -298,10 +287,10 @@ namespace MinecraftClient.UI
             passwordInput = loginPanel.transform.Find("Password Input").GetComponent<TMP_InputField>();
             loginButton   = loginPanel.transform.Find("Login Button").GetComponent<Button>();
 
-            quitButton    = transform.Find("Quit Button").GetComponent<Button>();
+            quitButton        = transform.Find("Quit Button").GetComponent<Button>();
+            loadStateInfoText = transform.Find("Load State Info Text").GetComponent<TMP_Text>();
 
             // TODO Initialize with loaded values
-            //serverInput.text = "192.168.1.2";
             serverInput.text = "192.168.1.7";
             usernameInput.text = "Corn";
             passwordInput.text = "-";
@@ -312,26 +301,11 @@ namespace MinecraftClient.UI
 
         }
 
-        void Update()
+        void FixedUpdate()
         {
-            if (Input.GetKeyDown(KeyCode.T))
+            if (loadStateInfoText!.text != loadStateInfo.infoText)
             {
-                CornClient.ShowNotification("Test Message", 4F, Notification.Type.Notification);
-            }
-
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                CornClient.ShowNotification("Error Message", 4F, Notification.Type.Error);
-            }
-
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                CornClient.ShowNotification("Warning Message", 4F, Notification.Type.Warning);
-            }
-
-            if (Input.GetKeyDown(KeyCode.W))
-            {
-                CornClient.ShowNotification("Success Message", 4F, Notification.Type.Success);
+                loadStateInfoText.text = loadStateInfo.infoText;
             }
 
         }

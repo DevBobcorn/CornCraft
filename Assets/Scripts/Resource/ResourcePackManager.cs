@@ -39,7 +39,7 @@ namespace MinecraftClient.Resource
             packs.Clear();
         }
 
-        public IEnumerator LoadPacks(Action callback)
+        public IEnumerator LoadPacks(CornClient.CoroutineFlag flag, CornClient.LoadStateInfo loadStateInfo)
         {
             float startTime = Time.realtimeSinceStartup;
 
@@ -47,7 +47,7 @@ namespace MinecraftClient.Resource
             {
                 if (pack.IsValid)
                 {
-                    yield return pack.LoadResources(this);
+                    yield return pack.LoadResources(this, loadStateInfo);
                 }
                 
             }
@@ -56,7 +56,7 @@ namespace MinecraftClient.Resource
             {
                 if (pack.IsValid)
                 {
-                    yield return pack.BuildStateGeometries(this);
+                    yield return pack.BuildStateGeometries(this, loadStateInfo);
                 }
                 
             }
@@ -72,11 +72,12 @@ namespace MinecraftClient.Resource
                 }
             }
 
+            loadStateInfo.infoText = string.Empty;
+
             Debug.Log("Resource packs loaded in " + (Time.realtimeSinceStartup - startTime) + " seconds.");
             Debug.Log("Built " + finalTable.Count + " block state geometry lists.");
 
-            if (callback is not null)
-                callback();
+            flag.done = true;
 
         }
 

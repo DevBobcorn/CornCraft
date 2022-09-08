@@ -220,10 +220,10 @@ namespace MinecraftClient
 
         #endregion
 
-        private bool resourceLoaded = false, preparing = false;
+        private bool preparing = false;
 
         #nullable enable
-        public void Login(string user, string uuid, string sessionID, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo)
+        public void Login(string user, string uuid, string sessionID, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo stateInfo)
         {
             if (preparing)
                 return;
@@ -240,15 +240,25 @@ namespace MinecraftClient
             this.protocolVersion = protocol;
             this.playerKeyPair = playerKeyPair;
 
-            StartCoroutine(StartClient(user, uuid, sessionID, playerKeyPair, serverIp, port, protocol, forgeInfo));
+            StartCoroutine(StartClient(user, uuid, sessionID, playerKeyPair, serverIp, port, protocol, forgeInfo, stateInfo));
         }
 
-        IEnumerator StartClient(string user, string uuid, string sessionID, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo)
+        public class CoroutineFlag
+        {
+            public bool done = false;
+        }
+
+        public class LoadStateInfo
+        {
+            public string infoText = string.Empty;
+        }
+
+        IEnumerator StartClient(string user, string uuid, string sessionID, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo loadStateInfo)
         {
             var wait = new WaitForSecondsRealtime(0.1F);
 
             // Create block palette first to prepare for resource loading
-            if (protocolVersion > ProtocolMinecraft.MC_1_18_2_Version)
+            if (protocolVersion > ProtocolMinecraft.MC_1_19_2_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.block"));
             
             var resourceVersion = string.Empty;
@@ -279,17 +289,20 @@ namespace MinecraftClient
             BlockTextureManager.Load(resourceVersion);
 
             // Load resources...
-            resourceLoaded = false;
             packManager.ClearPacks();
 
             ResourcePack pack = new ResourcePack("vanilla-" + resourceVersion);
             packManager.AddPack(pack);
 
             // Load valid packs...
-            var resLoad = StartCoroutine(packManager.LoadPacks(() => resourceLoaded = true));
+            var resLoadFlag = new CoroutineFlag();
+            var resLoad = StartCoroutine(packManager.LoadPacks(resLoadFlag, loadStateInfo));
 
-            while (!resourceLoaded)
+            while (!resLoadFlag.done)
+            {
+
                 yield return wait;
+            }
 
             // Prepare scene and unity objects
             var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
@@ -382,6 +395,8 @@ namespace MinecraftClient
                 Debug.LogError(e.Message);
                 Debug.LogError(e.StackTrace);
                 Disconnect();
+                preparing = false;
+                yield break;
             }
             finally
             {
