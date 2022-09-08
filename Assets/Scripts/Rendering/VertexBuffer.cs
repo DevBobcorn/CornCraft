@@ -5,8 +5,8 @@ namespace MinecraftClient.Rendering
     public class VertexBuffer
     {
         public float3[] vert = { };
-        public float2[] uv   = { };
-        public uint   offset = 0;
+        public float2[] txuv = { };
+        public int[]    tint = { };
 
     }
 }

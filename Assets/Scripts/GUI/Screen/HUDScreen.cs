@@ -104,7 +104,11 @@ namespace MinecraftClient.UI
                 else
                     displayedLatency--;
                 
-                latencyText.text = displayedLatency.ToString() + " ms";
+                if (displayedLatency >= 500)
+                    latencyText.text =  $"<color=red>{displayedLatency} ms</color>";
+                else if (displayedLatency >= 100)
+                    latencyText.text =  $"<color=orange>{displayedLatency} ms</color>";
+                else latencyText.text =  $"{displayedLatency} ms";
             }
 
         }
