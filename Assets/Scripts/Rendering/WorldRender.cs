@@ -12,13 +12,12 @@ using Unity.Mathematics;
 
 using MinecraftClient.Event;
 using MinecraftClient.Mapping;
+using MinecraftClient.Resource;
 
 namespace MinecraftClient.Rendering
 {
     public class WorldRender : MonoBehaviour
     {
-        private static ResourceLocation WATER_STILL = new ResourceLocation("block/water_still");
-
         private static WorldRender? instance;
         public static WorldRender Instance
         {
@@ -33,6 +32,7 @@ namespace MinecraftClient.Rendering
         }
 
         private Dictionary<int2, ChunkRenderColumn> columns = new();
+
         // Both manipulated on Unity main thread only
         private PriorityQueue<ChunkRender> chunksToBeBuild = new();
         private List<ChunkRender>         chunksBeingBuilt = new();
@@ -110,6 +110,7 @@ namespace MinecraftClient.Rendering
         #region Chunk building
         private static Chunk.BlockCheck notFullSolid = new Chunk.BlockCheck((bloc) => { return !bloc.State.FullSolid; });
         private static Chunk.BlockCheck waterSurface = new Chunk.BlockCheck((bloc) => { return !(bloc.State.InWater || bloc.State.FullSolid); });
+        private static int waterLayerIndex = ChunkRender.TypeIndex(RenderType.TRANSLUCENT);
 
         public void BuildChunk(ChunkRender chunkRender)
         {
@@ -151,16 +152,6 @@ namespace MinecraftClient.Rendering
             Task.Factory.StartNew(() => {
                 try
                 {
-                    bool isAllEmpty = true;
-                    int count = ChunkRender.TYPES.Length, layerMask = 0;
-                    int offsetY = World.GetDimension().minY;
-
-                    var visualBuffer = new VertexBuffer[count];
-                    for (int i = 0;i < count;i++)
-                        visualBuffer[i] = new VertexBuffer();
-
-                    int waterLayerIndex = ChunkRender.TypeIndex(RenderType.TRANSLUCENT);
-
                     var table = CornClient.Instance?.PackManager?.finalTable;
                     if (table is null)
                     {
@@ -168,6 +159,14 @@ namespace MinecraftClient.Rendering
                         chunkRender.State = BuildState.Cancelled;
                         return;
                     }
+
+                    bool isAllEmpty = true;
+                    int count = ChunkRender.TYPES.Length, layerMask = 0;
+                    int offsetY = World.GetDimension().minY;
+
+                    var visualBuffer = new VertexBuffer[count];
+                    for (int i = 0;i < count;i++)
+                        visualBuffer[i] = new();
 
                     // Build chunk mesh block by block
                     for (int x = 0;x < Chunk.SizeX;x++)
@@ -193,10 +192,13 @@ namespace MinecraftClient.Rendering
                                 if (state.InWater) // Build water here
                                 {
                                     int waterCullFlags = chunkData.GetCullFlags(loc, waterSurface);
-
-                                    // TODO ChunkFluidGeometry.Build(ref visualBuffer[waterLayerIndex], WATER_STILL, true, x, y, z, waterCullFlags);
-                                    layerMask |= (1 << waterLayerIndex);
-                                    isAllEmpty = false;
+                                    if (waterCullFlags != 0)
+                                    {
+                                        FluidGeometry.Build(ref visualBuffer[waterLayerIndex], x, y, z, waterCullFlags);
+                                        layerMask |= (1 << waterLayerIndex);
+                                        isAllEmpty = false;
+                                    }
+                                    
                                 }
 
                                 // If air-like (air, water block, etc), ignore it...
@@ -211,14 +213,8 @@ namespace MinecraftClient.Rendering
                                 {
                                     var models = table[stateId].Geometries;
                                     var chosen = (x + y + z) % models.Count;
-                                    var model  = models[chosen];
 
-                                    var data = model.GetDataForChunk(visualBuffer[layerIndex].offset, new float3(z, y, x), cullFlags);
-
-                                    visualBuffer[layerIndex].vert = ArrayUtil.GetConcated(visualBuffer[layerIndex].vert, data.Item1);
-                                    visualBuffer[layerIndex].uv   = ArrayUtil.GetConcated(visualBuffer[layerIndex].uv,   data.Item2);
-
-                                    visualBuffer[layerIndex].offset += (uint)data.Item1.Length;
+                                    models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags);
                                     
                                     layerMask |= (1 << layerIndex);
                                     isAllEmpty = false;
@@ -305,7 +301,7 @@ namespace MinecraftClient.Rendering
                                 if ((layerMask & (1 << layer)) != 0)
                                 {
                                     visualBuffer[layer].vert.CopyTo(allVerts, vertOffset);
-                                    visualBuffer[layer].uv.CopyTo(allUVs, vertOffset);
+                                    visualBuffer[layer].txuv.CopyTo(allUVs, vertOffset);
 
                                     vertOffset += visualBuffer[layer].vert.Length;
                                 }

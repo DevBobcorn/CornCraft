@@ -5,6 +5,8 @@ using System.Linq;
 using UnityEngine;
 using Unity.Mathematics;
 
+using MinecraftClient.Rendering;
+
 namespace MinecraftClient.Resource
 {
     public class BlockGeometry
@@ -42,7 +44,6 @@ namespace MinecraftClient.Resource
             {
                 AppendElement(wrapper.model, elem, wrapper.zyRot, wrapper.uvlock);
             }
-
         }
 
         private readonly Dictionary<CullDir, float3[]> vertexArrs = new();
@@ -90,33 +91,36 @@ namespace MinecraftClient.Resource
             return vertexCount;
         }
 
-        public Tuple<float3[], float2[], int[]> GetDataForChunk(uint startVertOffset, float3 posOffset, int cullFlags)
+        public void Build(ref VertexBuffer buffer, float3 posOffset, int cullFlags)
         {
             // Compute value if absent
-            int vertexCount = (sizeCache.ContainsKey(cullFlags)) ? sizeCache[cullFlags] : (sizeCache[cullFlags] = CalculateArraySize(cullFlags));
+            int vertexCount = buffer.vert.Length + ((sizeCache.ContainsKey(cullFlags)) ? sizeCache[cullFlags] : (sizeCache[cullFlags] = CalculateArraySize(cullFlags)));
 
-            var verts  = new float3[vertexCount];
-            var txuvs  = new float2[vertexCount];
-            var tintIndcs = new int[vertexCount];
+            var verts = new float3[vertexCount];
+            var txuvs = new float2[vertexCount];
+            var tints = new    int[vertexCount];
 
-            uint i;
+            buffer.vert.CopyTo(verts, 0);
+            buffer.txuv.CopyTo(txuvs, 0);
+            buffer.tint.CopyTo(tints, 0);
+
+            uint i, vertOffset = (uint)buffer.vert.Length;
 
             if (vertexArrs[CullDir.NONE].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.NONE].Length;i++)
-                    verts[i] = vertexArrs[CullDir.NONE][i] + posOffset;
-                txuvArrs[CullDir.NONE].CopyTo(txuvs, 0);
-                tintArrs[CullDir.NONE].CopyTo(tintIndcs, 0);
+                    verts[i + vertOffset] = vertexArrs[CullDir.NONE][i] + posOffset;
+                txuvArrs[CullDir.NONE].CopyTo(txuvs, vertOffset);
+                tintArrs[CullDir.NONE].CopyTo(tints, vertOffset);
+                vertOffset += (uint)vertexArrs[CullDir.NONE].Length;
             }
-
-            uint vertOffset = (uint)vertexArrs[CullDir.NONE].Length;
 
             if ((cullFlags & (1 << 0)) != 0 && vertexArrs[CullDir.UP].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.UP].Length;i++)
                     verts[i + vertOffset] = vertexArrs[CullDir.UP][i] + posOffset;
                 txuvArrs[CullDir.UP].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.UP].CopyTo(tintIndcs, vertOffset);
+                tintArrs[CullDir.UP].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.UP].Length;
             }
 
@@ -125,7 +129,7 @@ namespace MinecraftClient.Resource
                 for (i = 0U;i < vertexArrs[CullDir.DOWN].Length;i++)
                     verts[i + vertOffset] = vertexArrs[CullDir.DOWN][i] + posOffset;
                 txuvArrs[CullDir.DOWN].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.DOWN].CopyTo(tintIndcs, vertOffset);
+                tintArrs[CullDir.DOWN].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.DOWN].Length;
             }
 
@@ -134,7 +138,7 @@ namespace MinecraftClient.Resource
                 for (i = 0U;i < vertexArrs[CullDir.SOUTH].Length;i++)
                     verts[i + vertOffset] = vertexArrs[CullDir.SOUTH][i] + posOffset;
                 txuvArrs[CullDir.SOUTH].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.SOUTH].CopyTo(tintIndcs, vertOffset);
+                tintArrs[CullDir.SOUTH].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.SOUTH].Length;
             }
 
@@ -143,7 +147,7 @@ namespace MinecraftClient.Resource
                 for (i = 0U;i < vertexArrs[CullDir.NORTH].Length;i++)
                     verts[i + vertOffset] = vertexArrs[CullDir.NORTH][i] + posOffset;
                 txuvArrs[CullDir.NORTH].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.NORTH].CopyTo(tintIndcs, vertOffset);
+                tintArrs[CullDir.NORTH].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.NORTH].Length;
             }
 
@@ -152,7 +156,7 @@ namespace MinecraftClient.Resource
                 for (i = 0U;i < vertexArrs[CullDir.EAST].Length;i++)
                     verts[i + vertOffset] = vertexArrs[CullDir.EAST][i] + posOffset;
                 txuvArrs[CullDir.EAST].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.EAST].CopyTo(tintIndcs, vertOffset);
+                tintArrs[CullDir.EAST].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.EAST].Length;
             }
 
@@ -161,11 +165,13 @@ namespace MinecraftClient.Resource
                 for (i = 0U;i < vertexArrs[CullDir.WEST].Length;i++)
                     verts[i + vertOffset] = vertexArrs[CullDir.WEST][i] + posOffset;
                 txuvArrs[CullDir.WEST].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.WEST].CopyTo(tintIndcs, vertOffset);
+                tintArrs[CullDir.WEST].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.WEST].Length;
             }
 
-            return Tuple.Create(verts, txuvs, tintIndcs);
+            buffer.vert = verts;
+            buffer.txuv = txuvs;
+            buffer.tint = tints;
 
         }
 
