@@ -169,6 +169,11 @@ namespace MinecraftClient
             EventManager.Instance.Broadcast<NotificationEvent>(new NotificationEvent(notification));
         }
 
+        public static void ShowNotification(string notification, Notification.Type type)
+        {
+            EventManager.Instance.Broadcast<NotificationEvent>(new NotificationEvent(notification, 6F, type));
+        }
+
         public static void ShowNotification(string notification, float duration, Notification.Type type)
         {
             EventManager.Instance.Broadcast<NotificationEvent>(new NotificationEvent(notification, duration, type));
@@ -249,7 +254,7 @@ namespace MinecraftClient
             var resourceVersion = string.Empty;
 
             if (protocolVersion >= ProtocolMinecraft.MC_1_19_Version)
-            {   // Treat 1.18.X as 1.17.X because there ain't a single block changed in 1.18
+            {
                 Block.Palette = new Palette119();
                 resourceVersion = "1.19.2";
             }
@@ -363,7 +368,7 @@ namespace MinecraftClient
 
                 if (handler.Login(this.playerKeyPair)) // Login
                 {
-                    Translations.Log("mcc.joined", CornCraft.internalCmdChar);
+                    Translations.Notify("mcc.joined", CornCraft.internalCmdChar);
                     connected = true;
                 }
                 else
@@ -2271,10 +2276,6 @@ namespace MinecraftClient
         /// <param name="playerProperty">Tuple<Name, Value, Signature(empty if there is no signature)></param>
         public void OnLoginSuccess(Guid uuid, string userName, Tuple<string, string, string>[]? playerProperty)
         {
-            //string UUID = uuid.ToString().Replace("-", String.Empty);
-            //Log.Info("now UUID = " + this.uuid);
-            //Log.Info("new UUID = " + UUID);
-            ////handler.SetUserUUID(UUID);
 
         }
         #nullable disable

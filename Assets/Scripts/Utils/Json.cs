@@ -36,7 +36,7 @@ namespace MinecraftClient
                 type = datatype;
                 Properties = new Dictionary<string, JSONData>();
                 DataArray = new List<JSONData>();
-                StringValue = String.Empty;
+                StringValue = string.Empty;
             }
         }
 

@@ -48,10 +48,10 @@ namespace MinecraftClient.Protocol.Keys
             catch (Exception e)
             {
                 int code = (response == null) ? 0 : response.StatusCode;
-                Translations.Log("§cFetch profile key failed: HttpCode = " + code + ", Error = " + e.Message);
+                StringConvert.LogError("§cFetch profile key failed: HttpCode = " + code + ", Error = " + e.Message);
                 if (CornCraft.DebugMode)
                 {
-                    Translations.Log("§c" + e.StackTrace);
+                    StringConvert.LogError("§c" + e.StackTrace);
                 }
                 return null;
             }
@@ -66,8 +66,8 @@ namespace MinecraftClient.Protocol.Keys
                 int j = key.IndexOf(suffix, i);
                 key = key[i..j];
             }
-            key = key.Replace("\r", String.Empty);
-            key = key.Replace("\n", String.Empty);
+            key = key.Replace("\r", string.Empty);
+            key = key.Replace("\n", string.Empty);
             return Convert.FromBase64String(key);
         }
 

@@ -1216,7 +1216,7 @@ namespace Ionic.Zip
         {
             get
             {
-                string alg = String.Empty;
+                string alg = string.Empty;
                 switch (_UnsupportedAlgorithmId)
                 {
                     case 0:
@@ -1269,7 +1269,7 @@ namespace Ionic.Zip
         {
             get
             {
-                string meth = String.Empty;
+                string meth = string.Empty;
                 switch ((int)_CompressionMethod)
                 {
                     case 0:

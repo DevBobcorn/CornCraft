@@ -18,11 +18,11 @@ namespace MinecraftClient.Protocol.Session
 
         public SessionToken()
         {
-            ID = String.Empty;
-            PlayerName = String.Empty;
-            PlayerID = String.Empty;
-            ClientID = String.Empty;
-            RefreshToken = String.Empty;
+            ID = string.Empty;
+            PlayerName = string.Empty;
+            PlayerID = string.Empty;
+            ClientID = string.Empty;
+            RefreshToken = string.Empty;
         }
 
         public override string ToString()
@@ -45,7 +45,7 @@ namespace MinecraftClient.Protocol.Session
             if (fields.Length > 4)
                 session.RefreshToken = fields[4];
             else
-                session.RefreshToken = String.Empty;
+                session.RefreshToken = string.Empty;
 
             Guid temp;
             if (!JwtRegex.IsMatch(session.ID))

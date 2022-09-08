@@ -98,7 +98,7 @@ namespace MinecraftClient
 
         // Convert Minecraft formatting codes to TextMesh Pro format
         // The result text can somehow also be used in Unity Console
-        public static string MC2TMP(string original) // Example: Try "§7[§7YaeMicorn: §7Granted blah blah blah §5[TI§5§c[INSIDE]TLE] to §7§7Someone]"
+        public static string MC2TMP(string original)
         {
             var processed = string.Empty;
             Stack<char> prevColors = new Stack<char>();
@@ -108,7 +108,7 @@ namespace MinecraftClient
             int formatFlag = 0;
             for (int ptr = 0;ptr < original.Length;ptr++)
             {
-                if (original[ptr] == '\u00a7' && (ptr + 1) < original.Length)
+                if (original[ptr] == '§' && (ptr + 1) < original.Length)
                 {
                     // Skip section sign and read the formatting code...
                     ptr++;
@@ -208,6 +208,33 @@ namespace MinecraftClient
 
             return processed;
 
+        }
+
+        /// <summary>
+        /// Format the result and write it to Unity Console
+        /// </summary>
+        /// <param name="text">Text with formatting codes</param>
+        public static void Log(string text)
+        {
+            Debug.Log(StringConvert.MC2TMP(text));
+        }
+
+        /// <summary>
+        /// Format the result and write it to Unity Console as warning message
+        /// </summary>
+        /// <param name="text">Text with formatting codes</param>
+        public static void LogWarning(string text)
+        {
+            Debug.LogWarning(StringConvert.MC2TMP(text));
+        }
+
+        /// <summary>
+        /// Format the result and write it to Unity Console as error message
+        /// </summary>
+        /// <param name="text">Text with formatting codes</param>
+        public static void LogError(string text)
+        {
+            Debug.LogError(StringConvert.MC2TMP(text));
         }
 
     }

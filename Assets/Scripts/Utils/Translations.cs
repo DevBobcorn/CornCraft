@@ -212,10 +212,18 @@ namespace MinecraftClient
         {
             string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
             Debug.Log(StringConvert.MC2TMP(text));
+        }
 
-            Loom.QueueOnMainThread(
-                () => Notify(RemoveFormatting(text), 6F, UI.Notification.Type.Notification)
-            );
+        /// <summary>
+        /// Translate the key, format the result and display it as notification
+        /// </summary>
+        /// <param name="key">Translation key</param>
+        /// <param name="args"></param>
+        public static void Notify(string key, params object[] args)
+        {
+            string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
+            Debug.Log(StringConvert.MC2TMP(text));
+            Loom.QueueOnMainThread(() => Notify(RemoveFormatting(text), UI.Notification.Type.Notification));
         }
 
         /// <summary>
@@ -226,12 +234,19 @@ namespace MinecraftClient
         public static void LogWarning(string key, params object[] args)
         {
             string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.LogWarning(StringConvert.MC2TMP("\u00a7e" + text));
+            Debug.LogWarning(StringConvert.MC2TMP("§e" + text));
+        }
 
-            // Add yellow color prefix
-            Loom.QueueOnMainThread(
-                () => Notify(RemoveFormatting(text), 6F, UI.Notification.Type.Warning)
-            );
+        /// <summary>
+        /// Translate the key, format the result and display it as warning notification
+        /// </summary>
+        /// <param name="key">Translation key</param>
+        /// <param name="args"></param>
+        public static void NotifyWarning(string key, params object[] args)
+        {
+            string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
+            Debug.LogWarning(StringConvert.MC2TMP("§e" + text)); // Add yellow color prefix
+            Loom.QueueOnMainThread(() => Notify(RemoveFormatting(text), UI.Notification.Type.Warning));
         }
 
         /// <summary>
@@ -242,23 +257,30 @@ namespace MinecraftClient
         public static void LogError(string key, params object[] args)
         {
             string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.LogError(StringConvert.MC2TMP("\u00a74" + text));
-
-            // Add red color prefix, and notify on Unity thread via Loom
-            Loom.QueueOnMainThread(
-                () => Notify(RemoveFormatting(text), 6F, UI.Notification.Type.Error)
-            );
+            Debug.LogError(StringConvert.MC2TMP("§4" + text)); // Add red color prefix
         }
 
-        private static void Notify(string text, float duration, UI.Notification.Type type)
+        /// <summary>
+        /// Translate the key, format the result and display it as error notification
+        /// </summary>
+        /// <param name="key">Translation key</param>
+        /// <param name="args"></param>
+        public static void NotifyError(string key, params object[] args)
         {
-            CornClient.ShowNotification(text, duration, type);
+            string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
+            Debug.LogError(StringConvert.MC2TMP("§4" + text));
+            Loom.QueueOnMainThread(() => Notify(RemoveFormatting(text), UI.Notification.Type.Error));
+        }
+
+        private static void Notify(string text, UI.Notification.Type type)
+        {
+            CornClient.ShowNotification(text, type);
         }
 
         public static string RemoveFormatting(string original)
         {
             // Remove all Minecraft formatting codes from it
-            return Regex.Replace(original, "\u00a7.", "");
+            return Regex.Replace(original, "§.", "");
         }
 
         #endregion

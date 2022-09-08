@@ -66,11 +66,11 @@ namespace MinecraftClient.Protocol.Keys
             List<string> datas = new List<string>();
             datas.Add(Convert.ToBase64String(PublicKey.Key));
             if (PublicKey.Signature == null)
-                datas.Add(String.Empty);
+                datas.Add(string.Empty);
             else
                 datas.Add(Convert.ToBase64String(PublicKey.Signature));
             if (PublicKey.SignatureV2 == null)
-                datas.Add(String.Empty);
+                datas.Add(string.Empty);
             else
                 datas.Add(Convert.ToBase64String(PublicKey.SignatureV2));
             datas.Add(Convert.ToBase64String(PrivateKey.Key));

@@ -703,10 +703,10 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     case PacketTypesIn.Title:
                         int action2 = dataTypes.ReadNextVarInt(packetData);
-                        string titletext = String.Empty;
-                        string subtitletext = String.Empty;
-                        string actionbartext = String.Empty;
-                        string json = String.Empty;
+                        string titletext = string.Empty;
+                        string subtitletext = string.Empty;
+                        string actionbartext = string.Empty;
+                        string json = string.Empty;
                         int fadein = -1;
                         int stay = -1;
                         int fadeout = -1;
@@ -1232,7 +1232,7 @@ namespace MinecraftClient.Protocol.Handlers
                     case PacketTypesIn.ScoreboardObjective:
                         string objectivename = dataTypes.ReadNextString(packetData);
                         byte mode = dataTypes.ReadNextByte(packetData);
-                        string objectivevalue = String.Empty;
+                        string objectivevalue = string.Empty;
                         int type2 = -1;
                         if (mode == 0 || mode == 2)
                         {
@@ -1246,7 +1246,7 @@ namespace MinecraftClient.Protocol.Handlers
                         int action3 = protocolVersion >= MC_1_18_2_Version
                             ? dataTypes.ReadNextVarInt(packetData)
                             : dataTypes.ReadNextByte(packetData);
-                        string objectivename2 = String.Empty;
+                        string objectivename2 = string.Empty;
                         int value = -1;
                         objectivename2 = dataTypes.ReadNextString(packetData);
                         if (action3 != 1)
@@ -1540,7 +1540,7 @@ namespace MinecraftClient.Protocol.Handlers
                             string name = dataTypes.ReadNextString(packetData);
                             string value = dataTypes.ReadNextString(packetData);
                             bool isSigned = dataTypes.ReadNextBool(packetData);
-                            string signature = isSigned ? dataTypes.ReadNextString(packetData) : String.Empty;
+                            string signature = isSigned ? dataTypes.ReadNextString(packetData) : string.Empty;
                             playerProperty[i] = new Tuple<string, string, string>(name, value, signature);
                         }
                     }
@@ -1627,7 +1627,7 @@ namespace MinecraftClient.Protocol.Handlers
                             // Check for forge on the server.
                             ProtocolForge.ServerInfoCheckForge(jsonData, ref forgeInfo);
 
-                            Translations.Log("mcc.server_protocol", version, protocol + (forgeInfo != null ? Translations.Get("mcc.with_forge") : ""));
+                            Translations.Notify("mcc.server_protocol", version, protocol + (forgeInfo != null ? Translations.Get("mcc.with_forge") : ""));
 
                             return true;
                         }
