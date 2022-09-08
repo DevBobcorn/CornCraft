@@ -177,7 +177,7 @@ namespace MinecraftClient
         #region Util Functions
 
         /// <summary>
-        /// Verify that a string contains only a-z A-Z 0-9 and _ characters.
+        /// Verify that a string contains only a-z A-Z 0-9 or _ and meanwhile being not longer than 16 characters.
         /// </summary>
         public static bool IsValidName(string username)
         {
@@ -191,7 +191,7 @@ namespace MinecraftClient
                         || c == '_') )
                     return false;
 
-            return true;
+            return username.Length <= 16;
         }
 
         /// <summary>
