@@ -115,7 +115,7 @@ namespace MinecraftClient.UI
 
             if (password == "-")
             {   // Enter offline mode
-                Translations.Log("mcc.offline");
+                Translations.Notify("mcc.offline");
                 result = ProtocolHandler.LoginResult.Success;
                 session.PlayerID = "0";
                 session.PlayerName = account;
@@ -144,7 +144,7 @@ namespace MinecraftClient.UI
                         }
                         if (result != ProtocolHandler.LoginResult.Success && password == string.Empty)
                         {   // Request password
-                            Translations.LogWarning("Please input your password!");
+                            CornClient.ShowNotification("Please input your password!", Notification.Type.Warning);
                             tryingConnect = false;
                             return;
                         }
@@ -208,9 +208,9 @@ namespace MinecraftClient.UI
                 if (MinecraftRealmsEnabled && !String.IsNullOrEmpty(session.ID))
                     availableWorlds = ProtocolHandler.RealmsListWorlds(username, session.PlayerID, session.ID);
 
-                if (host == "")
+                if (host == string.Empty)
                 {   // Request host
-                    Translations.LogWarning("Please input your host!");
+                    CornClient.ShowNotification("Please input your host!", Notification.Type.Warning);
                     return;
                 }
 
@@ -253,7 +253,7 @@ namespace MinecraftClient.UI
             else
             {
                 string failureMessage = Translations.Get("error.login");
-                string failureReason = "";
+                string failureReason = string.Empty;
                 switch (result)
                 {
                     case ProtocolHandler.LoginResult.AccountMigrated: failureReason = "error.login.migrated"; break;

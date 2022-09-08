@@ -16,7 +16,7 @@ namespace MinecraftClient.Control
 
         void Update()
         {
-            if (CornClient.Instance.IsPaused() || Cursor.lockState != CursorLockMode.Locked) return;
+            if (CornClient.Instance.IsPaused()) return;
 
             float x = Input.GetAxis("Mouse X");
             float y = Input.GetAxis("Mouse Y");
@@ -29,7 +29,7 @@ namespace MinecraftClient.Control
 
         void LateUpdate()
         {
-            if (CornClient.Instance.IsPaused() || Cursor.lockState != CursorLockMode.Locked) return;
+            if (CornClient.Instance.IsPaused()) return;
 
             camControl.LateTick(Time.deltaTime);
         }

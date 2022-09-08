@@ -57,7 +57,7 @@ namespace MinecraftClient.UI
 
         public override bool ShouldPause()
         {
-            return false;
+            return true;
         }
 
         public void SetChatMessage(string message)
