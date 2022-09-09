@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using MinecraftClient.Mapping;
 using MinecraftClient.Inventory;
 using MinecraftClient.Protocol.Keys;
+using MinecraftClient.Protocol.Session;
 
 namespace MinecraftClient.Protocol
 {
@@ -19,7 +20,7 @@ namespace MinecraftClient.Protocol
         /// Start the login procedure once connected to the server
         /// </summary>
         /// <returns>True if login was successful</returns>
-        bool Login(PlayerKeyPair? playerKeyPair);
+        bool Login(PlayerKeyPair? playerKeyPair, SessionToken session, string accountLower);
 
         /// <summary>
         /// Disconnect from the server
@@ -173,7 +174,7 @@ namespace MinecraftClient.Protocol
         /// <param name="changedSlots">Slots that have been changed in this event: List<SlotID, Changed Items> </param>
         /// <param name="stateId">Inventory's stateId</param>
         /// <returns>True if packet was successfully sent</returns>
-        bool SendWindowAction(int windowId, int slotId, WindowActionType action, Item item, List<Tuple<short, Item>> changedSlots, int stateId);
+        bool SendWindowAction(int windowId, int slotId, WindowActionType action, Item? item, List<Tuple<short, Item?>> changedSlots, int stateId);
 
         /// <summary>
         /// Request Creative Mode item creation into regular/survival Player Inventory
@@ -253,9 +254,9 @@ namespace MinecraftClient.Protocol
         bool SendSpectate(Guid uuid);
 
         /// <summary>
-        /// Get net read thread (main thread) Id
+        /// Get net main thread ID
         /// </summary>
-        /// <returns>Net read thread Id</returns>
-        int GetNetReadThreadId();
+        /// <returns>Net main thread ID</returns>
+        int GetNetMainThreadId();
     }
 }

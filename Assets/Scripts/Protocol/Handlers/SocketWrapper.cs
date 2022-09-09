@@ -49,7 +49,7 @@ namespace MinecraftClient.Protocol.Handlers
         {
             if (encrypted)
                 throw new InvalidOperationException("Stream is already encrypted!?");
-            this.s = CryptoHandler.getAesStream(c.GetStream(), secretKey);
+            this.s = CryptoHandler.GetAesStream(c.GetStream(), secretKey);
             this.encrypted = true;
         }
 
@@ -93,11 +93,9 @@ namespace MinecraftClient.Protocol.Handlers
         {
             if (encrypted)
             {
-                s?.Write(buffer, 0, buffer.Length);
+                s.Write(buffer, 0, buffer.Length);
             }
-            else {
-                c?.Client?.Send(buffer);
-            }
+            else c.Client.Send(buffer);
         }
 
         /// <summary>

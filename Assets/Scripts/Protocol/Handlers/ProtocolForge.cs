@@ -14,7 +14,7 @@ namespace MinecraftClient.Protocol.Handlers
     {
         private int protocolversion;
         private DataTypes dataTypes;
-        private ProtocolMinecraft protocol18;
+        private ProtocolMinecraft protocolMC;
         private IMinecraftComHandler mcHandler;
 
         private ForgeInfo forgeInfo;
@@ -27,12 +27,12 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="forgeInfo">Forge Server Information</param>
         /// <param name="protocolVersion">Minecraft protocol version</param>
         /// <param name="dataTypes">Minecraft data types handler</param>
-        public ProtocolForge(ForgeInfo forgeInfo, int protocolVersion, DataTypes dataTypes, ProtocolMinecraft protocol18, IMinecraftComHandler mcHandler)
+        public ProtocolForge(ForgeInfo forgeInfo, int protocolVersion, DataTypes dataTypes, ProtocolMinecraft protocolMC, IMinecraftComHandler mcHandler)
         {
             this.forgeInfo = forgeInfo;
             this.protocolversion = protocolVersion;
             this.dataTypes = dataTypes;
-            this.protocol18 = protocol18;
+            this.protocolMC = protocolMC;
             this.mcHandler = mcHandler;
         }
 
@@ -56,12 +56,9 @@ namespace MinecraftClient.Protocol.Handlers
         {
             if (ForgeEnabled() && forgeInfo.Version == FMLVersion.FML)
             {
-                int packetID = -1;
-                Queue<byte> packetData = new Queue<byte>();
-
                 while (fmlHandshakeState != FMLHandshakeClientState.DONE)
                 {
-                    protocol18.ReadNextPacket(ref packetID, packetData);
+                    (int packetID, Queue<byte> packetData) = protocolMC.ReadNextPacket();
 
                     if (packetID == 0x40) // Disconnect
                     {
@@ -71,7 +68,7 @@ namespace MinecraftClient.Protocol.Handlers
                     else
                     {
                         // Send back regular packet to the vanilla protocol handler
-                        protocol18.HandlePacket(packetID, packetData);
+                        protocolMC.HandlePacket(packetID, packetData);
                     }
                 }
             }
@@ -129,7 +126,7 @@ namespace MinecraftClient.Protocol.Handlers
                             // and is also \0-separated.
                             // Also, yes, "FML" is there twice.  Don't ask me why, but that's the way forge does it.
                             string[] channels = { "FML|HS", "FML", "FML|MP", "FML", "FORGE" };
-                            protocol18.SendPluginChannelPacket("REGISTER", Encoding.UTF8.GetBytes(string.Join("\0", channels)));
+                            protocolMC.SendPluginChannelPacket("REGISTER", Encoding.UTF8.GetBytes(string.Join("\0", channels)));
 
                             byte fmlProtocolVersion = dataTypes.ReadNextByte(packetData);
 
@@ -416,7 +413,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="data">packet Data</param>
         private void SendForgeHandshakePacket(FMLHandshakeDiscriminator discriminator, byte[] data)
         {
-            protocol18.SendPluginChannelPacket("FML|HS", dataTypes.ConcatBytes(new byte[] { (byte)discriminator }, data));
+            protocolMC.SendPluginChannelPacket("FML|HS", dataTypes.ConcatBytes(new byte[] { (byte)discriminator }, data));
         }
 
         #nullable enable

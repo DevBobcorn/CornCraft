@@ -9,9 +9,13 @@ namespace MinecraftClient.Crypto
     /// <summary>
     /// Methods for handling all the crypto stuff: RSA (Encryption Key Request), AES (Encrypted Stream), SHA-1 (Server Hash).
     /// </summary>
-
-    public class CryptoHandler
+    public static class CryptoHandler
     {
+        #nullable enable
+        public static byte[]? ClientAESPrivateKey = null;
+
+        #nullable disable
+
         /// <summary>
         /// Get a cryptographic service for encrypting data using the server's RSA public key
         /// </summary>
@@ -198,7 +202,7 @@ namespace MinecraftClient.Crypto
         /// <param name="AesKey">Key to use</param>
         /// <returns>Return an appropriate stream depending on the framework being used</returns>
 
-        public static IAesStream getAesStream(Stream underlyingStream, byte[] AesKey)
+        public static IAesStream GetAesStream(Stream underlyingStream, byte[] AesKey)
         {
             return new Streams.RegularAesStream(underlyingStream, AesKey);
         }

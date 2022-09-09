@@ -150,6 +150,7 @@ namespace MinecraftClient.Protocol
                 switch (MCVersion.Split(' ')[0].Trim())
                 {
                     case "1.13":
+                    case "1.13.0":
                         return 393;
                     case "1.13.1":
                         return 401;
@@ -186,16 +187,22 @@ namespace MinecraftClient.Protocol
                     case "1.16.5":
                         return 754;
                     case "1.17":
+                    case "1.17.0":
                         return 755;
                     case "1.17.1":
                         return 756;
                     case "1.18":
+                    case "1.18.0":
                     case "1.18.1":
                         return 757;
                     case "1.18.2":
                         return 758;
                     case "1.19":
+                    case "1.19.0":
                         return 759;
+                    case "1.19.1":
+                    case "1.19.2":
+                        return 760;
                     default:
                         return 0;
                 }
@@ -723,7 +730,7 @@ namespace MinecraftClient.Protocol
                     //TcpClient client = ProxyHandler.newTcpClient(host, 443, true);
                     TcpClient client = new TcpClient(host, 443);
                     SslStream stream = new SslStream(client.GetStream());
-                    stream.AuthenticateAsClient(host, null, (SslProtocols)3072, true); // Enable TLS 1.2. Hotfix for #1780
+                    stream.AuthenticateAsClient(host, null, SslProtocols.Tls12, true); // Enable TLS 1.2. Hotfix for #1780
 
                     stream.Write(Encoding.ASCII.GetBytes(String.Join("\r\n", headers.ToArray())));
                     System.IO.StreamReader sr = new System.IO.StreamReader(stream);
