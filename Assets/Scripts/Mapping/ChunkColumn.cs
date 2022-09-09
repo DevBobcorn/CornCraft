@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using System;
-using System.Threading;
 
 namespace MinecraftClient.Mapping
 {
@@ -22,11 +21,6 @@ namespace MinecraftClient.Mapping
         private readonly Chunk?[] chunks;
 
         /// <summary>
-        /// Lock for thread safety
-        /// </summary>
-        private readonly ReaderWriterLockSlim chunkLock = new ReaderWriterLockSlim();
-
-        /// <summary>
         /// Create a new ChunkColumn
         /// </summary>
         public ChunkColumn(World parent, int size = 16)
@@ -37,36 +31,19 @@ namespace MinecraftClient.Mapping
         }
 
         /// <summary>
-        /// Get or set the specified chunk column
+        /// Get or set the specified chunk
         /// </summary>
-        /// <param name="chunkX">ChunkColumn X</param>
-        /// <param name="chunkY">ChunkColumn Y</param>
+        /// <param name="chunkY">Chunk Y</param>
         /// <returns>chunk at the given location</returns>
         public Chunk? this[int chunkY]
         {
             get
             {
-                chunkLock.EnterReadLock();
-                try
-                {
-                    return chunks[chunkY];
-                }
-                finally
-                {
-                    chunkLock.ExitReadLock();
-                }
+                return chunks[chunkY];
             }
             set
             {
-                chunkLock.EnterWriteLock();
-                try
-                {
-                    chunks[chunkY] = value;
-                }
-                finally
-                {
-                    chunkLock.ExitWriteLock();
-                }
+                chunks[chunkY] = value;
             }
         }
 

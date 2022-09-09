@@ -67,6 +67,8 @@ namespace MinecraftClient.UI
             string account = usernameInput!.text;
             string password = passwordInput!.text;
 
+            string accountLower = account.ToLower();
+
             string username; // In-game display name, will be set after connection
 
             string host;   // Server ip address
@@ -108,9 +110,9 @@ namespace MinecraftClient.UI
             }
             else
             {   // Validate cached session or login new session.
-                if (CornCraft.SessionCaching != CacheType.None && SessionCache.Contains(account.ToLower()))
+                if (CornCraft.SessionCaching != CacheType.None && SessionCache.Contains(accountLower))
                 {
-                    session = SessionCache.Get(account.ToLower());
+                    session = SessionCache.Get(accountLower);
                     result = ProtocolHandler.GetTokenValidation(session);
                     if (result != ProtocolHandler.LoginResult.Success)
                     {
@@ -149,7 +151,7 @@ namespace MinecraftClient.UI
 
             if (result == ProtocolHandler.LoginResult.Success && CornCraft.SessionCaching != CacheType.None)
             {
-                SessionCache.Store(account.ToLower(), session);
+                SessionCache.Store(accountLower, session);
             }
 
             if (result == ProtocolHandler.LoginResult.Success)
@@ -164,9 +166,9 @@ namespace MinecraftClient.UI
                             Translations.Log(cacheKeyLoaded ? "debug.keys_cache_ok" : "debug.keys_cache_fail");
                     }
 
-                    if (CornCraft.ProfileKeyCaching != CacheType.None && KeysCache.Contains(account.ToLower()))
+                    if (CornCraft.ProfileKeyCaching != CacheType.None && KeysCache.Contains(accountLower))
                     {
-                        playerKeyPair = KeysCache.Get(account.ToLower());
+                        playerKeyPair = KeysCache.Get(accountLower);
                         if (playerKeyPair.NeedRefresh())
                             Translations.Log("mcc.profile_key_invalid");
                         else
@@ -179,7 +181,7 @@ namespace MinecraftClient.UI
                         playerKeyPair = KeyUtils.GetKeys(session.ID);
                         if (CornCraft.ProfileKeyCaching != CacheType.None && playerKeyPair != null)
                         {
-                            KeysCache.Store(account.ToLower(), playerKeyPair);
+                            KeysCache.Store(accountLower, playerKeyPair);
                         }
                     }
                 }
@@ -223,7 +225,7 @@ namespace MinecraftClient.UI
                     {
                         try // Login to Server
                         {
-                            game!.Login(session.PlayerName, session.PlayerID, session.ID, playerKeyPair, host, port, protocolVersion, forgeInfo, loadStateInfo);
+                            game!.StartLogin(session, playerKeyPair, host, port, protocolVersion, forgeInfo, loadStateInfo, accountLower);
                             tryingConnect = false;
                             return;
                         }

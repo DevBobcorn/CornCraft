@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#nullable enable
+using System;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace MinecraftClient.Protocol.Session
 {
@@ -15,6 +16,10 @@ namespace MinecraftClient.Protocol.Session
         public string PlayerID { get; set; }
         public string ClientID { get; set; }
         public string RefreshToken { get; set; }
+        public string ServerIDhash { get; set; }
+        public byte[]? ServerPublicKey { get; set; }
+
+        public Task<bool>? SessionPreCheckTask = null;
 
         public SessionToken()
         {
@@ -23,11 +28,26 @@ namespace MinecraftClient.Protocol.Session
             PlayerID = string.Empty;
             ClientID = string.Empty;
             RefreshToken = string.Empty;
+            ServerIDhash = string.Empty;
+            ServerPublicKey = null;
+        }
+
+        public bool SessionPreCheck()
+        {
+            if (this.ID == string.Empty || this.PlayerID == string.Empty || this.ServerPublicKey == null)
+                return false;
+            if (Crypto.CryptoHandler.ClientAESPrivateKey == null)
+                Crypto.CryptoHandler.ClientAESPrivateKey = Crypto.CryptoHandler.GenerateAESPrivateKey();
+            string serverHash = Crypto.CryptoHandler.getServerHash(ServerIDhash, ServerPublicKey, Crypto.CryptoHandler.ClientAESPrivateKey);
+            if (ProtocolHandler.SessionCheck(PlayerID, ID, serverHash))
+                return true;
+            return false;
         }
 
         public override string ToString()
         {
-            return String.Join(",", ID, PlayerName, PlayerID, ClientID, RefreshToken);
+            return String.Join(",", ID, PlayerName, PlayerID, ClientID, RefreshToken, ServerIDhash, 
+                (ServerPublicKey == null) ? string.Empty : Convert.ToBase64String(ServerPublicKey));
         }
 
         public static SessionToken FromString(string tokenString)
@@ -46,6 +66,23 @@ namespace MinecraftClient.Protocol.Session
                 session.RefreshToken = fields[4];
             else
                 session.RefreshToken = string.Empty;
+            if (fields.Length > 5)
+                session.ServerIDhash = fields[5];
+            else
+                session.ServerIDhash = string.Empty;
+            if (fields.Length > 6)
+            {
+                try
+                {
+                    session.ServerPublicKey = Convert.FromBase64String(fields[6]);
+                }
+                catch
+                {
+                    session.ServerPublicKey = null;
+                }
+            }
+            else
+                session.ServerPublicKey = null;
 
             Guid temp;
             if (!JwtRegex.IsMatch(session.ID))

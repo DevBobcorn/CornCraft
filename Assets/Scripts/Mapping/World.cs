@@ -67,18 +67,17 @@ namespace MinecraftClient.Mapping
         /// <param name="registryCodec">Registry Codec nbt data</param>
         public static void StoreDimensionList(Dictionary<string, object> registryCodec)
         {
-            dimensionList = new();
             var dimensionListNbt = (object[])(((Dictionary<string, object>)registryCodec["minecraft:dimension_type"])["value"]);
             foreach (Dictionary<string, object> dimensionNbt in dimensionListNbt)
             {
                 string dimensionName = (string)dimensionNbt["name"];
-                Dictionary<string, object> element = (Dictionary<string, object>)dimensionNbt["element"];
-                dimensionList.Add(dimensionName, new Dimension(dimensionName, element));
+                Dictionary<string, object> dimensionType = (Dictionary<string, object>)dimensionNbt["element"];
+                StoreOneDimension(dimensionName, dimensionType);
             }
         }
 
         /// <summary>
-        /// Store one dimension - Directly used from 1.16.2 to 1.18.2
+        /// Store one dimension - Directly used in 1.16.2 to 1.18.2
         /// </summary>
         /// <param name="dimensionName">Dimension name</param>
         /// <param name="dimensionType">Dimension Type nbt data</param>
@@ -93,12 +92,10 @@ namespace MinecraftClient.Mapping
         /// Set current dimension - 1.16 and above
         /// </summary>
         /// <param name="name">	The name of the dimension type</param>
+        /// <param name="nbt">The dimension type (NBT Tag Compound)</param>
         public static void SetDimension(string name)
         {
-            if (dimensionList!.TryGetValue(name, out Dimension? dimension))
-                curDimension = dimension;
-            else
-                Console.WriteLine("Can't find dimension \"" + name + "\"");
+            curDimension = dimensionList[name]; // Should not fail
         }
 
         /// <summary>
@@ -108,6 +105,20 @@ namespace MinecraftClient.Mapping
         public static Dimension GetDimension()
         {
             return curDimension;
+        }
+
+        /// <summary>
+        /// Set chunk column at the specified location
+        /// </summary>
+        /// <param name="chunkX">ChunkColumn X</param>
+        /// <param name="chunkY">ChunkColumn Y</param>
+        /// <param name="chunkZ">ChunkColumn Z</param>
+        /// <param name="chunkColumnSize">ChunkColumn size</param>
+        /// <param name="chunk">Chunk data</param>
+        public void StoreChunk(int chunkX, int chunkY, int chunkZ, int chunkColumnSize, Chunk? chunk)
+        {
+            ChunkColumn chunkColumn = chunks.GetOrAdd(new(chunkX, chunkZ), (_) => new(this, chunkColumnSize));
+            chunkColumn[chunkY] = chunk;
         }
 
         /// <summary>

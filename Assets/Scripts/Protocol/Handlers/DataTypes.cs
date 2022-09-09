@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Text;
 using MinecraftClient.Mapping;
@@ -39,6 +40,17 @@ namespace MinecraftClient.Protocol.Handlers
             for (int i = 0; i < offset; i++)
                 result[i] = cache.Dequeue();
             return result;
+        }
+
+        /// <summary>
+        /// Read some data from a cache of bytes and remove it from the cache
+        /// </summary>
+        /// <param name="cache">Cache of bytes to read from</param>
+        /// <param name="dest">Storage results</param>
+        public void ReadDataReverse(Queue<byte> cache, Span<byte> dest)
+        {
+            for (int i = (dest.Length - 1); i >= 0; --i)
+                dest[i] = cache.Dequeue();
         }
 
         /// <summary>
@@ -92,9 +104,10 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>The short integer value</returns>
         public short ReadNextShort(Queue<byte> cache)
         {
-            byte[] rawValue = ReadData(2, cache);
-            Array.Reverse(rawValue); //Endianness
-            return BitConverter.ToInt16(rawValue, 0);
+            Span<byte> rawValue = stackalloc byte[2];
+            for (int i = (2 - 1); i >= 0; --i) //Endianness
+                rawValue[i] = cache.Dequeue();
+            return BitConverter.ToInt16(rawValue);
         }
 
         /// <summary>
@@ -103,9 +116,10 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>The integer value</returns>
         public int ReadNextInt(Queue<byte> cache)
         {
-            byte[] rawValue = ReadData(4, cache);
-            Array.Reverse(rawValue); //Endianness
-            return BitConverter.ToInt32(rawValue, 0);
+            Span<byte> rawValue = stackalloc byte[4];
+            for (int i = (4 - 1); i >= 0; --i) //Endianness
+                rawValue[i] = cache.Dequeue();
+            return BitConverter.ToInt32(rawValue);
         }
 
         /// <summary>
@@ -114,9 +128,10 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>The unsigned long integer value</returns>
         public long ReadNextLong(Queue<byte> cache)
         {
-            byte[] rawValue = ReadData(8, cache);
-            Array.Reverse(rawValue); //Endianness
-            return BitConverter.ToInt64(rawValue, 0);
+            Span<byte> rawValue = stackalloc byte[8];
+            for (int i = (8 - 1); i >= 0; --i) //Endianness
+                rawValue[i] = cache.Dequeue();
+            return BitConverter.ToInt64(rawValue);
         }
 
         /// <summary>
@@ -125,9 +140,10 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>The unsigned short integer value</returns>
         public ushort ReadNextUShort(Queue<byte> cache)
         {
-            byte[] rawValue = ReadData(2, cache);
-            Array.Reverse(rawValue); //Endianness
-            return BitConverter.ToUInt16(rawValue, 0);
+            Span<byte> rawValue = stackalloc byte[2];
+            for (int i = (2 - 1); i >= 0; --i) //Endianness
+                rawValue[i] = cache.Dequeue();
+            return BitConverter.ToUInt16(rawValue);
         }
 
         /// <summary>
@@ -136,9 +152,10 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>The unsigned long integer value</returns>
         public ulong ReadNextULong(Queue<byte> cache)
         {
-            byte[] rawValue = ReadData(8, cache);
-            Array.Reverse(rawValue); //Endianness
-            return BitConverter.ToUInt64(rawValue, 0);
+            Span<byte> rawValue = stackalloc byte[8];
+            for (int i = (8 - 1); i >= 0; --i) //Endianness
+                rawValue[i] = cache.Dequeue();
+            return BitConverter.ToUInt64(rawValue);
         }
 
         /// <summary>
@@ -161,12 +178,12 @@ namespace MinecraftClient.Protocol.Handlers
                 y = (int)((locEncoded >> 26) & 0xFFF);
                 z = (int)(locEncoded << 38 >> 38);
             }
-            if (x >= 33554432)
-                x -= 67108864;
-            if (y >= 2048)
-                y -= 4096;
-            if (z >= 33554432)
-                z -= 67108864;
+            if (x >= 0x02000000) // 33,554,432
+                x -= 0x04000000; // 67,108,864
+            if (y >= 0x00000800) //      2,048
+                y -= 0x00001000; //      4,096
+            if (z >= 0x02000000) // 33,554,432
+                z -= 0x04000000; // 67,108,864
             return new Location(x, y, z);
         }
 
@@ -190,7 +207,9 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>The uuid</returns>
         public Guid ReadNextUUID(Queue<byte> cache)
         {
-            byte[] javaUUID = ReadData(16, cache);
+            Span<byte> javaUUID = stackalloc byte[16];
+            for (int i = 0; i < 16; ++i)
+                javaUUID[i] = cache.Dequeue();
             Guid guid = new Guid(javaUUID);
             if (BitConverter.IsLittleEndian)
                 guid = guid.ToLittleEndian();
@@ -227,9 +246,10 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>The double value</returns>
         public double ReadNextDouble(Queue<byte> cache)
         {
-            byte[] rawValue = ReadData(8, cache);
-            Array.Reverse(rawValue); //Endianness
-            return BitConverter.ToDouble(rawValue, 0);
+            Span<byte> rawValue = stackalloc byte[8];
+            for (int i = (8 - 1); i >= 0; --i) //Endianness
+                rawValue[i] = cache.Dequeue();
+            return BitConverter.ToDouble(rawValue);
         }
 
         /// <summary>
@@ -238,9 +258,10 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>The float value</returns>
         public float ReadNextFloat(Queue<byte> cache)
         {
-            byte[] rawValue = ReadData(4, cache);
-            Array.Reverse(rawValue); //Endianness
-            return BitConverter.ToSingle(rawValue, 0);
+            Span<byte> rawValue = stackalloc byte[4];
+            for (int i = (4 - 1); i >= 0; --i) //Endianness
+                rawValue[i] = cache.Dequeue();
+            return BitConverter.ToSingle(rawValue);
         }
 
         /// <summary>
@@ -251,13 +272,13 @@ namespace MinecraftClient.Protocol.Handlers
         {
             int i = 0;
             int j = 0;
-            int k = 0;
+            byte b;
             while (true)
             {
-                k = socket.ReadDataRAW(1)[0];
-                i |= (k & 0x7F) << j++ * 7;
+                b = socket.ReadDataRAW(1)[0];
+                i |= (b & 0x7F) << j++ * 7;
                 if (j > 5) throw new OverflowException("VarInt too big");
-                if ((k & 0x80) != 128) break;
+                if ((b & 0x80) != 128) break;
             }
             return i;
         }
@@ -269,17 +290,15 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>The integer</returns>
         public int ReadNextVarInt(Queue<byte> cache)
         {
-            string rawData = BitConverter.ToString(cache.ToArray());
             int i = 0;
             int j = 0;
-            int k = 0;
-            while (true)
+            byte b;
+            do
             {
-                k = ReadNextByte(cache);
-                i |= (k & 0x7F) << j++ * 7;
-                if (j > 5) throw new OverflowException("VarInt too big " + rawData);
-                if ((k & 0x80) != 128) break;
-            }
+                b = cache.Dequeue();
+                i |= (b & 0x7F) << j++ * 7;
+                if (j > 5) throw new OverflowException("VarInt too big");
+            } while ((b & 0x80) == 128);
             return i;
         }
 
@@ -290,10 +309,8 @@ namespace MinecraftClient.Protocol.Handlers
         public void SkipNextVarInt(Queue<byte> cache)
         {
             while (true)
-            {
                 if ((ReadNextByte(cache) & 0x80) != 128)
                     break;
-            }
         }
 
         /// <summary>
@@ -362,7 +379,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// Read a single item slot from a cache of bytes and remove it from the cache
         /// </summary>
         /// <returns>The item that was read or NULL for an empty slot</returns>
-        public Item ReadNextItemSlot(Queue<byte> cache, ItemPalette itemPalette)
+        public Item? ReadNextItemSlot(Queue<byte> cache, ItemPalette itemPalette)
         {
             List<byte> slotData = new List<byte>();
             if (protocolversion > ProtocolMinecraft.MC_1_13_Version)
@@ -540,7 +557,7 @@ namespace MinecraftClient.Protocol.Handlers
 
         public Dictionary<int, object> ReadNextMetadata(Queue<byte> cache, ItemPalette itemPalette)
         {
-            Dictionary<int, object> data = new Dictionary<int, object>();
+            Dictionary<int, object?> data = new Dictionary<int, object?>();
             byte key = ReadNextByte(cache);
             while (key != 0xff)
             {
@@ -558,7 +575,7 @@ namespace MinecraftClient.Protocol.Handlers
                     }
                 }
                 // Value's data type is depended on Type
-                object value = null;
+                object? value = null;
 
                 // This is backward compatible since new type is appended to the end
                 // Version upgrade note
@@ -668,7 +685,7 @@ namespace MinecraftClient.Protocol.Handlers
                 data[key] = value;
                 key = ReadNextByte(cache);
             }
-            return data;
+            return data!;
         }
 
         /// <summary>
@@ -677,9 +694,9 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>The item that was read or NULL for an empty slot</returns>
         public VillagerTrade ReadNextTrade(Queue<byte> cache, ItemPalette itemPalette)
         {
-            Item inputItem1 = ReadNextItemSlot(cache, itemPalette);
-            Item outputItem = ReadNextItemSlot(cache, itemPalette);
-            Item inputItem2 = null;
+            Item? inputItem1 = ReadNextItemSlot(cache, itemPalette);
+            Item? outputItem = ReadNextItemSlot(cache, itemPalette);
+            Item? inputItem2 = null;
             if (ReadNextBool(cache)) //check if villager has second item
             {
                 inputItem2 = ReadNextItemSlot(cache, itemPalette);
@@ -699,7 +716,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// </summary>
         /// <param name="nbt">Dictionary to encode as Nbt</param>
         /// <returns>Byte array for this NBT tag</returns>
-        public byte[] GetNbt(Dictionary<string, object> nbt)
+        public byte[] GetNbt(Dictionary<string, object>? nbt)
         {
             return GetNbt(nbt, true);
         }
@@ -710,7 +727,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="nbt">Dictionary to encode as Nbt</param>
         /// <param name="root">TRUE if starting a new NBT tag, FALSE if processing a nested NBT tag</param>
         /// <returns>Byte array for this NBT tag</returns>
-        private byte[] GetNbt(Dictionary<string, object> nbt, bool root)
+        private byte[] GetNbt(Dictionary<string, object>? nbt, bool root)
         {
             if (nbt == null || nbt.Count == 0)
                 return new byte[] { 0 }; // TAG_End
@@ -722,7 +739,7 @@ namespace MinecraftClient.Protocol.Handlers
                 bytes.Add(10); // TAG_Compound
 
                 // NBT root name
-                string rootName = null;
+                string? rootName = null;
 
                 if (nbt.ContainsKey(""))
                     rootName = nbt[""] as string;
@@ -1017,7 +1034,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="item">Item</param>
         /// <param name="itemPalette">Item Palette</param>
         /// <returns>Item slot representation</returns>
-        public byte[] GetItemSlot(Item item, ItemPalette itemPalette)
+        public byte[] GetItemSlot(Item? item, ItemPalette itemPalette)
         {
             List<byte> slotData = new List<byte>();
 
@@ -1114,37 +1131,44 @@ namespace MinecraftClient.Protocol.Handlers
         /// Write LastSeenMessageList
         /// </summary>
         /// <param name="msgList">Message.LastSeenMessageList</param>
+        /// <param name="isOnlineMode">Whether the server is in online mode</param>
         /// <returns>Message.LastSeenMessageList Packet Data</returns>
-        public byte[] GetLastSeenMessageList(Message.LastSeenMessageList msgList)
+        public byte[] GetLastSeenMessageList(Message.LastSeenMessageList msgList, bool isOnlineMode)
         {
-            List<byte> fields = new List<byte>();
-            fields.AddRange(GetVarInt(msgList.entries.Length));
-            foreach (Message.LastSeenMessageList.Entry entry in msgList.entries)
+            if (!isOnlineMode)
+                return GetVarInt(0);                                                   // Message list size
+            else
             {
-                fields.AddRange(entry.profileId.ToBigEndianBytes());
-                fields.AddRange(GetVarInt(entry.lastSignature.Length));
-                fields.AddRange(entry.lastSignature);
+                List<byte> fields = new();
+                fields.AddRange(GetVarInt(msgList.entries.Length));                    // Message list size
+                foreach (Message.LastSeenMessageList.Entry entry in msgList.entries)
+                {
+                    fields.AddRange(entry.profileId.ToBigEndianBytes());               // UUID
+                    fields.AddRange(GetVarInt(entry.lastSignature.Length));            // Signature length
+                    fields.AddRange(entry.lastSignature);                              // Signature data
+                }
+                return fields.ToArray();
             }
-            return fields.ToArray();
         }
 
         /// <summary>
         /// Write LastSeenMessageList.Acknowledgment
         /// </summary>
         /// <param name="ack">Acknowledgment</param>
+        /// <param name="isOnlineMode">Whether the server is in online mode</param>
         /// <returns>Acknowledgment Packet Data</returns>
-        public byte[] GetAcknowledgment(Message.LastSeenMessageList.Acknowledgment ack)
+        public byte[] GetAcknowledgment(Message.LastSeenMessageList.Acknowledgment ack, bool isOnlineMode)
         {
-            List<byte> fields = new List<byte>();
-            fields.AddRange(GetLastSeenMessageList(ack.lastSeen));
-            if (ack.lastReceived == null)
-                fields.AddRange(GetBool(false));
+            List<byte> fields = new();
+            fields.AddRange(GetLastSeenMessageList(ack.lastSeen, isOnlineMode));
+            if (!isOnlineMode || ack.lastReceived == null)
+                fields.AddRange(GetBool(false));                                        // Has last received message
             else
             {
                 fields.AddRange(GetBool(true));
-                fields.AddRange(ack.lastReceived.profileId.ToBigEndianBytes());
-                fields.AddRange(GetVarInt(ack.lastReceived.lastSignature.Length));
-                fields.AddRange(ack.lastReceived.lastSignature);
+                fields.AddRange(ack.lastReceived.profileId.ToBigEndianBytes());         // Has last received message
+                fields.AddRange(GetVarInt(ack.lastReceived.lastSignature.Length));      // Last received message signature length
+                fields.AddRange(ack.lastReceived.lastSignature);                        // Last received message signature data
             }
             return fields.ToArray();
         }

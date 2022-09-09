@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using MinecraftClient.Mapping;
 using MinecraftClient.Protocol.Message;
 using MinecraftClient.Inventory;
@@ -31,30 +30,29 @@ namespace MinecraftClient.Protocol
         PlayerInfo? GetPlayerInfo(Guid uuid);
         Location GetCurrentLocation();
         World GetWorld();
-        public CancellationToken GetChunkProcessCancelToken();
         bool GetIsSupportPreviewsChat();
         int GetProtocolVersion();
-        Container GetInventory(int inventoryID);
+        Container? GetInventory(int inventoryID);
 
         /// <summary>
         /// Invoke a task on the main thread, wait for completion and retrieve return value.
         /// </summary>
         /// <param name="task">Task to run with any type or return value</param>
         /// <returns>Any result returned from task, result type is inferred from the task</returns>
-        /// <example>bool result = InvokeOnNetReadThread(methodThatReturnsAbool);</example>
-        /// <example>bool result = InvokeOnNetReadThread(() => methodThatReturnsAbool(argument));</example>
-        /// <example>int result = InvokeOnNetReadThread(() => { yourCode(); return 42; });</example>
+        /// <example>bool result = InvokeOnNetMainThread(methodThatReturnsAbool);</example>
+        /// <example>bool result = InvokeOnNetMainThread(() => methodThatReturnsAbool(argument));</example>
+        /// <example>int result = InvokeOnNetMainThread(() => { yourCode(); return 42; });</example>
         /// <typeparam name="T">Type of the return value</typeparam>
-        T InvokeOnNetReadThread<T>(Func<T> task);
+        T InvokeOnNetMainThread<T>(Func<T> task);
 
         /// <summary>
         /// Invoke a task on the main thread and wait for completion
         /// </summary>
         /// <param name="task">Task to run without return value</param>
-        /// <example>InvokeOnNetReadThread(methodThatReturnsNothing);</example>
-        /// <example>InvokeOnNetReadThread(() => methodThatReturnsNothing(argument));</example>
-        /// <example>InvokeOnNetReadThread(() => { yourCode(); });</example>
-        void InvokeOnNetReadThread(Action task);
+        /// <example>InvokeOnNetMainThread(methodThatReturnsNothing);</example>
+        /// <example>InvokeOnNetMainThread(() => methodThatReturnsNothing(argument));</example>
+        /// <example>InvokeOnNetMainThread(() => { yourCode(); });</example>
+        void InvokeOnNetMainThread(Action task);
 
         /// <summary>
         /// Called when a server was successfully joined

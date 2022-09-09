@@ -1,6 +1,8 @@
 ﻿#nullable enable
 using System;
+using System.Numerics;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 using MinecraftClient.Event;
 using MinecraftClient.Mapping;
@@ -52,17 +54,10 @@ namespace MinecraftClient.Protocol.Handlers
                     return null;
                 
                 Chunk chunk = new(world);
-
                 for (int blockY = 0; blockY < Chunk.SizeY; blockY++)
-                {
                     for (int blockZ = 0; blockZ < Chunk.SizeZ; blockZ++)
-                    {
                         for (int blockX = 0; blockX < Chunk.SizeX; blockX++)
-                        {
-                            chunk[blockX, blockY, blockZ] = new Block(blockId);
-                        }
-                    }
-                }
+                            chunk.SetWithoutCheck(blockX, blockY, blockZ, new(blockId));
 
                 return chunk;
             }
@@ -74,6 +69,8 @@ namespace MinecraftClient.Protocol.Handlers
                 // Indirect Mode: For block states with bits per entry <= 4, 4 bits are used to represent a block.
                 if (bitsPerEntry < 4) bitsPerEntry = 4;
 
+                int entryPerLong = 64 / bitsPerEntry; // entryPerLong = sizeof(long) / bitsPerEntry
+
                 // Direct Mode: Bit mask covering bitsPerEntry bits
                 // EG, if bitsPerEntry = 5, valueMask = 00011111 in binary
                 uint valueMask = (uint)((1 << bitsPerEntry) - 1);
@@ -81,43 +78,36 @@ namespace MinecraftClient.Protocol.Handlers
                 int paletteLength = 0; // Assume zero when length is absent
                 if (usePalette) paletteLength = dataTypes.ReadNextVarInt(cache);
 
-                int[] palette = new int[paletteLength];
+                Span<uint> palette = paletteLength < 256 ? stackalloc uint[paletteLength] : new uint[paletteLength];
                 for (int i = 0; i < paletteLength; i++)
-                    palette[i] = dataTypes.ReadNextVarInt(cache);
+                    palette[i] = (uint)dataTypes.ReadNextVarInt(cache);
 
-                // Block IDs are packed in the array of 64-bits integers
-                ulong[] dataArray = dataTypes.ReadNextULongArray(cache);
+                //// Block IDs are packed in the array of 64-bits integers
+                dataTypes.SkipNextVarInt(cache); // Entry length
+                Span<byte> entryDataByte = stackalloc byte[8];
+                Span<long> entryDataLong = MemoryMarshal.Cast<byte, long>(entryDataByte); // Faster than MemoryMarshal.Read<long>
 
                 Chunk chunk = new(world);
-
-                int longIndex = 0;
-                int startOffset = 0 - bitsPerEntry;
+                int startOffset = 64; // Read the first data immediately
                 for (int blockY = 0; blockY < Chunk.SizeY; blockY++)
                 {
                     for (int blockZ = 0; blockZ < Chunk.SizeZ; blockZ++)
                     {
                         for (int blockX = 0; blockX < Chunk.SizeX; blockX++)
                         {
-                            // NOTICE: In the future a single ushort may not store the entire block id;
-                            // the Block class may need to change if block state IDs go beyond 65535
-                            ushort blockId;
-
                             // Calculate location of next block ID inside the array of Longs
-                            startOffset += bitsPerEntry;
-
-                            if ((startOffset + bitsPerEntry) > 64)
+                            if ((startOffset += bitsPerEntry) > (64 - bitsPerEntry))
                             {
                                 // In MC 1.16+, padding is applied to prevent overlapping between Longs:
-                                // [      LONG INTEGER      ][      LONG INTEGER      ]
-                                // [Block][Block][Block]XXXXX[Block][Block][Block]XXXXX
+                                // [     LONG INTEGER     ][     LONG INTEGER     ]
+                                // [Block][Block][Block]XXX[Block][Block][Block]XXX
 
                                 // When overlapping, move forward to the beginning of the next Long
                                 startOffset = 0;
-                                longIndex++;
+                                dataTypes.ReadDataReverse(cache, entryDataByte); // read long
                             }
 
-                            // Extract Block ID
-                            blockId = (ushort)((dataArray[longIndex] >> startOffset) & valueMask);
+                            uint blockId = (uint)(entryDataLong[0] >> startOffset) & valueMask;
 
                             // Map small IDs to actual larger block IDs
                             if (usePalette)
@@ -132,15 +122,18 @@ namespace MinecraftClient.Protocol.Handlers
                                         blockNumber));
                                 }
 
-                                blockId = (ushort)palette[blockId];
+                                blockId = palette[(int)blockId];
                             }
 
+                            // NOTICE: In the future a single ushort may not store the entire block id;
+                            // the Block class may need to change if block state IDs go beyond 65535
+                            Block block = new((ushort)blockId);
+
                             // We have our block, save the block into the chunk
-                            chunk[blockX, blockY, blockZ] = new Block(blockId);
+                            chunk.SetWithoutCheck(blockX, blockY, blockZ, block);
                         }
                     }
                 }
-
                 return chunk;
             }
 
@@ -153,103 +146,73 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="chunkZ">Chunk Z location</param>
         /// <param name="verticalStripBitmask">Chunk mask for reading data, store in bitset, used in 1.17 and 1.17.1</param>
         /// <param name="cache">Cache for reading chunk data</param>
-        /// <param name="cancellationToken">token to cancel the task</param>
         /// <returns>true if successfully loaded</returns>
-        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ulong[]? verticalStripBitmask, Queue<byte> cache, CancellationToken cancellationToken)
+        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ulong[]? verticalStripBitmask, Queue<byte> cache)
         {
-            if (cancellationToken.IsCancellationRequested)
-                return false;
-            
             var world = handler.GetWorld();
 
             int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
             int chunkMask = 0;
 
-            if (protocolversion >= ProtocolMinecraft.MC_1_17_Version)
-            {
-                // 1.17 and above chunk format
-                // Unloading chunks is handled by a separate packet
-                for (int chunkY = 0; chunkY < chunkColumnSize; chunkY++)
+            // 1.17 and above chunk format
+            // Unloading chunks is handled by a separate packet
+            for (int chunkY = 0; chunkY < chunkColumnSize; chunkY++)
+            {   // 1.18 and above always contains all chunk section in data
+                // 1.17 and 1.17.1 need vertical strip bitmask to know if the chunk section is included
+                if ((protocolversion >= ProtocolMinecraft.MC_1_18_1_Version) ||
+                    (((protocolversion == ProtocolMinecraft.MC_1_17_Version) ||
+                        (protocolversion == ProtocolMinecraft.MC_1_17_1_Version)) &&
+                        ((verticalStripBitmask![chunkY / 64] & (1UL << (chunkY % 64))) != 0)))
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                        return false;
-                    
-                    // 1.18 and above always contains all chunk section in data
-                    // 1.17 and 1.17.1 need vertical strip bitmask to know if the chunk section is included
-                    if ((protocolversion >= ProtocolMinecraft.MC_1_18_1_Version) ||
-                        (((protocolversion == ProtocolMinecraft.MC_1_17_Version) ||
-                          (protocolversion == ProtocolMinecraft.MC_1_17_1_Version)) &&
-                         ((verticalStripBitmask![chunkY / 64] & (1UL << (chunkY % 64))) != 0)))
+                    // Non-air block count inside chunk section, for lighting purposes
+                    int blockCnt = dataTypes.ReadNextShort(cache);
+
+                    var chunk = ReadBlockStatesField(world, cache);
+
+                    // Read Block states (Type: Paletted Container)
+                    if (chunk is not null) // Chunk not empty(air)
+                        chunkMask |= 1 << chunkY;
+
+                    // We have our chunk, save the chunk into the world
+                    world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
+
+                    // Skip Read Biomes (Type: Paletted Container) - 1.18(1.18.1) and above
+                    if (protocolversion >= ProtocolMinecraft.MC_1_18_1_Version)
                     {
-                        // Non-air block count inside chunk section, for lighting purposes
-                        int blockCnt = dataTypes.ReadNextShort(cache);
-
-                        var chunk = ReadBlockStatesField(world, cache);
-
-                        // Read Block states (Type: Paletted Container)
-                        if (chunk is not null) // Chunk not empty(air)
+                        byte bitsPerEntryBiome = dataTypes.ReadNextByte(cache); // Bits Per Entry
+                        if (bitsPerEntryBiome == 0)
                         {
-                            chunkMask |= 1 << chunkY;
-
-                            // Check before storing chunk
-                            if (cancellationToken.IsCancellationRequested)
-                                return false;
-
-                            // We have our chunk, save the chunk into the world
-                            handler.InvokeOnNetReadThread(() =>
-                            {
-                                if (world[chunkX, chunkZ] is null)
-                                    world[chunkX, chunkZ] = new ChunkColumn(world, chunkColumnSize);
-                                world[chunkX, chunkZ]![chunkY] = chunk;
-                            });
-
+                            dataTypes.SkipNextVarInt(cache); // Value
+                            dataTypes.SkipNextVarInt(cache); // Data Array Length
+                            // Data Array must be empty
                         }
-
-                        // Skip Read Biomes (Type: Paletted Container) - 1.18(1.18.1) and above
-                        if (protocolversion >= ProtocolMinecraft.MC_1_18_1_Version)
+                        else
                         {
-                            byte bitsPerEntryBiome = dataTypes.ReadNextByte(cache); // Bits Per Entry
-                            if (bitsPerEntryBiome == 0)
+                            if (bitsPerEntryBiome <= 3)
                             {
-                                dataTypes.SkipNextVarInt(cache); // Value
-                                dataTypes.SkipNextVarInt(cache); // Data Array Length
-                                // Data Array must be empty
+                                int paletteLength = dataTypes.ReadNextVarInt(cache); // Palette Length
+                                for (int i = 0; i < paletteLength; i++)
+                                    dataTypes.SkipNextVarInt(cache); // Palette
                             }
-                            else
-                            {
-                                if (bitsPerEntryBiome <= 3)
-                                {
-                                    int paletteLength = dataTypes.ReadNextVarInt(cache); // Palette Length
-                                    for (int i = 0; i < paletteLength; i++)
-                                        dataTypes.SkipNextVarInt(cache); // Palette
-                                }
-                                int dataArrayLength = dataTypes.ReadNextVarInt(cache); // Data Array Length
-                                dataTypes.ReadData(dataArrayLength * 8, cache); // Data Array
-                            }
+                            int dataArrayLength = dataTypes.ReadNextVarInt(cache); // Data Array Length
+                            dataTypes.DropData(dataArrayLength * 8, cache); // Data Array
                         }
                     }
                 }
-
-                // Don't worry about skipping remaining data since there is no useful data afterwards in 1.9
-                // (plus, it would require parsing the tile entity lists' NBT)
-
-                handler.InvokeOnNetReadThread(() =>
-                {   // Set the column's chunk mask
-                    world[chunkX, chunkZ]!.ChunkMask = chunkMask;
-                    //Debug.Log("Chunk Mask: " + Convert.ToString(chunkMask, 2));
-                });
-
-                // Broadcast event to update world render
-                Loom.QueueOnMainThread(() => {
-                        EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new ReceiveChunkColumnEvent(chunkX, chunkZ));
-                    }
-                );
             }
-            handler.InvokeOnNetReadThread(() =>
-            {
-                if (world[chunkX, chunkZ] is not null)
-                    world[chunkX, chunkZ]!.FullyLoaded = true;
-            });
+
+            // Don't worry about skipping remaining data since there is no useful data afterwards in 1.9
+            // (plus, it would require parsing the tile entity lists' NBT)
+
+            // Set the column's chunk mask and load state
+            world[chunkX, chunkZ]!.ChunkMask = chunkMask;
+            world[chunkX, chunkZ]!.FullyLoaded = true;
+
+            // Broadcast event to update world render
+            Loom.QueueOnMainThread(() => {
+                    EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new ReceiveChunkColumnEvent(chunkX, chunkZ));
+                }
+            );
             return true;
         }
 
@@ -264,13 +227,9 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="chunksContinuous">Are the chunk continuous</param>
         /// <param name="currentDimension">Current dimension type (0 = overworld)</param>
         /// <param name="cache">Cache for reading chunk data</param>
-        /// <param name="cancellationToken">token to cancel the task</param>
         /// <returns>true if successfully loaded</returns>
-        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ushort chunkMask, ushort chunkMask2, bool hasSkyLight, bool chunksContinuous, int currentDimension, Queue<byte> cache, CancellationToken cancellationToken)
+        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ushort chunkMask, ushort chunkMask2, bool hasSkyLight, bool chunksContinuous, int currentDimension, Queue<byte> cache)
         {
-            if (cancellationToken.IsCancellationRequested)
-                return false;
-            
             World world = handler.GetWorld();
 
             const int chunkColumnSize = 16;
@@ -279,9 +238,6 @@ namespace MinecraftClient.Protocol.Handlers
             // Unloading chunks is handled by a separate packet
             for (int chunkY = 0; chunkY < chunkColumnSize; chunkY++)
             {
-                if (cancellationToken.IsCancellationRequested)
-                    return false;
-
                 if ((chunkMask & (1 << chunkY)) != 0)
                 {
                     // 1.14 and above Non-air block count inside chunk section, for lighting purposes
@@ -398,17 +354,8 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                     }
 
-                    // Check before storing chunk
-                    if (cancellationToken.IsCancellationRequested)
-                        return false;
-
                     // We have our chunk, save the chunk into the world
-                    handler.InvokeOnNetReadThread(() =>
-                    {
-                        if (world[chunkX, chunkZ] is null)
-                            world[chunkX, chunkZ] = new ChunkColumn(world);
-                        world[chunkX, chunkZ]![chunkY] = chunk;
-                    });
+                    world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
 
                     // Pre-1.14 Lighting data
                     if (protocolversion < ProtocolMinecraft.MC_1_14_Version)
@@ -427,14 +374,9 @@ namespace MinecraftClient.Protocol.Handlers
             // Don't worry about skipping remaining data since there is no useful data afterwards in 1.9
             // (plus, it would require parsing the tile entity lists' NBT)
 
-            handler.InvokeOnNetReadThread(() =>
-            {
-                if (world[chunkX, chunkZ] is not null)
-                {
-                    world[chunkX, chunkZ]!.ChunkMask = chunkMask;
-                    world[chunkX, chunkZ]!.FullyLoaded = true;
-                }
-            });
+            // Set the column's chunk mask and load state
+            world[chunkX, chunkZ]!.ChunkMask = chunkMask;
+            world[chunkX, chunkZ]!.FullyLoaded = true;
 
             // Broadcast event to update world render
             Loom.QueueOnMainThread(() => {
