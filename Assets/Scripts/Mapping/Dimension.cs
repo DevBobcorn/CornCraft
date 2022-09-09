@@ -177,11 +177,6 @@ namespace MinecraftClient.Mapping
             if (nbt.ContainsKey("min_y"))
             {
                 this.minY = (int)nbt["min_y"];
-                Debug.Log("Current MinY: " + this.minY);
-            }
-            else
-            {
-                Debug.Log("Current MinY not set, still 0");
             }
             if (nbt.ContainsKey("height"))
                 this.height = (int)nbt["height"];

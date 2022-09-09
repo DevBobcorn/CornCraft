@@ -480,7 +480,7 @@ namespace MinecraftClient.Protocol.Handlers
                     versionString = "2";
                     break;
                 default:
-                    throw new NotImplementedException("FMLVersion '" + fmlVersion + "' not implemented!");
+                    throw new NotImplementedException($"FMLVersion '{fmlVersion}' not implemented!");
             }
 
             if (jsonData.Properties.ContainsKey(forgeDataTag) && jsonData.Properties[forgeDataTag].Type == Json.JSONData.DataType.Object)

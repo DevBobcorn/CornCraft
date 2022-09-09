@@ -1196,13 +1196,16 @@ namespace MinecraftClient.Protocol.Handlers
                         int entityId7 = dataTypes.ReadNextVarInt(packetData);
                         Dictionary<int, object> metadata = dataTypes.ReadNextMetadata(packetData, itemPalette);
 
-                        // See https://wiki.vg/Entity_metadata#Living_Entity
-                        int healthField = 7; // From 1.10 to 1.13.2
-                        if (protocolVersion >= MC_1_14_Version)
-                            healthField = 8; // 1.14 and above
-                        if (protocolVersion >= MC_1_17_Version)
-                            healthField = 9; // 1.17 and above
-                        if (protocolVersion > MC_1_18_2_Version)
+                        int healthField; // See https://wiki.vg/Entity_metadata#Living_Entity
+                        if (protocolVersion > MC_1_19_2_Version)
+                            throw new NotImplementedException(Translations.Get("exception.palette.healthfield"));
+                        else if (protocolVersion >= MC_1_17_Version) // 1.17 and above
+                            healthField = 9;
+                        else if (protocolVersion >= MC_1_14_Version) // 1.14 and above
+                            healthField = 8;
+                        else if (protocolVersion >= MC_1_13_Version) // 1.10 and above (We'll say 1.13 here)
+                            healthField = 7;
+                        else
                             throw new NotImplementedException(Translations.Get("exception.palette.healthfield"));
 
                         if (metadata.ContainsKey(healthField) && metadata[healthField] != null && metadata[healthField].GetType() == typeof(float))
