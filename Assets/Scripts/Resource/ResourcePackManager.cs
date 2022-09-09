@@ -37,6 +37,9 @@ namespace MinecraftClient.Resource
         public void ClearPacks()
         {
             packs.Clear();
+            textureTable.Clear();
+            modelsTable.Clear();
+            finalTable.Clear();
         }
 
         public IEnumerator LoadPacks(CornClient.CoroutineFlag flag, CornClient.LoadStateInfo loadStateInfo)

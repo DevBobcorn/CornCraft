@@ -122,7 +122,7 @@ namespace MinecraftClient.Resource
         public IEnumerator BuildStateGeometries(ResourcePackManager manager, CornClient.LoadStateInfo loadStateInfo)
         {
             // Load all blockstate files, make and assign their block meshes...
-            if (Block.Palette is not null && Block.Palette.BlockStatesReady && isValid)
+            if (Block.Palette is not null && isValid)
             {
                 // Assets folder...
                 DirectoryInfo assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed(packName) + "/assets");

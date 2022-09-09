@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -113,10 +114,8 @@ namespace MinecraftClient.Resource
 
         }
 
-        public static void Load(string version)
+        public static IEnumerator Load(string version, CornClient.CoroutineFlag loadFlag, CornClient.LoadStateInfo loadStateInfo)
         {
-            Debug.Log("Preparing block atlas for MC " + version);
-
             blockAtlasTable.Clear(); // Clear previously loaded table...
 
             string atlasFilePath = PathHelper.GetPacksDirectory() + "/block_atlas_" + version + ".png";
@@ -139,18 +138,21 @@ namespace MinecraftClient.Resource
                 {
                     if (blockAtlasTable.ContainsKey(ResourceLocation.fromString(item.Key)))
                     {
+                        loadFlag.done = true;
                         throw new InvalidDataException("Duplicate block atlas with one name " + item.Key + "!?");
                     }
                     else
                     {
                         blockAtlasTable[ResourceLocation.fromString(item.Key)] = int.Parse(item.Value.StringValue);
+                        loadStateInfo.infoText = $"Loading pre-generated atlas {item.Key}";
+                        yield return null;
                     }
                 }
             }
             else
-            {
                 Debug.LogWarning("Texture files not all available!");
-            }
+
+            loadFlag.done = true;
 
         }
         

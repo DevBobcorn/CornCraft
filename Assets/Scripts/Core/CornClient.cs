@@ -262,20 +262,22 @@ namespace MinecraftClient
                 throw new NotImplementedException(Translations.Get("exception.palette.block"));
             
             var resourceVersion = string.Empty;
+            var blockLoadFlag = new CoroutineFlag();
 
+            Block.Palette = new BlockStatePalette();
             if (protocolVersion >= ProtocolMinecraft.MC_1_19_Version)
             {
-                Block.Palette = new Palette119();
+                StartCoroutine(Block.Palette.PrepareData("1.19", blockLoadFlag, loadStateInfo));
                 resourceVersion = "1.19.2";
             }
             else if (protocolVersion >= ProtocolMinecraft.MC_1_17_Version)
             {   // Treat 1.18.X as 1.17.X because there ain't a single block changed in 1.18
-                Block.Palette = new Palette117();
+                StartCoroutine(Block.Palette.PrepareData("1.17", blockLoadFlag, loadStateInfo));
                 resourceVersion = "1.17.1";
             }
             else if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
             {
-                Block.Palette = new Palette116();
+                StartCoroutine(Block.Palette.PrepareData("1.16", blockLoadFlag, loadStateInfo));
                 resourceVersion = "1.16.5";
             }    
             else // TODO Implement More
@@ -284,9 +286,16 @@ namespace MinecraftClient
                 yield break;
             }
 
-            // Load texture atlas... (Will be decently implemented in future)
+            while (!blockLoadFlag.done)
+                yield return wait;
+
+            // Load texture atlas... TODO (Will be decently implemented in future)
             BlockTextureManager.EnsureInitialized();
-            BlockTextureManager.Load(resourceVersion);
+            var atlasLoadFlag = new CoroutineFlag();
+            StartCoroutine(BlockTextureManager.Load(resourceVersion, atlasLoadFlag, loadStateInfo));
+
+            while (!atlasLoadFlag.done)
+                yield return wait;
 
             // Load resources...
             packManager.ClearPacks();
@@ -296,13 +305,10 @@ namespace MinecraftClient
 
             // Load valid packs...
             var resLoadFlag = new CoroutineFlag();
-            var resLoad = StartCoroutine(packManager.LoadPacks(resLoadFlag, loadStateInfo));
+            StartCoroutine(packManager.LoadPacks(resLoadFlag, loadStateInfo));
 
             while (!resLoadFlag.done)
-            {
-
                 yield return wait;
-            }
 
             // Prepare scene and unity objects
             var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
