@@ -1085,7 +1085,7 @@ namespace MinecraftClient.Protocol.Handlers
                 case Direction.South: return 3;
                 case Direction.West: return 4;
                 case Direction.East: return 5;
-                default: throw new NotImplementedException("Unknown direction: " + direction.ToString());
+                default: throw new NotImplementedException($"Unknown direction: {direction.ToString()}");
             }
         }
 
