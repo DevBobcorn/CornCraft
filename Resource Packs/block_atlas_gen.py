@@ -1,7 +1,7 @@
 from PIL import Image, ImageOps
 import os, glob, json
 
-version = '1.17.1'
+version = '1.19.2'
 
 recolor_dict = {
     'minecraft:block/water_flow': (63, 118, 228),

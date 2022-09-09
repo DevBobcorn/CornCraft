@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
@@ -7,13 +8,8 @@ using MinecraftClient.Rendering;
 
 namespace MinecraftClient.Mapping.BlockStatePalettes
 {
-    public abstract class BlockStatePalette
+    public class BlockStatePalette
     {
-        public BlockStatePalette()
-        {
-            PrepareData();
-        }
-
         public BlockState FromId(int stateId)
         {
             return statesTable.GetValueOrDefault(stateId, BlockState.AIR_STATE);
@@ -27,14 +23,6 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
         public HashSet<int> GetStatesOfBlock(ResourceLocation blockId)
         {
             return stateListTable.GetValueOrDefault(blockId, new HashSet<int>());
-        }
-
-        private bool blockStatesReady = false, buzy = false;
-        public bool BlockStatesReady
-        {
-            get {
-                return blockStatesReady;
-            }
         }
 
         private readonly Dictionary<ResourceLocation, HashSet<int>> stateListTable = new Dictionary<ResourceLocation, HashSet<int>>();
@@ -52,16 +40,8 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
             return renderTypeTable.GetValueOrDefault(stateId, RenderType.SOLID);
         }
 
-        protected abstract string GetBlockStatesFile();
-
-        protected abstract string GetBlockListsFile();
-
-        private void PrepareData()
+        public IEnumerator PrepareData(string dataVersion, CornClient.CoroutineFlag flag, CornClient.LoadStateInfo loadStateInfo)
         {
-            if (buzy || blockStatesReady) return;
-
-            buzy = true;
-
             // Clean up first...
             statesTable.Clear();
             blocksTable.Clear();
@@ -69,8 +49,8 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
 
             HashSet<int> knownStates = new HashSet<int>();
 
-            string statesPath = PathHelper.GetExtraDataFile(GetBlockStatesFile());
-            string listsPath  = PathHelper.GetExtraDataFile(GetBlockListsFile());
+            string statesPath = PathHelper.GetExtraDataFile($"blocks-{dataVersion}.json");
+            string listsPath  = PathHelper.GetExtraDataFile("block_lists-1.19.json");
 
             if (!File.Exists(statesPath) || !File.Exists(listsPath))
             {
@@ -85,13 +65,14 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
             var alwaysFulls = new List<ResourceLocation>();
 
             Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
-            Debug.Log("Reading special lists from " + listsPath);
+            loadStateInfo.infoText = $"Reading special lists from {listsPath}";
 
             if (spLists.Properties.ContainsKey("no_occlusion"))
             {
                 foreach (var block in spLists.Properties["no_occlusion"].DataArray)
                 {
                     noOcclusion.Add(ResourceLocation.fromString(block.StringValue));
+                    yield return null;
                 }
             }
 
@@ -100,6 +81,7 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                 foreach (var block in spLists.Properties["no_collision"].DataArray)
                 {
                     noCollision.Add(ResourceLocation.fromString(block.StringValue));
+                    yield return null;
                 }
             }
 
@@ -108,6 +90,7 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                 foreach (var block in spLists.Properties["water_blocks"].DataArray)
                 {
                     waterBlocks.Add(ResourceLocation.fromString(block.StringValue));
+                    yield return null;
                 }
             }
 
@@ -116,6 +99,7 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                 foreach (var block in spLists.Properties["always_fulls"].DataArray)
                 {
                     alwaysFulls.Add(ResourceLocation.fromString(block.StringValue));
+                    yield return null;
                 }
             }
 
@@ -190,20 +174,13 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                     }
 
                 }
+
+                loadStateInfo.infoText = $"Loading states of block {item.Key}";
+                yield return null;
             }
 
             Debug.Log($"{statesTable.Count} block states loaded.");
 
-            LoadRenderTypes();
-            Debug.Log($"Render type of {renderTypeTable.Count} blocks loaded.");
-
-            blockStatesReady = true;
-            buzy = false;
-
-        }
-
-        public void LoadRenderTypes()
-        {
             renderTypeTable.Clear();
             
             // Load and apply block render types...
@@ -245,6 +222,9 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                             }
                         }
 
+                        loadStateInfo.infoText = $"Loading states of block {typeItem.Key}";
+
+
                     }
 
                 }
@@ -257,6 +237,10 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
             {
                 Debug.LogWarning("Block render types not found at " + renderTypePath);
             }
+
+            Debug.Log($"Render type of {renderTypeTable.Count} blocks loaded.");
+
+            flag.done = true;
 
         }
 

@@ -76,7 +76,7 @@ namespace MinecraftClient.UI
             {
                 CornClient.ShowNotification("Failed to parse server name or address!", Notification.Type.Warning);
                 tryingConnect = false;
-                loadStateInfo.infoText = string.Empty;
+                loadStateInfo.infoText = "X_X";
                 return;
             }
 
@@ -96,7 +96,7 @@ namespace MinecraftClient.UI
                 {
                     CornClient.ShowNotification("The username is not valid!", Notification.Type.Warning);
                     tryingConnect = false;
-                    loadStateInfo.infoText = string.Empty;
+                    loadStateInfo.infoText = "X_X";
                     return;
                 }
 
@@ -132,7 +132,7 @@ namespace MinecraftClient.UI
                         {   // Request password
                             CornClient.ShowNotification("Please input your password!", Notification.Type.Warning);
                             tryingConnect = false;
-                            loadStateInfo.infoText = string.Empty;
+                            loadStateInfo.infoText = "X_X";
                             return;
                         }
                     }
@@ -212,7 +212,7 @@ namespace MinecraftClient.UI
                     {
                         Translations.NotifyError("error.ping");
                         tryingConnect = false;
-                        loadStateInfo.infoText = string.Empty;
+                        loadStateInfo.infoText = "X_X";
                         return;
                     }
                 }
@@ -260,14 +260,14 @@ namespace MinecraftClient.UI
                 {
                     Translations.NotifyError("error.login.ssl_help");
                     tryingConnect = false;
-                    loadStateInfo.infoText = string.Empty;
+                    loadStateInfo.infoText = "X_X";
                     return;
                 }
                 Debug.LogError(failureMessage);
             }
 
             tryingConnect = false;
-            loadStateInfo.infoText = string.Empty;
+            loadStateInfo.infoText = "X_X";
         }
 
         public void QuitGame()
@@ -298,6 +298,8 @@ namespace MinecraftClient.UI
             // Add listeners
             loginButton.onClick.AddListener(this.ConnectServer);
             quitButton.onClick.AddListener(this.QuitGame);
+
+            loadStateInfo.infoText = $"CornCraft {CornCraft.Version} Powered by <u>Minecraft Console Client</u>";
 
         }
 
