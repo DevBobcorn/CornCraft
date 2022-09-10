@@ -11,7 +11,7 @@ namespace MinecraftClient.Event
         public NotificationEvent(string text)
         {
             this.text = text;
-            this.duration = 1.4F; // 1.4 seconds by default
+            this.duration = 6F; // 6 seconds by default
             this.type = Notification.Type.Notification;
         }
 
