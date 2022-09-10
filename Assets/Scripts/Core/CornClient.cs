@@ -30,36 +30,8 @@ namespace MinecraftClient
 {
     public class CornClient : MonoBehaviour, IMinecraftComHandler
     {
-        private static readonly List<string> cmd_names = new();
-        private static readonly Dictionary<string, Command> cmds = new();
-        private static bool commandsLoaded = false;
-
-        private Queue<Action> threadTasks = new();
-        private object threadTasksLock = new();
-
-        private Queue<string> chatQueue = new();
-        private DateTime nextMessageSendTime = DateTime.MinValue;
-
-        #region World Data and Player Movement
-        private bool worldAndMovementsRequested = false;
-        private World world = new();
-        private Location location;
-        private object locationLock = new();
-        private bool locationReceived = false, localLocationUpdated = false;
-        private float? _yaw; // Used for calculation ONLY!!! Doesn't reflect the client yaw
-        private float? _pitch; // Used for calculation ONLY!!! Doesn't reflect the client pitch
-        private float playerYaw;
-        private float playerPitch;
-        private double motionY;
-        private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
-        public Location GetCurrentLocation() { return location; }
-
-        public float GetYaw() { return playerYaw; }
-        public float GetPitch() { return playerPitch; }
-        public World GetWorld() { return world; }
-        #endregion
-
         #region Login Information
+        private bool loggingIn = false;
         private string host;
         private int port;
         private int protocolVersion;
@@ -78,48 +50,7 @@ namespace MinecraftClient
         public string GetSessionID() { return sessionId; }
         #endregion
 
-        #region Players and Entities
-        private bool inventoryHandlingRequested = false;
-        private int gamemode = 0;
-        private int playerEntityID;
-        private float playerHealth;
-        private int playerFoodSaturation;
-        private int playerLevel;
-        private int playerTotalExperience;
-        private Dictionary<int, Container> inventories = new();
-        private byte CurrentSlot = 0;
-        public float GetHealth() { return playerHealth; }
-        public int GetSaturation() { return playerFoodSaturation; }
-        public int GetLevel() { return playerLevel; }
-        public int GetTotalExperience() { return playerTotalExperience; }
-        public byte GetCurrentSlot() { return CurrentSlot; }
-        public int GetGamemode() { return gamemode; }
-        public int GetPlayerEntityID() { return playerEntityID; }
-        private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
-        private Dictionary<int, Entity> entities = new();
-        #endregion
-
-        #region Server Updates
-        private DateTime lastKeepAlive;
-        private object lastKeepAliveLock = new();
-        private long lastAge = 0;
-        private DateTime lastTime;
-        private double serverTPS = 0;
-        private double averageTPS = 20;
-        private const int maxSamples = 5;
-        private List<double> tpsSamples = new(maxSamples);
-        private double sampleSum = 0;
-        public double GetServerTPS() { return averageTPS; }
-        public bool GetIsSupportPreviewsChat() { return isSupportPreviewsChat; }
-        #endregion
-        
-        TcpClient tcpClient;
-        IMinecraftCom handler;
-
-        #nullable enable
-        Tuple<Thread, CancellationTokenSource>? timeoutdetector = null;
-        #nullable disable
-
+        #region Client Control
         private static CornClient instance;
         public static CornClient Instance
         {
@@ -147,7 +78,16 @@ namespace MinecraftClient
             }
         }
 
-        #region Client Control
+        private static readonly List<string> cmd_names = new();
+        private static readonly Dictionary<string, Command> cmds = new();
+        private static bool internalCommandsLoaded = false;
+
+        private Queue<Action> threadTasks = new();
+        private object threadTasksLock = new();
+
+        private Queue<string> chatQueue = new();
+        private DateTime nextMessageSendTime = DateTime.MinValue;
+
         private static bool connected = false;
         public static bool Connected { get { return connected; } }
 
@@ -159,6 +99,27 @@ namespace MinecraftClient
             }
         }
 
+        #endregion
+
+        #region Networking
+        private DateTime lastKeepAlive;
+        private object lastKeepAliveLock = new();
+        private long lastAge = 0;
+        private DateTime lastTime;
+        private double serverTPS = 0;
+        private double averageTPS = 20;
+        private const int maxSamples = 5;
+        private List<double> tpsSamples = new(maxSamples);
+        private double sampleSum = 0;
+        public double GetServerTPS() { return averageTPS; }
+        public bool GetIsSupportPreviewsChat() { return isSupportPreviewsChat; }
+        
+        TcpClient tcpClient;
+        IMinecraftCom handler;
+
+        #nullable enable
+        Tuple<Thread, CancellationTokenSource>? timeoutdetector = null;
+        #nullable disable
         #endregion
 
         #region Notification
@@ -180,7 +141,47 @@ namespace MinecraftClient
 
         #endregion
 
-        #region Unity stuff
+        #region World Data and Player Movement
+        private bool worldAndMovementsRequested = false;
+        private World world = new();
+        private Location location;
+        private object locationLock = new();
+        private bool locationReceived = false, localLocationUpdated = false;
+        private float? _yaw; // Used for calculation ONLY!!! Doesn't reflect the client yaw
+        private float? _pitch; // Used for calculation ONLY!!! Doesn't reflect the client pitch
+        private float playerYaw;
+        private float playerPitch;
+        private double motionY;
+        private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
+        public Location GetCurrentLocation() { return location; }
+
+        public float GetYaw() { return playerYaw; }
+        public float GetPitch() { return playerPitch; }
+        public World GetWorld() { return world; }
+        #endregion
+
+        #region Players and Entities
+        private bool inventoryHandlingRequested = false;
+        private int gamemode = 0;
+        private int playerEntityID;
+        private float playerHealth;
+        private int playerFoodSaturation;
+        private int playerLevel;
+        private int playerTotalExperience;
+        private Dictionary<int, Container> inventories = new();
+        private byte CurrentSlot = 0;
+        public float GetHealth() { return playerHealth; }
+        public int GetSaturation() { return playerFoodSaturation; }
+        public int GetLevel() { return playerLevel; }
+        public int GetTotalExperience() { return playerTotalExperience; }
+        public byte GetCurrentSlot() { return CurrentSlot; }
+        public int GetGamemode() { return gamemode; }
+        public int GetPlayerEntityID() { return playerEntityID; }
+        private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
+        private Dictionary<int, Entity> entities = new();
+        #endregion
+
+        #region Unity stuffs
         private readonly ResourcePackManager packManager = new ResourcePackManager();
         public ResourcePackManager PackManager { get { return packManager; } }
         
@@ -219,15 +220,13 @@ namespace MinecraftClient
 
         #endregion
 
-        private bool preparing = false;
-
         #nullable enable
         public void StartLogin(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo stateInfo, string accountLower)
         {
-            if (preparing)
+            if (loggingIn)
                 return;
             
-            preparing = true;
+            loggingIn = true;
 
             this.sessionId = session.ID;
             if (!Guid.TryParse(session.PlayerID, out this.uuid))
@@ -255,6 +254,9 @@ namespace MinecraftClient
         IEnumerator StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo loadStateInfo, string accountLower)
         {
             var wait = new WaitForSecondsRealtime(0.1F);
+
+            if (!internalCommandsLoaded)
+                LoadInternalCommands();
 
             // Create block palette first to prepare for resource loading
             if (protocolVersion > ProtocolMinecraft.MC_1_19_2_Version)
@@ -331,7 +333,7 @@ namespace MinecraftClient
             {
                 Translations.LogError("error.connect");
                 Disconnect();
-                preparing = false;
+                loggingIn = false;
                 yield break;
             }
 
@@ -343,7 +345,7 @@ namespace MinecraftClient
             {
                 Debug.LogError(e.Message);
                 Disconnect();
-                preparing = false;
+                loggingIn = false;
                 yield break;
             }
 
@@ -400,12 +402,12 @@ namespace MinecraftClient
                 Debug.LogError(e.Message);
                 Debug.LogError(e.StackTrace);
                 Disconnect();
-                preparing = false;
+                loggingIn = false;
                 yield break;
             }
             finally
             {
-                preparing = false;
+                loggingIn = false;
             }
 
         }
@@ -466,7 +468,7 @@ namespace MinecraftClient
 
         }
 
-        #region Connection Lost and Disconnect from Server
+        #region Disconnect logic
 
         /// <summary>
         /// Periodically checks for server keepalives and consider that connection has been lost if the last received keepalive is too old.
@@ -640,6 +642,9 @@ namespace MinecraftClient
                     else if (response.Length > 0)
                     {   // Internal command performed, log the result...
                         Debug.Log(response);
+                        Loom.QueueOnMainThread(
+                            () => ShowNotification(response.Length <= 35 ? response : $"{response[..32]}...")
+                        );
                     }
                 }
                 else SendText(text);
@@ -706,11 +711,11 @@ namespace MinecraftClient
         }
         #nullable disable
 
-        public void LoadCommands()
+        public static void LoadInternalCommands()
         {
             /* Load commands from the 'Commands' namespace */
 
-            if (!commandsLoaded)
+            if (!internalCommandsLoaded)
             {
                 Type[] cmds_classes = CornCraft.GetTypesInNamespace("MinecraftClient.Commands");
                 foreach (Type type in cmds_classes)
@@ -731,7 +736,7 @@ namespace MinecraftClient
                         }
                     }
                 }
-                commandsLoaded = true;
+                internalCommandsLoaded = true;
             }
         }
 
