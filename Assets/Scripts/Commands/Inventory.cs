@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
+using MinecraftClient.Control;
 using MinecraftClient.Inventory;
 
 namespace MinecraftClient.Commands
@@ -29,7 +31,7 @@ namespace MinecraftClient.Commands
 
                         if (Enum.TryParse(args[2], true, out ItemType itemType))
                         {
-                            if (handler.GetGamemode() == 1)
+                            if (handler.GetGamemode() == GameMode.Creative)
                             {
                                 if (!int.TryParse(args[3], out int count))
                                     return GetCmdDescTranslated();
@@ -55,7 +57,7 @@ namespace MinecraftClient.Commands
                         if (!int.TryParse(args[1], out int slot))
                             return GetCmdDescTranslated();
 
-                        if (handler.GetGamemode() == 1)
+                        if (handler.GetGamemode() == GameMode.Creative)
                         {
                             if (handler.DoCreativeGive(slot, ItemType.Null, 0, null))
                                 return Translations.Get("cmd.inventory.creative_delete", slot);

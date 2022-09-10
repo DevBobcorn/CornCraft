@@ -34,7 +34,7 @@ namespace MinecraftClient.Resource
                         if (packData.Properties.ContainsKey("pack_format"))
                         {
                             string packFormat = packData.Properties["pack_format"].StringValue;
-                            Debug.Log("Pack " + packName + " is valid, with pack format " + packFormat);
+                            Debug.Log("Pack " + packName + " is valid, with pack format version " + packFormat);
                             isValid = true;
                         }
 
