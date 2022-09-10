@@ -38,7 +38,7 @@ namespace MinecraftClient.UI
         // Called by animator after hide animation ends...
         void Expire()
         {
-            EventManager.Instance.Broadcast<NotificationExpireEvent>(new NotificationExpireEvent(numeralID, selfPos));
+            EventManager.Instance.Broadcast<NotificationExpireEvent>(new(numeralID, selfPos));
             Destroy(this.gameObject);
         }
 

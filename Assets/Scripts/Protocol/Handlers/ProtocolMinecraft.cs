@@ -51,7 +51,7 @@ namespace MinecraftClient.Protocol.Handlers
         internal const int MC_1_19_2_Version = 760;
 
         private int compression_treshold = 0;
-        private int autocompleteTransactionId = 0;
+        private int autoCompleteTransactionId = 0;
         private readonly Dictionary<int, short> windowActions = new Dictionary<int, short>();
         private bool login_phase = true;
         private int protocolVersion;
@@ -813,7 +813,7 @@ namespace MinecraftClient.Protocol.Handlers
                             }
                             //Debug.Log("Blocks change: " + locs[0] + ", etc");
                             Loom.QueueOnMainThread(() => {
-                                EventManager.Instance.Broadcast<BlocksUpdateEvent>(new BlocksUpdateEvent(locs));
+                                EventManager.Instance.Broadcast<BlocksUpdateEvent>(new(locs));
                             });
                         }
                         break;
@@ -824,7 +824,7 @@ namespace MinecraftClient.Protocol.Handlers
                             handler.GetWorld().SetBlock(loc2, new Block((ushort)dataTypes.ReadNextVarInt(packetData)));
                             //Debug.Log("Block change: " + loc2);
                             Loom.QueueOnMainThread(() => {
-                                EventManager.Instance.Broadcast<BlockUpdateEvent>(new BlockUpdateEvent(loc2));
+                                EventManager.Instance.Broadcast<BlockUpdateEvent>(new(loc2));
                             });
                         }
                         else
@@ -843,7 +843,7 @@ namespace MinecraftClient.Protocol.Handlers
                         handler.GetWorld()[chunkX3, chunkZ3] = null;
 
                         Loom.QueueOnMainThread(() => {
-                            EventManager.Instance.Broadcast<UnloadChunkColumnEvent>(new UnloadChunkColumnEvent(chunkX3, chunkZ3));
+                            EventManager.Instance.Broadcast<UnloadChunkColumnEvent>(new(chunkX3, chunkZ3));
                         });
                         break;
                     case PacketTypesIn.SetDisplayChatPreview:
@@ -931,9 +931,9 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     case PacketTypesIn.TabComplete:
                         // MC 1.13 or greater
-                        autocompleteTransactionId = dataTypes.ReadNextVarInt(packetData);
-                        dataTypes.ReadNextVarInt(packetData); // Start of text to replace
-                        dataTypes.ReadNextVarInt(packetData); // Length of text to replace
+                        autoCompleteTransactionId = dataTypes.ReadNextVarInt(packetData);
+                        int completionStart  = dataTypes.ReadNextVarInt(packetData); // Start of text to replace
+                        int completionLength = dataTypes.ReadNextVarInt(packetData); // Length of text to replace
 
                         int resultCount = dataTypes.ReadNextVarInt(packetData);
                         var completeResults = new List<string>();
@@ -948,9 +948,19 @@ namespace MinecraftClient.Protocol.Handlers
                                     dataTypes.SkipNextString(packetData);
                             }
                         }
-                        // TODO Trigger Corn events...
-                        foreach (var result in completeResults)
-                            UnityEngine.Debug.Log(result);
+                        if (completeResults.Count > 0)
+                        {
+                            Loom.QueueOnMainThread(() =>
+                                EventManager.Instance.Broadcast<AutoCompletionEvent>(new(completionStart, completionLength, completeResults.ToArray()))
+                            );
+                        }
+                        else
+                        {
+                            UnityEngine.Debug.Log("No completion found!");
+                            Loom.QueueOnMainThread(() =>
+                                EventManager.Instance.Broadcast(AutoCompletionEvent.EMPTY)
+                            );
+                        }
                         break;
                     case PacketTypesIn.PluginMessage:
                         String channel = dataTypes.ReadNextString(packetData);
@@ -1958,7 +1968,7 @@ namespace MinecraftClient.Protocol.Handlers
                 return false;
             try
             {
-                byte[] transactionId = dataTypes.GetVarInt(autocompleteTransactionId);
+                byte[] transactionId = dataTypes.GetVarInt(autoCompleteTransactionId);
                 byte[] requestPacket = new byte[] { };
 
                 requestPacket = dataTypes.ConcatBytes(requestPacket, transactionId);

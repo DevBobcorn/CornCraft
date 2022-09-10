@@ -66,18 +66,19 @@ namespace MinecraftClient.UI
                 }
             };
 
-            EventManager.Instance.Register<NotificationEvent>(showCallback);
-            EventManager.Instance.Register<NotificationExpireEvent>(expireCallback);
+            EventManager.Instance.Register(showCallback);
+            EventManager.Instance.Register(expireCallback);
 
         }
 
         void OnDestroy()
         {
-            if (showCallback != null)
-                EventManager.Instance.Unregister<NotificationEvent>(showCallback);
+            if (showCallback is not null)
+                EventManager.Instance.Unregister(showCallback);
 
-            if (expireCallback != null)
-                EventManager.Instance.Unregister<NotificationExpireEvent>(expireCallback);
+            if (expireCallback is not null)
+                EventManager.Instance.Unregister(expireCallback);
+
         }
 
     }
