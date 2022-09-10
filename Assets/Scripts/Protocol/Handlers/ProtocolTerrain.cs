@@ -210,7 +210,7 @@ namespace MinecraftClient.Protocol.Handlers
 
             // Broadcast event to update world render
             Loom.QueueOnMainThread(() => {
-                    EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new ReceiveChunkColumnEvent(chunkX, chunkZ));
+                    EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new(chunkX, chunkZ));
                 }
             );
             return true;
@@ -380,7 +380,7 @@ namespace MinecraftClient.Protocol.Handlers
 
             // Broadcast event to update world render
             Loom.QueueOnMainThread(() => {
-                    EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new ReceiveChunkColumnEvent(chunkX, chunkZ));
+                    EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new(chunkX, chunkZ));
                 }
             );
             return true;

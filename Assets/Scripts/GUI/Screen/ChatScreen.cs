@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using TMPro;
 
@@ -35,15 +36,18 @@ namespace MinecraftClient.UI
         }
 
         // UI controls and objects
-        private CanvasGroup screenGroup;
+        private CanvasGroup screenGroup, autoCompleteGroup;
         private RectTransform chatScrollRect;
-        private TMP_InputField chatInput;
-        private TMP_Text       chatTexts;
+        private TMP_InputField chatInput, chatInputGhost;
+        private TMP_Text chatTexts, autoCompleteOptions;
 
         // Chat message data
         private List<string> chatHistory = new List<string>();
-        private int chatIndex = 0;
+        private int chatIndex = 0, completionIndex = -1, completionStart = 0, completionLength = 0;
         private string chatBuffer = string.Empty;
+        private bool completionsShown = false;
+        private string[] completionOptions = { };
+        private string confirmedPart = string.Empty;
 
         public override string ScreenName()
         {
@@ -66,10 +70,42 @@ namespace MinecraftClient.UI
             chatInput.caretPosition = message.Length;
         }
 
+        private void ShowCompletions()
+        {
+            autoCompleteGroup.alpha = 1F;
+            autoCompleteGroup.interactable = true;
+            autoCompleteGroup.blocksRaycasts = true;
+            completionsShown = true;
+        }
+
+        private void HideCompletions()
+        {
+            autoCompleteGroup.alpha = 0F;
+            autoCompleteGroup.interactable = false;
+            autoCompleteGroup.blocksRaycasts = false;
+            completionsShown = false;
+            // Restart marker value...
+            completionIndex = -1;
+        }
+
         public void OnChatInputChange(string message)
         {
-            // TODO
+            if (message.StartsWith("/") && message.Length > 1)
+                RequestAutoCompleteChat(message);
+            else
+                HideCompletions();
             
+            if (completionsShown)
+            {
+                if (completionIndex >= 0 && completionIndex < completionOptions.Length)
+                {
+                    if (!(confirmedPart + completionOptions[completionIndex]).Contains(message))
+                    {   // User is typing something which is not in the completion list, so hide it...
+                        HideCompletions();
+                    }
+                }
+            }
+
         }
 
         public void SendChatMessage()
@@ -90,7 +126,7 @@ namespace MinecraftClient.UI
             chatIndex = chatHistory.Count;
         }
 
-        public void AutoCompleteChatMessage(string message)
+        public void RequestAutoCompleteChat(string message)
         {
             CornClient.Instance?.AutoComplete(message);
         }
@@ -128,7 +164,40 @@ namespace MinecraftClient.UI
             }
         }
 
+        public void PrevCompletionOption()
+        {
+            if (completionIndex == -1)
+                completionIndex = 0; // Select first option
+            else
+                completionIndex = (completionIndex + completionOptions.Length - 1) % completionOptions.Length;
+            
+            RefreshCompletionOptions();
+        }
+
+        public void NextCompletionOption()
+        {
+            if (completionIndex == -1)
+                completionIndex = 0; // Select first option
+            else
+                completionIndex = (completionIndex + 1) % completionOptions.Length;
+            
+            RefreshCompletionOptions();
+        }
+
+        private void RefreshCompletionOptions()
+        {
+            StringBuilder str = new();
+            for (int i = 0;i < completionOptions.Length;i++)
+            {
+                str.Append(
+                    i == completionIndex ? $"<color=yellow>{completionOptions[i]}</color>" : completionOptions[i]
+                ).Append('\n');
+            }
+            autoCompleteOptions.text = str.ToString();
+        }
+
         private Action<ChatMessageEvent> chatCallback;
+        private Action<AutoCompletionEvent> autoCompleteCallback;
 
         protected override void Initialize()
         {
@@ -139,23 +208,76 @@ namespace MinecraftClient.UI
             chatInput = transform.Find("Chat Input").GetComponent<TMP_InputField>();
             chatInput.onValueChanged.AddListener(this.OnChatInputChange);
 
+            var chatInputGhostObj = GameObject.Instantiate(chatInput.gameObject, Vector3.zero, Quaternion.identity);
+            chatInputGhostObj.name = "Chat Input Ghost";
+            chatInputGhostObj.SetActive(false);
+
+            chatInputGhost = chatInputGhostObj.GetComponent<TMP_InputField>();
+
             chatTexts = FindHelper.FindChildRecursively(chatScrollRect, "Chat Texts").GetComponent<TMP_Text>();
             chatTexts.text = string.Empty;
+
+            autoCompleteGroup = transform.Find("Auto Complete Panel").GetComponent<CanvasGroup>();
+            autoCompleteGroup.alpha = 0F;
+            autoCompleteGroup.interactable = false;
+            autoCompleteGroup.blocksRaycasts = false;
+
+            autoCompleteOptions = autoCompleteGroup.transform.Find("Auto Complete Options").GetComponent<TMP_Text>();
+            autoCompleteOptions.text = string.Empty; // Clear up at start
 
             // Register callbacks
             chatCallback = (e) => {
                 chatTexts.text += StringConvert.MC2TMP(e.message) + '\n';
             };
 
-            EventManager.Instance.Register<ChatMessageEvent>(chatCallback);
+            autoCompleteCallback = (e) => {
+                if (e.options.Length > 0)
+                {   // Show at most 20 options
+                    completionOptions = e.options.Length > 20 ? e.options[..20] : e.options;
+                    completionStart = e.start;
+                    completionLength = e.length;
+                    completionIndex = 0; // Select first option
+                    RefreshCompletionOptions();
+                    if (!completionsShown)
+                        ShowCompletions();
+
+                    if (completionStart > 0)
+                    {   // Apply selected auto completion
+                        string original   = chatInput.text;
+                        string completion = completionOptions[completionIndex];
+                        confirmedPart     = completionStart <= original.Length ? original[..completionStart] : original.PadRight(completionStart, ' ');
+
+                        // Update auto completion panel position...
+                        chatInputGhost.text = confirmedPart;
+                    }
+                    
+                    float caretPosX = chatInputGhost.textComponent.preferredWidth;
+                    // Offset a bit to make sure that the completion part is perfectly aligned with user input
+                    if (chatInputGhost.text.EndsWith(' '))
+                        caretPosX += chatInputGhost.textComponent.fontSize * 0.5F;
+                    
+                    autoCompleteGroup.GetComponent<RectTransform>().anchoredPosition = new(caretPosX, 0F);
+                }
+                else // No option available
+                {
+                    if (completionsShown)
+                        HideCompletions();
+                }
+            };
+
+            EventManager.Instance.Register(chatCallback);
+            EventManager.Instance.Register(autoCompleteCallback);
+
         }
 
         void OnDestroy()
         {
-            if (chatCallback != null)
-            {
-                EventManager.Instance.Unregister<ChatMessageEvent>(chatCallback);
-            }
+            if (chatCallback is not null)
+                EventManager.Instance.Unregister(chatCallback);
+            
+            if (autoCompleteCallback is not null)
+                EventManager.Instance.Unregister(autoCompleteCallback);
+
         }
 
         void Update()
@@ -178,17 +300,37 @@ namespace MinecraftClient.UI
                 }
                 if (Input.GetKeyDown(KeyCode.UpArrow))
                 {
-                    PrevChatMessage();
+                    if (completionsShown)
+                        PrevCompletionOption();
+                    else PrevChatMessage();
                     chatInput.ActivateInputField();
+                    chatInput.MoveTextEnd(false);
                 }
                 if (Input.GetKeyDown(KeyCode.DownArrow))
                 {
-                    NextChatMessage();
+                    if (completionsShown)
+                        NextCompletionOption();
+                    else NextChatMessage();
                     chatInput.ActivateInputField();
+                    chatInput.MoveTextEnd(false);
                 }
                 if (Input.GetKeyDown(KeyCode.Tab))
                 {
-                    AutoCompleteChatMessage(chatInput.text);
+                    if (completionsShown)
+                    {
+                        if (completionIndex >= 0 && completionIndex < completionOptions.Length && completionStart > 0)
+                        {   // Apply selected auto completion
+                            string original   = chatInput.text;
+                            string completion = completionOptions[completionIndex];
+                            //Debug.Log($"Completing \"{original}\" at {completionStart} with \"{completion}\". Length: {completionLength}");
+
+                            string basePart = completionStart <= original.Length ? original[..completionStart] : original.PadRight(completionStart, ' ');
+                            //Debug.Log(unaffected + completion);
+                            SetChatMessage(basePart + completion);
+                            HideCompletions();
+                        }
+                    }
+
                 }
 
             }

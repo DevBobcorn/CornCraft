@@ -552,12 +552,12 @@ namespace MinecraftClient.Rendering
             game = CornClient.Instance;
 
             // Register event callbacks
-            EventManager.Instance.Register<ReceiveChunkColumnEvent>(columnCallBack1 = (e) => {
+            EventManager.Instance.Register(columnCallBack1 = (e) => {
                 // TODO Implement
 
             });
 
-            EventManager.Instance.Register<UnloadChunkColumnEvent>(columnCallBack2 = (e) => {
+            EventManager.Instance.Register(columnCallBack2 = (e) => {
                 int2 chunkCoord = new(e.chunkX, e.chunkZ);
                 if (columns.ContainsKey(chunkCoord))
                 {
@@ -566,7 +566,7 @@ namespace MinecraftClient.Rendering
                 }
             });
 
-            EventManager.Instance.Register<BlockUpdateEvent>(blockCallBack = (e) => {
+            EventManager.Instance.Register(blockCallBack = (e) => {
                 var loc = e.location;
                 int chunkX = loc.ChunkX, chunkY = loc.ChunkY, chunkZ = loc.ChunkZ;
 
@@ -613,7 +613,7 @@ namespace MinecraftClient.Rendering
 
             });
 
-            EventManager.Instance.Register<BlocksUpdateEvent>(blocksCallBack = (e) => {
+            EventManager.Instance.Register(blocksCallBack = (e) => {
                 World world = game!.GetWorld();
                 if (world is null) return;
                 

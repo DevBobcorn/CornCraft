@@ -126,17 +126,17 @@ namespace MinecraftClient
         // Should be called from the Unity thread only, not net read thread
         public static void ShowNotification(string notification)
         {
-            EventManager.Instance.Broadcast<NotificationEvent>(new NotificationEvent(notification));
+            EventManager.Instance.Broadcast<NotificationEvent>(new(notification));
         }
 
         public static void ShowNotification(string notification, Notification.Type type)
         {
-            EventManager.Instance.Broadcast<NotificationEvent>(new NotificationEvent(notification, 6F, type));
+            EventManager.Instance.Broadcast<NotificationEvent>(new(notification, 6F, type));
         }
 
         public static void ShowNotification(string notification, float duration, Notification.Type type)
         {
-            EventManager.Instance.Broadcast<NotificationEvent>(new NotificationEvent(notification, duration, type));
+            EventManager.Instance.Broadcast<NotificationEvent>(new(notification, duration, type));
         }
 
         #endregion
@@ -2180,7 +2180,7 @@ namespace MinecraftClient
             }
 
             Loom.QueueOnMainThread(
-                () => EventManager.Instance.Broadcast<ChatMessageEvent>(new ChatMessageEvent(messageText))
+                () => EventManager.Instance.Broadcast<ChatMessageEvent>(new(messageText))
             );
 
             foreach (string link in links)
