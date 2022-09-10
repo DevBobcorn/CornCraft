@@ -162,7 +162,6 @@ namespace MinecraftClient
 
         #region Players and Entities
         private bool inventoryHandlingRequested = false;
-        private int gamemode = 0;
         private int playerEntityID;
         private float playerHealth;
         private int playerFoodSaturation;
@@ -175,7 +174,7 @@ namespace MinecraftClient
         public int GetLevel() { return playerLevel; }
         public int GetTotalExperience() { return playerTotalExperience; }
         public byte GetCurrentSlot() { return CurrentSlot; }
-        public int GetGamemode() { return gamemode; }
+        public GameMode GetGamemode() { return playerController is null ? 0 : playerController.GameMode; }
         public int GetPlayerEntityID() { return playerEntityID; }
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         private Dictionary<int, Entity> entities = new();
@@ -301,7 +300,7 @@ namespace MinecraftClient
             // Load resources...
             packManager.ClearPacks();
 
-            ResourcePack pack = new ResourcePack("vanilla-" + resourceVersion);
+            ResourcePack pack = new ResourcePack($"vanilla-{resourceVersion}");
             packManager.AddPack(pack);
 
             // Load valid packs...
@@ -310,6 +309,10 @@ namespace MinecraftClient
 
             while (!resLoadFlag.done)
                 yield return wait;
+
+            // Preserve camera in login scene for a while
+            var loginCamera = Component.FindObjectOfType<Camera>();
+            DontDestroyOnLoad(loginCamera.gameObject);
 
             // Prepare scene and unity objects
             var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
@@ -337,7 +340,7 @@ namespace MinecraftClient
                 yield break;
             }
 
-            try // Initialize all palettes for resource loading
+            try // Create protocol handler
             {
                 handler = Protocol.ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
             }
@@ -355,29 +358,35 @@ namespace MinecraftClient
             // Wait a little bit...
             yield return wait;
 
-            // Find Screen Control
+            // Find screen control
             screenControl = Component.FindObjectOfType<ScreenControl>();
             var hudScreen = Component.FindObjectOfType<HUDScreen>();
             // Push HUD Screen on start
             screenControl.PushScreen(hudScreen);
 
-            // Create World Render
+            // Create world render
             var worldRenderObj = new GameObject("World Render");
             worldRender = worldRenderObj.AddComponent<WorldRender>();
 
-            // Create Player
+            // Create player
             var playerPrefab = Resources.Load<GameObject>("Prefabs/Player");
             var playerObj    = GameObject.Instantiate(playerPrefab);
+            playerObj.name = $"{session.PlayerName} (Player)";
             playerObj.SetActive(true);
             playerController = playerObj.GetComponent<PlayerController>();
 
-            // Create Camera
+            // Destroy previous camera and create a new one for player
+            Destroy(loginCamera.gameObject);
             var cameraPrefab = Resources.Load<GameObject>("Prefabs/Camera");
             var cameraObj    = GameObject.Instantiate(cameraPrefab);
+            cameraObj.name = "Main Camera (In-Game)";
             cameraObj.SetActive(true);
             cameraController = cameraObj.GetComponent<CameraController>();
 
             cameraController.SetTarget(playerObj.transform);
+
+            // Wait a little bit...
+            yield return wait;
 
             try
             {
@@ -2005,7 +2014,7 @@ namespace MinecraftClient
         /// <param name="UUID">UUID of player/entity to teleport to</param>
         public bool SpectateByUUID(Guid UUID)
         {
-            if(GetGamemode() == 3)
+            if(GetGamemode() == GameMode.Spectator)
             {
                 if(InvokeRequired)
                     return InvokeOnNetMainThread(() => SpectateByUUID(UUID));
@@ -2392,14 +2401,16 @@ namespace MinecraftClient
         {
             // Initial gamemode on login
             if (uuid == Guid.Empty)
-                this.gamemode = gamemode;
+            {
+                playerController.GameMode = (GameMode)gamemode;
+            }
 
             // Further regular gamemode change events
             if (onlinePlayers.ContainsKey(uuid))
             {
                 string playerName = onlinePlayers[uuid].Name;
                 if (playerName == this.username)
-                    this.gamemode = gamemode;
+                    playerController.GameMode = (GameMode)gamemode;
             }
         }
 
