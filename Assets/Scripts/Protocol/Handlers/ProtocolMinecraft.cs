@@ -575,12 +575,6 @@ namespace MinecraftClient.Protocol.Handlers
                             World.SetDimension(dimensionName);
                         }
 
-                        if (protocolVersion >= MC_1_16_Version)
-                        {
-                            string dimensionName = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
-                            World.SetDimension(dimensionName);
-                        }
-
                         if (protocolVersion < MC_1_14_Version)
                             dataTypes.ReadNextByte(packetData);           // Difficulty - 1.13 and below
                         if (protocolVersion >= MC_1_15_Version)
