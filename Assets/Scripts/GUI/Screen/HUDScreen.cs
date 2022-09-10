@@ -1,23 +1,28 @@
-using System;
 using UnityEngine;
-
+using UnityEngine.UI;
 using TMPro;
 
-using MinecraftClient.Event;
-
+using MinecraftClient.Control;
 namespace MinecraftClient.UI
 {
     [RequireComponent(typeof (CanvasGroup))]
     public class HUDScreen : BaseScreen
     {
+        private static readonly string[] modeIdentifiers = { "survival", "creative", "adventure", "spectator" };
+
         private CornClient game;
 
-        private TMP_Text    latencyText;
+        private TMP_Text    latencyText, debugText, modeText;
+        private Animator    modePanel;
+        private Button[]    modeButtons = new Button[4];
 
         private ChatScreen  chatScreen;
         private PauseScreen pauseScreen;
 
-        private bool isActive = false;
+        private bool isActive = false, debugInfo = false;
+
+        private bool modePanelShown = false;
+        private int  selectedMode   = 0;
 
         public override bool IsActive
         {
@@ -70,14 +75,73 @@ namespace MinecraftClient.UI
             // Ensure initialization
             base.Start();
             game = CornClient.Instance;
+
+            // Initialize controls...
+            debugText = transform.Find("Debug Text").GetComponent<TMP_Text>();
+            debugText.text = "Initializing...";
+
+            modePanel = transform.Find("Mode Panel").GetComponent<Animator>();
+            modeText  = modePanel.transform.Find("Mode Text").GetComponent<TMP_Text>();
+
+            modeButtons[0] = FindHelper.FindChildRecursively(transform, "Survival").GetComponent<Button>();
+            modeButtons[1] = FindHelper.FindChildRecursively(transform, "Creative").GetComponent<Button>();
+            modeButtons[2] = FindHelper.FindChildRecursively(transform, "Adventure").GetComponent<Button>();
+            modeButtons[3] = FindHelper.FindChildRecursively(transform, "Spectator").GetComponent<Button>();
+
         }
 
         private int displayedLatency = 0;
 
         void Update()
         {
-            if (!IsActive)
+            if (!IsActive || game is null)
                 return;
+            
+            if (game is null || !CornClient.Connected) return;
+
+            if (Input.GetKey(KeyCode.F3))
+            {
+                if (Input.GetKeyDown(KeyCode.F4))
+                {
+                    int buttonCount = modeButtons.Length;
+                    if (modePanelShown) // Select next gamemode
+                    {
+                        selectedMode = (selectedMode + 1) % buttonCount;
+                        // Turn identifiers into names with first letter in upper case...
+                        modeText.text = modeIdentifiers[selectedMode][0].ToString().ToUpper() + modeIdentifiers[selectedMode][1..];
+                        modeButtons[selectedMode].Select();
+                    }
+                    else // Show gamemode switch
+                    {
+                        selectedMode = (int)game.GetGamemode();
+                        if (selectedMode >= 0 && selectedMode < modeButtons.Length)
+                        {
+                            // Turn identifiers into names with first letter in upper case...
+                            modeText.text = modeIdentifiers[selectedMode][0].ToString().ToUpper() + modeIdentifiers[selectedMode][1..];
+                            modePanel.SetBool("Show", true);
+                            modePanelShown = true;
+                            modeButtons[selectedMode].Select();
+                        }
+                    }
+                }
+            }
+
+            if (Input.GetKeyUp(KeyCode.F3))
+            {
+                if (modePanelShown) // Hide gamemode switch
+                {
+                    modePanel.SetBool("Show", false);
+                    modePanelShown = false;
+
+                    if (selectedMode != (int)game.GetGamemode()) // Commit switch request
+                    {
+                        game.SendText("/gamemode " + modeIdentifiers[selectedMode]);
+                        CornClient.ShowNotification("Game mode switched to " + modeIdentifiers[selectedMode], 2F, Notification.Type.Notification);
+                    }
+                }
+                else // Toggle debug info
+                    debugInfo = !debugInfo;
+            }
 
             if (Input.GetKeyDown(KeyCode.Slash))
             {
@@ -95,6 +159,11 @@ namespace MinecraftClient.UI
             {
                 CornClient.Instance.ScreenControl?.PushScreen(pauseScreen);
             }
+
+            if (debugInfo)
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GetPlayerController()?.GetDebugInfo()}\n{game.GetWorldRender()?.GetDebugInfo()}";
+            else
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}";
 
             var realLatency = game.GetOwnLatency();
             if (displayedLatency != realLatency)

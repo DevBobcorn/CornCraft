@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 
 namespace MinecraftClient.UI
 {
@@ -23,8 +22,6 @@ namespace MinecraftClient.UI
 
         private Stack<BaseScreen> screenStack = new Stack<BaseScreen>();
         private float screenChangeCooldown = 0F;
-
-        private TMP_Text DebugText;
 
         public bool IsTopScreen(BaseScreen screen)
         {
@@ -116,28 +113,16 @@ namespace MinecraftClient.UI
 
         void Start()
         {
-            // Initialize controls
-            DebugText = GameObject.Find("Debug Text").GetComponent<TMP_Text>();
-            DebugText.text = "Initializing...";
-
             if (CornClient.Instance is null)
-            {
                 Debug.LogWarning("No Minecraft Client connected");
-            }
             else
-            {
                 game = CornClient.Instance;
-            }
 
         }
 
         void Update()
         {
             screenChangeCooldown -= Time.deltaTime;
-
-            if (game is null || !CornClient.Connected) return;
-
-            DebugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GetPlayerController()?.GetDebugInfo()}\n{game.GetWorldRender()?.GetDebugInfo()}";
 
         }
 
