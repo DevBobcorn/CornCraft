@@ -20,8 +20,9 @@ namespace MinecraftClient.UI
         private CornClient? game;
         private TMP_InputField? serverInput, usernameInput, passwordInput, authCodeInput;
         private Button?         loginButton, quitButton, authConfirmButton, authCancelButton;
+        private Button?         loginCloseButton, authLinkButton, authCloseButton;
         private TMP_Text?       loadStateInfoText, authLinkText;
-        private CanvasGroup?    loginPanel, authPanel;
+        private CanvasGroup?    loginPanel, authPanel, loginPanelButton;
 
         private bool tryingConnect = false, authenticating = false, authCancelled = false;
 
@@ -159,7 +160,15 @@ namespace MinecraftClient.UI
                     else // Proceed authentication...
                     {
                         var code = authCodeInput!.text.Trim();
-                        result = ProtocolHandler.MicrosoftBrowserLogin(code, out session, ref account);
+                        try
+                        {
+                            result = ProtocolHandler.MicrosoftBrowserLogin(code, out session, ref account);
+                        }
+                        catch // Authentication failed (code expired or something...)
+                        {
+                            result = ProtocolHandler.LoginResult.OtherError;
+                        }
+                        
                     }
 
                 }
@@ -252,6 +261,9 @@ namespace MinecraftClient.UI
                 {
                     if (Protocol.ProtocolHandler.IsProtocolSupported(protocolVersion))
                     {
+                        // Authentication completed, hide the panel...
+                        HideLoginPanel();
+
                         try // Login to Server
                         {
                             game!.StartLogin(session, playerKeyPair, host, port, protocolVersion, forgeInfo, loadStateInfo, accountLower);
@@ -284,10 +296,9 @@ namespace MinecraftClient.UI
                     ProtocolHandler.LoginResult.UserCancel           => "error.login.cancel",
                     _                                                => "error.login.unknown"
                 };
-                var translatedReason = Translations.Get(failureReason);
-                failureMessage += translatedReason;
-                loadStateInfo.infoText = translatedReason;
-                CornClient.ShowNotification(translatedReason, Notification.Type.Error);
+                failureMessage += Translations.Get(failureReason);
+                loadStateInfo.infoText = ">_<";
+                CornClient.ShowNotification(failureMessage, Notification.Type.Error);
 
                 if (result == ProtocolHandler.LoginResult.SSLError)
                     Translations.NotifyError("error.login.ssl_help");
@@ -296,6 +307,37 @@ namespace MinecraftClient.UI
             }
 
             tryingConnect = false;
+        }
+
+        public void ShowLoginPanel()
+        {   // Show login panel and hide button
+            loginPanel!.alpha = 1F;
+            loginPanel!.blocksRaycasts = true;
+            loginPanel!.interactable = true;
+            loginPanelButton!.alpha = 0F;
+            loginPanelButton!.blocksRaycasts = false;
+            loginPanelButton!.interactable = false;
+        }
+
+        public void HideLoginPanel()
+        {   // Hide login panel and show button
+            loginPanel!.alpha = 0F;
+            loginPanel!.blocksRaycasts = false;
+            loginPanel!.interactable = false;
+            loginPanelButton!.alpha = 1F;
+            loginPanelButton!.blocksRaycasts = true;
+            loginPanelButton!.interactable = true;
+        }
+
+        public void CopyAuthLink()
+        {
+            GUIUtility.systemCopyBuffer = authLinkText!.text;
+            CornClient.ShowNotification("Link copied to clipboard.", Notification.Type.Success);
+        }
+
+        public void PasteAuthCode()
+        {
+            authCodeInput!.text = GUIUtility.systemCopyBuffer;
         }
 
         private void ShowAuthPanel(string url)
@@ -365,25 +407,39 @@ namespace MinecraftClient.UI
             loginButton   = loginPanelObj.transform.Find("Login Button").GetComponent<Button>();
 
             authCodeInput     = authPanelObj.transform.Find("Auth Code Input").GetComponent<TMP_InputField>();
-            authLinkText      = authPanelObj.transform.Find("Auth Link Text").GetComponent<TMP_Text>();
+            authLinkButton    = authPanelObj.transform.Find("Auth Link Button").GetComponent<Button>();
             authCancelButton  = authPanelObj.transform.Find("Auth Cancel Button").GetComponent<Button>();
             authConfirmButton = authPanelObj.transform.Find("Auth Confirm Button").GetComponent<Button>();
 
-            quitButton        = transform.Find("Quit Button").GetComponent<Button>();
             loadStateInfoText = transform.Find("Load State Info Text").GetComponent<TMP_Text>();
+            authLinkText      = authLinkButton.transform.Find("Auth Link Text").GetComponent<TMP_Text>();
+
+            loginCloseButton  = loginPanelObj.transform.Find("Login Close Button").GetComponent<Button>();
+            authCloseButton   = authPanelObj.transform.Find("Auth Close Button").GetComponent<Button>();
+
+            quitButton        = transform.Find("Quit Button").GetComponent<Button>();
+            loginPanelButton  = transform.Find("Login Panel Button").GetComponent<CanvasGroup>();
 
             // TODO Initialize with cached values
             serverInput.text = "192.168.1.7";
 
-            // Hide auth panel on start
+            // Prepare panels at start
+            ShowLoginPanel();
             HideAuthPanel();
 
             // Add listeners
             loginButton.onClick.AddListener(this.TryConnectServer);
             quitButton.onClick.AddListener(this.QuitGame);
 
+            authLinkButton.onClick.AddListener(this.CopyAuthLink);
             authCancelButton.onClick.AddListener(this.CancelAuth);
             authConfirmButton.onClick.AddListener(this.ConfirmAuth);
+            authCodeInput.GetComponentInChildren<Button>().onClick.AddListener(this.PasteAuthCode);
+
+            loginCloseButton.onClick.AddListener(this.HideLoginPanel);
+            loginPanelButton.GetComponent<Button>().onClick.AddListener(this.ShowLoginPanel);
+            // Cancel auth, not just hide panel (so basically this button is totally the same as authCancelButton)...
+            authCloseButton.onClick.AddListener(this.CancelAuth);
 
             loadStateInfo.infoText = $"CornCraft {CornCraft.Version} Powered by <u>Minecraft Console Client</u>";
 

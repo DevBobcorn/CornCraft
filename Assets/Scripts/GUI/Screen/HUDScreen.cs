@@ -107,8 +107,7 @@ namespace MinecraftClient.UI
                     if (modePanelShown) // Select next gamemode
                     {
                         selectedMode = (selectedMode + 1) % buttonCount;
-                        // Turn identifiers into names with first letter in upper case...
-                        modeText.text = modeIdentifiers[selectedMode][0].ToString().ToUpper() + modeIdentifiers[selectedMode][1..];
+                        modeText.text = ((GameMode)selectedMode).ToString();
                         modeButtons[selectedMode].Select();
                     }
                     else // Show gamemode switch
@@ -116,8 +115,7 @@ namespace MinecraftClient.UI
                         selectedMode = (int)game.GetGamemode();
                         if (selectedMode >= 0 && selectedMode < modeButtons.Length)
                         {
-                            // Turn identifiers into names with first letter in upper case...
-                            modeText.text = modeIdentifiers[selectedMode][0].ToString().ToUpper() + modeIdentifiers[selectedMode][1..];
+                            modeText.text = ((GameMode)selectedMode).ToString();
                             modePanel.SetBool("Show", true);
                             modePanelShown = true;
                             modeButtons[selectedMode].Select();
@@ -136,7 +134,6 @@ namespace MinecraftClient.UI
                     if (selectedMode != (int)game.GetGamemode()) // Commit switch request
                     {
                         game.SendText("/gamemode " + modeIdentifiers[selectedMode]);
-                        CornClient.ShowNotification("Game mode switched to " + modeIdentifiers[selectedMode], 2F, Notification.Type.Notification);
                     }
                 }
                 else // Toggle debug info

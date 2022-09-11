@@ -603,15 +603,15 @@ namespace MinecraftClient
             switch (reason)
             {
                 case DisconnectReason.ConnectionLost:
-                    Debug.Log(Translations.Get("mcc.disconnect.lost"));
+                    StringConvert.Log(Translations.Get("mcc.disconnect.lost"));
                     break;
 
                 case DisconnectReason.InGameKick:
-                    Debug.Log(Translations.Get("mcc.disconnect.server") + message);
+                    StringConvert.Log(Translations.Get("mcc.disconnect.server") + message);
                     break;
 
                 case DisconnectReason.LoginRejected:
-                    Debug.Log(Translations.Get("mcc.disconnect.login") + message);
+                    StringConvert.Log(Translations.Get("mcc.disconnect.login") + message);
                     break;
 
                 case DisconnectReason.UserLogout:
@@ -2415,7 +2415,13 @@ namespace MinecraftClient
             {
                 string playerName = onlinePlayers[uuid].Name;
                 if (playerName == this.username)
-                    playerController.GameMode = (GameMode)gamemode;
+                {
+                    var newMode = (GameMode)gamemode;
+                    playerController.GameMode = newMode;
+                    Loom.QueueOnMainThread(() =>{
+                        ShowNotification("Gamemode updated to " + newMode, Notification.Type.Success);
+                    });
+                }
             }
         }
 
