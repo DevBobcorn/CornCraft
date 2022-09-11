@@ -950,7 +950,6 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                         else
                         {
-                            UnityEngine.Debug.Log("No completion found!");
                             Loom.QueueOnMainThread(() =>
                                 EventManager.Instance.Broadcast(AutoCompletionEvent.EMPTY)
                             );
