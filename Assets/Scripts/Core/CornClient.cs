@@ -31,7 +31,6 @@ namespace MinecraftClient
     public class CornClient : MonoBehaviour, IMinecraftComHandler
     {
         #region Login Information
-        private bool loggingIn = false;
         private string host;
         private int port;
         private int protocolVersion;
@@ -220,12 +219,12 @@ namespace MinecraftClient
         #endregion
 
         #nullable enable
-        public void StartLogin(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo stateInfo, string accountLower)
+        public void StartLogin(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo loadStateInfo, string accountLower)
         {
-            if (loggingIn)
+            if (loadStateInfo.loggingIn)
                 return;
             
-            loggingIn = true;
+            loadStateInfo.loggingIn = true;
 
             this.sessionId = session.ID;
             if (!Guid.TryParse(session.PlayerID, out this.uuid))
@@ -237,7 +236,7 @@ namespace MinecraftClient
             this.protocolVersion = protocol;
             this.playerKeyPair = playerKeyPair;
 
-            StartCoroutine(StartClient(session, playerKeyPair, serverIp, port, protocol, forgeInfo, stateInfo, accountLower));
+            StartCoroutine(StartClient(session, playerKeyPair, serverIp, port, protocol, forgeInfo, loadStateInfo, accountLower));
         }
 
         public class CoroutineFlag
@@ -248,18 +247,24 @@ namespace MinecraftClient
         public class LoadStateInfo
         {
             public string infoText = string.Empty;
+            public bool   loggingIn  = false;
         }
 
         IEnumerator StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo loadStateInfo, string accountLower)
         {
             var wait = new WaitForSecondsRealtime(0.1F);
+            loadStateInfo.loggingIn = true;
 
             if (!internalCommandsLoaded)
                 LoadInternalCommands();
 
             // Create block palette first to prepare for resource loading
             if (protocolVersion > ProtocolMinecraft.MC_1_19_2_Version)
-                throw new NotImplementedException(Translations.Get("exception.palette.block"));
+            {
+                Translations.LogError("exception.palette.block");
+                loadStateInfo.loggingIn = false;
+                yield break;
+            }
             
             var resourceVersion = string.Empty;
             var blockLoadFlag = new CoroutineFlag();
@@ -283,6 +288,7 @@ namespace MinecraftClient
             else // TODO Implement More
             {
                 Translations.LogError("exception.palette.block");
+                loadStateInfo.loggingIn = false;
                 yield break;
             }
 
@@ -336,7 +342,7 @@ namespace MinecraftClient
             {
                 Translations.LogError("error.connect");
                 Disconnect();
-                loggingIn = false;
+                loadStateInfo.loggingIn = false;
                 yield break;
             }
 
@@ -348,7 +354,7 @@ namespace MinecraftClient
             {
                 Debug.LogError(e.Message);
                 Disconnect();
-                loggingIn = false;
+                loadStateInfo.loggingIn = false;
                 yield break;
             }
 
@@ -411,12 +417,11 @@ namespace MinecraftClient
                 Debug.LogError(e.Message);
                 Debug.LogError(e.StackTrace);
                 Disconnect();
-                loggingIn = false;
                 yield break;
             }
             finally
             {
-                loggingIn = false;
+                loadStateInfo.loggingIn = false;
             }
 
         }

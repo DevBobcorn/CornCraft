@@ -277,101 +277,6 @@ namespace MinecraftClient.Protocol
         }
 
         public enum LoginResult { OtherError, ServiceUnavailable, SSLError, Success, WrongPassword, AccountMigrated, NotPremium, LoginRequired, InvalidToken, InvalidResponse, NullError, UserCancel };
-        public enum AccountType { Mojang, Microsoft };
-
-        /// <summary>
-        /// Allows to login to a premium Minecraft account using the Yggdrasil authentication scheme.
-        /// </summary>
-        /// <param name="user">Login</param>
-        /// <param name="pass">Password</param>
-        /// <param name="session">In case of successful login, will contain session information for multiplayer</param>
-        /// <returns>Returns the status of the login (Success, Failure, etc.)</returns>
-        public static LoginResult GetLogin(string user, string pass, AccountType type, out SessionToken session, ref string account)
-        {
-            if (type == AccountType.Microsoft)
-            {
-                return MicrosoftBrowserLogin(out session, ref account, user);
-            }
-            else if (type == AccountType.Mojang)
-            {
-                return MojangLogin(user, pass, out session);
-            }
-            else throw new InvalidOperationException("Account type must be Mojang or Microsoft");
-        }
-
-        /// <summary>
-        /// Login using Mojang account. Will be outdated after account migration
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="pass"></param>
-        /// <param name="session"></param>
-        /// <returns></returns>
-        private static LoginResult MojangLogin(string user, string pass, out SessionToken session)
-        {
-            session = new SessionToken() { ClientID = Guid.NewGuid().ToString().Replace("-", "") };
-
-            try
-            {
-                string result = "";
-                string json_request = "{\"agent\": { \"name\": \"Minecraft\", \"version\": 1 }, \"username\": \"" + JsonEncode(user) + "\", \"password\": \"" + JsonEncode(pass) + "\", \"clientToken\": \"" + JsonEncode(session.ClientID) + "\" }";
-                int code = DoHTTPSPost("authserver.mojang.com", "/authenticate", json_request, ref result);
-                if (code == 200)
-                {
-                    if (result.Contains("availableProfiles\":[]}"))
-                    {
-                        return LoginResult.NotPremium;
-                    }
-                    else
-                    {
-                        Json.JSONData loginResponse = Json.ParseJson(result);
-                        if (loginResponse.Properties.ContainsKey("accessToken")
-                            && loginResponse.Properties.ContainsKey("selectedProfile")
-                            && loginResponse.Properties["selectedProfile"].Properties.ContainsKey("id")
-                            && loginResponse.Properties["selectedProfile"].Properties.ContainsKey("name"))
-                        {
-                            session.ID = loginResponse.Properties["accessToken"].StringValue;
-                            session.PlayerID = loginResponse.Properties["selectedProfile"].Properties["id"].StringValue;
-                            session.PlayerName = loginResponse.Properties["selectedProfile"].Properties["name"].StringValue;
-                            return LoginResult.Success;
-                        }
-                        else return LoginResult.InvalidResponse;
-                    }
-                }
-                else if (code == 403)
-                {
-                    if (result.Contains("UserMigratedException"))
-                    {
-                        return LoginResult.AccountMigrated;
-                    }
-                    else return LoginResult.WrongPassword;
-                }
-                else if (code == 503)
-                {
-                    return LoginResult.ServiceUnavailable;
-                }
-                else
-                {
-                    Debug.LogError("HTTP Error: " + code);
-                    return LoginResult.OtherError;
-                }
-            }
-            catch (System.Security.Authentication.AuthenticationException)
-            {
-                return LoginResult.SSLError;
-            }
-            catch (System.IO.IOException e)
-            {
-                if (e.Message.Contains("authentication"))
-                {
-                    return LoginResult.SSLError;
-                }
-                else return LoginResult.OtherError;
-            }
-            catch (Exception)
-            {
-                return LoginResult.OtherError;
-            }
-        }
 
         /// <summary>
         /// Sign-in to Microsoft Account without using browser. Only works if 2FA is disabled.
@@ -393,7 +298,7 @@ namespace MinecraftClient.Protocol
             catch (Exception e)
             {
                 session = new SessionToken() { ClientID = Guid.NewGuid().ToString().Replace("-", "") };
-                StringConvert.LogError("Microsoft authenticate failed: " + e.Message);
+                Debug.LogError("Microsoft authenticate failed: " + e.Message);
                 if (CornCraft.DebugMode)
                 {
                     StringConvert.LogError("§c" + e.StackTrace);
@@ -410,21 +315,12 @@ namespace MinecraftClient.Protocol
         /// Sign-in page: 218 chars
         /// Response URL: around 1500 chars
         /// </remarks>
+        /// <param name="code"></param>
         /// <param name="session"></param>
+        /// <param name="account"></param>
         /// <returns></returns>
-        public static LoginResult MicrosoftBrowserLogin(out SessionToken session, ref string account, string loginHint = "")
+        public static LoginResult MicrosoftBrowserLogin(string code, out SessionToken session, ref string account)
         {
-            if (string.IsNullOrEmpty(loginHint))
-                Microsoft.OpenBrowser(Microsoft.SignInUrl);
-            else
-                Microsoft.OpenBrowser(Microsoft.GetSignInUrlWithHint(loginHint));
-            
-            Debug.Log("Your browser should open automatically. If not, open the link below in your browser.");
-            Debug.Log("\n" + Microsoft.SignInUrl + "\n");
-
-            //Debug.Log("Paste your code here");
-            string code = string.Empty; // TODO Implement
-
             var msaResponse = Microsoft.RequestAccessToken(code);
             return MicrosoftLogin(msaResponse, out session, ref account);
         }
@@ -465,6 +361,7 @@ namespace MinecraftClient.Protocol
             catch (Exception e)
             {
                 Debug.LogError("Microsoft authenticate failed: " + e.Message);
+                Debug.LogError(e.StackTrace);
                 return LoginResult.WrongPassword; // Might not always be wrong password
             }
         }

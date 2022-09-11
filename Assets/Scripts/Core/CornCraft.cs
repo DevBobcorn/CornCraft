@@ -17,7 +17,7 @@ namespace MinecraftClient
         public const char internalCmdChar = '>';
 
         #region Global Settings and Variables
-        public static bool DebugMode { get; set; } = false;
+        public static bool DebugMode { get; set; } = true;
 
         public static bool DisplaySystemMessages  { get; set; } =  true;
         public static bool DisplayXPBarMessages   { get; set; } =  true;

@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,11 +18,12 @@ namespace MinecraftClient.UI
     public class LoginControl : MonoBehaviour
     {
         private CornClient? game;
-        private TMP_InputField? serverInput, usernameInput, passwordInput;
-        private Button?         loginButton, quitButton;
-        private TMP_Text?       loadStateInfoText;
+        private TMP_InputField? serverInput, usernameInput, passwordInput, authCodeInput;
+        private Button?         loginButton, quitButton, authConfirmButton, authCancelButton;
+        private TMP_Text?       loadStateInfoText, authLinkText;
+        private CanvasGroup?    loginPanel, authPanel;
 
-        private bool tryingConnect = false;
+        private bool tryingConnect = false, authenticating = false, authCancelled = false;
 
         private readonly CornClient.LoadStateInfo loadStateInfo = new();
 
@@ -56,13 +58,20 @@ namespace MinecraftClient.UI
 
             return false;
         }
-
-        // Returns true if successfully connected
-        public void ConnectServer()
+        
+        public void TryConnectServer()
         {
-            if (tryingConnect) return;
+            if (tryingConnect || loadStateInfo.loggingIn)
+            {
+                CornClient.ShowNotification("Already loggin' in!", Notification.Type.Warning);
+                return;
+            }
             tryingConnect = true;
+            StartCoroutine(ConnectServer());
+        }
 
+        public IEnumerator ConnectServer()
+        {
             string serverText = serverInput!.text;
             string account = usernameInput!.text;
             string password = passwordInput!.text;
@@ -71,35 +80,19 @@ namespace MinecraftClient.UI
 
             string username; // In-game display name, will be set after connection
 
-            string host;   // Server ip address
-            ushort port = 25565; // Server port
-
-            if (!ParseServerIP(serverText, out host, ref port))
-            {
-                CornClient.ShowNotification("Failed to parse server name or address!", Notification.Type.Warning);
-                tryingConnect = false;
-                loadStateInfo.infoText = "X_X";
-                return;
-            }
-
-            bool MinecraftRealmsEnabled = false;
-
-            // TODO Move to right place
-            ProtocolHandler.AccountType accountType = ProtocolHandler.AccountType.Microsoft;
-
             SessionToken session = new SessionToken();
             PlayerKeyPair? playerKeyPair = null;
 
-            ProtocolHandler.LoginResult result = ProtocolHandler.LoginResult.LoginRequired;
+            var result = ProtocolHandler.LoginResult.LoginRequired;
 
             if (password == "-")
             {
                 if (!CornCraft.IsValidName(account))
                 {
-                    CornClient.ShowNotification("The username is not valid!", Notification.Type.Warning);
+                    CornClient.ShowNotification("The offline username is not valid!", Notification.Type.Warning);
                     tryingConnect = false;
-                    loadStateInfo.infoText = "X_X";
-                    return;
+                    loadStateInfo.infoText = ">_<";
+                    yield break;
                 }
 
                 // Enter offline mode
@@ -124,9 +117,9 @@ namespace MinecraftClient.UI
                             {
                                 result = ProtocolHandler.MicrosoftLoginRefresh(session.RefreshToken, out session, ref account);
                             }
-                            catch (Exception ex)
+                            catch (Exception e)
                             {
-                                Debug.LogError("Refresh access token fail: " + ex.Message);
+                                Debug.LogError("Refresh access token fail: " + e.Message);
                                 result = ProtocolHandler.LoginResult.InvalidResponse;
                             }
                         }
@@ -134,8 +127,8 @@ namespace MinecraftClient.UI
                         {   // Request password
                             CornClient.ShowNotification("Please input your password!", Notification.Type.Warning);
                             tryingConnect = false;
-                            loadStateInfo.infoText = "X_X";
-                            return;
+                            loadStateInfo.infoText = ">_<";
+                            yield break;
                         }
                     }
                     else
@@ -144,19 +137,52 @@ namespace MinecraftClient.UI
 
                 if (result != ProtocolHandler.LoginResult.Success)
                 {
-                    Translations.Log("mcc.connecting", accountType == ProtocolHandler.AccountType.Mojang ? "Minecraft.net" : "Microsoft");
-                    result = ProtocolHandler.GetLogin(account, password, accountType, out session, ref account);
-                }
-            }
+                    Translations.Log("mcc.connecting", "Microsoft");
+                    authenticating = true;
 
-            if (result == ProtocolHandler.LoginResult.Success && CornCraft.SessionCaching != CacheType.None)
-            {
-                SessionCache.Store(accountLower, session);
+                    // Start brower and open the page...
+                    var url = string.IsNullOrEmpty(account) ?
+                        Protocol.Microsoft.SignInUrl :
+                        Protocol.Microsoft.GetSignInUrlWithHint(account);
+
+                    Protocol.Microsoft.OpenBrowser(url);
+                    
+                    // Show the browser auth panel...
+                    ShowAuthPanel(url);
+
+                    // Wait for the user to proceed or cancel
+                    while (authenticating)
+                        yield return null;
+                    
+                    if (authCancelled) // Authentication cancelled by user
+                        result = ProtocolHandler.LoginResult.UserCancel;
+                    else // Proceed authentication...
+                    {
+                        var code = authCodeInput!.text.Trim();
+                        result = ProtocolHandler.MicrosoftBrowserLogin(code, out session, ref account);
+                    }
+
+                }
             }
 
             if (result == ProtocolHandler.LoginResult.Success)
             {
-                if (accountType == ProtocolHandler.AccountType.Microsoft && password != "-" && CornCraft.LoginWithSecureProfile)
+                string host;   // Server ip address
+                ushort port = 25565; // Server port
+                bool realmsEnabled = false;
+
+                if (!ParseServerIP(serverText, out host, ref port))
+                {
+                    CornClient.ShowNotification("Failed to parse server name or address!", Notification.Type.Warning);
+                    tryingConnect = false;
+                    loadStateInfo.infoText = ">_<";
+                    yield break;
+                }
+
+                if (CornCraft.SessionCaching != CacheType.None)
+                    SessionCache.Store(accountLower, session);
+
+                if (password != "-" && CornCraft.LoginWithSecureProfile)
                 {
                     // Load cached profile key from disk if necessary
                     if (CornCraft.ProfileKeyCaching == CacheType.Disk)
@@ -194,13 +220,13 @@ namespace MinecraftClient.UI
                     Translations.Log("debug.session_id", session.ID);
 
                 List<string> availableWorlds = new List<string>();
-                if (MinecraftRealmsEnabled && !String.IsNullOrEmpty(session.ID))
+                if (realmsEnabled && !String.IsNullOrEmpty(session.ID))
                     availableWorlds = ProtocolHandler.RealmsListWorlds(username, session.PlayerID, session.ID);
 
                 if (host == string.Empty)
                 {   // Request host
                     CornClient.ShowNotification("Please input your host!", Notification.Type.Warning);
-                    return;
+                    yield break;
                 }
 
                 // Get server version
@@ -210,12 +236,15 @@ namespace MinecraftClient.UI
                 if (!isRealms)
                 {
                     Translations.Log("mcc.retrieve"); // Retrieve server information
+                    loadStateInfo.infoText = Translations.Get("mcc.retrieve");
+                    yield return null;
+
                     if (!ProtocolHandler.GetServerInfo(host, port, ref protocolVersion, ref forgeInfo))
                     {
                         Translations.NotifyError("error.ping");
                         tryingConnect = false;
-                        loadStateInfo.infoText = "X_X";
-                        return;
+                        loadStateInfo.infoText = Translations.Get("error.ping");
+                        yield break;
                     }
                 }
 
@@ -227,7 +256,7 @@ namespace MinecraftClient.UI
                         {
                             game!.StartLogin(session, playerKeyPair, host, port, protocolVersion, forgeInfo, loadStateInfo, accountLower);
                             tryingConnect = false;
-                            return;
+                            yield break;
                         }
                         catch (Exception e)
                         {
@@ -243,33 +272,76 @@ namespace MinecraftClient.UI
             else
             {
                 string failureMessage = Translations.Get("error.login");
-                string failureReason = string.Empty;
-                switch (result)
+                string failureReason = result switch
                 {
-                    case ProtocolHandler.LoginResult.AccountMigrated: failureReason = "error.login.migrated"; break;
-                    case ProtocolHandler.LoginResult.ServiceUnavailable: failureReason = "error.login.server"; break;
-                    case ProtocolHandler.LoginResult.WrongPassword: failureReason = "error.login.blocked"; break;
-                    case ProtocolHandler.LoginResult.InvalidResponse: failureReason = "error.login.response"; break;
-                    case ProtocolHandler.LoginResult.NotPremium: failureReason = "error.login.premium"; break;
-                    case ProtocolHandler.LoginResult.OtherError: failureReason = "error.login.network"; break;
-                    case ProtocolHandler.LoginResult.SSLError: failureReason = "error.login.ssl"; break;
-                    case ProtocolHandler.LoginResult.UserCancel: failureReason = "error.login.cancel"; break;
-                    default: failureReason = "error.login.unknown"; break;
-                }
-                failureMessage += Translations.Get(failureReason);
+                    ProtocolHandler.LoginResult.AccountMigrated      => "error.login.migrated",
+                    ProtocolHandler.LoginResult.ServiceUnavailable   => "error.login.server",
+                    ProtocolHandler.LoginResult.WrongPassword        => "error.login.blocked",
+                    ProtocolHandler.LoginResult.InvalidResponse      => "error.login.response",
+                    ProtocolHandler.LoginResult.NotPremium           => "error.login.premium",
+                    ProtocolHandler.LoginResult.OtherError           => "error.login.network",
+                    ProtocolHandler.LoginResult.SSLError             => "error.login.ssl",
+                    ProtocolHandler.LoginResult.UserCancel           => "error.login.cancel",
+                    _                                                => "error.login.unknown"
+                };
+                var translatedReason = Translations.Get(failureReason);
+                failureMessage += translatedReason;
+                loadStateInfo.infoText = translatedReason;
+                CornClient.ShowNotification(translatedReason, Notification.Type.Error);
 
                 if (result == ProtocolHandler.LoginResult.SSLError)
-                {
                     Translations.NotifyError("error.login.ssl_help");
-                    tryingConnect = false;
-                    loadStateInfo.infoText = "X_X";
-                    return;
-                }
+                
                 Debug.LogError(failureMessage);
             }
 
             tryingConnect = false;
-            loadStateInfo.infoText = "X_X";
+        }
+
+        private void ShowAuthPanel(string url)
+        {
+            // Update auth panel link text
+            authLinkText!.text = url;
+
+            // Clear existing text if any
+            authCodeInput!.text = string.Empty;
+
+            authPanel!.alpha = 1F;
+            authPanel!.blocksRaycasts = true;
+            authPanel!.interactable = true;
+
+            authenticating = true;
+            authCancelled = false;
+        }
+
+        private void HideAuthPanel()
+        {
+            authPanel!.alpha = 0F;
+            authPanel!.blocksRaycasts = false;
+            authPanel!.interactable = false;
+
+            authenticating = false;
+        }
+
+        public void CancelAuth()
+        {
+            authCancelled = true;
+            HideAuthPanel();
+        }
+
+        public void ConfirmAuth()
+        {
+            var code = authCodeInput!.text.Trim();
+
+            if (String.IsNullOrEmpty(code))
+            {
+                CornClient.ShowNotification("Authentication code is empty!", Notification.Type.Warning);
+                return;
+            }
+
+            authCancelled = false;
+
+            HideAuthPanel();
         }
 
         public void QuitGame()
@@ -282,24 +354,36 @@ namespace MinecraftClient.UI
             game = CornClient.Instance;
 
             // Initialize controls
-            var loginPanel = transform.Find("Login Panel");
+            var loginPanelObj = transform.Find("Login Panel");
+            loginPanel = loginPanelObj.GetComponent<CanvasGroup>();
+            var authPanelObj = transform.Find("Auth Panel");
+            authPanel = authPanelObj.GetComponent<CanvasGroup>();
 
-            serverInput   = loginPanel.transform.Find("Server Input").GetComponent<TMP_InputField>();
-            usernameInput = loginPanel.transform.Find("Username Input").GetComponent<TMP_InputField>();
-            passwordInput = loginPanel.transform.Find("Password Input").GetComponent<TMP_InputField>();
-            loginButton   = loginPanel.transform.Find("Login Button").GetComponent<Button>();
+            serverInput   = loginPanelObj.transform.Find("Server Input").GetComponent<TMP_InputField>();
+            usernameInput = loginPanelObj.transform.Find("Username Input").GetComponent<TMP_InputField>();
+            passwordInput = loginPanelObj.transform.Find("Password Input").GetComponent<TMP_InputField>();
+            loginButton   = loginPanelObj.transform.Find("Login Button").GetComponent<Button>();
+
+            authCodeInput     = authPanelObj.transform.Find("Auth Code Input").GetComponent<TMP_InputField>();
+            authLinkText      = authPanelObj.transform.Find("Auth Link Text").GetComponent<TMP_Text>();
+            authCancelButton  = authPanelObj.transform.Find("Auth Cancel Button").GetComponent<Button>();
+            authConfirmButton = authPanelObj.transform.Find("Auth Confirm Button").GetComponent<Button>();
 
             quitButton        = transform.Find("Quit Button").GetComponent<Button>();
             loadStateInfoText = transform.Find("Load State Info Text").GetComponent<TMP_Text>();
 
-            // TODO Initialize with loaded values
+            // TODO Initialize with cached values
             serverInput.text = "192.168.1.7";
-            usernameInput.text = "Corn";
-            passwordInput.text = "-";
+
+            // Hide auth panel on start
+            HideAuthPanel();
 
             // Add listeners
-            loginButton.onClick.AddListener(this.ConnectServer);
+            loginButton.onClick.AddListener(this.TryConnectServer);
             quitButton.onClick.AddListener(this.QuitGame);
+
+            authCancelButton.onClick.AddListener(this.CancelAuth);
+            authConfirmButton.onClick.AddListener(this.ConfirmAuth);
 
             loadStateInfo.infoText = $"CornCraft {CornCraft.Version} Powered by <u>Minecraft Console Client</u>";
 
