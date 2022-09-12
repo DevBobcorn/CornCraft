@@ -545,7 +545,7 @@ namespace MinecraftClient.Protocol.Handlers
                                     bool lastVerifyResult = player.IsMessageChainLegal();
                                     verifyResult = player.VerifyMessageHead(ref precedingSignature, ref headerSignature, ref bodyDigest);
                                     if (lastVerifyResult && !verifyResult)
-                                        Translations.LogWarning("Player " + player.DisplayName + "'s message chain is broken!");
+                                        Translations.LogWarning("chat.message_chain_broken", player.Name);
                                 }
                             }
                         }
