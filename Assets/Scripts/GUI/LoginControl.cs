@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,10 +22,15 @@ namespace MinecraftClient.UI
         private TMP_InputField? serverInput, usernameInput, passwordInput, authCodeInput;
         private Button?         loginButton, quitButton, authConfirmButton, authCancelButton;
         private Button?         loginCloseButton, authLinkButton, authCloseButton;
-        private TMP_Text?       loadStateInfoText, authLinkText;
-        private CanvasGroup?    loginPanel, authPanel, loginPanelButton;
+        private TMP_Text?       loadStateInfoText, usernameOptions, authLinkText;
+        private CanvasGroup?    loginPanel, usernamePanel, authPanel, loginPanelButton;
 
         private bool tryingConnect = false, authenticating = false, authCancelled = false;
+
+        // Login auto-complete
+        int  usernameIndex =  0;
+        bool namesShown = false;
+        private string[] cachedNames = { }, shownNames = { };
 
         private readonly CornClient.LoadStateInfo loadStateInfo = new();
 
@@ -329,6 +335,44 @@ namespace MinecraftClient.UI
             loginPanelButton!.interactable = true;
         }
 
+        private void RefreshUsernames()
+        {
+            if (shownNames.Length > 0) // Show login candidates
+            {
+                StringBuilder str = new();
+                for (int i = 0;i < shownNames.Length;i++)
+                {
+                    str.Append(
+                        i == usernameIndex ? $"<color=yellow>{shownNames[i]}</color>" : shownNames[i]
+                    ).Append('\n');
+                }
+                usernameOptions!.text = str.ToString();
+                usernamePanel!.alpha = 1F;
+                namesShown         = true;
+            }
+            else // Hide them away...
+            {
+                usernamePanel!.alpha = 0F;
+                namesShown        = false;
+            }
+        }
+
+        public void UpdateUsernamePanel(string message)
+        {
+            shownNames = cachedNames.Where(
+                    (login) => login != message && login.Contains(message)).ToArray();
+
+            RefreshUsernames();
+
+        }
+
+        public void HideUsernamePanel(string message)
+        {
+            usernameIndex = 0;
+            usernamePanel!.alpha = 0F;
+            namesShown        = false;
+        }
+
         public void CopyAuthLink()
         {
             GUIUtility.systemCopyBuffer = authLinkText!.text;
@@ -401,8 +445,14 @@ namespace MinecraftClient.UI
             var authPanelObj = transform.Find("Auth Panel");
             authPanel = authPanelObj.GetComponent<CanvasGroup>();
 
-            serverInput   = loginPanelObj.transform.Find("Server Input").GetComponent<TMP_InputField>();
-            usernameInput = loginPanelObj.transform.Find("Username Input").GetComponent<TMP_InputField>();
+            serverInput     = loginPanelObj.transform.Find("Server Input").GetComponent<TMP_InputField>();
+
+            usernameInput   = loginPanelObj.transform.Find("Username Input").GetComponent<TMP_InputField>();
+            usernamePanel   = loginPanelObj.transform.Find("Username Panel").GetComponent<CanvasGroup>();
+            usernameOptions = usernamePanel.transform.Find("Username Options").GetComponent<TMP_Text>();
+            usernameOptions.text = string.Empty;
+            usernamePanel.alpha  = 0F; // Hide at start
+
             passwordInput = loginPanelObj.transform.Find("Password Input").GetComponent<TMP_InputField>();
             loginButton   = loginPanelObj.transform.Find("Login Button").GetComponent<Button>();
 
@@ -420,14 +470,33 @@ namespace MinecraftClient.UI
             quitButton        = transform.Find("Quit Button").GetComponent<Button>();
             loginPanelButton  = transform.Find("Login Panel Button").GetComponent<CanvasGroup>();
 
+            //Load cached sessions from disk if necessary
+            if (CornCraft.SessionCaching == CacheType.Disk)
+            {
+                bool cacheLoaded = SessionCache.InitializeDiskCache();
+                if (CornCraft.DebugMode)
+                    Translations.Log(cacheLoaded ? "debug.session_cache_ok" : "debug.session_cache_fail");
+                
+                if (cacheLoaded)
+                {
+                    cachedNames = SessionCache.GetCachedLogins();
+                }
+            }
+
             // TODO Initialize with cached values
             serverInput.text = "192.168.1.7";
+            if (cachedNames.Length > 0)
+                usernameInput.text = cachedNames[0];
 
             // Prepare panels at start
             ShowLoginPanel();
             HideAuthPanel();
 
             // Add listeners
+            usernameInput.onValueChanged.AddListener(this.UpdateUsernamePanel);
+            usernameInput.onSelect.AddListener(this.UpdateUsernamePanel);
+            usernameInput.onEndEdit.AddListener(this.HideUsernamePanel);
+
             loginButton.onClick.AddListener(this.TryConnectServer);
             quitButton.onClick.AddListener(this.QuitGame);
 
@@ -443,6 +512,34 @@ namespace MinecraftClient.UI
 
             loadStateInfo.infoText = $"CornCraft {CornCraft.Version} Powered by <u>Minecraft Console Client</u>";
 
+        }
+
+        void Update()
+        {
+            if (namesShown)
+            {
+                if (Input.GetKeyDown(KeyCode.UpArrow))
+                {
+                    usernameIndex = (usernameIndex + 1) % shownNames.Length;
+                    RefreshUsernames();
+                }
+                else if (Input.GetKeyDown(KeyCode.DownArrow))
+                {
+                    usernameIndex = (usernameIndex + shownNames.Length - 1) % shownNames.Length;
+                    RefreshUsernames();
+                }
+
+                if (Input.GetKeyDown(KeyCode.Tab)) // Tab-complete
+                {
+                    if (usernameIndex >= 0 && usernameIndex < shownNames.Length)
+                    {
+                        usernameInput!.text = shownNames[usernameIndex];
+                        usernameInput!.MoveTextEnd(false);
+                    }
+                        
+                }
+
+            }
         }
 
         void FixedUpdate()
