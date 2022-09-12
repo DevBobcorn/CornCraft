@@ -1,7 +1,8 @@
-﻿using MinecraftClient.Protocol;
+﻿#nullable enable
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Timers;
@@ -23,7 +24,7 @@ namespace MinecraftClient.Protocol.Session
             "launcher_profiles.json"
         );
 
-        private static FileMonitor cachemonitor;
+        private static FileMonitor? cachemonitor;
         private static Dictionary<string, SessionToken> sessions = new Dictionary<string, SessionToken>();
         private static Timer updatetimer = new Timer(100);
         private static List<KeyValuePair<string, SessionToken>> pendingadds = new List<KeyValuePair<string, SessionToken>>();
@@ -73,6 +74,11 @@ namespace MinecraftClient.Protocol.Session
         public static SessionToken Get(string login)
         {
             return sessions[login];
+        }
+
+        public static string[] GetCachedLogins()
+        {
+            return sessions.Keys.ToArray();
         }
 
         /// <summary>
