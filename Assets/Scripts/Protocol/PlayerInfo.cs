@@ -38,6 +38,7 @@ namespace MinecraftClient.Protocol
             Gamemode = gamemode;
             Ping = ping;
             DisplayName = displayName;
+            lastMessageVerified = false;
             if (timeStamp != null && publicKey != null && signature != null)
             {
                 DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeMilliseconds((long)timeStamp);
@@ -45,13 +46,13 @@ namespace MinecraftClient.Protocol
                 try
                 {
                     PublicKey = new PublicKey(publicKey, signature);
+                    lastMessageVerified = true;
                 }
                 catch (System.Security.Cryptography.CryptographicException)
                 {
                     PublicKey = null;
                 }
             }
-            lastMessageVerified = true;
             precedingSignature = null;
         }
 
@@ -113,9 +114,15 @@ namespace MinecraftClient.Protocol
             if (this.lastMessageVerified == false)
                 return false;
             if (PublicKey == null || IsKeyExpired() || (this.precedingSignature != null && precedingSignature == null))
+            {
+                this.lastMessageVerified = false;
                 return false;
+            }
             if (this.precedingSignature != null && !this.precedingSignature.SequenceEqual(precedingSignature!))
+            {
+                this.lastMessageVerified = false;
                 return false;
+            }
 
             DateTimeOffset timeOffset = DateTimeOffset.FromUnixTimeMilliseconds(timestamp);
 
