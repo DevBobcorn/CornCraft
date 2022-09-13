@@ -67,12 +67,16 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
             Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
             loadStateInfo.infoText = $"Reading special lists from {listsPath}";
 
+            int count = 0, yieldCount = 200;
+
             if (spLists.Properties.ContainsKey("no_occlusion"))
             {
                 foreach (var block in spLists.Properties["no_occlusion"].DataArray)
                 {
                     noOcclusion.Add(ResourceLocation.fromString(block.StringValue));
-                    yield return null;
+                    count++;
+                    if (count % yieldCount == 0)
+                        yield return null;
                 }
             }
 
@@ -81,7 +85,9 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                 foreach (var block in spLists.Properties["no_collision"].DataArray)
                 {
                     noCollision.Add(ResourceLocation.fromString(block.StringValue));
-                    yield return null;
+                    count++;
+                    if (count % yieldCount == 0)
+                        yield return null;
                 }
             }
 
@@ -90,7 +96,9 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                 foreach (var block in spLists.Properties["water_blocks"].DataArray)
                 {
                     waterBlocks.Add(ResourceLocation.fromString(block.StringValue));
-                    yield return null;
+                    count++;
+                    if (count % yieldCount == 0)
+                        yield return null;
                 }
             }
 
@@ -99,7 +107,9 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                 foreach (var block in spLists.Properties["always_fulls"].DataArray)
                 {
                     alwaysFulls.Add(ResourceLocation.fromString(block.StringValue));
-                    yield return null;
+                    count++;
+                    if (count % yieldCount == 0)
+                        yield return null;
                 }
             }
 
@@ -114,7 +124,7 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
             // Then read block states...
             Json.JSONData palette = Json.ParseJson(File.ReadAllText(statesPath, Encoding.UTF8));
             Debug.Log("Reading block states from " + statesPath);
-
+            count = 0;
             foreach (KeyValuePair<string, Json.JSONData> item in palette.Properties)
             {
                 ResourceLocation blockId = ResourceLocation.fromString(item.Key);
@@ -175,8 +185,12 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
 
                 }
 
-                loadStateInfo.infoText = $"Loading states of block {item.Key}";
-                yield return null;
+                count++;
+                if (count % 3 == 0)
+                {
+                    loadStateInfo.infoText = $"Loading states of block {item.Key}";
+                    yield return null;
+                }
             }
 
             Debug.Log($"{statesTable.Count} block states loaded.");
@@ -223,7 +237,6 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                         }
 
                         loadStateInfo.infoText = $"Loading states of block {typeItem.Key}";
-
 
                     }
 

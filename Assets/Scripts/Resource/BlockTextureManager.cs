@@ -133,7 +133,7 @@ namespace MinecraftClient.Resource
 
                 string jsonText = File.ReadAllText(atlasJsonPath);
                 Json.JSONData atlasJson = Json.ParseJson(jsonText);
-
+                int count = 0;
                 foreach (KeyValuePair<string, Json.JSONData> item in atlasJson.Properties)
                 {
                     if (blockAtlasTable.ContainsKey(ResourceLocation.fromString(item.Key)))
@@ -144,8 +144,12 @@ namespace MinecraftClient.Resource
                     else
                     {
                         blockAtlasTable[ResourceLocation.fromString(item.Key)] = int.Parse(item.Value.StringValue);
-                        loadStateInfo.infoText = $"Loading pre-generated atlas {item.Key}";
-                        yield return null;
+                        count++;
+                        if (count % 20 == 0)
+                        {
+                            loadStateInfo.infoText = $"Loading pre-generated atlas {item.Key}";
+                            yield return null;
+                        }
                     }
                 }
             }

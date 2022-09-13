@@ -65,6 +65,8 @@ namespace MinecraftClient.Resource
                     // Load textures and models
                     foreach (var nameSpaceDir in assetsDir.GetDirectories())
                     {
+                        int count = 0;
+
                         string nameSpace = nameSpaceDir.Name;
 
                         // Load and store all texture files...
@@ -81,9 +83,13 @@ namespace MinecraftClient.Resource
                             {
                                 // This texture is not provided by previous resource packs, so add it here...
                                 manager.textureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
-                                loadStateInfo.infoText = $"Loading texture {identifier}";
                             }
-                            yield return null;
+                            count++;
+                            if (count % 100 == 0)
+                            {
+                                loadStateInfo.infoText = $"Loading texture {identifier}";
+                                yield return null;
+                            }
                         }
 
                         // Load and store all model files...
@@ -100,8 +106,12 @@ namespace MinecraftClient.Resource
                             // This model loader will load this model, its parent model(if not yet loaded),
                             // and then add them to the manager's model dictionary
                             manager.blockModelLoader.LoadBlockModel(identifier, assetsDir.FullName.Replace('\\', '/'));
-                            loadStateInfo.infoText =  $"Loading block model {identifier}";
-                            yield return null;
+                            count++;
+                            if (count % 50 == 0)
+                            {
+                                loadStateInfo.infoText =  $"Loading block model {identifier}";
+                                yield return null;
+                            }
                         }
 
                     }
@@ -128,6 +138,7 @@ namespace MinecraftClient.Resource
                 DirectoryInfo assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed(packName) + "/assets");
                 if (assetsDir.Exists)
                 {
+                    int count = 0;
                     foreach (var blockPair in Block.Palette.StateListTable)
                     {
                         var blockId = blockPair.Key;
@@ -144,8 +155,12 @@ namespace MinecraftClient.Resource
                         // Load the state model definition of this block
                         string statePath = assetsDir.FullName + '/' + blockId.nameSpace + "/blockstates/" + blockId.path + ".json";
                         manager.stateModelLoader.LoadBlockStateModel(manager, blockId, statePath);
-                        loadStateInfo.infoText = $"Building model for block {blockId}";
-                        yield return null;
+                        count++;
+                        if (count % 20 == 0)
+                        {
+                            loadStateInfo.infoText = $"Building model for block {blockId}";
+                            yield return null;
+                        }
                     }
 
                 }
