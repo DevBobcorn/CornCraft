@@ -167,6 +167,8 @@ namespace MinecraftClient.Rendering
                     var visualBuffer = new VertexBuffer[count];
                     for (int i = 0;i < count;i++)
                         visualBuffer[i] = new();
+                    
+                    float3[] colliderVerts = { };
 
                     // Build chunk mesh block by block
                     for (int x = 0;x < Chunk.SizeX;x++)
@@ -214,7 +216,10 @@ namespace MinecraftClient.Rendering
                                     var models = table[stateId].Geometries;
                                     var chosen = (x + y + z) % models.Length;
 
-                                    models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags);
+                                    if (state.NoCollision)
+                                        models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags);
+                                    else
+                                        models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags);
                                     
                                     layerMask |= (1 << layerIndex);
                                     isAllEmpty = false;
@@ -265,6 +270,7 @@ namespace MinecraftClient.Rendering
                                 return;
                             }
 
+                            // Visual Mesh
                             // Count layers, vertices and face indices
                             int layerCount = 0, totalVertCount = 0;
                             for (int layer = 0;layer < count;layer++)
@@ -333,18 +339,14 @@ namespace MinecraftClient.Rendering
                                 if ((layerMask & (1 << layer)) != 0)
                                 {
                                     materialArr[subMeshIndex] = MaterialManager.GetBlockMaterial(ChunkRender.TYPES[layer]);
-
                                     int vertCount = visualBuffer[layer].vert.Length;
-
                                     meshData.SetSubMesh(subMeshIndex, new((vertOffset / 2) * 3, (vertCount / 2) * 3){ vertexCount = vertCount });
-
                                     vertOffset += vertCount;
                                     subMeshIndex++;
                                 }
                             }
 
                             var visualMesh = new Mesh { subMeshCount = layerCount };
-
                             Mesh.ApplyAndDisposeWritableMeshData(meshDataArr, visualMesh);
 
                             visualMesh.RecalculateNormals();
@@ -353,7 +355,53 @@ namespace MinecraftClient.Rendering
                             chunkRender.GetComponent<MeshFilter>().sharedMesh = visualMesh;
                             chunkRender.GetComponent<MeshRenderer>().sharedMaterials = materialArr;
 
-                            // TODO Collider Mesh
+                            // Collider Mesh
+                            int colVertCount = colliderVerts.Length;
+
+                            if (colVertCount > 0)
+                            {
+                                var colMeshDataArr  = Mesh.AllocateWritableMeshData(1);
+                                var colMeshData = colMeshDataArr[0];
+                                colMeshData.subMeshCount = 1;
+
+                                // Set mesh attributes
+                                var colVertAttrs = new NativeArray<VertexAttributeDescriptor>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+                                colVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3);
+
+                                colMeshData.SetVertexBufferParams(colVertCount,          colVertAttrs);
+                                colMeshData.SetIndexBufferParams((colVertCount / 2) * 3, IndexFormat.UInt32);
+
+                                colVertAttrs.Dispose();
+
+                                // Copy the source arrays to mesh data
+                                var colPositions  = colMeshData.GetVertexData<float3>(0);
+                                colPositions.CopyFrom(colliderVerts);
+
+                                // Generate triangle arrays
+                                var colTriIndices = colMeshData.GetIndexData<uint>();
+                                vi = 0; ti = 0;
+                                for (;vi < colliderVerts.Length;vi += 4U, ti += 6)
+                                {
+                                    colTriIndices[ti]     = vi;
+                                    colTriIndices[ti + 1] = vi + 3U;
+                                    colTriIndices[ti + 2] = vi + 2U;
+                                    colTriIndices[ti + 3] = vi;
+                                    colTriIndices[ti + 4] = vi + 1U;
+                                    colTriIndices[ti + 5] = vi + 3U;
+                                }
+
+                                colMeshData.SetSubMesh(0, new(0, (colVertCount / 2) * 3){ vertexCount = colVertCount });
+                                var colliderMesh = new Mesh { subMeshCount = 1 };
+                                Mesh.ApplyAndDisposeWritableMeshData(colMeshDataArr, colliderMesh);
+
+                                colliderMesh.RecalculateNormals();
+                                colliderMesh.RecalculateBounds();
+
+                                chunkRender.UpdateCollider(colliderMesh);
+
+                            }
+                            else
+                                chunkRender.ClearCollider();
 
                             chunksBeingBuilt.Remove(chunkRender);
                             chunkRender.State = BuildState.Ready;

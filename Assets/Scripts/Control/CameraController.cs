@@ -25,7 +25,7 @@ namespace MinecraftClient.Control
             mainCamera.fieldOfView = 60F;
 
             //DisableFixedMode();
-            EnableFixedMode(0F, 0F);
+            EnableFixedMode(1.8F, 0F);
         }
 
         public void SetTarget(Transform target)

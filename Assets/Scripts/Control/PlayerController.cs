@@ -1,17 +1,19 @@
 using UnityEngine;
+
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
 {
+    [RequireComponent(typeof (Rigidbody))]
     public class PlayerController : MonoBehaviour
     {
         private CornClient game;
+        private Rigidbody rigidBody;
+        private BoxCollider boxCollider;
 
-        public float walkSpeed = 0.9F;
-        public float runSpeed  = 4.2F;
+        public float walkSpeed = 1F;
+        public float runSpeed  = 2F;
         public float jumpSpeed = 4F;
-        public float swimSpeed = 0.8F;
-        public float swimFastSpeed = 3.2F;
 
         protected LayerMask checkLayer, entityLayer;
         protected GameMode gameMode = 0;
@@ -52,22 +54,25 @@ namespace MinecraftClient.Control
             // Reset movement params...
             isOnGround = true;
             isInWater = false;
+            // Update components state...
+            boxCollider.enabled = false;
+            rigidBody.velocity = Vector3.zero;
+            rigidBody.useGravity = false;
         }
 
         public virtual void EnableEntity()
         {
             // Update and control...
             entityDisabled = false;
+            // Update components state...
+            boxCollider.enabled = true;
+            rigidBody.useGravity = true;
         }
 
         public virtual void SetPosition(Location pos)
         {
             transform.position = CoordConvert.MC2Unity(pos);
-        }
-
-        public float GetCursorRotation()
-        {
-            return 360F - transform.eulerAngles.y;
+            Debug.Log($"Position set to {transform.position}");
         }
 
         public void Tick(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
@@ -85,7 +90,7 @@ namespace MinecraftClient.Control
         private void TickSpectator(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
             // Update player rotation
-            Vector3 moveVelocity = Vector3.zero;
+            var moveVelocity = Vector3.zero;
 
             // Check horizontal movement...
             if (Mathf.Abs(verInput) > 0F || Mathf.Abs(horInput) > 0F)
@@ -96,26 +101,22 @@ namespace MinecraftClient.Control
 
             // Check vertical movement...
             if (up)
-            {
-                moveVelocity.y = walkMode ? walkSpeed : runSpeed;
-            }
+                moveVelocity.y =  walkSpeed;
             else if (down)
-            {
-                moveVelocity.y = walkMode ? -walkSpeed : -runSpeed;
-            }
+                moveVelocity.y = -walkSpeed;
 
             // Apply movement...
-                transform.position += moveVelocity * interval;
+            transform.position += moveVelocity * interval;
 
             // No need to check position validity in spectator mode,
             // just tell server the new position...
-            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visual.eulerAngles.y - 90F, 0F);
+            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), transform.eulerAngles.y - 90F, 0F);
         }
 
         private void TickNormal(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
             // Update player rotation
-            Vector3 moveVelocity = Vector3.zero;
+            var moveVelocity = Vector3.zero;
 
             // Check horizontal movement...
             if (Mathf.Abs(verInput) > 0F || Mathf.Abs(horInput) > 0F)
@@ -125,21 +126,13 @@ namespace MinecraftClient.Control
             }
 
             // Check vertical movement...
-            if (up)
-            {
-                moveVelocity.y = walkMode ? walkSpeed : runSpeed;
-            }
-            else if (down)
-            {
-                moveVelocity.y = walkMode ? -walkSpeed : -runSpeed;
-            }
+            moveVelocity.y = up ? jumpSpeed : rigidBody.velocity.y;
 
             // Apply movement...
-                transform.position += moveVelocity * interval;
+            rigidBody.velocity = moveVelocity;
 
-            // No need to check position validity in spectator mode,
-            // just tell server the new position...
-            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visual.eulerAngles.y - 90F, 0F);
+            // Tell server our current position
+            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), transform.eulerAngles.y - 90F, 0F);
         }
 
         Vector3 GetMoveVelocity(float horInput, float verInput, float speed)
@@ -151,10 +144,10 @@ namespace MinecraftClient.Control
 
             visual.rotation = orgVisualRotation;
             
-            Vector3 dir = Quaternion.AngleAxis(transform.eulerAngles.y, Vector3.up) * Vector3.forward;
+            var dir = Quaternion.AngleAxis(transform.eulerAngles.y, Vector3.up) * Vector3.forward;
 
             // hor: x, ver: y
-            Vector2 inputDirection = new Vector2(horInput, verInput);
+            Vector2 inputDirection = new(horInput, verInput);
             inputDirection.Normalize();
             if (inputDirection.y > 0F)
             {
@@ -180,6 +173,9 @@ namespace MinecraftClient.Control
             visual      = transform.Find("Visual");
 
             game = CornClient.Instance;
+
+            boxCollider = transform.Find("Collider").GetComponent<BoxCollider>();
+            rigidBody   = GetComponent<Rigidbody>();
 
         }
 

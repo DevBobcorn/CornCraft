@@ -2407,7 +2407,9 @@ namespace MinecraftClient
             // Initial gamemode on login
             if (uuid == Guid.Empty)
             {
-                playerController.GameMode = (GameMode)gamemode;
+                Loom.QueueOnMainThread(() =>{
+                    playerController.GameMode = (GameMode)gamemode;
+                });
             }
 
             // Further regular gamemode change events
@@ -2416,9 +2418,9 @@ namespace MinecraftClient
                 string playerName = onlinePlayers[uuid].Name;
                 if (playerName == this.username)
                 {
-                    var newMode = (GameMode)gamemode;
-                    playerController.GameMode = newMode;
                     Loom.QueueOnMainThread(() =>{
+                        var newMode = (GameMode)gamemode;
+                        playerController.GameMode = newMode;
                         ShowNotification("Gamemode updated to " + newMode, Notification.Type.Success);
                     });
                 }
