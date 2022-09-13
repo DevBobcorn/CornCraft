@@ -239,17 +239,6 @@ namespace MinecraftClient
             StartCoroutine(StartClient(session, playerKeyPair, serverIp, port, protocol, forgeInfo, loadStateInfo, accountLower));
         }
 
-        public class CoroutineFlag
-        {
-            public bool done = false;
-        }
-
-        public class LoadStateInfo
-        {
-            public string infoText = string.Empty;
-            public bool   loggingIn  = false;
-        }
-
         IEnumerator StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo loadStateInfo, string accountLower)
         {
             var wait = new WaitForSecondsRealtime(0.1F);

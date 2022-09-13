@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -42,7 +41,7 @@ namespace MinecraftClient.Resource
             finalTable.Clear();
         }
 
-        public IEnumerator LoadPacks(CornClient.CoroutineFlag flag, CornClient.LoadStateInfo loadStateInfo)
+        public IEnumerator LoadPacks(CoroutineFlag flag, LoadStateInfo loadStateInfo)
         {
             float startTime = Time.realtimeSinceStartup;
 

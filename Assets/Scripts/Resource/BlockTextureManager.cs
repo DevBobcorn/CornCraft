@@ -114,7 +114,7 @@ namespace MinecraftClient.Resource
 
         }
 
-        public static IEnumerator Load(string version, CornClient.CoroutineFlag loadFlag, CornClient.LoadStateInfo loadStateInfo)
+        public static IEnumerator Load(string version, CoroutineFlag loadFlag, LoadStateInfo loadStateInfo)
         {
             blockAtlasTable.Clear(); // Clear previously loaded table...
 

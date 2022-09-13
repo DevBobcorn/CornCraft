@@ -54,7 +54,7 @@ namespace MinecraftClient.Resource
 
         }
 
-        public IEnumerator LoadResources(ResourcePackManager manager, CornClient.LoadStateInfo loadStateInfo)
+        public IEnumerator LoadResources(ResourcePackManager manager, LoadStateInfo loadStateInfo)
         {
             if (isValid)
             {
@@ -129,7 +129,7 @@ namespace MinecraftClient.Resource
             }
         }
 
-        public IEnumerator BuildStateGeometries(ResourcePackManager manager, CornClient.LoadStateInfo loadStateInfo)
+        public IEnumerator BuildStateGeometries(ResourcePackManager manager, LoadStateInfo loadStateInfo)
         {
             // Load all blockstate files, make and assign their block meshes...
             if (Block.Palette is not null && isValid)

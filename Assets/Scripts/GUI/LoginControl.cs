@@ -33,7 +33,7 @@ namespace MinecraftClient.UI
         bool namesShown = false;
         private string[] cachedNames = { }, shownNames = { };
 
-        private readonly CornClient.LoadStateInfo loadStateInfo = new();
+        private readonly LoadStateInfo loadStateInfo = new();
 
         /// <summary>
         /// Load server information in ServerIP and ServerPort variables from a "serverip:port" couple or server alias
@@ -486,7 +486,7 @@ namespace MinecraftClient.UI
             }
 
             // TODO Also initialize server with cached values
-            serverInput.text = "192.168.1.7";
+            serverInput.text = "192.168.1.2";
             if (cachedNames.Length > 0)
                 usernameInput.text = cachedNames[0];
             

@@ -40,7 +40,7 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
             return renderTypeTable.GetValueOrDefault(stateId, RenderType.SOLID);
         }
 
-        public IEnumerator PrepareData(string dataVersion, CornClient.CoroutineFlag flag, CornClient.LoadStateInfo loadStateInfo)
+        public IEnumerator PrepareData(string dataVersion, CoroutineFlag flag, LoadStateInfo loadStateInfo)
         {
             // Clean up first...
             statesTable.Clear();
