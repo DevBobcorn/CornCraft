@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace MinecraftClient.Control
 {
-    [AddComponentMenu("Unicorn/Control/Camera Controller")]
     public class CameraController : MonoBehaviour
     {
         private LayerMask checkLayer;
@@ -45,24 +44,7 @@ namespace MinecraftClient.Control
 
         public void Tick(float interval, float mouseX, float mouseY)
         {
-            if (fixedMode)
-            {
-                // Update position and rotation
-                transform.position = target.position;
-                Vector3 orgPivotEuler = transform.rotation.eulerAngles;
-
-                float rotationX = orgPivotEuler.y + mouseX * sensitivityX;
-                float rotationY = orgPivotEuler.x - mouseY * sensitivityY;
-
-                if (rotationY < 0F) rotationY += 360F;
-
-                transform.rotation = Quaternion.Euler(
-                    rotationY > 180F ? Mathf.Clamp(rotationY, 300F, 360F) : Mathf.Clamp(rotationY, 0F, 60F),
-                    rotationX,
-                    0F
-                );
-            }
-            else
+            if (!fixedMode)
             {
                 Vector3 orgPivotEuler = transform.rotation.eulerAngles;
 
@@ -81,10 +63,29 @@ namespace MinecraftClient.Control
             }
         }
 
-        public void LateTick(float interval)
+        public void LateTick(float interval, float mouseX, float mouseY)
         {
             if (!fixedMode)
+            {
                 transform.position = Vector3.SmoothDamp(transform.position, target.position + Vector3.up, ref currentVelocity, 0.05F);
+            }
+            else
+            {
+                // Update position and rotation
+                transform.position = target.position;
+                Vector3 orgPivotEuler = transform.rotation.eulerAngles;
+
+                float rotationX = orgPivotEuler.y + mouseX * sensitivityX;
+                float rotationY = orgPivotEuler.x - mouseY * sensitivityY;
+
+                if (rotationY < 0F) rotationY += 360F;
+
+                transform.rotation = Quaternion.Euler(
+                    rotationY > 180F ? Mathf.Clamp(rotationY, 300F, 360F) : Mathf.Clamp(rotationY, 0F, 60F),
+                    rotationX,
+                    0F
+                );
+            }
         }
 
         public float GetCursorRotation()

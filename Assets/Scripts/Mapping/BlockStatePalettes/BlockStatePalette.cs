@@ -183,19 +183,22 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                         };
                     }
 
-                }
+                    // Count per state so that loading time can be more evenly distributed
+                    count++;
+                    if (count % 10 == 0)
+                    {
+                        loadStateInfo.infoText = $"Loading states of block {item.Key}";
+                        yield return null;
+                    }
 
-                count++;
-                if (count % 3 == 0)
-                {
-                    loadStateInfo.infoText = $"Loading states of block {item.Key}";
-                    yield return null;
                 }
             }
 
             Debug.Log($"{statesTable.Count} block states loaded.");
 
             renderTypeTable.Clear();
+            loadStateInfo.infoText = $"Loading lists of render types";
+            yield return null;
             
             // Load and apply block render types...
             string renderTypePath = PathHelper.GetExtraDataFile("block_render_type.json");
@@ -228,15 +231,12 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                                             _               => RenderType.SOLID
                                         }
                                     );
-
                                 }
                                 else
                                     Debug.LogWarning($"Render type of {statesTable[stateId].ToString()} registered more than once!");
 
                             }
                         }
-
-                        loadStateInfo.infoText = $"Loading states of block {typeItem.Key}";
 
                     }
 

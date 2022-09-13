@@ -3,7 +3,6 @@ using UnityEngine;
 namespace MinecraftClient.Control
 {
     [RequireComponent(typeof (PlayerController))]
-    [AddComponentMenu("Unicorn/Control/Player User Control")]
     public class PlayerUserControl : MonoBehaviour
     {
         private CornClient game;

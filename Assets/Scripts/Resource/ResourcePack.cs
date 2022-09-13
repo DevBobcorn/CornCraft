@@ -107,7 +107,7 @@ namespace MinecraftClient.Resource
                             // and then add them to the manager's model dictionary
                             manager.blockModelLoader.LoadBlockModel(identifier, assetsDir.FullName.Replace('\\', '/'));
                             count++;
-                            if (count % 50 == 0)
+                            if (count % 5 == 0)
                             {
                                 loadStateInfo.infoText =  $"Loading block model {identifier}";
                                 yield return null;
@@ -156,7 +156,7 @@ namespace MinecraftClient.Resource
                         string statePath = assetsDir.FullName + '/' + blockId.nameSpace + "/blockstates/" + blockId.path + ".json";
                         manager.stateModelLoader.LoadBlockStateModel(manager, blockId, statePath);
                         count++;
-                        if (count % 20 == 0)
+                        if (count % 10 == 0)
                         {
                             loadStateInfo.infoText = $"Building model for block {blockId}";
                             yield return null;

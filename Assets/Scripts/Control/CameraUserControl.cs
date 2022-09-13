@@ -3,7 +3,6 @@ using UnityEngine;
 namespace MinecraftClient.Control
 {
     [RequireComponent(typeof (CameraController))]
-    [AddComponentMenu("Unicorn/Control/Camera User Control")]
     public class CameraUserControl : MonoBehaviour
     {
         CameraController camControl;
@@ -21,6 +20,7 @@ namespace MinecraftClient.Control
             float x = Input.GetAxis("Mouse X");
             float y = Input.GetAxis("Mouse Y");
             camControl.Tick(Time.deltaTime, x, y);
+
             if (!scrollLocked)
             {
                 ScrollCamera(Input.GetAxis("Mouse ScrollWheel"));
@@ -31,7 +31,9 @@ namespace MinecraftClient.Control
         {
             if (CornClient.Instance.IsPaused()) return;
 
-            camControl.LateTick(Time.deltaTime);
+            float x = Input.GetAxis("Mouse X");
+            float y = Input.GetAxis("Mouse Y");
+            camControl.LateTick(Time.deltaTime, x, y);
         }
 
         public void ScrollCamera(float scroll)
