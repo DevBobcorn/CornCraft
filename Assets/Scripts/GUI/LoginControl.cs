@@ -19,11 +19,12 @@ namespace MinecraftClient.UI
     public class LoginControl : MonoBehaviour
     {
         private CornClient? game;
-        private TMP_InputField? serverInput, usernameInput, passwordInput, authCodeInput;
+        private TMP_InputField? serverInput, usernameInput, authCodeInput;
         private Button?         loginButton, quitButton, authConfirmButton, authCancelButton;
         private Button?         loginCloseButton, authLinkButton, authCloseButton;
-        private TMP_Text?       loadStateInfoText, usernameOptions, authLinkText;
+        private TMP_Text?       loadStateInfoText, usernameOptions, usernamePlaceholder, authLinkText;
         private CanvasGroup?    loginPanel, usernamePanel, authPanel, loginPanelButton;
+        private TMP_Dropdown?   loginDropDown;
 
         private bool tryingConnect = false, authenticating = false, authCancelled = false;
 
@@ -81,7 +82,6 @@ namespace MinecraftClient.UI
         {
             string serverText = serverInput!.text;
             string account = usernameInput!.text;
-            string password = passwordInput!.text;
 
             string accountLower = account.ToLower();
 
@@ -91,8 +91,9 @@ namespace MinecraftClient.UI
             PlayerKeyPair? playerKeyPair = null;
 
             var result = ProtocolHandler.LoginResult.LoginRequired;
+            var online = loginDropDown!.value == 0; // Dropdown value is 0 if use Microsoft login
 
-            if (password == "-")
+            if (!online)
             {
                 if (!CornCraft.IsValidName(account))
                 {
@@ -129,13 +130,6 @@ namespace MinecraftClient.UI
                                 Debug.LogError("Refresh access token fail: " + e.Message);
                                 result = ProtocolHandler.LoginResult.InvalidResponse;
                             }
-                        }
-                        if (result != ProtocolHandler.LoginResult.Success && password == string.Empty)
-                        {   // Request password
-                            CornClient.ShowNotification("Please input your password!", Notification.Type.Warning);
-                            tryingConnect = false;
-                            loadStateInfo.infoText = ">_<";
-                            yield break;
                         }
                     }
                     else
@@ -197,7 +191,7 @@ namespace MinecraftClient.UI
                 if (CornCraft.SessionCaching != CacheType.None)
                     SessionCache.Store(accountLower, session);
 
-                if (password != "-" && CornCraft.LoginWithSecureProfile)
+                if (online && CornCraft.LoginWithSecureProfile)
                 {
                     // Load cached profile key from disk if necessary
                     if (CornCraft.ProfileKeyCaching == CacheType.Disk)
@@ -258,7 +252,7 @@ namespace MinecraftClient.UI
                     {
                         Translations.NotifyError("error.ping");
                         tryingConnect = false;
-                        loadStateInfo.infoText = Translations.Get("error.ping");
+                        loadStateInfo.infoText = ">_<";
                         yield break;
                     }
                 }
@@ -373,6 +367,11 @@ namespace MinecraftClient.UI
             namesShown        = false;
         }
 
+        public void UpdateUsernamePlaceholder(int selection)
+        {
+            usernamePlaceholder!.text = selection == 0 ? "Email Address" : "User Name";
+        }
+
         public void CopyAuthLink()
         {
             GUIUtility.systemCopyBuffer = authLinkText!.text;
@@ -448,12 +447,15 @@ namespace MinecraftClient.UI
             serverInput     = loginPanelObj.transform.Find("Server Input").GetComponent<TMP_InputField>();
 
             usernameInput   = loginPanelObj.transform.Find("Username Input").GetComponent<TMP_InputField>();
+            usernamePlaceholder = FindHelper.FindChildRecursively(usernameInput.transform,
+                                        "Placeholder").GetComponent<TMP_Text>();
             usernamePanel   = loginPanelObj.transform.Find("Username Panel").GetComponent<CanvasGroup>();
             usernameOptions = usernamePanel.transform.Find("Username Options").GetComponent<TMP_Text>();
             usernameOptions.text = string.Empty;
             usernamePanel.alpha  = 0F; // Hide at start
 
-            passwordInput = loginPanelObj.transform.Find("Password Input").GetComponent<TMP_InputField>();
+            loginDropDown = loginPanelObj.transform.Find("Login Dropdown").GetComponent<TMP_Dropdown>();
+            loginDropDown.onValueChanged.AddListener(this.UpdateUsernamePlaceholder);
             loginButton   = loginPanelObj.transform.Find("Login Button").GetComponent<Button>();
 
             authCodeInput     = authPanelObj.transform.Find("Auth Code Input").GetComponent<TMP_InputField>();
@@ -483,10 +485,13 @@ namespace MinecraftClient.UI
                 }
             }
 
-            // TODO Initialize with cached values
+            // TODO Also initialize server with cached values
             serverInput.text = "192.168.1.7";
             if (cachedNames.Length > 0)
                 usernameInput.text = cachedNames[0];
+            
+            loginDropDown.value = 0;
+            UpdateUsernamePlaceholder(0);
 
             // Prepare panels at start
             ShowLoginPanel();
