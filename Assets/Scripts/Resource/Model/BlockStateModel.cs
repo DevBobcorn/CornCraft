@@ -4,11 +4,11 @@ namespace MinecraftClient.Resource
 {
     public class BlockStateModel
     {
-        public readonly List<BlockGeometry> Geometries = new List<BlockGeometry>();
+        public readonly BlockGeometry[] Geometries;
 
         public BlockStateModel(List<BlockGeometry> geometries)
         {
-            Geometries = geometries;
+            Geometries = geometries.ToArray();
         }
 
     }

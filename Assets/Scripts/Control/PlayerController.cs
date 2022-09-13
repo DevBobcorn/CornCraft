@@ -3,7 +3,6 @@ using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
 {
-    [AddComponentMenu("Unicorn/Control/Player Controller")]
     public class PlayerController : MonoBehaviour
     {
         private CornClient game;

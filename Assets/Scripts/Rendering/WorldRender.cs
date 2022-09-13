@@ -212,7 +212,7 @@ namespace MinecraftClient.Rendering
                                 if (cullFlags != 0 && table is not null && table.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                                 {
                                     var models = table[stateId].Geometries;
-                                    var chosen = (x + y + z) % models.Count;
+                                    var chosen = (x + y + z) % models.Length;
 
                                     models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags);
                                     
