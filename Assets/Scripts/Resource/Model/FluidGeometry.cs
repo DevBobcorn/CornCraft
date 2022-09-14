@@ -8,12 +8,17 @@ namespace MinecraftClient.Resource
 {
     public static class FluidGeometry
     {
-        private static ResourceLocation WATER_STILL = new ResourceLocation("block/water_still");
-        private static Vector4 FULL = new(0, 0, 1, 1);
+        private static readonly ResourceLocation WATER_STILL = new ResourceLocation("block/water_still");
+
+        private static readonly Vector4 FULL = new(0, 0, 1, 1);
+
+        // Add a subtle offset to sides of water to avoid z-fighting
+        private const float O = 0.001F;
+        private const float I = 0.999F;
 
         public static void Build(ref VertexBuffer buffer, int x, int y, int z, int cullFlags)
         {
-            float h = (cullFlags & (1 << 0)) != 0 ? 0.875F : 1F;
+            float h = (cullFlags & (1 << 0)) != 0 ? 0.875F : I;
 
             int vertOffset = buffer.vert.Length;
             int newLength = vertOffset + arraySizeMap[cullFlags];
@@ -38,50 +43,50 @@ namespace MinecraftClient.Resource
 
             if ((cullFlags & (1 << 1)) != 0) // Down
             {
-                verts[vertOffset]     = new(0 + z, 0 + y, 0 + x); // 0 => 0
-                verts[vertOffset + 1] = new(1 + z, 0 + y, 0 + x); // 1 => 1
-                verts[vertOffset + 2] = new(0 + z, 0 + y, 1 + x); // 7 => 3
-                verts[vertOffset + 3] = new(1 + z, 0 + y, 1 + x); // 6 => 2
+                verts[vertOffset]     = new(0 + z, O + y, 0 + x); // 0 => 0
+                verts[vertOffset + 1] = new(1 + z, O + y, 0 + x); // 1 => 1
+                verts[vertOffset + 2] = new(0 + z, O + y, 1 + x); // 7 => 3
+                verts[vertOffset + 3] = new(1 + z, O + y, 1 + x); // 6 => 2
                 BlockTextureManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
             if ((cullFlags & (1 << 2)) != 0) // South
             {
-                verts[vertOffset]     = new(1 + z, h + y, 0 + x); // 2 => 1
-                verts[vertOffset + 1] = new(1 + z, h + y, 1 + x); // 5 => 2
-                verts[vertOffset + 2] = new(1 + z, 0 + y, 0 + x); // 1 => 0
-                verts[vertOffset + 3] = new(1 + z, 0 + y, 1 + x); // 6 => 3
+                verts[vertOffset]     = new(I + z, h + y, O + x); // 2 => 1
+                verts[vertOffset + 1] = new(I + z, h + y, I + x); // 5 => 2
+                verts[vertOffset + 2] = new(I + z, 0 + y, O + x); // 1 => 0
+                verts[vertOffset + 3] = new(I + z, 0 + y, I + x); // 6 => 3
                 BlockTextureManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
             if ((cullFlags & (1 << 3)) != 0) // North
             {
-                verts[vertOffset]     = new(0 + z, h + y, 1 + x); // 4 => 2
-                verts[vertOffset + 1] = new(0 + z, h + y, 0 + x); // 3 => 1
-                verts[vertOffset + 2] = new(0 + z, 0 + y, 1 + x); // 7 => 3
-                verts[vertOffset + 3] = new(0 + z, 0 + y, 0 + x); // 0 => 0
+                verts[vertOffset]     = new(O + z, h + y, I + x); // 4 => 2
+                verts[vertOffset + 1] = new(O + z, h + y, O + x); // 3 => 1
+                verts[vertOffset + 2] = new(O + z, 0 + y, I + x); // 7 => 3
+                verts[vertOffset + 3] = new(O + z, 0 + y, O + x); // 0 => 0
                 BlockTextureManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
             if ((cullFlags & (1 << 4)) != 0) // East
             {
-                verts[vertOffset]     = new(1 + z, h + y, 1 + x); // 5 => 1
-                verts[vertOffset + 1] = new(0 + z, h + y, 1 + x); // 4 => 0
-                verts[vertOffset + 2] = new(1 + z, 0 + y, 1 + x); // 6 => 2
-                verts[vertOffset + 3] = new(0 + z, 0 + y, 1 + x); // 7 => 3
+                verts[vertOffset]     = new(I + z, h + y, I + x); // 5 => 1
+                verts[vertOffset + 1] = new(O + z, h + y, I + x); // 4 => 0
+                verts[vertOffset + 2] = new(I + z, 0 + y, I + x); // 6 => 2
+                verts[vertOffset + 3] = new(O + z, 0 + y, I + x); // 7 => 3
                 BlockTextureManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
             if ((cullFlags & (1 << 5)) != 0) // West
             {
-                verts[vertOffset]     = new(0 + z, h + y, 0 + x); // 3 => 3
-                verts[vertOffset + 1] = new(1 + z, h + y, 0 + x); // 2 => 2
-                verts[vertOffset + 2] = new(0 + z, 0 + y, 0 + x); // 0 => 0
-                verts[vertOffset + 3] = new(1 + z, 0 + y, 0 + x); // 1 => 1
+                verts[vertOffset]     = new(O + z, h + y, O + x); // 3 => 3
+                verts[vertOffset + 1] = new(I + z, h + y, O + x); // 2 => 2
+                verts[vertOffset + 2] = new(O + z, 0 + y, O + x); // 0 => 0
+                verts[vertOffset + 3] = new(I + z, 0 + y, O + x); // 1 => 1
                 BlockTextureManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
                 // Not necessary vertOffset += 4;
             }
