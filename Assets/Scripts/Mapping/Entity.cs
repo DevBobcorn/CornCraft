@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using MinecraftClient.Inventory;
@@ -19,17 +20,15 @@ namespace MinecraftClient.Mapping
         /// </summary>
         public Guid UUID;
 
-        #nullable enable
         /// <summary>
         /// Nickname of the entity if it is a player.
         /// </summary>
         public string? Name;
-        #nullable disable
         
         /// <summary>
         /// CustomName of the entity.
         /// </summary>
-        public string CustomNameJson;
+        public string? CustomNameJson;
         
         /// <summary>
         /// IsCustomNameVisible of the entity.
@@ -39,7 +38,7 @@ namespace MinecraftClient.Mapping
         /// <summary>
         /// CustomName of the entity.
         /// </summary>
-        public string CustomName;
+        public string? CustomName;
         
         /// <summary>
         /// Latency of the entity if it is a player.
@@ -93,7 +92,7 @@ namespace MinecraftClient.Mapping
         /// <summary>
         /// Entity metadata
         /// </summary>
-        public Dictionary<int, object> Metadata;
+        public Dictionary<int, object?>? Metadata;
 
         /// <summary>
         /// Entity equipment
@@ -135,7 +134,6 @@ namespace MinecraftClient.Mapping
             this.ObjectData = objectData;
         }
 
-        #nullable enable
         /// <summary>
         /// Create a new entity based on Entity ID, Entity Type, location, name and UUID
         /// </summary>
@@ -155,7 +153,6 @@ namespace MinecraftClient.Mapping
             this.Equipment = new Dictionary<int, Item>();
             this.Item = new Item(ItemType.Air, 0, null);
         }
-        #nullable disable
 
         public override string ToString()
         {

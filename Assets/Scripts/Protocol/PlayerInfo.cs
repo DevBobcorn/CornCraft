@@ -149,9 +149,15 @@ namespace MinecraftClient.Protocol
             if (this.lastMessageVerified == false)
                 return false;
             if (PublicKey == null || IsKeyExpired() || (this.precedingSignature != null && precedingSignature == null))
+            {
+                this.lastMessageVerified = false;
                 return false;
+            }
             if (this.precedingSignature != null && !this.precedingSignature.SequenceEqual(precedingSignature!))
+            {
+                this.lastMessageVerified = false;
                 return false;
+            }
 
             bool res = PublicKey.VerifyHeader(ref bodyDigest, ref headerSignature);
 
