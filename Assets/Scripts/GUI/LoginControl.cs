@@ -486,7 +486,7 @@ namespace MinecraftClient.UI
             }
 
             // TODO Also initialize server with cached values
-            serverInput.text = "192.168.1.2";
+            serverInput.text = "127.0.0.1";
             if (cachedNames.Length > 0)
                 usernameInput.text = cachedNames[0];
             
