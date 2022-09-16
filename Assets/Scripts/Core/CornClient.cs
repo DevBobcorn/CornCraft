@@ -146,6 +146,7 @@ namespace MinecraftClient
         private Location location;
         private object locationLock = new();
         private bool locationReceived = false, localLocationUpdated = false;
+        public bool LocationReceived { get { return locationReceived; } }
         private float? _yaw; // Used for calculation ONLY!!! Doesn't reflect the client yaw
         private float? _pitch; // Used for calculation ONLY!!! Doesn't reflect the client pitch
         private float playerYaw;
