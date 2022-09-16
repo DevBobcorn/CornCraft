@@ -5,7 +5,7 @@ namespace MinecraftClient.Control
     public class CameraController : MonoBehaviour
     {
         private LayerMask checkLayer;
-        private Camera mainCamera;
+        public Camera ActiveCamera { get; set; }
         private Transform target;
         private Vector3 cameraPositionTarget, currentVelocity = Vector3.zero;
         public float sensitivityX = 5F;
@@ -21,8 +21,8 @@ namespace MinecraftClient.Control
         void Awake()
         {
             checkLayer = ~LayerMask.GetMask("Player", "Ignore Raycast");
-            mainCamera = Camera.main;
-            mainCamera.fieldOfView = 60F;
+            ActiveCamera = Camera.main;
+            ActiveCamera.fieldOfView = 60F;
 
             //DisableFixedMode();
             EnableFixedMode(1.8F, 0F);
@@ -37,8 +37,8 @@ namespace MinecraftClient.Control
         {
             if (scroll != 0)
             {
-                mainCamera.fieldOfView = mainCamera.fieldOfView - scroll * sensitivityWheel;
-                mainCamera.fieldOfView = Mathf.Clamp(mainCamera.fieldOfView, near, far);
+                ActiveCamera.fieldOfView = ActiveCamera.fieldOfView - scroll * sensitivityWheel;
+                ActiveCamera.fieldOfView = Mathf.Clamp(ActiveCamera.fieldOfView, near, far);
             }
         }
 
@@ -48,14 +48,14 @@ namespace MinecraftClient.Control
             {
                 Vector3 orgPivotEuler = transform.rotation.eulerAngles;
 
-                float rotationX = orgPivotEuler.y + mouseX * sensitivityX;
-                float rotationY = orgPivotEuler.x - mouseY * sensitivityY;
+                float camYaw   = orgPivotEuler.y + mouseX * sensitivityX;
+                float camPitch = orgPivotEuler.x - mouseY * sensitivityY;
 
-                if (rotationY < 0F) rotationY += 360F;
+                camPitch %= 360F;
 
                 transform.rotation = Quaternion.Euler(
-                    rotationY > 180F ? Mathf.Clamp(rotationY, 300F, 360F) : Mathf.Clamp(rotationY, 0F, 60F),
-                    rotationX,
+                    camPitch,
+                    camYaw,
                     0F
                 );
 
@@ -72,19 +72,22 @@ namespace MinecraftClient.Control
             else
             {
                 // Update position and rotation
-                transform.position = target.position;
+                transform.position = target.position + target.up * fixedYOffset - target.forward * fixedZOffset;
                 Vector3 orgPivotEuler = transform.rotation.eulerAngles;
 
-                float rotationX = orgPivotEuler.y + mouseX * sensitivityX;
-                float rotationY = orgPivotEuler.x - mouseY * sensitivityY;
+                float camYaw   = orgPivotEuler.y + mouseX * sensitivityX;
+                float camPitch = orgPivotEuler.x - mouseY * sensitivityY;
 
-                if (rotationY < 0F) rotationY += 360F;
+                while (camPitch < 0F)
+                    camPitch += 360F;
 
                 transform.rotation = Quaternion.Euler(
-                    rotationY > 180F ? Mathf.Clamp(rotationY, 300F, 360F) : Mathf.Clamp(rotationY, 0F, 60F),
-                    rotationX,
+                    camPitch > 180F ? Mathf.Clamp(camPitch, 271F, 360F) : Mathf.Clamp(camPitch, 0F, 89F),
+                    camYaw,
                     0F
                 );
+
+                CheckCameraPosition();
             }
         }
 
@@ -95,19 +98,19 @@ namespace MinecraftClient.Control
 
         public Vector2 GetPlayerFocusOnScreen()
         {
-            return mainCamera.WorldToScreenPoint(target.position + Vector3.up); // TODO
+            return ActiveCamera.WorldToScreenPoint(target.position + Vector3.up); // TODO
         }
 
         private void CheckCameraPosition()
         {
             RaycastHit hitInfo;
-            if (Physics.Linecast(transform.position, mainCamera.transform.position, out hitInfo, checkLayer))
+            if (Physics.Linecast(transform.position, ActiveCamera.transform.position, out hitInfo, checkLayer))
             {
-                mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, hitInfo.point, 0.2F);
+                ActiveCamera.transform.position = Vector3.Lerp(ActiveCamera.transform.position, hitInfo.point, 0.2F);
             }
             else
             {
-                mainCamera.transform.localPosition = Vector3.Lerp(mainCamera.transform.localPosition, cameraPositionTarget, 0.05F);
+                ActiveCamera.transform.localPosition = Vector3.Lerp(ActiveCamera.transform.localPosition, cameraPositionTarget, 0.05F);
             }
         }
 
@@ -116,13 +119,13 @@ namespace MinecraftClient.Control
             fixedMode = true;
             fixedYOffset = fixedY;
             fixedZOffset = fixedZ;
-            mainCamera.transform.localPosition = cameraPositionTarget = new Vector3(0F, fixedYOffset, fixedZOffset);
+            ActiveCamera.transform.localPosition = cameraPositionTarget = Vector3.zero;
         }
 
         public void DisableFixedMode()
         {
             fixedMode = false;
-            mainCamera.transform.localPosition = cameraPositionTarget = new Vector3(0F, cameraYOffset, cameraZOffset);
+            ActiveCamera.transform.localPosition = cameraPositionTarget = new Vector3(0F, cameraYOffset, cameraZOffset);
         }
 
     }

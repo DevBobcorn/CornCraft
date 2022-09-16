@@ -1,5 +1,4 @@
 using UnityEngine;
-
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
@@ -15,7 +14,8 @@ namespace MinecraftClient.Control
         public float runSpeed  = 2F;
         public float jumpSpeed = 4F;
 
-        protected LayerMask checkLayer, entityLayer;
+        protected LayerMask terrainLayer, entityLayer;
+
         protected GameMode gameMode = 0;
         public GameMode GameMode
         {
@@ -32,7 +32,10 @@ namespace MinecraftClient.Control
                 }
                 else
                 {
-                    EnableEntity();
+                    if (game.LocationReceived)
+                        EnableEntity();
+                    else
+                        DisableEntity();
                 }
             }
         }
@@ -73,10 +76,21 @@ namespace MinecraftClient.Control
         {
             transform.position = CoordConvert.MC2Unity(pos);
             Debug.Log($"Position set to {transform.position}");
+
+            if (gameMode == GameMode.Spectator) // Spectating
+                DisableEntity();
+            else
+                EnableEntity();
         }
 
         public void Tick(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
+            if (attack)
+            {
+                if (blockPos is not null)
+                    game.DigBlock(blockPos.Value, true, false);
+            }
+
             if (entityDisabled)
             {
                 TickSpectator(interval, horInput, verInput, walkMode, attack, up, down);
@@ -110,7 +124,7 @@ namespace MinecraftClient.Control
 
             // No need to check position validity in spectator mode,
             // just tell server the new position...
-            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), transform.eulerAngles.y - 90F, 0F);
+            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visual.eulerAngles.y - 90F, 0F);
         }
 
         private void TickNormal(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
@@ -132,19 +146,15 @@ namespace MinecraftClient.Control
             rigidBody.velocity = moveVelocity;
 
             // Tell server our current position
-            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), transform.eulerAngles.y - 90F, 0F);
+            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visual.eulerAngles.y - 90F, 0F);
         }
 
         Vector3 GetMoveVelocity(float horInput, float verInput, float speed)
         {
-            Quaternion orgVisualRotation = visual.rotation;
-
             float newRotation = camControl.transform.rotation.eulerAngles.y + camRotation;
-            transform.eulerAngles = new Vector3(0F, newRotation, 0F);
-
-            visual.rotation = orgVisualRotation;
+            visual.transform.eulerAngles = new Vector3(0F, newRotation, 0F);
             
-            var dir = Quaternion.AngleAxis(transform.eulerAngles.y, Vector3.up) * Vector3.forward;
+            var dir = Quaternion.AngleAxis(visual.transform.eulerAngles.y, Vector3.up) * Vector3.forward;
 
             // hor: x, ver: y
             Vector2 inputDirection = new(horInput, verInput);
@@ -167,10 +177,10 @@ namespace MinecraftClient.Control
 
         public void Start()
         {
-            checkLayer  = ~LayerMask.GetMask("Player", "Ignore Raycast");
-            entityLayer = LayerMask.GetMask("Entity");
-            camControl  = GameObject.FindObjectOfType<CameraController>();
-            visual      = transform.Find("Visual");
+            terrainLayer = LayerMask.GetMask("Terrain"); // ~LayerMask.GetMask("Player", "Ignore Raycast");
+            entityLayer  = LayerMask.GetMask("Entity");
+            camControl   = GameObject.FindObjectOfType<CameraController>();
+            visual       = transform.Find("Visual");
 
             game = CornClient.Instance;
 
@@ -179,9 +189,51 @@ namespace MinecraftClient.Control
 
         }
 
+        private Vector3? targetPos = null, targetDir = null;
+        private Location? blockPos = null;
+
+        void Update()
+        {
+            var ray = camControl.ActiveCamera.ViewportPointToRay(new(0.5F, 0.5F, 0F));
+
+            RaycastHit hit;
+            if (Physics.Raycast(ray.origin, ray.direction, out hit, 100F, terrainLayer))
+            {
+                targetPos = hit.point;
+                targetDir = hit.normal;
+            }
+            else
+            {
+                targetPos = null;
+                targetDir = null;
+            }
+
+        }
+
+        void OnDrawGizmos()
+        {
+            if (targetPos is not null)
+            {
+                // Draw hit result
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawCube(targetPos.Value, Vector3.one * 0.1F);
+                Gizmos.color = Color.green;
+                Gizmos.DrawRay(targetPos.Value, targetDir.Value);
+                // Draw calculated block position
+                var offseted = targetPos.Value - targetDir.Value * 0.5F;
+                Vector3 pos = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
+                blockPos = CoordConvert.Unity2MC(pos);
+                Gizmos.color = Color.black;
+                Gizmos.DrawWireCube(pos + Vector3.one * .5F, Vector3.one);
+
+            }
+            else
+                blockPos = null;
+        }
+
         public string GetDebugInfo()
         {
-            return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{isOnGround}\nIn water:\t{isInWater}";
+            return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{isOnGround}\nIn water:\t{isInWater}\nTarget Block:\t{blockPos}";
         }
 
     }
