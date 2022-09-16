@@ -30,9 +30,9 @@ namespace MinecraftClient
         /// <returns>Float number</returns>
         public static float str2float(string str)
         {
-            float f;
-            if (float.TryParse(str.Trim(), out f))
-                return f;
+            float num;
+            if (float.TryParse(str.Trim(), out num))
+                return num;
             else
             {
                 Translations.LogError("error.setting.str2int", str);
