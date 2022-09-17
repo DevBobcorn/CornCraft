@@ -44,7 +44,8 @@ namespace MinecraftClient.Control
         public bool EntityDisabled { get { return entityDisabled; } }
 
         private CameraController camControl;
-        private Transform visual;
+        private Transform visualTransform, blockSelectionTransform;
+        private MeshRenderer blockSelection;
         protected bool isMoving = false, isOnGround = false;
         protected float camRotation = 0F;
         public bool IsOnGround { get { return isOnGround; } }
@@ -87,8 +88,8 @@ namespace MinecraftClient.Control
         {
             if (attack)
             {
-                if (blockPos is not null)
-                    game.DigBlock(blockPos.Value, true, false);
+                if (targetBlockPos is not null)
+                    game.DigBlock(targetBlockPos.Value, true, false);
             }
 
             if (entityDisabled)
@@ -124,7 +125,7 @@ namespace MinecraftClient.Control
 
             // No need to check position validity in spectator mode,
             // just tell server the new position...
-            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visual.eulerAngles.y - 90F, 0F);
+            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visualTransform.eulerAngles.y - 90F, 0F);
         }
 
         private void TickNormal(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
@@ -146,15 +147,15 @@ namespace MinecraftClient.Control
             rigidBody.velocity = moveVelocity;
 
             // Tell server our current position
-            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visual.eulerAngles.y - 90F, 0F);
+            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visualTransform.eulerAngles.y - 90F, 0F);
         }
 
         Vector3 GetMoveVelocity(float horInput, float verInput, float speed)
         {
             float newRotation = camControl.transform.rotation.eulerAngles.y + camRotation;
-            visual.transform.eulerAngles = new Vector3(0F, newRotation, 0F);
+            visualTransform.transform.eulerAngles = new Vector3(0F, newRotation, 0F);
             
-            var dir = Quaternion.AngleAxis(visual.transform.eulerAngles.y, Vector3.up) * Vector3.forward;
+            var dir = Quaternion.AngleAxis(visualTransform.transform.eulerAngles.y, Vector3.up) * Vector3.forward;
 
             // hor: x, ver: y
             Vector2 inputDirection = new(horInput, verInput);
@@ -177,10 +178,18 @@ namespace MinecraftClient.Control
 
         public void Start()
         {
-            terrainLayer = LayerMask.GetMask("Terrain"); // ~LayerMask.GetMask("Player", "Ignore Raycast");
-            entityLayer  = LayerMask.GetMask("Entity");
-            camControl   = GameObject.FindObjectOfType<CameraController>();
-            visual       = transform.Find("Visual");
+            terrainLayer  = LayerMask.GetMask("Terrain"); // ~LayerMask.GetMask("Player", "Ignore Raycast");
+            entityLayer   = LayerMask.GetMask("Entity");
+            camControl    = GameObject.FindObjectOfType<CameraController>();
+            
+            var blockSelectionPrefab = Resources.Load<GameObject>("Prefabs/Block Selection");
+            var blockSelectionObj = GameObject.Instantiate(blockSelectionPrefab);
+            blockSelection = blockSelectionObj.GetComponentInChildren<MeshRenderer>();
+            blockSelection.enabled = false;
+
+            
+            visualTransform         = transform.Find("Visual");
+            blockSelectionTransform = blockSelectionObj.transform;
 
             game = CornClient.Instance;
 
@@ -190,7 +199,7 @@ namespace MinecraftClient.Control
         }
 
         private Vector3? targetPos = null, targetDir = null;
-        private Location? blockPos = null;
+        private Location? targetBlockPos = null;
 
         void Update()
         {
@@ -208,6 +217,33 @@ namespace MinecraftClient.Control
                 targetDir = null;
             }
 
+            if (targetPos is not null)
+            {
+                // Update block selection
+                Vector3 offseted  = onSurface(targetPos.Value) ? targetPos.Value - targetDir.Value * 0.5F : targetPos.Value;
+                Vector3 selection = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
+                blockSelectionTransform.position = selection;
+
+                targetBlockPos = CoordConvert.Unity2MC(selection);
+                blockSelection.enabled = true;
+            }
+            else
+            {
+                targetBlockPos = null;
+                blockSelection.enabled = false;
+            }
+
+        }
+
+        private bool onGridEdge(float value)
+        {
+            var delta = value - Mathf.Floor(value);
+            return delta < 0.01F || delta > 0.99F;
+        }
+
+        private bool onSurface(Vector3 point)
+        {
+            return onGridEdge(point.x) || onGridEdge(point.y) || onGridEdge(point.z);
         }
 
         void OnDrawGizmos()
@@ -215,25 +251,14 @@ namespace MinecraftClient.Control
             if (targetPos is not null)
             {
                 // Draw hit result
-                Gizmos.color = Color.yellow;
-                Gizmos.DrawCube(targetPos.Value, Vector3.one * 0.1F);
                 Gizmos.color = Color.green;
                 Gizmos.DrawRay(targetPos.Value, targetDir.Value);
-                // Draw calculated block position
-                var offseted = targetPos.Value - targetDir.Value * 0.5F;
-                Vector3 pos = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
-                blockPos = CoordConvert.Unity2MC(pos);
-                Gizmos.color = Color.black;
-                Gizmos.DrawWireCube(pos + Vector3.one * .5F, Vector3.one);
-
             }
-            else
-                blockPos = null;
         }
 
         public string GetDebugInfo()
         {
-            return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{isOnGround}\nIn water:\t{isInWater}\nTarget Block:\t{blockPos}";
+            return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{isOnGround}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}";
         }
 
     }
