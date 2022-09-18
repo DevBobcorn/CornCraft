@@ -43,8 +43,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.8, y: 2, z: 0.8}
-  m_Center: {x: 0, y: 0.9, z: 0}
+  m_Size: {x: 0.75, y: 1.95, z: 0.75}
+  m_Center: {x: 0, y: 0.87, z: 0}
 --- !u!1 &2579919273003202909
 GameObject:
   m_ObjectHideFlags: 0
@@ -96,7 +96,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 2
   runSpeed: 4
-  jumpSpeed: 4
+  jumpSpeed: 5.5
 --- !u!114 &2579919273003202905
 MonoBehaviour:
   m_ObjectHideFlags: 0

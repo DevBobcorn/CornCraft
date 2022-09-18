@@ -44,6 +44,24 @@ namespace MinecraftClient.Mapping
         }
 
         /// <summary>
+        /// Round coordinates
+        /// </summary>
+        /// <returns>New location</returns>
+        public Location ToFloor()
+        {
+            return new Location(Math.Floor(this.X), Math.Floor(this.Y), Math.Floor(this.Z));
+        }
+
+        /// <summary>
+        /// Get the center coordinates
+        /// </summary>
+        /// <returns>New location</returns>
+        public Location ToCenter()
+        {
+            return new Location(Math.Floor(this.X) + 0.5, this.Y, Math.Floor(this.Z) + 0.5);
+        }
+
+        /// <summary>
         /// Create a new location
         /// </summary>
         /// <param name="chunkX">Location of the chunk into the world</param>

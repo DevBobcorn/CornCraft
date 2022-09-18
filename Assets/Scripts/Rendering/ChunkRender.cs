@@ -33,7 +33,6 @@ namespace MinecraftClient.Rendering
 
         public CancellationTokenSource TokenSource = null;
         public int Priority = 0;
-        public MeshCollider ChunkCollider;
         
         // Stores whether its neighbor chunks are present (when self is being built)...
         public bool ZNegDataPresent, ZPosDataPresent, XNegDataPresent, XPosDataPresent;
@@ -58,18 +57,6 @@ namespace MinecraftClient.Rendering
             ZPosDataPresent = world.isChunkColumnReady(ChunkX, ChunkZ + 1); // ZPos neighbor
             XNegDataPresent = world.isChunkColumnReady(ChunkX - 1, ChunkZ); // XNeg neighbor
             XPosDataPresent = world.isChunkColumnReady(ChunkX + 1, ChunkZ); // XPos neighbor
-        }
-
-        public void UpdateCollider(Mesh colliderMesh)
-        {
-            if (ChunkCollider is null)
-                ChunkCollider = gameObject.AddComponent<MeshCollider>();
-            ChunkCollider.sharedMesh = colliderMesh;
-        }
-
-        public void ClearCollider()
-        {
-            ChunkCollider?.sharedMesh.Clear();
         }
 
         public void Unload()
