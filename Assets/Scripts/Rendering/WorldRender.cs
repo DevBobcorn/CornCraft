@@ -40,7 +40,9 @@ namespace MinecraftClient.Rendering
         public static PhysicMaterial? CHUNK_MATERIAL;
 
         private CornClient? game;
-        private MeshCollider? terrainCollider;
+
+        // Terrain collider for movement
+        private MeshCollider? movementCollider;
 
         public string GetDebugInfo()
         {
@@ -248,6 +250,8 @@ namespace MinecraftClient.Rendering
                             // TODO Improve below cleaning
                             chunkRender.GetComponent<MeshFilter>().sharedMesh?.Clear(false);
 
+                            chunkRender.ClearCollider();
+
                             chunksBeingBuilt.Remove(chunkRender);
                             chunkRender.State = BuildState.Ready;
 
@@ -352,6 +356,8 @@ namespace MinecraftClient.Rendering
 
                             chunkRender.GetComponent<MeshFilter>().sharedMesh = visualMesh;
                             chunkRender.GetComponent<MeshRenderer>().sharedMaterials = materialArr;
+
+                            chunkRender.UpdateCollider(visualMesh);
 
                             chunksBeingBuilt.Remove(chunkRender);
                             chunkRender.State = BuildState.Ready;
@@ -550,7 +556,9 @@ namespace MinecraftClient.Rendering
         private int   operationAction    = 0;
 
         private static readonly Block AIR_INSTANCE = new Block(0);
-        public const int COLLIDER_RADIUS = 4;
+        public const int MOVEMENT_RADIUS = 3;
+        public const int MOVEMENT_RADIUS_SQR = MOVEMENT_RADIUS * MOVEMENT_RADIUS;
+
         private Location lastPlayerLoc = new();
         private bool terrainColliderDirty = true;
 
@@ -567,12 +575,15 @@ namespace MinecraftClient.Rendering
 
                 int offsetY = World.GetDimension().minY;
                 
-                float3[] colliderVerts = { };
+                float3[] movementVerts = { };
 
-                for (int x = -COLLIDER_RADIUS;x <= COLLIDER_RADIUS;x++)
-                    for (int y = -COLLIDER_RADIUS;y <= COLLIDER_RADIUS;y++)
-                        for (int z = -COLLIDER_RADIUS;z <= COLLIDER_RADIUS;z++)
+                for (int x = -MOVEMENT_RADIUS;x <= MOVEMENT_RADIUS;x++)
+                    for (int y = -MOVEMENT_RADIUS;y <= MOVEMENT_RADIUS;y++)
+                        for (int z = -MOVEMENT_RADIUS;z <= MOVEMENT_RADIUS;z++)
                         {
+                            if (x * x + y * y + z * z > MOVEMENT_RADIUS_SQR)
+                                continue;
+
                             var loc  = playerLoc + new Location(x, y, z);
                             var column = world.GetChunkColumn(loc);
                             if (column is null || !column.FullyLoaded)
@@ -593,44 +604,41 @@ namespace MinecraftClient.Rendering
                             var layer = Block.Palette.GetRenderType(stateId);
                             int layerIndex = ChunkRender.TypeIndex(layer);
                             
-                            //int cullFlags = chunkData.GetCullFlags(loc, bloc, notFullSolid); // TODO Correct
                             int cullFlags = world.GetCullFlags(loc, bloc, notFullSolidAndNotSame);
                             
                             if (cullFlags != 0 && table is not null && table.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
-                            {   // They all have the same collider so we just pick the 1st one
-                                table[stateId].Geometries[0].BuildCollider(ref colliderVerts, new((float)loc.Z, (float)loc.Y, (float)loc.X), cullFlags);
+                            {
+                                // They all have the same collider so we just pick the 1st one
+                                table[stateId].Geometries[0].BuildCollider(ref movementVerts, new((float)loc.Z, (float)loc.Y, (float)loc.X), cullFlags);
+
                             }
 
                         }
                 
                 Loom.QueueOnMainThread(() => {
-                    int colVertCount = colliderVerts.Length;
+                    int movVertCount = movementVerts.Length;
 
-                    Debug.Log("COL " + colVertCount);
+                    // Make vertex attributes
+                    var colVertAttrs = new NativeArray<VertexAttributeDescriptor>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+                    colVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3);
 
-                    if (colVertCount > 0)
+                    if (movVertCount > 0)
                     {
                         var colMeshDataArr  = Mesh.AllocateWritableMeshData(1);
                         var colMeshData = colMeshDataArr[0];
                         colMeshData.subMeshCount = 1;
 
-                        // Set mesh attributes
-                        var colVertAttrs = new NativeArray<VertexAttributeDescriptor>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-                        colVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3);
-
-                        colMeshData.SetVertexBufferParams(colVertCount,          colVertAttrs);
-                        colMeshData.SetIndexBufferParams((colVertCount / 2) * 3, IndexFormat.UInt32);
-
-                        colVertAttrs.Dispose();
+                        colMeshData.SetVertexBufferParams(movVertCount,          colVertAttrs);
+                        colMeshData.SetIndexBufferParams((movVertCount / 2) * 3, IndexFormat.UInt32);
 
                         // Copy the source arrays to mesh data
-                        var colPositions  = colMeshData.GetVertexData<float3>(0);
-                        colPositions.CopyFrom(colliderVerts);
+                        var colPositions = colMeshData.GetVertexData<float3>(0);
+                        colPositions.CopyFrom(movementVerts);
 
                         // Generate triangle arrays
                         var colTriIndices = colMeshData.GetIndexData<uint>();
                         uint vi = 0; int ti = 0;
-                        for (;vi < colliderVerts.Length;vi += 4U, ti += 6)
+                        for (;vi < movVertCount;vi += 4U, ti += 6)
                         {
                             colTriIndices[ti]     = vi;
                             colTriIndices[ti + 1] = vi + 3U;
@@ -640,19 +648,18 @@ namespace MinecraftClient.Rendering
                             colTriIndices[ti + 5] = vi + 3U;
                         }
 
-                        colMeshData.SetSubMesh(0, new(0, (colVertCount / 2) * 3){ vertexCount = colVertCount });
+                        colMeshData.SetSubMesh(0, new(0, (movVertCount / 2) * 3){ vertexCount = movVertCount });
                         var colliderMesh = new Mesh { subMeshCount = 1 };
                         Mesh.ApplyAndDisposeWritableMeshData(colMeshDataArr, colliderMesh);
 
                         colliderMesh.RecalculateNormals();
                         colliderMesh.RecalculateBounds();
 
-                        terrainCollider!.sharedMesh = colliderMesh;
+                        movementCollider!.sharedMesh = colliderMesh;
 
                     }
                     else
-                        terrainCollider!.sharedMesh?.Clear();
-
+                        movementCollider!.sharedMesh?.Clear();
                 });
                 
             });
@@ -671,9 +678,9 @@ namespace MinecraftClient.Rendering
                 dynamicFriction = 0F
             };
 
-            var terrainColliderObj = new GameObject("Terrain Collider");
-            terrainColliderObj.layer = LayerMask.NameToLayer("Terrain");
-            terrainCollider = terrainColliderObj.AddComponent<MeshCollider>();
+            var movementColliderObj = new GameObject("Terrain Movement Collider");
+            movementColliderObj.layer = LayerMask.NameToLayer("Movement");
+            movementCollider = movementColliderObj.AddComponent<MeshCollider>();
 
             // Register event callbacks
             EventManager.Instance.Register(columnCallBack1 = (e) => {
@@ -793,6 +800,9 @@ namespace MinecraftClient.Rendering
 
         void FixedUpdate()
         {
+            if (game is null)
+                return;
+
             int newCount = BUILD_COUNT_LIMIT - chunksBeingBuilt.Count;
 
             // Build chunks in queue...
@@ -843,7 +853,7 @@ namespace MinecraftClient.Rendering
                 
                 if (terrainColliderDirty || lastPlayerLoc != playerLoc)
                 {
-                    RefreshTerrainCollider(playerLoc);
+                    RefreshTerrainCollider(playerLoc.Up());
                     lastPlayerLoc = playerLoc;
                 }
             }

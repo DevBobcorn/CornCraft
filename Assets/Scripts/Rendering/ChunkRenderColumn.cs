@@ -15,7 +15,7 @@ namespace MinecraftClient.Rendering
         {
             // Create this chunk...
             GameObject chunkObj = new GameObject("Chunk " + chunkY.ToString());
-            chunkObj.layer = UnityEngine.LayerMask.NameToLayer("Terrain");
+            chunkObj.layer = UnityEngine.LayerMask.NameToLayer("Interaction");
             ChunkRender newChunk = chunkObj.AddComponent<ChunkRender>();
             newChunk.ChunkX = this.ChunkX;
             newChunk.ChunkY = chunkY;
