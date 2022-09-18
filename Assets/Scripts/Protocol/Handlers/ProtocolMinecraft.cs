@@ -103,7 +103,8 @@ namespace MinecraftClient.Protocol.Handlers
                 entityPalette = new EntityPalette115();  // 1.15   ~ 1.15.2
             else if (protocolVersion >= MC_1_14_Version)
                 entityPalette = new EntityPalette114();  // 1.14   ~ 1.14.4
-            else entityPalette = new EntityPalette113(); // 1.13   ~ 1.13.2
+            else
+                entityPalette = new EntityPalette113();  // 1.13   ~ 1.13.2
 
             // Item palette
             if (this.protocolVersion > MC_1_19_2_Version)
@@ -119,7 +120,8 @@ namespace MinecraftClient.Protocol.Handlers
                 itemPalette = new ItemPalette1162();  // 1.16.2 ~ 1.16.5
             else if (this.protocolVersion >= MC_1_16_1_Version)
                 itemPalette = new ItemPalette1161();  // 1.16   ~ 1.16.1
-            else itemPalette = new ItemPalette115();  // 1.13   ~ 1.15.2
+            else
+                itemPalette = new ItemPalette115();   // 1.13   ~ 1.15.2
 
             // MessageType 
             // You can find it in https://wiki.vg/Protocol#Player_Chat_Message or /net/minecraft/network/message/MessageType.java
@@ -1334,14 +1336,22 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                     case PacketTypesIn.Explosion:
                         {
-                            Location explosionLocation = new Location(dataTypes.ReadNextFloat(packetData), dataTypes.ReadNextFloat(packetData), dataTypes.ReadNextFloat(packetData));
+                            Location explosionLocation = new(dataTypes.ReadNextFloat(packetData), dataTypes.ReadNextFloat(packetData), dataTypes.ReadNextFloat(packetData));
+
                             float explosionStrength = dataTypes.ReadNextFloat(packetData);
                             int explosionBlockCount = protocolVersion >= MC_1_17_Version
                                 ? dataTypes.ReadNextVarInt(packetData)
                                 : dataTypes.ReadNextInt(packetData);
-                            // Ignoring additional fields (records, pushback)
+
+                            for (int i = 0; i < explosionBlockCount; i++)
+                                dataTypes.ReadData(3, packetData);
+
+                            float playerVelocityX = dataTypes.ReadNextFloat(packetData);
+                            float playerVelocityY = dataTypes.ReadNextFloat(packetData);
+                            float playerVelocityZ = dataTypes.ReadNextFloat(packetData);
+
                             handler.OnExplosion(explosionLocation, explosionStrength, explosionBlockCount);
-                            break;
+                            break;   
                         }
                     case PacketTypesIn.HeldItemChange:
                         {
