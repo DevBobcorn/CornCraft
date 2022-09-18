@@ -70,13 +70,13 @@ namespace MinecraftClient
         {
             if (instance is null)
             {
-                GameObject g = new GameObject("Corn Craft");
-                GameObject.DontDestroyOnLoad(g);
-                instance = g.AddComponent<CornClient>();
+                GameObject magic = new GameObject("Corn Craft");
+                GameObject.DontDestroyOnLoad(magic);
+                instance = magic.AddComponent<CornClient>();
             }
         }
 
-        private static readonly List<string> cmd_names = new();
+        private static readonly List<string> cmdNames = new();
         private static readonly Dictionary<string, Command> cmds = new();
         private static bool internalCommandsLoaded = false;
 
@@ -698,7 +698,7 @@ namespace MinecraftClient
                     }
                     else response = Translations.Get("icmd.unknown", command_name);
                 }
-                else response = Translations.Get("icmd.list", String.Join(", ", cmd_names.ToArray()), CornCraft.internalCmdChar);
+                else response = Translations.Get("icmd.list", String.Join(", ", cmdNames.ToArray()), CornCraft.internalCmdChar);
             }
             else if (cmds.ContainsKey(command_name))
             {
@@ -729,7 +729,7 @@ namespace MinecraftClient
                         {
                             Command cmd = (Command)Activator.CreateInstance(type);
                             cmds[cmd.CmdName.ToLower()] = cmd;
-                            cmd_names.Add(cmd.CmdName.ToLower());
+                            cmdNames.Add(cmd.CmdName.ToLower());
                             foreach (string alias in cmd.getCMDAliases())
                                 cmds[alias.ToLower()] = cmd;
                         }
@@ -2542,7 +2542,7 @@ namespace MinecraftClient
 
             if (health <= 0)
             {
-                Debug.Log(Translations.Get("mcc.player_dead"));
+                Translations.NotifyError("mcc.player_dead", CornCraft.internalCmdChar);
             }
 
         }

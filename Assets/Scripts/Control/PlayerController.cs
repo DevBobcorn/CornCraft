@@ -7,6 +7,9 @@ namespace MinecraftClient.Control
     [RequireComponent(typeof (Rigidbody))]
     public class PlayerController : MonoBehaviour
     {
+        private static readonly Vector3 GRAVITY_NORMAL  = new(0F, -9.81F, 0F);
+        private static readonly Vector3 GRAVITY_REDUCED = new(0F, -1.00F, 0F);
+
         private CornClient? game;
         private Rigidbody? rigidBody;
         private BoxCollider? boxCollider;
@@ -99,7 +102,7 @@ namespace MinecraftClient.Control
 
             if (targetPos is not null && targetDir is not null)
             {
-                Vector3 offseted  = onSurface(targetPos.Value) ? targetPos.Value - targetDir.Value * 0.5F : targetPos.Value;
+                Vector3 offseted  = onCubeSurface(targetPos.Value) ? targetPos.Value - targetDir.Value * 0.5F : targetPos.Value;
                 Vector3 selection = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
                 blockSelectionTransform!.position = selection;
 
@@ -121,32 +124,36 @@ namespace MinecraftClient.Control
 
         private void TickSpectator(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
-            // Update player rotation
-            var moveVelocity = Vector3.zero;
+            // Update player velocity
+            var newVelocity = Vector3.zero;
 
             // Check horizontal movement...
             if (Mathf.Abs(verInput) > 0F || Mathf.Abs(horInput) > 0F)
             {
                 // Calculate current velocity...
-                moveVelocity = GetMoveVelocity(horInput, verInput, walkMode ? walkSpeed : runSpeed) * 4F;
+                newVelocity = GetMoveVelocity(horInput, verInput, walkMode ? walkSpeed : runSpeed) * 4F;
             }
 
             // Check vertical movement...
             if (up)
-                moveVelocity.y =  walkSpeed * 4F;
+                newVelocity.y =  walkSpeed * 4F;
             else if (down)
-                moveVelocity.y = -walkSpeed * 4F;
+                newVelocity.y = -walkSpeed * 4F;
 
             // Apply movement...
-            transform.position += moveVelocity * interval;
+            transform.position += newVelocity * interval;
 
             // No need to check position validity in spectator mode,
             // just tell server the new position...
             CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visualTransform!.eulerAngles.y - 90F, 0F);
         }
 
-        private float camRotation = 0F;
-        public bool IsOnGround { get { return centerDownDist < 0.4F; } }
+        private static readonly Vector3 groundBoxCenter   = new(0F, -0.1F, 0F);
+        private static readonly Vector3 groundBoxHalfSize = new(0.375F, 0.05F, 0.375F);
+        private bool isOnGround = false;
+        public bool IsOnGround { get { return isOnGround; } }
+        private bool isInWater = false;
+        public bool IsInWater { get { return isInWater; } }
         private float centerDownDist, frontDownDist;
         private Vector3? targetPos = null, targetDir = null;
         private Location? targetBlockPos = null;
@@ -159,55 +166,110 @@ namespace MinecraftClient.Control
                     game!.DigBlock(targetBlockPos.Value, true, false);
                 // else if (use) TODO Implement
             }
-            
-            // Update player rotation
-            var moveVelocity = Vector3.zero;
 
-            // Update player state
-            var center = transform.position + transform.up * 0.2F;
-            var front  = center + GetAxisAlignedOrientation(visualTransform!.forward) * 0.5F;
+            // Update player state - in water or not?
+            isInWater = game!.GetWorld().IsWaterAt(CoordConvert.Unity2MC(transform.position));
+
+            // Update player state - on ground or not?
+            if (isInWater)
+                isOnGround = false;
+            else // Cast a box down by 0.1 meter
+                isOnGround = Physics.BoxCast(transform.position, groundBoxHalfSize, Vector3.down, Quaternion.identity, 0.1F, movementLayer);
+
+            var rayCenter = transform.position + transform.up * 0.2F;
+            var rayFront  = rayCenter + GetAxisAlignedOrientation(visualTransform!.forward) * 0.5F;
 
             RaycastHit centerDownHit, frontDownHit;
-            if (Physics.Raycast(center, -transform.up, out centerDownHit, 1F, movementLayer))
+            if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, 1F, movementLayer))
                 centerDownDist = centerDownHit.distance;
             else centerDownDist = 1F;
 
-            Debug.DrawRay(center, transform.up * -1F, Color.cyan);
+            Debug.DrawRay(rayCenter, transform.up * -1F, Color.cyan);
 
-            if (Physics.Raycast(front,  -transform.up, out frontDownHit, 1F, movementLayer))
+            if (Physics.Raycast(rayFront,  -transform.up, out frontDownHit, 1F, movementLayer))
                 frontDownDist = frontDownHit.distance;
             else frontDownDist = 1F;
 
-            Debug.DrawRay(front,  transform.up * -1F, Color.cyan);
+            Debug.DrawRay(rayFront,  transform.up * -1F, Color.green);
 
-            // Check horizontal movement...
-            if (Mathf.Abs(verInput) > 0F || Mathf.Abs(horInput) > 0F)
-            {
-                // Calculate current velocity...
-                moveVelocity = GetMoveVelocity(horInput, verInput, walkMode ? walkSpeed : runSpeed);
+            // Update player velocity
+            Vector3 newVelocity;
 
-                // Check auto-jump
-                // Clamp delta to [0, 0.8], and amplify to [0, 1]
-                float slope = Mathf.Clamp01((centerDownDist - frontDownDist) * 1.25F);
-                if (IsOnGround && slope > 0F) // Amplify and apply auto-jump speed
-                    moveVelocity.y = jumpSpeed * Mathf.Sqrt(slope);
-                else
-                    moveVelocity.y = rigidBody!.velocity.y;
-            }
-            else
+            if (IsOnGround) // Player is on the ground
             {
-                moveVelocity.y = rigidBody!.velocity.y;
-            }
+                bool horizontalInput = Mathf.Abs(verInput) > 0F || Mathf.Abs(horInput) > 0F;
 
-            // Check vertical movement...
-            if (IsOnGround)
-            {
+                // Check horizontal movement...
+                if (horizontalInput) // Move
+                {
+                    newVelocity = GetMoveVelocity(horInput, verInput, walkMode ? walkSpeed : runSpeed);
+                    newVelocity.y = rigidBody!.velocity.y;
+                }
+                else // Idle
+                {
+                    newVelocity = Vector3.zero;
+                    newVelocity.y = rigidBody!.velocity.y;
+                }
+                
+                // Check vertical movement...
                 if (up) // Jump up
-                    moveVelocity.y = jumpSpeed;
+                {
+                    newVelocity.y = jumpSpeed;
+                }
+                else if (horizontalInput) // Check auto-jump
+                {
+                    if (centerDownDist < 0.4F) // Center is on ground, that is, not standing on the edge of a block
+                    {
+                        // Clamp delta to [0, 0.8], and amplify to [0, 1]
+                        float slope = Mathf.Clamp01((centerDownDist - frontDownDist) * 1.25F);
+                        if (IsOnGround && slope > 0F) // Amplify and apply auto-jump speed
+                        {
+                            //transform.position = transform.position + transform.up * (frontDownDist - centerDownDist);
+                            newVelocity.y = jumpSpeed * Mathf.Sqrt(slope);
+                        }
+                    }
+                }
+            }
+            else if (isInWater) // Player is in water
+            {
+                bool horizontalInput = Mathf.Abs(verInput) > 0F || Mathf.Abs(horInput) > 0F;
+
+                // Check horizontal movement...
+                if (horizontalInput) // Move
+                {
+                    newVelocity = GetMoveVelocity(horInput, verInput, (walkMode ? walkSpeed : runSpeed) * 0.6F);
+                    newVelocity.y = rigidBody!.velocity.y;
+                }
+                else // Tread
+                {
+                    newVelocity = Vector3.zero;
+                    newVelocity.y = rigidBody!.velocity.y;
+                }
+                
+                // Check vertical movement...
+                if (up) // Swim up
+                {
+                    newVelocity.y = jumpSpeed * 0.5F;
+                }
+                else if (down) // Swim down
+                {
+                    newVelocity.y = -jumpSpeed * 0.5F;
+                }
+            }
+            else // Player is in the air
+            {
+                // Leave velocity to Unity physics
+                newVelocity = rigidBody!.velocity;
+            }
+
+            if (isInWater)
+            {
+                if (newVelocity.magnitude > walkSpeed)
+                    newVelocity = newVelocity.normalized * walkSpeed;
             }
 
             // Apply movement...
-            rigidBody!.velocity = moveVelocity;
+            rigidBody!.velocity = newVelocity;
 
             // Tell server our current position
             CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visualTransform!.eulerAngles.y - 90F, 0F);
@@ -220,6 +282,8 @@ namespace MinecraftClient.Control
             else
                 return original.z > 0F ? Vector3.forward : Vector3.back;
         }
+
+        private float camRotation = 0F;
 
         Vector3 GetMoveVelocity(float horInput, float verInput, float speed)
         {
@@ -247,7 +311,7 @@ namespace MinecraftClient.Control
             return dir * speed;
         }
 
-        public void Start()
+        void Start()
         {
             interactionLayer  = LayerMask.GetMask("Interaction"); // ~LayerMask.GetMask("Player", "Ignore Raycast");
             movementLayer     = LayerMask.GetMask("Movement");
@@ -271,15 +335,10 @@ namespace MinecraftClient.Control
 
         }
 
-        private bool onGridEdge(float value)
+        void OnDrawGizmos()
         {
-            var delta = value - Mathf.Floor(value);
-            return delta < 0.01F || delta > 0.99F;
-        }
-
-        private bool onSurface(Vector3 point)
-        {
-            return onGridEdge(point.x) || onGridEdge(point.y) || onGridEdge(point.z);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireCube(transform.position + groundBoxCenter, groundBoxHalfSize * 2F);
         }
 
         public string GetDebugInfo()
@@ -294,10 +353,21 @@ namespace MinecraftClient.Control
             }
 
             if (entityDisabled)
-                return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nIn water:\t{false}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+                return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
             else
-                return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{IsOnGround}\t{centerDownDist.ToString("#.##")} {frontDownDist.ToString("#.##")}\nIn water:\t{false}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+                return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{isOnGround}\t{centerDownDist.ToString("#.##")} {frontDownDist.ToString("#.##")}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
 
+        }
+
+        private static bool onGridEdge(float value)
+        {
+            var delta = value - Mathf.Floor(value);
+            return delta < 0.01F || delta > 0.99F;
+        }
+
+        private static bool onCubeSurface(Vector3 point)
+        {
+            return onGridEdge(point.x) || onGridEdge(point.y) || onGridEdge(point.z);
         }
 
     }

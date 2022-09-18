@@ -559,7 +559,7 @@ namespace MinecraftClient.Rendering
         public const int MOVEMENT_RADIUS = 3;
         public const int MOVEMENT_RADIUS_SQR = MOVEMENT_RADIUS * MOVEMENT_RADIUS;
 
-        private Location lastPlayerLoc = new();
+        private Location? lastPlayerLoc = null;
         private bool terrainColliderDirty = true;
 
         public void RefreshTerrainCollider(Location playerLoc)
@@ -742,6 +742,8 @@ namespace MinecraftClient.Rendering
                     QueueChunkBuildIfNotEmpty(GetChunk(chunkX, chunkY, chunkZ + 1));
                 }
 
+                terrainColliderDirty = true;
+
             });
 
             EventManager.Instance.Register(blocksCallBack = (e) => {
@@ -794,15 +796,14 @@ namespace MinecraftClient.Rendering
                     }
                 }
 
+                terrainColliderDirty = true;
+
             });
 
         }
 
         void FixedUpdate()
         {
-            if (game is null)
-                return;
-
             int newCount = BUILD_COUNT_LIMIT - chunksBeingBuilt.Count;
 
             // Build chunks in queue...
@@ -849,13 +850,14 @@ namespace MinecraftClient.Rendering
             }
             else
             {
-                var playerLoc = game!.GetPlayerController().GetLocation().ToFloor();
+                var playerLoc = game!.GetPlayerController()?.GetLocation().ToFloor();
                 
-                if (terrainColliderDirty || lastPlayerLoc != playerLoc)
-                {
-                    RefreshTerrainCollider(playerLoc.Up());
-                    lastPlayerLoc = playerLoc;
-                }
+                if (playerLoc is not null)
+                    if (terrainColliderDirty || lastPlayerLoc != playerLoc)
+                    {
+                        RefreshTerrainCollider(playerLoc.Value.Up());
+                        lastPlayerLoc = playerLoc;
+                    }
             }
 
             operationCooldown -= Time.fixedDeltaTime;
