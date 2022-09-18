@@ -13,19 +13,32 @@ namespace MinecraftClient.Control
         public float sensitivityWheel = 15F;
         public float near = 40F;
         public float far = 80F;
-        public float cameraYOffset = 0.1F;
-        public float cameraZOffset = -2F;
+        public float cameraYOffset = 0.5F;
+        public float cameraZOffset = -5F;
         private float fixedYOffset, fixedZOffset;
         private bool fixedMode;
 
         void Awake()
         {
-            checkLayer = ~LayerMask.GetMask("Player", "Ignore Raycast");
+            checkLayer = LayerMask.GetMask("Entity", "Movement");
             ActiveCamera = Camera.main;
             ActiveCamera.fieldOfView = 60F;
 
             //DisableFixedMode();
-            EnableFixedMode(1.8F, 0F);
+            EnableFixedMode(1.62F, 0F);
+        }
+
+        public void ToggleFixedMode()
+        {
+            if (fixedMode)
+            {
+                DisableFixedMode();
+            }
+            else
+            {
+                EnableFixedMode(1.62F, 0F);
+            }
+
         }
 
         public void SetTarget(Transform target)
