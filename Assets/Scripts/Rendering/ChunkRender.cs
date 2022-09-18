@@ -33,6 +33,7 @@ namespace MinecraftClient.Rendering
 
         public CancellationTokenSource TokenSource = null;
         public int Priority = 0;
+        public MeshCollider InteractionCollider;
         
         // Stores whether its neighbor chunks are present (when self is being built)...
         public bool ZNegDataPresent, ZPosDataPresent, XNegDataPresent, XPosDataPresent;
@@ -41,6 +42,18 @@ namespace MinecraftClient.Rendering
             get {
                 return ZNegDataPresent && ZPosDataPresent && XNegDataPresent && XPosDataPresent;
             }
+        }
+
+        public void UpdateCollider(Mesh colliderMesh)
+        {
+            if (InteractionCollider is null)
+                InteractionCollider = gameObject.AddComponent<MeshCollider>();
+            InteractionCollider.sharedMesh = colliderMesh;
+        }
+
+        public void ClearCollider()
+        {
+            InteractionCollider?.sharedMesh.Clear();
         }
 
         public int CompareTo(ChunkRender chunkRender)

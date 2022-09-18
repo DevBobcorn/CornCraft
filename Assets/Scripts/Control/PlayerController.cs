@@ -15,7 +15,7 @@ namespace MinecraftClient.Control
         public float runSpeed  = 2F;
         public float jumpSpeed = 4F;
 
-        private LayerMask terrainLayer, entityLayer;
+        private LayerMask interactionLayer, movementLayer, entityLayer;
 
         private GameMode gameMode = 0;
         public GameMode GameMode
@@ -55,6 +55,7 @@ namespace MinecraftClient.Control
             boxCollider!.enabled = false;
             rigidBody!.velocity = Vector3.zero;
             rigidBody!.useGravity = false;
+
         }
 
         public void EnableEntity()
@@ -84,20 +85,38 @@ namespace MinecraftClient.Control
 
         public void Tick(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
-            if (attack)
-            {
-                if (targetBlockPos is not null)
-                    game!.DigBlock(targetBlockPos.Value, true, false);
-            }
+            // Update block selection
+            var viewRay = camControl!.ActiveCamera.ViewportPointToRay(new(0.5F, 0.5F, 0F));
 
-            if (entityDisabled)
+            RaycastHit viewHit;
+            if (Physics.Raycast(viewRay.origin, viewRay.direction, out viewHit, 10F, interactionLayer))
             {
-                TickSpectator(interval, horInput, verInput, walkMode, attack, up, down);
+                targetPos = viewHit.point;
+                targetDir = viewHit.normal;
+            }
+            else
+                targetPos = targetDir = null;
+
+            if (targetPos is not null && targetDir is not null)
+            {
+                Vector3 offseted  = onSurface(targetPos.Value) ? targetPos.Value - targetDir.Value * 0.5F : targetPos.Value;
+                Vector3 selection = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
+                blockSelectionTransform!.position = selection;
+
+                targetBlockPos = CoordConvert.Unity2MC(selection);
+                blockSelection!.enabled = true;
             }
             else
             {
-                TickNormal(interval, horInput, verInput, walkMode, attack, up, down);
+                targetBlockPos = null;
+                blockSelection!.enabled = false;
             }
+
+            if (entityDisabled)
+                TickSpectator(interval, horInput, verInput, walkMode, attack, up, down);
+            else
+                TickNormal(interval, horInput, verInput, walkMode, attack, up, down);
+            
         }
 
         private void TickSpectator(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
@@ -134,51 +153,28 @@ namespace MinecraftClient.Control
 
         private void TickNormal(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
+            if (targetBlockPos is not null)
+            {
+                if (attack)
+                    game!.DigBlock(targetBlockPos.Value, true, false);
+                // else if (use) TODO Implement
+            }
+            
             // Update player rotation
             var moveVelocity = Vector3.zero;
-
-            // Update block selection
-            var viewRay = camControl!.ActiveCamera.ViewportPointToRay(new(0.5F, 0.5F, 0F));
-
-            RaycastHit viewHit;
-            if (Physics.Raycast(viewRay.origin, viewRay.direction, out viewHit, 100F, terrainLayer))
-            {
-                targetPos = viewHit.point;
-                targetDir = viewHit.normal;
-            }
-            else
-            {
-                targetPos = null;
-                targetDir = null;
-            }
-
-            if (targetPos is not null && targetDir is not null)
-            {
-                Vector3 offseted  = onSurface(targetPos.Value) ? targetPos.Value - targetDir.Value * 0.5F : targetPos.Value;
-                Vector3 selection = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
-                blockSelectionTransform!.position = selection;
-
-                targetBlockPos = CoordConvert.Unity2MC(selection);
-                blockSelection!.enabled = true;
-            }
-            else
-            {
-                targetBlockPos = null;
-                blockSelection!.enabled = false;
-            }
 
             // Update player state
             var center = transform.position + transform.up * 0.2F;
             var front  = center + GetAxisAlignedOrientation(visualTransform!.forward) * 0.5F;
 
             RaycastHit centerDownHit, frontDownHit;
-            if (Physics.Raycast(center, -transform.up, out centerDownHit, 1F, terrainLayer))
+            if (Physics.Raycast(center, -transform.up, out centerDownHit, 1F, movementLayer))
                 centerDownDist = centerDownHit.distance;
             else centerDownDist = 1F;
 
             Debug.DrawRay(center, transform.up * -1F, Color.cyan);
 
-            if (Physics.Raycast(front,  -transform.up, out frontDownHit, 1F, terrainLayer))
+            if (Physics.Raycast(front,  -transform.up, out frontDownHit, 1F, movementLayer))
                 frontDownDist = frontDownHit.distance;
             else frontDownDist = 1F;
 
@@ -253,7 +249,9 @@ namespace MinecraftClient.Control
 
         public void Start()
         {
-            terrainLayer  = LayerMask.GetMask("Terrain"); // ~LayerMask.GetMask("Player", "Ignore Raycast");
+            interactionLayer  = LayerMask.GetMask("Interaction"); // ~LayerMask.GetMask("Player", "Ignore Raycast");
+            movementLayer     = LayerMask.GetMask("Movement");
+
             entityLayer   = LayerMask.GetMask("Entity");
             camControl    = GameObject.FindObjectOfType<CameraController>();
               
@@ -294,8 +292,12 @@ namespace MinecraftClient.Control
                 if (targetBlockState is not null)
                     targetBlockInfo = targetBlockState.ToString();
             }
-                
-            return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{IsOnGround}\t{centerDownDist.ToString("#.##")} {frontDownDist.ToString("#.##")}\nIn water:\t{false}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+
+            if (entityDisabled)
+                return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nIn water:\t{false}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+            else
+                return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{IsOnGround}\t{centerDownDist.ToString("#.##")} {frontDownDist.ToString("#.##")}\nIn water:\t{false}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+
         }
 
     }
