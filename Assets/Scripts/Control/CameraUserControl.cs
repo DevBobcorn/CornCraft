@@ -27,6 +27,11 @@ namespace MinecraftClient.Control
             {
                 ScrollCamera(Input.GetAxis("Mouse ScrollWheel"));
             }
+
+            if (Input.GetKeyDown(KeyCode.F5))
+            {
+                camControl.ToggleFixedMode();
+            }
         }
 
         void LateUpdate()
