@@ -155,6 +155,18 @@ namespace MinecraftClient.Mapping
             return AIR_INSTANCE; // Air
         }
 
+        public bool IsWaterAt(Location location)
+        {
+            var column = GetChunkColumn(location);
+            if (column != null)
+            {
+                var chunk = column.GetChunk(location);
+                if (chunk != null)
+                    return chunk.GetBlock(location).State.InWater;
+            }
+            return false;
+        }
+
         public int GetCullFlags(Location location, Block self, Chunk.BlockCheck check)
         {
             int cullFlags = 0;
