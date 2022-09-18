@@ -111,9 +111,11 @@ namespace MinecraftClient.Rendering
         #endregion
 
         #region Chunk building
-        private static Chunk.BlockCheck notFullSolid = new Chunk.BlockCheck((bloc) => { return !bloc.State.FullSolid; });
-        private static Chunk.BlockCheck waterSurface = new Chunk.BlockCheck((bloc) => { return !(bloc.State.InWater || bloc.State.FullSolid); });
-        private static int waterLayerIndex = ChunkRender.TypeIndex(RenderType.TRANSLUCENT);
+        //private static readonly Chunk.BlockCheck notFullSolid = new Chunk.BlockCheck((self, neighbor) => { return !neighbor.State.FullSolid; });
+        private static readonly Chunk.BlockCheck waterSurface = new Chunk.BlockCheck((self, neighbor) => { return !(neighbor.State.InWater || neighbor.State.FullSolid); });
+
+        private static readonly Chunk.BlockCheck notFullSolidAndNotSame = new Chunk.BlockCheck((self, neighbor) => { return !neighbor.State.FullSolid && neighbor.State != self.State; });
+        private static readonly int waterLayerIndex = ChunkRender.TypeIndex(RenderType.TRANSLUCENT);
 
         public void BuildChunk(ChunkRender chunkRender)
         {
@@ -194,7 +196,7 @@ namespace MinecraftClient.Rendering
 
                                 if (state.InWater) // Build water here
                                 {
-                                    int waterCullFlags = chunkData.GetCullFlags(loc, waterSurface);
+                                    int waterCullFlags = chunkData.GetCullFlags(loc, bloc, waterSurface);
                                     if (waterCullFlags != 0)
                                     {
                                         FluidGeometry.Build(ref visualBuffer[waterLayerIndex], x, y, z, waterCullFlags);
@@ -210,7 +212,7 @@ namespace MinecraftClient.Rendering
                                 var layer = Block.Palette.GetRenderType(stateId);
                                 int layerIndex = ChunkRender.TypeIndex(layer);
                                 
-                                int cullFlags = chunkData.GetCullFlags(loc, notFullSolid); // TODO Correct
+                                int cullFlags = chunkData.GetCullFlags(loc, bloc, notFullSolidAndNotSame); // TODO Correct
                                 
                                 if (cullFlags != 0 && table is not null && table.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                                 {
@@ -591,8 +593,8 @@ namespace MinecraftClient.Rendering
                             var layer = Block.Palette.GetRenderType(stateId);
                             int layerIndex = ChunkRender.TypeIndex(layer);
                             
-                            //int cullFlags = chunkData.GetCullFlags(loc, notFullSolid); // TODO Correct
-                            int cullFlags = world.GetCullFlags(loc, notFullSolid);
+                            //int cullFlags = chunkData.GetCullFlags(loc, bloc, notFullSolid); // TODO Correct
+                            int cullFlags = world.GetCullFlags(loc, bloc, notFullSolidAndNotSame);
                             
                             if (cullFlags != 0 && table is not null && table.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {   // They all have the same collider so we just pick the 1st one

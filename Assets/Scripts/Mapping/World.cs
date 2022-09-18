@@ -155,20 +155,20 @@ namespace MinecraftClient.Mapping
             return AIR_INSTANCE; // Air
         }
 
-        public int GetCullFlags(Location location, Chunk.BlockCheck check)
+        public int GetCullFlags(Location location, Block self, Chunk.BlockCheck check)
         {
             int cullFlags = 0;
-            if (check(GetBlock(location.Up())))
+            if (check(self, GetBlock(location.Up())))
                 cullFlags |= (1 << 0);
-            if (check(GetBlock(location.Down())))
+            if (check(self, GetBlock(location.Down())))
                 cullFlags |= (1 << 1);
-            if (check(GetBlock(location.South())))
+            if (check(self, GetBlock(location.South())))
                 cullFlags |= (1 << 2);
-            if (check(GetBlock(location.North())))
+            if (check(self, GetBlock(location.North())))
                 cullFlags |= (1 << 3);
-            if (check(GetBlock(location.East())))
+            if (check(self, GetBlock(location.East())))
                 cullFlags |= (1 << 4);
-            if (check(GetBlock(location.West())))
+            if (check(self, GetBlock(location.West())))
                 cullFlags |= (1 << 5);
             return cullFlags;
         }
