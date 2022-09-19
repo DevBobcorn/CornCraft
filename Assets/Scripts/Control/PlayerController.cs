@@ -1,5 +1,8 @@
 #nullable enable
+using System;
 using UnityEngine;
+
+using MinecraftClient.Event;
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
@@ -88,31 +91,34 @@ namespace MinecraftClient.Control
 
         public void Tick(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
-            // Update block selection
-            var viewRay = camControl!.ActiveCamera.ViewportPointToRay(new(0.5F, 0.5F, 0F));
-
-            RaycastHit viewHit;
-            if (Physics.Raycast(viewRay.origin, viewRay.direction, out viewHit, 10F, interactionLayer))
+            if (updateTarget) // Update block selection
             {
-                targetPos = viewHit.point;
-                targetDir = viewHit.normal;
-            }
-            else
-                targetPos = targetDir = null;
+                var viewRay = camControl!.ActiveCamera.ViewportPointToRay(new(0.5F, 0.5F, 0F));
 
-            if (targetPos is not null && targetDir is not null)
-            {
-                Vector3 offseted  = onCubeSurface(targetPos.Value) ? targetPos.Value - targetDir.Value * 0.5F : targetPos.Value;
-                Vector3 selection = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
-                blockSelectionTransform!.position = selection;
+                RaycastHit viewHit;
+                if (Physics.Raycast(viewRay.origin, viewRay.direction, out viewHit, 10F, interactionLayer))
+                {
+                    targetPos = viewHit.point;
+                    targetDir = viewHit.normal;
+                }
+                else
+                    targetPos = targetDir = null;
 
-                targetBlockPos = CoordConvert.Unity2MC(selection);
-                blockSelection!.enabled = true;
-            }
-            else
-            {
-                targetBlockPos = null;
-                blockSelection!.enabled = false;
+                if (targetPos is not null && targetDir is not null)
+                {
+                    Vector3 offseted  = onCubeSurface(targetPos.Value) ? targetPos.Value - targetDir.Value * 0.5F : targetPos.Value;
+                    Vector3 selection = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
+                    blockSelectionTransform!.position = selection;
+
+                    targetBlockPos = CoordConvert.Unity2MC(selection);
+                    blockSelection!.enabled = true;
+                }
+                else
+                {
+                    targetBlockPos = null;
+                    blockSelection!.enabled = false;
+                }
+
             }
 
             if (entityDisabled)
@@ -155,18 +161,12 @@ namespace MinecraftClient.Control
         private bool isInWater = false;
         public bool IsInWater { get { return isInWater; } }
         private float centerDownDist, frontDownDist;
+        private bool updateTarget = true;
         private Vector3? targetPos = null, targetDir = null;
         private Location? targetBlockPos = null;
 
         private void TickNormal(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
-            if (targetBlockPos is not null)
-            {
-                if (attack)
-                    game!.DigBlock(targetBlockPos.Value, true, false);
-                // else if (use) TODO Implement
-            }
-
             // Update player state - in water or not?
             isInWater = game!.GetWorld().IsWaterAt(CoordConvert.Unity2MC(transform.position));
 
@@ -311,6 +311,8 @@ namespace MinecraftClient.Control
             return dir * speed;
         }
 
+        private Action<PerspectiveUpdateEvent>? perspectiveCallback;
+
         void Start()
         {
             interactionLayer  = LayerMask.GetMask("Interaction"); // ~LayerMask.GetMask("Player", "Ignore Raycast");
@@ -333,6 +335,29 @@ namespace MinecraftClient.Control
             boxCollider = transform.Find("Collider").GetComponent<BoxCollider>();
             rigidBody   = GetComponent<Rigidbody>();
 
+            perspectiveCallback = (e) => {
+                switch (e.newPerspective)
+                {
+                    case CornClient.Perspective.FirstPerson: // Enable block selection
+                        updateTarget = true;
+                        break;
+                    case CornClient.Perspective.ThirdPerson: // Disable block selection
+                        updateTarget = false;
+                        targetBlockPos = null;
+                        blockSelection!.enabled = false;
+                        break;
+                }
+            };
+
+            EventManager.Instance.Register(perspectiveCallback);
+
+        }
+
+        void OnDestroy()
+        {
+            if (perspectiveCallback is not null)
+                EventManager.Instance.Unregister(perspectiveCallback);
+
         }
 
         void OnDrawGizmos()
@@ -345,7 +370,7 @@ namespace MinecraftClient.Control
         {
             string targetBlockInfo = string.Empty;
 
-            if (targetBlockPos is not null)
+            if (updateTarget && targetBlockPos is not null)
             {
                 var targetBlockState = game!.GetWorld()?.GetBlock(targetBlockPos.Value).State;
                 if (targetBlockState is not null)

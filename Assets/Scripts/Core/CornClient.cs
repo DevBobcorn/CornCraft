@@ -216,6 +216,25 @@ namespace MinecraftClient
             return this.playerController;
         }
 
+        public enum Perspective
+        {
+            FirstPerson, ThirdPerson
+        }
+
+        public Perspective CurrentPerspective = Perspective.FirstPerson;
+
+        public void TogglePerspective()
+        {
+            if (CurrentPerspective == Perspective.FirstPerson)
+                CurrentPerspective = Perspective.ThirdPerson;
+            else
+                CurrentPerspective = Perspective.FirstPerson;
+            
+            cameraController.SetPerspective(CurrentPerspective);
+
+            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(CurrentPerspective));
+        }
+
         #endregion
 
         #nullable enable
@@ -377,11 +396,13 @@ namespace MinecraftClient
             cameraObj.name = "Main Camera (In-Game)";
             cameraObj.SetActive(true);
             cameraController = cameraObj.GetComponent<CameraController>();
-
             cameraController.SetTarget(playerObj.transform);
+            cameraController.SetPerspective(CurrentPerspective);
+
+            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(CurrentPerspective));
 
             // Wait a little bit...
-            yield return wait;
+            yield return new WaitForSecondsRealtime(0.3F);
 
             try
             {
