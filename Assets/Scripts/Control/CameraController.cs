@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using MinecraftClient.Event;
 namespace MinecraftClient.Control
 {
     public class CameraController : MonoBehaviour
@@ -23,22 +23,20 @@ namespace MinecraftClient.Control
             checkLayer = LayerMask.GetMask("Entity", "Movement");
             ActiveCamera = Camera.main;
             ActiveCamera.fieldOfView = 60F;
-
-            //DisableFixedMode();
-            EnableFixedMode(1.62F, 0F);
         }
 
-        public void ToggleFixedMode()
+        public void SetPerspective(CornClient.Perspective perspective)
         {
-            if (fixedMode)
+            switch (perspective)
             {
-                DisableFixedMode();
+                case CornClient.Perspective.FirstPerson:
+                    EnableFixedMode(1.62F, 0F);
+                    break;
+                case CornClient.Perspective.ThirdPerson:
+                    DisableFixedMode();
+                    break;
             }
-            else
-            {
-                EnableFixedMode(1.62F, 0F);
-            }
-
+            
         }
 
         public void SetTarget(Transform target)

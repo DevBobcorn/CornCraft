@@ -1,8 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 using MinecraftClient.Control;
+using MinecraftClient.Event;
 namespace MinecraftClient.UI
 {
     [RequireComponent(typeof (CanvasGroup))]
@@ -13,7 +15,7 @@ namespace MinecraftClient.UI
         private CornClient game;
 
         private TMP_Text    latencyText, debugText, modeText;
-        private Animator    modePanel;
+        private Animator    modePanel, crosshair;
         private Button[]    modeButtons = new Button[4];
 
         private ChatScreen  chatScreen;
@@ -70,6 +72,8 @@ namespace MinecraftClient.UI
             
         }
 
+        private Action<PerspectiveUpdateEvent> perspectiveCallback;
+
         protected override void Start()
         {
             // Ensure initialization
@@ -87,6 +91,29 @@ namespace MinecraftClient.UI
             modeButtons[1] = FindHelper.FindChildRecursively(transform, "Creative").GetComponent<Button>();
             modeButtons[2] = FindHelper.FindChildRecursively(transform, "Adventure").GetComponent<Button>();
             modeButtons[3] = FindHelper.FindChildRecursively(transform, "Spectator").GetComponent<Button>();
+
+            crosshair = transform.Find("Crosshair").GetComponent<Animator>();
+
+            perspectiveCallback = (e) => {
+                switch (e.newPerspective)
+                {
+                    case CornClient.Perspective.FirstPerson:
+                        crosshair.SetBool("Show", true);
+                        break;
+                    case CornClient.Perspective.ThirdPerson:
+                        crosshair.SetBool("Show", false);
+                        break;
+                }
+            };
+
+            EventManager.Instance.Register(perspectiveCallback);
+
+        }
+
+        void OnDestroy()
+        {
+            if (perspectiveCallback is not null)
+                EventManager.Instance.Unregister(perspectiveCallback);
 
         }
 
@@ -139,6 +166,9 @@ namespace MinecraftClient.UI
                 else // Toggle debug info
                     debugInfo = !debugInfo;
             }
+
+            if (Input.GetKeyDown(KeyCode.F5))
+                game.TogglePerspective();
 
             if (Input.GetKeyDown(KeyCode.Slash))
             {
