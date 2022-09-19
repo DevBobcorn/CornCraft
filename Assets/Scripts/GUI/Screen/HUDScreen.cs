@@ -146,6 +146,8 @@ namespace MinecraftClient.UI
                             modePanel.SetBool("Show", true);
                             modePanelShown = true;
                             modeButtons[selectedMode].Select();
+                            // Hide crosshair (if shown)
+                            crosshair.SetBool("Show", false);
                         }
                     }
                 }
@@ -159,9 +161,12 @@ namespace MinecraftClient.UI
                     modePanelShown = false;
 
                     if (selectedMode != (int)game.GetGamemode()) // Commit switch request
-                    {
                         game.SendText("/gamemode " + modeIdentifiers[selectedMode]);
-                    }
+                    
+                    // Restore crosshair if necessary
+                    if (game.CurrentPerspective == CornClient.Perspective.FirstPerson)
+                        crosshair.SetBool("Show", true);
+                    
                 }
                 else // Toggle debug info
                     debugInfo = !debugInfo;

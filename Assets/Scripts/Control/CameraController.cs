@@ -1,9 +1,11 @@
 using UnityEngine;
-using MinecraftClient.Event;
+
 namespace MinecraftClient.Control
 {
     public class CameraController : MonoBehaviour
     {
+        private const float EYE_HEIGHT = 1.62F;
+
         private LayerMask checkLayer;
         public Camera ActiveCamera { get; set; }
         private Transform target;
@@ -13,8 +15,8 @@ namespace MinecraftClient.Control
         public float sensitivityWheel = 15F;
         public float near = 40F;
         public float far = 80F;
-        public float cameraYOffset = 0.5F;
-        public float cameraZOffset = -5F;
+        public float cameraYOffset = 0.5F, cameraZOffset = -5F;
+        public float smoothTime = 0.15F;
         private float fixedYOffset, fixedZOffset;
         private bool fixedMode;
 
@@ -30,7 +32,7 @@ namespace MinecraftClient.Control
             switch (perspective)
             {
                 case CornClient.Perspective.FirstPerson:
-                    EnableFixedMode(1.62F, 0F);
+                    EnableFixedMode(EYE_HEIGHT, 0F);
                     break;
                 case CornClient.Perspective.ThirdPerson:
                     DisableFixedMode();
@@ -78,7 +80,7 @@ namespace MinecraftClient.Control
         {
             if (!fixedMode)
             {
-                transform.position = Vector3.SmoothDamp(transform.position, target.position + Vector3.up, ref currentVelocity, 0.05F);
+                transform.position = Vector3.SmoothDamp(transform.position, target.position + Vector3.up * cameraYOffset, ref currentVelocity, smoothTime);
             }
             else
             {
@@ -109,7 +111,7 @@ namespace MinecraftClient.Control
 
         public Vector2 GetPlayerFocusOnScreen()
         {
-            return ActiveCamera.WorldToScreenPoint(target.position + Vector3.up); // TODO
+            return ActiveCamera.WorldToScreenPoint(target.position + Vector3.up * cameraYOffset);
         }
 
         private void CheckCameraPosition()
@@ -136,7 +138,7 @@ namespace MinecraftClient.Control
         public void DisableFixedMode()
         {
             fixedMode = false;
-            ActiveCamera.transform.localPosition = cameraPositionTarget = new Vector3(0F, cameraYOffset, cameraZOffset);
+            ActiveCamera.transform.localPosition = cameraPositionTarget = new Vector3(0F, 0F, cameraZOffset);
         }
 
     }
