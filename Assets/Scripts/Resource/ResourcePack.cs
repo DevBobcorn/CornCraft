@@ -59,7 +59,7 @@ namespace MinecraftClient.Resource
             if (isValid)
             {
                 // Assets folder...
-                DirectoryInfo assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed(packName) + "/assets");
+                var assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed(packName) + "/assets");
                 if (assetsDir.Exists)
                 {
                     // Load textures and models
@@ -70,47 +70,74 @@ namespace MinecraftClient.Resource
                         string nameSpace = nameSpaceDir.Name;
 
                         // Load and store all texture files...
-                        DirectoryInfo texturesDir = new DirectoryInfo(nameSpaceDir + "/textures/");
+                        var texturesDir = new DirectoryInfo(nameSpaceDir + "/textures/");
                         int texDirLen = texturesDir.FullName.Length;
-                        // TODO Allow other textures instead of block textures only...
-                        foreach (var texFile in texturesDir.GetFiles("block/*.png", SearchOption.AllDirectories)) // Allow sub folders...
+
+                        if (new DirectoryInfo(nameSpaceDir + "/textures/block").Exists)
                         {
-                            string texId = texFile.FullName.Replace('\\', '/');
-                            texId = texId.Substring(texDirLen); // e.g. 'block/grass_block_top.png'
-                            texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'block/grass_block_top'
-                            ResourceLocation identifier = new ResourceLocation(nameSpace, texId);
-                            if (!manager.textureTable.ContainsKey(identifier))
+                            foreach (var texFile in texturesDir.GetFiles("block/*.png", SearchOption.AllDirectories)) // Allow sub folders...
                             {
-                                // This texture is not provided by previous resource packs, so add it here...
-                                manager.textureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
+                                string texId = texFile.FullName.Replace('\\', '/');
+                                texId = texId.Substring(texDirLen); // e.g. 'block/grass_block_top.png'
+                                texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'block/grass_block_top'
+                                ResourceLocation identifier = new ResourceLocation(nameSpace, texId);
+                                if (!manager.textureTable.ContainsKey(identifier))
+                                {
+                                    // This texture is not provided by previous resource packs, so add it here...
+                                    manager.textureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
+                                }
+                                count++;
+                                if (count % 100 == 0)
+                                {
+                                    loadStateInfo.infoText = $"Loading block texture {identifier}";
+                                    yield return null;
+                                }
                             }
-                            count++;
-                            if (count % 100 == 0)
+                        }
+                        
+                        if (new DirectoryInfo(nameSpaceDir + "/textures/item").Exists)
+                        {
+                            foreach (var texFile in texturesDir.GetFiles("item/*.png", SearchOption.AllDirectories)) // Allow sub folders...
                             {
-                                loadStateInfo.infoText = $"Loading texture {identifier}";
-                                yield return null;
+                                string texId = texFile.FullName.Replace('\\', '/');
+                                texId = texId.Substring(texDirLen); // e.g. 'block/grass_block_top.png'
+                                texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'block/grass_block_top'
+                                ResourceLocation identifier = new ResourceLocation(nameSpace, texId);
+                                if (!manager.textureTable.ContainsKey(identifier))
+                                {
+                                    // This texture is not provided by previous resource packs, so add it here...
+                                    manager.textureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
+                                }
+                                count++;
+                                if (count % 100 == 0)
+                                {
+                                    loadStateInfo.infoText = $"Loading item texture {identifier}";
+                                    yield return null;
+                                }
                             }
                         }
 
                         // Load and store all model files...
-                        DirectoryInfo modelsDir = new DirectoryInfo(nameSpaceDir + "/models/");
+                        var modelsDir = new DirectoryInfo(nameSpaceDir + "/models/");
                         int modelDirLen = modelsDir.FullName.Length;
 
-                        // TODO Allow other models instead of block models only...
-                        foreach (var modelFile in modelsDir.GetFiles("block/*.json", SearchOption.AllDirectories)) // Allow sub folders...
+                        if (new DirectoryInfo(nameSpaceDir + "/models/block").Exists)
                         {
-                            string modelId = modelFile.FullName.Replace('\\', '/');
-                            modelId = modelId.Substring(modelDirLen); // e.g. 'block/acacia_button.json'
-                            modelId = modelId.Substring(0, modelId.LastIndexOf('.')); // e.g. 'block/acacia_button'
-                            ResourceLocation identifier = new ResourceLocation(nameSpace, modelId);
-                            // This model loader will load this model, its parent model(if not yet loaded),
-                            // and then add them to the manager's model dictionary
-                            manager.blockModelLoader.LoadBlockModel(identifier, assetsDir.FullName.Replace('\\', '/'));
-                            count++;
-                            if (count % 5 == 0)
+                            foreach (var modelFile in modelsDir.GetFiles("block/*.json", SearchOption.AllDirectories)) // Allow sub folders...
                             {
-                                loadStateInfo.infoText =  $"Loading block model {identifier}";
-                                yield return null;
+                                string modelId = modelFile.FullName.Replace('\\', '/');
+                                modelId = modelId.Substring(modelDirLen); // e.g. 'block/acacia_button.json'
+                                modelId = modelId.Substring(0, modelId.LastIndexOf('.')); // e.g. 'block/acacia_button'
+                                ResourceLocation identifier = new ResourceLocation(nameSpace, modelId);
+                                // This model loader will load this model, its parent model(if not yet loaded),
+                                // and then add them to the manager's model dictionary
+                                manager.blockModelLoader.LoadBlockModel(identifier, assetsDir.FullName.Replace('\\', '/'));
+                                count++;
+                                if (count % 5 == 0)
+                                {
+                                    loadStateInfo.infoText =  $"Loading block model {identifier}";
+                                    yield return null;
+                                }
                             }
                         }
 
@@ -135,7 +162,7 @@ namespace MinecraftClient.Resource
             if (Block.Palette is not null && isValid)
             {
                 // Assets folder...
-                DirectoryInfo assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed(packName) + "/assets");
+                var assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed(packName) + "/assets");
                 if (assetsDir.Exists)
                 {
                     int count = 0;

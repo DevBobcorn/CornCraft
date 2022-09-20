@@ -3,6 +3,11 @@ import os, glob, json
 
 version = '1.19.2'
 
+proc_types = [
+    'block',
+    'item'
+]
+
 recolor_dict = {
     'minecraft:block/water_flow': (63, 118, 228),
     'minecraft:block/water_overlay': (63, 118, 228),
@@ -40,7 +45,7 @@ def recolor(srci, col):
     #rec.show()
     return rec
 
-size = 512
+size = 1024
 rct = 16
 lncnt = int(size / rct) # How many textures in a line
 print('Textures in a line: ' + str(lncnt))
@@ -58,46 +63,47 @@ packpath = 'vanilla-' + version + '/assets/'
 namespaces = os.listdir(packpath)
 for nspath in namespaces:
     print('NameSpace: ' + nspath)
-    # Also search sub-folders...
-    paths = glob.iglob(packpath + nspath + '/textures/block/**/*?.png', recursive=True)
+    
+    for proc_type in proc_types:
+        paths = glob.iglob(packpath + nspath + '/textures/' + proc_type + '/**/*?.png', recursive=True) # Also search sub-folders...
 
-    pathLen = len(packpath + nspath + '/textures/')
+        pathLen = len(packpath + nspath + '/textures/')
 
-    for path in paths:
-        texname = nspath + ':' + path[pathLen:-4]
-        texname = texname.replace('//', '/').replace('\\', '/')
+        for path in paths:
+            texname = nspath + ':' + path[pathLen:-4]
+            texname = texname.replace('//', '/').replace('\\', '/')
 
-        if texname in skip_list:
-            print('Skipping ' + texname)
-            continue
-        
-        print('Processing ' + texname)
-        #print('\t\t\t[\"' + texname + '\"] = '+ str(offset) + ',')
-        atlas_dict[texname] = offset
-        tex = Image.open(path).convert('RGBA')
-
-        # Rescale if necessary
-        if tex.width != rct:
-            print('Rescaling ' + texname + ' to make its width match ' + str(rct))
-            tex = tex.resize((rct, round(tex.height / tex.width) * rct))
-
-        # Crop if necessary
-        if tex.width != tex.height:
-            print('Cropping ' + texname)
-            tex = tex.crop((0, 0, tex.width, tex.width))
-        
-        # Recolor if necessary
-        if recolor_dict.__contains__(texname):
-            print('Recoloring ' + texname)
-            tex = recolor(tex, recolor_dict[texname])
+            if texname in skip_list:
+                print('Skipping ' + texname)
+                continue
             
-        atlas.paste(tex, (i * rct, j * rct))
-        
-        i += 1
-        offset += 1
-        if i == lncnt:
-            i = 0
-            j -= 1
+            print('Processing ' + texname)
+            #print('\t\t\t[\"' + texname + '\"] = '+ str(offset) + ',')
+            atlas_dict[texname] = offset
+            tex = Image.open(path).convert('RGBA')
+
+            # Rescale if necessary
+            if tex.width != rct:
+                print('Rescaling ' + texname + ' to make its width match ' + str(rct))
+                tex = tex.resize((rct, round(tex.height / tex.width) * rct))
+
+            # Crop if necessary
+            if tex.width != tex.height:
+                print('Cropping ' + texname)
+                tex = tex.crop((0, 0, tex.width, tex.width))
+            
+            # Recolor if necessary
+            if recolor_dict.__contains__(texname):
+                print('Recoloring ' + texname)
+                tex = recolor(tex, recolor_dict[texname])
+                
+            atlas.paste(tex, (i * rct, j * rct))
+            
+            i += 1
+            offset += 1
+            if i == lncnt:
+                i = 0
+                j -= 1
 
 with open("./block_atlas_" + version + "_dict.json", "w+") as f:
     data = json.dumps(atlas_dict, sort_keys=True, indent=4, separators=(',', ': '))

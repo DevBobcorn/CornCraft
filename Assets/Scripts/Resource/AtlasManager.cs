@@ -8,10 +8,10 @@ using MinecraftClient.Rendering;
 
 namespace MinecraftClient.Resource
 {
-    public static class BlockTextureManager
+    public static class AtlasManager
     {
-        private static Dictionary<ResourceLocation, int> blockAtlasTable = new Dictionary<ResourceLocation, int>();
-        private static Dictionary<RenderType, int> plcboAtlasTable       = new Dictionary<RenderType, int>();
+        private static Dictionary<ResourceLocation, int> texAtlasTable = new();
+        private static Dictionary<RenderType, int>     plcboAtlasTable = new();
         private static bool initialized = false;
 
         public static float2[] GetUVs(ResourceLocation identifier, Vector4 part, int areaRot)
@@ -19,7 +19,7 @@ namespace MinecraftClient.Resource
             return GetUVsAtOffset(GetAtlasOffset(identifier), part, areaRot);
         }
 
-        private const int TexturesInALine = 32;
+        private const int TexturesInALine = 64;
         private const float One = 1.0F / TexturesInALine; // Size of a single block texture
 
         private static float2[] GetUVsAtOffset(int offset, Vector4 part, int areaRot)
@@ -51,8 +51,8 @@ namespace MinecraftClient.Resource
         {
             EnsureInitialized();
 
-            if (blockAtlasTable.ContainsKey(identifier))
-                return blockAtlasTable[identifier];
+            if (texAtlasTable.ContainsKey(identifier))
+                return texAtlasTable[identifier];
             
             return 0;
         }
@@ -116,7 +116,7 @@ namespace MinecraftClient.Resource
 
         public static IEnumerator Load(string version, CoroutineFlag loadFlag, LoadStateInfo loadStateInfo)
         {
-            blockAtlasTable.Clear(); // Clear previously loaded table...
+            texAtlasTable.Clear(); // Clear previously loaded table...
 
             string atlasFilePath = PathHelper.GetPacksDirectory() + "/block_atlas_" + version + ".png";
             string atlasJsonPath = PathHelper.GetPacksDirectory() + "/block_atlas_" + version + "_dict.json";
@@ -136,14 +136,14 @@ namespace MinecraftClient.Resource
                 int count = 0;
                 foreach (KeyValuePair<string, Json.JSONData> item in atlasJson.Properties)
                 {
-                    if (blockAtlasTable.ContainsKey(ResourceLocation.fromString(item.Key)))
+                    if (texAtlasTable.ContainsKey(ResourceLocation.fromString(item.Key)))
                     {
                         loadFlag.done = true;
                         throw new InvalidDataException("Duplicate block atlas with one name " + item.Key + "!?");
                     }
                     else
                     {
-                        blockAtlasTable[ResourceLocation.fromString(item.Key)] = int.Parse(item.Value.StringValue);
+                        texAtlasTable[ResourceLocation.fromString(item.Key)] = int.Parse(item.Value.StringValue);
                         count++;
                         if (count % 20 == 0)
                         {

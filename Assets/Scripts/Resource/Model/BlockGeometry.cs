@@ -364,7 +364,7 @@ namespace MinecraftClient.Resource
 
         private static float2[] RemapUVs(float4 uvs, ResourceLocation source, int areaRot)
         {
-            return BlockTextureManager.GetUVs(source, uvs, areaRot);
+            return AtlasManager.GetUVs(source, uvs, areaRot);
         }
 
         private static Dictionary<int2, Dictionary<FaceDir, int>> CreateUVLockMap()
