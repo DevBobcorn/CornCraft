@@ -516,9 +516,7 @@ namespace MinecraftClient.Rendering
             var chunkCoords = columns.Keys.ToArray();
 
             foreach (var chunkCoord in chunkCoords)
-            {
                 columns.Remove(chunkCoord);
-            }
 
             columns.Clear();
 
@@ -549,6 +547,30 @@ namespace MinecraftClient.Rendering
 
             // Reset instance
             instance = null;
+
+        }
+
+        public void ReloadWorld()
+        {
+            // Clear the queue first...
+            chunksToBeBuild.Clear();
+
+            // And cancel current chunk builds
+            foreach (var chunk in chunksBeingBuilt)
+                chunk.TokenSource?.Cancel();
+            
+            chunksBeingBuilt.Clear();
+
+            // Clear all chunk columns in world
+            var chunkCoords = columns.Keys.ToArray();
+
+            foreach (var chunkCoord in chunkCoords)
+            {
+                columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
+                columns.Remove(chunkCoord);
+            }
+
+            columns.Clear();
         }
 
         public const int BUILD_COUNT_LIMIT = 8;
@@ -562,6 +584,11 @@ namespace MinecraftClient.Rendering
         private Location? lastPlayerLoc = null;
         private bool terrainColliderDirty = true;
 
+        // For player movement, it is not favorable to use per-chunk mesh colliders
+        // because player can get stuck on the edge of chunks due to a bug of Unity
+        // (or say PhysX) bug, so we dynamically build the mesh collider around the
+        // player as a solution to this. See the problem discussion at
+        // https://forum.unity.com/threads/ball-rolling-on-mesh-hits-edges.772760/
         public void RefreshTerrainCollider(Location playerLoc)
         {
             // Build nearby collider

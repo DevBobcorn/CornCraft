@@ -198,6 +198,13 @@ namespace MinecraftClient
             return this.worldRender;
         }
 
+        private EntityManager entityManager;
+
+        public EntityManager GetEntityManager()
+        {
+            return this.entityManager;
+        }
+
         private ScreenControl screenControl;
         public ScreenControl ScreenControl { get { return screenControl; } }
 
@@ -213,7 +220,15 @@ namespace MinecraftClient
 
         public PlayerController GetPlayerController()
         {
-            return this.playerController;
+            return playerController;
+        }
+
+        public Vector3 GetCameraPosition()
+        {
+            if (cameraController is null)
+                return Vector3.zero;
+            
+            return cameraController.ActiveCamera.transform.position;
         }
 
         public enum Perspective
@@ -378,6 +393,10 @@ namespace MinecraftClient
             // Create world render
             var worldRenderObj = new GameObject("World Render");
             worldRender = worldRenderObj.AddComponent<WorldRender>();
+
+            // Create entity manager
+            var entityManagerObj = new GameObject("Entity Manager");
+            entityManager = entityManagerObj.AddComponent<EntityManager>();
 
             // Create player
             var playerPrefab = Resources.Load<GameObject>("Prefabs/Player");
@@ -553,6 +572,8 @@ namespace MinecraftClient
                 // so it is neccessary to run it on Unity thread via Loom
                 () => {
                     worldRender?.UnloadWorld();
+                    entityManager?.UnloadEntities();
+
                     screenControl?.ClearScreens();
 
                     // Release cursor anyway
@@ -2096,6 +2117,12 @@ namespace MinecraftClient
             
             entities.Clear();
             ClearInventories();
+
+            Loom.QueueOnMainThread(() => {
+                worldRender.ReloadWorld();
+                entityManager.ReloadEntities();
+            });
+
         }
 
         /// <summary>
@@ -2362,6 +2389,11 @@ namespace MinecraftClient
                 OnDestroyEntities(new[] { entity.ID });
 
             entities.Add(entity.ID, entity);
+
+            Loom.QueueOnMainThread(() => {
+                entityManager.AddEntity(entity);
+            });
+
         }
 
         #nullable enable
@@ -2446,6 +2478,10 @@ namespace MinecraftClient
                     entities.Remove(a);
                 }
             }
+
+            Loom.QueueOnMainThread(() => {
+                entityManager.RemoveEntities(Entities);
+            });
         }
 
         /// <summary>
@@ -2493,6 +2529,10 @@ namespace MinecraftClient
             {
                 Location location = new Location(X, Y, Z);
                 entities[EntityID].Location = location;
+
+                Loom.QueueOnMainThread(() => {
+                    entityManager.TeleportEntity(EntityID, location);
+                });
             }
         }
 
@@ -2559,9 +2599,11 @@ namespace MinecraftClient
             playerFoodSaturation = food;
 
             if (health <= 0)
-            {
                 Translations.NotifyError("mcc.player_dead", CornCraft.internalCmdChar);
-            }
+
+            Loom.QueueOnMainThread(() => {
+                EventManager.Instance.Broadcast<HealthUpdateEvent>(new(health));
+            });
 
         }
 

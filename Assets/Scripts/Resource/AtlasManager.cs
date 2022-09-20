@@ -128,6 +128,8 @@ namespace MinecraftClient.Resource
             else
                 Debug.LogWarning("Texture files not all available!");
             
+            plcboAtlasTable.Clear(); // Clear previously loaded table...
+
             string plcboFilePath = PathHelper.GetPacksDirectory() + "/block_atlas_placebo.png";
 
             if (File.Exists(plcboFilePath))
