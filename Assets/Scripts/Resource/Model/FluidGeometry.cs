@@ -37,7 +37,7 @@ namespace MinecraftClient.Resource
                 verts[vertOffset + 1] = new(1 + z, h + y, 1 + x); // 5 => 3
                 verts[vertOffset + 2] = new(0 + z, h + y, 0 + x); // 3 => 1
                 verts[vertOffset + 3] = new(1 + z, h + y, 0 + x); // 2 => 0
-                BlockTextureManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
@@ -47,7 +47,7 @@ namespace MinecraftClient.Resource
                 verts[vertOffset + 1] = new(1 + z, O + y, 0 + x); // 1 => 1
                 verts[vertOffset + 2] = new(0 + z, O + y, 1 + x); // 7 => 3
                 verts[vertOffset + 3] = new(1 + z, O + y, 1 + x); // 6 => 2
-                BlockTextureManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
@@ -57,7 +57,7 @@ namespace MinecraftClient.Resource
                 verts[vertOffset + 1] = new(I + z, h + y, I + x); // 5 => 2
                 verts[vertOffset + 2] = new(I + z, 0 + y, O + x); // 1 => 0
                 verts[vertOffset + 3] = new(I + z, 0 + y, I + x); // 6 => 3
-                BlockTextureManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
@@ -67,7 +67,7 @@ namespace MinecraftClient.Resource
                 verts[vertOffset + 1] = new(O + z, h + y, O + x); // 3 => 1
                 verts[vertOffset + 2] = new(O + z, 0 + y, I + x); // 7 => 3
                 verts[vertOffset + 3] = new(O + z, 0 + y, O + x); // 0 => 0
-                BlockTextureManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
@@ -77,7 +77,7 @@ namespace MinecraftClient.Resource
                 verts[vertOffset + 1] = new(O + z, h + y, I + x); // 4 => 0
                 verts[vertOffset + 2] = new(I + z, 0 + y, I + x); // 6 => 2
                 verts[vertOffset + 3] = new(O + z, 0 + y, I + x); // 7 => 3
-                BlockTextureManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
@@ -87,7 +87,7 @@ namespace MinecraftClient.Resource
                 verts[vertOffset + 1] = new(I + z, h + y, O + x); // 2 => 2
                 verts[vertOffset + 2] = new(O + z, 0 + y, O + x); // 0 => 0
                 verts[vertOffset + 3] = new(I + z, 0 + y, O + x); // 1 => 1
-                BlockTextureManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
                 // Not necessary vertOffset += 4;
             }
 
