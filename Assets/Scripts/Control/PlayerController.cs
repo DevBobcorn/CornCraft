@@ -10,9 +10,6 @@ namespace MinecraftClient.Control
     [RequireComponent(typeof (Rigidbody))]
     public class PlayerController : MonoBehaviour
     {
-        private static readonly Vector3 GRAVITY_NORMAL  = new(0F, -9.81F, 0F);
-        private static readonly Vector3 GRAVITY_REDUCED = new(0F, -1.00F, 0F);
-
         private CornClient? game;
         private Rigidbody? rigidBody;
         private BoxCollider? boxCollider;
