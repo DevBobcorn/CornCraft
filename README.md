@@ -17,9 +17,20 @@ When setting up a server for CornCraft, it is recommended to set the <code>allow
 ## > Building & Running
 The project is made and tested with Unity 2021.3.6f1c1, so it is recommended to use this version(or newer) of Unity to build this game.
 
-You'll need to manually prepare resource packs containing vanilla resources and put them under the <code>Resource Packs</code> folder to actually play it on a server. The path of resources should be like <code>\<Your Project Path\>\Resource Packs\vanilla-\<version\>\assets\XXX</code>, and <code>\<version\></code> can be one of <code>1.16.5</code>, <code>1.17.1</code> and <code>1.19.2</code> (Minecraft 1.18.X should also use 1.17.1 resource pack since there's no new block added in 1.18).
+You'll need to manually prepare resource packs containing full vanilla resources (textures, models and blockstates) and put them under the <code>Resource Packs</code> folder to actually play it on a server. The path of resources should be like <code>\<Your Project Path\>\Resource Packs\vanilla-\<version\>\assets\XXX</code>, and <code>\<version\></code> can be one of <code>1.16.5</code>, <code>1.17.1</code> and <code>1.19.2</code> (Minecraft 1.18.X should also use 1.17.1 resource pack since there's no new block added in 1.18).
 
-When the resource packs are ready, you can then run the Python3 script called <code>block_atlas_gen.py</code> in the <code>Resource Packs</code> folder to generate block texture atlas for running the game (also change resource path in the script before executing it).
+Then, add a <code>pack.mcmeta</code> in each  of  the resource folders. In this file you could simply write
+```json
+{
+  "pack": {
+    "pack_format": 6,
+    "description": "Blah blah blah"
+  }
+}
+```
+and that'll do the trick. The value of <code>pack_format</code> is not used by CornCraft yet, so it actually doesn't have to match the game version.
+
+Finally, when the resource packs are ready, you can then run the Python3 script called <code>block_atlas_gen.py</code> in the <code>Resource Packs</code> folder to generate block texture atlas for running the game (also change resource path in the script before executing it).
 
 ## > License
 Like MCC, CornCraft adopts CDDL-1.0 as the license of its code repository, and this license applies to all source code except those mention their author and license or with specific license attached.
