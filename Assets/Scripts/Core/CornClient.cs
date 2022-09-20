@@ -304,7 +304,6 @@ namespace MinecraftClient
                 yield return wait;
 
             // Load texture atlas... TODO (Will be decently implemented in future)
-            AtlasManager.EnsureInitialized();
             var atlasLoadFlag = new CoroutineFlag();
             StartCoroutine(AtlasManager.Load(resourceVersion, atlasLoadFlag, loadStateInfo));
 
@@ -337,8 +336,6 @@ namespace MinecraftClient
                 //Debug.Log("Loading: " + op.progress);
                 yield return wait;
             }
-
-            AtlasManager.EnsureInitialized();
 
             try // Setup tcp client
             {
