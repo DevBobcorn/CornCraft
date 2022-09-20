@@ -33,9 +33,13 @@ namespace MinecraftClient.Control
             {
                 case CornClient.Perspective.FirstPerson:
                     EnableFixedMode(EYE_HEIGHT, 0F);
+                    // Don't render player on this camera
+                    ActiveCamera.cullingMask = ActiveCamera.cullingMask & ~(1 << LayerMask.NameToLayer("Player"));
                     break;
                 case CornClient.Perspective.ThirdPerson:
                     DisableFixedMode();
+                    // Render player on this camera
+                    ActiveCamera.cullingMask = ActiveCamera.cullingMask | (1 << LayerMask.NameToLayer("Player"));
                     break;
             }
             
