@@ -12,11 +12,15 @@ namespace MinecraftClient.Resource
     {
         private static Dictionary<ResourceLocation, int> texAtlasTable = new();
         private static Dictionary<RenderType, int>     plcboAtlasTable = new();
-        private static bool initialized = false;
 
         public static float2[] GetUVs(ResourceLocation identifier, Vector4 part, int areaRot)
         {
             return GetUVsAtOffset(GetAtlasOffset(identifier), part, areaRot);
+        }
+
+        public static float2[] GetPlaceboUVs(RenderType type, Vector4 part, int areaRot)
+        {
+            return GetUVsAtOffset(plcboAtlasTable[type], part, areaRot);
         }
 
         private const int TexturesInALine = 64;
@@ -49,8 +53,6 @@ namespace MinecraftClient.Resource
 
         private static int GetAtlasOffset(ResourceLocation identifier)
         {
-            EnsureInitialized();
-
             if (texAtlasTable.ContainsKey(identifier))
                 return texAtlasTable[identifier];
             
@@ -61,7 +63,6 @@ namespace MinecraftClient.Resource
         public static Texture2D PlcboTexture
         {
             get {
-                EnsureInitialized();
                 return plcboTexture;
             }
         }
@@ -83,35 +84,6 @@ namespace MinecraftClient.Resource
 
                 _                        => atlasTexture[0]
             };
-        }
-
-        public static void EnsureInitialized()
-        {
-            if (!initialized) Initialze();
-        }
-
-        private static void Initialze()
-        {
-            string plcboFilePath = PathHelper.GetPacksDirectory() + "/block_atlas_placebo.png";
-
-            if (File.Exists(plcboFilePath))
-            {
-                plcboTexture.LoadImage(File.ReadAllBytes(plcboFilePath));
-                plcboTexture.filterMode = FilterMode.Point;
-
-                plcboAtlasTable.Add(RenderType.SOLID,         0);
-                plcboAtlasTable.Add(RenderType.CUTOUT,        1);
-                plcboAtlasTable.Add(RenderType.CUTOUT_MIPPED, 2);
-                plcboAtlasTable.Add(RenderType.TRANSLUCENT,   3);
-
-            }
-            else
-            {
-                Debug.LogWarning("Placebo texture file not available!");
-            }
-
-            initialized = true;
-
         }
 
         public static IEnumerator Load(string version, CoroutineFlag loadFlag, LoadStateInfo loadStateInfo)
@@ -155,6 +127,23 @@ namespace MinecraftClient.Resource
             }
             else
                 Debug.LogWarning("Texture files not all available!");
+            
+            string plcboFilePath = PathHelper.GetPacksDirectory() + "/block_atlas_placebo.png";
+
+            if (File.Exists(plcboFilePath))
+            {
+                plcboTexture.LoadImage(File.ReadAllBytes(plcboFilePath));
+                plcboTexture.filterMode = FilterMode.Point;
+
+                plcboAtlasTable.Add(RenderType.SOLID,         0);
+                plcboAtlasTable.Add(RenderType.CUTOUT,        1);
+                plcboAtlasTable.Add(RenderType.CUTOUT_MIPPED, 2);
+                plcboAtlasTable.Add(RenderType.TRANSLUCENT,   3);
+            }
+            else
+            {
+                Debug.LogWarning("Placebo texture file not available!");
+            }
 
             loadFlag.done = true;
 

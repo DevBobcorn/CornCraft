@@ -8,7 +8,7 @@ namespace MinecraftClient.Resource
 {
     public static class FluidGeometry
     {
-        private static readonly ResourceLocation WATER_STILL = new ResourceLocation("block/water_still");
+        private static readonly ResourceLocation WATER_STILL = new("block/water_still");
 
         private static readonly Vector4 FULL = new(0, 0, 1, 1);
 
@@ -31,13 +31,16 @@ namespace MinecraftClient.Resource
             buffer.txuv.CopyTo(txuvs, 0);
             buffer.tint.CopyTo(tints, 0);
 
+            float2[] topUVs  = AtlasManager.GetUVs(WATER_STILL, FULL, 0);
+            float2[] sideUVs = AtlasManager.GetUVs(WATER_STILL, new Vector4(0, 1 - h, 1, 1), 0);
+
             if ((cullFlags & (1 << 0)) != 0) // Up
             {
                 verts[vertOffset]     = new(0 + z, h + y, 1 + x); // 4 => 2
                 verts[vertOffset + 1] = new(1 + z, h + y, 1 + x); // 5 => 3
                 verts[vertOffset + 2] = new(0 + z, h + y, 0 + x); // 3 => 1
                 verts[vertOffset + 3] = new(1 + z, h + y, 0 + x); // 2 => 0
-                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                topUVs.CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
@@ -47,7 +50,7 @@ namespace MinecraftClient.Resource
                 verts[vertOffset + 1] = new(1 + z, O + y, 0 + x); // 1 => 1
                 verts[vertOffset + 2] = new(0 + z, O + y, 1 + x); // 7 => 3
                 verts[vertOffset + 3] = new(1 + z, O + y, 1 + x); // 6 => 2
-                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                topUVs.CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
@@ -57,7 +60,7 @@ namespace MinecraftClient.Resource
                 verts[vertOffset + 1] = new(I + z, h + y, I + x); // 5 => 2
                 verts[vertOffset + 2] = new(I + z, 0 + y, O + x); // 1 => 0
                 verts[vertOffset + 3] = new(I + z, 0 + y, I + x); // 6 => 3
-                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                sideUVs.CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
@@ -67,7 +70,7 @@ namespace MinecraftClient.Resource
                 verts[vertOffset + 1] = new(O + z, h + y, O + x); // 3 => 1
                 verts[vertOffset + 2] = new(O + z, 0 + y, I + x); // 7 => 3
                 verts[vertOffset + 3] = new(O + z, 0 + y, O + x); // 0 => 0
-                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                sideUVs.CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
@@ -77,7 +80,7 @@ namespace MinecraftClient.Resource
                 verts[vertOffset + 1] = new(O + z, h + y, I + x); // 4 => 0
                 verts[vertOffset + 2] = new(I + z, 0 + y, I + x); // 6 => 2
                 verts[vertOffset + 3] = new(O + z, 0 + y, I + x); // 7 => 3
-                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                sideUVs.CopyTo(txuvs, vertOffset);
                 vertOffset += 4;
             }
 
@@ -87,7 +90,7 @@ namespace MinecraftClient.Resource
                 verts[vertOffset + 1] = new(I + z, h + y, O + x); // 2 => 2
                 verts[vertOffset + 2] = new(O + z, 0 + y, O + x); // 0 => 0
                 verts[vertOffset + 3] = new(I + z, 0 + y, O + x); // 1 => 1
-                AtlasManager.GetUVs(WATER_STILL, FULL, 0).CopyTo(txuvs, vertOffset);
+                sideUVs.CopyTo(txuvs, vertOffset);
                 // Not necessary vertOffset += 4;
             }
 
