@@ -23,7 +23,7 @@ namespace MinecraftClient.Control
             float y = paused ? 0F : Input.GetAxis("Mouse Y");
             camControl.Tick(Time.deltaTime, x, y);
 
-            if (!scrollLocked)
+            if (!scrollLocked && !paused)
             {
                 ScrollCamera(Input.GetAxis("Mouse ScrollWheel"));
             }

@@ -21,7 +21,7 @@ namespace MinecraftClient.UI
         private ChatScreen  chatScreen;
         private PauseScreen pauseScreen;
 
-        private bool isActive = false, debugInfo = false;
+        private bool isActive = false, debugInfo = true;
 
         private bool modePanelShown = false;
         private int  selectedMode   = 0;
@@ -193,7 +193,7 @@ namespace MinecraftClient.UI
             }
 
             if (debugInfo)
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GetPlayerController()?.GetDebugInfo()}\n{game.GetWorldRender()?.GetDebugInfo()}";
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GetPlayerController()?.GetDebugInfo()}\n{game.GetWorldRender()?.GetDebugInfo()}\n{game.GetEntityManager().GetDebugInfo()}";
             else
                 debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}";
 
