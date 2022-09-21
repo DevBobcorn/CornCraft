@@ -22,7 +22,11 @@ namespace MinecraftClient.Control
 
         void Update()
         {
-            if (game.IsPaused()) return;
+            if (game.IsPaused())
+            {
+                player.Tick(Time.deltaTime, 0F, 0F, walkMode, false, false, false);
+                return;
+            }
 
             float h = getValue(Input.GetKey(KeyCode.D), Input.GetKey(KeyCode.A));
             float v = getValue(Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S));

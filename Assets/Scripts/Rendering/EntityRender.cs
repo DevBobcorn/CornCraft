@@ -7,8 +7,11 @@ namespace MinecraftClient.Rendering
 {
     public class EntityRender : MonoBehaviour
     {
+        private const float MOVE_THERESHOLD = 3F * 3F; // Treat as teleport if move more than 3 meters at once
+
         public Vector3 currentVelocity = Vector3.zero;
-        public float smoothTime = 0.1F;
+        //public float smoothTime = 0.1F;
+        public float lerpFactor = 0.5F;
         public float showInfoDist = 20F;
         public float hideInfoDist = 25F;
 
@@ -79,7 +82,15 @@ namespace MinecraftClient.Rendering
         {
             // Update position
             Vector3 targetPos = CoordConvert.MC2Unity(entity.Location);
-            transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref currentVelocity, smoothTime);
+
+            if ((targetPos - transform.position).sqrMagnitude > MOVE_THERESHOLD) // Treat as teleport
+                transform.position = targetPos;
+            else
+            {
+                // Smoothly move to current position
+                //transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref currentVelocity, smoothTime);
+                transform.position = Vector3.Lerp(transform.position, targetPos, Mathf.Min(0.2F, lerpFactor * Time.deltaTime));
+            }
 
             // Update info plate
             var cameraPos = game.GetCameraPosition();

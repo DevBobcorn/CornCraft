@@ -4,7 +4,6 @@ using System;
 using System.Threading;
 using System.Linq;
 
-[AddComponentMenu("Unicorn/Util/Loom")]
 public class Loom : MonoBehaviour
 {
     public static int maxThreads = 8;

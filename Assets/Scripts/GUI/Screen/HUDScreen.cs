@@ -17,6 +17,7 @@ namespace MinecraftClient.UI
         private TMP_Text    latencyText, debugText, modeText;
         private Animator    modePanel, crosshair;
         private Button[]    modeButtons = new Button[4];
+        private ValueBar    healthBar;
 
         private ChatScreen  chatScreen;
         private PauseScreen pauseScreen;
@@ -73,6 +74,7 @@ namespace MinecraftClient.UI
         }
 
         private Action<PerspectiveUpdateEvent> perspectiveCallback;
+        private Action<HealthUpdateEvent>      healthCallback;
 
         protected override void Start()
         {
@@ -93,6 +95,10 @@ namespace MinecraftClient.UI
             modeButtons[3] = FindHelper.FindChildRecursively(transform, "Spectator").GetComponent<Button>();
 
             crosshair = transform.Find("Crosshair").GetComponent<Animator>();
+            healthBar = transform.Find("Health Bar").GetComponent<ValueBar>();
+
+            healthBar.MaxValue = 200F;
+            healthBar.CurValue = 200F;
 
             perspectiveCallback = (e) => {
                 switch (e.newPerspective)
@@ -106,7 +112,12 @@ namespace MinecraftClient.UI
                 }
             };
 
+            healthCallback = (e) => {
+                healthBar.CurValue = e.newHealth * 10F;
+            };
+
             EventManager.Instance.Register(perspectiveCallback);
+            EventManager.Instance.Register(healthCallback);
 
         }
 
