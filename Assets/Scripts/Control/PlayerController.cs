@@ -18,6 +18,8 @@ namespace MinecraftClient.Control
         public float runSpeed  = 2F;
         public float jumpSpeed = 4F;
 
+        public float steerSpeed = 20F;
+
         private LayerMask interactionLayer, movementLayer, entityLayer;
 
         private GameMode gameMode = 0;
@@ -134,7 +136,7 @@ namespace MinecraftClient.Control
             if (Mathf.Abs(verInput) > 0F || Mathf.Abs(horInput) > 0F)
             {
                 // Calculate current velocity...
-                newVelocity = GetMoveVelocity(horInput, verInput, walkMode ? walkSpeed : runSpeed) * 3F;
+                newVelocity = UpdateMoveVelocity(interval, horInput, verInput, walkMode ? walkSpeed : runSpeed) * 3F;
             }
 
             // Check vertical movement...
@@ -199,7 +201,7 @@ namespace MinecraftClient.Control
                 // Check horizontal movement...
                 if (horizontalInput) // Move
                 {
-                    newVelocity = GetMoveVelocity(horInput, verInput, walkMode ? walkSpeed : runSpeed);
+                    newVelocity = UpdateMoveVelocity(interval, horInput, verInput, walkMode ? walkSpeed : runSpeed);
                     newVelocity.y = rigidBody!.velocity.y;
                 }
                 else // Idle
@@ -234,7 +236,7 @@ namespace MinecraftClient.Control
                 // Check horizontal movement...
                 if (horizontalInput) // Move
                 {
-                    newVelocity = GetMoveVelocity(horInput, verInput, (walkMode ? walkSpeed : runSpeed) * 0.6F);
+                    newVelocity = UpdateMoveVelocity(interval, horInput, verInput, (walkMode ? walkSpeed : runSpeed) * 0.6F);
                     newVelocity.y = rigidBody!.velocity.y;
                 }
                 else // Tread
@@ -280,30 +282,28 @@ namespace MinecraftClient.Control
                 return original.z > 0F ? Vector3.forward : Vector3.back;
         }
 
-        private float camRotation = 0F;
+        private float targetYaw = 0F;
 
-        Vector3 GetMoveVelocity(float horInput, float verInput, float speed)
+        Vector3 UpdateMoveVelocity(float interval, float horInput, float verInput, float speed)
         {
             // hor: x, ver: y
-            Vector2 inputDirection = new(horInput, verInput);
-            inputDirection.Normalize();
-            if (inputDirection.y > 0F)
-            {
-                camRotation = Mathf.Atan(inputDirection.x / inputDirection.y) * Mathf.Rad2Deg;
-            }
-            else if (inputDirection.y < 0F)
-            {
-                camRotation = Mathf.Atan(inputDirection.x / inputDirection.y) * Mathf.Rad2Deg + 180F;
-            }
-            else
-            {
-                camRotation = inputDirection.x > 0 ? 90F : 270F;
-            }
-
-            float newRotation = camControl!.transform.rotation.eulerAngles.y + camRotation;
-            visualTransform!.transform.eulerAngles = new Vector3(0F, newRotation, 0F);
+            var inputDirection = new Vector2(horInput, verInput).normalized;
             
-            var dir = Quaternion.AngleAxis(visualTransform.transform.eulerAngles.y, Vector3.up) * Vector3.forward;
+            if (inputDirection.y > 0F)
+                targetYaw = Mathf.Atan(inputDirection.x / inputDirection.y) * Mathf.Rad2Deg;
+            else if (inputDirection.y < 0F)
+                targetYaw = Mathf.Atan(inputDirection.x / inputDirection.y) * Mathf.Rad2Deg + 180F;
+            else
+                targetYaw = inputDirection.x > 0 ? 90F : 270F;
+
+            float targetVisualYaw = camControl!.transform.rotation.eulerAngles.y + targetYaw;
+
+            // Smooth rotation for player model
+            float newVisualYaw = Mathf.LerpAngle(visualTransform!.eulerAngles.y, targetVisualYaw, steerSpeed * interval);
+            visualTransform!.eulerAngles = new Vector3(0F, newVisualYaw, 0F);
+            
+            // Use the target visual yaw as actual movement direction
+            var dir = Quaternion.AngleAxis(targetVisualYaw, Vector3.up) * Vector3.forward;
 
             return dir * speed;
         }

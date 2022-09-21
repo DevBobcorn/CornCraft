@@ -2496,11 +2496,15 @@ namespace MinecraftClient
         {
             if (entities.ContainsKey(EntityID))
             {
-                Location L = entities[EntityID].Location;
-                L.X += Dx;
-                L.Y += Dy;
-                L.Z += Dz;
-                entities[EntityID].Location = L;
+                Location location = entities[EntityID].Location;
+                location.X += Dx;
+                location.Y += Dy;
+                location.Z += Dz;
+                entities[EntityID].Location = location;
+
+                Loom.QueueOnMainThread(() => {
+                    entityManager.MoveEntity(EntityID, location);
+                });
             }
 
         }
@@ -2531,7 +2535,7 @@ namespace MinecraftClient
                 entities[EntityID].Location = location;
 
                 Loom.QueueOnMainThread(() => {
-                    entityManager.TeleportEntity(EntityID, location);
+                    entityManager.MoveEntity(EntityID, location);
                 });
             }
         }

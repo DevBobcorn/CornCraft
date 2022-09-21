@@ -55,12 +55,11 @@ namespace MinecraftClient.Rendering
             }
         }
 
-        public void TeleportEntity(int entityId, Location location)
+        public void MoveEntity(int entityId, Location location)
         {
             if (entities.ContainsKey(entityId))
-            {
-                entities[entityId].TeleportTo(CoordConvert.MC2Unity(location));
-            }
+                entities[entityId].MoveTo(CoordConvert.MC2Unity(location));
+            
         }
 
         public void UnloadEntities()
