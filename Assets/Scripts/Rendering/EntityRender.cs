@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 using TMPro;
 
@@ -7,27 +8,28 @@ namespace MinecraftClient.Rendering
 {
     public class EntityRender : MonoBehaviour
     {
-        private const float MOVE_THERESHOLD = 3F * 3F; // Treat as teleport if move more than 3 meters at once
-
-        public Vector3 currentVelocity = Vector3.zero;
-        //public float smoothTime = 0.1F;
-        public float lerpFactor = 0.5F;
+        private const float MOVE_THERESHOLD = 5F * 5F; // Treat as teleport if move more than 5 meters at once
+        private Vector3? targetPosition = null;
+        private Vector3 currentVelocity = Vector3.zero;
         public float showInfoDist = 20F;
         public float hideInfoDist = 25F;
 
-        private TMP_Text nameText;
+        private TMP_Text? nameText;
         private bool nameTextShown = false, initialized = false;
-        private CornClient game;
-        private Entity entity;
+        private CornClient? game;
+        private Entity? entity;
 
         public Entity Entity
         {
             get {
-                return entity;
+                return entity!;
             }
 
             set {
                 entity = value;
+
+                transform.position = CoordConvert.MC2Unity(entity.Location);
+
                 UpdateDisplayName();
             }
         }
@@ -37,7 +39,7 @@ namespace MinecraftClient.Rendering
             Destroy(this.gameObject);
         }
 
-        public void TeleportTo(Vector3 position)
+        public void MoveTo(Vector3 position)
         {
             transform.position = position;
         }
@@ -60,12 +62,12 @@ namespace MinecraftClient.Rendering
         {
             EnsureInitialized();
 
-            if (entity.CustomName is not null)
-                nameText.text = $"#{entity.ID} {entity.CustomName}";
+            if (entity!.CustomName is not null)
+                nameText!.text = $"#{entity.ID} {entity.CustomName}";
             else if (entity.Name is not null)
-                nameText.text = $"#{entity.ID} {entity.Name}";
+                nameText!.text = $"#{entity.ID} {entity.Name}";
             else
-                nameText.text = $"#{entity.ID} {entity.Type}";
+                nameText!.text = $"#{entity.ID} {entity.Type}";
             
         }
 
@@ -78,41 +80,48 @@ namespace MinecraftClient.Rendering
 
         }
 
+        public float lerpParam = 0.1F;
+
         void Update()
         {
             // Update position
-            Vector3 targetPos = CoordConvert.MC2Unity(entity.Location);
+            var cameraPos = game!.GetCameraPosition();
+            var dist2Cam  = (cameraPos - transform.position).magnitude;
 
-            if ((targetPos - transform.position).sqrMagnitude > MOVE_THERESHOLD) // Treat as teleport
-                transform.position = targetPos;
-            else
+            if (targetPosition is not null)
             {
-                // Smoothly move to current position
-                //transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref currentVelocity, smoothTime);
-                transform.position = Vector3.Lerp(transform.position, targetPos, Mathf.Min(0.2F, lerpFactor * Time.deltaTime));
+                if (dist2Cam > 10F || (targetPosition.Value - transform.position).sqrMagnitude > MOVE_THERESHOLD) // Treat as teleport
+                    transform.position = targetPosition.Value;
+                else
+                {
+                    // Smoothly move to current position
+                    //transform.position = Vector3.SmoothDamp(transform.position, targetPosition.Value, ref currentVelocity, lerpParam);
+                    
+                    //transform.position = Vector3.Lerp(transform.position, targetPosition.Value, lerpParam * Time.deltaTime);
+                    transform.position = Vector3.Lerp(transform.position, targetPosition.Value, lerpParam);
+                    
+                    //transform.position = targetPos;
+                }
             }
 
             // Update info plate
-            var cameraPos = game.GetCameraPosition();
-            float dist = (cameraPos - transform.position).magnitude;
-
             if (nameTextShown)
             {
-                if (dist > hideInfoDist) // Hide info plate
+                if (dist2Cam > hideInfoDist) // Hide info plate
                 {
-                    nameText.enabled = false;
+                    nameText!.enabled = false;
                     nameTextShown = false;
                 }
                 else // Update info plate rotation
                 {
-                    nameText.transform.parent.LookAt(cameraPos);
+                    nameText!.transform.parent.LookAt(cameraPos);
                 }
             }
             else
             {
-                if (dist < showInfoDist) // Show info plate
+                if (dist2Cam < showInfoDist) // Show info plate
                 {
-                    nameText.enabled = true;
+                    nameText!.enabled = true;
                     nameTextShown = true;
                 }
             }
