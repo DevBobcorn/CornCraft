@@ -134,14 +134,14 @@ namespace MinecraftClient.Control
             if (Mathf.Abs(verInput) > 0F || Mathf.Abs(horInput) > 0F)
             {
                 // Calculate current velocity...
-                newVelocity = GetMoveVelocity(horInput, verInput, walkMode ? walkSpeed : runSpeed) * 4F;
+                newVelocity = GetMoveVelocity(horInput, verInput, walkMode ? walkSpeed : runSpeed) * 3F;
             }
 
             // Check vertical movement...
             if (up)
-                newVelocity.y =  walkSpeed * 4F;
+                newVelocity.y =  walkSpeed * 3F;
             else if (down)
-                newVelocity.y = -walkSpeed * 4F;
+                newVelocity.y = -walkSpeed * 3F;
 
             // Apply movement...
             transform.position += newVelocity * interval;

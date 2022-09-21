@@ -130,7 +130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentVelocity: {x: 0, y: 0, z: 0}
-  smoothTime: 0.1
+  lerpFactor: 5
   showInfoDist: 10
   hideInfoDist: 12
 --- !u!1 &2716930875251792988
