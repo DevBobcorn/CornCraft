@@ -1,8 +1,10 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+using MinecraftClient.Event;
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Rendering
@@ -22,6 +24,7 @@ namespace MinecraftClient.Rendering
             }
         }
 
+        private CornClient? game;
         private GameObject? entityPrefab;
 
         private static Dictionary<int, EntityRender> entities = new();
@@ -84,7 +87,22 @@ namespace MinecraftClient.Rendering
         void Start()
         {
             entityPrefab = Resources.Load<GameObject>("Prefabs/Entity");
-            
+            game = CornClient.Instance;
+
+        }
+
+        private float tickMilSec;
+
+        void Update()
+        {
+            tickMilSec = (float)(1D / game!.GetServerTPS());
+
+            // Call managed update
+            var cameraPos = game!.GetCameraPosition();
+
+            foreach (var entity in entities.Values)
+                entity.ManagedUpdate(cameraPos, tickMilSec);
+
         }
 
     }

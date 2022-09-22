@@ -59,7 +59,7 @@ namespace MinecraftClient.Control
             }
         }
 
-        public void Tick(float interval, float mouseX, float mouseY)
+        public void ManagedUpdate(float interval, float mouseX, float mouseY)
         {
             if (!fixedMode)
             {

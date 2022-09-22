@@ -24,7 +24,7 @@ namespace MinecraftClient.Control
         {
             if (game.IsPaused())
             {
-                player.Tick(Time.deltaTime, 0F, 0F, walkMode, false, false, false);
+                player.ManagedUpdate(Time.deltaTime, 0F, 0F, walkMode, false, false, false);
                 return;
             }
 
@@ -42,7 +42,7 @@ namespace MinecraftClient.Control
                 CornClient.ShowNotification(walkMode ? "Walk Mode" : "Rush Mode");
             }
 
-            player.Tick(Time.deltaTime, h, v, walkMode, attack, up, down);
+            player.ManagedUpdate(Time.deltaTime, h, v, walkMode, attack, up, down);
         }
     }
 }
