@@ -2461,6 +2461,9 @@ namespace MinecraftClient
                     Loom.QueueOnMainThread(() =>{
                         var newMode = (GameMode)gamemode;
                         playerController.GameMode = newMode;
+
+                        EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(newMode));
+
                         ShowNotification("Gamemode updated to " + newMode, Notification.Type.Success);
                     });
                 }
