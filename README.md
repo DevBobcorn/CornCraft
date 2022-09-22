@@ -32,6 +32,21 @@ and that'll do the trick. The value of <code>pack_format</code> is not used by C
 
 Finally, when the resource packs are ready, you can then run the Python3 script called <code>block_atlas_gen.py</code> in the <code>Resource Packs</code> folder to generate block texture atlas for running the game (also change resource path in the script before executing it).
 
+## > Controls
+Most basic controls in CornCraft are similar to vanilla Java Edition. They're hard-coded for now, but will be configurable in the future. Here's a list of currently supported actions:
+Key                                                       | Action
+---                                                       | :---:
+<kbd>W</kbd> / <kbd>A</kbd> / <kbd>S</kbd> / <kbd>D</kbd> | Move(/Fly) Horizontally
+<kbd>Space</kbd>                                          | Move(/Fly) Up
+<kbd>Left Shift</kbd>                                     | Move(/Fly) Down
+<kbd>Left Ctrl</kbd>                                      | Toggle Walk/Rush Mode
+<kbd>F3</kbd>                                             | Toggle Debug Info
+<kbd>F3</kbd> + <kbd>F4</kbd>                             | Show Game Mode Switch
+<kbd>F5</kbd>                                             | Toggle First/Third Person Perspective
+<kbd>F11</kbd>                                            | Toggle Fullscreen
+<kbd>T</kbd> / <kbd>/</kbd>                               | Show Chat Screen
+<kbd>Esc</kbd>                                            | Pause Game
+
 ## > License
 Like MCC, CornCraft adopts CDDL-1.0 as the license of its code repository, and this license applies to all source code except those mention their author and license or with specific license attached.
 
