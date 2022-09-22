@@ -183,6 +183,27 @@ namespace MinecraftClient
         private readonly ResourcePackManager packManager = new ResourcePackManager();
         public ResourcePackManager PackManager { get { return packManager; } }
         
+        public const int WINDOWED_WIDTH = 1600, WINDOWED_HEIGHT = 900;
+
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.F11)) // Toggle full screen
+            {
+                if (Screen.fullScreen)
+                {
+                    Screen.SetResolution(WINDOWED_WIDTH, WINDOWED_HEIGHT, false);
+                    Screen.fullScreen = false;
+                }
+                else
+                {
+                    var maxRes = Screen.resolutions[Screen.resolutions.Length - 1];
+                    Screen.SetResolution(maxRes.width, maxRes.height, true);
+                    Screen.fullScreen = true;
+                }
+                
+            }
+        }
+
         void OnApplicationQuit()
         {
             if (CornClient.Connected)
