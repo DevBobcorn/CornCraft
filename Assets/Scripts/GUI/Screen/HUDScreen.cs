@@ -11,11 +11,12 @@ namespace MinecraftClient.UI
     public class HUDScreen : BaseScreen
     {
         private static readonly string[] modeIdentifiers = { "survival", "creative", "adventure", "spectator" };
+        private const float HEALTH_MULTIPLIER = 10F;
 
         private CornClient game;
 
         private TMP_Text    latencyText, debugText, modeText;
-        private Animator    modePanel, crosshair;
+        private Animator    modePanel, crosshair, statusPanel;
         private Button[]    modeButtons = new Button[4];
         private ValueBar    healthBar;
 
@@ -74,6 +75,7 @@ namespace MinecraftClient.UI
         }
 
         private Action<PerspectiveUpdateEvent> perspectiveCallback;
+        private Action<GameModeUpdateEvent>    gameModeCallback;
         private Action<HealthUpdateEvent>      healthCallback;
 
         protected override void Start()
@@ -94,8 +96,10 @@ namespace MinecraftClient.UI
             modeButtons[2] = FindHelper.FindChildRecursively(transform, "Adventure").GetComponent<Button>();
             modeButtons[3] = FindHelper.FindChildRecursively(transform, "Spectator").GetComponent<Button>();
 
-            crosshair = transform.Find("Crosshair").GetComponent<Animator>();
-            healthBar = transform.Find("Health Bar").GetComponent<ValueBar>();
+            crosshair   = transform.Find("Crosshair").GetComponent<Animator>();
+            statusPanel = transform.Find("Status Panel").GetComponent<Animator>();
+
+            healthBar = statusPanel.transform.Find("Health Bar").GetComponent<ValueBar>();
 
             healthBar.MaxValue = 200F;
             healthBar.CurValue = 200F;
@@ -112,11 +116,25 @@ namespace MinecraftClient.UI
                 }
             };
 
+            gameModeCallback = (e) => {
+                var showStatus = e.newGameMode switch {
+                    GameMode.Survival   => true,
+                    GameMode.Creative   => false,
+                    GameMode.Adventure  => true,
+                    GameMode.Spectator  => false,
+
+                    _                   => false
+                };
+
+                statusPanel.SetBool("Show", showStatus);
+            };
+
             healthCallback = (e) => {
-                healthBar.CurValue = e.newHealth * 10F;
+                healthBar.CurValue = e.newHealth * HEALTH_MULTIPLIER;
             };
 
             EventManager.Instance.Register(perspectiveCallback);
+            EventManager.Instance.Register(gameModeCallback);
             EventManager.Instance.Register(healthCallback);
 
         }
@@ -125,6 +143,12 @@ namespace MinecraftClient.UI
         {
             if (perspectiveCallback is not null)
                 EventManager.Instance.Unregister(perspectiveCallback);
+            
+            if (gameModeCallback is not null)
+                EventManager.Instance.Unregister(gameModeCallback);
+            
+            if (healthCallback is not null)
+                EventManager.Instance.Unregister(healthCallback);
 
         }
 
