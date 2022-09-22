@@ -88,7 +88,7 @@ namespace MinecraftClient.Control
             return CoordConvert.Unity2MC(transform.position);
         }
 
-        public void Tick(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
+        public void ManagedUpdate(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
             if (updateTarget) // Update block selection
             {
@@ -121,13 +121,13 @@ namespace MinecraftClient.Control
             }
 
             if (entityDisabled)
-                TickSpectator(interval, horInput, verInput, walkMode, attack, up, down);
+                UpdateSpectator(interval, horInput, verInput, walkMode, attack, up, down);
             else
-                TickNormal(interval, horInput, verInput, walkMode, attack, up, down);
+                UpdateEntity(interval, horInput, verInput, walkMode, attack, up, down);
             
         }
 
-        private void TickSpectator(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
+        private void UpdateSpectator(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
             // Update player velocity
             var newVelocity = Vector3.zero;
@@ -164,7 +164,7 @@ namespace MinecraftClient.Control
         private Vector3? targetPos = null, targetDir = null;
         private Location? targetBlockPos = null;
 
-        private void TickNormal(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
+        private void UpdateEntity(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
             // Update player state - in water or not?
             isInWater = game!.GetWorld().IsWaterAt(CoordConvert.Unity2MC(transform.position));

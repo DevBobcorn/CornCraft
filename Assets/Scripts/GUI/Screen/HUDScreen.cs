@@ -204,7 +204,7 @@ namespace MinecraftClient.UI
             }
 
             if (debugInfo)
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GetPlayerController()?.GetDebugInfo()}\n{game.GetWorldRender()?.GetDebugInfo()}\n{game.GetEntityManager().GetDebugInfo()}";
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GetPlayerController()?.GetDebugInfo()}\n{game.GetWorldRender()?.GetDebugInfo()}\n{game.GetEntityManager().GetDebugInfo()}\nSvr TPS: {game.GetServerTPS()}";
             else
                 debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}";
 

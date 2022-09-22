@@ -21,7 +21,7 @@ namespace MinecraftClient.Control
 
             float x = paused ? 0F : Input.GetAxis("Mouse X");
             float y = paused ? 0F : Input.GetAxis("Mouse Y");
-            camControl.Tick(Time.deltaTime, x, y);
+            camControl.ManagedUpdate(Time.deltaTime, x, y);
 
             if (!scrollLocked && !paused)
             {

@@ -484,8 +484,9 @@ namespace MinecraftClient
                     playerYaw = _yaw == null ? playerYaw : _yaw.Value;
                     playerPitch = _pitch == null ? playerPitch : _pitch.Value;
                     
-                    // TODO
-                    handler.SendLocationUpdate(location, Movement.IsOnGround(world, location), _yaw, _pitch);
+                    if (playerController is not null)
+                        handler.SendLocationUpdate(location, playerController.IsOnGround, _yaw, _pitch);
+                    
                     //handler.SendLocationUpdate(location, isOnGround, _yaw, _pitch);
                     
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)
@@ -2603,7 +2604,7 @@ namespace MinecraftClient
             playerFoodSaturation = food;
 
             if (health <= 0)
-                Translations.NotifyError("mcc.player_dead", CornCraft.internalCmdChar);
+                Translations.Notify("mcc.player_dead", CornCraft.internalCmdChar);
 
             Loom.QueueOnMainThread(() => {
                 EventManager.Instance.Broadcast<HealthUpdateEvent>(new(health));
