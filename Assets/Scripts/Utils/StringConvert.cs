@@ -71,6 +71,8 @@ namespace MinecraftClient
             return closeTags;
         }
 
+        //private static char defaultColor = 'b'; // TODO White 'f'
+
         private static string GetTMPColorTag(char color)
         {
             return color switch
@@ -100,8 +102,12 @@ namespace MinecraftClient
         // The result text can somehow also be used in Unity Console
         public static string MC2TMP(string original)
         {
+            Debug.Log(original);
+
             var processed = string.Empty;
-            Stack<char> prevColors = new Stack<char>();
+            Stack<char> prevColors  = new Stack<char>();
+            Stack<char> fieldColors = new Stack<char>();
+
             // curColor:  The color used by next character (from original text)
             // lastColor: The color used by last character (from original text)
             char curColor = ' ', lastColor = ' ';
@@ -157,7 +163,7 @@ namespace MinecraftClient
                                 prefix = GetTMPCloseTags(formatFlag);
                                 formatFlag = 0;
                                 curColor = ' ';
-                                prevColors.Clear(); // TODO
+                                // prevColors.Clear(); // TODO
                                 break;
                             default:
                                 prefix = string.Empty;
@@ -172,27 +178,60 @@ namespace MinecraftClient
                     // push color
                     if (lastColor != ' ')
                         prevColors.Push(lastColor);
-                    processed += original[ptr]; // Append part of original text
-                    lastColor = curColor;
+                    else
+                        prevColors.Push(' ');
+                    
+                    processed += '['; // Append part of original text
+                    lastColor  = curColor;
+
+                    if (curColor != ' ')
+                        fieldColors.Push(curColor);
+                    else
+                        fieldColors.Push(' ');
+                    
                 }
                 else if (original[ptr] == ']') // Right bracket, a field ends...
                 {
-                    string prefix = string.Empty, suffix = string.Empty;
-                    // pop color
+                    string bracket;
+
+                    if (fieldColors.Count > 0)
+                    {
+                        char fieldColor = fieldColors.Pop();
+
+                        if (fieldColor != curColor)
+                            bracket = (GetTMPColorTag(fieldColor) + "]</color>");
+                        else
+                            bracket = "]";
+                        
+                    }
+                    else
+                        bracket = "]";
+                    
                     if (prevColors.Count > 0)
                     {
                         char preserved = prevColors.Pop();
                         if (curColor != preserved) // Then apply(restore to) this color...
-                        {   // End prev color if present
+                        {
+                            string suffix = string.Empty;
+
+                            // End prev color if present
                             if ((formatFlag & (1 << 5)) > 0)
                                 suffix = "</color>";
                             // Then apply this color
-                            suffix += GetTMPColorTag(curColor = preserved);
-                            formatFlag |= 1 << 5; // Turn the 'colored' flag bit to on, and leave other flags unchanged
-                        }
-                    }
+                            suffix += GetTMPColorTag(preserved);
 
-                    processed += (original[ptr] + suffix); // Append part of original text and change color
+                            formatFlag |= 1 << 5; // Turn the 'colored' flag bit to on, and leave other flags unchanged
+
+                            processed += bracket + suffix;
+
+                            curColor = preserved;
+                        }
+                        else
+                            processed += bracket;
+                    }
+                    else
+                        processed += bracket;
+                    
                     lastColor = curColor;
                 }
                 else
