@@ -40,6 +40,8 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
             return renderTypeTable.GetValueOrDefault(stateId, RenderType.SOLID);
         }
 
+        private static readonly ResourceLocation LAVA = new("lava");
+
         public IEnumerator PrepareData(string dataVersion, CoroutineFlag flag, LoadStateInfo loadStateInfo)
         {
             // Clean up first...
@@ -119,6 +121,7 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
             emptyBlocks.Add(new ResourceLocation("structure_void"));
             emptyBlocks.Add(new ResourceLocation("light"));
             emptyBlocks.Add(new ResourceLocation("water"));
+            emptyBlocks.Add(LAVA);
             emptyBlocks.Add(new ResourceLocation("barrier"));
 
             // Then read block states...
@@ -167,6 +170,7 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                             NoOcclusion = noOcclusion.Contains(blockId),
                             NoCollision = noCollision.Contains(blockId),
                             InWater = inWater,
+                            InLava  = blockId == LAVA,
                             LikeAir = emptyBlocks.Contains(blockId),
                             FullSolid = (!noOcclusion.Contains(blockId)) && alwaysFulls.Contains(blockId)
                         };
@@ -178,6 +182,7 @@ namespace MinecraftClient.Mapping.BlockStatePalettes
                             NoOcclusion = noOcclusion.Contains(blockId),
                             NoCollision = noCollision.Contains(blockId),
                             InWater = waterBlocks.Contains(blockId),
+                            InLava  = blockId == LAVA,
                             LikeAir = emptyBlocks.Contains(blockId),
                             FullSolid = (!noOcclusion.Contains(blockId)) && alwaysFulls.Contains(blockId)
                         };

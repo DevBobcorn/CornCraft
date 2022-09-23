@@ -102,8 +102,6 @@ namespace MinecraftClient
         // The result text can somehow also be used in Unity Console
         public static string MC2TMP(string original)
         {
-            Debug.Log(original);
-
             var processed = string.Empty;
             Stack<char> prevColors  = new Stack<char>();
             Stack<char> fieldColors = new Stack<char>();

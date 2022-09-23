@@ -26,7 +26,8 @@ namespace MinecraftClient.Mapping
         /// <returns>True if the specified location implies swimming</returns>
         public static bool IsSwimming(World world, Location location)
         {
-            return world.GetBlock(location).State.InWater;
+            var state = world.GetBlock(location).State;
+            return state.InWater || state.InLava;
         }
 
     }

@@ -115,9 +115,14 @@ namespace MinecraftClient.Rendering
         #region Chunk building
         //private static readonly Chunk.BlockCheck notFullSolid = new Chunk.BlockCheck((self, neighbor) => { return !neighbor.State.FullSolid; });
         private static readonly Chunk.BlockCheck waterSurface = new Chunk.BlockCheck((self, neighbor) => { return !(neighbor.State.InWater || neighbor.State.FullSolid); });
+        private static readonly Chunk.BlockCheck lavaSurface  = new Chunk.BlockCheck((self, neighbor) => { return !(neighbor.State.InLava  || neighbor.State.FullSolid); });
 
         private static readonly Chunk.BlockCheck notFullSolidAndNotSame = new Chunk.BlockCheck((self, neighbor) => { return !neighbor.State.FullSolid && neighbor.State != self.State; });
+        
+        private static readonly ResourceLocation WATER_STILL = new("block/water_still");
+        private static readonly ResourceLocation LAVA_STILL  = new("block/lava_still");
         private static readonly int waterLayerIndex = ChunkRender.TypeIndex(RenderType.TRANSLUCENT);
+        private static readonly int lavaLayerIndex  = ChunkRender.TypeIndex(RenderType.SOLID);
 
         public void BuildChunk(ChunkRender chunkRender)
         {
@@ -201,11 +206,20 @@ namespace MinecraftClient.Rendering
                                     int waterCullFlags = chunkData.GetCullFlags(loc, bloc, waterSurface);
                                     if (waterCullFlags != 0)
                                     {
-                                        FluidGeometry.Build(ref visualBuffer[waterLayerIndex], x, y, z, waterCullFlags);
+                                        FluidGeometry.Build(ref visualBuffer[waterLayerIndex], WATER_STILL, x, y, z, waterCullFlags);
                                         layerMask |= (1 << waterLayerIndex);
                                         isAllEmpty = false;
                                     }
-                                    
+                                }
+                                else if (state.InLava) // Build lava here
+                                {
+                                    int lavaCullFlags = chunkData.GetCullFlags(loc, bloc, lavaSurface);
+                                    if (lavaCullFlags != 0)
+                                    {
+                                        FluidGeometry.Build(ref visualBuffer[lavaLayerIndex], LAVA_STILL, x, y, z, lavaCullFlags);
+                                        layerMask |= (1 << lavaLayerIndex);
+                                        isAllEmpty = false;
+                                    }
                                 }
 
                                 // If air-like (air, water block, etc), ignore it...
