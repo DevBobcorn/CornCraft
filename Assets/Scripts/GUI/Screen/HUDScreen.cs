@@ -214,7 +214,7 @@ namespace MinecraftClient.UI
             {
                 // Open chat screen and input a slash
                 CornClient.Instance.ScreenControl?.PushScreen(chatScreen);
-                chatScreen?.SetChatMessage("/");
+                chatScreen?.SetChatMessage("/", 1);
             }
             else if (Input.GetKeyDown(KeyCode.T))
             {

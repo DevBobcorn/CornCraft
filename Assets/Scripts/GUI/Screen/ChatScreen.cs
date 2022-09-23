@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UIElements;
 using TMPro;
 
 using MinecraftClient.Event;
@@ -64,10 +65,10 @@ namespace MinecraftClient.UI
             return true;
         }
 
-        public void SetChatMessage(string message)
+        public void SetChatMessage(string message, int caretPos)
         {
             chatInput.text = message;
-            chatInput.caretPosition = message.Length;
+            chatInput.caretPosition = caretPos;
         }
 
         private void ShowCompletions()
@@ -91,7 +92,15 @@ namespace MinecraftClient.UI
         public void OnChatInputChange(string message)
         {
             if (message.StartsWith("/") && message.Length > 1)
-                RequestAutoCompleteChat(message);
+            {
+                string requestText;
+                if (chatInput.caretPosition > 0 && chatInput.caretPosition < message.Length)
+                    requestText = message[0..chatInput.caretPosition];
+                else
+                    requestText = message;
+                
+                RequestAutoCompleteChat(requestText);
+            }
             else
                 HideCompletions();
             
@@ -301,18 +310,35 @@ namespace MinecraftClient.UI
                 if (Input.GetKeyDown(KeyCode.UpArrow))
                 {
                     if (completionsShown)
+                    {
                         PrevCompletionOption();
-                    else PrevChatMessage();
+                        chatInput.caretPosition = chatInput.text.Length;
+                    }
+                    else
+                    {
+                        PrevChatMessage();
+                        chatInput.MoveTextEnd(false);
+                    }
                     chatInput.ActivateInputField();
-                    chatInput.MoveTextEnd(false);
                 }
                 if (Input.GetKeyDown(KeyCode.DownArrow))
                 {
                     if (completionsShown)
+                    {
                         NextCompletionOption();
-                    else NextChatMessage();
+                        chatInput.caretPosition = chatInput.text.Length;
+                    }
+                    else
+                    {
+                        NextChatMessage();
+                        chatInput.MoveTextEnd(false);
+                    }
                     chatInput.ActivateInputField();
-                    chatInput.MoveTextEnd(false);
+                }
+                if (Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
+                {
+                    // Refresh complete after moving cursor position
+                    chatInput.onValueChanged.Invoke(chatInput.text);
                 }
                 if (Input.GetKeyDown(KeyCode.Tab))
                 {
@@ -325,8 +351,15 @@ namespace MinecraftClient.UI
                             //Debug.Log($"Completing \"{original}\" at {completionStart} with \"{completion}\". Length: {completionLength}");
 
                             string basePart = completionStart <= original.Length ? original[..completionStart] : original.PadRight(completionStart, ' ');
-                            //Debug.Log(unaffected + completion);
-                            SetChatMessage(basePart + completion);
+
+                            string textBehindCursor;
+
+                            if (chatInput.caretPosition < original.Length)
+                                textBehindCursor = original[chatInput.caretPosition..original.Length];
+                            else
+                                textBehindCursor = string.Empty;
+
+                            SetChatMessage(basePart + completion + textBehindCursor, (basePart + completion).Length);
                             HideCompletions();
                         }
                     }
