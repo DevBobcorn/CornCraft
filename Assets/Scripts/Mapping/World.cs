@@ -167,6 +167,30 @@ namespace MinecraftClient.Mapping
             return false;
         }
 
+        public bool IsLavaAt(Location location)
+        {
+            var column = GetChunkColumn(location);
+            if (column != null)
+            {
+                var chunk = column.GetChunk(location);
+                if (chunk != null)
+                    return chunk.GetBlock(location).State.InLava;
+            }
+            return false;
+        }
+
+        public bool IsLiquidAt(Location location)
+        {
+            var column = GetChunkColumn(location);
+            if (column != null)
+            {
+                var chunk = column.GetChunk(location);
+                if (chunk != null)
+                    return chunk.GetBlock(location).State.InWater || chunk.GetBlock(location).State.InLava;
+            }
+            return false;
+        }
+
         public int GetCullFlags(Location location, Block self, Chunk.BlockCheck check)
         {
             int cullFlags = 0;

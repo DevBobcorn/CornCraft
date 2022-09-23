@@ -16,7 +16,14 @@ namespace MinecraftClient.Mapping
         public bool NoCollision = false;
         public bool NoOcclusion = false;
         public bool InWater = false;
-        public bool LikeAir = false;
+        public bool InLava  = false;
+        public bool InLiquid
+        {
+            get {
+                return InWater || InLava;
+            }
+        }
+        public bool LikeAir   = false;
         public bool FullSolid = true;
 
         public static BlockState fromString(string state)

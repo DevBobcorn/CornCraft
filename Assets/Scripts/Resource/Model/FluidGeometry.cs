@@ -8,15 +8,13 @@ namespace MinecraftClient.Resource
 {
     public static class FluidGeometry
     {
-        private static readonly ResourceLocation WATER_STILL = new("block/water_still");
-
         private static readonly Vector4 FULL = new(0, 0, 1, 1);
 
         // Add a subtle offset to sides of water to avoid z-fighting
         private const float O = 0.001F;
         private const float I = 0.999F;
 
-        public static void Build(ref VertexBuffer buffer, int x, int y, int z, int cullFlags)
+        public static void Build(ref VertexBuffer buffer, ResourceLocation liquid, int x, int y, int z, int cullFlags)
         {
             float h = (cullFlags & (1 << 0)) != 0 ? 0.875F : I;
 
@@ -31,8 +29,8 @@ namespace MinecraftClient.Resource
             buffer.txuv.CopyTo(txuvs, 0);
             buffer.tint.CopyTo(tints, 0);
 
-            float2[] topUVs  = AtlasManager.GetUVs(WATER_STILL, FULL, 0);
-            float2[] sideUVs = AtlasManager.GetUVs(WATER_STILL, new Vector4(0, 1 - h, 1, 1), 0);
+            float2[] topUVs  = AtlasManager.GetUVs(liquid, FULL, 0);
+            float2[] sideUVs = AtlasManager.GetUVs(liquid, new Vector4(0, 1 - h, 1, 1), 0);
 
             if ((cullFlags & (1 << 0)) != 0) // Up
             {
