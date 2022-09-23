@@ -56,4 +56,5 @@ More information about CDDL-1.0 can be found on MCC's [home page](https://github
 
 ## > Screenshots
 ![Screenshot 1](https://s2.loli.net/2022/09/20/gVIj4bZyz2TF9uB.png)
-![Screenshot 2](https://s2.loli.net/2022/09/20/oQReD3g6BsObCfH.png)
+![Screenshot 2](https://s2.loli.net/2022/09/23/D8l7efqn2TCbvK9.png)
+![Screenshot 3](https://s2.loli.net/2022/09/23/DTVlgA2v3otze7i.png)
