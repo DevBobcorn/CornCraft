@@ -7,7 +7,6 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Threading;
-using MinecraftClient.Protocol.Keys;
 using System.Text.RegularExpressions;
 
 using MinecraftClient.Crypto;
@@ -19,6 +18,7 @@ using MinecraftClient.Inventory;
 using MinecraftClient.Inventory.ItemPalettes;
 using MinecraftClient.Protocol.Handlers.PacketPalettes;
 using MinecraftClient.Protocol.Handlers.Forge;
+using MinecraftClient.Protocol.Keys;
 using MinecraftClient.Protocol.Message;
 using MinecraftClient.Protocol.Session;
 
@@ -35,6 +35,7 @@ namespace MinecraftClient.Protocol.Handlers
     class ProtocolMinecraft : IMinecraftCom
     {
         internal const int MC_1_13_Version   = 393;
+        internal const int MC_1_13_2_Version = 404;
         internal const int MC_1_14_Version   = 477;
         internal const int MC_1_15_Version   = 573;
         internal const int MC_1_15_2_Version = 578;
@@ -722,18 +723,87 @@ namespace MinecraftClient.Protocol.Handlers
                         {
                             int mapid = dataTypes.ReadNextVarInt(packetData);
                             byte scale = dataTypes.ReadNextByte(packetData);
-                            bool trackingposition = protocolVersion >= MC_1_17_Version ? false : dataTypes.ReadNextBool(packetData);
-                            bool locked = false;
-                            if (protocolVersion >= MC_1_14_Version)
-                            {
-                                locked = dataTypes.ReadNextBool(packetData);
-                            }
+
+                            bool trackingPosition = true; //  1.9+
+                            bool locked = false;          // 1.14+
+
+                            // 1.17+ (locked and trackingPosition switched places)
                             if (protocolVersion >= MC_1_17_Version)
                             {
-                                trackingposition = dataTypes.ReadNextBool(packetData);
+                                if (protocolVersion >= MC_1_14_Version)
+                                    locked = dataTypes.ReadNextBool(packetData);
+
+                                trackingPosition = dataTypes.ReadNextBool(packetData);
                             }
-                            int iconcount = dataTypes.ReadNextVarInt(packetData);
-                            handler.OnMapData(mapid, scale, trackingposition, locked, iconcount);
+                            else
+                            {
+                                trackingPosition = dataTypes.ReadNextBool(packetData);
+
+                                if (protocolVersion >= MC_1_14_Version)
+                                    locked = dataTypes.ReadNextBool(packetData);
+                            }
+
+                            int iconcount = 0;
+                            List<MapIcon> icons = new();
+
+                            // 1.9 or later needs tracking position to be true to get the icons
+                            if (trackingPosition)
+                            {
+                                iconcount = dataTypes.ReadNextVarInt(packetData);
+
+                                for (int i = 0; i < iconcount; i++)
+                                {
+                                    MapIcon mapIcon = new();
+
+                                    // 1.8 - 1.13
+                                    if (protocolVersion < MC_1_13_2_Version)
+                                    {
+                                        byte directionAndtype = dataTypes.ReadNextByte(packetData);
+                                        byte direction, type;
+
+                                        // 1.12.2+
+                                        direction = (byte)(directionAndtype & 0xF);
+                                        type = (byte)((directionAndtype >> 4) & 0xF);
+
+                                        mapIcon.Type = (MapIconType)type;
+                                        mapIcon.Direction = direction;
+                                    }
+
+                                    // 1.13.2+
+                                    if (protocolVersion >= MC_1_13_2_Version)
+                                        mapIcon.Type = (MapIconType)dataTypes.ReadNextVarInt(packetData);
+
+                                    mapIcon.X = dataTypes.ReadNextByte(packetData);
+                                    mapIcon.Z = dataTypes.ReadNextByte(packetData);
+
+                                    // 1.13.2+
+                                    if (protocolVersion >= MC_1_13_2_Version)
+                                    {
+                                        mapIcon.Direction = dataTypes.ReadNextByte(packetData);
+
+                                        if (dataTypes.ReadNextBool(packetData)) // Has Display Name?
+                                            mapIcon.DisplayName = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                                    }
+
+                                    icons.Add(mapIcon);
+                                }
+                            }
+
+                            byte columnsUpdated = dataTypes.ReadNextByte(packetData); // width
+                            byte rowsUpdated = 0; // height
+                            byte mapCoulmnX = 0;
+                            byte mapRowZ = 0;
+                            byte[]? colors = null;
+
+                            if (columnsUpdated > 0)
+                            {
+                                rowsUpdated = dataTypes.ReadNextByte(packetData); // height
+                                mapCoulmnX = dataTypes.ReadNextByte(packetData);
+                                mapRowZ = dataTypes.ReadNextByte(packetData);
+                                colors = dataTypes.ReadNextByteArray(packetData);
+                            }
+
+                            handler.OnMapData(mapid, scale, trackingPosition, locked, icons, columnsUpdated, rowsUpdated, mapCoulmnX, mapRowZ, colors);
                             break;
                         }
                     case PacketTypesIn.TradeList:
