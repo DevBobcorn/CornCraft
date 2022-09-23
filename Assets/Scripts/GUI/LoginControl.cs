@@ -515,6 +515,8 @@ namespace MinecraftClient.UI
             // Cancel auth, not just hide panel (so basically this button is totally the same as authCancelButton)...
             authCloseButton.onClick.AddListener(this.CancelAuth);
 
+            // Used for testing MC format code parsing
+            // loadStateInfo.infoText = StringConvert.MC2TMP("Hello world §a[§a§a-1, §a1 §6[Bl§b[HHH]ah] Hello §c[Color RE§rD]  §a1§r] (blah)");
             loadStateInfo.infoText = $"CornCraft {CornCraft.Version} Powered by <u>Minecraft Console Client</u>";
 
         }
