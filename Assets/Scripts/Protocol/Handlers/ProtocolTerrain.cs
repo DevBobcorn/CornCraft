@@ -205,8 +205,12 @@ namespace MinecraftClient.Protocol.Handlers
             // (plus, it would require parsing the tile entity lists' NBT)
 
             // Set the column's chunk mask and load state
-            world[chunkX, chunkZ]!.ChunkMask = chunkMask;
-            world[chunkX, chunkZ]!.FullyLoaded = true;
+            var c = world[chunkX, chunkZ];
+            if (c is not null)
+            {
+                c!.ChunkMask = chunkMask;
+                c!.FullyLoaded = true;
+            }
 
             // Broadcast event to update world render
             Loom.QueueOnMainThread(() => {
@@ -375,8 +379,12 @@ namespace MinecraftClient.Protocol.Handlers
             // (plus, it would require parsing the tile entity lists' NBT)
 
             // Set the column's chunk mask and load state
-            world[chunkX, chunkZ]!.ChunkMask = chunkMask;
-            world[chunkX, chunkZ]!.FullyLoaded = true;
+            var c = world[chunkX, chunkZ];
+            if (c is not null)
+            {
+                c!.ChunkMask = chunkMask;
+                c!.FullyLoaded = true;
+            }
 
             // Broadcast event to update world render
             Loom.QueueOnMainThread(() => {
