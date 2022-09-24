@@ -269,6 +269,7 @@ MonoBehaviour:
   walkSpeed: 2
   runSpeed: 4
   jumpSpeed: 4.7
+  steerSpeed: 20
 --- !u!114 &2579919273003202905
 MonoBehaviour:
   m_ObjectHideFlags: 0

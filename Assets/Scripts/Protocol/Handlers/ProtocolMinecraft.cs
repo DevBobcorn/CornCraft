@@ -721,7 +721,7 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                     case PacketTypesIn.MapData:
                         {
-                            int mapid = dataTypes.ReadNextVarInt(packetData);
+                            int mapId = dataTypes.ReadNextVarInt(packetData);
                             byte scale = dataTypes.ReadNextByte(packetData);
 
                             bool trackingPosition = true; //  1.9+
@@ -743,15 +743,15 @@ namespace MinecraftClient.Protocol.Handlers
                                     locked = dataTypes.ReadNextBool(packetData);
                             }
 
-                            int iconcount = 0;
+                            int iconCount = 0;
                             List<MapIcon> icons = new();
 
                             // 1.9 or later needs tracking position to be true to get the icons
                             if (trackingPosition)
                             {
-                                iconcount = dataTypes.ReadNextVarInt(packetData);
+                                iconCount = dataTypes.ReadNextVarInt(packetData);
 
-                                for (int i = 0; i < iconcount; i++)
+                                for (int i = 0; i < iconCount; i++)
                                 {
                                     MapIcon mapIcon = new();
 
@@ -789,21 +789,21 @@ namespace MinecraftClient.Protocol.Handlers
                                 }
                             }
 
-                            byte columnsUpdated = dataTypes.ReadNextByte(packetData); // width
+                            byte colsUpdated = dataTypes.ReadNextByte(packetData); // width
                             byte rowsUpdated = 0; // height
-                            byte mapCoulmnX = 0;
+                            byte mapColX = 0;
                             byte mapRowZ = 0;
                             byte[]? colors = null;
 
-                            if (columnsUpdated > 0)
+                            if (colsUpdated > 0)
                             {
                                 rowsUpdated = dataTypes.ReadNextByte(packetData); // height
-                                mapCoulmnX = dataTypes.ReadNextByte(packetData);
+                                mapColX = dataTypes.ReadNextByte(packetData);
                                 mapRowZ = dataTypes.ReadNextByte(packetData);
                                 colors = dataTypes.ReadNextByteArray(packetData);
                             }
 
-                            handler.OnMapData(mapid, scale, trackingPosition, locked, icons, columnsUpdated, rowsUpdated, mapCoulmnX, mapRowZ, colors);
+                            handler.OnMapData(mapId, scale, trackingPosition, locked, icons, colsUpdated, rowsUpdated, mapColX, mapRowZ, colors);
                             break;
                         }
                     case PacketTypesIn.TradeList:

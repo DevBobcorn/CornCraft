@@ -1,9 +1,9 @@
 #nullable enable
 using System;
 using UnityEngine;
-
 using MinecraftClient.Event;
 using MinecraftClient.Mapping;
+using MinecraftClient.UI;
 
 namespace MinecraftClient.Control
 {
@@ -52,6 +52,7 @@ namespace MinecraftClient.Control
         private CameraController? camControl;
         private Transform? visualTransform, blockSelectionTransform;
         private MeshRenderer? blockSelection;
+        private FirstPersonPanel? firstPersonPanel;
 
         public void DisableEntity()
         {
@@ -92,30 +93,38 @@ namespace MinecraftClient.Control
         {
             if (updateTarget) // Update block selection
             {
-                var viewRay = camControl!.ActiveCamera.ViewportPointToRay(new(0.5F, 0.5F, 0F));
-
-                RaycastHit viewHit;
-                if (Physics.Raycast(viewRay.origin, viewRay.direction, out viewHit, 10F, interactionLayer))
-                {
-                    targetPos = viewHit.point;
-                    targetDir = viewHit.normal;
-                }
-                else
-                    targetPos = targetDir = null;
-
-                if (targetPos is not null && targetDir is not null)
-                {
-                    Vector3 offseted  = onCubeSurface(targetPos.Value) ? targetPos.Value - targetDir.Value * 0.5F : targetPos.Value;
-                    Vector3 selection = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
-                    blockSelectionTransform!.position = selection;
-
-                    targetBlockPos = CoordConvert.Unity2MC(selection);
-                    blockSelection!.enabled = true;
-                }
-                else
+                if (firstPersonPanel!.PanelShown)
                 {
                     targetBlockPos = null;
                     blockSelection!.enabled = false;
+                }
+                else
+                {
+                    var viewRay = camControl!.ActiveCamera.ViewportPointToRay(new(0.5F, 0.5F, 0F));
+
+                    RaycastHit viewHit;
+                    if (Physics.Raycast(viewRay.origin, viewRay.direction, out viewHit, 10F, interactionLayer))
+                    {
+                        targetPos = viewHit.point;
+                        targetDir = viewHit.normal;
+                    }
+                    else
+                        targetPos = targetDir = null;
+
+                    if (targetPos is not null && targetDir is not null)
+                    {
+                        Vector3 offseted  = onCubeSurface(targetPos.Value) ? targetPos.Value - targetDir.Value * 0.5F : targetPos.Value;
+                        Vector3 selection = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
+                        blockSelectionTransform!.position = selection;
+
+                        targetBlockPos = CoordConvert.Unity2MC(selection);
+                        blockSelection!.enabled = true;
+                    }
+                    else
+                    {
+                        targetBlockPos = null;
+                        blockSelection!.enabled = false;
+                    }
                 }
 
             }
@@ -322,10 +331,16 @@ namespace MinecraftClient.Control
             var blockSelectionObj = GameObject.Instantiate(blockSelectionPrefab);
             blockSelection = blockSelectionObj.GetComponentInChildren<MeshRenderer>();
             blockSelection.enabled = false;
-
             
             visualTransform         = transform.Find("Visual");
             blockSelectionTransform = blockSelectionObj.transform;
+
+            var firstPersonPanelPrefab = Resources.Load<GameObject>("Prefabs/First Person Panel");
+            var firstPersonPanelObj = GameObject.Instantiate(firstPersonPanelPrefab);
+            firstPersonPanelObj.transform.SetParent(transform, false);
+            firstPersonPanelObj.transform.localPosition = new(0F, 1.5F, 0F);
+
+            firstPersonPanel = firstPersonPanelObj.GetComponent<FirstPersonPanel>();
 
             game = CornClient.Instance;
 
