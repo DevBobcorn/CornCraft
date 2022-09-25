@@ -74,8 +74,6 @@ namespace MinecraftClient.UI
 
                 if (Mathf.Abs(deltaRot) > maxDeltaAngle)
                 {
-                    Debug.Log(deltaRot);
-                    
                     if (deltaRot > 0F)
                         transform.eulerAngles = new(0F, ownRot + followSpeed * Time.deltaTime, 0F);
                     else
