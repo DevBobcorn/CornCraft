@@ -6,8 +6,8 @@ using MinecraftClient.Resource;
 namespace MinecraftClient.Rendering
 {
     public static class MaterialManager {
-        private static Dictionary<RenderType, Material> blockMaterials = new Dictionary<RenderType, Material>();
-        private static Dictionary<RenderType, Material> plcboMaterials = new Dictionary<RenderType, Material>();
+        private static Dictionary<RenderType, Material> blockMaterials = new();
+        private static Dictionary<RenderType, Material> plcboMaterials = new();
 
         private static Material solid, solidPlacebo;
 
@@ -32,98 +32,42 @@ namespace MinecraftClient.Rendering
 
         private static void Initialize()
         {
-            // Solid
-            var sshader = Shader.Find("Universal Render Pipeline/Lit");
-            //var sshader = Shader.Find("Unicorn/BlockSolid");
+            blockMaterials.Clear();
+            plcboMaterials.Clear();
 
-            var s1 = new Material(sshader);
-            s1.name = "Block Solid";
+            // Solid
+            var s1 = Resources.Load<Material>("Materials/Block/Block Solid");
             s1.SetTexture("_BaseMap", AtlasManager.GetAtlasTexture(RenderType.SOLID));
-            s1.SetFloat("_Smoothness", 0F);
             blockMaterials.Add(RenderType.SOLID, s1);
 
-            var s2 = new Material(sshader);
-            s2.name = "Placebo Solid";
+            var s2 = Resources.Load<Material>("Materials/Block/Placebo Solid");
             s2.SetTexture("_BaseMap", AtlasManager.PlcboTexture);
-            s2.SetFloat("_Smoothness", 0F);
             plcboMaterials.Add(RenderType.SOLID, s2);
 
             // Cutout & Cutout Mipped
-            var cshader = Shader.Find("Universal Render Pipeline/Lit");
-            //var cshader = Shader.Find("Unicorn/BlockCutout");
-            
-            var c1 = new Material(cshader);
-            c1.name = "Block Cutout";
+            var c1 = Resources.Load<Material>("Materials/Block/Block Cutout");
             c1.SetTexture("_BaseMap", AtlasManager.GetAtlasTexture(RenderType.CUTOUT));
-            c1.EnableKeyword("_ALPHATEST_ON");
-            c1.SetFloat("_Mode", 1);
-            c1.renderQueue = 2450;
-            c1.SetFloat("_Smoothness", 0F);
-            c1.SetFloat("_Cutoff", 0.75F);
             blockMaterials.Add(RenderType.CUTOUT, c1);
 
-            var c2 = new Material(cshader);
-            c2.name = "Placebo Cutout";
+            var c2 = Resources.Load<Material>("Materials/Block/Placebo Cutout");
             c2.SetTexture("_BaseMap", AtlasManager.PlcboTexture);
-            c2.EnableKeyword("_ALPHATEST_ON");
-            c2.SetFloat("_Mode", 1);
-            c2.renderQueue = 2450;
-            c2.SetFloat("_Smoothness", 0F);
-            c2.SetFloat("_Cutoff", 0.75F);
             plcboMaterials.Add(RenderType.CUTOUT, c2);
 
-            var cm1 = new Material(cshader);
-            cm1.name = "Block Cutout Mipped";
+            var cm1 = Resources.Load<Material>("Materials/Block/Block Cutout Mipped");
             cm1.SetTexture("_BaseMap", AtlasManager.GetAtlasTexture(RenderType.CUTOUT_MIPPED));
-            cm1.EnableKeyword("_ALPHATEST_ON");
-            cm1.SetFloat("_Mode", 1);
-            cm1.renderQueue = 2450;
-            cm1.SetFloat("_Smoothness", 0F);
-            cm1.SetFloat("_Cutoff", 0.75F);
             blockMaterials.Add(RenderType.CUTOUT_MIPPED, cm1);
 
-            var cm2 = new Material(cshader);
-            cm2.name = "Placebo Cutout Mipped";
+            var cm2 = Resources.Load<Material>("Materials/Block/Placebo Cutout Mipped");
             cm2.SetTexture("_BaseMap", AtlasManager.PlcboTexture);
-            cm2.EnableKeyword("_ALPHATEST_ON");
-            cm2.SetFloat("_Mode", 1);
-            cm2.renderQueue = 2450;
-            cm2.SetFloat("_Smoothness", 0F);
-            cm2.SetFloat("_Cutoff", 0.75F);
             plcboMaterials.Add(RenderType.CUTOUT_MIPPED, cm2);
 
             // Translucent
-            var tshader = Shader.Find("Universal Render Pipeline/Lit");
-            //var tshader = Shader.Find("Unicorn/BlockTranslucent");
-
-            var t1 = new Material(tshader);
-            t1.name = "Block Transparent";
+            var t1 = Resources.Load<Material>("Materials/Block/Block Transparent");
             t1.SetTexture("_BaseMap", AtlasManager.GetAtlasTexture(RenderType.TRANSLUCENT));
-            t1.SetFloat("_Mode", 2);
-            t1.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            t1.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            t1.SetInt("_ZWrite", 0);
-            t1.DisableKeyword("_ALPHATEST_ON");
-            t1.EnableKeyword("_ALPHABLEND_ON");
-            t1.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-            t1.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            t1.renderQueue = 3000;
-            t1.SetFloat("_Smoothness", 0F);
             blockMaterials.Add(RenderType.TRANSLUCENT, t1);
 
-            var t2 = new Material(tshader);
-            t2.name = "Placebo Transparent";
+            var t2 = Resources.Load<Material>("Materials/Block/Placebo Transparent");
             t2.SetTexture("_BaseMap", AtlasManager.PlcboTexture);
-            t2.SetFloat("_Mode", 2);
-            t2.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            t2.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            t2.SetInt("_ZWrite", 0);
-            t2.DisableKeyword("_ALPHATEST_ON");
-            t2.EnableKeyword("_ALPHABLEND_ON");
-            t2.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-            t2.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            t2.renderQueue = 3000;
-            t2.SetFloat("_Smoothness", 0F);
             plcboMaterials.Add(RenderType.TRANSLUCENT, t2);
 
             initialized = true;
