@@ -91,9 +91,11 @@ namespace MinecraftClient.Control
 
         public void ManagedUpdate(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
+            var panelShown = firstPersonPanel!.PanelShown;
+
             if (updateTarget) // Update block selection
             {
-                if (firstPersonPanel!.PanelShown)
+                if (panelShown)
                 {
                     targetBlockPos = null;
                     blockSelection!.enabled = false;
@@ -128,6 +130,11 @@ namespace MinecraftClient.Control
                 }
 
             }
+
+            // Close first person panel if any input detected
+            if (panelShown)
+                if (horInput != 0F || verInput != 0F || attack || up || down)
+                    firstPersonPanel!.HidePanel();
 
             if (entityDisabled)
                 UpdateSpectator(interval, horInput, verInput, walkMode, attack, up, down);
@@ -338,7 +345,7 @@ namespace MinecraftClient.Control
             var firstPersonPanelPrefab = Resources.Load<GameObject>("Prefabs/First Person Panel");
             var firstPersonPanelObj = GameObject.Instantiate(firstPersonPanelPrefab);
             firstPersonPanelObj.transform.SetParent(transform, false);
-            firstPersonPanelObj.transform.localPosition = new(0F, 1.5F, 0F);
+            firstPersonPanelObj.transform.localPosition = new(0F, 1.45F, 0F);
 
             firstPersonPanel = firstPersonPanelObj.GetComponent<FirstPersonPanel>();
 
@@ -390,9 +397,9 @@ namespace MinecraftClient.Control
             }
 
             if (entityDisabled)
-                return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+                return $"{firstPersonPanel!.PanelShown}\n{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
             else
-                return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{isOnGround}\t{centerDownDist.ToString("#.##")} {frontDownDist.ToString("#.##")}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+                return $"{firstPersonPanel!.PanelShown}\n{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{isOnGround}\t{centerDownDist.ToString("#.##")} {frontDownDist.ToString("#.##")}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
 
         }
 
