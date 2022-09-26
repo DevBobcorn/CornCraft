@@ -75,7 +75,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
-    - _WireframeVal: 0.1
+    - _WireframeVal: 0.02
     - _ZWrite: 1
     m_Colors:
     - _BackColor: {r: 0, g: 0, b: 0, a: 1}
