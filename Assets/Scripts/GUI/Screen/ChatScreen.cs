@@ -17,8 +17,6 @@ namespace MinecraftClient.UI
         public override bool IsActive
         {
             set {
-                EnsureInitialized();
-
                 isActive = value;
                 screenGroup.alpha = value ? 1F : 0F;
                 screenGroup.blocksRaycasts = value;
@@ -49,11 +47,6 @@ namespace MinecraftClient.UI
         private bool completionsShown = false;
         private string[] completionOptions = { };
         private string confirmedPart = string.Empty;
-
-        public override string ScreenName()
-        {
-            return "Chat Screen";
-        }
 
         public override bool ReleaseCursor()
         {
@@ -208,7 +201,7 @@ namespace MinecraftClient.UI
         private Action<ChatMessageEvent> chatCallback;
         private Action<AutoCompletionEvent> autoCompleteCallback;
 
-        protected override void Initialize()
+        protected override bool Initialize()
         {
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
@@ -277,6 +270,7 @@ namespace MinecraftClient.UI
             EventManager.Instance.Register(chatCallback);
             EventManager.Instance.Register(autoCompleteCallback);
 
+            return true;
         }
 
         void OnDestroy()

@@ -238,10 +238,8 @@ namespace MinecraftClient
         private PlayerController playerController;
         private CameraController cameraController;
 
-        public PlayerController GetPlayerController()
-        {
-            return playerController;
-        }
+        public PlayerController GetPlayerController() => playerController;
+        public CameraController GetCameraController() => cameraController;
 
         public Vector3 GetCameraPosition()
         {

@@ -41,20 +41,23 @@ namespace MinecraftClient.UI
             if (screenChangeCooldown > 0F)
                 return;
 
-            // Deactive previous top screen if present
-            if (screenStack.Count > 0)
-                screenStack.Peek().IsActive = false;
-            
-            // Push and activate new top screen
-            screenStack.Push(screen);
-            screen.IsActive = true;
+            if (screen is not null && screen.EnsureInitialized())
+            {
+                // Deactive previous top screen if present
+                if (screenStack.Count > 0)
+                    screenStack.Peek().IsActive = false;
+                
+                // Push and activate new top screen
+                screenStack.Push(screen);
+                screen.IsActive = true;
 
-            // Move this screen to the top
-            screen.transform.SetAsLastSibling();
+                // Move this screen to the top
+                screen.transform.SetAsLastSibling();
 
-            UpdateScreenStates();
+                UpdateScreenStates();
 
-            screenChangeCooldown = 0.1F;
+                screenChangeCooldown = 0.1F;
+            }
 
         }
 
@@ -94,10 +97,10 @@ namespace MinecraftClient.UI
             bool releaseCursor = (screenStack.Count > 0) ? screenStack.Peek().ReleaseCursor() : false;
             bool shouldPauseGame = false;
             foreach (var w in screenStack)
-            {
-                //Debug.Log("In window stack: " + w.ScreenName());
                 shouldPauseGame = shouldPauseGame || w.ShouldPause();
-            }
+            
+            //Debug.Log($"In window stack: {string.Join(' ', screenStack)}");
+
             // Update States
             if (isPaused != shouldPauseGame)
             {
