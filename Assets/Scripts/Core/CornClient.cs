@@ -150,7 +150,6 @@ namespace MinecraftClient
         private float? _pitch; // Used for calculation ONLY!!! Doesn't reflect the client pitch
         private float playerYaw;
         private float playerPitch;
-        private double motionY;
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
         public Location GetCurrentLocation() { return location; }
 
@@ -373,32 +372,6 @@ namespace MinecraftClient
                 yield return wait;
             }
 
-            try // Setup tcp client
-            {
-                tcpClient = ProxyHandler.newTcpClient(host, port);
-                tcpClient.ReceiveBufferSize = 1024 * 1024;
-                tcpClient.ReceiveTimeout = 30000; // 30 seconds
-            }
-            catch (SocketException)
-            {
-                Translations.LogError("error.connect");
-                Disconnect();
-                loadStateInfo.loggingIn = false;
-                yield break;
-            }
-
-            try // Create protocol handler
-            {
-                handler = Protocol.ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e.Message);
-                Disconnect();
-                loadStateInfo.loggingIn = false;
-                yield break;
-            }
-
             // Scene is loaded, activate it
             op.allowSceneActivation = true;
 
@@ -443,6 +416,14 @@ namespace MinecraftClient
 
             try
             {
+                // Setup tcp client
+                tcpClient = ProxyHandler.newTcpClient(host, port);
+                tcpClient.ReceiveBufferSize = 1024 * 1024;
+                tcpClient.ReceiveTimeout = 30000; // 30 seconds
+
+                // Create handler
+                handler = Protocol.ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
+
                 // Start update loop
                 timeoutdetector = Tuple.Create(new Thread(new ParameterizedThreadStart(TimeoutDetector)), new CancellationTokenSource());
                 timeoutdetector.Item1.Name = "Connection Timeout Detector";
@@ -461,10 +442,14 @@ namespace MinecraftClient
             }
             catch (Exception e)
             {
+                tcpClient = ProxyHandler.newTcpClient(host, port);
+                tcpClient.ReceiveBufferSize = 1024 * 1024;
+                tcpClient.ReceiveTimeout = 30000; // 30 seconds
+
+                Translations.LogError("error.connect");
                 Debug.LogError(e.Message);
                 Debug.LogError(e.StackTrace);
                 Disconnect();
-                yield break;
             }
             finally
             {
@@ -2413,7 +2398,7 @@ namespace MinecraftClient
             entities.Add(entity.ID, entity);
 
             Loom.QueueOnMainThread(() => {
-                entityManager.AddEntity(entity);
+                entityManager?.AddEntity(entity);
             });
 
         }
