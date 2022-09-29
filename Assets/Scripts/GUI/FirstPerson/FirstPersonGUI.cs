@@ -6,10 +6,10 @@ using MinecraftClient.Control;
 
 namespace MinecraftClient.UI
 {
-    public class FirstPersonPanel : MonoBehaviour
+    public class FirstPersonGUI : MonoBehaviour
     {
-        public float followSpeed = 75F;
-        public float maxDeltaAngle = 25F;
+        public float followSpeed = 1F;
+        public float maxDeltaAngle = 30F;
 
         private PlayerController? player;
         private CornClient? game;
@@ -31,42 +31,63 @@ namespace MinecraftClient.UI
             var posIndex = (index + BUTTON_COUNT - selectedIndex) % BUTTON_COUNT;
             var itsStartTime = SINGLE_DELTA_TIME * (BUTTON_COUNT - 1 - posIndex);
 
-            if (showPanelTime <= itsStartTime) // This button's animation hasn't yet started
+            if (buttonShowTime <= itsStartTime) // This button's animation hasn't yet started
                 return START_POS[posIndex];
-            else if (showPanelTime >= itsStartTime + SINGLE_SHOW_TIME) // This button's animation has already ended
+            else if (buttonShowTime >= itsStartTime + SINGLE_SHOW_TIME) // This button's animation has already ended
                 return STOP_POS[posIndex];
             else // Lerp to get its position
-                return Mathf.Lerp(START_POS[posIndex], STOP_POS[posIndex], (showPanelTime - itsStartTime) / SINGLE_SHOW_TIME);
+                return Mathf.Lerp(START_POS[posIndex], STOP_POS[posIndex], (buttonShowTime - itsStartTime) / SINGLE_SHOW_TIME);
 
         }
 
-        private float showPanelTime = -1F, buttonsOffset = 0F;
+        private float buttonShowTime = -1F, buttonOffset = 0F;
 
-        private bool panelShown = false;
+        private bool initialzed = false, buttonListShown = false;
         public bool PanelShown
         {
             get {
-                return panelShown;
+                return buttonListShown;
             }
         }
 
-        private void ShowPanel()
+        private void Initialize()
         {
-            // First calculate and set rotation
-            var cameraRot = Camera.main.transform.eulerAngles.y;
-            transform.eulerAngles = new(0F, cameraRot, 0F);
+            // Find game instance
+            game = CornClient.Instance;
 
-            // Select button on top
-            buttonObjs[selectedIndex].GetComponent<Button>().Select();
+            // Initialize panel animator
+            panel = GetComponent<Animator>();
+            panel.SetBool("Show", false);
+            buttonListShown = false;
 
-            // Then play fade animation
-            panel!.SetBool("Show", true);
-            showPanelTime = 0F;
+            var canvas = panel.GetComponentInChildren<Canvas>();
+
+            // Get button list and buttons
+            buttonListMask = FindHelper.FindChildRecursively(transform, "Button List").GetComponent<SoftMask>();
+            buttonListMask.enabled = false;
+            buttonListMaskImage = buttonListMask.GetComponent<Image>();
+            buttonListMaskImage.color = new(0F, 0F, 0F, 0F);
+
+            buttonObjs[0] = buttonListMask.transform.Find("Avatar Button").gameObject;
+            buttonObjs[1] = buttonListMask.transform.Find("Social Button").gameObject;
+            buttonObjs[2] = buttonListMask.transform.Find("Chat Button").gameObject;
+            buttonObjs[3] = buttonListMask.transform.Find("Map Button").gameObject;
+            buttonObjs[4] = buttonListMask.transform.Find("Settings Button").gameObject;
+
+            selectedIndex = 0;
+
+            initialzed = true;
+        }
+
+        public void EnsureInitialized()
+        {
+            if (!initialzed)
+                Initialize();
         }
 
         private void SelectAdjacentButton(bool next)
         {
-            if (buttonsOffset != 0F)
+            if (buttonOffset != 0F)
                 return;
 
             if (next)
@@ -104,95 +125,91 @@ namespace MinecraftClient.UI
 
             newButtonTransform.localPosition = new(0F, next ? -270F : 270F);
             
-            buttonsOffset = next ? -90F : 90F;
+            buttonOffset = next ? -90F : 90F;
 
             buttonListMask!.enabled = true;
             buttonListMaskImage!.color = Color.white;
 
         }
 
+        public void ShowPanel()
+        {
+            EnsureInitialized();
+
+            // First calculate and set rotation
+            var cameraRot = Camera.main.transform.eulerAngles.y;
+            transform.eulerAngles = new(0F, cameraRot, 0F);
+
+            // Select button on top
+            buttonObjs[selectedIndex].GetComponent<Button>().Select();
+
+            // Then play fade animation
+            panel!.SetBool("Show", true);
+            buttonShowTime = 0F;
+        }
+
         public void HidePanel()
         {
+            EnsureInitialized();
+            
             // Play hide animation
             panel!.SetBool("Show", false);
-            panelShown = false;
-            showPanelTime = -1F;
+            buttonListShown = false;
+            buttonShowTime = -1F;
         }
 
         void Start()
         {
-            // Find game instance
-            game = CornClient.Instance;
-
-            // Initialize panel animator
-            panel = GetComponent<Animator>();
-            panel.SetBool("Show", false);
-            panelShown = false;
-
-            var canvas = panel.GetComponentInChildren<Canvas>();
-
-            // Get button list and buttons
-            buttonListMask = FindHelper.FindChildRecursively(transform, "Button List").GetComponent<SoftMask>();
-            buttonListMask.enabled = false;
-            buttonListMaskImage = buttonListMask.GetComponent<Image>();
-            buttonListMaskImage.color = new(0F, 0F, 0F, 0F);
-
-            buttonObjs[0] = buttonListMask.transform.Find("Avatar Button").gameObject;
-            buttonObjs[1] = buttonListMask.transform.Find("Social Button").gameObject;
-            buttonObjs[2] = buttonListMask.transform.Find("Chat Button").gameObject;
-            buttonObjs[3] = buttonListMask.transform.Find("Map Button").gameObject;
-            buttonObjs[4] = buttonListMask.transform.Find("Settings Button").gameObject;
-
-            selectedIndex = 0;
-
+            if (!initialzed)
+                Initialize();
         }
 
         void Update()
         {
-            if (showPanelTime >= 0F) // Panel should be shown
+            if (buttonShowTime >= 0F) // Panel should be shown
             {
-                if (showPanelTime < TOTAL_SHOW_TIME) // Play show animation
+                if (buttonShowTime < TOTAL_SHOW_TIME) // Play show animation
                 {
-                    showPanelTime = Mathf.Min(showPanelTime + Time.deltaTime, TOTAL_SHOW_TIME);
+                    buttonShowTime = Mathf.Min(buttonShowTime + Time.deltaTime, TOTAL_SHOW_TIME);
 
                     for (int i = 0;i < BUTTON_COUNT;i++)
                         buttonObjs[i].GetComponent<RectTransform>().anchoredPosition = new(0F, GetPosForButton(i));
                     
                     return;
                 }
-                else if (!panelShown) // Complete show animation
+                else if (!buttonListShown) // Complete show animation
                 {
                     for (int i = 0;i < BUTTON_COUNT;i++)
                         buttonObjs[i].GetComponent<RectTransform>().anchoredPosition = new(0F, STOP_POS[(i + BUTTON_COUNT - selectedIndex) % BUTTON_COUNT]);
                     
-                    panelShown = true;
+                    buttonListShown = true;
 
                     Debug.Log("Panel show complete");
                 }
 
             }
 
-            if (buttonsOffset != 0F)
+            if (buttonOffset != 0F)
             {
                 float newOffset;
 
-                if (buttonsOffset > 0F)
-                    newOffset = Mathf.Max(0F, buttonsOffset - 240F * Time.deltaTime);
+                if (buttonOffset > 0F)
+                    newOffset = Mathf.Max(0F, buttonOffset - 240F * Time.deltaTime);
                 else
-                    newOffset = Mathf.Min(0F, buttonsOffset + 240F * Time.deltaTime);
+                    newOffset = Mathf.Min(0F, buttonOffset + 240F * Time.deltaTime);
 
                 for (int i = 0;i < BUTTON_COUNT;i++)
                 {
                     RectTransform buttonRect = buttonObjs[i].GetComponent<RectTransform>();
-                    buttonRect.anchoredPosition = new(0F, buttonRect.anchoredPosition.y + (newOffset - buttonsOffset));
+                    buttonRect.anchoredPosition = new(0F, buttonRect.anchoredPosition.y + (newOffset - buttonOffset));
                 }
 
                 var newButtonRect = newButtonObj!.GetComponent<RectTransform>();
-                newButtonRect.anchoredPosition = new(0F, newButtonRect.anchoredPosition.y + (newOffset - buttonsOffset));
+                newButtonRect.anchoredPosition = new(0F, newButtonRect.anchoredPosition.y + (newOffset - buttonOffset));
 
-                buttonsOffset = newOffset;
+                buttonOffset = newOffset;
 
-                if (buttonsOffset == 0F) // Complete button selection
+                if (buttonOffset == 0F) // Complete button selection
                 {
                     // Destroy old button
                     Destroy(buttonObjs[rollingIndex]);
@@ -207,15 +224,7 @@ namespace MinecraftClient.UI
             if (game!.IsPaused())
                 return;
 
-            if (Input.GetKeyDown(KeyCode.I))
-            {
-                if (panelShown)
-                    HidePanel();
-                else
-                    ShowPanel();
-            }
-
-            if (panelShown)
+            if (buttonListShown)
             {
                 if (Input.GetKeyDown(KeyCode.U)) // Previous button
                 {
@@ -237,9 +246,9 @@ namespace MinecraftClient.UI
                 if (Mathf.Abs(deltaRot) > maxDeltaAngle)
                 {
                     if (deltaRot > 0F)
-                        transform.eulerAngles = new(0F, ownRot + followSpeed * Time.deltaTime, 0F);
+                        transform.eulerAngles = new(0F, Mathf.LerpAngle(ownRot, cameraRot + maxDeltaAngle, followSpeed * Time.deltaTime));
                     else
-                        transform.eulerAngles = new(0F, ownRot - followSpeed * Time.deltaTime, 0F);
+                        transform.eulerAngles = new(0F, Mathf.LerpAngle(ownRot, cameraRot - maxDeltaAngle, followSpeed * Time.deltaTime));
 
                 }
                 

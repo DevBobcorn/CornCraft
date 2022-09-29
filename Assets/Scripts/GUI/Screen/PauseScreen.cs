@@ -13,8 +13,6 @@ namespace MinecraftClient.UI
         public override bool IsActive
         {
             set {
-                EnsureInitialized();
-
                 isActive = value;
                 screenGroup.alpha = value ? 1F : 0F;
                 screenGroup.blocksRaycasts = value;
@@ -28,11 +26,6 @@ namespace MinecraftClient.UI
 
         // UI controls
         private CanvasGroup screenGroup;
-
-        public override string ScreenName()
-        {
-            return "Pause Screen";
-        }
 
         public override bool ReleaseCursor()
         {
@@ -54,7 +47,7 @@ namespace MinecraftClient.UI
             CornClient.StopClient();
         }
 
-        protected override void Initialize()
+        protected override bool Initialize()
         {
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
@@ -65,6 +58,7 @@ namespace MinecraftClient.UI
             resumeButton.onClick.AddListener(this.Back2Game);
             quitButton.onClick.AddListener(this.QuitGame);
             
+            return true;
         }
 
         void Update()

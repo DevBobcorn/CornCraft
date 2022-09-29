@@ -22,6 +22,7 @@ namespace MinecraftClient.UI
 
         private ChatScreen  chatScreen;
         private PauseScreen pauseScreen;
+        private FPGUIScreen fphudScreen;
 
         private bool isActive = false, debugInfo = true;
 
@@ -31,8 +32,6 @@ namespace MinecraftClient.UI
         public override bool IsActive
         {
             set {
-                EnsureInitialized();
-
                 isActive = value;
                 screenGroup.alpha = value ? 1F : 0F;
                 screenGroup.blocksRaycasts = value;
@@ -47,11 +46,6 @@ namespace MinecraftClient.UI
         // UI controls
         private CanvasGroup screenGroup;
 
-        public override string ScreenName()
-        {
-            return "HUD Screen";
-        }
-
         public override bool ReleaseCursor()
         {
             return false;
@@ -62,26 +56,8 @@ namespace MinecraftClient.UI
             return false;
         }
 
-        protected override void Initialize()
+        protected override bool Initialize()
         {
-            // Initialize screens
-            chatScreen  = GameObject.FindObjectOfType<ChatScreen>(true);
-            pauseScreen = GameObject.FindObjectOfType<PauseScreen>(true);
-
-            // Initialize controls
-            screenGroup = GetComponent<CanvasGroup>();
-            latencyText = transform.Find("Latency Text").GetComponent<TMP_Text>();
-            
-        }
-
-        private Action<PerspectiveUpdateEvent> perspectiveCallback;
-        private Action<GameModeUpdateEvent>    gameModeCallback;
-        private Action<HealthUpdateEvent>      healthCallback;
-
-        protected override void Start()
-        {
-            // Ensure initialization
-            base.Start();
             game = CornClient.Instance;
 
             // Initialize controls...
@@ -137,7 +113,21 @@ namespace MinecraftClient.UI
             EventManager.Instance.Register(gameModeCallback);
             EventManager.Instance.Register(healthCallback);
 
+            // Initialize screens
+            chatScreen  = GameObject.FindObjectOfType<ChatScreen>(true);
+            pauseScreen = GameObject.FindObjectOfType<PauseScreen>(true);
+            fphudScreen = GameObject.FindObjectOfType<FPGUIScreen>(true);
+
+            // Initialize controls
+            screenGroup = GetComponent<CanvasGroup>();
+            latencyText = transform.Find("Latency Text").GetComponent<TMP_Text>();
+            
+            return true;
         }
+
+        private Action<PerspectiveUpdateEvent> perspectiveCallback;
+        private Action<GameModeUpdateEvent>    gameModeCallback;
+        private Action<HealthUpdateEvent>      healthCallback;
 
         void OnDestroy()
         {
@@ -156,10 +146,8 @@ namespace MinecraftClient.UI
 
         void Update()
         {
-            if (!IsActive || game is null)
+            if (!initialized || !IsActive || !CornClient.Connected)
                 return;
-            
-            if (game is null || !CornClient.Connected) return;
 
             if (Input.GetKey(KeyCode.F3))
             {
@@ -221,6 +209,9 @@ namespace MinecraftClient.UI
                 // Just open chat screen
                 CornClient.Instance.ScreenControl?.PushScreen(chatScreen);
             }
+
+            if (Input.GetKeyDown(KeyCode.I))
+                CornClient.Instance.ScreenControl?.PushScreen(fphudScreen);
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
