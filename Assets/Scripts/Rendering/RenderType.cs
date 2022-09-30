@@ -4,6 +4,7 @@ namespace MinecraftClient.Rendering
         SOLID,
         CUTOUT,
         CUTOUT_MIPPED,
-        TRANSLUCENT
+        TRANSLUCENT,
+        WATER
     }
 }
