@@ -141,6 +141,7 @@ namespace MinecraftClient.Resource
                 plcboAtlasTable.Add(RenderType.CUTOUT,        1);
                 plcboAtlasTable.Add(RenderType.CUTOUT_MIPPED, 2);
                 plcboAtlasTable.Add(RenderType.TRANSLUCENT,   3);
+                plcboAtlasTable.Add(RenderType.WATER,         3);
             }
             else
             {

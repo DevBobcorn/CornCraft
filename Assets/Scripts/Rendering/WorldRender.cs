@@ -121,7 +121,7 @@ namespace MinecraftClient.Rendering
         
         private static readonly ResourceLocation WATER_STILL = new("block/water_still");
         private static readonly ResourceLocation LAVA_STILL  = new("block/lava_still");
-        private static readonly int waterLayerIndex = ChunkRender.TypeIndex(RenderType.TRANSLUCENT);
+        private static readonly int waterLayerIndex = ChunkRender.TypeIndex(RenderType.WATER);
         private static readonly int lavaLayerIndex  = ChunkRender.TypeIndex(RenderType.SOLID);
 
         public void BuildChunk(ChunkRender chunkRender)

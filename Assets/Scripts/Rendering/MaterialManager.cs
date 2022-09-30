@@ -70,6 +70,11 @@ namespace MinecraftClient.Rendering
             t2.SetTexture("_BaseMap", AtlasManager.PlcboTexture);
             plcboMaterials.Add(RenderType.TRANSLUCENT, t2);
 
+            // Water
+            var w = Resources.Load<Material>("Materials/WaterTest");
+            blockMaterials.Add(RenderType.WATER, w);
+            plcboMaterials.Add(RenderType.WATER, w);
+
             initialized = true;
 
         }

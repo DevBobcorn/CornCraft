@@ -12,7 +12,8 @@ namespace MinecraftClient.Rendering
         public static readonly RenderType[] TYPES = new RenderType[]
         {
             RenderType.SOLID,         RenderType.CUTOUT,
-            RenderType.CUTOUT_MIPPED, RenderType.TRANSLUCENT
+            RenderType.CUTOUT_MIPPED, RenderType.TRANSLUCENT,
+            RenderType.WATER
         };
 
         public static int TypeIndex(RenderType type)
@@ -23,6 +24,7 @@ namespace MinecraftClient.Rendering
                 RenderType.CUTOUT        => 1,
                 RenderType.CUTOUT_MIPPED => 2,
                 RenderType.TRANSLUCENT   => 3,
+                RenderType.WATER   => 4,
                 _                        => 0
             };
         }
