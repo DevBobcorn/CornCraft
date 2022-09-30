@@ -1,5 +1,7 @@
 #nullable enable
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Coffee.UISoftMask;
 using MinecraftClient.Control;
@@ -10,10 +12,12 @@ namespace MinecraftClient.UI
     {
         public float followSpeed = 1F;
         public float maxDeltaAngle = 30F;
-
-        private PlayerController? player;
         private CornClient? game;
-        private Animator? panel;
+
+        private CameraController? cameraCon;
+
+        private Canvas? firstPersonCanvas;
+        private Animator? firstPersonPanel;
 
         private SoftMask?   buttonListMask;
         private Image? buttonListMaskImage;
@@ -31,36 +35,33 @@ namespace MinecraftClient.UI
             var posIndex = (index + BUTTON_COUNT - selectedIndex) % BUTTON_COUNT;
             var itsStartTime = SINGLE_DELTA_TIME * (BUTTON_COUNT - 1 - posIndex);
 
-            if (buttonShowTime <= itsStartTime) // This button's animation hasn't yet started
+            if (buttonListShowTime <= itsStartTime) // This button's animation hasn't yet started
                 return START_POS[posIndex];
-            else if (buttonShowTime >= itsStartTime + SINGLE_SHOW_TIME) // This button's animation has already ended
+            else if (buttonListShowTime >= itsStartTime + SINGLE_SHOW_TIME) // This button's animation has already ended
                 return STOP_POS[posIndex];
             else // Lerp to get its position
-                return Mathf.Lerp(START_POS[posIndex], STOP_POS[posIndex], (buttonShowTime - itsStartTime) / SINGLE_SHOW_TIME);
+                return Mathf.Lerp(START_POS[posIndex], STOP_POS[posIndex], (buttonListShowTime - itsStartTime) / SINGLE_SHOW_TIME);
 
         }
 
-        private float buttonShowTime = -1F, buttonOffset = 0F;
+        private float buttonListShowTime = -1F, rollOffset = 0F;
+        private int rollCount = 0;
 
-        private bool initialzed = false, buttonListShown = false;
-        public bool PanelShown
-        {
-            get {
-                return buttonListShown;
-            }
-        }
+        private bool initialzed = false, buttonListActive = false;
 
         private void Initialize()
         {
             // Find game instance
             game = CornClient.Instance;
 
-            // Initialize panel animator
-            panel = GetComponent<Animator>();
-            panel.SetBool("Show", false);
-            buttonListShown = false;
+            firstPersonCanvas = GetComponentInChildren<Canvas>();
 
-            var canvas = panel.GetComponentInChildren<Canvas>();
+            // Initialize panel animator
+            firstPersonPanel = GetComponent<Animator>();
+            firstPersonPanel.SetBool("Show", false);
+            buttonListActive = false;
+
+            var canvas = firstPersonPanel.GetComponentInChildren<Canvas>();
 
             // Get button list and buttons
             buttonListMask = FindHelper.FindChildRecursively(transform, "Button List").GetComponent<SoftMask>();
@@ -74,6 +75,21 @@ namespace MinecraftClient.UI
             buttonObjs[3] = buttonListMask.transform.Find("Map Button").gameObject;
             buttonObjs[4] = buttonListMask.transform.Find("Settings Button").gameObject;
 
+            for (int i = 0;i < BUTTON_COUNT;i++)
+            {
+                var button = buttonObjs[i].GetComponent<Button>();
+                int clickedIndex = i;
+
+                button.onClick.AddListener(() => {
+                    if (rollOffset == 0F && rollCount == 0)
+                    {
+                        rollCount = clickedIndex - selectedIndex;
+                        RollButtons();
+                    }
+                });
+
+            }
+
             selectedIndex = 0;
 
             initialzed = true;
@@ -85,10 +101,9 @@ namespace MinecraftClient.UI
                 Initialize();
         }
 
-        private void SelectAdjacentButton(bool next)
+        private void RollButtons()
         {
-            if (buttonOffset != 0F)
-                return;
+            var next = (rollCount > 0);
 
             if (next)
             {
@@ -101,7 +116,7 @@ namespace MinecraftClient.UI
                 selectedIndex = (selectedIndex + BUTTON_COUNT - 1) % BUTTON_COUNT;
             }
 
-            // Make a copy of newly selected button
+            // Make a visual copy of newly selected button
             newButtonObj = GameObject.Instantiate(buttonObjs[rollingIndex]);
             newButtonObj.name = buttonObjs[rollingIndex].name;
 
@@ -125,7 +140,7 @@ namespace MinecraftClient.UI
 
             newButtonTransform.localPosition = new(0F, next ? -270F : 270F);
             
-            buttonOffset = next ? -90F : 90F;
+            rollOffset = next ? -90F : 90F;
 
             buttonListMask!.enabled = true;
             buttonListMaskImage!.color = Color.white;
@@ -144,8 +159,8 @@ namespace MinecraftClient.UI
             buttonObjs[selectedIndex].GetComponent<Button>().Select();
 
             // Then play fade animation
-            panel!.SetBool("Show", true);
-            buttonShowTime = 0F;
+            firstPersonPanel!.SetBool("Show", true);
+            buttonListShowTime = 0F;
         }
 
         public void HidePanel()
@@ -153,9 +168,15 @@ namespace MinecraftClient.UI
             EnsureInitialized();
             
             // Play hide animation
-            panel!.SetBool("Show", false);
-            buttonListShown = false;
-            buttonShowTime = -1F;
+            firstPersonPanel!.SetBool("Show", false);
+            buttonListActive = false;
+            buttonListShowTime = -1F;
+        }
+
+        public void SetCameraCon(CameraController cameraCon)
+        {
+            this.cameraCon = cameraCon;
+            firstPersonCanvas!.worldCamera = cameraCon.ActiveCamera;
         }
 
         void Start()
@@ -166,79 +187,115 @@ namespace MinecraftClient.UI
 
         void Update()
         {
-            if (buttonShowTime >= 0F) // Panel should be shown
+            if (buttonListShowTime >= 0F) // Panel should be shown
             {
-                if (buttonShowTime < TOTAL_SHOW_TIME) // Play show animation
+                if (buttonListShowTime < TOTAL_SHOW_TIME) // Play show animation
                 {
-                    buttonShowTime = Mathf.Min(buttonShowTime + Time.deltaTime, TOTAL_SHOW_TIME);
+                    buttonListShowTime = Mathf.Min(buttonListShowTime + Time.deltaTime, TOTAL_SHOW_TIME);
 
                     for (int i = 0;i < BUTTON_COUNT;i++)
                         buttonObjs[i].GetComponent<RectTransform>().anchoredPosition = new(0F, GetPosForButton(i));
                     
                     return;
                 }
-                else if (!buttonListShown) // Complete show animation
+                else if (!buttonListActive) // Complete show animation
                 {
                     for (int i = 0;i < BUTTON_COUNT;i++)
                         buttonObjs[i].GetComponent<RectTransform>().anchoredPosition = new(0F, STOP_POS[(i + BUTTON_COUNT - selectedIndex) % BUTTON_COUNT]);
                     
-                    buttonListShown = true;
+                    buttonListActive = true;
 
                     Debug.Log("Panel show complete");
                 }
 
             }
 
-            if (buttonOffset != 0F)
+            if (rollOffset != 0F)
             {
                 float newOffset;
 
-                if (buttonOffset > 0F)
-                    newOffset = Mathf.Max(0F, buttonOffset - 240F * Time.deltaTime);
+                if (rollOffset > 0F)
+                    newOffset = Mathf.Max(0F, rollOffset - 240F * Time.deltaTime);
                 else
-                    newOffset = Mathf.Min(0F, buttonOffset + 240F * Time.deltaTime);
+                    newOffset = Mathf.Min(0F, rollOffset + 240F * Time.deltaTime);
 
                 for (int i = 0;i < BUTTON_COUNT;i++)
                 {
                     RectTransform buttonRect = buttonObjs[i].GetComponent<RectTransform>();
-                    buttonRect.anchoredPosition = new(0F, buttonRect.anchoredPosition.y + (newOffset - buttonOffset));
+                    buttonRect.anchoredPosition = new(0F, buttonRect.anchoredPosition.y + (newOffset - rollOffset));
                 }
 
                 var newButtonRect = newButtonObj!.GetComponent<RectTransform>();
-                newButtonRect.anchoredPosition = new(0F, newButtonRect.anchoredPosition.y + (newOffset - buttonOffset));
+                newButtonRect.anchoredPosition = new(0F, newButtonRect.anchoredPosition.y + (newOffset - rollOffset));
 
-                buttonOffset = newOffset;
+                rollOffset = newOffset;
 
-                if (buttonOffset == 0F) // Complete button selection
+                if (rollOffset == 0F) // Complete button roll
                 {
-                    // Destroy old button
-                    Destroy(buttonObjs[rollingIndex]);
-                    buttonObjs[rollingIndex] = newButtonObj;
+                    // Destroy old button, will have to register on click action for new button if we do this
+                    //Destroy(buttonObjs[rollingIndex]);
+                    //buttonObjs[rollingIndex] = newButtonObj;
+
+                    // Otherwise, we teleport old button to new button and destroy new button
+                    buttonObjs[rollingIndex].transform.position = newButtonObj.transform.position;
+                    Destroy(newButtonObj);
+                    // And select the selected button
+                    buttonObjs[selectedIndex].GetComponent<Button>().Select();
 
                     buttonListMask!.enabled = false;
                     buttonListMaskImage!.color = new(0F, 0F, 0F, 0F);
+
+                    // Update offset count
+                    if (rollCount > 0)
+                        rollCount--;
+                    else if (rollCount < 0)
+                        rollCount++;
+                    
+                    // Continue to roll buttons if necessary
+                    if (rollCount != 0)
+                        RollButtons();
                 }
 
             }
 
-            if (game!.IsPaused())
-                return;
-
-            if (buttonListShown)
+            if (buttonListActive)
             {
-                if (Input.GetKeyDown(KeyCode.U)) // Previous button
+                if (Input.GetKeyDown(KeyCode.UpArrow)) // Previous button
                 {
-                    SelectAdjacentButton(false);
+                    if (rollOffset == 0F && rollCount == 0)
+                    {
+                        rollCount = -1;
+                        RollButtons();
+                    }
                 }
-                else if (Input.GetKeyDown(KeyCode.O)) // Next button
+                else if (Input.GetKeyDown(KeyCode.DownArrow)) // Next button
                 {
-                    SelectAdjacentButton(true);
+                    if (rollOffset == 0F && rollCount == 0)
+                    {
+                        rollCount =  1;
+                        RollButtons();
+                    }
+                }
+                else if (Input.GetMouseButtonDown(0)) // Detect click on a certain button
+                {
+                    var rayCaster = firstPersonCanvas!.GetComponent<GraphicRaycaster>();
+                    //Debug.Log($"LMB down at {Input.mousePosition}");
+                    // Simulate a mouse click, we need to do this because click events won't be triggered when mouse cursor is locked
+                    var result = new List<RaycastResult>();
+                    rayCaster.Raycast(new(EventSystem.current) { position = Input.mousePosition }, result);
+                    foreach(var r in result)
+                    {
+                        var button = r.gameObject.GetComponent<Button>();
+                        if (button is not null)
+                            button.onClick.Invoke();
+                    }
                 }
             }
 
-            if (Camera.main is not null)
+            // Follow player view
+            if (game!.CurrentPerspective == CornClient.Perspective.FirstPerson && cameraCon is not null)
             {
-                var cameraRot = Camera.main.transform.eulerAngles.y;
+                var cameraRot = cameraCon.ActiveCamera.transform.eulerAngles.y;
                 var ownRot = transform.eulerAngles.y;
 
                 var deltaRot = Mathf.DeltaAngle(ownRot, cameraRot);

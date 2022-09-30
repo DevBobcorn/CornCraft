@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,15 +12,15 @@ namespace MinecraftClient.UI
     {
         private bool isActive = false;
 
-        private Button respawnButton, quitButton;
+        private Button? respawnButton, quitButton;
 
         public override bool IsActive
         {
             set {
                 isActive = value;
-                screenGroup.alpha = value ? 1F : 0F;
-                screenGroup.blocksRaycasts = value;
-                screenGroup.interactable   = value;
+                screenGroup!.alpha = value ? 1F : 0F;
+                screenGroup!.blocksRaycasts = value;
+                screenGroup!.interactable   = value;
             }
 
             get {
@@ -28,7 +29,7 @@ namespace MinecraftClient.UI
         }
 
         // UI controls
-        private CanvasGroup screenGroup;
+        private CanvasGroup? screenGroup;
 
         public override bool ReleaseCursor()
         {
@@ -50,7 +51,7 @@ namespace MinecraftClient.UI
             CornClient.StopClient();
         }
 
-        private Action<HealthUpdateEvent> healthCallback;
+        private Action<HealthUpdateEvent>? healthCallback;
 
         protected override bool Initialize()
         {
