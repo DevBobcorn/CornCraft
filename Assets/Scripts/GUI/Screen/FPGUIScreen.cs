@@ -17,6 +17,9 @@ namespace MinecraftClient.UI
                     firstPersonPanel?.HidePanel();
 
                 isActive = value;
+                screenGroup!.alpha = value ? 1F : 0F;
+                screenGroup!.blocksRaycasts = value;
+                screenGroup!.interactable   = value;
             }
 
             get {
@@ -25,12 +28,12 @@ namespace MinecraftClient.UI
         }
 
         private CornClient? game;
+        private CanvasGroup? screenGroup;
         private FirstPersonGUI? firstPersonPanel = null;
-        private Canvas? firstPersonCanvas = null;
 
         public override bool ReleaseCursor()
         {
-            return true;
+            return false;
         }
 
         public override bool ShouldPause()
@@ -40,27 +43,25 @@ namespace MinecraftClient.UI
 
         protected override bool Initialize()
         {
-            // Initialize owner
+            screenGroup = GetComponent<CanvasGroup>();
             game = CornClient.Instance;
 
             // Create and initialize panel if not present
             if (firstPersonPanel is null)
             {
-                var player = game!.GetPlayerController();
-                var camera = game!.GetCameraController();
+                var playerCon = game!.GetPlayerController();
+                var cameraCon = game!.GetCameraController();
 
-                if (player is not null && camera is not null)
+                if (playerCon is not null)
                 {
                     var firstPersonPanelPrefab = Resources.Load<GameObject>("Prefabs/First Person GUI");
                     var firstPersonPanelObj = GameObject.Instantiate(firstPersonPanelPrefab);
-                    firstPersonPanelObj.transform.SetParent(player.transform, false);
+                    firstPersonPanelObj.transform.SetParent(playerCon.transform, false);
                     firstPersonPanelObj.transform.localPosition = new(0F, 1.45F, 0F);
 
                     firstPersonPanel = firstPersonPanelObj.GetComponent<FirstPersonGUI>();
                     firstPersonPanel.EnsureInitialized();
-
-                    firstPersonCanvas = firstPersonPanelObj.GetComponentInChildren<Canvas>();
-                    firstPersonCanvas.worldCamera = camera.ActiveCamera;
+                    firstPersonPanel.SetCameraCon(cameraCon);
 
                     return true;
                 }
@@ -74,10 +75,8 @@ namespace MinecraftClient.UI
             if (!IsActive)
                 return;
             
-            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.I))
+            if (Input.GetKeyDown(KeyCode.Escape))
                 CornClient.Instance.ScreenControl?.TryPopScreen();
-            
-            
 
         }
 

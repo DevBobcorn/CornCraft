@@ -22,7 +22,7 @@ namespace MinecraftClient.UI
 
         private ChatScreen  chatScreen;
         private PauseScreen pauseScreen;
-        private FPGUIScreen fphudScreen;
+        private FPGUIScreen fpguiScreen;
 
         private bool isActive = false, debugInfo = true;
 
@@ -116,7 +116,7 @@ namespace MinecraftClient.UI
             // Initialize screens
             chatScreen  = GameObject.FindObjectOfType<ChatScreen>(true);
             pauseScreen = GameObject.FindObjectOfType<PauseScreen>(true);
-            fphudScreen = GameObject.FindObjectOfType<FPGUIScreen>(true);
+            fpguiScreen = GameObject.FindObjectOfType<FPGUIScreen>(true);
 
             // Initialize controls
             screenGroup = GetComponent<CanvasGroup>();
@@ -199,19 +199,17 @@ namespace MinecraftClient.UI
                 game.TogglePerspective();
 
             if (Input.GetKeyDown(KeyCode.Slash))
-            {
-                // Open chat screen and input a slash
+            {   // Open chat screen and input a slash
                 CornClient.Instance.ScreenControl?.PushScreen(chatScreen);
                 chatScreen?.SetChatMessage("/", 1);
             }
             else if (Input.GetKeyDown(KeyCode.T))
-            {
-                // Just open chat screen
+            {   // Just open chat screen
                 CornClient.Instance.ScreenControl?.PushScreen(chatScreen);
             }
 
-            if (Input.GetKeyDown(KeyCode.I))
-                CornClient.Instance.ScreenControl?.PushScreen(fphudScreen);
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+                CornClient.Instance.ScreenControl?.PushScreen(fpguiScreen);
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
