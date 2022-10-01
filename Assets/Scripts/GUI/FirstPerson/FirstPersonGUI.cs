@@ -22,13 +22,23 @@ namespace MinecraftClient.UI
         private SoftMask?   buttonListMask;
         private Image? buttonListMaskImage;
         private const int BUTTON_COUNT = 5;
-        private GameObject[] buttonObjs = new GameObject[BUTTON_COUNT];
-        private GameObject? newButtonObj;
-        private int selectedIndex = 0, rollingIndex = -1;
+        
         private const float SINGLE_SHOW_TIME = 0.25F, SINGLE_DELTA_TIME = 0.15F;
         private const float TOTAL_SHOW_TIME = SINGLE_DELTA_TIME * (BUTTON_COUNT - 1) + SINGLE_SHOW_TIME;
         private static readonly float[] START_POS = {  800F,  560F,  320F,   80F, -160F };
         private static readonly float[] STOP_POS  = {  180F,   90F,    0F,  -90F, -180F };
+
+        private const float ROLL_BUTTON_SPEED = 300F;
+
+        private const float ROOT_MENU_OFFSET = 190F;
+        private const float SUB_MENU_OFFSET  = 200F;
+        
+        private GameObject[] rootMenuPrefabs = new GameObject[BUTTON_COUNT];
+        private GameObject[] buttonObjs = new GameObject[BUTTON_COUNT];
+        private GameObject? newButtonObj;
+        private int selectedIndex = 0, rollingIndex = -1;
+
+        private Stack<FirstPersonMenu> openedMenus = new();
 
         private float GetPosForButton(int index)
         {
@@ -91,6 +101,12 @@ namespace MinecraftClient.UI
             }
 
             selectedIndex = 0;
+
+            rootMenuPrefabs[0] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
+            rootMenuPrefabs[1] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
+            rootMenuPrefabs[2] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
+            rootMenuPrefabs[3] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
+            rootMenuPrefabs[4] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Settings");
 
             initialzed = true;
         }
@@ -210,52 +226,104 @@ namespace MinecraftClient.UI
 
             }
 
+            var canvasTransform = firstPersonCanvas!.transform;
+
+            float targetHor = -Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET * 0.0005F;
+            float horOffset = targetHor - canvasTransform.localPosition.x;
+
+            if (horOffset != 0F)
+            {
+                float mov;
+
+                if (horOffset > 0)
+                    mov = Mathf.Min(horOffset,  Time.deltaTime * 0.5F);
+                else
+                    mov = Mathf.Max(horOffset, -Time.deltaTime * 0.5F);
+
+                canvasTransform.Translate(mov, 0F, 0F, Space.Self);
+            }
+
             if (rollOffset != 0F)
             {
-                float newOffset;
-
-                if (rollOffset > 0F)
-                    newOffset = Mathf.Max(0F, rollOffset - 240F * Time.deltaTime);
-                else
-                    newOffset = Mathf.Min(0F, rollOffset + 240F * Time.deltaTime);
-
-                for (int i = 0;i < BUTTON_COUNT;i++)
+                if (openedMenus.Count == 0) // Roll button
                 {
-                    RectTransform buttonRect = buttonObjs[i].GetComponent<RectTransform>();
-                    buttonRect.anchoredPosition = new(0F, buttonRect.anchoredPosition.y + (newOffset - rollOffset));
+                    float newOffset;
+
+                    if (rollOffset > 0F)
+                        newOffset = Mathf.Max(0F, rollOffset - ROLL_BUTTON_SPEED * Time.deltaTime);
+                    else
+                        newOffset = Mathf.Min(0F, rollOffset + ROLL_BUTTON_SPEED * Time.deltaTime);
+
+                    for (int i = 0;i < BUTTON_COUNT;i++)
+                    {
+                        RectTransform buttonRect = buttonObjs[i].GetComponent<RectTransform>();
+                        buttonRect.anchoredPosition = new(0F, buttonRect.anchoredPosition.y + (newOffset - rollOffset));
+                    }
+
+                    var newButtonRect = newButtonObj!.GetComponent<RectTransform>();
+                    newButtonRect.anchoredPosition = new(0F, newButtonRect.anchoredPosition.y + (newOffset - rollOffset));
+
+                    rollOffset = newOffset;
+
+                    if (rollOffset == 0F) // Complete button roll
+                    {
+                        // Teleport old button to new button and destroy new button
+                        buttonObjs[rollingIndex].transform.position = newButtonObj.transform.position;
+                        Destroy(newButtonObj);
+
+                        // And select the selected button
+                        buttonObjs[selectedIndex].GetComponent<Button>().Select();
+
+                        buttonListMask!.enabled = false;
+                        buttonListMaskImage!.color = new(0F, 0F, 0F, 0F);
+
+                        // Update offset count
+                        if (rollCount > 0)
+                            rollCount--;
+                        else if (rollCount < 0)
+                            rollCount++;
+                        
+                        // Continue to roll buttons if necessary
+                        if (rollCount != 0)
+                            RollButtons();
+                        else // Rolled to target button, unfolder its root menu
+                        {
+                            if (openedMenus.Count == 0)
+                            {
+                                var rootMenuObj = GameObject.Instantiate(rootMenuPrefabs[selectedIndex], Vector3.zero, Quaternion.identity);
+                                rootMenuObj!.transform.SetParent(firstPersonCanvas!.transform, false);
+                                rootMenuObj.transform.localPosition = new(ROOT_MENU_OFFSET + openedMenus.Count * SUB_MENU_OFFSET, 180F, 0F);
+                                rootMenuObj.SetActive(true);
+
+                                var rootMenu = rootMenuObj!.GetComponent<FirstPersonMenu>();
+
+                                openedMenus.Push(rootMenu);
+                            }
+                            else // Previously opened menus not closed properly
+                            {
+                                // TODO Handle properly
+                                Debug.LogWarning("Menus not properly closed.");
+                            }
+                        }
+                    }
                 }
-
-                var newButtonRect = newButtonObj!.GetComponent<RectTransform>();
-                newButtonRect.anchoredPosition = new(0F, newButtonRect.anchoredPosition.y + (newOffset - rollOffset));
-
-                rollOffset = newOffset;
-
-                if (rollOffset == 0F) // Complete button roll
+                else // Pop all opened menus first
                 {
-                    // Destroy old button, will have to register on click action for new button if we do this
-                    //Destroy(buttonObjs[rollingIndex]);
-                    //buttonObjs[rollingIndex] = newButtonObj;
+                    var topMenu = openedMenus.Peek();
 
-                    // Otherwise, we teleport old button to new button and destroy new button
-                    buttonObjs[rollingIndex].transform.position = newButtonObj.transform.position;
-                    Destroy(newButtonObj);
-                    // And select the selected button
-                    buttonObjs[selectedIndex].GetComponent<Button>().Select();
+                    switch (topMenu.state)
+                    {
+                        case FirstPersonMenu.State.Hidden:
+                        case FirstPersonMenu.State.Error:
+                            openedMenus.Pop();
+                            Destroy(topMenu);
+                            break;
+                        case FirstPersonMenu.State.Shown:
+                            topMenu.Hide();
+                            break;
+                    }
 
-                    buttonListMask!.enabled = false;
-                    buttonListMaskImage!.color = new(0F, 0F, 0F, 0F);
-
-                    // Update offset count
-                    if (rollCount > 0)
-                        rollCount--;
-                    else if (rollCount < 0)
-                        rollCount++;
-                    
-                    // Continue to roll buttons if necessary
-                    if (rollCount != 0)
-                        RollButtons();
                 }
-
             }
 
             if (buttonListActive)

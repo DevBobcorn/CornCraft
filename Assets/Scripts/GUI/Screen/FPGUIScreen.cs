@@ -54,7 +54,7 @@ namespace MinecraftClient.UI
 
                 if (playerCon is not null)
                 {
-                    var firstPersonPanelPrefab = Resources.Load<GameObject>("Prefabs/First Person GUI");
+                    var firstPersonPanelPrefab = Resources.Load<GameObject>("Prefabs/GUI/First Person GUI");
                     var firstPersonPanelObj = GameObject.Instantiate(firstPersonPanelPrefab);
                     firstPersonPanelObj.transform.SetParent(playerCon.transform, false);
                     firstPersonPanelObj.transform.localPosition = new(0F, 1.45F, 0F);
