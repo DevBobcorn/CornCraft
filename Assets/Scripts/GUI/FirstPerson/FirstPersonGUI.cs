@@ -22,9 +22,12 @@ namespace MinecraftClient.UI
         private SoftMask?   buttonListMask;
         private Image? buttonListMaskImage;
         private const int BUTTON_COUNT = 5;
+
+        private const float CANVAS_SCALE = 0.0006F;
         
         private const float SINGLE_SHOW_TIME = 0.25F, SINGLE_DELTA_TIME = 0.15F;
         private const float TOTAL_SHOW_TIME = SINGLE_DELTA_TIME * (BUTTON_COUNT - 1) + SINGLE_SHOW_TIME;
+        private const float TOTAL_HIDE_TIME = 0.5F;
         private static readonly float[] START_POS = {  800F,  560F,  320F,   80F, -160F };
         private static readonly float[] STOP_POS  = {  180F,   90F,    0F,  -90F, -180F };
 
@@ -36,6 +39,9 @@ namespace MinecraftClient.UI
         private GameObject[] rootMenuPrefabs = new GameObject[BUTTON_COUNT];
         private GameObject[] buttonObjs = new GameObject[BUTTON_COUNT];
         private GameObject? newButtonObj;
+
+        public WidgetState State { get; set; } = WidgetState.Hidden;
+
         private int selectedIndex = 0, rollingIndex = -1;
 
         private Stack<FirstPersonMenu> openedMenus = new();
@@ -45,19 +51,20 @@ namespace MinecraftClient.UI
             var posIndex = (index + BUTTON_COUNT - selectedIndex) % BUTTON_COUNT;
             var itsStartTime = SINGLE_DELTA_TIME * (BUTTON_COUNT - 1 - posIndex);
 
-            if (buttonListShowTime <= itsStartTime) // This button's animation hasn't yet started
+            if (panelAnimTime <= itsStartTime) // This button's animation hasn't yet started
                 return START_POS[posIndex];
-            else if (buttonListShowTime >= itsStartTime + SINGLE_SHOW_TIME) // This button's animation has already ended
+            else if (panelAnimTime >= itsStartTime + SINGLE_SHOW_TIME) // This button's animation has already ended
                 return STOP_POS[posIndex];
             else // Lerp to get its position
-                return Mathf.Lerp(START_POS[posIndex], STOP_POS[posIndex], (buttonListShowTime - itsStartTime) / SINGLE_SHOW_TIME);
+                return Mathf.Lerp(START_POS[posIndex], STOP_POS[posIndex], (panelAnimTime - itsStartTime) / SINGLE_SHOW_TIME);
 
         }
 
-        private float buttonListShowTime = -1F, rollOffset = 0F;
+        private float targetHor = 0F;
+        private float panelAnimTime = -1F, rollOffset = 0F;
         private int rollCount = 0;
 
-        private bool initialzed = false, buttonListActive = false;
+        private bool initialzed = false;
 
         private void Initialize()
         {
@@ -69,7 +76,7 @@ namespace MinecraftClient.UI
             // Initialize panel animator
             firstPersonPanel = GetComponent<Animator>();
             firstPersonPanel.SetBool("Show", false);
-            buttonListActive = false;
+            State = WidgetState.Hidden;
 
             var canvas = firstPersonPanel.GetComponentInChildren<Canvas>();
 
@@ -111,7 +118,7 @@ namespace MinecraftClient.UI
             initialzed = true;
         }
 
-        public void EnsureInitialized()
+        private void EnsureInitialized()
         {
             if (!initialzed)
                 Initialize();
@@ -163,73 +170,187 @@ namespace MinecraftClient.UI
 
         }
 
+        private void UnfoldRootMenu()
+        {
+            if (openedMenus.Count == 0)
+            {
+                var rootMenuObj = GameObject.Instantiate(rootMenuPrefabs[selectedIndex], Vector3.zero, Quaternion.identity);
+                rootMenuObj!.transform.SetParent(firstPersonCanvas!.transform, false);
+                rootMenuObj.transform.localPosition = new(ROOT_MENU_OFFSET + openedMenus.Count * SUB_MENU_OFFSET, 180F, 0F);
+                rootMenuObj.SetActive(true);
+
+                var rootMenu = rootMenuObj!.GetComponent<FirstPersonMenu>();
+                rootMenu.SetParent(this);
+
+                openedMenus.Push(rootMenu);
+            }
+            else // Previously opened menus not closed properly
+            {
+                // TODO Handle properly
+                Debug.LogWarning("Menus not properly closed.");
+            }
+        }
+
         public void ShowPanel()
         {
             EnsureInitialized();
 
+            if (State != WidgetState.Hidden)
+                return;
+            
             // First calculate and set rotation
             var cameraRot = Camera.main.transform.eulerAngles.y;
             transform.eulerAngles = new(0F, cameraRot, 0F);
+
+            // Teleport panel to the right position
+            var canvasTransform = firstPersonCanvas!.transform;
+            targetHor = -Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET * CANVAS_SCALE;
+
+            //canvasTransform.localPosition = new(targetHor, canvasTransform.localPosition.y, 0F);
+            canvasTransform.Translate(targetHor - canvasTransform.localPosition.x, 0F, 0F, Space.Self);
 
             // Select button on top
             buttonObjs[selectedIndex].GetComponent<Button>().Select();
 
             // Then play fade animation
             firstPersonPanel!.SetBool("Show", true);
-            buttonListShowTime = 0F;
+            State = WidgetState.Show;
+            panelAnimTime = 0F;
         }
 
         public void HidePanel()
         {
             EnsureInitialized();
-            
+
+            if (State != WidgetState.Shown)
+                return;
+
             // Play hide animation
             firstPersonPanel!.SetBool("Show", false);
-            buttonListActive = false;
-            buttonListShowTime = -1F;
+            State = WidgetState.Hide;
+            panelAnimTime = 0F;
         }
 
         public void SetCameraCon(CameraController cameraCon)
         {
+            EnsureInitialized();
+
             this.cameraCon = cameraCon;
             firstPersonCanvas!.worldCamera = cameraCon.ActiveCamera;
         }
 
         void Start()
         {
-            if (!initialzed)
-                Initialize();
+            EnsureInitialized();
         }
 
         void Update()
         {
-            if (buttonListShowTime >= 0F) // Panel should be shown
+            if (State == WidgetState.Show) // Panel is showing up
             {
-                if (buttonListShowTime < TOTAL_SHOW_TIME) // Play show animation
+                if (panelAnimTime < TOTAL_SHOW_TIME) // Play show animation
                 {
-                    buttonListShowTime = Mathf.Min(buttonListShowTime + Time.deltaTime, TOTAL_SHOW_TIME);
+                    panelAnimTime = Mathf.Min(panelAnimTime + Time.deltaTime, TOTAL_SHOW_TIME);
 
                     for (int i = 0;i < BUTTON_COUNT;i++)
                         buttonObjs[i].GetComponent<RectTransform>().anchoredPosition = new(0F, GetPosForButton(i));
                     
                     return;
                 }
-                else if (!buttonListActive) // Complete show animation
+                else // Complete show animation
                 {
                     for (int i = 0;i < BUTTON_COUNT;i++)
                         buttonObjs[i].GetComponent<RectTransform>().anchoredPosition = new(0F, STOP_POS[(i + BUTTON_COUNT - selectedIndex) % BUTTON_COUNT]);
                     
-                    buttonListActive = true;
-
-                    Debug.Log("Panel show complete");
+                    UnfoldRootMenu();
+                    State = WidgetState.Shown;
                 }
 
             }
+            else if (State == WidgetState.Hide) // Panel is fading out
+            {
+                if (panelAnimTime < TOTAL_HIDE_TIME) // Play hide animation
+                {
+                    panelAnimTime = Mathf.Min(panelAnimTime + Time.deltaTime, TOTAL_HIDE_TIME);
+
+                    var fadeOffset = panelAnimTime / TOTAL_HIDE_TIME;
+                    targetHor = -Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET * CANVAS_SCALE - fadeOffset;
+                }
+                else // Complete fade animation
+                {
+                    State = WidgetState.Hidden;
+
+                    // Destroy all opened menus
+                    foreach (var menu in openedMenus)
+                        Destroy(menu.gameObject);
+                    
+                    openedMenus.Clear();
+                }
+            }
+            else if (State == WidgetState.Shown) // Panel is shown
+            {
+                targetHor = -Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET * CANVAS_SCALE;
+
+                if (Input.GetKeyDown(KeyCode.UpArrow)) // Previous button
+                {
+                    if (rollOffset == 0F && rollCount == 0)
+                    {
+                        rollCount = -1;
+                        RollButtons();
+                    }
+                }
+                else if (Input.GetKeyDown(KeyCode.DownArrow)) // Next button
+                {
+                    if (rollOffset == 0F && rollCount == 0)
+                    {
+                        rollCount =  1;
+                        RollButtons();
+                    }
+                }
+                else if (Input.GetMouseButtonDown(0) && Cursor.lockState == CursorLockMode.Locked) // Detect click on a certain button
+                {
+                    var rayCaster = firstPersonCanvas!.GetComponent<GraphicRaycaster>();
+                    //Debug.Log($"LMB down at {Input.mousePosition}");
+                    // Simulate a mouse click, we need to do this because click events won't be triggered when mouse cursor is locked
+                    var result = new List<RaycastResult>();
+                    rayCaster.Raycast(new(EventSystem.current) { position = Input.mousePosition }, result);
+
+                    string res = string.Empty;
+
+                    foreach(var r in result)
+                    {
+                        var button = r.gameObject.GetComponent<Button>();
+                        if (button is not null)
+                        {
+                            button.onClick.Invoke();
+                            break;
+                        }
+                            
+                    }
+                }
+
+                // Follow player view
+                if (game!.CurrentPerspective == CornClient.Perspective.FirstPerson && cameraCon is not null)
+                {
+                    var cameraRot = cameraCon.ActiveCamera.transform.eulerAngles.y;
+                    var ownRot = transform.eulerAngles.y;
+
+                    var deltaRot = Mathf.DeltaAngle(ownRot, cameraRot);
+
+                    if (Mathf.Abs(deltaRot) > maxDeltaAngle)
+                    {
+                        if (deltaRot > 0F)
+                            transform.eulerAngles = new(0F, Mathf.LerpAngle(ownRot, cameraRot + maxDeltaAngle, followSpeed * Time.deltaTime));
+                        else
+                            transform.eulerAngles = new(0F, Mathf.LerpAngle(ownRot, cameraRot - maxDeltaAngle, followSpeed * Time.deltaTime));
+
+                    }
+                    
+                }
+            }
 
             var canvasTransform = firstPersonCanvas!.transform;
-
-            float targetHor = -Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET * 0.0005F;
-            float horOffset = targetHor - canvasTransform.localPosition.x;
+            var horOffset = targetHor - canvasTransform.localPosition.x;
 
             if (horOffset != 0F)
             {
@@ -287,96 +408,26 @@ namespace MinecraftClient.UI
                         if (rollCount != 0)
                             RollButtons();
                         else // Rolled to target button, unfolder its root menu
-                        {
-                            if (openedMenus.Count == 0)
-                            {
-                                var rootMenuObj = GameObject.Instantiate(rootMenuPrefabs[selectedIndex], Vector3.zero, Quaternion.identity);
-                                rootMenuObj!.transform.SetParent(firstPersonCanvas!.transform, false);
-                                rootMenuObj.transform.localPosition = new(ROOT_MENU_OFFSET + openedMenus.Count * SUB_MENU_OFFSET, 180F, 0F);
-                                rootMenuObj.SetActive(true);
-
-                                var rootMenu = rootMenuObj!.GetComponent<FirstPersonMenu>();
-
-                                openedMenus.Push(rootMenu);
-                            }
-                            else // Previously opened menus not closed properly
-                            {
-                                // TODO Handle properly
-                                Debug.LogWarning("Menus not properly closed.");
-                            }
-                        }
+                            UnfoldRootMenu();
                     }
                 }
                 else // Pop all opened menus first
                 {
                     var topMenu = openedMenus.Peek();
 
-                    switch (topMenu.state)
+                    switch (topMenu.State)
                     {
-                        case FirstPersonMenu.State.Hidden:
-                        case FirstPersonMenu.State.Error:
+                        case WidgetState.Hidden: // Fade out animation completed
+                        case WidgetState.Error:
                             openedMenus.Pop();
-                            Destroy(topMenu);
+                            Destroy(topMenu.gameObject);
                             break;
-                        case FirstPersonMenu.State.Shown:
+                        case WidgetState.Shown: // Start its fade out animation
                             topMenu.Hide();
                             break;
                     }
 
                 }
-            }
-
-            if (buttonListActive)
-            {
-                if (Input.GetKeyDown(KeyCode.UpArrow)) // Previous button
-                {
-                    if (rollOffset == 0F && rollCount == 0)
-                    {
-                        rollCount = -1;
-                        RollButtons();
-                    }
-                }
-                else if (Input.GetKeyDown(KeyCode.DownArrow)) // Next button
-                {
-                    if (rollOffset == 0F && rollCount == 0)
-                    {
-                        rollCount =  1;
-                        RollButtons();
-                    }
-                }
-                else if (Input.GetMouseButtonDown(0)) // Detect click on a certain button
-                {
-                    var rayCaster = firstPersonCanvas!.GetComponent<GraphicRaycaster>();
-                    //Debug.Log($"LMB down at {Input.mousePosition}");
-                    // Simulate a mouse click, we need to do this because click events won't be triggered when mouse cursor is locked
-                    var result = new List<RaycastResult>();
-                    rayCaster.Raycast(new(EventSystem.current) { position = Input.mousePosition }, result);
-                    foreach(var r in result)
-                    {
-                        var button = r.gameObject.GetComponent<Button>();
-                        if (button is not null)
-                            button.onClick.Invoke();
-                    }
-                }
-            }
-
-            // Follow player view
-            if (game!.CurrentPerspective == CornClient.Perspective.FirstPerson && cameraCon is not null)
-            {
-                var cameraRot = cameraCon.ActiveCamera.transform.eulerAngles.y;
-                var ownRot = transform.eulerAngles.y;
-
-                var deltaRot = Mathf.DeltaAngle(ownRot, cameraRot);
-
-                if (Mathf.Abs(deltaRot) > maxDeltaAngle)
-                {
-                    if (deltaRot > 0F)
-                        transform.eulerAngles = new(0F, Mathf.LerpAngle(ownRot, cameraRot + maxDeltaAngle, followSpeed * Time.deltaTime));
-                    else
-                        transform.eulerAngles = new(0F, Mathf.LerpAngle(ownRot, cameraRot - maxDeltaAngle, followSpeed * Time.deltaTime));
-
-                }
-                
             }
 
         }

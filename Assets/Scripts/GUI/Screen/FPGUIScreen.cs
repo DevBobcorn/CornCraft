@@ -60,7 +60,6 @@ namespace MinecraftClient.UI
                     firstPersonPanelObj.transform.localPosition = new(0F, 1.45F, 0F);
 
                     firstPersonPanel = firstPersonPanelObj.GetComponent<FirstPersonGUI>();
-                    firstPersonPanel.EnsureInitialized();
                     firstPersonPanel.SetCameraCon(cameraCon);
 
                     return true;

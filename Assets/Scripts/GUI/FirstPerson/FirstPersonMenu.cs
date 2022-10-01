@@ -7,16 +7,15 @@ namespace MinecraftClient.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class FirstPersonMenu : MonoBehaviour
     {
-        public enum State
-        {
-            Hidden, Show, Shown, Hide, Error
-        }
-
         public GameObject? templateItem;
+
+        private FirstPersonGUI? parentGUI;
         private CanvasGroup? canvasGroup;
         private Transform? itemList;
+
+        public bool Focused { get; set; } = false;
         
-        public State state = State.Hidden;
+        public WidgetState State { get; set; } = WidgetState.Hidden;
         private const float ITEM_SHOW_TIME = 0.1F;
         private const float MENU_HIDE_TIME = 0.1F;
         private float animTime = 0F;
@@ -26,13 +25,42 @@ namespace MinecraftClient.UI
         public Sprite[] itemIcons = { };
 
         private List<FirstPersonListItem> items = new();
+        private FirstPersonListItem? selectedItem = null;
         
+        public void SetParent(FirstPersonGUI parent)
+        {
+            parentGUI = parent;
+        }
+
+        public void Hide()
+        {
+            State = WidgetState.Hide;
+            animTime = 0F;
+        }
+
+        public void Select(FirstPersonListItem target)
+        {
+            if (target is not null && items.Contains(target))
+            {
+                selectedItem = target;
+                foreach (var item in items)
+                {
+                    if (item != selectedItem)
+                        item.Deselect();
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"Trying to select an invalid item");
+            }
+        }
+
         void Start()
         {
             if (templateItem is null)
             {
                 Debug.LogWarning("Template list item not assigned.");
-                state = State.Error;
+                State = WidgetState.Error;
                 return;
             }
 
@@ -40,7 +68,7 @@ namespace MinecraftClient.UI
             if (itemIcons.Length != itemCount * 2)
             {
                 Debug.LogWarning("Please check list item data.");
-                state = State.Error;
+                State = WidgetState.Error;
                 return;
             }
 
@@ -51,28 +79,24 @@ namespace MinecraftClient.UI
             {
                 var itemObj = GameObject.Instantiate(templateItem, Vector3.zero, Quaternion.identity);
                 itemObj.transform.SetParent(itemList, false);
+                itemObj.name = $"{itemTexts[i]} Item";
 
                 var item = itemObj.GetComponent<FirstPersonListItem>();
-                item.SetContent(itemIcons[i * 2], itemIcons[i * 2 + 1], itemTexts[i]);
+                item.SetContent(this, itemIcons[i * 2], itemIcons[i * 2 + 1], itemTexts[i]);
+
                 item.SetAlpha(0F);
                 items.Add(item);
 
                 item.gameObject.SetActive(true);
             }
 
-            state = State.Show;
-            animTime = 0F;
-        }
-
-        public void Hide()
-        {
-            state = State.Hide;
+            State = WidgetState.Show;
             animTime = 0F;
         }
 
         void Update()
         {
-            if (state == State.Show)
+            if (State == WidgetState.Show)
             {
                 animTime += Time.deltaTime;
 
@@ -87,7 +111,7 @@ namespace MinecraftClient.UI
                             items[i].SetAlpha(1F);
                             
                             if (i == items.Count - 1) // All items fully shown
-                                state = State.Shown;
+                                State = WidgetState.Shown;
                         }
                         else // Fading in
                             items[i].SetAlpha((animTime - fullyShownCount * ITEM_SHOW_TIME) / ITEM_SHOW_TIME);
@@ -96,7 +120,7 @@ namespace MinecraftClient.UI
                     
                 }
             }
-            else if (state == State.Hide)
+            else if (State == WidgetState.Hide)
             {
                 animTime += Time.deltaTime;
 
@@ -107,7 +131,7 @@ namespace MinecraftClient.UI
                 else
                 {
                     canvasGroup!.alpha = 0F;
-                    state = State.Hidden;
+                    State = WidgetState.Hidden;
                 }
             }
         }

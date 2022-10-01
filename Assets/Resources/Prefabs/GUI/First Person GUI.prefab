@@ -29,7 +29,7 @@ RectTransform:
   m_GameObject: {fileID: 2452025937428988485}
   m_LocalRotation: {x: 0.13052616, y: 0, z: 0, w: 0.9914449}
   m_LocalPosition: {x: 0, y: 0, z: 0.4}
-  m_LocalScale: {x: 0.0005, y: 0.0005, z: 0.0005}
+  m_LocalScale: {x: 0.0006, y: 0.0006, z: 0.0006}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7073678557347653900}
@@ -162,6 +162,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   followSpeed: 1.5
   maxDeltaAngle: 30
+  state: 0
 --- !u!95 &2548118666939659522
 Animator:
   serializedVersion: 4

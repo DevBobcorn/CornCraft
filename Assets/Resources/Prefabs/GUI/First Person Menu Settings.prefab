@@ -38,27 +38,27 @@ PrefabInstance:
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[0]
       value: 
-      objectReference: {fileID: 21300000, guid: 59cb356cf6ea35f40afecb6ce3d4f77a, type: 3}
+      objectReference: {fileID: 21300000, guid: 91fb7954c96d9c94c809eb2f5015b330, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[1]
       value: 
-      objectReference: {fileID: 21300000, guid: 59cb356cf6ea35f40afecb6ce3d4f77a, type: 3}
+      objectReference: {fileID: 21300000, guid: 363e5e71609f8304f84c64363a7c40ec, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[2]
       value: 
-      objectReference: {fileID: 21300000, guid: 59cb356cf6ea35f40afecb6ce3d4f77a, type: 3}
+      objectReference: {fileID: 21300000, guid: 36d1198d5faac9c49b2238e26489a0c4, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[3]
       value: 
-      objectReference: {fileID: 21300000, guid: 59cb356cf6ea35f40afecb6ce3d4f77a, type: 3}
+      objectReference: {fileID: 21300000, guid: 44737d79d83a55f4f9ad4dc270e27721, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[4]
       value: 
-      objectReference: {fileID: 21300000, guid: 59cb356cf6ea35f40afecb6ce3d4f77a, type: 3}
+      objectReference: {fileID: 21300000, guid: d96afb95810716b40a95b08e42fb5afa, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[5]
       value: 
-      objectReference: {fileID: 21300000, guid: 59cb356cf6ea35f40afecb6ce3d4f77a, type: 3}
+      objectReference: {fileID: 21300000, guid: 33cf224d4397bc94ca816e95016cefac, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[6]
       value: 
@@ -77,7 +77,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[2]
-      value: Log Out
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[3]
