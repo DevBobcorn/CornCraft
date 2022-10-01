@@ -31,9 +31,9 @@ namespace MinecraftClient.UI
         private static readonly float[] START_POS = {  800F,  560F,  320F,   80F, -160F };
         private static readonly float[] STOP_POS  = {  180F,   90F,    0F,  -90F, -180F };
 
-        private const float ROLL_BUTTON_SPEED = 300F;
+        private const float ROLL_BUTTON_SPEED = 700F;
 
-        private const float ROOT_MENU_OFFSET = 190F;
+        private const float ROOT_MENU_OFFSET = 70F;
         private const float SUB_MENU_OFFSET  = 200F;
         
         private GameObject[] rootMenuPrefabs = new GameObject[BUTTON_COUNT];
@@ -60,7 +60,6 @@ namespace MinecraftClient.UI
 
         }
 
-        private float targetHor = 0F;
         private float panelAnimTime = -1F, rollOffset = 0F;
         private int rollCount = 0;
 
@@ -111,7 +110,7 @@ namespace MinecraftClient.UI
 
             rootMenuPrefabs[0] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
             rootMenuPrefabs[1] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
-            rootMenuPrefabs[2] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
+            rootMenuPrefabs[2] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Chat");
             rootMenuPrefabs[3] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
             rootMenuPrefabs[4] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Settings");
 
@@ -170,17 +169,41 @@ namespace MinecraftClient.UI
 
         }
 
+        private float GetHorizontalPosition()
+        {
+            float basePos;
+
+            if (openedMenus.Count > 0 && openedMenus.Peek().leftSide)
+            {
+                basePos = ( Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET) * CANVAS_SCALE;
+            }
+            else
+            {
+                basePos = (-Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET + 100F) * CANVAS_SCALE;
+            }
+
+            if (State == WidgetState.Hide)
+                return basePos - 1F;
+
+            return basePos;
+        }
+
         private void UnfoldRootMenu()
         {
             if (openedMenus.Count == 0)
             {
                 var rootMenuObj = GameObject.Instantiate(rootMenuPrefabs[selectedIndex], Vector3.zero, Quaternion.identity);
                 rootMenuObj!.transform.SetParent(firstPersonCanvas!.transform, false);
-                rootMenuObj.transform.localPosition = new(ROOT_MENU_OFFSET + openedMenus.Count * SUB_MENU_OFFSET, 180F, 0F);
-                rootMenuObj.SetActive(true);
 
                 var rootMenu = rootMenuObj!.GetComponent<FirstPersonMenu>();
                 rootMenu.SetParent(this);
+
+                if (rootMenu.leftSide)
+                    rootMenuObj.transform.localPosition = new(-ROOT_MENU_OFFSET, 180F, 0F);
+                else
+                    rootMenuObj.transform.localPosition = new( ROOT_MENU_OFFSET, 180F, 0F);
+
+                rootMenuObj.SetActive(true);
 
                 openedMenus.Push(rootMenu);
             }
@@ -204,10 +227,8 @@ namespace MinecraftClient.UI
 
             // Teleport panel to the right position
             var canvasTransform = firstPersonCanvas!.transform;
-            targetHor = -Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET * CANVAS_SCALE;
 
-            //canvasTransform.localPosition = new(targetHor, canvasTransform.localPosition.y, 0F);
-            canvasTransform.Translate(targetHor - canvasTransform.localPosition.x, 0F, 0F, Space.Self);
+            canvasTransform.Translate(GetHorizontalPosition() - canvasTransform.localPosition.x, 0F, 0F, Space.Self);
 
             // Select button on top
             buttonObjs[selectedIndex].GetComponent<Button>().Select();
@@ -269,14 +290,9 @@ namespace MinecraftClient.UI
             }
             else if (State == WidgetState.Hide) // Panel is fading out
             {
-                if (panelAnimTime < TOTAL_HIDE_TIME) // Play hide animation
-                {
-                    panelAnimTime = Mathf.Min(panelAnimTime + Time.deltaTime, TOTAL_HIDE_TIME);
+                panelAnimTime = Mathf.Min(panelAnimTime + Time.deltaTime, TOTAL_HIDE_TIME);
 
-                    var fadeOffset = panelAnimTime / TOTAL_HIDE_TIME;
-                    targetHor = -Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET * CANVAS_SCALE - fadeOffset;
-                }
-                else // Complete fade animation
+                if (panelAnimTime >= TOTAL_HIDE_TIME) // Complete fade animation
                 {
                     State = WidgetState.Hidden;
 
@@ -289,8 +305,6 @@ namespace MinecraftClient.UI
             }
             else if (State == WidgetState.Shown) // Panel is shown
             {
-                targetHor = -Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET * CANVAS_SCALE;
-
                 if (Input.GetKeyDown(KeyCode.UpArrow)) // Previous button
                 {
                     if (rollOffset == 0F && rollCount == 0)
@@ -350,16 +364,16 @@ namespace MinecraftClient.UI
             }
 
             var canvasTransform = firstPersonCanvas!.transform;
-            var horOffset = targetHor - canvasTransform.localPosition.x;
+            var horOffset = GetHorizontalPosition() - canvasTransform.localPosition.x;
 
             if (horOffset != 0F)
             {
                 float mov;
 
                 if (horOffset > 0)
-                    mov = Mathf.Min(horOffset,  Time.deltaTime * 0.5F);
+                    mov = Mathf.Min(horOffset,  Time.deltaTime * 0.3F);
                 else
-                    mov = Mathf.Max(horOffset, -Time.deltaTime * 0.5F);
+                    mov = Mathf.Max(horOffset, -Time.deltaTime * 0.3F);
 
                 canvasTransform.Translate(mov, 0F, 0F, Space.Self);
             }

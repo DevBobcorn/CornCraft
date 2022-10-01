@@ -8,6 +8,7 @@ namespace MinecraftClient.UI
     public class FirstPersonMenu : MonoBehaviour
     {
         public GameObject? templateItem;
+        public bool leftSide = false;
 
         private FirstPersonGUI? parentGUI;
         private CanvasGroup? canvasGroup;
