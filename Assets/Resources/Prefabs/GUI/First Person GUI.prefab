@@ -195,6 +195,7 @@ GameObject:
   - component: {fileID: 5971717649771550976}
   - component: {fileID: 2634602131503112414}
   - component: {fileID: 2195834041671157533}
+  - component: {fileID: 8162979106352510546}
   m_Layer: 5
   m_Name: Settings Button
   m_TagString: Untagged
@@ -320,6 +321,22 @@ MonoBehaviour:
   m_MaskInteraction: 85
   m_UseStencil: 1
   m_RaycastFilter: 0
+--- !u!114 &8162979106352510546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2832818946905849174}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18207ba514fce1042956c221aa19707b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemsOnLeftSide: 0
+  panelSize: {x: 260, y: 320}
+  avatarOnPanel: 0
+  panelTitle: Settings
 --- !u!1 &4031153315546646660
 GameObject:
   m_ObjectHideFlags: 0
@@ -333,6 +350,7 @@ GameObject:
   - component: {fileID: 5814158387982149468}
   - component: {fileID: 4313907867550916082}
   - component: {fileID: 5183802494630991717}
+  - component: {fileID: 913346928334916505}
   m_Layer: 5
   m_Name: Map Button
   m_TagString: Untagged
@@ -458,6 +476,22 @@ MonoBehaviour:
   m_MaskInteraction: 85
   m_UseStencil: 1
   m_RaycastFilter: 0
+--- !u!114 &913346928334916505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4031153315546646660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18207ba514fce1042956c221aa19707b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemsOnLeftSide: 0
+  panelSize: {x: 0, y: 0}
+  avatarOnPanel: 0
+  panelTitle: ???
 --- !u!1 &5312660961673720557
 GameObject:
   m_ObjectHideFlags: 0
@@ -471,6 +505,7 @@ GameObject:
   - component: {fileID: 8361805595786993071}
   - component: {fileID: 8302742027428503540}
   - component: {fileID: 1446604267882989773}
+  - component: {fileID: 4224968337980599681}
   m_Layer: 5
   m_Name: Avatar Button
   m_TagString: Untagged
@@ -596,6 +631,22 @@ MonoBehaviour:
   m_MaskInteraction: 85
   m_UseStencil: 1
   m_RaycastFilter: 0
+--- !u!114 &4224968337980599681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5312660961673720557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18207ba514fce1042956c221aa19707b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemsOnLeftSide: 0
+  panelSize: {x: 260, y: 320}
+  avatarOnPanel: 1
+  panelTitle: '{0}'
 --- !u!1 &5733611601288877390
 GameObject:
   m_ObjectHideFlags: 0
@@ -711,6 +762,7 @@ GameObject:
   - component: {fileID: 234320692185017652}
   - component: {fileID: 983177820782157438}
   - component: {fileID: 7299004666039862641}
+  - component: {fileID: 731141522709131831}
   m_Layer: 5
   m_Name: Social Button
   m_TagString: Untagged
@@ -836,6 +888,22 @@ MonoBehaviour:
   m_MaskInteraction: 85
   m_UseStencil: 1
   m_RaycastFilter: 0
+--- !u!114 &731141522709131831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7354932617538602777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18207ba514fce1042956c221aa19707b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemsOnLeftSide: 0
+  panelSize: {x: 0, y: 0}
+  avatarOnPanel: 0
+  panelTitle: ???
 --- !u!1 &8745705821136845116
 GameObject:
   m_ObjectHideFlags: 0
@@ -849,6 +917,7 @@ GameObject:
   - component: {fileID: 8572666696610402857}
   - component: {fileID: 8024342613367253431}
   - component: {fileID: 7157172203882291765}
+  - component: {fileID: 9207427224882743067}
   m_Layer: 5
   m_Name: Chat Button
   m_TagString: Untagged
@@ -974,3 +1043,19 @@ MonoBehaviour:
   m_MaskInteraction: 85
   m_UseStencil: 1
   m_RaycastFilter: 0
+--- !u!114 &9207427224882743067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8745705821136845116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18207ba514fce1042956c221aa19707b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemsOnLeftSide: 1
+  panelSize: {x: 0, y: 0}
+  avatarOnPanel: 0
+  panelTitle: ???

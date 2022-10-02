@@ -1,5 +1,8 @@
 #nullable enable
+using System;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 namespace MinecraftClient.UI
 {
@@ -10,6 +13,8 @@ namespace MinecraftClient.UI
 
         private Vector2 targetSize = Vector2.zero;
         private bool resized = false;
+
+        private TMP_Text? contentTitle;
 
         private Animator? firstPersonPanelAnim, contentAnim;
 
@@ -28,17 +33,22 @@ namespace MinecraftClient.UI
             contentAnim = contentObj.GetComponent<Animator>();
             contentAnim.SetBool("Show", false);
 
+            contentTitle = contentObj.transform.Find("Title").GetComponent<TMP_Text>();
+
             var panelObj = transform.Find("Panel").gameObject;
             panelRectTransform = panelObj.GetComponent<RectTransform>();
 
         }
 
-        public void Show(float width, float height)
+        public void Show(Vector2 size, string title, bool showAvatar)
         {
-            targetSize = new(width, height);
+            targetSize = size;
 
             firstPersonPanelAnim!.SetBool("Show", true);
             contentAnim!.SetBool("Show", false);
+            contentAnim!.SetBool("Avatar", showAvatar);
+
+            contentTitle!.text = String.Format(title, CornClient.Instance.GetUsername());
 
             resized = false;
         }
@@ -93,6 +103,10 @@ namespace MinecraftClient.UI
                 {
                     resized = true;
                     contentAnim!.SetBool("Show", true);
+
+                    // Change content
+                    
+
                 }
             }
 
