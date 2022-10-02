@@ -20,9 +20,6 @@ namespace MinecraftClient.UI
         private static readonly float[] START_POS = {  800F,  560F,  320F,   80F, -160F };
         private static readonly float[] STOP_POS  = {  180F,   90F,    0F,  -90F, -180F };
 
-        private static readonly bool[] LEFT_SIDE  = { false, false,  true, false, false };
-        private static readonly bool[] SHOW_PANEL = {  true, false, false, false,  true };
-
         private const float ROLL_BUTTON_SPEED = 700F;
 
         private const float ROOT_MENU_OFFSET = 70F;
@@ -44,6 +41,7 @@ namespace MinecraftClient.UI
 
         private GameObject[] rootMenuPrefabs = new GameObject[BUTTON_COUNT];
         private GameObject[] buttonObjs = new GameObject[BUTTON_COUNT];
+        private FirstPersonButton[] buttons = new FirstPersonButton[BUTTON_COUNT];
         private GameObject? newButtonObj;
 
         public WidgetState State { get; set; } = WidgetState.Hidden;
@@ -111,6 +109,8 @@ namespace MinecraftClient.UI
                         RollButtons();
                     }
                 });
+
+                buttons[i] = buttonObjs[i].GetComponent<FirstPersonButton>();
 
             }
 
@@ -190,7 +190,7 @@ namespace MinecraftClient.UI
 
             float basePos;
 
-            if (!LEFT_SIDE[refIndex])
+            if (!buttons[refIndex].itemsOnLeftSide)
                 basePos = (-Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET) * CANVAS_SCALE;
             else
                 basePos = ( Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET) * CANVAS_SCALE;
@@ -212,7 +212,9 @@ namespace MinecraftClient.UI
                 var rootMenu = rootMenuObj!.GetComponent<FirstPersonMenu>();
                 rootMenu.SetParent(this);
 
-                if (LEFT_SIDE[selectedButton])
+                var rootButton = buttons[selectedButton];
+
+                if (rootButton.itemsOnLeftSide)
                     rootMenuObj.transform.localPosition = new(-ROOT_MENU_OFFSET, STOP_POS[0], 0F);
                 else
                     rootMenuObj.transform.localPosition = new( ROOT_MENU_OFFSET, STOP_POS[0], 0F);
@@ -222,9 +224,9 @@ namespace MinecraftClient.UI
                 openedMenus.Push(rootMenu);
 
                  // Change panel visibility if necessary
-                if (SHOW_PANEL[selectedButton])
+                if (rootButton.panelSize != Vector2.zero)
                 {
-                    firstPersonPanel!.Show(260F, 320F);
+                    firstPersonPanel!.Show(rootButton.panelSize, rootButton.panelTitle, rootButton.avatarOnPanel);
                 }
                 else
                     firstPersonPanel!.Hide();
