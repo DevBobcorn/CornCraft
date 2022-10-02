@@ -69,6 +69,8 @@ namespace MinecraftClient.UI
             itemIcon!.sprite = selectedIcon;
             itemText!.color = selectedTextColor;
             GetComponent<Button>().Select();
+
+            selected = true;
         }
 
         public void Deselect()
@@ -76,6 +78,8 @@ namespace MinecraftClient.UI
             // Update visuals
             itemIcon!.sprite = normalIcon;
             itemText!.color = normalTextColor;
+
+            selected = false;
         }
 
     }

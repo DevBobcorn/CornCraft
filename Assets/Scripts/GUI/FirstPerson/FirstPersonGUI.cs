@@ -10,17 +10,6 @@ namespace MinecraftClient.UI
 {
     public class FirstPersonGUI : MonoBehaviour
     {
-        public float followSpeed = 1F;
-        public float maxDeltaAngle = 30F;
-        private CornClient? game;
-
-        private CameraController? cameraCon;
-
-        private Canvas? firstPersonCanvas;
-        private Animator? firstPersonPanel;
-
-        private SoftMask?   buttonListMask;
-        private Image? buttonListMaskImage;
         private const int BUTTON_COUNT = 5;
 
         private const float CANVAS_SCALE = 0.0006F;
@@ -31,36 +20,56 @@ namespace MinecraftClient.UI
         private static readonly float[] START_POS = {  800F,  560F,  320F,   80F, -160F };
         private static readonly float[] STOP_POS  = {  180F,   90F,    0F,  -90F, -180F };
 
+        private static readonly bool[] LEFT_SIDE  = { false, false,  true, false, false };
+        private static readonly bool[] SHOW_PANEL = {  true, false, false, false,  true };
+
         private const float ROLL_BUTTON_SPEED = 700F;
 
         private const float ROOT_MENU_OFFSET = 70F;
         private const float SUB_MENU_OFFSET  = 200F;
+
+        public float followSpeed = 1F;
+        public float maxDeltaAngle = 30F;
+        private CornClient? game;
+
+        private CameraController? cameraCon;
+
+        private Canvas?   canvas;
+        private Animator? canvasAnim;
+
+        private SoftMask?   buttonListMask;
+        private Image? buttonListMaskImage;
         
+        private FirstPersonPanel? firstPersonPanel = null;
+
         private GameObject[] rootMenuPrefabs = new GameObject[BUTTON_COUNT];
         private GameObject[] buttonObjs = new GameObject[BUTTON_COUNT];
         private GameObject? newButtonObj;
 
         public WidgetState State { get; set; } = WidgetState.Hidden;
 
-        private int selectedIndex = 0, rollingIndex = -1;
+        // Selected button: The currently selected button
+        // Rolling button:  The button which is currently on the edge of the list and has a visual duplication, -1 if the list is not rolling
+        // Target button:   The target button of rolling, -1 if the list is not rolling
+        private int selectedButton = 0, rollingButton = -1, targetButton = -1;
 
         private Stack<FirstPersonMenu> openedMenus = new();
 
         private float GetPosForButton(int index)
         {
-            var posIndex = (index + BUTTON_COUNT - selectedIndex) % BUTTON_COUNT;
+            var posIndex = (index + BUTTON_COUNT - selectedButton) % BUTTON_COUNT;
             var itsStartTime = SINGLE_DELTA_TIME * (BUTTON_COUNT - 1 - posIndex);
 
-            if (panelAnimTime <= itsStartTime) // This button's animation hasn't yet started
+            if (GUIAnimTime <= itsStartTime) // This button's animation hasn't yet started
                 return START_POS[posIndex];
-            else if (panelAnimTime >= itsStartTime + SINGLE_SHOW_TIME) // This button's animation has already ended
+            else if (GUIAnimTime >= itsStartTime + SINGLE_SHOW_TIME) // This button's animation has already ended
                 return STOP_POS[posIndex];
             else // Lerp to get its position
-                return Mathf.Lerp(START_POS[posIndex], STOP_POS[posIndex], (panelAnimTime - itsStartTime) / SINGLE_SHOW_TIME);
+                return Mathf.Lerp(START_POS[posIndex], STOP_POS[posIndex], (GUIAnimTime - itsStartTime) / SINGLE_SHOW_TIME);
 
         }
 
-        private float panelAnimTime = -1F, rollOffset = 0F;
+        private float GUIAnimTime = -1F, rollOffset = 0F;
         private int rollCount = 0;
 
         private bool initialzed = false;
@@ -70,14 +79,12 @@ namespace MinecraftClient.UI
             // Find game instance
             game = CornClient.Instance;
 
-            firstPersonCanvas = GetComponentInChildren<Canvas>();
+            canvas = GetComponentInChildren<Canvas>();
 
             // Initialize panel animator
-            firstPersonPanel = GetComponent<Animator>();
-            firstPersonPanel.SetBool("Show", false);
+            canvasAnim = canvas.GetComponent<Animator>();
+            canvasAnim.SetBool("Show", false);
             State = WidgetState.Hidden;
-
-            var canvas = firstPersonPanel.GetComponentInChildren<Canvas>();
 
             // Get button list and buttons
             buttonListMask = FindHelper.FindChildRecursively(transform, "Button List").GetComponent<SoftMask>();
@@ -99,20 +106,28 @@ namespace MinecraftClient.UI
                 button.onClick.AddListener(() => {
                     if (rollOffset == 0F && rollCount == 0)
                     {
-                        rollCount = clickedIndex - selectedIndex;
+                        rollCount = clickedIndex - selectedButton;
+                        targetButton = clickedIndex;
                         RollButtons();
                     }
                 });
 
             }
 
-            selectedIndex = 0;
+            selectedButton = 0;
 
             rootMenuPrefabs[0] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
-            rootMenuPrefabs[1] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
+            rootMenuPrefabs[1] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Map");
             rootMenuPrefabs[2] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Chat");
-            rootMenuPrefabs[3] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
+            rootMenuPrefabs[3] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Map");
             rootMenuPrefabs[4] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Settings");
+
+            var firstPersonPanelPrefab = Resources.Load<GameObject>("Prefabs/GUI/First Person Panel");
+            var firstPersonPanelObj = GameObject.Instantiate(firstPersonPanelPrefab, Vector3.zero, Quaternion.identity);
+            firstPersonPanelObj.transform.SetParent(canvas.transform, false);
+            firstPersonPanelObj.transform.localPosition = new(-70F, STOP_POS[0], 0F);
+
+            firstPersonPanel = firstPersonPanelObj.GetComponent<FirstPersonPanel>();
 
             initialzed = true;
         }
@@ -129,26 +144,26 @@ namespace MinecraftClient.UI
 
             if (next)
             {
-                rollingIndex = selectedIndex; // Current top button
-                selectedIndex = (selectedIndex + 1) % BUTTON_COUNT;
+                rollingButton = selectedButton; // Current top button
+                selectedButton = (selectedButton + 1) % BUTTON_COUNT;
             }
             else
             {
-                rollingIndex = (selectedIndex + BUTTON_COUNT - 1) % BUTTON_COUNT; // Current bottom button
-                selectedIndex = (selectedIndex + BUTTON_COUNT - 1) % BUTTON_COUNT;
+                rollingButton = (selectedButton + BUTTON_COUNT - 1) % BUTTON_COUNT; // Current bottom button
+                selectedButton = (selectedButton + BUTTON_COUNT - 1) % BUTTON_COUNT;
             }
 
             // Make a visual copy of newly selected button
-            newButtonObj = GameObject.Instantiate(buttonObjs[rollingIndex]);
-            newButtonObj.name = buttonObjs[rollingIndex].name;
+            newButtonObj = GameObject.Instantiate(buttonObjs[rollingButton]);
+            newButtonObj.name = buttonObjs[rollingButton].name;
 
             if (next)
-                buttonObjs[selectedIndex].GetComponent<Button>().Select();
+                buttonObjs[selectedButton].GetComponent<Button>().Select();
             else
                 newButtonObj.GetComponent<Button>().Select();
             
             var newButtonTransform = newButtonObj.GetComponent<RectTransform>();
-            var oldButtonTransform = buttonObjs[rollingIndex].GetComponent<RectTransform>();
+            var oldButtonTransform = buttonObjs[rollingButton].GetComponent<RectTransform>();
 
             newButtonTransform.SetParent(oldButtonTransform.parent);
 
@@ -171,18 +186,16 @@ namespace MinecraftClient.UI
 
         private float GetHorizontalPosition()
         {
+            int refIndex = (targetButton == -1) ? selectedButton : targetButton;
+
             float basePos;
 
-            if (openedMenus.Count > 0 && openedMenus.Peek().leftSide)
-            {
-                basePos = ( Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET) * CANVAS_SCALE;
-            }
+            if (!LEFT_SIDE[refIndex])
+                basePos = (-Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET) * CANVAS_SCALE;
             else
-            {
-                basePos = (-Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET + 100F) * CANVAS_SCALE;
-            }
+                basePos = ( Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET) * CANVAS_SCALE;
 
-            if (State == WidgetState.Hide)
+            if (State == WidgetState.Hide) // Move to the left when fading out
                 return basePos - 1F;
 
             return basePos;
@@ -192,20 +205,30 @@ namespace MinecraftClient.UI
         {
             if (openedMenus.Count == 0)
             {
-                var rootMenuObj = GameObject.Instantiate(rootMenuPrefabs[selectedIndex], Vector3.zero, Quaternion.identity);
-                rootMenuObj!.transform.SetParent(firstPersonCanvas!.transform, false);
+                // Unfold root menu of selected button
+                var rootMenuObj = GameObject.Instantiate(rootMenuPrefabs[selectedButton], Vector3.zero, Quaternion.identity);
+                rootMenuObj!.transform.SetParent(canvas!.transform, false);
 
                 var rootMenu = rootMenuObj!.GetComponent<FirstPersonMenu>();
                 rootMenu.SetParent(this);
 
-                if (rootMenu.leftSide)
-                    rootMenuObj.transform.localPosition = new(-ROOT_MENU_OFFSET, 180F, 0F);
+                if (LEFT_SIDE[selectedButton])
+                    rootMenuObj.transform.localPosition = new(-ROOT_MENU_OFFSET, STOP_POS[0], 0F);
                 else
-                    rootMenuObj.transform.localPosition = new( ROOT_MENU_OFFSET, 180F, 0F);
+                    rootMenuObj.transform.localPosition = new( ROOT_MENU_OFFSET, STOP_POS[0], 0F);
 
                 rootMenuObj.SetActive(true);
 
                 openedMenus.Push(rootMenu);
+
+                 // Change panel visibility if necessary
+                if (SHOW_PANEL[selectedButton])
+                {
+                    firstPersonPanel!.Show(260F, 320F);
+                }
+                else
+                    firstPersonPanel!.Hide();
+
             }
             else // Previously opened menus not closed properly
             {
@@ -214,7 +237,7 @@ namespace MinecraftClient.UI
             }
         }
 
-        public void ShowPanel()
+        public void ShowGUI()
         {
             EnsureInitialized();
 
@@ -226,20 +249,20 @@ namespace MinecraftClient.UI
             transform.eulerAngles = new(0F, cameraRot, 0F);
 
             // Teleport panel to the right position
-            var canvasTransform = firstPersonCanvas!.transform;
+            var canvasTransform = canvas!.transform;
 
             canvasTransform.Translate(GetHorizontalPosition() - canvasTransform.localPosition.x, 0F, 0F, Space.Self);
 
             // Select button on top
-            buttonObjs[selectedIndex].GetComponent<Button>().Select();
+            buttonObjs[selectedButton].GetComponent<Button>().Select();
 
             // Then play fade animation
-            firstPersonPanel!.SetBool("Show", true);
+            canvasAnim!.SetBool("Show", true);
             State = WidgetState.Show;
-            panelAnimTime = 0F;
+            GUIAnimTime = 0F;
         }
 
-        public void HidePanel()
+        public void HideGUI()
         {
             EnsureInitialized();
 
@@ -247,9 +270,9 @@ namespace MinecraftClient.UI
                 return;
 
             // Play hide animation
-            firstPersonPanel!.SetBool("Show", false);
+            canvasAnim!.SetBool("Show", false);
             State = WidgetState.Hide;
-            panelAnimTime = 0F;
+            GUIAnimTime = 0F;
         }
 
         public void SetCameraCon(CameraController cameraCon)
@@ -257,7 +280,7 @@ namespace MinecraftClient.UI
             EnsureInitialized();
 
             this.cameraCon = cameraCon;
-            firstPersonCanvas!.worldCamera = cameraCon.ActiveCamera;
+            canvas!.worldCamera = cameraCon.ActiveCamera;
         }
 
         void Start()
@@ -269,9 +292,9 @@ namespace MinecraftClient.UI
         {
             if (State == WidgetState.Show) // Panel is showing up
             {
-                if (panelAnimTime < TOTAL_SHOW_TIME) // Play show animation
+                if (GUIAnimTime < TOTAL_SHOW_TIME) // Play show animation
                 {
-                    panelAnimTime = Mathf.Min(panelAnimTime + Time.deltaTime, TOTAL_SHOW_TIME);
+                    GUIAnimTime = Mathf.Min(GUIAnimTime + Time.deltaTime, TOTAL_SHOW_TIME);
 
                     for (int i = 0;i < BUTTON_COUNT;i++)
                         buttonObjs[i].GetComponent<RectTransform>().anchoredPosition = new(0F, GetPosForButton(i));
@@ -281,7 +304,7 @@ namespace MinecraftClient.UI
                 else // Complete show animation
                 {
                     for (int i = 0;i < BUTTON_COUNT;i++)
-                        buttonObjs[i].GetComponent<RectTransform>().anchoredPosition = new(0F, STOP_POS[(i + BUTTON_COUNT - selectedIndex) % BUTTON_COUNT]);
+                        buttonObjs[i].GetComponent<RectTransform>().anchoredPosition = new(0F, STOP_POS[(i + BUTTON_COUNT - selectedButton) % BUTTON_COUNT]);
                     
                     UnfoldRootMenu();
                     State = WidgetState.Shown;
@@ -290,9 +313,9 @@ namespace MinecraftClient.UI
             }
             else if (State == WidgetState.Hide) // Panel is fading out
             {
-                panelAnimTime = Mathf.Min(panelAnimTime + Time.deltaTime, TOTAL_HIDE_TIME);
+                GUIAnimTime = Mathf.Min(GUIAnimTime + Time.deltaTime, TOTAL_HIDE_TIME);
 
-                if (panelAnimTime >= TOTAL_HIDE_TIME) // Complete fade animation
+                if (GUIAnimTime >= TOTAL_HIDE_TIME) // Complete fade animation
                 {
                     State = WidgetState.Hidden;
 
@@ -309,6 +332,7 @@ namespace MinecraftClient.UI
                 {
                     if (rollOffset == 0F && rollCount == 0)
                     {
+                        targetButton = (selectedButton + BUTTON_COUNT - 1) % BUTTON_COUNT;
                         rollCount = -1;
                         RollButtons();
                     }
@@ -317,13 +341,14 @@ namespace MinecraftClient.UI
                 {
                     if (rollOffset == 0F && rollCount == 0)
                     {
+                        targetButton = (selectedButton + 1) % BUTTON_COUNT;
                         rollCount =  1;
                         RollButtons();
                     }
                 }
                 else if (Input.GetMouseButtonDown(0) && Cursor.lockState == CursorLockMode.Locked) // Detect click on a certain button
                 {
-                    var rayCaster = firstPersonCanvas!.GetComponent<GraphicRaycaster>();
+                    var rayCaster = canvas!.GetComponent<GraphicRaycaster>();
                     //Debug.Log($"LMB down at {Input.mousePosition}");
                     // Simulate a mouse click, we need to do this because click events won't be triggered when mouse cursor is locked
                     var result = new List<RaycastResult>();
@@ -363,7 +388,7 @@ namespace MinecraftClient.UI
                 }
             }
 
-            var canvasTransform = firstPersonCanvas!.transform;
+            var canvasTransform = canvas!.transform;
             var horOffset = GetHorizontalPosition() - canvasTransform.localPosition.x;
 
             if (horOffset != 0F)
@@ -371,9 +396,9 @@ namespace MinecraftClient.UI
                 float mov;
 
                 if (horOffset > 0)
-                    mov = Mathf.Min(horOffset,  Time.deltaTime * 0.3F);
+                    mov = Mathf.Min(horOffset,  Time.deltaTime * 0.2F);
                 else
-                    mov = Mathf.Max(horOffset, -Time.deltaTime * 0.3F);
+                    mov = Mathf.Max(horOffset, -Time.deltaTime * 0.2F);
 
                 canvasTransform.Translate(mov, 0F, 0F, Space.Self);
             }
@@ -403,11 +428,11 @@ namespace MinecraftClient.UI
                     if (rollOffset == 0F) // Complete button roll
                     {
                         // Teleport old button to new button and destroy new button
-                        buttonObjs[rollingIndex].transform.position = newButtonObj.transform.position;
+                        buttonObjs[rollingButton].transform.position = newButtonObj.transform.position;
                         Destroy(newButtonObj);
 
                         // And select the selected button
-                        buttonObjs[selectedIndex].GetComponent<Button>().Select();
+                        buttonObjs[selectedButton].GetComponent<Button>().Select();
 
                         buttonListMask!.enabled = false;
                         buttonListMaskImage!.color = new(0F, 0F, 0F, 0F);
@@ -418,11 +443,17 @@ namespace MinecraftClient.UI
                         else if (rollCount < 0)
                             rollCount++;
                         
+                        rollingButton = -1;
+                        
                         // Continue to roll buttons if necessary
                         if (rollCount != 0)
                             RollButtons();
-                        else // Rolled to target button, unfolder its root menu
+                        else
+                        {
+                            // Rolled to target button, unfolder its root menu
                             UnfoldRootMenu();
+                            targetButton = -1;
+                        }
                     }
                 }
                 else // Pop all opened menus first

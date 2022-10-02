@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &1226811178608387586
+--- !u!1001 &7253640552781393883
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -28,10 +28,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
-      propertyPath: showPanel
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.size
       value: 6
       objectReference: {fileID: 0}
@@ -42,11 +38,11 @@ PrefabInstance:
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[0]
       value: 
-      objectReference: {fileID: 21300000, guid: 91fb7954c96d9c94c809eb2f5015b330, type: 3}
+      objectReference: {fileID: 21300000, guid: 36d1198d5faac9c49b2238e26489a0c4, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[1]
       value: 
-      objectReference: {fileID: 21300000, guid: 363e5e71609f8304f84c64363a7c40ec, type: 3}
+      objectReference: {fileID: 21300000, guid: 44737d79d83a55f4f9ad4dc270e27721, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[2]
       value: 
@@ -58,34 +54,22 @@ PrefabInstance:
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[4]
       value: 
-      objectReference: {fileID: 21300000, guid: d96afb95810716b40a95b08e42fb5afa, type: 3}
+      objectReference: {fileID: 21300000, guid: 36d1198d5faac9c49b2238e26489a0c4, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[5]
       value: 
-      objectReference: {fileID: 21300000, guid: 33cf224d4397bc94ca816e95016cefac, type: 3}
-    - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
-      propertyPath: itemIcons.Array.data[6]
-      value: 
-      objectReference: {fileID: 21300000, guid: abf3a0059260b94468099430d8e04db6, type: 3}
-    - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
-      propertyPath: itemIcons.Array.data[7]
-      value: 
-      objectReference: {fileID: 21300000, guid: abf3a0059260b94468099430d8e04db6, type: 3}
+      objectReference: {fileID: 21300000, guid: 44737d79d83a55f4f9ad4dc270e27721, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[0]
-      value: Options
+      value: ???
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[1]
-      value: Help
+      value: ???
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[2]
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
-      propertyPath: itemTexts.Array.data[3]
-      value: Equipment
+      value: ???
       objectReference: {fileID: 0}
     - target: {fileID: 8510299232680379770, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: m_AnchorMax.y
@@ -109,7 +93,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9109159638774325563, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: m_Name
-      value: First Person Menu Settings
+      value: First Person Menu Map
       objectReference: {fileID: 0}
     - target: {fileID: 9182428156840265933, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: m_Pivot.x
