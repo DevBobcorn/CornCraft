@@ -12,9 +12,9 @@ namespace MinecraftClient.UI
         {
             set {
                 if (value)
-                    firstPersonPanel?.ShowPanel();
+                    firstPersonPanel?.ShowGUI();
                 else
-                    firstPersonPanel?.HidePanel();
+                    firstPersonPanel?.HideGUI();
 
                 isActive = value;
                 screenGroup!.alpha = value ? 1F : 0F;

@@ -28,6 +28,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
+      propertyPath: showPanel
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.size
       value: 6
       objectReference: {fileID: 0}
