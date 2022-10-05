@@ -22,8 +22,8 @@ namespace MinecraftClient.UI
 
         private const float ROLL_BUTTON_SPEED = 700F;
 
-        private const float ROOT_MENU_OFFSET = 70F;
-        private const float SUB_MENU_OFFSET  = 200F;
+        private const float ROOT_MENU_OFFSET =  70F;
+        private const float SUB_MENU_OFFSET  = 190F;
 
         public float followSpeed = 1F;
         public float maxDeltaAngle = 30F;
@@ -99,13 +99,21 @@ namespace MinecraftClient.UI
             for (int i = 0;i < BUTTON_COUNT;i++)
             {
                 var button = buttonObjs[i].GetComponent<Button>();
-                int clickedIndex = i;
+                int clickedButton = i;
 
                 button.onClick.AddListener(() => {
-                    if (rollOffset == 0F && rollCount == 0)
+                    if (rollOffset == 0F && rollCount == 0 && clickedButton != selectedButton)
                     {
-                        rollCount = clickedIndex - selectedButton;
-                        targetButton = clickedIndex;
+                        //rollCount = clickedButton - selectedButton;
+
+                        int d1 = (clickedButton - selectedButton + BUTTON_COUNT) % BUTTON_COUNT;
+
+                        if (d1 <= (BUTTON_COUNT / 2))
+                            rollCount =  (clickedButton - selectedButton + BUTTON_COUNT) % BUTTON_COUNT;
+                        else
+                            rollCount = -(selectedButton - clickedButton + BUTTON_COUNT) % BUTTON_COUNT;
+
+                        targetButton = clickedButton;
                         RollButtons();
                     }
                 });
@@ -117,7 +125,7 @@ namespace MinecraftClient.UI
             selectedButton = 0;
 
             rootMenuPrefabs[0] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
-            rootMenuPrefabs[1] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Map");
+            rootMenuPrefabs[1] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Social");
             rootMenuPrefabs[2] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Chat");
             rootMenuPrefabs[3] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Map");
             rootMenuPrefabs[4] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Settings");
@@ -136,6 +144,12 @@ namespace MinecraftClient.UI
         {
             if (!initialzed)
                 Initialize();
+        }
+
+        private void UnfocusButtons()
+        {
+            foreach (var button in buttons)
+                button.Unfocus();
         }
 
         private void RollButtons()
@@ -157,10 +171,16 @@ namespace MinecraftClient.UI
             newButtonObj = GameObject.Instantiate(buttonObjs[rollingButton]);
             newButtonObj.name = buttonObjs[rollingButton].name;
 
-            if (next)
-                buttonObjs[selectedButton].GetComponent<Button>().Select();
-            else
-                newButtonObj.GetComponent<Button>().Select();
+            // First unfocus all buttons
+            UnfocusButtons();
+
+            if (next) // Then focus on the next target button
+                buttons[selectedButton].Focus();
+            else // Focus on both the original button and its duplication
+            {
+                buttons[rollingButton].Focus();
+                newButtonObj.GetComponent<FirstPersonButton>().Focus();
+            }
             
             var newButtonTransform = newButtonObj.GetComponent<RectTransform>();
             var oldButtonTransform = buttonObjs[rollingButton].GetComponent<RectTransform>();
@@ -184,6 +204,26 @@ namespace MinecraftClient.UI
 
         }
 
+        private void SelectPrevButton()
+        {
+            if (rollOffset == 0F && rollCount == 0)
+            {
+                targetButton = (selectedButton + BUTTON_COUNT - 1) % BUTTON_COUNT;
+                rollCount = -1;
+                RollButtons();
+            }
+        }
+
+        private void SelectNextButton()
+        {
+            if (rollOffset == 0F && rollCount == 0)
+            {
+                targetButton = (selectedButton + 1) % BUTTON_COUNT;
+                rollCount =  1;
+                RollButtons();
+            }
+        }
+
         private float GetHorizontalPosition()
         {
             int refIndex = (targetButton == -1) ? selectedButton : targetButton;
@@ -201,32 +241,22 @@ namespace MinecraftClient.UI
             return basePos;
         }
 
-        private void UnfoldRootMenu()
+        private void UnfoldCurrentRootMenu()
         {
             if (openedMenus.Count == 0)
             {
                 // Unfold root menu of selected button
-                var rootMenuObj = GameObject.Instantiate(rootMenuPrefabs[selectedButton], Vector3.zero, Quaternion.identity);
-                rootMenuObj!.transform.SetParent(canvas!.transform, false);
-
-                var rootMenu = rootMenuObj!.GetComponent<FirstPersonMenu>();
-                rootMenu.SetParent(this);
-
+                UnfoldMenu(rootMenuPrefabs[selectedButton]);
+                
                 var rootButton = buttons[selectedButton];
-
-                if (rootButton.itemsOnLeftSide)
-                    rootMenuObj.transform.localPosition = new(-ROOT_MENU_OFFSET, STOP_POS[0], 0F);
-                else
-                    rootMenuObj.transform.localPosition = new( ROOT_MENU_OFFSET, STOP_POS[0], 0F);
-
-                rootMenuObj.SetActive(true);
-
-                openedMenus.Push(rootMenu);
 
                  // Change panel visibility if necessary
                 if (rootButton.panelSize != Vector2.zero)
                 {
                     firstPersonPanel!.Show(rootButton.panelSize, rootButton.panelTitle, rootButton.avatarOnPanel);
+
+                    // TODO Display corresponding UI on the panel
+                    
                 }
                 else
                     firstPersonPanel!.Hide();
@@ -237,6 +267,27 @@ namespace MinecraftClient.UI
                 // TODO Handle properly
                 Debug.LogWarning("Menus not properly closed.");
             }
+        }
+
+        public void UnfoldMenu(GameObject menuPrefab)
+        {
+            var menuObj = GameObject.Instantiate(menuPrefab, Vector3.zero, Quaternion.identity);
+
+            menuObj!.transform.SetParent(canvas!.transform, false);
+
+            var rootMenu = menuObj!.GetComponent<FirstPersonMenu>();
+            rootMenu.SetParent(this);
+
+            if (buttons[selectedButton].itemsOnLeftSide)
+                menuObj.transform.localPosition = new(-ROOT_MENU_OFFSET - openedMenus.Count * SUB_MENU_OFFSET, STOP_POS[0], 0F);
+            else
+                menuObj.transform.localPosition = new( ROOT_MENU_OFFSET + openedMenus.Count * SUB_MENU_OFFSET, STOP_POS[0], 0F);
+
+            menuObj.SetActive(true);
+
+            openedMenus.Push(rootMenu);
+            rootMenu.FocusSelf();
+
         }
 
         public void ShowGUI()
@@ -256,7 +307,8 @@ namespace MinecraftClient.UI
             canvasTransform.Translate(GetHorizontalPosition() - canvasTransform.localPosition.x, 0F, 0F, Space.Self);
 
             // Select button on top
-            buttonObjs[selectedButton].GetComponent<Button>().Select();
+            UnfocusButtons();
+            buttons[selectedButton].Focus();
 
             // Then play fade animation
             canvasAnim!.SetBool("Show", true);
@@ -275,6 +327,8 @@ namespace MinecraftClient.UI
             canvasAnim!.SetBool("Show", false);
             State = WidgetState.Hide;
             GUIAnimTime = 0F;
+
+            firstPersonPanel!.Hide();
         }
 
         public void SetCameraCon(CameraController cameraCon)
@@ -285,10 +339,7 @@ namespace MinecraftClient.UI
             canvas!.worldCamera = cameraCon.ActiveCamera;
         }
 
-        void Start()
-        {
-            EnsureInitialized();
-        }
+        void Start() => EnsureInitialized();
 
         void Update()
         {
@@ -308,7 +359,7 @@ namespace MinecraftClient.UI
                     for (int i = 0;i < BUTTON_COUNT;i++)
                         buttonObjs[i].GetComponent<RectTransform>().anchoredPosition = new(0F, STOP_POS[(i + BUTTON_COUNT - selectedButton) % BUTTON_COUNT]);
                     
-                    UnfoldRootMenu();
+                    UnfoldCurrentRootMenu();
                     State = WidgetState.Shown;
                 }
 
@@ -330,23 +381,55 @@ namespace MinecraftClient.UI
             }
             else if (State == WidgetState.Shown) // Panel is shown
             {
-                if (Input.GetKeyDown(KeyCode.UpArrow)) // Previous button
+                bool goBackFlag = 
+                    buttons[selectedButton].itemsOnLeftSide ? Input.GetKeyDown(KeyCode.RightArrow) : Input.GetKeyDown(KeyCode.LeftArrow);
+                
+                bool goForwardFlag =
+                    buttons[selectedButton].itemsOnLeftSide ? Input.GetKeyDown(KeyCode.LeftArrow) : Input.GetKeyDown(KeyCode.RightArrow);
+
+                if (goBackFlag)
                 {
-                    if (rollOffset == 0F && rollCount == 0)
+                    if (openedMenus.Count == 1 && openedMenus.Peek().InputActive())
+                        openedMenus.Peek().FocusSelf();
+                    else if (openedMenus.Count > 1 && openedMenus.Peek().InputActive())
                     {
-                        targetButton = (selectedButton + BUTTON_COUNT - 1) % BUTTON_COUNT;
-                        rollCount = -1;
-                        RollButtons();
+                        // Try closing this sub menu
+                        openedMenus.Pop().Hide();
+
+                        if (openedMenus.Count > 0) // If the stack is still not empty
+                            openedMenus.Peek().TryRefocusOnCurrentItem();
+                        
                     }
                 }
-                else if (Input.GetKeyDown(KeyCode.DownArrow)) // Next button
+                else if (goForwardFlag)
+                {   // TODO Implement
+                    if (openedMenus.Count > 0)
+                        openedMenus.Peek().TryFocusMiddleItem();
+                }
+
+                if (Input.GetKeyDown(KeyCode.Return))
                 {
-                    if (rollOffset == 0F && rollCount == 0)
-                    {
-                        targetButton = (selectedButton + 1) % BUTTON_COUNT;
-                        rollCount =  1;
-                        RollButtons();
-                    }
+                    if (openedMenus.Count > 0 && openedMenus.Peek().InputActive())
+                        openedMenus.Peek().TryUnfoldSubMenu();
+                }
+
+                if (Input.GetKeyDown(KeyCode.UpArrow)) // Previous
+                {
+                    if (openedMenus.Count > 1 && openedMenus.Peek().InputActive())
+                        openedMenus.Peek().FocusPrevItem();
+                    else if (openedMenus.Count > 0 && openedMenus.Peek().UpDownActive())
+                        openedMenus.Peek().FocusPrevItem();
+                    else
+                        SelectPrevButton();
+                }
+                else if (Input.GetKeyDown(KeyCode.DownArrow)) // Next
+                {
+                    if (openedMenus.Count > 1 && openedMenus.Peek().InputActive())
+                        openedMenus.Peek().FocusNextItem();
+                    else if (openedMenus.Count > 0 && openedMenus.Peek().UpDownActive())
+                        openedMenus.Peek().FocusNextItem();
+                    else
+                        SelectNextButton();
                 }
                 else if (Input.GetMouseButtonDown(0) && Cursor.lockState == CursorLockMode.Locked) // Detect click on a certain button
                 {
@@ -358,7 +441,7 @@ namespace MinecraftClient.UI
 
                     string res = string.Empty;
 
-                    foreach(var r in result)
+                    foreach (var r in result)
                     {
                         var button = r.gameObject.GetComponent<Button>();
                         if (button is not null)
@@ -389,6 +472,8 @@ namespace MinecraftClient.UI
                     
                 }
             }
+            else // panel is hidden
+                return;
 
             var canvasTransform = canvas!.transform;
             var horOffset = GetHorizontalPosition() - canvasTransform.localPosition.x;
@@ -398,16 +483,16 @@ namespace MinecraftClient.UI
                 float mov;
 
                 if (horOffset > 0)
-                    mov = Mathf.Min(horOffset,  Time.deltaTime * 0.2F);
+                    mov = Mathf.Min(horOffset,  Time.deltaTime * 0.4F);
                 else
-                    mov = Mathf.Max(horOffset, -Time.deltaTime * 0.2F);
+                    mov = Mathf.Max(horOffset, -Time.deltaTime * 0.4F);
 
                 canvasTransform.Translate(mov, 0F, 0F, Space.Self);
             }
 
-            if (rollOffset != 0F)
+            if (openedMenus.Count == 0) // Roll button
             {
-                if (openedMenus.Count == 0) // Roll button
+                if (rollOffset != 0F)
                 {
                     float newOffset;
 
@@ -434,7 +519,7 @@ namespace MinecraftClient.UI
                         Destroy(newButtonObj);
 
                         // And select the selected button
-                        buttonObjs[selectedButton].GetComponent<Button>().Select();
+                        buttons[selectedButton].Focus();
 
                         buttonListMask!.enabled = false;
                         buttonListMaskImage!.color = new(0F, 0F, 0F, 0F);
@@ -453,29 +538,35 @@ namespace MinecraftClient.UI
                         else
                         {
                             // Rolled to target button, unfolder its root menu
-                            UnfoldRootMenu();
+                            UnfoldCurrentRootMenu();
                             targetButton = -1;
                         }
                     }
-                }
-                else // Pop all opened menus first
-                {
-                    var topMenu = openedMenus.Peek();
-
-                    switch (topMenu.State)
-                    {
-                        case WidgetState.Hidden: // Fade out animation completed
-                        case WidgetState.Error:
-                            openedMenus.Pop();
-                            Destroy(topMenu.gameObject);
-                            break;
-                        case WidgetState.Shown: // Start its fade out animation
-                            topMenu.Hide();
-                            break;
-                    }
-
+                    
                 }
             }
+            else // Update states of menus in stack
+            {
+                var topMenu = openedMenus.Peek();
+
+                switch (topMenu.State)
+                {
+                    case WidgetState.Error:
+                        openedMenus.Pop();
+                        Destroy(topMenu.gameObject);
+                        break;
+                    case WidgetState.Shown:
+                        if (rollOffset != 0F) // Pop stack and start its fade out animation
+                            openedMenus.Pop().Hide();
+                        
+                        if (openedMenus.Count > 0) // If the stack is still not empty
+                            openedMenus.Peek().TryRefocusOnCurrentItem();
+                        
+                        break;
+                }
+
+            }
+            
 
         }
 

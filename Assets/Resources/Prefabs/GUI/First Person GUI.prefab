@@ -280,7 +280,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 2
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -337,6 +337,8 @@ MonoBehaviour:
   panelSize: {x: 260, y: 320}
   avatarOnPanel: 0
   panelTitle: Settings
+  normalIcon: {fileID: 21300000, guid: 6bffa20d6a8959f4c95c3e63df61e715, type: 3}
+  focusedIcon: {fileID: 21300000, guid: 97b56a91ee11b714a8ce02e8dcd71a48, type: 3}
 --- !u!1 &4031153315546646660
 GameObject:
   m_ObjectHideFlags: 0
@@ -435,7 +437,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 2
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -492,6 +494,8 @@ MonoBehaviour:
   panelSize: {x: 0, y: 0}
   avatarOnPanel: 0
   panelTitle: ???
+  normalIcon: {fileID: 21300000, guid: 976f261282d59d7408f4bcd4cd72f2c6, type: 3}
+  focusedIcon: {fileID: 21300000, guid: 7b4c9289f40558842a75f1332f066297, type: 3}
 --- !u!1 &5312660961673720557
 GameObject:
   m_ObjectHideFlags: 0
@@ -590,7 +594,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 2
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -647,6 +651,8 @@ MonoBehaviour:
   panelSize: {x: 260, y: 320}
   avatarOnPanel: 1
   panelTitle: '{0}'
+  normalIcon: {fileID: 21300000, guid: 4405df2254b177f488882c0f97807e82, type: 3}
+  focusedIcon: {fileID: 21300000, guid: 38d0c0e2cd48cc445aa590c00a080e6d, type: 3}
 --- !u!1 &5733611601288877390
 GameObject:
   m_ObjectHideFlags: 0
@@ -847,7 +853,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 2
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -904,6 +910,8 @@ MonoBehaviour:
   panelSize: {x: 0, y: 0}
   avatarOnPanel: 0
   panelTitle: ???
+  normalIcon: {fileID: 21300000, guid: 58be36f87b7610245816701e927fbaef, type: 3}
+  focusedIcon: {fileID: 21300000, guid: e5ac2b56eae94454190ca9185cf11f63, type: 3}
 --- !u!1 &8745705821136845116
 GameObject:
   m_ObjectHideFlags: 0
@@ -1002,7 +1010,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 2
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -1059,3 +1067,5 @@ MonoBehaviour:
   panelSize: {x: 0, y: 0}
   avatarOnPanel: 0
   panelTitle: ???
+  normalIcon: {fileID: 21300000, guid: 0d84fca0310250442b6397cfd5ff91ed, type: 3}
+  focusedIcon: {fileID: 21300000, guid: 83f6efa0970409d42aea41002b137f68, type: 3}

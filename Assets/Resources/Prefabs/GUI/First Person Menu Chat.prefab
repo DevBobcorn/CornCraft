@@ -69,11 +69,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.size
-      value: 8
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.size
-      value: 4
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[0]
@@ -108,6 +108,18 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 0d821b62ec1a34042b8cdbe65d231330, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
+      propertyPath: itemIcons.Array.data[8]
+      value: 
+      objectReference: {fileID: 21300000, guid: feb62f5d96218e1489e618c4bce3cc91, type: 3}
+    - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
+      propertyPath: itemIcons.Array.data[9]
+      value: 
+      objectReference: {fileID: 21300000, guid: 0d821b62ec1a34042b8cdbe65d231330, type: 3}
+    - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
+      propertyPath: itemSubMenus.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[0]
       value: Kirito
       objectReference: {fileID: 0}
@@ -121,6 +133,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[3]
+      value: Leafa
+      objectReference: {fileID: 0}
+    - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
+      propertyPath: itemTexts.Array.data[4]
       value: Yuuki
       objectReference: {fileID: 0}
     - target: {fileID: 7996488130939804768, guid: fae00ea55dd7da748be74bbe20243855, type: 3}

@@ -5,43 +5,53 @@ using TMPro;
 
 namespace MinecraftClient.UI
 {
-    [RequireComponent(typeof (CanvasGroup), typeof (Button))]
+    [RequireComponent(typeof (CanvasGroup), typeof (Image), typeof (Button))]
     public class FirstPersonListItem : MonoBehaviour
     {
-        public Color normalTextColor   = Color.black;
-        public Color selectedTextColor = Color.white;
+        private static readonly Color TRANSPARENT = new(0F, 0F, 0F, 0F);
+
+        public Color normalForeColor  = Color.black;
+        public Color focusedForeColor = Color.white;
+        public Color normalBackColor  = Color.black;
+        public Color focusedBackColor = Color.white;
+
+        public FirstPersonMenu? SubMenu { get; set; } = null;
 
         private FirstPersonMenu? parentMenu;
         private CanvasGroup? canvasGroup;
         private TMP_Text? itemText;
-        private Image?    itemIcon;
+        private Image?    itemIcon, itemBackground, arrow;
 
         private Sprite? normalIcon, selectedIcon;
 
-        private bool initialized = false, selected = false;
+        private bool initialized = false, focused = false, unfolded = false;
+        public bool Focused { get { return focused; } }
 
         private void EnsureInitialized()
         {
             if (!initialized)
             {
                 canvasGroup = GetComponent<CanvasGroup>();
+                itemBackground = GetComponent<Image>();
 
                 itemText = transform.Find("Text").GetComponent<TMP_Text>();
                 itemIcon = transform.Find("Icon").GetComponent<Image>();
+                arrow = transform.Find("Arrow").GetComponent<Image>();
 
-                selected = false;
-                itemText!.color = normalTextColor;
+                focused = false;
+                unfolded = false;
 
-                GetComponent<Button>().onClick.AddListener(() => Select());
+                itemText!.color = normalForeColor;
+                itemBackground!.color = normalBackColor;
+                arrow!.color = TRANSPARENT;
+
+                GetComponent<Button>().onClick.AddListener(() => parentMenu!.TryFocusItem(this));
 
                 initialized = true;
             }
         }
 
-        void Start()
-        {
-            EnsureInitialized();
-        }
+        void Start() => EnsureInitialized();
 
         public void SetAlpha(float alpha)
         {
@@ -49,6 +59,7 @@ namespace MinecraftClient.UI
             canvasGroup!.alpha = alpha;
         }
 
+        // Should be only called once as initialization
         public void SetContent(FirstPersonMenu parent, Sprite normal, Sprite selected, string text)
         {
             EnsureInitialized();
@@ -58,28 +69,37 @@ namespace MinecraftClient.UI
             selectedIcon = selected;
             
             // Apply new values instantly
-            itemIcon!.sprite = normal;
             itemText!.text = text;
+            Unfocus();
         }
 
-        public void Select()
+        public void Focus(bool unfold)
         {
-            parentMenu!.Select(this);
+            EnsureInitialized();
             // Update visuals
             itemIcon!.sprite = selectedIcon;
-            itemText!.color = selectedTextColor;
-            GetComponent<Button>().Select();
+            itemText!.color = focusedForeColor;
 
-            selected = true;
+            itemBackground!.color = focusedBackColor;
+
+            arrow!.color = unfold ? focusedBackColor : TRANSPARENT;
+
+            focused = true;
+            unfolded = unfold;
         }
 
-        public void Deselect()
+        public void Unfocus()
         {
+            EnsureInitialized();
             // Update visuals
             itemIcon!.sprite = normalIcon;
-            itemText!.color = normalTextColor;
+            itemText!.color = normalForeColor;
 
-            selected = false;
+            itemBackground!.color = normalBackColor;
+            arrow!.color = TRANSPARENT;
+
+            focused = false;
+            unfolded = false;
         }
 
     }

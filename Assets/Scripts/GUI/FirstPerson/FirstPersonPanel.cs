@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 namespace MinecraftClient.UI
@@ -20,14 +19,11 @@ namespace MinecraftClient.UI
 
         private RectTransform? panelRectTransform;
 
-        public WidgetState State { get; set; } = WidgetState.Hidden;
-
         void Start()
         {
             // Initialize panel animators
             firstPersonPanelAnim = GetComponent<Animator>();
             firstPersonPanelAnim.SetBool("Show", false);
-            State = WidgetState.Hidden;
 
             var contentObj = transform.Find("Content").gameObject;
             contentAnim = contentObj.GetComponent<Animator>();
@@ -45,8 +41,9 @@ namespace MinecraftClient.UI
             targetSize = size;
 
             firstPersonPanelAnim!.SetBool("Show", true);
-            contentAnim!.SetBool("Show", false);
+
             contentAnim!.SetBool("Avatar", showAvatar);
+            contentAnim!.SetBool("Show", false);
 
             contentTitle!.text = String.Format(title, CornClient.Instance.GetUsername());
 
@@ -103,10 +100,7 @@ namespace MinecraftClient.UI
                 {
                     resized = true;
                     contentAnim!.SetBool("Show", true);
-
-                    // Change content
                     
-
                 }
             }
 
