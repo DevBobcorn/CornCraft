@@ -948,6 +948,28 @@ namespace MinecraftClient.Protocol.Handlers
                             });
                             break;
                         }
+                    case PacketTypesIn.ChangeGameState:
+                        if (protocolVersion >= MC_1_15_2_Version)
+                        {
+                            byte changeReason = dataTypes.ReadNextByte(packetData);
+                            float changeValue = dataTypes.ReadNextFloat(packetData);
+                            switch (changeReason)
+                            {
+                                case 1: // End raining
+                                    handler.OnRainChange(false);
+                                    break;
+                                case 2: // Begin raining
+                                    handler.OnRainChange(true);
+                                    break;
+                                case 7: // Rain level change
+                                    
+                                    break;
+                                case 8: // Thunder level change
+                                    
+                                    break;
+                            }
+                        }
+                        break;
                     case PacketTypesIn.SetDisplayChatPreview:
                         bool previewsChatSetting = dataTypes.ReadNextBool(packetData);
                         // TODO handler.OnChatPreviewSettingUpdate(previewsChatSetting);
@@ -1470,21 +1492,6 @@ namespace MinecraftClient.Protocol.Handlers
                             int playerId2 = dataTypes.ReadNextVarInt(packetData);
                             byte animation = dataTypes.ReadNextByte(packetData);
                             handler.OnEntityAnimation(playerId2, animation);
-                            break;
-                        }
-                    case PacketTypesIn.ChangeGameState:
-                        {
-                            int changeReason = dataTypes.ReadNextByte(packetData);
-                            float changeValue = dataTypes.ReadNextFloat(packetData);
-                            switch (changeReason)
-                            {
-                                case 1: // End raining
-                                    handler.OnRainChange(false);
-                                    break;
-                                case 2: // Begin raining
-                                    handler.OnRainChange(true);
-                                    break;
-                            }
                             break;
                         }
                     default:

@@ -72,6 +72,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: abf3a0059260b94468099430d8e04db6, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
+      propertyPath: itemSubMenus.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[0]
       value: Option
       objectReference: {fileID: 0}
