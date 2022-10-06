@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -23,6 +24,8 @@ namespace MinecraftClient.UI
         private Image?    itemIcon, itemBackground, arrow;
 
         private Sprite? normalIcon, selectedIcon;
+
+        public Action? Callback = null;
 
         private bool initialized = false, focused = false, unfolded = false;
         public bool Focused { get { return focused; } }

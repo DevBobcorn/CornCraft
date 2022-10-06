@@ -12,6 +12,13 @@ namespace MinecraftClient.UI
         protected override bool InitializeContent()
         {
             var game = CornClient.Instance;
+
+            if (itemIcons.Length < 2)
+            {
+                Debug.LogWarning("Faulty items icon data, list initialization cancelled.");
+                return true;
+            }
+
             var inventory = game.GetInventory(0);
 
             if (inventory is not null && inventory.Items.Count > 0)
@@ -36,7 +43,7 @@ namespace MinecraftClient.UI
                     item.SetAlpha(0F);
                     items.Add(item);
 
-                    item.gameObject.SetActive(true);
+                    itemObj.SetActive(true);
                 }
             }
             else
