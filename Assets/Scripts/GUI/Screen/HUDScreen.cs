@@ -26,8 +26,9 @@ namespace MinecraftClient.UI
 
         private bool isActive = false, debugInfo = true;
 
-        private bool modePanelShown = false;
-        private int  selectedMode   = 0;
+        private bool modePanelShown  = false;
+        private int  selectedMode    = 0;
+        private int displayedLatency = 0;
 
         public override bool IsActive
         {
@@ -142,8 +143,6 @@ namespace MinecraftClient.UI
 
         }
 
-        private int displayedLatency = 0;
-
         void Update()
         {
             if (!initialized || !IsActive || !CornClient.Connected)
@@ -217,9 +216,9 @@ namespace MinecraftClient.UI
             }
 
             if (debugInfo)
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GetPlayerController()?.GetDebugInfo()}\n{game.GetWorldRender()?.GetDebugInfo()}\n{game.GetEntityManager().GetDebugInfo()}\nSvr TPS: {game.GetServerTPS()}";
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GetPlayerController()?.GetDebugInfo()}\n{game.GetWorldRender()?.GetDebugInfo()}\n{game.GetEntityManager().GetDebugInfo()}\nSvr TPS: {game.GetServerTPS():00.00}\nTime: {StringConvert.TimeOfDay2String(game.CurrentTimeOfDay)}";
             else
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}";
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\nTime: {StringConvert.TimeOfDay2String(game.CurrentTimeOfDay)}";
 
             var realLatency = game.GetOwnLatency();
             if (displayedLatency != realLatency)

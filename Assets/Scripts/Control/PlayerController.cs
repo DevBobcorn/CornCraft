@@ -374,9 +374,9 @@ namespace MinecraftClient.Control
             }
 
             if (entityDisabled)
-                return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+                return $"{gameMode}\nPosition:\t{transform.position.x:0.00}\t{transform.position.y:0.00}\t{transform.position.z:0.00}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
             else
-                return $"{gameMode}\nPosition:\t{transform.position.x.ToString("#.##")}\t{transform.position.y.ToString("#.##")}\t{transform.position.z.ToString("#.##")}\nGrounded:\t{isOnGround}\t{centerDownDist.ToString("#.##")} {frontDownDist.ToString("#.##")}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+                return $"{gameMode}\nPosition:\t{transform.position.x:0.00}\t{transform.position.y:0.00}\t{transform.position.z:0.00}\nGrounded:\t{isOnGround}\t{centerDownDist:0.00} {frontDownDist:0.00}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
 
         }
 

@@ -53,6 +53,19 @@ namespace MinecraftClient
             return str == "true" || str == "1";
         }
 
+        // Convert a Minecraft time of day to 24-hour string format
+        // See https://minecraft.fandom.com/wiki/Daylight_cycle
+        public static string TimeOfDay2String(long timeOfDay)
+        {
+            int tod = (int)(timeOfDay % 24000L);
+
+            int hour = (tod / 1000 + 6) % 24;
+            int minute = (int)((tod % 1000) / 1000F * 60F);
+
+            return $"{hour:00}:{minute:00}";
+
+        }
+
         private static string GetTMPCloseTags(int formatFlag)
         {
             string closeTags = string.Empty;
