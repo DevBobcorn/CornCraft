@@ -2482,9 +2482,8 @@ namespace MinecraftClient
             foreach (int a in Entities)
             {
                 if (entities.ContainsKey(a))
-                {
                     entities.Remove(a);
-                }
+                
             }
 
             Loom.QueueOnMainThread(() => {
@@ -2523,6 +2522,10 @@ namespace MinecraftClient
             {
                 entities[EntityID].Yaw = yaw;
                 entities[EntityID].Pitch = pitch;
+
+                Loom.QueueOnMainThread(() => {
+                    entityManager.RotateEntity(EntityID, yaw, pitch);
+                });
             }
 
         }
