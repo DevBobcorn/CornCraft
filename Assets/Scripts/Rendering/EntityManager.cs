@@ -1,10 +1,8 @@
 #nullable enable
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-using MinecraftClient.Event;
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Rendering
@@ -25,9 +23,13 @@ namespace MinecraftClient.Rendering
         }
 
         private CornClient? game;
-        private GameObject? entityPrefab;
+        private static GameObject? placeboEntityPrefab;
 
-        private static Dictionary<int, EntityRender> entities = new();
+        private static Dictionary<EntityType, GameObject?> entityPrefabs = new();
+
+        private static GameObject? GetPrefabForType(EntityType type) => entityPrefabs.GetValueOrDefault(type, placeboEntityPrefab);
+
+        private Dictionary<int, EntityRender> entities = new();
 
         public string GetDebugInfo()
         {
@@ -36,7 +38,8 @@ namespace MinecraftClient.Rendering
 
         public void AddEntity(Entity entity)
         {
-            var entityObj    = GameObject.Instantiate(entityPrefab);
+            var entityObj    = GameObject.Instantiate(GetPrefabForType(entity.Type));
+
             var entityRender = entityObj!.GetComponent<EntityRender>();
             entityRender.Entity = entity;
             entities.Add(entity.ID, entityRender);
@@ -65,6 +68,13 @@ namespace MinecraftClient.Rendering
             
         }
 
+        public void RotateEntity(int entityId, float yaw, float pitch)
+        {
+            if (entities.ContainsKey(entityId))
+                entities[entityId].RotateTo(AngleConvert.MCYaw2Unity(yaw), AngleConvert.MC2Unity(pitch));
+            
+        }
+
         public void UnloadEntities()
         {
             entities.Clear();
@@ -86,7 +96,14 @@ namespace MinecraftClient.Rendering
 
         void Start()
         {
-            entityPrefab = Resources.Load<GameObject>("Prefabs/Entity");
+            placeboEntityPrefab = Resources.Load<GameObject>("Prefabs/Entity/Placebo Entity");
+
+            // Clear loaded things
+            entityPrefabs.Clear();
+
+            // Add specific entity prefabs TODO Expand
+            entityPrefabs.Add(EntityType.Zombie, Resources.Load<GameObject>("Prefabs/Entity/Zombie Entity"));
+
             game = CornClient.Instance;
 
         }

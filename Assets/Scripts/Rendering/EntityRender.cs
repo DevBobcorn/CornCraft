@@ -10,6 +10,8 @@ namespace MinecraftClient.Rendering
     {
         private const float MOVE_THERESHOLD = 5F * 5F; // Treat as teleport if move more than 5 meters at once
         private Vector3? lastPosition = null, targetPosition = null;
+        private float lastYaw = 0F, targetYaw = 0F;
+
         public float showInfoDist = 20F;
         public float hideInfoDist = 25F;
 
@@ -40,6 +42,11 @@ namespace MinecraftClient.Rendering
         public void MoveTo(Vector3 position)
         {
             targetPosition = position;
+        }
+
+        public void RotateTo(float yaw, float pitch)
+        {
+            targetYaw = yaw;
         }
 
         private void EnsureInitialized()
@@ -112,6 +119,15 @@ namespace MinecraftClient.Rendering
                 else // Smoothly move to current position
                     transform.position = Vector3.SmoothDamp(transform.position, targetPosition.Value, ref currentVelocity, tickMilSec);
 
+            }
+
+            // Update rotation
+            if (lastYaw != targetYaw)
+            {
+                // TODO Transition
+                lastYaw = targetYaw;
+
+                transform.eulerAngles = new(0F, lastYaw, 0F);
             }
 
         }
