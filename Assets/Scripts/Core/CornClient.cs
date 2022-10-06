@@ -102,7 +102,10 @@ namespace MinecraftClient
         #region Networking
         private DateTime lastKeepAlive;
         private object lastKeepAliveLock = new();
-        private long lastAge = 0;
+        private long lastAge = 0L, timeOfDay = 0L;
+        public long CurrentTimeOfDay { get { return timeOfDay + (long)(timeElapsedSinceUpdate * 20F); } }
+        private float timeElapsedSinceUpdate = 0F;
+
         private DateTime lastTime;
         private double serverTPS = 0;
         private double averageTPS = 20;
@@ -182,7 +185,7 @@ namespace MinecraftClient
         private readonly ResourcePackManager packManager = new ResourcePackManager();
         public ResourcePackManager PackManager { get { return packManager; } }
         
-        public const int WINDOWED_WIDTH = 1600, WINDOWED_HEIGHT = 900;
+        public const int WINDOWED_APP_WIDTH = 1600, WINDOWED_APP_HEIGHT = 900;
 
         void Update()
         {
@@ -190,7 +193,7 @@ namespace MinecraftClient
             {
                 if (Screen.fullScreen)
                 {
-                    Screen.SetResolution(WINDOWED_WIDTH, WINDOWED_HEIGHT, false);
+                    Screen.SetResolution(WINDOWED_APP_WIDTH, WINDOWED_APP_HEIGHT, false);
                     Screen.fullScreen = false;
                 }
                 else
@@ -201,14 +204,17 @@ namespace MinecraftClient
                 }
                 
             }
+
+            // Time update
+            timeElapsedSinceUpdate += Time.unscaledDeltaTime;
+
         }
 
         void OnApplicationQuit()
         {
-            if (CornClient.Connected)
-            {
-                CornClient.StopClient();
-            }
+            if (Connected)
+                StopClient();
+            
         }
 
         private WorldRender worldRender;
@@ -2574,6 +2580,10 @@ namespace MinecraftClient
         {
             // TimeUpdate sent every server tick hence used as timeout detect
             UpdateKeepAlive();
+
+            this.timeOfDay = TimeOfDay;
+            timeElapsedSinceUpdate = 0F;
+
             // calculate server tps
             if (lastAge != 0)
             {
