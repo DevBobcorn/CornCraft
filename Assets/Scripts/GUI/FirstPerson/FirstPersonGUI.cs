@@ -10,9 +10,8 @@ namespace MinecraftClient.UI
 {
     public class FirstPersonGUI : MonoBehaviour
     {
-        private const int BUTTON_COUNT = 5;
-
-        private const float CANVAS_SCALE = 0.0006F;
+        public const float CANVAS_SCALE = 0.0006F;
+        public const int BUTTON_COUNT = 5;
         
         private const float SINGLE_SHOW_TIME = 0.25F, SINGLE_DELTA_TIME = 0.15F;
         private const float TOTAL_SHOW_TIME = SINGLE_DELTA_TIME * (BUTTON_COUNT - 1) + SINGLE_SHOW_TIME;
@@ -38,6 +37,7 @@ namespace MinecraftClient.UI
         private Image? buttonListMaskImage;
         
         private FirstPersonPanel? firstPersonPanel = null;
+        private FirstPersonChat?  firstPersonChat  = null;
 
         private GameObject[] rootMenuPrefabs = new GameObject[BUTTON_COUNT];
         private GameObject[] buttonObjs = new GameObject[BUTTON_COUNT];
@@ -137,6 +137,13 @@ namespace MinecraftClient.UI
 
             firstPersonPanel = firstPersonPanelObj.GetComponent<FirstPersonPanel>();
 
+            var chatPrefab = Resources.Load<GameObject>("Prefabs/GUI/First Person Chat");
+            var chatObj = GameObject.Instantiate(chatPrefab, Vector3.zero, Quaternion.identity);
+            chatObj.transform.SetParent(canvas.transform, false);
+            chatObj.transform.localPosition = new(70F, STOP_POS[0], 0F);
+
+            firstPersonChat = chatObj.GetComponent<FirstPersonChat>();
+
             initialzed = true;
         }
 
@@ -234,6 +241,9 @@ namespace MinecraftClient.UI
                 basePos = (-Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET) * CANVAS_SCALE;
             else
                 basePos = ( Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET) * CANVAS_SCALE;
+            
+            if (firstPersonChat!.Shown)
+                basePos -= 190F * CANVAS_SCALE;
 
             if (State == WidgetState.Hide) // Move to the left when fading out
                 return basePos - 1F;
@@ -290,6 +300,20 @@ namespace MinecraftClient.UI
 
         }
 
+        public void ShowChatPanel(string contact)
+        {
+            EnsureInitialized();
+
+            firstPersonChat!.Show(contact);
+        }
+
+        public void HideChatPanel()
+        {
+            EnsureInitialized();
+
+            firstPersonChat!.Hide();
+        }
+
         public void ShowGUI()
         {
             EnsureInitialized();
@@ -329,6 +353,7 @@ namespace MinecraftClient.UI
             GUIAnimTime = 0F;
 
             firstPersonPanel!.Hide();
+            HideChatPanel();
         }
 
         public void SetCameraCon(CameraController cameraCon)
@@ -410,7 +435,7 @@ namespace MinecraftClient.UI
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
                     if (openedMenus.Count > 0 && openedMenus.Peek().InputActive())
-                        openedMenus.Peek().TryUnfoldSubMenu();
+                        openedMenus.Peek().TryUnfoldSubMenuOrCallAction();
                 }
 
                 if (Input.GetKeyDown(KeyCode.UpArrow)) // Previous

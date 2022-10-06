@@ -8,10 +8,10 @@ namespace MinecraftClient.UI
     public class FirstPersonMenu : MonoBehaviour
     {
         private const float SUB_MENU_FOCUS_OPCACITY = 0.7F;
+        protected FirstPersonGUI? parentGUI;
 
         public GameObject? templateItem;
 
-        private FirstPersonGUI? parentGUI;
         private CanvasGroup? canvasGroup, stripeCanvasGroup;
         protected Transform? itemList;
         
@@ -20,7 +20,10 @@ namespace MinecraftClient.UI
 
         private const float ITEM_SHOW_TIME = 0.1F;
         private const float MENU_HIDE_TIME = 0.1F;
-        private float animTime = 0F;
+        private float animTime = 0F, itemHeight = 0F;
+
+        private float curVerticalOffset = 0F;
+        private float targetVerticalOffset = 0F;
 
         // Used for initializing items only
         public string[] itemTexts = { };
@@ -41,7 +44,7 @@ namespace MinecraftClient.UI
             parentGUI = parent;
         }
 
-        public void Hide()
+        public virtual void Hide()
         {
             EnsureInitialized();
 
@@ -49,17 +52,11 @@ namespace MinecraftClient.UI
             animTime = 0F;
         }
 
-        public bool UpDownActive()
-        {
-            return State == WidgetState.Shown && (items.Count <= 0 || focusState == MenuFocusState.ChildFocused);
-        }
+        public bool UpDownActive() => State == WidgetState.Shown && (items.Count <= 0 || focusState == MenuFocusState.ChildFocused);
 
-        public bool InputActive()
-        {
-            return State == WidgetState.Shown;
-        }
+        public bool InputActive() => State == WidgetState.Shown;
 
-        public void FocusPrevItem()
+        public virtual void FocusPrevItem()
         {
             EnsureInitialized();
 
@@ -78,7 +75,7 @@ namespace MinecraftClient.UI
 
         }
 
-        public void FocusNextItem()
+        public virtual void FocusNextItem()
         {
             EnsureInitialized();
 
@@ -97,7 +94,7 @@ namespace MinecraftClient.UI
 
         }
 
-        public void TryFocusMiddleItem()
+        public virtual void TryFocusMiddleItem()
         {
             EnsureInitialized();
 
@@ -109,16 +106,18 @@ namespace MinecraftClient.UI
         }
 
         // Called when an item's sub menu is closed, and we refocus on this item itself again
-        public void TryRefocusOnCurrentItem()
+        public virtual void TryRefocusOnCurrentItem()
         {
             EnsureInitialized();
 
             if (focusItem is not null)
                 FocusItem(focusItem);
             
+            targetVerticalOffset = 0F;
+            
         }
 
-        public void TryFocusItem(FirstPersonListItem targetItem)
+        public virtual void TryFocusItem(FirstPersonListItem targetItem)
         {
             if (targetItem is not null && items.Contains(targetItem))
             {
@@ -167,7 +166,7 @@ namespace MinecraftClient.UI
 
         }
 
-        public void FocusSelf()
+        public virtual void FocusSelf()
         {
             EnsureInitialized();
 
@@ -175,6 +174,7 @@ namespace MinecraftClient.UI
             canvasGroup!.alpha = 1F;
 
             UnfocusItems();
+            targetVerticalOffset = 0F;
 
             focusState = MenuFocusState.SelfFocused;
         }
@@ -216,33 +216,44 @@ namespace MinecraftClient.UI
             rollCooldown = 0.2F;
         }
 
-        public void TryUnfoldSubMenu()
+        public void TryUnfoldSubMenuOrCallAction()
         {
             EnsureInitialized();
 
-            if (focusItem is not null && focusItem.SubMenu is not null)
+            if (focusItem is not null)
             {
-                // This item has a sub menu, unfold it
-                parentGUI!.UnfoldMenu(focusItem.SubMenu.gameObject);
-                focusItem.Focus(true);
-
-                stripeCanvasGroup!.alpha = 0F;
-                canvasGroup!.alpha = SUB_MENU_FOCUS_OPCACITY;
-
-                focusState = MenuFocusState.SubMenuFocused;
-
-                // Roll the unfolded item to the middle of menu
-                int rollTargetIndex = items.FindIndex((i) => i == focusItem);
-
-                if (rollTargetIndex != -1 && topItemIndex != -1) // Sanity check
+                if (focusItem.SubMenu is not null)
                 {
-                    int targetItemCurPos = (rollTargetIndex - topItemIndex + items.Count) % items.Count;
-                    int middlePos = GetMiddlePos(items.Count);
+                    // This item has a sub menu, unfold it
+                    parentGUI!.UnfoldMenu(focusItem.SubMenu.gameObject);
+                    focusItem.Focus(true);
 
-                    rollCount = middlePos - targetItemCurPos;
+                    stripeCanvasGroup!.alpha = 0F;
+                    canvasGroup!.alpha = SUB_MENU_FOCUS_OPCACITY;
 
+                    focusState = MenuFocusState.SubMenuFocused;
+
+                    // Roll the unfolded item to the middle of menu
+                    int rollTargetIndex = items.FindIndex((i) => i == focusItem);
+
+                    if (rollTargetIndex != -1 && topItemIndex != -1) // Sanity check
+                    {
+                        int targetItemCurPos = (rollTargetIndex - topItemIndex + items.Count) % items.Count;
+                        int middlePos = GetMiddlePos(items.Count);
+
+                        rollCount = middlePos - targetItemCurPos;
+
+                        // Apply a tiny offset in down direction if the number of items is even,
+                        // to make sure the arrow tip points to center of left item
+                        if (items.Count % 2 == 0)
+                            targetVerticalOffset = -itemHeight / 2;
+
+                    }
                 }
 
+                if (focusItem.Callback is not null)
+                    focusItem.Callback.Invoke();
+                
             }
             
         }
@@ -257,6 +268,10 @@ namespace MinecraftClient.UI
                     State = WidgetState.Error;
                     return;
                 }
+
+                itemHeight = templateItem.GetComponent<RectTransform>().rect.height + 2F;
+
+                targetVerticalOffset = 0F;
 
                 itemList = transform.Find("Item List");
                 canvasGroup = GetComponent<CanvasGroup>();
@@ -373,6 +388,22 @@ namespace MinecraftClient.UI
             else // Hidden, self destroy
             {
                 Destroy(this.gameObject);
+            }
+
+            var verticalOffsetDelta = targetVerticalOffset - curVerticalOffset;
+
+            if (verticalOffsetDelta != 0F)
+            {
+                float mov;
+
+                if (verticalOffsetDelta < 0F)
+                    mov = Mathf.Max(-Time.deltaTime * 100F, verticalOffsetDelta);
+                else
+                    mov = Mathf.Min( Time.deltaTime * 100F, verticalOffsetDelta);
+                
+                transform.Translate(0F, mov * FirstPersonGUI.CANVAS_SCALE, 0F, Space.Self);
+                curVerticalOffset += mov;
+
             }
 
         }

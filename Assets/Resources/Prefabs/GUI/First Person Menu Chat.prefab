@@ -69,7 +69,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.size
-      value: 10
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.size
@@ -86,58 +86,58 @@ PrefabInstance:
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[2]
       value: 
-      objectReference: {fileID: 21300000, guid: feb62f5d96218e1489e618c4bce3cc91, type: 3}
+      objectReference: {fileID: 21300000, guid: 0d821b62ec1a34042b8cdbe65d231330, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[3]
       value: 
-      objectReference: {fileID: 21300000, guid: 0d821b62ec1a34042b8cdbe65d231330, type: 3}
+      objectReference: {fileID: 21300000, guid: feb62f5d96218e1489e618c4bce3cc91, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[4]
       value: 
-      objectReference: {fileID: 21300000, guid: feb62f5d96218e1489e618c4bce3cc91, type: 3}
+      objectReference: {fileID: 21300000, guid: 0d821b62ec1a34042b8cdbe65d231330, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[5]
       value: 
-      objectReference: {fileID: 21300000, guid: 0d821b62ec1a34042b8cdbe65d231330, type: 3}
+      objectReference: {fileID: 21300000, guid: feb62f5d96218e1489e618c4bce3cc91, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[6]
       value: 
-      objectReference: {fileID: 21300000, guid: feb62f5d96218e1489e618c4bce3cc91, type: 3}
+      objectReference: {fileID: 21300000, guid: 0d821b62ec1a34042b8cdbe65d231330, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[7]
       value: 
-      objectReference: {fileID: 21300000, guid: 0d821b62ec1a34042b8cdbe65d231330, type: 3}
+      objectReference: {fileID: 21300000, guid: feb62f5d96218e1489e618c4bce3cc91, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[8]
       value: 
-      objectReference: {fileID: 21300000, guid: feb62f5d96218e1489e618c4bce3cc91, type: 3}
+      objectReference: {fileID: 21300000, guid: 0d821b62ec1a34042b8cdbe65d231330, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemIcons.Array.data[9]
       value: 
       objectReference: {fileID: 21300000, guid: 0d821b62ec1a34042b8cdbe65d231330, type: 3}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemSubMenus.Array.size
-      value: 5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[0]
-      value: Kirito
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[1]
-      value: Asuna
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[2]
-      value: Yui
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[3]
-      value: Leafa
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: itemTexts.Array.data[4]
-      value: Yuuki
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7996488130939804768, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
       propertyPath: m_AnchorMax.y
@@ -263,5 +263,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7741345727970870774, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
+--- !u!1 &9106868316967306063 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9109159638774325563, guid: fae00ea55dd7da748be74bbe20243855, type: 3}
+  m_PrefabInstance: {fileID: 2291477768086132}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3564908380155773410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9106868316967306063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 002260c6ed21cfc45825365961e1f400, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  templateItem: {fileID: 379028408809923589, guid: f6756cc3ae54e5f4c87369fb1f5d286b, type: 3}
+  itemTexts:
+  - Kirito
+  - Asuna
+  - Yui
+  - Leafa
+  - Yuuki
+  itemIcons:
+  - {fileID: 21300000, guid: feb62f5d96218e1489e618c4bce3cc91, type: 3}
+  - {fileID: 21300000, guid: 0d821b62ec1a34042b8cdbe65d231330, type: 3}
+  itemSubMenus: []
