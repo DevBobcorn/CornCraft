@@ -7,16 +7,20 @@ namespace MinecraftClient.Rendering
     {
         public Transform? frontLeftLeg, frontRightLeg, rearLeftLeg, rearRightLeg;
 
-        void Start()
+        protected override void Initialize()
         {
+            base.Initialize();
+            
             if (frontLeftLeg is null || frontRightLeg is null || rearLeftLeg is null || rearRightLeg is null)
                 Debug.LogWarning("Legs of quadruped entity not properly assigned!");
             else
                 legsPresent = true;
         }
 
-        void Update()
+        public override void ManagedUpdate(Vector3 cameraPos, float tickMilSec)
         {
+            base.ManagedUpdate(cameraPos, tickMilSec);
+            
             if (legsPresent)
             {
                 UpdateLegAngle();

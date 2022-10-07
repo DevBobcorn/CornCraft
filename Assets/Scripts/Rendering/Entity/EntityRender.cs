@@ -81,13 +81,9 @@ namespace MinecraftClient.Rendering
             
         }
 
-        void Start()
-        {
-            EnsureInitialized();
+        void Start() => EnsureInitialized();
 
-        }
-
-        public void ManagedUpdate(Vector3 cameraPos, float tickMilSec)
+        public virtual void ManagedUpdate(Vector3 cameraPos, float tickMilSec)
         {
             var dist2Cam  = (cameraPos - transform.position).magnitude;
 

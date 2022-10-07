@@ -7,16 +7,20 @@ namespace MinecraftClient.Rendering
     {
         public Transform? leftLeg, rightLeg;
 
-        void Start()
+        protected override void Initialize()
         {
+            base.Initialize();
+
             if (leftLeg is null || rightLeg is null)
                 Debug.LogWarning("Legs of biped entity not properly assigned!");
             else
                 legsPresent = true;
         }
 
-        void Update()
+        public override void ManagedUpdate(Vector3 cameraPos, float tickMilSec)
         {
+            base.ManagedUpdate(cameraPos, tickMilSec);
+            
             if (legsPresent)
             {
                 UpdateLegAngle();
