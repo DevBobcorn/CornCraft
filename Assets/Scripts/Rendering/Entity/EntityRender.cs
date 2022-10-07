@@ -16,7 +16,11 @@ namespace MinecraftClient.Rendering
         public float showInfoDist = 10F;
         public float hideInfoDist = 12F;
 
-        private TMP_Text? nameText;
+        // A number made from the entity's numeral id, used in animations to prevent
+        // several mobs of a same type moving synchronisedly, which looks unnatural
+        protected float pseudoRandomOffset = 0F;
+
+        protected TMP_Text? nameText;
         private bool nameTextShown = false, initialized = false;
 
         protected Entity? entity;
@@ -30,26 +34,20 @@ namespace MinecraftClient.Rendering
             set {
                 entity = value;
 
-                lastPosition = targetPosition = transform.position = CoordConvert.MC2Unity(entity.Location);
-
                 UpdateDisplayName();
+
+                Random.InitState(entity.ID);
+                pseudoRandomOffset = Random.Range(0F, 1F);
+                
+                lastPosition = targetPosition = transform.position = CoordConvert.MC2Unity(entity.Location);
             }
         }
 
-        public void Unload()
-        {
-            Destroy(this.gameObject);
-        }
+        public void Unload() => Destroy(this.gameObject);
 
-        public void MoveTo(Vector3 position)
-        {
-            targetPosition = position;
-        }
+        public void MoveTo(Vector3 position) => targetPosition = position;
 
-        public void RotateTo(float yaw, float pitch)
-        {
-            targetYaw = yaw;
-        }
+        public void RotateTo(float yaw, float pitch) => targetYaw = yaw;
 
         private void EnsureInitialized()
         {
