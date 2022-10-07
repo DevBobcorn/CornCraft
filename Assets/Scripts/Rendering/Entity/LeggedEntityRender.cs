@@ -17,17 +17,24 @@ namespace MinecraftClient.Rendering
             var movFact = Mathf.Clamp01(currentVelocity.magnitude);
 
             if (currentMovFact != movFact)
-                currentMovFact = Mathf.MoveTowards(currentMovFact, movFact, Time.deltaTime);
+                currentMovFact = Mathf.MoveTowards(currentMovFact, movFact, Time.deltaTime * 3F);
 
-            var movTime = (Time.realtimeSinceStartup % cycleTime) / cycleTime;
+            // Make sure every mob is moving with a different offset
+            var refTime = Time.realtimeSinceStartup + pseudoRandomOffset * cycleTime;
+
+            int fullCnt = (int)(refTime / cycleTime);
+            var movTime = (refTime - fullCnt * cycleTime) / cycleTime;
 
             // Update leg rotation
-            if (movTime <= cycleTime * 0.25F) // 0 ~ 0.25
-                currentLegAngle =  legAngle * (movTime / cycleTime) * 4F;
-            else if ((1F - movTime) <= cycleTime * 0.25F) // 0.75 ~ 1
-                currentLegAngle = -legAngle * (1F - movTime / cycleTime) * 4F;
+            if (movTime <= 0.25F) // 0 ~ 0.25
+                currentLegAngle =  legAngle * movTime * 4F;
+            else if (movTime >= 0.75F) // 0.75 ~ 1
+                currentLegAngle = -legAngle * (1F - movTime) * 4F;
             else // 0.25 ~ 0.75
-                currentLegAngle = -legAngle * (movTime / cycleTime - 0.5F) * 4F;
+                currentLegAngle = -legAngle * (movTime - 0.5F) * 4F;
+            
+            //nameText!.text = ((int)currentLegAngle).ToString();
+
         }
 
     }
