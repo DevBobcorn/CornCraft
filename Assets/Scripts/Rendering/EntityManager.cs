@@ -102,7 +102,17 @@ namespace MinecraftClient.Rendering
             entityPrefabs.Clear();
 
             // Add specific entity prefabs TODO Expand
+            entityPrefabs.Add(EntityType.Skeleton, Resources.Load<GameObject>("Prefabs/Entity/Zombie Entity"));
+            entityPrefabs.Add(EntityType.Stray, Resources.Load<GameObject>("Prefabs/Entity/Zombie Entity"));
+
             entityPrefabs.Add(EntityType.Zombie, Resources.Load<GameObject>("Prefabs/Entity/Zombie Entity"));
+            entityPrefabs.Add(EntityType.Husk, Resources.Load<GameObject>("Prefabs/Entity/Zombie Entity"));
+            entityPrefabs.Add(EntityType.Drowned, Resources.Load<GameObject>("Prefabs/Entity/Zombie Entity"));
+
+            entityPrefabs.Add(EntityType.Pig, Resources.Load<GameObject>("Prefabs/Entity/Pig Entity"));
+            entityPrefabs.Add(EntityType.Cow, Resources.Load<GameObject>("Prefabs/Entity/Pig Entity"));
+            entityPrefabs.Add(EntityType.Sheep, Resources.Load<GameObject>("Prefabs/Entity/Pig Entity"));
+            entityPrefabs.Add(EntityType.Goat, Resources.Load<GameObject>("Prefabs/Entity/Pig Entity"));
 
             game = CornClient.Instance;
 
