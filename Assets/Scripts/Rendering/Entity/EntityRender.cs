@@ -9,15 +9,17 @@ namespace MinecraftClient.Rendering
     public class EntityRender : MonoBehaviour
     {
         private const float MOVE_THERESHOLD = 5F * 5F; // Treat as teleport if move more than 5 meters at once
-        private Vector3? lastPosition = null, targetPosition = null;
-        private float lastYaw = 0F, targetYaw = 0F;
+        protected Vector3? lastPosition = null, targetPosition = null;
+        protected float lastYaw = 0F, targetYaw = 0F;
+        protected Vector3 currentVelocity = Vector3.zero;
 
-        public float showInfoDist = 20F;
-        public float hideInfoDist = 25F;
+        public float showInfoDist = 10F;
+        public float hideInfoDist = 12F;
 
         private TMP_Text? nameText;
         private bool nameTextShown = false, initialized = false;
-        private Entity? entity;
+
+        protected Entity? entity;
 
         public Entity Entity
         {
@@ -54,13 +56,16 @@ namespace MinecraftClient.Rendering
             if (initialized)
                 return;
             
+            Initialize();
+            initialized = true;
+        }
+
+        protected virtual void Initialize()
+        {
             // Initialze info plate
             nameText = FindHelper.FindChildRecursively(transform, "Name Text").GetComponent<TMP_Text>();
             nameTextShown    = false;
             nameText.enabled = false;
-
-            initialized = true;
-
         }
 
         private void UpdateDisplayName()
@@ -81,8 +86,6 @@ namespace MinecraftClient.Rendering
             EnsureInitialized();
 
         }
-
-        private Vector3 currentVelocity = Vector3.zero;
 
         public void ManagedUpdate(Vector3 cameraPos, float tickMilSec)
         {
@@ -125,7 +128,7 @@ namespace MinecraftClient.Rendering
             if (lastYaw != targetYaw)
             {
                 // TODO Transition
-                lastYaw = targetYaw;
+                lastYaw = Mathf.MoveTowardsAngle(lastYaw, targetYaw, Time.deltaTime * 400F);
 
                 transform.eulerAngles = new(0F, lastYaw, 0F);
             }
