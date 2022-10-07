@@ -5,8 +5,8 @@
       <author>Blockbench user</author>
       <authoring_tool>Blockbench</authoring_tool>
     </contributor>
-    <created>2022-10-07T03:27:03.394Z</created>
-    <modified>2022-10-07T03:27:03.394Z</modified>
+    <created>2022-10-07T13:05:08.379Z</created>
+    <modified>2022-10-07T13:05:08.379Z</modified>
     <unit name="meter" meter="1.0"/>
     <up_axis>Y_UP</up_axis>
   </asset>
@@ -50,7 +50,7 @@
     </material>
   </library_materials>
   <library_geometries>
-    <geometry id="9822be5f-b464-53e7-1920-f92d5c492021-mesh" name="Front Left Leg">
+    <geometry id="9822be5f-b464-53e7-1920-f92d5c492021-mesh" name="FrontLeftLeg">
       <mesh>
         <source id="9822be5f-b464-53e7-1920-f92d5c492021-mesh-positions">
           <float_array id="9822be5f-b464-53e7-1920-f92d5c492021-mesh-positions-array" count="24">0.125 0 0.125 0.125 0 -0.125 0.125 -0.375 0.125 0.125 -0.375 -0.125 -0.125 0 -0.125 -0.125 0 0.125 -0.125 -0.375 -0.125 -0.125 -0.375 0.125</float_array>
@@ -136,7 +136,7 @@
         </polylist>
       </mesh>
     </geometry>
-    <geometry id="c0d31104-bd5e-e40f-b919-38c070b0e50f-mesh" name="Front Right Leg">
+    <geometry id="c0d31104-bd5e-e40f-b919-38c070b0e50f-mesh" name="FrontRightLeg">
       <mesh>
         <source id="c0d31104-bd5e-e40f-b919-38c070b0e50f-mesh-positions">
           <float_array id="c0d31104-bd5e-e40f-b919-38c070b0e50f-mesh-positions-array" count="24">0.125 0 0.125 0.125 0 -0.125 0.125 -0.375 0.125 0.125 -0.375 -0.125 -0.125 0 -0.125 -0.125 0 0.125 -0.125 -0.375 -0.125 -0.125 -0.375 0.125</float_array>
@@ -179,7 +179,7 @@
         </polylist>
       </mesh>
     </geometry>
-    <geometry id="30570866-25fa-5120-d096-df25901dafb4-mesh" name="Rear Right Leg">
+    <geometry id="30570866-25fa-5120-d096-df25901dafb4-mesh" name="RearRightLeg">
       <mesh>
         <source id="30570866-25fa-5120-d096-df25901dafb4-mesh-positions">
           <float_array id="30570866-25fa-5120-d096-df25901dafb4-mesh-positions-array" count="24">0.125 0 0.125 0.125 0 -0.125 0.125 -0.375 0.125 0.125 -0.375 -0.125 -0.125 0 -0.125 -0.125 0 0.125 -0.125 -0.375 -0.125 -0.125 -0.375 0.125</float_array>
@@ -222,7 +222,7 @@
         </polylist>
       </mesh>
     </geometry>
-    <geometry id="e80eb144-65bd-5e21-4254-ff4f5cf230e2-mesh" name="Rear Left Leg">
+    <geometry id="e80eb144-65bd-5e21-4254-ff4f5cf230e2-mesh" name="RearLeftLeg">
       <mesh>
         <source id="e80eb144-65bd-5e21-4254-ff4f5cf230e2-mesh-positions">
           <float_array id="e80eb144-65bd-5e21-4254-ff4f5cf230e2-mesh-positions-array" count="24">0.125 0 0.125 0.125 0 -0.125 0.125 -0.375 0.125 0.125 -0.375 -0.125 -0.125 0 -0.125 -0.125 0 0.125 -0.125 -0.375 -0.125 -0.125 -0.375 0.125</float_array>
@@ -265,7 +265,7 @@
         </polylist>
       </mesh>
     </geometry>
-    <geometry id="83d9bedf-cab3-14b9-82f3-307336ec2e22-mesh" name="Head Main">
+    <geometry id="83d9bedf-cab3-14b9-82f3-307336ec2e22-mesh" name="Head">
       <mesh>
         <source id="83d9bedf-cab3-14b9-82f3-307336ec2e22-mesh-positions">
           <float_array id="83d9bedf-cab3-14b9-82f3-307336ec2e22-mesh-positions-array" count="24">0.25 0.3125 0.5 0.25 0.3125 0 0.25 -0.1875 0.5 0.25 -0.1875 0 -0.25 0.3125 0 -0.25 0.3125 0.5 -0.25 -0.1875 0 -0.25 -0.1875 0.5</float_array>
@@ -354,13 +354,13 @@
   </library_geometries>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
-      <node id="9822be5f-b464-53e7-1920-f92d5c492021" name="Front Left Leg" type="NODE">
+      <node id="9822be5f-b464-53e7-1920-f92d5c492021" name="FrontLeftLeg" type="NODE">
         <scale sid="scale">1 1 1</scale>
         <translate sid="location">0.1875 0.375 0.375</translate>
         <rotate sid="rotationZ">0 0 1 0</rotate>
         <rotate sid="rotationY">0 1 0 0</rotate>
         <rotate sid="rotationX">1 0 0 0</rotate>
-        <instance_geometry url="#9822be5f-b464-53e7-1920-f92d5c492021-mesh" name="Front Left Leg">
+        <instance_geometry url="#9822be5f-b464-53e7-1920-f92d5c492021-mesh" name="FrontLeftLeg">
           <bind_material>
             <technique_common>
               <instance_material symbol="Material_0-material" target="#Material_0-material">
@@ -370,13 +370,13 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="c0d31104-bd5e-e40f-b919-38c070b0e50f" name="Front Right Leg" type="NODE">
+      <node id="c0d31104-bd5e-e40f-b919-38c070b0e50f" name="FrontRightLeg" type="NODE">
         <scale sid="scale">1 1 1</scale>
         <translate sid="location">-0.1875 0.375 0.375</translate>
         <rotate sid="rotationZ">0 0 1 0</rotate>
         <rotate sid="rotationY">0 1 0 0</rotate>
         <rotate sid="rotationX">1 0 0 0</rotate>
-        <instance_geometry url="#c0d31104-bd5e-e40f-b919-38c070b0e50f-mesh" name="Front Right Leg">
+        <instance_geometry url="#c0d31104-bd5e-e40f-b919-38c070b0e50f-mesh" name="FrontRightLeg">
           <bind_material>
             <technique_common>
               <instance_material symbol="Material_0-material" target="#Material_0-material">
@@ -386,13 +386,13 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="e80eb144-65bd-5e21-4254-ff4f5cf230e2" name="Rear Left Leg" type="NODE">
+      <node id="e80eb144-65bd-5e21-4254-ff4f5cf230e2" name="RearLeftLeg" type="NODE">
         <scale sid="scale">1 1 1</scale>
         <translate sid="location">0.1875 0.375 -0.375</translate>
         <rotate sid="rotationZ">0 0 1 0</rotate>
         <rotate sid="rotationY">0 1 0 0</rotate>
         <rotate sid="rotationX">1 0 0 0</rotate>
-        <instance_geometry url="#e80eb144-65bd-5e21-4254-ff4f5cf230e2-mesh" name="Rear Left Leg">
+        <instance_geometry url="#e80eb144-65bd-5e21-4254-ff4f5cf230e2-mesh" name="RearLeftLeg">
           <bind_material>
             <technique_common>
               <instance_material symbol="Material_0-material" target="#Material_0-material">
@@ -402,13 +402,13 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="30570866-25fa-5120-d096-df25901dafb4" name="Rear Right Leg" type="NODE">
+      <node id="30570866-25fa-5120-d096-df25901dafb4" name="RearRightLeg" type="NODE">
         <scale sid="scale">1 1 1</scale>
         <translate sid="location">-0.1875 0.375 -0.375</translate>
         <rotate sid="rotationZ">0 0 1 0</rotate>
         <rotate sid="rotationY">0 1 0 0</rotate>
         <rotate sid="rotationX">1 0 0 0</rotate>
-        <instance_geometry url="#30570866-25fa-5120-d096-df25901dafb4-mesh" name="Rear Right Leg">
+        <instance_geometry url="#30570866-25fa-5120-d096-df25901dafb4-mesh" name="RearRightLeg">
           <bind_material>
             <technique_common>
               <instance_material symbol="Material_0-material" target="#Material_0-material">
@@ -434,19 +434,19 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="30eb23b5-2530-11b4-0ef7-51a5bc7b5117" name="Head" type="NODE">
+      <node id="30eb23b5-2530-11b4-0ef7-51a5bc7b5117" name="HeadGroup" type="NODE">
         <scale sid="scale">1 1 1</scale>
         <translate sid="location">0 0.6875 0.4375</translate>
         <rotate sid="rotationZ">0 0 1 0</rotate>
         <rotate sid="rotationY">0 1 0 0</rotate>
         <rotate sid="rotationX">1 0 0 0</rotate>
-        <node id="83d9bedf-cab3-14b9-82f3-307336ec2e22" name="Head Main" type="NODE">
+        <node id="83d9bedf-cab3-14b9-82f3-307336ec2e22" name="Head" type="NODE">
           <scale sid="scale">1 1 1</scale>
           <translate sid="location">0 0 0</translate>
           <rotate sid="rotationZ">0 0 1 0</rotate>
           <rotate sid="rotationY">0 1 0 0</rotate>
           <rotate sid="rotationX">1 0 0 0</rotate>
-          <instance_geometry url="#83d9bedf-cab3-14b9-82f3-307336ec2e22-mesh" name="Head Main">
+          <instance_geometry url="#83d9bedf-cab3-14b9-82f3-307336ec2e22-mesh" name="Head">
             <bind_material>
               <technique_common>
                 <instance_material symbol="Material_0-material" target="#Material_0-material">

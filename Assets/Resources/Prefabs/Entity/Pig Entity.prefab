@@ -286,10 +286,10 @@ MonoBehaviour:
   hideInfoDist: 12
   cycleTime: 1
   legAngle: 45
-  frontLeftLeg: {fileID: 8915143335622092895}
-  frontRightLeg: {fileID: 6772375949495070298}
-  rearLeftLeg: {fileID: 1466962954007744720}
-  rearRightLeg: {fileID: 4657421122111909099}
+  frontLeftLeg: {fileID: 6398734945089148527}
+  frontRightLeg: {fileID: 2829092200162745753}
+  rearLeftLeg: {fileID: 6355137034990961191}
+  rearRightLeg: {fileID: 8749899508757009915}
 --- !u!1001 &8785207576479647290
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -375,24 +375,24 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 73e983ca2a359444f9a7000258033ceb, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c6ef79af918031444a2403502004ed47, type: 3}
---- !u!4 &1466962954007744720 stripped
+--- !u!4 &2829092200162745753 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 7904064420042102506, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_CorrespondingSourceObject: {fileID: -2402204331724727389, guid: c6ef79af918031444a2403502004ed47, type: 3}
   m_PrefabInstance: {fileID: 8785207576479647290}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &4657421122111909099 stripped
+--- !u!4 &6355137034990961191 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: -5095497063185880367, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_CorrespondingSourceObject: {fileID: 2439447729277174813, guid: c6ef79af918031444a2403502004ed47, type: 3}
   m_PrefabInstance: {fileID: 8785207576479647290}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &6772375949495070298 stripped
+--- !u!4 &6398734945089148527 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: -6622820647725782944, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_CorrespondingSourceObject: {fileID: 2389032305928245333, guid: c6ef79af918031444a2403502004ed47, type: 3}
   m_PrefabInstance: {fileID: 8785207576479647290}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &8915143335622092895 stripped
+--- !u!4 &8749899508757009915 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 167653669155761765, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_CorrespondingSourceObject: {fileID: 37911711452255169, guid: c6ef79af918031444a2403502004ed47, type: 3}
   m_PrefabInstance: {fileID: 8785207576479647290}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &9106818048326541777 stripped
