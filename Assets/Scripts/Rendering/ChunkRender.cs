@@ -16,18 +16,16 @@ namespace MinecraftClient.Rendering
             RenderType.WATER
         };
 
-        public static int TypeIndex(RenderType type)
+        public static int TypeIndex(RenderType type) => type switch
         {
-            return type switch
-            {
-                RenderType.SOLID         => 0,
-                RenderType.CUTOUT        => 1,
-                RenderType.CUTOUT_MIPPED => 2,
-                RenderType.TRANSLUCENT   => 3,
-                RenderType.WATER   => 4,
-                _                        => 0
-            };
-        }
+            RenderType.SOLID         => 0,
+            RenderType.CUTOUT        => 1,
+            RenderType.CUTOUT_MIPPED => 2,
+            RenderType.TRANSLUCENT   => 3,
+            RenderType.WATER         => 4,
+            
+            _                        => 0
+        };
 
         public int ChunkX, ChunkY, ChunkZ;
         public Chunk Chunk;
@@ -53,15 +51,9 @@ namespace MinecraftClient.Rendering
             InteractionCollider.sharedMesh = colliderMesh;
         }
 
-        public void ClearCollider()
-        {
-            InteractionCollider?.sharedMesh.Clear();
-        }
+        public void ClearCollider() => InteractionCollider?.sharedMesh.Clear();
 
-        public int CompareTo(ChunkRender chunkRender)
-        {
-            return this.Priority - chunkRender.Priority;
-        }
+        public int CompareTo(ChunkRender chunkRender) => Priority - chunkRender.Priority;
 
         public void UpdateNeighborStatus()
         {
@@ -81,10 +73,7 @@ namespace MinecraftClient.Rendering
             Destroy(this.gameObject);
         }
 
-        public override string ToString()
-        {
-            return $"[ChunkRender {ChunkX}, {ChunkY}, {ChunkZ}]";
-        }
+        public override string ToString() => $"[ChunkRender {ChunkX}, {ChunkY}, {ChunkZ}]";
 
     }
 

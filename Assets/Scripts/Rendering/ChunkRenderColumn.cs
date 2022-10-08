@@ -27,15 +27,9 @@ namespace MinecraftClient.Rendering
             return newChunk;
         }
 
-        public bool HasChunk(int chunkY)
-        {
-            return chunks.ContainsKey(chunkY);
-        }
+        public bool HasChunk(int chunkY) => chunks.ContainsKey(chunkY);
 
-        public Dictionary<int, ChunkRender> GetChunks()
-        {
-            return chunks;
-        }
+        public Dictionary<int, ChunkRender> GetChunks() => chunks;
 
         public ChunkRender GetChunk(int chunkY, bool createIfEmpty)
         {
@@ -89,10 +83,7 @@ namespace MinecraftClient.Rendering
             Destroy(this.gameObject);
         }
 
-        public override string ToString()
-        {
-            return "[ChunkRenderColumn {ChunkX}, {ChunkZ}]";
-        }
+        public override string ToString() => $"[ChunkRenderColumn {ChunkX}, {ChunkZ}]";
 
     }
 }

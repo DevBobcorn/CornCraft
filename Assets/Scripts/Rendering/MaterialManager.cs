@@ -40,9 +40,13 @@ namespace MinecraftClient.Rendering
             s1.SetTexture("_BaseMap", AtlasManager.GetAtlasTexture(RenderType.SOLID));
             blockMaterials.Add(RenderType.SOLID, s1);
 
+            solid = s1;
+
             var s2 = Resources.Load<Material>("Materials/Block/Placebo Solid");
             s2.SetTexture("_BaseMap", AtlasManager.PlcboTexture);
             plcboMaterials.Add(RenderType.SOLID, s2);
+
+            solidPlacebo = s2;
 
             // Cutout & Cutout Mipped
             var c1 = Resources.Load<Material>("Materials/Block/Block Cutout");

@@ -49,11 +49,11 @@ MonoBehaviour:
   sensitivityX: 5
   sensitivityY: 3
   sensitivityWheel: 15
-  near: 40
-  far: 80
-  cameraYOffset: 0.5
-  cameraZOffset: -5
-  smoothTime: 0.2
+  near: 45
+  far: 75
+  cameraYOffset: 0.85
+  cameraZOffset: -7.5
+  smoothTime: 0.25
 --- !u!114 &5930999786523324073
 MonoBehaviour:
   m_ObjectHideFlags: 0

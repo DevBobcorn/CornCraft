@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4824216760403016094}
   - component: {fileID: 1391227026685269008}
   m_Layer: 9
-  m_Name: Placebo Self Player Entity
+  m_Name: Client Cube Player Entity
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -51,8 +51,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 2
-  runSpeed: 4
-  jumpSpeed: 4.7
+  runSpeed: 5.2
+  jumpSpeed: 5
   steerSpeed: 20
 --- !u!114 &739474774391685890
 MonoBehaviour:

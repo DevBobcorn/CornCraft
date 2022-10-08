@@ -25,16 +25,15 @@ namespace MinecraftClient.Rendering
         private CornClient? game;
         private static GameObject? placeboEntityPrefab;
 
+        private static GameObject? serverDefoPlayerPrefab, serverSlimPlayerPrefab;
+
         private static Dictionary<EntityType, GameObject?> entityPrefabs = new();
 
         private static GameObject? GetPrefabForType(EntityType type) => entityPrefabs.GetValueOrDefault(type, placeboEntityPrefab);
 
         private Dictionary<int, EntityRender> entities = new();
 
-        public string GetDebugInfo()
-        {
-            return $"Ent: {entities.Count}";
-        }
+        public string GetDebugInfo() => $"Ent: {entities.Count}";
 
         public void AddEntity(Entity entity)
         {
@@ -100,7 +99,10 @@ namespace MinecraftClient.Rendering
 
         void Start()
         {
-            placeboEntityPrefab = Resources.Load<GameObject>("Prefabs/Entity/Placebo Entity");
+            placeboEntityPrefab = Resources.Load<GameObject>("Prefabs/Entity/Cube Entity");
+
+            serverDefoPlayerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Server Defo Player Entity");
+            serverSlimPlayerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Server Slim Player Entity");
 
             // Clear loaded things
             entityPrefabs.Clear();

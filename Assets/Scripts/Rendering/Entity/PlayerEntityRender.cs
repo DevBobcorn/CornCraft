@@ -1,5 +1,6 @@
 #nullable enable
 using UnityEngine;
+using MinecraftClient.Resource;
 
 namespace MinecraftClient.Rendering
 {
@@ -17,6 +18,8 @@ namespace MinecraftClient.Rendering
                 Debug.LogWarning("Arms of player entity not properly assigned!");
             else
                 armsPresent = true;
+            
+            UpdateSkinMaterial();
         }
 
         public override void UpdateAnimation(float tickMilSec)
@@ -29,6 +32,24 @@ namespace MinecraftClient.Rendering
                 rightArm!.localEulerAngles = new( currentLegAngle * currentMovFact, 0F, 0F);
             }
 
+        }
+
+        private void UpdateSkinMaterial()
+        {
+            var nameLower = entity!.Name?.ToLower();
+
+            // Find skin and change materials
+            if (nameLower is not null && SkinManager.SkinMaterials.ContainsKey(nameLower))
+            {
+                var visualObj = transform.Find("Visual").gameObject;
+
+                var renderers = visualObj.GetComponentsInChildren<MeshRenderer>();
+                var mat = SkinManager.SkinMaterials[nameLower];
+
+                foreach (var renderer in renderers)
+                    renderer.sharedMaterial = mat;
+
+            }
         }
 
     }

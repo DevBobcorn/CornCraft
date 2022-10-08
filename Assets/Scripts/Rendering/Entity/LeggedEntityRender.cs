@@ -14,7 +14,7 @@ namespace MinecraftClient.Rendering
 
         protected void UpdateLegAngle()
         {
-            var movFact = Mathf.Clamp01(currentVelocity.magnitude);
+            var movFact = Mathf.Clamp01(currentVelocity.x * currentVelocity.x + currentVelocity.z * currentVelocity.z);
 
             if (currentMovFact != movFact)
                 currentMovFact = Mathf.MoveTowards(currentMovFact, movFact, Time.deltaTime * 3F);
