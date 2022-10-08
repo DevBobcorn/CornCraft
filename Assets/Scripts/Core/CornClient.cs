@@ -349,6 +349,9 @@ namespace MinecraftClient
 
             while (!atlasLoadFlag.done)
                 yield return wait;
+            
+            // Load player skin overrides...
+            SkinManager.Load();
 
             // Load resources...
             packManager.ClearPacks();
@@ -397,9 +400,8 @@ namespace MinecraftClient
             var entityManagerObj = new GameObject("Entity Manager");
             entityManager = entityManagerObj.AddComponent<EntityManager>();
 
-            // Create player
-            //var playerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Placebo Self Player Entity");
-            var playerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Self Player Entity");
+            // Create player entity
+            var playerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Client Slim Player Entity");
             var playerObj    = GameObject.Instantiate(playerPrefab);
             playerObj.name = $"{session.PlayerName} (Player)";
             playerObj.SetActive(true);
@@ -2345,6 +2347,11 @@ namespace MinecraftClient
         public void OnReceivePlayerEntityID(int EntityID)
         {
             playerEntityID = EntityID;
+
+            Loom.QueueOnMainThread(() => {
+                playerController?.SetEntityId(EntityID);
+            });
+            
         }
 
         /// <summary>

@@ -66,7 +66,7 @@ namespace MinecraftClient.Rendering
             nameText.enabled = false;
         }
 
-        private void UpdateDisplayName()
+        protected virtual void UpdateDisplayName()
         {
             EnsureInitialized();
 
@@ -81,7 +81,7 @@ namespace MinecraftClient.Rendering
 
         void Start() => EnsureInitialized();
 
-        protected void UpdateInfoPlate(Vector3 cameraPos, float dist2Cam)
+        public void UpdateInfoPlate(Vector3 cameraPos, float dist2Cam)
         {
             if (nameTextShown)
             {
@@ -107,7 +107,7 @@ namespace MinecraftClient.Rendering
 
         }
 
-        protected void UpdateTransform(float dist2Cam, float tickMilSec)
+        public void UpdateTransform(float dist2Cam, float tickMilSec)
         {
             // Update position
             if (lastPosition is not null && targetPosition is not null)

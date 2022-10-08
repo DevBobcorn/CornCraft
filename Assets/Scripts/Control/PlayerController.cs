@@ -52,6 +52,7 @@ namespace MinecraftClient.Control
         private CameraController? camControl;
         private Transform? visualTransform, blockSelectionTransform;
         private EntityRender? playerRender;
+        private Entity fakeEntity = new(0, EntityType.Player, new());
 
         private MeshRenderer? blockSelection;
 
@@ -72,6 +73,13 @@ namespace MinecraftClient.Control
             // Update components state...
             boxCollider!.enabled = true;
             rigidBody!.useGravity = true;
+        }
+
+        public void SetEntityId(int entityId)
+        {
+            fakeEntity.ID = entityId;
+            // Reassign this entity to refresh
+            playerRender!.Entity = fakeEntity;
         }
 
         public void SetPosition(Location pos)
@@ -128,6 +136,7 @@ namespace MinecraftClient.Control
                 UpdateAsEntity(interval, horInput, verInput, walkMode, attack, up, down);
             
             // Update render
+            playerRender!.UpdateInfoPlate(game!.GetCameraPosition(), 0F); // Use 0 as distance to camera since it doesn't matter
             playerRender!.UpdateAnimation(game!.GetTickMilSec());
             
         }
@@ -333,15 +342,18 @@ namespace MinecraftClient.Control
             var blockSelectionObj = GameObject.Instantiate(blockSelectionPrefab);
             blockSelection = blockSelectionObj.GetComponentInChildren<MeshRenderer>();
             blockSelection.enabled = false;
+
+            game = CornClient.Instance;
             
             // Initialize player visuals
             visualTransform = transform.Find("Visual");
             playerRender    = GetComponent<EntityRender>();
-            playerRender.Entity = new(0, EntityType.Player, new());
+
+            fakeEntity.Name = game!.GetUsername();
+            fakeEntity.ID   = 0;
+            playerRender.Entity = fakeEntity;
             
             blockSelectionTransform = blockSelectionObj.transform;
-
-            game = CornClient.Instance;
 
             boxCollider = transform.Find("Collider").GetComponent<BoxCollider>();
             rigidBody   = GetComponent<Rigidbody>();

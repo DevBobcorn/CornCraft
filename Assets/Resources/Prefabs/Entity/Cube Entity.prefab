@@ -266,7 +266,7 @@ GameObject:
   - component: {fileID: 1993495832377569330}
   - component: {fileID: 3445072782038573565}
   m_Layer: 10
-  m_Name: Placebo Entity
+  m_Name: Cube Entity
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
