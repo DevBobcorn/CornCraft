@@ -293,7 +293,7 @@ namespace MinecraftClient.Control
             var rawLocation = CoordConvert.Unity2MC(transform.position);
 
             // Preprocess the location before sending it (to avoid position correction from server)
-            if ((isOnGround || centerDownDist < 0.5F) && rawLocation.Y - (int)rawLocation.Y > 0.98D)
+            if ((isOnGround || centerDownDist < 0.5F) && rawLocation.Y - (int)rawLocation.Y > 0.9D)
                 rawLocation.Y = (int)rawLocation.Y + 1;
 
             CornClient.Instance.SyncLocation(rawLocation, visualTransform!.eulerAngles.y - 90F, 0F);
