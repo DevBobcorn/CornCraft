@@ -170,8 +170,10 @@ namespace MinecraftClient.Control
 
         }
 
-        private static readonly Vector3 groundBoxCenter   = new(0F, -0.1F, 0F);
+        private static readonly Vector3 groundBoxCenter   = new(0F, 0.2F, 0F);
         private static readonly Vector3 groundBoxHalfSize = new(0.375F, 0.05F, 0.375F);
+        private const float castDist = 0.22F;
+
         private bool isOnGround = false;
         public bool IsOnGround { get { return isOnGround; } }
         private bool isInWater = false;
@@ -190,7 +192,7 @@ namespace MinecraftClient.Control
             if (isInWater)
                 isOnGround = false;
             else // Cast a box down by 0.1 meter
-                isOnGround = Physics.BoxCast(transform.position, groundBoxHalfSize, Vector3.down, Quaternion.identity, 0.1F, movementLayer);
+                isOnGround = Physics.BoxCast(transform.position + groundBoxCenter, groundBoxHalfSize, Vector3.down, Quaternion.identity, castDist, movementLayer);
 
             var rayCenter = transform.position + transform.up * 0.2F;
             var rayFront  = rayCenter + GetAxisAlignedOrientation(visualTransform!.forward) * 0.5F;
@@ -288,7 +290,13 @@ namespace MinecraftClient.Control
             rigidBody!.velocity = newVelocity;
 
             // Tell server our current position
-            CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visualTransform!.eulerAngles.y - 90F, 0F);
+            var rawLocation = CoordConvert.Unity2MC(transform.position);
+
+            // Preprocess the location before sending it (to avoid position correction from server)
+            if ((isOnGround || centerDownDist < 0.5F) && rawLocation.Y - (int)rawLocation.Y > 0.98D)
+                rawLocation.Y = (int)rawLocation.Y + 1;
+
+            CornClient.Instance.SyncLocation(rawLocation, visualTransform!.eulerAngles.y - 90F, 0F);
 
             playerRender!.SetCurrentVelocity(newVelocity);
 
@@ -385,8 +393,10 @@ namespace MinecraftClient.Control
 
         void OnDrawGizmos()
         {
-            Gizmos.color = Color.cyan;
+            Gizmos.color = Color.magenta;
             Gizmos.DrawWireCube(transform.position + groundBoxCenter, groundBoxHalfSize * 2F);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireCube(transform.position + groundBoxCenter + Vector3.down * castDist, groundBoxHalfSize * 2F);
         }
 
         public string GetDebugInfo()
