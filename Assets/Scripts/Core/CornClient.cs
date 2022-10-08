@@ -113,6 +113,7 @@ namespace MinecraftClient
         private List<double> tpsSamples = new(maxSamples);
         private double sampleSum = 0;
         public double GetServerTPS() { return averageTPS; }
+        public float GetTickMilSec() { return (float)(1D / averageTPS); }
         public bool GetIsSupportPreviewsChat() { return isSupportPreviewsChat; }
         
         TcpClient tcpClient;
@@ -397,7 +398,8 @@ namespace MinecraftClient
             entityManager = entityManagerObj.AddComponent<EntityManager>();
 
             // Create player
-            var playerPrefab = Resources.Load<GameObject>("Prefabs/Player");
+            //var playerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Placebo Self Player Entity");
+            var playerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Self Player Entity");
             var playerObj    = GameObject.Instantiate(playerPrefab);
             playerObj.name = $"{session.PlayerName} (Player)";
             playerObj.SetActive(true);

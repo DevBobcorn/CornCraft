@@ -3,12 +3,12 @@ using System;
 using UnityEngine;
 using MinecraftClient.Event;
 using MinecraftClient.Mapping;
-using MinecraftClient.UI;
+using MinecraftClient.Rendering;
 
 namespace MinecraftClient.Control
 {
-    [RequireComponent(typeof (Rigidbody))]
-    public class PlayerController : MonoBehaviour
+    [RequireComponent(typeof (Rigidbody), typeof (EntityRender))]
+    public class PlayerController : MonoBehaviour, IPlayerController
     {
         private CornClient? game;
         private Rigidbody? rigidBody;
@@ -51,6 +51,8 @@ namespace MinecraftClient.Control
 
         private CameraController? camControl;
         private Transform? visualTransform, blockSelectionTransform;
+        private EntityRender? playerRender;
+
         private MeshRenderer? blockSelection;
 
         public void DisableEntity()
@@ -121,13 +123,16 @@ namespace MinecraftClient.Control
             }
 
             if (entityDisabled)
-                UpdateSpectator(interval, horInput, verInput, walkMode, attack, up, down);
+                UpdateAsSpectator(interval, horInput, verInput, walkMode, attack, up, down);
             else
-                UpdateEntity(interval, horInput, verInput, walkMode, attack, up, down);
+                UpdateAsEntity(interval, horInput, verInput, walkMode, attack, up, down);
+            
+            // Update render
+            playerRender!.UpdateAnimation(game!.GetTickMilSec());
             
         }
 
-        private void UpdateSpectator(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
+        private void UpdateAsSpectator(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
             // Update player velocity
             var newVelocity = Vector3.zero;
@@ -151,6 +156,9 @@ namespace MinecraftClient.Control
             // No need to check position validity in spectator mode,
             // just tell server the new position...
             CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visualTransform!.eulerAngles.y - 90F, 0F);
+
+            playerRender!.SetCurrentVelocity(newVelocity);
+
         }
 
         private static readonly Vector3 groundBoxCenter   = new(0F, -0.1F, 0F);
@@ -164,7 +172,7 @@ namespace MinecraftClient.Control
         private Vector3? targetPos = null, targetDir = null;
         private Location? targetBlockPos = null;
 
-        private void UpdateEntity(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
+        private void UpdateAsEntity(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
             // Update player state - in water or not?
             isInWater = game!.GetWorld().IsWaterAt(CoordConvert.Unity2MC(transform.position));
@@ -272,6 +280,9 @@ namespace MinecraftClient.Control
 
             // Tell server our current position
             CornClient.Instance.SyncLocation(CoordConvert.Unity2MC(transform.position), visualTransform!.eulerAngles.y - 90F, 0F);
+
+            playerRender!.SetCurrentVelocity(newVelocity);
+
         }
 
         Vector3 GetAxisAlignedOrientation(Vector3 original)
@@ -323,7 +334,11 @@ namespace MinecraftClient.Control
             blockSelection = blockSelectionObj.GetComponentInChildren<MeshRenderer>();
             blockSelection.enabled = false;
             
-            visualTransform         = transform.Find("Visual");
+            // Initialize player visuals
+            visualTransform = transform.Find("Visual");
+            playerRender    = GetComponent<EntityRender>();
+            playerRender.Entity = new(0, EntityType.Player, new());
+            
             blockSelectionTransform = blockSelectionObj.transform;
 
             game = CornClient.Instance;

@@ -53,7 +53,7 @@ MonoBehaviour:
   far: 80
   cameraYOffset: 0.5
   cameraZOffset: -5
-  smoothTime: 0.15
+  smoothTime: 0.2
 --- !u!114 &5930999786523324073
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -17,9 +17,9 @@ namespace MinecraftClient.Rendering
                 legsPresent = true;
         }
 
-        public override void ManagedUpdate(Vector3 cameraPos, float tickMilSec)
+        public override void UpdateAnimation(float tickMilSec)
         {
-            base.ManagedUpdate(cameraPos, tickMilSec);
+            base.UpdateAnimation(tickMilSec); 
             
             if (legsPresent)
             {
