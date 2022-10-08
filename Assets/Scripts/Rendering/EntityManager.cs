@@ -49,7 +49,7 @@ namespace MinecraftClient.Rendering
                 entities.Add(entity.ID, entityRender);
 
                 entityObj.name = $"{entity.ID} {entity.Type}";
-                entityObj.transform.parent = transform;                
+                entityObj.transform.parent = transform;
             }
         }
 
@@ -128,17 +128,13 @@ namespace MinecraftClient.Rendering
 
         }
 
-        private float tickMilSec;
-
         void Update()
         {
-            tickMilSec = (float)(1D / game!.GetServerTPS());
-
             // Call managed update
             var cameraPos = game!.GetCameraPosition();
 
             foreach (var entity in entities.Values)
-                entity.ManagedUpdate(cameraPos, tickMilSec);
+                entity.ManagedUpdate(cameraPos, game!.GetTickMilSec());
 
         }
 

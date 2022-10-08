@@ -81,11 +81,8 @@ namespace MinecraftClient.Rendering
 
         void Start() => EnsureInitialized();
 
-        public virtual void ManagedUpdate(Vector3 cameraPos, float tickMilSec)
+        protected void UpdateInfoPlate(Vector3 cameraPos, float dist2Cam)
         {
-            var dist2Cam  = (cameraPos - transform.position).magnitude;
-
-            // Update info plate
             if (nameTextShown)
             {
                 if (dist2Cam > hideInfoDist) // Hide info plate
@@ -108,6 +105,10 @@ namespace MinecraftClient.Rendering
                 }
             }
 
+        }
+
+        protected void UpdateTransform(float dist2Cam, float tickMilSec)
+        {
             // Update position
             if (lastPosition is not null && targetPosition is not null)
             {
@@ -126,6 +127,21 @@ namespace MinecraftClient.Rendering
 
                 transform.eulerAngles = new(0F, lastYaw, 0F);
             }
+
+        }
+
+        public void SetCurrentVelocity(Vector3 velocity) => currentVelocity = velocity;
+
+        public virtual void UpdateAnimation(float tickMilSec) { }
+
+        public virtual void ManagedUpdate(Vector3 cameraPos, float tickMilSec)
+        {
+            var dist2Cam  = (cameraPos - transform.position).magnitude;
+
+            UpdateInfoPlate(cameraPos, dist2Cam);
+            UpdateTransform(dist2Cam, tickMilSec);
+            
+            UpdateAnimation(tickMilSec);
 
         }
 

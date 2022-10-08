@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MinecraftClient.Rendering
 {
-    public class ZombieEntityRender : BipedEntityRender
+    public class PlayerEntityRender : BipedEntityRender
     {
         public Transform? leftArm, rightArm;
 
@@ -14,7 +14,7 @@ namespace MinecraftClient.Rendering
             base.Initialize();
 
             if (leftArm is null || rightArm is null)
-                Debug.LogWarning("Arms of zombie entity not properly assigned!");
+                Debug.LogWarning("Arms of player entity not properly assigned!");
             else
                 armsPresent = true;
         }
@@ -25,8 +25,8 @@ namespace MinecraftClient.Rendering
 
             if (armsPresent)
             {
-                leftArm!.localEulerAngles  = new(-90F + currentMovFact * 5F, 0F, 0F);
-                rightArm!.localEulerAngles = new(-90F + currentMovFact * 5F, 0F, 0F);
+                leftArm!.localEulerAngles  = new(-currentLegAngle * currentMovFact, 0F, 0F);
+                rightArm!.localEulerAngles = new( currentLegAngle * currentMovFact, 0F, 0F);
             }
 
         }
