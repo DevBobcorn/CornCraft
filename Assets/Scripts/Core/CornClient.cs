@@ -497,11 +497,9 @@ namespace MinecraftClient
                 {
                     playerYaw = _yaw == null ? playerYaw : _yaw.Value;
                     playerPitch = _pitch == null ? playerPitch : _pitch.Value;
-                    
+
                     if (playerController is not null)
                         handler.SendLocationUpdate(location, playerController.IsOnGround, _yaw, _pitch);
-                    
-                    //handler.SendLocationUpdate(location, isOnGround, _yaw, _pitch);
                     
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)
                     // Once yaw and pitch have been sent, switch back to location-only updates (without yaw and pitch)
