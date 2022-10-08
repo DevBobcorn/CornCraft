@@ -122,13 +122,10 @@ namespace MinecraftClient.Control
         {
             RaycastHit hitInfo;
             if (Physics.Linecast(transform.position, ActiveCamera.transform.position, out hitInfo, checkLayer))
-            {
                 ActiveCamera.transform.position = Vector3.Lerp(ActiveCamera.transform.position, hitInfo.point, 0.2F);
-            }
             else
-            {
                 ActiveCamera.transform.localPosition = Vector3.Lerp(ActiveCamera.transform.localPosition, cameraPositionTarget, 0.05F);
-            }
+            
         }
 
         public void EnableFixedMode(float fixedY, float fixedZ)

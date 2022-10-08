@@ -37,7 +37,14 @@ namespace MinecraftClient.Rendering
 
         public void AddEntity(Entity entity)
         {
-            var entityPrefab = GetPrefabForType(entity.Type);
+            GameObject? entityPrefab;
+
+            if (entity.Type == EntityType.Player) // TODO Apply right model
+            {
+                entityPrefab = serverSlimPlayerPrefab;
+            }
+            else
+                entityPrefab = GetPrefabForType(entity.Type);
 
             if (entityPrefab is not null)
             {
