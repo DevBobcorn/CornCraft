@@ -58,3 +58,4 @@ More information about CDDL-1.0 can be found on MCC's [home page](https://github
 ![Screenshot 1](https://s2.loli.net/2022/09/20/gVIj4bZyz2TF9uB.png)
 ![Screenshot 2](https://s2.loli.net/2022/09/23/D8l7efqn2TCbvK9.png)
 ![Screenshot 3](https://s2.loli.net/2022/09/23/DTVlgA2v3otze7i.png)
+![Screenshot 4](https://s2.loli.net/2022/10/08/hvaYrnOmJk6ZgoD.png)
