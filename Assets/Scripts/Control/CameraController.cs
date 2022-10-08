@@ -22,7 +22,7 @@ namespace MinecraftClient.Control
 
         void Awake()
         {
-            checkLayer = LayerMask.GetMask("Entity", "Movement");
+            checkLayer = LayerMask.GetMask("Entity", "Interaction");
             ActiveCamera = Camera.main;
             ActiveCamera.fieldOfView = 60F;
         }
@@ -122,9 +122,9 @@ namespace MinecraftClient.Control
         {
             RaycastHit hitInfo;
             if (Physics.Linecast(transform.position, ActiveCamera.transform.position, out hitInfo, checkLayer))
-                ActiveCamera.transform.position = Vector3.Lerp(ActiveCamera.transform.position, hitInfo.point, 0.2F);
+                ActiveCamera.transform.position = Vector3.Lerp(ActiveCamera.transform.position, hitInfo.point, Time.unscaledDeltaTime * 30F);
             else
-                ActiveCamera.transform.localPosition = Vector3.Lerp(ActiveCamera.transform.localPosition, cameraPositionTarget, 0.05F);
+                ActiveCamera.transform.localPosition = Vector3.Lerp(ActiveCamera.transform.localPosition, cameraPositionTarget, Time.unscaledDeltaTime * 5F);
             
         }
 
