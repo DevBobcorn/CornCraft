@@ -115,8 +115,9 @@ namespace MinecraftClient.Rendering
             entityPrefabs.Clear();
 
             // Add specific entity prefabs TODO Expand
-            entityPrefabs.Add(EntityType.Skeleton, Resources.Load<GameObject>("Prefabs/Entity/Zombie Entity"));
-            entityPrefabs.Add(EntityType.Stray, Resources.Load<GameObject>("Prefabs/Entity/Zombie Entity"));
+            entityPrefabs.Add(EntityType.Skeleton, Resources.Load<GameObject>("Prefabs/Entity/Skeleton Entity"));
+            entityPrefabs.Add(EntityType.WitherSkeleton, Resources.Load<GameObject>("Prefabs/Entity/Wither Skeleton Entity"));
+            entityPrefabs.Add(EntityType.Stray, Resources.Load<GameObject>("Prefabs/Entity/Stray Entity"));
 
             entityPrefabs.Add(EntityType.Zombie, Resources.Load<GameObject>("Prefabs/Entity/Zombie Entity"));
             entityPrefabs.Add(EntityType.Husk, Resources.Load<GameObject>("Prefabs/Entity/Husk Entity"));
