@@ -103,7 +103,13 @@ namespace MinecraftClient
         private DateTime lastKeepAlive;
         private object lastKeepAliveLock = new();
         private long lastAge = 0L, timeOfDay = 0L;
-        public long CurrentTimeOfDay { get { return timeOfDay + (long)(timeElapsedSinceUpdate * 20F); } }
+        public long CurrentTimeOfDay {
+            get {
+                // When time of day is negetive, it means gamerule doDaylightCycle is set to false
+                return timeOfDay >= 0L ? timeOfDay + (long)(timeElapsedSinceUpdate * 20F) : -timeOfDay;
+            }
+        }
+        
         private float timeElapsedSinceUpdate = 0F;
 
         private DateTime lastTime;
