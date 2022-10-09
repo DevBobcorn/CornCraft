@@ -314,7 +314,7 @@ namespace MinecraftClient.Mapping
         /// <returns>String representation of the location</returns>
         public override string ToString()
         {
-            return String.Format("X:{0:0.000} Y:{1:0.000} Z:{2:0.000}", X, Y, Z);
+            return String.Format("X:{0:0.00} Y:{1:0.00} Z:{2:0.00}", X, Y, Z);
         }
 
         // MAGICRAFT
