@@ -284,6 +284,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showInfoDist: 10
   hideInfoDist: 12
+  head: {fileID: 9033170414677758884}
   cycleTime: 1
   legAngle: 45
   frontLeftLeg: {fileID: 6398734945089148527}
@@ -429,6 +430,11 @@ Transform:
 --- !u!4 &8749899508757009915 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 37911711452255169, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_PrefabInstance: {fileID: 8785207576479647290}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &9033170414677758884 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8883606316840626786, guid: c6ef79af918031444a2403502004ed47, type: 3}
   m_PrefabInstance: {fileID: 8785207576479647290}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &9106818048326541777 stripped

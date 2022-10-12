@@ -226,17 +226,11 @@ namespace MinecraftClient
 
         private WorldRender worldRender;
 
-        public WorldRender GetWorldRender()
-        {
-            return this.worldRender;
-        }
+        public WorldRender GetWorldRender() => worldRender;
 
         private EntityManager entityManager;
 
-        public EntityManager GetEntityManager()
-        {
-            return this.entityManager;
-        }
+        public EntityManager GetEntityManager() => entityManager;
 
         private ScreenControl screenControl;
         public ScreenControl ScreenControl { get { return screenControl; } }
@@ -2183,6 +2177,7 @@ namespace MinecraftClient
 
                 Loom.QueueOnMainThread(() => {
                     playerController.SetPosition(location);
+                    // TODO Set player rotation
                 });
                 
             }
@@ -2535,15 +2530,33 @@ namespace MinecraftClient
 
         }
 
-        public void OnEntityRotation(int EntityID, float yaw, float pitch, bool onGround)
+        public void OnEntityRotation(int EntityID, float yaw, float pitch, bool onGround, int flag)
         {
             if (entities.ContainsKey(EntityID))
             {
+                yaw = AngleConvert.MCYaw2Unity(yaw);
+                pitch = AngleConvert.MC2Unity(pitch);
+
                 entities[EntityID].Yaw = yaw;
                 entities[EntityID].Pitch = pitch;
 
                 Loom.QueueOnMainThread(() => {
-                    entityManager.RotateEntity(EntityID, yaw, pitch);
+                    entityManager.RotateEntity(EntityID, yaw, pitch, flag);
+                });
+            }
+
+        }
+
+        public void OnEntityHeadLook(int EntityID, float headYaw)
+        {
+            if (entities.ContainsKey(EntityID))
+            {
+                headYaw = AngleConvert.MCYaw2Unity(headYaw);
+
+                entities[EntityID].HeadYaw = headYaw;
+
+                Loom.QueueOnMainThread(() => {
+                    entityManager.UpdateEntityHeadYaw(EntityID, headYaw);
                 });
             }
 

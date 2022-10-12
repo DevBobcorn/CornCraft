@@ -56,15 +56,18 @@ namespace MinecraftClient.Mapping
         public Location Location;
 
         /// <summary>
+        /// Entity yaw
+        /// </summary>
+        public float Yaw = 0;
+
+        /// <summary>
         /// Entity head yaw
         /// </summary>
-        /// <remarks>Untested</remarks>
-        public float Yaw = 0;
+        public float HeadYaw = 0;
 
         /// <summary>
         /// Entity head pitch
         /// </summary>
-        /// <remarks>Untested</remarks>
         public float Pitch = 0;
 
         /// <summary>
@@ -129,8 +132,8 @@ namespace MinecraftClient.Mapping
             this.Health = 1.0f;
             this.Equipment = new Dictionary<int, Item>();
             this.Item = new Item(ItemType.Air, 0, null);
-            this.Yaw = yaw * (1 / 256) * 360; // to angle in 360 degree
-            this.Pitch = pitch * (1 / 256) * 360;
+            this.Yaw = AngleConvert.MC2Unity(yaw);
+            this.Pitch = AngleConvert.MC2Unity(pitch);
             this.ObjectData = objectData;
         }
 

@@ -107,7 +107,7 @@ namespace MinecraftClient.Protocol
         /// <param name="entityId">PlayerId</param>
         /// <param name="type">Type of packet to send</param>
         /// <returns>True if packet was successfully sent</returns>
-        bool SendEntityAction(int EntityId, int type);
+        bool SendEntityAction(int entityId, int type);
         
         /// <summary>
         /// Send a held item change packet to the server.
@@ -119,42 +119,42 @@ namespace MinecraftClient.Protocol
         /// <summary>
         /// Send an entity interaction packet to the server.
         /// </summary>
-        /// <param name="EntityId">Entity Id to interact with</param>
+        /// <param name="entityId">Entity Id to interact with</param>
         /// <param name="type">Type of interaction (0: interact, 1: attack, 2: interact at)</param>
         /// <returns>True if packet was successfully sent</returns>
-        bool SendInteractEntity(int EntityId, int type);
+        bool SendInteractEntity(int entityId, int type);
 
         /// <summary>
         /// Send an entity interaction packet to the server.
         /// </summary>
-        /// <param name="EntityId">Entity Id to interact with</param>
+        /// <param name="entityId">Entity Id to interact with</param>
         /// <param name="type">Type of interaction (0: interact, 1: attack, 2: interact at)</param>
         /// <param name="X">X coordinate for "interact at"</param>
         /// <param name="Y">Y coordinate for "interact at"</param>
         /// <param name="Z">Z coordinate for "interact at"</param>
         /// <param name="hand">Player hand (0: main hand, 1: off hand)</param>
         /// <returns>True if packet was successfully sent</returns>
-        bool SendInteractEntity(int EntityId, int type, float X, float Y, float Z, int hand);
+        bool SendInteractEntity(int entityId, int type, float X, float Y, float Z, int hand);
 
         /// <summary>
         /// Send an entity interaction packet to the server.
         /// </summary>
-        /// <param name="EntityId">Entity Id to interact with</param>
+        /// <param name="entityId">Entity Id to interact with</param>
         /// <param name="type">Type of interaction (0: interact, 1: attack, 2: interact at)</param>
         /// <param name="X">X coordinate for "interact at"</param>
         /// <param name="Y">Y coordinate for "interact at"</param>
         /// <param name="Z">Z coordinate for "interact at"</param>
         /// <returns>True if packet was successfully sent</returns>
-        bool SendInteractEntity(int EntityId, int type, float X, float Y, float Z);
+        bool SendInteractEntity(int entityId, int type, float X, float Y, float Z);
         
         /// <summary>
         /// Send an entity interaction packet to the server.
         /// </summary>
-        /// <param name="EntityId">Entity Id to interact with</param>
+        /// <param name="entityId">Entity Id to interact with</param>
         /// <param name="type">Type of interaction (0: interact, 1: attack, 2: interact at)</param>
         /// <param name="hand">Only if Type is interact or interact at; 0: main hand, 1: off hand</param>
         /// <returns>True if packet was successfully sent</returns>
-        bool SendInteractEntity(int EntityId, int type, int hand);
+        bool SendInteractEntity(int entityId, int type, int hand);
 
         /// <summary>
         /// Send a use item packet to the server

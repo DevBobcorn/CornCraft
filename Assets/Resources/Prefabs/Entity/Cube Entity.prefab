@@ -303,6 +303,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showInfoDist: 20
   hideInfoDist: 24
+  head: {fileID: 8169007461439516784}
 --- !u!1 &2716930875251792988
 GameObject:
   m_ObjectHideFlags: 0
