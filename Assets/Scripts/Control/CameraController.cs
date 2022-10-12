@@ -1,4 +1,5 @@
 using UnityEngine;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
 {
@@ -27,16 +28,16 @@ namespace MinecraftClient.Control
             ActiveCamera.fieldOfView = 60F;
         }
 
-        public void SetPerspective(CornClient.Perspective perspective)
+        public void SetPerspective(Perspective perspective)
         {
             switch (perspective)
             {
-                case CornClient.Perspective.FirstPerson:
+                case Perspective.FirstPerson:
                     EnableFixedMode(EYE_HEIGHT, 0F);
                     // Don't render player on this camera
                     ActiveCamera.cullingMask = ActiveCamera.cullingMask & ~(1 << LayerMask.NameToLayer("Player"));
                     break;
-                case CornClient.Perspective.ThirdPerson:
+                case Perspective.ThirdPerson:
                     DisableFixedMode();
                     // Render player on this camera
                     ActiveCamera.cullingMask = ActiveCamera.cullingMask | (1 << LayerMask.NameToLayer("Player"));
@@ -108,15 +109,7 @@ namespace MinecraftClient.Control
             }
         }
 
-        public float GetCursorRotation()
-        {
-            return 360F - transform.eulerAngles.y;
-        }
-
-        public Vector2 GetPlayerFocusOnScreen()
-        {
-            return ActiveCamera.WorldToScreenPoint(target.position + Vector3.up * cameraYOffset);
-        }
+        public float GetCursorRotation() => 360F - transform.eulerAngles.y;
 
         private void CheckCameraPosition()
         {

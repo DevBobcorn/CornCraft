@@ -22,30 +22,6 @@ namespace MinecraftClient.Control
 
         private LayerMask interactionLayer, movementLayer, entityLayer;
 
-        private GameMode gameMode = 0;
-        public GameMode GameMode
-        {
-            get {
-                return gameMode;
-            }
-
-            set {
-                gameMode = value;
-
-                if (gameMode == GameMode.Spectator) // Spectating
-                {
-                    DisableEntity();
-                }
-                else
-                {
-                    if (game!.LocationReceived)
-                        EnableEntity();
-                    else
-                        DisableEntity();
-                }
-            }
-        }
-
         private bool entityDisabled = false;
         public bool EntityDisabled { get { return entityDisabled; } }
 
@@ -55,6 +31,14 @@ namespace MinecraftClient.Control
         private Entity fakeEntity = new(0, EntityType.Player, new());
 
         private MeshRenderer? blockSelection;
+
+        public void UpdateGameMode(GameMode gameMode)
+        {
+            if (gameMode != GameMode.Spectator && game!.LocationReceived)
+                EnableEntity();
+            else
+                DisableEntity();
+        }
 
         public void DisableEntity()
         {
@@ -87,16 +71,13 @@ namespace MinecraftClient.Control
             transform.position = CoordConvert.MC2Unity(pos);
             Debug.Log($"Position set to {transform.position}");
 
-            if (gameMode == GameMode.Spectator) // Spectating
+            if (game!.GetPlayer().GameMode == GameMode.Spectator) // Spectating
                 DisableEntity();
             else
                 EnableEntity();
         }
 
-        public Location GetLocation()
-        {
-            return CoordConvert.Unity2MC(transform.position);
-        }
+        public Location GetLocation() => CoordConvert.Unity2MC(transform.position);
 
         public void ManagedUpdate(float interval, float horInput, float verInput, bool walkMode, bool attack, bool up, bool down)
         {
@@ -369,10 +350,10 @@ namespace MinecraftClient.Control
             perspectiveCallback = (e) => {
                 switch (e.newPerspective)
                 {
-                    case CornClient.Perspective.FirstPerson: // Enable block selection
+                    case Perspective.FirstPerson: // Enable block selection
                         updateTarget = true;
                         break;
-                    case CornClient.Perspective.ThirdPerson: // Disable block selection
+                    case Perspective.ThirdPerson: // Disable block selection
                         updateTarget = false;
                         targetBlockPos = null;
                         blockSelection!.enabled = false;
@@ -411,9 +392,9 @@ namespace MinecraftClient.Control
             }
 
             if (entityDisabled)
-                return $"{gameMode}\nPosition:\t{transform.position.x:0.00}\t{transform.position.y:0.00}\t{transform.position.z:0.00}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+                return $"Position:\t{transform.position.x:0.00}\t{transform.position.y:0.00}\t{transform.position.z:0.00}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
             else
-                return $"{gameMode}\nPosition:\t{transform.position.x:0.00}\t{transform.position.y:0.00}\t{transform.position.z:0.00}\nGrounded:\t{isOnGround}\t{centerDownDist:0.00} {frontDownDist:0.00}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+                return $"Position:\t{transform.position.x:0.00}\t{transform.position.y:0.00}\t{transform.position.z:0.00}\nGrounded:\t{isOnGround}\t{centerDownDist:0.00} {frontDownDist:0.00}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
 
         }
 

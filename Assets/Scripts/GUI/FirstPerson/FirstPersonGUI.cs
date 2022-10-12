@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Coffee.UISoftMask;
 using MinecraftClient.Control;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.UI
 {
@@ -479,7 +480,7 @@ namespace MinecraftClient.UI
                 }
 
                 // Follow player view
-                if (game!.CurrentPerspective == CornClient.Perspective.FirstPerson && cameraCon is not null)
+                if (game!.GetPlayer().Perspective == Perspective.FirstPerson && cameraCon is not null)
                 {
                     var cameraRot = cameraCon.ActiveCamera.transform.eulerAngles.y;
                     var ownRot = transform.eulerAngles.y;

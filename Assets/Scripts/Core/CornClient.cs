@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,31 +31,32 @@ namespace MinecraftClient
     public class CornClient : MonoBehaviour, IMinecraftComHandler
     {
         #region Login Information
-        private string host;
+        private string? host;
         private int port;
         private int protocolVersion;
-        private string username;
-        private string uuidStr;
+        private string? username;
+        private string? uuidStr;
         private Guid uuid;
-        private string sessionId;
-        private PlayerKeyPair playerKeyPair;
+        private string? sessionId;
+        private PlayerKeyPair? playerKeyPair;
         private bool isSupportPreviewsChat;
-        public string GetServerHost() { return host; }
-        public int GetServerPort() { return port; }
-        public int GetProtocolVersion() { return protocolVersion; }
-        public string GetUsername() { return username; }
-        public Guid GetUserUUID() { return uuid; }
-        public string GetUserUUIDStr() { return uuidStr; }
-        public string GetSessionID() { return sessionId; }
+        public bool GetIsSupportPreviewsChat() => isSupportPreviewsChat;
+        public string GetServerHost() => host!;
+        public int GetServerPort() => port;
+        public int GetProtocolVersion() => protocolVersion;
+        public string GetUsername() => username!;
+        public Guid GetUserUUID() => uuid;
+        public string GetUserUUIDStr() => uuidStr!;
+        public string GetSessionID() => sessionId!;
         #endregion
 
         #region Client Control
-        private static CornClient instance;
+        private static CornClient? instance;
         public static CornClient Instance
         {
             get {
                 EnsureInitialized();
-                return instance;
+                return instance!;
             }
         }
 
@@ -86,8 +88,8 @@ namespace MinecraftClient
         private Queue<string> chatQueue = new();
         private DateTime nextMessageSendTime = DateTime.MinValue;
 
-        private static bool connected = false;
-        public static bool Connected { get { return connected; } }
+        private bool connected = false;
+        public bool Connected { get { return connected; } }
 
         public static void StopClient()
         {
@@ -99,10 +101,11 @@ namespace MinecraftClient
 
         #endregion
 
-        #region Networking
+        #region Time and Networking
         private DateTime lastKeepAlive;
         private object lastKeepAliveLock = new();
         private long lastAge = 0L, timeOfDay = 0L;
+        private float timeElapsedSinceUpdate = 0F; 
         public long CurrentTimeOfDay {
             get {
                 // When time of day is negetive, it means gamerule doDaylightCycle is set to false
@@ -110,82 +113,56 @@ namespace MinecraftClient
             }
         }
         
-        private float timeElapsedSinceUpdate = 0F;
-
         private DateTime lastTime;
         private double serverTPS = 0;
         private double averageTPS = 20;
         private const int maxSamples = 5;
         private List<double> tpsSamples = new(maxSamples);
         private double sampleSum = 0;
-        public double GetServerTPS() { return averageTPS; }
-        public float GetTickMilSec() { return (float)(1D / averageTPS); }
-        public bool GetIsSupportPreviewsChat() { return isSupportPreviewsChat; }
+        public double GetServerTPS() => averageTPS;
+        public float GetTickMilSec() => (float)(1D / averageTPS);
         
-        TcpClient tcpClient;
-        IMinecraftCom handler;
+        TcpClient? tcpClient;
+        IMinecraftCom? handler;
 
-        #nullable enable
         Tuple<Thread, CancellationTokenSource>? timeoutdetector = null;
-        #nullable disable
         #endregion
 
-        #region Notification
-        // Should be called from the Unity thread only, not net read thread
-        public static void ShowNotification(string notification)
-        {
-            EventManager.Instance.Broadcast<NotificationEvent>(new(notification));
-        }
-
-        public static void ShowNotification(string notification, Notification.Type type)
-        {
-            EventManager.Instance.Broadcast<NotificationEvent>(new(notification, 6F, type));
-        }
-
-        public static void ShowNotification(string notification, float duration, Notification.Type type)
-        {
-            EventManager.Instance.Broadcast<NotificationEvent>(new(notification, duration, type));
-        }
-
-        #endregion
-
-        #region World Data and Player Movement
+        #region World
         private bool worldAndMovementsRequested = false;
         private World world = new();
-        private Location location;
-        private object locationLock = new();
-        private bool locationReceived = false, localLocationUpdated = false;
-        public bool LocationReceived { get { return locationReceived; } }
-        private float? _yaw; // Used for calculation ONLY!!! Doesn't reflect the client yaw
-        private float? _pitch; // Used for calculation ONLY!!! Doesn't reflect the client pitch
-        private float playerYaw;
-        private float playerPitch;
-        private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
-        public Location GetCurrentLocation() { return location; }
-
-        public float GetYaw() { return playerYaw; }
-        public float GetPitch() { return playerPitch; }
-        public World GetWorld() { return world; }
+        public World GetWorld() => world;
+        private WorldRender? worldRender;
+        public WorldRender GetWorldRender() => worldRender!;
         #endregion
 
         #region Players and Entities
         private bool inventoryHandlingRequested = false;
-        private int playerEntityID;
-        private float playerHealth;
-        private int playerFoodSaturation;
-        private int playerLevel;
-        private int playerTotalExperience;
-        private Dictionary<int, Container> inventories = new();
-        private byte CurrentSlot = 0;
-        public float GetHealth() { return playerHealth; }
-        public int GetSaturation() { return playerFoodSaturation; }
-        public int GetLevel() { return playerLevel; }
-        public int GetTotalExperience() { return playerTotalExperience; }
-        public byte GetCurrentSlot() { return CurrentSlot; }
-        public GameMode GetGamemode() { return playerController is null ? 0 : playerController.GameMode; }
-        public int GetPlayerEntityID() { return playerEntityID; }
+        private bool locationReceived = false, localLocationUpdated = false;
+        public bool LocationReceived { get { return locationReceived; } }
+        private ClientPlayer player = new();
+        public ClientPlayer GetPlayer() => player;
+
+        public object locationLock = new();
+        public Location GetCurrentLocation() => player.location;
+
+        private PlayerController? playerController;
+        private CameraController? cameraController;
+
+        public PlayerController GetPlayerController() => playerController!;
+        public CameraController GetCameraController() => cameraController!;
+        public Vector3 GetCameraPosition()
+        {
+            if (cameraController is null)
+                return Vector3.zero;
+            
+            return cameraController.ActiveCamera.transform.position;
+        }
+        
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         private Dictionary<int, Entity> entities = new();
+        private EntityManager? entityManager;
+        public EntityManager GetEntityManager() => entityManager!;
         #endregion
 
         #region Unity stuffs
@@ -217,23 +194,8 @@ namespace MinecraftClient
 
         }
 
-        void OnApplicationQuit()
-        {
-            if (Connected)
-                StopClient();
-            
-        }
-
-        private WorldRender worldRender;
-
-        public WorldRender GetWorldRender() => worldRender;
-
-        private EntityManager entityManager;
-
-        public EntityManager GetEntityManager() => entityManager;
-
-        private ScreenControl screenControl;
-        public ScreenControl ScreenControl { get { return screenControl; } }
+        private ScreenControl? screenControl;
+        public ScreenControl ScreenControl { get { return screenControl!; } }
 
         public bool IsPaused()
         {
@@ -241,43 +203,35 @@ namespace MinecraftClient
                 return screenControl.IsPaused;
             return true;
         }
-        
-        private PlayerController playerController;
-        private CameraController cameraController;
 
-        public PlayerController GetPlayerController() => playerController;
-        public CameraController GetCameraController() => cameraController;
+        // Should be called from the Unity thread only, not net read thread
+        public static void ShowNotification(string notification) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification));
 
-        public Vector3 GetCameraPosition()
-        {
-            if (cameraController is null)
-                return Vector3.zero;
-            
-            return cameraController.ActiveCamera.transform.position;
-        }
+        public static void ShowNotification(string notification, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, 6F, type));
 
-        public enum Perspective
-        {
-            FirstPerson, ThirdPerson
-        }
-
-        public Perspective CurrentPerspective = Perspective.FirstPerson;
+        public static void ShowNotification(string notification, float duration, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, duration, type));
 
         public void TogglePerspective()
         {
-            if (CurrentPerspective == Perspective.FirstPerson)
-                CurrentPerspective = Perspective.ThirdPerson;
+            if (player.Perspective == Perspective.FirstPerson)
+                player.Perspective = Perspective.ThirdPerson;
             else
-                CurrentPerspective = Perspective.FirstPerson;
+                player.Perspective = Perspective.FirstPerson;
             
-            cameraController.SetPerspective(CurrentPerspective);
+            cameraController?.SetPerspective(player.Perspective);
 
-            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(CurrentPerspective));
+            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(player.Perspective));
         }
 
         #endregion
 
-        #nullable enable
+        void OnApplicationQuit()
+        {
+            if (Connected)
+                StopClient();
+            
+        }
+
         public void StartLogin(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo loadStateInfo, string accountLower)
         {
             if (loadStateInfo.loggingIn)
@@ -415,9 +369,9 @@ namespace MinecraftClient
             cameraObj.SetActive(true);
             cameraController = cameraObj.GetComponent<CameraController>();
             cameraController.SetTarget(playerObj.transform);
-            cameraController.SetPerspective(CurrentPerspective);
+            cameraController.SetPerspective(player.Perspective);
 
-            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(CurrentPerspective));
+            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(player.Perspective));
 
             // Wait a little bit...
             yield return new WaitForSecondsRealtime(0.3F);
@@ -465,7 +419,6 @@ namespace MinecraftClient
             }
 
         }
-        #nullable disable
 
         /// <summary>
         /// Retrieve messages from the queue and send.
@@ -476,7 +429,7 @@ namespace MinecraftClient
             while (chatQueue.Count > 0 && nextMessageSendTime < DateTime.Now)
             {
                 string text = chatQueue.Dequeue();
-                handler.SendChatMessage(text, playerKeyPair);
+                handler!.SendChatMessage(text, playerKeyPair);
                 nextMessageSendTime = DateTime.Now + TimeSpan.FromSeconds(CornCraft.MessageCooldown);
             }
         }
@@ -495,16 +448,16 @@ namespace MinecraftClient
             {
                 lock (locationLock)
                 {
-                    playerYaw = _yaw == null ? playerYaw : _yaw.Value;
-                    playerPitch = _pitch == null ? playerPitch : _pitch.Value;
+                    player.Yaw = player._yaw == null ? player.Yaw : player._yaw.Value;
+                    player.Pitch = player._pitch == null ? player.Pitch : player._pitch.Value;
 
                     if (playerController is not null)
-                        handler.SendLocationUpdate(location, playerController.IsOnGround, _yaw, _pitch);
+                        handler!.SendLocationUpdate(player.location, playerController.IsOnGround, player._yaw, player._pitch);
                     
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)
                     // Once yaw and pitch have been sent, switch back to location-only updates (without yaw and pitch)
-                    _yaw = null;
-                    _pitch = null;
+                    player._yaw = null;
+                    player._pitch = null;
 
                     localLocationUpdated = false;
                 }
@@ -526,7 +479,6 @@ namespace MinecraftClient
         /// <summary>
         /// Periodically checks for server keepalives and consider that connection has been lost if the last received keepalive is too old.
         /// </summary>
-        #nullable enable
         private void TimeoutDetector(object? o)
         {
             Debug.Log("Timeout Detector start");
@@ -562,7 +514,6 @@ namespace MinecraftClient
             while (!((CancellationToken)o!).IsCancellationRequested);
             Debug.Log("Timeout Detector stop");
         }
-        #nullable disable
 
         /// <summary>
         /// Update last keep alive to current time
@@ -601,8 +552,8 @@ namespace MinecraftClient
                     // Reset this marker, so that it's not gonna cause troubles next time we log in
                     locationReceived = false;
 
-                    _yaw   = null;
-                    _pitch = null;
+                    player._yaw   = null;
+                    player._pitch = null;
                 });
         }
 
@@ -716,13 +667,12 @@ namespace MinecraftClient
             // the result options while passing in '/gamemode' yields nothing...
             try
             {
-                InvokeOnNetMainThread(() => handler.SendAutoCompleteText(text));
+                InvokeOnNetMainThread(() => handler!.SendAutoCompleteText(text));
             }
             catch (IOException) { }
             catch (NullReferenceException) { }
         }
 
-        #nullable enable
         /// <summary>
         /// Perform an internal MCC command (not a server command, use SendText() instead for that!)
         /// </summary>
@@ -764,7 +714,6 @@ namespace MinecraftClient
 
             return true;
         }
-        #nullable disable
 
         public static void LoadInternalCommands()
         {
@@ -879,7 +828,7 @@ namespace MinecraftClient
         /// <returns>Max length, in characters</returns>
         public int GetMaxChatMessageLength()
         {
-            return handler.GetMaxChatMessageLength();
+            return handler!.GetMaxChatMessageLength();
         }
 
         /// <summary>
@@ -892,22 +841,16 @@ namespace MinecraftClient
         }
 
         /// <summary>
-        /// Get all inventories. ID 0 is the player inventory.
+        /// Get all player.inventories. ID 0 is the player inventory.
         /// </summary>
-        /// <returns>All inventories</returns>
-        public Dictionary<int, Container> GetInventories()
-        {
-            return inventories;
-        }
+        /// <returns>All player.inventories</returns>
+        public Dictionary<int, Container> GetInventories() => player.Inventories;
 
         /// <summary>
         /// Get all Entities
         /// </summary>
         /// <returns>All Entities</returns>
-        public Dictionary<int, Entity> GetEntities()
-        {
-            return entities;
-        }
+        public Dictionary<int, Entity> GetEntities() => entities;
 
         /// <summary>
         /// Get all players latency
@@ -921,12 +864,8 @@ namespace MinecraftClient
             return playersLatency;
         }
 
-        public int GetOwnLatency()
-        {
-            return onlinePlayers.ContainsKey(uuid) ? onlinePlayers[uuid].Ping : 0;
-        }
+        public int GetOwnLatency() => onlinePlayers.ContainsKey(uuid) ? onlinePlayers[uuid].Ping : 0;
 
-        #nullable enable
         /// <summary>
         /// Get player info from uuid
         /// </summary>
@@ -953,20 +892,14 @@ namespace MinecraftClient
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => GetInventory(inventoryID));
 
-            if (inventories.ContainsKey(inventoryID))
-                return inventories[inventoryID];
-            return null;
+            return player.GetInventory(inventoryID);
         }
-        #nullable disable
 
         /// <summary>
         /// Get client player's inventory items
         /// </summary>
         /// <returns> Item Dictionary indexed by Slot ID (Check wiki.vg for slot ID)</returns>
-        public Container GetPlayerInventory()
-        {
-            return GetInventory(0)!;
-        }
+        public Container GetPlayerInventory() => GetInventory(0)!;
 
         /// <summary>
         /// Get a set of online player names
@@ -1014,7 +947,7 @@ namespace MinecraftClient
             if (String.IsNullOrEmpty(text))
                 return;
 
-            int maxLength = handler.GetMaxChatMessageLength();
+            int maxLength = handler!.GetMaxChatMessageLength();
 
             lock (chatQueue)
             {
@@ -1053,7 +986,7 @@ namespace MinecraftClient
             if (InvokeRequired)
                 return InvokeOnNetMainThread<bool>(SendRespawnPacket);
 
-            return handler.SendRespawnPacket();
+            return handler!.SendRespawnPacket();
         }
 
         /// <summary>
@@ -1062,7 +995,7 @@ namespace MinecraftClient
         /// <returns>TRUE if the item was successfully used</returns>
         public bool SendEntityAction(EntityActionType entityAction)
         {
-            return InvokeOnNetMainThread(() => handler.SendEntityAction(playerEntityID, (int)entityAction));
+            return InvokeOnNetMainThread(() => handler!.SendEntityAction(player.EntityID, (int)entityAction));
         }
 
         /// <summary>
@@ -1071,10 +1004,9 @@ namespace MinecraftClient
         /// <returns>TRUE if the item was successfully used</returns>
         public bool UseItemOnHand()
         {
-            return InvokeOnNetMainThread(() => handler.SendUseItem(0, this.sequenceId));
+            return InvokeOnNetMainThread(() => handler!.SendUseItem(0, player.SequenceId));
         }
 
-        #nullable enable
         /// <summary>
         /// Try to merge a slot
         /// </summary>
@@ -1142,8 +1074,8 @@ namespace MinecraftClient
                 return InvokeOnNetMainThread(() => DoWindowAction(windowId, slotId, action));
 
             Item? item = null;
-            if (inventories.ContainsKey(windowId) && inventories[windowId].Items.ContainsKey(slotId))
-                item = inventories[windowId].Items[slotId];
+            if (player.Inventories.ContainsKey(windowId) && player.Inventories[windowId].Items.ContainsKey(slotId))
+                item = player.Inventories[windowId].Items[slotId];
 
             List<Tuple<short, Item?>> changedSlots = new List<Tuple<short, Item?>>(); // List<Slot ID, Changed Items>
 
@@ -1861,9 +1793,8 @@ namespace MinecraftClient
                 }
             }
 
-            return handler.SendWindowAction(windowId, slotId, action, item, changedSlots, inventories[windowId].StateID);
+            return handler!.SendWindowAction(windowId, slotId, action, item, changedSlots, player.Inventories[windowId].StateID);
         }
-        #nullable disable
 
         /// <summary>
         /// Give Creative Mode items into regular/survival Player Inventory
@@ -1874,9 +1805,9 @@ namespace MinecraftClient
         /// <param name="count">Item count</param>
         /// <param name="nbt">Item NBT</param>
         /// <returns>TRUE if item given successfully</returns>
-        public bool DoCreativeGive(int slot, ItemType itemType, int count, Dictionary<string, object> nbt = null)
+        public bool DoCreativeGive(int slot, ItemType itemType, int count, Dictionary<string, object>? nbt = null)
         {
-            return InvokeOnNetMainThread(() => handler.SendCreativeInventoryAction(slot, itemType, count, nbt));
+            return InvokeOnNetMainThread(() => handler!.SendCreativeInventoryAction(slot, itemType, count, nbt));
         }
 
         /// <summary>
@@ -1886,7 +1817,7 @@ namespace MinecraftClient
         /// <returns>TRUE if animation successfully done</returns>
         public bool DoAnimation(int animation)
         {
-            return InvokeOnNetMainThread(() => handler.SendAnimation(animation, playerEntityID));
+            return InvokeOnNetMainThread(() => handler!.SendAnimation(animation, player.EntityID));
         }
 
         /// <summary>
@@ -1900,11 +1831,11 @@ namespace MinecraftClient
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => CloseInventory(windowId));
 
-            if (inventories.ContainsKey(windowId))
+            if (player.Inventories.ContainsKey(windowId))
             {
                 if (windowId != 0)
-                    inventories.Remove(windowId);
-                return handler.SendCloseWindow(windowId);
+                    player.Inventories.Remove(windowId);
+                return handler!.SendCloseWindow(windowId);
             }
             return false;
         }
@@ -1918,8 +1849,8 @@ namespace MinecraftClient
             if (InvokeRequired)
                 return InvokeOnNetMainThread<bool>(ClearInventories);
 
-            inventories.Clear();
-            inventories[0] = new Container(0, ContainerType.PlayerInventory, "Player Inventory");
+            player.Inventories.Clear();
+            player.Inventories[0] = new Container(0, ContainerType.PlayerInventory, "Player Inventory");
             return true;
         }
 
@@ -1938,13 +1869,9 @@ namespace MinecraftClient
             if (entities.ContainsKey(entityID))
             {
                 if (type == 0)
-                {
-                    return handler.SendInteractEntity(entityID, type, (int)hand);
-                }
+                    return handler!.SendInteractEntity(entityID, type, (int)hand);
                 else
-                {
-                    return handler.SendInteractEntity(entityID, type);
-                }
+                    return handler!.SendInteractEntity(entityID, type);
             }
             else return false;
         }
@@ -1957,7 +1884,7 @@ namespace MinecraftClient
         /// <returns>TRUE if successfully placed</returns>
         public bool PlaceBlock(Location location, Direction blockFace, Hand hand = Hand.MainHand)
         {
-            return InvokeOnNetMainThread(() => handler.SendPlayerBlockPlacement((int)hand, location, blockFace, this.sequenceId));
+            return InvokeOnNetMainThread(() => handler!.SendPlayerBlockPlacement((int)hand, location, blockFace, player.SequenceId));
         }
 
         /// <summary>
@@ -1980,9 +1907,9 @@ namespace MinecraftClient
 
             // Send dig start and dig end, will need to wait for server response to know dig result
             // See https://wiki.vg/How_to_Write_a_Client#Digging for more details
-            return handler.SendPlayerDigging(0, location, blockFace, this.sequenceId)
+            return handler!.SendPlayerDigging(0, location, blockFace, player.SequenceId)
                 && (!swingArms || DoAnimation((int)Hand.MainHand))
-                && handler.SendPlayerDigging(2, location, blockFace, this.sequenceId);
+                && handler.SendPlayerDigging(2, location, blockFace, player.SequenceId);
         }
 
         /// <summary>
@@ -1998,8 +1925,8 @@ namespace MinecraftClient
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => ChangeSlot(slot));
 
-            CurrentSlot = Convert.ToByte(slot);
-            return handler.SendHeldItemChange(slot);
+            player.CurrentSlot = Convert.ToByte(slot);
+            return handler!.SendHeldItemChange(slot);
         }
 
         /// <summary>
@@ -2013,7 +1940,7 @@ namespace MinecraftClient
         public bool UpdateSign(Location location, string line1, string line2, string line3, string line4)
         {
             // TODO Open sign editor first https://wiki.vg/Protocol#Open_Sign_Editor
-            return InvokeOnNetMainThread(() => handler.SendUpdateSign(location, line1, line2, line3, line4));
+            return InvokeOnNetMainThread(() => handler!.SendUpdateSign(location, line1, line2, line3, line4));
         }
 
         /// <summary>
@@ -2022,7 +1949,7 @@ namespace MinecraftClient
         /// <param name="selectedSlot">The slot of the trade, starts at 0.</param>
         public bool SelectTrade(int selectedSlot)
         {
-            return InvokeOnNetMainThread(() => handler.SelectTrade(selectedSlot));
+            return InvokeOnNetMainThread(() => handler!.SelectTrade(selectedSlot));
         }
 
         /// <summary>
@@ -2034,7 +1961,7 @@ namespace MinecraftClient
         /// <param name="flags">command block flags</param>
         public bool UpdateCommandBlock(Location location, string command, CommandBlockMode mode, CommandBlockFlags flags)
         {
-            return InvokeOnNetMainThread(() => handler.UpdateCommandBlock(location, command, mode, flags));
+            return InvokeOnNetMainThread(() => handler!.UpdateCommandBlock(location, command, mode, flags));
         }
 
         /// <summary>
@@ -2045,13 +1972,8 @@ namespace MinecraftClient
         public bool Spectate(Entity entity)
         {
             if(entity.Type == EntityType.Player)
-            {
                 return SpectateByUUID(entity.UUID);
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
         /// <summary>
@@ -2060,16 +1982,14 @@ namespace MinecraftClient
         /// <param name="UUID">UUID of player/entity to teleport to</param>
         public bool SpectateByUUID(Guid UUID)
         {
-            if(GetGamemode() == GameMode.Spectator)
+            if(player.GameMode == GameMode.Spectator)
             {
                 if(InvokeRequired)
                     return InvokeOnNetMainThread(() => SpectateByUUID(UUID));
-                return handler.SendSpectate(UUID);
+                return handler!.SendSpectate(UUID);
             }
-            else
-            {
-                return false;
-            }
+            
+            return false;
         }
         #endregion
 
@@ -2091,7 +2011,7 @@ namespace MinecraftClient
         /// </summary>
         public void OnGameJoined()
         {
-            handler.SendBrandInfo(CornCraft.BrandInfo.Trim());
+            handler!.SendBrandInfo(CornCraft.BrandInfo.Trim());
 
             if (CornCraft.MCSettings_Enabled)
                 handler.SendClientSettings(
@@ -2132,8 +2052,8 @@ namespace MinecraftClient
             ClearInventories();
 
             Loom.QueueOnMainThread(() => {
-                worldRender.ReloadWorld();
-                entityManager.ReloadEntities();
+                worldRender?.ReloadWorld();
+                entityManager?.ReloadEntities();
             });
 
         }
@@ -2168,15 +2088,15 @@ namespace MinecraftClient
         {
             lock (locationLock)
             {
-                this._yaw = yaw;
-                this._pitch = pitch;
+                player._yaw = yaw;
+                player._pitch = pitch;
 
-                this.location = location;
+                player.location = location;
                 localLocationUpdated = false;
                 locationReceived = true;
 
                 Loom.QueueOnMainThread(() => {
-                    playerController.SetPosition(location);
+                    playerController?.SetPosition(location);
                     // TODO Set player rotation
                 });
                 
@@ -2194,12 +2114,12 @@ namespace MinecraftClient
         {
             lock (locationLock)
             {
-                if (this.location != location || playerYaw != yaw || playerPitch != pitch)
+                if (player.location != location || player.Yaw != yaw || player.Pitch != pitch)
                 {
-                    this._yaw = yaw;
-                    this._pitch = pitch;
+                    player._yaw = yaw;
+                    player._pitch = pitch;
 
-                    this.location = location;
+                    player.location = location;
                     localLocationUpdated = true;
                 }
                 
@@ -2256,7 +2176,7 @@ namespace MinecraftClient
         /// <param name="inventoryID">Inventory ID</param>
         public void OnInventoryOpen(int inventoryID, Container inventory)
         {
-            inventories[inventoryID] = inventory;
+            player.Inventories[inventoryID] = inventory;
 
             if (inventoryID != 0)
             {
@@ -2271,12 +2191,12 @@ namespace MinecraftClient
         /// <param name="inventoryID">Inventory ID</param>
         public void OnInventoryClose(int inventoryID)
         {
-            if (inventories.ContainsKey(inventoryID))
+            if (player.Inventories.ContainsKey(inventoryID))
             {
                 if (inventoryID == 0)
-                    inventories[0].Items.Clear(); // Don't delete player inventory
+                    player.Inventories[0].Items.Clear(); // Don't delete player inventory
                 else
-                    inventories.Remove(inventoryID);
+                    player.Inventories.Remove(inventoryID);
             }
 
             if (inventoryID != 0)
@@ -2292,10 +2212,10 @@ namespace MinecraftClient
         /// <param name="itemList">Item list, key = slot ID, value = Item information</param>
         public void OnWindowItems(byte inventoryID, Dictionary<int, Inventory.Item> itemList, int stateId)
         {
-            if (inventories.ContainsKey(inventoryID))
+            if (player.Inventories.ContainsKey(inventoryID))
             {
-                inventories[inventoryID].Items = itemList;
-                inventories[inventoryID].StateID = stateId;
+                player.Inventories[inventoryID].Items = itemList;
+                player.Inventories[inventoryID].StateID = stateId;
             }
         }
 
@@ -2307,8 +2227,8 @@ namespace MinecraftClient
         /// <param name="item">Item (may be null for empty slot)</param>
         public void OnSetSlot(byte inventoryID, short slotID, Item item, int stateId)
         {
-            if (inventories.ContainsKey(inventoryID))
-                inventories[inventoryID].StateID = stateId;
+            if (player.Inventories.ContainsKey(inventoryID))
+                player.Inventories[inventoryID].StateID = stateId;
 
             // Handle inventoryID -2 - Add item to player inventory without animation
             if (inventoryID == 254)
@@ -2317,24 +2237,24 @@ namespace MinecraftClient
             if (inventoryID == 255 && slotID == -1)
             {
                 inventoryID = 0; // Prevent key not found for some bots relied to this event
-                if (inventories.ContainsKey(0))
+                if (player.Inventories.ContainsKey(0))
                 {
                     if (item != null)
-                        inventories[0].Items[-1] = item;
+                        player.Inventories[0].Items[-1] = item;
                     else
-                        inventories[0].Items.Remove(-1);
+                        player.Inventories[0].Items.Remove(-1);
                 }
             }
             else
             {
-                if (inventories.ContainsKey(inventoryID))
+                if (player.Inventories.ContainsKey(inventoryID))
                 {
                     if (item == null || item.IsEmpty)
                     {
-                        if (inventories[inventoryID].Items.ContainsKey(slotID))
-                            inventories[inventoryID].Items.Remove(slotID);
+                        if (player.Inventories[inventoryID].Items.ContainsKey(slotID))
+                            player.Inventories[inventoryID].Items.Remove(slotID);
                     }
-                    else inventories[inventoryID].Items[slotID] = item;
+                    else player.Inventories[inventoryID].Items[slotID] = item;
                 }
             }
         }
@@ -2345,7 +2265,7 @@ namespace MinecraftClient
         /// <param name="EntityID">Player Entity ID</param>
         public void OnReceivePlayerEntityID(int EntityID)
         {
-            playerEntityID = EntityID;
+            player.EntityID = EntityID;
 
             Loom.QueueOnMainThread(() => {
                 playerController?.SetEntityId(EntityID);
@@ -2377,7 +2297,6 @@ namespace MinecraftClient
 
         }
 
-        #nullable enable
         /// <summary>
         /// Triggered when a player has left the game
         /// </summary>
@@ -2396,7 +2315,6 @@ namespace MinecraftClient
             }
 
         }
-        #nullable disable
 
         /// <summary>
         /// Called when an entity spawned
@@ -2415,14 +2333,11 @@ namespace MinecraftClient
 
         }
 
-        #nullable enable
         /// <summary>
         /// Called when an entity effects
         /// </summary>
         public void OnEntityEffect(int entityid, Effects effect, int amplifier, int duration, byte flags, bool hasFactorData, Dictionary<string, object>? factorCodec) { }
-        #nullable disable
 
-        #nullable enable
         /// <summary>
         /// Called when a player spawns or enters the client's render distance
         /// </summary>
@@ -2434,7 +2349,6 @@ namespace MinecraftClient
             Entity playerEntity = new Entity(entityID, EntityType.Player, location, uuid, playerName);
             OnSpawnEntity(playerEntity);
         }
-        #nullable disable
 
         /// <summary>
         /// Called on Entity Equipment
@@ -2466,7 +2380,8 @@ namespace MinecraftClient
             if (uuid == Guid.Empty)
             {
                 Loom.QueueOnMainThread(() =>{
-                    playerController.GameMode = (GameMode)gamemode;
+                    player.GameMode = (GameMode)gamemode;
+                    playerController?.UpdateGameMode(player.GameMode);
                 });
             }
 
@@ -2478,7 +2393,8 @@ namespace MinecraftClient
                 {
                     Loom.QueueOnMainThread(() =>{
                         var newMode = (GameMode)gamemode;
-                        playerController.GameMode = newMode;
+                        player.GameMode = newMode;
+                        playerController?.UpdateGameMode(player.GameMode);
 
                         EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(newMode));
 
@@ -2501,7 +2417,7 @@ namespace MinecraftClient
             }
 
             Loom.QueueOnMainThread(() => {
-                entityManager.RemoveEntities(Entities);
+                entityManager?.RemoveEntities(Entities);
             });
         }
 
@@ -2524,7 +2440,7 @@ namespace MinecraftClient
                 entities[EntityID].Location = location;
 
                 Loom.QueueOnMainThread(() => {
-                    entityManager.MoveEntity(EntityID, location);
+                    entityManager?.MoveEntity(EntityID, location);
                 });
             }
 
@@ -2541,7 +2457,7 @@ namespace MinecraftClient
                 entities[EntityID].Pitch = pitch;
 
                 Loom.QueueOnMainThread(() => {
-                    entityManager.RotateEntity(EntityID, yaw, pitch, flag);
+                    entityManager?.RotateEntity(EntityID, yaw, pitch, flag);
                 });
             }
 
@@ -2556,7 +2472,7 @@ namespace MinecraftClient
                 entities[EntityID].HeadYaw = headYaw;
 
                 Loom.QueueOnMainThread(() => {
-                    entityManager.UpdateEntityHeadYaw(EntityID, headYaw);
+                    entityManager?.UpdateEntityHeadYaw(EntityID, headYaw);
                 });
             }
 
@@ -2578,7 +2494,7 @@ namespace MinecraftClient
                 entities[EntityID].Location = location;
 
                 Loom.QueueOnMainThread(() => {
-                    entityManager.MoveEntity(EntityID, location);
+                    entityManager?.MoveEntity(EntityID, location);
                 });
             }
         }
@@ -2646,8 +2562,8 @@ namespace MinecraftClient
         /// <param name="health">Player current health</param>
         public void OnUpdateHealth(float health, int food)
         {
-            playerHealth = health;
-            playerFoodSaturation = food;
+            player.Health = health;
+            player.FoodSaturation = food;
 
             if (health <= 0)
                 Translations.Notify("mcc.player_dead", CornCraft.internalCmdChar);
@@ -2666,8 +2582,8 @@ namespace MinecraftClient
         /// <param name="TotalExperience">Total Experience</param>
         public void OnSetExperience(float Experiencebar, int Level, int TotalExperience)
         {
-            playerLevel = Level;
-            playerTotalExperience = TotalExperience;
+            player.Level = Level;
+            player.TotalExperience = TotalExperience;
         }
 
         /// <summary>
@@ -2705,12 +2621,8 @@ namespace MinecraftClient
         /// Called when held item change
         /// </summary>
         /// <param name="slot"> item slot</param>
-        public void OnHeldItemChange(byte slot)
-        {
-            CurrentSlot = slot;
-        }
+        public void OnHeldItemChange(byte slot) => player.CurrentSlot = slot;
 
-        #nullable enable
         /// Called when an update of the map is sent by the server, take a look at https://wiki.vg/Protocol#Map_Data for more info on the fields
         /// Map format and colors: https://minecraft.fandom.com/wiki/Map_item_format
         /// </summary>
@@ -2724,11 +2636,7 @@ namespace MinecraftClient
         /// <param name="mapColX">x offset of the westernmost column</param>
         /// <param name="mapRowZ">z offset of the northernmost row</param>
         /// <param name="colors">a byte array of colors on the map</param>
-        public void OnMapData(int mapId, byte scale, bool trackingPosition, bool locked, List<MapIcon> icons, byte colsUpdated, byte rowsUpdated, byte mapColX, byte mapRowZ, byte[]? colors)
-        {
-
-        }
-        #nullable disable
+        public void OnMapData(int mapId, byte scale, bool trackingPosition, bool locked, List<MapIcon> icons, byte colsUpdated, byte rowsUpdated, byte mapColX, byte mapRowZ, byte[]? colors) { }
 
         /// <summary>
         /// Received some Title from the server
@@ -2775,12 +2683,10 @@ namespace MinecraftClient
         public void OnEntityHealth(int entityID, float health)
         {
             if (entities.ContainsKey(entityID))
-            {
                 entities[entityID].Health = health;
-            }
+            
         }
 
-        #nullable enable
         /// <summary>
         /// Called when the metadata of an entity changed
         /// </summary>
@@ -2815,7 +2721,6 @@ namespace MinecraftClient
                 }
             }
         }
-        #nullable disable
 
         /// <summary>
         /// Called when tradeList is recieved after interacting with villager
@@ -2867,7 +2772,7 @@ namespace MinecraftClient
         /// <param name="sequenceId">Sequence ID</param>
         public void OnBlockChangeAck(int sequenceId)
         {
-            this.sequenceId = sequenceId;
+            player.SequenceId = sequenceId;
         }
 
         /// <summary>
@@ -2892,18 +2797,13 @@ namespace MinecraftClient
             this.isSupportPreviewsChat = previewsChat;
         }
 
-        #nullable enable
         /// <summary>
         /// Called when the protocol handler receives "Login Success" packet
         /// </summary>
         /// <param name="uuid">The player's UUID received from the server</param>
         /// <param name="userName">The player's username received from the server</param>
         /// <param name="playerProperty">Tuple<Name, Value, Signature(empty if there is no signature)></param>
-        public void OnLoginSuccess(Guid uuid, string userName, Tuple<string, string, string>[]? playerProperty)
-        {
-
-        }
-        #nullable disable
+        public void OnLoginSuccess(Guid uuid, string userName, Tuple<string, string, string>[]? playerProperty) { }
 
         #endregion
 

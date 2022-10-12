@@ -1,4 +1,4 @@
-using MinecraftClient.Control;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Event
 {
