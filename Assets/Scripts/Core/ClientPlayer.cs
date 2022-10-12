@@ -1,0 +1,36 @@
+#nullable enable
+using System.Collections.Generic;
+using MinecraftClient.Mapping;
+using MinecraftClient.Inventory;
+
+namespace MinecraftClient
+{
+    public class ClientPlayer
+    {
+        public Perspective Perspective = 0;
+        public GameMode GameMode = 0;
+
+        public Location location;
+        public float? _yaw; // Used for calculation ONLY!!! Doesn't reflect the client yaw
+        public float? _pitch; // Used for calculation ONLY!!! Doesn't reflect the client pitch
+        public float Yaw;
+        public float Pitch;
+        public int SequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
+
+        public int EntityID;
+        public float Health;
+        public int FoodSaturation;
+        public int Level;
+        public int TotalExperience;
+        public Dictionary<int, Container> Inventories = new();
+        public byte CurrentSlot = 0;
+
+        public Container? GetInventory(int inventoryID)
+        {
+            if (Inventories.ContainsKey(inventoryID))
+                return Inventories[inventoryID];
+            return null;
+        }
+
+    }
+}
