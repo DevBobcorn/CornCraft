@@ -96,6 +96,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showInfoDist: 10
   hideInfoDist: 12
+  head: {fileID: 5596500650646025532}
 --- !u!1 &739474774658305514
 GameObject:
   m_ObjectHideFlags: 0

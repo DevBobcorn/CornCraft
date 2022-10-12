@@ -75,14 +75,25 @@ namespace MinecraftClient.Rendering
         {
             if (entities.ContainsKey(entityId))
                 entities[entityId].MoveTo(CoordConvert.MC2Unity(location));
+        }
+
+        public void RotateEntity(int entityId, float yaw, float pitch, int flag)
+        {
+            if (entities.ContainsKey(entityId))
+            {
+                entities[entityId].RotateTo(yaw, pitch);
+
+                if (entities[entityId].Entity.Type == EntityType.Mooshroom)
+                    UnityEngine.Debug.Log($"{entityId} Rot [{flag}] {yaw}");
+            }
+                
             
         }
 
-        public void RotateEntity(int entityId, float yaw, float pitch)
+        public void UpdateEntityHeadYaw(int entityId, float headYaw)
         {
             if (entities.ContainsKey(entityId))
-                entities[entityId].RotateTo(AngleConvert.MCYaw2Unity(yaw), AngleConvert.MC2Unity(pitch));
-            
+                entities[entityId].RotateHeadTo(headYaw);
         }
 
         public void UnloadEntities()
@@ -127,7 +138,9 @@ namespace MinecraftClient.Rendering
 
             entityPrefabs.Add(EntityType.Pig, Resources.Load<GameObject>("Prefabs/Entity/Pig Entity"));
             entityPrefabs.Add(EntityType.Cow, Resources.Load<GameObject>("Prefabs/Entity/Cow Entity"));
+            entityPrefabs.Add(EntityType.Mooshroom, Resources.Load<GameObject>("Prefabs/Entity/Cow Entity"));
             entityPrefabs.Add(EntityType.Sheep, Resources.Load<GameObject>("Prefabs/Entity/Sheep Entity"));
+            
             entityPrefabs.Add(EntityType.Goat, Resources.Load<GameObject>("Prefabs/Entity/Pig Entity"));
 
             foreach (var prefabItem in entityPrefabs)

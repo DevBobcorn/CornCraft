@@ -829,37 +829,37 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     case PacketTypesIn.Title:
                         {
-                            int action2 = dataTypes.ReadNextVarInt(packetData);
-                            string titletext = string.Empty;
-                            string subtitletext = string.Empty;
-                            string actionbartext = string.Empty;
+                            int action = dataTypes.ReadNextVarInt(packetData);
+                            string titleText = string.Empty;
+                            string subtitleText = string.Empty;
+                            string actionbarText = string.Empty;
                             string json = string.Empty;
                             int fadein = -1;
                             int stay = -1;
                             int fadeout = -1;
                             // MC 1.10 or greater
-                            if (action2 == 0)
+                            if (action == 0)
                             {
-                                json = titletext;
-                                titletext = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                                json = titleText;
+                                titleText = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
                             }
-                            else if (action2 == 1)
+                            else if (action == 1)
                             {
-                                json = subtitletext;
-                                subtitletext = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                                json = subtitleText;
+                                subtitleText = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
                             }
-                            else if (action2 == 2)
+                            else if (action == 2)
                             {
-                                json = actionbartext;
-                                actionbartext = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                                json = actionbarText;
+                                actionbarText = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
                             }
-                            else if (action2 == 3)
+                            else if (action == 3)
                             {
                                 fadein = dataTypes.ReadNextInt(packetData);
                                 stay = dataTypes.ReadNextInt(packetData);
                                 fadeout = dataTypes.ReadNextInt(packetData);
                             }
-                            handler.OnTitle(action2, titletext, subtitletext, actionbartext, fadein, stay, fadeout, json);
+                            handler.OnTitle(action, titleText, subtitleText, actionbarText, fadein, stay, fadeout, json);
 
                             break;
                         }
@@ -893,8 +893,8 @@ namespace MinecraftClient.Protocol.Handlers
                             }
                             else
                             {
-                                int chunkX2 = dataTypes.ReadNextInt(packetData);
-                                int chunkZ2 = dataTypes.ReadNextInt(packetData);
+                                int chunkX = dataTypes.ReadNextInt(packetData);
+                                int chunkZ = dataTypes.ReadNextInt(packetData);
                                 int recordCount = dataTypes.ReadNextVarInt(packetData);
 
                                 for (int i = 0; i < recordCount; i++)
@@ -906,7 +906,7 @@ namespace MinecraftClient.Protocol.Handlers
                                     int blockX = locationXZ >> 4;
                                     int blockZ = locationXZ & 0x0F;
                                     Block bloc = new Block(blockIdMeta);
-                                    var loc1 = new Location(chunkX2, chunkZ2, blockX, blockY, blockZ);
+                                    var loc1 = new Location(chunkX, chunkZ, blockX, blockY, blockZ);
                                     handler.GetWorld().SetBlock(loc1, bloc);
                                     locs.Add(loc1);
                                 }
@@ -920,11 +920,11 @@ namespace MinecraftClient.Protocol.Handlers
                     case PacketTypesIn.BlockChange:
                         if (protocolVersion < MC_1_19_Version)
                         {
-                            var loc2 = dataTypes.ReadNextLocation(packetData);
-                            handler.GetWorld().SetBlock(loc2, new Block((ushort)dataTypes.ReadNextVarInt(packetData)));
-                            //Debug.Log("Block change: " + loc2);
+                            var location = dataTypes.ReadNextLocation(packetData);
+                            handler.GetWorld().SetBlock(location, new Block((ushort)dataTypes.ReadNextVarInt(packetData)));
+                            //Debug.Log($"Block change: {location}");
                             Loom.QueueOnMainThread(() => {
-                                EventManager.Instance.Broadcast<BlockUpdateEvent>(new(loc2));
+                                EventManager.Instance.Broadcast<BlockUpdateEvent>(new(location));
                             });
                         }
                         else
@@ -934,17 +934,17 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     case PacketTypesIn.UnloadChunk:
                         {
-                            int chunkX3 = dataTypes.ReadNextInt(packetData);
-                            int chunkZ3 = dataTypes.ReadNextInt(packetData);
+                            int chunkX = dataTypes.ReadNextInt(packetData);
+                            int chunkZ = dataTypes.ReadNextInt(packetData);
 
-                            if (handler.GetWorld()[chunkX3, chunkZ3] != null)
+                            if (handler.GetWorld()[chunkX, chunkZ] != null)
                                 Interlocked.Decrement(ref handler.GetWorld().chunkCnt);
                             // Warning: It is legal to include unloaded chunks in the UnloadChunk packet. Since chunks that have not been loaded are not recorded, this may result in loading chunks that should be unloaded and inaccurate statistics.
                             
-                            handler.GetWorld()[chunkX3, chunkZ3] = null;
+                            handler.GetWorld()[chunkX, chunkZ] = null;
 
                             Loom.QueueOnMainThread(() => {
-                                EventManager.Instance.Broadcast<UnloadChunkColumnEvent>(new(chunkX3, chunkZ3));
+                                EventManager.Instance.Broadcast<UnloadChunkColumnEvent>(new(chunkX, chunkZ));
                             });
                             break;
                         }
@@ -1101,40 +1101,40 @@ namespace MinecraftClient.Protocol.Handlers
                     case PacketTypesIn.OpenWindow:
                         if (protocolVersion < MC_1_14_Version)
                         {   // MC 1.13 or lower
-                            byte windowId1 = dataTypes.ReadNextByte(packetData);
+                            byte windowId = dataTypes.ReadNextByte(packetData);
                             string type = dataTypes.ReadNextString(packetData).Replace("minecraft:", "").ToUpper();
                             ContainerTypeOld inventoryType = (ContainerTypeOld)Enum.Parse(typeof(ContainerTypeOld), type);
                             string title = dataTypes.ReadNextString(packetData);
                             byte slots = dataTypes.ReadNextByte(packetData);
-                            Container inventory = new Container(windowId1, inventoryType, ChatParser.ParseText(title));
-                            handler.OnInventoryOpen(windowId1, inventory);
+                            Container inventory = new Container(windowId, inventoryType, ChatParser.ParseText(title));
+                            handler.OnInventoryOpen(windowId, inventory);
                         }
                         else
                         {   // MC 1.14 or greater
-                            int windowId1 = dataTypes.ReadNextVarInt(packetData);
+                            int windowId = dataTypes.ReadNextVarInt(packetData);
                             int windowType = dataTypes.ReadNextVarInt(packetData);
                             string title = dataTypes.ReadNextString(packetData);
-                            Container inventory = new Container(windowId1, windowType, ChatParser.ParseText(title));
-                            handler.OnInventoryOpen(windowId1, inventory);
+                            Container inventory = new Container(windowId, windowType, ChatParser.ParseText(title));
+                            handler.OnInventoryOpen(windowId, inventory);
                         }
                         break;
                     case PacketTypesIn.CloseWindow:
                         {
-                            byte windowId2 = dataTypes.ReadNextByte(packetData);
-                            lock (windowActions) { windowActions[windowId2] = 0; }
-                            handler.OnInventoryClose(windowId2);
+                            byte windowId = dataTypes.ReadNextByte(packetData);
+                            lock (windowActions) { windowActions[windowId] = 0; }
+                            handler.OnInventoryClose(windowId);
                             break;
                         }
                     case PacketTypesIn.WindowItems:
                         {
-                            byte windowId3 = dataTypes.ReadNextByte(packetData);
-                            int stateId1 = -1;
+                            byte windowId = dataTypes.ReadNextByte(packetData);
+                            int stateId = -1;
                             int elements = 0;
 
                             if (protocolVersion >= MC_1_17_1_Version)
                             {
                                 // State ID and Elements as VarInt - 1.17.1 and above
-                                stateId1 = dataTypes.ReadNextVarInt(packetData);
+                                stateId = dataTypes.ReadNextVarInt(packetData);
                                 elements = dataTypes.ReadNextVarInt(packetData);
                             }
                             else
@@ -1154,28 +1154,28 @@ namespace MinecraftClient.Protocol.Handlers
                             if (protocolVersion >= MC_1_17_1_Version) // Carried Item - 1.17.1 and above
                                 dataTypes.ReadNextItemSlot(packetData, itemPalette);
 
-                            handler.OnWindowItems(windowId3, inventorySlots, stateId1);
+                            handler.OnWindowItems(windowId, inventorySlots, stateId);
                             break;
                         }
                     case PacketTypesIn.SetSlot:
                         {
-                            byte windowId4 = dataTypes.ReadNextByte(packetData);
-                            int stateId2 = -1;
+                            byte windowId = dataTypes.ReadNextByte(packetData);
+                            int stateId = -1;
                             if (protocolVersion >= MC_1_17_1_Version)
-                                stateId2 = dataTypes.ReadNextVarInt(packetData); // State ID - 1.17.1 and above
+                                stateId = dataTypes.ReadNextVarInt(packetData); // State ID - 1.17.1 and above
                             short slotId2 = dataTypes.ReadNextShort(packetData);
-                            Item? item2 = dataTypes.ReadNextItemSlot(packetData, itemPalette);
-                            handler.OnSetSlot(windowId4, slotId2, item2!, stateId2);
+                            Item? item = dataTypes.ReadNextItemSlot(packetData, itemPalette);
+                            handler.OnSetSlot(windowId, slotId2, item!, stateId);
                             break;
                         }
                     case PacketTypesIn.WindowConfirmation:
                         {
-                            byte windowId5 = dataTypes.ReadNextByte(packetData);
+                            byte windowId = dataTypes.ReadNextByte(packetData);
                             short actionId = dataTypes.ReadNextShort(packetData);
                             bool accepted = dataTypes.ReadNextBool(packetData);
                             if (!accepted)
                             {
-                                SendWindowConfirmation(windowId5, actionId, accepted);
+                                SendWindowConfirmation(windowId, actionId, accepted);
                             }
                             break;
                         }
@@ -1202,8 +1202,8 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                     case PacketTypesIn.SpawnEntity:
                         {
-                            Entity entity1 = dataTypes.ReadNextEntity(packetData, entityPalette, false);
-                            handler.OnSpawnEntity(entity1);
+                            Entity entity = dataTypes.ReadNextEntity(packetData, entityPalette, false);
+                            handler.OnSpawnEntity(entity);
                             break;
                         }
                     case PacketTypesIn.EntityEquipment:
@@ -1241,20 +1241,20 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                     case PacketTypesIn.SpawnPlayer:
                         {
-                            int entityId1 = dataTypes.ReadNextVarInt(packetData);
+                            int entityId = dataTypes.ReadNextVarInt(packetData);
                             Guid UUID = dataTypes.ReadNextUUID(packetData);
-                            double X = dataTypes.ReadNextDouble(packetData);
-                            double Y = dataTypes.ReadNextDouble(packetData);
-                            double Z = dataTypes.ReadNextDouble(packetData);
-                            byte Yaw = dataTypes.ReadNextByte(packetData);
-                            byte Pitch = dataTypes.ReadNextByte(packetData);
-                            Location EntityLocation = new Location(X, Y, Z);
-                            handler.OnSpawnPlayer(entityId1, UUID, EntityLocation, Yaw, Pitch);
+                            double x = dataTypes.ReadNextDouble(packetData);
+                            double y = dataTypes.ReadNextDouble(packetData);
+                            double z = dataTypes.ReadNextDouble(packetData);
+                            byte yaw = dataTypes.ReadNextByte(packetData);
+                            byte pitch = dataTypes.ReadNextByte(packetData);
+                            Location location = new Location(x, y, z);
+                            handler.OnSpawnPlayer(entityId, UUID, location, yaw, pitch);
                             break;
                         }
                     case PacketTypesIn.EntityEffect:
                         {
-                            int entityId2 = dataTypes.ReadNextVarInt(packetData);
+                            int entityId = dataTypes.ReadNextVarInt(packetData);
                             Inventory.Effects effect = Effects.Speed;
                             if (Enum.TryParse(dataTypes.ReadNextByte(packetData).ToString(), out effect))
                             {
@@ -1271,7 +1271,7 @@ namespace MinecraftClient.Protocol.Handlers
                                     factorCodec = dataTypes.ReadNextNbt(packetData);
                                 }
 
-                                handler.OnEntityEffect(entityId2, effect, amplifier, duration, flags, hasFactorData, factorCodec);
+                                handler.OnEntityEffect(entityId, effect, amplifier, duration, flags, hasFactorData, factorCodec);
                             }
                             break;
                         }
@@ -1290,45 +1290,52 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                     case PacketTypesIn.EntityPosition:
                         {
-                            int entityId3 = dataTypes.ReadNextVarInt(packetData);
-                            Double DeltaX1 = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                            Double DeltaY1 = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                            Double DeltaZ1 = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                            bool OnGround1 = dataTypes.ReadNextBool(packetData);
-                            DeltaX1 = DeltaX1 / (128 * 32);
-                            DeltaY1 = DeltaY1 / (128 * 32);
-                            DeltaZ1 = DeltaZ1 / (128 * 32);
-                            handler.OnEntityPosition(entityId3, DeltaX1, DeltaY1, DeltaZ1, OnGround1);
+                            int entityId = dataTypes.ReadNextVarInt(packetData);
+                            Double deltaX = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
+                            Double deltaY = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
+                            Double deltaZ = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
+                            bool onGround = dataTypes.ReadNextBool(packetData);
+                            deltaX = deltaX / (128 * 32);
+                            deltaY = deltaY / (128 * 32);
+                            deltaZ = deltaZ / (128 * 32);
+                            handler.OnEntityPosition(entityId, deltaX, deltaY, deltaZ, onGround);
                             break;
                         }
                     case PacketTypesIn.EntityPositionAndRotation:
                         {
-                            int entityId4 = dataTypes.ReadNextVarInt(packetData);
-                            Double DeltaX2 = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                            Double DeltaY2 = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                            Double DeltaZ2 = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                            byte _yaw1 = dataTypes.ReadNextByte(packetData);
-                            byte _pitch1 = dataTypes.ReadNextByte(packetData);
-                            bool OnGround2 = dataTypes.ReadNextBool(packetData);
-                            DeltaX2 = DeltaX2 / (128 * 32);
-                            DeltaY2 = DeltaY2 / (128 * 32);
-                            DeltaZ2 = DeltaZ2 / (128 * 32);
-                            handler.OnEntityPosition(entityId4, DeltaX2, DeltaY2, DeltaZ2, OnGround2);
-                            handler.OnEntityRotation(entityId4, _yaw1, _pitch1, OnGround2);
+                            int entityId = dataTypes.ReadNextVarInt(packetData);
+                            Double deltaX = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
+                            Double deltaY = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
+                            Double deltaZ = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
+                            byte yaw = dataTypes.ReadNextByte(packetData);
+                            byte pitch = dataTypes.ReadNextByte(packetData);
+                            bool onGround = dataTypes.ReadNextBool(packetData);
+                            deltaX = deltaX / (128 * 32);
+                            deltaY = deltaY / (128 * 32);
+                            deltaZ = deltaZ / (128 * 32);
+                            handler.OnEntityPosition(entityId, deltaX, deltaY, deltaZ, onGround);
+                            handler.OnEntityRotation(entityId, yaw, pitch, onGround, 1);
                             break;
                         }
                     case PacketTypesIn.EntityRotation:
                         {
-                            int entityId5 = dataTypes.ReadNextVarInt(packetData);
-                            byte _yaw2 = dataTypes.ReadNextByte(packetData);
-                            byte _pitch2 = dataTypes.ReadNextByte(packetData);
-                            bool OnGround3 = dataTypes.ReadNextBool(packetData);
-                            handler.OnEntityRotation(entityId5, _yaw2, _pitch2, OnGround3);
+                            int entityId = dataTypes.ReadNextVarInt(packetData);
+                            byte yaw = dataTypes.ReadNextByte(packetData);
+                            byte pitch = dataTypes.ReadNextByte(packetData);
+                            bool onGround = dataTypes.ReadNextBool(packetData);
+                            handler.OnEntityRotation(entityId, yaw, pitch, onGround, 0);
+                            break;
+                        }
+                    case PacketTypesIn.EntityHeadLook:
+                        {
+                            int entityId = dataTypes.ReadNextVarInt(packetData);
+                            byte headYaw = dataTypes.ReadNextByte(packetData);
+                            handler.OnEntityHeadLook(entityId, headYaw);
                             break;
                         }
                     case PacketTypesIn.EntityProperties:
                         {
-                            int entityId6 = dataTypes.ReadNextVarInt(packetData);
+                            int entityId = dataTypes.ReadNextVarInt(packetData);
                             int NumberOfProperties = protocolVersion >= MC_1_17_Version ? dataTypes.ReadNextVarInt(packetData) : dataTypes.ReadNextInt(packetData);
                             Dictionary<string, Double> keys = new Dictionary<string, Double>();
                             for (int i = 0; i < NumberOfProperties; i++)
@@ -1357,12 +1364,12 @@ namespace MinecraftClient.Protocol.Handlers
                                 if (op2.Count > 0) _value *= op2.Aggregate((a, _x) => a * _x);
                                 keys.Add(_key, _value);
                             }
-                            handler.OnEntityProperties(entityId6, keys);
+                            handler.OnEntityProperties(entityId, keys);
                             break;
                         }
                     case PacketTypesIn.EntityMetadata:
                         {
-                            int entityId7 = dataTypes.ReadNextVarInt(packetData);
+                            int entityId = dataTypes.ReadNextVarInt(packetData);
                             Dictionary<int, object?> metadata = dataTypes.ReadNextMetadata(packetData, itemPalette);
 
                             int healthField; // See https://wiki.vg/Entity_metadata#Living_Entity
@@ -1378,16 +1385,16 @@ namespace MinecraftClient.Protocol.Handlers
                                 throw new NotImplementedException(Translations.Get("exception.palette.healthfield"));
 
                             if (metadata.TryGetValue(healthField, out object? healthObj) && healthObj != null && healthObj.GetType() == typeof(float))
-                                handler.OnEntityHealth(entityId7, (float)healthObj);
+                                handler.OnEntityHealth(entityId, (float)healthObj);
                             
-                            handler.OnEntityMetadata(entityId7, metadata);
+                            handler.OnEntityMetadata(entityId, metadata);
                         }
                         break;
                     case PacketTypesIn.EntityStatus:
                         {
-                            int entityId8 = dataTypes.ReadNextInt(packetData);
+                            int entityId = dataTypes.ReadNextInt(packetData);
                             byte status = dataTypes.ReadNextByte(packetData);
-                            handler.OnEntityStatus(entityId8, status);
+                            handler.OnEntityStatus(entityId, status);
                             break;
                         }
                     case PacketTypesIn.TimeUpdate:
@@ -1399,14 +1406,14 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                     case PacketTypesIn.EntityTeleport:
                         {
-                            int EntityId = dataTypes.ReadNextVarInt(packetData);
+                            int entityId = dataTypes.ReadNextVarInt(packetData);
                             Double tX = dataTypes.ReadNextDouble(packetData);
                             Double tY = dataTypes.ReadNextDouble(packetData);
                             Double tZ = dataTypes.ReadNextDouble(packetData);
-                            byte EntityYaw = dataTypes.ReadNextByte(packetData);
-                            byte EntityPitch = dataTypes.ReadNextByte(packetData);
-                            bool OnGround = dataTypes.ReadNextBool(packetData);
-                            handler.OnEntityTeleport(EntityId, tX, tY, tZ, OnGround);
+                            byte yaw = dataTypes.ReadNextByte(packetData);
+                            byte pitch = dataTypes.ReadNextByte(packetData);
+                            bool onGround = dataTypes.ReadNextBool(packetData);
+                            handler.OnEntityTeleport(entityId, tX, tY, tZ, onGround);
                             break;
                         }
                     case PacketTypesIn.UpdateHealth:
@@ -1453,21 +1460,21 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                     case PacketTypesIn.ScoreboardObjective:
                         {
-                            string objectivename = dataTypes.ReadNextString(packetData);
+                            string objectiveName = dataTypes.ReadNextString(packetData);
                             byte mode = dataTypes.ReadNextByte(packetData);
-                            string objectivevalue = string.Empty;
+                            string objectiveValue = string.Empty;
                             int type2 = -1;
                             if (mode == 0 || mode == 2)
                             {
-                                objectivevalue = dataTypes.ReadNextString(packetData);
+                                objectiveValue = dataTypes.ReadNextString(packetData);
                                 type2 = dataTypes.ReadNextVarInt(packetData);
                             }
-                            handler.OnScoreboardObjective(objectivename, mode, objectivevalue, type2);
+                            handler.OnScoreboardObjective(objectiveName, mode, objectiveValue, type2);
                             break;
                         }
                     case PacketTypesIn.UpdateScore:
                         {
-                            string entityname = dataTypes.ReadNextString(packetData);
+                            string entityName = dataTypes.ReadNextString(packetData);
                             int action3 = protocolVersion >= MC_1_18_2_Version
                                 ? dataTypes.ReadNextVarInt(packetData)
                                 : dataTypes.ReadNextByte(packetData);
@@ -1476,22 +1483,22 @@ namespace MinecraftClient.Protocol.Handlers
                             objectivename2 = dataTypes.ReadNextString(packetData);
                             if (action3 != 1)
                                 value = dataTypes.ReadNextVarInt(packetData);
-                            handler.OnUpdateScore(entityname, action3, objectivename2, value);
+                            handler.OnUpdateScore(entityName, action3, objectivename2, value);
                             break;
                         }
                     case PacketTypesIn.BlockBreakAnimation:
                         {
-                            int playerId1 = dataTypes.ReadNextVarInt(packetData);
+                            int playerId = dataTypes.ReadNextVarInt(packetData);
                             Location blockLocation = dataTypes.ReadNextLocation(packetData);
                             byte stage = dataTypes.ReadNextByte(packetData);
-                            handler.OnBlockBreakAnimation(playerId1, blockLocation, stage);
+                            handler.OnBlockBreakAnimation(playerId, blockLocation, stage);
                             break;
                         }
                     case PacketTypesIn.EntityAnimation:
                         {
-                            int playerId2 = dataTypes.ReadNextVarInt(packetData);
+                            int playerId = dataTypes.ReadNextVarInt(packetData);
                             byte animation = dataTypes.ReadNextByte(packetData);
-                            handler.OnEntityAnimation(playerId2, animation);
+                            handler.OnEntityAnimation(playerId, animation);
                             break;
                         }
                     default:
@@ -2326,15 +2333,15 @@ namespace MinecraftClient.Protocol.Handlers
         /// <summary>
         /// Send an Interact Entity Packet to server
         /// </summary>
-        /// <param name="EntityId"></param>
+        /// <param name="entityId"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public bool SendInteractEntity(int EntityId, int type)
+        public bool SendInteractEntity(int entityId, int type)
         {
             try
             {
                 List<byte> fields = new List<byte>();
-                fields.AddRange(dataTypes.GetVarInt(EntityId));
+                fields.AddRange(dataTypes.GetVarInt(entityId));
                 fields.AddRange(dataTypes.GetVarInt(type));
 
                 // Is player Sneaking (Only 1.16 and above)
@@ -2352,12 +2359,12 @@ namespace MinecraftClient.Protocol.Handlers
         }
 
         // TODO: Interact at block location (e.g. chest minecart)
-        public bool SendInteractEntity(int EntityId, int type, float X, float Y, float Z, int hand)
+        public bool SendInteractEntity(int entityId, int type, float X, float Y, float Z, int hand)
         {
             try
             {
                 List<byte> fields = new List<byte>();
-                fields.AddRange(dataTypes.GetVarInt(EntityId));
+                fields.AddRange(dataTypes.GetVarInt(entityId));
                 fields.AddRange(dataTypes.GetVarInt(type));
                 fields.AddRange(dataTypes.GetFloat(X));
                 fields.AddRange(dataTypes.GetFloat(Y));
@@ -2375,12 +2382,12 @@ namespace MinecraftClient.Protocol.Handlers
             catch (System.IO.IOException) { return false; }
             catch (ObjectDisposedException) { return false; }
         }
-        public bool SendInteractEntity(int EntityId, int type, int hand)
+        public bool SendInteractEntity(int entityId, int type, int hand)
         {
             try
             {
                 List<byte> fields = new List<byte>();
-                fields.AddRange(dataTypes.GetVarInt(EntityId));
+                fields.AddRange(dataTypes.GetVarInt(entityId));
                 fields.AddRange(dataTypes.GetVarInt(type));
                 fields.AddRange(dataTypes.GetVarInt(hand));
                 // Is player Sneaking (Only 1.16 and above)
@@ -2395,7 +2402,7 @@ namespace MinecraftClient.Protocol.Handlers
             catch (System.IO.IOException) { return false; }
             catch (ObjectDisposedException) { return false; }
         }
-        public bool SendInteractEntity(int EntityId, int type, float X, float Y, float Z)
+        public bool SendInteractEntity(int entityId, int type, float X, float Y, float Z)
         {
             return false;
         }

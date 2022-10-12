@@ -72,7 +72,7 @@ namespace MinecraftClient.Protocol
         /// </summary>
         /// <param name="entityID">Player ID</param>
         /// <param name="animation">0 = LMB, 1 = RMB (RMB Corrent not work)</param>
-        void OnEntityAnimation(int entityID, byte animation);
+        void OnEntityAnimation(int entityId, byte animation);
 
         /// <summary>
         /// Will be called every player break block in gamemode 0
@@ -80,7 +80,7 @@ namespace MinecraftClient.Protocol
         /// <param name="entityId">Player ID</param>
         /// <param name="location">Block location</param>
         /// <param name="stage">Destroy stage, maximum 255</param>
-        void OnBlockBreakAnimation(int entityID, Location location, byte stage);
+        void OnBlockBreakAnimation(int entityId, Location location, byte stage);
 
         /// <summary>
         /// Called when the protocol handler receives a title
@@ -176,49 +176,51 @@ namespace MinecraftClient.Protocol
         /// <param name="location">Entity location</param>
         /// <param name="yaw">Player head yaw</param>
         /// <param name="pitch">Player head pitch</param>
-        void OnSpawnPlayer(int entityID, Guid uuid, Location location, byte yaw, byte pitch);
+        void OnSpawnPlayer(int entityId, Guid uuid, Location location, byte yaw, byte pitch);
 
         /// <summary>
         /// Called when entities have despawned
         /// </summary>
-        /// <param name="EntityID">List of Entity ID that have despawned</param>
-        void OnDestroyEntities(int[] EntityID);
+        /// <param name="entityId">List of Entity ID that have despawned</param>
+        void OnDestroyEntities(int[] entityId);
 
         /// <summary>
         /// Called when an entity moved by coordinate offset
         /// </summary>
-        /// <param name="EntityID">Entity ID</param>
+        /// <param name="entityId">Entity ID</param>
         /// <param name="Dx">X offset</param>
         /// <param name="Dy">Y offset</param>
         /// <param name="Dz">Z offset</param>
         /// <param name="onGround">TRUE if on ground</param>
-        void OnEntityPosition(int entityID, Double dx, Double dy, Double dz, bool onGround);
+        void OnEntityPosition(int entityId, Double dx, Double dy, Double dz, bool onGround);
 
-        void OnEntityRotation(int entityID, float yaw, float pitch, bool onGround);
+        void OnEntityRotation(int entityId, float yaw, float pitch, bool onGround, int flag);
+
+        void OnEntityHeadLook(int entityId, float headYaw);
 
         /// <summary>
         /// Called when an entity moved to fixed coordinates
         /// </summary>
-        /// <param name="EntityID">Entity ID</param>
+        /// <param name="entityId">Entity ID</param>
         /// <param name="Dx">X</param>
         /// <param name="Dy">Y</param>
         /// <param name="Dz">Z</param>
         /// <param name="onGround">TRUE if on ground</param>
-        void OnEntityTeleport(int entityID, Double x, Double y, Double z, bool onGround);
+        void OnEntityTeleport(int entityId, Double x, Double y, Double z, bool onGround);
 
         /// <summary>
         /// Called when additional properties have been received for an entity
         /// </summary>
-        /// <param name="EntityID">Entity ID</param>
+        /// <param name="entityId">Entity ID</param>
         /// <param name="prop">Dictionary of properties</param>
-        void OnEntityProperties(int entityID, Dictionary<string, Double> prop);
+        void OnEntityProperties(int entityId, Dictionary<string, Double> prop);
 
         /// <summary>
         /// Called when the status of an entity have been changed
         /// </summary>
         /// <param name="entityID">Entity ID</param>
         /// <param name="status">Status ID</param>
-        void OnEntityStatus(int entityID, byte status);
+        void OnEntityStatus(int entityId, byte status);
 
         /// <summary>
         /// Called when the world age has been updated
@@ -256,14 +258,14 @@ namespace MinecraftClient.Protocol
         /// </summary>
         /// <param name="entityID">Entity ID</param>
         /// <param name="health">The health of the entity</param>
-        void OnEntityHealth(int entityID, float health);
+        void OnEntityHealth(int entityId, float health);
 
         /// <summary>
         /// Called when entity metadata or metadata changed.
         /// </summary>
-        /// <param name="EntityID">Entity ID</param>
+        /// <param name="entityId">Entity ID</param>
         /// <param name="metadata">Entity metadata</param>
-        void OnEntityMetadata(int EntityID, Dictionary<int, object?> metadata);
+        void OnEntityMetadata(int entityId, Dictionary<int, object?> metadata);
 
         /// <summary>
         /// Called when and explosion occurs on the server
@@ -321,8 +323,8 @@ namespace MinecraftClient.Protocol
         /// <summary>
         /// Called when the Player entity ID has been received from the server
         /// </summary>
-        /// <param name="EntityID">Player entity ID</param>
-        void OnReceivePlayerEntityID(int EntityID);
+        /// <param name="entityId">Player entity ID</param>
+        void OnReceivePlayerEntityID(int entityId);
 
         /// <summary>
         /// Called when the Entity use effects

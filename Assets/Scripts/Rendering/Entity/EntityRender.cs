@@ -11,10 +11,15 @@ namespace MinecraftClient.Rendering
         private const float MOVE_THERESHOLD = 5F * 5F; // Treat as teleport if move more than 5 meters at once
         protected Vector3? lastPosition = null, targetPosition = null;
         protected float lastYaw = 0F, targetYaw = 0F;
+        protected float lastHeadYaw = 0F, targetHeadYaw = 0F;
+        protected float lastPitch = 0F, targetPitch = 0F;
         protected Vector3 currentVelocity = Vector3.zero;
 
         public float showInfoDist = 10F;
         public float hideInfoDist = 12F;
+
+        public Transform? head;
+        private bool headPresent = false;
 
         // A number made from the entity's numeral id, used in animations to prevent
         // several mobs of a same type moving synchronisedly, which looks unnatural
@@ -47,7 +52,13 @@ namespace MinecraftClient.Rendering
 
         public void MoveTo(Vector3 position) => targetPosition = position;
 
-        public void RotateTo(float yaw, float pitch) => targetYaw = yaw;
+        public void RotateTo(float yaw, float pitch)
+        {
+            targetYaw = yaw;
+            targetPitch = pitch;
+        }
+
+        public void RotateHeadTo(float headYaw) => targetHeadYaw = headYaw;
 
         private void EnsureInitialized()
         {
@@ -64,6 +75,8 @@ namespace MinecraftClient.Rendering
             nameText = FindHelper.FindChildRecursively(transform, "Name Text").GetComponent<TMP_Text>();
             nameTextShown    = false;
             nameText.enabled = false;
+
+            headPresent = head is not null;
         }
 
         protected virtual void UpdateDisplayName()
@@ -128,11 +141,27 @@ namespace MinecraftClient.Rendering
                 transform.eulerAngles = new(0F, lastYaw, 0F);
             }
 
+            if (lastHeadYaw != targetHeadYaw)
+                lastHeadYaw = Mathf.MoveTowardsAngle(lastHeadYaw, targetHeadYaw, Time.deltaTime * 360F);
+            
+            if (lastPitch != targetPitch)
+                lastPitch = Mathf.MoveTowardsAngle(lastPitch, targetPitch, Time.deltaTime * 360F);
+
         }
 
         public void SetCurrentVelocity(Vector3 velocity) => currentVelocity = velocity;
 
-        public virtual void UpdateAnimation(float tickMilSec) { }
+        public virtual void UpdateAnimation(float tickMilSec)
+        {
+            if (headPresent)
+            {
+                if (head is null)
+                    Debug.LogWarning("WTF?");
+                else
+                    head!.localEulerAngles = new(lastPitch, lastHeadYaw - lastYaw);
+            }
+
+        }
 
         public virtual void ManagedUpdate(Vector3 cameraPos, float tickMilSec)
         {
