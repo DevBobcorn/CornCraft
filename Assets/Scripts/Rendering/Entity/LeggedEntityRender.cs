@@ -3,21 +3,21 @@ using UnityEngine;
 
 namespace MinecraftClient.Rendering
 {
-    public class LeggedEntityRender : EntityRender
+    public class LeggedEntityRender : LivingEntityRender
     {
         public float cycleTime = 1F;
         public float legAngle = 45F;
         
-        protected float currentLegAngle = 0F, currentMovFact = 0F;
+        protected float currentLegAngle = 0F, currentMovFract = 0F;
 
         protected bool legsPresent = false;
 
         protected void UpdateLegAngle()
         {
-            var movFact = Mathf.Clamp01(currentVelocity.x * currentVelocity.x + currentVelocity.z * currentVelocity.z);
+            var movFract = Mathf.Clamp01(currentVelocity.x * currentVelocity.x + currentVelocity.z * currentVelocity.z);
 
-            if (currentMovFact != movFact)
-                currentMovFact = Mathf.MoveTowards(currentMovFact, movFact, Time.deltaTime * 3F);
+            if (currentMovFract != movFract)
+                currentMovFract = Mathf.MoveTowards(currentMovFract, movFract, Time.deltaTime * 3F);
 
             // Make sure every mob is moving with a different offset
             var refTime = Time.realtimeSinceStartup + pseudoRandomOffset * cycleTime;

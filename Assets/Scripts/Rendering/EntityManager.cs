@@ -80,14 +80,7 @@ namespace MinecraftClient.Rendering
         public void RotateEntity(int entityId, float yaw, float pitch, int flag)
         {
             if (entities.ContainsKey(entityId))
-            {
                 entities[entityId].RotateTo(yaw, pitch);
-
-                if (entities[entityId].Entity.Type == EntityType.Mooshroom)
-                    UnityEngine.Debug.Log($"{entityId} Rot [{flag}] {yaw}");
-            }
-                
-            
         }
 
         public void UpdateEntityHeadYaw(int entityId, float headYaw)

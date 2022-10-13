@@ -25,6 +25,7 @@ namespace MinecraftClient.Resource
 
             // Clear loaded things...
             skinTextures.Clear();
+            skinMaterials.Clear();
 
             var skinPath = PathHelper.GetPacksDirectory() + "/skins";
             var skinDir = new DirectoryInfo(skinPath);
