@@ -32,14 +32,6 @@ namespace MinecraftClient.Control
 
         private MeshRenderer? blockSelection;
 
-        public void UpdateGameMode(GameMode gameMode)
-        {
-            if (gameMode != GameMode.Spectator && game!.LocationReceived)
-                EnableEntity();
-            else
-                DisableEntity();
-        }
-
         public void DisableEntity()
         {
             entityDisabled = true;
@@ -318,6 +310,7 @@ namespace MinecraftClient.Control
         }
 
         private Action<PerspectiveUpdateEvent>? perspectiveCallback;
+        private Action<GameModeUpdateEvent>? gameModeCallback;
 
         void Start()
         {
@@ -361,7 +354,15 @@ namespace MinecraftClient.Control
                 }
             };
 
+            gameModeCallback = (e) => {
+                if (e.newGameMode != GameMode.Spectator && game!.LocationReceived)
+                    EnableEntity();
+                else
+                    DisableEntity();
+            };
+
             EventManager.Instance.Register(perspectiveCallback);
+            EventManager.Instance.Register(gameModeCallback);
 
         }
 
@@ -370,6 +371,8 @@ namespace MinecraftClient.Control
             if (perspectiveCallback is not null)
                 EventManager.Instance.Unregister(perspectiveCallback);
 
+            if (gameModeCallback is not null)
+                EventManager.Instance.Unregister(gameModeCallback);
         }
 
         void OnDrawGizmos()

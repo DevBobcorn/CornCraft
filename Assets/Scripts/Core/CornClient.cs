@@ -2376,17 +2376,15 @@ namespace MinecraftClient
         /// <param name="gamemode">New Game Mode (0: Survival, 1: Creative, 2: Adventure, 3: Spectator).</param>
         public void OnGamemodeUpdate(Guid uuid, int gamemode)
         {
-            // Initial gamemode on login
-            if (uuid == Guid.Empty)
+            
+            if (uuid == Guid.Empty) // Initial gamemode on login
             {
                 Loom.QueueOnMainThread(() =>{
                     player.GameMode = (GameMode)gamemode;
-                    playerController?.UpdateGameMode(player.GameMode);
+                    EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(player.GameMode));
                 });
             }
-
-            // Further regular gamemode change events
-            if (onlinePlayers.ContainsKey(uuid))
+            else if (onlinePlayers.ContainsKey(uuid)) // Further regular gamemode change events
             {
                 string playerName = onlinePlayers[uuid].Name;
                 if (playerName == this.username)
@@ -2394,9 +2392,7 @@ namespace MinecraftClient
                     Loom.QueueOnMainThread(() =>{
                         var newMode = (GameMode)gamemode;
                         player.GameMode = newMode;
-                        playerController?.UpdateGameMode(player.GameMode);
-
-                        EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(newMode));
+                        EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(player.GameMode));
 
                         ShowNotification("Gamemode updated to " + newMode, Notification.Type.Success);
                     });

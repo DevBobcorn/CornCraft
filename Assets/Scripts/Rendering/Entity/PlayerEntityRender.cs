@@ -28,8 +28,8 @@ namespace MinecraftClient.Rendering
 
             if (armsPresent)
             {
-                leftArm!.localEulerAngles  = new(-currentLegAngle * currentMovFact, 0F, 0F);
-                rightArm!.localEulerAngles = new( currentLegAngle * currentMovFact, 0F, 0F);
+                leftArm!.localEulerAngles  = new(-currentLegAngle * currentMovFract, 0F, 0F);
+                rightArm!.localEulerAngles = new( currentLegAngle * currentMovFract, 0F, 0F);
             }
 
         }

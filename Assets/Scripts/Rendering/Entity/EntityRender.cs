@@ -18,8 +18,7 @@ namespace MinecraftClient.Rendering
         public float showInfoDist = 10F;
         public float hideInfoDist = 12F;
 
-        public Transform? head;
-        private bool headPresent = false;
+        
 
         // A number made from the entity's numeral id, used in animations to prevent
         // several mobs of a same type moving synchronisedly, which looks unnatural
@@ -58,7 +57,10 @@ namespace MinecraftClient.Rendering
             targetPitch = pitch;
         }
 
-        public void RotateHeadTo(float headYaw) => targetHeadYaw = headYaw;
+        public void RotateHeadTo(float headYaw)
+        {
+            targetHeadYaw = headYaw;
+        }
 
         private void EnsureInitialized()
         {
@@ -75,8 +77,6 @@ namespace MinecraftClient.Rendering
             nameText = FindHelper.FindChildRecursively(transform, "Name Text").GetComponent<TMP_Text>();
             nameTextShown    = false;
             nameText.enabled = false;
-
-            headPresent = head is not null;
         }
 
         protected virtual void UpdateDisplayName()
@@ -133,35 +133,35 @@ namespace MinecraftClient.Rendering
             }
 
             // Update rotation
-            if (lastYaw != targetYaw)
-            {
-                // TODO Transition
-                lastYaw = Mathf.MoveTowardsAngle(lastYaw, targetYaw, Time.deltaTime * 400F);
+            var headYawDelta = Mathf.Abs(Mathf.DeltaAngle(lastHeadYaw, targetHeadYaw));
+            var bodyYawDelta = Mathf.Abs(Mathf.DeltaAngle(lastYaw, targetYaw));
+
+            if (bodyYawDelta > 0.0025F)
+            {   // TODO Transition
+                lastYaw = Mathf.MoveTowardsAngle(lastYaw, targetYaw, Time.deltaTime * 300F);
 
                 transform.eulerAngles = new(0F, lastYaw, 0F);
             }
 
-            if (lastHeadYaw != targetHeadYaw)
-                lastHeadYaw = Mathf.MoveTowardsAngle(lastHeadYaw, targetHeadYaw, Time.deltaTime * 360F);
+            if (headYawDelta > 0.0025F)
+                lastHeadYaw = Mathf.MoveTowardsAngle(lastHeadYaw, targetHeadYaw, Time.deltaTime * 150F);
+            else
+            {
+                if (currentVelocity.magnitude < 0.1F)
+                    targetYaw = targetHeadYaw;
+            }
+            
+            if (Mathf.Abs(Mathf.DeltaAngle(targetYaw, targetHeadYaw)) > 75F)
+                targetYaw = targetHeadYaw;
             
             if (lastPitch != targetPitch)
-                lastPitch = Mathf.MoveTowardsAngle(lastPitch, targetPitch, Time.deltaTime * 360F);
+                lastPitch = Mathf.MoveTowardsAngle(lastPitch, targetPitch, Time.deltaTime * 300F);
 
         }
 
         public void SetCurrentVelocity(Vector3 velocity) => currentVelocity = velocity;
 
-        public virtual void UpdateAnimation(float tickMilSec)
-        {
-            if (headPresent)
-            {
-                if (head is null)
-                    Debug.LogWarning("WTF?");
-                else
-                    head!.localEulerAngles = new(lastPitch, lastHeadYaw - lastYaw);
-            }
-
-        }
+        public virtual void UpdateAnimation(float tickMilSec) { }
 
         public virtual void ManagedUpdate(Vector3 cameraPos, float tickMilSec)
         {

@@ -25,8 +25,8 @@ namespace MinecraftClient.Rendering
             {
                 UpdateLegAngle();
                 
-                leftLeg!.localEulerAngles  = new( currentLegAngle * currentMovFact, 0F, 0F);
-                rightLeg!.localEulerAngles = new(-currentLegAngle * currentMovFact, 0F, 0F);
+                leftLeg!.localEulerAngles  = new( currentLegAngle * currentMovFract, 0F, 0F);
+                rightLeg!.localEulerAngles = new(-currentLegAngle * currentMovFract, 0F, 0F);
             }
 
         }
