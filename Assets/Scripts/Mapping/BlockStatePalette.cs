@@ -6,10 +6,12 @@ using UnityEngine;
 
 using MinecraftClient.Rendering;
 
-namespace MinecraftClient.Mapping.BlockStatePalettes
+namespace MinecraftClient.Mapping
 {
     public class BlockStatePalette
     {
+        public static readonly BlockStatePalette INSTANCE = new();
+
         public BlockState FromId(int stateId)
         {
             return statesTable.GetValueOrDefault(stateId, BlockState.AIR_STATE);

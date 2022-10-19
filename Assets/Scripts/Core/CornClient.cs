@@ -20,7 +20,6 @@ using MinecraftClient.Rendering;
 using MinecraftClient.Resource;
 using MinecraftClient.UI;
 using MinecraftClient.Mapping;
-using MinecraftClient.Mapping.BlockStatePalettes;
 using MinecraftClient.Inventory;
 
 using UnityEngine;
@@ -269,23 +268,24 @@ namespace MinecraftClient
             }
             
             var resourceVersion = string.Empty;
+
             var blockLoadFlag = new CoroutineFlag();
 
-            Block.Palette = new BlockStatePalette();
             if (protocolVersion >= ProtocolMinecraft.MC_1_19_Version)
             {
-                StartCoroutine(Block.Palette.PrepareData("1.19", blockLoadFlag, loadStateInfo));
+                StartCoroutine(BlockStatePalette.INSTANCE.PrepareData("1.19", blockLoadFlag, loadStateInfo));
                 resourceVersion = "1.19.2";
             }
             else if (protocolVersion >= ProtocolMinecraft.MC_1_17_Version)
             {   // Treat 1.18.X as 1.17.X because there ain't a single block changed in 1.18
-                StartCoroutine(Block.Palette.PrepareData("1.17", blockLoadFlag, loadStateInfo));
+                StartCoroutine(BlockStatePalette.INSTANCE.PrepareData("1.17", blockLoadFlag, loadStateInfo));
                 resourceVersion = "1.17.1";
             }
             else if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
             {
-                StartCoroutine(Block.Palette.PrepareData("1.16", blockLoadFlag, loadStateInfo));
+                StartCoroutine(BlockStatePalette.INSTANCE.PrepareData("1.16", blockLoadFlag, loadStateInfo));
                 resourceVersion = "1.16.5";
+                BiomePalette.INSTANCE.PrepareData("1.16");
             }    
             else // TODO Implement More
             {

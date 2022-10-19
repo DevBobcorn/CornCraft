@@ -37,6 +37,9 @@ namespace MinecraftClient.Rendering
 
         public void AddEntity(Entity entity)
         {
+            if (entities.ContainsKey(entity.ID))
+                return;
+
             GameObject? entityPrefab;
 
             if (entity.Type == EntityType.Player) // TODO Apply right model

@@ -1,5 +1,4 @@
 ﻿using System;
-using MinecraftClient.Mapping.BlockStatePalettes;
 
 namespace MinecraftClient.Mapping
 {
@@ -8,12 +7,6 @@ namespace MinecraftClient.Mapping
     /// </summary>
     public struct Block
     {
-        /// <summary>
-        /// Get or set global block ID to Material mapping
-        /// The global Palette is a concept introduced with Minecraft 1.13
-        /// </summary>
-        public static BlockStatePalette Palette { get; set; }
-
         /// <summary>
         /// Storage for block ID, as ushort for compatibility, performance and lower memory footprint
         /// For Minecraft 1.13 and greater, all 16 bits are used to store block state ID (0-65535)
@@ -50,14 +43,14 @@ namespace MinecraftClient.Mapping
         public BlockState State
         {
             get {
-                return Palette.FromId(StateId);
+                return BlockStatePalette.INSTANCE.FromId(StateId);
             }
         }
 
         public ResourceLocation BlockId
         {
             get {
-                return Palette.GetBlock(StateId);
+                return BlockStatePalette.INSTANCE.GetBlock(StateId);
             }
         }
 

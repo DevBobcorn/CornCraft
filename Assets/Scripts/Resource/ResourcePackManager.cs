@@ -64,7 +64,7 @@ namespace MinecraftClient.Resource
             }
 
             // Perform integrity check...
-            var statesTable = Block.Palette.StatesTable;
+            var statesTable = BlockStatePalette.INSTANCE.StatesTable;
 
             foreach (var stateItem in statesTable)
             {

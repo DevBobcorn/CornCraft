@@ -2,8 +2,8 @@ namespace MinecraftClient
 {
     public struct ResourceLocation
     {
-        public static readonly string defaultNameSpace = "minecraft";
-        public static readonly ResourceLocation INVALID = new ResourceLocation(defaultNameSpace, "<missingno>");
+        public static readonly string DEFAULT_NAMESPACE = "minecraft";
+        public static readonly ResourceLocation INVALID = new ResourceLocation(DEFAULT_NAMESPACE, "<missingno>");
 
         public readonly string nameSpace;
         public readonly string path;
@@ -16,7 +16,7 @@ namespace MinecraftClient
 
         public ResourceLocation(string path)
         {
-            this.nameSpace = defaultNameSpace;
+            this.nameSpace = DEFAULT_NAMESPACE;
             this.path = path;
         }
 

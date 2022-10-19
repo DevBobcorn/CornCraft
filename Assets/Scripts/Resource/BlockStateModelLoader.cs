@@ -66,11 +66,11 @@ namespace MinecraftClient.Resource
                     results.Add(new BlockGeometry(BlockModelWrapper.fromJson(manager, variant.Value)).Finalize());
                 }
 
-                foreach (var stateId in Block.Palette.StateListTable[blockId])
+                foreach (var stateId in BlockStatePalette.INSTANCE.StateListTable[blockId])
                 {
                     // For every possible state of this block, select the states that belong
                     // to this variant and give them this geometry list to use...
-                    if (!manager.finalTable.ContainsKey(stateId) && conditions.check(Block.Palette.StatesTable[stateId]))
+                    if (!manager.finalTable.ContainsKey(stateId) && conditions.check(BlockStatePalette.INSTANCE.StatesTable[stateId]))
                     {
                         // Then this block state belongs to the current variant...
                         manager.finalTable.Add(stateId, new BlockStateModel(results));
@@ -86,7 +86,7 @@ namespace MinecraftClient.Resource
         private void LoadMultipartFormat(List<Json.JSONData> parts, ResourceLocation blockId, ResourcePackManager manager)
         {
             Dictionary<int, BlockGeometry> resultsList = new Dictionary<int, BlockGeometry>();
-            foreach (var stateId in Block.Palette.StateListTable[blockId])
+            foreach (var stateId in BlockStatePalette.INSTANCE.StateListTable[blockId])
             {
                 resultsList.Add(stateId, new BlockGeometry());
             }
@@ -121,7 +121,7 @@ namespace MinecraftClient.Resource
                                 // An array of predicates in the value of 'OR'
                                 foreach (var conditionData in whenData.Properties["OR"].DataArray)
                                 {
-                                    if (BlockStatePredicate.fromJson(conditionData).check(Block.Palette.StatesTable[stateId]))
+                                    if (BlockStatePredicate.fromJson(conditionData).check(BlockStatePalette.INSTANCE.StatesTable[stateId]))
                                     {
                                         apply = true;
                                         break;
@@ -140,7 +140,7 @@ namespace MinecraftClient.Resource
                             {
                                 int stateId = stateItem.Key;
                                 // Check and apply...
-                                if (BlockStatePredicate.fromJson(whenData).check(Block.Palette.StatesTable[stateId]))
+                                if (BlockStatePredicate.fromJson(whenData).check(BlockStatePalette.INSTANCE.StatesTable[stateId]))
                                     resultsList[stateId].AppendWrapper(partWrapper);
 
                             }
