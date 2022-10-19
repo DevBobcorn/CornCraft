@@ -227,7 +227,7 @@ namespace MinecraftClient.Rendering
                                 // If air-like (air, water block, etc), ignore it...
                                 if (state.LikeAir) continue;
 
-                                var layer = Block.Palette.GetRenderType(stateId);
+                                var layer = BlockStatePalette.INSTANCE.GetRenderType(stateId);
                                 int layerIndex = ChunkRender.TypeIndex(layer);
                                 
                                 int cullFlags = chunkData.GetCullFlags(loc, bloc, notFullSolid); // TODO Make it more accurate
@@ -693,7 +693,7 @@ namespace MinecraftClient.Rendering
                             // Build collider here
                             var stateId = bloc.StateId;
 
-                            var layer = Block.Palette.GetRenderType(stateId);
+                            var layer = BlockStatePalette.INSTANCE.GetRenderType(stateId);
                             int layerIndex = ChunkRender.TypeIndex(layer);
                             
                             int cullFlags = world.GetCullFlags(loc, bloc, notFullSolid);

@@ -696,10 +696,15 @@ namespace MinecraftClient.Protocol.Handlers
 
                                 if (protocolVersion >= MC_1_14_Version)
                                     dataTypes.ReadNextNbt(packetData);  // Heightmaps - 1.14 and above
+                                
                                 int biomesLength = 0;
-                                if (protocolVersion >= MC_1_16_2_Version)
-                                    if (chunksContinuous)
-                                        biomesLength = dataTypes.ReadNextVarInt(packetData); // Biomes length - 1.16.2 and above
+                                
+                                if (protocolVersion >= MC_1_16_2_Version && chunksContinuous)
+                                    biomesLength = dataTypes.ReadNextVarInt(packetData); // Biomes length - 1.16.2 and above
+                                
+                                // TODO Implement for all versions
+                                int[] biomes = new int[biomesLength];
+
                                 if (protocolVersion >= MC_1_15_Version && chunksContinuous)
                                 {
                                     if (protocolVersion >= MC_1_16_2_Version)
@@ -707,14 +712,19 @@ namespace MinecraftClient.Protocol.Handlers
                                         for (int i = 0; i < biomesLength; i++)
                                         {
                                             // Biomes - 1.16.2 and above
-                                            // Don't use ReadNextVarInt because it cost too much time
-                                            dataTypes.SkipNextVarInt(packetData);
+                                            biomes[i] = dataTypes.ReadNextVarInt(packetData);
+
                                         }
                                     }
-                                    else dataTypes.ReadData(1024 * 4, packetData); // Biomes - 1.15 and above
+                                    else
+                                    {
+                                        dataTypes.ReadData(1024 * 4, packetData); // Biomes - 1.15 and above
+                                    }
                                 }
+
                                 int dataSize = dataTypes.ReadNextVarInt(packetData);
-                                if (pTerrain.ProcessChunkColumnData(chunkX, chunkZ, chunkMask, 0, false, chunksContinuous, currentDimension, packetData))
+
+                                if (pTerrain.ProcessChunkColumnData(chunkX, chunkZ, chunkMask, 0, false, chunksContinuous, biomes, currentDimension, packetData))
                                     Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
                             }
                             break;

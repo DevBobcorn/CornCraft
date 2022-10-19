@@ -386,18 +386,20 @@ namespace MinecraftClient.Control
         public string GetDebugInfo()
         {
             string targetBlockInfo = string.Empty;
+            var pos = CoordConvert.Unity2MC(transform.position);
+            var world = game!.GetWorld();
 
             if (updateTarget && targetBlockPos is not null)
             {
-                var targetBlockState = game!.GetWorld()?.GetBlock(targetBlockPos.Value).State;
+                var targetBlockState = world?.GetBlock(targetBlockPos.Value).State;
                 if (targetBlockState is not null)
                     targetBlockInfo = targetBlockState.ToString();
             }
 
             if (entityDisabled)
-                return $"Position:\t{transform.position.x:0.00}\t{transform.position.y:0.00}\t{transform.position.z:0.00}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+                return $"Position:\t{pos}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}\nBiome:\n{world?.GetBiome(pos)}";
             else
-                return $"Position:\t{transform.position.x:0.00}\t{transform.position.y:0.00}\t{transform.position.z:0.00}\nGrounded:\t{isOnGround}\t{centerDownDist:0.00} {frontDownDist:0.00}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}";
+                return $"Position:\t{pos}\nGrounded:\t{isOnGround}\t{centerDownDist:0.00} {frontDownDist:0.00}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}\nBiome:\n{world?.GetBiome(pos)}";
 
         }
 

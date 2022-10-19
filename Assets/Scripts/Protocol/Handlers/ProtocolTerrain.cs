@@ -1,9 +1,7 @@
 ﻿#nullable enable
 using System;
-using System.Numerics;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading;
 using MinecraftClient.Event;
 using MinecraftClient.Mapping;
 
@@ -137,6 +135,94 @@ namespace MinecraftClient.Protocol.Handlers
                 return chunk;
             }
 
+            // TODO Implement for all supported game versions
+            /* Read biome data
+            // Indirect: For biomes the given value is always used, and will be <= 3
+            byte bitsPerBiome = dataTypes.ReadNextByte(cache);
+            int biomePaletteLength = dataTypes.ReadNextVarInt(cache);
+
+            int[] biomePalette = new int[biomePaletteLength];
+            for (int i = 0;i < paletteLength;i++)
+                biomePalette[i] = dataTypes.ReadNextVarInt(cache);
+
+            // Same as above
+            uint biomeValueMask = (uint)((1 << bitsPerBiome) - 1);
+
+            ulong[] biomeDataArray = dataTypes.ReadNextULongArray(cache);
+
+            if (biomeDataArray.Length > 0)
+            {
+                int longIndex = 0;
+                int startOffset = 0 - bitsPerBiome;
+
+                for (int biomeY = 0; biomeY < 4; biomeY++)
+                {
+                    for (int biomeZ = 0; biomeZ < 4; biomeZ++)
+                    {
+                        for (int biomeX = 0; biomeX < 4; biomeX++)
+                        {
+                            // NOTICE: In the future a single ushort may not store the entire block id;
+                            // the Block class may need to change if block state IDs go beyond 65535
+                            ushort biomeId;
+
+                            // Calculate location of next block ID inside the array of Longs
+                            startOffset += bitsPerBiome;
+                            bool overlap = false;
+
+                            if ((startOffset + bitsPerBiome) > 64)
+                            {
+                                if (protocolversion >= ProtocolMinecraft.MC_1_16_Version)
+                                {
+                                    // When overlapping, move forward to the beginning of the next Long
+                                    startOffset = 0;
+                                    longIndex++;
+                                }
+                                else
+                                {
+                                    // Detect when we reached the next Long or switch to overlap mode
+                                    if (startOffset >= 64)
+                                    {
+                                        startOffset -= 64;
+                                        longIndex++;
+                                    }
+                                    else overlap = true;
+                                }
+                            }
+
+                            // Extract Block ID
+                            if (overlap)
+                            {
+                                int endOffset = 64 - startOffset;
+                                biomeId = (ushort)((dataArray[longIndex] >> startOffset | dataArray[longIndex + 1] << endOffset) & valueMask);
+                            }
+                            else
+                                biomeId = (ushort)((dataArray[longIndex] >> startOffset) & valueMask);
+                            
+                            // Map small IDs to actual larger block IDs
+                            if (usePalette)
+                            {
+                                if (paletteLength <= biomeId)
+                                {
+                                    int biomeNumber = (biomeY * 4 + biomeZ) * 4 + biomeX;
+                                    throw new IndexOutOfRangeException(String.Format("Block ID {0} is outside Palette range 0-{1}! (bitsPerBiome: {2}, biomeNumber: {3})",
+                                        biomeId,
+                                        paletteLength - 1,
+                                        bitsPerBiome,
+                                        biomeNumber));
+                                }
+
+                                biomeId = (ushort)palette[biomeId];
+                            }
+
+                            // We have our biome, save it into the chunk
+                            chunk.SetBiomeWithoutCheck(biomeX, biomeY, biomeZ, biomeId);
+
+                        }
+                    }
+                }
+            }
+            */
+
         }
 
         /// <summary>
@@ -232,7 +318,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="currentDimension">Current dimension type (0 = overworld)</param>
         /// <param name="cache">Cache for reading chunk data</param>
         /// <returns>true if successfully loaded</returns>
-        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ushort chunkMask, ushort chunkMask2, bool hasSkyLight, bool chunksContinuous, int currentDimension, Queue<byte> cache)
+        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ushort chunkMask, ushort chunkMask2, bool hasSkyLight, bool chunksContinuous, int[] biomes, int currentDimension, Queue<byte> cache)
         {
             World world = handler.GetWorld();
 
@@ -263,9 +349,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                     int[] palette = new int[paletteLength];
                     for (int i = 0; i < paletteLength; i++)
-                    {
                         palette[i] = dataTypes.ReadNextVarInt(cache);
-                    }
 
                     // Bit mask covering bitsPerBlock bits
                     // EG, if bitsPerBlock = 5, valueMask = 00011111 in binary
@@ -330,10 +414,8 @@ namespace MinecraftClient.Protocol.Handlers
                                         blockId = (ushort)((dataArray[longIndex] >> startOffset | dataArray[longIndex + 1] << endOffset) & valueMask);
                                     }
                                     else
-                                    {
                                         blockId = (ushort)((dataArray[longIndex] >> startOffset) & valueMask);
-                                    }
-
+                                    
                                     // Map small IDs to actual larger block IDs
                                     if (usePalette)
                                     {
@@ -368,8 +450,7 @@ namespace MinecraftClient.Protocol.Handlers
                         dataTypes.ReadData((Chunk.SizeX * Chunk.SizeY * Chunk.SizeZ) / 2, cache);
 
                         // Skip sky light
-                        if (currentDimension == 0)
-                            // Sky light is not sent in the nether or the end
+                        if (currentDimension == 0) // Sky light is not sent in the nether or the end
                             dataTypes.ReadData((Chunk.SizeX * Chunk.SizeY * Chunk.SizeZ) / 2, cache);
                     }
                 }
@@ -382,14 +463,18 @@ namespace MinecraftClient.Protocol.Handlers
             var c = world[chunkX, chunkZ];
             if (c is not null)
             {
+                if (biomes.Length == 1024)
+                    c.SetBiomes(biomes);
+                else if (biomes.Length > 0)
+                    UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}");
+                
                 c!.ChunkMask = chunkMask;
                 c!.FullyLoaded = true;
             }
 
             // Broadcast event to update world render
-            Loom.QueueOnMainThread(() => {
-                    EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new(chunkX, chunkZ));
-                }
+            Loom.QueueOnMainThread(() =>
+                EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new(chunkX, chunkZ))
             );
             return true;
         }

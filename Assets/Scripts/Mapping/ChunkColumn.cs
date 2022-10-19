@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using UnityEngine;
 
 namespace MinecraftClient.Mapping
 {
@@ -20,6 +21,8 @@ namespace MinecraftClient.Mapping
         /// </summary>
         private readonly Chunk?[] chunks;
 
+        private readonly int[]    biomes;
+
         /// <summary>
         /// Create a new ChunkColumn
         /// </summary>
@@ -28,6 +31,7 @@ namespace MinecraftClient.Mapping
             world = parent;
             ColumnSize = size;
             chunks = new Chunk?[size];
+            biomes = new int[4 * 4 * 4 * size]; // [YYYYZZXX]
         }
 
         /// <summary>
@@ -63,6 +67,22 @@ namespace MinecraftClient.Mapping
                 return null;
             }
         }
+
+        public void SetBiomes(int[] biomes)
+        {
+            if (biomes.Length == this.biomes.Length)
+                Array.Copy(biomes, this.biomes, biomes.Length);
+            else
+                Debug.LogWarning($"Biomes data length inconsistent: {biomes.Length} {this.biomes.Length}");
+        }
+
+        public Biome GetBiome(Location location)
+        {
+            int index = (location.ChunkBlockY << 4) | (location.ChunkBlockZ << 2) | location.ChunkBlockX;
+            return index < biomes.Length ? BiomePalette.INSTANCE.FromId(biomes[index]) : BiomePalette.EMPTY;
+        }
+
+        public int[] GetBiomes() => biomes;
 
     }
 }

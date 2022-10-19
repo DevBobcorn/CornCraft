@@ -155,6 +155,15 @@ namespace MinecraftClient.Mapping
             return AIR_INSTANCE; // Air
         }
 
+        public Biome GetBiome(Location location)
+        {
+            var column = GetChunkColumn(location);
+            if (column != null)
+                return column.GetBiome(location);
+            
+            return BiomePalette.EMPTY; // Not available
+        }
+
         public bool IsWaterAt(Location location)
         {
             var column = GetChunkColumn(location);

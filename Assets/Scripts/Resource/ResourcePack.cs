@@ -159,14 +159,14 @@ namespace MinecraftClient.Resource
         public IEnumerator BuildStateGeometries(ResourcePackManager manager, LoadStateInfo loadStateInfo)
         {
             // Load all blockstate files, make and assign their block meshes...
-            if (Block.Palette is not null && isValid)
+            if (BlockStatePalette.INSTANCE is not null && isValid)
             {
                 // Assets folder...
                 var assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed(packName) + "/assets");
                 if (assetsDir.Exists)
                 {
                     int count = 0;
-                    foreach (var blockPair in Block.Palette.StateListTable)
+                    foreach (var blockPair in BlockStatePalette.INSTANCE.StateListTable)
                     {
                         var blockId = blockPair.Key;
                         bool shouldLoad = false;
