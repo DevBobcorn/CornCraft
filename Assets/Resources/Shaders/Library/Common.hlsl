@@ -10,6 +10,8 @@
 #define UNITY_MATRIX_VP unity_MatrixVP
 #define UNITY_MATRIX_P glstate_matrix_projection
 
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
+
 float3 TransformObjectToWorld (float3 positionOS) {
 	return mul(unity_ObjectToWorld, float4(positionOS, 1.0)).xyz;
 }
