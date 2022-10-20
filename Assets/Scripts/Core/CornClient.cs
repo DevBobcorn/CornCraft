@@ -267,25 +267,25 @@ namespace MinecraftClient
                 yield break;
             }
             
+            var dataVersion     = string.Empty;
             var resourceVersion = string.Empty;
 
             var blockLoadFlag = new CoroutineFlag();
 
             if (protocolVersion >= ProtocolMinecraft.MC_1_19_Version)
             {
-                StartCoroutine(BlockStatePalette.INSTANCE.PrepareData("1.19", blockLoadFlag, loadStateInfo));
+                dataVersion = "1.19";
                 resourceVersion = "1.19.2";
             }
             else if (protocolVersion >= ProtocolMinecraft.MC_1_17_Version)
             {   // Treat 1.18.X as 1.17.X because there ain't a single block changed in 1.18
-                StartCoroutine(BlockStatePalette.INSTANCE.PrepareData("1.17", blockLoadFlag, loadStateInfo));
+                dataVersion = "1.17";
                 resourceVersion = "1.17.1";
             }
             else if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
             {
-                StartCoroutine(BlockStatePalette.INSTANCE.PrepareData("1.16", blockLoadFlag, loadStateInfo));
+                dataVersion = "1.16";
                 resourceVersion = "1.16.5";
-                BiomePalette.INSTANCE.PrepareData("1.16");
             }    
             else // TODO Implement More
             {
@@ -293,6 +293,8 @@ namespace MinecraftClient
                 loadStateInfo.loggingIn = false;
                 yield break;
             }
+
+            StartCoroutine(BlockStatePalette.INSTANCE.PrepareData(dataVersion, blockLoadFlag, loadStateInfo));
 
             while (!blockLoadFlag.done)
                 yield return wait;
@@ -307,6 +309,9 @@ namespace MinecraftClient
             // Load player skin overrides...
             SkinManager.Load();
 
+            // Load biome definitions...
+            BiomePalette.INSTANCE.PrepareData(dataVersion, $"vanilla-{resourceVersion}");
+            
             // Load resources...
             packManager.ClearPacks();
 
@@ -329,10 +334,7 @@ namespace MinecraftClient
             op.allowSceneActivation = false;
 
             while (op.progress < 0.9F)
-            {
-                //Debug.Log("Loading: " + op.progress);
                 yield return wait;
-            }
 
             // Scene is loaded, activate it
             op.allowSceneActivation = true;

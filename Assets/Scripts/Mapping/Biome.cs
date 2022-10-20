@@ -1,5 +1,3 @@
-using System;
-
 namespace MinecraftClient.Mapping
 {
     /// <summary>
@@ -7,12 +5,11 @@ namespace MinecraftClient.Mapping
     /// </summary>
     public record Biome
     {
-
-
         public int NumeralId { get; }
 
         public float Temperature = 0F;
         public float Downfall    = 0F;
+        
         public Precipitation Precipitation = Precipitation.None;
 
         public int SkyColor      = 0xFFFFFF;
@@ -31,13 +28,7 @@ namespace MinecraftClient.Mapping
             BiomeId = id;
         }
 
-        private static string GetColorPrev(int color)
-        {
-            var colorCode = $"{color:x}".PadLeft(6, '0');
-            return $"<color=#{colorCode}>{colorCode}</color>";
-        }
-
-        public string GetDescription() => $"{BiomeId}\nTemperature: {Temperature:0.00}\tDownfall: {Precipitation} {Downfall:0.00}\n{GetColorPrev(SkyColor)} {GetColorPrev(FoliageColor)} {GetColorPrev(GrassColor)}\n{GetColorPrev(FogColor)} {GetColorPrev(WaterColor)} {GetColorPrev(WaterFogColor)}";
+        public string GetDescription() => $"{BiomeId}\nTemperature: {Temperature:0.00}\tDownfall: {Precipitation} {Downfall:0.00}\n{ColorHelper.GetPreview(SkyColor)} {ColorHelper.GetPreview(FoliageColor)} {ColorHelper.GetPreview(GrassColor)}\n{ColorHelper.GetPreview(FogColor)} {ColorHelper.GetPreview(WaterColor)} {ColorHelper.GetPreview(WaterFogColor)}";
 
         public override string ToString() => BiomeId.ToString();
     }
