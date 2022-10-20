@@ -397,9 +397,9 @@ namespace MinecraftClient.Control
             }
 
             if (entityDisabled)
-                return $"Position:\t{pos}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}\nBiome:\n{world?.GetBiome(pos)}";
+                return $"Position:\t{pos}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}\nBiome:\n{world?.GetBiome(pos).GetDescription()}";
             else
-                return $"Position:\t{pos}\nGrounded:\t{isOnGround}\t{centerDownDist:0.00} {frontDownDist:0.00}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}\nBiome:\n{world?.GetBiome(pos)}";
+                return $"Position:\t{pos}\nGrounded:\t{isOnGround}\t{centerDownDist:0.00} {frontDownDist:0.00}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}\nBiome:\n{world?.GetBiome(pos).GetDescription()}";
 
         }
 
