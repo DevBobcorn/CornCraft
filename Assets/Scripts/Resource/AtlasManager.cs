@@ -111,7 +111,7 @@ namespace MinecraftClient.Resource
                     if (texAtlasTable.ContainsKey(ResourceLocation.fromString(item.Key)))
                     {
                         loadFlag.done = true;
-                        throw new InvalidDataException("Duplicate block atlas with one name " + item.Key + "!?");
+                        throw new InvalidDataException($"Duplicate block atlas with one name {item.Key}!?");
                     }
                     else
                     {
