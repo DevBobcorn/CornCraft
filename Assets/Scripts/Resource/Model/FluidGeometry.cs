@@ -23,7 +23,7 @@ namespace MinecraftClient.Resource
 
             var verts = new float3[newLength];
             var txuvs = new float2[newLength];
-            var tints = new    int[newLength];
+            var tints = new float3[newLength];
 
             buffer.vert.CopyTo(verts, 0);
             buffer.txuv.CopyTo(txuvs, 0);

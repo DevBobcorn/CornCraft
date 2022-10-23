@@ -35,6 +35,7 @@ float4 UnlitPassFragment (Varyings input) : SV_TARGET {
     #if defined(_CLIPPING)
 		clip(result.a - _Cutoff);
 	#endif
+
     return result;
 }
 

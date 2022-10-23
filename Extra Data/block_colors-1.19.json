@@ -1,0 +1,26 @@
+{
+  "dynamic": {
+    "foliage": [
+      "minecraft:oak_leaves",
+      "minecraft:acacia_leaves",
+      "minecraft:jungle_leaves",
+      "minecraft:dark_oak_leaves",
+      "minecraft:vine"
+    ],
+    "grass": [
+      "minecraft:grass_block",
+      "minecraft:grass",
+      "minecraft:tall_grass",
+      "minecraft:fern",
+      "minecraft:large_fern",
+      "minecraft:potted_fern",
+      "minecraft:sugar_cane"
+    ]
+  },
+  "fixed": {
+    "minecraft:birch_leaves": [128, 167, 55],
+    "minecraft:spruce_leaves": [97, 153, 97],
+    "minecraft:lily_pad": [32, 128, 48],
+    "minecraft:nothingtoseeheremovealong": [0, 0, 0]
+  }
+}

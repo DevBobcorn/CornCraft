@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace MinecraftClient
 {
@@ -21,5 +22,15 @@ namespace MinecraftClient
 
             return (r << 16) | (g << 8) | b;
         }
+
+        public static float3 MC2Float3(int color)
+        {
+            float r = ((color & 0xFF0000) >> 16) / 255F;
+            float g = ((color &   0xFF00) >>  8) / 255F;
+            float b = ((color &     0xFF))       / 255F;
+
+            return new(r, g, b);
+        }
+
     }
 }
