@@ -31,7 +31,7 @@ namespace MinecraftClient.Mapping
             world = parent;
             ColumnSize = size;
             chunks = new Chunk?[size];
-            biomes = new int[4 * 4 * 4 * size]; // [YYYYZZXX]
+            biomes = new int[4 * 4 * 4 * size];
         }
 
         /// <summary>
@@ -82,7 +82,11 @@ namespace MinecraftClient.Mapping
             return index < biomes.Length ? BiomePalette.INSTANCE.FromId(biomes[index]) : BiomePalette.EMPTY;
         }
 
-        public int[] GetBiomes() => biomes;
+        public int GetBiomeId(Location location)
+        {
+            int index = (location.ChunkBlockY << 4) | (location.ChunkBlockZ << 2) | location.ChunkBlockX;
+            return index < biomes.Length ? biomes[index] : -1;
+        }
 
     }
 }

@@ -672,16 +672,28 @@ namespace MinecraftClient.Protocol.Handlers
 
                                 dataTypes.ReadNextNbt(packetData); // Heightmaps
 
+                                int biomesLength = 0;
+                                int[] biomes;
+
                                 if (protocolVersion == MC_1_17_Version || protocolVersion == MC_1_17_1_Version)
                                 {
-                                    int biomesLength = dataTypes.ReadNextVarInt(packetData); // Biomes length
+                                    biomesLength = dataTypes.ReadNextVarInt(packetData); // Biomes length
+                                    biomes = new int[biomesLength];
+
                                     for (int i = 0; i < biomesLength; i++)
-                                        dataTypes.SkipNextVarInt(packetData); // Biomes
+                                    {
+                                        biomes[i] = dataTypes.ReadNextVarInt(packetData); // Biomes
+                                    }
+                                }
+                                else
+                                {
+                                    // TODO Implement for higher versions
+                                    biomes = new int[0];
                                 }
 
                                 int dataSize = dataTypes.ReadNextVarInt(packetData); // Size
 
-                                if (pTerrain.ProcessChunkColumnData(chunkX, chunkZ, verticalStripBitmask, packetData))
+                                if (pTerrain.ProcessChunkColumnData(chunkX, chunkZ, verticalStripBitmask, biomes, packetData))
                                     Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
 
                                 // Block Entity data: ignored

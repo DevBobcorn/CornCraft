@@ -233,7 +233,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="verticalStripBitmask">Chunk mask for reading data, store in bitset, used in 1.17 and 1.17.1</param>
         /// <param name="cache">Cache for reading chunk data</param>
         /// <returns>true if successfully loaded</returns>
-        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ulong[]? verticalStripBitmask, Queue<byte> cache)
+        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ulong[]? verticalStripBitmask, int[] biomes, Queue<byte> cache)
         {
             var world = handler.GetWorld();
 
@@ -294,6 +294,11 @@ namespace MinecraftClient.Protocol.Handlers
             var c = world[chunkX, chunkZ];
             if (c is not null)
             {
+                if (biomes.Length == c.ColumnSize * 64)
+                    c.SetBiomes(biomes);
+                else if (biomes.Length > 0)
+                    UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}, should be {c.ColumnSize * 64}");
+                
                 c!.ChunkMask = chunkMask;
                 c!.FullyLoaded = true;
             }
@@ -463,10 +468,10 @@ namespace MinecraftClient.Protocol.Handlers
             var c = world[chunkX, chunkZ];
             if (c is not null)
             {
-                if (biomes.Length == 1024)
+                if (biomes.Length == c.ColumnSize * 64)
                     c.SetBiomes(biomes);
                 else if (biomes.Length > 0)
-                    UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}");
+                    UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}, should be {c.ColumnSize * 64}");
                 
                 c!.ChunkMask = chunkMask;
                 c!.FullyLoaded = true;

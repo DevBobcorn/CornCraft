@@ -164,6 +164,15 @@ namespace MinecraftClient.Mapping
             return BiomePalette.EMPTY; // Not available
         }
 
+        public int GetBiomeId(Location location)
+        {
+            var column = GetChunkColumn(location);
+            if (column != null)
+                return column.GetBiomeId(location);
+            
+            return -1; // Not available
+        }
+
         public bool IsWaterAt(Location location)
         {
             var column = GetChunkColumn(location);
