@@ -6,7 +6,7 @@ namespace MinecraftClient.Rendering
     {
         public float3[] vert = { };
         public float2[] txuv = { };
-        public int[]    tint = { };
+        public float3[] tint = { };
 
     }
 }

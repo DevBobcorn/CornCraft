@@ -44,10 +44,7 @@ namespace MinecraftClient.Rendering
         // Terrain collider for movement
         private MeshCollider? movementCollider;
 
-        public string GetDebugInfo()
-        {
-            return $"QueC: {chunksToBeBuild.Count}\t BldC: {chunksBeingBuilt.Count}";
-        }
+        public string GetDebugInfo() => $"QueC: {chunksToBeBuild.Count}\t BldC: {chunksBeingBuilt.Count}";
 
         #region Chunk management
         private ChunkRenderColumn CreateColumn(int chunkX, int chunkZ)
@@ -102,11 +99,9 @@ namespace MinecraftClient.Rendering
                     // and in this case the chunk data is also ready.
                     return true;
                 }
-                else
-                {
-                    // Chunk position is valid, but its data is still not known (not loaded)
+                else // Chunk position is valid, but its data is still not known (not loaded)
                     return false;
-                }
+                
             }
         }
 
@@ -175,6 +170,7 @@ namespace MinecraftClient.Rendering
                     bool isAllEmpty = true;
                     int count = ChunkRender.TYPES.Length, layerMask = 0;
                     int offsetY = World.GetDimension().minY;
+                    var world = game!.GetWorld();
 
                     var visualBuffer = new VertexBuffer[count];
                     for (int i = 0;i < count;i++)
@@ -236,11 +232,12 @@ namespace MinecraftClient.Rendering
                                 {
                                     var models = table[stateId].Geometries;
                                     var chosen = (x + y + z) % models.Length;
+                                    var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, loc, state);
 
                                     if (state.NoCollision)
-                                        models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags);
+                                        models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, color);
                                     else
-                                        models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags);
+                                        models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags, color);
                                     
                                     layerMask |= (1 << layerIndex);
                                     isAllEmpty = false;
@@ -311,9 +308,10 @@ namespace MinecraftClient.Rendering
                             meshData.subMeshCount = layerCount;
 
                             // Set mesh attributes
-                            var visVertAttrs = new NativeArray<VertexAttributeDescriptor>(2, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+                            var visVertAttrs = new NativeArray<VertexAttributeDescriptor>(3, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
                             visVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3, stream: 0);
                             visVertAttrs[1]  = new(VertexAttribute.TexCoord0, dimension: 2, stream: 1);
+                            visVertAttrs[2]  = new(VertexAttribute.Color,     dimension: 3, stream: 2);
 
                             meshData.SetVertexBufferParams(totalVertCount,          visVertAttrs);
                             meshData.SetIndexBufferParams((totalVertCount / 2) * 3, IndexFormat.UInt32);
@@ -323,12 +321,15 @@ namespace MinecraftClient.Rendering
                             // Prepare source data arrays
                             var allVerts = new float3[totalVertCount];
                             var allUVs   = new float2[totalVertCount];
+                            var allTints = new float3[totalVertCount];
+
                             for (int layer = 0;layer < count;layer++)
                             {
                                 if ((layerMask & (1 << layer)) != 0)
                                 {
                                     visualBuffer[layer].vert.CopyTo(allVerts, vertOffset);
                                     visualBuffer[layer].txuv.CopyTo(allUVs, vertOffset);
+                                    visualBuffer[layer].tint.CopyTo(allTints, vertOffset);
 
                                     vertOffset += visualBuffer[layer].vert.Length;
                                 }
@@ -339,6 +340,9 @@ namespace MinecraftClient.Rendering
                             positions.CopyFrom(allVerts);
                             var texCoords  = meshData.GetVertexData<float2>(1);
                             texCoords.CopyFrom(allUVs);
+                            var vertColors = meshData.GetVertexData<float3>(2);
+                            vertColors.CopyFrom(allTints);
+
                             // Generate triangle arrays
                             var triIndices = meshData.GetIndexData<uint>();
                             uint vi = 0; int ti = 0;

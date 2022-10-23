@@ -14,6 +14,8 @@ namespace MinecraftClient.Resource
         public const float MC_VERT_SCALE = 16F;
         public const float MC_UV_SCALE = 16F;
 
+        public static readonly float3 DEFAULT_COLOR = new(1F, 1F, 1F);
+
         public readonly Dictionary<CullDir, List<float3>> verticies = new();
         public readonly Dictionary<CullDir, List<float2>> uvs       = new();
         public readonly Dictionary<CullDir, List<int>> tintIndices  = new();
@@ -91,14 +93,14 @@ namespace MinecraftClient.Resource
             return vertexCount;
         }
 
-        public void Build(ref VertexBuffer buffer, float3 posOffset, int cullFlags)
+        public void Build(ref VertexBuffer buffer, float3 posOffset, int cullFlags, float3 blockTint)
         {
             // Compute value if absent
             int vertexCount = buffer.vert.Length + ((sizeCache.ContainsKey(cullFlags)) ? sizeCache[cullFlags] : (sizeCache[cullFlags] = CalculateArraySize(cullFlags)));
 
             var verts = new float3[vertexCount];
             var txuvs = new float2[vertexCount];
-            var tints = new    int[vertexCount];
+            var tints = new float3[vertexCount];
 
             buffer.vert.CopyTo(verts, 0);
             buffer.txuv.CopyTo(txuvs, 0);
@@ -109,63 +111,77 @@ namespace MinecraftClient.Resource
             if (vertexArrs[CullDir.NONE].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.NONE].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.NONE][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.NONE][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.NONE].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.NONE].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.NONE].Length;
             }
 
             if ((cullFlags & (1 << 0)) != 0 && vertexArrs[CullDir.UP].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.UP].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.UP][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.UP][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.UP].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.UP].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.UP].Length;
             }
 
             if ((cullFlags & (1 << 1)) != 0 && vertexArrs[CullDir.DOWN].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.DOWN].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.DOWN][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.DOWN][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.DOWN].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.DOWN].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.DOWN].Length;
             }
 
             if ((cullFlags & (1 << 2)) != 0 && vertexArrs[CullDir.SOUTH].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.SOUTH].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.SOUTH][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.SOUTH][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.SOUTH].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.SOUTH].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.SOUTH].Length;
             }
 
             if ((cullFlags & (1 << 3)) != 0 && vertexArrs[CullDir.NORTH].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.NORTH].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.NORTH][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.NORTH][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.NORTH].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.NORTH].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.NORTH].Length;
             }
 
             if ((cullFlags & (1 << 4)) != 0 && vertexArrs[CullDir.EAST].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.EAST].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.EAST][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.EAST][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.EAST].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.EAST].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.EAST].Length;
             }
 
             if ((cullFlags & (1 << 5)) != 0 && vertexArrs[CullDir.WEST].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.WEST].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.WEST][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.WEST][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.WEST].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.WEST].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.WEST].Length;
             }
 
@@ -175,7 +191,7 @@ namespace MinecraftClient.Resource
 
         }
 
-        public void BuildWithCollider(ref VertexBuffer visualBuffer, ref float3[] colliderVerts, float3 posOffset, int cullFlags)
+        public void BuildWithCollider(ref VertexBuffer visualBuffer, ref float3[] colliderVerts, float3 posOffset, int cullFlags, float3 blockTint)
         {
             // Compute value if absent
             int extraVertCount  = sizeCache.ContainsKey(cullFlags) ? sizeCache[cullFlags] : (sizeCache[cullFlags] = CalculateArraySize(cullFlags));
@@ -183,7 +199,7 @@ namespace MinecraftClient.Resource
 
             var verts = new float3[vVertexCount];
             var txuvs = new float2[vVertexCount];
-            var tints = new    int[vVertexCount];
+            var tints = new float3[vVertexCount];
 
             visualBuffer.vert.CopyTo(verts, 0);
             visualBuffer.txuv.CopyTo(txuvs, 0);
@@ -198,63 +214,77 @@ namespace MinecraftClient.Resource
             if (vertexArrs[CullDir.NONE].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.NONE].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.NONE][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.NONE][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.NONE].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.NONE].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.NONE].Length;
             }
 
             if ((cullFlags & (1 << 0)) != 0 && vertexArrs[CullDir.UP].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.UP].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.UP][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.UP][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.UP].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.UP].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.UP].Length;
             }
 
             if ((cullFlags & (1 << 1)) != 0 && vertexArrs[CullDir.DOWN].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.DOWN].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.DOWN][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.DOWN][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.DOWN].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.DOWN].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.DOWN].Length;
             }
 
             if ((cullFlags & (1 << 2)) != 0 && vertexArrs[CullDir.SOUTH].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.SOUTH].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.SOUTH][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.SOUTH][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.SOUTH].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.SOUTH].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.SOUTH].Length;
             }
 
             if ((cullFlags & (1 << 3)) != 0 && vertexArrs[CullDir.NORTH].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.NORTH].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.NORTH][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.NORTH][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.NORTH].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.NORTH].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.NORTH].Length;
             }
 
             if ((cullFlags & (1 << 4)) != 0 && vertexArrs[CullDir.EAST].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.EAST].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.EAST][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.EAST][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.EAST].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.EAST].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.EAST].Length;
             }
 
             if ((cullFlags & (1 << 5)) != 0 && vertexArrs[CullDir.WEST].Length > 0)
             {
                 for (i = 0U;i < vertexArrs[CullDir.WEST].Length;i++)
+                {
                     verts[i + vertOffset] = vertexArrs[CullDir.WEST][i] + posOffset;
+                    tints[i + vertOffset] = tintArrs[CullDir.WEST][i] >= 0 ? blockTint : DEFAULT_COLOR;
+                }
                 txuvArrs[CullDir.WEST].CopyTo(txuvs, vertOffset);
-                tintArrs[CullDir.WEST].CopyTo(tints, vertOffset);
                 vertOffset += (uint)vertexArrs[CullDir.WEST].Length;
             }
 

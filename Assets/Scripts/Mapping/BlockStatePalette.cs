@@ -1,10 +1,13 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using UnityEngine;
 
+using UnityEngine;
+using Unity.Mathematics;
 using MinecraftClient.Rendering;
+using MinecraftClient.Resource;
 
 namespace MinecraftClient.Mapping
 {
@@ -37,10 +40,16 @@ namespace MinecraftClient.Mapping
         public Dictionary<int, BlockState> StatesTable { get { return statesTable; } }
 
         private readonly Dictionary<int, RenderType> renderTypeTable = new Dictionary<int, RenderType>();
-        public RenderType GetRenderType(int stateId)
+        public RenderType GetRenderType(int stateId) => renderTypeTable.GetValueOrDefault(stateId, RenderType.SOLID);
+
+        private readonly Dictionary<int, Func<World, Location, BlockState, float3>> blockColorRules = new();
+
+        public float3 GetBlockColor(int stateId, World world, Location loc, BlockState state)
         {
-            return renderTypeTable.GetValueOrDefault(stateId, RenderType.SOLID);
-        }
+            if (blockColorRules.ContainsKey(stateId))
+                return blockColorRules[stateId].Invoke(world, loc, state);
+            return BlockGeometry.DEFAULT_COLOR;
+        } 
 
         private static readonly ResourceLocation LAVA = new("lava");
 
@@ -55,8 +64,9 @@ namespace MinecraftClient.Mapping
 
             string statesPath = PathHelper.GetExtraDataFile($"blocks-{dataVersion}.json");
             string listsPath  = PathHelper.GetExtraDataFile("block_lists-1.19.json");
+            string colorsPath = PathHelper.GetExtraDataFile("block_colors-1.19.json");
 
-            if (!File.Exists(statesPath) || !File.Exists(listsPath))
+            if (!File.Exists(statesPath) || !File.Exists(listsPath) || !File.Exists(colorsPath))
             {
                 throw new FileNotFoundException("Block data not complete!");
             }
@@ -205,6 +215,71 @@ namespace MinecraftClient.Mapping
 
             renderTypeTable.Clear();
             loadStateInfo.infoText = $"Loading lists of render types";
+            yield return null;
+
+            // Load block color rules...
+            Json.JSONData colorRules = Json.ParseJson(File.ReadAllText(colorsPath, Encoding.UTF8));
+
+            if (colorRules.Properties.ContainsKey("dynamic"))
+            {
+                foreach (var dynamicRule in colorRules.Properties["dynamic"].Properties)
+                {
+                    var ruleName = dynamicRule.Key;
+
+                    Func<World, Location, BlockState, float3> ruleFunc = ruleName switch {
+                        "foliage" => (world, loc, state) => world.GetBiome(loc).foliageColor,
+                        "grass"   => (world, loc, state) => world.GetBiome(loc).grassColor,
+
+                        _         => (world, loc, state) => float3.zero
+                    };
+
+                    foreach (var block in dynamicRule.Value.DataArray)
+                    {
+                        var blockId = ResourceLocation.fromString(block.StringValue);
+
+                        if (stateListTable.ContainsKey(blockId))
+                        {
+                            foreach (var stateId in stateListTable[blockId])
+                            {
+                                if (!blockColorRules.TryAdd(stateId, ruleFunc))
+                                    Debug.LogWarning($"Failed to apply dynamic color rules to {blockId} ({stateId})!");
+                            }
+                        }
+                        else
+                            Debug.LogWarning($"Applying dynamic color rules to undefined block {blockId}!");
+                        
+                        count++;
+                        if (count % yieldCount == 0)
+                            yield return null;
+                    }
+                }
+            }
+
+            if (colorRules.Properties.ContainsKey("fixed"))
+            {
+                foreach (var fixedRule in colorRules.Properties["fixed"].Properties)
+                {
+                    var blockId = ResourceLocation.fromString(fixedRule.Key);
+
+                    if (stateListTable.ContainsKey(blockId))
+                    {
+                        var fixedColor = VectorUtil.Json2Float3(fixedRule.Value) / 255F;
+                        Func<World, Location, BlockState, float3> ruleFunc = (world, loc, state) => fixedColor;
+
+                        foreach (var stateId in stateListTable[blockId])
+                        {
+                            if (!blockColorRules.TryAdd(stateId, ruleFunc))
+                                Debug.LogWarning($"Failed to apply fixed color rules to {blockId} ({stateId})!");
+                            count++;
+                            if (count % yieldCount == 0)
+                                yield return null;
+                        }
+                    }
+                    else
+                        Debug.LogWarning($"Applying fixed color rules to undefined block {blockId}!");
+                }
+            }
+
             yield return null;
             
             // Load and apply block render types...

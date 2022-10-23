@@ -1,7 +1,7 @@
 from PIL import Image, ImageOps
 import os, glob, json
 
-version = '1.19.2'
+version = '1.16.5'
 
 proc_types = [
     'block',
@@ -12,25 +12,6 @@ recolor_dict = {
     'minecraft:block/water_flow': (63, 118, 228),
     'minecraft:block/water_overlay': (63, 118, 228),
     'minecraft:block/water_still': (63, 118, 228),
-    
-    'minecraft:block/birch_leaves': (128, 167, 55),
-    'minecraft:block/spruce_leaves': (97, 153, 97),
-    'minecraft:block/lily_pad': (32, 128, 48),
-    
-    'minecraft:block/grass_block_top': (121, 192, 90),
-    'minecraft:block/grass_block_side_overlay': (121, 192, 90),
-    'minecraft:block/grass': (121, 192, 90),
-    'minecraft:block/fern': (121, 192, 90),
-    'minecraft:block/tall_grass_bottom': (121, 192, 90),
-    'minecraft:block/tall_grass_top': (121, 192, 90),
-    'minecraft:block/large_fern_bottom': (121, 192, 90),
-    'minecraft:block/large_fern_top': (121, 192, 90),
-    'minecraft:block/sugar_cane': (121, 192, 90),
-
-    'minecraft:block/oak_leaves': (119, 171, 47),
-    'minecraft:block/acacia_leaves': (119, 171, 47),
-    'minecraft:block/jungle_leaves': (119, 171, 47),
-    'minecraft:block/dark_oak_leaves': (119, 171, 47),
 }
 
 skip_list = []
