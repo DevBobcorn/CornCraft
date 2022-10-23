@@ -386,7 +386,7 @@ namespace MinecraftClient.Control
         public string GetDebugInfo()
         {
             string targetBlockInfo = string.Empty;
-            var pos = CoordConvert.Unity2MC(transform.position);
+            var loc = CoordConvert.Unity2MC(transform.position);
             var world = game!.GetWorld();
 
             if (updateTarget && targetBlockPos is not null)
@@ -397,9 +397,9 @@ namespace MinecraftClient.Control
             }
 
             if (entityDisabled)
-                return $"Position:\t{pos}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}\nBiome:\n{world?.GetBiome(pos).GetDescription()}";
+                return $"Position:\t{loc}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
             else
-                return $"Position:\t{pos}\nGrounded:\t{isOnGround}\t{centerDownDist:0.00} {frontDownDist:0.00}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}\nBiome:\n{world?.GetBiome(pos).GetDescription()}";
+                return $"Position:\t{loc}\nGrounded:\t{isOnGround}\t{centerDownDist:0.00} {frontDownDist:0.00}\nIn water:\t{isInWater}\nTarget Block:\t{targetBlockPos}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
 
         }
 
