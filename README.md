@@ -55,7 +55,6 @@ For in-game texts, CornCraft uses [Welai Glow Sans](https://github.com/welai/glo
 More information about CDDL-1.0 can be found on MCC's [home page](https://github.com/MCCTeam/Minecraft-Console-Client), in the license section, and the full license can be reviewed [here](http://opensource.org/licenses/CDDL-1.0).
 
 ## > Screenshots
-![Screenshot 1](https://s2.loli.net/2022/09/20/gVIj4bZyz2TF9uB.png)
-![Screenshot 2](https://s2.loli.net/2022/09/23/D8l7efqn2TCbvK9.png)
-![Screenshot 3](https://s2.loli.net/2022/09/23/DTVlgA2v3otze7i.png)
-![Screenshot 4](https://s2.loli.net/2022/10/08/hvaYrnOmJk6ZgoD.png)
+![Screenshot 1](https://s2.loli.net/2022/10/23/yk9D2ejznQE5ZJa.png)
+![Screenshot 2](https://s2.loli.net/2022/10/24/pLfmGiEbBOqFzTZ.png)
+![Screenshot 3](https://s2.loli.net/2022/10/24/jvE8rdWhiY5GORc.png)

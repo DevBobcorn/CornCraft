@@ -46,6 +46,7 @@ Shader "URP/Water"
             {
                 float3 positionOS : POSITION;
                 float4 uv : TEXCOORD0;
+                float3 vertexColor : COLOR;
             };
 
             // 顶点着色器的输出
@@ -55,6 +56,7 @@ Shader "URP/Water"
                 float4 screenPosition : TEXCOORD0;
                 float2 noiseUV : TEXCOORD1;
                 float2 distortUV : TEXCOORD2;
+                float3 vertexColor : COLOR;
             };
             
             v2f vert(a2v v)
@@ -64,6 +66,7 @@ Shader "URP/Water"
                 o.positionCS = positionInputs.positionCS;
                 o.noiseUV = TRANSFORM_TEX(v.uv, _SurfaceNoise);
                 o.screenPosition = ComputeScreenPos(positionInputs.positionCS);
+                o.vertexColor = v.vertexColor;
                 return o;
             }
             
@@ -77,15 +80,17 @@ Shader "URP/Water"
                 // 最终得到水的深度
                 float waterDepth = sceneEyeDepth - i.screenPosition.w; 
                 // 拿到水的颜色
-                float3 waterColor = lerp(_ShallowWater, _DeepWater, waterDepth);
+                //float3 waterColor = lerp(_ShallowWater, i.vertexColor, clamp(waterDepth * 2, 0, 1));
+                float3 waterColor = i.vertexColor;
                 
                 float surfaceNoiseSample = tex2D(_SurfaceNoise, i.noiseUV + _Time.y * _MoveSpeed * 0.1).r;
                 
                 // 浮沫
                 float foam = saturate(waterDepth / _FoamDistance);
-                float surfaceNoise = smoothstep(0, foam, surfaceNoiseSample) ;
+                float surfaceNoise = smoothstep(0, foam, surfaceNoiseSample); 
                 // 混合水面透明度
-                float4 col = float4(waterColor + surfaceNoise * _FoamColor, _WaterAlpha) ;
+                float4 col = float4(waterColor + surfaceNoise * _FoamColor, _WaterAlpha * clamp(waterDepth / 8, 0, 1));
+                //return float4(i.vertexColor, 1);
                 return col;
             }
             ENDHLSL
