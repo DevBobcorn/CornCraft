@@ -15,12 +15,14 @@
       "minecraft:large_fern",
       "minecraft:potted_fern",
       "minecraft:sugar_cane"
+    ],
+    "redstone": [
+      "minecraft:redstone_wire"
     ]
   },
   "fixed": {
     "minecraft:birch_leaves": [128, 167, 55],
     "minecraft:spruce_leaves": [97, 153, 97],
-    "minecraft:lily_pad": [32, 128, 48],
-    "minecraft:nothingtoseeheremovealong": [0, 0, 0]
+    "minecraft:lily_pad": [32, 128, 48]
   }
 }
