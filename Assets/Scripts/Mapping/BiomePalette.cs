@@ -9,8 +9,19 @@ namespace MinecraftClient.Mapping
 {
     public class BiomePalette
     {
+        // Using biome colors of minecraft:plains as default
+        // See https://minecraft.fandom.com/wiki/Plains
+        public static readonly int DEFAULT_FOLIAGE = 0x77AB2F;
+        public static readonly int DEFAULT_GRASS   = 0x91BD59;
+        public static readonly int DEFAULT_WATER   = 0x3F76E4;
+
         public static readonly BiomePalette INSTANCE = new();
-        public static readonly Biome EMPTY = new(-1, ResourceLocation.INVALID);
+        public static readonly Biome EMPTY = new(-1, ResourceLocation.INVALID)
+        {
+            FoliageColor = DEFAULT_FOLIAGE,
+            GrassColor   = DEFAULT_GRASS,
+            WaterColor   = DEFAULT_WATER
+        };
 
         private readonly Dictionary<int, Biome> biomesTable = new();
 

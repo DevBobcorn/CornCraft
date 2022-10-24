@@ -173,6 +173,11 @@ namespace MinecraftClient.Mapping
             return -1; // Not available
         }
 
+        public float3 GetFoliageColor(Location loc) => GetBiome(loc).foliageColor;
+
+        public float3 GetGrassColor(Location loc) => GetBiome(loc).grassColor;
+
+        public float3 GetWaterColor(Location loc) => GetBiome(loc).waterColor;
         public bool IsWaterAt(Location location)
         {
             var column = GetChunkColumn(location);

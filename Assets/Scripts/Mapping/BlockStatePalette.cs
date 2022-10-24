@@ -227,8 +227,13 @@ namespace MinecraftClient.Mapping
                     var ruleName = dynamicRule.Key;
 
                     Func<World, Location, BlockState, float3> ruleFunc = ruleName switch {
-                        "foliage" => (world, loc, state) => world.GetBiome(loc).foliageColor,
-                        "grass"   => (world, loc, state) => world.GetBiome(loc).grassColor,
+                        "foliage"  => (world, loc, state) => world.GetFoliageColor(loc),
+                        "grass"    => (world, loc, state) => world.GetGrassColor(loc),
+                        "redstone" => (world, loc, state) => {
+                            if (state.props.ContainsKey("power"))
+                                return new(float.Parse(state.props["power"]) / 16F, 0F, 0F);
+                            return BlockGeometry.DEFAULT_COLOR;
+                        },
 
                         _         => (world, loc, state) => float3.zero
                     };

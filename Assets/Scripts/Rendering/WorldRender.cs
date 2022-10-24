@@ -204,7 +204,7 @@ namespace MinecraftClient.Rendering
                                     int waterCullFlags = chunkData.GetCullFlags(loc, bloc, waterSurface);
                                     if (waterCullFlags != 0)
                                     {
-                                        FluidGeometry.Build(ref visualBuffer[waterLayerIndex], WATER_STILL, x, y, z, waterCullFlags, world.GetBiome(loc).waterColor);
+                                        FluidGeometry.Build(ref visualBuffer[waterLayerIndex], WATER_STILL, x, y, z, waterCullFlags, world.GetWaterColor(loc));
                                         layerMask |= (1 << waterLayerIndex);
                                         isAllEmpty = false;
                                     }
