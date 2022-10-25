@@ -2,7 +2,7 @@ Shader "URP/Water"
 {
     Properties
     {
-        _ShallowWater ("shallowColor", Color) = (1.0, 1.0, 1.0, 1.0)
+        _ShallowWater ("ShallowColor", Color) = (1.0, 1.0, 1.0, 1.0)
         _DeepWater ("DeepColor", Color) = (1.0, 1.0, 1.0, 1.0)
         _WaterAlpha("WaterAlpha",Range(0,1)) = 0.5
         
@@ -80,17 +80,17 @@ Shader "URP/Water"
                 // 最终得到水的深度
                 float waterDepth = sceneEyeDepth - i.screenPosition.w; 
                 // 拿到水的颜色
-                //float3 waterColor = lerp(_ShallowWater, i.vertexColor, clamp(waterDepth * 2, 0, 1));
+                //float3 waterColor = lerp(i.vertexColor, _DeepWater, clamp(waterDepth * 0.02, 0, 1));
                 float3 waterColor = i.vertexColor;
                 
                 float surfaceNoiseSample = tex2D(_SurfaceNoise, i.noiseUV + _Time.y * _MoveSpeed * 0.1).r;
                 
                 // 浮沫
                 float foam = saturate(waterDepth / _FoamDistance);
-                float surfaceNoise = smoothstep(0, foam, surfaceNoiseSample); 
+                float edge = 1 - sqrt(clamp(waterDepth / 2, 0, 1));
+                float surfaceNoise = smoothstep(0, foam, surfaceNoiseSample);
                 // 混合水面透明度
-                float4 col = float4(waterColor + surfaceNoise * _FoamColor, _WaterAlpha * clamp(waterDepth / 8, 0, 1));
-                //return float4(i.vertexColor, 1);
+                float4 col = float4(waterColor + surfaceNoise * _FoamColor * edge, _WaterAlpha * clamp(waterDepth + edge, 0, 1));
                 return col;
             }
             ENDHLSL
