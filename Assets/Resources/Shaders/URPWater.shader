@@ -25,6 +25,7 @@ Shader "URP/Water"
             Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
+            #pragma multi_compile_fog
             #pragma vertex vert
             #pragma fragment frag
             
@@ -55,8 +56,8 @@ Shader "URP/Water"
                 float4 positionCS : SV_POSITION;
                 float4 screenPosition : TEXCOORD0;
                 float2 noiseUV : TEXCOORD1;
-                float2 distortUV : TEXCOORD2;
                 float3 vertexColor : COLOR;
+                half fogFactor : TEXCOORD2;
             };
             
             v2f vert(a2v v)
@@ -67,6 +68,8 @@ Shader "URP/Water"
                 o.noiseUV = TRANSFORM_TEX(v.uv, _SurfaceNoise);
                 o.screenPosition = ComputeScreenPos(positionInputs.positionCS);
                 o.vertexColor = v.vertexColor;
+
+                o.fogFactor = ComputeFogFactor(o.positionCS.z);
                 return o;
             }
             
@@ -90,7 +93,10 @@ Shader "URP/Water"
                 float edge = 1 - sqrt(clamp(waterDepth / 2, 0, 1));
                 float surfaceNoise = smoothstep(0, foam, surfaceNoiseSample);
                 // 混合水面透明度
-                float4 col = float4(waterColor + surfaceNoise * _FoamColor * edge, _WaterAlpha * clamp(waterDepth + edge, 0, 1));
+                float4 col = float4(waterColor + surfaceNoise * _FoamColor.rgb * edge, _WaterAlpha * clamp(waterDepth + edge, 0, 1));
+                // 混合雾色
+                col.rgb = MixFog(col.rgb, i.fogFactor);
+                
                 return col;
             }
             ENDHLSL
