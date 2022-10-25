@@ -173,11 +173,65 @@ namespace MinecraftClient.Mapping
             return -1; // Not available
         }
 
-        public float3 GetFoliageColor(Location loc) => GetBiome(loc).foliageColor;
+        private const int radius = 2;
 
-        public float3 GetGrassColor(Location loc) => GetBiome(loc).grassColor;
+        public float3 GetFoliageColor(Location loc)
+        {
+            int cnt = 0;
+            float3 colorSum = float3.zero;
+            for (int x = -radius;x <= radius;x++)
+                for (int y = -radius;y <= radius;y++)
+                    for (int z = -radius;z < radius;z++)
+                    {
+                        var b = GetBiome(loc + new Location(x, y, z));
+                        if (b != BiomePalette.EMPTY)
+                        {
+                            cnt++;
+                            colorSum += b.foliageColor;
+                        }
+                    }
+            cnt = (cnt == 0) ? 1 : cnt;
+            return colorSum / cnt;
+        }
 
-        public float3 GetWaterColor(Location loc) => GetBiome(loc).waterColor;
+        public float3 GetGrassColor(Location loc)
+        {
+            int cnt = 0;
+            float3 colorSum = float3.zero;
+            for (int x = -radius;x <= radius;x++)
+                for (int y = -radius;y <= radius;y++)
+                    for (int z = -radius;z < radius;z++)
+                    {
+                        var b = GetBiome(loc + new Location(x, y, z));
+                        if (b != BiomePalette.EMPTY)
+                        {
+                            cnt++;
+                            colorSum += b.grassColor;
+                        }
+                    }
+            cnt = (cnt == 0) ? 1 : cnt;
+            return colorSum / cnt;
+        }
+
+        public float3 GetWaterColor(Location loc)
+        {
+            int cnt = 0;
+            float3 colorSum = float3.zero;
+            for (int x = -radius;x <= radius;x++)
+                for (int y = -radius;y <= radius;y++)
+                    for (int z = -radius;z < radius;z++)
+                    {
+                        var b = GetBiome(loc + new Location(x, y, z));
+                        if (b != BiomePalette.EMPTY)
+                        {
+                            cnt++;
+                            colorSum += b.waterColor;
+                        }
+                    }
+            cnt = (cnt == 0) ? 1 : cnt;
+            return colorSum / cnt;
+        }
+
         public bool IsWaterAt(Location location)
         {
             var column = GetChunkColumn(location);

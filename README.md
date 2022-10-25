@@ -50,11 +50,14 @@ Key                                                       | Action
 ## > License
 Like MCC, CornCraft adopts CDDL-1.0 as the license of its code repository, and this license applies to all source code except those mention their author and license or with specific license attached.
 
-For in-game texts, CornCraft uses [Welai Glow Sans](https://github.com/welai/glow-sans) and [Cascadia Code/Mono](https://github.com/microsoft/cascadia-code), these font files don't fall under CDDL-1.0 and use their own licenses.
+Some other open-source projects/code examples are used in the project, which don't fall under CDDL-1.0 and use their own licenses. Here's a list of them:
+* [Welai Glow Sans](https://github.com/welai/glow-sans)
+* [Cascadia Code/Mono](https://github.com/microsoft/cascadia-code)
+* [NiloCat Toon URP (Simple Version)](https://github.com/ColinLeung-NiloCat/UnityURPToonLitShaderExample)
 
 More information about CDDL-1.0 can be found on MCC's [home page](https://github.com/MCCTeam/Minecraft-Console-Client), in the license section, and the full license can be reviewed [here](http://opensource.org/licenses/CDDL-1.0).
 
 ## > Screenshots
 ![Screenshot 1](https://s2.loli.net/2022/10/23/yk9D2ejznQE5ZJa.png)
 ![Screenshot 2](https://s2.loli.net/2022/10/24/pLfmGiEbBOqFzTZ.png)
-![Screenshot 3](https://s2.loli.net/2022/10/24/jvE8rdWhiY5GORc.png)
+![Screenshot 3](https://s2.loli.net/2022/10/25/RSZK3FbOdHXkanm.png)
