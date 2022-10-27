@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4824216760403016094}
   - component: {fileID: 1391227026685269008}
   - component: {fileID: 5527262585442108988}
+  - component: {fileID: 1247848230699109303}
   m_Layer: 9
   m_Name: Client Cube Player Entity
   m_TagString: Untagged
@@ -51,10 +52,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4437c7076747dbd4fa52519dcbf8845e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkSpeed: 2
-  runSpeed: 5.2
-  jumpSpeed: 5
-  steerSpeed: 20
+  playerAbility: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
+  WalkMode: 0
+  EntityDisabled: 0
 --- !u!114 &739474774391685890
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,6 +127,24 @@ MonoBehaviour:
   m_DefaultActionMap: Gameplay
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &1247848230699109303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 739474774391685894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97f9c4390573ed643b136abb835f0e17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BlockSelectionLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  GroundLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!1 &739474774658305514
 GameObject:
   m_ObjectHideFlags: 0

@@ -111,6 +111,8 @@ namespace MinecraftClient.Control
 
         public float GetCursorRotation() => 360F - transform.eulerAngles.y;
 
+        public float GetCameraYaw() => transform.eulerAngles.y;
+
         private void CheckCameraPosition()
         {
             RaycastHit hitInfo;
