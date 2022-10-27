@@ -9,11 +9,6 @@ namespace MinecraftClient.Control
         private PlayerController player;
         private bool walkMode = false;
 
-        private float getValue(bool pos, bool neg)
-        {
-            return (pos ? 1F : 0F) + (neg ? -1F : 0F);
-        }
-
         void Start()
         {
             game = CornClient.Instance;
@@ -44,5 +39,7 @@ namespace MinecraftClient.Control
 
             player.ManagedUpdate(Time.deltaTime, h, v, walkMode, attack, up, down);
         }
+
+        private float getValue(bool pos, bool neg) => (pos ? 1F : 0F) + (neg ? -1F : 0F);
     }
 }
