@@ -454,7 +454,7 @@ namespace MinecraftClient
                     player.Pitch = player._pitch == null ? player.Pitch : player._pitch.Value;
 
                     if (playerController is not null)
-                        handler!.SendLocationUpdate(player.location, playerController.IsOnGround, player._yaw, player._pitch);
+                        handler!.SendLocationUpdate(player.location, playerController.Status.Grounded, player._yaw, player._pitch);
                     
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)
                     // Once yaw and pitch have been sent, switch back to location-only updates (without yaw and pitch)
@@ -2098,7 +2098,7 @@ namespace MinecraftClient
                 locationReceived = true;
 
                 Loom.QueueOnMainThread(() => {
-                    playerController?.SetPosition(location);
+                    playerController?.SetLocation(location);
                     // TODO Set player rotation
                 });
                 

@@ -213,11 +213,11 @@ namespace MinecraftClient.Mapping
 
             Debug.Log($"{statesTable.Count} block states loaded.");
 
-            renderTypeTable.Clear();
-            loadStateInfo.infoText = $"Loading lists of render types";
+            // Load block color rules...
+            blockColorRules.Clear();
+            loadStateInfo.infoText = $"Loading block color rules";
             yield return null;
 
-            // Load block color rules...
             Json.JSONData colorRules = Json.ParseJson(File.ReadAllText(colorsPath, Encoding.UTF8));
 
             if (colorRules.Properties.ContainsKey("dynamic"))
@@ -288,6 +288,10 @@ namespace MinecraftClient.Mapping
             yield return null;
             
             // Load and apply block render types...
+            renderTypeTable.Clear();
+            loadStateInfo.infoText = $"Loading lists of render types";
+            yield return null;
+
             string renderTypePath = PathHelper.GetExtraDataFile("block_render_type.json");
             if (File.Exists(renderTypePath))
             {
