@@ -20,5 +20,12 @@ namespace MinecraftClient
 
         public static Location Unity2MC(Vector3 vec) => new(vec.z, vec.y, vec.x);
 
+        public static Vector3 ApproachOrigin(Vector3 original, float delta)
+        {
+            if (original.magnitude <= delta)
+                return Vector3.zero;
+            return original / original .magnitude * (original.magnitude - delta);
+        }
+
     }
 }

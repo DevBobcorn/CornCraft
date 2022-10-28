@@ -20,12 +20,18 @@ namespace MinecraftClient.Control
                 var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
                 moveVelocity.y = rigidbody.velocity.y;
 
+                // Auto walk up aid
+                if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 60F) // Trying to moving forward
+                {
+                    if (info.FrontDownDist < -0.03F && info.FrontDownDist > -0.6F)
+                        moveVelocity.y = ability.AidSpeedCurve.Evaluate(info.FrontDownDist);
+                }
+
+                if (inputData.ascend) // Jump up, keep horizontal speed
+                    moveVelocity.y = ability.JumpSpeed;
+
                 // Apply new velocity to rigidbody
                 rigidbody.velocity = moveVelocity;
-                
-                if (inputData.ascend) // Jump up, keep horizontal speed
-                    rigidbody.velocity = new(rigidbody.velocity.x, ability.JumpSpeed, rigidbody.velocity.z);
-                
             }
             else // Stop moving
                 info.Moving = false;
@@ -34,7 +40,7 @@ namespace MinecraftClient.Control
 
         public bool ShouldEnter(PlayerStatus info)
         {
-            if (!info.Spectating && info.Grounded && info.Moving)
+            if (!info.Spectating && info.Grounded && !info.OnWall && !info.InWater && info.Moving)
                 return true;
             return false;
         }
@@ -44,7 +50,7 @@ namespace MinecraftClient.Control
             if (info.Spectating)
                 return true;
 
-            if (!info.Grounded || !info.Moving)
+            if (!info.Grounded || info.OnWall || info.InWater || !info.Moving)
                 return true;
             return false;
         }

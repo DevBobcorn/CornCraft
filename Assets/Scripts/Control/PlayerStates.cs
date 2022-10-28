@@ -16,7 +16,8 @@ namespace MinecraftClient.Control
         public static readonly IPlayerState FALL = new FallState();
 
         // In water states
-        // TODO
+        public static readonly IPlayerState SWIM  = new SwimState();
+        public static readonly IPlayerState TREAD = new TreadState();
 
         // Special states
         public static readonly IPlayerState SPECTATE = new SpectateState();
@@ -31,6 +32,9 @@ namespace MinecraftClient.Control
             list.Add(MOVE);
 
             list.Add(FALL);
+
+            list.Add(SWIM);
+            list.Add(TREAD);
 
             list.Add(SPECTATE);
 

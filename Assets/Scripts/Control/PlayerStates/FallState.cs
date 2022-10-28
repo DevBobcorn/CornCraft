@@ -7,23 +7,35 @@ namespace MinecraftClient.Control
     {
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody)
         {
+            var moveSpeed = rigidbody.velocity;
+
             // Check and constrain fall speed
-            if (rigidbody.velocity.y < ability.MaxFallSpeed)
-                rigidbody.velocity = new Vector3(rigidbody.velocity.x, ability.MaxFallSpeed, rigidbody.velocity.z);
+            if (moveSpeed.y < ability.MaxFallSpeed)
+                moveSpeed = new(moveSpeed.x, ability.MaxFallSpeed, moveSpeed.z);
             
+            // Auto walk up aid
+            if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 60F) // Trying to moving forward
+            {
+                if (info.FrontDownDist < -0.03F && info.FrontDownDist > -0.6F)
+                    moveSpeed.y = ability.AidSpeedCurve.Evaluate(info.FrontDownDist);
+            }
+
             // Otherwise free fall, leave velocity unchanged
         }
 
         public bool ShouldEnter(PlayerStatus info)
         {
-            if (!info.Grounded && !info.InWater)
+            if (!info.Spectating && !info.Grounded && !info.OnWall && !info.InWater)
                 return true;
             return false;
         }
 
         public bool ShouldExit(PlayerStatus info)
         {
-            if (info.Grounded || info.InWater)
+            if (info.Spectating)
+                return true;
+            
+            if (info.Grounded || info.OnWall || info.InWater)
                 return true;
             return false;
         }

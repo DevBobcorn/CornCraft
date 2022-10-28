@@ -6,10 +6,12 @@ namespace MinecraftClient.Control
 {
     public class PlayerStatus
     {
-        // Player state
+        // Player status
         public bool InWater  = false;
+        public bool OnWaterSurface = false;
+
         public bool Grounded = false;
-        public bool Climbing = false;
+        public bool OnWall   = false;
         public bool Moving   = false;
 
         public bool Attacking  = false;
@@ -24,11 +26,13 @@ namespace MinecraftClient.Control
         public float TargetVisualYaw  = 0F;
         public float CurrentVisualYaw = 0F;
 
+        public float YawOffset => Mathf.Abs(Mathf.DeltaAngle(TargetVisualYaw, CurrentVisualYaw));
+
         // Block selection data
         public Location? TargetBlockPos = null;
 
         public override string ToString() => 
-            $"InWater:\t{InWater}\nGrounded:\t{Grounded}\nClimbing:\t{Climbing}\nMoving:\t{Moving} {CenterDownDist} {FrontDownDist}";
+            $"InWater:\t{InWater}\n* Surfing:\t{OnWaterSurface}\nGrounded:\t{Grounded}\nClimbing:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\nYaw delta:\t{YawOffset:0.00}";
 
     }
 }

@@ -92,20 +92,21 @@ namespace MinecraftClient.Control
             userInput!.UpdateInputs(inputData);
 
             // Update target block selection
-            statusUpdater!.UpdateBlockSelection(camControl!.ActiveCamera);
+            var viewRay = camControl!.ActiveCamera.ViewportPointToRay(new(0.5F, 0.5F, 0F));
+            statusUpdater!.UpdateBlockSelection(viewRay);
 
             // Update player status (in water, grounded, etc)
             statusUpdater.UpdatePlayerStatus(game!.GetWorld(), visualTransform!.forward);
 
-            var statusInfo = statusUpdater.Status;
+            var status = statusUpdater.Status;
 
             // Update current player state
-            if (CurrentState.ShouldExit(statusInfo))
+            if (CurrentState.ShouldExit(status))
             {
                 // Try to exit current state and enter another one
                 foreach (var state in PlayerStates.STATES)
                 {
-                    if (state != CurrentState && state.ShouldEnter(statusInfo))
+                    if (state != CurrentState && state.ShouldEnter(status))
                     {
                         // Exit previous state and enter this state
                         CurrentState = state;
@@ -121,7 +122,7 @@ namespace MinecraftClient.Control
             Status.CurrentVisualYaw = visualTransform!.eulerAngles.y;
 
             // Update player physics and transform using updated current state
-            CurrentState.UpdatePlayer(interval, inputData, statusInfo, playerAbility!, playerRigidbody!);
+            CurrentState.UpdatePlayer(interval, inputData, status, playerAbility!, playerRigidbody!);
 
             // Apply updated visual yaw to visual transform
             visualTransform!.eulerAngles = new(0F, Status.CurrentVisualYaw, 0F);
@@ -135,7 +136,7 @@ namespace MinecraftClient.Control
             var rawLocation = CoordConvert.Unity2MC(transform.position);
 
             // Preprocess the location before sending it (to avoid position correction from server)
-            if ((statusInfo.Grounded || statusInfo.CenterDownDist < 0.5F) && rawLocation.Y - (int)rawLocation.Y > 0.9D)
+            if ((status.Grounded || status.CenterDownDist < 0.5F) && rawLocation.Y - (int)rawLocation.Y > 0.9D)
                 rawLocation.Y = (int)rawLocation.Y + 1;
 
             CornClient.Instance.SyncLocation(rawLocation, visualTransform!.eulerAngles.y - 90F, 0F);
@@ -206,10 +207,14 @@ namespace MinecraftClient.Control
                     targetBlockInfo = targetBlockState.ToString();
             }
 
+            var velocity = playerRigidbody!.velocity;
+            // Visually swap xz velocity to fit vanilla
+            var veloInfo = $"Vel:\t{velocity.z:0.00}\t{velocity.y:0.00}\t{velocity.x:0.00}\n({velocity.magnitude:0.000})";
+
             if (EntityDisabled)
-                return $"Position:\t{loc}\nState:\t{CurrentState}\nTarget Block:\t{status.TargetBlockPos}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
+                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nTarget Block:\t{status.TargetBlockPos}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
             else
-                return $"Position:\t{loc}\nState:\t{CurrentState}\n{status.ToString()}\nTarget Block:\t{status.TargetBlockPos}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
+                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\n{status.ToString()}\nTarget Block:\t{status.TargetBlockPos}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
 
         }
 
