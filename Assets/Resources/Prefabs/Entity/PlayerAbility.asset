@@ -12,8 +12,59 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 626338d7e82f32b4893ae4cf50bbdfc2, type: 3}
   m_Name: PlayerAbility
   m_EditorClassIdentifier: 
-  WalkSpeed: 2
+  WalkSpeed: 1.6
   RunSpeed: 4
   JumpSpeed: 5
   SteerSpeed: 20
+  AidSpeedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -1
+      value: 5
+      inSlope: -0.028877096
+      outSlope: -0.028877096
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0.33333334
+      outWeight: 0.9791667
+    - serializedVersion: 3
+      time: 0
+      value: 2
+      inSlope: -0.50405
+      outSlope: 0
+      tangentMode: 1
+      weightedMode: 3
+      inWeight: 0.72083336
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  WaterAidSpeedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -1
+      value: 4
+      inSlope: 0.037750874
+      outSlope: 0.037750874
+      tangentMode: 0
+      weightedMode: 2
+      inWeight: 0
+      outWeight: 0.55782974
+    - serializedVersion: 3
+      time: 0
+      value: 2.5
+      inSlope: -0.07843167
+      outSlope: -0.07843167
+      tangentMode: 0
+      weightedMode: 1
+      inWeight: 0.72614497
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   MaxFallSpeed: -10
+  MaxWaterMoveSpeed: 2.3
+  MaxWaterFallSpeed: -0.5
+  WaterMoveMultiplier: 0.6

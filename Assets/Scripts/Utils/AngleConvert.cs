@@ -14,7 +14,7 @@ namespace MinecraftClient
 
         public static float UnityYaw2MC(float angle) => (angle / 360F - 90F) * 256F;
 
-        public static Vector3 GetAxisAlignedOrientation(Vector3 original)
+        public static Vector3 GetAxisAlignedDirection(Vector3 original)
         {
             if (Mathf.Abs(original.x) > Mathf.Abs(original.z))
                 return original.x > 0F ? Vector3.right   : Vector3.left;

@@ -21,7 +21,7 @@ namespace MinecraftClient.Control
 
         public bool ShouldEnter(PlayerStatus info)
         {
-            if (!info.Spectating && info.Grounded && !info.Moving)
+            if (!info.Spectating && info.Grounded && !info.OnWall && !info.InWater && !info.Moving)
                 return true;
             return false;
         }
@@ -31,7 +31,7 @@ namespace MinecraftClient.Control
             if (info.Spectating)
                 return true;
             
-            if (!info.Grounded || info.Moving)
+            if (!info.Grounded || info.OnWall || info.InWater || info.Moving)
                 return true;
             return false;
         }
