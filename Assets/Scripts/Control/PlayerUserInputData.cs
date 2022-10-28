@@ -9,7 +9,7 @@ namespace MinecraftClient.Control
         public bool   descend;
         public bool   attack;
 
-        public string GetDescription() => $"{horInputNormalized}\nAsc: {ascend}\tDesc: {descend}\tAtkL {attack}";
+        public override string ToString() => $"{horInputNormalized}\nAsc: {ascend}\tDesc: {descend}\tAtk: {attack}";
 
     }
 }

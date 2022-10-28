@@ -3,7 +3,7 @@ using UnityEngine;
 namespace MinecraftClient.Control
 {
     [RequireComponent(typeof (CameraController))]
-    public class CameraUserControl : MonoBehaviour
+    public class CameraUserInput : MonoBehaviour
     {
         private CornClient game;
         CameraController camControl;
