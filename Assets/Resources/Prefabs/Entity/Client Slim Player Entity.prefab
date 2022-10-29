@@ -334,7 +334,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerAbility: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
-  WalkMode: 0
   EntityDisabled: 0
 --- !u!114 &9066864819563880320
 MonoBehaviour:
@@ -432,7 +431,7 @@ MonoBehaviour:
     m_Bits: 128
   GroundLayer:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 64
 --- !u!1001 &8297465430410305446
 PrefabInstance:
   m_ObjectHideFlags: 0

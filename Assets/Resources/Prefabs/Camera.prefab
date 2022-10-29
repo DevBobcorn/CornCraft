@@ -48,16 +48,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 1088
-  nearFov: 45
-  farFov: 85
+    m_Bits: 1152
+  nearFov: 55
+  farFov: 65
   cameraZOffsetNear: -3
   cameraZOffsetFar: -10
   cameraYOffsetNear: 1.4
   cameraYOffsetFar: 1.8
-  followSmoothTime: 0.25
-  scaleSmoothFactor: 5
-  rotateSmoothFactor: 5.5
+  followSmoothTime: 0.2
+  scaleSmoothFactor: 6
+  rotateSmoothFactor: 12
+  obstacleSmoothFactor: 0.5
   fixedOffset: {x: 0, y: 1.6, z: 0}
 --- !u!114 &5930999786523324073
 MonoBehaviour:

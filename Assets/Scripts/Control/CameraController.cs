@@ -13,9 +13,10 @@ namespace MinecraftClient.Control
         [SerializeField] private float cameraZOffsetFar  =  -9F;
         [SerializeField] private float cameraYOffsetNear = 0.1F;
         [SerializeField] private float cameraYOffsetFar  = 0.5F;
-        [SerializeField] private float followSmoothTime = 0.25F;
-        [SerializeField] private float scaleSmoothFactor  =  5F;
-        [SerializeField] private float rotateSmoothFactor =  5F;
+        [SerializeField] private float followSmoothTime   = 0.25F;
+        [SerializeField] private float scaleSmoothFactor    =  5F;
+        [SerializeField] private float rotateSmoothFactor   =  5F;
+        [SerializeField] private float obstacleSmoothFactor =  2F;
 
         [SerializeField] private Vector3 fixedOffset = new(0F, 1.6F, 0F);
 
@@ -116,8 +117,8 @@ namespace MinecraftClient.Control
                 cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, interval * scaleSmoothFactor);
                 // Update Fov
                 ActiveCamera!.fieldOfView = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
-                if (!cameraInfo.FixedMode)// Update offset
-                    ActiveCamera.transform.localPosition = cameraInfo.TargetLocalPosition = new(0F, 0F, Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale));
+                if (!cameraInfo.FixedMode)// Update target local position
+                    cameraInfo.TargetLocalPosition = new(0F, 0F, Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale));
             }
 
             if (!cameraInfo.FixedMode) // Normal update
@@ -127,10 +128,10 @@ namespace MinecraftClient.Control
             
                 // Obstacle check
                 RaycastHit hitInfo;
-                if (Physics.Linecast(transform.position, ActiveCamera!.transform.position, out hitInfo, obstacleLayer))
-                    ActiveCamera.transform.position = Vector3.Lerp(ActiveCamera.transform.position, hitInfo.point, Time.unscaledDeltaTime * 30F);
+                if (Physics.Linecast(transform.position, transform.TransformPoint(cameraInfo.TargetLocalPosition), out hitInfo, obstacleLayer))
+                    ActiveCamera!.transform.position = hitInfo.point;
                 else
-                    ActiveCamera.transform.localPosition = Vector3.Lerp(ActiveCamera.transform.localPosition, cameraInfo.TargetLocalPosition, Time.unscaledDeltaTime * 5F);
+                    ActiveCamera!.transform.localPosition = Vector3.Lerp(ActiveCamera.transform.localPosition, cameraInfo.TargetLocalPosition, interval * obstacleSmoothFactor);
             }
             else // Fixed mode update
                 transform.position = cameraInfo.Target.TransformPoint(fixedOffset);
