@@ -92,7 +92,7 @@ namespace MinecraftClient.Control
             userInput!.UpdateInputs(inputData);
 
             // Update target block selection
-            var viewRay = camControl!.ActiveCamera.ViewportPointToRay(new(0.5F, 0.5F, 0F));
+            var viewRay = camControl!.ActiveCamera!.ViewportPointToRay(new(0.5F, 0.5F, 0F));
             statusUpdater!.UpdateBlockSelection(viewRay);
 
             // Update player status (in water, grounded, etc)

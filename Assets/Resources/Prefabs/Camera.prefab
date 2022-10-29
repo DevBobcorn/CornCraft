@@ -49,16 +49,16 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 1088
-  sensitivityX: 5
-  sensitivityY: 3
-  sensitivityScroll: 0.25
-  nearFov: 40
-  farFov: 60
+  nearFov: 45
+  farFov: 85
   cameraZOffsetNear: -3
-  cameraZOffsetFar: -9
-  cameraYOffsetNear: 1.35
-  cameraYOffsetFar: 1.7
-  smoothTime: 0.25
+  cameraZOffsetFar: -10
+  cameraYOffsetNear: 1.4
+  cameraYOffsetFar: 1.8
+  followSmoothTime: 0.25
+  scaleSmoothFactor: 5
+  rotateSmoothFactor: 5.5
+  fixedOffset: {x: 0, y: 1.6, z: 0}
 --- !u!114 &5930999786523324073
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -71,6 +71,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b8872f7c3a5b5543911f87cd11ad88d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sensitivityYaw: 5
+  sensitivityPitch: 3
+  sensitivityScroll: 0.25
+  scrollLocked: 0
 --- !u!1 &5930999786733273601
 GameObject:
   m_ObjectHideFlags: 0

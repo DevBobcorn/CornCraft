@@ -5,44 +5,31 @@ namespace MinecraftClient.Control
     [RequireComponent(typeof (CameraController))]
     public class CameraUserInput : MonoBehaviour
     {
+        [SerializeField] private float sensitivityYaw    = 5F;
+        [SerializeField] private float sensitivityPitch  = 3F;
+        [SerializeField] private float sensitivityScroll = 0.25F;
+        [SerializeField] private bool scrollLocked = false;
         private CornClient game;
-        CameraController camControl;
-        private bool scrollLocked = false;
 
-        void Start()
+        void Start() => game = CornClient.Instance;
+
+        public void UpdateInputs(CameraUserInputData inputData)
         {
-            game = CornClient.Instance;
-            camControl = GetComponent<CameraController>();
-        }
-
-        void Update()
-        {
-            var paused = game.IsPaused();
-
-            float x = paused ? 0F : Input.GetAxis("Mouse X");
-            float y = paused ? 0F : Input.GetAxis("Mouse Y");
-            camControl.ManagedUpdate(Time.deltaTime, x, y);
-
-            if (!scrollLocked && !paused)
+            if (!game!.IsPaused())
             {
-                ScrollCamera(Input.GetAxis("Mouse ScrollWheel"));
+                inputData.mouseDelta = new(
+                    Input.GetAxis("Mouse X") * sensitivityYaw,   // Yaw
+                    Input.GetAxis("Mouse Y") * sensitivityPitch  // Pitch
+                );
+
+                if (!scrollLocked)
+                    inputData.scroll = Input.GetAxis("Mouse ScrollWheel") * sensitivityScroll;
             }
-
-        }
-
-        void LateUpdate()
-        {
-            var paused = game.IsPaused();
-
-            float x = paused ? 0F : Input.GetAxis("Mouse X");
-            float y = paused ? 0F : Input.GetAxis("Mouse Y");
-            camControl.LateTick(Time.deltaTime, x, y);
-        }
-
-        public void ScrollCamera(float scroll)
-        {
-            if (!camControl) return;
-            camControl.Scroll(scroll);
+            else
+            {
+                inputData.mouseDelta = Vector2.zero;
+                inputData.scroll = 0F;
+            }
         }
     }
 }
