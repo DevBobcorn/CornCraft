@@ -482,7 +482,7 @@ namespace MinecraftClient.UI
                 // Follow player view
                 if (game!.GetPlayer().Perspective == Perspective.FirstPerson && cameraCon is not null)
                 {
-                    var cameraRot = cameraCon.ActiveCamera.transform.eulerAngles.y;
+                    var cameraRot = cameraCon.ActiveCamera!.transform.eulerAngles.y;
                     var ownRot = transform.eulerAngles.y;
 
                     var deltaRot = Mathf.DeltaAngle(ownRot, cameraRot);

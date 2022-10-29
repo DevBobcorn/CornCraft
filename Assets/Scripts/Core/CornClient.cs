@@ -155,7 +155,7 @@ namespace MinecraftClient
             if (cameraController is null)
                 return Vector3.zero;
             
-            return cameraController.ActiveCamera.transform.position;
+            return cameraController.ActiveCamera!.transform.position;
         }
         
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
