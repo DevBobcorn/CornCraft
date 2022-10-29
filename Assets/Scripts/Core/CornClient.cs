@@ -150,10 +150,10 @@ namespace MinecraftClient
 
         public PlayerController GetPlayerController() => playerController!;
         public CameraController GetCameraController() => cameraController!;
-        public Vector3 GetCameraPosition()
+        public Vector3? GetCameraPosition()
         {
             if (cameraController is null)
-                return Vector3.zero;
+                return null;
             
             return cameraController.ActiveCamera!.transform.position;
         }

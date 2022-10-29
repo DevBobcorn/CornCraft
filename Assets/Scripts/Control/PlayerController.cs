@@ -142,7 +142,11 @@ namespace MinecraftClient.Control
             CornClient.Instance.SyncLocation(rawLocation, visualTransform!.eulerAngles.y - 90F, 0F);
 
             // Update render
-            playerRender!.UpdateInfoPlate(game!.GetCameraPosition(), 0F); // Use 0 as distance to camera since it doesn't matter
+            var cameraPos = game!.GetCameraPosition();
+
+            if (cameraPos is not null)
+                playerRender!.UpdateInfoPlate(cameraPos.Value);
+            
             playerRender!.UpdateAnimation(game!.GetTickMilSec());
 
         }

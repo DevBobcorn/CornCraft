@@ -18,6 +18,9 @@ namespace MinecraftClient.Rendering
 {
     public class WorldRender : MonoBehaviour
     {
+        public const string MOVEMENT_LAYER_NAME = "Movement";
+        public const string OBSTACLE_LAYER_NAME = "Obstacle";
+
         private static WorldRender? instance;
         public static WorldRender Instance
         {
@@ -36,8 +39,6 @@ namespace MinecraftClient.Rendering
         // Both manipulated on Unity main thread only
         private PriorityQueue<ChunkRender> chunksToBeBuild = new();
         private List<ChunkRender>         chunksBeingBuilt = new();
-
-        public static PhysicMaterial? CHUNK_MATERIAL;
 
         private CornClient? game;
 
@@ -765,17 +766,8 @@ namespace MinecraftClient.Rendering
         {
             game = CornClient.Instance;
 
-            // Physic materials are not allowed to be created in a static method,
-            // so we put the initialization here...
-            CHUNK_MATERIAL = new()
-            {
-                frictionCombine = PhysicMaterialCombine.Minimum,
-                staticFriction = 0F,
-                dynamicFriction = 0F
-            };
-
-            var movementColliderObj = new GameObject("Terrain Movement Collider");
-            movementColliderObj.layer = LayerMask.NameToLayer("Movement");
+            var movementColliderObj = new GameObject("Terrain Collider");
+            movementColliderObj.layer = LayerMask.NameToLayer(MOVEMENT_LAYER_NAME);
             movementCollider = movementColliderObj.AddComponent<MeshCollider>();
 
             // Register event callbacks
@@ -874,22 +866,14 @@ namespace MinecraftClient.Rendering
                     }
 
                     if (loc.ChunkBlockX == 0) // Check MC X direction neighbors
-                    {
                         QueueChunkBuildIfNotEmpty(GetChunk(chunkX - 1, chunkY, chunkZ));
-                    }
                     else if (loc.ChunkBlockX == Chunk.SizeX - 1)
-                    {
                         QueueChunkBuildIfNotEmpty(GetChunk(chunkX + 1, chunkY, chunkZ));
-                    }
 
                     if (loc.ChunkBlockZ == 0) // Check MC Z direction neighbors
-                    {
                         QueueChunkBuildIfNotEmpty(GetChunk(chunkX, chunkY, chunkZ - 1));
-                    }
                     else if (loc.ChunkBlockZ == Chunk.SizeZ - 1)
-                    {
                         QueueChunkBuildIfNotEmpty(GetChunk(chunkX, chunkY, chunkZ + 1));
-                    }
                 }
 
                 terrainColliderDirty = true;

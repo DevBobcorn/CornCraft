@@ -94,8 +94,10 @@ namespace MinecraftClient.Rendering
 
         void Start() => EnsureInitialized();
 
-        public void UpdateInfoPlate(Vector3 cameraPos, float dist2Cam)
+        public void UpdateInfoPlate(Vector3 cameraPos)
         {
+            float dist2Cam = (cameraPos - transform.position).magnitude;
+
             if (nameTextShown)
             {
                 if (dist2Cam > hideInfoDist) // Hide info plate
@@ -105,7 +107,6 @@ namespace MinecraftClient.Rendering
                 }
                 else // Update info plate rotation
                 {
-                    //nameText!.text = $"T: {partialTick}"; // TODO Remove
                     nameText!.transform.parent.LookAt(cameraPos);
                 }
             }
@@ -120,12 +121,12 @@ namespace MinecraftClient.Rendering
 
         }
 
-        public void UpdateTransform(float dist2Cam, float tickMilSec)
+        public void UpdateTransform(float tickMilSec)
         {
             // Update position
             if (lastPosition is not null && targetPosition is not null)
             {
-                if (dist2Cam > 100F || (targetPosition.Value - transform.position).sqrMagnitude > MOVE_THERESHOLD) // Treat as teleport
+                if ((targetPosition.Value - transform.position).sqrMagnitude > MOVE_THERESHOLD) // Treat as teleport
                     transform.position = targetPosition.Value;
                 else // Smoothly move to current position
                     transform.position = Vector3.SmoothDamp(transform.position, targetPosition.Value, ref currentVelocity, tickMilSec);
@@ -163,13 +164,12 @@ namespace MinecraftClient.Rendering
 
         public virtual void UpdateAnimation(float tickMilSec) { }
 
-        public virtual void ManagedUpdate(Vector3 cameraPos, float tickMilSec)
+        public virtual void ManagedUpdate(Vector3? cameraPos, float tickMilSec)
         {
-            var dist2Cam  = (cameraPos - transform.position).magnitude;
+            if (cameraPos is not null)
+                UpdateInfoPlate(cameraPos.Value);
 
-            UpdateInfoPlate(cameraPos, dist2Cam);
-            UpdateTransform(dist2Cam, tickMilSec);
-            
+            UpdateTransform(tickMilSec);
             UpdateAnimation(tickMilSec);
 
         }
