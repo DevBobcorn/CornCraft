@@ -365,12 +365,16 @@ namespace MinecraftClient
 
             // Destroy previous camera and create a new one for player
             Destroy(loginCamera.gameObject);
-            var cameraPrefab = Resources.Load<GameObject>("Prefabs/Camera");
+            var cameraPrefab = Resources.Load<GameObject>("Prefabs/Camera Cinemachine"); // Simple Cinemachine
             var cameraObj    = GameObject.Instantiate(cameraPrefab);
             cameraObj.name = "Main Camera (In-Game)";
             cameraObj.SetActive(true);
             cameraController = cameraObj.GetComponent<CameraController>();
-            cameraController.SetTarget(playerObj.transform);
+
+
+
+            cameraController.ActiveCamera = cameraController.GetComponentInChildren<Camera>();
+            cameraController.SetTarget(playerController.cameraRef!);
             cameraController.SetPerspective(player.Perspective);
 
             EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(player.Perspective));

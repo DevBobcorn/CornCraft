@@ -12,6 +12,7 @@ namespace MinecraftClient.Control
     public class PlayerController : MonoBehaviour, IPlayerController
     {
         [SerializeField] public PlayerAbility? playerAbility;
+        [SerializeField] public Transform? cameraRef;
 
         private CornClient? game;
         private Rigidbody? playerRigidbody;
@@ -117,7 +118,7 @@ namespace MinecraftClient.Control
 
             // Prepare current and target player visual yaw before updating it
             Status.UserInputYaw = AngleConvert.GetYawFromVector2(inputData.horInputNormalized);
-            Status.TargetVisualYaw = camControl!.GetCameraYaw() + Status.UserInputYaw;
+            Status.TargetVisualYaw = camControl.GetCameraYaw() + Status.UserInputYaw;
 
             Status.CurrentVisualYaw = visualTransform!.eulerAngles.y;
 
@@ -142,10 +143,7 @@ namespace MinecraftClient.Control
             CornClient.Instance.SyncLocation(rawLocation, visualTransform!.eulerAngles.y - 90F, 0F);
 
             // Update render
-            var cameraPos = game!.GetCameraPosition();
-
-            if (cameraPos is not null)
-                playerRender!.UpdateInfoPlate(cameraPos.Value);
+            playerRender!.UpdateInfoPlate(camControl.ActiveCamera.transform.position);
             
             playerRender!.UpdateAnimation(game!.GetTickMilSec());
 
@@ -172,6 +170,9 @@ namespace MinecraftClient.Control
 
             statusUpdater = GetComponent<PlayerStatusUpdater>();
             userInput = GetComponent<PlayerUserInput>();
+
+            if (playerAbility is null)
+                Debug.LogError("Player ability not assigned!");
 
             perspectiveCallback = (e) => { };
 

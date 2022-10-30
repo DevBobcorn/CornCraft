@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace MinecraftClient.Control
 {
-    [RequireComponent(typeof (CameraController))]
+    [RequireComponent(typeof (CameraControllerSimple))]
     public class CameraUserInput : MonoBehaviour
     {
         [SerializeField] private float sensitivityYaw    = 5F;

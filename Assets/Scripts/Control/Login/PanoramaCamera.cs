@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace MinecraftClient.Control
 {
-    public class CameraRotate : MonoBehaviour
+    public class PanoramaCamera : MonoBehaviour
     {
         [SerializeField] private float rotateSpeed = 5F;
 
