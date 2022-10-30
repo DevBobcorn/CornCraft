@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5930999786523324078}
   - component: {fileID: 5930999786523324073}
   m_Layer: 16
-  m_Name: Camera
+  m_Name: Camera Simple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -53,8 +53,8 @@ MonoBehaviour:
   farFov: 65
   cameraZOffsetNear: -3
   cameraZOffsetFar: -10
-  cameraYOffsetNear: 1.4
-  cameraYOffsetFar: 1.8
+  cameraYOffsetNear: 0.1
+  cameraYOffsetFar: 0.8
   followSmoothTime: 0.2
   scaleSmoothFactor: 6
   rotateSmoothFactor: 12
