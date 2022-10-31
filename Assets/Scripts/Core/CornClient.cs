@@ -132,7 +132,7 @@ namespace MinecraftClient
         private World world = new();
         public World GetWorld() => world;
         private WorldRender? worldRender;
-        public WorldRender GetWorldRender() => worldRender!;
+        public WorldRender? WorldRender => worldRender;
         #endregion
 
         #region Players and Entities
@@ -140,7 +140,7 @@ namespace MinecraftClient
         private bool locationReceived = false, localLocationUpdated = false;
         public bool LocationReceived { get { return locationReceived; } }
         private ClientPlayer player = new();
-        public ClientPlayer GetPlayer() => player;
+        public ClientPlayer Player => player;
 
         public object locationLock = new();
         public Location GetCurrentLocation() => player.location;
@@ -148,20 +148,13 @@ namespace MinecraftClient
         private PlayerController? playerController;
         private CameraController? cameraController;
 
-        public PlayerController GetPlayerController() => playerController!;
-        public CameraController GetCameraController() => cameraController!;
-        public Vector3? GetCameraPosition()
-        {
-            if (cameraController is null)
-                return null;
-            
-            return cameraController.ActiveCamera!.transform.position;
-        }
+        public PlayerController? PlayerController => playerController;
+        public CameraController? CameraController => cameraController;
         
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         private Dictionary<int, Entity> entities = new();
         private EntityManager? entityManager;
-        public EntityManager GetEntityManager() => entityManager!;
+        public EntityManager? EntityManager => entityManager!;
         #endregion
 
         #region Unity stuffs
@@ -365,15 +358,11 @@ namespace MinecraftClient
 
             // Destroy previous camera and create a new one for player
             Destroy(loginCamera.gameObject);
-            var cameraPrefab = Resources.Load<GameObject>("Prefabs/Camera Cinemachine"); // Simple Cinemachine
+            var cameraPrefab = Resources.Load<GameObject>("Prefabs/Camera Cinemachine"); // Simple or Cinemachine
             var cameraObj    = GameObject.Instantiate(cameraPrefab);
             cameraObj.name = "Main Camera (In-Game)";
             cameraObj.SetActive(true);
             cameraController = cameraObj.GetComponent<CameraController>();
-
-
-
-            cameraController.ActiveCamera = cameraController.GetComponentInChildren<Camera>();
             cameraController.SetTarget(playerController.cameraRef!);
             cameraController.SetPerspective(player.Perspective);
 

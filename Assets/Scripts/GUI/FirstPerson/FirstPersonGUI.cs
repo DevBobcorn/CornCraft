@@ -29,7 +29,7 @@ namespace MinecraftClient.UI
         public float maxDeltaAngle = 30F;
         private CornClient? game;
 
-        private CameraController? cameraCon;
+        private Transform? viewTransform;
 
         private Canvas?   canvas;
         private Animator? canvasAnim;
@@ -357,12 +357,16 @@ namespace MinecraftClient.UI
             HideChatPanel();
         }
 
-        public void SetCameraCon(CameraController cameraCon)
+        public void SetViewTransform(Transform transform)
         {
             EnsureInitialized();
 
-            this.cameraCon = cameraCon;
-            canvas!.worldCamera = cameraCon.ActiveCamera;
+            viewTransform = transform;
+
+            if (Camera.main is not null)
+                canvas!.worldCamera = Camera.main;
+            else
+                Debug.LogWarning("Main camera not found, canvas camera left unassigned.");
         }
 
         void Start() => EnsureInitialized();
@@ -480,19 +484,19 @@ namespace MinecraftClient.UI
                 }
 
                 // Follow player view
-                if (game!.GetPlayer().Perspective == Perspective.FirstPerson && cameraCon is not null)
+                if (game!.Player.Perspective == Perspective.FirstPerson && viewTransform is not null)
                 {
-                    var cameraRot = cameraCon.ActiveCamera!.transform.eulerAngles.y;
+                    var viewRot = viewTransform.eulerAngles.y;
                     var ownRot = transform.eulerAngles.y;
 
-                    var deltaRot = Mathf.DeltaAngle(ownRot, cameraRot);
+                    var deltaRot = Mathf.DeltaAngle(ownRot, viewRot);
 
                     if (Mathf.Abs(deltaRot) > maxDeltaAngle)
                     {
                         if (deltaRot > 0F)
-                            transform.eulerAngles = new(0F, Mathf.LerpAngle(ownRot, cameraRot + maxDeltaAngle, followSpeed * Time.deltaTime));
+                            transform.eulerAngles = new(0F, Mathf.LerpAngle(ownRot, viewRot + maxDeltaAngle, followSpeed * Time.deltaTime));
                         else
-                            transform.eulerAngles = new(0F, Mathf.LerpAngle(ownRot, cameraRot - maxDeltaAngle, followSpeed * Time.deltaTime));
+                            transform.eulerAngles = new(0F, Mathf.LerpAngle(ownRot, viewRot - maxDeltaAngle, followSpeed * Time.deltaTime));
 
                     }
                     

@@ -4,34 +4,46 @@ using Cinemachine;
 
 namespace MinecraftClient.Control
 {
-    [RequireComponent(typeof (CinemachineVirtualCamera))]
     public class CameraControllerCinemachine : CameraController
     {
-        [SerializeField] private float cameraZOffsetNear =  -3F;
-        [SerializeField] private float cameraZOffsetFar  =  -9F;
+        [SerializeField] private float nearFov = 40F;
+        [SerializeField] private float farFov  = 80F;
+        [SerializeField] private float cameraZOffsetNear =   2F;
+        [SerializeField] private float cameraZOffsetFar  =  20F;
         [SerializeField] private float cameraYOffsetNear = 0.1F;
         [SerializeField] private float cameraYOffsetFar  = 0.5F;
-        [SerializeField] [Range(0F, 20F)] private float scaleSmoothFactor = 4F;
-        [SerializeField] [Range(0F, 20F)] private float scrollSensitivity = 1F;
+        [SerializeField] [Range(0F, 20F)] private float scaleSmoothFactor = 4.0F;
+        [SerializeField] [Range(0F,  2F)] private float scrollSensitivity = 0.5F;
 
         // Virtual camera and camera components
-        private CinemachineVirtualCamera? virtualCamera;
+        private CinemachineVirtualCamera? virtualCameraNormal;
         private CinemachineFramingTransposer? framingTransposer;
-        private CinemachineHardLockToTarget? hardLockToTarget;
+        private CinemachineVirtualCamera? virtualCameraFixed;
 
-        private CinemachineCollider? cameraCollider;
+        private CinemachinePOV? normalPOV, fixedPOV;
 
         private float currentTargetDistance;
 
-        // flag indicating whether framing transposer is initialized
-        private bool initialized = false;
-
-        public void EnsureInitialized()
+        public override void EnsureInitialized()
         {
             if (!initialized)
             {
-                virtualCamera = GetComponent<CinemachineVirtualCamera>();
-                cameraCollider = GetComponent<CinemachineCollider>();
+                // Get virtual and render cameras
+                var normalObj = transform.Find("Normal Virtual");
+                virtualCameraNormal = normalObj.GetComponent<CinemachineVirtualCamera>();
+                normalPOV = virtualCameraNormal.GetCinemachineComponent<CinemachinePOV>();
+                framingTransposer = virtualCameraNormal.GetCinemachineComponent<CinemachineFramingTransposer>();
+
+                var fixedObj = transform.Find("Fixed Virtual");
+                virtualCameraFixed = fixedObj.GetComponent<CinemachineVirtualCamera>();
+                fixedPOV = virtualCameraFixed.GetCinemachineComponent<CinemachinePOV>();
+
+                renderCamera = GetComponentInChildren<Camera>();
+
+                if (renderCamera is not null)
+                    renderCameraPresent = true;
+                else
+                    Debug.LogWarning("Render camera not found!");
 
                 // Override input axis to disable input when paused
                 CinemachineCore.GetInputAxis = (axisName) => {
@@ -49,6 +61,11 @@ namespace MinecraftClient.Control
             // Initialize camera scale
             cameraInfo.CurrentScale = cameraInfo.TargetScale;
 
+            // Apply default Fov
+            var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
+            virtualCameraNormal!.m_Lens.FieldOfView = fov;
+            virtualCameraFixed!.m_Lens.FieldOfView  = fov;
+
             if (!cameraInfo.FixedMode) // Apply default offset
                 DisableFixedMode();
             else
@@ -59,7 +76,8 @@ namespace MinecraftClient.Control
 
         void ManagedUpdate(float interval)
         {
-            float scroll = Input.GetAxis("Mouse ScrollWheel") * scrollSensitivity;
+            // Disable input when game is paused, see EnsureInitialized() above
+            float scroll = CinemachineCore.GetInputAxis("Mouse ScrollWheel") * scrollSensitivity;
 
             // Update target camera status according to user input
             if (scroll != 0F)
@@ -69,6 +87,10 @@ namespace MinecraftClient.Control
             {
                 cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, interval * scaleSmoothFactor);
                 
+                var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
+                virtualCameraNormal!.m_Lens.FieldOfView = fov;
+                virtualCameraFixed!.m_Lens.FieldOfView  = fov;
+
                 if (!cameraInfo.FixedMode) // Update target local position
                 {
                     framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale), 0F);
@@ -82,45 +104,50 @@ namespace MinecraftClient.Control
         {
             EnsureInitialized();
 
-            virtualCamera!.Follow = target;
-            virtualCamera!.LookAt = target;
+            virtualCameraNormal!.Follow = target;
+            virtualCameraNormal!.LookAt = target;
+
+            virtualCameraFixed!.Follow = target;
         }
 
-        public override float GetCameraYaw() => transform.eulerAngles.y;
+        public override float GetYaw() => renderCameraPresent ? renderCamera!.transform.eulerAngles.y : 0F;
+
+        public override Vector3? GetPosition() => renderCameraPresent ? renderCamera!.transform.position : null;
+
+        public override Transform GetTransform() => renderCameraPresent ? renderCamera!.transform : transform;
 
         public override void EnableFixedMode()
         {
             EnsureInitialized();
             cameraInfo.FixedMode = true;
 
-            hardLockToTarget = virtualCamera!.AddCinemachineComponent<CinemachineHardLockToTarget>();
+            // Sync virtual camera rotation
+            fixedPOV!.m_HorizontalAxis.Value = normalPOV!.m_HorizontalAxis.Value;
+            fixedPOV!.m_VerticalAxis.Value   = normalPOV!.m_VerticalAxis.Value;
 
-            var pov = virtualCamera!.AddCinemachineComponent<CinemachinePOV>();
-            pov.m_VerticalAxis   = new( -80,  80, false, false, 600F, 0F, 0F, "Mouse Y",  true);
-            pov.m_HorizontalAxis = new(-180, 180,  true, false, 600F, 0F, 0F, "Mouse X", false);
+            // Make fixed virtual camera the live camera
+            virtualCameraFixed!.MoveToTopOfPrioritySubqueue();
 
-            // Disable obstacle avoiding
-            cameraCollider!.enabled = false;
+            // Don't render player on this camera
+            if (renderCameraPresent)
+                renderCamera!.cullingMask = renderCamera.cullingMask & ~(1 << LayerMask.NameToLayer("Player"));
         }
 
         public override void DisableFixedMode()
         {
             EnsureInitialized();
             cameraInfo.FixedMode = false;
+
+            // Sync virtual camera rotation
+            normalPOV!.m_HorizontalAxis.Value = fixedPOV!.m_HorizontalAxis.Value;
+            normalPOV!.m_VerticalAxis.Value   = fixedPOV!.m_VerticalAxis.Value;
             
-            framingTransposer = virtualCamera!.AddCinemachineComponent<CinemachineFramingTransposer>();
-            framingTransposer!.m_SoftZoneWidth  = 0.3F;
-            framingTransposer!.m_SoftZoneHeight = 0.5F;
+            // Make normal virtual camera the live camera
+            virtualCameraNormal!.MoveToTopOfPrioritySubqueue();
 
-            framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale), 0F);
-            framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
-
-            var pov = virtualCamera!.AddCinemachineComponent<CinemachinePOV>();
-            pov.m_VerticalAxis   = new( -89,  89, false, false, 300F, 0.1F, 0.1F, "Mouse Y",  true);
-            pov.m_HorizontalAxis = new(-180, 180,  true, false, 300F, 0.1F, 0.1F, "Mouse X", false);
-
-            // Disable obstacle avoiding
-            cameraCollider!.enabled = true;
+            // Render player on this camera
+            if (renderCameraPresent)
+                renderCamera!.cullingMask = renderCamera.cullingMask | (1 << LayerMask.NameToLayer("Player"));
         }
 
     }

@@ -62,7 +62,7 @@ namespace MinecraftClient.Control
 
         private void CheckEntityEnabled()
         {
-            if (game!.GetPlayer().GameMode == GameMode.Spectator) // Spectating
+            if (game!.Player.GameMode == GameMode.Spectator) // Spectating
                 DisableEntity();
             else
                 EnableEntity();
@@ -75,9 +75,9 @@ namespace MinecraftClient.Control
             playerRender!.Entity = fakeEntity;
         }
 
-        public void SetLocation(Location pos)
+        public void SetLocation(Location loc)
         {
-            transform.position = CoordConvert.MC2Unity(pos);
+            transform.position = CoordConvert.MC2Unity(loc);
             Debug.Log($"Position set to {transform.position}");
 
             CheckEntityEnabled();
@@ -93,8 +93,7 @@ namespace MinecraftClient.Control
             userInput!.UpdateInputs(inputData);
 
             // Update target block selection
-            var viewRay = camControl!.ActiveCamera!.ViewportPointToRay(new(0.5F, 0.5F, 0F));
-            statusUpdater!.UpdateBlockSelection(viewRay);
+            statusUpdater!.UpdateBlockSelection(camControl!.GetViewportCenterRay());
 
             // Update player status (in water, grounded, etc)
             statusUpdater.UpdatePlayerStatus(game!.GetWorld(), visualTransform!.forward);
@@ -118,7 +117,7 @@ namespace MinecraftClient.Control
 
             // Prepare current and target player visual yaw before updating it
             Status.UserInputYaw = AngleConvert.GetYawFromVector2(inputData.horInputNormalized);
-            Status.TargetVisualYaw = camControl.GetCameraYaw() + Status.UserInputYaw;
+            Status.TargetVisualYaw = camControl!.GetYaw() + Status.UserInputYaw;
 
             Status.CurrentVisualYaw = visualTransform!.eulerAngles.y;
 
@@ -143,7 +142,10 @@ namespace MinecraftClient.Control
             CornClient.Instance.SyncLocation(rawLocation, visualTransform!.eulerAngles.y - 90F, 0F);
 
             // Update render
-            playerRender!.UpdateInfoPlate(camControl.ActiveCamera.transform.position);
+            var cameraPos = camControl.GetPosition();
+
+            if (cameraPos is not null)
+                playerRender!.UpdateInfoPlate(cameraPos.Value);
             
             playerRender!.UpdateAnimation(game!.GetTickMilSec());
 

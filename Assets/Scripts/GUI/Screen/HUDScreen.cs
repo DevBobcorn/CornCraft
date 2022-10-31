@@ -162,7 +162,7 @@ namespace MinecraftClient.UI
                     }
                     else // Show gamemode switch
                     {
-                        selectedMode = (int)game.GetPlayer().GameMode;
+                        selectedMode = (int)game.Player.GameMode;
                         if (selectedMode >= 0 && selectedMode < modeButtons.Length)
                         {
                             modeText.text = ((GameMode)selectedMode).ToString();
@@ -183,11 +183,11 @@ namespace MinecraftClient.UI
                     modePanel.SetBool("Show", false);
                     modePanelShown = false;
 
-                    if (selectedMode != (int)game.GetPlayer().GameMode) // Commit switch request
+                    if (selectedMode != (int)game.Player.GameMode) // Commit switch request
                         game.SendText("/gamemode " + modeIdentifiers[selectedMode]);
                     
                     // Restore crosshair if necessary
-                    if (game.GetPlayer().Perspective == Perspective.FirstPerson)
+                    if (game.Player.Perspective == Perspective.FirstPerson)
                         crosshair.SetBool("Show", true);
                     
                 }
@@ -217,9 +217,9 @@ namespace MinecraftClient.UI
             }
 
             if (debugInfo)
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GetPlayer().GameMode}\n{game.GetPlayerController()?.GetDebugInfo()}\n{game.GetWorldRender()?.GetDebugInfo()}\n{game.GetEntityManager().GetDebugInfo()}\nSvr TPS: {game.GetServerTPS():00.00}\nTime: {StringConvert.TimeOfDay2String(game.CurrentTimeOfDay)} ({game.CurrentTimeOfDay})";
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.Player.GameMode}\n{game.PlayerController?.GetDebugInfo()}\n{game.WorldRender?.GetDebugInfo()}\n{game.EntityManager?.GetDebugInfo()}\nSvr TPS: {game.GetServerTPS():00.00}\nTime: {StringConvert.TimeOfDay2String(game.CurrentTimeOfDay)} ({game.CurrentTimeOfDay})";
             else
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GetPlayer().GameMode}\nTime: {StringConvert.TimeOfDay2String(game.CurrentTimeOfDay)}";
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.Player.GameMode}\nTime: {StringConvert.TimeOfDay2String(game.CurrentTimeOfDay)}";
 
             var realLatency = game.GetOwnLatency();
             if (displayedLatency != realLatency)
