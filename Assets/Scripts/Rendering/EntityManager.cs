@@ -152,7 +152,7 @@ namespace MinecraftClient.Rendering
         void Update()
         {
             // Call managed update
-            var cameraPos = game!.GetCameraPosition();
+            var cameraPos = game!.CameraController?.GetPosition();
 
             foreach (var entity in entities.Values)
                 entity.ManagedUpdate(cameraPos, game!.GetTickMilSec());

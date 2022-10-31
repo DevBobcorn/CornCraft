@@ -17,26 +17,45 @@ namespace MinecraftClient.Control
         [SerializeField] private float rotateSmoothFactor   =  5F;
         [SerializeField] private float obstacleSmoothFactor =  2F;
 
-        [SerializeField] private Vector3 fixedOffset = new(0F, 1.6F, 0F);
-
         private readonly CameraUserInputData inputData = new();
         private CameraUserInput? userInput;
 
+        public override void EnsureInitialized()
+        {
+            if (!initialized)
+            {
+                // Get render camera
+                renderCamera = GetComponentInChildren<Camera>();
+
+                if (renderCamera is not null)
+                    renderCameraPresent = true;
+                else
+                    Debug.LogWarning("Render camera not found!");
+
+                // Get user input
+                userInput = GetComponent<CameraUserInput>();
+
+                initialized = true;
+            }
+        }
+
         void Start()
         {
-            // Get user input
-            userInput = GetComponent<CameraUserInput>();
+            EnsureInitialized();
 
             // Initialize camera scale
             cameraInfo.CurrentScale = cameraInfo.TargetScale;
 
-            // Apply default Fov
-            ActiveCamera!.fieldOfView = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
+            if (renderCameraPresent)
+            {
+                // Apply default Fov
+                renderCamera!.fieldOfView = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
 
-            if (!cameraInfo.FixedMode)// Apply default offset
-                ActiveCamera.transform.localPosition = cameraInfo.TargetLocalPosition = new(0F, 0F, Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale));
-            else
-                ActiveCamera!.transform.localPosition = cameraInfo.TargetLocalPosition = Vector3.zero;
+                if (!cameraInfo.FixedMode)// Apply default offset
+                    renderCamera.transform.localPosition = cameraInfo.TargetLocalPosition = new(0F, 0F, Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale));
+                else
+                    renderCamera!.transform.localPosition = cameraInfo.TargetLocalPosition = Vector3.zero;
+            }
         }
 
         void Update() => ManagedUpdate(Time.deltaTime);
@@ -92,8 +111,10 @@ namespace MinecraftClient.Control
             if (cameraInfo.TargetScale != cameraInfo.CurrentScale)
             {
                 cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, interval * scaleSmoothFactor);
-                // Update Fov
-                ActiveCamera!.fieldOfView = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
+                
+                if (renderCameraPresent) // Update Fov
+                    renderCamera!.fieldOfView = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
+                
                 if (!cameraInfo.FixedMode)// Update target local position
                     cameraInfo.TargetLocalPosition = new(0F, 0F, Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale));
             }
@@ -102,32 +123,55 @@ namespace MinecraftClient.Control
             {
                 transform.position = Vector3.SmoothDamp(transform.position,
                         cameraInfo.Target.position + Vector3.up * Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale), ref cameraInfo.CurrentVelocity, followSmoothTime);
-            
-                // Obstacle check
-                RaycastHit hitInfo;
-                if (Physics.Linecast(transform.position, transform.TransformPoint(cameraInfo.TargetLocalPosition), out hitInfo, obstacleLayer))
-                    ActiveCamera!.transform.position = hitInfo.point;
-                else
-                    ActiveCamera!.transform.localPosition = Vector3.Lerp(ActiveCamera.transform.localPosition, cameraInfo.TargetLocalPosition, interval * obstacleSmoothFactor);
+
+                if (renderCameraPresent)
+                {
+                    // Obstacle check
+                    RaycastHit hitInfo;
+                    if (Physics.Linecast(transform.position, transform.TransformPoint(cameraInfo.TargetLocalPosition), out hitInfo, obstacleLayer))
+                        renderCamera!.transform.position = hitInfo.point;
+                    else
+                        renderCamera!.transform.localPosition = Vector3.Lerp(renderCamera.transform.localPosition, cameraInfo.TargetLocalPosition, interval * obstacleSmoothFactor);
+                }
             }
             else // Fixed mode update
-                transform.position = cameraInfo.Target.TransformPoint(fixedOffset);
+                transform.position = cameraInfo.Target.position;
         }
 
         public override void SetTarget(Transform target) => cameraInfo.Target = target;
 
-        public override float GetCameraYaw() => transform.eulerAngles.y;
+        public override float GetYaw() => transform.eulerAngles.y;
+
+        public override Vector3? GetPosition() => renderCameraPresent ? renderCamera!.transform.position : null;
+
+        public override Transform GetTransform() => renderCameraPresent ? renderCamera!.transform : transform;
 
         public override void EnableFixedMode()
         {
+            EnsureInitialized();
             cameraInfo.FixedMode = true;
-            ActiveCamera!.transform.localPosition = cameraInfo.TargetLocalPosition = Vector3.zero;
+
+            if (renderCameraPresent)
+            {
+                renderCamera!.transform.localPosition = cameraInfo.TargetLocalPosition = Vector3.zero;
+
+                // Don't render player on this camera
+                renderCamera!.cullingMask = renderCamera.cullingMask & ~(1 << LayerMask.NameToLayer("Player"));
+            }
         }
 
         public override void DisableFixedMode()
         {
+            EnsureInitialized();
             cameraInfo.FixedMode = false;
-            ActiveCamera!.transform.localPosition = cameraInfo.TargetLocalPosition = new Vector3(0F, 0F, Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale));
+
+            if (renderCameraPresent)
+            {
+                renderCamera!.transform.localPosition = cameraInfo.TargetLocalPosition = new Vector3(0F, 0F, Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale));
+
+                // Render player on this camera
+                renderCamera!.cullingMask = renderCamera.cullingMask | (1 << LayerMask.NameToLayer("Player"));
+            }
         }
 
     }

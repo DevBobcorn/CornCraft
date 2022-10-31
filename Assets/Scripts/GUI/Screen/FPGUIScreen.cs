@@ -49,10 +49,10 @@ namespace MinecraftClient.UI
             // Create and initialize panel if not present
             if (firstPersonPanel is null)
             {
-                var playerCon = game!.GetPlayerController();
-                var cameraCon = game!.GetCameraController();
+                var playerCon = game!.PlayerController;
+                var cameraCon = game!.CameraController;
 
-                if (playerCon is not null)
+                if (playerCon is not null && cameraCon is not null)
                 {
                     var firstPersonPanelPrefab = Resources.Load<GameObject>("Prefabs/GUI/First Person GUI");
                     var firstPersonPanelObj = GameObject.Instantiate(firstPersonPanelPrefab);
@@ -60,7 +60,7 @@ namespace MinecraftClient.UI
                     firstPersonPanelObj.transform.localPosition = new(0F, 1.45F, 0F);
 
                     firstPersonPanel = firstPersonPanelObj.GetComponent<FirstPersonGUI>();
-                    firstPersonPanel.SetCameraCon(cameraCon);
+                    firstPersonPanel.SetViewTransform(cameraCon.GetTransform());
 
                     return true;
                 }

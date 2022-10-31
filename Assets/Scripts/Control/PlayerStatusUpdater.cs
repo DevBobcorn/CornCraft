@@ -23,14 +23,17 @@ namespace MinecraftClient.Control
 
         public PlayerStatus Status = new();
 
-        public void UpdateBlockSelection(Ray viewRay)
+        public void UpdateBlockSelection(Ray? viewRay)
         {
+            if (viewRay is null)
+                return;
+
             RaycastHit viewHit;
 
             Vector3? castResultPos  = null;
             Vector3? castSurfaceDir = null;
 
-            if (Physics.Raycast(viewRay.origin, viewRay.direction, out viewHit, 10F, BlockSelectionLayer))
+            if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out viewHit, 10F, BlockSelectionLayer))
             {
                 castResultPos  = viewHit.point;
                 castSurfaceDir = viewHit.normal;

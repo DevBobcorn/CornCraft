@@ -31,7 +31,7 @@ namespace MinecraftClient.Commands
 
                         if (Enum.TryParse(args[2], true, out ItemType itemType))
                         {
-                            if (handler.GetPlayer().GameMode == GameMode.Creative)
+                            if (handler.Player.GameMode == GameMode.Creative)
                             {
                                 if (!int.TryParse(args[3], out int count))
                                     return GetCmdDescTranslated();
@@ -57,7 +57,7 @@ namespace MinecraftClient.Commands
                         if (!int.TryParse(args[1], out int slot))
                             return GetCmdDescTranslated();
 
-                        if (handler.GetPlayer().GameMode == GameMode.Creative)
+                        if (handler.Player.GameMode == GameMode.Creative)
                         {
                             if (handler.DoCreativeGive(slot, ItemType.Null, 0, null))
                                 return Translations.Get("cmd.inventory.creative_delete", slot);
@@ -116,7 +116,7 @@ namespace MinecraftClient.Commands
                     if (asciiArt != null)
                         response.AppendLine(asciiArt);
 
-                    int selectedHotbar = handler.GetPlayer().CurrentSlot + 1;
+                    int selectedHotbar = handler.Player.CurrentSlot + 1;
                     foreach ((int itemId, Item item) in new SortedDictionary<int, Item>(inventory.Items))
                     {
                         bool isHotbar = inventory.IsHotbar(itemId, out int hotbar);
@@ -127,7 +127,7 @@ namespace MinecraftClient.Commands
                     }
 
                     if (inventoryId == 0)
-                        response.AppendLine(Translations.Get("cmd.inventory.hotbar", (handler.GetPlayer().CurrentSlot + 1)));
+                        response.AppendLine(Translations.Get("cmd.inventory.hotbar", (handler.Player.CurrentSlot + 1)));
 
                     response.Remove(response.Length - 1, 1); // Remove last '\n'
                     return response.ToString();

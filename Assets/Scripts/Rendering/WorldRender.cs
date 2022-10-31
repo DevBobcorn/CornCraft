@@ -930,14 +930,13 @@ namespace MinecraftClient.Rendering
             }
             else
             {
-                var playerLoc = game!.GetPlayerController()?.GetLocation().ToFloor();
+                var playerLoc = game!.Player.location.ToFloor();
                 
-                if (playerLoc is not null)
-                    if (terrainColliderDirty || lastPlayerLoc != playerLoc)
-                    {
-                        RefreshTerrainCollider(playerLoc.Value.Up());
-                        lastPlayerLoc = playerLoc;
-                    }
+                if (terrainColliderDirty || lastPlayerLoc != playerLoc)
+                {
+                    RefreshTerrainCollider(playerLoc.Up());
+                    lastPlayerLoc = playerLoc;
+                }
             }
 
             operationCooldown -= Time.fixedDeltaTime;
