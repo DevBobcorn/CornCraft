@@ -67,9 +67,7 @@ namespace MinecraftClient.Mapping
             string colorsPath = PathHelper.GetExtraDataFile("block_colors-1.19.json");
 
             if (!File.Exists(statesPath) || !File.Exists(listsPath) || !File.Exists(colorsPath))
-            {
                 throw new FileNotFoundException("Block data not complete!");
-            }
 
             // First read special block lists...
             var noOcclusion = new List<ResourceLocation>();

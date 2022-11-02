@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.IO;
 
@@ -181,6 +182,34 @@ namespace MinecraftClient
                 
             }
 
+            if (Input.GetKeyDown(KeyCode.Q)) // Biome pattern debug
+            {
+                var chunkLoc = new Location(player.location.ChunkX << 4, (player.location.ChunkY << 4) + World.GetDimension().minY, player.location.ChunkZ << 4);
+                chunkLoc += new Location(0.5F, 0.5F, 0.5F); // To block center
+
+                int colorPropId = Shader.PropertyToID("_BaseColor");
+
+                for (int x = 0;x < 16;x++)
+                    for (int y = 0;y < 16;y++)
+                        for (int z = 0;z < 16;z++)
+                        {
+                            if ((x + y + z) % 2 != 0)
+                                continue;
+                            
+                            Location curLoc = new(chunkLoc.X + x, chunkLoc.Y + y, chunkLoc.Z + z);
+                            
+                            var ball = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+
+                            ball.transform.SetParent(transform);
+                            ball.transform.position = CoordConvert.MC2Unity(curLoc);
+
+                            var col = world.GetBiome(curLoc).foliageColor;
+                            ball.GetComponent<MeshRenderer>().material.SetColor(colorPropId, new(col.x, col.y, col.z));
+                            
+                        }
+
+            }
+
             // Time update
             timeElapsedSinceUpdate += Time.unscaledDeltaTime;
 
@@ -259,34 +288,38 @@ namespace MinecraftClient
                 loadStateInfo.loggingIn = false;
                 yield break;
             }
-            
+
+            var versionDictPath = PathHelper.GetExtraDataFile("versions.json");
+
             var dataVersion     = string.Empty;
             var resourceVersion = string.Empty;
 
-            var blockLoadFlag = new CoroutineFlag();
+            try
+            {
+                // Read data version dictionary
+                var versions = Json.ParseJson(File.ReadAllText(versionDictPath, Encoding.UTF8));
+                var version = protocolVersion.ToString();
 
-            if (protocolVersion >= ProtocolMinecraft.MC_1_19_Version)
-            {
-                dataVersion = "1.19";
-                resourceVersion = "1.19.2";
+                if (versions.Properties.ContainsKey(version))
+                {
+                    var entries = versions.Properties[version].Properties;
+
+                    dataVersion = entries["data"].StringValue;
+                    resourceVersion = entries["resource"].StringValue;
+                }
             }
-            else if (protocolVersion >= ProtocolMinecraft.MC_1_17_Version)
-            {   // Treat 1.18.X as 1.17.X because there ain't a single block changed in 1.18
-                dataVersion = "1.17";
-                resourceVersion = "1.17.1";
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
             }
-            else if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
+
+            if (dataVersion == string.Empty || resourceVersion == string.Empty) // Data not ready, cancel login
             {
-                dataVersion = "1.16";
-                resourceVersion = "1.16.5";
-            }    
-            else // TODO Implement More
-            {
-                Translations.LogError("exception.palette.block");
                 loadStateInfo.loggingIn = false;
                 yield break;
             }
 
+            var blockLoadFlag = new CoroutineFlag();
             StartCoroutine(BlockStatePalette.INSTANCE.PrepareData(dataVersion, blockLoadFlag, loadStateInfo));
 
             while (!blockLoadFlag.done)

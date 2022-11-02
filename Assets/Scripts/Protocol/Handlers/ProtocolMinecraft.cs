@@ -672,28 +672,12 @@ namespace MinecraftClient.Protocol.Handlers
 
                                 dataTypes.ReadNextNbt(packetData); // Heightmaps
 
-                                int biomesLength = 0;
-                                int[] biomes;
-
-                                if (protocolVersion == MC_1_17_Version || protocolVersion == MC_1_17_1_Version)
-                                {
-                                    biomesLength = dataTypes.ReadNextVarInt(packetData); // Biomes length
-                                    biomes = new int[biomesLength];
-
-                                    for (int i = 0; i < biomesLength; i++)
-                                    {
-                                        biomes[i] = dataTypes.ReadNextVarInt(packetData); // Biomes
-                                    }
-                                }
-                                else
-                                {
-                                    // TODO Implement for higher versions
-                                    biomes = new int[0];
-                                }
+                                // Otherwise biomes will be read later, together with block states
+                                // Leave the biome array null
 
                                 int dataSize = dataTypes.ReadNextVarInt(packetData); // Size
 
-                                if (pTerrain.ProcessChunkColumnData(chunkX, chunkZ, verticalStripBitmask, biomes, packetData))
+                                if (pTerrain.ProcessChunkColumnData(chunkX, chunkZ, verticalStripBitmask, packetData))
                                     Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
 
                                 // Block Entity data: ignored
@@ -721,17 +705,11 @@ namespace MinecraftClient.Protocol.Handlers
                                 {
                                     if (protocolVersion >= MC_1_16_2_Version)
                                     {
-                                        for (int i = 0; i < biomesLength; i++)
-                                        {
-                                            // Biomes - 1.16.2 and above
+                                        for (int i = 0; i < biomesLength; i++) // Biomes - 1.16.2 and above
                                             biomes[i] = dataTypes.ReadNextVarInt(packetData);
-
-                                        }
                                     }
                                     else
-                                    {
                                         dataTypes.ReadData(1024 * 4, packetData); // Biomes - 1.15 and above
-                                    }
                                 }
 
                                 int dataSize = dataTypes.ReadNextVarInt(packetData);

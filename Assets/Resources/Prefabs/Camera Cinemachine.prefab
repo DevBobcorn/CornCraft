@@ -172,8 +172,8 @@ MonoBehaviour:
   farFov: 85
   cameraZOffsetNear: 3
   cameraZOffsetFar: 20
-  cameraYOffsetNear: 0.1
-  cameraYOffsetFar: 0.5
+  cameraYOffsetNear: 0.5
+  cameraYOffsetFar: -0.5
   scaleSmoothFactor: 4
   scrollSensitivity: 0.5
 --- !u!1 &2514416844597822599

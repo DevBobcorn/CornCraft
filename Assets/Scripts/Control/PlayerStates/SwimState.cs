@@ -35,6 +35,8 @@ namespace MinecraftClient.Control
                 }
                 else if (inputData.descend)
                     moveVelocity.y = -moveSpeed;
+                else if (inputData.horInputNormalized != Vector2.zero) // Moving, cancel gravity
+                    moveVelocity.y = -Time.fixedDeltaTime * Physics.gravity.y;
                 else // Preserve vertical speed
                     moveVelocity.y = Mathf.Max(ability.MaxWaterFallSpeed, rigidbody.velocity.y);
 
