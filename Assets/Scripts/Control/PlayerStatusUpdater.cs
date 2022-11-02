@@ -10,16 +10,21 @@ namespace MinecraftClient.Control
         private static readonly Vector3 GROUND_BOXCAST_HALF_SIZE = new(0.375F, 0.01F, 0.375F);
         private const float GROUND_BOXCAST_DIST  = 0.1F;
 
-        private const float GROUND_RAYCAST_START   = 1.1F;
+        private const float GROUND_RAYCAST_START   = 1.5F;
         private const float GROUND_RAYCAST_DIST    = 4.0F;
-        private const float GROUND_RAYCAST_OFFSET  = 0.8F;
+        private const float GROUND_RAYCAST_OFFSET  = 0.8F; // The distance to move forward for front raycast
         private static readonly Vector3 GROUND_BOXCAST_START_POINT = new(0F, GROUND_RAYCAST_START, 0F);
+
+        private const float LIQUID_RAYCAST_START   = 2.0F; // Liquid raycast goes downward from top of player
+        private const float LIQUID_RAYCAST_DIST    = 5.0F;
+        private static readonly Vector3 LIQUID_BOXCAST_START_POINT = new(0F, LIQUID_RAYCAST_START, 0F);
 
         private static readonly Vector3 IN_WATER_CHECK_POINT_LOWER = new(0F, 0.3F, 0F);
         private static readonly Vector3 IN_WATER_CHECK_POINT_UPPER = new(0F, 0.8F, 0F);
 
-        public LayerMask BlockSelectionLayer;
-        public LayerMask GroundLayer;
+        [SerializeField] public LayerMask BlockSelectionLayer;
+        [SerializeField] public LayerMask GroundLayer;
+        [SerializeField] public LayerMask LiquidLayer;
 
         public PlayerStatus Status = new();
 
@@ -43,7 +48,7 @@ namespace MinecraftClient.Control
 
             if (castResultPos is not null && castSurfaceDir is not null)
             {
-                Vector3 offseted  = PointOnCubeSurface(castResultPos.Value) ?
+                Vector3 offseted = PointOnCubeSurface(castResultPos.Value) ?
                         castResultPos.Value - castSurfaceDir.Value * 0.5F : castResultPos.Value;
                 
                 Vector3 selection = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
@@ -78,10 +83,7 @@ namespace MinecraftClient.Control
             // Cast a ray downwards
             RaycastHit centerDownHit, frontDownHit;
             if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, GROUND_RAYCAST_DIST, GroundLayer))
-            {
-                //Status.CenterDownDist = Mathf.Max(0F, centerDownHit.distance - GROUND_RAYCAST_START);
                 Status.CenterDownDist = centerDownHit.distance - GROUND_RAYCAST_START;
-            }
             else
                 Status.CenterDownDist = GROUND_RAYCAST_DIST - GROUND_RAYCAST_START;
 
@@ -89,15 +91,63 @@ namespace MinecraftClient.Control
 
             // Cast another ray downwards in front of the player
             if (Physics.Raycast(rayFront, -transform.up, out frontDownHit, GROUND_RAYCAST_DIST, GroundLayer))
-            {
-                //Status.FrontDownDist = Mathf.Max(0F, frontDownHit.distance - GROUND_RAYCAST_START);
                 Status.FrontDownDist = frontDownHit.distance - GROUND_RAYCAST_START;
-            }
             else
                 Status.FrontDownDist = GROUND_RAYCAST_DIST - GROUND_RAYCAST_START;
+            
+            // Cast a ray downwards again, but check liquid layer this time
+            if (Status.InWater)
+            {
+                if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, LIQUID_RAYCAST_DIST, LiquidLayer))
+                {
+                    Status.LiquidDist = centerDownHit.distance - LIQUID_RAYCAST_START;
+                    // Check if player's on water surface
+                    Status.OnWaterSurface = Status.LiquidDist > -1.0F;
+                }
+                else // Dived completely into water
+                {
+                    Status.LiquidDist = 0F;
+                    Status.OnWaterSurface = false;
+                }
+            }
+            else
+            {
+                Status.LiquidDist = 0F;
+                Status.OnWaterSurface = false;
+            }
+
+            Debug.DrawRay(rayCenter, transform.up * -GROUND_RAYCAST_DIST, Color.cyan);
 
             Debug.DrawRay(rayFront,  transform.up * -GROUND_RAYCAST_DIST, Color.green);
         }
+
+        /* Used in other projects which uses trigger collider water volumes
+        void OnTriggerEnter(Collider trigger)
+        {
+            var layerName = LayerMask.LayerToName(trigger.gameObject.layer);
+
+            Debug.Log($"Trigger {layerName} layer enter");
+
+            if ((LiquidLayer.value & (1 << trigger.gameObject.layer)) != 0)
+            {
+                Debug.Log($"Into liquid");
+                Status.InWater = true;
+            }
+        }
+
+        void OnTriggerExit(Collider trigger)
+        {
+            var layerName = LayerMask.LayerToName(trigger.gameObject.layer);
+
+            Debug.Log($"Trigger {layerName} layer exit");
+
+            if ((LiquidLayer.value & (1 << trigger.gameObject.layer)) != 0)
+            {
+                Debug.Log($"Out of liquid");
+                Status.InWater = false;
+            }
+        }
+        */
 
         void OnDrawGizmos()
         {

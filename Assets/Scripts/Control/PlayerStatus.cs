@@ -6,6 +6,11 @@ namespace MinecraftClient.Control
 {
     public class PlayerStatus
     {
+        public Vector3? ForceMoveOrigin = null;
+        public Vector3? ForceMoveDist   = null;
+        public float    ForceMoveTimeTotal   = 0F;
+        public float    ForceMoveTimeCurrent = 0F;
+
         // Player status
         public bool InWater  = false;
         public bool OnWaterSurface = false;
@@ -21,6 +26,7 @@ namespace MinecraftClient.Control
         // Reference values
         public float CenterDownDist = 0F;
         public float FrontDownDist  = 0F;
+        public float LiquidDist     = 0F;
 
         public float UserInputYaw     = 0F;
         public float TargetVisualYaw  = 0F;
@@ -32,7 +38,7 @@ namespace MinecraftClient.Control
         public Location? TargetBlockPos = null;
 
         public override string ToString() => 
-            $"InWater:\t{InWater}\n* Surfing:\t{OnWaterSurface}\nGrounded:\t{Grounded}\nClimbing:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\nYaw delta:\t{YawOffset:0.00}";
+            $"InWater:\t{InWater}\n* Surfing:\t{OnWaterSurface}\nGrounded:\t{Grounded}\nClimbing:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nYaw delta:\t{YawOffset:0.00}";
 
     }
 }

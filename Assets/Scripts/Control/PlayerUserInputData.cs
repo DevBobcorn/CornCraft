@@ -8,6 +8,7 @@ namespace MinecraftClient.Control
         public bool   ascend;
         public bool   descend;
         public bool   attack;
+        public bool   sprint;
 
         public override string ToString() => $"{horInputNormalized}\nAsc: {ascend}\tDesc: {descend}\tAtk: {attack}";
 

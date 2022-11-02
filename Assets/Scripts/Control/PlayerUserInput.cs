@@ -18,8 +18,12 @@ namespace MinecraftClient.Control
                     inputData.horInputNormalized = new Vector2(h, v).normalized;
 
                 inputData.attack  = Input.GetButton("Attack");
+                inputData.sprint  = Input.GetButton("Sprint");
                 inputData.ascend  = Input.GetButton("GoUp");
                 inputData.descend = Input.GetButton("GoDown");
+
+                if (Input.GetKeyDown(KeyCode.LeftControl))
+                    GetComponent<PlayerController>().ToggleWalkMode();
             }
             else
             {
