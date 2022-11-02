@@ -12,7 +12,7 @@ namespace MinecraftClient.Protocol.Handlers
     /// </summary>
     class ProtocolTerrain
     {
-        private int protocolversion;
+        private int protocolVersion;
         private DataTypes dataTypes;
         private IMinecraftComHandler handler;
 
@@ -23,7 +23,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="dataTypes">Minecraft Protocol Data Types</param>
         public ProtocolTerrain(int protocolVersion, DataTypes dataTypes, IMinecraftComHandler handler)
         {
-            this.protocolversion = protocolVersion;
+            this.protocolVersion = protocolVersion;
             this.dataTypes = dataTypes;
             this.handler = handler;
         }
@@ -40,7 +40,7 @@ namespace MinecraftClient.Protocol.Handlers
             byte bitsPerEntry = dataTypes.ReadNextByte(cache);
 
             // 1.18(1.18.1) add a palette named "Single valued" to replace the vertical strip bitmask in the old
-            if (bitsPerEntry == 0 && protocolversion >= ProtocolMinecraft.MC_1_18_1_Version)
+            if (bitsPerEntry == 0 && protocolVersion >= ProtocolMinecraft.MC_1_18_1_Version)
             {
                 // Palettes: Single valued - 1.18(1.18.1) and above
                 ushort blockId = (ushort)dataTypes.ReadNextVarInt(cache);
@@ -67,7 +67,7 @@ namespace MinecraftClient.Protocol.Handlers
                 // Indirect Mode: For block states with bits per entry <= 4, 4 bits are used to represent a block.
                 if (bitsPerEntry < 4) bitsPerEntry = 4;
 
-                int entryPerLong = 64 / bitsPerEntry; // entryPerLong = sizeof(long) / bitsPerEntry
+                //int entryPerLong = 64 / bitsPerEntry; // entryPerLong = sizeof(long) / bitsPerEntry
 
                 // Direct Mode: Bit mask covering bitsPerEntry bits
                 // EG, if bitsPerEntry = 5, valueMask = 00011111 in binary
@@ -88,9 +88,7 @@ namespace MinecraftClient.Protocol.Handlers
                 Chunk chunk = new(world);
                 int startOffset = 64; // Read the first data immediately
                 for (int blockY = 0; blockY < Chunk.SizeY; blockY++)
-                {
                     for (int blockZ = 0; blockZ < Chunk.SizeZ; blockZ++)
-                    {
                         for (int blockX = 0; blockX < Chunk.SizeX; blockX++)
                         {
                             // Calculate location of next block ID inside the array of Longs
@@ -130,98 +128,94 @@ namespace MinecraftClient.Protocol.Handlers
                             // We have our block, save the block into the chunk
                             chunk.SetWithoutCheck(blockX, blockY, blockZ, block);
                         }
-                    }
-                }
+                
                 return chunk;
             }
+        }
 
-            // TODO Implement for all supported game versions
-            /* Read biome data
-            // Indirect: For biomes the given value is always used, and will be <= 3
-            byte bitsPerBiome = dataTypes.ReadNextByte(cache);
-            int biomePaletteLength = dataTypes.ReadNextVarInt(cache);
+        /// <summary>
+        /// Reading the "Biomes" field: consists of 64 entries, representing all the biomes in the chunk section.
+        /// See https://wiki.vg/Chunk_Format#Data_structure
+        /// </summary>
+        private void ReadBiomesField(int chunkY, int[] biomes, Queue<byte> cache)
+        {
+            int biomeYOffset = chunkY << 2;
+            byte bitsPerEntry = dataTypes.ReadNextByte(cache); // Bits Per Entry
 
-            int[] biomePalette = new int[biomePaletteLength];
-            for (int i = 0;i < paletteLength;i++)
-                biomePalette[i] = dataTypes.ReadNextVarInt(cache);
+            // Direct Mode: Bit mask covering bitsPerEntry bits
+            // EG, if bitsPerEntry = 5, valueMask = 00011111 in binary
+            uint valueMask = (uint)((1 << bitsPerEntry) - 1);
 
-            // Same as above
-            uint biomeValueMask = (uint)((1 << bitsPerBiome) - 1);
-
-            ulong[] biomeDataArray = dataTypes.ReadNextULongArray(cache);
-
-            if (biomeDataArray.Length > 0)
+            if (bitsPerEntry == 0) // Single valued
             {
-                int longIndex = 0;
-                int startOffset = 0 - bitsPerBiome;
+                int biomeId = dataTypes.ReadNextVarInt(cache); // Value
+                dataTypes.SkipNextVarInt(cache); // Data Array Length
+                // Data Array must be empty
 
-                for (int biomeY = 0; biomeY < 4; biomeY++)
+                // Fill the whole section with this biome
+                Array.Fill(biomes, biomeId, biomeYOffset << 4, 64);
+            }
+            else // Indirect
+            {
+                if (bitsPerEntry <= 3) // For biomes the given value is always used, and will be <= 3
                 {
-                    for (int biomeZ = 0; biomeZ < 4; biomeZ++)
-                    {
-                        for (int biomeX = 0; biomeX < 4; biomeX++)
-                        {
-                            // NOTICE: In the future a single ushort may not store the entire block id;
-                            // the Block class may need to change if block state IDs go beyond 65535
-                            ushort biomeId;
+                    int paletteLength = dataTypes.ReadNextVarInt(cache); // Palette Length
 
-                            // Calculate location of next block ID inside the array of Longs
-                            startOffset += bitsPerBiome;
-                            bool overlap = false;
+                    Span<uint> palette = paletteLength < 256 ? stackalloc uint[paletteLength] : new uint[paletteLength];
+                    for (int i = 0; i < paletteLength; i++)
+                        palette[i] = (uint)dataTypes.ReadNextVarInt(cache); // Palette
 
-                            if ((startOffset + bitsPerBiome) > 64)
+                    //// Biome IDs are packed in the array of 64-bits integers
+                    int dataArrayLength = dataTypes.ReadNextVarInt(cache); // Data Array Length
+
+                    //dataTypes.DropData(dataArrayLength * 8, cache); // Data Array
+                    UnityEngine.Debug.Log($"Biome data length: {dataArrayLength}");
+
+                    Span<byte> entryDataByte = stackalloc byte[8];
+                    Span<long> entryDataLong = MemoryMarshal.Cast<byte, long>(entryDataByte); // Faster than MemoryMarshal.Read<long>
+
+                    int startOffset = 64; // Read the first data immediately
+                    for (int biomeY = 0; biomeY < 4; biomeY++)
+                        for (int biomeZ = 0; biomeZ < 4; biomeZ++)
+                            for (int biomeX = 0; biomeX < 4; biomeX++)
                             {
-                                if (protocolversion >= ProtocolMinecraft.MC_1_16_Version)
+                                // Calculate location of next block ID inside the array of Longs
+                                if ((startOffset += bitsPerEntry) > (64 - bitsPerEntry))
                                 {
+                                    // In MC 1.16+, padding is applied to prevent overlapping between Longs:
+                                    // [     LONG INTEGER     ][     LONG INTEGER     ]
+                                    // [Biome][Biome][Biome]XXX[Biome][Biome][Biome]XXX
+
                                     // When overlapping, move forward to the beginning of the next Long
                                     startOffset = 0;
-                                    longIndex++;
+                                    dataTypes.ReadDataReverse(cache, entryDataByte); // read long
                                 }
-                                else
-                                {
-                                    // Detect when we reached the next Long or switch to overlap mode
-                                    if (startOffset >= 64)
-                                    {
-                                        startOffset -= 64;
-                                        longIndex++;
-                                    }
-                                    else overlap = true;
-                                }
-                            }
 
-                            // Extract Block ID
-                            if (overlap)
-                            {
-                                int endOffset = 64 - startOffset;
-                                biomeId = (ushort)((dataArray[longIndex] >> startOffset | dataArray[longIndex + 1] << endOffset) & valueMask);
-                            }
-                            else
-                                biomeId = (ushort)((dataArray[longIndex] >> startOffset) & valueMask);
-                            
-                            // Map small IDs to actual larger block IDs
-                            if (usePalette)
-                            {
+                                uint biomeId = (uint)(entryDataLong[0] >> startOffset) & valueMask;
+
+                                // Map small IDs to actual larger biome IDs
                                 if (paletteLength <= biomeId)
                                 {
                                     int biomeNumber = (biomeY * 4 + biomeZ) * 4 + biomeX;
-                                    throw new IndexOutOfRangeException(String.Format("Block ID {0} is outside Palette range 0-{1}! (bitsPerBiome: {2}, biomeNumber: {3})",
+                                    throw new IndexOutOfRangeException(String.Format("Biome ID {0} is outside Palette range 0-{1}! (bitsPerBlock: {2}, blockNumber: {3})",
                                         biomeId,
                                         paletteLength - 1,
-                                        bitsPerBiome,
+                                        bitsPerEntry,
                                         biomeNumber));
                                 }
 
-                                biomeId = (ushort)palette[biomeId];
+                                biomeId = palette[(int)biomeId];
+
+                                // Set it in biome array
+                                biomes[((biomeY + biomeYOffset) << 4) | (biomeZ << 2) | biomeX] = (int)biomeId;
+                                
                             }
-
-                            // We have our biome, save it into the chunk
-                            chunk.SetBiomeWithoutCheck(biomeX, biomeY, biomeZ, biomeId);
-
-                        }
-                    }
+                    
                 }
+                else
+                    UnityEngine.Debug.LogWarning($"Bits per biome entry not valid: {bitsPerEntry}");
+
             }
-            */
 
         }
 
@@ -233,58 +227,55 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="verticalStripBitmask">Chunk mask for reading data, store in bitset, used in 1.17 and 1.17.1</param>
         /// <param name="cache">Cache for reading chunk data</param>
         /// <returns>true if successfully loaded</returns>
-        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ulong[]? verticalStripBitmask, int[] biomes, Queue<byte> cache)
+        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ulong[]? verticalStripBitmask, Queue<byte> cache)
         {
+            // Biome data of this whole chunk column
+            int[]? biomes = null;
+            
             var world = handler.GetWorld();
 
             int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
             int chunkMask = 0;
+
+            if (protocolVersion >= ProtocolMinecraft.MC_1_18_1_Version) // 1.18, 1.18.1 and above
+                biomes = new int[64 * chunkColumnSize]; // Prepare an empty array and do nothing else here
+            else // 1.17 and 1.17.1, read biome data right here
+            {
+                int biomesLength = dataTypes.ReadNextVarInt(cache); // Biomes length
+                biomes = new int[biomesLength];
+
+                // Read all biome data at once before other chunk data
+                for (int i = 0; i < biomesLength; i++)
+                    biomes[i] = dataTypes.ReadNextVarInt(cache); // Biomes
+            }
 
             // 1.17 and above chunk format
             // Unloading chunks is handled by a separate packet
             for (int chunkY = 0; chunkY < chunkColumnSize; chunkY++)
             {   // 1.18 and above always contains all chunk section in data
                 // 1.17 and 1.17.1 need vertical strip bitmask to know if the chunk section is included
-                if ((protocolversion >= ProtocolMinecraft.MC_1_18_1_Version) ||
-                    (((protocolversion == ProtocolMinecraft.MC_1_17_Version) ||
-                        (protocolversion == ProtocolMinecraft.MC_1_17_1_Version)) &&
+                if ((protocolVersion >= ProtocolMinecraft.MC_1_18_1_Version) ||
+                    (((protocolVersion == ProtocolMinecraft.MC_1_17_Version) ||
+                        (protocolVersion == ProtocolMinecraft.MC_1_17_1_Version)) &&
                         ((verticalStripBitmask![chunkY / 64] & (1UL << (chunkY % 64))) != 0)))
                 {
                     // Non-air block count inside chunk section, for lighting purposes
                     int blockCnt = dataTypes.ReadNextShort(cache);
-
-                    var chunk = ReadBlockStatesField(world, cache);
-
+                    
                     // Read Block states (Type: Paletted Container)
+                    var chunk = ReadBlockStatesField(world, cache);
+                    
                     if (chunk is not null) // Chunk not empty(air)
                         chunkMask |= 1 << chunkY;
 
                     // We have our chunk, save the chunk into the world
                     world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
-
-                    // Skip Read Biomes (Type: Paletted Container) - 1.18(1.18.1) and above
-                    if (protocolversion >= ProtocolMinecraft.MC_1_18_1_Version)
-                    {
-                        byte bitsPerEntryBiome = dataTypes.ReadNextByte(cache); // Bits Per Entry
-                        if (bitsPerEntryBiome == 0)
-                        {
-                            dataTypes.SkipNextVarInt(cache); // Value
-                            dataTypes.SkipNextVarInt(cache); // Data Array Length
-                            // Data Array must be empty
-                        }
-                        else
-                        {
-                            if (bitsPerEntryBiome <= 3)
-                            {
-                                int paletteLength = dataTypes.ReadNextVarInt(cache); // Palette Length
-                                for (int i = 0; i < paletteLength; i++)
-                                    dataTypes.SkipNextVarInt(cache); // Palette
-                            }
-                            int dataArrayLength = dataTypes.ReadNextVarInt(cache); // Data Array Length
-                            dataTypes.DropData(dataArrayLength * 8, cache); // Data Array
-                        }
-                    }
                 }
+
+                // Read Biomes (Type: Paletted Container) - 1.18(1.18.1) and above
+                if (protocolVersion >= ProtocolMinecraft.MC_1_18_1_Version)
+                    ReadBiomesField(chunkY, biomes!, cache);
+                
             }
 
             // Don't worry about skipping remaining data since there is no useful data afterwards in 1.9
@@ -294,7 +285,7 @@ namespace MinecraftClient.Protocol.Handlers
             var c = world[chunkX, chunkZ];
             if (c is not null)
             {
-                if (biomes.Length == c.ColumnSize * 64)
+                if (biomes!.Length == c.ColumnSize * 64)
                     c.SetBiomes(biomes);
                 else if (biomes.Length > 0)
                     UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}, should be {c.ColumnSize * 64}");
@@ -336,7 +327,7 @@ namespace MinecraftClient.Protocol.Handlers
                 if ((chunkMask & (1 << chunkY)) != 0)
                 {
                     // 1.14 and above Non-air block count inside chunk section, for lighting purposes
-                    if (protocolversion >= ProtocolMinecraft.MC_1_14_Version)
+                    if (protocolVersion >= ProtocolMinecraft.MC_1_14_Version)
                         dataTypes.ReadNextShort(cache);
 
                     byte bitsPerBlock = dataTypes.ReadNextByte(cache);
@@ -349,7 +340,7 @@ namespace MinecraftClient.Protocol.Handlers
                     // MC 1.9 to 1.12 will set palette length field to 0 when palette
                     // is not used, MC 1.13+ does not send the field at all in this case
                     int paletteLength = 0; // Assume zero when length is absent
-                    if (usePalette || protocolversion < ProtocolMinecraft.MC_1_13_Version)
+                    if (usePalette || protocolVersion < ProtocolMinecraft.MC_1_13_Version)
                         paletteLength = dataTypes.ReadNextVarInt(cache);
 
                     int[] palette = new int[paletteLength];
@@ -386,7 +377,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                                     if ((startOffset + bitsPerBlock) > 64)
                                     {
-                                        if (protocolversion >= ProtocolMinecraft.MC_1_16_Version)
+                                        if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
                                         {
                                             // In MC 1.16+, padding is applied to prevent overlapping between Longs:
                                             // [      LONG INTEGER      ][      LONG INTEGER      ]
@@ -449,7 +440,7 @@ namespace MinecraftClient.Protocol.Handlers
                     world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
 
                     // Pre-1.14 Lighting data
-                    if (protocolversion < ProtocolMinecraft.MC_1_14_Version)
+                    if (protocolVersion < ProtocolMinecraft.MC_1_14_Version)
                     {
                         // Skip block light
                         dataTypes.ReadData((Chunk.SizeX * Chunk.SizeY * Chunk.SizeZ) / 2, cache);

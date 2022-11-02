@@ -12,7 +12,7 @@ namespace MinecraftClient.Protocol.Handlers
     /// </summary>
     class ProtocolForge
     {
-        private int protocolversion;
+        private int protocolVersion;
         private DataTypes dataTypes;
         private ProtocolMinecraft protocolMC;
         private IMinecraftComHandler mcHandler;
@@ -30,7 +30,7 @@ namespace MinecraftClient.Protocol.Handlers
         public ProtocolForge(ForgeInfo forgeInfo, int protocolVersion, DataTypes dataTypes, ProtocolMinecraft protocolMC, IMinecraftComHandler mcHandler)
         {
             this.forgeInfo = forgeInfo;
-            this.protocolversion = protocolVersion;
+            this.protocolVersion = protocolVersion;
             this.dataTypes = dataTypes;
             this.protocolMC = protocolMC;
             this.mcHandler = mcHandler;
