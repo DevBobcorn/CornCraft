@@ -26,7 +26,16 @@ namespace MinecraftClient.Control
                     moveVelocity = Vector3.zero;
 
                 // Check vertical movement...
-                if (inputData.ascend)
+                if (info.FrontDownDist < -0.05F) // Swim up to land
+                {
+                    var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+
+                    // Start force move operation
+                    info.ForceMoveOrigin = rigidbody.transform.position;
+                    info.ForceMoveDist = rigidbody.transform.position + (-info.FrontDownDist + 0.1F) * Vector3.up + moveHorDir * 0.5F;
+                    info.ForceMoveTimeTotal = info.ForceMoveTimeCurrent = 0.3F; // 1 second to finish
+                }
+                else if (inputData.ascend)
                 {
                     if (!info.OnWaterSurface) // Move up
                         moveVelocity.y =  moveSpeed;
@@ -43,14 +52,6 @@ namespace MinecraftClient.Control
                 // Clamp velocity magnitude
                 if (moveVelocity.magnitude > ability.MaxWaterMoveSpeed)
                     moveVelocity *= (ability.MaxWaterMoveSpeed / moveVelocity.magnitude);
-                
-                // Auto walk up aid (in water), or aid when player is trying to get onto land from water
-                // Note that this is applied after velocity magnitude clamping
-                if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 60F) // Trying to moving forward
-                {
-                    if (info.FrontDownDist < -0.03F && info.FrontDownDist > -0.9F)
-                        moveVelocity.y = ability.WaterAidSpeedCurve.Evaluate(info.FrontDownDist);
-                }
 
                 // Apply new velocity to rigidbody
                 rigidbody.velocity = moveVelocity;

@@ -464,6 +464,9 @@ MonoBehaviour:
   GroundLayer:
     serializedVersion: 2
     m_Bits: 64
+  LiquidLayer:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!1001 &8297465430410305446
 PrefabInstance:
   m_ObjectHideFlags: 0

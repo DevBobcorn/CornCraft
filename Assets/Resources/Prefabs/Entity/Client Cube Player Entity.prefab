@@ -145,6 +145,9 @@ MonoBehaviour:
   GroundLayer:
     serializedVersion: 2
     m_Bits: 64
+  LiquidLayer:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!1 &739474774658305514
 GameObject:
   m_ObjectHideFlags: 0

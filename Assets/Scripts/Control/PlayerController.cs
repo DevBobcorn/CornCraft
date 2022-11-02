@@ -121,8 +121,25 @@ namespace MinecraftClient.Control
 
             Status.CurrentVisualYaw = visualTransform!.eulerAngles.y;
 
-            // Update player physics and transform using updated current state
-            CurrentState.UpdatePlayer(interval, inputData, status, playerAbility!, playerRigidbody!);
+            if (status.ForceMoveDist is not null && status.ForceMoveOrigin is not null)
+            {
+                status.ForceMoveTimeCurrent = Mathf.Max(status.ForceMoveTimeCurrent - interval, 0F);
+                var moveProgress = status.ForceMoveTimeCurrent / status.ForceMoveTimeTotal;
+                var curPosition = Vector3.Lerp(status.ForceMoveDist.Value, status.ForceMoveOrigin.Value, moveProgress);
+
+                playerRigidbody!.MovePosition(curPosition);
+
+                if (status.ForceMoveTimeCurrent == 0F) // End force move operation
+                {
+                    status.ForceMoveDist = null;
+                    status.ForceMoveOrigin = null;
+                }
+            }
+            else
+            {
+                // Update player physics and transform using updated current state
+                CurrentState.UpdatePlayer(interval, inputData, status, playerAbility!, playerRigidbody!);
+            }
 
             // Apply updated visual yaw to visual transform
             visualTransform!.eulerAngles = new(0F, Status.CurrentVisualYaw, 0F);

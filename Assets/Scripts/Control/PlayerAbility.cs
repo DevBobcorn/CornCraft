@@ -12,7 +12,6 @@ namespace MinecraftClient.Control
         [SerializeField] [Range(10F,  30F)] public float SteerSpeed = 20F;
         
         [SerializeField] public AnimationCurve AidSpeedCurve      = new();
-        [SerializeField] public AnimationCurve WaterAidSpeedCurve = new();
 
         [SerializeField] [Range(-50F,  -1F)] public float MaxFallSpeed        =  -20F;
         [SerializeField] [Range(0.01F,  8F)] public float MaxWaterMoveSpeed   =  1.8F;

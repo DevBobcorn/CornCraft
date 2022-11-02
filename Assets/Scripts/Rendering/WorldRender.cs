@@ -20,6 +20,7 @@ namespace MinecraftClient.Rendering
     {
         public const string MOVEMENT_LAYER_NAME = "Movement";
         public const string OBSTACLE_LAYER_NAME = "Obstacle";
+        public const string LIQUID_LAYER_NAME   = "Liquid";
 
         private static WorldRender? instance;
         public static WorldRender Instance
@@ -43,7 +44,7 @@ namespace MinecraftClient.Rendering
         private CornClient? game;
 
         // Terrain collider for movement
-        private MeshCollider? movementCollider;
+        private MeshCollider? movementCollider, liquidCollider;
 
         public string GetDebugInfo() => $"QueC: {chunksToBeBuild.Count}\t BldC: {chunksBeingBuilt.Count}";
 
@@ -672,7 +673,7 @@ namespace MinecraftClient.Rendering
 
                 int offsetY = World.GetDimension().minY;
                 
-                float3[] movementVerts = { };
+                float3[] movementVerts = { }, fluidVerts = { };
 
                 for (int x = -MOVEMENT_RADIUS;x <= MOVEMENT_RADIUS;x++)
                     for (int y = -MOVEMENT_RADIUS;y <= MOVEMENT_RADIUS;y++)
@@ -692,28 +693,32 @@ namespace MinecraftClient.Rendering
                             var bloc = world.GetBlock(loc);
                             var state = bloc.State;
 
+                            if (state.InWater || state.InLava) // Build fluid collider
+                            {
+                                int fluidCullFlags = world.GetCullFlags(loc, bloc, waterSurface);
+
+                                if (fluidCullFlags != 0)
+                                    FluidGeometry.BuildCollider(ref fluidVerts, (int)loc.X, (int)loc.Y, (int)loc.Z, fluidCullFlags);
+                            }
+
                             if (state.LikeAir || state.NoCollision)
                                 continue;
                             
                             // Build collider here
                             var stateId = bloc.StateId;
-
-                            var layer = BlockStatePalette.INSTANCE.GetRenderType(stateId);
-                            int layerIndex = ChunkRender.TypeIndex(layer);
-                            
                             int cullFlags = world.GetCullFlags(loc, bloc, notFullSolid);
                             
                             if (cullFlags != 0 && table is not null && table.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
                                 // They all have the same collider so we just pick the 1st one
                                 table[stateId].Geometries[0].BuildCollider(ref movementVerts, new((float)loc.Z, (float)loc.Y, (float)loc.X), cullFlags);
-
                             }
 
                         }
                 
                 Loom.QueueOnMainThread(() => {
                     int movVertCount = movementVerts.Length;
+                    int fldVertCount = fluidVerts.Length;
 
                     // Make vertex attributes
                     var colVertAttrs = new NativeArray<VertexAttributeDescriptor>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
@@ -757,6 +762,48 @@ namespace MinecraftClient.Rendering
                     }
                     else
                         movementCollider!.sharedMesh?.Clear();
+                    
+                    if (fldVertCount > 0)
+                    {
+                        var colMeshDataArr  = Mesh.AllocateWritableMeshData(1);
+                        var colMeshData = colMeshDataArr[0];
+                        colMeshData.subMeshCount = 1;
+
+                        colMeshData.SetVertexBufferParams(fldVertCount,          colVertAttrs);
+                        colMeshData.SetIndexBufferParams((fldVertCount / 2) * 3, IndexFormat.UInt32);
+
+                        // Copy the source arrays to mesh data
+                        var colPositions = colMeshData.GetVertexData<float3>(0);
+                        colPositions.CopyFrom(fluidVerts);
+
+                        // Generate triangle arrays
+                        var colTriIndices = colMeshData.GetIndexData<uint>();
+                        uint vi = 0; int ti = 0;
+                        for (;vi < fldVertCount;vi += 4U, ti += 6)
+                        {
+                            colTriIndices[ti]     = vi;
+                            colTriIndices[ti + 1] = vi + 3U;
+                            colTriIndices[ti + 2] = vi + 2U;
+                            colTriIndices[ti + 3] = vi;
+                            colTriIndices[ti + 4] = vi + 1U;
+                            colTriIndices[ti + 5] = vi + 3U;
+                        }
+
+                        colMeshData.SetSubMesh(0, new(0, (fldVertCount / 2) * 3){ vertexCount = fldVertCount });
+                        var colliderMesh = new Mesh { subMeshCount = 1 };
+                        Mesh.ApplyAndDisposeWritableMeshData(colMeshDataArr, colliderMesh);
+
+                        colliderMesh.RecalculateNormals();
+                        colliderMesh.RecalculateBounds();
+
+                        liquidCollider!.sharedMesh = colliderMesh;
+
+                    }
+                    else
+                        liquidCollider!.sharedMesh?.Clear();
+                    
+                    colVertAttrs.Dispose();
+
                 });
                 
             });
@@ -766,9 +813,13 @@ namespace MinecraftClient.Rendering
         {
             game = CornClient.Instance;
 
-            var movementColliderObj = new GameObject("Terrain Collider");
+            var movementColliderObj = new GameObject("Movement Collider");
             movementColliderObj.layer = LayerMask.NameToLayer(MOVEMENT_LAYER_NAME);
             movementCollider = movementColliderObj.AddComponent<MeshCollider>();
+
+            var liquidColliderObj = new GameObject("Liquid Collider");
+            liquidColliderObj.layer = LayerMask.NameToLayer(LIQUID_LAYER_NAME);
+            liquidCollider = liquidColliderObj.AddComponent<MeshCollider>();
 
             // Register event callbacks
             EventManager.Instance.Register(columnCallBack1 = (e) => {
