@@ -314,8 +314,28 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="currentDimension">Current dimension type (0 = overworld)</param>
         /// <param name="cache">Cache for reading chunk data</param>
         /// <returns>true if successfully loaded</returns>
-        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ushort chunkMask, ushort chunkMask2, bool hasSkyLight, bool chunksContinuous, int[] biomes, int currentDimension, Queue<byte> cache)
+        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ushort chunkMask, ushort chunkMask2, bool hasSkyLight, bool chunksContinuous, int currentDimension, Queue<byte> cache)
         {
+            int biomesLength = 0;
+                                
+            if (protocolVersion >= ProtocolMinecraft.MC_1_16_2_Version && chunksContinuous)
+                biomesLength = dataTypes.ReadNextVarInt(cache); // Biomes length - 1.16.2 and above
+            
+            int[] biomes = new int[biomesLength];
+
+            if (protocolVersion >= ProtocolMinecraft.MC_1_15_Version && chunksContinuous)
+            {
+                if (protocolVersion >= ProtocolMinecraft.MC_1_16_2_Version)
+                {
+                    for (int i = 0; i < biomesLength; i++) // Biomes - 1.16.2 and above
+                        biomes[i] = dataTypes.ReadNextVarInt(cache);
+                }
+                else
+                    dataTypes.ReadData(1024 * 4, cache); // Biomes - 1.15 and above
+            }
+
+            int dataSize = dataTypes.ReadNextVarInt(cache);
+            
             World world = handler.GetWorld();
 
             const int chunkColumnSize = 16;

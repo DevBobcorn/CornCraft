@@ -311,6 +311,7 @@ namespace MinecraftClient
             catch (Exception e)
             {
                 Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
+                ShowNotification("Data for gameplay is not available!", Notification.Type.Error);
             }
 
             if (dataVersion == string.Empty || resourceVersion == string.Empty) // Data not ready, cancel login
