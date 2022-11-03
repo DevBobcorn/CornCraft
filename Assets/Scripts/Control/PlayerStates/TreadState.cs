@@ -15,21 +15,27 @@ namespace MinecraftClient.Control
 
                 Vector3 moveVelocity;
 
-                if (!info.Grounded) // Floating in water
+                bool onLiquidSurface = info.LiquidDist > PlayerStatusUpdater.SURFING_LIQUID_DIST_THERSHOLD;
+                
+                if (!onLiquidSurface)
                 {
                     // Gradually reduce velocity to zero
                     moveVelocity = CoordConvert.ApproachOrigin(rigidbody.velocity, interval * 4F);
+
                     // Restore y velocity (to validate rigidbody gravity)
                     moveVelocity.y = Mathf.Max(ability.MaxWaterFallSpeed, rigidbody.velocity.y);
                 }
-                else  // Idle in water
-                    moveVelocity = Vector3.zero;
+                else // On water surface, preserve velocity
+                {
+                    moveVelocity = rigidbody.velocity;
+                }
 
                 // Clamp velocity magnitude
                 if (moveVelocity.magnitude > ability.MaxWaterMoveSpeed)
                     moveVelocity *= (ability.MaxWaterMoveSpeed / moveVelocity.magnitude);
                 
                 rigidbody.velocity = moveVelocity;
+                
             }
             
         }

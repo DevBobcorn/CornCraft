@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -6,13 +7,25 @@ namespace MinecraftClient.UI
 {
     public class ValueBar : MonoBehaviour
     {
-        private const RectTransform.Axis HOR = RectTransform.Axis.Horizontal;
+        [SerializeField] private Color normalColor   = Color.white;
+        [SerializeField] private Color reduceColor   = new(1F, 0.521F, 0.596F); // 255 133 152 #FF8598
+        [SerializeField] private Color increaseColor = new(0.815F, 1F, 0.372F); // 208 255 095 #D0FF5F
 
-        private RectTransform barFillTransform, deltaFillTransform, displayFillTransform;
-        private Image displayFillImage, deltaFillImage;
-        private TMP_Text barText;
+        [SerializeField] private float smoothSpeed   = 1000F;
 
-        private float fullBarWidth;
+        [SerializeField] private Color warningColor = Color.yellow;
+        [SerializeField] private Color dangerColor  = Color.red;
+
+        [SerializeField] private float warningThreshold = 0.3F;
+        [SerializeField] private float dangerThreshold  = 0.1F;
+
+        [SerializeField] private RectTransform.Axis barAxis = RectTransform.Axis.Horizontal;
+
+        private RectTransform? barFillTransform, deltaFillTransform, displayFillTransform;
+        private Image? displayFillImage, deltaFillImage;
+        private TMP_Text? barText;
+
+        private float fullBarLength;
 
         private float maxValue = 100F, curValue = 100F, displayValue = 100F;
 
@@ -45,18 +58,6 @@ namespace MinecraftClient.UI
             }
         }
 
-        public Color normalColor   = Color.white;
-        public Color reduceColor   = new(1F, 0.521F, 0.596F); // 255 133 152 #FF8598
-        public Color increaseColor = new(0.815F, 1F, 0.372F); // 208 255 095 #D0FF5F
-
-        public float smoothSpeed   = 1000F;
-
-        public Color warningColor = Color.yellow;
-        public Color dangerColor  = Color.red;
-
-        public float warningThreshold = 0.3F;
-        public float dangerThreshold  = 0.1F;
-
         void Start()
         {
             barFillTransform = transform.Find("Bar Fill Mask").GetComponent<RectTransform>();
@@ -68,12 +69,16 @@ namespace MinecraftClient.UI
             deltaFillImage   = deltaFillTransform.GetComponent<Image>();
             displayFillImage = displayFillTransform.GetComponent<Image>();
 
-            fullBarWidth   = barFillTransform.rect.width;
+            if (barAxis == RectTransform.Axis.Horizontal)
+                fullBarLength = barFillTransform.rect.width;
+            else
+                fullBarLength = barFillTransform.rect.height;
 
-            deltaFillTransform.SetSizeWithCurrentAnchors(HOR, 0F);
-            displayFillTransform.SetSizeWithCurrentAnchors(HOR, fullBarWidth);
+            deltaFillTransform.SetSizeWithCurrentAnchors(barAxis, 0F);
+            displayFillTransform.SetSizeWithCurrentAnchors(barAxis, fullBarLength);
 
-            barText.text = $"{(int)displayValue}/{(int)maxValue}";
+            if (barText is not null)
+                barText.text = $"{(int)displayValue}/{(int)maxValue}";
             
             float displayFrac = displayValue / maxValue;
 
@@ -95,34 +100,38 @@ namespace MinecraftClient.UI
                     // Calculate new display value
                     displayValue = Mathf.Max(displayValue - smoothSpeed * Time.deltaTime, curValue);
                     // Then update visuals
-                    float curValuePos = (curValue / maxValue) * fullBarWidth;
-                    displayFillTransform.SetSizeWithCurrentAnchors(HOR, curValuePos);
-                    deltaFillImage.color = reduceColor;
-                    deltaFillTransform.anchoredPosition = new(curValuePos, 0F);
-                    deltaFillTransform.SetSizeWithCurrentAnchors(HOR, (displayValue - curValue) / maxValue * fullBarWidth);
-                    barText.text = $"{(int)displayValue}/{(int)maxValue}";
+                    float curValuePos = (curValue / maxValue) * fullBarLength;
+                    displayFillTransform!.SetSizeWithCurrentAnchors(barAxis, curValuePos);
+                    deltaFillImage!.color = reduceColor;
+                    deltaFillTransform!.anchoredPosition = new(curValuePos, 0F);
+                    deltaFillTransform.SetSizeWithCurrentAnchors(barAxis, (displayValue - curValue) / maxValue * fullBarLength);
+
+                    if (barText is not null)
+                        barText.text = $"{(int)displayValue}/{(int)maxValue}";
                 }
                 else // Increase visual fill
                 {
                     // Calculate new display value
                     displayValue = Mathf.Min(displayValue + smoothSpeed * Time.deltaTime, curValue);
                     // Then update visuals
-                    float displayValuePos = (displayValue / maxValue) * fullBarWidth;
-                    displayFillTransform.SetSizeWithCurrentAnchors(HOR, displayValuePos);
-                    deltaFillImage.color = increaseColor;
-                    deltaFillTransform.anchoredPosition = new(displayValuePos, 0F);
-                    deltaFillTransform.SetSizeWithCurrentAnchors(HOR, (curValue - displayValue) / maxValue * fullBarWidth);
-                    barText.text = $"{(int)displayValue}/{(int)maxValue}";
+                    float displayValuePos = (displayValue / maxValue) * fullBarLength;
+                    displayFillTransform!.SetSizeWithCurrentAnchors(barAxis, displayValuePos);
+                    deltaFillImage!.color = increaseColor;
+                    deltaFillTransform!.anchoredPosition = new(displayValuePos, 0F);
+                    deltaFillTransform.SetSizeWithCurrentAnchors(barAxis, (curValue - displayValue) / maxValue * fullBarLength);
+
+                    if (barText is not null)
+                        barText.text = $"{(int)displayValue}/{(int)maxValue}";
                 }
 
                 float displayFrac = displayValue / maxValue;
 
                 if (displayFrac < dangerThreshold)
-                    displayFillImage.color = dangerColor;
+                    displayFillImage!.color = dangerColor;
                 else if (displayFrac < warningThreshold)
-                    displayFillImage.color = warningColor;
+                    displayFillImage!.color = warningColor;
                 else
-                    displayFillImage.color = normalColor;
+                    displayFillImage!.color = normalColor;
 
             }
             

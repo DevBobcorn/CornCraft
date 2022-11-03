@@ -28,6 +28,9 @@ namespace MinecraftClient.Control
         private CameraController? camControl;
         private Transform? visualTransform;
         private EntityRender? playerRender;
+        /* DISABLE START
+        private PlayerAnimatorController? animatorController;
+        // DISABLE END */
         private Entity fakeEntity = new(0, EntityType.Player, new());
 
         [SerializeField] public bool EntityDisabled = false;
@@ -141,12 +144,17 @@ namespace MinecraftClient.Control
                 CurrentState.UpdatePlayer(interval, inputData, status, playerAbility!, playerRigidbody!);
             }
 
+            // Update player animator
+            /* DISABLE START
+            animatorController!.UpdateStateMachine(status, playerRigidbody!.velocity);
+            // DISABLE END */
+
             // Apply updated visual yaw to visual transform
             visualTransform!.eulerAngles = new(0F, Status.CurrentVisualYaw, 0F);
 
-            // Apply current horizontal velocity to visual render TODO Check and improve
+            // Apply current horizontal velocity to visual render
             var horizontalVelocity = playerRigidbody!.velocity;
-            horizontalVelocity.y = 0;
+            horizontalVelocity.y = 0; // TODO Check and improve
             playerRender!.SetCurrentVelocity(horizontalVelocity);
 
             // Tell server our current position
@@ -179,6 +187,10 @@ namespace MinecraftClient.Control
             // Initialize player visuals
             visualTransform = transform.Find("Visual");
             playerRender    = GetComponent<EntityRender>();
+
+            /* DISABLE START
+            animatorController = GetComponentInChildren<PlayerAnimatorController>();
+            // DISABLE END */
 
             fakeEntity.Name = game!.GetUsername();
             fakeEntity.ID   = 0;

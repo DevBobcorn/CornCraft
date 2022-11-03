@@ -343,6 +343,7 @@ MonoBehaviour:
   dangerColor: {r: 1, g: 0, b: 0, a: 0.7058824}
   warningThreshold: 0.3
   dangerThreshold: 0.1
+  barAxis: 0
 --- !u!1 &7337760133953898077
 GameObject:
   m_ObjectHideFlags: 0

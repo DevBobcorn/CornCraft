@@ -110,6 +110,13 @@ namespace MinecraftClient.Control
             virtualCameraFixed!.Follow = target;
         }
 
+        public override Transform? GetTarget()
+        {
+            EnsureInitialized();
+            
+            return virtualCameraNormal!.Follow;
+        }
+
         public override float GetYaw() => renderCameraPresent ? renderCamera!.transform.eulerAngles.y : 0F;
 
         public override Vector3? GetPosition() => renderCameraPresent ? renderCamera!.transform.position : null;

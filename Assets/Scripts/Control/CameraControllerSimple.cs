@@ -140,6 +140,8 @@ namespace MinecraftClient.Control
 
         public override void SetTarget(Transform target) => cameraInfo.Target = target;
 
+        public override Transform? GetTarget() => cameraInfo.Target;
+
         public override float GetYaw() => transform.eulerAngles.y;
 
         public override Vector3? GetPosition() => renderCameraPresent ? renderCamera!.transform.position : null;

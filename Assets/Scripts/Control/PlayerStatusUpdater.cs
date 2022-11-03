@@ -22,6 +22,8 @@ namespace MinecraftClient.Control
         private static readonly Vector3 IN_WATER_CHECK_POINT_LOWER = new(0F, 0.3F, 0F);
         private static readonly Vector3 IN_WATER_CHECK_POINT_UPPER = new(0F, 0.8F, 0F);
 
+        public const float SURFING_LIQUID_DIST_THERSHOLD = -1.5F;
+
         [SerializeField] public LayerMask BlockSelectionLayer;
         [SerializeField] public LayerMask GroundLayer;
         [SerializeField] public LayerMask LiquidLayer;
@@ -63,12 +65,9 @@ namespace MinecraftClient.Control
         public void UpdatePlayerStatus(World world, Vector3 frontDirNormalized)
         {
             // Update player state - in water or not?
+            // ENABLED START
             Status.InWater = world.IsWaterAt(CoordConvert.Unity2MC(transform.position + IN_WATER_CHECK_POINT_LOWER));
-
-            if (Status.InWater)
-                Status.OnWaterSurface = !world.IsWaterAt(CoordConvert.Unity2MC(transform.position + IN_WATER_CHECK_POINT_UPPER));
-            else
-                Status.OnWaterSurface = false;
+            // ENABLED END
 
             // Update player state - on ground or not?
             if (Status.InWater)
@@ -101,19 +100,13 @@ namespace MinecraftClient.Control
                 if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, LIQUID_RAYCAST_DIST, LiquidLayer))
                 {
                     Status.LiquidDist = centerDownHit.distance - LIQUID_RAYCAST_START;
-                    // Check if player's on water surface
-                    Status.OnWaterSurface = Status.LiquidDist > -1.0F;
                 }
                 else // Dived completely into water
-                {
-                    Status.LiquidDist = 0F;
-                    Status.OnWaterSurface = false;
-                }
+                    Status.LiquidDist = -LIQUID_RAYCAST_DIST;
             }
             else
             {
                 Status.LiquidDist = 0F;
-                Status.OnWaterSurface = false;
             }
 
             Debug.DrawRay(rayCenter, transform.up * -GROUND_RAYCAST_DIST, Color.cyan);
@@ -121,13 +114,9 @@ namespace MinecraftClient.Control
             Debug.DrawRay(rayFront,  transform.up * -GROUND_RAYCAST_DIST, Color.green);
         }
 
-        /* Used in other projects which uses trigger collider water volumes
+        /* DISABLED START
         void OnTriggerEnter(Collider trigger)
         {
-            var layerName = LayerMask.LayerToName(trigger.gameObject.layer);
-
-            Debug.Log($"Trigger {layerName} layer enter");
-
             if ((LiquidLayer.value & (1 << trigger.gameObject.layer)) != 0)
             {
                 Debug.Log($"Into liquid");
@@ -137,17 +126,13 @@ namespace MinecraftClient.Control
 
         void OnTriggerExit(Collider trigger)
         {
-            var layerName = LayerMask.LayerToName(trigger.gameObject.layer);
-
-            Debug.Log($"Trigger {layerName} layer exit");
-
             if ((LiquidLayer.value & (1 << trigger.gameObject.layer)) != 0)
             {
                 Debug.Log($"Out of liquid");
                 Status.InWater = false;
             }
         }
-        */
+        // DISABLED END */
 
         void OnDrawGizmos()
         {
