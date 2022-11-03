@@ -12,12 +12,11 @@ namespace MinecraftClient.Control
         public float    ForceMoveTimeCurrent = 0F;
 
         // Player status
-        public bool InWater  = false;
-        public bool OnWaterSurface = false;
-
-        public bool Grounded = false;
-        public bool OnWall   = false;
-        public bool Moving   = false;
+        public bool InWater   = false;
+        public bool Grounded  = false;
+        public bool OnWall    = false;
+        public bool Moving    = false;
+        public bool Sprinting = false;
 
         public bool Attacking  = false;
         public bool Spectating = false;
@@ -38,7 +37,7 @@ namespace MinecraftClient.Control
         public Location? TargetBlockPos = null;
 
         public override string ToString() => 
-            $"InWater:\t{InWater}\n* Surfing:\t{OnWaterSurface}\nGrounded:\t{Grounded}\nClimbing:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nYaw delta:\t{YawOffset:0.00}";
+            $"InWater:\t{InWater}\nGrounded:\t{Grounded}\nClimbing:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nGrounded:\t{Sprinting}\nYaw delta:\t{YawOffset:0.00}";
 
     }
 }

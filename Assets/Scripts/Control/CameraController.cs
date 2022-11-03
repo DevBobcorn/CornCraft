@@ -34,9 +34,20 @@ namespace MinecraftClient.Control
             return null;
         }
 
+        public virtual Vector3 GetTargetScreenPos()
+        {
+            var targetPos = GetTarget()?.position;
+
+            if (renderCameraPresent && targetPos is not null)
+                return renderCamera!.WorldToScreenPoint(targetPos.Value);
+            return Vector3.zero;
+        }
+
         public abstract void EnsureInitialized();
 
         public abstract void SetTarget(Transform target);
+
+        public abstract Transform? GetTarget();
 
         public abstract float GetYaw();
 

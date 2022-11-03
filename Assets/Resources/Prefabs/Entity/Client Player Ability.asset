@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Client Player Ability
   m_EditorClassIdentifier: 
   WalkSpeed: 1.6
-  RunSpeed: 4
+  RunSpeed: 3.5
+  SprintSpeed: 7
   JumpSpeed: 5
   SteerSpeed: 20
   AidSpeedCurve:
@@ -36,30 +37,6 @@ MonoBehaviour:
       tangentMode: 1
       weightedMode: 3
       inWeight: 0.72083336
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  WaterAidSpeedCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: -1
-      value: 4
-      inSlope: 0.037750874
-      outSlope: 0.037750874
-      tangentMode: 0
-      weightedMode: 2
-      inWeight: 0
-      outWeight: 0.55782974
-    - serializedVersion: 3
-      time: 0
-      value: 2.5
-      inSlope: -0.07843167
-      outSlope: -0.07843167
-      tangentMode: 0
-      weightedMode: 1
-      inWeight: 0.72614497
       outWeight: 0.33333334
     m_PreInfinity: 2
     m_PostInfinity: 2

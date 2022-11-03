@@ -14,7 +14,17 @@ namespace MinecraftClient.Control
                 // Smooth rotation for player model
                 info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval);
 
-                var moveSpeed = info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
+                float moveSpeed;
+
+                if (inputData.sprint) // TODO Add stamina
+                    info.Sprinting = true;
+                else
+                    info.Sprinting = false;
+                
+                if (info.Sprinting)
+                    moveSpeed = ability.SprintSpeed;
+                else
+                    moveSpeed = info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
 
                 // Use the target visual yaw as actual movement direction
                 var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
@@ -34,7 +44,10 @@ namespace MinecraftClient.Control
                 rigidbody.velocity = moveVelocity;
             }
             else // Stop moving
+            {
                 info.Moving = false;
+                info.Sprinting = false;
+            }
 
         }
 

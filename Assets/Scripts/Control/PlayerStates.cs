@@ -13,7 +13,7 @@ namespace MinecraftClient.Control
         // TODO
 
         // Airborne states
-        public static readonly IPlayerState FALL = new FallState();
+        public static readonly IPlayerState FALL  = new FallState();
 
         // In water states
         public static readonly IPlayerState SWIM  = new SwimState();
