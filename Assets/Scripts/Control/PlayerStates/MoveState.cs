@@ -18,7 +18,7 @@ namespace MinecraftClient.Control
 
                 float moveSpeed;
 
-                if (inputData.sprint && info.StaminaLeft > ability.SprintMinStamina)
+                if ((inputData.sprint || info.Sprinting) && info.StaminaLeft > ability.SprintMinStamina)
                 {
                     info.Sprinting = true;
                     costStamina = true;

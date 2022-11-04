@@ -208,17 +208,6 @@ namespace MinecraftClient.Control
             statusUpdater = GetComponent<PlayerStatusUpdater>();
             userInput = GetComponent<PlayerUserInput>();
 
-            if (playerAbility is null)
-                Debug.LogError("Player ability not assigned!");
-            else
-            {
-                // Set stamina to max value
-                Status.StaminaLeft = playerAbility.MaxStamina;
-
-                // And broadcast current stamina
-                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, true));
-            }
-
             perspectiveCallback = (e) => { };
 
             gameModeCallback = (e) => {
@@ -230,6 +219,9 @@ namespace MinecraftClient.Control
 
             EventManager.Instance.Register(perspectiveCallback);
             EventManager.Instance.Register(gameModeCallback);
+
+            if (playerAbility is null)
+                Debug.LogError("Player ability not assigned!");
 
         }
 

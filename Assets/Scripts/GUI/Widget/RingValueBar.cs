@@ -21,7 +21,7 @@ namespace MinecraftClient.UI
 
         private float maxValue = 100F, curValue = 100F, displayValue = 100F;
 
-        public float MaxValue 
+        public float MaxValue
         {
             get {
                 return maxValue;
