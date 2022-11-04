@@ -1,13 +1,14 @@
 namespace MinecraftClient.Event
 {
-    public class NotificationExpireEvent : BaseEvent
+    public record NotificationExpireEvent : BaseEvent
     {
-        public readonly int id;
-        public readonly int pos;
-        public NotificationExpireEvent(int id, int pos)
+        public int Id { get; }
+        public int ExpireIndex { get; }
+
+        public NotificationExpireEvent(int id, int index)
         {
-            this.id = id;
-            this.pos = pos;
+            this.Id = id;
+            this.ExpireIndex = index;
         }
     }
 }

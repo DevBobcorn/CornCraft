@@ -1,13 +1,14 @@
 namespace MinecraftClient.Event
 {
-    public class ReceiveChunkColumnEvent : BaseEvent
+    public record ReceiveChunkColumnEvent : BaseEvent
     {
-        public readonly int chunkX, chunkZ;
+        public int ChunkX { get; }
+        public int ChunkZ { get; }
 
         public ReceiveChunkColumnEvent(int x, int z)
         {
-            this.chunkX = x;
-            this.chunkZ = z;
+            this.ChunkX = x;
+            this.ChunkZ = z;
         }
     }
 }

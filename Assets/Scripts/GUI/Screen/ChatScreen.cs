@@ -229,15 +229,15 @@ namespace MinecraftClient.UI
 
             // Register callbacks
             chatCallback = (e) => {
-                chatTexts.text += StringConvert.MC2TMP(e.message) + '\n';
+                chatTexts.text += StringConvert.MC2TMP(e.Message) + '\n';
             };
 
             autoCompleteCallback = (e) => {
-                if (e.options.Length > 0)
+                if (e.Options.Length > 0)
                 {   // Show at most 20 options
-                    completionOptions = e.options.Length > 20 ? e.options[..20] : e.options;
-                    completionStart = e.start;
-                    completionLength = e.length;
+                    completionOptions = e.Options.Length > 20 ? e.Options[..20] : e.Options;
+                    completionStart = e.Start;
+                    completionLength = e.Length;
                     completionIndex = 0; // Select first option
                     RefreshCompletionOptions();
                     if (!completionsShown)

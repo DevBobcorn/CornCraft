@@ -1,12 +1,12 @@
 namespace MinecraftClient.Event
 {
-    public class HealthUpdateEvent : BaseEvent
+    public record HealthUpdateEvent : BaseEvent
     {
-        public float newHealth;
+        public float Health { get; }
 
         public HealthUpdateEvent(float health)
         {
-            newHealth = health;
+            Health = health;
         }
 
     }

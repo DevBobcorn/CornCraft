@@ -7,7 +7,7 @@ namespace MinecraftClient.UI
     public class RingValueBar : MonoBehaviour
     {
         [SerializeField] private Color normalColor   = Color.white;
-        [SerializeField] private float smoothSpeed   = 500F;
+        [SerializeField] private float smoothSpeed   = 1000F;
 
         [SerializeField] private Color warningColor = Color.yellow;
         [SerializeField] private Color dangerColor  = Color.red;
@@ -52,11 +52,11 @@ namespace MinecraftClient.UI
 
         void Start()
         {
-            backgroundImage = transform.Find("Bar Background").GetComponent<Image>();
-            fillImage = transform.Find("Bar Fill").GetComponent<Image>();
+            backgroundImage = FindHelper.FindChildRecursively(transform, "Bar Background").GetComponent<Image>();
+            fillImage = FindHelper.FindChildRecursively(transform, "Bar Fill").GetComponent<Image>();
 
-            backgroundImage.transform.rotation = Quaternion.AngleAxis(fullBarDegree / 2F, Vector3.forward);
-            fillImage.transform.rotation = Quaternion.AngleAxis(fullBarDegree / 2F, Vector3.forward);
+            backgroundImage.transform.rotation = Quaternion.AngleAxis(fullBarDegree / 2F, Vector3.back);
+            fillImage.transform.rotation = Quaternion.AngleAxis(fullBarDegree / 2F, Vector3.back);
 
             float displayFrac = displayValue / maxValue;
 

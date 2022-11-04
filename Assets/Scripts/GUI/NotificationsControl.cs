@@ -36,9 +36,9 @@ namespace MinecraftClient.UI
 
                         Notification notification = notificationObj.GetComponent<Notification>();
 
-                        notification.SetInfo(nextNumeralID, i, e.text, e.duration);
+                        notification.SetInfo(nextNumeralID, i, e.Text, e.Duration);
 
-                        switch (e.type)
+                        switch (e.Type)
                         {
                             case Notification.Type.Success:
                                 notification.SetImage(success);
@@ -60,9 +60,9 @@ namespace MinecraftClient.UI
             };
 
             expireCallback = (e) => {
-                if (e.pos >= 0 && e.pos < posAvailable.Length)
+                if (e.ExpireIndex >= 0 && e.ExpireIndex < posAvailable.Length)
                 {
-                    posAvailable[e.pos] = true;
+                    posAvailable[e.ExpireIndex] = true;
                 }
             };
 

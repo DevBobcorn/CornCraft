@@ -828,7 +828,7 @@ namespace MinecraftClient.Rendering
             });
 
             EventManager.Instance.Register(columnCallBack2 = (e) => {
-                int2 chunkCoord = new(e.chunkX, e.chunkZ);
+                int2 chunkCoord = new(e.ChunkX, e.ChunkZ);
                 if (columns.ContainsKey(chunkCoord))
                 {
                     columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
@@ -837,7 +837,7 @@ namespace MinecraftClient.Rendering
             });
 
             EventManager.Instance.Register(blockCallBack = (e) => {
-                var loc = e.location;
+                var loc = e.Location;
                 int chunkX = loc.ChunkX, chunkY = loc.ChunkY, chunkZ = loc.ChunkZ;
 
                 var chunkData = game?.GetWorld()?[chunkX, chunkZ];
@@ -889,7 +889,7 @@ namespace MinecraftClient.Rendering
                 World world = game!.GetWorld();
                 if (world is null) return;
                 
-                foreach (var loc in e.locations)
+                foreach (var loc in e.Locations)
                 {
                     int chunkX = loc.ChunkX, chunkY = loc.ChunkY, chunkZ = loc.ChunkZ;
 

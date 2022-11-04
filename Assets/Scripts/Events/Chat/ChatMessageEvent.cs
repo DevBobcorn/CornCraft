@@ -1,12 +1,12 @@
 namespace MinecraftClient.Event
 {
-    public class ChatMessageEvent : BaseEvent
+    public record ChatMessageEvent : BaseEvent
     {
-        public readonly string message;
+        public string Message { get; }
         
         public ChatMessageEvent(string message)
         {
-            this.message = message;
+            this.Message = message;
         }
 
     }

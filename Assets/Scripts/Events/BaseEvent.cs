@@ -1,4 +1,4 @@
 namespace MinecraftClient.Event
 {
-    public class BaseEvent{ }
+    public record BaseEvent { }
 }

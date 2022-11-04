@@ -6,6 +6,10 @@ namespace MinecraftClient.Control
 {
     public class PlayerStatus
     {
+        // Player data
+        public float    StaminaLeft = 0F;
+
+        // Force move operation
         public Vector3? ForceMoveOrigin = null;
         public Vector3? ForceMoveDist   = null;
         public float    ForceMoveTimeTotal   = 0F;

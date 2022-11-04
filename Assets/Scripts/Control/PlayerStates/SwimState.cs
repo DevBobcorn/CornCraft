@@ -15,6 +15,8 @@ namespace MinecraftClient.Control
 
                 info.Moving = true;
 
+                bool costStamina = true;
+
                 // Use the target visual yaw as actual movement direction
                 Vector3 moveVelocity;
 
@@ -40,9 +42,15 @@ namespace MinecraftClient.Control
                 else if (inputData.ascend)
                 {
                     if (distAboveLiquidSurface > 0.1F) // Free fall in air
+                    {
                         moveVelocity.y =  rigidbody.velocity.y;
+                        costStamina = false;
+                    }
                     else if (distAboveLiquidSurface > 0F) // Cancel gravity, but don't move up further
+                    {
                         moveVelocity.y = -Time.fixedDeltaTime * Physics.gravity.y;
+                        costStamina = false;
+                    }
                     else
                         moveVelocity.y =  moveSpeed; // Move up
                 }
@@ -64,6 +72,9 @@ namespace MinecraftClient.Control
 
                 // Apply new velocity to rigidbody
                 rigidbody.velocity = moveVelocity;
+                
+                if (costStamina) // Update stamina
+                    info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, 0F, interval * ability.SwimStaminaCost);
             }
             else // Stop moving
                 info.Moving = false;

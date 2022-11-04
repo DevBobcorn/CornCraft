@@ -11,7 +11,13 @@ namespace MinecraftClient.Control
         [SerializeField] [Range(0.1F, 10F)] public float SprintSpeed = 3.5F;
         [SerializeField] [Range(0.1F, 10F)] public float JumpSpeed   =   4F;
         [SerializeField] [Range(10F,  30F)] public float SteerSpeed  =  20F;
-        
+
+        [SerializeField] [Range(1F,  100F)] public float MaxStamina        =  20F;
+        [SerializeField] [Range(1F,  100F)] public float SprintMinStamina  =   3F;
+        [SerializeField] [Range(1F,  100F)] public float SprintStaminaCost =   3F; // Stamina cost per second
+        [SerializeField] [Range(1F,  100F)] public float SwimStaminaCost   =   1F;
+        [SerializeField] [Range(1F,  100F)] public float StaminaRestore    =   1F;
+
         [SerializeField] public AnimationCurve AidSpeedCurve      = new();
 
         [SerializeField] [Range(-50F,  -1F)] public float MaxFallSpeed        =  -20F;

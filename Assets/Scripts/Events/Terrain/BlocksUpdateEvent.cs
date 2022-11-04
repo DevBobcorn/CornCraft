@@ -3,13 +3,13 @@ using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Event
 {
-    public class BlocksUpdateEvent : BaseEvent
+    public record BlocksUpdateEvent : BaseEvent
     {
-        public readonly List<Location> locations;
+        public List<Location> Locations { get; }
 
         public BlocksUpdateEvent(List<Location> locs)
         {
-            this.locations = locs;
+            this.Locations = locs;
         }
     }
 }

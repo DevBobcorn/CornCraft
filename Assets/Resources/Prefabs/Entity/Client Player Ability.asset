@@ -17,6 +17,11 @@ MonoBehaviour:
   SprintSpeed: 7
   JumpSpeed: 5
   SteerSpeed: 20
+  MaxStamina: 20
+  SprintMinStamina: 2
+  SprintStaminaCost: 8
+  SwimStaminaCost: 1
+  StaminaRestore: 6
   AidSpeedCurve:
     serializedVersion: 2
     m_Curve:
