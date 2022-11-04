@@ -10,7 +10,7 @@ namespace MinecraftClient.Commands
 
         public override string Run(CornClient handler, string command, Dictionary<string, object> localVars)
         {
-            var player = handler.Player;
+            var player = handler.PlayerData;
             return Translations.Get("cmd.health.response", player.Health, player.FoodSaturation, player.Level, player.TotalExperience);
         }
     }

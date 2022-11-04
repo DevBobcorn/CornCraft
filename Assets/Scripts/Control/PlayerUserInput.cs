@@ -1,11 +1,12 @@
 using UnityEngine;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
 {
     [RequireComponent(typeof (PlayerController))]
     public class PlayerUserInput : MonoBehaviour
     {
-        public void UpdateInputs(PlayerUserInputData inputData)
+        public void UpdateInputs(PlayerUserInputData inputData, Perspective perspective)
         {
             if (!CornClient.Instance.IsPaused())
             {
@@ -18,7 +19,18 @@ namespace MinecraftClient.Control
                     inputData.horInputNormalized = new Vector2(h, v).normalized;
 
                 inputData.attack  = Input.GetButton("Attack");
-                inputData.sprint  = Input.GetButton("Sprint");
+
+                if (perspective == Perspective.ThirdPerson)
+                {
+                    // Sprinting with use item button is also possible in third person mode
+                    inputData.sprint = Input.GetButton("UseItem") || Input.GetButton("Sprint");
+                }
+                else
+                {
+                    inputData.useItem = Input.GetButton("UseItem");
+                    inputData.sprint  = Input.GetButton("Sprint");
+                }
+
                 inputData.ascend  = Input.GetButton("GoUp");
                 inputData.descend = Input.GetButton("GoDown");
 

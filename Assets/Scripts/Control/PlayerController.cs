@@ -65,7 +65,7 @@ namespace MinecraftClient.Control
 
         private void CheckEntityEnabled()
         {
-            if (game!.Player.GameMode == GameMode.Spectator) // Spectating
+            if (game!.PlayerData.GameMode == GameMode.Spectator) // Spectating
                 DisableEntity();
             else
                 EnableEntity();
@@ -93,7 +93,7 @@ namespace MinecraftClient.Control
         public void ManagedUpdate(float interval)
         {
             // Update user input
-            userInput!.UpdateInputs(inputData);
+            userInput!.UpdateInputs(inputData, game!.PlayerData.Perspective);
 
             // Update target block selection
             statusUpdater!.UpdateBlockSelection(camControl!.GetViewportCenterRay());
