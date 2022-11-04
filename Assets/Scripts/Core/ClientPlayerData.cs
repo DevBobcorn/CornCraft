@@ -5,7 +5,7 @@ using MinecraftClient.Inventory;
 
 namespace MinecraftClient
 {
-    public class ClientPlayer
+    public class ClientPlayerData
     {
         public Perspective Perspective = 0;
         public GameMode GameMode = 0;

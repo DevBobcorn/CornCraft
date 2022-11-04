@@ -484,7 +484,7 @@ namespace MinecraftClient.UI
                 }
 
                 // Follow player view
-                if (game!.Player.Perspective == Perspective.FirstPerson && viewTransform is not null)
+                if (game!.PlayerData.Perspective == Perspective.FirstPerson && viewTransform is not null)
                 {
                     var viewRot = viewTransform.eulerAngles.y;
                     var ownRot = transform.eulerAngles.y;
