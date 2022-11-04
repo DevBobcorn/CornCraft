@@ -22,7 +22,7 @@ namespace MinecraftClient.Control
         private static readonly Vector3 IN_WATER_CHECK_POINT_LOWER = new(0F, 0.3F, 0F);
         private static readonly Vector3 IN_WATER_CHECK_POINT_UPPER = new(0F, 0.8F, 0F);
 
-        public const float SURFING_LIQUID_DIST_THERSHOLD = -1.5F;
+        public const float SURFING_LIQUID_DIST_THERSHOLD = -1.3F;
 
         [SerializeField] public LayerMask BlockSelectionLayer;
         [SerializeField] public LayerMask GroundLayer;
