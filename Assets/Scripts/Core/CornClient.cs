@@ -281,14 +281,6 @@ namespace MinecraftClient
             if (!internalCommandsLoaded)
                 LoadInternalCommands();
 
-            // Create block palette first to prepare for resource loading
-            if (protocolVersion > ProtocolMinecraft.MC_1_19_2_Version)
-            {
-                Translations.LogError("exception.palette.block");
-                loadStateInfo.loggingIn = false;
-                yield break;
-            }
-
             var versionDictPath = PathHelper.GetExtraDataFile("versions.json");
 
             var dataVersion     = string.Empty;
@@ -424,6 +416,14 @@ namespace MinecraftClient
                 {
                     Translations.Notify("mcc.joined", CornCraft.internalCmdChar);
                     connected = true;
+
+                    // Initialization after entering world scene
+                    // Set stamina to max value
+                    playerController.Status.StaminaLeft = playerController.playerAbility!.MaxStamina;
+                    // And broadcast current stamina
+                    EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(playerController.Status.StaminaLeft, true));
+                    // Initialize health value
+                    EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
                 }
                 else
                 {
@@ -2587,6 +2587,8 @@ namespace MinecraftClient
         /// <param name="health">Player current health</param>
         public void OnUpdateHealth(float health, int food)
         {
+            bool updateMaxHealth = player.Health < health;
+            
             player.Health = health;
             player.FoodSaturation = food;
 
@@ -2594,7 +2596,7 @@ namespace MinecraftClient
                 Translations.Notify("mcc.player_dead", CornCraft.internalCmdChar);
 
             Loom.QueueOnMainThread(() => {
-                EventManager.Instance.Broadcast<HealthUpdateEvent>(new(health));
+                EventManager.Instance.Broadcast<HealthUpdateEvent>(new(health, updateMaxHealth));
             });
 
         }

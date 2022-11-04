@@ -169,13 +169,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nearFov: 55
-  farFov: 85
+  farFov: 65
   cameraZOffsetNear: 3
-  cameraZOffsetFar: 20
+  cameraZOffsetFar: 9
   cameraYOffsetNear: 0.5
   cameraYOffsetFar: -0.5
   scaleSmoothFactor: 4
-  scrollSensitivity: 0.5
+  scrollSensitivity: 0.2
 --- !u!1 &2514416844597822599
 GameObject:
   m_ObjectHideFlags: 0
@@ -244,7 +244,7 @@ MonoBehaviour:
   m_TargetMovementOnly: 1
   m_ScreenX: 0.5
   m_ScreenY: 0.5
-  m_CameraDistance: 10
+  m_CameraDistance: 9
   m_DeadZoneWidth: 0
   m_DeadZoneHeight: 0
   m_DeadZoneDepth: 0

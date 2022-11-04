@@ -82,9 +82,6 @@ namespace MinecraftClient.UI
 
             healthBar = statusPanel.transform.Find("Health Bar").GetComponent<ValueBar>();
 
-            healthBar.MaxValue = 200F;
-            healthBar.CurValue = 200F;
-
             staminaBar = transform.Find("Stamina Bar").GetComponent<RingValueBar>();
             staminaBarAnimator = staminaBar.GetComponent<Animator>();
 
@@ -114,6 +111,9 @@ namespace MinecraftClient.UI
             };
 
             healthCallback = (e) => {
+                if (e.UpdateMaxHealth)
+                    healthBar.MaxValue = e.Health * HEALTH_MULTIPLIER;
+
                 healthBar.CurValue = e.Health * HEALTH_MULTIPLIER;
             };
 
@@ -260,7 +260,8 @@ namespace MinecraftClient.UI
             }
 
             // Update stamina bar position
-            staminaBar.transform.position = game!.CameraController.GetTargetScreenPos();
+            staminaBar.transform.position = 
+                    Vector3.Lerp(staminaBar.transform.position, game!.CameraController.GetTargetScreenPos(), Time.deltaTime * 10F);
 
         }
 

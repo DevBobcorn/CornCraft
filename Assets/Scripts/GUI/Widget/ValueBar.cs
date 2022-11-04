@@ -29,7 +29,7 @@ namespace MinecraftClient.UI
 
         private float maxValue = 100F, curValue = 100F, displayValue = 100F;
 
-        public float MaxValue 
+        public float MaxValue
         {
             get {
                 return maxValue;
@@ -39,6 +39,11 @@ namespace MinecraftClient.UI
                 float oldFract = displayValue / maxValue; // old max value
                 maxValue = value;
                 displayValue = oldFract * maxValue; // new max value
+
+                if (barText is not null)
+                    barText.text = $"{(int)displayValue}/{(int)maxValue}";
+                
+                Debug.Log($"Max set to {value}");
             }
         }
 
@@ -55,6 +60,11 @@ namespace MinecraftClient.UI
                     curValue = maxValue;
                 else
                     curValue = value;
+                
+                if (barText is not null)
+                    barText.text = $"{(int)displayValue}/{(int)maxValue}";
+                
+                Debug.Log($"Cur set to {value}");
             }
         }
 
