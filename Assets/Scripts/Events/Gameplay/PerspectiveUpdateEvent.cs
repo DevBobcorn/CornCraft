@@ -2,13 +2,13 @@ using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Event
 {
-    public class PerspectiveUpdateEvent : BaseEvent
+    public record PerspectiveUpdateEvent : BaseEvent
     {
-        public Perspective newPerspective;
+        public Perspective Perspective { get; }
 
         public PerspectiveUpdateEvent(Perspective perspective)
         {
-            newPerspective = perspective;
+            Perspective = perspective;
         }
 
     }

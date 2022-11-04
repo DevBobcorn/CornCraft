@@ -65,7 +65,7 @@ namespace MinecraftClient.UI
             quitButton.onClick.AddListener(this.QuitGame);
 
             healthCallback = (e) => {
-                if (e.newHealth <= 0F && !isActive)
+                if (e.Health <= 0F && !isActive)
                 {
                     if (!this.isActive) // Show death screen
                         CornClient.Instance.ScreenControl.PushScreen(this);

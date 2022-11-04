@@ -35,7 +35,8 @@ namespace MinecraftClient.Control
                     moveVelocity *= (ability.MaxWaterMoveSpeed / moveVelocity.magnitude);
                 
                 rigidbody.velocity = moveVelocity;
-                
+
+                // Leave stamina value unchanged
             }
             
         }

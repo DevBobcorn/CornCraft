@@ -124,6 +124,8 @@ namespace MinecraftClient.Control
 
             Status.CurrentVisualYaw = visualTransform!.eulerAngles.y;
 
+            float prevStamina = status.StaminaLeft;
+
             if (status.ForceMoveDist is not null && status.ForceMoveOrigin is not null)
             {
                 status.ForceMoveTimeCurrent = Mathf.Max(status.ForceMoveTimeCurrent - interval, 0F);
@@ -143,6 +145,10 @@ namespace MinecraftClient.Control
                 // Update player physics and transform using updated current state
                 CurrentState.UpdatePlayer(interval, inputData, status, playerAbility!, playerRigidbody!);
             }
+
+            // Broadcast current stamina if changed
+            if (prevStamina != status.StaminaLeft)
+                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, status.StaminaLeft >= playerAbility!.MaxStamina));
 
             // Update player animator
             /* DISABLE START
@@ -204,11 +210,19 @@ namespace MinecraftClient.Control
 
             if (playerAbility is null)
                 Debug.LogError("Player ability not assigned!");
+            else
+            {
+                // Set stamina to max value
+                Status.StaminaLeft = playerAbility.MaxStamina;
+
+                // And broadcast current stamina
+                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, true));
+            }
 
             perspectiveCallback = (e) => { };
 
             gameModeCallback = (e) => {
-                if (e.newGameMode != GameMode.Spectator && game!.LocationReceived)
+                if (e.GameMode != GameMode.Spectator && game!.LocationReceived)
                     EnableEntity();
                 else
                     DisableEntity();

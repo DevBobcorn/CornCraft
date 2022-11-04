@@ -17,6 +17,8 @@ namespace MinecraftClient.Control
             if (inputData.ascend) // Jump in place
                 rigidbody.velocity = new(0F, ability.JumpSpeed, 0F);
 
+            // Restore stamina
+            info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.SwimStaminaCost);
         }
 
         public bool ShouldEnter(PlayerStatus info)

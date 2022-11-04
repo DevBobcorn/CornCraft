@@ -21,6 +21,8 @@ namespace MinecraftClient.Control
             }
 
             // Otherwise free fall, leave velocity unchanged
+
+            // Leave stamina value unchanged
         }
 
         public bool ShouldEnter(PlayerStatus info)

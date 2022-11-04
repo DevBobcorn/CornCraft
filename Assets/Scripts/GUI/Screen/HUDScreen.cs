@@ -11,15 +11,18 @@ namespace MinecraftClient.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class HUDScreen : BaseScreen
     {
+        private static readonly int SHOW = Animator.StringToHash("Show");
+
         private static readonly string[] modeIdentifiers = { "survival", "creative", "adventure", "spectator" };
         private const float HEALTH_MULTIPLIER = 10F;
 
         private CornClient game;
 
         private TMP_Text    latencyText, debugText, modeText;
-        private Animator    modePanel, crosshair, statusPanel;
+        private Animator    modePanel, crosshair, statusPanel, staminaBarAnimator;
         private Button[]    modeButtons = new Button[4];
-        private ValueBar    healthBar;
+        private ValueBar healthBar;
+        private RingValueBar staminaBar;
 
         private ChatScreen  chatScreen;
         private PauseScreen pauseScreen;
@@ -82,20 +85,23 @@ namespace MinecraftClient.UI
             healthBar.MaxValue = 200F;
             healthBar.CurValue = 200F;
 
+            staminaBar = transform.Find("Stamina Bar").GetComponent<RingValueBar>();
+            staminaBarAnimator = staminaBar.GetComponent<Animator>();
+
             perspectiveCallback = (e) => {
-                switch (e.newPerspective)
+                switch (e.Perspective)
                 {
                     case Perspective.FirstPerson:
-                        crosshair.SetBool("Show", true);
+                        crosshair.SetBool(SHOW, true);
                         break;
                     case Perspective.ThirdPerson:
-                        crosshair.SetBool("Show", false);
+                        crosshair.SetBool(SHOW, false);
                         break;
                 }
             };
 
             gameModeCallback = (e) => {
-                var showStatus = e.newGameMode switch {
+                var showStatus = e.GameMode switch {
                     GameMode.Survival   => true,
                     GameMode.Creative   => false,
                     GameMode.Adventure  => true,
@@ -104,16 +110,29 @@ namespace MinecraftClient.UI
                     _                   => false
                 };
 
-                statusPanel.SetBool("Show", showStatus);
+                statusPanel.SetBool(SHOW, showStatus);
             };
 
             healthCallback = (e) => {
-                healthBar.CurValue = e.newHealth * HEALTH_MULTIPLIER;
+                healthBar.CurValue = e.Health * HEALTH_MULTIPLIER;
+            };
+
+            staminaCallback = (e) => {
+                staminaBar.CurValue = e.Stamina;
+
+                if (e.IsStaminaFull)
+                {
+                    staminaBar.MaxValue = e.Stamina;
+                    staminaBarAnimator.SetBool(SHOW, false);
+                }
+                else
+                    staminaBarAnimator.SetBool(SHOW, true);
             };
 
             EventManager.Instance.Register(perspectiveCallback);
             EventManager.Instance.Register(gameModeCallback);
             EventManager.Instance.Register(healthCallback);
+            EventManager.Instance.Register(staminaCallback);
 
             // Initialize screens
             chatScreen  = GameObject.FindObjectOfType<ChatScreen>(true);
@@ -130,6 +149,7 @@ namespace MinecraftClient.UI
         private Action<PerspectiveUpdateEvent> perspectiveCallback;
         private Action<GameModeUpdateEvent>    gameModeCallback;
         private Action<HealthUpdateEvent>      healthCallback;
+        private Action<StaminaUpdateEvent>     staminaCallback;
 
         void OnDestroy()
         {
@@ -141,6 +161,9 @@ namespace MinecraftClient.UI
             
             if (healthCallback is not null)
                 EventManager.Instance.Unregister(healthCallback);
+            
+            if (staminaCallback is not null)
+                EventManager.Instance.Unregister(staminaCallback);
 
         }
 
@@ -166,11 +189,11 @@ namespace MinecraftClient.UI
                         if (selectedMode >= 0 && selectedMode < modeButtons.Length)
                         {
                             modeText.text = ((GameMode)selectedMode).ToString();
-                            modePanel.SetBool("Show", true);
+                            modePanel.SetBool(SHOW, true);
                             modePanelShown = true;
                             modeButtons[selectedMode].Select();
                             // Hide crosshair (if shown)
-                            crosshair.SetBool("Show", false);
+                            crosshair.SetBool(SHOW, false);
                         }
                     }
                 }
@@ -180,7 +203,7 @@ namespace MinecraftClient.UI
             {
                 if (modePanelShown) // Hide gamemode switch
                 {
-                    modePanel.SetBool("Show", false);
+                    modePanel.SetBool(SHOW, false);
                     modePanelShown = false;
 
                     if (selectedMode != (int)game.Player.GameMode) // Commit switch request
@@ -188,7 +211,7 @@ namespace MinecraftClient.UI
                     
                     // Restore crosshair if necessary
                     if (game.Player.Perspective == Perspective.FirstPerson)
-                        crosshair.SetBool("Show", true);
+                        crosshair.SetBool(SHOW, true);
                     
                 }
                 else // Toggle debug info
@@ -235,6 +258,9 @@ namespace MinecraftClient.UI
                     latencyText.text =  $"<color=orange>{displayedLatency} ms</color>";
                 else latencyText.text =  $"{displayedLatency} ms";
             }
+
+            // Update stamina bar position
+            staminaBar.transform.position = game!.CameraController.GetTargetScreenPos();
 
         }
 

@@ -2,13 +2,13 @@ using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Event
 {
-    public class BlockUpdateEvent : BaseEvent
+    public record BlockUpdateEvent : BaseEvent
     {
-        public readonly Location location;
+        public Location Location { get; }
 
         public BlockUpdateEvent(Location loc)
         {
-            this.location = loc;
+            this.Location = loc;
         }
     }
 }

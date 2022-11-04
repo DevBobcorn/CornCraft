@@ -2,13 +2,13 @@ using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Event
 {
-    public class GameModeUpdateEvent : BaseEvent
+    public record GameModeUpdateEvent : BaseEvent
     {
-        public GameMode newGameMode;
+        public GameMode GameMode { get; }
 
         public GameModeUpdateEvent(GameMode gamemode)
         {
-            newGameMode = gamemode;
+            GameMode = gamemode;
         }
 
     }

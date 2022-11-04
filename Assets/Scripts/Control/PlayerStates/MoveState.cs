@@ -11,13 +11,18 @@ namespace MinecraftClient.Control
             {
                 info.Moving = true;
 
+                bool costStamina = false;
+
                 // Smooth rotation for player model
                 info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval);
 
                 float moveSpeed;
 
-                if (inputData.sprint) // TODO Add stamina
+                if (inputData.sprint && info.StaminaLeft > ability.SprintMinStamina)
+                {
                     info.Sprinting = true;
+                    costStamina = true;
+                }
                 else
                     info.Sprinting = false;
                 
@@ -42,6 +47,11 @@ namespace MinecraftClient.Control
 
                 // Apply new velocity to rigidbody
                 rigidbody.velocity = moveVelocity;
+
+                if (costStamina) // Cost stamina
+                    info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, 0F, interval * ability.SwimStaminaCost);
+                else // Restore stamina
+                    info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.SwimStaminaCost);
             }
             else // Stop moving
             {

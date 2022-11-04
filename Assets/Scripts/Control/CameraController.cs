@@ -34,20 +34,25 @@ namespace MinecraftClient.Control
             return null;
         }
 
-        public virtual Vector3 GetTargetScreenPos()
-        {
-            var targetPos = GetTarget()?.position;
-
-            if (renderCameraPresent && targetPos is not null)
-                return renderCamera!.WorldToScreenPoint(targetPos.Value);
-            return Vector3.zero;
-        }
-
         public abstract void EnsureInitialized();
 
         public abstract void SetTarget(Transform target);
 
         public abstract Transform? GetTarget();
+
+        public virtual Vector3 GetTargetScreenPos()
+        {
+            if (cameraInfo.FixedMode)
+                return renderCameraPresent ? renderCamera!.ViewportToScreenPoint(VIEWPORT_CENTER) : Vector3.zero;
+            
+            EnsureInitialized();
+            
+            var targetPos = GetTarget()?.position;
+            if (renderCameraPresent && targetPos is not null)
+                return renderCamera!.WorldToScreenPoint(targetPos.Value);
+            
+            return Vector3.zero;
+        }
 
         public abstract float GetYaw();
 
