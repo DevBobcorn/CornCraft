@@ -35,11 +35,32 @@ namespace MinecraftClient.Control
                 var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
                 moveVelocity.y = rigidbody.velocity.y;
 
-                // Auto walk up aid
                 if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 60F) // Trying to moving forward
                 {
-                    if (info.FrontDownDist < -0.03F && info.FrontDownDist > -0.6F)
-                        moveVelocity.y = ability.AidSpeedCurve.Evaluate(info.FrontDownDist);
+                    if (info.FrontDownDist < -0.05F && info.FrontDownDist > -1.05F) // Walk up aid
+                    {
+                        if (info.GroundSlope > 80F) // Stairs or slabs, just step up
+                        {
+                            var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+
+                            // Start force move operation
+                            info.ForceMoveOrigin = rigidbody.transform.position;
+                            info.ForceMoveDestination = rigidbody.transform.position + (-info.FrontDownDist + 0.01F) * Vector3.up + moveHorDir * 0.8F;
+                            var moveDist = (info.ForceMoveDestination - info.ForceMoveOrigin).Value.magnitude;
+                            info.ForceMoveTimeTotal = info.ForceMoveTimeCurrent = moveDist / moveSpeed;
+                        }
+                    }
+                    else if (info.FrontDownDist > 0.25F && info.FrontDownDist < 0.95F) // Walk down aid
+                    {
+                        var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+
+                        // Start force move operation
+                        info.ForceMoveOrigin = rigidbody.transform.position;
+                        info.ForceMoveDestination = rigidbody.transform.position + (-info.FrontDownDist + 0.01F) * Vector3.up + moveHorDir * 0.8F;
+                        var moveDist = (info.ForceMoveDestination - info.ForceMoveOrigin).Value.magnitude;
+                        info.ForceMoveTimeTotal = info.ForceMoveTimeCurrent = moveDist / moveSpeed;
+                    }
+
                 }
 
                 if (inputData.ascend) // Jump up, keep horizontal speed
