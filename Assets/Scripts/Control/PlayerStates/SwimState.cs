@@ -7,6 +7,9 @@ namespace MinecraftClient.Control
     {
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody)
         {
+            
+            info.Sprinting = false;
+            
             if (inputData.horInputNormalized != Vector2.zero || inputData.ascend || inputData.descend)
             {
                 var moveSpeed = (info.WalkMode ? ability.WalkSpeed : ability.RunSpeed) * ability.WaterMoveMultiplier;
@@ -36,8 +39,13 @@ namespace MinecraftClient.Control
 
                     // Start force move operation
                     info.ForceMoveOrigin = rigidbody.transform.position;
-                    info.ForceMoveDist = rigidbody.transform.position + (-info.FrontDownDist + 0.1F) * Vector3.up + moveHorDir * 0.8F;
-                    info.ForceMoveTimeTotal = info.ForceMoveTimeCurrent = 0.4F; // 1 second to finish
+                    info.ForceMoveDestination = rigidbody.transform.position + (-info.FrontDownDist + 0.01F) * Vector3.up + moveHorDir * 0.8F;
+                    info.ForceMoveTimeTotal = info.ForceMoveTimeCurrent = 0.4F;
+
+                    // Force update some info before force move opration starts
+                    info.InWater = false;
+                    info.Grounded = true;
+                    info.Moving = true;
                 }
                 else if (inputData.ascend)
                 {

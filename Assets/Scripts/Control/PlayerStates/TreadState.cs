@@ -7,6 +7,8 @@ namespace MinecraftClient.Control
     {
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody)
         {
+            info.Sprinting = false;
+            
             if (inputData.horInputNormalized != Vector2.zero || inputData.ascend || inputData.descend) // Start moving
                 info.Moving = true;
             else
@@ -38,7 +40,7 @@ namespace MinecraftClient.Control
 
                 // Leave stamina value unchanged
             }
-            
+
         }
 
         public bool ShouldEnter(PlayerStatus info)

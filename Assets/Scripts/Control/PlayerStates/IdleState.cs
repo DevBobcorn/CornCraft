@@ -7,6 +7,8 @@ namespace MinecraftClient.Control
     {
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody)
         {
+            info.Sprinting = false;
+
             rigidbody.velocity = Vector3.zero;
 
             if (inputData.horInputNormalized != Vector2.zero) // Start moving

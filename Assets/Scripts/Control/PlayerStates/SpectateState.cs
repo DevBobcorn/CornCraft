@@ -7,6 +7,7 @@ namespace MinecraftClient.Control
     {
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody)
         {
+            info.Sprinting = false;
 
             Vector3 moveVelocity = Vector3.zero;
 

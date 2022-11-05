@@ -16,7 +16,9 @@ namespace MinecraftClient.Control
 
         private CornClient? game;
         private Rigidbody? playerRigidbody;
-        private BoxCollider? boxCollider;
+        private Collider? playerCollider;
+
+        private bool entityDisabled = false;
 
         private readonly PlayerUserInputData inputData = new();
         private PlayerUserInput? userInput;
@@ -33,13 +35,11 @@ namespace MinecraftClient.Control
         // DISABLE END */
         private Entity fakeEntity = new(0, EntityType.Player, new());
 
-        [SerializeField] public bool EntityDisabled = false;
-
         public void DisableEntity()
         {
-            EntityDisabled = true;
+            entityDisabled = true;
             // Update components state...
-            boxCollider!.enabled = false;
+            playerCollider!.enabled = false;
             playerRigidbody!.velocity = Vector3.zero;
             playerRigidbody!.useGravity = false;
 
@@ -49,9 +49,9 @@ namespace MinecraftClient.Control
         public void EnableEntity()
         {
             // Update and control...
-            EntityDisabled = false;
+            entityDisabled = false;
             // Update components state...
-            boxCollider!.enabled = true;
+            playerCollider!.enabled = true;
             playerRigidbody!.useGravity = true;
 
             Status.Spectating = false;
@@ -118,30 +118,36 @@ namespace MinecraftClient.Control
                 }
             }
 
-            // Prepare current and target player visual yaw before updating it
-            Status.UserInputYaw = AngleConvert.GetYawFromVector2(inputData.horInputNormalized);
-            Status.TargetVisualYaw = camControl!.GetYaw() + Status.UserInputYaw;
-
             Status.CurrentVisualYaw = visualTransform!.eulerAngles.y;
 
             float prevStamina = status.StaminaLeft;
 
-            if (status.ForceMoveDist is not null && status.ForceMoveOrigin is not null)
+            if (status.ForceMoveDestination is not null && status.ForceMoveOrigin is not null)
             {
                 status.ForceMoveTimeCurrent = Mathf.Max(status.ForceMoveTimeCurrent - interval, 0F);
                 var moveProgress = status.ForceMoveTimeCurrent / status.ForceMoveTimeTotal;
-                var curPosition = Vector3.Lerp(status.ForceMoveDist.Value, status.ForceMoveOrigin.Value, moveProgress);
+                var curPosition = Vector3.Lerp(status.ForceMoveDestination.Value, status.ForceMoveOrigin.Value, moveProgress);
 
-                playerRigidbody!.MovePosition(curPosition);
+                // Force grounded while doing the move
+                status.Grounded = true;
+                // Update player yaw
+                status.CurrentVisualYaw = Mathf.LerpAngle(status.CurrentVisualYaw, status.TargetVisualYaw, playerAbility!.SteerSpeed * interval);
+
+                //playerRigidbody!.MovePosition(curPosition);
+                transform.position = curPosition;
 
                 if (status.ForceMoveTimeCurrent == 0F) // End force move operation
                 {
-                    status.ForceMoveDist = null;
+                    status.ForceMoveDestination = null;
                     status.ForceMoveOrigin = null;
                 }
             }
             else
             {
+                // Prepare current and target player visual yaw before updating it
+                Status.UserInputYaw = AngleConvert.GetYawFromVector2(inputData.horInputNormalized);
+                Status.TargetVisualYaw = camControl!.GetYaw() + Status.UserInputYaw;
+                
                 // Update player physics and transform using updated current state
                 CurrentState.UpdatePlayer(interval, inputData, status, playerAbility!, playerRigidbody!);
             }
@@ -202,7 +208,6 @@ namespace MinecraftClient.Control
             fakeEntity.ID   = 0;
             playerRender.Entity = fakeEntity;
 
-            boxCollider = transform.Find("Collider").GetComponent<BoxCollider>();
             playerRigidbody   = GetComponent<Rigidbody>();
 
             statusUpdater = GetComponent<PlayerStatusUpdater>();
@@ -222,6 +227,38 @@ namespace MinecraftClient.Control
 
             if (playerAbility is null)
                 Debug.LogError("Player ability not assigned!");
+            else
+            {
+                var boxcast = playerAbility.ColliderType == PlayerAbility.PlayerColliderType.Box;
+
+                if (boxcast)
+                {
+                    // Attach box collider
+                    var box = gameObject.AddComponent<BoxCollider>();
+                    var sideLength = playerAbility.ColliderRadius * 2F;
+                    box.size = new(sideLength, playerAbility.ColliderHeight, sideLength);
+                    box.center = new(0F, playerAbility.ColliderHeight / 2F, 0F);
+
+                    statusUpdater.GroundBoxcastHalfSize = new(playerAbility.ColliderRadius, 0.01F, playerAbility.ColliderRadius);
+
+                    playerCollider = box;
+                }
+                else
+                {
+                    // Attach capsule collider
+                    var capsule = gameObject.AddComponent<CapsuleCollider>();
+                    capsule.height = playerAbility.ColliderHeight;
+                    capsule.radius = playerAbility.ColliderRadius;
+                    capsule.center = new(0F, playerAbility.ColliderHeight / 2F, 0F);
+
+                    statusUpdater.GroundSpherecastRadius = playerAbility.ColliderRadius;
+                    statusUpdater.GroundSpherecastCenter = new(0F, playerAbility.ColliderRadius + 0.05F, 0F);
+
+                    playerCollider = capsule;
+                }
+
+                statusUpdater.UseBoxCastForGroundedCheck = boxcast;
+            }
 
         }
 
@@ -253,7 +290,7 @@ namespace MinecraftClient.Control
             // Visually swap xz velocity to fit vanilla
             var veloInfo = $"Vel:\t{velocity.z:0.00}\t{velocity.y:0.00}\t{velocity.x:0.00}\n({velocity.magnitude:0.000})";
 
-            if (EntityDisabled)
+            if (entityDisabled)
                 return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nTarget Block:\t{status.TargetBlockPos}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
             else
                 return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\n{status.ToString()}\nTarget Block:\t{status.TargetBlockPos}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";

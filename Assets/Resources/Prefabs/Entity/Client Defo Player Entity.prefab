@@ -1,50 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1170376255981016677
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 895179346428754459}
-  - component: {fileID: 3090405812923029619}
-  m_Layer: 9
-  m_Name: Collider
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &895179346428754459
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1170376255981016677}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2579919273003202910}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &3090405812923029619
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1170376255981016677}
-  m_Material: {fileID: 13400000, guid: 1427002ae8a4d814eb44504647593074, type: 2}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.75, y: 1.8, z: 0.75}
-  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &1705191053498647954
 GameObject:
   m_ObjectHideFlags: 0
@@ -112,7 +67,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1921079098883139421}
-  - {fileID: 895179346428754459}
   - {fileID: 3326929108941878309}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -131,7 +85,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerAbility: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
   cameraRef: {fileID: 1567116767503276910}
-  EntityDisabled: 0
 --- !u!114 &2579919273003202905
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -232,6 +185,13 @@ MonoBehaviour:
   LiquidLayer:
     serializedVersion: 2
     m_Bits: 256
+  UseBoxCastForGroundedCheck: 0
+  GroundBoxcastCenter: {x: 0, y: 0.05, z: 0}
+  GroundBoxcastHalfSize: {x: 0.35, y: 0.01, z: 0.35}
+  GroundBoxcastDist: 0.1
+  GroundSpherecastCenter: {x: 0, y: 0.4, z: 0}
+  GroundSpherecastRadius: 0.35
+  GroundSpherecastDist: 0.1
 --- !u!1 &4431764364056890110
 GameObject:
   m_ObjectHideFlags: 0
@@ -465,7 +425,7 @@ Transform:
   m_Children:
   - {fileID: 8803891040800302397}
   m_Father: {fileID: 2579919273003202910}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2099717832335294646
 PrefabInstance:
