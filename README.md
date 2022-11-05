@@ -60,4 +60,16 @@ More information about CDDL-1.0 can be found on MCC's [home page](https://github
 ## > Screenshots
 ![Screenshot 1](https://s2.loli.net/2022/10/23/yk9D2ejznQE5ZJa.png)
 ![Screenshot 2](https://s2.loli.net/2022/10/24/pLfmGiEbBOqFzTZ.png)
+<center>
+  <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block; color: #999;
+    padding: 2px;">A serene village</div>
+</center>
+
 ![Screenshot 3](https://s2.loli.net/2022/10/25/RSZK3FbOdHXkanm.png)
+![Screenshot 4](https://s2.loli.net/2022/11/05/nbDqZo6AlwfdjGs.png)
+<center>
+  <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block; color: #999;
+    padding: 2px;">Screenshot taken in <a href="https://www.minecraftmaps.com/castle-maps/celestial-castle">celestial castle</a> created by CloseDBr</div>
+</center>
