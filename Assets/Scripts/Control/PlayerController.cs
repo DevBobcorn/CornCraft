@@ -80,6 +80,10 @@ namespace MinecraftClient.Control
 
         public void SetLocation(Location loc)
         {
+            // Immediately end force move operation
+            Status.ForceMoveDestination = null;
+            Status.ForceMoveOrigin = null;
+
             transform.position = CoordConvert.MC2Unity(loc);
             Debug.Log($"Position set to {transform.position}");
 
@@ -170,7 +174,13 @@ namespace MinecraftClient.Control
             playerRender!.SetCurrentVelocity(horizontalVelocity);
 
             // Tell server our current position
-            var rawLocation = CoordConvert.Unity2MC(transform.position);
+            Location rawLocation;
+            
+            if (status.ForceMoveDestination is null) // TODO Check and Improve
+                rawLocation = CoordConvert.Unity2MC(transform.position);
+            else // Use move destination as the player location to tell to server
+            // This is done to prevent sending invalid positions during a force move operation
+                rawLocation = CoordConvert.Unity2MC(status.ForceMoveDestination.Value);
 
             // Preprocess the location before sending it (to avoid position correction from server)
             if ((status.Grounded || status.CenterDownDist < 0.5F) && rawLocation.Y - (int)rawLocation.Y > 0.9D)

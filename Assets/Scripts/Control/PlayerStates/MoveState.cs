@@ -50,7 +50,7 @@ namespace MinecraftClient.Control
                             info.ForceMoveTimeTotal = info.ForceMoveTimeCurrent = moveDist / moveSpeed;
                         }
                     }
-                    else if (info.FrontDownDist > 0.25F && info.FrontDownDist < 0.95F) // Walk down aid
+                    else if (info.FrontDownDist > 0.55F && info.FrontDownDist < 0.95F) // Walk down aid
                     {
                         var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
 
