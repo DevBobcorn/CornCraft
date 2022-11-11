@@ -7,6 +7,7 @@ namespace MinecraftClient.Control
     {
         public readonly string Name;
         public readonly ForceMoveOperation[] Operations;
+        public Vector3 Origin => Operations[0].Origin;
 
         private int currentOperationIndex = 0;
 
