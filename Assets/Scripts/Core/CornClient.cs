@@ -376,7 +376,7 @@ namespace MinecraftClient
             entityManager = entityManagerObj.AddComponent<EntityManager>();
 
             // Create player entity
-            var playerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Client Slim Player Entity");
+            var playerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Client Lumine Player Entity");
             var playerObj    = GameObject.Instantiate(playerPrefab);
             playerObj.name = $"{session.PlayerName} (Player)";
             playerObj.SetActive(true);

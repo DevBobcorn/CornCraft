@@ -15,6 +15,15 @@ namespace MinecraftClient.Control
         [SerializeField] [Range(0.1F, 2F)] public float ColliderRadius = 0.35F;
         [SerializeField] [Range(0.1F, 5F)] public float ColliderHeight =  1.8F;
 
+        // Force move animation states
+        public static readonly string CLIMB_1M = "Climb1m";
+        public static readonly string CLIMB_2M = "Climb2m";
+
+        [SerializeField] public AnimationCurve Climb1mX = new(), Climb1mY = new(), Climb1mZ = new();
+        public AnimationCurve[] Climb1mCurves => new[] { Climb1mX, Climb1mY, Climb1mZ };
+        [SerializeField] public AnimationCurve Climb2mX = new(), Climb2mY = new(), Climb2mZ = new();
+        public AnimationCurve[] Climb2mCurves => new[] { Climb2mX, Climb2mY, Climb2mZ };
+
         [SerializeField] [Range(0.1F,  4F)] public float WalkSpeed   =   1F;
         [SerializeField] [Range(0.1F, 10F)] public float RunSpeed    =   2F;
         [SerializeField] [Range(0.1F, 10F)] public float SprintSpeed = 3.5F;

@@ -76,9 +76,9 @@ namespace MinecraftClient.Control
         public void UpdatePlayerStatus(World world, Vector3 frontDirNormalized)
         {
             // Update player state - in water or not?
-            /* DISABLED START
-            Status.InWater = world.IsWaterAt(CoordConvert.Unity2MC(transform.position + IN_WATER_CHECK_POINT_LOWER));
-            // DISABLED END */
+            // ENABLED START
+            Status.InLiquid = world.IsWaterAt(CoordConvert.Unity2MC(transform.position + IN_WATER_CHECK_POINT_LOWER));
+            // ENABLED END */
 
             // Update player state - on ground or not?
             if (Status.InLiquid)
