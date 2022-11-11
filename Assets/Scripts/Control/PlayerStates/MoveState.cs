@@ -105,25 +105,6 @@ namespace MinecraftClient.Control
                                     } );
                         }
                     }
-                    else if (info.FrontDownDist > 0.25F && info.FrontDownDist < 0.95F) // Walk down stairs
-                    {
-                        var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
-
-                        // Start force move operation
-                        var org  = rigidbody.transform.position;
-                        var dest = rigidbody.transform.position + (-info.FrontDownDist + 0.01F) * Vector3.up + moveHorDir * 0.8F;
-                        var time = (dest - org).magnitude / moveSpeed;
-
-                        player.StartForceMoveOperation("Walk down stairs", new ForceMoveOperation[] { new(org, dest, time,
-                                        update: (interval, inputData, info, ability, rigidbody, player) =>
-                                        {
-                                            // Force grounded while doing the move
-                                            info.Grounded = true;
-                                            // Update player yaw
-                                            info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability!.SteerSpeed * interval);
-                                        })
-                                    } );
-                    }
 
                 }
 

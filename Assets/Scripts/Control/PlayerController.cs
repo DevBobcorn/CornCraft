@@ -158,7 +158,14 @@ namespace MinecraftClient.Control
             playerRender!.UpdateVisual(game!.GetTickMilSec());
 
             // Tell server our current position
-            var rawLocation = CoordConvert.Unity2MC(transform.position);
+            Location rawLocation;
+
+            if (CurrentState is ForceMoveState)
+            // Use move origin as the player location to tell to server, to
+            // prevent sending invalid positions during a force move operation
+                rawLocation = CoordConvert.Unity2MC(((ForceMoveState) CurrentState).Origin);
+            else
+                rawLocation = CoordConvert.Unity2MC(transform.position);
 
             // Preprocess the location before sending it (to avoid position correction from server)
             if ((status.Grounded || status.CenterDownDist < 0.5F) && rawLocation.Y - (int)rawLocation.Y > 0.9D)
