@@ -1,0 +1,71 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MeshPositionUpdate
+#pragma kernel MeshPositionNormalUpdate
+
+uint VertexCount;
+uint VertexCount2;
+
+uint VertexStride;
+uint VertexStride2;
+
+uint ChunkStart;
+uint ChunkStart2;
+
+RWByteAddressBuffer VertexBuffer;
+RWByteAddressBuffer VertexBuffer2;
+
+StructuredBuffer<float3> Positions;
+StructuredBuffer<float3> Normals;
+
+void WritePosition(uint id, uint vcnt, uint stride, uint cstart, RWByteAddressBuffer vb)
+{
+	if (id >= vcnt)
+		return;
+
+	uint index = cstart + id;
+	float3 pos = Positions[index];
+	// 使用頂点判定
+	if (pos.x > 99999.0f) // (RenderMeshWorker.cs - CalcVertexUseFlagJobを参照)
+		return;
+
+	uint addr_v = id * stride;
+	vb.Store3(addr_v, asuint(pos));
+}
+
+void WritePositionNormal(uint id, uint vcnt, uint stride, uint cstart, RWByteAddressBuffer vb)
+{
+	if (id >= vcnt)
+		return;
+
+	uint index = cstart + id;
+	float3 pos = Positions[index];
+	// 使用頂点判定
+	if (pos.x > 99999.0f) // (RenderMeshWorker.cs - CalcVertexUseFlagJobを参照)
+		return;
+
+	float3 nor = Normals[index];
+
+	uint addr_v = id * stride;
+	vb.Store3(addr_v, asuint(pos));
+	vb.Store3(addr_v + 12, asuint(nor));
+}
+
+[numthreads(64, 1, 1)]
+void MeshPositionUpdate(uint id : SV_DispatchThreadID)
+{
+	// (1)
+	WritePosition(id, VertexCount, VertexStride, ChunkStart, VertexBuffer);
+
+	// (2)
+	WritePosition(id, VertexCount2, VertexStride2, ChunkStart2, VertexBuffer2);
+}
+
+[numthreads(64, 1, 1)]
+void MeshPositionNormalUpdate(uint id : SV_DispatchThreadID)
+{
+	// (1)
+	WritePositionNormal(id, VertexCount, VertexStride, ChunkStart, VertexBuffer);
+
+	// (2)
+	WritePositionNormal(id, VertexCount2, VertexStride2, ChunkStart2, VertexBuffer2);
+}
