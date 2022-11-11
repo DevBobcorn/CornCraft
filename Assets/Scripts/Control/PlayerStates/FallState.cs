@@ -5,9 +5,62 @@ namespace MinecraftClient.Control
 {
     public class FallState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody)
+        public const float THRESHOULD_CLIMB_2M = -2.05F;
+        public const float THRESHOULD_CLIMB_1M = -1.55F;
+        public const float THRESHOULD_CLIMB_UP = -1.35F;
+
+        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
             info.Sprinting = false;
+
+            if (inputData.horInputNormalized != Vector2.zero)
+            {
+                // Smooth rotation for player model
+                info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval);
+
+                if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 40F) // Trying to moving forward
+                {
+                    if (info.FrontDownDist <= THRESHOULD_CLIMB_1M && info.FrontDownDist > THRESHOULD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
+                    {
+                        var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+                        var horOffset = info.BarrierDist - 1.0F;
+
+                        var org  = rigidbody.transform.position;
+                        var dest = org + (-info.FrontDownDist - 1.995F) * Vector3.up + moveHorDir * horOffset;
+
+                        player.StartForceMoveOperation("Climb over wall",
+                                new ForceMoveOperation[] {
+                                        new(org,  dest, 0.1F),
+                                        new(dest, player.climb2mRM!, player.visualTransform!.rotation, 0F, 2.2F,
+                                            playbackSpeed: 1.8F,
+                                            init: (info, ability, rigidbody, player) =>
+                                                player.CrossFadeState(PlayerController.CLIMB_2M),
+                                            update: (interval, inputData, info, ability, rigidbody, player) =>
+                                                info.Moving = inputData.horInputNormalized != Vector2.zero
+                                        )
+                                } );
+                    }
+                    else if (info.FrontDownDist <= THRESHOULD_CLIMB_UP && info.FrontDownDist > THRESHOULD_CLIMB_1M && info.BarrierAngle < 30F) // Climb up platform
+                    {
+                        var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+                        var horOffset = info.BarrierDist - 1.0F;
+
+                        var org  = rigidbody.transform.position;
+                        var dest = org + (-info.FrontDownDist - 0.995F) * Vector3.up + moveHorDir * horOffset;
+
+                        player.StartForceMoveOperation("Climb over barrier",
+                                new ForceMoveOperation[] {
+                                        new(org,  dest, 0.1F),
+                                        new(dest, player.climb1mRM!, player.visualTransform!.rotation, 0F, 0.9F,
+                                            init: (info, ability, rigidbody, player) =>
+                                                player.CrossFadeState(PlayerController.CLIMB_1M),
+                                            update: (interval, inputData, info, ability, rigidbody, player) =>
+                                                info.Moving = inputData.horInputNormalized != Vector2.zero
+                                        )
+                                } );
+                    }
+                }
+            }
             
             var moveSpeed = rigidbody.velocity;
 
@@ -16,12 +69,14 @@ namespace MinecraftClient.Control
                 moveSpeed = new(moveSpeed.x, ability.MaxFallSpeed, moveSpeed.z);
             // Otherwise free fall, leave velocity unchanged
 
+            rigidbody.velocity = moveSpeed;
+
             // Leave stamina value unchanged
         }
 
         public bool ShouldEnter(PlayerStatus info)
         {
-            if (!info.Spectating && !info.Grounded && !info.OnWall && !info.InWater)
+            if (!info.Spectating && !info.Grounded && !info.OnWall && !info.InLiquid)
                 return true;
             return false;
         }
@@ -31,7 +86,7 @@ namespace MinecraftClient.Control
             if (info.Spectating)
                 return true;
             
-            if (info.Grounded || info.OnWall || info.InWater)
+            if (info.Grounded || info.OnWall || info.InLiquid)
                 return true;
             return false;
         }

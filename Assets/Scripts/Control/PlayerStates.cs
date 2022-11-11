@@ -9,8 +9,8 @@ namespace MinecraftClient.Control
         public static readonly IPlayerState IDLE = new IdleState();
         public static readonly IPlayerState MOVE = new MoveState();
 
-        // Climbing states
-        // TODO
+        // On wall states
+        public static readonly IPlayerState CLIMB = new ClimbState();
 
         // Airborne states
         public static readonly IPlayerState FALL  = new FallState();
@@ -30,6 +30,8 @@ namespace MinecraftClient.Control
 
             list.Add(IDLE);
             list.Add(MOVE);
+
+            list.Add(CLIMB);
 
             list.Add(FALL);
 

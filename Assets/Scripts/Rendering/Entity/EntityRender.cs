@@ -18,8 +18,6 @@ namespace MinecraftClient.Rendering
         public float showInfoDist = 10F;
         public float hideInfoDist = 12F;
 
-        
-
         // A number made from the entity's numeral id, used in animations to prevent
         // several mobs of a same type moving synchronisedly, which looks unnatural
         protected float pseudoRandomOffset = 0F;
@@ -31,9 +29,7 @@ namespace MinecraftClient.Rendering
 
         public Entity Entity
         {
-            get {
-                return entity!;
-            }
+            get => entity!;
 
             set {
                 entity = value;
@@ -46,6 +42,17 @@ namespace MinecraftClient.Rendering
                 lastPosition = targetPosition = transform.position = CoordConvert.MC2Unity(entity.Location);
             }
         }
+
+        private void EnsureInitialized()
+        {
+            if (initialized)
+                return;
+            
+            Initialize();
+            initialized = true;
+        }
+
+        void Start() => EnsureInitialized();
 
         public void Unload() => Destroy(this.gameObject);
 
@@ -60,15 +67,6 @@ namespace MinecraftClient.Rendering
         public void RotateHeadTo(float headYaw)
         {
             targetHeadYaw = headYaw;
-        }
-
-        private void EnsureInitialized()
-        {
-            if (initialized)
-                return;
-            
-            Initialize();
-            initialized = true;
         }
 
         protected virtual void Initialize()
@@ -92,9 +90,7 @@ namespace MinecraftClient.Rendering
             
         }
 
-        void Start() => EnsureInitialized();
-
-        public void UpdateInfoPlate(Vector3 cameraPos)
+        public void UpdateInfo(Vector3 cameraPos)
         {
             float dist2Cam = (cameraPos - transform.position).magnitude;
 
@@ -160,14 +156,18 @@ namespace MinecraftClient.Rendering
 
         }
 
-        public void SetCurrentVelocity(Vector3 velocity) => currentVelocity = velocity;
+        public virtual void SetCurrentVelocity(Vector3 velocity)
+        {
+            velocity.y = 0; // Ignore y velocity by default
+            currentVelocity = velocity;
+        }
 
         public virtual void UpdateAnimation(float tickMilSec) { }
 
         public virtual void ManagedUpdate(Vector3? cameraPos, float tickMilSec)
         {
             if (cameraPos is not null)
-                UpdateInfoPlate(cameraPos.Value);
+                UpdateInfo(cameraPos.Value);
 
             UpdateTransform(tickMilSec);
             UpdateAnimation(tickMilSec);

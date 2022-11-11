@@ -5,7 +5,7 @@ namespace MinecraftClient.Control
 {
     public class SpectateState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody)
+        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
             info.Sprinting = false;
 
