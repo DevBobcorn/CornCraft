@@ -14,12 +14,6 @@ namespace MinecraftClient.Control
         [SerializeField] public Transform? cameraRef;
         [SerializeField] public Transform? visualTransform;
 
-        // Root motion clips
-        [SerializeField] public AnimationClip? climb1mRM;
-        public static readonly string CLIMB_1M = "Climb1m";
-        [SerializeField] public AnimationClip? climb2mRM;
-        public static readonly string CLIMB_2M = "Climb2m";
-
         private CornClient? game;
         private Rigidbody? playerRigidbody;
         private Collider? playerCollider;

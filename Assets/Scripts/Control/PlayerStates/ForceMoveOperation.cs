@@ -10,7 +10,6 @@ namespace MinecraftClient.Control
         public readonly Vector3 Origin;
 
         // Offset using curves
-        public readonly AnimationClip? RootMotionClip;
         public readonly Quaternion? RootMotionRotation;
         public readonly float RootMotionPlaybackSpeed = 1F;
         public readonly float RootMotionTimeOffset = 0F;
@@ -38,28 +37,17 @@ namespace MinecraftClient.Control
         public readonly OperationExitAction?   OperationExit;
         public readonly OperationUpdateAction? OperationUpdate;
 
-        public ForceMoveOperation(Vector3 origin, AnimationClip clip, Quaternion rotation, float timeOffset, float time, float playbackSpeed = 1F, OperationInitAction? init = null, OperationExitAction? exit = null, OperationUpdateAction? update = null)
+        public ForceMoveOperation(Vector3 origin, AnimationCurve[] curves, Quaternion rotation, float timeOffset, float time, float playbackSpeed = 1F, OperationInitAction? init = null, OperationExitAction? exit = null, OperationUpdateAction? update = null)
         {
             Origin = origin;
-            RootMotionClip = clip;
             RootMotionPlaybackSpeed = playbackSpeed;
 
             RootMotionRotation = rotation;
             RootMotionTimeOffset = timeOffset;
 
-            var curves = AnimationUtility.GetCurveBindings(clip);
-
-            foreach (var binding in curves)
-            {
-                //Debug.Log(binding.propertyName);
-
-                if (binding.propertyName == "m_LocalPosition.x")
-                    XCurve = AnimationUtility.GetEditorCurve(clip, binding);
-                else if (binding.propertyName == "m_LocalPosition.y")
-                    YCurve = AnimationUtility.GetEditorCurve(clip, binding);
-                else if (binding.propertyName == "m_LocalPosition.z")
-                    ZCurve = AnimationUtility.GetEditorCurve(clip, binding);
-            }
+            XCurve = curves[0];
+            YCurve = curves[1];
+            ZCurve = curves[2];
 
             OriginOffset = SampleVector3At(0F);
 
