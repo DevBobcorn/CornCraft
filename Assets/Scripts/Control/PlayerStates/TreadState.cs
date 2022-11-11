@@ -5,7 +5,7 @@ namespace MinecraftClient.Control
 {
     public class TreadState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody)
+        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
             info.Sprinting = false;
             
@@ -45,7 +45,7 @@ namespace MinecraftClient.Control
 
         public bool ShouldEnter(PlayerStatus info)
         {
-            if (!info.Spectating && info.InWater && !info.Moving)
+            if (!info.Spectating && info.InLiquid && !info.Moving)
                 return true;
             return false;
         }
@@ -55,7 +55,7 @@ namespace MinecraftClient.Control
             if (info.Spectating)
                 return true;
             
-            if (!info.InWater || info.Moving)
+            if (!info.InLiquid || info.Moving)
                 return true;
             return false;
         }

@@ -53,6 +53,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerAbility: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
   cameraRef: {fileID: 7297584487596027466}
+  visualTransform: {fileID: 2575827992083140173}
+  climb1mRM: {fileID: 7400000, guid: faf5f17ea243d3f40a3c028f4f56ff50, type: 2}
+  climb2mRM: {fileID: 7400000, guid: a2ec8cfc647fda84db4fd8bc233eff5b, type: 2}
 --- !u!114 &739474774391685890
 MonoBehaviour:
   m_ObjectHideFlags: 0

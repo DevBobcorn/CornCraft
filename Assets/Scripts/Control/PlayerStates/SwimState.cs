@@ -5,9 +5,8 @@ namespace MinecraftClient.Control
 {
     public class SwimState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody)
+        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
-            
             info.Sprinting = false;
             
             if (inputData.horInputNormalized != Vector2.zero || inputData.ascend || inputData.descend)
@@ -38,14 +37,18 @@ namespace MinecraftClient.Control
                     var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
 
                     // Start force move operation
-                    info.ForceMoveOrigin = rigidbody.transform.position;
-                    info.ForceMoveDestination = rigidbody.transform.position + (-info.FrontDownDist + 0.01F) * Vector3.up + moveHorDir * 0.8F;
-                    info.ForceMoveTimeTotal = info.ForceMoveTimeCurrent = 0.4F;
-
-                    // Force update some info before force move opration starts
-                    info.InWater = false;
-                    info.Grounded = true;
-                    info.Moving = true;
+                    var org  = rigidbody.transform.position;
+                    var dest = rigidbody.transform.position + (-info.FrontDownDist + 0.01F) * Vector3.up + moveHorDir * 0.8F;
+                    
+                    player.StartForceMoveOperation("Swim to land", new ForceMoveOperation[] {
+                            new(org, dest, 0.4F,
+                                update: (interval, inputData, info, ability, rigidbody, player) =>
+                                {
+                                    info.InLiquid = false;
+                                    info.Grounded = true;
+                                    info.Moving = true;
+                                })
+                            } );
                 }
                 else if (inputData.ascend)
                 {
@@ -91,7 +94,7 @@ namespace MinecraftClient.Control
 
         public bool ShouldEnter(PlayerStatus info)
         {
-            if (!info.Spectating && info.InWater && info.Moving)
+            if (!info.Spectating && info.InLiquid && info.Moving)
                 return true;
             return false;
         }
@@ -101,7 +104,7 @@ namespace MinecraftClient.Control
             if (info.Spectating)
                 return true;
 
-            if (!info.InWater || !info.Moving)
+            if (!info.InLiquid || !info.Moving)
                 return true;
             return false;
         }

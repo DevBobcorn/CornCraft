@@ -7,12 +7,18 @@ using MinecraftClient.Rendering;
 
 namespace MinecraftClient.Control
 {
-    [RequireComponent(typeof (Rigidbody), typeof (EntityRender))]
-    [RequireComponent(typeof (PlayerStatusUpdater), typeof (PlayerUserInput))]
+    [RequireComponent(typeof (Rigidbody), typeof (EntityRender), typeof (PlayerStatusUpdater))]
     public class PlayerController : MonoBehaviour, IPlayerController
     {
         [SerializeField] public PlayerAbility? playerAbility;
         [SerializeField] public Transform? cameraRef;
+        [SerializeField] public Transform? visualTransform;
+
+        // Root motion clips
+        [SerializeField] public AnimationClip? climb1mRM;
+        public static readonly string CLIMB_1M = "Climb1m";
+        [SerializeField] public AnimationClip? climb2mRM;
+        public static readonly string CLIMB_2M = "Climb2m";
 
         private CornClient? game;
         private Rigidbody? playerRigidbody;
@@ -23,16 +29,12 @@ namespace MinecraftClient.Control
         private readonly PlayerUserInputData inputData = new();
         private PlayerUserInput? userInput;
         private PlayerStatusUpdater? statusUpdater;
-        public PlayerStatus Status { get => statusUpdater!.Status; }
+        public PlayerStatus Status => statusUpdater!.Status;
 
         private IPlayerState CurrentState = PlayerStates.IDLE;
 
         private CameraController? camControl;
-        private Transform? visualTransform;
-        private EntityRender? playerRender;
-        /* DISABLE START
-        private PlayerAnimatorController? animatorController;
-        // DISABLE END */
+        private IPlayerVisual? playerRender;
         private Entity fakeEntity = new(0, EntityType.Player, new());
 
         public void DisableEntity()
@@ -63,6 +65,11 @@ namespace MinecraftClient.Control
             CornClient.ShowNotification(Status.WalkMode ? "Switched to walk mode" : "Switched to rush mode");
         }
 
+        public void CrossFadeState(string stateName, float time = 0.2F, int layer = 0, float timeOffset = 0F)
+        {
+            playerRender!.CrossFadeState(stateName, time, layer, timeOffset);
+        }
+
         private void CheckEntityEnabled()
         {
             if (game!.PlayerData.GameMode == GameMode.Spectator) // Spectating
@@ -75,15 +82,11 @@ namespace MinecraftClient.Control
         {
             fakeEntity.ID = entityId;
             // Reassign this entity to refresh
-            playerRender!.Entity = fakeEntity;
+            playerRender!.UpdateEntity(fakeEntity);
         }
 
         public void SetLocation(Location loc)
         {
-            // Immediately end force move operation
-            Status.ForceMoveDestination = null;
-            Status.ForceMoveOrigin = null;
-
             transform.position = CoordConvert.MC2Unity(loc);
             Debug.Log($"Position set to {transform.position}");
 
@@ -115,8 +118,12 @@ namespace MinecraftClient.Control
                 {
                     if (state != CurrentState && state.ShouldEnter(status))
                     {
+                        CurrentState.OnExit(status, playerAbility!, playerRigidbody!, this);
+
                         // Exit previous state and enter this state
                         CurrentState = state;
+                        
+                        CurrentState.OnEnter(status, playerAbility!, playerRigidbody!, this);
                         break;
                     }
                 }
@@ -126,76 +133,51 @@ namespace MinecraftClient.Control
 
             float prevStamina = status.StaminaLeft;
 
-            if (status.ForceMoveDestination is not null && status.ForceMoveOrigin is not null)
+            // Prepare current and target player visual yaw before updating it
+            if (inputData.horInputNormalized != Vector2.zero)
             {
-                status.ForceMoveTimeCurrent = Mathf.Max(status.ForceMoveTimeCurrent - interval, 0F);
-                var moveProgress = status.ForceMoveTimeCurrent / status.ForceMoveTimeTotal;
-                var curPosition = Vector3.Lerp(status.ForceMoveDestination.Value, status.ForceMoveOrigin.Value, moveProgress);
-
-                // Force grounded while doing the move
-                status.Grounded = true;
-                // Update player yaw
-                status.CurrentVisualYaw = Mathf.LerpAngle(status.CurrentVisualYaw, status.TargetVisualYaw, playerAbility!.SteerSpeed * interval);
-
-                //playerRigidbody!.MovePosition(curPosition);
-                transform.position = curPosition;
-
-                if (status.ForceMoveTimeCurrent == 0F) // End force move operation
-                {
-                    status.ForceMoveDestination = null;
-                    status.ForceMoveOrigin = null;
-                }
-            }
-            else
-            {
-                // Prepare current and target player visual yaw before updating it
                 Status.UserInputYaw = AngleConvert.GetYawFromVector2(inputData.horInputNormalized);
                 Status.TargetVisualYaw = camControl!.GetYaw() + Status.UserInputYaw;
-                
-                // Update player physics and transform using updated current state
-                CurrentState.UpdatePlayer(interval, inputData, status, playerAbility!, playerRigidbody!);
             }
+            
+            // Update player physics and transform using updated current state
+            CurrentState.UpdatePlayer(interval, inputData, status, playerAbility!, playerRigidbody!, this);
 
             // Broadcast current stamina if changed
             if (prevStamina != status.StaminaLeft)
                 EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, status.StaminaLeft >= playerAbility!.MaxStamina));
 
-            // Update player animator
-            /* DISABLE START
-            animatorController!.UpdateStateMachine(status, playerRigidbody!.velocity);
-            // DISABLE END */
-
             // Apply updated visual yaw to visual transform
             visualTransform!.eulerAngles = new(0F, Status.CurrentVisualYaw, 0F);
+            
+            // Update player render state machine
+            playerRender!.UpdateStateMachine(status);
+            // Update player render velocity
+            playerRender.UpdateVelocity(playerRigidbody!.velocity);
 
-            // Apply current horizontal velocity to visual render
-            var horizontalVelocity = playerRigidbody!.velocity;
-            horizontalVelocity.y = 0; // TODO Check and improve
-            playerRender!.SetCurrentVelocity(horizontalVelocity);
+            // Update render
+            var cameraPos = camControl.GetPosition();
+
+            if (cameraPos is not null)
+                playerRender!.UpdateInfo(cameraPos.Value);
+            
+            playerRender!.UpdateVisual(game!.GetTickMilSec());
 
             // Tell server our current position
-            Location rawLocation;
-            
-            if (status.ForceMoveDestination is null) // TODO Check and Improve
-                rawLocation = CoordConvert.Unity2MC(transform.position);
-            else // Use move destination as the player location to tell to server
-            // This is done to prevent sending invalid positions during a force move operation
-                rawLocation = CoordConvert.Unity2MC(status.ForceMoveDestination.Value);
+            var rawLocation = CoordConvert.Unity2MC(transform.position);
 
             // Preprocess the location before sending it (to avoid position correction from server)
             if ((status.Grounded || status.CenterDownDist < 0.5F) && rawLocation.Y - (int)rawLocation.Y > 0.9D)
                 rawLocation.Y = (int)rawLocation.Y + 1;
 
             CornClient.Instance.SyncLocation(rawLocation, visualTransform!.eulerAngles.y - 90F, 0F);
+        }
 
-            // Update render
-            var cameraPos = camControl.GetPosition();
-
-            if (cameraPos is not null)
-                playerRender!.UpdateInfoPlate(cameraPos.Value);
-            
-            playerRender!.UpdateAnimation(game!.GetTickMilSec());
-
+        public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)
+        {
+            // Enter a new force move state
+            CurrentState = new ForceMoveState(name, ops);
+            CurrentState.OnEnter(statusUpdater!.Status, playerAbility!, playerRigidbody!, this);
         }
 
         private Action<PerspectiveUpdateEvent>? perspectiveCallback;
@@ -207,16 +189,11 @@ namespace MinecraftClient.Control
             game = CornClient.Instance;
             
             // Initialize player visuals
-            visualTransform = transform.Find("Visual");
-            playerRender    = GetComponent<EntityRender>();
-
-            /* DISABLE START
-            animatorController = GetComponentInChildren<PlayerAnimatorController>();
-            // DISABLE END */
+            playerRender = GetComponent<IPlayerVisual>();
 
             fakeEntity.Name = game!.GetUsername();
             fakeEntity.ID   = 0;
-            playerRender.Entity = fakeEntity;
+            playerRender.UpdateEntity(fakeEntity);
 
             playerRigidbody   = GetComponent<Rigidbody>();
 

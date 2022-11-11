@@ -9,28 +9,25 @@ namespace MinecraftClient.Control
         // Player data
         public float    StaminaLeft = 0F;
 
-        // Force move operation
-        public Vector3? ForceMoveOrigin      = null;
-        public Vector3? ForceMoveDestination = null;
-        public float    ForceMoveTimeTotal   = 0F;
-        public float    ForceMoveTimeCurrent = 0F;
-
         // Player status
-        public bool InWater   = false;
+        public bool InLiquid  = false;
         public bool Grounded  = false;
-        public bool OnWall    = false;
+        public bool OnWall  = false;
         public bool Moving    = false;
         public bool Sprinting = false;
 
         public bool Attacking  = false;
         public bool Spectating = false;
         public bool WalkMode   = false;
+        public bool PlayingForcedAnimation = false;
 
         // Reference values
         public float CenterDownDist = 0F;
         public float FrontDownDist  = 0F;
         public float LiquidDist     = 0F;
         public float GroundSlope    = 0F;
+        public float BarrierAngle   = 0F;
+        public float BarrierDist    = 0F;
 
         public float UserInputYaw     = 0F;
         public float TargetVisualYaw  = 0F;
@@ -42,7 +39,7 @@ namespace MinecraftClient.Control
         public Location? TargetBlockPos = null;
 
         public override string ToString() => 
-            $"InWater:\t{InWater}\nGrounded:\t{Grounded}\nClimbing:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nGrounded:\t{Sprinting}\nGround Slope:\t{GroundSlope:0.00}";
+            $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nGrounded:\t{Sprinting}\nGround Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}";
 
     }
 }

@@ -7,7 +7,7 @@ namespace MinecraftClient.Control
     public class PlayerStatusUpdater : MonoBehaviour
     {
         // Ground distance check
-        private const float GROUND_RAYCAST_START   = 1.5F;
+        private const float GROUND_RAYCAST_START   = 2.5F;
         private const float GROUND_RAYCAST_DIST    = 4.0F;
         private const float GROUND_RAYCAST_OFFSET  = 0.8F; // The distance to move forward for front raycast
         private static readonly Vector3 GROUND_BOXCAST_START_POINT = new(0F, GROUND_RAYCAST_START, 0F);
@@ -21,7 +21,7 @@ namespace MinecraftClient.Control
         private static readonly Vector3 IN_WATER_CHECK_POINT_LOWER = new(0F, 0.3F, 0F);
         private static readonly Vector3 IN_WATER_CHECK_POINT_UPPER = new(0F, 0.8F, 0F);
 
-        public const float SURFING_LIQUID_DIST_THERSHOLD = -1.3F;
+        public const float SURFING_LIQUID_DIST_THERSHOLD = -0.6F;
 
         [SerializeField] public LayerMask BlockSelectionLayer;
         [SerializeField] public LayerMask GroundLayer;
@@ -76,12 +76,12 @@ namespace MinecraftClient.Control
         public void UpdatePlayerStatus(World world, Vector3 frontDirNormalized)
         {
             // Update player state - in water or not?
-            // ENABLED START
+            /* DISABLED START
             Status.InWater = world.IsWaterAt(CoordConvert.Unity2MC(transform.position + IN_WATER_CHECK_POINT_LOWER));
-            // ENABLED END
+            // DISABLED END */
 
             // Update player state - on ground or not?
-            if (Status.InWater)
+            if (Status.InLiquid)
                 Status.Grounded = false;
             else // Perform grounded check
             {
@@ -116,8 +116,10 @@ namespace MinecraftClient.Control
             Debug.DrawRay(rayFront,  transform.up * -GROUND_RAYCAST_DIST, Color.green);
             
             // Cast a ray downwards again, but check liquid layer this time
-            if (Status.InWater)
+            if (Status.InLiquid)
             {
+                var rayLiquid = transform.position + LIQUID_BOXCAST_START_POINT;
+
                 if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, LIQUID_RAYCAST_DIST, LiquidLayer))
                 {
                     Status.LiquidDist = centerDownHit.distance - LIQUID_RAYCAST_START;
@@ -132,7 +134,7 @@ namespace MinecraftClient.Control
 
             var angleCheckRayOrigin = transform.position + ANGLE_CHECK_RAYCAST_START_POINT;
 
-            // Cast rays forward to figure out whether the slope angle before the player
+            // Cast a ray forward from feet to figure out whether the slope angle before the player
             if (Physics.Raycast(angleCheckRayOrigin, frontDirNormalized, out angleCheckHit, 1F, GroundLayer))
             {
                 Debug.DrawRay(angleCheckHit.point, angleCheckHit.normal, Color.magenta);
@@ -141,10 +143,24 @@ namespace MinecraftClient.Control
             }
             else
                 Status.GroundSlope = 0F;
+            
+            Debug.DrawRay(angleCheckRayOrigin, frontDirNormalized, Color.red);
 
+            var barrierCheckRayOrigin = transform.position + new Vector3(0F, Status.FrontDownDist < -0.2F ? -Status.FrontDownDist - 0.1F : 0.1F, 0F);
 
-            Debug.DrawRay(angleCheckRayOrigin, frontDirNormalized, Color.white);
+            // Cast another ray forward from the height of barrier to figure out whether the slope angle before the player
+            if (Physics.Raycast(barrierCheckRayOrigin, frontDirNormalized, out angleCheckHit, 1F, GroundLayer))
+            {
+                Status.BarrierAngle = Vector3.Angle(frontDirNormalized, -angleCheckHit.normal);
+                Status.BarrierDist = angleCheckHit.distance;
+            }
+            else // No barrier
+            {
+                Status.BarrierAngle = 0F;
+                Status.BarrierDist = 0F;
+            }
 
+            Debug.DrawRay(barrierCheckRayOrigin, frontDirNormalized, Color.blue);
             
         }
 
@@ -154,7 +170,7 @@ namespace MinecraftClient.Control
             if ((LiquidLayer.value & (1 << trigger.gameObject.layer)) != 0)
             {
                 Debug.Log($"Into liquid");
-                Status.InWater = true;
+                Status.InLiquid = true;
             }
         }
 
@@ -163,7 +179,7 @@ namespace MinecraftClient.Control
             if ((LiquidLayer.value & (1 << trigger.gameObject.layer)) != 0)
             {
                 Debug.Log($"Out of liquid");
-                Status.InWater = false;
+                Status.InLiquid = false;
             }
         }
         // DISABLED END */

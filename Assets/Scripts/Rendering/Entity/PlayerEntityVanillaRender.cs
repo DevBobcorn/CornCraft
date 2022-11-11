@@ -1,10 +1,11 @@
 #nullable enable
 using UnityEngine;
+using MinecraftClient.Mapping;
 using MinecraftClient.Resource;
 
 namespace MinecraftClient.Rendering
 {
-    public class PlayerEntityRender : BipedEntityRender
+    public class PlayerEntityVanillaRender : BipedEntityRender, IPlayerVisual
     {
         public Transform? leftArm, rightArm;
 
@@ -21,6 +22,12 @@ namespace MinecraftClient.Rendering
             
             UpdateSkinMaterial();
         }
+
+        public void UpdateEntity(Entity entity) => base.Entity = entity;
+
+        public void UpdateVelocity(Vector3 velocity) => SetCurrentVelocity(velocity);
+
+        public void UpdateVisual(float tickMilSec) => UpdateAnimation(tickMilSec);
 
         public override void UpdateAnimation(float tickMilSec)
         {

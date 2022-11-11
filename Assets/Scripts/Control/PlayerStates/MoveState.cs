@@ -5,7 +5,13 @@ namespace MinecraftClient.Control
 {
     public class MoveState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody)
+        public const float THRESHOULD_CLIMB_2M = -2.05F;
+        public const float THRESHOULD_CLIMB_1M = -1.85F;
+        public const float THRESHOULD_CLIMB_UP = -1.35F;
+        public const float THRESHOULD_STEP_UP  = -0.05F;
+
+
+        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
             if (inputData.horInputNormalized != Vector2.zero)
             {
@@ -35,30 +41,88 @@ namespace MinecraftClient.Control
                 var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
                 moveVelocity.y = rigidbody.velocity.y;
 
-                if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 60F) // Trying to moving forward
+                if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 40F) // Trying to moving forward
                 {
-                    if (info.FrontDownDist < -0.05F && info.FrontDownDist > -1.05F) // Walk up aid
+                    if (info.FrontDownDist <= THRESHOULD_CLIMB_1M && info.FrontDownDist > THRESHOULD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
+                    {
+                        var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+                        var horOffset = info.BarrierDist - 1.0F;
+
+                        var org  = rigidbody.transform.position;
+                        var dest = org + (-info.FrontDownDist - 1.98F) * Vector3.up + moveHorDir * horOffset;
+
+                        player.StartForceMoveOperation("Climb over wall",
+                                new ForceMoveOperation[] {
+                                        new(org,  dest, 0.1F),
+                                        new(dest, player.climb2mRM!, player.visualTransform!.rotation, 0F, 2.25F,
+                                            playbackSpeed: 1.8F,
+                                            init: (info, ability, rigidbody, player) =>
+                                                player.CrossFadeState(PlayerController.CLIMB_2M),
+                                            update: (interval, inputData, info, ability, rigidbody, player) =>
+                                                info.Moving = inputData.horInputNormalized != Vector2.zero
+                                        )
+                                } );
+                    }
+                    else if (info.FrontDownDist <= THRESHOULD_CLIMB_UP && info.FrontDownDist > THRESHOULD_CLIMB_1M && info.BarrierAngle < 30F) // Climb up platform
+                    {
+                        var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+                        var horOffset = info.BarrierDist - 1.0F;
+
+                        var org  = rigidbody.transform.position;
+                        var dest = org + (-info.FrontDownDist - 0.98F) * Vector3.up + moveHorDir * horOffset;
+
+                        player.StartForceMoveOperation("Climb over barrier",
+                                new ForceMoveOperation[] {
+                                        new(org,  dest, 0.1F),
+                                        new(dest, player.climb1mRM!, player.visualTransform!.rotation, 0F, 0.95F,
+                                            init: (info, ability, rigidbody, player) =>
+                                                player.CrossFadeState(PlayerController.CLIMB_1M),
+                                            update: (interval, inputData, info, ability, rigidbody, player) =>
+                                                info.Moving = inputData.horInputNormalized != Vector2.zero
+                                        )
+                                } );
+                    }
+                    else if (info.FrontDownDist <= THRESHOULD_STEP_UP && info.FrontDownDist > THRESHOULD_CLIMB_UP) // Walk up stairs
                     {
                         if (info.GroundSlope > 80F) // Stairs or slabs, just step up
                         {
                             var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
 
                             // Start force move operation
-                            info.ForceMoveOrigin = rigidbody.transform.position;
-                            info.ForceMoveDestination = rigidbody.transform.position + (-info.FrontDownDist + 0.01F) * Vector3.up + moveHorDir * 0.8F;
-                            var moveDist = (info.ForceMoveDestination - info.ForceMoveOrigin).Value.magnitude;
-                            info.ForceMoveTimeTotal = info.ForceMoveTimeCurrent = moveDist / moveSpeed;
+                            var org  = rigidbody.transform.position;
+                            var dest = rigidbody.transform.position + (-info.FrontDownDist + 0.01F) * Vector3.up + moveHorDir * 0.7F;
+                            var time = (dest - org).magnitude / moveSpeed;
+
+                            player.StartForceMoveOperation("Walk up stairs", new ForceMoveOperation[] {
+                                    new(org, dest, time,
+                                        update: (interval, inputData, info, ability, rigidbody, player) =>
+                                        {
+                                            // Force grounded while doing the move
+                                            info.Grounded = true;
+                                            // Update player yaw
+                                            info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability!.SteerSpeed * interval);
+                                        })
+                                    } );
                         }
                     }
-                    else if (info.FrontDownDist > 0.55F && info.FrontDownDist < 0.95F) // Walk down aid
+                    else if (info.FrontDownDist > 0.25F && info.FrontDownDist < 0.95F) // Walk down stairs
                     {
                         var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
 
                         // Start force move operation
-                        info.ForceMoveOrigin = rigidbody.transform.position;
-                        info.ForceMoveDestination = rigidbody.transform.position + (-info.FrontDownDist + 0.01F) * Vector3.up + moveHorDir * 0.8F;
-                        var moveDist = (info.ForceMoveDestination - info.ForceMoveOrigin).Value.magnitude;
-                        info.ForceMoveTimeTotal = info.ForceMoveTimeCurrent = moveDist / moveSpeed;
+                        var org  = rigidbody.transform.position;
+                        var dest = rigidbody.transform.position + (-info.FrontDownDist + 0.01F) * Vector3.up + moveHorDir * 0.8F;
+                        var time = (dest - org).magnitude / moveSpeed;
+
+                        player.StartForceMoveOperation("Walk down stairs", new ForceMoveOperation[] { new(org, dest, time,
+                                        update: (interval, inputData, info, ability, rigidbody, player) =>
+                                        {
+                                            // Force grounded while doing the move
+                                            info.Grounded = true;
+                                            // Update player yaw
+                                            info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability!.SteerSpeed * interval);
+                                        })
+                                    } );
                     }
 
                 }
@@ -84,7 +148,7 @@ namespace MinecraftClient.Control
 
         public bool ShouldEnter(PlayerStatus info)
         {
-            if (!info.Spectating && info.Grounded && !info.OnWall && !info.InWater && info.Moving)
+            if (!info.Spectating && info.Grounded && !info.OnWall && !info.InLiquid && info.Moving)
                 return true;
             return false;
         }
@@ -94,7 +158,7 @@ namespace MinecraftClient.Control
             if (info.Spectating)
                 return true;
 
-            if (!info.Grounded || info.OnWall || info.InWater || !info.Moving)
+            if (!info.Grounded || info.OnWall || info.InLiquid || !info.Moving)
                 return true;
             return false;
         }

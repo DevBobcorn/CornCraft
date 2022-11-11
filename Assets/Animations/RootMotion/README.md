@@ -1,0 +1,1 @@
+This root animations are extracted from MotionT.position in animation clips, used in code for displacing player transform correctly and precisely when playing corresponding animation clips.
