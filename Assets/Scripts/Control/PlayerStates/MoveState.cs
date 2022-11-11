@@ -54,10 +54,10 @@ namespace MinecraftClient.Control
                         player.StartForceMoveOperation("Climb over wall",
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.1F),
-                                        new(dest, player.climb2mRM!, player.visualTransform!.rotation, 0F, 2.25F,
+                                        new(dest, ability.Climb2mCurves, player.visualTransform!.rotation, 0F, 2.25F,
                                             playbackSpeed: 1.8F,
                                             init: (info, ability, rigidbody, player) =>
-                                                player.CrossFadeState(PlayerController.CLIMB_2M),
+                                                player.CrossFadeState(PlayerAbility.CLIMB_2M),
                                             update: (interval, inputData, info, ability, rigidbody, player) =>
                                                 info.Moving = inputData.horInputNormalized != Vector2.zero
                                         )
@@ -74,9 +74,9 @@ namespace MinecraftClient.Control
                         player.StartForceMoveOperation("Climb over barrier",
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.1F),
-                                        new(dest, player.climb1mRM!, player.visualTransform!.rotation, 0F, 0.95F,
+                                        new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.95F,
                                             init: (info, ability, rigidbody, player) =>
-                                                player.CrossFadeState(PlayerController.CLIMB_1M),
+                                                player.CrossFadeState(PlayerAbility.CLIMB_1M),
                                             update: (interval, inputData, info, ability, rigidbody, player) =>
                                                 info.Moving = inputData.horInputNormalized != Vector2.zero
                                         )
