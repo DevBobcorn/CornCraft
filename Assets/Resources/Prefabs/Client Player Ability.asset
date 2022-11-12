@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 626338d7e82f32b4893ae4cf50bbdfc2, type: 3}
   m_Name: Client Player Ability
   m_EditorClassIdentifier: 
-  ColliderType: 1
-  ColliderRadius: 0.4
+  ColliderType: 0
+  ColliderRadius: 0.35
   ColliderHeight: 1.8
   Climb1mX:
     serializedVersion: 2
@@ -808,8 +808,8 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   WalkSpeed: 1.2
-  RunSpeed: 3.5
-  SprintSpeed: 7
+  RunSpeed: 5
+  SprintSpeed: 8
   JumpSpeed: 5
   SteerSpeed: 20
   MaxStamina: 20
