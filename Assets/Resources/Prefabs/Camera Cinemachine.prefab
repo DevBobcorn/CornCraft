@@ -170,8 +170,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nearFov: 55
   farFov: 65
-  cameraZOffsetNear: 3
-  cameraZOffsetFar: 9
+  cameraZOffsetNear: 1
+  cameraZOffsetFar: 4
   cameraYOffsetNear: 0.5
   cameraYOffsetFar: -0.5
   scaleSmoothFactor: 4
@@ -244,7 +244,7 @@ MonoBehaviour:
   m_TargetMovementOnly: 1
   m_ScreenX: 0.5
   m_ScreenY: 0.5
-  m_CameraDistance: 9
+  m_CameraDistance: 4
   m_DeadZoneWidth: 0
   m_DeadZoneHeight: 0
   m_DeadZoneDepth: 0
