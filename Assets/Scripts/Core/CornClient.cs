@@ -424,6 +424,7 @@ namespace MinecraftClient
                     EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(playerController.Status.StaminaLeft, true));
                     // Initialize health value
                     EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
+                    playerData.MaxHealth = 20F;
                 }
                 else
                 {
@@ -2587,9 +2588,12 @@ namespace MinecraftClient
         /// <param name="health">Player current health</param>
         public void OnUpdateHealth(float health, int food)
         {
-            bool updateMaxHealth = playerData.Health < health;
+            bool updateMaxHealth = playerData.MaxHealth < health;
+
+            if (updateMaxHealth)
+                playerData.MaxHealth = health;
             
-            playerData.Health = health;
+            playerData.CurHealth= health;
             playerData.FoodSaturation = food;
 
             if (health <= 0)

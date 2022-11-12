@@ -18,7 +18,7 @@ namespace MinecraftClient
         public int SequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
 
         public int EntityID;
-        public float Health;
+        public float CurHealth, MaxHealth;
         public int FoodSaturation;
         public int Level;
         public int TotalExperience;
