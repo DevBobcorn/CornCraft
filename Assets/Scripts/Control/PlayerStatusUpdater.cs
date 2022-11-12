@@ -16,7 +16,7 @@ namespace MinecraftClient.Control
         private const float LIQUID_RAYCAST_DIST    = 5.0F;
         private static readonly Vector3 LIQUID_BOXCAST_START_POINT = new(0F, LIQUID_RAYCAST_START, 0F);
 
-        private static readonly Vector3 ANGLE_CHECK_RAYCAST_START_POINT = new(0F, 0.1F, 0F);
+        private static readonly Vector3 ANGLE_CHECK_RAYCAST_START_POINT = new(0F, 0.02F, 0F);
 
         private static readonly Vector3 IN_WATER_CHECK_POINT_LOWER = new(0F, 0.3F, 0F);
         private static readonly Vector3 IN_WATER_CHECK_POINT_UPPER = new(0F, 0.8F, 0F);

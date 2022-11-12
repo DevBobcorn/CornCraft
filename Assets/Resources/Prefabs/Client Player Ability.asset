@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Client Player Ability
   m_EditorClassIdentifier: 
   ColliderType: 0
-  ColliderRadius: 0.4
+  ColliderRadius: 0.35
   ColliderHeight: 1.8
   Climb1mX:
     serializedVersion: 2

@@ -169,7 +169,7 @@ namespace MinecraftClient.Protocol.Handlers
                     int dataArrayLength = dataTypes.ReadNextVarInt(cache); // Data Array Length
 
                     //dataTypes.DropData(dataArrayLength * 8, cache); // Data Array
-                    UnityEngine.Debug.Log($"Biome data length: {dataArrayLength}");
+                    //UnityEngine.Debug.Log($"Biome data length: {dataArrayLength}");
 
                     Span<byte> entryDataByte = stackalloc byte[8];
                     Span<long> entryDataLong = MemoryMarshal.Cast<byte, long>(entryDataByte); // Faster than MemoryMarshal.Read<long>
