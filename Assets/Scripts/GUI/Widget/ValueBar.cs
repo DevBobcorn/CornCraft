@@ -42,8 +42,6 @@ namespace MinecraftClient.UI
 
                 if (barText is not null)
                     barText.text = $"{(int)displayValue}/{(int)maxValue}";
-                
-                Debug.Log($"Max set to {value}");
             }
         }
 
@@ -63,8 +61,6 @@ namespace MinecraftClient.UI
                 
                 if (barText is not null)
                     barText.text = $"{(int)displayValue}/{(int)maxValue}";
-                
-                Debug.Log($"Cur set to {value}");
             }
         }
 
