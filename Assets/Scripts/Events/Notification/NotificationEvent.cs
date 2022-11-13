@@ -12,7 +12,7 @@ namespace MinecraftClient.Event
         {
             this.Text = text;
             this.Duration = 6F; // 6 seconds by default
-            this.Type = Notification.Type.Notification;
+            this.Type = Notification.Type.Notify;
         }
 
         public NotificationEvent(string text, float duration, Notification.Type type)
