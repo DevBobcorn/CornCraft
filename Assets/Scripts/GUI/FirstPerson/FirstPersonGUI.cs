@@ -4,15 +4,25 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Coffee.UISoftMask;
-using MinecraftClient.Control;
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.UI
 {
     public class FirstPersonGUI : MonoBehaviour
     {
+        public const string FIRST_PERSON_ROOT_PATH  = "Prefabs/GUI/FirstPerson";
+        public const string FIRST_PERSON_GUI_PREFAB = FIRST_PERSON_ROOT_PATH + "/First Person GUI";
+        public const string BUTTON_AVATAR_PREFAB    = FIRST_PERSON_ROOT_PATH + "/First Person Menu Avatar";
+        public const string BUTTON_SOCIAL_PREFAB    = FIRST_PERSON_ROOT_PATH + "/First Person Menu Social";
+        public const string BUTTON_CHAT_PREFAB      = FIRST_PERSON_ROOT_PATH + "/First Person Menu Chat";
+        public const string BUTTON_MAP_PREFAB       = FIRST_PERSON_ROOT_PATH + "/First Person Menu Map";
+        public const string BUTTON_SETTINGS_PREFAB  = FIRST_PERSON_ROOT_PATH + "/First Person Menu Settings";
+        
+        public const string PANEL_PREFAB = FIRST_PERSON_ROOT_PATH + "/First Person Panel";
+        public const string PANEL_CHAT   = FIRST_PERSON_ROOT_PATH + "/First Person Chat";
+
         public const float CANVAS_SCALE = 0.0006F;
-        public const int BUTTON_COUNT = 5;
+        public const int   BUTTON_COUNT = 5;
         
         private const float SINGLE_SHOW_TIME = 0.25F, SINGLE_DELTA_TIME = 0.15F;
         private const float TOTAL_SHOW_TIME = SINGLE_DELTA_TIME * (BUTTON_COUNT - 1) + SINGLE_SHOW_TIME;
@@ -125,20 +135,20 @@ namespace MinecraftClient.UI
 
             selectedButton = 0;
 
-            rootMenuPrefabs[0] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Avatar");
-            rootMenuPrefabs[1] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Social");
-            rootMenuPrefabs[2] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Chat");
-            rootMenuPrefabs[3] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Map");
-            rootMenuPrefabs[4] = Resources.Load<GameObject>("Prefabs/GUI/First Person Menu Settings");
+            rootMenuPrefabs[0] = Resources.Load<GameObject>(BUTTON_AVATAR_PREFAB);
+            rootMenuPrefabs[1] = Resources.Load<GameObject>(BUTTON_SOCIAL_PREFAB);
+            rootMenuPrefabs[2] = Resources.Load<GameObject>(BUTTON_CHAT_PREFAB);
+            rootMenuPrefabs[3] = Resources.Load<GameObject>(BUTTON_MAP_PREFAB);
+            rootMenuPrefabs[4] = Resources.Load<GameObject>(BUTTON_SETTINGS_PREFAB);
 
-            var firstPersonPanelPrefab = Resources.Load<GameObject>("Prefabs/GUI/First Person Panel");
+            var firstPersonPanelPrefab = Resources.Load<GameObject>(PANEL_PREFAB);
             var firstPersonPanelObj = GameObject.Instantiate(firstPersonPanelPrefab, Vector3.zero, Quaternion.identity);
             firstPersonPanelObj.transform.SetParent(canvas.transform, false);
             firstPersonPanelObj.transform.localPosition = new(-70F, STOP_POS[0], 0F);
 
             firstPersonPanel = firstPersonPanelObj.GetComponent<FirstPersonPanel>();
 
-            var chatPrefab = Resources.Load<GameObject>("Prefabs/GUI/First Person Chat");
+            var chatPrefab = Resources.Load<GameObject>(PANEL_CHAT);
             var chatObj = GameObject.Instantiate(chatPrefab, Vector3.zero, Quaternion.identity);
             chatObj.transform.SetParent(canvas.transform, false);
             chatObj.transform.localPosition = new(70F, STOP_POS[0], 0F);

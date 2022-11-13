@@ -146,6 +146,9 @@ namespace MinecraftClient
         public object locationLock = new();
         public Location GetCurrentLocation() => playerData.location;
 
+        public const string PLAYER_PREFAB = "Prefabs/Entity/Client Slim Player Entity";
+        public const string CAMERA_PREFAB = "Prefabs/Camera Cinemachine"; // Cinemachine or Simple
+
         private PlayerController? playerController;
         private CameraController? cameraController;
 
@@ -376,7 +379,7 @@ namespace MinecraftClient
             entityManager = entityManagerObj.AddComponent<EntityManager>();
 
             // Create player entity
-            var playerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Client Slim Player Entity");
+            var playerPrefab = Resources.Load<GameObject>(PLAYER_PREFAB);
             var playerObj    = GameObject.Instantiate(playerPrefab);
             playerObj.name = $"{session.PlayerName} (Player)";
             playerObj.SetActive(true);
@@ -384,7 +387,7 @@ namespace MinecraftClient
 
             // Destroy previous camera and create a new one for player
             Destroy(loginCamera.gameObject);
-            var cameraPrefab = Resources.Load<GameObject>("Prefabs/Camera Cinemachine"); // Simple or Cinemachine
+            var cameraPrefab = Resources.Load<GameObject>(CAMERA_PREFAB);
             var cameraObj    = GameObject.Instantiate(cameraPrefab);
             cameraObj.name = "Main Camera (In-Game)";
             cameraObj.SetActive(true);
@@ -424,6 +427,7 @@ namespace MinecraftClient
                     EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(playerController.Status.StaminaLeft, true));
                     // Initialize health value
                     EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
+                    playerData.MaxHealth = 20F;
                 }
                 else
                 {
@@ -2587,9 +2591,12 @@ namespace MinecraftClient
         /// <param name="health">Player current health</param>
         public void OnUpdateHealth(float health, int food)
         {
-            bool updateMaxHealth = playerData.Health < health;
+            bool updateMaxHealth = playerData.MaxHealth < health;
+
+            if (updateMaxHealth)
+                playerData.MaxHealth = health;
             
-            playerData.Health = health;
+            playerData.CurHealth= health;
             playerData.FoodSaturation = food;
 
             if (health <= 0)
