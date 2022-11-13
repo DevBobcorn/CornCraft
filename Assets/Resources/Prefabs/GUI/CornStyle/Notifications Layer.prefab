@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6677876857797290924}
   - component: {fileID: 6677876857797290925}
   m_Layer: 5
-  m_Name: Notifications Layer 1
+  m_Name: Notifications Layer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
