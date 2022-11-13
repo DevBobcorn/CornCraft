@@ -146,6 +146,9 @@ namespace MinecraftClient
         public object locationLock = new();
         public Location GetCurrentLocation() => playerData.location;
 
+        public const string PLAYER_PREFAB = "Prefabs/Entity/Client Lumine Player Entity";
+        public const string CAMERA_PREFAB = "Prefabs/Camera Cinemachine"; // Cinemachine or Simple
+
         private PlayerController? playerController;
         private CameraController? cameraController;
 
@@ -376,7 +379,7 @@ namespace MinecraftClient
             entityManager = entityManagerObj.AddComponent<EntityManager>();
 
             // Create player entity
-            var playerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Client Lumine Player Entity");
+            var playerPrefab = Resources.Load<GameObject>(PLAYER_PREFAB);
             var playerObj    = GameObject.Instantiate(playerPrefab);
             playerObj.name = $"{session.PlayerName} (Player)";
             playerObj.SetActive(true);
@@ -384,7 +387,7 @@ namespace MinecraftClient
 
             // Destroy previous camera and create a new one for player
             Destroy(loginCamera.gameObject);
-            var cameraPrefab = Resources.Load<GameObject>("Prefabs/Camera Cinemachine"); // Simple or Cinemachine
+            var cameraPrefab = Resources.Load<GameObject>(CAMERA_PREFAB);
             var cameraObj    = GameObject.Instantiate(cameraPrefab);
             cameraObj.name = "Main Camera (In-Game)";
             cameraObj.SetActive(true);

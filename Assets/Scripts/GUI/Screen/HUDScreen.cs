@@ -66,7 +66,7 @@ namespace MinecraftClient.UI
             game = CornClient.Instance;
 
             // Initialize controls...
-            debugText = transform.Find("Debug Text").GetComponent<TMP_Text>();
+            debugText = FindHelper.FindChildRecursively(transform, "Debug Text").GetComponent<TMP_Text>();
             debugText.text = "Initializing...";
 
             modePanel = transform.Find("Mode Panel").GetComponent<Animator>();
@@ -141,7 +141,7 @@ namespace MinecraftClient.UI
 
             // Initialize controls
             screenGroup = GetComponent<CanvasGroup>();
-            latencyText = transform.Find("Latency Text").GetComponent<TMP_Text>();
+            latencyText = FindHelper.FindChildRecursively(transform, "Latency Text").GetComponent<TMP_Text>();
             
             return true;
         }
