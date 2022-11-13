@@ -185,33 +185,8 @@ namespace MinecraftClient
                 
             }
 
-            if (Input.GetKeyDown(KeyCode.Q)) // Biome pattern debug
-            {
-                var chunkLoc = new Location(playerData.location.ChunkX << 4, (playerData.location.ChunkY << 4) + World.GetDimension().minY, playerData.location.ChunkZ << 4);
-                chunkLoc += new Location(0.5F, 0.5F, 0.5F); // To block center
-
-                int colorPropId = Shader.PropertyToID("_BaseColor");
-
-                for (int x = 0;x < 16;x++)
-                    for (int y = 0;y < 16;y++)
-                        for (int z = 0;z < 16;z++)
-                        {
-                            if ((x + y + z) % 2 != 0)
-                                continue;
-                            
-                            Location curLoc = new(chunkLoc.X + x, chunkLoc.Y + y, chunkLoc.Z + z);
-                            
-                            var ball = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-
-                            ball.transform.SetParent(transform);
-                            ball.transform.position = CoordConvert.MC2Unity(curLoc);
-
-                            var col = world.GetBiome(curLoc).foliageColor;
-                            ball.GetComponent<MeshRenderer>().material.SetColor(colorPropId, new(col.x, col.y, col.z));
-                            
-                        }
-
-            }
+            if (Input.GetKeyDown(KeyCode.Q))
+                ShowNotification("Moew~");
 
             // Time update
             timeElapsedSinceUpdate += Time.unscaledDeltaTime;
