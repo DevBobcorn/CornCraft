@@ -223,7 +223,7 @@ namespace MinecraftClient
         {
             string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
             Debug.Log(StringConvert.MC2TMP(text));
-            Loom.QueueOnMainThread(() => Notify(RemoveFormatting(text), UI.Notification.Type.Notification));
+            Loom.QueueOnMainThread(() => Notify(RemoveFormatting(text), UI.Notification.Type.Notify));
         }
 
         /// <summary>

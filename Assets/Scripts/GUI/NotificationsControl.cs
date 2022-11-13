@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using UnityEngine;
 
@@ -7,67 +8,42 @@ namespace MinecraftClient.UI
 {
     public class NotificationsControl : MonoBehaviour
     {
-        private static int nextNumeralID = 1;
-        private static bool[] posAvailable = new bool[1000];
-        public GameObject notificationPrefab;
-        public Sprite success, warning, error;
+        [SerializeField] private GameObject? notificationPrefab;
+        [SerializeField] private Sprite? notify, success, warning, error;
 
-        public float startPos = -100F, notificationWidth = 40F;
+        private int nextNumeralID = 1;
+        private Transform? notifications;
 
-        private Action<NotificationEvent> showCallback;
-        private Action<NotificationExpireEvent> expireCallback;
+        private Action<NotificationEvent>? showCallback;
 
         void Start()
         {
-            for (int i = 0;i < 1000;i++)
-            {
-                posAvailable[i] = true;
-            }
+            notifications = transform.Find("Notifications");
 
             showCallback = (e) => {
-                for (int i = 0;i < 1000;i++)
-                {
-                    if (posAvailable[i])
-                    {
-                        // Make a new notification here...
-                        GameObject notificationObj = GameObject.Instantiate(notificationPrefab);
-                        notificationObj.transform.SetParent(this.transform, false);
-                        notificationObj.transform.localPosition = new Vector3(0F, startPos - notificationWidth * i, 0F);
+                // Make a new notification here...
+                var notificationObj = GameObject.Instantiate(notificationPrefab);
+                notificationObj!.transform.SetParent(notifications, true);
+                notificationObj!.transform.localScale = Vector3.one;
+                
+                Notification notification = notificationObj.GetComponent<Notification>();
+                notification.SetInfo(nextNumeralID, e.Text, e.Duration);
 
-                        Notification notification = notificationObj.GetComponent<Notification>();
+                var image = e.Type switch {
+                    Notification.Type.Success => success,
+                    Notification.Type.Warning => warning,
+                    Notification.Type.Error   => error,
+                    Notification.Type.Notify  => notify,
 
-                        notification.SetInfo(nextNumeralID, i, e.Text, e.Duration);
+                    _                         => notify
+                };
 
-                        switch (e.Type)
-                        {
-                            case Notification.Type.Success:
-                                notification.SetImage(success);
-                                break;
-                            case Notification.Type.Warning:
-                                notification.SetImage(warning);
-                                break;
-                            case Notification.Type.Error:
-                                notification.SetImage(error);
-                                break;
-                        }
-
-                        posAvailable[i] = false;
-                        nextNumeralID++;
-                        break;
-                    }
-                }
-                // No position available, ignore it...
-            };
-
-            expireCallback = (e) => {
-                if (e.ExpireIndex >= 0 && e.ExpireIndex < posAvailable.Length)
-                {
-                    posAvailable[e.ExpireIndex] = true;
-                }
+                notification.SetImage(image);
+                
+                nextNumeralID++;
             };
 
             EventManager.Instance.Register(showCallback);
-            EventManager.Instance.Register(expireCallback);
 
         }
 
@@ -75,9 +51,6 @@ namespace MinecraftClient.UI
         {
             if (showCallback is not null)
                 EventManager.Instance.Unregister(showCallback);
-
-            if (expireCallback is not null)
-                EventManager.Instance.Unregister(expireCallback);
 
         }
 

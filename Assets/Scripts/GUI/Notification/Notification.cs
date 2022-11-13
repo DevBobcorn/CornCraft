@@ -9,22 +9,21 @@ namespace MinecraftClient.UI
     public class Notification : MonoBehaviour
     {
         public enum Type {
-            Notification,
+            Notify,
             Success,
             Warning,
             Error
         }
 
         private Animator anim;
-        private int numeralID, selfPos;
+        private int numeralID;
         private float timeLeft = float.MaxValue;
 
-        public void SetInfo(int id, int pos, string text, float duration)
+        public void SetInfo(int id, string text, float duration)
         {
             numeralID = id;
-            name = "Notification " + id;
+            name = "Notification #" + id;
 
-            selfPos = pos;
             GetComponentInChildren<TMP_Text>().text = text;
 
             timeLeft = duration;
@@ -38,7 +37,7 @@ namespace MinecraftClient.UI
         // Called by animator after hide animation ends...
         void Expire()
         {
-            EventManager.Instance.Broadcast<NotificationExpireEvent>(new(numeralID, selfPos));
+            EventManager.Instance.Broadcast<NotificationExpireEvent>(new(numeralID));
             Destroy(this.gameObject);
         }
 
