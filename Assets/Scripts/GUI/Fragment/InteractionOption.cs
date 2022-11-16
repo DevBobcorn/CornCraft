@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using UnityEngine;
+using TMPro;
 
 using MinecraftClient.Event;
 
@@ -24,11 +25,13 @@ namespace MinecraftClient.UI
             anim = GetComponent<Animator>();
         }
 
-        public void SetNameAndAction(int id, string name, Action<InteractionPanel, InteractionOption>? action)
+        public void SetInfo(int id, string name, Action<InteractionPanel, InteractionOption>? action)
         {
             numeralID = id;
             Name = name;
             InteractionAction = action;
+
+            GetComponentInChildren<TMP_Text>().text = name;
 
             name = $"Interaction Option #{id} [{name}]";
         }
