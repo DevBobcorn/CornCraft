@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -6,8 +7,11 @@ using MinecraftClient.Event;
 
 namespace MinecraftClient.UI
 {
+    [RequireComponent(typeof (Animator))]
     public class Notification : MonoBehaviour
     {
+        private static readonly int EXPIRED  = Animator.StringToHash("Expired");
+
         public enum Type {
             Notify,
             Success,
@@ -15,14 +19,14 @@ namespace MinecraftClient.UI
             Error
         }
 
-        private Animator anim;
+        private Animator? anim;
         private int numeralID;
         private float timeLeft = float.MaxValue;
 
         public void SetInfo(int id, string text, float duration)
         {
             numeralID = id;
-            name = "Notification #" + id;
+            name = $"Notification #{id}";
 
             GetComponentInChildren<TMP_Text>().text = text;
 
@@ -53,7 +57,7 @@ namespace MinecraftClient.UI
             if (timeLeft <= 0F) // Time to go....
             {
                 // Play fade away animation...
-                anim.SetBool("Expired", true);
+                anim?.SetBool(EXPIRED, true);
             }
         }
 

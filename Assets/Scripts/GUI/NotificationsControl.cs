@@ -12,18 +12,18 @@ namespace MinecraftClient.UI
         [SerializeField] private Sprite? notify, success, warning, error;
 
         private int nextNumeralID = 1;
-        private Transform? notifications;
+        private Transform? container;
 
         private Action<NotificationEvent>? showCallback;
 
         void Start()
         {
-            notifications = transform.Find("Notifications");
+            container = transform.Find("Notifications");
 
             showCallback = (e) => {
                 // Make a new notification here...
                 var notificationObj = GameObject.Instantiate(notificationPrefab);
-                notificationObj!.transform.SetParent(notifications, true);
+                notificationObj!.transform.SetParent(container, true);
                 notificationObj!.transform.localScale = Vector3.one;
                 
                 Notification notification = notificationObj.GetComponent<Notification>();
@@ -38,7 +38,7 @@ namespace MinecraftClient.UI
                     _                         => notify
                 };
 
-                notification.SetImage(image);
+                notification.SetImage(image!);
                 
                 nextNumeralID++;
             };
