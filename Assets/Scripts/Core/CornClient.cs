@@ -203,6 +203,13 @@ namespace MinecraftClient
             return true;
         }
 
+        public bool MouseScrollAbsorbed()
+        {
+            if (screenControl is not null)
+                return screenControl.GetTopScreen().AbsorbMouseScroll();
+            return false;
+        }
+
         // Should be called from the Unity thread only, not net read thread
         public static void ShowNotification(string notification) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification));
 
