@@ -2,12 +2,19 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace MinecraftClient.UI
 {
+    [RequireComponent(typeof (ScrollRect))]
     public class InteractionPanel : MonoBehaviour
     {
+        private static readonly int SHOW = Animator.StringToHash("Show");
+
         [SerializeField] private GameObject? interactionOptionPrefab;
+
+        private Animator? scrollHint;
+        private ScrollRect? scrollRect;
 
         private readonly List<InteractionOption> interactionOptions = new();
 
@@ -20,6 +27,10 @@ namespace MinecraftClient.UI
         {
             // Initialize controls
             container = FindHelper.FindChildRecursively(transform, "Interactions");
+            scrollHint = transform.Find("Scroll Hint").GetComponent<Animator>();
+
+            scrollRect = GetComponent<ScrollRect>();
+            scrollHint.SetBool(SHOW, false);
 
         }
 
@@ -30,7 +41,7 @@ namespace MinecraftClient.UI
 
             if (option is not null)
             {
-                option.SetNameAndAction(nextNumeralID, name, action);
+                option.SetInfo(nextNumeralID, name, action);
                 interactionOptions.Add(option);
 
                 optionObj!.transform.SetParent(container);
@@ -40,9 +51,14 @@ namespace MinecraftClient.UI
                 nextNumeralID++;
 
                 if (interactionOptions.Count == 1)
+                {
+                    selectedIndex = 0;
                     SetSelected(0); // Select the only available option
-                if (selectedIndex < 0 || selectedIndex >= interactionOptions.Count)
+                }
+                else if (selectedIndex < 0 || selectedIndex >= interactionOptions.Count)
                     SetSelected(0); // There's at least 1 option available after adding
+                
+                scrollHint!.SetBool(SHOW, interactionOptions.Count > 1); // Show mouse hint
             }
             else
             {
@@ -85,6 +101,8 @@ namespace MinecraftClient.UI
                     break; // End iteration after removing
                 }
             }
+
+            scrollHint!.SetBool(SHOW, interactionOptions.Count > 1); // Show mouse hint
         }
 
         public void SelectPrevOption()
@@ -100,6 +118,11 @@ namespace MinecraftClient.UI
         private void SetSelected(int selIndex)
         {
             selectedIndex = selIndex;
+
+            var scrollPos = 1F - (float)selectedIndex / (float)(interactionOptions.Count - 1);
+
+            if (scrollRect is not null)
+                scrollRect.verticalScrollbar.value = scrollPos;
 
             for (int i = 0;i < interactionOptions.Count;i++)
                 interactionOptions[i].SetSelected(i == selIndex);

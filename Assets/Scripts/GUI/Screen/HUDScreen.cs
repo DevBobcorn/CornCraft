@@ -231,7 +231,7 @@ namespace MinecraftClient.UI
             if (Input.GetKeyDown(KeyCode.E))
             {
                 // Debug interactions
-                interactionPanel.AddInteractionOption("Test", (panel, option) => {
+                interactionPanel.AddInteractionOption("Test " + DateTime.Now.Second, (panel, option) => {
                     panel.RemoveInteractionOption(option.NumeralID);
                 });
 
