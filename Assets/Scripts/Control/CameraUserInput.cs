@@ -8,7 +8,6 @@ namespace MinecraftClient.Control
         [SerializeField] private float sensitivityYaw    = 5F;
         [SerializeField] private float sensitivityPitch  = 3F;
         [SerializeField] private float sensitivityScroll = 0.25F;
-        [SerializeField] private bool scrollLocked = false;
         private CornClient game;
 
         void Start() => game = CornClient.Instance;
@@ -22,8 +21,10 @@ namespace MinecraftClient.Control
                     Input.GetAxis("Mouse Y") * sensitivityPitch  // Pitch
                 );
 
-                if (!scrollLocked)
+                if (!game.MouseScrollAbsorbed())
                     inputData.scroll = Input.GetAxis("Mouse ScrollWheel") * sensitivityScroll;
+                else
+                    inputData.scroll = 0;
             }
             else
             {

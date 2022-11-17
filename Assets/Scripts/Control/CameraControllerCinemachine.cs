@@ -77,11 +77,14 @@ namespace MinecraftClient.Control
         void ManagedUpdate(float interval)
         {
             // Disable input when game is paused, see EnsureInitialized() above
-            float scroll = CinemachineCore.GetInputAxis("Mouse ScrollWheel") * scrollSensitivity;
+            if (!CornClient.Instance.MouseScrollAbsorbed())
+            {
+                float scroll = CinemachineCore.GetInputAxis("Mouse ScrollWheel");
 
-            // Update target camera status according to user input
-            if (scroll != 0F)
-                cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - scroll);
+                // Update target camera status according to user input
+                if (scroll != 0F)
+                    cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - scroll * scrollSensitivity);
+            }
             
             if (cameraInfo.TargetScale != cameraInfo.CurrentScale)
             {
