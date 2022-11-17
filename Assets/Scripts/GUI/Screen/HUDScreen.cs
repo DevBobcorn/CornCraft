@@ -23,6 +23,7 @@ namespace MinecraftClient.UI
         private Button[]    modeButtons = new Button[4];
         private ValueBar healthBar;
         private RingValueBar staminaBar;
+        private InteractionPanel interactionPanel;
 
         private ChatScreen  chatScreen;
         private PauseScreen pauseScreen;
@@ -61,6 +62,13 @@ namespace MinecraftClient.UI
             return false;
         }
 
+        public override bool AbsorbMouseScroll()
+        {
+            if (interactionPanel is not null)
+                return interactionPanel.ShouldAbsordMouseScroll;
+            return false;
+        }
+
         protected override bool Initialize()
         {
             game = CornClient.Instance;
@@ -79,6 +87,8 @@ namespace MinecraftClient.UI
 
             crosshair   = transform.Find("Crosshair").GetComponent<Animator>();
             statusPanel = transform.Find("Status Panel").GetComponent<Animator>();
+
+            interactionPanel = transform.Find("Interaction Panel").GetComponent<InteractionPanel>();
 
             healthBar = statusPanel.transform.Find("Health Bar").GetComponent<ValueBar>();
 
@@ -216,6 +226,34 @@ namespace MinecraftClient.UI
                 }
                 else // Toggle debug info
                     debugInfo = !debugInfo;
+            }
+
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                // Debug interactions
+                interactionPanel.AddInteractionOption("Test " + DateTime.Now.Second, (panel, option) => {
+                    panel.RemoveInteractionOption(option.NumeralID);
+                });
+
+            }
+
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                // Debug interactions
+                interactionPanel.RunInteractionOption();
+
+            }
+
+            if (interactionPanel.ShouldAbsordMouseScroll)
+            {
+                var scroll = Input.GetAxis("Mouse ScrollWheel");
+                if (scroll != 0F && interactionPanel is not null)
+                {
+                    if (scroll < 0F)
+                        interactionPanel.SelectNextOption();
+                    else
+                        interactionPanel.SelectPrevOption();
+                }
             }
 
             if (Input.GetKeyDown(KeyCode.F5))

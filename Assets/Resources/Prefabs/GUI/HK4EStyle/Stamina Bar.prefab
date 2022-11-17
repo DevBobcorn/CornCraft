@@ -135,7 +135,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.64705884}
+  m_Color: {r: 0.3018868, g: 0.11953795, b: 0, a: 0.64705884}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -215,7 +215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalColor: {r: 1, g: 0.72203434, b: 0.04150939, a: 1}
   smoothSpeed: 1000
-  warningColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  warningColor: {r: 1, g: 0.47412714, b: 0.015686274, a: 1}
   dangerColor: {r: 1, g: 0, b: 0, a: 1}
   warningThreshold: 0.3
   dangerThreshold: 0.1
