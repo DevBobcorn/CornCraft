@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+using MinecraftClient.Event;
+using MinecraftClient.Mapping;
+
 namespace MinecraftClient.UI
 {
     [RequireComponent(typeof (ScrollRect))]
@@ -13,18 +16,26 @@ namespace MinecraftClient.UI
 
         [SerializeField] private GameObject? interactionOptionPrefab;
 
+        private CornClient? game;
+
         private Animator? scrollHint;
         private ScrollRect? scrollRect;
 
         private readonly List<InteractionOption> interactionOptions = new();
 
-        private int nextNumeralID = 1, selectedIndex = 0;
+        private int selectedIndex = 0;
         private Transform? container;
 
         public bool ShouldAbsordMouseScroll => interactionOptions.Count > 1;
 
+        private Action<InteractionAddEvent>?     addCallback;
+        private Action<InteractionRemoveEvent>?  removeCallback;
+
         void Start()
         {
+            // First get the game instance
+            game = CornClient.Instance;
+
             // Initialize controls
             container = FindHelper.FindChildRecursively(transform, "Interactions");
             scrollHint = transform.Find("Scroll Hint").GetComponent<Animator>();
@@ -32,23 +43,43 @@ namespace MinecraftClient.UI
             scrollRect = GetComponent<ScrollRect>();
             scrollHint.SetBool(SHOW, false);
 
+            // Events
+            addCallback = (e) => {
+                AddInteractionOption(e.InteractionId, e.Info);
+            };
+
+            removeCallback = (e) => {
+                RemoveInteractionOption(e.InteractionId);
+            };
+
+            EventManager.Instance.Register(addCallback);
+            EventManager.Instance.Register(removeCallback);
+
         }
 
-        public void AddInteractionOption(string name, Action<InteractionPanel, InteractionOption>? action = null)
+        void OnDestroy()
+        {
+            if (addCallback is not null)
+                EventManager.Instance.Unregister(addCallback);
+            
+            if (removeCallback is not null)
+                EventManager.Instance.Unregister(removeCallback);
+
+        }
+
+        public void AddInteractionOption(int id, InteractionInfo info)
         {
             var optionObj = GameObject.Instantiate(interactionOptionPrefab);
             var option = optionObj?.GetComponent<InteractionOption>();
 
             if (option is not null)
             {
-                option.SetInfo(nextNumeralID, name, action);
+                option.SetInfo(id, info);
                 interactionOptions.Add(option);
 
                 optionObj!.transform.SetParent(container);
                 optionObj!.transform.localScale = Vector3.one;
                 optionObj!.transform.SetAsLastSibling();
-
-                nextNumeralID++;
 
                 if (interactionOptions.Count == 1)
                 {
@@ -74,7 +105,7 @@ namespace MinecraftClient.UI
             if (selectedIndex >= 0 && selectedIndex < interactionOptions.Count)
             {
                 var targetOption = interactionOptions[selectedIndex];
-                targetOption.Execute(this, targetOption);
+                targetOption.Execute(game!);
             }
         }
 
@@ -82,7 +113,7 @@ namespace MinecraftClient.UI
         {
             for (int i = 0;i < interactionOptions.Count;i++)
             {
-                if (interactionOptions[i].NumeralID == id)
+                if (interactionOptions[i].InteractionId == id)
                 {
                     // Play fade away animation
                     interactionOptions[i].Remove();
