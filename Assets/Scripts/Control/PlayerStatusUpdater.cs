@@ -23,7 +23,6 @@ namespace MinecraftClient.Control
 
         public const float SURFING_LIQUID_DIST_THERSHOLD = -0.6F;
 
-        [SerializeField] public LayerMask BlockSelectionLayer;
         [SerializeField] public LayerMask GroundLayer;
         [SerializeField] public LayerMask LiquidLayer;
 
@@ -40,38 +39,6 @@ namespace MinecraftClient.Control
         [HideInInspector] public float   GroundSpherecastDist   = 0.1F;
 
         public PlayerStatus Status = new();
-
-        public void UpdateBlockSelection(Ray? viewRay)
-        {
-            if (viewRay is null)
-                return;
-
-            RaycastHit viewHit;
-
-            Vector3? castResultPos  = null;
-            Vector3? castSurfaceDir = null;
-
-            if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out viewHit, 10F, BlockSelectionLayer))
-            {
-                castResultPos  = viewHit.point;
-                castSurfaceDir = viewHit.normal;
-            }
-            else
-                castResultPos = castSurfaceDir = null;
-
-            if (castResultPos is not null && castSurfaceDir is not null)
-            {
-                Vector3 offseted = PointOnCubeSurface(castResultPos.Value) ?
-                        castResultPos.Value - castSurfaceDir.Value * 0.5F : castResultPos.Value;
-                
-                Vector3 selection = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
-
-                Status.TargetBlockPos = CoordConvert.Unity2MC(selection);
-            }
-            else
-                Status.TargetBlockPos = null;
-
-        }
 
         public void UpdatePlayerStatus(World world, Vector3 frontDirNormalized)
         {
@@ -201,18 +168,6 @@ namespace MinecraftClient.Control
                 Gizmos.DrawWireSphere(transform.position + GroundSpherecastCenter + Vector3.down * GroundSpherecastDist, GroundSpherecastRadius);
             }
         }
-
-        private static bool PointOnGridEdge(float value)
-        {
-            var delta = value - Mathf.Floor(value);
-            return delta < 0.01F || delta > 0.99F;
-        }
-
-        private static bool PointOnCubeSurface(Vector3 point)
-        {
-            return PointOnGridEdge(point.x) || PointOnGridEdge(point.y) || PointOnGridEdge(point.z);
-        }
-
 
     }
 }

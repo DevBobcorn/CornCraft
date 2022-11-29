@@ -1,0 +1,112 @@
+#nullable enable
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using UnityEngine;
+
+using MinecraftClient.Protocol;
+
+namespace MinecraftClient.Mapping
+{
+    public class BlockInteractionManager
+    {
+        public static readonly BlockInteractionManager INSTANCE = new();
+
+        private static readonly Dictionary<int, BlockInteractionDefinition> interactionTable = new();
+
+        public Dictionary<int, BlockInteractionDefinition> InteractionTable => interactionTable;
+
+        public IEnumerator PrepareData(CoroutineFlag flag, LoadStateInfo loadStateInfo)
+        {
+            string interactionPath = PathHelper.GetExtraDataFile("block_interaction-1.19.json");
+
+            if (!File.Exists(interactionPath))
+                throw new FileNotFoundException("Block interaction data not found!");
+            
+            // Load block interaction definitions...
+            interactionTable.Clear();
+            loadStateInfo.infoText = $"Loading block interaction definitions";
+            yield return null;
+
+            var interactions = Json.ParseJson(File.ReadAllText(interactionPath, Encoding.UTF8));
+
+            var stateListTable = BlockStatePalette.INSTANCE.StateListTable;
+            var statesTable = BlockStatePalette.INSTANCE.StatesTable;
+
+            if (interactions.Properties.ContainsKey("pickable"))
+            {
+                var entries = interactions.Properties["pickable"].DataArray;
+
+                foreach (var entry in entries) {
+                    var blockId = ResourceLocation.fromString(entry.StringValue);
+
+                    if (stateListTable.ContainsKey(blockId)) {
+                        foreach (var stateId in stateListTable[blockId]) {
+                            interactionTable.Add(stateId, new(BlockInteractionType.Break, ChatParser.TranslateString($"block.{blockId.nameSpace}.{blockId.path}")));
+
+                            //Debug.Log($"Added pickable interaction for blockstate [{stateId}] {statesTable[stateId]}");
+                        }
+                    }
+
+                }
+            }
+
+            if (interactions.Properties.ContainsKey("special"))
+            {
+                var entries = interactions.Properties["special"].Properties;
+
+                foreach (var entry in entries) {
+                    string entryName = entry.Key;
+
+                    var entryCont = entry.Value.Properties;
+
+                    if (entryCont.ContainsKey("action") &&
+                        entryCont.ContainsKey("hint") &&
+                        entryCont.ContainsKey("predicate") &&
+                        entryCont.ContainsKey("triggers"))
+                    {
+                        var interactionType = entryCont["action"].StringValue switch
+                        {
+                            "interact" => BlockInteractionType.Interact,
+                            "break"    => BlockInteractionType.Break,
+                            _          => BlockInteractionType.Interact
+                        };
+
+                        var hint = Translations.TryGet(entryCont["hint"].StringValue);
+                        var predicate = BlockStatePredicate.fromString(entryCont["predicate"].StringValue);
+
+                        var triggers = entryCont["triggers"].DataArray;
+
+                        foreach (var trigger in triggers)
+                        {
+                            var blockId = ResourceLocation.fromString(trigger.StringValue);
+
+                            if (stateListTable.ContainsKey(blockId))
+                            {
+                                foreach (var stateId in stateListTable[blockId])
+                                {
+                                    if (predicate.check(statesTable[stateId]))
+                                    {
+                                        interactionTable.Add(stateId, new(interactionType, hint));
+
+                                        //Debug.Log($"Added {entryName} interaction for blockstate [{stateId}] {statesTable[stateId]}");
+
+                                    }
+                                }
+                            }
+                            else
+                                Debug.LogWarning($"Unknown interactable block {blockId}");
+                        }
+
+                    }
+                    else
+                        Debug.LogWarning($"Invalid special block interation definition: {entryName}");
+                }
+            }
+
+            flag.done = true;
+
+        }
+    }
+}

@@ -228,15 +228,6 @@ namespace MinecraftClient.UI
                     debugInfo = !debugInfo;
             }
 
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                // Debug interactions
-                interactionPanel.AddInteractionOption("Test " + DateTime.Now.Second, (panel, option) => {
-                    panel.RemoveInteractionOption(option.NumeralID);
-                });
-
-            }
-
             if (Input.GetKeyDown(KeyCode.F))
             {
                 // Debug interactions

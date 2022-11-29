@@ -269,50 +269,57 @@ namespace MinecraftClient.Protocol
         /// <param name="rulename">Name of the rule, chosen by the server</param>
         /// <param name="using_data">Data to be used in the rule</param>
         /// <returns>Returns the formatted text according to the given data</returns>
-        private static string TranslateString(string rulename, List<string> using_data)
+        public static string TranslateString(string rulename, List<string>? using_data = null)
         {
             if (!RulesInitialized) { InitRules(); RulesInitialized = true; }
             if (TranslationRules.ContainsKey(rulename))
             {
-                int using_idx = 0;
-                string rule = TranslationRules[rulename];
-                StringBuilder result = new StringBuilder();
-                for (int i = 0; i < rule.Length; i++)
+                if (using_data is not null)
                 {
-                    if (rule[i] == '%' && i + 1 < rule.Length)
+                    int using_idx = 0;
+                    string rule = TranslationRules[rulename];
+                    StringBuilder result = new StringBuilder();
+                    for (int i = 0; i < rule.Length; i++)
                     {
-                        //Using string or int with %s or %d
-                        if (rule[i + 1] == 's' || rule[i + 1] == 'd')
+                        if (rule[i] == '%' && i + 1 < rule.Length)
                         {
-                            if (using_data.Count > using_idx)
+                            //Using string or int with %s or %d
+                            if (rule[i + 1] == 's' || rule[i + 1] == 'd')
                             {
-                                result.Append(using_data[using_idx]);
-                                using_idx++;
-                                i += 1;
-                                continue;
+                                if (using_data.Count > using_idx)
+                                {
+                                    result.Append(using_data[using_idx]);
+                                    using_idx++;
+                                    i += 1;
+                                    continue;
+                                }
                             }
-                        }
 
-                        //Using specified string or int with %1$s, %2$s...
-                        else if (char.IsDigit(rule[i + 1])
-                            && i + 3 < rule.Length && rule[i + 2] == '$'
-                            && (rule[i + 3] == 's' || rule[i + 3] == 'd'))
-                        {
-                            int specified_idx = rule[i + 1] - '1';
-                            if (using_data.Count > specified_idx)
+                            //Using specified string or int with %1$s, %2$s...
+                            else if (char.IsDigit(rule[i + 1])
+                                && i + 3 < rule.Length && rule[i + 2] == '$'
+                                && (rule[i + 3] == 's' || rule[i + 3] == 'd'))
                             {
-                                result.Append(using_data[specified_idx]);
-                                using_idx++;
-                                i += 3;
-                                continue;
+                                int specified_idx = rule[i + 1] - '1';
+                                if (using_data.Count > specified_idx)
+                                {
+                                    result.Append(using_data[specified_idx]);
+                                    using_idx++;
+                                    i += 3;
+                                    continue;
+                                }
                             }
                         }
+                        result.Append(rule[i]);
                     }
-                    result.Append(rule[i]);
+                    return result.ToString();
                 }
-                return result.ToString();
+                else
+                    return TranslationRules[rulename];
+                
             }
-            else return "[" + rulename + "] " + String.Join(" ", using_data);
+            else
+                return using_data is null ? $"[{rulename}]" : $"[{rulename}] {String.Join(" ", using_data)}";
         }
 
         /// <summary>
