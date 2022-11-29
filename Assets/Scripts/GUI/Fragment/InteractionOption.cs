@@ -1,9 +1,9 @@
 #nullable enable
-using System;
 using UnityEngine;
 using TMPro;
 
 using MinecraftClient.Event;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.UI
 {
@@ -12,28 +12,26 @@ namespace MinecraftClient.UI
     {
         private static readonly int SELECTED = Animator.StringToHash("Selected");
         private static readonly int EXPIRED  = Animator.StringToHash("Expired");
+        private static readonly int EXECUTED = Animator.StringToHash("Executed");
 
         private Animator? anim;
-        private int numeralID;
-        public int NumeralID => numeralID;
+        private int interactionKey;
+        public int InteractionId => interactionKey;
 
-        public Action<InteractionPanel, InteractionOption>? InteractionAction;
-        public string Name = string.Empty;
+        public InteractionInfo? interactionInfo;
 
         void Awake()
         {
             anim = GetComponent<Animator>();
         }
 
-        public void SetInfo(int id, string name, Action<InteractionPanel, InteractionOption>? action)
+        public void SetInfo(int id, InteractionInfo info)
         {
-            numeralID = id;
-            Name = name;
-            InteractionAction = action;
+            interactionKey = id;
+            interactionInfo = info;
 
-            GetComponentInChildren<TMP_Text>().text = name;
-
-            name = $"Interaction Option #{id} [{name}]";
+            GetComponentInChildren<TMP_Text>().text = info.GetHint();
+            gameObject.name = info.GetHint();
         }
 
         public void SetSelected(bool selected)
@@ -48,15 +46,18 @@ namespace MinecraftClient.UI
             anim?.SetBool(EXPIRED, true);
         }
 
-        public void Execute(InteractionPanel panel, InteractionOption option)
+        public void Execute(CornClient game)
         {
-            InteractionAction?.Invoke(panel, option);
+            // Execution visual feedback
+            anim?.SetTrigger(EXECUTED);
+
+            interactionInfo?.RunInteraction(game);
         }
 
         // Called by animator after hide animation ends...
         void Expire()
         {
-            EventManager.Instance.Broadcast<NotificationExpireEvent>(new(numeralID));
+            EventManager.Instance.Broadcast<NotificationExpireEvent>(new(interactionKey));
             Destroy(this.gameObject);
         }
 
