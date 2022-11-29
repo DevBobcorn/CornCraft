@@ -25,6 +25,8 @@ namespace MinecraftClient.Control
         private PlayerStatusUpdater? statusUpdater;
         public PlayerStatus Status => statusUpdater!.Status;
 
+        private PlayerInteractionUpdater? interactionUpdater;
+
         private IPlayerState CurrentState = PlayerStates.IDLE;
 
         private CameraController? camControl;
@@ -97,10 +99,13 @@ namespace MinecraftClient.Control
             userInput!.UpdateInputs(inputData, game!.PlayerData.Perspective);
 
             // Update target block selection
-            statusUpdater!.UpdateBlockSelection(camControl!.GetViewportCenterRay());
+            interactionUpdater!.UpdateBlockSelection(camControl!.GetViewportCenterRay());
+
+            // Update player interactions
+            interactionUpdater.UpdateInteractions(game!.GetWorld());
 
             // Update player status (in water, grounded, etc)
-            statusUpdater.UpdatePlayerStatus(game!.GetWorld(), visualTransform!.forward);
+            statusUpdater!.UpdatePlayerStatus(game!.GetWorld(), visualTransform!.forward);
 
             var status = statusUpdater.Status;
 
@@ -180,7 +185,7 @@ namespace MinecraftClient.Control
             CurrentState = new ForceMoveState(name, ops);
             CurrentState.OnEnter(statusUpdater!.Status, playerAbility!, playerRigidbody!, this);
         }
-
+ 
         private Action<PerspectiveUpdateEvent>? perspectiveCallback;
         private Action<GameModeUpdateEvent>? gameModeCallback;
 
@@ -196,10 +201,11 @@ namespace MinecraftClient.Control
             fakeEntity.ID   = 0;
             playerRender.UpdateEntity(fakeEntity);
 
-            playerRigidbody   = GetComponent<Rigidbody>();
+            playerRigidbody = GetComponent<Rigidbody>();
 
             statusUpdater = GetComponent<PlayerStatusUpdater>();
             userInput = GetComponent<PlayerUserInput>();
+            interactionUpdater = GetComponent<PlayerInteractionUpdater>();
 
             perspectiveCallback = (e) => { };
 
@@ -265,11 +271,12 @@ namespace MinecraftClient.Control
             var loc = CoordConvert.Unity2MC(transform.position);
             var world = game!.GetWorld();
 
+            var target = interactionUpdater!.TargetLocation;
             var status = statusUpdater!.Status;
 
-            if (status.TargetBlockPos is not null)
+            if (target is not null)
             {
-                var targetBlockState = world?.GetBlock(status.TargetBlockPos.Value).State;
+                var targetBlockState = world?.GetBlock(target.Value).State;
                 if (targetBlockState is not null)
                     targetBlockInfo = targetBlockState.ToString();
             }
@@ -279,9 +286,9 @@ namespace MinecraftClient.Control
             var veloInfo = $"Vel:\t{velocity.z:0.00}\t{velocity.y:0.00}\t{velocity.x:0.00}\n({velocity.magnitude:0.000})";
 
             if (entityDisabled)
-                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nTarget Block:\t{status.TargetBlockPos}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
+                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
             else
-                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\n{status.ToString()}\nTarget Block:\t{status.TargetBlockPos}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
+                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\n{status.ToString()}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
 
         }
 

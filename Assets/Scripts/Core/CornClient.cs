@@ -302,6 +302,12 @@ namespace MinecraftClient
 
             while (!blockLoadFlag.done)
                 yield return wait;
+            
+            var interactionDefFlag = new CoroutineFlag();
+            StartCoroutine(BlockInteractionManager.INSTANCE.PrepareData(interactionDefFlag, loadStateInfo));
+
+            while (!interactionDefFlag.done)
+                yield return wait;
 
             // Load texture atlas... TODO (Will be decently implemented in future)
             var atlasLoadFlag = new CoroutineFlag();
