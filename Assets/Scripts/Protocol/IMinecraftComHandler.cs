@@ -166,7 +166,7 @@ namespace MinecraftClient.Protocol
         /// <param name="entityid">Entity id</param>
         /// <param name="slot">Equipment slot. 0: main hand, 1: off hand, 2–5: armor slot (2: boots, 3: leggings, 4: chestplate, 5: helmet)/param>
         /// <param name="item">Item/param>
-        void OnEntityEquipment(int entityid, int slot, Item item);
+        void OnEntityEquipment(int entityid, int slot, ItemStack item);
 
         /// <summary>
         /// Called when a player spawns or enters the client's render distance
@@ -235,7 +235,7 @@ namespace MinecraftClient.Protocol
         /// <param name="inventoryID">Inventory ID</param>
         /// <param name="itemList">Item list</param>
         /// <param name="stateId">State ID</param>
-        void OnWindowItems(byte inventoryID, Dictionary<int, Item> itemList, int stateId);
+        void OnWindowItems(byte inventoryID, Dictionary<int, ItemStack> itemList, int stateId);
 
         /// <summary>
         /// Called when a single slot has been updated inside an inventory
@@ -244,7 +244,7 @@ namespace MinecraftClient.Protocol
         /// <param name="slotID">Slot ID</param>
         /// <param name="item">Item (may be null for empty slot)</param>
         /// <param name="stateId">State ID</param>
-        void OnSetSlot(byte inventoryID, short slotID, Item item, int stateId);
+        void OnSetSlot(byte inventoryID, short slotID, ItemStack item, int stateId);
 
         /// <summary>
         /// Called when player health or hunger changed.

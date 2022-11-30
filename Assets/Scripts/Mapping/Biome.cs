@@ -3,7 +3,7 @@ using Unity.Mathematics;
 namespace MinecraftClient.Mapping
 {
     /// <summary>
-    /// Represents a Minecraft Block State
+    /// Represents a Minecraft Biome
     /// </summary>
     public record Biome
     {

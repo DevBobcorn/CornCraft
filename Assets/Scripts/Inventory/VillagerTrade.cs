@@ -5,9 +5,9 @@
     /// </summary>
     public class VillagerTrade
     {
-        public Item InputItem1;
-        public Item OutputItem;
-        public Item InputItem2;
+        public ItemStack InputItem1;
+        public ItemStack OutputItem;
+        public ItemStack InputItem2;
         public bool TradeDisabled;
         public int NumberOfTradeUses;
         public int MaximumNumberOfTradeUses;
@@ -16,7 +16,7 @@
         public float PriceMultiplier;
         public int Demand;
 
-        public VillagerTrade(Item inputItem1, Item outputItem, Item inputItem2, bool tradeDisabled, int numberOfTradeUses, int maximumNumberOfTradeUses, int xp, int specialPrice, float priceMultiplier, int demand)
+        public VillagerTrade(ItemStack inputItem1, ItemStack outputItem, ItemStack inputItem2, bool tradeDisabled, int numberOfTradeUses, int maximumNumberOfTradeUses, int xp, int specialPrice, float priceMultiplier, int demand)
         {
             this.InputItem1 = inputItem1;
             this.OutputItem = outputItem;

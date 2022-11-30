@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.Text;
 
 using MinecraftClient.Protocol;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Inventory
 {
     /// <summary>
-    /// Represents an item inside a Container
+    /// Represents an item stack
     /// </summary>
-    public class Item
+    public class ItemStack
     {
         /// <summary>
         /// Item Type
         /// </summary>
-        public ItemType Type;
+        public Item Type;
 
         /// <summary>
         /// Item Count
@@ -33,7 +34,7 @@ namespace MinecraftClient.Inventory
         /// <param name="itemType">Type of the item</param>
         /// <param name="count">Item Count</param>
         /// <param name="nbt">Item Metadata</param>
-        public Item(ItemType itemType, int count, Dictionary<string, object>? nbt)
+        public ItemStack(Item itemType, int count, Dictionary<string, object>? nbt)
         {
             this.Type = itemType;
             this.Count = count;
@@ -49,7 +50,7 @@ namespace MinecraftClient.Inventory
         {
             get
             {
-                return Type == ItemType.Air || Count == 0;
+                return Type == Item.AIR_ITEM || Count == 0;
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Inventory
 {
@@ -30,7 +31,7 @@ namespace MinecraftClient.Inventory
         /// <summary>
         /// Container Items
         /// </summary>
-        public Dictionary<int, Item> Items;
+        public Dictionary<int, ItemStack> Items;
 
         /// <summary>
         /// Create an empty container
@@ -48,7 +49,7 @@ namespace MinecraftClient.Inventory
             ID = id;
             Type = type;
             Title = title;
-            Items = new Dictionary<int, Item>();
+            Items = new Dictionary<int, ItemStack>();
         }
 
         /// <summary>
@@ -58,7 +59,7 @@ namespace MinecraftClient.Inventory
         /// <param name="type">Container Type</param>
         /// <param name="title">Container Title</param>
         /// <param name="items">Container Items (key: slot ID, value: item info)</param>
-        public Container(int id, ContainerType type, string title, Dictionary<int, Item> items)
+        public Container(int id, ContainerType type, string title, Dictionary<int, ItemStack> items)
         {
             ID = id;
             Type = type;
@@ -77,7 +78,7 @@ namespace MinecraftClient.Inventory
             ID = id;
             Title = title;
             Type = ConvertType.ToNew(type);
-            Items = new Dictionary<int, Item>();
+            Items = new Dictionary<int, ItemStack>();
         }
 
         /// <summary>
@@ -91,7 +92,7 @@ namespace MinecraftClient.Inventory
             ID = id;
             Type = GetContainerType(typeID);
             Title = title;
-            Items = new Dictionary<int, Item>();
+            Items = new Dictionary<int, ItemStack>();
         }
 
         /// <summary>
@@ -103,7 +104,7 @@ namespace MinecraftClient.Inventory
             ID = -1;
             Type = type;
             Title = null;
-            Items = new Dictionary<int, Item>();
+            Items = new Dictionary<int, ItemStack>();
         }
 
         /// <summary>
@@ -111,7 +112,7 @@ namespace MinecraftClient.Inventory
         /// </summary>
         /// <param name="type">Container Type</param>
         /// <param name="items">Container Items (key: slot ID, value: item info)</param>
-        public Container(ContainerType type, Dictionary<int, Item> items)
+        public Container(ContainerType type, Dictionary<int, ItemStack> items)
         {
             ID = -1;
             Type = type;
@@ -161,7 +162,7 @@ namespace MinecraftClient.Inventory
         /// </summary>
         /// <param name="itemType">The item to search</param>
         /// <returns>An array of slot ID</returns>
-        public int[] SearchItem(ItemType itemType)
+        public int[] SearchItem(Item itemType)
         {
             List<int> result = new List<int>();
             if (Items != null)
