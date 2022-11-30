@@ -7,7 +7,7 @@ namespace MinecraftClient.Control
     {
         public const float THRESHOULD_CLIMB_2M = -2.05F;
         public const float THRESHOULD_CLIMB_1M = -1.85F;
-        public const float THRESHOULD_CLIMB_UP = -1.35F;
+        public const float THRESHOULD_CLIMB_UP = -0.85F;
         public const float THRESHOULD_STEP_UP  = -0.01F;
 
 
