@@ -57,7 +57,7 @@ namespace MinecraftClient.UI
                     var firstPersonPanelPrefab = Resources.Load<GameObject>(FirstPersonGUI.FIRST_PERSON_GUI_PREFAB);
                     var firstPersonPanelObj = GameObject.Instantiate(firstPersonPanelPrefab);
                     firstPersonPanelObj.transform.SetParent(playerCon.transform, false);
-                    firstPersonPanelObj.transform.localPosition = new(0F, 1.45F, 0F);
+                    firstPersonPanelObj.transform.localPosition = Vector3.up;
 
                     firstPersonPanel = firstPersonPanelObj.GetComponent<FirstPersonGUI>();
                     firstPersonPanel.SetViewTransform(cameraCon.GetTransform());

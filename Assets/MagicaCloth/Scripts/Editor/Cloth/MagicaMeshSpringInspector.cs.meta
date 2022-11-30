@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 56a299f6e0bc2e941aae1a80f506cdb6
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - iconPresetSave: {fileID: 2800000, guid: 0a9130c87c14bf04d87b3206383804c2, type: 3}
+  - iconPresetLoad: {fileID: 2800000, guid: 6f79ae8ba554e704fa0a0afd64ee0c8f, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

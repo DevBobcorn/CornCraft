@@ -1,0 +1,17 @@
+{
+    "name": "MagicaCloth.Editor",
+    "references": [
+        "Unity.Mathematics",
+        "MagicaCloth"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
