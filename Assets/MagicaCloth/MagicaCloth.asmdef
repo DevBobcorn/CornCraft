@@ -1,0 +1,24 @@
+{
+    "name": "MagicaCloth",
+    "rootNamespace": "",
+    "references": [
+        "Unity.Mathematics",
+        "Unity.Burst",
+        "Unity.Collections"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.collections",
+            "expression": "1.3.0",
+            "define": "MAGICACLOTH_USE_COLLECTIONS_130"
+        }
+    ],
+    "noEngineReferences": false
+}
