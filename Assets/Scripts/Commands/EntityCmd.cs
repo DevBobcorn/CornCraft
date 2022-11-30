@@ -40,7 +40,7 @@ namespace MinecraftClient.Commands
                                     int id = entity.ID;
                                     float health = entity.Health;
                                     int latency = entity.Latency;
-                                    Item item = entity.Item;
+                                    ItemStack item = entity.Item;
                                     string nickname = entity.Name;
                                     string customname = entity.CustomName;
                                     EntityPose pose = entity.Pose;
@@ -142,7 +142,7 @@ namespace MinecraftClient.Commands
                     string customname = entity2.Value.CustomName;
                     EntityPose pose = entity2.Value.Pose;
                     EntityType type = entity2.Value.Type;
-                    Item item = entity2.Value.Item;
+                    ItemStack item = entity2.Value.Item;
                     string location = String.Format("X:{0}, Y:{1}, Z:{2}", Math.Round(entity2.Value.Location.X, 2), Math.Round(entity2.Value.Location.Y, 2), Math.Round(entity2.Value.Location.Z, 2));
 
                     if (type == EntityType.Item || type == EntityType.ItemFrame || type == EntityType.EyeOfEnder || type == EntityType.Egg || type == EntityType.EnderPearl || type == EntityType.Potion || type == EntityType.Fireball || type == EntityType.FireworkRocket)
