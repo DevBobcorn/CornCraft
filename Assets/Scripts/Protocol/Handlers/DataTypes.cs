@@ -5,7 +5,6 @@ using System.Text;
 using MinecraftClient.Mapping;
 using MinecraftClient.Inventory;
 using MinecraftClient.Mapping.EntityPalettes;
-using MinecraftClient.Inventory.ItemPalettes;
 
 namespace MinecraftClient.Protocol.Handlers
 {
@@ -379,7 +378,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// Read a single item slot from a cache of bytes and remove it from the cache
         /// </summary>
         /// <returns>The item that was read or NULL for an empty slot</returns>
-        public Item? ReadNextItemSlot(Queue<byte> cache, ItemPalette itemPalette)
+        public ItemStack? ReadNextItemSlot(Queue<byte> cache, ItemPalette itemPalette)
         {
             List<byte> slotData = new List<byte>();
             if (protocolversion > ProtocolMinecraft.MC_1_13_Version)
@@ -388,10 +387,10 @@ namespace MinecraftClient.Protocol.Handlers
                 bool itemPresent = ReadNextBool(cache);
                 if (itemPresent)
                 {
-                    ItemType type = itemPalette.FromId(ReadNextVarInt(cache));
+                    Item type = itemPalette.FromId(ReadNextVarInt(cache));
                     byte itemCount = ReadNextByte(cache);
                     Dictionary<string, object> nbt = ReadNextNbt(cache);
-                    return new Item(type, itemCount, nbt);
+                    return new ItemStack(type, itemCount, nbt);
                 }
                 else return null;
             }
@@ -404,7 +403,7 @@ namespace MinecraftClient.Protocol.Handlers
                 byte itemCount = ReadNextByte(cache);
                 short itemDamage = ReadNextShort(cache);
                 Dictionary<string, object> nbt = ReadNextNbt(cache);
-                return new Item(itemPalette.FromId(itemID), itemCount, nbt);
+                return new ItemStack(itemPalette.FromId(itemID), itemCount, nbt);
             }
         }
 
@@ -711,9 +710,9 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>The item that was read or NULL for an empty slot</returns>
         public VillagerTrade ReadNextTrade(Queue<byte> cache, ItemPalette itemPalette)
         {
-            Item? inputItem1 = ReadNextItemSlot(cache, itemPalette);
-            Item? outputItem = ReadNextItemSlot(cache, itemPalette);
-            Item? inputItem2 = null;
+            ItemStack? inputItem1 = ReadNextItemSlot(cache, itemPalette);
+            ItemStack? outputItem = ReadNextItemSlot(cache, itemPalette);
+            ItemStack? inputItem2 = null;
             if (ReadNextBool(cache)) //check if villager has second item
             {
                 inputItem2 = ReadNextItemSlot(cache, itemPalette);
@@ -1051,7 +1050,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="item">Item</param>
         /// <param name="itemPalette">Item Palette</param>
         /// <returns>Item slot representation</returns>
-        public byte[] GetItemSlot(Item? item, ItemPalette itemPalette)
+        public byte[] GetItemSlot(ItemStack? item, ItemPalette itemPalette)
         {
             List<byte> slotData = new List<byte>();
 
@@ -1075,11 +1074,11 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="items">Items</param>
         /// <param name="itemPalette">Item Palette</param>
         /// <returns>Array of Item slot representations</returns>
-        public byte[] GetSlotsArray(Dictionary<int, Item> items, ItemPalette itemPalette)
+        public byte[] GetSlotsArray(Dictionary<int, ItemStack> items, ItemPalette itemPalette)
         {
             byte[] slotsArray = new byte[items.Count];
 
-            foreach (KeyValuePair<int, Item> item in items)
+            foreach (KeyValuePair<int, ItemStack> item in items)
             {
                 slotsArray = ConcatBytes(slotsArray, GetShort((short)item.Key), GetItemSlot(item.Value, itemPalette));
             }

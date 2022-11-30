@@ -85,7 +85,7 @@ namespace MinecraftClient.Mapping
         /// <summary>
         /// Item of the entity if ItemFrame or Item
         /// </summary>
-        public Item Item;
+        public ItemStack Item;
         
         /// <summary>
         /// Entity pose in the Minecraft world
@@ -100,7 +100,7 @@ namespace MinecraftClient.Mapping
         /// <summary>
         /// Entity equipment
         /// </summary>
-        public Dictionary<int, Item> Equipment;
+        public Dictionary<int, ItemStack> Equipment;
 
         /// <summary>
         /// Create a new entity based on Entity ID, Entity Type and location
@@ -114,8 +114,8 @@ namespace MinecraftClient.Mapping
             this.Type = type;
             this.Location = location;
             this.Health = 1.0f;
-            this.Equipment = new Dictionary<int, Item>();
-            this.Item = new Item(ItemType.Air, 0, null);
+            this.Equipment = new Dictionary<int, ItemStack>();
+            this.Item = new ItemStack(Mapping.Item.AIR_ITEM, 0, null);
         }
 
         /// <summary>
@@ -130,8 +130,8 @@ namespace MinecraftClient.Mapping
             this.Type = type;
             this.Location = location;
             this.Health = 1.0f;
-            this.Equipment = new Dictionary<int, Item>();
-            this.Item = new Item(ItemType.Air, 0, null);
+            this.Equipment = new Dictionary<int, ItemStack>();
+            this.Item = new ItemStack(Mapping.Item.AIR_ITEM, 0, null);
             this.Yaw = AngleConvert.MC2Unity(yaw);
             this.Pitch = AngleConvert.MC2Unity(pitch);
             this.ObjectData = objectData;
@@ -153,8 +153,8 @@ namespace MinecraftClient.Mapping
             this.UUID = uuid;
             this.Name = name;
             this.Health = 1.0f;
-            this.Equipment = new Dictionary<int, Item>();
-            this.Item = new Item(ItemType.Air, 0, null);
+            this.Equipment = new Dictionary<int, ItemStack>();
+            this.Item = new ItemStack(Mapping.Item.AIR_ITEM, 0, null);
         }
 
         public override string ToString()
