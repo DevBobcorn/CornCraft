@@ -111,7 +111,7 @@ namespace MinecraftClient.Resource
                     if (texAtlasTable.ContainsKey(ResourceLocation.fromString(item.Key)))
                     {
                         loadFlag.done = true;
-                        throw new InvalidDataException($"Duplicate block atlas with one name {item.Key}!?");
+                        throw new InvalidDataException("Duplicate block atlas with one name " + item.Key + "!?");
                     }
                     else
                     {
@@ -128,8 +128,6 @@ namespace MinecraftClient.Resource
             else
                 Debug.LogWarning("Texture files not all available!");
             
-            plcboAtlasTable.Clear(); // Clear previously loaded table...
-
             string plcboFilePath = PathHelper.GetPacksDirectory() + "/block_atlas_placebo.png";
 
             if (File.Exists(plcboFilePath))
@@ -141,7 +139,6 @@ namespace MinecraftClient.Resource
                 plcboAtlasTable.Add(RenderType.CUTOUT,        1);
                 plcboAtlasTable.Add(RenderType.CUTOUT_MIPPED, 2);
                 plcboAtlasTable.Add(RenderType.TRANSLUCENT,   3);
-                plcboAtlasTable.Add(RenderType.WATER,         3);
             }
             else
             {

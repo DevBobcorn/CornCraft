@@ -9,9 +9,11 @@ namespace MinecraftClient.Mapping
     {
         public static readonly ItemPalette INSTANCE = new();
 
-        private static readonly Dictionary<int, Item> itemsTable = new Dictionary<int, Item>();
+        private readonly Dictionary<int, Item> itemsTable = new Dictionary<int, Item>();
+        public Dictionary<int, Item> ItemsTable { get { return itemsTable; } }
 
-        private readonly Dictionary<Item, int> DictReverse = new Dictionary<Item, int>();
+        private readonly Dictionary<Item, int> dictReverse = new Dictionary<Item, int>();
+        private readonly Dictionary<ResourceLocation, int> dictId = new Dictionary<ResourceLocation, int>();
 
         public Item FromId(int id)
         {
@@ -24,7 +26,12 @@ namespace MinecraftClient.Mapping
 
         public int ToId(Item itemType)
         {
-            return DictReverse[itemType];
+            return dictReverse[itemType];
+        }
+
+        public int ToId(ResourceLocation identifier)
+        {
+            return dictId[identifier];
         }
 
         public IEnumerator PrepareData(string dataVersion, CoroutineFlag flag, LoadStateInfo loadStateInfo)
@@ -65,10 +72,14 @@ namespace MinecraftClient.Mapping
 
             // Index reverse mappings for use in ToId()
             foreach (KeyValuePair<int, Item> entry in itemsTable)
-                DictReverse.Add(entry.Value, entry.Key);
+            {
+                dictReverse.Add(entry.Value, entry.Key);
+                dictId.Add(entry.Value.itemId, entry.Key);
+            }
 
             // Hardcoded placeholder types for internal and network use
-            DictReverse[Item.UNKNOWN] = -1;
+            dictReverse[Item.UNKNOWN] = -1;
+            dictId[Item.UNKNOWN.itemId] = -1;
 
             flag.done = true;
         }
