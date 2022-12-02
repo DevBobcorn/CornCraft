@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
+using MinecraftClient.Rendering;
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Resource
@@ -16,7 +17,7 @@ namespace MinecraftClient.Resource
             this.manager = manager;
         }
 
-        public void LoadBlockStateModel(ResourcePackManager manager, ResourceLocation blockId, string path)
+        public void LoadBlockStateModel(ResourcePackManager manager, ResourceLocation blockId, string path, RenderType renderType)
         {
             if (File.Exists(path))
             {
@@ -25,27 +26,23 @@ namespace MinecraftClient.Resource
                 if (stateData.Properties.ContainsKey("variants"))
                 {
                     //Debug.Log("Load variant state model: " + blockId.ToString());
-                    LoadVariantsFormat(stateData.Properties["variants"].Properties, blockId, manager);
+                    LoadVariantsFormat(stateData.Properties["variants"].Properties, blockId, renderType, manager);
                 }
                 else if (stateData.Properties.ContainsKey("multipart"))
                 {
                     //Debug.Log("Load multipart state model: " + blockId.ToString());
-                    LoadMultipartFormat(stateData.Properties["multipart"].DataArray, blockId, manager);
+                    LoadMultipartFormat(stateData.Properties["multipart"].DataArray, blockId, renderType, manager);
                 }
                 else
-                {
                     Debug.LogWarning("Invalid state model file: " + path);
-                }
 
             }
             else
-            {
                 Debug.LogWarning("Cannot find block state model file: " + path);
-            }
 
         }
 
-        private void LoadVariantsFormat(Dictionary<string, Json.JSONData> variants, ResourceLocation blockId, ResourcePackManager manager)
+        private void LoadVariantsFormat(Dictionary<string, Json.JSONData> variants, ResourceLocation blockId, RenderType renderType, ResourcePackManager manager)
         {
             foreach (var variant in variants)
             {
@@ -70,10 +67,10 @@ namespace MinecraftClient.Resource
                 {
                     // For every possible state of this block, select the states that belong
                     // to this variant and give them this geometry list to use...
-                    if (!manager.finalTable.ContainsKey(stateId) && conditions.check(BlockStatePalette.INSTANCE.StatesTable[stateId]))
+                    if (!manager.StateModelTable.ContainsKey(stateId) && conditions.check(BlockStatePalette.INSTANCE.StatesTable[stateId]))
                     {
                         // Then this block state belongs to the current variant...
-                        manager.finalTable.Add(stateId, new BlockStateModel(results));
+                        manager.StateModelTable.Add(stateId, new(results, renderType));
 
                     }
 
@@ -83,7 +80,7 @@ namespace MinecraftClient.Resource
 
         }
 
-        private void LoadMultipartFormat(List<Json.JSONData> parts, ResourceLocation blockId, ResourcePackManager manager)
+        private void LoadMultipartFormat(List<Json.JSONData> parts, ResourceLocation blockId, RenderType renderType, ResourcePackManager manager)
         {
             Dictionary<int, BlockGeometry> resultsList = new Dictionary<int, BlockGeometry>();
             foreach (var stateId in BlockStatePalette.INSTANCE.StateListTable[blockId])
@@ -160,7 +157,7 @@ namespace MinecraftClient.Resource
             // Get the table into manager...
             foreach (var resultItem in resultsList)
             {
-                manager.finalTable.Add(resultItem.Key, new BlockStateModel(new BlockGeometry[]{ resultItem.Value.Finalize() }.ToList()));
+                manager.StateModelTable.Add(resultItem.Key, new(new BlockGeometry[]{ resultItem.Value.Finalize() }.ToList(), renderType));
             }
 
         }

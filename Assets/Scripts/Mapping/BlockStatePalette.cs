@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 using UnityEngine;
@@ -39,8 +40,7 @@ namespace MinecraftClient.Mapping
         private readonly Dictionary<int, BlockState> statesTable = new Dictionary<int, BlockState>();
         public Dictionary<int, BlockState> StatesTable { get { return statesTable; } }
 
-        private readonly Dictionary<int, RenderType> renderTypeTable = new Dictionary<int, RenderType>();
-        public RenderType GetRenderType(int stateId) => renderTypeTable.GetValueOrDefault(stateId, RenderType.SOLID);
+        public readonly Dictionary<ResourceLocation, RenderType> RenderTypeTable = new();
 
         private readonly Dictionary<int, Func<World, Location, BlockState, float3>> blockColorRules = new();
 
@@ -286,8 +286,9 @@ namespace MinecraftClient.Mapping
             yield return null;
             
             // Load and apply block render types...
-            renderTypeTable.Clear();
-            loadStateInfo.infoText = $"Loading lists of render types";
+            RenderTypeTable.Clear();
+
+            loadStateInfo.infoText = $"Loading block render types";
             yield return null;
 
             string renderTypePath = PathHelper.GetExtraDataFile("block_render_type.json");
@@ -295,52 +296,49 @@ namespace MinecraftClient.Mapping
             {
                 try
                 {
-                    string renderTypeText = File.ReadAllText(renderTypePath);
+                    var renderTypeText = File.ReadAllText(renderTypePath);
                     var renderTypes = Json.ParseJson(renderTypeText);
 
-                    foreach (var typeItem in renderTypes.Properties)
+                    var allBlockIds = stateListTable.Keys.ToHashSet();
+
+                    foreach (var pair in renderTypes.Properties)
                     {
-                        var blockId = ResourceLocation.fromString(typeItem.Key);
+                        var blockId = ResourceLocation.fromString(pair.Key);
 
-                        if (stateListTable.ContainsKey(blockId))
+                        if (allBlockIds.Contains(blockId))
                         {
-                            foreach (var stateId in stateListTable[blockId])
+                            var type = pair.Value.StringValue.ToLower() switch
                             {
-                                if (!renderTypeTable.ContainsKey(stateId))
-                                {
-                                    renderTypeTable.Add(
-                                        stateId,
-                                        typeItem.Value.StringValue.ToLower() switch
-                                        {
-                                            "solid"         => RenderType.SOLID,
-                                            "cutout"        => RenderType.CUTOUT,
-                                            "cutout_mipped" => RenderType.CUTOUT_MIPPED,
-                                            "translucent"   => RenderType.TRANSLUCENT,
+                                "solid"         => RenderType.SOLID,
+                                "cutout"        => RenderType.CUTOUT,
+                                "cutout_mipped" => RenderType.CUTOUT_MIPPED,
+                                "translucent"   => RenderType.TRANSLUCENT,
 
-                                            _               => RenderType.SOLID
-                                        }
-                                    );
-                                }
-                                else
-                                    Debug.LogWarning($"Render type of {statesTable[stateId].ToString()} registered more than once!");
+                                _               => RenderType.SOLID
+                            };
 
-                            }
+                            RenderTypeTable.Add(blockId, type);
+
+                            allBlockIds.Remove(blockId);
                         }
 
+                    }
+
+                    foreach (var blockId in allBlockIds) // Other blocks which doesn't its render type specifically stated
+                    {
+                        RenderTypeTable.Add(blockId, RenderType.SOLID); // Default to solid
                     }
 
                 }
                 catch (IOException e)
                 {
-                    Debug.LogWarning("Failed to load block render types: " + e.Message);
+                    Debug.LogWarning($"Failed to load block render types: {e.Message}");
                 }
             }
             else
-            {
-                Debug.LogWarning("Block render types not found at " + renderTypePath);
-            }
+                Debug.LogWarning($"Block render types not found at {renderTypePath}");
 
-            Debug.Log($"Render type of {renderTypeTable.Count} blocks loaded.");
+            Debug.Log($"Render type of {RenderTypeTable.Count} blocks loaded.");
 
             flag.done = true;
 

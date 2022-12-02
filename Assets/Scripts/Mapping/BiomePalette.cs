@@ -67,7 +67,7 @@ namespace MinecraftClient.Mapping
                                 Precipitation prec = Precipitation.None;
 
                                 var biomeId = ResourceLocation.fromString(biome.Value.StringValue);
-                                var biomeDefPath = PathHelper.GetExtraDataFile($"biome_defs-{dataVersion}\\{biomeId.path}.json");
+                                var biomeDefPath = PathHelper.GetExtraDataFile($"biome_defs-{dataVersion}\\{biomeId.Path}.json");
 
                                 if (File.Exists(biomeDefPath))
                                 {

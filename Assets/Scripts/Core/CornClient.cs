@@ -355,7 +355,7 @@ namespace MinecraftClient
             op.allowSceneActivation = true;
 
             // Wait a little bit...
-            yield return wait;
+            yield return new WaitForSeconds(0.5F);
 
             // Find screen control
             screenControl = Component.FindObjectOfType<ScreenControl>();

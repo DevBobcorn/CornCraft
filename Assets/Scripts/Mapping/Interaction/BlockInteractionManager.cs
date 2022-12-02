@@ -43,7 +43,7 @@ namespace MinecraftClient.Mapping
 
                     if (stateListTable.ContainsKey(blockId)) {
                         foreach (var stateId in stateListTable[blockId]) {
-                            interactionTable.Add(stateId, new(BlockInteractionType.Break, ChatParser.TranslateString($"block.{blockId.nameSpace}.{blockId.path}")));
+                            interactionTable.Add(stateId, new(BlockInteractionType.Break, ChatParser.TranslateString($"block.{blockId.Namespace}.{blockId.Path}")));
 
                             //Debug.Log($"Added pickable interaction for blockstate [{stateId}] {statesTable[stateId]}");
                         }

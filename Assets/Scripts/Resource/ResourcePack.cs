@@ -2,7 +2,10 @@ using System.Collections;
 using System.IO;
 using UnityEngine;
 
+using MinecraftClient.Rendering;
 using MinecraftClient.Mapping;
+using System.Collections.Generic;
+
 namespace MinecraftClient.Resource
 {
     public class ResourcePack
@@ -48,9 +51,7 @@ namespace MinecraftClient.Resource
                 }
             }
             else
-            {
                 Debug.LogWarning("No resource pack found at " + packDir);
-            }
 
         }
 
@@ -81,10 +82,10 @@ namespace MinecraftClient.Resource
                                 texId = texId.Substring(texDirLen); // e.g. 'block/grass_block_top.png'
                                 texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'block/grass_block_top'
                                 ResourceLocation identifier = new ResourceLocation(nameSpace, texId);
-                                if (!manager.textureTable.ContainsKey(identifier))
+                                if (!manager.TextureTable.ContainsKey(identifier))
                                 {
                                     // This texture is not provided by previous resource packs, so add it here...
-                                    manager.textureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
+                                    manager.TextureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
                                 }
                                 count++;
                                 if (count % 100 == 0)
@@ -103,10 +104,10 @@ namespace MinecraftClient.Resource
                                 texId = texId.Substring(texDirLen); // e.g. 'block/grass_block_top.png'
                                 texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'block/grass_block_top'
                                 ResourceLocation identifier = new ResourceLocation(nameSpace, texId);
-                                if (!manager.textureTable.ContainsKey(identifier))
+                                if (!manager.TextureTable.ContainsKey(identifier))
                                 {
                                     // This texture is not provided by previous resource packs, so add it here...
-                                    manager.textureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
+                                    manager.TextureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
                                 }
                                 count++;
                                 if (count % 100 == 0)
@@ -131,7 +132,7 @@ namespace MinecraftClient.Resource
                                 ResourceLocation identifier = new ResourceLocation(nameSpace, modelId);
                                 // This model loader will load this model, its parent model(if not yet loaded),
                                 // and then add them to the manager's model dictionary
-                                manager.blockModelLoader.LoadBlockModel(identifier, assetsDir.FullName.Replace('\\', '/'));
+                                manager.BlockModelLoader.LoadBlockModel(identifier, assetsDir.FullName.Replace('\\', '/'));
                                 count++;
                                 if (count % 5 == 0)
                                 {
@@ -141,25 +142,44 @@ namespace MinecraftClient.Resource
                             }
                         }
 
+                        if (new DirectoryInfo(nameSpaceDir + "/models/item").Exists)
+                        {
+                            // No sub folders, because the file name here is the identifier of corresponding item...
+                            foreach (var modelFile in modelsDir.GetFiles("item/*.json", SearchOption.TopDirectoryOnly))
+                            {
+                                string modelId = modelFile.FullName.Replace('\\', '/');
+                                modelId = modelId.Substring(modelDirLen); // e.g. 'item/acacia_boat.json'
+                                modelId = modelId.Substring(0, modelId.LastIndexOf('.')); // e.g. 'item/acacia_boat'
+                                ResourceLocation identifier = new ResourceLocation(nameSpace, modelId);
+                                // This model loader will load this model, its parent model(if not yet loaded),
+                                // and then add them to the manager's model dictionary
+                                bool generated = false;
+                                manager.ItemModelLoader.LoadItemModel(identifier, ref generated, assetsDir.FullName.Replace('\\', '/'));
+                                count++;
+                                if (count % 5 == 0)
+                                {
+                                    loadStateInfo.infoText =  $"Loading item model {identifier}";
+                                    yield return null;
+                                }
+                            }
+                        }
+
                     }
 
                 }
                 else
-                {
                     Debug.LogWarning("Cannot find path " + assetsDir.FullName);
-                }
 
             }
             else
-            {
                 Debug.LogWarning("Trying to load resources from an invalid resource pack!");
-            }
+
         }
 
         public IEnumerator BuildStateGeometries(ResourcePackManager manager, LoadStateInfo loadStateInfo)
         {
             // Load all blockstate files, make and assign their block meshes...
-            if (BlockStatePalette.INSTANCE is not null && isValid)
+            if (isValid)
             {
                 // Assets folder...
                 var assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed(packName) + "/assets");
@@ -172,7 +192,7 @@ namespace MinecraftClient.Resource
                         bool shouldLoad = false;
                         foreach (var stateId in blockPair.Value)
                         {
-                            if (!manager.finalTable.ContainsKey(stateId))
+                            if (!manager.StateModelTable.ContainsKey(stateId))
                                 shouldLoad = true;
                         }
                         
@@ -180,8 +200,12 @@ namespace MinecraftClient.Resource
                         if (!shouldLoad) continue;
 
                         // Load the state model definition of this block
-                        string statePath = assetsDir.FullName + '/' + blockId.nameSpace + "/blockstates/" + blockId.path + ".json";
-                        manager.stateModelLoader.LoadBlockStateModel(manager, blockId, statePath);
+                        string statePath = assetsDir.FullName + '/' + blockId.Namespace + "/blockstates/" + blockId.Path + ".json";
+
+                        var renderType =
+                                BlockStatePalette.INSTANCE.RenderTypeTable.GetValueOrDefault(blockId, RenderType.SOLID);
+
+                        manager.StateModelLoader.LoadBlockStateModel(manager, blockId, statePath, renderType);
                         count++;
                         if (count % 10 == 0)
                         {
@@ -194,9 +218,53 @@ namespace MinecraftClient.Resource
 
             }
             else
+                Debug.LogWarning("Resource pack is not invalid!");
+
+        }
+
+        public IEnumerator BuildItemGeometries(ResourcePackManager manager, LoadStateInfo loadStateInfo)
+        {
+            // Load all item files, make and assign their item meshes...
+            if (isValid)
             {
-                Debug.LogWarning("Block state list not loaded, or resource pack invalid!");
+                int count = 0;
+                foreach (var numId in ItemPalette.INSTANCE.ItemsTable.Keys)
+                {
+                    var item = ItemPalette.INSTANCE.ItemsTable[numId];
+                    var itemId = item.itemId;
+
+                    var itemModelId = new ResourceLocation(itemId.Namespace, $"item/{itemId.Path}");
+
+                    if (manager.RawItemModelTable.ContainsKey(itemModelId))
+                    {
+                        var itemGeometry = new ItemGeometry(manager.RawItemModelTable[itemModelId]).Finalize();
+
+                        RenderType renderType;
+
+                        if (manager.GeneratedItemModels.Contains(itemModelId))
+                            renderType = RenderType.CUTOUT; // Set render type to cutout for all generated item models
+                        else
+                            renderType = BlockStatePalette.INSTANCE.RenderTypeTable.GetValueOrDefault(itemId, RenderType.SOLID);
+
+                        var itemModel = new ItemModel(itemGeometry, renderType);
+                        // TODO Add geometry overrides into the item model
+
+                        manager.ItemModelTable.Add(numId, itemModel);
+                        count++;
+                        if (count % 10 == 0)
+                        {
+                            loadStateInfo.infoText = $"Building model for item {itemId}";
+                            yield return null;
+                        }
+                    }
+                    else
+                        Debug.LogWarning($"Item model for {itemId} not found at {itemModelId}!");
+
+                }
+
             }
+            else
+                Debug.LogWarning("Resource pack is not invalid!");
 
         }
     }

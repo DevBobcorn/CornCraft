@@ -5,26 +5,26 @@ using Unity.Mathematics;
 
 namespace MinecraftClient.Resource
 {
-    public class BlockModelElement // a box element
+    public class JsonModelElement // a cuboid element
     {
         public static readonly float3 FULL   = new float3(16, 16, 16);
         public static readonly float3 CENTER = new float3( 8,  8,  8);
 
         public float3 from = float3.zero, to = FULL, pivot = CENTER;
-        public Dictionary<FaceDir, BlockModelFace> faces;
+        public Dictionary<FaceDir, BlockModelFace> faces = new();
         public float rotAngle = 0F;
         public Rotations.Axis axis;
         public bool rescale = false;
 
-        public static BlockModelElement fromJson(Json.JSONData data)
+        public static JsonModelElement fromJson(Json.JSONData data)
         {
-            BlockModelElement elem = new BlockModelElement();
+            JsonModelElement elem = new JsonModelElement();
             if (data.Properties.ContainsKey("from") && data.Properties.ContainsKey("to") && data.Properties.ContainsKey("faces"))
             {
                 // Read vertex positions with xz values swapped...
                 elem.from = VectorUtil.Json2SwappedFloat3(data.Properties["from"]);
                 elem.to = VectorUtil.Json2SwappedFloat3(data.Properties["to"]);
-                elem.faces = new Dictionary<FaceDir, BlockModelFace>();
+                
                 var facesData = data.Properties["faces"].Properties;
                 foreach (FaceDir faceDir in Enum.GetValues(typeof (FaceDir)))
                 {

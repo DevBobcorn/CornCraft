@@ -161,7 +161,7 @@ namespace MinecraftClient.Rendering
             Task.Factory.StartNew(() => {
                 try
                 {
-                    var table = CornClient.Instance?.PackManager?.finalTable;
+                    var table = CornClient.Instance?.PackManager?.StateModelTable;
                     if (table is null)
                     {
                         chunksBeingBuilt.Remove(chunkRender);
@@ -224,14 +224,13 @@ namespace MinecraftClient.Rendering
 
                                 // If air-like (air, water block, etc), ignore it...
                                 if (state.LikeAir) continue;
-
-                                var layer = BlockStatePalette.INSTANCE.GetRenderType(stateId);
-                                int layerIndex = ChunkRender.TypeIndex(layer);
                                 
                                 int cullFlags = chunkData.GetCullFlags(loc, bloc, notFullSolid); // TODO Make it more accurate
                                 
                                 if (cullFlags != 0 && table is not null && table.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                                 {
+                                    int layerIndex = ChunkRender.TypeIndex(table[stateId].RenderType);
+
                                     var models = table[stateId].Geometries;
                                     var chosen = (x + y + z) % models.Length;
                                     var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, loc, state);
@@ -667,7 +666,7 @@ namespace MinecraftClient.Rendering
                 terrainColliderDirty = false;
                 var world = game!.GetWorld();
 
-                var table = CornClient.Instance?.PackManager?.finalTable;
+                var table = CornClient.Instance?.PackManager?.StateModelTable;
                 if (table is null)
                     return;
 
