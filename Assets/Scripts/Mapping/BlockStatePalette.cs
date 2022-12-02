@@ -228,8 +228,8 @@ namespace MinecraftClient.Mapping
                         "foliage"  => (world, loc, state) => world.GetFoliageColor(loc),
                         "grass"    => (world, loc, state) => world.GetGrassColor(loc),
                         "redstone" => (world, loc, state) => {
-                            if (state.props.ContainsKey("power"))
-                                return new(float.Parse(state.props["power"]) / 16F, 0F, 0F);
+                            if (state.Properties.ContainsKey("power"))
+                                return new(float.Parse(state.Properties["power"]) / 16F, 0F, 0F);
                             return BlockGeometry.DEFAULT_COLOR;
                         },
 

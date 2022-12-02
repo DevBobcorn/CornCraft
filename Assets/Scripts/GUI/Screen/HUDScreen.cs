@@ -217,7 +217,7 @@ namespace MinecraftClient.UI
                     modePanelShown = false;
 
                     if (selectedMode != (int)game.PlayerData.GameMode) // Commit switch request
-                        game.SendText("/gamemode " + modeIdentifiers[selectedMode]);
+                        game.SendText($"/gamemode {modeIdentifiers[selectedMode]}");
                     
                     // Restore crosshair if necessary
                     if (game.PlayerData.Perspective == Perspective.FirstPerson)
@@ -228,12 +228,8 @@ namespace MinecraftClient.UI
                     debugInfo = !debugInfo;
             }
 
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                // Debug interactions
+            if (Input.GetKeyDown(KeyCode.F)) // Execute interactions
                 interactionPanel.RunInteractionOption();
-
-            }
 
             if (interactionPanel.ShouldAbsordMouseScroll)
             {

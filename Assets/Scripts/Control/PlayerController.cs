@@ -272,13 +272,12 @@ namespace MinecraftClient.Control
             var world = game!.GetWorld();
 
             var target = interactionUpdater!.TargetLocation;
-            var status = statusUpdater!.Status;
 
             if (target is not null)
             {
-                var targetBlockState = world?.GetBlock(target.Value).State;
-                if (targetBlockState is not null)
-                    targetBlockInfo = targetBlockState.ToString();
+                var targetBlock = world?.GetBlock(target.Value);
+                if (targetBlock is not null)
+                    targetBlockInfo = targetBlock.ToString();
             }
 
             var velocity = playerRigidbody!.velocity;
@@ -288,7 +287,7 @@ namespace MinecraftClient.Control
             if (entityDisabled)
                 return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
             else
-                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\n{status.ToString()}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
+                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\n{statusUpdater!.Status}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
 
         }
 

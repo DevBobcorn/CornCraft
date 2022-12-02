@@ -10,8 +10,8 @@ namespace MinecraftClient.Mapping
 
         public static readonly BlockState AIR_STATE = new BlockState(new ResourceLocation("air"));
 
-        public readonly ResourceLocation blockId; // Something like 'minecraft:grass_block'
-        public readonly Dictionary<string, string> props;
+        public readonly ResourceLocation BlockId; // Something like 'minecraft:grass_block'
+        public readonly Dictionary<string, string> Properties;
 
         public bool NoCollision = false;
         public bool NoOcclusion = false;
@@ -26,7 +26,7 @@ namespace MinecraftClient.Mapping
         public bool LikeAir   = false;
         public bool FullSolid = true;
 
-        public static BlockState fromString(string state)
+        public static BlockState FromString(string state)
         {
             var props = new Dictionary<string, string>();
 
@@ -57,32 +57,30 @@ namespace MinecraftClient.Mapping
 
         public BlockState(ResourceLocation blockId)
         {
-            this.blockId = blockId;
-            this.props = new Dictionary<string, string>();
+            this.BlockId = blockId;
+            this.Properties = new Dictionary<string, string>();
         }
 
         public BlockState(ResourceLocation blockId, Dictionary<string, string> props)
         {
-            this.blockId = blockId;
-            this.props = props;
+            this.BlockId = blockId;
+            this.Properties = props;
         }
 
         public override string ToString()
         {
-            if (props.Count > 0)
+            if (Properties.Count > 0)
             {
-                var prop = props.GetEnumerator();
+                var prop = Properties.GetEnumerator();
                 prop.MoveNext();
-                string propsText = prop.Current.Key + '=' + prop.Current.Value;
+                string propsText = $"{prop.Current.Key}={prop.Current.Value}";
 
                 while (prop.MoveNext())
-                {
-                    propsText += ',' + prop.Current.Key + '=' + prop.Current.Value;
-                }
+                    propsText += $",{prop.Current.Key}={prop.Current.Value}";
 
-                return blockId.ToString() + '[' + propsText + ']';
+                return $"{BlockId}[{propsText}]";
             }
-            else return blockId.ToString();
+            else return BlockId.ToString();
         }
 
     }
