@@ -55,14 +55,14 @@ namespace MinecraftClient.Mapping
             foreach (var condition in conditions)
             {
                 // Check if the key exists...
-                if (!state.props.ContainsKey(condition.Key))
+                if (!state.Properties.ContainsKey(condition.Key))
                     return false;
                 
                 // Multiple allowed values are supported, separated with symbol '|'
                 string[] allowedValues = condition.Value.Split('|');
 
                 // Check if the value matches..
-                if (!allowedValues.Contains(state.props[condition.Key]))
+                if (!allowedValues.Contains(state.Properties[condition.Key]))
                     return false;
 
             }

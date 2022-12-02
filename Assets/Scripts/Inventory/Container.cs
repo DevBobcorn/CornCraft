@@ -71,20 +71,6 @@ namespace MinecraftClient.Inventory
         /// Create an empty container with ID, Type and Title
         /// </summary>
         /// <param name="id">Container ID</param>
-        /// <param name="type">Container Type</param>
-        /// <param name="title">Container title</param>
-        public Container(int id, ContainerTypeOld type, string title)
-        {
-            ID = id;
-            Title = title;
-            Type = ConvertType.ToNew(type);
-            Items = new Dictionary<int, ItemStack>();
-        }
-
-        /// <summary>
-        /// Create an empty container with ID, Type and Title
-        /// </summary>
-        /// <param name="id">Container ID</param>
         /// <param name="typeID">Container Type</param>
         /// <param name="title">Container Title</param>
         public Container(int id, int typeID, string title)
