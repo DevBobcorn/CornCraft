@@ -8,7 +8,7 @@ using MinecraftClient.Mapping;
 namespace MinecraftClient.Protocol.Handlers
 {
     /// <summary>
-    /// Terrain Decoding handler for MC 1.13+
+    /// Terrain Decoding handler for MC 1.15+
     /// </summary>
     class ProtocolTerrain
     {
@@ -347,8 +347,7 @@ namespace MinecraftClient.Protocol.Handlers
                 if ((chunkMask & (1 << chunkY)) != 0)
                 {
                     // 1.14 and above Non-air block count inside chunk section, for lighting purposes
-                    if (protocolVersion >= ProtocolMinecraft.MC_1_14_Version)
-                        dataTypes.ReadNextShort(cache);
+                    dataTypes.ReadNextShort(cache);
 
                     byte bitsPerBlock = dataTypes.ReadNextByte(cache);
                     bool usePalette = (bitsPerBlock <= 8);
@@ -360,7 +359,7 @@ namespace MinecraftClient.Protocol.Handlers
                     // MC 1.9 to 1.12 will set palette length field to 0 when palette
                     // is not used, MC 1.13+ does not send the field at all in this case
                     int paletteLength = 0; // Assume zero when length is absent
-                    if (usePalette || protocolVersion < ProtocolMinecraft.MC_1_13_Version)
+                    if (usePalette)
                         paletteLength = dataTypes.ReadNextVarInt(cache);
 
                     int[] palette = new int[paletteLength];
@@ -458,17 +457,6 @@ namespace MinecraftClient.Protocol.Handlers
 
                     // We have our chunk, save the chunk into the world
                     world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
-
-                    // Pre-1.14 Lighting data
-                    if (protocolVersion < ProtocolMinecraft.MC_1_14_Version)
-                    {
-                        // Skip block light
-                        dataTypes.ReadData((Chunk.SizeX * Chunk.SizeY * Chunk.SizeZ) / 2, cache);
-
-                        // Skip sky light
-                        if (currentDimension == 0) // Sky light is not sent in the nether or the end
-                            dataTypes.ReadData((Chunk.SizeX * Chunk.SizeY * Chunk.SizeZ) / 2, cache);
-                    }
                 }
             }
 

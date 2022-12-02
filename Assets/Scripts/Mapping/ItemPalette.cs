@@ -52,7 +52,7 @@ namespace MinecraftClient.Mapping
                         Item newItem = new Item(itemId);
 
                         itemsTable.TryAdd(numId, newItem);
-                        UnityEngine.Debug.Log($"Loading item {numId} {item.Value.StringValue}");
+                        //UnityEngine.Debug.Log($"Loading item {numId} {item.Value.StringValue}");
                     }
 
                     count++;

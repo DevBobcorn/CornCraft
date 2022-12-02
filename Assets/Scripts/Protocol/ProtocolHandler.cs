@@ -111,17 +111,9 @@ namespace MinecraftClient.Protocol
         }
         #nullable disable
 
-        // MC 1.13+ only now...
-        private static int[] supportedVersions = { 393, 401, 404, 477, 480, 485, 490, 498, 573, 575, 578, 735, 736, 751, 753, 754, 755, 756, 757, 758, 759, 760 };
-
         public static bool IsProtocolSupported(int version)
         {
-            return Array.IndexOf(supportedVersions, version) > -1;
-        }
-
-        public static string GetLatestSupported()
-        {
-            return ProtocolVersion2MCVer(supportedVersions.Max());
+            return ProtocolVersion2MCVer(version) != "unknown";
         }
 
         /// <summary>
@@ -133,7 +125,7 @@ namespace MinecraftClient.Protocol
         /// <returns></returns>
         public static IMinecraftCom GetProtocolHandler(TcpClient Client, int ProtocolVersion, ForgeInfo forgeInfo, IMinecraftComHandler Handler)
         {
-            if (Array.IndexOf(supportedVersions, ProtocolVersion) > -1)
+            if (IsProtocolSupported(ProtocolVersion))
                 return new ProtocolMinecraft(Client, ProtocolVersion, Handler, forgeInfo);
             throw new NotSupportedException(Translations.Get("exception.version_unsupport", ProtocolVersion));
         }
@@ -149,31 +141,6 @@ namespace MinecraftClient.Protocol
             {
                 switch (MCVersion.Split(' ')[0].Trim())
                 {
-                    case "1.13":
-                    case "1.13.0":
-                        return 393;
-                    case "1.13.1":
-                        return 401;
-                    case "1.13.2":
-                        return 404;
-                    case "1.14":
-                    case "1.14.0":
-                        return 477;
-                    case "1.14.1":
-                        return 480;
-                    case "1.14.2":
-                        return 485;
-                    case "1.14.3":
-                        return 490;
-                    case "1.14.4":
-                        return 498;
-                    case "1.15":
-                    case "1.15.0":
-                        return 573;
-                    case "1.15.1":
-                        return 575;
-                    case "1.15.2":
-                        return 578;
                     case "1.16":
                     case "1.16.0":
                         return 735;
@@ -225,22 +192,11 @@ namespace MinecraftClient.Protocol
         /// </summary>
         /// <remarks>Some Minecraft versions share the same protocol number. In that case, the lowest version for that protocol is returned.</remarks>
         /// <param name="protocol">The Minecraft protocol version number</param>
-        /// <returns>The 1.X.X version number, or 0.0 if could not determine protocol version</returns>
+        /// <returns>The 1.X.X version number, or unknown if could not determine protocol version</returns>
         public static string ProtocolVersion2MCVer(int protocol)
         {
             switch (protocol)
             {
-                case 393: return "1.13";
-                case 401: return "1.13.1";
-                case 404: return "1.13.2";
-                case 477: return "1.14";
-                case 480: return "1.14.1";
-                case 485: return "1.14.2";
-                case 490: return "1.14.3";
-                case 498: return "1.14.4";
-                case 573: return "1.15";
-                case 575: return "1.15.1";
-                case 578: return "1.15.2";
                 case 735: return "1.16";
                 case 736: return "1.16.1";
                 case 751: return "1.16.2";
@@ -252,7 +208,7 @@ namespace MinecraftClient.Protocol
                 case 758: return "1.18.2";
                 case 759: return "1.19";
                 case 760: return "1.19.2";
-                default: return "0.0";
+                default: return "unknown";
             }
         }
 
@@ -459,102 +415,6 @@ namespace MinecraftClient.Protocol
                 return (code >= 200 && code < 300);
             }
             catch { return false; }
-        }
-
-        /// <summary>
-        /// Retrieve available Realms worlds of a player and display them
-        /// </summary>
-        /// <param name="username">Player Minecraft username</param>
-        /// <param name="uuid">Player UUID</param>
-        /// <param name="accesstoken">Access token</param>
-        /// <returns>List of ID of available Realms worlds</returns>
-        public static List<string> RealmsListWorlds(string username, string uuid, string accesstoken)
-        {
-            List<string> realmsWorldsResult = new List<string>(); // Store world ID
-            try
-            {
-                string result = "";
-                string cookies = String.Format("sid=token:{0}:{1};user={2};version={3}", accesstoken, uuid, username, GetLatestSupported());
-                DoHTTPSGet("pc.realms.minecraft.net", "/worlds", cookies, ref result);
-                Json.JSONData realmsWorlds = Json.ParseJson(result);
-                if (realmsWorlds.Properties.ContainsKey("servers")
-                    && realmsWorlds.Properties["servers"].Type == Json.JSONData.DataType.Array
-                    && realmsWorlds.Properties["servers"].DataArray.Count > 0)
-                {
-                    List<string> availableWorlds = new List<string>(); // Store string to print
-                    int index = 0;
-                    foreach (Json.JSONData realmsServer in realmsWorlds.Properties["servers"].DataArray)
-                    {
-                        if (realmsServer.Properties.ContainsKey("name")
-                            && realmsServer.Properties.ContainsKey("owner")
-                            && realmsServer.Properties.ContainsKey("id")
-                            && realmsServer.Properties.ContainsKey("expired"))
-                        {
-                            if (realmsServer.Properties["expired"].StringValue == "false")
-                            {
-                                availableWorlds.Add(String.Format("[{0}] {2} ({3}) - {1}",
-                                    index++,
-                                    realmsServer.Properties["id"].StringValue,
-                                    realmsServer.Properties["name"].StringValue,
-                                    realmsServer.Properties["owner"].StringValue));
-                                realmsWorldsResult.Add(realmsServer.Properties["id"].StringValue);
-                            }
-                        }
-                    }
-                    if (availableWorlds.Count > 0)
-                    {
-                        Translations.Log("mcc.realms_available");
-                        foreach (var world in availableWorlds)
-                            Debug.Log(world);
-                        Translations.Log("mcc.realms_join");
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e.GetType().ToString() + ": " + e.Message);
-            }
-            return realmsWorldsResult;
-        }
-
-        /// <summary>
-        /// Get the server address of a Realms world by world ID
-        /// </summary>
-        /// <param name="worldId">The world ID of the Realms world</param>
-        /// <param name="username">Player Minecraft username</param>
-        /// <param name="uuid">Player UUID</param>
-        /// <param name="accesstoken">Access token</param>
-        /// <returns>Server address (host:port) or empty string if failure</returns>
-        public static string GetRealmsWorldServerAddress(string worldId, string username, string uuid, string accesstoken)
-        {
-            try
-            {
-                string result = "";
-                string cookies = String.Format("sid=token:{0}:{1};user={2};version={3}", accesstoken, uuid, username, GetLatestSupported());
-                int statusCode = DoHTTPSGet("pc.realms.minecraft.net", "/worlds/v1/" + worldId + "/join/pc", cookies, ref result);
-                if (statusCode == 200)
-                {
-                    Json.JSONData serverAddress = Json.ParseJson(result);
-                    if (serverAddress.Properties.ContainsKey("address"))
-                        return serverAddress.Properties["address"].StringValue;
-                    else
-                    {
-                        Translations.Log("error.realms.ip_error");
-                        return "";
-                    }
-                }
-                else
-                {
-                    Translations.Log("error.realms.access_denied");
-                    return "";
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e.GetType().ToString() + ": " + e.Message);
-                return "";
-            }
         }
 
         /// <summary>

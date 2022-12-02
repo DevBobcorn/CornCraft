@@ -165,18 +165,12 @@ namespace MinecraftClient.Protocol.Handlers
         {
             ulong locEncoded = ReadNextULong(cache);
             int x, y, z;
-            if (protocolversion >= ProtocolMinecraft.MC_1_14_Version)
-            {
-                x = (int)(locEncoded >> 38);
-                y = (int)(locEncoded & 0xFFF);
-                z = (int)(locEncoded << 26 >> 38);
-            }
-            else
-            {
-                x = (int)(locEncoded >> 38);
-                y = (int)((locEncoded >> 26) & 0xFFF);
-                z = (int)(locEncoded << 38 >> 38);
-            }
+            
+            // MC 1.14+
+            x = (int)(locEncoded >> 38);
+            y = (int)(locEncoded & 0xFFF);
+            z = (int)(locEncoded << 26 >> 38);
+
             if (x >= 0x02000000) // 33,554,432
                 x -= 0x04000000; // 67,108,864
             if (y >= 0x00000800) //      2,048
@@ -381,30 +375,17 @@ namespace MinecraftClient.Protocol.Handlers
         public ItemStack? ReadNextItemSlot(Queue<byte> cache, ItemPalette itemPalette)
         {
             List<byte> slotData = new List<byte>();
-            if (protocolversion > ProtocolMinecraft.MC_1_13_Version)
+            
+            // MC 1.13+
+            bool itemPresent = ReadNextBool(cache);
+            if (itemPresent)
             {
-                // MC 1.13 and greater
-                bool itemPresent = ReadNextBool(cache);
-                if (itemPresent)
-                {
-                    Item type = itemPalette.FromId(ReadNextVarInt(cache));
-                    byte itemCount = ReadNextByte(cache);
-                    Dictionary<string, object> nbt = ReadNextNbt(cache);
-                    return new ItemStack(type, itemCount, nbt);
-                }
-                else return null;
-            }
-            else
-            {
-                // MC 1.12.2 and lower
-                short itemID = ReadNextShort(cache);
-                if (itemID == -1)
-                    return null;
+                Item type = itemPalette.FromId(ReadNextVarInt(cache));
                 byte itemCount = ReadNextByte(cache);
-                short itemDamage = ReadNextShort(cache);
                 Dictionary<string, object> nbt = ReadNextNbt(cache);
-                return new ItemStack(itemPalette.FromId(itemID), itemCount, nbt);
+                return new ItemStack(type, itemCount, nbt);
             }
+            else return null;
         }
 
         /// <summary>
@@ -422,14 +403,7 @@ namespace MinecraftClient.Protocol.Handlers
 
             EntityType entityType;
             // Entity type data type change from byte to varint after 1.14
-            if (protocolversion > ProtocolMinecraft.MC_1_13_Version)
-            {
-                entityType = entityPalette.FromId(ReadNextVarInt(cache), living);
-            }
-            else
-            {
-                entityType = entityPalette.FromId(ReadNextByte(cache), living);
-            }
+            entityType = entityPalette.FromId(ReadNextVarInt(cache), living);
 
             Double entityX = ReadNextDouble(cache);
             Double entityY = ReadNextDouble(cache);
@@ -562,18 +536,6 @@ namespace MinecraftClient.Protocol.Handlers
             while (key != 0xff)
             {
                 int type = ReadNextVarInt(cache);
-
-                // starting from 1.13, Optional Chat is inserted as number 5 in 1.13 and IDs after 5 got shifted.
-                // Increase type ID by 1 if
-                // - below 1.13
-                // - type ID larger than 4
-                if (protocolversion < ProtocolMinecraft.MC_1_13_Version)
-                {
-                    if (type > 4)
-                    {
-                        type += 1;
-                    }
-                }
 
                 // Value's data type is depended on Type
                 object? value = null;
@@ -1034,12 +996,10 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns>Location representation as ulong</returns>
         public byte[] GetLocation(Location location)
         {
-            byte[] locationBytes;
-            if (protocolversion >= ProtocolMinecraft.MC_1_14_Version)
-            {
-                locationBytes = BitConverter.GetBytes(((((ulong)location.X) & 0x3FFFFFF) << 38) | ((((ulong)location.Z) & 0x3FFFFFF) << 12) | (((ulong)location.Y) & 0xFFF));
-            }
-            else locationBytes = BitConverter.GetBytes(((((ulong)location.X) & 0x3FFFFFF) << 38) | ((((ulong)location.Y) & 0xFFF) << 26) | (((ulong)location.Z) & 0x3FFFFFF));
+            byte[] locationBytes =
+                BitConverter.GetBytes(
+                    ((((ulong)location.X) & 0x3FFFFFF) << 38) | ((((ulong)location.Z) & 0x3FFFFFF) << 12) | (((ulong)location.Y) & 0xFFF));
+
             Array.Reverse(locationBytes); //Endianness
             return locationBytes;
         }

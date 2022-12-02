@@ -51,13 +51,7 @@ namespace MinecraftClient.Protocol.Handlers
             if (protocol > ProtocolMinecraft.MC_1_19_2_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.packet"));
             
-            if (protocol < ProtocolMinecraft.MC_1_14_Version)
-                p = new PacketPalette113();
-            else if (protocol <= ProtocolMinecraft.MC_1_15_Version)
-                p = new PacketPalette114();
-            else if (protocol <= ProtocolMinecraft.MC_1_15_2_Version)
-                p = new PacketPalette115();
-            else if (protocol <= ProtocolMinecraft.MC_1_16_1_Version)
+            if (protocol <= ProtocolMinecraft.MC_1_16_1_Version)
                 p = new PacketPalette116();
             else if (protocol <= ProtocolMinecraft.MC_1_16_5_Version)
                 p = new PacketPalette1162();
