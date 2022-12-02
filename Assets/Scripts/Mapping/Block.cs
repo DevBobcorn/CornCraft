@@ -59,7 +59,7 @@ namespace MinecraftClient.Mapping
         /// </summary>
         public override string ToString()
         {
-            return StateId.ToString();
+            return $"[{StateId}] {State}";
         }
 
     }
