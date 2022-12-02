@@ -178,7 +178,6 @@ namespace MinecraftClient.UI
             {
                 string host;   // Server ip address
                 ushort port = 25565; // Server port
-                bool realmsEnabled = false;
 
                 if (!ParseServerIP(serverText, out host, ref port))
                 {
@@ -223,14 +222,9 @@ namespace MinecraftClient.UI
 
                 // Update the in-game user name
                 username = session.PlayerName;
-                bool isRealms = false;
 
                 if (CornCraft.DebugMode)
                     Translations.Log("debug.session_id", session.ID);
-
-                List<string> availableWorlds = new List<string>();
-                if (realmsEnabled && !String.IsNullOrEmpty(session.ID))
-                    availableWorlds = ProtocolHandler.RealmsListWorlds(username, session.PlayerID, session.ID);
 
                 if (host == string.Empty)
                 {   // Request host
@@ -242,19 +236,17 @@ namespace MinecraftClient.UI
                 int protocolVersion = 0;
                 ForgeInfo? forgeInfo = null;
 
-                if (!isRealms)
-                {
-                    Translations.Log("mcc.retrieve"); // Retrieve server information
-                    loadStateInfo.infoText = Translations.Get("mcc.retrieve");
-                    yield return null;
+                // Not realms
+                Translations.Log("mcc.retrieve"); // Retrieve server information
+                loadStateInfo.infoText = Translations.Get("mcc.retrieve");
+                yield return null;
 
-                    if (!ProtocolHandler.GetServerInfo(host, port, ref protocolVersion, ref forgeInfo))
-                    {
-                        Translations.NotifyError("error.ping");
-                        tryingConnect = false;
-                        loadStateInfo.infoText = ">_<";
-                        yield break;
-                    }
+                if (!ProtocolHandler.GetServerInfo(host, port, ref protocolVersion, ref forgeInfo))
+                {
+                    Translations.NotifyError("error.ping");
+                    tryingConnect = false;
+                    loadStateInfo.infoText = ">_<";
+                    yield break;
                 }
 
                 if (protocolVersion != 0) // Proceed to server login
