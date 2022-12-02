@@ -1,32 +1,22 @@
 using System.Collections.Generic;
+using MinecraftClient.Rendering;
 using UnityEngine;
 
 namespace MinecraftClient.Resource
 {
-    public struct TextureReference
-    {
-        public bool isPointer;
-        public string name;
-
-        public TextureReference(bool pointer, string name)
-        {
-            isPointer = pointer;
-            this.name = name;
-        }
-    }
-
-    public class BlockModel
+    public class JsonModel
     {
         private const int MAXDEPTH = 50;
+        
         // texName -> texture resource location
-        public readonly Dictionary<string, TextureReference> textures = new Dictionary<string, TextureReference>();
-        public readonly List<BlockModelElement> elements = new List<BlockModelElement>();
+        public readonly Dictionary<string, TextureReference> Textures = new Dictionary<string, TextureReference>();
+        public readonly List<JsonModelElement> Elements = new List<JsonModelElement>();
 
         public ResourceLocation resolveTextureName(string texName)
         {
-            if (textures.ContainsKey(texName))
+            if (Textures.ContainsKey(texName))
             {
-                return resolveTextureRef(textures[texName]);
+                return resolveTextureRef(Textures[texName]);
             }
 
             // Might be templates who have place holder textures...
@@ -39,9 +29,9 @@ namespace MinecraftClient.Resource
             int depth = 0;
             while (texRef.isPointer)
             {
-                if (textures.ContainsKey(texRef.name)) // Pointer valid, go to that tex ref
+                if (Textures.ContainsKey(texRef.name)) // Pointer valid, go to that tex ref
                 {
-                    texRef = textures[texRef.name];
+                    texRef = Textures[texRef.name];
                 }
                 else
                 {
@@ -62,7 +52,5 @@ namespace MinecraftClient.Resource
             // Reach our destination, a tex ref whose name is a resource location
             return ResourceLocation.fromString(texRef.name);
         }
-
     }
-
 }

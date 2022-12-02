@@ -42,7 +42,7 @@ namespace MinecraftClient.Resource
         public void AppendWrapper(BlockModelWrapper wrapper)
         {
             // Build things up!
-            foreach (var elem in wrapper.model.elements)
+            foreach (var elem in wrapper.model.Elements)
             {
                 AppendElement(wrapper.model, elem, wrapper.zyRot, wrapper.uvlock);
             }
@@ -363,7 +363,7 @@ namespace MinecraftClient.Resource
 
         }
 
-        private void AppendElement(BlockModel model, BlockModelElement elem, int2 zyRot, bool uvlock)
+        private void AppendElement(JsonModel model, JsonModelElement elem, int2 zyRot, bool uvlock)
         {
             float lx = Mathf.Min(elem.from.x, elem.to.x) / MC_VERT_SCALE;
             float mx = Mathf.Max(elem.from.x, elem.to.x) / MC_VERT_SCALE;

@@ -2,22 +2,22 @@ namespace MinecraftClient
 {
     public struct ResourceLocation
     {
-        public static readonly string DEFAULT_NAMESPACE = "minecraft";
+        private const string DEFAULT_NAMESPACE = "minecraft";
         public static readonly ResourceLocation INVALID = new ResourceLocation(DEFAULT_NAMESPACE, "<missingno>");
 
-        public readonly string nameSpace;
-        public readonly string path;
+        public readonly string Namespace;
+        public readonly string Path;
 
         public ResourceLocation(string ns, string path)
         {
-            this.nameSpace = ns;
-            this.path = path;
+            this.Namespace = ns;
+            this.Path = path;
         }
 
         public ResourceLocation(string path)
         {
-            this.nameSpace = DEFAULT_NAMESPACE;
-            this.path = path;
+            this.Namespace = DEFAULT_NAMESPACE;
+            this.Path = path;
         }
 
         public static ResourceLocation fromString(string source)
@@ -32,11 +32,11 @@ namespace MinecraftClient
 
         public static bool operator ==(ResourceLocation a, ResourceLocation b)
         {
-            return a.nameSpace == b.nameSpace && a.path == b.path;
+            return a.Namespace == b.Namespace && a.Path == b.Path;
         }
         public static bool operator !=(ResourceLocation a, ResourceLocation b)
         {
-            return a.nameSpace != b.nameSpace || a.path != b.path;
+            return a.Namespace != b.Namespace || a.Path != b.Path;
         }
 
         public override bool Equals(object obj)
@@ -44,19 +44,19 @@ namespace MinecraftClient
             if (obj is ResourceLocation)
             {
                 ResourceLocation other = (ResourceLocation) obj;
-                return this.nameSpace == other.nameSpace && this.path == other.path;
+                return this.Namespace == other.Namespace && this.Path == other.Path;
             }
             return false;
         }
 
         public override int GetHashCode()
         {
-            return nameSpace.GetHashCode() ^ path.GetHashCode();
+            return Namespace.GetHashCode() ^ Path.GetHashCode();
         }
 
         public override string ToString()
         {
-            return $"{nameSpace}:{path}";
+            return Namespace + ":" + Path;
         }
 
     }
