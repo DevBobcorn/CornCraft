@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
@@ -37,7 +36,7 @@ namespace MinecraftClient.Resource
             return this;
         }
 
-        public void Build(ref VertexBuffer buffer, float3 posOffset, float3 itemTint)
+        public void Build(ref VertexBuffer buffer, float3 posOffset, float3[] itemTints)
         {
             int vertexCount = buffer.vert.Length + vertexArr.Length;
 
@@ -56,7 +55,7 @@ namespace MinecraftClient.Resource
                 for (i = 0U;i < vertexArr.Length;i++)
                 {
                     verts[i + vertOffset] = vertexArr[i] + posOffset;
-                    tints[i + vertOffset] = tintArr[i] >= 0 ? itemTint : BlockGeometry.DEFAULT_COLOR;
+                    tints[i + vertOffset] = tintArr[i] >= 0 ? itemTints[tintArr[i]] : BlockGeometry.DEFAULT_COLOR;
                 }
                 txuvArr.CopyTo(txuvs, vertOffset);
                 vertOffset += (uint)vertexArr.Length;

@@ -1,7 +1,13 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Unity.Mathematics;
+using UnityEngine;
+
+using MinecraftClient.Resource;
+using MinecraftClient.Inventory;
 
 namespace MinecraftClient.Mapping
 {
@@ -14,6 +20,8 @@ namespace MinecraftClient.Mapping
 
         private readonly Dictionary<Item, int> dictReverse = new Dictionary<Item, int>();
         private readonly Dictionary<ResourceLocation, int> dictId = new Dictionary<ResourceLocation, int>();
+
+        private readonly Dictionary<int, Func<ItemStack, float3[]>> itemColorRules = new();
 
         public Item FromId(int id)
         {
@@ -34,14 +42,29 @@ namespace MinecraftClient.Mapping
             return dictId[identifier];
         }
 
+        public bool IsTintable(int itemNumId)
+        {
+            return itemColorRules.ContainsKey(itemNumId);
+        }
+
+        public Func<ItemStack, float3[]> GetTintRule(int itemNumId)
+        {
+            if (itemColorRules.ContainsKey(itemNumId))
+                return itemColorRules[itemNumId];
+            return null;
+        }
+
         public IEnumerator PrepareData(string dataVersion, CoroutineFlag flag, LoadStateInfo loadStateInfo)
         {
             loadStateInfo.infoText = "Loading items";
 
             // Clear loaded stuff...
             itemsTable.Clear();
+            dictReverse.Clear();
+            dictId.Clear();
 
             string itemsPath = PathHelper.GetExtraDataFile($"items-{dataVersion}.json");
+            string colorsPath = PathHelper.GetExtraDataFile("item_colors-1.19.json");
 
             int count = 0, yieldCount = 200;
 
@@ -80,6 +103,41 @@ namespace MinecraftClient.Mapping
             // Hardcoded placeholder types for internal and network use
             dictReverse[Item.UNKNOWN] = -1;
             dictId[Item.UNKNOWN.itemId] = -1;
+
+            yield return null;
+
+            // Load item color rules...
+            itemColorRules.Clear();
+            loadStateInfo.infoText = $"Loading item color rules";
+            yield return null;
+
+            Json.JSONData colorRules = Json.ParseJson(File.ReadAllText(colorsPath, Encoding.UTF8));
+
+            if (colorRules.Properties.ContainsKey("fixed"))
+            {
+                foreach (var fixedRule in colorRules.Properties["fixed"].Properties)
+                {
+                    var itemId = ResourceLocation.fromString(fixedRule.Key);
+
+                    if (dictId.ContainsKey(itemId))
+                    {
+                        var numId = dictId[itemId];
+
+                        var fixedColor = VectorUtil.Json2Float3(fixedRule.Value) / 255F;
+                        Func<ItemStack, float3[]> ruleFunc = (itemStack) => new float3[] { fixedColor };
+
+                        if (!itemColorRules.TryAdd(numId, ruleFunc))
+                            Debug.LogWarning($"Failed to apply fixed color rules to {itemId} ({numId})!");
+                        count++;
+                        if (count % yieldCount == 0)
+                            yield return null;
+                        
+                    }
+                    else
+                        Debug.LogWarning($"Applying fixed color rules to undefined item {itemId}!");
+                }
+            }
+
 
             flag.done = true;
         }
