@@ -153,8 +153,21 @@ namespace MinecraftClient.Resource
                                 ResourceLocation identifier = new ResourceLocation(nameSpace, modelId);
                                 // This model loader will load this model, its parent model(if not yet loaded),
                                 // and then add them to the manager's model dictionary
-                                bool generated = false;
-                                manager.ItemModelLoader.LoadItemModel(identifier, ref generated, assetsDir.FullName.Replace('\\', '/'));
+                                manager.ItemModelLoader.LoadItemModel(identifier, assetsDir.FullName.Replace('\\', '/'));
+
+                                if (manager.GeneratedItemModels.Contains(identifier)) // This model should be generated
+                                {
+                                    var model = manager.RawItemModelTable[identifier];
+
+                                    // Get layer count of this item model
+                                    int layerCount = model.Textures.Count;
+                                    var useItemCol = manager.TintableItemModels.Contains(identifier);
+
+                                    model.Elements.AddRange(
+                                            manager.ItemModelLoader.GetGeneratedItemModelElements(
+                                                    layerCount, 16, useItemCol).ToArray());
+                                }
+                                
                                 count++;
                                 if (count % 5 == 0)
                                 {
@@ -168,7 +181,7 @@ namespace MinecraftClient.Resource
 
                 }
                 else
-                    Debug.LogWarning("Cannot find path " + assetsDir.FullName);
+                    Debug.LogWarning($"Cannot find path {assetsDir.FullName}");
 
             }
             else
@@ -248,6 +261,14 @@ namespace MinecraftClient.Resource
 
                         var itemModel = new ItemModel(itemGeometry, renderType);
                         // TODO Add geometry overrides into the item model
+
+                        if (ItemPalette.INSTANCE.IsTintable(numId))
+                        {
+                            // Mark this item model as tintable
+                            manager.TintableItemModels.Add(itemModelId);
+                            //Debug.Log($"Marked {itemModelId} as tintable");
+                            // TODO Also add its override models
+                        }
 
                         manager.ItemModelTable.Add(numId, itemModel);
                         count++;

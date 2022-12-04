@@ -1,11 +1,13 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Resource
 {
     public class ItemModelLoader
     {
-        private const string GERERATED = "builtin/generated";
+        private const string GENERATED = "builtin/generated";
         private const string ENTITY    = "builtin/entity";
 
         public static JsonModel INVALID_MODEL = new JsonModel();
@@ -18,33 +20,96 @@ namespace MinecraftClient.Resource
             this.manager = manager;
         }
 
-        public JsonModel GenerateItemModel(Json.JSONData modelData, ref bool generated)
+        // 
+        private static Dictionary<int2, List<JsonModelElement>> generatedModels = new();
+
+        public List<JsonModelElement> GetGeneratedItemModelElements(int layerCount, int precision, bool useItemColor)
         {
-            JsonModel model = new();
+            int2 modelKey = new(layerCount, precision);
 
-            var elem = new JsonModelElement();
+            if (!generatedModels.ContainsKey(modelKey)) // Not present yet, generate it
+            {
+                //Debug.Log($"Generating item model... Layer count: {layerCount} Precision: {precision}");
+                var model = new List<JsonModelElement>();
+                var stepLength = 16F / (float) precision;
 
-            elem.faces.Add(FaceDir.UP, new() {
-                uv = new(0F, 0F, 16F, 16F),
-                texName = "layer0"
-            });
+                for (int layer = 0;layer < layerCount;layer++)
+                {
+                    var elem = new JsonModelElement();
+                    var layerTexName = $"layer{layer}";
 
-            elem.faces.Add(FaceDir.DOWN, new() {
-                uv = new(0F, 0F, 16F, 16F),
-                texName = "layer0"
-            });
+                    elem.from = new(8F - stepLength / 2F,  0F,  0F);
+                    elem.to   = new(8F + stepLength / 2F, 16F, 16F);
 
-            //Debug.Log("Generating model: " + modelData.StringValue);
-            model.Elements.Add(elem);
+                    elem.faces.Add(FaceDir.NORTH, new() {
+                        uv = new(0F, 0F, 16F, 16F),
+                        texName = layerTexName,
+                        tintIndex = useItemColor ? layer : -1
+                    });
 
-            generated = true;
+                    elem.faces.Add(FaceDir.SOUTH, new() {
+                        uv = new(16F, 0F, 0F, 16F),
+                        texName = layerTexName,
+                        tintIndex = useItemColor ? layer : -1
+                    });
 
-            return model;
+                    for (int i = 0;i < precision;i++)
+                    {
+                        var fracL1 =       i * stepLength;
+                        var fracR1 = (i + 1) * stepLength;
+                        var fracL2 = (precision -       i) * stepLength;
+                        var fracR2 = (precision - (i + 1)) * stepLength;
+
+                        var vertStripe = new JsonModelElement();
+                        var horzStripe = new JsonModelElement();
+
+                        vertStripe.from = new(8F - stepLength / 2F,  0F, fracL2);
+                        vertStripe.to   = new(8F + stepLength / 2F, 16F, fracR2);
+                        horzStripe.from = new(8F - stepLength / 2F, fracL2,  0F);
+                        horzStripe.to   = new(8F + stepLength / 2F, fracR2, 16F);
+
+                        // Left faces
+                        vertStripe.faces.Add(FaceDir.EAST, new() {
+                            uv = new(fracL1,       0F,       fracR1, 16F),
+                            texName = layerTexName,
+                            tintIndex = useItemColor ? layer : -1
+                        });
+                        // Right faces
+                        vertStripe.faces.Add(FaceDir.WEST, new() {
+                            uv = new(16F - fracL2, 0F, 16F - fracR2, 16F),
+                            texName = layerTexName,
+                            tintIndex = useItemColor ? layer : -1
+                        });
+                        // Top faces
+                        horzStripe.faces.Add(FaceDir.UP, new() {
+                            uv = new(16F,       fracL1, 0F,       fracR1),
+                            texName = layerTexName,
+                            tintIndex = useItemColor ? layer : -1
+                        });
+                        // Bottom faces
+                        horzStripe.faces.Add(FaceDir.DOWN, new() {
+                            uv = new(16F, 16F - fracL2, 0F, 16F - fracR2),
+                            texName = layerTexName,
+                            tintIndex = useItemColor ? layer : -1
+                        });
+
+                        model.Add(vertStripe);
+                        model.Add(horzStripe);
+                    }
+
+                    model.Add(elem);
+                }
+
+                // Generation complete, add it into the dictionary
+                generatedModels.Add(modelKey, model);
+            }
+
+            return generatedModels[modelKey];
         }
 
         // Accepts the assets path of current resource pack so that it can easily find other model
         // files(when searching for a parent model which is not loaded yet, for example)
-        public JsonModel LoadItemModel(ResourceLocation identifier, ref bool generated, string assetsPath)
+        public JsonModel LoadItemModel(ResourceLocation identifier, string assetsPath)
         {
             // Check if this model is loaded already...
             if (manager.RawItemModelTable.ContainsKey(identifier))
@@ -64,56 +129,67 @@ namespace MinecraftClient.Resource
                 if (modelData.Properties.ContainsKey("parent"))
                 {
                     ResourceLocation parentIdentifier = ResourceLocation.fromString(modelData.Properties["parent"].StringValue.Replace('\\', '/'));
-                    JsonModel parentModel;
+                    
+                    switch (parentIdentifier.Path) {
+                        case GENERATED:
+                            if (manager.GeneratedItemModels.Add(identifier))
+                            {
+                                //Debug.Log($"Marked item model {identifier} as generated (Direct)");
+                            }
+                            model = new(); // Return a placeholder model
+                            break;
+                        case ENTITY:
+                            break;
+                        default:
+                            bool parentIsGenerated = false;
+                            JsonModel parentModel;
 
-                    bool parentIsGenerated = manager.GeneratedItemModels.Contains(parentIdentifier);
+                            if (manager.RawItemModelTable.ContainsKey(parentIdentifier)
+                                    && !manager.GeneratedItemModels.Contains(parentIdentifier))
+                            {
+                                // This parent is not generated and is already loaded, get it...
+                                parentModel = manager.RawItemModelTable[parentIdentifier];
+                            }
+                            else if (manager.BlockModelTable.ContainsKey(parentIdentifier))
+                            {
+                                // This parent is already loaded as a block model, get it...
+                                parentModel = manager.BlockModelTable[parentIdentifier];
+                            }
+                            else {
+                                // This parent is not yet loaded or is a generated model, load it...
+                                parentModel = LoadItemModel(parentIdentifier, assetsPath);
+                                parentIsGenerated = manager.GeneratedItemModels.Contains(parentIdentifier);
 
-                    if (manager.RawItemModelTable.ContainsKey(parentIdentifier) && !parentIsGenerated)
-                    {
-                        // This parent is already loaded, get it...
-                        parentModel = manager.RawItemModelTable[parentIdentifier];
+                                if (parentIsGenerated) // Also mark self as generated
+                                    if (manager.GeneratedItemModels.Add(identifier))
+                                    {
+                                        //Debug.Log($"Marked item model {identifier} as generated (Inherited)");
+                                    }
+
+                                if (parentModel == INVALID_MODEL)
+                                    Debug.LogWarning($"Failed to load parent of {identifier}");
+                            }
+
+                            // Inherit parent textures...
+                            foreach (var tex in parentModel.Textures)
+                            {
+                                model.Textures.Add(tex.Key, tex.Value);
+                            }
+
+                            // Inherit parent elements only if itself doesn't have those defined...
+                            if (!containsElements)
+                            {
+                                foreach (var elem in parentModel.Elements)
+                                {
+                                    model.Elements.Add(elem);
+                                }
+                            }
+
+                            break;
                     }
-                    else if (manager.BlockModelTable.ContainsKey(parentIdentifier))
-                    {
-                        // This parent is already loaded, get it...
-                        parentModel = manager.BlockModelTable[parentIdentifier];
-                    }
-                    else
-                    {
-                        if (parentIsGenerated)
-                        {   // Clear this parent from model cache, and re-generate it
-                            if (manager.RawItemModelTable.ContainsKey(parentIdentifier))
-                                manager.RawItemModelTable.Remove(parentIdentifier);
-                        }
 
-                        parentModel = parentIdentifier.Path switch {
-                            GERERATED    => GenerateItemModel(modelData, ref generated),
-                            ENTITY       => EMPTY_MODEL,
-                            
-                            // This parent is not yet loaded, load it...
-                            _            => LoadItemModel(parentIdentifier, ref generated, assetsPath)
-                        };
-
-                        if (parentModel == INVALID_MODEL)
-                            Debug.LogWarning($"Failed to load parent of {identifier}");
-                    }
-
-                    // Inherit parent textures...
-                    foreach (var tex in parentModel.Textures)
-                    {
-                        model.Textures.Add(tex.Key, tex.Value);
-                    }
-
-                    // Inherit parent elements only if itself doesn't have those defined...
-                    if (!containsElements)
-                    {
-                        foreach (var elem in parentModel.Elements)
-                        {
-                            model.Elements.Add(elem);
-                        }
-                    }
                 }
-
+                
                 if (containsTextures) // Add / Override texture references
                 {
                     var texData = modelData.Properties["textures"].Properties;
@@ -158,12 +234,6 @@ namespace MinecraftClient.Resource
                 }
                 else
                     Debug.LogWarning($"Trying to add model twice: {identifier}");
-                
-                if (generated && !manager.GeneratedItemModels.Contains(identifier))
-                {
-                    manager.GeneratedItemModels.Add(identifier);
-                    //Debug.Log($"Marked item model {identifier} as generated");
-                }
 
                 return model;
             }
