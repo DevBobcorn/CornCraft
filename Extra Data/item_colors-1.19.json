@@ -1,0 +1,21 @@
+{
+  "fixed": {
+    "minecraft:birch_leaves": [128, 167, 55],
+    "minecraft:spruce_leaves": [97, 153, 97],
+    "minecraft:lily_pad": [32, 128, 48],
+
+    "minecraft:oak_leaves": [128, 167, 55],
+    "minecraft:acacia_leaves": [128, 167, 55],
+    "minecraft:jungle_leaves": [128, 167, 55],
+    "minecraft:dark_oak_leaves": [128, 167, 55],
+    "minecraft:vine": [128, 167, 55],
+
+    "minecraft:grass_block": [128, 167, 55],
+    "minecraft:grass": [128, 167, 55],
+    "minecraft:tall_grass": [128, 167, 55],
+    "minecraft:fern": [128, 167, 55],
+    "minecraft:large_fern": [128, 167, 55],
+    "minecraft:potted_fern": [128, 167, 55],
+    "minecraft:sugar_cane": [128, 167, 55]
+  }
+}

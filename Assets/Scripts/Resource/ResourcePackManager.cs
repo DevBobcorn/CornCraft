@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 using MinecraftClient.Mapping;
+using MinecraftClient.Inventory;
 
 namespace MinecraftClient.Resource
 {
@@ -24,6 +27,7 @@ namespace MinecraftClient.Resource
         public readonly Dictionary<int, ItemModel> ItemModelTable = new Dictionary<int, ItemModel>();
 
         public readonly HashSet<ResourceLocation> GeneratedItemModels = new();
+        public readonly HashSet<ResourceLocation> TintableItemModels  = new();
 
         public readonly BlockModelLoader BlockModelLoader;
         public readonly BlockStateModelLoader StateModelLoader;
@@ -56,6 +60,7 @@ namespace MinecraftClient.Resource
             RawItemModelTable.Clear();
             ItemModelTable.Clear();
             GeneratedItemModels.Clear();
+            TintableItemModels.Clear();
         }
 
         public IEnumerator LoadPacks(CoroutineFlag flag, LoadStateInfo loadStateInfo)
