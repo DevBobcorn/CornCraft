@@ -1,11 +1,8 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.Mathematics;
 
 using MinecraftClient.Mapping;
-using MinecraftClient.Inventory;
 
 namespace MinecraftClient.Resource
 {
@@ -63,7 +60,7 @@ namespace MinecraftClient.Resource
             TintableItemModels.Clear();
         }
 
-        public IEnumerator LoadPacks(CoroutineFlag flag, LoadStateInfo loadStateInfo)
+        public IEnumerator LoadPacks(MonoBehaviour loader, CoroutineFlag flag, LoadStateInfo loadStateInfo)
         {
             float startTime = Time.realtimeSinceStartup;
 
@@ -75,6 +72,14 @@ namespace MinecraftClient.Resource
                 }
                 
             }
+
+            var wait = new WaitForSecondsRealtime(0.1F);
+
+            var atlasLoadFlag = new CoroutineFlag();
+            loader.StartCoroutine(AtlasManager.Generate(this, atlasLoadFlag, loadStateInfo));
+
+            while (!atlasLoadFlag.done)
+                yield return wait;
 
             foreach (var pack in packs)
             {

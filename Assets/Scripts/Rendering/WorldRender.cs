@@ -364,7 +364,7 @@ namespace MinecraftClient.Rendering
                             {
                                 if ((layerMask & (1 << layer)) != 0)
                                 {
-                                    materialArr[subMeshIndex] = MaterialManager.GetBlockMaterial(ChunkRender.TYPES[layer]);
+                                    materialArr[subMeshIndex] = MaterialManager.GetAtlasMaterial(ChunkRender.TYPES[layer]);
                                     int vertCount = visualBuffer[layer].vert.Length;
                                     meshData.SetSubMesh(subMeshIndex, new((vertOffset / 2) * 3, (vertCount / 2) * 3){ vertexCount = vertCount });
                                     vertOffset += vertCount;
