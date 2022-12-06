@@ -30,8 +30,6 @@ Then, add a <code>pack.mcmeta</code> in each  of  the resource folders. In this 
 ```
 and that'll do the trick. The value of <code>pack_format</code> is not used by CornCraft yet, so it actually doesn't have to match the game version.
 
-Finally, when the resource packs are ready, you can then run the Python3 script called <code>block_atlas_gen.py</code> in the <code>Resource Packs</code> folder to generate block texture atlas for running the game (also change resource path in the script before executing it).
-
 ## > Controls
 Most basic controls in CornCraft are similar to vanilla Java Edition. They're hard-coded for now, but will be configurable in the future. Here's a list of currently supported actions:
 Key                                                       | Action
@@ -60,16 +58,4 @@ More information about CDDL-1.0 can be found on MCC's [home page](https://github
 ## > Screenshots
 ![Screenshot 1](https://s2.loli.net/2022/10/23/yk9D2ejznQE5ZJa.png)
 ![Screenshot 2](https://s2.loli.net/2022/10/24/pLfmGiEbBOqFzTZ.png)
-<center>
-  <div style="border-bottom: 1px solid #d9d9d9;
-    display: inline-block; color: #999;
-    padding: 2px;">A serene village</div>
-</center>
-
 ![Screenshot 3](https://s2.loli.net/2022/10/25/RSZK3FbOdHXkanm.png)
-![Screenshot 4](https://s2.loli.net/2022/11/11/jaoAvD84C16gq7U.png)
-<center>
-  <div style="border-bottom: 1px solid #d9d9d9;
-    display: inline-block; color: #999;
-    padding: 2px;">Screenshot taken in <a href="https://www.minecraftmaps.com/castle-maps/celestial-castle">celestial castle</a> created by CloseDBr</div>
-</center>
