@@ -160,9 +160,12 @@ namespace MinecraftClient
         public EntityManager? EntityManager => entityManager!;
         #endregion
 
-        #region Unity stuffs
+        #region Resources management
         private readonly ResourcePackManager packManager = new ResourcePackManager();
-        public ResourcePackManager PackManager { get { return packManager; } }
+        public ResourcePackManager PackManager => packManager;
+
+        private readonly List<string> resourceOverrides = new();
+        public List<string> ResourceOverrides => resourceOverrides;
         
         public const int WINDOWED_APP_WIDTH = 1600, WINDOWED_APP_HEIGHT = 900;
 
@@ -314,14 +317,19 @@ namespace MinecraftClient
             while (!interactionDefFlag.done)
                 yield return wait;
 
-            // Load biome definitions...
-            BiomePalette.INSTANCE.PrepareData(dataVersion, $"vanilla-{resourceVersion}");
-            
             // Load resources...
             packManager.ClearPacks();
 
-            ResourcePack pack = new ResourcePack($"vanilla-{resourceVersion}");
-            packManager.AddPack(pack);
+            // First add base resources
+            ResourcePack basePack = new($"vanilla-{resourceVersion}");
+            packManager.AddPack(basePack);
+
+            // Then append overrides
+            foreach (var packName in resourceOverrides)
+            {
+                ResourcePack overridePack = new(packName);
+                packManager.AddPack(overridePack);
+            }
 
             // Load valid packs...
             var resLoadFlag = new CoroutineFlag();
@@ -332,6 +340,9 @@ namespace MinecraftClient
             
             // Load player skin overrides...
             SkinManager.Load();
+
+            // Load biome definitions (After colormaps in resource packs are loaded)...
+            BiomePalette.INSTANCE.PrepareData(dataVersion, $"vanilla-{resourceVersion}");
 
             // Preserve camera in login scene for a while
             var loginCamera = Component.FindObjectOfType<Camera>();
