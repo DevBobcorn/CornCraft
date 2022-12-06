@@ -258,6 +258,9 @@ namespace MinecraftClient.UI
 
                         try // Login to Server
                         {
+                            game!.ResourceOverrides.Clear();
+                            game!.ResourceOverrides.Add("VanillaBDcraft 128x MC116");
+
                             game!.StartLogin(session, playerKeyPair, host, port, protocolVersion, forgeInfo, loadStateInfo, accountLower);
                             tryingConnect = false;
                             yield break;

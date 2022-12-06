@@ -16,18 +16,19 @@ namespace MinecraftClient.Resource
 
         // Accepts the assets path of current resource pack so that it can easily find other model
         // files(when searching for a parent model which is not loaded yet, for example)
-        public JsonModel LoadBlockModel(ResourceLocation identifier, string assetsPath)
+        public JsonModel LoadBlockModel(ResourceLocation identifier)
         {
             // Check if this model is loaded already...
             if (manager.BlockModelTable.ContainsKey(identifier))
                 return manager.BlockModelTable[identifier];
             
-            string modelPath = $"{assetsPath}/{identifier.Namespace}/models/{identifier.Path}.json";
-            if (File.Exists(modelPath))
+            var modelFilePath = manager.BlockModelFileTable[identifier];
+            
+            if (File.Exists(modelFilePath))
             {
                 JsonModel model = new JsonModel();
 
-                string modelText = File.ReadAllText(modelPath);
+                string modelText = File.ReadAllText(modelFilePath);
                 Json.JSONData modelData = Json.ParseJson(modelText);
 
                 bool containsTextures = modelData.Properties.ContainsKey("textures");
@@ -45,7 +46,7 @@ namespace MinecraftClient.Resource
                     else
                     {
                         // This parent is not yet loaded, load it...
-                        parentModel = LoadBlockModel(parentIdentifier, assetsPath);
+                        parentModel = LoadBlockModel(parentIdentifier);
                     }
 
                     // Inherit parent textures...
@@ -113,7 +114,7 @@ namespace MinecraftClient.Resource
             }
             else
             {
-                Debug.LogWarning($"Block model file not found: {modelPath}");
+                Debug.LogWarning($"Block model file not found: {modelFilePath}");
                 return INVALID_MODEL;
             }
         }

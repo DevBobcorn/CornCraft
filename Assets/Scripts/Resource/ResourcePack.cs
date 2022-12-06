@@ -55,12 +55,12 @@ namespace MinecraftClient.Resource
 
         }
 
-        public IEnumerator LoadResources(ResourcePackManager manager, LoadStateInfo loadStateInfo)
+        public IEnumerator GatherResources(ResourcePackManager manager, LoadStateInfo loadStateInfo)
         {
             if (isValid)
             {
                 // Assets folder...
-                var assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed(packName) + "/assets");
+                var assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed($"{packName}/assets"));
                 if (assetsDir.Exists)
                 {
                     // Load textures and models
@@ -71,10 +71,10 @@ namespace MinecraftClient.Resource
                         string nameSpace = nameSpaceDir.Name;
 
                         // Load and store all texture files...
-                        var texturesDir = new DirectoryInfo(nameSpaceDir + "/textures/");
+                        var texturesDir = new DirectoryInfo($"{nameSpaceDir}/textures/");
                         int texDirLen = texturesDir.FullName.Length;
 
-                        if (new DirectoryInfo(nameSpaceDir + "/textures/block").Exists)
+                        if (new DirectoryInfo($"{nameSpaceDir}/textures/block").Exists)
                         {
                             foreach (var texFile in texturesDir.GetFiles("block/*.png", SearchOption.AllDirectories)) // Allow sub folders...
                             {
@@ -82,21 +82,24 @@ namespace MinecraftClient.Resource
                                 texId = texId.Substring(texDirLen); // e.g. 'block/grass_block_top.png'
                                 texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'block/grass_block_top'
                                 ResourceLocation identifier = new ResourceLocation(nameSpace, texId);
-                                if (!manager.TextureTable.ContainsKey(identifier))
+                                if (!manager.TextureFileTable.ContainsKey(identifier))
                                 {
                                     // This texture is not provided by previous resource packs, so add it here...
-                                    manager.TextureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
+                                    manager.TextureFileTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
                                 }
+                                else // Overwrite it
+                                    manager.TextureFileTable[identifier] = texFile.FullName.Replace('\\', '/');
+                                
                                 count++;
                                 if (count % 100 == 0)
                                 {
-                                    loadStateInfo.infoText = $"Loading block texture {identifier}";
+                                    loadStateInfo.infoText = $"Gathering block texture {identifier}";
                                     yield return null;
                                 }
                             }
                         }
                         
-                        if (new DirectoryInfo(nameSpaceDir + "/textures/item").Exists)
+                        if (new DirectoryInfo($"{nameSpaceDir}/textures/item").Exists)
                         {
                             foreach (var texFile in texturesDir.GetFiles("item/*.png", SearchOption.AllDirectories)) // Allow sub folders...
                             {
@@ -104,25 +107,28 @@ namespace MinecraftClient.Resource
                                 texId = texId.Substring(texDirLen); // e.g. 'block/grass_block_top.png'
                                 texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'block/grass_block_top'
                                 ResourceLocation identifier = new ResourceLocation(nameSpace, texId);
-                                if (!manager.TextureTable.ContainsKey(identifier))
+                                if (!manager.TextureFileTable.ContainsKey(identifier))
                                 {
                                     // This texture is not provided by previous resource packs, so add it here...
-                                    manager.TextureTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
+                                    manager.TextureFileTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
                                 }
+                                else // Overwrite it
+                                    manager.TextureFileTable[identifier] = texFile.FullName.Replace('\\', '/');
+                                
                                 count++;
                                 if (count % 100 == 0)
                                 {
-                                    loadStateInfo.infoText = $"Loading item texture {identifier}";
+                                    loadStateInfo.infoText = $"Gathering item texture {identifier}";
                                     yield return null;
                                 }
                             }
                         }
 
                         // Load and store all model files...
-                        var modelsDir = new DirectoryInfo(nameSpaceDir + "/models/");
+                        var modelsDir = new DirectoryInfo($"{nameSpaceDir}/models/");
                         int modelDirLen = modelsDir.FullName.Length;
 
-                        if (new DirectoryInfo(nameSpaceDir + "/models/block").Exists)
+                        if (new DirectoryInfo($"{nameSpaceDir}/models/block").Exists)
                         {
                             foreach (var modelFile in modelsDir.GetFiles("block/*.json", SearchOption.AllDirectories)) // Allow sub folders...
                             {
@@ -130,48 +136,73 @@ namespace MinecraftClient.Resource
                                 modelId = modelId.Substring(modelDirLen); // e.g. 'block/acacia_button.json'
                                 modelId = modelId.Substring(0, modelId.LastIndexOf('.')); // e.g. 'block/acacia_button'
                                 ResourceLocation identifier = new ResourceLocation(nameSpace, modelId);
-                                // This model loader will load this model, its parent model(if not yet loaded),
-                                // and then add them to the manager's model dictionary
-                                manager.BlockModelLoader.LoadBlockModel(identifier, assetsDir.FullName.Replace('\\', '/'));
-                                count++;
-                                if (count % 5 == 0)
+                                if (!manager.BlockModelFileTable.ContainsKey(identifier))
                                 {
-                                    loadStateInfo.infoText =  $"Loading block model {identifier}";
+                                    // This model is not provided by previous resource packs, so add it here...
+                                    manager.BlockModelFileTable.Add(identifier, modelFile.FullName.Replace('\\', '/'));
+                                }
+                                else // Overwrite it
+                                    manager.BlockModelFileTable[identifier] = modelFile.FullName.Replace('\\', '/');
+
+                                count++;
+                                if (count % 100 == 0)
+                                {
+                                    loadStateInfo.infoText =  $"Gathering block model {identifier}";
                                     yield return null;
                                 }
                             }
                         }
 
-                        if (new DirectoryInfo(nameSpaceDir + "/models/item").Exists)
+                        if (new DirectoryInfo($"{nameSpaceDir}/models/item").Exists)
                         {
-                            // No sub folders, because the file name here is the identifier of corresponding item...
-                            foreach (var modelFile in modelsDir.GetFiles("item/*.json", SearchOption.TopDirectoryOnly))
+                            foreach (var modelFile in modelsDir.GetFiles("item/*.json", SearchOption.AllDirectories)) // Allow sub folders...
                             {
                                 string modelId = modelFile.FullName.Replace('\\', '/');
                                 modelId = modelId.Substring(modelDirLen); // e.g. 'item/acacia_boat.json'
                                 modelId = modelId.Substring(0, modelId.LastIndexOf('.')); // e.g. 'item/acacia_boat'
                                 ResourceLocation identifier = new ResourceLocation(nameSpace, modelId);
-                                // This model loader will load this model, its parent model(if not yet loaded),
-                                // and then add them to the manager's model dictionary
-                                manager.ItemModelLoader.LoadItemModel(identifier, assetsDir.FullName.Replace('\\', '/'));
 
-                                if (manager.GeneratedItemModels.Contains(identifier)) // This model should be generated
+                                if (!manager.ItemModelFileTable.ContainsKey(identifier))
                                 {
-                                    var model = manager.RawItemModelTable[identifier];
-
-                                    // Get layer count of this item model
-                                    int layerCount = model.Textures.Count;
-                                    var useItemCol = manager.TintableItemModels.Contains(identifier);
-
-                                    model.Elements.AddRange(
-                                            manager.ItemModelLoader.GetGeneratedItemModelElements(
-                                                    layerCount, 16, useItemCol).ToArray());
+                                    // This model is not provided by previous resource packs, so add it here...
+                                    manager.ItemModelFileTable.Add(identifier, modelFile.FullName.Replace('\\', '/'));
                                 }
+                                else // Overwrite it
+                                    manager.ItemModelFileTable[identifier] = modelFile.FullName.Replace('\\', '/');
                                 
                                 count++;
-                                if (count % 5 == 0)
+                                if (count % 100 == 0)
                                 {
-                                    loadStateInfo.infoText =  $"Loading item model {identifier}";
+                                    loadStateInfo.infoText =  $"Gathering item model {identifier}";
+                                    yield return null;
+                                }
+                            }
+                        }
+
+                        // Load and store all blockstate files...
+                        var blockstatesDir = new DirectoryInfo($"{nameSpaceDir}/blockstates/");
+                        int blockstateDirLen = blockstatesDir.FullName.Length;
+
+                        if (blockstatesDir.Exists)
+                        {
+                            foreach (var statesFile in blockstatesDir.GetFiles("*.json", SearchOption.TopDirectoryOnly)) // No sub folders...
+                            {
+                                string blockId = statesFile.FullName.Replace('\\', '/');
+                                blockId = blockId.Substring(blockstateDirLen); // e.g. 'grass_block.json'
+                                blockId = blockId.Substring(0, blockId.LastIndexOf('.')); // e.g. 'grass_block'
+                                ResourceLocation identifier = new ResourceLocation(nameSpace, blockId);
+                                if (!manager.BlockStateFileTable.ContainsKey(identifier))
+                                {
+                                    // This file is not provided by previous resource packs, so add it here...
+                                    manager.BlockStateFileTable.Add(identifier, statesFile.FullName.Replace('\\', '/'));
+                                }
+                                else // Overwrite it
+                                    manager.BlockStateFileTable[identifier] = statesFile.FullName.Replace('\\', '/');
+                                
+                                count++;
+                                if (count % 100 == 0)
+                                {
+                                    loadStateInfo.infoText = $"Gathering block state model definition for {identifier}";
                                     yield return null;
                                 }
                             }
@@ -189,105 +220,7 @@ namespace MinecraftClient.Resource
 
         }
 
-        public IEnumerator BuildStateGeometries(ResourcePackManager manager, LoadStateInfo loadStateInfo)
-        {
-            // Load all blockstate files, make and assign their block meshes...
-            if (isValid)
-            {
-                // Assets folder...
-                var assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed(packName) + "/assets");
-                if (assetsDir.Exists)
-                {
-                    int count = 0;
-                    foreach (var blockPair in BlockStatePalette.INSTANCE.StateListTable)
-                    {
-                        var blockId = blockPair.Key;
-                        bool shouldLoad = false;
-                        foreach (var stateId in blockPair.Value)
-                        {
-                            if (!manager.StateModelTable.ContainsKey(stateId))
-                                shouldLoad = true;
-                        }
-                        
-                        // All states are loaded (from previous packs), just skip...
-                        if (!shouldLoad) continue;
-
-                        // Load the state model definition of this block
-                        string statePath = assetsDir.FullName + '/' + blockId.Namespace + "/blockstates/" + blockId.Path + ".json";
-
-                        var renderType =
-                                BlockStatePalette.INSTANCE.RenderTypeTable.GetValueOrDefault(blockId, RenderType.SOLID);
-
-                        manager.StateModelLoader.LoadBlockStateModel(manager, blockId, statePath, renderType);
-                        count++;
-                        if (count % 10 == 0)
-                        {
-                            loadStateInfo.infoText = $"Building model for block {blockId}";
-                            yield return null;
-                        }
-                    }
-
-                }
-
-            }
-            else
-                Debug.LogWarning("Resource pack is not invalid!");
-
-        }
-
-        public IEnumerator BuildItemGeometries(ResourcePackManager manager, LoadStateInfo loadStateInfo)
-        {
-            // Load all item files, make and assign their item meshes...
-            if (isValid)
-            {
-                int count = 0;
-                foreach (var numId in ItemPalette.INSTANCE.ItemsTable.Keys)
-                {
-                    var item = ItemPalette.INSTANCE.ItemsTable[numId];
-                    var itemId = item.itemId;
-
-                    var itemModelId = new ResourceLocation(itemId.Namespace, $"item/{itemId.Path}");
-
-                    if (manager.RawItemModelTable.ContainsKey(itemModelId))
-                    {
-                        var itemGeometry = new ItemGeometry(manager.RawItemModelTable[itemModelId]).Finalize();
-
-                        RenderType renderType;
-
-                        if (manager.GeneratedItemModels.Contains(itemModelId))
-                            renderType = RenderType.CUTOUT; // Set render type to cutout for all generated item models
-                        else
-                            renderType = BlockStatePalette.INSTANCE.RenderTypeTable.GetValueOrDefault(itemId, RenderType.SOLID);
-
-                        var itemModel = new ItemModel(itemGeometry, renderType);
-                        // TODO Add geometry overrides into the item model
-
-                        if (ItemPalette.INSTANCE.IsTintable(numId))
-                        {
-                            // Mark this item model as tintable
-                            manager.TintableItemModels.Add(itemModelId);
-                            //Debug.Log($"Marked {itemModelId} as tintable");
-                            // TODO Also add its override models
-                        }
-
-                        manager.ItemModelTable.Add(numId, itemModel);
-                        count++;
-                        if (count % 10 == 0)
-                        {
-                            loadStateInfo.infoText = $"Building model for item {itemId}";
-                            yield return null;
-                        }
-                    }
-                    else
-                        Debug.LogWarning($"Item model for {itemId} not found at {itemModelId}!");
-
-                }
-
-            }
-            else
-                Debug.LogWarning("Resource pack is not invalid!");
-
-        }
+        
     }
 
 }

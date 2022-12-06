@@ -68,11 +68,11 @@ namespace MinecraftClient.Resource
             };
         }
         
-        public static IEnumerator Generate(ResourcePackManager packManager, CoroutineFlag loadFlag, LoadStateInfo loadStateInfo)
+        public static IEnumerator Generate(ResourcePackManager packManager, LoadStateInfo loadStateInfo)
         {
             texAtlasTable.Clear(); // Clear previously loaded table...
 
-            var texDict = packManager.TextureTable;
+            var texDict = packManager.TextureFileTable;
 
             int count = 0;
 
@@ -111,10 +111,7 @@ namespace MinecraftClient.Resource
                 //Debug.Log($"{ids[i]} => {rects[i].xMin} {rects[i].xMax} {rects[i].yMin} {rects[i].yMax}");
             }
 
-            //File.WriteAllBytes(@"G:\Images\AtlasPrev.png", atlas.EncodeToPNG());
-
-
-            loadFlag.done = true;
+            //File.WriteAllBytes(@"D:\Images\AtlasPrev.png", atlas.EncodeToPNG());
 
         }
 
