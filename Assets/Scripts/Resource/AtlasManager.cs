@@ -10,64 +10,46 @@ namespace MinecraftClient.Resource
 {
     public static class AtlasManager
     {
-        private static Dictionary<ResourceLocation, int> texAtlasTable = new();
-        private static Dictionary<RenderType, int>     plcboAtlasTable = new();
+        private static Dictionary<ResourceLocation, Rect> texAtlasTable = new();
 
         public static float2[] GetUVs(ResourceLocation identifier, Vector4 part, int areaRot)
         {
-            return GetUVsAtOffset(GetAtlasOffset(identifier), part, areaRot);
+            return GetUVsAt(GetAtlasRect(identifier), part, areaRot);
         }
 
-        public static float2[] GetPlaceboUVs(RenderType type, Vector4 part, int areaRot)
+        private static float2[] GetUVsAt(Rect rect, Vector4 part, int areaRot)
         {
-            return GetUVsAtOffset(plcboAtlasTable[type], part, areaRot);
-        }
+            var oneU = rect.width;
+            var oneV = rect.width; // Use width here because a texture can contain multiple frames
 
-        private const int TexturesInALine = 64;
-        private const float One = 1.0F / TexturesInALine; // Size of a single block texture
+            // Get texture offset in atlas
+            float2 o = new(rect.xMin, rect.yMin);
 
-        private static float2[] GetUVsAtOffset(int offset, Vector4 part, int areaRot)
-        {
-            // vect: x,  y,  z,  w
+            // vect:  x,  y,  z,  w
             // vect: x1, y1, x2, y2
-
-            part *= One;
-
-            float blockU = (offset % TexturesInALine) / (float)TexturesInALine;
-            float blockV = (offset / TexturesInALine) / (float)TexturesInALine;
-            float2 o = new float2(blockU, blockV);
-
-            float u1 = part.x, v1 = part.y;
-            float u2 = part.z, v2 = part.w;
+            float u1 = part.x * oneU, v1 = part.y * oneV;
+            float u2 = part.z * oneU, v2 = part.w * oneV;
 
             return areaRot switch
             {
-                0 => new float2[]{ new float2(      u1, One - v1) + o, new float2(      u2, One - v1) + o, new float2(      u1, One - v2) + o, new float2(      u2, One - v2) + o }, //   0 Deg
-                1 => new float2[]{ new float2(      v1,       u1) + o, new float2(      v1,       u2) + o, new float2(      v2,       u1) + o, new float2(      v2,       u2) + o }, //  90 Deg
-                2 => new float2[]{ new float2(One - u1,       v1) + o, new float2(One - u2,       v1) + o, new float2(One - u1,       v2) + o, new float2(One - u2,       v2) + o }, // 180 Deg
-                3 => new float2[]{ new float2(One - v1, One - u1) + o, new float2(One - v1, One - u2) + o, new float2(One - v2, One - u1) + o, new float2(One - v2, One - u2) + o }, // 270 Deg
+                0 => new float2[]{ new float2(       u1, oneV - v1) + o, new float2(       u2, oneV - v1) + o, new float2(       u1, oneV - v2) + o, new float2(       u2, oneV - v2) + o }, //   0 Deg
+                1 => new float2[]{ new float2(       v1,        u1) + o, new float2(       v1,        u2) + o, new float2(       v2,        u1) + o, new float2(       v2,        u2) + o }, //  90 Deg
+                2 => new float2[]{ new float2(oneU - u1,        v1) + o, new float2(oneU - u2,        v1) + o, new float2(oneU - u1,        v2) + o, new float2(oneU - u2,        v2) + o }, // 180 Deg
+                3 => new float2[]{ new float2(oneV - v1, oneV - u1) + o, new float2(oneV - v1, oneU - u2) + o, new float2(oneV - v2, oneU - u1) + o, new float2(oneV - v2, oneU - u2) + o }, // 270 Deg
 
-                _ => new float2[]{ new float2(      u1, One - v1) + o, new float2(      u2, One - v1) + o, new float2(      u1, One - v2) + o, new float2(      u2, One - v2) + o }  // Default
+                _ => new float2[]{ new float2(       u1, oneV - v1) + o, new float2(       u2, oneV - v1) + o, new float2(       u1, oneV - v2) + o, new float2(       u2, oneV - v2) + o }  // Default
             };
         }        
 
-        private static int GetAtlasOffset(ResourceLocation identifier)
+        private static Rect GetAtlasRect(ResourceLocation identifier)
         {
             if (texAtlasTable.ContainsKey(identifier))
                 return texAtlasTable[identifier];
             
-            return 0;
+            return Rect.zero; // TODO Fix
         }
 
-        private static Texture2D plcboTexture = new Texture2D(2, 2); // First assign a place holder...
-        public static Texture2D PlcboTexture
-        {
-            get {
-                return plcboTexture;
-            }
-        }
-
-        private static Texture2D[] atlasTexture = new Texture2D[]
+        private static readonly Texture2D[] atlasTexture = new Texture2D[]
         { 
             new Texture2D(2, 2),
             new Texture2D(2, 2)
@@ -85,70 +67,57 @@ namespace MinecraftClient.Resource
                 _                        => atlasTexture[0]
             };
         }
-
-        public static IEnumerator Load(string version, CoroutineFlag loadFlag, LoadStateInfo loadStateInfo)
+        
+        public static IEnumerator Generate(ResourcePackManager packManager, CoroutineFlag loadFlag, LoadStateInfo loadStateInfo)
         {
             texAtlasTable.Clear(); // Clear previously loaded table...
 
-            string atlasFilePath = PathHelper.GetPacksDirectory() + "/block_atlas_" + version + ".png";
-            string atlasJsonPath = PathHelper.GetPacksDirectory() + "/block_atlas_" + version + "_dict.json";
+            var texDict = packManager.TextureTable;
 
-            if (File.Exists(atlasJsonPath) && File.Exists(atlasFilePath))
-            {   // Set up atlas textures...
-                for (int i = 0;i < atlasTexture.Length;i++)
-                {
-                    atlasTexture[i].LoadImage(File.ReadAllBytes(atlasFilePath));
-                    atlasTexture[i].filterMode = FilterMode.Point;
-                }
-                
-                atlasTexture[1].mipMapBias = -1F;
+            int count = 0;
 
-                string jsonText = File.ReadAllText(atlasJsonPath);
-                Json.JSONData atlasJson = Json.ParseJson(jsonText);
-                int count = 0;
-                foreach (KeyValuePair<string, Json.JSONData> item in atlasJson.Properties)
+            var textures = new Texture2D[texDict.Count];
+            var ids = new ResourceLocation[texDict.Count];
+
+            foreach (var pair in texDict) // Stitch texture atlas...
+            {
+                var texFilePath = pair.Value;
+                ids[count] = pair.Key;
+                //Debug.Log($"Loading {texId} from {pair.Key}");
+
+                Texture2D tex = new(2, 2);
+                tex.LoadImage(File.ReadAllBytes(texFilePath));
+
+                textures[count] = tex;
+
+                count++;
+                if (count % 20 == 0)
                 {
-                    if (texAtlasTable.ContainsKey(ResourceLocation.fromString(item.Key)))
-                    {
-                        loadFlag.done = true;
-                        throw new InvalidDataException("Duplicate block atlas with one name " + item.Key + "!?");
-                    }
-                    else
-                    {
-                        texAtlasTable[ResourceLocation.fromString(item.Key)] = int.Parse(item.Value.StringValue);
-                        count++;
-                        if (count % 20 == 0)
-                        {
-                            loadStateInfo.infoText = $"Loading pre-generated atlas {item.Key}";
-                            yield return null;
-                        }
-                    }
+                    loadStateInfo.infoText = $"Loading texture atlas {pair.Key}";
+                    yield return null;
                 }
             }
-            else
-                Debug.LogWarning("Texture files not all available!");
             
-            string plcboFilePath = PathHelper.GetPacksDirectory() + "/block_atlas_placebo.png";
+            var atlas = new Texture2D(2, 2); // First assign a placeholder
+            atlas.filterMode = FilterMode.Point;
+            var rects = atlas.PackTextures(textures, 0, 4096, false);
 
-            if (File.Exists(plcboFilePath))
-            {
-                plcboTexture.LoadImage(File.ReadAllBytes(plcboFilePath));
-                plcboTexture.filterMode = FilterMode.Point;
+            atlasTexture[0] = atlas;
+            atlasTexture[1] = atlas;
 
-                plcboAtlasTable.Add(RenderType.SOLID,         0);
-                plcboAtlasTable.Add(RenderType.CUTOUT,        1);
-                plcboAtlasTable.Add(RenderType.CUTOUT_MIPPED, 2);
-                plcboAtlasTable.Add(RenderType.TRANSLUCENT,   3);
-            }
-            else
+            for (int i = 0;i < textures.Length;i++)
             {
-                Debug.LogWarning("Placebo texture file not available!");
+                texAtlasTable.Add(ids[i], rects[i]);
+                //Debug.Log($"{ids[i]} => {rects[i].xMin} {rects[i].xMax} {rects[i].yMin} {rects[i].yMax}");
             }
+
+            //File.WriteAllBytes(@"G:\Images\AtlasPrev.png", atlas.EncodeToPNG());
+
 
             loadFlag.done = true;
 
         }
-        
+
     }
 
 }

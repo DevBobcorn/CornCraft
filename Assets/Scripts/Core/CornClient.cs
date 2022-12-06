@@ -314,16 +314,6 @@ namespace MinecraftClient
             while (!interactionDefFlag.done)
                 yield return wait;
 
-            // Load texture atlas... TODO (Will be decently implemented in future)
-            var atlasLoadFlag = new CoroutineFlag();
-            StartCoroutine(AtlasManager.Load(resourceVersion, atlasLoadFlag, loadStateInfo));
-
-            while (!atlasLoadFlag.done)
-                yield return wait;
-            
-            // Load player skin overrides...
-            SkinManager.Load();
-
             // Load biome definitions...
             BiomePalette.INSTANCE.PrepareData(dataVersion, $"vanilla-{resourceVersion}");
             
@@ -335,10 +325,13 @@ namespace MinecraftClient
 
             // Load valid packs...
             var resLoadFlag = new CoroutineFlag();
-            StartCoroutine(packManager.LoadPacks(resLoadFlag, loadStateInfo));
+            StartCoroutine(packManager.LoadPacks(this, resLoadFlag, loadStateInfo));
 
             while (!resLoadFlag.done)
                 yield return wait;
+            
+            // Load player skin overrides...
+            SkinManager.Load();
 
             // Preserve camera in login scene for a while
             var loginCamera = Component.FindObjectOfType<Camera>();
