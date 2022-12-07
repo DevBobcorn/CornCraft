@@ -21,11 +21,11 @@ namespace MinecraftClient.Resource
         }
 
         // 
-        private static Dictionary<int2, List<JsonModelElement>> generatedModels = new();
+        private static Dictionary<int4, List<JsonModelElement>> generatedModels = new();
 
         public List<JsonModelElement> GetGeneratedItemModelElements(int layerCount, int precision, int thickness, bool useItemColor)
         {
-            int2 modelKey = new(layerCount, precision);
+            int4 modelKey = new(layerCount, precision, thickness, useItemColor ? 1 : 0);
 
             if (!generatedModels.ContainsKey(modelKey)) // Not present yet, generate it
             {

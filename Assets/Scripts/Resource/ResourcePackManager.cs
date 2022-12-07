@@ -35,7 +35,6 @@ namespace MinecraftClient.Resource
         public readonly Dictionary<int, ItemModel> ItemModelTable = new();
 
         public readonly HashSet<ResourceLocation> GeneratedItemModels = new();
-        public readonly HashSet<ResourceLocation> TintableItemModels  = new();
 
         public readonly BlockModelLoader BlockModelLoader;
         public readonly BlockStateModelLoader StateModelLoader;
@@ -71,7 +70,6 @@ namespace MinecraftClient.Resource
             RawItemModelTable.Clear();
             ItemModelTable.Clear();
             GeneratedItemModels.Clear();
-            TintableItemModels.Clear();
         }
 
         public IEnumerator LoadPacks(MonoBehaviour loader, CoroutineFlag flag, LoadStateInfo loadStateInfo)
@@ -105,25 +103,11 @@ namespace MinecraftClient.Resource
                 // This model loader will load this model, its parent model(if not yet loaded),
                 // and then add them to the manager's model dictionary
                 ItemModelLoader.LoadItemModel(itemModelId);
-                
-                if (GeneratedItemModels.Contains(itemModelId)) // This model should be generated
-                {
-                    var model = RawItemModelTable[itemModelId];
-
-                    // Get layer count of this item model
-                    int layerCount = model.Textures.Count;
-                    var useItemCol = TintableItemModels.Contains(itemModelId);
-
-                    model.Elements.AddRange(
-                            ItemModelLoader.GetGeneratedItemModelElements(
-                                    layerCount, GeneratedItemModelPrecision,
-                                            GeneratedItemModelThickness, useItemCol).ToArray());
-                }
             }
 
-            yield return BuildStateGeometries(this, loadStateInfo);
+            yield return BuildStateGeometries(loadStateInfo);
 
-            yield return BuildItemGeometries(this, loadStateInfo);
+            yield return BuildItemGeometries(loadStateInfo);
 
             // Perform integrity check...
             var statesTable = BlockStatePalette.INSTANCE.StatesTable;
@@ -145,10 +129,8 @@ namespace MinecraftClient.Resource
 
         }
 
-        public IEnumerator BuildStateGeometries(ResourcePackManager manager, LoadStateInfo loadStateInfo)
+        public IEnumerator BuildStateGeometries(LoadStateInfo loadStateInfo)
         {
-            var fileTable = manager.BlockStateFileTable;
-
             // Load all blockstate files and build their block meshes...
             int count = 0;
 
@@ -156,12 +138,12 @@ namespace MinecraftClient.Resource
             {
                 var blockId = blockPair.Key;
                 
-                if (fileTable.ContainsKey(blockId)) // Load the state model definition of this block
+                if (BlockStateFileTable.ContainsKey(blockId)) // Load the state model definition of this block
                 {
                     var renderType =
                         BlockStatePalette.INSTANCE.RenderTypeTable.GetValueOrDefault(blockId, RenderType.SOLID);
 
-                    manager.StateModelLoader.LoadBlockStateModel(manager, blockId, fileTable[blockId], renderType);
+                    StateModelLoader.LoadBlockStateModel(this, blockId, BlockStateFileTable[blockId], renderType);
                     count++;
                     if (count % 10 == 0)
                     {
@@ -177,10 +159,8 @@ namespace MinecraftClient.Resource
 
         }
 
-        public IEnumerator BuildItemGeometries(ResourcePackManager manager, LoadStateInfo loadStateInfo)
+        public IEnumerator BuildItemGeometries(LoadStateInfo loadStateInfo)
         {
-            var fileTable = manager.ItemModelFileTable;
-
             // Load all item model files and build their item meshes...
             int count = 0;
 
@@ -191,31 +171,40 @@ namespace MinecraftClient.Resource
 
                 var itemModelId = new ResourceLocation(itemId.Namespace, $"item/{itemId.Path}");
 
-                if (fileTable.ContainsKey(itemModelId))
+                if (ItemModelFileTable.ContainsKey(itemModelId))
                 {
-                    if (manager.RawItemModelTable.ContainsKey(itemModelId))
+                    if (RawItemModelTable.ContainsKey(itemModelId))
                     {
-                        var itemGeometry = new ItemGeometry(manager.RawItemModelTable[itemModelId]);
+                        var rawModel = RawItemModelTable[itemModelId];
+                        var tintable = ItemPalette.INSTANCE.IsTintable(numId);
+
+                        if (GeneratedItemModels.Contains(itemModelId)) // This model should be generated
+                        {
+                            // Get layer count of this item model
+                            int layerCount = rawModel.Textures.Count;
+
+                            rawModel.Elements.AddRange(
+                                    ItemModelLoader.GetGeneratedItemModelElements(
+                                            layerCount, GeneratedItemModelPrecision,
+                                                    GeneratedItemModelThickness, tintable).ToArray());
+                            
+                            //Debug.Log($"Generating item model for {itemModelId} tintable: {tintable}");
+                        }
+
+                        var itemGeometry = new ItemGeometry(rawModel);
 
                         RenderType renderType;
 
-                        if (manager.GeneratedItemModels.Contains(itemModelId))
+                        if (GeneratedItemModels.Contains(itemModelId))
                             renderType = RenderType.CUTOUT; // Set render type to cutout for all generated item models
                         else
                             renderType = BlockStatePalette.INSTANCE.RenderTypeTable.GetValueOrDefault(itemId, RenderType.SOLID);
 
                         var itemModel = new ItemModel(itemGeometry, renderType);
-
-                        var tintable = ItemPalette.INSTANCE.IsTintable(numId);
-
-                        if (tintable) // Mark this item model as tintable
-                        {
-                            manager.TintableItemModels.Add(itemModelId);
-                            //Debug.Log($"Marked {itemModelId} as tintable");
-                        }
+                        
 
                         // Look for and append geometry overrides to the item model
-                        Json.JSONData modelData = Json.ParseJson(File.ReadAllText(fileTable[itemModelId]));
+                        Json.JSONData modelData = Json.ParseJson(File.ReadAllText(ItemModelFileTable[itemModelId]));
 
                         if (modelData.Properties.ContainsKey("overrides"))
                         {
@@ -225,15 +214,24 @@ namespace MinecraftClient.Resource
                             {
                                 var overrideModelId = ResourceLocation.fromString(o.Properties["model"].StringValue);
 
-                                if (tintable) // Mark this override model as tintable
+                                if (RawItemModelTable.ContainsKey(overrideModelId)) // Build this override
                                 {
-                                    manager.TintableItemModels.Add(overrideModelId);
-                                    //Debug.Log($"Marked {itemModelId} as tintable");
-                                }
+                                    var rawOverrideModel = RawItemModelTable[overrideModelId];
 
-                                if (manager.RawItemModelTable.ContainsKey(overrideModelId)) // Build this override
-                                {
-                                    var overrideGeometry = new ItemGeometry(manager.RawItemModelTable[overrideModelId]);
+                                    if (GeneratedItemModels.Contains(itemModelId)) // This model should be generated
+                                    {
+                                        // Get layer count of this item model
+                                        int layerCount = rawModel.Textures.Count;
+
+                                        rawOverrideModel.Elements.AddRange(
+                                                ItemModelLoader.GetGeneratedItemModelElements(
+                                                        layerCount, GeneratedItemModelPrecision,
+                                                                GeneratedItemModelThickness, tintable).ToArray());
+                                        
+                                        //Debug.Log($"Generating item model for {itemModelId} tintable: {tintable}");
+                                    }
+
+                                    var overrideGeometry = new ItemGeometry(rawOverrideModel);
                                     var predicate = ItemModelPredicate.fromJson(o.Properties["predicate"]);
                                     
                                     itemModel.AddOverride(predicate, overrideGeometry);
@@ -242,7 +240,7 @@ namespace MinecraftClient.Resource
                             }
                         }
 
-                        manager.ItemModelTable.Add(numId, itemModel);
+                        ItemModelTable.Add(numId, itemModel);
                         count++;
                         if (count % 8 == 0)
                         {
