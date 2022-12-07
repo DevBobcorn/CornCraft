@@ -12,7 +12,7 @@ namespace MinecraftClient.Resource
             if (numbers.Count == 2)
                 return new float2(float.Parse(numbers[0].StringValue), float.Parse(numbers[1].StringValue));
             
-            Debug.LogWarning("Cannot convert to float2: Invalid json array");
+            Debug.LogWarning($"Cannot convert to float2: Invalid json array {data.StringValue}");
             return float2.zero;
         }
 
@@ -23,7 +23,7 @@ namespace MinecraftClient.Resource
             if (numbers.Count == 3)
                 return new float3(float.Parse(numbers[0].StringValue), float.Parse(numbers[1].StringValue), float.Parse(numbers[2].StringValue));
             
-            Debug.LogWarning("Cannot convert to float3: Invalid json array");
+            Debug.LogWarning($"Cannot convert to float3: Invalid json array {data.StringValue}");
             return float3.zero;
         }
 
@@ -35,7 +35,7 @@ namespace MinecraftClient.Resource
             if (numbers.Count == 3)
                 return new float3(float.Parse(numbers[2].StringValue), float.Parse(numbers[1].StringValue), float.Parse(numbers[0].StringValue));
             
-            Debug.LogWarning("Cannot convert to swapped float3: Invalid json array");
+            Debug.LogWarning($"Cannot convert to swapped float3: Invalid json array {data.StringValue}");
             return float3.zero;
         }
 
@@ -46,7 +46,7 @@ namespace MinecraftClient.Resource
             if (numbers.Count == 4)
                 return new float4(float.Parse(numbers[0].StringValue), float.Parse(numbers[1].StringValue), float.Parse(numbers[2].StringValue), float.Parse(numbers[3].StringValue));
             
-            Debug.LogWarning("Cannot convert to float4: Invalid json array");
+            Debug.LogWarning($"Cannot convert to float4: Invalid json array {data.StringValue}");
             return float4.zero;
         }
     }
