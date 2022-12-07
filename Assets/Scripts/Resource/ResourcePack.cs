@@ -2,10 +2,6 @@ using System.Collections;
 using System.IO;
 using UnityEngine;
 
-using MinecraftClient.Rendering;
-using MinecraftClient.Mapping;
-using System.Collections.Generic;
-
 namespace MinecraftClient.Resource
 {
     public class ResourcePack

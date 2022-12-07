@@ -83,6 +83,8 @@ namespace MinecraftClient
             }
         }
 
+        public static List<string> ResourceOverrides { get; } = new();
+
         /// <summary>
         /// Set a custom %variable% which will be available through expandVars()
         /// </summary>
