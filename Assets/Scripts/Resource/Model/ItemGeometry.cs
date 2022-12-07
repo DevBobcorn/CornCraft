@@ -21,20 +21,15 @@ namespace MinecraftClient.Resource
             {
                 AppendElement(model, elem);
             }
+
+            vertexArr = verticies.ToArray();
+            txuvArr = uvs.ToArray();
+            tintArr = tintIndices.ToArray();
         }
 
         private float3[] vertexArr = { };
         private float2[] txuvArr = { };
         private int[]    tintArr = { };
-
-        public ItemGeometry Finalize()
-        {
-            vertexArr = verticies.ToArray();
-            txuvArr = uvs.ToArray();
-            tintArr = tintIndices.ToArray();
-
-            return this;
-        }
 
         public void Build(ref VertexBuffer buffer, float3 posOffset, float3[] itemTints)
         {

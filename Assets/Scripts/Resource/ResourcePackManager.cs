@@ -42,6 +42,9 @@ namespace MinecraftClient.Resource
 
         public readonly ItemModelLoader ItemModelLoader;
 
+        public int GeneratedItemModelPrecision { get; set; } = 16;
+        public int GeneratedItemModelThickness { get; set; } =  1;
+
         private readonly List<ResourcePack> packs = new List<ResourcePack>();
 
         public ResourcePackManager()
@@ -113,7 +116,8 @@ namespace MinecraftClient.Resource
 
                     model.Elements.AddRange(
                             ItemModelLoader.GetGeneratedItemModelElements(
-                                    layerCount, 16, useItemCol).ToArray());
+                                    layerCount, GeneratedItemModelPrecision,
+                                            GeneratedItemModelThickness, useItemCol).ToArray());
                 }
             }
 
@@ -191,7 +195,7 @@ namespace MinecraftClient.Resource
                 {
                     if (manager.RawItemModelTable.ContainsKey(itemModelId))
                     {
-                        var itemGeometry = new ItemGeometry(manager.RawItemModelTable[itemModelId]).Finalize();
+                        var itemGeometry = new ItemGeometry(manager.RawItemModelTable[itemModelId]);
 
                         RenderType renderType;
 
@@ -201,19 +205,46 @@ namespace MinecraftClient.Resource
                             renderType = BlockStatePalette.INSTANCE.RenderTypeTable.GetValueOrDefault(itemId, RenderType.SOLID);
 
                         var itemModel = new ItemModel(itemGeometry, renderType);
-                        // TODO Add geometry overrides into the item model
 
-                        if (ItemPalette.INSTANCE.IsTintable(numId))
+                        var tintable = ItemPalette.INSTANCE.IsTintable(numId);
+
+                        if (tintable) // Mark this item model as tintable
                         {
-                            // Mark this item model as tintable
                             manager.TintableItemModels.Add(itemModelId);
                             //Debug.Log($"Marked {itemModelId} as tintable");
-                            // TODO Also add its override models
+                        }
+
+                        // Look for and append geometry overrides to the item model
+                        Json.JSONData modelData = Json.ParseJson(File.ReadAllText(fileTable[itemModelId]));
+
+                        if (modelData.Properties.ContainsKey("overrides"))
+                        {
+                            var overrides = modelData.Properties["overrides"].DataArray;
+
+                            foreach (var o in overrides)
+                            {
+                                var overrideModelId = ResourceLocation.fromString(o.Properties["model"].StringValue);
+
+                                if (tintable) // Mark this override model as tintable
+                                {
+                                    manager.TintableItemModels.Add(overrideModelId);
+                                    //Debug.Log($"Marked {itemModelId} as tintable");
+                                }
+
+                                if (manager.RawItemModelTable.ContainsKey(overrideModelId)) // Build this override
+                                {
+                                    var overrideGeometry = new ItemGeometry(manager.RawItemModelTable[overrideModelId]);
+                                    var predicate = ItemModelPredicate.fromJson(o.Properties["predicate"]);
+                                    
+                                    itemModel.AddOverride(predicate, overrideGeometry);
+                                }
+                                
+                            }
                         }
 
                         manager.ItemModelTable.Add(numId, itemModel);
                         count++;
-                        if (count % 10 == 0)
+                        if (count % 8 == 0)
                         {
                             loadStateInfo.infoText = $"Building model for item {itemId}";
                             yield return null;

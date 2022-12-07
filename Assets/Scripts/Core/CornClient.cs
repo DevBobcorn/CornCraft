@@ -65,6 +65,10 @@ namespace MinecraftClient
         {
             EnsureInitialized();
             Loom.Initialize();
+
+            // TODO Decently implement resource pack selection
+            CornCraft.ResourceOverrides.Clear();
+            CornCraft.ResourceOverrides.Add("VanillaBDcraft 64x MC116");
         }
 
         public static void EnsureInitialized()
@@ -163,9 +167,6 @@ namespace MinecraftClient
         #region Resources management
         private readonly ResourcePackManager packManager = new ResourcePackManager();
         public ResourcePackManager PackManager => packManager;
-
-        private readonly List<string> resourceOverrides = new();
-        public List<string> ResourceOverrides => resourceOverrides;
         
         public const int WINDOWED_APP_WIDTH = 1600, WINDOWED_APP_HEIGHT = 900;
 
@@ -325,7 +326,7 @@ namespace MinecraftClient
             packManager.AddPack(basePack);
 
             // Then append overrides
-            foreach (var packName in resourceOverrides)
+            foreach (var packName in CornCraft.ResourceOverrides)
             {
                 ResourcePack overridePack = new(packName);
                 packManager.AddPack(overridePack);

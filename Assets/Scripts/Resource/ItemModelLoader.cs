@@ -23,7 +23,7 @@ namespace MinecraftClient.Resource
         // 
         private static Dictionary<int2, List<JsonModelElement>> generatedModels = new();
 
-        public List<JsonModelElement> GetGeneratedItemModelElements(int layerCount, int precision, bool useItemColor)
+        public List<JsonModelElement> GetGeneratedItemModelElements(int layerCount, int precision, int thickness, bool useItemColor)
         {
             int2 modelKey = new(layerCount, precision);
 
@@ -32,14 +32,15 @@ namespace MinecraftClient.Resource
                 //Debug.Log($"Generating item model... Layer count: {layerCount} Precision: {precision}");
                 var model = new List<JsonModelElement>();
                 var stepLength = 16F / (float) precision;
+                var halfThick  = thickness / 2F;
 
                 for (int layer = 0;layer < layerCount;layer++)
                 {
                     var elem = new JsonModelElement();
                     var layerTexName = $"layer{layer}";
 
-                    elem.from = new(8F - stepLength / 2F,  0F,  0F);
-                    elem.to   = new(8F + stepLength / 2F, 16F, 16F);
+                    elem.from = new(8F - halfThick,  0F,  0F);
+                    elem.to   = new(8F + halfThick, 16F, 16F);
 
                     elem.faces.Add(FaceDir.NORTH, new() {
                         uv = new(0F, 0F, 16F, 16F),
@@ -63,10 +64,10 @@ namespace MinecraftClient.Resource
                         var vertStripe = new JsonModelElement();
                         var horzStripe = new JsonModelElement();
 
-                        vertStripe.from = new(8F - stepLength / 2F,  0F, fracL2);
-                        vertStripe.to   = new(8F + stepLength / 2F, 16F, fracR2);
-                        horzStripe.from = new(8F - stepLength / 2F, fracL2,  0F);
-                        horzStripe.to   = new(8F + stepLength / 2F, fracR2, 16F);
+                        vertStripe.from = new(8F - halfThick,  0F, fracL2);
+                        vertStripe.to   = new(8F + halfThick, 16F, fracR2);
+                        horzStripe.from = new(8F - halfThick, fracL2,  0F);
+                        horzStripe.to   = new(8F + halfThick, fracR2, 16F);
 
                         // Left faces
                         vertStripe.faces.Add(FaceDir.EAST, new() {
