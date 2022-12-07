@@ -138,6 +138,35 @@ namespace MinecraftClient.Mapping
                 }
             }
 
+            if (colorRules.Properties.ContainsKey("fixed_multicolor"))
+            {
+                foreach (var fixedRule in colorRules.Properties["fixed_multicolor"].Properties)
+                {
+                    var itemId = ResourceLocation.fromString(fixedRule.Key);
+
+                    if (dictId.ContainsKey(itemId))
+                    {
+                        var numId = dictId[itemId];
+
+                        var colorList = fixedRule.Value.DataArray.ToArray();
+                        var fixedColors = new float3[colorList.Length];
+
+                        for (int c = 0;c < colorList.Length;c++)
+                            fixedColors[c] = VectorUtil.Json2Float3(colorList[c]) / 255F;
+
+                        Func<ItemStack, float3[]> ruleFunc = (itemStack) => fixedColors;
+
+                        if (!itemColorRules.TryAdd(numId, ruleFunc))
+                            Debug.LogWarning($"Failed to apply fixed multi-color rules to {itemId} ({numId})!");
+                        count++;
+                        if (count % yieldCount == 0)
+                            yield return null;
+                        
+                    }
+                    else
+                        Debug.LogWarning($"Applying fixed multi-color rules to undefined item {itemId}!");
+                }
+            }
 
             flag.done = true;
         }
