@@ -12,9 +12,10 @@ namespace MinecraftClient.Control
         // Player status
         public bool InLiquid  = false;
         public bool Grounded  = false;
-        public bool OnWall  = false;
+        public bool OnWall    = false;
         public bool Moving    = false;
         public bool Sprinting = false;
+        public float MoveBrake =   0F;
 
         public bool Attacking  = false;
         public bool Spectating = false;
@@ -35,8 +36,11 @@ namespace MinecraftClient.Control
 
         public float YawOffset => Mathf.Abs(Mathf.DeltaAngle(TargetVisualYaw, CurrentVisualYaw));
 
+        // Block selection data
+        public Location? TargetBlockPos = null;
+
         public override string ToString() => 
-            $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nSprinting:\t{Sprinting}\nGround Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}";
+            $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nGrounded:\t{Sprinting}\nGround Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}";
 
     }
 }

@@ -15,15 +15,11 @@ namespace MinecraftClient.Rendering
         protected float lastPitch = 0F, targetPitch = 0F;
         protected Vector3 currentVelocity = Vector3.zero;
 
-        public float showInfoDist = 10F;
-        public float hideInfoDist = 12F;
-
         // A number made from the entity's numeral id, used in animations to prevent
         // several mobs of a same type moving synchronisedly, which looks unnatural
         protected float pseudoRandomOffset = 0F;
 
-        protected TMP_Text? nameText;
-        private bool nameTextShown = false, initialized = false;
+        private bool initialized = false;
 
         protected Entity? entity;
 
@@ -33,8 +29,6 @@ namespace MinecraftClient.Rendering
 
             set {
                 entity = value;
-
-                UpdateDisplayName();
 
                 Random.InitState(entity.ID);
                 pseudoRandomOffset = Random.Range(0F, 1F);
@@ -69,53 +63,7 @@ namespace MinecraftClient.Rendering
             targetHeadYaw = headYaw;
         }
 
-        protected virtual void Initialize()
-        {
-            // Initialze info plate
-            nameText = FindHelper.FindChildRecursively(transform, "Name Text").GetComponent<TMP_Text>();
-            nameTextShown    = false;
-            nameText.enabled = false;
-        }
-
-        protected virtual void UpdateDisplayName()
-        {
-            EnsureInitialized();
-
-            if (entity!.CustomName is not null)
-                nameText!.text = $"#{entity.ID} {entity.CustomName}";
-            else if (entity.Name is not null)
-                nameText!.text = $"#{entity.ID} {entity.Name}";
-            else
-                nameText!.text = $"#{entity.ID} {entity.Type}";
-            
-        }
-
-        public void UpdateInfo(Vector3 cameraPos)
-        {
-            float dist2Cam = (cameraPos - transform.position).magnitude;
-
-            if (nameTextShown)
-            {
-                if (dist2Cam > hideInfoDist) // Hide info plate
-                {
-                    nameText!.enabled = false;
-                    nameTextShown = false;
-                }
-                else // Update info plate rotation
-                {
-                    nameText!.transform.parent.LookAt(cameraPos);
-                }
-            }
-            else
-            {
-                if (dist2Cam < showInfoDist) // Show info plate
-                {
-                    nameText!.enabled = true;
-                    nameTextShown = true;
-                }
-            }
-
-        }
+        protected virtual void Initialize() { }
 
         public void UpdateTransform(float tickMilSec)
         {
@@ -164,11 +112,8 @@ namespace MinecraftClient.Rendering
 
         public virtual void UpdateAnimation(float tickMilSec) { }
 
-        public virtual void ManagedUpdate(Vector3? cameraPos, float tickMilSec)
+        public virtual void ManagedUpdate(float tickMilSec)
         {
-            if (cameraPos is not null)
-                UpdateInfo(cameraPos.Value);
-
             UpdateTransform(tickMilSec);
             UpdateAnimation(tickMilSec);
 

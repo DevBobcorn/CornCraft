@@ -155,11 +155,6 @@ namespace MinecraftClient.Control
             playerRender.UpdateVelocity(playerRigidbody!.velocity);
 
             // Update render
-            var cameraPos = camControl.GetPosition();
-
-            if (cameraPos is not null)
-                playerRender!.UpdateInfo(cameraPos.Value);
-            
             playerRender!.UpdateVisual(game!.GetTickMilSec());
 
             // Tell server our current position
