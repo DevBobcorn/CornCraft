@@ -64,7 +64,7 @@ namespace MinecraftClient.Mapping
             dictId.Clear();
 
             string itemsPath = PathHelper.GetExtraDataFile($"items-{dataVersion}.json");
-            string colorsPath = PathHelper.GetExtraDataFile("item_colors-1.19.json");
+            string colorsPath = PathHelper.GetExtraDataFile("item_colors.json");
 
             int count = 0, yieldCount = 200;
 
