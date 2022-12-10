@@ -19,7 +19,7 @@ namespace MinecraftClient.Mapping
 
         public IEnumerator PrepareData(CoroutineFlag flag, LoadStateInfo loadStateInfo)
         {
-            string interactionPath = PathHelper.GetExtraDataFile("block_interaction-1.19.json");
+            string interactionPath = PathHelper.GetExtraDataFile("block_interaction.json");
 
             if (!File.Exists(interactionPath))
                 throw new FileNotFoundException("Block interaction data not found!");

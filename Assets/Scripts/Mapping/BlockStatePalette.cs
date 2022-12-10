@@ -63,8 +63,8 @@ namespace MinecraftClient.Mapping
             HashSet<int> knownStates = new HashSet<int>();
 
             string statesPath = PathHelper.GetExtraDataFile($"blocks-{dataVersion}.json");
-            string listsPath  = PathHelper.GetExtraDataFile("block_lists-1.19.json");
-            string colorsPath = PathHelper.GetExtraDataFile("block_colors-1.19.json");
+            string listsPath  = PathHelper.GetExtraDataFile("block_lists.json");
+            string colorsPath = PathHelper.GetExtraDataFile("block_colors.json");
 
             if (!File.Exists(statesPath) || !File.Exists(listsPath) || !File.Exists(colorsPath))
                 throw new FileNotFoundException("Block data not complete!");
