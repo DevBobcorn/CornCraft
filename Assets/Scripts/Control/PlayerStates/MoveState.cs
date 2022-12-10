@@ -10,13 +10,23 @@ namespace MinecraftClient.Control
         public const float THRESHOULD_CLIMB_UP = -0.85F;
         public const float THRESHOULD_STEP_UP  = -0.01F;
 
+        public const float RUN_BRAKE_TIME = 0.1F;
+        public const float SPRINT_BRAKE_TIME = 0.2F;
+
 
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
             if (inputData.horInputNormalized != Vector2.zero)
             {
-                info.Moving = true;
+                info.MoveBrake = info.Sprinting ? SPRINT_BRAKE_TIME : RUN_BRAKE_TIME;
+            }
+            else
+                info.MoveBrake -= interval;
 
+            if (info.MoveBrake > 0F)
+            {
+                info.Moving = true;
+                
                 bool costStamina = false;
 
                 // Smooth rotation for player model
@@ -33,9 +43,9 @@ namespace MinecraftClient.Control
                     info.Sprinting = false;
                 
                 if (info.Sprinting)
-                    moveSpeed = ability.SprintSpeed;
+                    moveSpeed = ability.SprintSpeed * (info.MoveBrake / SPRINT_BRAKE_TIME);
                 else
-                    moveSpeed = info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
+                    moveSpeed = (info.WalkMode ? ability.WalkSpeed : ability.RunSpeed) * info.MoveBrake / RUN_BRAKE_TIME;
 
                 // Use the target visual yaw as actual movement direction
                 var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
@@ -49,7 +59,7 @@ namespace MinecraftClient.Control
                         var horOffset = info.BarrierDist - 1.0F;
 
                         var org  = rigidbody.transform.position;
-                        var dest = org + (-info.FrontDownDist - 1.98F) * Vector3.up + moveHorDir * horOffset;
+                        var dest = org + (-info.FrontDownDist - 1.99F) * Vector3.up + moveHorDir * horOffset;
 
                         player.StartForceMoveOperation("Climb over wall",
                                 new ForceMoveOperation[] {
@@ -69,7 +79,7 @@ namespace MinecraftClient.Control
                         var horOffset = info.BarrierDist - 1.0F;
 
                         var org  = rigidbody.transform.position;
-                        var dest = org + (-info.FrontDownDist - 0.98F) * Vector3.up + moveHorDir * horOffset;
+                        var dest = org + (-info.FrontDownDist - 0.99F) * Vector3.up + moveHorDir * horOffset;
 
                         player.StartForceMoveOperation("Climb over barrier",
                                 new ForceMoveOperation[] {

@@ -11,8 +11,6 @@ namespace MinecraftClient.Rendering
 
         public abstract void UpdateVelocity(Vector3 velocity);
 
-        public abstract void UpdateInfo(Vector3 cameraPos);
-
         public virtual void UpdateVisual(float tickMilSec) { }
 
         public virtual void UpdateStateMachine(PlayerStatus info) { }

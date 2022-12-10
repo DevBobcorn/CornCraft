@@ -16,7 +16,7 @@ namespace MinecraftClient.Control
             if (inputData.horInputNormalized != Vector2.zero)
             {
                 // Smooth rotation for player model
-                info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval);
+                info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval * 0.05F);
 
                 if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 40F) // Trying to moving forward
                 {
