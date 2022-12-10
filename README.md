@@ -2,7 +2,7 @@
 A Minecraft client implementation made with Unity.
 
 ## > About
-__CornCraft__ is a Unity version of Minecraft. It connects to vanilla servers(1.16 to latest 1.19.2) and provides basic graphical, vanilla-like gameplay support. It is based on another open source project, [Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client), and makes heavy use of its cross-version Minecraft protocol implementation.
+__CornCraft__ is a Unity version of Minecraft. It connects to vanilla servers(currently 1.16 to 1.19.2) and provides basic graphical, vanilla-like gameplay support. It is based on another open source project, [Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client), and makes heavy use of its cross-version Minecraft protocol implementation.
 
 However, unlike MCC itself which runs on modern .NET, CornCraft is a Unity app/game and runs on Mono/IL2CPP backend, so a large part of the code from MCC has been refactored or rewritten to adapt to Unity's environment.
 
@@ -11,8 +11,11 @@ __*Important!*__ It is __NOT__ recommended to join a public/commercial server wi
 The code CornCraft uses to parse vanilla resource packs is open source as a separate project called [CornModel](https://github.com/DevBobcorn/CornModel). Check it out if you want to make a Minecraft structure viewer, map editor or something like that with Unity.
 
 ## > Server Setup
-Recommended server versions for CornCraft are <code>1.16.5</code>, <code>1.17.1</code>, <code>1.18.2</code> and <code>1.19.2(WIP)</code>, both vanilla servers and plugin servers like Spigot are supported. 
+Recommended server versions for CornCraft are <code>1.16.5</code>, <code>1.17.1</code>, <code>1.18.2</code> and <code>1.19.2</code>, both vanilla servers and plugin servers like Spigot are supported.
+
 When setting up a server for CornCraft, it is recommended to set the <code>allow-flight</code> option to <code>true</code> in <code>server.properties</code> file, otherwise it's likely you'll be kicked from the server when moving around(because CornCraft does not and likely will not simulate vanilla player physics, it uses Unity's physics system).
+
+For <code>1.19.1</code> or higher servers, it is also necessary to set <code>enforce-secure-profile</code> to <code>false</code> so that CornCraft can log in correctly.
 
 ## > Building & Running
 The project is made and tested with Unity 2021.3.6f1c1, so it is recommended to use this version(or newer) of Unity to build this game.
