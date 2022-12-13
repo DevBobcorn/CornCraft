@@ -2,11 +2,14 @@
 using UnityEngine;
 using MinecraftClient.Control;
 using MinecraftClient.Mapping;
+using MinecraftClient.Resource;
 
 namespace MinecraftClient.Rendering
 {
-    public class PlayerEntityAnimeRender : EntityRender, IPlayerVisual
+    public class PlayerEntityRiggedRender : EntityRender, IPlayerVisual
     {
+        [SerializeField] private bool usePlayerSkin = false;
+
         private static readonly int GROUNDED = Animator.StringToHash("Grounded");
         private static readonly int IN_LIQUID = Animator.StringToHash("InLiquid");
         private static readonly int ON_WALL = Animator.StringToHash("OnWall");
@@ -36,6 +39,8 @@ namespace MinecraftClient.Rendering
             else
                 Debug.LogWarning("Player animator not found!");
 
+            if (usePlayerSkin)
+                UpdateSkinMaterial();
         }
 
         public void UpdateEntity(Entity entity) => base.Entity = entity;
@@ -67,6 +72,24 @@ namespace MinecraftClient.Rendering
                 playerAnimator.SetFloat(CENTER_DOWN_DIST, info.CenterDownDist);
 
                 playerAnimator.SetBool(FORCED_ANIMATION, info.PlayingForcedAnimation);
+
+            }
+        }
+
+        private void UpdateSkinMaterial()
+        {
+            var nameLower = entity!.Name?.ToLower();
+
+            // Find skin and change materials
+            if (nameLower is not null && SkinManager.SkinMaterials.ContainsKey(nameLower))
+            {
+                var visualObj = transform.Find("Visual").gameObject;
+
+                var renderers = visualObj.GetComponentsInChildren<SkinnedMeshRenderer>();
+                var mat = SkinManager.SkinMaterials[nameLower];
+
+                foreach (var renderer in renderers)
+                    renderer.sharedMaterial = mat;
 
             }
         }

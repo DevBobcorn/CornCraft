@@ -149,7 +149,7 @@ namespace MinecraftClient
         public object locationLock = new();
         public Location GetCurrentLocation() => playerData.location;
 
-        public const string PLAYER_PREFAB = "Prefabs/Entity/Client Slim Player Entity";
+        public const string PLAYER_PREFAB = "Prefabs/Player/Client Slim Player Entity";
         public const string CAMERA_PREFAB = "Prefabs/Camera Cinemachine"; // Cinemachine or Simple
 
         private PlayerController? playerController;
