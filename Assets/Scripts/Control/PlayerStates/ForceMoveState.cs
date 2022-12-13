@@ -74,6 +74,9 @@ namespace MinecraftClient.Control
                 currentOperation.OperationInit?.Invoke(info, ability, rigidbody, player);
                 
                 currentTime = currentOperation.TimeTotal;
+
+                // TODO Check validity
+                info.PlayingForcedAnimation = currentOperation.UseRootMotionClipAsDisplacement;
             }
         }
 
@@ -88,6 +91,8 @@ namespace MinecraftClient.Control
                     // Perform last move with rigidbody.MovePosition()
                     rigidbody!.MovePosition(currentOperation.Destination!.Value);
                 }
+
+                info.PlayingForcedAnimation = false;
             }
         }
 
@@ -101,12 +106,12 @@ namespace MinecraftClient.Control
             if (Operations.Length > currentOperationIndex)
                 StartOperation(info, ability, rigidbody, player);
             
-            info.PlayingForcedAnimation = true;
+            //info.PlayingForcedAnimation = true;
         }
 
         public void OnExit(PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
-            info.PlayingForcedAnimation = false;
+            //info.PlayingForcedAnimation = false;
 
         }
 
