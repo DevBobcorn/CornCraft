@@ -10,22 +10,27 @@ namespace MinecraftClient.Control
         public const float THRESHOULD_CLIMB_UP = -0.85F;
         public const float THRESHOULD_STEP_UP  = -0.01F;
 
-        public const float RUN_BRAKE_TIME = 0.1F;
-        public const float SPRINT_BRAKE_TIME = 0.2F;
+        public const float MOVE_PERSISTANCE = 0.1F;
 
+        public const float RUN_BRAKE_TIME = 0.2F;
+        public const float SPRINT_BRAKE_TIME = 0.5F;
 
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
             if (inputData.horInputNormalized != Vector2.zero)
             {
-                info.MoveBrake = info.Sprinting ? SPRINT_BRAKE_TIME : RUN_BRAKE_TIME;
+                info.MovePersistence = MOVE_PERSISTANCE;
+                info.BrakeTime = info.Sprinting ? SPRINT_BRAKE_TIME : RUN_BRAKE_TIME;
             }
             else
-                info.MoveBrake -= interval;
+                info.MovePersistence -= interval;
 
-            if (info.MoveBrake > 0F)
+            if (info.BrakeTime > 0F)
             {
-                info.Moving = true;
+                info.Moving = info.MovePersistence > 0F;
+
+                if (!info.Moving)
+                    info.BrakeTime -= interval;
                 
                 bool costStamina = false;
 
@@ -43,9 +48,9 @@ namespace MinecraftClient.Control
                     info.Sprinting = false;
                 
                 if (info.Sprinting)
-                    moveSpeed = ability.SprintSpeed * (info.MoveBrake / SPRINT_BRAKE_TIME);
+                    moveSpeed = ability.SprintSpeed * (info.BrakeTime / SPRINT_BRAKE_TIME);
                 else
-                    moveSpeed = (info.WalkMode ? ability.WalkSpeed : ability.RunSpeed) * info.MoveBrake / RUN_BRAKE_TIME;
+                    moveSpeed = (info.WalkMode ? ability.WalkSpeed : ability.RunSpeed) * info.BrakeTime / RUN_BRAKE_TIME;
 
                 // Use the target visual yaw as actual movement direction
                 var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
@@ -63,7 +68,7 @@ namespace MinecraftClient.Control
 
                         player.StartForceMoveOperation("Climb over wall",
                                 new ForceMoveOperation[] {
-                                        new(org,  dest, 0.1F),
+                                        new(org,  dest, 0.15F),
                                         new(dest, ability.Climb2mCurves, player.visualTransform!.rotation, 0F, 2.25F,
                                             playbackSpeed: 1.8F,
                                             init: (info, ability, rigidbody, player) =>
@@ -83,7 +88,7 @@ namespace MinecraftClient.Control
 
                         player.StartForceMoveOperation("Climb over barrier",
                                 new ForceMoveOperation[] {
-                                        new(org,  dest, 0.1F),
+                                        new(org,  dest, 0.15F),
                                         new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.95F,
                                             init: (info, ability, rigidbody, player) =>
                                                 player.CrossFadeState(PlayerAbility.CLIMB_1M),
@@ -129,10 +134,12 @@ namespace MinecraftClient.Control
                 else // Restore stamina
                     info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.SwimStaminaCost);
             }
-            else // Stop moving
+            else // Not moving
             {
+                // Stop moving and clear sprinting flag anyway
                 info.Moving = false;
                 info.Sprinting = false;
+                
             }
 
         }

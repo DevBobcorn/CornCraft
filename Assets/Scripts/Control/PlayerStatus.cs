@@ -15,7 +15,9 @@ namespace MinecraftClient.Control
         public bool OnWall    = false;
         public bool Moving    = false;
         public bool Sprinting = false;
-        public float MoveBrake =   0F;
+
+        public float MovePersistence = 0F;
+        public float BrakeTime       = 0F;
 
         public bool Attacking  = false;
         public bool Spectating = false;

@@ -32,23 +32,49 @@ namespace MinecraftClient.Control
                     moveVelocity = Vector3.zero;
 
                 // Check vertical movement...
-                if (info.FrontDownDist < -0.05F) // Swim up to land
+                if (info.FrontDownDist < -0.05F)
                 {
-                    var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+                    if (info.LiquidDist > -0.5F) // On water suface now, swim up to land
+                    {
+                        var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+                        var horOffset = info.BarrierDist - 1.0F;
 
-                    // Start force move operation
-                    var org  = rigidbody.transform.position;
-                    var dest = rigidbody.transform.position + (-info.FrontDownDist + 0.01F) * Vector3.up + moveHorDir * 0.8F;
+                        // Start force move operation
+                        var org  = rigidbody.transform.position;
+                        var dest = org + (-info.FrontDownDist - 0.99F) * Vector3.up + moveHorDir * horOffset;
+
+                        player.StartForceMoveOperation("Climb to land",
+                                    new ForceMoveOperation[] {
+                                            new(org,  dest, 0.15F),
+                                            new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.95F,
+                                                init: (info, ability, rigidbody, player) =>
+                                                    player.CrossFadeState(PlayerAbility.CLIMB_1M),
+                                                update: (interval, inputData, info, ability, rigidbody, player) =>
+                                                    info.Moving = inputData.horInputNormalized != Vector2.zero
+                                            )
+                                    } );
+
+                        Debug.Log("Climb to land " + info.LiquidDist);
+                    }
+                    else // Below water surface now, swim up a bit
+                    {
+                        var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+
+                        // Start force move operation
+                        var org  = rigidbody.transform.position;
+                        var dest = org + (-info.FrontDownDist + 0.2F) * Vector3.up + moveHorDir * 0.35F;
+
+                        player.StartForceMoveOperation("Swim over barrier underwater",
+                                    new ForceMoveOperation[] {
+                                            new(org,  dest, 0.5F,
+                                                update: (interval, inputData, info, ability, rigidbody, player) =>
+                                                    info.Moving = true
+                                            )
+                                    } );
+                        
+                        Debug.Log("Swim over barrier underwater " + info.LiquidDist);
+                    }
                     
-                    player.StartForceMoveOperation("Swim to land", new ForceMoveOperation[] {
-                            new(org, dest, 0.4F,
-                                update: (interval, inputData, info, ability, rigidbody, player) =>
-                                {
-                                    info.InLiquid = false;
-                                    info.Grounded = true;
-                                    info.Moving = true;
-                                })
-                            } );
                 }
                 else if (inputData.ascend)
                 {
