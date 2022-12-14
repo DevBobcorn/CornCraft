@@ -48,17 +48,12 @@ namespace MinecraftClient.Control
             // ENABLED END */
 
             // Update player state - on ground or not?
-            if (Status.InLiquid)
-                Status.Grounded = false;
-            else // Perform grounded check
+            if (UseBoxCastForGroundedCheck) // Cast a box down to check if player is grounded
+                Status.Grounded = Physics.BoxCast(transform.position + GroundBoxcastCenter, GroundBoxcastHalfSize, -transform.up, Quaternion.identity, GroundBoxcastDist, GroundLayer);
+            else
             {
-                if (UseBoxCastForGroundedCheck) // Cast a box down to check if player is grounded
-                    Status.Grounded = Physics.BoxCast(transform.position + GroundBoxcastCenter, GroundBoxcastHalfSize, -transform.up, Quaternion.identity, GroundBoxcastDist, GroundLayer);
-                else
-                {
-                    RaycastHit hit;
-                    Status.Grounded = Physics.SphereCast(transform.position + GroundSpherecastCenter, GroundSpherecastRadius, -transform.up, out hit, GroundSpherecastDist, GroundLayer);
-                }
+                RaycastHit hit;
+                Status.Grounded = Physics.SphereCast(transform.position + GroundSpherecastCenter, GroundSpherecastRadius, -transform.up, out hit, GroundSpherecastDist, GroundLayer);
             }
 
             var rayCenter = transform.position + GROUND_BOXCAST_START_POINT;

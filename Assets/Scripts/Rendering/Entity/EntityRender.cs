@@ -7,7 +7,7 @@ namespace MinecraftClient.Rendering
 {
     public class EntityRender : MonoBehaviour
     {
-        private const float MOVE_THERESHOLD = 5F * 5F; // Treat as teleport if move more than 5 meters at once
+        private const float MOVE_THRESHOLD = 5F * 5F; // Treat as teleport if move more than 5 meters at once
         protected Vector3? lastPosition = null, targetPosition = null;
         protected float lastYaw = 0F, targetYaw = 0F;
         protected float lastHeadYaw = 0F, targetHeadYaw = 0F;
@@ -75,7 +75,7 @@ namespace MinecraftClient.Rendering
             // Update position
             if (lastPosition is not null && targetPosition is not null)
             {
-                if ((targetPosition.Value - transform.position).sqrMagnitude > MOVE_THERESHOLD) // Treat as teleport
+                if ((targetPosition.Value - transform.position).sqrMagnitude > MOVE_THRESHOLD) // Treat as teleport
                     transform.position = targetPosition.Value;
                 else // Smoothly move to current position
                     transform.position = Vector3.SmoothDamp(transform.position, targetPosition.Value, ref currentVelocity, tickMilSec);
