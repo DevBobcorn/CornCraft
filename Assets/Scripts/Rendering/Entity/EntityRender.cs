@@ -1,6 +1,5 @@
 #nullable enable
 using UnityEngine;
-using TMPro;
 
 using MinecraftClient.Mapping;
 
@@ -14,6 +13,9 @@ namespace MinecraftClient.Rendering
         protected float lastHeadYaw = 0F, targetHeadYaw = 0F;
         protected float lastPitch = 0F, targetPitch = 0F;
         protected Vector3 currentVelocity = Vector3.zero;
+
+        [SerializeField] protected Transform? infoAnchor;
+        public Transform InfoAnchor => infoAnchor is null ? transform : infoAnchor;
 
         // A number made from the entity's numeral id, used in animations to prevent
         // several mobs of a same type moving synchronisedly, which looks unnatural
@@ -63,7 +65,10 @@ namespace MinecraftClient.Rendering
             targetHeadYaw = headYaw;
         }
 
-        protected virtual void Initialize() { }
+        protected virtual void Initialize()
+        {
+            
+        }
 
         public void UpdateTransform(float tickMilSec)
         {

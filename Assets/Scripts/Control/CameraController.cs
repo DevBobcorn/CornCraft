@@ -7,7 +7,6 @@ namespace MinecraftClient.Control
     public abstract class CameraController : MonoBehaviour
     {
         protected static readonly Vector3 VIEWPORT_CENTER    = new(0.5F,  0.5F, 0F);
-        protected static readonly Vector3 TARGET_MASS_CENTER = new(0.0F, -0.5F, 0F);
         protected CameraInfo cameraInfo = new();
         // Camera used for actual rendering
         protected Camera? renderCamera;
@@ -50,7 +49,21 @@ namespace MinecraftClient.Control
             
             var targetPos = GetTarget()?.position;
             if (renderCameraPresent && targetPos is not null)
-                return renderCamera!.WorldToScreenPoint(targetPos.Value + TARGET_MASS_CENTER);
+                return renderCamera!.WorldToScreenPoint(targetPos.Value);
+            
+            return Vector3.zero;
+        }
+
+        public virtual Vector3 GetTransfromScreenPos(Transform? t)
+        {
+            EnsureInitialized();
+
+            var targetPos = t?.position;
+            if (renderCameraPresent && targetPos is not null)
+            {
+                if (renderCamera!.WorldToViewportPoint(targetPos.Value).z > 0F)
+                    return renderCamera!.WorldToScreenPoint(targetPos.Value);
+            }
             
             return Vector3.zero;
         }

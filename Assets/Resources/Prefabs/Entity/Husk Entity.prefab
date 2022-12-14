@@ -63,6 +63,10 @@ PrefabInstance:
       propertyPath: head
       value: 
       objectReference: {fileID: 7083468092088530940}
+    - target: {fileID: 6033660137571719628, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
+      propertyPath: infoAnchor
+      value: 
+      objectReference: {fileID: 8299503759999353212}
     - target: {fileID: 6353004117845051208, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -144,5 +148,10 @@ PrefabInstance:
 --- !u!4 &7083468092088530940 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7348907273871669706, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
+  m_PrefabInstance: {fileID: 554251208326876726}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8299503759999353212 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8402830955569499978, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
   m_PrefabInstance: {fileID: 554251208326876726}
   m_PrefabAsset: {fileID: 0}
