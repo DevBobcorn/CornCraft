@@ -23,12 +23,12 @@ namespace MinecraftClient.Control
                 if (perspective == Perspective.ThirdPerson)
                 {
                     // Sprinting with use item button is also possible in third person mode
-                    inputData.sprint = Input.GetButton("UseItem") || Input.GetButton("Sprint");
+                    inputData.sprint = Input.GetButtonDown("UseItem") || Input.GetButtonDown("Sprint");
                 }
                 else
                 {
-                    inputData.useItem = Input.GetButton("UseItem");
-                    inputData.sprint  = Input.GetButton("Sprint");
+                    inputData.useItem = Input.GetButtonDown("UseItem");
+                    inputData.sprint  = Input.GetButtonDown("Sprint");
                 }
 
                 inputData.ascend  = Input.GetButton("GoUp");
