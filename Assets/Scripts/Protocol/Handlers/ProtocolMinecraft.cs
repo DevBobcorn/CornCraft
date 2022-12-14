@@ -89,7 +89,7 @@ namespace MinecraftClient.Protocol.Handlers
             
             if (this.protocolVersion >= MC_1_19_Version)
                 entityPalette = new EntityPalette119();  // 1.19   ~ 1.19.2
-            if (this.protocolVersion >= MC_1_17_Version)
+            else if (this.protocolVersion >= MC_1_17_Version)
                 entityPalette = new EntityPalette117();  // 1.17   ~ 1.18.2
             else if (this.protocolVersion >= MC_1_16_2_Version)
                 entityPalette = new EntityPalette1162(); // 1.16.2 ~ 1.16.5
