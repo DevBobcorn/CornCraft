@@ -10,7 +10,12 @@ namespace MinecraftClient.Control
             info.Sprinting = false;
             
             if (inputData.horInputNormalized != Vector2.zero || inputData.ascend || inputData.descend) // Start moving
+            {
                 info.Moving = true;
+
+                if ((inputData.horInputNormalized == Vector2.zero && !inputData.ascend) && info.Grounded)
+                    info.Moving = false; // Awful exceptions
+            }
             else
             {
                 info.Moving = false;

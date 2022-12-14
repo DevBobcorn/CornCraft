@@ -5,6 +5,8 @@ namespace MinecraftClient.Control
 {
     public class SwimState : IPlayerState
     {
+        public const float THRESHOLD_LAND_PLATFORM  = -1.4F;
+
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
             info.Sprinting = false;
@@ -16,6 +18,9 @@ namespace MinecraftClient.Control
                 var distAboveLiquidSurface = info.LiquidDist - PlayerStatusUpdater.SURFING_LIQUID_DIST_THERSHOLD;
 
                 info.Moving = true;
+
+                if ((inputData.horInputNormalized == Vector2.zero && !inputData.ascend) && info.Grounded)
+                    info.Moving = false; // Awful exceptions
 
                 bool costStamina = true;
 
@@ -34,27 +39,45 @@ namespace MinecraftClient.Control
                 // Check vertical movement...
                 if (info.FrontDownDist < -0.05F)
                 {
-                    if (info.LiquidDist > -0.5F) // On water suface now, swim up to land
+                    if (info.LiquidDist > info.FrontDownDist) // On water suface now, and the platform is above water
+                    {
+                        if (info.LiquidDist > THRESHOLD_LAND_PLATFORM)
+                        {
+                            var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+                            var horOffset = info.BarrierDist - 1.0F;
+
+                            // Start force move operation
+                            var org  = rigidbody.transform.position;
+                            var dest = org + (-info.FrontDownDist - 0.99F) * Vector3.up + moveHorDir * horOffset;
+
+                            player.StartForceMoveOperation("Climb to land",
+                                        new ForceMoveOperation[] {
+                                                new(org,  dest, 0.01F + Mathf.Max(info.LiquidDist - info.FrontDownDist - 0.2F, 0F) * 0.5F),
+                                                new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.95F,
+                                                    init: (info, ability, rigidbody, player) =>
+                                                        player.CrossFadeState(PlayerAbility.CLIMB_1M),
+                                                    update: (interval, inputData, info, ability, rigidbody, player) =>
+                                                        info.Moving = inputData.horInputNormalized != Vector2.zero
+                                                )
+                                        } );
+                        }
+                        // Otherwise the platform/land is too high to reach
+                    }
+                    else if (info.LiquidDist > THRESHOLD_LAND_PLATFORM) // Approaching Water suface, and the platform is under water 
                     {
                         var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
-                        var horOffset = info.BarrierDist - 1.0F;
 
                         // Start force move operation
                         var org  = rigidbody.transform.position;
-                        var dest = org + (-info.FrontDownDist - 0.99F) * Vector3.up + moveHorDir * horOffset;
+                        var dest = org + (-info.FrontDownDist) * Vector3.up + moveHorDir * 0.55F;
 
-                        player.StartForceMoveOperation("Climb to land",
+                        player.StartForceMoveOperation("Swim over barrier underwater",
                                     new ForceMoveOperation[] {
-                                            new(org,  dest, 0.15F),
-                                            new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.95F,
-                                                init: (info, ability, rigidbody, player) =>
-                                                    player.CrossFadeState(PlayerAbility.CLIMB_1M),
+                                            new(org,  dest, 0.8F,
                                                 update: (interval, inputData, info, ability, rigidbody, player) =>
-                                                    info.Moving = inputData.horInputNormalized != Vector2.zero
+                                                    info.Moving = true
                                             )
                                     } );
-
-                        Debug.Log("Climb to land " + info.LiquidDist);
                     }
                     else // Below water surface now, swim up a bit
                     {
@@ -71,8 +94,6 @@ namespace MinecraftClient.Control
                                                     info.Moving = true
                                             )
                                     } );
-                        
-                        Debug.Log("Swim over barrier underwater " + info.LiquidDist);
                     }
                     
                 }
@@ -91,7 +112,7 @@ namespace MinecraftClient.Control
                     else
                         moveVelocity.y =  moveSpeed; // Move up
                 }
-                else if (inputData.descend)
+                else if (!info.Grounded && inputData.descend)
                     moveVelocity.y = -moveSpeed;
                 else // Sink
                 {
@@ -110,7 +131,9 @@ namespace MinecraftClient.Control
                 // Apply new velocity to rigidbody
                 rigidbody.velocity = moveVelocity;
                 
-                if (costStamina) // Update stamina
+                if (info.Grounded) // Restore stamina
+                    info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
+                else if (costStamina) // Update stamina
                     info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, 0F, interval * ability.SwimStaminaCost);
             }
             else // Stop moving
