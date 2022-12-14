@@ -176,6 +176,8 @@ namespace MinecraftClient.Control
 
         public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)
         {
+            CurrentState.OnExit(statusUpdater!.Status, playerAbility!, playerRigidbody!, this);
+
             // Enter a new force move state
             CurrentState = new ForceMoveState(name, ops);
             CurrentState.OnEnter(statusUpdater!.Status, playerAbility!, playerRigidbody!, this);

@@ -9,6 +9,8 @@ namespace MinecraftClient.Control
         public const float THRESHOLD_CLIMB_1M = -1.55F;
         public const float THRESHOLD_CLIMB_UP = -1.35F;
 
+        public const float THRESHOLD_ANGLE_FORWARD = 40F;
+
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
             info.Sprinting = false;
@@ -18,7 +20,7 @@ namespace MinecraftClient.Control
                 // Smooth rotation for player model
                 info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval * 0.05F);
 
-                if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 40F) // Trying to moving forward
+                if (inputData.horInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
                 {
                     if (info.FrontDownDist <= THRESHOLD_CLIMB_1M && info.FrontDownDist > THRESHOLD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
                     {

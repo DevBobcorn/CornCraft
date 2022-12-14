@@ -12,8 +12,11 @@ namespace MinecraftClient.Control
 
         public const float MOVE_PERSISTANCE = 0.1F;
 
-        public const float RUN_BRAKE_TIME = 0.2F;
+        public const float RUN_BRAKE_TIME    = 0.2F;
         public const float SPRINT_BRAKE_TIME = 0.5F;
+
+        public const float THRESHOLD_SPRINT_STOP   = 50F;
+        public const float THRESHOLD_ANGLE_FORWARD = 70F;
 
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
@@ -21,6 +24,10 @@ namespace MinecraftClient.Control
             {
                 info.MovePersistence = MOVE_PERSISTANCE;
                 info.BrakeTime = info.Sprinting ? SPRINT_BRAKE_TIME : RUN_BRAKE_TIME;
+
+                // Stop sprinting if steer angle too sharp
+                if (info.YawOffset > THRESHOLD_SPRINT_STOP)
+                    info.Sprinting = false;
             }
             else
                 info.MovePersistence -= interval;
@@ -30,12 +37,24 @@ namespace MinecraftClient.Control
                 info.Moving = info.MovePersistence > 0F;
 
                 if (!info.Moving)
+                {
                     info.BrakeTime -= interval;
+                    info.Sprinting = false;
+                }
                 
                 bool costStamina = false;
 
                 // Smooth rotation for player model
-                info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval);
+                if (info.Sprinting)
+                {
+                    info.CurrentVisualYaw =
+                            Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * 0.3F * interval);
+                }
+                else
+                {
+                    info.CurrentVisualYaw =
+                            Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval);
+                }
 
                 float moveSpeed;
 
@@ -56,7 +75,7 @@ namespace MinecraftClient.Control
                 var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
                 moveVelocity.y = rigidbody.velocity.y;
 
-                if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 40F) // Trying to moving forward
+                if (inputData.horInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
                 {
                     if (info.FrontDownDist <= THRESHOLD_CLIMB_1M && info.FrontDownDist > THRESHOLD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
                     {
@@ -159,6 +178,11 @@ namespace MinecraftClient.Control
             if (!info.Grounded || info.OnWall || info.InLiquid || !info.Moving)
                 return true;
             return false;
+        }
+
+        public void OnExit(PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        {
+            info.Sprinting = false;
         }
 
         public override string ToString() => "Move";
