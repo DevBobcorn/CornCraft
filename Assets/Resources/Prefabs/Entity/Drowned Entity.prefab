@@ -77,6 +77,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e103a45dbef17946ac3cf9e05f1e9c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  infoAnchor: {fileID: 1165613711076197239}
   head: {fileID: 4168515927556775934}
   cycleTime: 1
   legAngle: 45
