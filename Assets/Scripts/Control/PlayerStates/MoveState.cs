@@ -5,10 +5,10 @@ namespace MinecraftClient.Control
 {
     public class MoveState : IPlayerState
     {
-        public const float THRESHOULD_CLIMB_2M = -2.05F;
-        public const float THRESHOULD_CLIMB_1M = -1.85F;
-        public const float THRESHOULD_CLIMB_UP = -0.85F;
-        public const float THRESHOULD_STEP_UP  = -0.01F;
+        public const float THRESHOLD_CLIMB_2M = -2.05F;
+        public const float THRESHOLD_CLIMB_1M = -1.85F;
+        public const float THRESHOLD_CLIMB_UP = -0.85F;
+        public const float THRESHOLD_STEP_UP  = -0.01F;
 
         public const float MOVE_PERSISTANCE = 0.1F;
 
@@ -58,7 +58,7 @@ namespace MinecraftClient.Control
 
                 if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 40F) // Trying to moving forward
                 {
-                    if (info.FrontDownDist <= THRESHOULD_CLIMB_1M && info.FrontDownDist > THRESHOULD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
+                    if (info.FrontDownDist <= THRESHOLD_CLIMB_1M && info.FrontDownDist > THRESHOLD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
                     {
                         var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
                         var horOffset = info.BarrierDist - 1.0F;
@@ -68,7 +68,7 @@ namespace MinecraftClient.Control
 
                         player.StartForceMoveOperation("Climb over wall",
                                 new ForceMoveOperation[] {
-                                        new(org,  dest, 0.15F),
+                                        new(org,  dest, 0.1F),
                                         new(dest, ability.Climb2mCurves, player.visualTransform!.rotation, 0F, 2.25F,
                                             playbackSpeed: 1.8F,
                                             init: (info, ability, rigidbody, player) =>
@@ -78,7 +78,7 @@ namespace MinecraftClient.Control
                                         )
                                 } );
                     }
-                    else if (info.FrontDownDist <= THRESHOULD_CLIMB_UP && info.FrontDownDist > THRESHOULD_CLIMB_1M && info.BarrierAngle < 30F) // Climb up platform
+                    else if (info.FrontDownDist <= THRESHOLD_CLIMB_UP && info.FrontDownDist > THRESHOLD_CLIMB_1M && info.BarrierAngle < 30F) // Climb up platform
                     {
                         var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
                         var horOffset = info.BarrierDist - 1.0F;
@@ -88,7 +88,7 @@ namespace MinecraftClient.Control
 
                         player.StartForceMoveOperation("Climb over barrier",
                                 new ForceMoveOperation[] {
-                                        new(org,  dest, 0.15F),
+                                        new(org,  dest, 0.1F),
                                         new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.95F,
                                             init: (info, ability, rigidbody, player) =>
                                                 player.CrossFadeState(PlayerAbility.CLIMB_1M),
@@ -97,7 +97,7 @@ namespace MinecraftClient.Control
                                         )
                                 } );
                     }
-                    else if (info.FrontDownDist <= THRESHOULD_STEP_UP && info.FrontDownDist > THRESHOULD_CLIMB_UP) // Walk up stairs
+                    else if (info.FrontDownDist <= THRESHOLD_STEP_UP && info.FrontDownDist > THRESHOLD_CLIMB_UP) // Walk up stairs
                     {
                         if (info.GroundSlope > 80F) // Stairs or slabs, just step up
                         {

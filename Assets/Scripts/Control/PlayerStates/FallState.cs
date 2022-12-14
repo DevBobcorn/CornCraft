@@ -5,9 +5,9 @@ namespace MinecraftClient.Control
 {
     public class FallState : IPlayerState
     {
-        public const float THRESHOULD_CLIMB_2M = -2.05F;
-        public const float THRESHOULD_CLIMB_1M = -1.55F;
-        public const float THRESHOULD_CLIMB_UP = -1.35F;
+        public const float THRESHOLD_CLIMB_2M = -2.05F;
+        public const float THRESHOLD_CLIMB_1M = -1.55F;
+        public const float THRESHOLD_CLIMB_UP = -1.35F;
 
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {
@@ -20,7 +20,7 @@ namespace MinecraftClient.Control
 
                 if (inputData.horInputNormalized != Vector2.zero && Mathf.Abs(info.YawOffset) < 40F) // Trying to moving forward
                 {
-                    if (info.FrontDownDist <= THRESHOULD_CLIMB_1M && info.FrontDownDist > THRESHOULD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
+                    if (info.FrontDownDist <= THRESHOLD_CLIMB_1M && info.FrontDownDist > THRESHOLD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
                     {
                         var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
                         var horOffset = info.BarrierDist - 1.0F;
@@ -40,7 +40,7 @@ namespace MinecraftClient.Control
                                         )
                                 } );
                     }
-                    else if (info.FrontDownDist <= THRESHOULD_CLIMB_UP && info.FrontDownDist > THRESHOULD_CLIMB_1M && info.BarrierAngle < 30F) // Climb up platform
+                    else if (info.FrontDownDist <= THRESHOLD_CLIMB_UP && info.FrontDownDist > THRESHOLD_CLIMB_1M && info.BarrierAngle < 30F) // Climb up platform
                     {
                         var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
                         var horOffset = info.BarrierDist - 1.0F;

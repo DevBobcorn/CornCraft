@@ -20,7 +20,7 @@ namespace MinecraftClient.Control
                 rigidbody.velocity = new(0F, ability.JumpSpeed, 0F);
 
             // Restore stamina
-            info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.SwimStaminaCost);
+            info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
         }
 
         public bool ShouldEnter(PlayerStatus info)
