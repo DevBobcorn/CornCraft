@@ -27,11 +27,15 @@ namespace MinecraftClient.Rendering
 
         private static GameObject? serverDefoPlayerPrefab, serverSlimPlayerPrefab;
 
-        private static Dictionary<EntityType, GameObject?> entityPrefabs = new();
+        private static readonly Dictionary<EntityType, GameObject?> entityPrefabs = new();
 
         private static GameObject? GetPrefabForType(EntityType type) => entityPrefabs.GetValueOrDefault(type, placeboEntityPrefab);
 
-        private Dictionary<int, EntityRender> entities = new();
+        private readonly Dictionary<int, EntityRender> entities = new();
+        private readonly HashSet<int> nearbyEntities = new();
+
+        private const float NEARBY_THERESHOLD_INNER = 25F;
+        private const float NEARBY_THERESHOLD_OUTER = 30F;
 
         public string GetDebugInfo() => $"Ent: {entities.Count}";
 
@@ -71,7 +75,11 @@ namespace MinecraftClient.Rendering
                     entities[id].Unload();
                     entities.Remove(id);
                 }
+
+                if (nearbyEntities.Contains(id))
+                    nearbyEntities.Remove(id);
             }
+
         }
 
         public void MoveEntity(int entityId, Location location)
@@ -95,6 +103,7 @@ namespace MinecraftClient.Rendering
         public void UnloadEntities()
         {
             entities.Clear();
+            nearbyEntities.Clear();
 
             // Reset instance
             instance = null;
@@ -108,15 +117,26 @@ namespace MinecraftClient.Rendering
                 entities[id].Unload();
 
             entities.Clear();
+            nearbyEntities.Clear();
 
+        }
+
+        public HashSet<int> GetNearbyEntities() => nearbyEntities;
+
+        public EntityRender? GetEntity(int entityId)
+        {
+            if (entities.ContainsKey(entityId))
+                return entities[entityId];
+            
+            return null;
         }
 
         void Start()
         {
             placeboEntityPrefab = Resources.Load<GameObject>("Prefabs/Entity/Cube Entity");
 
-            serverDefoPlayerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Server Defo Player Entity");
-            serverSlimPlayerPrefab = Resources.Load<GameObject>("Prefabs/Entity/Server Slim Player Entity");
+            serverDefoPlayerPrefab = Resources.Load<GameObject>("Prefabs/Player/Server Defo Player Entity");
+            serverSlimPlayerPrefab = Resources.Load<GameObject>("Prefabs/Player/Server Slim Player Entity");
 
             // Clear loaded things
             entityPrefabs.Clear();
@@ -151,10 +171,27 @@ namespace MinecraftClient.Rendering
 
         void Update()
         {
-            // Call managed update
-            foreach (var entity in entities.Values)
-                entity.ManagedUpdate(game!.GetTickMilSec());
+            var playerPos = game!.PlayerController?.transform.position;
 
+            foreach (var render in entities.Values)
+            {
+                // Call managed update
+                render.ManagedUpdate(game!.GetTickMilSec());
+
+                // Update entity set around the player
+                if (playerPos is not null)
+                {
+                    float dist = (render.transform.position - playerPos.Value).sqrMagnitude;
+
+                    if (dist < NEARBY_THERESHOLD_INNER)
+                        nearbyEntities.Add(render.Entity.ID);
+                    else if (dist > NEARBY_THERESHOLD_OUTER)
+                        nearbyEntities.Remove(render.Entity.ID);
+                    
+                }
+
+
+            }
         }
 
     }
