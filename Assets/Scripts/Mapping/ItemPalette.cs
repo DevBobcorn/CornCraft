@@ -64,9 +64,45 @@ namespace MinecraftClient.Mapping
             dictId.Clear();
 
             string itemsPath = PathHelper.GetExtraDataFile($"items-{dataVersion}.json");
+            string listsPath  = PathHelper.GetExtraDataFile("item_lists.json");
             string colorsPath = PathHelper.GetExtraDataFile("item_colors.json");
 
+            if (!File.Exists(itemsPath) || !File.Exists(listsPath) || !File.Exists(colorsPath))
+                throw new FileNotFoundException("Item data not complete!");
+
+            // First read special item lists...
+            var lists = new Dictionary<string, HashSet<ResourceLocation>>();
+            lists.Add("non_stackable", new());
+            lists.Add("stacklimit_16", new());
+            lists.Add("uncommon", new());
+            lists.Add("rare", new());
+            lists.Add("epic", new());
+
+            Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
+            loadStateInfo.infoText = $"Reading special lists from {listsPath}";
+
             int count = 0, yieldCount = 200;
+
+            foreach (var pair in lists)
+            {
+                if (spLists.Properties.ContainsKey(pair.Key))
+                {
+                    foreach (var block in spLists.Properties[pair.Key].DataArray)
+                    {
+                        pair.Value.Add(ResourceLocation.fromString(block.StringValue));
+                        count++;
+                        if (count % yieldCount == 0)
+                            yield return null;
+                    }
+                }
+            }
+
+            // References for later use
+            var rarityU = lists["uncommon"];
+            var rarityR = lists["rare"];
+            var rarityE = lists["epic"];
+            var nonStackables = lists["non_stackable"];
+            var stackLimit16s = lists["stacklimit_16"];
 
             if (File.Exists(itemsPath))
             {
@@ -79,7 +115,27 @@ namespace MinecraftClient.Mapping
                     {
                         var itemId = ResourceLocation.fromString(item.Value.StringValue);
 
-                        Item newItem = new Item(itemId);
+                        ItemRarity rarity = ItemRarity.Common;
+
+                        if (rarityE.Contains(itemId))
+                            rarity = ItemRarity.Epic;
+                        else if (rarityR.Contains(itemId))
+                            rarity = ItemRarity.Rare;
+                        else if (rarityU.Contains(itemId))
+                            rarity = ItemRarity.Uncommon;
+                        
+                        int stackLimit = Item.DEFAULT_STACK_LIMIT;
+
+                        if (nonStackables.Contains(itemId))
+                            stackLimit = 1;
+                        else if (stackLimit16s.Contains(itemId))
+                            stackLimit = 16;
+
+                        Item newItem = new Item(itemId)
+                        {
+                            Rarity = rarity,
+                            StackLimit = stackLimit
+                        };
 
                         itemsTable.TryAdd(numId, newItem);
                         //UnityEngine.Debug.Log($"Loading item {numId} {item.Value.StringValue}");
@@ -97,12 +153,15 @@ namespace MinecraftClient.Mapping
             foreach (KeyValuePair<int, Item> entry in itemsTable)
             {
                 dictReverse.Add(entry.Value, entry.Key);
-                dictId.Add(entry.Value.itemId, entry.Key);
+                dictId.Add(entry.Value.ItemId, entry.Key);
             }
 
             // Hardcoded placeholder types for internal and network use
-            dictReverse[Item.UNKNOWN] = -1;
-            dictId[Item.UNKNOWN.itemId] = -1;
+            dictReverse[Item.UNKNOWN] = -2;
+            dictId[Item.UNKNOWN.ItemId] = -2;
+
+            dictReverse[Item.NULL] = -1;
+            dictId[Item.NULL.ItemId] = -1;
 
             yield return null;
 

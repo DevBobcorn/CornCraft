@@ -167,7 +167,7 @@ namespace MinecraftClient.Resource
             foreach (var numId in ItemPalette.INSTANCE.ItemsTable.Keys)
             {
                 var item = ItemPalette.INSTANCE.ItemsTable[numId];
-                var itemId = item.itemId;
+                var itemId = item.ItemId;
 
                 var itemModelId = new ResourceLocation(itemId.Namespace, $"item/{itemId.Path}");
 
