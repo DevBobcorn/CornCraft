@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "block/wall_banner/light_gray"
+		},
+		"facing=east": {
+			"model": "block/wall_banner/light_gray",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "block/wall_banner/light_gray",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "block/wall_banner/light_gray",
+			"y": 270
+		}
+	}
+}
