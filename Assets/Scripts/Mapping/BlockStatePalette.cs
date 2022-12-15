@@ -51,8 +51,6 @@ namespace MinecraftClient.Mapping
             return BlockGeometry.DEFAULT_COLOR;
         } 
 
-        private static readonly ResourceLocation LAVA = new("lava");
-
         public IEnumerator PrepareData(string dataVersion, CoroutineFlag flag, LoadStateInfo loadStateInfo)
         {
             // Clean up first...
@@ -70,69 +68,39 @@ namespace MinecraftClient.Mapping
                 throw new FileNotFoundException("Block data not complete!");
 
             // First read special block lists...
-            var noOcclusion = new List<ResourceLocation>();
-            var noCollision = new List<ResourceLocation>();
-            var waterBlocks = new List<ResourceLocation>();
-            var emptyBlocks = new List<ResourceLocation>();
-            var alwaysFulls = new List<ResourceLocation>();
+            var lists = new Dictionary<string, HashSet<ResourceLocation>>();
+            lists.Add("no_occlusion", new());
+            lists.Add("no_collision", new());
+            lists.Add("water_blocks", new());
+            lists.Add("always_fulls", new());
+            lists.Add("empty_blocks", new());
 
             Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
             loadStateInfo.infoText = $"Reading special lists from {listsPath}";
 
             int count = 0, yieldCount = 200;
 
-            if (spLists.Properties.ContainsKey("no_occlusion"))
+            foreach (var pair in lists)
             {
-                foreach (var block in spLists.Properties["no_occlusion"].DataArray)
+                if (spLists.Properties.ContainsKey(pair.Key))
                 {
-                    noOcclusion.Add(ResourceLocation.fromString(block.StringValue));
-                    count++;
-                    if (count % yieldCount == 0)
-                        yield return null;
+                    foreach (var block in spLists.Properties[pair.Key].DataArray)
+                    {
+                        pair.Value.Add(ResourceLocation.fromString(block.StringValue));
+                        count++;
+                        if (count % yieldCount == 0)
+                            yield return null;
+                    }
                 }
             }
 
-            if (spLists.Properties.ContainsKey("no_collision"))
-            {
-                foreach (var block in spLists.Properties["no_collision"].DataArray)
-                {
-                    noCollision.Add(ResourceLocation.fromString(block.StringValue));
-                    count++;
-                    if (count % yieldCount == 0)
-                        yield return null;
-                }
-            }
-
-            if (spLists.Properties.ContainsKey("water_blocks"))
-            {
-                foreach (var block in spLists.Properties["water_blocks"].DataArray)
-                {
-                    waterBlocks.Add(ResourceLocation.fromString(block.StringValue));
-                    count++;
-                    if (count % yieldCount == 0)
-                        yield return null;
-                }
-            }
-
-            if (spLists.Properties.ContainsKey("always_fulls"))
-            {
-                foreach (var block in spLists.Properties["always_fulls"].DataArray)
-                {
-                    alwaysFulls.Add(ResourceLocation.fromString(block.StringValue));
-                    count++;
-                    if (count % yieldCount == 0)
-                        yield return null;
-                }
-            }
-
-            emptyBlocks.Add(new ResourceLocation("air"));
-            emptyBlocks.Add(new ResourceLocation("void_air"));
-            emptyBlocks.Add(new ResourceLocation("cave_air"));
-            emptyBlocks.Add(new ResourceLocation("structure_void"));
-            emptyBlocks.Add(new ResourceLocation("light"));
-            emptyBlocks.Add(new ResourceLocation("water"));
-            emptyBlocks.Add(LAVA);
-            emptyBlocks.Add(new ResourceLocation("barrier"));
+            // References for later use
+            ResourceLocation lavaId   = new("lava");
+            var noOcclusion = lists["no_occlusion"];
+            var noCollision = lists["no_collision"];
+            var waterBlocks = lists["water_blocks"];
+            var alwaysFulls = lists["always_fulls"];
+            var emptyBlocks = lists["empty_blocks"];
 
             // Then read block states...
             Json.JSONData palette = Json.ParseJson(File.ReadAllText(statesPath, Encoding.UTF8));
@@ -180,7 +148,7 @@ namespace MinecraftClient.Mapping
                             NoOcclusion = noOcclusion.Contains(blockId),
                             NoCollision = noCollision.Contains(blockId),
                             InWater = inWater,
-                            InLava  = blockId == LAVA,
+                            InLava  = blockId == lavaId,
                             LikeAir = emptyBlocks.Contains(blockId),
                             FullSolid = (!noOcclusion.Contains(blockId)) && alwaysFulls.Contains(blockId)
                         };
@@ -192,7 +160,7 @@ namespace MinecraftClient.Mapping
                             NoOcclusion = noOcclusion.Contains(blockId),
                             NoCollision = noCollision.Contains(blockId),
                             InWater = waterBlocks.Contains(blockId),
-                            InLava  = blockId == LAVA,
+                            InLava  = blockId == lavaId,
                             LikeAir = emptyBlocks.Contains(blockId),
                             FullSolid = (!noOcclusion.Contains(blockId)) && alwaysFulls.Contains(blockId)
                         };
