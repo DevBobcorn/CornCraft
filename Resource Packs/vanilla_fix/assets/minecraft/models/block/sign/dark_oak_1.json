@@ -1,0 +1,7 @@
+{
+	"parent": "block/sign/sign_1",
+	"textures": {
+		"all": "entity/signs/dark_oak",
+		"particle": "block/dark_oak_planks"
+	}
+}

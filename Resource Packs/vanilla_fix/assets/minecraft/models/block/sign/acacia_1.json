@@ -1,0 +1,7 @@
+{
+	"parent": "block/sign/sign_1",
+	"textures": {
+		"all": "entity/signs/acacia",
+		"particle": "block/acacia_planks"
+	}
+}

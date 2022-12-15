@@ -1,0 +1,7 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "particle": "block/end_portal",
+        "all": "block/end_portal"
+    }
+}
