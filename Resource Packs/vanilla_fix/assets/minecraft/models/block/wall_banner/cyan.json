@@ -1,0 +1,6 @@
+{
+	"parent": "block/wall_banner",
+	"textures": {
+		"colour": "block/banner/banner_cyan"
+	}
+}

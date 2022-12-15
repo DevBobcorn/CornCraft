@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "block/wall_banner/lime"
+		},
+		"facing=east": {
+			"model": "block/wall_banner/lime",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "block/wall_banner/lime",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "block/wall_banner/lime",
+			"y": 270
+		}
+	}
+}

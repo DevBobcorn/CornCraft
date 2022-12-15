@@ -1,0 +1,7 @@
+{
+	"parent": "block/wall_sign/wall_sign",
+	"textures": {
+		"all": "entity/signs/jungle",
+		"particle": "block/jungle_planks"
+	}
+}

@@ -1,0 +1,7 @@
+{
+	"parent": "block/sign/sign_1",
+	"textures": {
+		"all": "entity/signs/mangrove",
+		"particle": "block/mangrove_planks"
+	}
+}

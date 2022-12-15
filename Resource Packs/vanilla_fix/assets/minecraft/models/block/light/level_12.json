@@ -1,0 +1,7 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "particle": "item/light_12",
+        "all": "item/light_12"
+    }
+}

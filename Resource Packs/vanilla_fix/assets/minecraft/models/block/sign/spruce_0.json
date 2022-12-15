@@ -1,0 +1,7 @@
+{
+	"parent": "block/sign/sign_0",
+	"textures": {
+		"all": "entity/signs/spruce",
+		"particle": "block/spruce_planks"
+	}
+}

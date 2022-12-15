@@ -1,0 +1,6 @@
+{
+	"parent": "block/bed_foot",
+	"textures": {
+		"all": "entity/bed/pink"
+	}
+}

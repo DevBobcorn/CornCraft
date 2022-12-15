@@ -8,8 +8,9 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
-# CornModel data
+# CornModel resources
 /[Rr]esource [Pp]acks/*/
+!/[Rr]esource [Pp]acks/vanilla_fix/
 /[Ll]ang/
 /*.ini
 

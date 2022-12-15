@@ -120,6 +120,31 @@ namespace MinecraftClient.Resource
                             }
                         }
 
+                        if (new DirectoryInfo($"{nameSpaceDir}/textures/entity").Exists)
+                        {
+                            foreach (var texFile in texturesDir.GetFiles("entity/*.png", SearchOption.AllDirectories)) // Allow sub folders...
+                            {
+                                string texId = texFile.FullName.Replace('\\', '/');
+                                texId = texId.Substring(texDirLen); // e.g. 'entity/banner/base.png'
+                                texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'entity/banner/base'
+                                ResourceLocation identifier = new ResourceLocation(nameSpace, texId);
+                                if (!manager.TextureFileTable.ContainsKey(identifier))
+                                {
+                                    // This texture is not provided by previous resource packs, so add it here...
+                                    manager.TextureFileTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
+                                }
+                                else // Overwrite it
+                                    manager.TextureFileTable[identifier] = texFile.FullName.Replace('\\', '/');
+                                
+                                count++;
+                                if (count % 100 == 0)
+                                {
+                                    loadStateInfo.infoText = $"Gathering entity texture {identifier}";
+                                    yield return null;
+                                }
+                            }
+                        }
+
                         // Load and store all model files...
                         var modelsDir = new DirectoryInfo($"{nameSpaceDir}/models/");
                         int modelDirLen = modelsDir.FullName.Length;

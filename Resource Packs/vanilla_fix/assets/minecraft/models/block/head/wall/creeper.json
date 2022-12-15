@@ -1,0 +1,6 @@
+{
+	"parent": "block/head/wall/head",
+	"textures": {
+		"head": "entity/creeper/creeper"
+	}
+}

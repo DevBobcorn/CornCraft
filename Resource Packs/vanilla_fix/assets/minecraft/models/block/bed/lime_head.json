@@ -1,0 +1,6 @@
+{
+	"parent": "block/bed_head",
+	"textures": {
+		"all": "entity/bed/lime"
+	}
+}

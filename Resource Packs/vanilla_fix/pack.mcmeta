@@ -1,0 +1,6 @@
+{
+    "pack": {
+        "description": "Fix for Minecraft's hard coded models",
+        "pack_format": 4
+    }
+}

@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "block/head/wall/creeper"
+		},
+		"facing=east": {
+			"model": "block/head/wall/creeper",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "block/head/wall/creeper",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "block/head/wall/creeper",
+			"y": 270
+		}
+	}
+}

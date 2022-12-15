@@ -1,0 +1,7 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "particle": "block/black_shulker_box",
+        "all": "block/black_shulker_box"
+    }
+}

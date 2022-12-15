@@ -1,0 +1,7 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "all": "block/grass_block_top",
+        "particle": "block/grass_block_top"
+    }
+}

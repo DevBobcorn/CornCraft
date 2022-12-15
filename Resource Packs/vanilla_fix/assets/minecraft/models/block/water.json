@@ -1,0 +1,7 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "particle": "block/water_still",
+        "all": "block/water"
+    }
+}
