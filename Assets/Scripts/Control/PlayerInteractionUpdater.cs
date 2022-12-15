@@ -55,6 +55,7 @@ namespace MinecraftClient.Control
         public void UpdateInteractions(World world)
         {
             var playerLoc = CoordConvert.Unity2MC(transform.position).ToFloor();
+            var table = BlockInteractionManager.INSTANCE.InteractionTable;
 
             // Remove expired interactions
             var ids = interactionInfos.Keys.ToArray();
@@ -72,10 +73,8 @@ namespace MinecraftClient.Control
                 
                 var block = world.GetBlock(loc);
 
-                if (!BlockInteractionManager.INSTANCE.InteractionTable.ContainsKey(block.StateId))
-                {
+                if (!table.ContainsKey(block.StateId))
                     RemoveInteraction(id); // Remove this one
-                }
                 
             }
 
@@ -88,30 +87,30 @@ namespace MinecraftClient.Control
                             continue;
                         
                         var loc = playerLoc + new Location(x, y, z);
-                        // Special usage TODO: Check if correct
-                        int key = loc.X.GetHashCode() ^ loc.Y.GetHashCode() ^ loc.Z.GetHashCode();
+                        // Hash locations in a 16*16*16 area
+                        int locHash = loc.ChunkBlockX + (loc.ChunkBlockY << 4) + (loc.ChunkBlockZ << 8);
                         
                         var block = world.GetBlock(loc);
 
                         BlockInteractionDefinition? newDef;
                         
-                        if (BlockInteractionManager.INSTANCE.InteractionTable.TryGetValue(block.StateId, out newDef))
+                        if (table.TryGetValue(block.StateId, out newDef))
                         {
-                            if (interactionInfos.ContainsKey(key))
+                            if (interactionInfos.ContainsKey(locHash))
                             {
-                                var def = interactionInfos[key].Definition;
+                                var def = interactionInfos[locHash].Definition;
                                 if (def.GetHashCode() != newDef.GetHashCode())
                                 {
                                     // Update this interaction
-                                    RemoveInteraction(key);
+                                    RemoveInteraction(locHash);
                                     //Debug.Log($"Upd: {def.GetHashCode()} {def.Hint} {def.Type} => {newDef.GetHashCode()} {newDef.Hint} {newDef.Type}");
-                                    AddInteraction(key, loc, newDef);
+                                    AddInteraction(locHash, loc, newDef);
                                 }
                                 // Otherwise leave it unchanged
 
                             }
                             else // Add this interaction
-                                AddInteraction(key, loc, newDef);
+                                AddInteraction(locHash, loc, newDef);
                             
                         }
 
@@ -125,16 +124,21 @@ namespace MinecraftClient.Control
 
             EventManager.Instance.Broadcast<InteractionAddEvent>(new(id, info));
 
-            //Debug.Log($"Add {id}");
+            Debug.Log($"Add {id} {def.Hint} at {loc}");
         }
 
         private void RemoveInteraction(int id)
         {
-            interactionInfos.Remove(id);
-            
-            EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(id));
+            if (interactionInfos.ContainsKey(id))
+            {
+                var info = interactionInfos[id];
+                interactionInfos.Remove(id);
+                
+                EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(id));
 
-            //Debug.Log($"Remove {id}");
+                Debug.Log($"Remove {id} {info.GetHint()} at {info.Location}");
+            }
+            
         }
 
         private static bool PointOnGridEdge(float value)
