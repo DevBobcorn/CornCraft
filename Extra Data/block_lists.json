@@ -1023,5 +1023,15 @@
     "minecraft:gray_concrete_powder",
     "minecraft:emerald_ore",
     "minecraft:dead_bubble_coral_block"
+  ],
+  "empty_blocks": [
+    "minecraft:air",
+    "minecraft:void_air",
+    "minecraft:cave_air",
+    "minecraft:structure_void",
+    "minecraft:light",
+    "minecraft:water",
+    "minecraft:lava",
+    "minecraft:barrier"
   ]
 }
