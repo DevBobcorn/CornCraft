@@ -21,7 +21,7 @@ namespace MinecraftClient.Mapping
 
         public override int GetHashCode()
         {
-            return ((int)Type) ^ Hint.GetHashCode();
+            return Hint.GetHashCode();
         }
     }
 }
