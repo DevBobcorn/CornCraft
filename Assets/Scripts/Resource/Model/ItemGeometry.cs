@@ -11,7 +11,7 @@ namespace MinecraftClient.Resource
         public const float MC_UV_SCALE = 16F;
 
         public readonly List<float3> verticies = new();
-        public readonly List<float2> uvs       = new();
+        public readonly List<float3> uvs       = new();
         public readonly List<int> tintIndices  = new();
 
         public ItemGeometry(JsonModel model)
@@ -28,7 +28,7 @@ namespace MinecraftClient.Resource
         }
 
         private float3[] vertexArr = { };
-        private float2[] txuvArr = { };
+        private float3[] txuvArr = { };
         private int[]    tintArr = { };
 
         public void Build(ref VertexBuffer buffer, float3 posOffset, float3[] itemTints)
@@ -36,7 +36,7 @@ namespace MinecraftClient.Resource
             int vertexCount = buffer.vert.Length + vertexArr.Length;
 
             var verts = new float3[vertexCount];
-            var txuvs = new float2[vertexCount];
+            var txuvs = new float3[vertexCount];
             var tints = new float3[vertexCount];
 
             buffer.vert.CopyTo(verts, 0);
@@ -128,7 +128,7 @@ namespace MinecraftClient.Resource
 
                 ResourceLocation texIdentifier = model.resolveTextureName(face.texName);
 
-                float2[] remappedUVs = RemapUVs(face.uv / MC_UV_SCALE, texIdentifier, 0);
+                float3[] remappedUVs = RemapUVs(face.uv / MC_UV_SCALE, texIdentifier, 0);
 
                 // This rotation doesn't change the area of texture used...
                 // See https://minecraft.fandom.com/wiki/Model#Block_models
@@ -168,7 +168,7 @@ namespace MinecraftClient.Resource
 
         }
 
-        private static float2[] RemapUVs(float4 uvs, ResourceLocation source, int areaRot)
+        private static float3[] RemapUVs(float4 uvs, ResourceLocation source, int areaRot)
         {
             return AtlasManager.GetUVs(source, uvs, areaRot);
         }
