@@ -47,7 +47,7 @@ namespace MinecraftClient.Control
 
         }
 
-        public const int INTERACTION_RADIUS = 2;
+        public const int INTERACTION_RADIUS = 3;
         public const int INTERACTION_RADIUS_SQR = INTERACTION_RADIUS * INTERACTION_RADIUS;
 
         public const int INTERACTION_RADIUS_SQR_PLUS = INTERACTION_RADIUS * INTERACTION_RADIUS + INTERACTION_RADIUS;
