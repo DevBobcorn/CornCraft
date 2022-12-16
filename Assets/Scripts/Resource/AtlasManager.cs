@@ -173,6 +173,29 @@ namespace MinecraftClient.Resource
 
                 var rects = atlas.PackTextures(texturesConsumed, 0, ATLAS_SIZE, false);
 
+                if (atlas.width != ATLAS_SIZE || atlas.height != ATLAS_SIZE)
+                {
+                    // Size not right, replace it (usually the last atlas in array which doesn't
+                    // have enough textures to take up all the place and thus is smaller in size)
+                    var newAtlas = new Texture2D(ATLAS_SIZE, ATLAS_SIZE);
+
+                    Graphics.CopyTexture(atlas, 0, 0, 0, 0, atlas.width, atlas.height, newAtlas, 0, 0, 0, 0);
+
+                    float scaleX = (float) atlas.width  / (float) ATLAS_SIZE;
+                    float scaleY = (float) atlas.height / (float) ATLAS_SIZE;
+
+                    // Rescale the texture boundaries
+                    for (int i = 0;i < rects.Length;i++)
+                    {
+                        rects[i] = new Rect(
+                            rects[i].x     * scaleX,    rects[i].y      * scaleY,
+                            rects[i].width * scaleX,    rects[i].height * scaleY
+                        );
+                    }
+
+                    atlas = newAtlas;
+                }
+
                 atlases.Add(atlas);
 
                 for (int i = 0;i < consumedTexCount;i++)
@@ -199,14 +222,6 @@ namespace MinecraftClient.Resource
 
             for (int index = 0;index < atlases.Count;index++)
             {
-                if (atlases[index].width != ATLAS_SIZE || atlases[index].height != ATLAS_SIZE)
-                {
-                    Debug.Log($"W {atlases[index].width} H {atlases[index].height}");
-                    // Usually the last one, replace it...
-                    // TODO Do something right
-                    atlases[index].Reinitialize(ATLAS_SIZE, ATLAS_SIZE);
-                }
-
                 atlasArray.SetPixels(atlases[index].GetPixels(), index, 0);
             }
 
