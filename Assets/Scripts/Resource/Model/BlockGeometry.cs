@@ -17,7 +17,7 @@ namespace MinecraftClient.Resource
         public static readonly float3 DEFAULT_COLOR = new(1F, 1F, 1F);
 
         public readonly Dictionary<CullDir, List<float3>> verticies = new();
-        public readonly Dictionary<CullDir, List<float2>> uvs       = new();
+        public readonly Dictionary<CullDir, List<float3>> uvs       = new();
         public readonly Dictionary<CullDir, List<int>> tintIndices  = new();
         public readonly Dictionary<CullDir, uint> vertIndexOffset   = new();
 
@@ -27,7 +27,7 @@ namespace MinecraftClient.Resource
             foreach (CullDir dir in Enum.GetValues(typeof (CullDir)))
             {
                 verticies.Add(dir, new List<float3>());
-                uvs.Add(dir, new List<float2>());
+                uvs.Add(dir, new List<float3>());
                 tintIndices.Add(dir, new List<int>());
                 vertIndexOffset.Add(dir, 0);
             }
@@ -49,7 +49,7 @@ namespace MinecraftClient.Resource
         }
 
         private readonly Dictionary<CullDir, float3[]> vertexArrs = new();
-        private readonly Dictionary<CullDir, float2[]> txuvArrs = new();
+        private readonly Dictionary<CullDir, float3[]> txuvArrs = new();
         private readonly Dictionary<CullDir, int[]>    tintArrs = new();
 
         public BlockGeometry Finalize()
@@ -99,7 +99,7 @@ namespace MinecraftClient.Resource
             int vertexCount = buffer.vert.Length + ((sizeCache.ContainsKey(cullFlags)) ? sizeCache[cullFlags] : (sizeCache[cullFlags] = CalculateArraySize(cullFlags)));
 
             var verts = new float3[vertexCount];
-            var txuvs = new float2[vertexCount];
+            var txuvs = new float3[vertexCount];
             var tints = new float3[vertexCount];
 
             buffer.vert.CopyTo(verts, 0);
@@ -198,7 +198,7 @@ namespace MinecraftClient.Resource
             int vVertexCount = visualBuffer.vert.Length + extraVertCount;
 
             var verts = new float3[vVertexCount];
-            var txuvs = new float2[vVertexCount];
+            var txuvs = new float3[vVertexCount];
             var tints = new float3[vVertexCount];
 
             visualBuffer.vert.CopyTo(verts, 0);
@@ -441,7 +441,7 @@ namespace MinecraftClient.Resource
                 // state rotation, and it rotates the area of texture which is used on the face
                 int uvAreaRot = stateRotated && uvlock ? uvlockMap[zyRot][facePair.Key] : 0;
 
-                float2[] remappedUVs = RemapUVs(face.uv / MC_UV_SCALE, texIdentifier, uvAreaRot);
+                float3[] remappedUVs = RemapUVs(face.uv / MC_UV_SCALE, texIdentifier, uvAreaRot);
 
                 // This rotation doesn't change the area of texture used...
                 // See https://minecraft.fandom.com/wiki/Model#Block_models
@@ -486,7 +486,7 @@ namespace MinecraftClient.Resource
 
         }
 
-        private static float2[] RemapUVs(float4 uvs, ResourceLocation source, int areaRot)
+        private static float3[] RemapUVs(float4 uvs, ResourceLocation source, int areaRot)
         {
             return AtlasManager.GetUVs(source, uvs, areaRot);
         }
