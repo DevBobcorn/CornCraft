@@ -311,7 +311,7 @@ namespace MinecraftClient.Rendering
                             // Set mesh attributes
                             var visVertAttrs = new NativeArray<VertexAttributeDescriptor>(3, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
                             visVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3, stream: 0);
-                            visVertAttrs[1]  = new(VertexAttribute.TexCoord0, dimension: 2, stream: 1);
+                            visVertAttrs[1]  = new(VertexAttribute.TexCoord0, dimension: 3, stream: 1);
                             visVertAttrs[2]  = new(VertexAttribute.Color,     dimension: 3, stream: 2);
 
                             meshData.SetVertexBufferParams(totalVertCount,          visVertAttrs);
@@ -321,7 +321,7 @@ namespace MinecraftClient.Rendering
 
                             // Prepare source data arrays
                             var allVerts = new float3[totalVertCount];
-                            var allUVs   = new float2[totalVertCount];
+                            var allUVs   = new float3[totalVertCount];
                             var allTints = new float3[totalVertCount];
 
                             for (int layer = 0;layer < count;layer++)
@@ -339,7 +339,7 @@ namespace MinecraftClient.Rendering
                             // Copy the source arrays to mesh data
                             var positions  = meshData.GetVertexData<float3>(0);
                             positions.CopyFrom(allVerts);
-                            var texCoords  = meshData.GetVertexData<float2>(1);
+                            var texCoords  = meshData.GetVertexData<float3>(1);
                             texCoords.CopyFrom(allUVs);
                             var vertColors = meshData.GetVertexData<float3>(2);
                             vertColors.CopyFrom(allTints);

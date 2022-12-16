@@ -22,7 +22,7 @@ namespace MinecraftClient.Resource
             int newLength = vertOffset + arraySizeMap[cullFlags];
 
             var verts = new float3[newLength];
-            var txuvs = new float2[newLength];
+            var txuvs = new float3[newLength];
             var tints = new float3[newLength];
 
             buffer.vert.CopyTo(verts, 0);
@@ -32,8 +32,8 @@ namespace MinecraftClient.Resource
             for (int fti = vertOffset;fti < newLength;fti++)
                 tints[fti] = fluidColor;
 
-            float2[] topUVs  = AtlasManager.GetUVs(liquid, FULL, 0);
-            float2[] sideUVs = AtlasManager.GetUVs(liquid, new Vector4(0, 1 - h, 1, 1), 0);
+            float3[] topUVs  = AtlasManager.GetUVs(liquid, FULL, 0);
+            float3[] sideUVs = AtlasManager.GetUVs(liquid, new Vector4(0, 1 - h, 1, 1), 0);
 
             if ((cullFlags & (1 << 0)) != 0) // Up
             {
