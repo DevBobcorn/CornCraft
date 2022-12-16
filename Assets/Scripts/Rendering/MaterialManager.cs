@@ -23,6 +23,11 @@ namespace MinecraftClient.Rendering
             if (!initialized) Initialize();
         }
 
+        public static void ClearInitializedFlag()
+        {
+            initialized = false;
+        }
+
         private static void Initialize()
         {
             blockMaterials.Clear();

@@ -343,6 +343,9 @@ namespace MinecraftClient
             // Load player skin overrides...
             SkinManager.Load();
 
+            // Reset atlas materials
+            MaterialManager.ClearInitializedFlag();
+
             // Load biome definitions (After colormaps in resource packs are loaded)...
             BiomePalette.INSTANCE.PrepareData(dataVersion, $"vanilla-{resourceVersion}");
 
