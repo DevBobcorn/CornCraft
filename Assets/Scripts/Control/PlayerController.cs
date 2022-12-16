@@ -13,6 +13,7 @@ namespace MinecraftClient.Control
         [SerializeField] public PlayerAbility? playerAbility;
         [SerializeField] public Transform? cameraRef;
         [SerializeField] public Transform? visualTransform;
+        [SerializeField] public PhysicMaterial? physicMaterial;
 
         private CornClient? game;
         private Rigidbody? playerRigidbody;
@@ -247,6 +248,8 @@ namespace MinecraftClient.Control
 
                     playerCollider = capsule;
                 }
+
+                playerCollider.material = physicMaterial;
 
                 statusUpdater.UseBoxCastForGroundedCheck = boxcast;
             }
