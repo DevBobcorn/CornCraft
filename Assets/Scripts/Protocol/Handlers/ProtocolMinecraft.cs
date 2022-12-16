@@ -642,11 +642,6 @@ namespace MinecraftClient.Protocol.Handlers
 
                                 dataTypes.ReadNextNbt(packetData); // Heightmaps
 
-                                // Otherwise biomes will be read later, together with block states
-                                // Leave the biome array null
-
-                                int dataSize = dataTypes.ReadNextVarInt(packetData); // Size
-
                                 if (pTerrain.ProcessChunkColumnData(chunkX, chunkZ, verticalStripBitmask, packetData))
                                     Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
 

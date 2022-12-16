@@ -238,7 +238,12 @@ namespace MinecraftClient.Protocol.Handlers
             int chunkMask = 0;
 
             if (protocolVersion >= ProtocolMinecraft.MC_1_18_1_Version) // 1.18, 1.18.1 and above
-                biomes = new int[64 * chunkColumnSize]; // Prepare an empty array and do nothing else here
+            {
+                int dataSize = dataTypes.ReadNextVarInt(cache); // Size
+
+                // Prepare an empty array and do nothing else here
+                biomes = new int[64 * chunkColumnSize];
+            }
             else // 1.17 and 1.17.1, read biome data right here
             {
                 int biomesLength = dataTypes.ReadNextVarInt(cache); // Biomes length
@@ -247,17 +252,18 @@ namespace MinecraftClient.Protocol.Handlers
                 // Read all biome data at once before other chunk data
                 for (int i = 0; i < biomesLength; i++)
                     biomes[i] = dataTypes.ReadNextVarInt(cache); // Biomes
+                
+                int dataSize = dataTypes.ReadNextVarInt(cache); // Size
             }
 
             // 1.17 and above chunk format
             // Unloading chunks is handled by a separate packet
             for (int chunkY = 0; chunkY < chunkColumnSize; chunkY++)
-            {   // 1.18 and above always contains all chunk section in data
+            {
+                // 1.18 and above always contains all chunk section in data
                 // 1.17 and 1.17.1 need vertical strip bitmask to know if the chunk section is included
                 if ((protocolVersion >= ProtocolMinecraft.MC_1_18_1_Version) ||
-                    (((protocolVersion == ProtocolMinecraft.MC_1_17_Version) ||
-                        (protocolVersion == ProtocolMinecraft.MC_1_17_1_Version)) &&
-                        ((verticalStripBitmask![chunkY / 64] & (1UL << (chunkY % 64))) != 0)))
+                    ((verticalStripBitmask![chunkY / 64] & (1UL << (chunkY % 64))) != 0))
                 {
                     // Non-air block count inside chunk section, for lighting purposes
                     int blockCnt = dataTypes.ReadNextShort(cache);
