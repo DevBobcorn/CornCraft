@@ -217,18 +217,26 @@ namespace MinecraftClient.Resource
             }
             while (curTexIndex < texDict.Count);
 
-            var atlasArray = new Texture2DArray(ATLAS_SIZE, ATLAS_SIZE, curAtlasIndex, DefaultFormat.HDR, TextureCreationFlags.None);
-            atlasArray.filterMode = FilterMode.Point;
+            var atlasArray0 = new Texture2DArray(ATLAS_SIZE, ATLAS_SIZE, curAtlasIndex, TextureFormat.RGBA32,  2, false);
+            var atlasArray1 = new Texture2DArray(ATLAS_SIZE, ATLAS_SIZE, curAtlasIndex, TextureFormat.RGBA32,  4, false);
+
+            atlasArray0.filterMode = FilterMode.Point;
+            atlasArray1.filterMode = FilterMode.Point;
 
             for (int index = 0;index < atlases.Count;index++)
             {
-                atlasArray.SetPixels(atlases[index].GetPixels(), index, 0);
+                atlasArray0.SetPixels(atlases[index].GetPixels(), index, 0);
+                atlasArray1.SetPixels(atlases[index].GetPixels(), index, 0);
+
+                loadStateInfo.infoText = $"Creating atlas array element #{curAtlasIndex}";
+                yield return null;
             }
 
-            atlasArray.Apply(true, false);
+            atlasArray0.Apply(true, false);
+            atlasArray1.Apply(true, false);
 
-            atlasArrays[0] = atlasArray;
-            atlasArrays[1] = atlasArray;
+            atlasArrays[0] = atlasArray0;
+            atlasArrays[1] = atlasArray1;
 
         }
 
