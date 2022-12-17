@@ -56,7 +56,7 @@ namespace MinecraftClient
         public static bool MCSettings_Enabled = true;
         public static string MCSettings_Locale = "en_US";
         public static byte MCSettings_Difficulty = 0;
-        public static byte MCSettings_RenderDistance = 8;
+        public static byte MCSettings_RenderDistance = 12;
         public static byte MCSettings_ChatMode = 0;
         public static bool MCSettings_ChatColors = true;
         public static byte MCSettings_MainHand = 0;
