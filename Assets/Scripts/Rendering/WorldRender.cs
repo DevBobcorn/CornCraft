@@ -487,6 +487,7 @@ namespace MinecraftClient.Rendering
             ChunkRenderColumn columnRender;
 
             int viewDist = CornCraft.MCSettings_RenderDistance;
+            int viewDistSqr = viewDist * viewDist;
 
             int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
             int offsetY = World.GetDimension().minY;
@@ -494,6 +495,9 @@ namespace MinecraftClient.Rendering
             for (int cx = -viewDist;cx <= viewDist;cx++)
                 for (int cz = -viewDist;cz <= viewDist;cz++)
                 {
+                    if (cx * cx + cz * cz >= viewDistSqr)
+                        continue;
+
                     int chunkX = location.ChunkX + cx, chunkZ = location.ChunkZ + cz;
                     
                     if (world.isChunkColumnReady(chunkX, chunkZ))
