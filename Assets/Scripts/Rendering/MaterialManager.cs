@@ -53,8 +53,10 @@ namespace MinecraftClient.Rendering
             translucent.SetTexture("_BaseMap", AtlasManager.GetAtlasArray(RenderType.TRANSLUCENT));
             blockMaterials.Add(RenderType.TRANSLUCENT, translucent);
 
-            // Also add water as translucent
-            blockMaterials.Add(RenderType.WATER, translucent);
+            // Water
+            var water = Resources.Load<Material>("Materials/WaterTest");
+            water.SetTexture("_BaseMap", AtlasManager.GetAtlasArray(RenderType.WATER));
+            blockMaterials.Add(RenderType.WATER, water);
 
             initialized = true;
 

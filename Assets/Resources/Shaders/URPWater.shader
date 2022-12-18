@@ -84,7 +84,8 @@ Shader "URP/Water"
                 float waterDepth = sceneEyeDepth - i.screenPosition.w; 
                 // 拿到水的颜色
                 //float3 waterColor = lerp(i.vertexColor, _DeepWater, clamp(waterDepth * 0.02, 0, 1));
-                float3 waterColor = i.vertexColor;
+                //float3 waterColor = i.vertexColor;
+                float3 waterColor = lerp(i.vertexColor, i.vertexColor + float3(0, 0.5, 0.8), clamp(waterDepth * 0.8, 0, 1));
                 
                 float surfaceNoiseSample = tex2D(_SurfaceNoise, i.noiseUV + _Time.y * _MoveSpeed * 0.1).r;
                 
@@ -92,8 +93,10 @@ Shader "URP/Water"
                 float foam = saturate(waterDepth / _FoamDistance);
                 float edge = 1 - sqrt(clamp(waterDepth / 2, 0, 1));
                 float surfaceNoise = smoothstep(0, foam, surfaceNoiseSample);
+                
                 // 混合水面透明度
-                float4 col = float4(waterColor + surfaceNoise * _FoamColor.rgb * edge, _WaterAlpha * clamp(waterDepth + edge, 0, 1));
+                float4 col = float4(waterColor + surfaceNoise * _FoamColor.rgb * edge, _WaterAlpha * clamp(waterDepth + edge, 0, 0.8));
+                
                 // 混合雾色
                 col.rgb = MixFog(col.rgb, i.fogFactor);
                 
