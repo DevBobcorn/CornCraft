@@ -39,7 +39,7 @@ namespace MinecraftClient.Resource
         {
             // Move the texture boundaries a bit inner to avoid sampling on neighbor edges
             // TODO Find a better solution, maybe?
-            float oneU = bounds.width - 0.001F;
+            float oneU = bounds.width - 0.0008F;
             float oneV;
 
             if (animatable)
@@ -47,13 +47,13 @@ namespace MinecraftClient.Resource
                 // Use width here because a texture can contain multiple frames
                 // TODO Real support for animatable texture
 
-                oneV = bounds.width - 0.001F; 
+                oneV = bounds.width - 0.0008F; 
             }
             else
-                oneV = bounds.height - 0.001F;
+                oneV = bounds.height - 0.0008F;
 
             // Get texture offset in atlas
-            float3 o = new(bounds.xMin + 0.0005F, bounds.yMin + 0.0005F, index + 0.1F);
+            float3 o = new(bounds.xMin + 0.0004F, bounds.yMin + 0.0004F, index + 0.1F);
 
             // vect:  x,  y,  z,  w
             // vect: x1, y1, x2, y2
