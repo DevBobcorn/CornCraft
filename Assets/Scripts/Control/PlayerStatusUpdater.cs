@@ -47,13 +47,15 @@ namespace MinecraftClient.Control
             Status.InLiquid = world.IsWaterAt(CoordConvert.Unity2MC(transform.position + IN_WATER_CHECK_POINT_LOWER));
             // ENABLED END */
 
+            bool groundCheck;
+
             // Update player state - on ground or not?
             if (UseBoxCastForGroundedCheck) // Cast a box down to check if player is grounded
-                Status.Grounded = Physics.BoxCast(transform.position + GroundBoxcastCenter, GroundBoxcastHalfSize, -transform.up, Quaternion.identity, GroundBoxcastDist, GroundLayer);
+                groundCheck = Physics.BoxCast(transform.position + GroundBoxcastCenter, GroundBoxcastHalfSize, -transform.up, Quaternion.identity, GroundBoxcastDist, GroundLayer);
             else
             {
                 RaycastHit hit;
-                Status.Grounded = Physics.SphereCast(transform.position + GroundSpherecastCenter, GroundSpherecastRadius, -transform.up, out hit, GroundSpherecastDist, GroundLayer);
+                groundCheck = Physics.SphereCast(transform.position + GroundSpherecastCenter, GroundSpherecastRadius, -transform.up, out hit, GroundSpherecastDist, GroundLayer);
             }
 
             var rayCenter = transform.position + GROUND_BOXCAST_START_POINT;
@@ -76,6 +78,16 @@ namespace MinecraftClient.Control
                 Status.FrontDownDist = GROUND_RAYCAST_DIST - GROUND_RAYCAST_START;
             
             Debug.DrawRay(rayFront,  transform.up * -GROUND_RAYCAST_DIST, Color.green);
+
+            if (Status.Grounded)
+            {
+                // Extra check to make sure the player is just walking on some bumped surface and happen to leave the ground
+                // for a really small amount of time (for example walking from grass block to grass path block)
+                if (!groundCheck && Status.CenterDownDist > 0.2F)
+                    Status.Grounded = false;
+            }
+            else
+                Status.Grounded = groundCheck;
             
             // Cast a ray downwards again, but check liquid layer this time
             if (Status.InLiquid)
