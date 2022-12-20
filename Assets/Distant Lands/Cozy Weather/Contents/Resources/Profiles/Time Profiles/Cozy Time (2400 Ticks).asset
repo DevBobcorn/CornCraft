@@ -38,7 +38,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   tempratureFilter: 0
   precipitationFilter: 0
-  currentTicks: 1221.6
+  currentTicks: 2065
   currentDay: 179
   currentYear: 0
   dayAndTime: 179.509
