@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edc9e8ccf7e1f314da24a604c1a11094, type: 3}
   m_Name: Partly Cloudy
   m_EditorClassIdentifier: 
-  weatherTime: {x: 5, y: 64.62}
-  likelihood: 0.831
+  weatherTime: {x: 32, y: 64}
+  likelihood: 0.8
   forecastNext:
   - {fileID: 11400000, guid: 48908a08bbd076e4182bc3ca961b9c34, type: 2}
   - {fileID: 11400000, guid: df6d6974e6130cf4ba80f13cf41ae5f4, type: 2}
@@ -35,5 +35,5 @@ MonoBehaviour:
     borderHeight: 0.5
     borderVariation: 0.94
     borderEffect: 1
-  fogDensity: 1.03
+  fogDensity: 1
   FX: []

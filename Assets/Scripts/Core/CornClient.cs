@@ -7,6 +7,9 @@ using System.Text;
 using System.Threading;
 using System.IO;
 
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
 using MinecraftClient.Commands;
 using MinecraftClient.Control;
 using MinecraftClient.Event;
@@ -22,8 +25,7 @@ using MinecraftClient.UI;
 using MinecraftClient.Mapping;
 using MinecraftClient.Inventory;
 
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using DistantLands.Cozy;
 
 namespace MinecraftClient
 {
@@ -116,7 +118,7 @@ namespace MinecraftClient
                 return timeOfDay >= 0L ? timeOfDay + (long)(timeElapsedSinceUpdate * 20F) : -timeOfDay;
             }
         }
-        
+        public bool TimeElapsing => timeOfDay > 0L;
         private DateTime lastTime;
         private double serverTPS = 0;
         private double averageTPS = 20;
@@ -132,12 +134,13 @@ namespace MinecraftClient
         Tuple<Thread, CancellationTokenSource>? timeoutdetector = null;
         #endregion
 
-        #region World
+        #region Environment
         private bool worldAndMovementsRequested = false;
         private World world = new();
         public World GetWorld() => world;
         private WorldRender? worldRender;
         public WorldRender? WorldRender => worldRender;
+        private CozyWeather? cozyWeather;
         #endregion
 
         #region Players and Entities
@@ -381,6 +384,10 @@ namespace MinecraftClient
             var worldRenderObj = new GameObject("World Render");
             worldRender = worldRenderObj.AddComponent<WorldRender>();
 
+            // Get cozy weather object
+            var cozyWeatherObj = GameObject.Find("Cozy Weather");
+            cozyWeather = cozyWeatherObj?.GetComponent<CozyWeather>();
+
             // Create entity manager
             var entityManagerObj = new GameObject("Entity Manager");
             entityManager = entityManagerObj.AddComponent<EntityManager>();
@@ -391,7 +398,7 @@ namespace MinecraftClient
             playerObj.name = $"{session.PlayerName} (Player)";
             playerController = playerObj.GetComponent<PlayerController>();
 
-            // Destroy previous camera and create a new one for player
+            // Destroy previous camera and get camera for player
             Destroy(loginCamera.gameObject);
             var cameraObj = GameObject.Find("Camera Controller");
             cameraController = cameraObj.GetComponent<CameraController>();
@@ -1788,6 +1795,23 @@ namespace MinecraftClient
 
             this.timeOfDay = TimeOfDay;
             timeElapsedSinceUpdate = 0F;
+
+            if (cozyWeather is not null) // Update cozy weather time
+            {
+                var timeProfile = cozyWeather.perennialProfile;
+
+                // Update pause time
+                if (TimeElapsing == timeProfile.pauseTime)
+                    timeProfile.pauseTime = !TimeElapsing;
+
+                int cozyTick = (int)((CurrentTimeOfDay + 6000L) % 24000L);
+
+                if (Mathf.Abs(cozyWeather.currentTicks - cozyTick) > 25F)
+                {
+                    cozyWeather.currentTicks = cozyTick;
+                    Debug.Log($"Weather time set to {cozyTick}");
+                }
+            }
 
             // calculate server tps
             if (lastAge != 0)
