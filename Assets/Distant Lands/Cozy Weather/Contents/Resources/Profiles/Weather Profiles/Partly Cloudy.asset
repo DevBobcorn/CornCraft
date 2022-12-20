@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edc9e8ccf7e1f314da24a604c1a11094, type: 3}
+  m_Name: Partly Cloudy
+  m_EditorClassIdentifier: 
+  weatherTime: {x: 5, y: 64.62}
+  likelihood: 0.831
+  forecastNext:
+  - {fileID: 11400000, guid: 48908a08bbd076e4182bc3ca961b9c34, type: 2}
+  - {fileID: 11400000, guid: df6d6974e6130cf4ba80f13cf41ae5f4, type: 2}
+  - {fileID: 11400000, guid: de311de87cd9d1e4cbe2d9899cbc5680, type: 2}
+  - {fileID: 11400000, guid: 5a5650a48d2869048b392b88aab5df10, type: 2}
+  - {fileID: 11400000, guid: 56652bb77d1606b4396767fbb07e50ab, type: 2}
+  - {fileID: 11400000, guid: ccbfe05b7967917448c280fffa3a86d1, type: 2}
+  forecastModifierMethod: 0
+  chances: []
+  cloudSettings:
+    cumulusCoverage: 0.2109
+    altocumulusCoverage: 0
+    chemtrailCoverage: 0
+    cirrostratusCoverage: 0
+    cirrusCoverage: 0
+    nimbusCoverage: 0
+    nimbusVariation: 0.9
+    nimbusHeightEffect: 1
+    borderHeight: 0.5
+    borderVariation: 0.94
+    borderEffect: 1
+  fogDensity: 1.03
+  FX: []

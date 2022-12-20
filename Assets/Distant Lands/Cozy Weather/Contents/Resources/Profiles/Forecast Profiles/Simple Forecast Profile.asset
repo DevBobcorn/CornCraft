@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd9f2f3af9c7daa40b51758d10f57159, type: 3}
+  m_Name: Simple Forecast Profile
+  m_EditorClassIdentifier: 
+  profilesToForecast:
+  - {fileID: 11400000, guid: 48908a08bbd076e4182bc3ca961b9c34, type: 2}
+  - {fileID: 11400000, guid: 28ce0162a9eccda47a345fd44e9e6e15, type: 2}
+  - {fileID: 11400000, guid: 69c9549d57701234e8b6a0047971e744, type: 2}
+  - {fileID: 11400000, guid: f161b3af7360fc043927736dde8f5c42, type: 2}
+  - {fileID: 11400000, guid: e2fbee6f21ca32740a76a387cf2a0abc, type: 2}
+  - {fileID: 11400000, guid: f2d3f1cb4e3d78a4fb7f9853c2ec899a, type: 2}
+  - {fileID: 11400000, guid: 4d539afa69e41c24592baf151ffc2e69, type: 2}
+  - {fileID: 11400000, guid: ae94c1a397a01e442a11e8b23ebb1cef, type: 2}
+  - {fileID: 11400000, guid: df6d6974e6130cf4ba80f13cf41ae5f4, type: 2}
+  - {fileID: 11400000, guid: 56652bb77d1606b4396767fbb07e50ab, type: 2}
+  startWeatherWith: {fileID: 0}
+  startWithRandomWeather: 1
+  forecastLength: 10

@@ -1,0 +1,245 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 940bc5c08f23e3947a38c262be3e3dfc, type: 3}
+  m_Name: Cozy Time (2400 Ticks)
+  m_EditorClassIdentifier: 
+  tempratureOverYear:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  precipitationOverYear:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  tempratureOverDay:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  precipitationOverDay:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  tempratureFilter: 0
+  precipitationFilter: 0
+  currentTicks: 1221.6
+  currentDay: 179
+  currentYear: 0
+  dayAndTime: 179.509
+  pauseTime: 0
+  realisticYear: 1
+  useLeapYear: 1
+  resetTicksOnStart: 0
+  startTicks: 120
+  ticksPerDay: 2400
+  tickSpeed: 1
+  tickSpeedMultiplier:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  sunriseWeight:
+    time: 0.25
+    sunHeight: 90
+    weight: 0
+  dayWeight:
+    time: 0.5
+    sunHeight: 180
+    weight: 0
+  sunsetWeight:
+    time: 0.75
+    sunHeight: 270
+    weight: 0
+  nightWeight:
+    time: 0
+    sunHeight: 0
+    weight: 0
+  sunMovementCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.25
+      value: 90
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.5
+      value: 180
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.75
+      value: 270
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 360
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  displayCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.25
+      value: 90
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.5
+      value: 180
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.75
+      value: 90
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  standardYear:
+  - name: January
+    days: 31
+  - name: Febraury
+    days: 28
+  - name: March
+    days: 31
+  - name: April
+    days: 30
+  - name: May
+    days: 31
+  - name: June
+    days: 30
+  - name: July
+    days: 31
+  - name: August
+    days: 31
+  - name: September
+    days: 30
+  - name: October
+    days: 31
+  - name: Novemeber
+    days: 30
+  - name: December
+    days: 31
+  leapYear:
+  - name: January
+    days: 31
+  - name: Febraury
+    days: 29
+  - name: March
+    days: 31
+  - name: April
+    days: 30
+  - name: May
+    days: 31
+  - name: June
+    days: 30
+  - name: July
+    days: 31
+  - name: August
+    days: 31
+  - name: September
+    days: 30
+  - name: October
+    days: 31
+  - name: Novemeber
+    days: 30
+  - name: December
+    days: 31
+  timeCurveSettings: 0
+  daysPerYear: 366

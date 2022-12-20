@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac36c75b9c2af5b42a8f1907e068490d, type: 3}
+  m_Name: Sprite Based Moon
+  m_EditorClassIdentifier: 
+  satelliteReference: {fileID: 2012264065759116755, guid: dcbc27466d9179640b30c0804c67f152, type: 3}
+  orbitRef: {fileID: 0}
+  moonRef: {fileID: 0}
+  lightRef: {fileID: 0}
+  size: 1
+  distance: 1
+  useLight: 1
+  flare: {fileID: 12100000, guid: 7f27290990cd1754c94eba89ca2dafa8, type: 2}
+  lightColorMultiplier: {r: 0.4745906, g: 0.6207166, b: 0.745283, a: 1}
+  castShadows: 2
+  orbitOffset: 90
+  initialRotation: {x: 0, y: 0, z: 0}
+  satelliteRotateSpeed: 0.2
+  satelliteRotateAxis: {x: 0, y: 0, z: 0}
+  satelliteDirection: 0
+  satelliteRotation: 208351.33
+  satellitePitch: 0
+  changedLastFrame: 0
+  open: 1
