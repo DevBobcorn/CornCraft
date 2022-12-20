@@ -15,14 +15,18 @@ MonoBehaviour:
   version: 6
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Firefly
   m_Shader: {fileID: 4800000, guid: 0406db5a14f94604a8c57ccfbc9f3b46, type: 3}
-  m_ShaderKeywords: _COLORADDSUBDIFF_ON
+  m_ValidKeywords:
+  - _COLORADDSUBDIFF_ON
+  - _SURFACE_TYPE_TRANSPARENT
+  m_InvalidKeywords:
+  - _FLIPBOOKBLENDING_OFF
   m_LightmapFlags: 6
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 1
@@ -132,7 +136,7 @@ Material:
     - _BaseColor: {r: 4.2149115, g: 5.190996, b: 3.3941128, a: 0.16862746}
     - _BaseColorAddSubDiff: {r: 1, g: 0, b: 0, a: 0}
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
-    - _Color: {r: 4.214912, g: 5.1909966, b: 3.394113, a: 0.16862746}
+    - _Color: {r: 4.2149115, g: 5.190996, b: 3.3941128, a: 0.16862746}
     - _ColorAddSubDiff: {r: 1, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Flip: {r: 1, g: 1, b: 1, a: 1}
