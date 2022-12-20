@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 940bc5c08f23e3947a38c262be3e3dfc, type: 3}
-  m_Name: Monodirectional Time
+  m_Name: Minecraft Time
   m_EditorClassIdentifier: 
   tempratureOverYear:
     serializedVersion: 2
@@ -38,17 +38,17 @@ MonoBehaviour:
     m_RotationOrder: 4
   tempratureFilter: 0
   precipitationFilter: 0
-  currentTicks: 96
-  currentDay: 22
+  currentTicks: 2
+  currentDay: 0
   currentYear: 0
-  dayAndTime: 14.619445
+  dayAndTime: 0
   pauseTime: 0
   realisticYear: 0
-  useLeapYear: 0
+  useLeapYear: 1
   resetTicksOnStart: 0
-  startTicks: 120
-  ticksPerDay: 360
-  tickSpeed: 0.5
+  startTicks: 0
+  ticksPerDay: 24000
+  tickSpeed: 20
   tickSpeedMultiplier:
     serializedVersion: 2
     m_Curve:
@@ -74,21 +74,21 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   sunriseWeight:
-    time: 0.288
+    time: 0.25
     sunHeight: 90
-    weight: 0
+    weight: 0.2
   dayWeight:
     time: 0.5
-    sunHeight: 133
-    weight: 0.444
+    sunHeight: 180
+    weight: 0.2
   sunsetWeight:
     time: 0.75
-    sunHeight: 90
-    weight: 0.5
+    sunHeight: 270
+    weight: 0.2
   nightWeight:
     time: 1
-    sunHeight: 0
-    weight: 0
+    sunHeight: 360
+    weight: 0.2
   sunMovementCurve:
     serializedVersion: 2
     m_Curve:
@@ -102,7 +102,7 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.288
+      time: 0.25
       value: 90
       inSlope: 0
       outSlope: 0
@@ -112,25 +112,25 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.5
-      value: 133
+      value: 180
       inSlope: 0
       outSlope: 0
       tangentMode: 0
       weightedMode: 3
-      inWeight: 0.444
-      outWeight: 0.444
+      inWeight: 0
+      outWeight: 0
     - serializedVersion: 3
       time: 0.75
-      value: 90
+      value: 270
       inSlope: 0
       outSlope: 0
       tangentMode: 0
       weightedMode: 3
-      inWeight: 0.5
-      outWeight: 0.5
+      inWeight: 0
+      outWeight: 0
     - serializedVersion: 3
       time: 1
-      value: 0
+      value: 360
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -153,7 +153,7 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.288
+      time: 0.25
       value: 90
       inSlope: 0
       outSlope: 0
@@ -163,13 +163,13 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.5
-      value: 133
+      value: 180
       inSlope: 0
       outSlope: 0
       tangentMode: 0
       weightedMode: 3
-      inWeight: 0.444
-      outWeight: 0.444
+      inWeight: 0
+      outWeight: 0
     - serializedVersion: 3
       time: 0.75
       value: 90
@@ -177,8 +177,8 @@ MonoBehaviour:
       outSlope: 0
       tangentMode: 0
       weightedMode: 3
-      inWeight: 0.5
-      outWeight: 0.5
+      inWeight: 0
+      outWeight: 0
     - serializedVersion: 3
       time: 1
       value: 0
@@ -241,5 +241,5 @@ MonoBehaviour:
     days: 30
   - name: December
     days: 31
-  timeCurveSettings: 2
-  daysPerYear: 48
+  timeCurveSettings: 0
+  daysPerYear: 8
