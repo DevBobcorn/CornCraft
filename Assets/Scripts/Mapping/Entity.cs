@@ -81,6 +81,11 @@ namespace MinecraftClient.Mapping
         /// Health of the entity
         /// </summary>
         public float Health;
+
+        /// <summary>
+        /// Max health of the entity
+        /// </summary>
+        public float MaxHealth;
         
         /// <summary>
         /// Item of the entity if ItemFrame or Item
@@ -113,7 +118,8 @@ namespace MinecraftClient.Mapping
             this.ID = ID;
             this.Type = type;
             this.Location = location;
-            this.Health = 1.0f;
+            this.Health = 1F;
+            this.MaxHealth = 1F;
             this.Equipment = new Dictionary<int, ItemStack>();
             this.Item = new ItemStack(Mapping.Item.AIR_ITEM, 0, null);
         }
@@ -129,7 +135,8 @@ namespace MinecraftClient.Mapping
             this.ID = ID;
             this.Type = type;
             this.Location = location;
-            this.Health = 1.0f;
+            this.Health = 1F;
+            this.MaxHealth = 1F;
             this.Equipment = new Dictionary<int, ItemStack>();
             this.Item = new ItemStack(Mapping.Item.AIR_ITEM, 0, null);
             this.Yaw = AngleConvert.MC2Unity(yaw);
@@ -152,7 +159,8 @@ namespace MinecraftClient.Mapping
             this.Location = location;
             this.UUID = uuid;
             this.Name = name;
-            this.Health = 1.0f;
+            this.Health = 1F;
+            this.MaxHealth = 1F;
             this.Equipment = new Dictionary<int, ItemStack>();
             this.Item = new ItemStack(Mapping.Item.AIR_ITEM, 0, null);
         }

@@ -23,7 +23,7 @@ namespace MinecraftClient.UI
 
         private RectTransform? barFillTransform, deltaFillTransform, displayFillTransform;
         private Image? displayFillImage, deltaFillImage;
-        private TMP_Text? barText;
+        [SerializeField] private TMP_Text? barText;
 
         private float fullBarLength;
 
@@ -67,7 +67,6 @@ namespace MinecraftClient.UI
         void Start()
         {
             barFillTransform = transform.Find("Bar Fill Mask").GetComponent<RectTransform>();
-            barText = transform.Find("Bar Text").GetComponent<TMP_Text>();
 
             deltaFillTransform   = barFillTransform.Find("Delta Fill").GetComponent<RectTransform>();
             displayFillTransform = barFillTransform.Find("Current Fill").GetComponent<RectTransform>();
