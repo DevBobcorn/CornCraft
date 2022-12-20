@@ -51,21 +51,29 @@ namespace MinecraftClient.Mapping
             return BlockGeometry.DEFAULT_COLOR;
         } 
 
-        public IEnumerator PrepareData(string dataVersion, CoroutineFlag flag, LoadStateInfo loadStateInfo)
+        public IEnumerator PrepareData(string dataVersion, DataLoadFlag flag, LoadStateInfo loadStateInfo)
         {
             // Clean up first...
             statesTable.Clear();
             blocksTable.Clear();
             stateListTable.Clear();
+            blockColorRules.Clear();
+            RenderTypeTable.Clear();
 
             HashSet<int> knownStates = new HashSet<int>();
 
             string statesPath = PathHelper.GetExtraDataFile($"blocks-{dataVersion}.json");
             string listsPath  = PathHelper.GetExtraDataFile("block_lists.json");
             string colorsPath = PathHelper.GetExtraDataFile("block_colors.json");
+            string renderTypePath = PathHelper.GetExtraDataFile("block_render_type.json");
 
-            if (!File.Exists(statesPath) || !File.Exists(listsPath) || !File.Exists(colorsPath))
-                throw new FileNotFoundException("Block data not complete!");
+            if (!File.Exists(statesPath) || !File.Exists(listsPath) || !File.Exists(colorsPath) || !File.Exists(renderTypePath))
+            {
+                loadStateInfo.infoText = "Block data not complete!";
+                flag.Finished = true;
+                flag.Failed = true;
+                yield break;
+            }
 
             // First read special block lists...
             var lists = new Dictionary<string, HashSet<ResourceLocation>>();
@@ -180,7 +188,6 @@ namespace MinecraftClient.Mapping
             Debug.Log($"{statesTable.Count} block states loaded.");
 
             // Load block color rules...
-            blockColorRules.Clear();
             loadStateInfo.infoText = $"Loading block color rules";
             yield return null;
 
@@ -254,61 +261,55 @@ namespace MinecraftClient.Mapping
             yield return null;
             
             // Load and apply block render types...
-            RenderTypeTable.Clear();
-
             loadStateInfo.infoText = $"Loading block render types";
             yield return null;
 
-            string renderTypePath = PathHelper.GetExtraDataFile("block_render_type.json");
-            if (File.Exists(renderTypePath))
+            try
             {
-                try
+                var renderTypeText = File.ReadAllText(renderTypePath);
+                var renderTypes = Json.ParseJson(renderTypeText);
+
+                var allBlockIds = stateListTable.Keys.ToHashSet();
+
+                foreach (var pair in renderTypes.Properties)
                 {
-                    var renderTypeText = File.ReadAllText(renderTypePath);
-                    var renderTypes = Json.ParseJson(renderTypeText);
+                    var blockId = ResourceLocation.fromString(pair.Key);
 
-                    var allBlockIds = stateListTable.Keys.ToHashSet();
-
-                    foreach (var pair in renderTypes.Properties)
+                    if (allBlockIds.Contains(blockId))
                     {
-                        var blockId = ResourceLocation.fromString(pair.Key);
-
-                        if (allBlockIds.Contains(blockId))
+                        var type = pair.Value.StringValue.ToLower() switch
                         {
-                            var type = pair.Value.StringValue.ToLower() switch
-                            {
-                                "solid"         => RenderType.SOLID,
-                                "cutout"        => RenderType.CUTOUT,
-                                "cutout_mipped" => RenderType.CUTOUT_MIPPED,
-                                "translucent"   => RenderType.TRANSLUCENT,
+                            "solid"         => RenderType.SOLID,
+                            "cutout"        => RenderType.CUTOUT,
+                            "cutout_mipped" => RenderType.CUTOUT_MIPPED,
+                            "translucent"   => RenderType.TRANSLUCENT,
 
-                                _               => RenderType.SOLID
-                            };
+                            _               => RenderType.SOLID
+                        };
 
-                            RenderTypeTable.Add(blockId, type);
+                        RenderTypeTable.Add(blockId, type);
 
-                            allBlockIds.Remove(blockId);
-                        }
-
-                    }
-
-                    foreach (var blockId in allBlockIds) // Other blocks which doesn't its render type specifically stated
-                    {
-                        RenderTypeTable.Add(blockId, RenderType.SOLID); // Default to solid
+                        allBlockIds.Remove(blockId);
                     }
 
                 }
-                catch (IOException e)
+
+                foreach (var blockId in allBlockIds) // Other blocks which doesn't its render type specifically stated
                 {
-                    Debug.LogWarning($"Failed to load block render types: {e.Message}");
+                    RenderTypeTable.Add(blockId, RenderType.SOLID); // Default to solid
                 }
+
             }
-            else
-                Debug.LogWarning($"Block render types not found at {renderTypePath}");
+            catch (IOException e)
+            {
+                Debug.LogWarning($"Failed to load block render types: {e.Message}");
+                loadStateInfo.infoText = $"Failed to load block render types: {e.Message}";
+                flag.Failed = true;
+            }
 
             Debug.Log($"Render type of {RenderTypeTable.Count} blocks loaded.");
 
-            flag.done = true;
+            flag.Finished = true;
 
         }
 

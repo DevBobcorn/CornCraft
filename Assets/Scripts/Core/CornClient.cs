@@ -151,7 +151,6 @@ namespace MinecraftClient
         public Location GetCurrentLocation() => playerData.location;
 
         public const string PLAYER_PREFAB = "Prefabs/Player/Client Lumine Player Entity";
-        public const string CAMERA_PREFAB = "Prefabs/Camera Cinemachine"; // Cinemachine or Simple
 
         private PlayerController? playerController;
         private CameraController? cameraController;
@@ -264,7 +263,6 @@ namespace MinecraftClient
 
         IEnumerator StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo loadStateInfo, string accountLower)
         {
-            var wait = new WaitForSecondsRealtime(0.1F);
             loadStateInfo.loggingIn = true;
 
             if (!internalCommandsLoaded)
@@ -301,44 +299,39 @@ namespace MinecraftClient
                 yield break;
             }
 
-            var blockLoadFlag = new CoroutineFlag();
-            StartCoroutine(BlockStatePalette.INSTANCE.PrepareData(dataVersion, blockLoadFlag, loadStateInfo));
+            DataLoadFlag loadFlag = new();
 
-            while (!blockLoadFlag.done)
-                yield return wait;
+            StartCoroutine(BlockStatePalette.INSTANCE.PrepareData(dataVersion, loadFlag, loadStateInfo));
+
+            while (!loadFlag.Finished)
+                yield return null;
             
-            var itemLoadFlag = new CoroutineFlag();
-            StartCoroutine(ItemPalette.INSTANCE.PrepareData(dataVersion, itemLoadFlag, loadStateInfo));
+            loadFlag.Finished = false;
+            StartCoroutine(ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag, loadStateInfo));
 
-            while (!itemLoadFlag.done)
-                yield return wait;
+            while (!loadFlag.Finished)
+                yield return null;
             
-            var interactionDefFlag = new CoroutineFlag();
-            StartCoroutine(BlockInteractionManager.INSTANCE.PrepareData(interactionDefFlag, loadStateInfo));
+            loadFlag.Finished = false;
+            StartCoroutine(BlockInteractionManager.INSTANCE.PrepareData(loadFlag, loadStateInfo));
 
-            while (!interactionDefFlag.done)
-                yield return wait;
+            while (!loadFlag.Finished)
+                yield return null;
 
-            // Load resources...
+            // Load resource packs...
             packManager.ClearPacks();
-
             // First add base resources
             ResourcePack basePack = new($"vanilla-{resourceVersion}");
             packManager.AddPack(basePack);
-
             // Then append overrides
             foreach (var packName in CornCraft.ResourceOverrides)
-            {
-                ResourcePack overridePack = new(packName);
-                packManager.AddPack(overridePack);
-            }
-
+                packManager.AddPack(new(packName));
             // Load valid packs...
-            var resLoadFlag = new CoroutineFlag();
-            StartCoroutine(packManager.LoadPacks(this, resLoadFlag, loadStateInfo));
+            loadFlag.Finished = false;
+            StartCoroutine(packManager.LoadPacks(this, loadFlag, loadStateInfo));
 
-            while (!resLoadFlag.done)
-                yield return wait;
+            while (!loadFlag.Finished)
+                yield return null;
             
             // Load player skin overrides...
             SkinManager.Load();
@@ -347,7 +340,19 @@ namespace MinecraftClient
             MaterialManager.ClearInitializedFlag();
 
             // Load biome definitions (After colormaps in resource packs are loaded)...
-            BiomePalette.INSTANCE.PrepareData(dataVersion, $"vanilla-{resourceVersion}");
+            loadFlag.Finished = false;
+            StartCoroutine(BiomePalette.INSTANCE.PrepareData(dataVersion, $"vanilla-{resourceVersion}", loadFlag, loadStateInfo));
+
+            while (!loadFlag.Finished)
+                yield return null;
+
+            if (loadFlag.Failed) // Cancel login if resources are not properly loaded
+            {
+                loadStateInfo.loggingIn = false;
+                loadStateInfo.infoText = "Failed to load all resources >_<";
+                ShowNotification("Failed to load all resources!", Notification.Type.Error);
+                yield break;
+            }
 
             // Preserve camera in login scene for a while
             var loginCamera = Component.FindObjectOfType<Camera>();
@@ -358,13 +363,13 @@ namespace MinecraftClient
             op.allowSceneActivation = false;
 
             while (op.progress < 0.9F)
-                yield return wait;
+                yield return null;
 
             // Scene is loaded, activate it
             op.allowSceneActivation = true;
 
             // Wait a little bit...
-            yield return new WaitForSeconds(0.5F);
+            yield return new WaitForSecondsRealtime(0.5F);
 
             // Find screen control
             screenControl = Component.FindObjectOfType<ScreenControl>();
@@ -384,15 +389,11 @@ namespace MinecraftClient
             var playerPrefab = Resources.Load<GameObject>(PLAYER_PREFAB);
             var playerObj    = GameObject.Instantiate(playerPrefab);
             playerObj.name = $"{session.PlayerName} (Player)";
-            playerObj.SetActive(true);
             playerController = playerObj.GetComponent<PlayerController>();
 
             // Destroy previous camera and create a new one for player
             Destroy(loginCamera.gameObject);
-            var cameraPrefab = Resources.Load<GameObject>(CAMERA_PREFAB);
-            var cameraObj    = GameObject.Instantiate(cameraPrefab);
-            cameraObj.name = "Main Camera (In-Game)";
-            cameraObj.SetActive(true);
+            var cameraObj = GameObject.Find("Camera Controller");
             cameraController = cameraObj.GetComponent<CameraController>();
             cameraController.SetTarget(playerController.cameraRef!);
             cameraController.SetPerspective(playerData.Perspective);

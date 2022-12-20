@@ -72,7 +72,7 @@ namespace MinecraftClient.Resource
             GeneratedItemModels.Clear();
         }
 
-        public IEnumerator LoadPacks(MonoBehaviour loader, CoroutineFlag flag, LoadStateInfo loadStateInfo)
+        public IEnumerator LoadPacks(MonoBehaviour loader, DataLoadFlag flag, LoadStateInfo loadStateInfo)
         {
             float startTime = Time.realtimeSinceStartup;
 
@@ -125,7 +125,7 @@ namespace MinecraftClient.Resource
             Debug.Log($"Resource packs loaded in {Time.realtimeSinceStartup - startTime} seconds.");
             Debug.Log($"Built {StateModelTable.Count} block state geometry lists.");
 
-            flag.done = true;
+            flag.Finished = true;
 
         }
 

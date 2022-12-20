@@ -17,12 +17,17 @@ namespace MinecraftClient.Mapping
 
         public Dictionary<int, BlockInteractionDefinition> InteractionTable => interactionTable;
 
-        public IEnumerator PrepareData(CoroutineFlag flag, LoadStateInfo loadStateInfo)
+        public IEnumerator PrepareData(DataLoadFlag flag, LoadStateInfo loadStateInfo)
         {
             string interactionPath = PathHelper.GetExtraDataFile("block_interaction.json");
 
             if (!File.Exists(interactionPath))
-                throw new FileNotFoundException("Block interaction data not found!");
+            {
+                loadStateInfo.infoText = "Block interaction definition not found!";
+                flag.Finished = true;
+                flag.Failed = true;
+                yield break;
+            }
             
             // Load block interaction definitions...
             interactionTable.Clear();
@@ -105,7 +110,7 @@ namespace MinecraftClient.Mapping
                 }
             }
 
-            flag.done = true;
+            flag.Finished = true;
 
         }
     }
