@@ -54,10 +54,8 @@ namespace MinecraftClient.Mapping
             return null;
         }
 
-        public IEnumerator PrepareData(string dataVersion, CoroutineFlag flag, LoadStateInfo loadStateInfo)
+        public IEnumerator PrepareData(string dataVersion, DataLoadFlag flag, LoadStateInfo loadStateInfo)
         {
-            loadStateInfo.infoText = "Loading items";
-
             // Clear loaded stuff...
             itemsTable.Clear();
             dictReverse.Clear();
@@ -68,7 +66,12 @@ namespace MinecraftClient.Mapping
             string colorsPath = PathHelper.GetExtraDataFile("item_colors.json");
 
             if (!File.Exists(itemsPath) || !File.Exists(listsPath) || !File.Exists(colorsPath))
-                throw new FileNotFoundException("Item data not complete!");
+            {
+                loadStateInfo.infoText = "Item data not complete!";
+                flag.Finished = true;
+                flag.Failed = true;
+                yield break;
+            }
 
             // First read special item lists...
             var lists = new Dictionary<string, HashSet<ResourceLocation>>();
@@ -227,7 +230,7 @@ namespace MinecraftClient.Mapping
                 }
             }
 
-            flag.done = true;
+            flag.Finished = true;
         }
     }
 }
