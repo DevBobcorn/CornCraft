@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edc9e8ccf7e1f314da24a604c1a11094, type: 3}
+  m_Name: Dense Clouds
+  m_EditorClassIdentifier: 
+  weatherTime: {x: 45, y: 90}
+  likelihood: 1
+  forecastNext:
+  - {fileID: 11400000, guid: 3500d156aa5168944b5dd4b8e84ff00c, type: 2}
+  - {fileID: 11400000, guid: 56652bb77d1606b4396767fbb07e50ab, type: 2}
+  - {fileID: 11400000, guid: ae94c1a397a01e442a11e8b23ebb1cef, type: 2}
+  - {fileID: 11400000, guid: df6d6974e6130cf4ba80f13cf41ae5f4, type: 2}
+  - {fileID: 11400000, guid: de311de87cd9d1e4cbe2d9899cbc5680, type: 2}
+  forecastModifierMethod: 0
+  chances:
+  - limitType: 1
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.5579588
+        value: 0.28537276
+        inSlope: 1.2293255
+        outSlope: 1.2293255
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.08690662
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+  cloudSettings:
+    cumulusCoverage: 1.5
+    altocumulusCoverage: 0
+    chemtrailCoverage: 0
+    cirrostratusCoverage: 0
+    cirrusCoverage: 0
+    nimbusCoverage: 0
+    nimbusVariation: 0.9
+    nimbusHeightEffect: 1
+    borderHeight: 0.5
+    borderVariation: 0.9
+    borderEffect: 1
+  fogDensity: 1
+  FX:
+  - {fileID: 11400000, guid: 3539307017f50244e9815d6d39bd997b, type: 2}

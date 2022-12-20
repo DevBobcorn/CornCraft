@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 58971c84a8da56f46bc72a85a31d8a2d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - skyShader: {fileID: 2100000, guid: 6eb59c244ec58774ab61d691d4cf6a19, type: 2}
+  - cloudShader: {fileID: 2100000, guid: bfd828e6ce201e9478ecded123a8d908, type: 2}
+  - fogShader: {fileID: 2100000, guid: 8521660c56b3a0642a23d3f0ebacac58, type: 2}
+  executionOrder: 0
+  icon: {fileID: 2800000, guid: 75645812b98cbf94b9dd8d2f9401cf16, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
