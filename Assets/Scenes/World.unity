@@ -704,6 +704,42 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6528787430458379626, guid: 4eec27c79d98be547aacf6739e9b30d2, type: 3}
+      propertyPath: canvas3d
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6528787430458379626, guid: 4eec27c79d98be547aacf6739e9b30d2, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[1].time
+      value: 12.049988
+      objectReference: {fileID: 0}
+    - target: {fileID: 6528787430458379626, guid: 4eec27c79d98be547aacf6739e9b30d2, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[0].value
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6528787430458379626, guid: 4eec27c79d98be547aacf6739e9b30d2, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[1].value
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6528787430458379626, guid: 4eec27c79d98be547aacf6739e9b30d2, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[0].inSlope
+      value: -0.05809135
+      objectReference: {fileID: 0}
+    - target: {fileID: 6528787430458379626, guid: 4eec27c79d98be547aacf6739e9b30d2, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[1].inSlope
+      value: -0.05785579
+      objectReference: {fileID: 0}
+    - target: {fileID: 6528787430458379626, guid: 4eec27c79d98be547aacf6739e9b30d2, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[0].outSlope
+      value: -0.05809135
+      objectReference: {fileID: 0}
+    - target: {fileID: 6528787430458379626, guid: 4eec27c79d98be547aacf6739e9b30d2, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[1].inWeight
+      value: 0.16182485
+      objectReference: {fileID: 0}
+    - target: {fileID: 6528787430458379626, guid: 4eec27c79d98be547aacf6739e9b30d2, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[1].outSlope
+      value: -0.05785579
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4eec27c79d98be547aacf6739e9b30d2, type: 3}
 --- !u!224 &379754982 stripped
@@ -796,7 +832,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.75
+  m_fontSize: 46.05
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -931,7 +967,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.75
+  m_fontSize: 46.05
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2444,7 +2480,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 35.45
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2579,7 +2615,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 35.45
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2714,7 +2750,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 35.45
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3631,7 +3667,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 35.45
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1

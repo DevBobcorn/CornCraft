@@ -9,15 +9,34 @@ namespace MinecraftClient.UI
 {
     public class InfoTagPanel : MonoBehaviour
     {
-        [SerializeField] private GameObject? infoTagPrefab;
-
         private CornClient? game;
         private Dictionary<int, EntityInfoTag> infoTags = new();
+
+        [SerializeField] public GameObject? npcInfoTagPrefab;
+        [SerializeField] public GameObject? monsterInfoTagPrefab;
+
+        [SerializeField] public AnimationCurve? tagScaleCurve;
+
+        private GameObject? GetTagPrefab(EntityInfoTagType type)
+        {
+            return type switch
+            {
+                EntityInfoTagType.Monster => monsterInfoTagPrefab,
+                EntityInfoTagType.NPC     => npcInfoTagPrefab,
+
+                _                         => null
+            };
+        }
 
         public void AddTagInfo(int entityId, EntityRender? render)
         {
             if (render is not null && !infoTags.ContainsKey(entityId))
             {
+                var infoTagPrefab = GetTagPrefab(EntityManager.GetInfoTagTypeForType(render.Entity.Type));
+
+                if (infoTagPrefab is null)
+                    return;
+
                 // Make a new notification here...
                 var infoTagObj = GameObject.Instantiate(infoTagPrefab);
                 infoTagObj!.transform.SetParent(transform, true);
@@ -66,12 +85,8 @@ namespace MinecraftClient.UI
             {
                 for (int i = 0;i < tagOwners.Length;i++)
                 {
-                    if (!validTagOwners.Contains(tagOwners[i]))
-                    {
-                        // Remove this tag
+                    if (!validTagOwners.Contains(tagOwners[i])) // Remove this tag
                         RemoveTagInfo(tagOwners[i]);
-
-                    }
 
                     validTagOwners.Remove(tagOwners[i]);
                 }
@@ -82,20 +97,33 @@ namespace MinecraftClient.UI
                 }
             }
 
-            // Update existing info tags
-            foreach (var pair in infoTags)
+            var camController = game!.CameraController;
+
+            if (camController is not null) // Update existing info tags
             {
-                var entity = entityManager!.GetEntity(pair.Key);
+                var camPos = camController.GetPosition()!.Value;
 
-                if (entity is null) // This entity is no longer there, also remove its tag
+                foreach (var pair in infoTags)
                 {
-                    RemoveTagInfo(pair.Key);
-                    continue;
-                }
+                    var entity = entityManager!.GetEntity(pair.Key);
 
-                // Update tag position
-                pair.Value.transform.position = 
-                        game!.CameraController!.GetTransfromScreenPos(entity.InfoAnchor);
+                    if (entity is null) // This entity is no longer there, also remove its tag
+                    {
+                        RemoveTagInfo(pair.Key);
+                        continue;
+                    }
+
+                    pair.Value.UpdateInfo();
+
+                    var tagTransform = pair.Value.transform;
+
+                    // Update tag position
+                    tagTransform.position = camController.GetTransfromScreenPos(entity.InfoAnchor);
+                    
+                    var scale = tagScaleCurve!.Evaluate(Vector3.Distance(camPos, entity.InfoAnchor.position));
+                    tagTransform.localScale = new(scale, scale, scale);
+
+                }
             }
 
         }

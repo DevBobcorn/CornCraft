@@ -7,6 +7,13 @@ using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Rendering
 {
+    public enum EntityInfoTagType
+    {
+        NPC,
+        Monster,
+        None
+    }
+
     public class EntityManager : MonoBehaviour
     {
         private static EntityManager? instance;
@@ -28,14 +35,17 @@ namespace MinecraftClient.Rendering
         private static GameObject? serverDefoPlayerPrefab, serverSlimPlayerPrefab;
 
         private static readonly Dictionary<EntityType, GameObject?> entityPrefabs = new();
+        private static readonly Dictionary<EntityType, EntityInfoTagType> infoTagTypes = new();
 
         private static GameObject? GetPrefabForType(EntityType type) => entityPrefabs.GetValueOrDefault(type, placeboEntityPrefab);
+        public static EntityInfoTagType GetInfoTagTypeForType(EntityType type) =>
+                infoTagTypes.GetValueOrDefault(type, EntityInfoTagType.None);
 
         private readonly Dictionary<int, EntityRender> entities = new();
         private readonly HashSet<int> nearbyEntities = new();
 
-        private const float NEARBY_THERESHOLD_INNER = 25F;
-        private const float NEARBY_THERESHOLD_OUTER = 30F;
+        private const float NEARBY_THERESHOLD_INNER = 256F;
+        private const float NEARBY_THERESHOLD_OUTER = 300F;
 
         public string GetDebugInfo() => $"Ent: {entities.Count}";
 
@@ -140,6 +150,7 @@ namespace MinecraftClient.Rendering
 
             // Clear loaded things
             entityPrefabs.Clear();
+            infoTagTypes.Clear();
 
             // Add specific entity prefabs TODO Expand
             entityPrefabs.Add(EntityType.Skeleton, Resources.Load<GameObject>("Prefabs/Entity/Skeleton Entity"));
@@ -158,6 +169,19 @@ namespace MinecraftClient.Rendering
             entityPrefabs.Add(EntityType.Sheep, Resources.Load<GameObject>("Prefabs/Entity/Sheep Entity"));
             
             entityPrefabs.Add(EntityType.Goat, Resources.Load<GameObject>("Prefabs/Entity/Pig Entity"));
+
+            // Register info tag types
+            infoTagTypes.Add(EntityType.Skeleton, EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.WitherSkeleton, EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.Stray, EntityInfoTagType.Monster);
+
+            infoTagTypes.Add(EntityType.Zombie, EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.Husk, EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.Drowned, EntityInfoTagType.Monster);
+
+            infoTagTypes.Add(EntityType.Creeper, EntityInfoTagType.Monster);
+
+            infoTagTypes.Add(EntityType.Villager, EntityInfoTagType.NPC);
 
             foreach (var prefabItem in entityPrefabs)
             {

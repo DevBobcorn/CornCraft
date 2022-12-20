@@ -1,68 +1,51 @@
 #nullable enable
 using UnityEngine;
-using TMPro;
 
+using MinecraftClient.Mapping;
 using MinecraftClient.Rendering;
 
 namespace MinecraftClient.UI
 {
-    public class EntityInfoTag : MonoBehaviour
+    [RequireComponent(typeof (Animator))]
+    public abstract class EntityInfoTag : MonoBehaviour
     {
         private static readonly int EXPIRED  = Animator.StringToHash("Expired");
         
-        [SerializeField] private TMP_Text? nameText;
-        [SerializeField] private TMP_Text? tagText;
+        protected InfoTagPanel? parent;
+        protected Animator? anim;
 
-        private InfoTagPanel? parent;
-        private int entityId;
-        private Animator? anim;
-        private EntityRender? entityRender;
+        protected int entityId;
+        protected EntityRender? entityRender;
 
-        public void SetInfo(InfoTagPanel panelParent, int entityId, EntityRender entityRender)
+        public virtual void SetInfo(InfoTagPanel panelParent, int entityId, EntityRender entityRender)
         {
             parent = panelParent;
 
             this.entityId = entityId;
             this.entityRender = entityRender;
-            var entity = entityRender.Entity;
 
-            if (nameText is not null) // Update name text
-            {
-                if (entity.CustomName is not null)
-                    nameText.text = entity.CustomName;
-                else if (entity.Name is not null)
-                    nameText.text = entity.Name;
-                else
-                    nameText.text = entity.Type.ToString();
-            }
-            
-            if (tagText is not null) // Update tag text
-                tagText.text = $"<{entity.Type}>";
 
         }
 
-        public void Remove()
+        public virtual void Remove()
         {
             // Play fade away animation...
             anim?.SetBool(EXPIRED, true);
         }
 
         // Called by animator after hide animation ends...
-        void Expire()
+        protected virtual void Expire()
         {
             parent?.ExpireTagInfo(entityId);
             Destroy(this.gameObject);
         }
 
-        void Awake()
+        protected virtual void Awake()
         {
             anim = GetComponent<Animator>();
+
         }
 
-        void Update()
-        {
-            
-        }
-        
+        public abstract void UpdateInfo();
     }
 }

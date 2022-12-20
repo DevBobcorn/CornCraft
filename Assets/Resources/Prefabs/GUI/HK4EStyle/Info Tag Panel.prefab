@@ -49,4 +49,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d950cacf70d4aa44966b23c2f352db6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  infoTagPrefab: {fileID: 4053460885410228824, guid: 346d5cad2835d2049a91836edcb50d43, type: 3}
+  npcInfoTagPrefab: {fileID: 4053460885410228824, guid: 346d5cad2835d2049a91836edcb50d43, type: 3}
+  monsterInfoTagPrefab: {fileID: 5439248724102382893, guid: f4a2f3bc427ed0348ab28209a5911157, type: 3}
+  tagScaleCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1.2
+      inSlope: -0.058333337
+      outSlope: -0.058333337
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 12
+      value: 0.5
+      inSlope: -0.05752859
+      outSlope: -0.05752859
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.2208333
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4

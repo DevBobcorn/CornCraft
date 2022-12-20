@@ -1950,7 +1950,12 @@ namespace MinecraftClient
         public void OnEntityHealth(int entityID, float health)
         {
             if (entities.ContainsKey(entityID))
-                entities[entityID].Health = health;
+            {
+                Entity entity = entities[entityID];
+
+                entity.Health = health;
+                entity.MaxHealth = Math.Max(entity.MaxHealth, health);
+            }
             
         }
 
