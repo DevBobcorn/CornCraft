@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 2a61d1fe99ca7e74b986c801b0920c8d
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - _StarTexture: {fileID: 2800000, guid: 93557f6a2b0824644b6ddaa6442e6c8e, type: 3}
+  - _GalaxyPlacement: {fileID: 2800000, guid: 9e328e1f846025e47ad7a9f00ca77f9b, type: 3}
+  - _GalaxyStars: {fileID: 2800000, guid: 831ed62fbc9349041bf2404184ed2461, type: 3}
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

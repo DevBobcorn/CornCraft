@@ -1,0 +1,527 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab43f620421ea8447ac2c347f8e8584d, type: 3}
+  m_Name: Cozy Materials
+  m_EditorClassIdentifier: 
+  snowTexture: {fileID: 2800000, guid: da7b2a01626e7224d92acb5c2e151193, type: 3}
+  snowNoiseSize: 10
+  snowColor: {r: 1, g: 1, b: 1, a: 1}
+  puddleScale: 2
+  modulatedValues:
+  - expanded: 0
+    modulationSource: 1
+    modulationTarget: 0
+    mappedGradient:
+      serializedVersion: 2
+      key0: {r: 0.65882355, g: 0.6425177, b: 0.5698824, a: 1}
+      key1: {r: 0.46666667, g: 0.65882355, b: 0.6368692, a: 1}
+      key2: {r: 0.3551086, g: 0.7169812, b: 0.37393805, a: 0}
+      key3: {r: 0.46512944, g: 0.65882355, b: 0.5445937, a: 0}
+      key4: {r: 0.65882355, g: 0.6527852, b: 0.46666667, a: 0}
+      key5: {r: 0.7169812, g: 0.63270944, b: 0.3551086, a: 0}
+      key6: {r: 0.65882355, g: 0.6425177, b: 0.5698824, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 7517
+      ctime1: 14842
+      ctime2: 23323
+      ctime3: 45875
+      ctime4: 52428
+      ctime5: 57632
+      ctime6: 65535
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 7
+      m_NumAlphaKeys: 2
+    mappedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+    targetLayer: {fileID: 8574412962073106934, guid: d40ab38b86df56649b580f6f4c6227f8, type: 2}
+    targetMaterial: {fileID: 0}
+    targetVariableName: 
+  - expanded: 0
+    modulationSource: 1
+    modulationTarget: 0
+    mappedGradient:
+      serializedVersion: 2
+      key0: {r: 0.709, g: 0.68532443, b: 0.58847, a: 1}
+      key1: {r: 0.745283, g: 0.70195085, b: 0.5238074, a: 1}
+      key2: {r: 0.745283, g: 0.70195085, b: 0.5238074, a: 0}
+      key3: {r: 0.709, g: 0.68532443, b: 0.58847, a: 0}
+      key4: {r: 0.709, g: 0.68532443, b: 0.58847, a: 0}
+      key5: {r: 0.65882355, g: 0.6425177, b: 0.5698824, a: 0}
+      key6: {r: 0.65882355, g: 0.6425177, b: 0.5698824, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 5590
+      ctime1: 17733
+      ctime2: 57825
+      ctime3: 65535
+      ctime4: 56861
+      ctime5: 65535
+      ctime6: 65535
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 4
+      m_NumAlphaKeys: 2
+    mappedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+    targetLayer: {fileID: 8574412962073106934, guid: f1ef5cbee8e42e043a5deedb8b4e70fc, type: 2}
+    targetMaterial: {fileID: 0}
+    targetVariableName: 
+  - expanded: 0
+    modulationSource: 1
+    modulationTarget: 1
+    mappedGradient:
+      serializedVersion: 2
+      key0: {r: 0.376, g: 0.35742885, b: 0.269216, a: 1}
+      key1: {r: 0.19571298, g: 0.383, b: 0.3600669, a: 1}
+      key2: {r: 0.08332076, g: 0.4528302, b: 0.101493336, a: 0}
+      key3: {r: 0.160094, g: 0.383, b: 0.25107604, a: 0}
+      key4: {r: 0.397, g: 0.3876989, b: 0.16912201, a: 0}
+      key5: {r: 0.4528302, g: 0.3685514, b: 0.1003916, a: 0}
+      key6: {r: 0.376, g: 0.35742885, b: 0.269216, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 7517
+      ctime1: 14842
+      ctime2: 23323
+      ctime3: 45875
+      ctime4: 51850
+      ctime5: 56861
+      ctime6: 65535
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 7
+      m_NumAlphaKeys: 2
+    mappedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+    targetLayer: {fileID: 8574412962073106934, guid: f1ef5cbee8e42e043a5deedb8b4e70fc, type: 2}
+    targetMaterial: {fileID: 2100000, guid: e1bd59b534bee9a47b8348d5bab989e0, type: 2}
+    targetVariableName: _Color
+  - expanded: 0
+    modulationSource: 1
+    modulationTarget: 1
+    mappedGradient:
+      serializedVersion: 2
+      key0: {r: 0.376, g: 0.35742885, b: 0.269216, a: 1}
+      key1: {r: 0.19571298, g: 0.383, b: 0.3600669, a: 1}
+      key2: {r: 0.08332076, g: 0.4528302, b: 0.101493336, a: 0}
+      key3: {r: 0.160094, g: 0.383, b: 0.25107604, a: 0}
+      key4: {r: 0.397, g: 0.3876989, b: 0.16912201, a: 0}
+      key5: {r: 0.469, g: 0.34799278, b: 0.056748997, a: 0}
+      key6: {r: 0.376, g: 0.35742885, b: 0.269216, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 7517
+      ctime1: 14842
+      ctime2: 23323
+      ctime3: 45875
+      ctime4: 52814
+      ctime5: 56861
+      ctime6: 65535
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 7
+      m_NumAlphaKeys: 2
+    mappedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+    targetLayer: {fileID: 8574412962073106934, guid: f1ef5cbee8e42e043a5deedb8b4e70fc, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 2bd5492c9cd108a4f88840897193af75, type: 2}
+    targetVariableName: _BottomColor
+  - expanded: 0
+    modulationSource: 1
+    modulationTarget: 1
+    mappedGradient:
+      serializedVersion: 2
+      key0: {r: 0.509434, g: 0.47516912, b: 0.3244037, a: 1}
+      key1: {r: 0.18534178, g: 0.46226418, b: 0.401319, a: 1}
+      key2: {r: 0.29676932, g: 0.509434, b: 0.08410466, a: 0}
+      key3: {r: 0.19842473, g: 0.46226418, b: 0.30488628, a: 0}
+      key4: {r: 0.46226418, g: 0.43941063, b: 0.14609292, a: 0}
+      key5: {r: 0.5283019, g: 0.43010628, b: 0.11213957, a: 0}
+      key6: {r: 0.509434, g: 0.47516912, b: 0.3244037, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 7517
+      ctime1: 14842
+      ctime2: 23323
+      ctime3: 45875
+      ctime4: 53199
+      ctime5: 58596
+      ctime6: 65535
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 7
+      m_NumAlphaKeys: 2
+    mappedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+    targetLayer: {fileID: 8574412962073106934, guid: f1ef5cbee8e42e043a5deedb8b4e70fc, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 2bd5492c9cd108a4f88840897193af75, type: 2}
+    targetVariableName: _TopColor
+  - expanded: 0
+    modulationSource: 1
+    modulationTarget: 1
+    mappedGradient:
+      serializedVersion: 2
+      key0: {r: 0.39479426, g: 0.48293403, b: 0.29788938, a: 1}
+      key1: {r: 0.23268957, g: 0.7830189, b: 0.36085477, a: 1}
+      key2: {r: 0.44869888, g: 0.6226415, b: 0.1765595, a: 0}
+      key3: {r: 0.47694457, g: 0.6226415, b: 0.17328231, a: 0}
+      key4: {r: 0.23153257, g: 0.37718013, b: 0.4056604, a: 0}
+      key5: {r: 0.39479426, g: 0.48293403, b: 0.29788938, a: 0}
+      key6: {r: 0.39479426, g: 0.48293403, b: 0.29788938, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 6554
+      ctime1: 20239
+      ctime2: 31611
+      ctime3: 42791
+      ctime4: 51079
+      ctime5: 61102
+      ctime6: 61102
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 6
+      m_NumAlphaKeys: 2
+    mappedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+    targetLayer: {fileID: 8574412962073106934, guid: f1ef5cbee8e42e043a5deedb8b4e70fc, type: 2}
+    targetMaterial: {fileID: 2100000, guid: eb7a3936ed0c129469d6714f4c9e8c9b, type: 2}
+    targetVariableName: _FilterColor
+  - expanded: 0
+    modulationSource: 1
+    modulationTarget: 1
+    mappedGradient:
+      serializedVersion: 2
+      key0: {r: 0.22390006, g: 0.6698113, b: 0.08530616, a: 1}
+      key1: {r: 0.90588236, g: 0.71377873, b: 0.2941177, a: 1}
+      key2: {r: 1, g: 0.31193793, b: 0, a: 0}
+      key3: {r: 1, g: 0.59621054, b: 0, a: 0}
+      key4: {r: 1, g: 0.8441558, b: 0, a: 0}
+      key5: {r: 1, g: 0.8441558, b: 0, a: 0}
+      key6: {r: 0.5660378, g: 0.51943225, b: 0.26432896, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 32768
+      ctime1: 44333
+      ctime2: 51079
+      ctime3: 52621
+      ctime4: 61487
+      ctime5: 61487
+      ctime6: 61487
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 3
+      m_NumAlphaKeys: 2
+    mappedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+    targetLayer: {fileID: 8574412962073106934, guid: f1ef5cbee8e42e043a5deedb8b4e70fc, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 42932dd051b572e4ba2ec8df5e1674dc, type: 2}
+    targetVariableName: _FilterColor
+  - expanded: 0
+    modulationSource: 1
+    modulationTarget: 2
+    mappedGradient:
+      serializedVersion: 2
+      key0: {r: 0.22390006, g: 0.6698113, b: 0.08530616, a: 1}
+      key1: {r: 0.90588236, g: 0.71377873, b: 0.2941177, a: 1}
+      key2: {r: 1, g: 0.31193793, b: 0, a: 0}
+      key3: {r: 1, g: 0.59621054, b: 0, a: 0}
+      key4: {r: 1, g: 0.8441558, b: 0, a: 0}
+      key5: {r: 1, g: 0.8441558, b: 0, a: 0}
+      key6: {r: 0.5660378, g: 0.51943225, b: 0.26432896, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 32768
+      ctime1: 44333
+      ctime2: 51079
+      ctime3: 52621
+      ctime4: 61487
+      ctime5: 61487
+      ctime6: 61487
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 3
+      m_NumAlphaKeys: 2
+    mappedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.15
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.2399109
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.87
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.98
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+    targetLayer: {fileID: 8574412962073106934, guid: f1ef5cbee8e42e043a5deedb8b4e70fc, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 42932dd051b572e4ba2ec8df5e1674dc, type: 2}
+    targetVariableName: _AlphaClip

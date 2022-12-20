@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 0da724f7a7696a946946faca09b70529
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - weatherSphere: {instanceID: 0}
+  - reflectionCubeMap: {fileID: 8900000, guid: c1206bb3fa7b1d14e81afd040dc52409, type: 2}
+  executionOrder: 0
+  icon: {fileID: 2800000, guid: d6a487c980e3f9841a4165e5b60200ff, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
