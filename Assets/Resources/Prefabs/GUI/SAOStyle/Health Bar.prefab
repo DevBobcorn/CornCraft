@@ -846,3 +846,4 @@ MonoBehaviour:
   warningThreshold: 0.3
   dangerThreshold: 0.15
   barAxis: 0
+  barText: {fileID: 5397507981359714686}

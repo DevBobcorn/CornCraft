@@ -204,16 +204,16 @@ Material:
     m_Colors:
     - _ACWindSpeed: {r: -0.1, g: 0.5, b: 0, a: 0}
     - _AlphaRemap: {r: 0, g: 3, b: 0, a: 0}
-    - _AltoCloudColor: {r: 0.2943663, g: 0.831844, b: 0.990566, a: 0}
+    - _AltoCloudColor: {r: 1.0833969, g: 1.3920008, b: 1.382235, a: 0}
     - _AltoCloudColor1: {r: 0.8160377, g: 0.9787034, b: 1, a: 0}
     - _AltoCumulusWindSpeed: {r: -0.1, g: 0.5, b: 0, a: 0}
     - _AltocumulusWindSpeed: {r: -0.1, g: 0.5, b: 0, a: 0}
-    - _CloudColor: {r: 0.021568628, g: 0.0372549, b: 0.043137256, a: 0}
+    - _CloudColor: {r: 0.7520787, g: 0.83938855, b: 0.8729692, a: 0}
     - _CloudColor1: {r: 0.7264151, g: 0.7264151, b: 0.7264151, a: 0}
     - _CloudCoverageMovement: {r: 5, g: 20, b: 0, a: 0}
     - _CloudDetailColor: {r: 0.8867924, g: 0.8867924, b: 0.8867924, a: 0}
     - _CloudFlareColor: {r: 2.7294118, g: 2.3843138, b: 1.882353, a: 1}
-    - _CloudHighlightColor: {r: 0.07524919, g: 0.1315804, b: 0.1792453, a: 0}
+    - _CloudHighlightColor: {r: 4.4678597, g: 4.4678597, b: 4.4678597, a: 0}
     - _CloudHighlightColor1: {r: 1, g: 1, b: 1, a: 0}
     - _CloudHighlightColorr: {r: 1, g: 1, b: 1, a: 0}
     - _CloudScale: {r: 0.01, g: 0.05, b: 0.01, a: 0}
@@ -227,12 +227,12 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _MainCloudWindDir: {r: 0.3, g: 0.1, b: 0, a: 0}
     - _MainCloudWindDir1: {r: 0.1, g: 0.2, b: 0, a: 0}
-    - _MoonColor: {r: 0.036259443, g: 0.052507058, b: 0.05658073, a: 1}
+    - _MoonColor: {r: 0, g: 0, b: 0, a: 1}
     - _MoonDirection: {r: 7.628955e-10, g: 0.99996185, b: 0.008726478, a: 0}
     - _SecondLayer: {r: 0.9056604, g: 0.9056604, b: 0.9056604, a: 0}
     - _SecondLayer1: {r: 0.8396226, g: 0.8396226, b: 0.8396226, a: 0}
     - _ShadowDirection: {r: 0, g: 0, b: 0, a: 0}
-    - _StormDirection: {r: 0.7826677, g: -0, b: 0.6224398, a: 0}
+    - _StormDirection: {r: -0.28292578, g: -0, b: 0.9591418, a: 0}
     - _SunDirection: {r: 0.23759001, g: 0.9521441, b: 0.19228333, a: 0}
     - _SunDirection1: {r: 0, g: 0, b: 0, a: 0}
     - _TexturePanDirection: {r: 0.1, g: 1, b: 0.1, a: 0}
