@@ -13,10 +13,10 @@ namespace MagicaCloth
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     public class ExNativeHashMap<TKey, TValue>
-        where TKey : struct, IEquatable<TKey>
-        where TValue : struct
+        where TKey : unmanaged, IEquatable<TKey>
+        where TValue : unmanaged
     {
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
         NativeParallelHashMap<TKey, TValue> nativeHashMap;
 #else
         NativeHashMap<TKey, TValue> nativeHashMap;
@@ -36,7 +36,7 @@ namespace MagicaCloth
         //=========================================================================================
         public ExNativeHashMap()
         {
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
             nativeHashMap = new NativeParallelHashMap<TKey, TValue>(1, Allocator.Persistent);
 #else
             nativeHashMap = new NativeHashMap<TKey, TValue>(1, Allocator.Persistent);
@@ -56,7 +56,11 @@ namespace MagicaCloth
         {
             get
             {
+#if MAGICACLOTH_USE_COLLECTIONS_200
+                return nativeHashMap.Count;
+#else
                 return nativeHashMap.Count();
+#endif
             }
         }
 
@@ -176,7 +180,7 @@ namespace MagicaCloth
         /// 内部のNativeHashMapを取得する
         /// </summary>
         /// <returns></returns>
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
         public NativeParallelHashMap<TKey, TValue> Map
 #else
         public NativeHashMap<TKey, TValue> Map

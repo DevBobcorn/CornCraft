@@ -138,7 +138,7 @@ namespace MagicaCloth
             [Unity.Collections.ReadOnly]
             public NativeArray<int> vertexToParticleList;
             [Unity.Collections.ReadOnly]
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
             public NativeParallelMultiHashMap<int, int> vertexToParticleMap;
 #else
             public NativeMultiHashMap<int, int> vertexToParticleMap;
@@ -161,7 +161,7 @@ namespace MagicaCloth
             public NativeArray<quaternion> snapBaseRotList;
             //public NativeArray<quaternion> baseRotList;
 
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
             private NativeParallelMultiHashMapIterator<int> iterator;
 #else
             private NativeMultiHashMapIterator<int> iterator;
@@ -250,7 +250,7 @@ namespace MagicaCloth
             [Unity.Collections.ReadOnly]
             public NativeArray<int> vertexToParticleList;
             [Unity.Collections.ReadOnly]
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
             public NativeParallelMultiHashMap<int, int> vertexToParticleMap;
 #else
             public NativeMultiHashMap<int, int> vertexToParticleMap;
@@ -282,7 +282,7 @@ namespace MagicaCloth
             [Unity.Collections.ReadOnly]
             public NativeArray<quaternion> particleRotList;
 
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
             private NativeParallelMultiHashMapIterator<int> iterator;
 #else
             private NativeMultiHashMapIterator<int> iterator;

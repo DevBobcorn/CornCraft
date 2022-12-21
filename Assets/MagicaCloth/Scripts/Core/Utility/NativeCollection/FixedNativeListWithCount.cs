@@ -204,10 +204,10 @@ namespace MagicaCloth
             countDict.Clear();
         }
 
-        public T[] ToArray()
-        {
-            return nativeList.ToArray();
-        }
+        //public T[] ToArray()
+        //{
+        //    return nativeList.ToArray();
+        //}
 
         /// <summary>
         /// Jobで利用する場合はこの関数でNativeArrayに変換して受け渡す

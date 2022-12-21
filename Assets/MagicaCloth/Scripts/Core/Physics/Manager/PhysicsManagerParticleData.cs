@@ -1338,7 +1338,7 @@ namespace MagicaCloth
 
             // トランスフォームごと
             [Unity.Collections.ReadOnly]
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
             public NativeParallelMultiHashMap<int, int> transformParticleIndexMap;
 #else
             public NativeMultiHashMap<int, int> transformParticleIndexMap;
@@ -1356,7 +1356,7 @@ namespace MagicaCloth
             public void Execute(int index)
             {
                 int pindex;
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
                 NativeParallelMultiHashMapIterator<int> iterator;
 #else
                 NativeMultiHashMapIterator<int> iterator;
