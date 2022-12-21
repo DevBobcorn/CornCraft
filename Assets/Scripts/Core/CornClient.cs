@@ -386,6 +386,7 @@ namespace MinecraftClient
             {
                 Translations.LogError("error.scene_objects_load_failed");
                 Disconnect();
+                yield break;
             }
             // Otherwise all the game objects and prefabs should be ready
 

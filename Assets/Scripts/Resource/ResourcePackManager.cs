@@ -177,8 +177,9 @@ namespace MinecraftClient.Resource
                     {
                         var rawModel = RawItemModelTable[itemModelId];
                         var tintable = ItemPalette.INSTANCE.IsTintable(numId);
+                        var generated = GeneratedItemModels.Contains(itemModelId);
 
-                        if (GeneratedItemModels.Contains(itemModelId)) // This model should be generated
+                        if (generated) // This model should be generated
                         {
                             // Get layer count of this item model
                             int layerCount = rawModel.Textures.Count;
@@ -191,7 +192,7 @@ namespace MinecraftClient.Resource
                             //Debug.Log($"Generating item model for {itemModelId} tintable: {tintable}");
                         }
 
-                        var itemGeometry = new ItemGeometry(rawModel);
+                        var itemGeometry = new ItemGeometry(rawModel, generated);
 
                         RenderType renderType;
 
@@ -217,8 +218,9 @@ namespace MinecraftClient.Resource
                                 if (RawItemModelTable.ContainsKey(overrideModelId)) // Build this override
                                 {
                                     var rawOverrideModel = RawItemModelTable[overrideModelId];
+                                    var overrideGenerated = GeneratedItemModels.Contains(overrideModelId);
 
-                                    if (GeneratedItemModels.Contains(itemModelId)) // This model should be generated
+                                    if (overrideGenerated) // This model should be generated
                                     {
                                         // Get layer count of this item model
                                         int layerCount = rawModel.Textures.Count;
@@ -231,7 +233,7 @@ namespace MinecraftClient.Resource
                                         //Debug.Log($"Generating item model for {itemModelId} tintable: {tintable}");
                                     }
 
-                                    var overrideGeometry = new ItemGeometry(rawOverrideModel);
+                                    var overrideGeometry = new ItemGeometry(rawOverrideModel, overrideGenerated);
                                     var predicate = ItemModelPredicate.fromJson(o.Properties["predicate"]);
                                     
                                     itemModel.AddOverride(predicate, overrideGeometry);

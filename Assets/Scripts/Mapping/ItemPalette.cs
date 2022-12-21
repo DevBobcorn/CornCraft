@@ -32,12 +32,12 @@ namespace MinecraftClient.Mapping
             return itemsTable[id];
         }
 
-        public int ToId(Item itemType)
+        public int ToNumId(Item itemType)
         {
             return dictReverse[itemType];
         }
 
-        public int ToId(ResourceLocation identifier)
+        public int ToNumId(ResourceLocation identifier)
         {
             return dictId[identifier];
         }
