@@ -1020,7 +1020,7 @@ namespace MinecraftClient.Protocol.Handlers
             else
             {
                 slotData.AddRange(GetBool(true)); // Item is present
-                slotData.AddRange(GetVarInt(itemPalette.ToId(item.Type)));
+                slotData.AddRange(GetVarInt(itemPalette.ToNumId(item.Type)));
                 slotData.Add((byte)item.Count);
                 slotData.AddRange(GetNbt(item.NBT));
             }

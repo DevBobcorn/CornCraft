@@ -37,23 +37,21 @@ namespace MinecraftClient.Resource
 
         private static float3[] GetUVsAt(Rect bounds, int index, bool animatable, Vector4 part, int areaRot)
         {
-            // Move the texture boundaries a bit inner to avoid sampling on neighbor edges
-            // TODO Find a better solution, maybe?
-            float oneU = bounds.width - 0.0008F;
+            float oneU = bounds.width;
             float oneV;
 
             if (animatable)
             {
                 // Use width here because a texture can contain multiple frames
                 // TODO Real support for animatable texture
-
-                oneV = bounds.width - 0.0008F; 
+                // TODO Solve the texture bleeding problem
+                oneV = bounds.width; 
             }
             else
-                oneV = bounds.height - 0.0008F;
+                oneV = bounds.height;
 
             // Get texture offset in atlas
-            float3 o = new(bounds.xMin + 0.0004F, bounds.yMin + 0.0004F, index + 0.1F);
+            float3 o = new(bounds.xMin, bounds.yMin, index + 0.1F);
 
             // vect:  x,  y,  z,  w
             // vect: x1, y1, x2, y2
