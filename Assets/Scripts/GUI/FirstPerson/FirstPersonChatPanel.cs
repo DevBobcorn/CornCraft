@@ -5,7 +5,7 @@ using TMPro;
 namespace MinecraftClient.UI
 {
     [RequireComponent(typeof (Animator))]
-    public class FirstPersonChat : MonoBehaviour
+    public class FirstPersonChatPanel : MonoBehaviour
     {
         private static readonly Vector2 PANEL_SIZE = new(300F, 390F);
         private const float RESIZE_SPEED = 1000F;
