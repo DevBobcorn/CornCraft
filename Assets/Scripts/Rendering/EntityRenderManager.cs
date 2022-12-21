@@ -14,38 +14,52 @@ namespace MinecraftClient.Rendering
         None
     }
 
-    public class EntityManager : MonoBehaviour
+    public class EntityRenderManager : MonoBehaviour
     {
-        private static EntityManager? instance;
-        public static EntityManager Instance
+        private static EntityRenderManager? instance;
+        public static EntityRenderManager Instance
         {
             get {
                 if (instance is null)
                 {
-                    instance = Component.FindObjectOfType<EntityManager>();
+                    instance = Component.FindObjectOfType<EntityRenderManager>();
                 }
                 
                 return instance;
             }
         }
 
+        [SerializeField] private GameObject? defaultPrefab;
+
+        [SerializeField] private GameObject? serverPlayerPrefab;
+        [SerializeField] private GameObject? serverSlimPlayerPrefab;
+
+        [SerializeField] private GameObject? skeletonPrefab;
+        [SerializeField] private GameObject? witherSkeletonPrefab;
+        [SerializeField] private GameObject? strayPrefab;
+        [SerializeField] private GameObject? zombiePrefab;
+        [SerializeField] private GameObject? huskPrefab;
+        [SerializeField] private GameObject? drownedPrefab;
+        [SerializeField] private GameObject? creeperPrefab;
+        [SerializeField] private GameObject? pigPrefab;
+        [SerializeField] private GameObject? cowPrefab;
+        [SerializeField] private GameObject? mooshroomPrefab;
+        [SerializeField] private GameObject? sheepPrefab;
+
         private CornClient? game;
-        private static GameObject? placeboEntityPrefab;
 
-        private static GameObject? serverDefoPlayerPrefab, serverSlimPlayerPrefab;
+        private readonly Dictionary<EntityType, GameObject?> entityPrefabs = new();
+        private readonly Dictionary<EntityType, EntityInfoTagType> infoTagTypes = new();
 
-        private static readonly Dictionary<EntityType, GameObject?> entityPrefabs = new();
-        private static readonly Dictionary<EntityType, EntityInfoTagType> infoTagTypes = new();
-
-        private static GameObject? GetPrefabForType(EntityType type) => entityPrefabs.GetValueOrDefault(type, placeboEntityPrefab);
-        public static EntityInfoTagType GetInfoTagTypeForType(EntityType type) =>
+        private GameObject? GetPrefabForType(EntityType type) => entityPrefabs.GetValueOrDefault(type, defaultPrefab);
+        public EntityInfoTagType GetInfoTagTypeForType(EntityType type) =>
                 infoTagTypes.GetValueOrDefault(type, EntityInfoTagType.None);
 
         private readonly Dictionary<int, EntityRender> entities = new();
         private readonly HashSet<int> nearbyEntities = new();
 
-        private const float NEARBY_THERESHOLD_INNER = 256F;
-        private const float NEARBY_THERESHOLD_OUTER = 300F;
+        private const float NEARBY_THERESHOLD_INNER = 100F;
+        private const float NEARBY_THERESHOLD_OUTER = 128F;
 
         public string GetDebugInfo() => $"Ent: {entities.Count}";
 
@@ -143,53 +157,53 @@ namespace MinecraftClient.Rendering
 
         void Start()
         {
-            placeboEntityPrefab = Resources.Load<GameObject>("Prefabs/Entity/Cube Entity");
-
-            serverDefoPlayerPrefab = Resources.Load<GameObject>("Prefabs/Player/Server Defo Player Entity");
-            serverSlimPlayerPrefab = Resources.Load<GameObject>("Prefabs/Player/Server Slim Player Entity");
+            game = CornClient.Instance;
 
             // Clear loaded things
             entityPrefabs.Clear();
             infoTagTypes.Clear();
 
-            // Add specific entity prefabs TODO Expand
-            entityPrefabs.Add(EntityType.Skeleton, Resources.Load<GameObject>("Prefabs/Entity/Skeleton Entity"));
-            entityPrefabs.Add(EntityType.WitherSkeleton, Resources.Load<GameObject>("Prefabs/Entity/Wither Skeleton Entity"));
-            entityPrefabs.Add(EntityType.Stray, Resources.Load<GameObject>("Prefabs/Entity/Stray Entity"));
+            // Register entity render prefabs ===========================================
+            // Hostile Mobs
+            entityPrefabs.Add(EntityType.Skeleton,         skeletonPrefab);
+            entityPrefabs.Add(EntityType.WitherSkeleton,   witherSkeletonPrefab);
+            entityPrefabs.Add(EntityType.Stray,            strayPrefab);
+            entityPrefabs.Add(EntityType.Zombie,           zombiePrefab);
+            entityPrefabs.Add(EntityType.Husk,             huskPrefab);
+            entityPrefabs.Add(EntityType.Drowned,          drownedPrefab);
+            entityPrefabs.Add(EntityType.Creeper,          creeperPrefab);
+            // ...
+            // Passive Mobs
+            entityPrefabs.Add(EntityType.Pig,              pigPrefab);
+            entityPrefabs.Add(EntityType.Cow,              cowPrefab);
+            entityPrefabs.Add(EntityType.Mooshroom,        mooshroomPrefab);
+            entityPrefabs.Add(EntityType.Sheep,            sheepPrefab);
+            // Neutral Mobs
+            // ...
+            // Miscellaneous Entities
+            //...
 
-            entityPrefabs.Add(EntityType.Zombie, Resources.Load<GameObject>("Prefabs/Entity/Zombie Entity"));
-            entityPrefabs.Add(EntityType.Husk, Resources.Load<GameObject>("Prefabs/Entity/Husk Entity"));
-            entityPrefabs.Add(EntityType.Drowned, Resources.Load<GameObject>("Prefabs/Entity/Drowned Entity"));
-
-            entityPrefabs.Add(EntityType.Creeper, Resources.Load<GameObject>("Prefabs/Entity/Creeper Entity"));
-
-            entityPrefabs.Add(EntityType.Pig, Resources.Load<GameObject>("Prefabs/Entity/Pig Entity"));
-            entityPrefabs.Add(EntityType.Cow, Resources.Load<GameObject>("Prefabs/Entity/Cow Entity"));
-            entityPrefabs.Add(EntityType.Mooshroom, Resources.Load<GameObject>("Prefabs/Entity/Cow Entity"));
-            entityPrefabs.Add(EntityType.Sheep, Resources.Load<GameObject>("Prefabs/Entity/Sheep Entity"));
-            
-            entityPrefabs.Add(EntityType.Goat, Resources.Load<GameObject>("Prefabs/Entity/Pig Entity"));
-
-            // Register info tag types
-            infoTagTypes.Add(EntityType.Skeleton, EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.WitherSkeleton, EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.Stray, EntityInfoTagType.Monster);
-
-            infoTagTypes.Add(EntityType.Zombie, EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.Husk, EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.Drowned, EntityInfoTagType.Monster);
-
-            infoTagTypes.Add(EntityType.Creeper, EntityInfoTagType.Monster);
-
+            // Register entity info tag types ===========================================
+            infoTagTypes.Add(EntityType.Skeleton,         EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.WitherSkeleton,   EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.Stray,            EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.Zombie,           EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.Husk,             EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.Drowned,          EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.Creeper,          EntityInfoTagType.Monster);
+            // Passive Mobs
             infoTagTypes.Add(EntityType.Villager, EntityInfoTagType.NPC);
+            // Neutral Mobs
+            // ...
+            // Miscellaneous Entities
+            //...
 
             foreach (var prefabItem in entityPrefabs)
             {
                 if (prefabItem.Value is null)
-                    Debug.LogWarning($"Prefab for entity type {prefabItem.Key} is not properly assigned!");
+                    Debug.LogWarning($"Prefab for entity type {prefabItem.Key} is not assigned!");
+                
             }
-
-            game = CornClient.Instance;
 
         }
 

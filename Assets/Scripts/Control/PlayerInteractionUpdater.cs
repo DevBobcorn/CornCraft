@@ -1,5 +1,4 @@
 #nullable enable
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -124,7 +123,7 @@ namespace MinecraftClient.Control
 
             EventManager.Instance.Broadcast<InteractionAddEvent>(new(id, info));
 
-            Debug.Log($"Add {id} {def.Hint} at {loc}");
+            //Debug.Log($"Add {id} {def.Hint} at {loc}");
         }
 
         private void RemoveInteraction(int id)
@@ -136,7 +135,7 @@ namespace MinecraftClient.Control
                 
                 EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(id));
 
-                Debug.Log($"Remove {id} {info.GetHint()} at {info.Location}");
+                //Debug.Log($"Remove {id} {info.GetHint()} at {info.Location}");
             }
             
         }

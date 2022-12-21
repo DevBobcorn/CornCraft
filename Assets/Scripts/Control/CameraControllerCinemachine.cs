@@ -1,6 +1,7 @@
 #nullable enable
 using UnityEngine;
 using Cinemachine;
+using MinecraftClient.Event;
 
 namespace MinecraftClient.Control
 {
@@ -15,6 +16,8 @@ namespace MinecraftClient.Control
         [SerializeField] [Range(0F, 20F)] private float scaleSmoothFactor = 4.0F;
         [SerializeField] [Range(0F,  2F)] private float scrollSensitivity = 0.5F;
 
+        private CornClient? game;
+
         // Virtual camera and camera components
         private CinemachineVirtualCamera? virtualCameraNormal;
         private CinemachineFramingTransposer? framingTransposer;
@@ -28,6 +31,9 @@ namespace MinecraftClient.Control
         {
             if (!initialized)
             {
+                // Get game instance
+                game = CornClient.Instance;
+
                 // Get virtual and render cameras
                 var normalObj = transform.Find("Normal Virtual");
                 virtualCameraNormal = normalObj.GetComponent<CinemachineVirtualCamera>();
@@ -47,7 +53,7 @@ namespace MinecraftClient.Control
 
                 // Override input axis to disable input when paused
                 CinemachineCore.GetInputAxis = (axisName) => {
-                    return CornClient.Instance.IsPaused() ? 0F : Input.GetAxis(axisName);
+                    return game.IsPaused() ? 0F : Input.GetAxis(axisName);
                 };
 
                 initialized = true;
@@ -77,7 +83,7 @@ namespace MinecraftClient.Control
         void ManagedUpdate(float interval)
         {
             // Disable input when game is paused, see EnsureInitialized() above
-            if (!CornClient.Instance.MouseScrollAbsorbed())
+            if (!game!.MouseScrollAbsorbed())
             {
                 float scroll = CinemachineCore.GetInputAxis("Mouse ScrollWheel");
 
