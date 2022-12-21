@@ -182,6 +182,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   followSpeed: 1.5
   maxDeltaAngle: 30
+  rootMenuPrefabs:
+  - {fileID: 5241885527875202331, guid: eb848069cbcd7d44da8d7153d3865c20, type: 3}
+  - {fileID: 8691014733791933277, guid: 2c0b14090c55c0a418cdeec7d746c537, type: 3}
+  - {fileID: 9106868316967306063, guid: cea7c48a05af48149a435e0a5da7c392, type: 3}
+  - {fileID: 1927584395152002784, guid: b1afa55029833ba4e89039303b20f8f4, type: 3}
+  - {fileID: 8029001321347958585, guid: 0a4bb463b04be1b46bd3797b6eb15c11, type: 3}
+  buttonObjs:
+  - {fileID: 5312660961673720557}
+  - {fileID: 7354932617538602777}
+  - {fileID: 8745705821136845116}
+  - {fileID: 4031153315546646660}
+  - {fileID: 2832818946905849174}
+  mainPanelPrefab: {fileID: 8273318990848781744, guid: 821fe9015a5e79745b0bfc02f156a937, type: 3}
+  chatPanelPrefab: {fileID: 9070391280913271343, guid: b2f501c814eca1f4a8f00dc11c80985e, type: 3}
 --- !u!1 &2832818946905849174
 GameObject:
   m_ObjectHideFlags: 0
@@ -336,7 +350,6 @@ MonoBehaviour:
   itemsOnLeftSide: 0
   panelSize: {x: 260, y: 320}
   avatarOnPanel: 0
-  showChatPanel: 0
   panelTitle: Settings
   normalIcon: {fileID: 21300000, guid: 6bffa20d6a8959f4c95c3e63df61e715, type: 3}
   focusedIcon: {fileID: 21300000, guid: 97b56a91ee11b714a8ce02e8dcd71a48, type: 3}
@@ -494,7 +507,6 @@ MonoBehaviour:
   itemsOnLeftSide: 0
   panelSize: {x: 0, y: 0}
   avatarOnPanel: 0
-  showChatPanel: 0
   panelTitle: ???
   normalIcon: {fileID: 21300000, guid: 976f261282d59d7408f4bcd4cd72f2c6, type: 3}
   focusedIcon: {fileID: 21300000, guid: 7b4c9289f40558842a75f1332f066297, type: 3}
@@ -652,7 +664,6 @@ MonoBehaviour:
   itemsOnLeftSide: 0
   panelSize: {x: 260, y: 320}
   avatarOnPanel: 1
-  showChatPanel: 0
   panelTitle: '{0}'
   normalIcon: {fileID: 21300000, guid: 4405df2254b177f488882c0f97807e82, type: 3}
   focusedIcon: {fileID: 21300000, guid: 38d0c0e2cd48cc445aa590c00a080e6d, type: 3}
@@ -912,7 +923,6 @@ MonoBehaviour:
   itemsOnLeftSide: 0
   panelSize: {x: 0, y: 0}
   avatarOnPanel: 0
-  showChatPanel: 0
   panelTitle: ???
   normalIcon: {fileID: 21300000, guid: 58be36f87b7610245816701e927fbaef, type: 3}
   focusedIcon: {fileID: 21300000, guid: e5ac2b56eae94454190ca9185cf11f63, type: 3}
@@ -1070,7 +1080,6 @@ MonoBehaviour:
   itemsOnLeftSide: 1
   panelSize: {x: 0, y: 0}
   avatarOnPanel: 0
-  showChatPanel: 1
   panelTitle: ???
   normalIcon: {fileID: 21300000, guid: 0d84fca0310250442b6397cfd5ff91ed, type: 3}
   focusedIcon: {fileID: 21300000, guid: 83f6efa0970409d42aea41002b137f68, type: 3}

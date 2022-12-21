@@ -252,6 +252,14 @@ namespace MinecraftClient.Control
                 playerCollider.material = physicMaterial;
 
                 statusUpdater.UseBoxCastForGroundedCheck = boxcast;
+
+                // Set stamina to max value
+                Status.StaminaLeft = playerAbility!.MaxStamina;
+                // And broadcast current stamina
+                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, true));
+                // Initialize health value
+                EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
+                game.PlayerData.MaxHealth = 20F;
             }
 
         }

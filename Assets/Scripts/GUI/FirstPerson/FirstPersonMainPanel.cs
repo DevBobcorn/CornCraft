@@ -6,7 +6,7 @@ using TMPro;
 namespace MinecraftClient.UI
 {
     [RequireComponent(typeof (Animator))]
-    public class FirstPersonPanel : MonoBehaviour
+    public class FirstPersonMainPanel : MonoBehaviour
     {
         private const float RESIZE_SPEED = 1000F;
 

@@ -1918,7 +1918,7 @@ GameObject:
   - component: {fileID: 518753496069617934}
   - component: {fileID: 2527620041005310924}
   m_Layer: 0
-  m_Name: First Person Chat
+  m_Name: First Person Chat Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -10,17 +10,6 @@ namespace MinecraftClient.UI
 {
     public class FirstPersonGUI : MonoBehaviour
     {
-        public const string FIRST_PERSON_ROOT_PATH  = "Prefabs/GUI/FirstPerson";
-        public const string FIRST_PERSON_GUI_PREFAB = FIRST_PERSON_ROOT_PATH + "/First Person GUI";
-        public const string BUTTON_AVATAR_PREFAB    = FIRST_PERSON_ROOT_PATH + "/First Person Menu Avatar";
-        public const string BUTTON_SOCIAL_PREFAB    = FIRST_PERSON_ROOT_PATH + "/First Person Menu Social";
-        public const string BUTTON_CHAT_PREFAB      = FIRST_PERSON_ROOT_PATH + "/First Person Menu Chat";
-        public const string BUTTON_MAP_PREFAB       = FIRST_PERSON_ROOT_PATH + "/First Person Menu Map";
-        public const string BUTTON_SETTINGS_PREFAB  = FIRST_PERSON_ROOT_PATH + "/First Person Menu Settings";
-        
-        public const string PANEL_PREFAB = FIRST_PERSON_ROOT_PATH + "/First Person Panel";
-        public const string PANEL_CHAT   = FIRST_PERSON_ROOT_PATH + "/First Person Chat";
-
         public const float CANVAS_SCALE = 0.0006F;
         public const int   BUTTON_COUNT = 5;
         
@@ -43,15 +32,16 @@ namespace MinecraftClient.UI
 
         private Canvas?   canvas;
         private Animator? canvasAnim;
-
-        private SoftMask?   buttonListMask;
+        private SoftMask? buttonListMask;
         private Image? buttonListMaskImage;
         
-        private FirstPersonPanel? firstPersonPanel = null;
-        private FirstPersonChat?  firstPersonChat  = null;
+        private FirstPersonMainPanel? mainPanel = null;
+        private FirstPersonChatPanel?  chatPanel  = null;
 
-        private GameObject[] rootMenuPrefabs = new GameObject[BUTTON_COUNT];
-        private GameObject[] buttonObjs = new GameObject[BUTTON_COUNT];
+        [SerializeField] private GameObject[] rootMenuPrefabs = new GameObject[BUTTON_COUNT];
+        [SerializeField] private GameObject[] buttonObjs = new GameObject[BUTTON_COUNT];
+        [SerializeField] private GameObject? mainPanelPrefab, chatPanelPrefab;
+
         private FirstPersonButton[] buttons = new FirstPersonButton[BUTTON_COUNT];
         private GameObject? newButtonObj;
 
@@ -101,12 +91,6 @@ namespace MinecraftClient.UI
             buttonListMaskImage = buttonListMask.GetComponent<Image>();
             buttonListMaskImage.color = new(0F, 0F, 0F, 0F);
 
-            buttonObjs[0] = buttonListMask.transform.Find("Avatar Button").gameObject;
-            buttonObjs[1] = buttonListMask.transform.Find("Social Button").gameObject;
-            buttonObjs[2] = buttonListMask.transform.Find("Chat Button").gameObject;
-            buttonObjs[3] = buttonListMask.transform.Find("Map Button").gameObject;
-            buttonObjs[4] = buttonListMask.transform.Find("Settings Button").gameObject;
-
             for (int i = 0;i < BUTTON_COUNT;i++)
             {
                 var button = buttonObjs[i].GetComponent<Button>();
@@ -134,26 +118,18 @@ namespace MinecraftClient.UI
             }
 
             selectedButton = 0;
+            
+            var mainPanelObj = GameObject.Instantiate(mainPanelPrefab!, Vector3.zero, Quaternion.identity);
+            mainPanelObj.transform.SetParent(canvas.transform, false);
+            mainPanelObj.transform.localPosition = new(-70F, STOP_POS[0], 0F);
 
-            rootMenuPrefabs[0] = Resources.Load<GameObject>(BUTTON_AVATAR_PREFAB);
-            rootMenuPrefabs[1] = Resources.Load<GameObject>(BUTTON_SOCIAL_PREFAB);
-            rootMenuPrefabs[2] = Resources.Load<GameObject>(BUTTON_CHAT_PREFAB);
-            rootMenuPrefabs[3] = Resources.Load<GameObject>(BUTTON_MAP_PREFAB);
-            rootMenuPrefabs[4] = Resources.Load<GameObject>(BUTTON_SETTINGS_PREFAB);
+            mainPanel = mainPanelObj.GetComponent<FirstPersonMainPanel>();
 
-            var firstPersonPanelPrefab = Resources.Load<GameObject>(PANEL_PREFAB);
-            var firstPersonPanelObj = GameObject.Instantiate(firstPersonPanelPrefab, Vector3.zero, Quaternion.identity);
-            firstPersonPanelObj.transform.SetParent(canvas.transform, false);
-            firstPersonPanelObj.transform.localPosition = new(-70F, STOP_POS[0], 0F);
+            var chatPanelObj = GameObject.Instantiate(chatPanelPrefab!, Vector3.zero, Quaternion.identity);
+            chatPanelObj.transform.SetParent(canvas.transform, false);
+            chatPanelObj.transform.localPosition = new(70F, STOP_POS[0], 0F);
 
-            firstPersonPanel = firstPersonPanelObj.GetComponent<FirstPersonPanel>();
-
-            var chatPrefab = Resources.Load<GameObject>(PANEL_CHAT);
-            var chatObj = GameObject.Instantiate(chatPrefab, Vector3.zero, Quaternion.identity);
-            chatObj.transform.SetParent(canvas.transform, false);
-            chatObj.transform.localPosition = new(70F, STOP_POS[0], 0F);
-
-            firstPersonChat = chatObj.GetComponent<FirstPersonChat>();
+            chatPanel = chatPanelObj.GetComponent<FirstPersonChatPanel>();
 
             initialzed = true;
         }
@@ -253,7 +229,7 @@ namespace MinecraftClient.UI
             else
                 basePos = ( Mathf.Max(0, openedMenus.Count - 1) * SUB_MENU_OFFSET) * CANVAS_SCALE;
             
-            if (firstPersonChat!.Shown)
+            if (chatPanel!.Shown)
                 basePos -= 190F * CANVAS_SCALE;
 
             if (State == WidgetState.Hide) // Move to the left when fading out
@@ -274,13 +250,13 @@ namespace MinecraftClient.UI
                  // Change panel visibility if necessary
                 if (rootButton.panelSize != Vector2.zero)
                 {
-                    firstPersonPanel!.Show(rootButton.panelSize, rootButton.panelTitle, rootButton.avatarOnPanel);
+                    mainPanel!.Show(rootButton.panelSize, rootButton.panelTitle, rootButton.avatarOnPanel);
 
                     // TODO Display corresponding UI on the panel
                     
                 }
                 else
-                    firstPersonPanel!.Hide();
+                    mainPanel!.Hide();
 
             }
             else // Previously opened menus not closed properly
@@ -315,14 +291,14 @@ namespace MinecraftClient.UI
         {
             EnsureInitialized();
 
-            firstPersonChat!.Show(contact);
+            chatPanel!.Show(contact);
         }
 
         public void HideChatPanel()
         {
             EnsureInitialized();
 
-            firstPersonChat!.Hide();
+            chatPanel!.Hide();
         }
 
         public void ShowGUI()
@@ -363,7 +339,7 @@ namespace MinecraftClient.UI
             State = WidgetState.Hide;
             GUIAnimTime = 0F;
 
-            firstPersonPanel!.Hide();
+            mainPanel!.Hide();
             HideChatPanel();
         }
 

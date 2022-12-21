@@ -6,6 +6,8 @@ namespace MinecraftClient.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class FPGUIScreen : BaseScreen
     {
+        [SerializeField] private GameObject? firstPersonGUIPrefab;
+
         private bool isActive = false;
 
         public override bool IsActive
@@ -47,15 +49,14 @@ namespace MinecraftClient.UI
             game = CornClient.Instance;
 
             // Create and initialize panel if not present
-            if (firstPersonPanel is null)
+            if (firstPersonPanel is null && firstPersonGUIPrefab is not null)
             {
                 var playerCon = game!.PlayerController;
                 var cameraCon = game!.CameraController;
 
                 if (playerCon is not null && cameraCon is not null)
                 {
-                    var firstPersonPanelPrefab = Resources.Load<GameObject>(FirstPersonGUI.FIRST_PERSON_GUI_PREFAB);
-                    var firstPersonPanelObj = GameObject.Instantiate(firstPersonPanelPrefab);
+                    var firstPersonPanelObj = GameObject.Instantiate(firstPersonGUIPrefab);
                     firstPersonPanelObj.transform.SetParent(playerCon.transform, false);
                     firstPersonPanelObj.transform.localPosition = Vector3.up;
 
