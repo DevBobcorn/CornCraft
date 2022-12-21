@@ -265,7 +265,7 @@ namespace MinecraftClient.UI
             }
 
             if (debugInfo)
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.PlayerData.GameMode}\n{game.PlayerController?.GetDebugInfo()}\n{game.WorldRender?.GetDebugInfo()}\n{game.EntityManager?.GetDebugInfo()}\nSvr TPS: {game.GetServerTPS():00.00}\nTime: {StringConvert.TimeOfDay2String(game.CurrentTimeOfDay)} ({game.CurrentTimeOfDay})";
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.PlayerData.GameMode}\n{game.PlayerController?.GetDebugInfo()}\n{game.ChunkRenderManager?.GetDebugInfo()}\n{game.EntityRenderManager?.GetDebugInfo()}\nSvr TPS: {game.GetServerTPS():00.00}\nTime: {StringConvert.TimeOfDay2String(game.CurrentTimeOfDay)} ({game.CurrentTimeOfDay})";
             else
                 debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.PlayerData.GameMode}\nTime: {StringConvert.TimeOfDay2String(game.CurrentTimeOfDay)}";
 

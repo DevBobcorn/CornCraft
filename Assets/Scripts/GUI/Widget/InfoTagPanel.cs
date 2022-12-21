@@ -32,7 +32,7 @@ namespace MinecraftClient.UI
         {
             if (render is not null && !infoTags.ContainsKey(entityId))
             {
-                var infoTagPrefab = GetTagPrefab(EntityManager.GetInfoTagTypeForType(render.Entity.Type));
+                var infoTagPrefab = GetTagPrefab(EntityRenderManager.Instance.GetInfoTagTypeForType(render.Entity.Type));
 
                 if (infoTagPrefab is null)
                     return;
@@ -75,7 +75,7 @@ namespace MinecraftClient.UI
 
         void Update()
         {
-            var entityManager = game!.EntityManager;
+            var entityManager = game!.EntityRenderManager;
 
             // Add or remove info tags
             var tagOwners = infoTags.Keys.ToArray();

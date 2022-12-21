@@ -138,8 +138,8 @@ namespace MinecraftClient
         private bool worldAndMovementsRequested = false;
         private World world = new();
         public World GetWorld() => world;
-        private WorldRender? worldRender;
-        public WorldRender? WorldRender => worldRender;
+        private ChunkRenderManager? chunkRenderManager;
+        public ChunkRenderManager? ChunkRenderManager => chunkRenderManager;
         private CozyWeather? cozyWeather;
         #endregion
 
@@ -155,14 +155,13 @@ namespace MinecraftClient
 
         private PlayerController? playerController;
         private CameraController? cameraController;
-
         public PlayerController? PlayerController => playerController;
         public CameraController? CameraController => cameraController;
         
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         private Dictionary<int, Entity> entities = new();
-        private EntityManager? entityManager;
-        public EntityManager? EntityManager => entityManager!;
+        private EntityRenderManager? entityRenderManager;
+        public EntityRenderManager? EntityRenderManager => entityRenderManager!;
         #endregion
 
         #region Resources management
@@ -379,7 +378,7 @@ namespace MinecraftClient
             {
                 yield return wait;
                 loadTime += 0.1F;
-                holder = GameObject.Find("World Objects")?.GetComponent<SceneObjectHolder>();
+                holder = Component.FindObjectOfType<SceneObjectHolder>();
             }
 
             // Short-circuit logic here
@@ -390,21 +389,17 @@ namespace MinecraftClient
             }
             // Otherwise all the game objects and prefabs should be ready
 
-            // Find screen control
+            // Get screen control
             screenControl = holder!.screenControl!;
             // Push HUD Screen on start
             screenControl.PushScreen(holder.hudScreen!);
 
-            // Create world render
-            var worldRenderObj = new GameObject("World Render");
-            worldRender = worldRenderObj.AddComponent<WorldRender>();
-
+            // Get chunk render manager
+            chunkRenderManager = holder.chunkRenderManager;
+            // Get entity render manager
+            entityRenderManager = holder.entityRenderManager;
             // Get cozy weather object
             cozyWeather = holder.cozyWeather;
-
-            // Create entity manager
-            var entityManagerObj = new GameObject("Entity Manager");
-            entityManager = entityManagerObj.AddComponent<EntityManager>();
 
             // Create player entity
             var playerObj = GameObject.Instantiate(holder.playerPrefab);
@@ -415,12 +410,9 @@ namespace MinecraftClient
             Destroy(loginCamera.gameObject);
             cameraController = holder.cameraController!;
             cameraController.SetTarget(playerController.cameraRef!);
-            cameraController.SetPerspective(playerData.Perspective);
 
             // Destroy the object holder
             Destroy(holder.gameObject);
-
-            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(playerData.Perspective));
 
             try
             {
@@ -581,8 +573,8 @@ namespace MinecraftClient
                 // Called by protocol handler from net read thread
                 // so it is neccessary to run it on Unity thread via Loom
                 () => {
-                    worldRender?.UnloadWorld();
-                    entityManager?.UnloadEntities();
+                    chunkRenderManager?.UnloadWorld();
+                    entityRenderManager?.UnloadEntities();
 
                     screenControl?.ClearScreens();
 
@@ -590,7 +582,7 @@ namespace MinecraftClient
                     Cursor.lockState = CursorLockMode.None;
 
                     // Clear objects in world scene (no need to destroy them manually, tho)
-                    worldRender   = null;
+                    chunkRenderManager   = null;
                     screenControl = null;
                     playerController = null;
                     cameraController = null;
@@ -1329,8 +1321,8 @@ namespace MinecraftClient
             ClearInventories();
 
             Loom.QueueOnMainThread(() => {
-                worldRender?.ReloadWorld();
-                entityManager?.ReloadEntities();
+                chunkRenderManager?.ReloadWorld();
+                entityRenderManager?.ReloadEntities();
             });
 
         }
@@ -1605,7 +1597,7 @@ namespace MinecraftClient
             entities.Add(entity.ID, entity);
 
             Loom.QueueOnMainThread(() => {
-                entityManager?.AddEntity(entity);
+                entityRenderManager?.AddEntity(entity);
             });
 
         }
@@ -1690,7 +1682,7 @@ namespace MinecraftClient
             }
 
             Loom.QueueOnMainThread(() => {
-                entityManager?.RemoveEntities(Entities);
+                entityRenderManager?.RemoveEntities(Entities);
             });
         }
 
@@ -1713,7 +1705,7 @@ namespace MinecraftClient
                 entities[EntityID].Location = location;
 
                 Loom.QueueOnMainThread(() => {
-                    entityManager?.MoveEntity(EntityID, location);
+                    entityRenderManager?.MoveEntity(EntityID, location);
                 });
             }
 
@@ -1730,7 +1722,7 @@ namespace MinecraftClient
                 entities[EntityID].Pitch = pitch;
 
                 Loom.QueueOnMainThread(() => {
-                    entityManager?.RotateEntity(EntityID, yaw, pitch, flag);
+                    entityRenderManager?.RotateEntity(EntityID, yaw, pitch, flag);
                 });
             }
 
@@ -1745,7 +1737,7 @@ namespace MinecraftClient
                 entities[EntityID].HeadYaw = headYaw;
 
                 Loom.QueueOnMainThread(() => {
-                    entityManager?.UpdateEntityHeadYaw(EntityID, headYaw);
+                    entityRenderManager?.UpdateEntityHeadYaw(EntityID, headYaw);
                 });
             }
 
@@ -1767,7 +1759,7 @@ namespace MinecraftClient
                 entities[EntityID].Location = location;
 
                 Loom.QueueOnMainThread(() => {
-                    entityManager?.MoveEntity(EntityID, location);
+                    entityRenderManager?.MoveEntity(EntityID, location);
                 });
             }
         }

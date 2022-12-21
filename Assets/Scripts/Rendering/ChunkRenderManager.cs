@@ -16,19 +16,19 @@ using MinecraftClient.Resource;
 
 namespace MinecraftClient.Rendering
 {
-    public class WorldRender : MonoBehaviour
+    public class ChunkRenderManager : MonoBehaviour
     {
         public const string MOVEMENT_LAYER_NAME = "Movement";
         public const string OBSTACLE_LAYER_NAME = "Obstacle";
         public const string LIQUID_LAYER_NAME   = "Liquid";
 
-        private static WorldRender? instance;
-        public static WorldRender Instance
+        private static ChunkRenderManager? instance;
+        public static ChunkRenderManager Instance
         {
             get {
                 if (instance is null)
                 {
-                    instance = Component.FindObjectOfType<WorldRender>();
+                    instance = Component.FindObjectOfType<ChunkRenderManager>();
                 }
                 
                 return instance;
