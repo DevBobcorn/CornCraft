@@ -31,6 +31,9 @@ https://magicasoft.jp/magica-cloth-install/
 
 
 ■更新履歴
+[v1.12.11]
+修正: Collections 2.xパッケージでエラーが発生する問題を修正しました。
+
 [v1.12.10]
 修正: 多くのMeshClothを利用している場合に頂点法線の計算に誤作動を引き起こす可能性があった問題を修正しました。
 

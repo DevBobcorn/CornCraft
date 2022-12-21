@@ -239,7 +239,7 @@ namespace MagicaCloth
             [Unity.Collections.ReadOnly]
             public NativeArray<GroupData> groupList;
             [Unity.Collections.ReadOnly]
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
             public NativeParallelMultiHashMap<int, int> particleMap;
 #else
             public NativeMultiHashMap<int, int> particleMap;
