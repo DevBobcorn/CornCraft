@@ -153,8 +153,6 @@ namespace MinecraftClient
         public object locationLock = new();
         public Location GetCurrentLocation() => playerData.location;
 
-        public const string PLAYER_PREFAB = "Prefabs/Player/Client Lumine Player Entity";
-
         private PlayerController? playerController;
         private CameraController? cameraController;
 
@@ -361,6 +359,8 @@ namespace MinecraftClient
             var loginCamera = Component.FindObjectOfType<Camera>();
             DontDestroyOnLoad(loginCamera.gameObject);
 
+            loadStateInfo.infoText = "Loading world scene";
+
             // Prepare scene and unity objects
             var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
             op.allowSceneActivation = false;
@@ -371,44 +371,56 @@ namespace MinecraftClient
             // Scene is loaded, activate it
             op.allowSceneActivation = true;
 
-            // Wait a little bit...
-            yield return new WaitForSecondsRealtime(0.5F);
+            // Wait till everything's ready
+            var wait = new WaitForSecondsRealtime(0.1F);
+            var loadTime = 0F;
+            SceneObjectHolder? holder = null;
+            while (holder is null && loadTime <= 3F) // Allow up to 3 seconds to find the object holder
+            {
+                yield return wait;
+                loadTime += 0.1F;
+                holder = GameObject.Find("World Objects")?.GetComponent<SceneObjectHolder>();
+            }
+
+            // Short-circuit logic here
+            if (holder is null || !holder.AllPresent()) // Cancel login and return to login scene
+            {
+                Translations.LogError("error.scene_objects_load_failed");
+                Disconnect();
+            }
+            // Otherwise all the game objects and prefabs should be ready
 
             // Find screen control
-            screenControl = Component.FindObjectOfType<ScreenControl>();
-            var hudScreen = Component.FindObjectOfType<HUDScreen>();
+            screenControl = holder!.screenControl!;
             // Push HUD Screen on start
-            screenControl.PushScreen(hudScreen);
+            screenControl.PushScreen(holder.hudScreen!);
 
             // Create world render
             var worldRenderObj = new GameObject("World Render");
             worldRender = worldRenderObj.AddComponent<WorldRender>();
 
             // Get cozy weather object
-            var cozyWeatherObj = GameObject.Find("Cozy Weather");
-            cozyWeather = cozyWeatherObj?.GetComponent<CozyWeather>();
+            cozyWeather = holder.cozyWeather;
 
             // Create entity manager
             var entityManagerObj = new GameObject("Entity Manager");
             entityManager = entityManagerObj.AddComponent<EntityManager>();
 
             // Create player entity
-            var playerPrefab = Resources.Load<GameObject>(PLAYER_PREFAB);
-            var playerObj    = GameObject.Instantiate(playerPrefab);
-            playerObj.name = $"{session.PlayerName} (Player)";
+            var playerObj = GameObject.Instantiate(holder.playerPrefab);
+            playerObj!.name = $"{session.PlayerName} (Player)";
             playerController = playerObj.GetComponent<PlayerController>();
 
             // Destroy previous camera and get camera for player
             Destroy(loginCamera.gameObject);
-            var cameraObj = GameObject.Find("Camera Controller");
-            cameraController = cameraObj.GetComponent<CameraController>();
+            cameraController = holder.cameraController!;
             cameraController.SetTarget(playerController.cameraRef!);
             cameraController.SetPerspective(playerData.Perspective);
 
-            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(playerData.Perspective));
+            // Destroy the object holder
+            Destroy(holder.gameObject);
 
-            // Wait a little bit...
-            yield return new WaitForSecondsRealtime(0.3F);
+            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(playerData.Perspective));
 
             try
             {
@@ -429,15 +441,6 @@ namespace MinecraftClient
                 {
                     Translations.Notify("mcc.joined", CornCraft.internalCmdChar);
                     connected = true;
-
-                    // Initialization after entering world scene
-                    // Set stamina to max value
-                    playerController.Status.StaminaLeft = playerController.playerAbility!.MaxStamina;
-                    // And broadcast current stamina
-                    EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(playerController.Status.StaminaLeft, true));
-                    // Initialize health value
-                    EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
-                    playerData.MaxHealth = 20F;
                 }
                 else
                 {

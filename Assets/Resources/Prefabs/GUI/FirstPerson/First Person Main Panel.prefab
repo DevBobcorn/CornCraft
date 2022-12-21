@@ -1547,7 +1547,7 @@ GameObject:
   - component: {fileID: 1527668365215629500}
   - component: {fileID: 7875991839659601976}
   m_Layer: 5
-  m_Name: First Person Panel
+  m_Name: First Person Main Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

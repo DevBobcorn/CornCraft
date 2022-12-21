@@ -2440,6 +2440,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5352454210288882761}
     m_Modifications:
+    - target: {fileID: 943686800439001758, guid: 1d4cc39ff9f553e4db4f09cd45505306, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[1].time
+      value: 12.049988
+      objectReference: {fileID: 0}
+    - target: {fileID: 943686800439001758, guid: 1d4cc39ff9f553e4db4f09cd45505306, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[0].inSlope
+      value: -0.05809135
+      objectReference: {fileID: 0}
+    - target: {fileID: 943686800439001758, guid: 1d4cc39ff9f553e4db4f09cd45505306, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[1].inSlope
+      value: -0.05785579
+      objectReference: {fileID: 0}
+    - target: {fileID: 943686800439001758, guid: 1d4cc39ff9f553e4db4f09cd45505306, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[0].outSlope
+      value: -0.05809135
+      objectReference: {fileID: 0}
+    - target: {fileID: 943686800439001758, guid: 1d4cc39ff9f553e4db4f09cd45505306, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[1].inWeight
+      value: 0.16182485
+      objectReference: {fileID: 0}
+    - target: {fileID: 943686800439001758, guid: 1d4cc39ff9f553e4db4f09cd45505306, type: 3}
+      propertyPath: tagScaleCurve.m_Curve.Array.data[1].outSlope
+      value: -0.05785579
+      objectReference: {fileID: 0}
     - target: {fileID: 1168844513137419734, guid: 1d4cc39ff9f553e4db4f09cd45505306, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
