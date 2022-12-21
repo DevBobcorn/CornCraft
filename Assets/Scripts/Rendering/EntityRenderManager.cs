@@ -45,6 +45,7 @@ namespace MinecraftClient.Rendering
         [SerializeField] private GameObject? cowPrefab;
         [SerializeField] private GameObject? mooshroomPrefab;
         [SerializeField] private GameObject? sheepPrefab;
+        [SerializeField] private GameObject? itemPrefab;
 
         private CornClient? game;
 
@@ -181,7 +182,8 @@ namespace MinecraftClient.Rendering
             // Neutral Mobs
             // ...
             // Miscellaneous Entities
-            //...
+            entityPrefabs.Add(EntityType.Item,             itemPrefab);
+            // ...
 
             // Register entity info tag types ===========================================
             infoTagTypes.Add(EntityType.Skeleton,         EntityInfoTagType.Monster);
@@ -191,12 +193,14 @@ namespace MinecraftClient.Rendering
             infoTagTypes.Add(EntityType.Husk,             EntityInfoTagType.Monster);
             infoTagTypes.Add(EntityType.Drowned,          EntityInfoTagType.Monster);
             infoTagTypes.Add(EntityType.Creeper,          EntityInfoTagType.Monster);
+            // ...
             // Passive Mobs
             infoTagTypes.Add(EntityType.Villager, EntityInfoTagType.NPC);
+            // ...
             // Neutral Mobs
             // ...
             // Miscellaneous Entities
-            //...
+            // ...
 
             foreach (var prefabItem in entityPrefabs)
             {

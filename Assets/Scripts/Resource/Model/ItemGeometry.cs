@@ -14,17 +14,19 @@ namespace MinecraftClient.Resource
         public readonly List<float3> uvs       = new();
         public readonly List<int> tintIndices  = new();
 
-        public ItemGeometry(JsonModel model)
+        public readonly bool isGenerated = false;
+
+        public ItemGeometry(JsonModel model, bool generated)
         {
             // Build things up!
             foreach (var elem in model.Elements)
-            {
                 AppendElement(model, elem);
-            }
 
             vertexArr = verticies.ToArray();
             txuvArr = uvs.ToArray();
             tintArr = tintIndices.ToArray();
+
+            isGenerated = generated;
         }
 
         private float3[] vertexArr = { };
