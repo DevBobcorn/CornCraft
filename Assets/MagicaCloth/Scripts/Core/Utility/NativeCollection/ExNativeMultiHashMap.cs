@@ -13,13 +13,13 @@ namespace MagicaCloth
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     public class ExNativeMultiHashMap<TKey, TValue>
-        where TKey : struct, IEquatable<TKey>
-        where TValue : struct
+        where TKey : unmanaged, IEquatable<TKey>
+        where TValue : unmanaged
     {
         /// <summary>
         /// ネイティブハッシュマップ
         /// </summary>
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
         NativeParallelMultiHashMap<TKey, TValue> nativeMultiHashMap;
 #else
         NativeMultiHashMap<TKey, TValue> nativeMultiHashMap;
@@ -39,7 +39,7 @@ namespace MagicaCloth
         //=========================================================================================
         public ExNativeMultiHashMap()
         {
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
             nativeMultiHashMap = new NativeParallelMultiHashMap<TKey, TValue>(1, Allocator.Persistent);
 #else
             nativeMultiHashMap = new NativeMultiHashMap<TKey, TValue>(1, Allocator.Persistent);
@@ -100,7 +100,7 @@ namespace MagicaCloth
         public void Remove(TKey key, TValue value)
         {
             TValue data;
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
             NativeParallelMultiHashMapIterator<TKey> iterator;
 #else
             NativeMultiHashMapIterator<TKey> iterator;
@@ -138,7 +138,7 @@ namespace MagicaCloth
             foreach (TKey key in useKeyDict.Keys)
             {
                 TValue data;
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
                 NativeParallelMultiHashMapIterator<TKey> iterator;
 #else
                 NativeMultiHashMapIterator<TKey> iterator;
@@ -178,7 +178,7 @@ namespace MagicaCloth
             foreach (var key in useKeyDict.Keys)
             {
                 TValue data;
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
                 NativeParallelMultiHashMapIterator<TKey> iterator;
 #else
                 NativeMultiHashMapIterator<TKey> iterator;
@@ -210,7 +210,7 @@ namespace MagicaCloth
             foreach (var key in useKeyDict.Keys)
             {
                 TValue data;
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
                 NativeParallelMultiHashMapIterator<TKey> iterator;
 #else
                 NativeMultiHashMapIterator<TKey> iterator;
@@ -234,7 +234,7 @@ namespace MagicaCloth
         public void Process(TKey key, Action<TValue> act)
         {
             TValue data;
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
             NativeParallelMultiHashMapIterator<TKey> iterator;
 #else
             NativeMultiHashMapIterator<TKey> iterator;
@@ -258,7 +258,7 @@ namespace MagicaCloth
         public bool Contains(TKey key, TValue value)
         {
             TValue data;
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
             NativeParallelMultiHashMapIterator<TKey> iterator;
 #else
             NativeMultiHashMapIterator<TKey> iterator;
@@ -326,7 +326,7 @@ namespace MagicaCloth
         /// 内部のNativeMultiHashMapを取得する
         /// </summary>
         /// <returns></returns>
-#if MAGICACLOTH_USE_COLLECTIONS_130
+#if MAGICACLOTH_USE_COLLECTIONS_130 && !MAGICACLOTH_USE_COLLECTIONS_200
         public NativeParallelMultiHashMap<TKey, TValue> Map
 #else
         public NativeMultiHashMap<TKey, TValue> Map

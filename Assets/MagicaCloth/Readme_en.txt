@@ -32,6 +32,9 @@ Then read the [System Overview] and proceed with the [Setup Guide] for a better 
 
 
 ### Release Notes
+[v1.12.11]
+Fixed: Fixed an issue that caused an error with the Collections 2.x package.
+
 [v1.12.10]
 Fixed: Fixed an issue that could cause malfunctions in calculating vertex normals when using many MeshCloths.
 
