@@ -78,6 +78,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   infoAnchor: {fileID: 4411062541765167136}
+  visual: {fileID: 9106818048326541777}
   head: {fileID: 9033170414677758884}
   cycleTime: 1
   legAngle: 45

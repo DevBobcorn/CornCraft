@@ -83,7 +83,7 @@ namespace MinecraftClient.Rendering
             // Find skin and change materials
             if (nameLower is not null && SkinManager.SkinMaterials.ContainsKey(nameLower))
             {
-                var visualObj = transform.Find("Visual").gameObject;
+                var visualObj = visual!.gameObject;
 
                 var renderers = visualObj.GetComponentsInChildren<SkinnedMeshRenderer>();
                 var mat = SkinManager.SkinMaterials[nameLower];
