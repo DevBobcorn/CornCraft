@@ -14,7 +14,7 @@ namespace MinecraftClient.Rendering
         protected float lastPitch = 0F, targetPitch = 0F;
         protected Vector3 currentVelocity = Vector3.zero;
 
-        [SerializeField] protected Transform? infoAnchor;
+        [SerializeField] protected Transform? infoAnchor, visual;
         public Transform InfoAnchor => infoAnchor is null ? transform : infoAnchor;
 
         // A number made from the entity's numeral id, used in animations to prevent
@@ -67,7 +67,11 @@ namespace MinecraftClient.Rendering
 
         protected virtual void Initialize()
         {
-            
+            if (visual is null)
+            {
+                Debug.LogWarning("Visual transform for entity render not assigned!");
+                visual = transform;
+            }
         }
 
         public void UpdateTransform(float tickMilSec)

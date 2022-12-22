@@ -302,6 +302,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   infoAnchor: {fileID: 1002350574447168253}
+  visual: {fileID: 4934986444833276686}
 --- !u!1 &2716930875251792988
 GameObject:
   m_ObjectHideFlags: 0
