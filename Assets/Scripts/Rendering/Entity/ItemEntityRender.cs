@@ -125,16 +125,22 @@ namespace MinecraftClient.Rendering
                 if (itemGeometry.isGenerated) // Put it onto the ground, instead of floating in the air
                 {
                     var meshTransform = itemMeshRenderer.transform;
-                    meshTransform.localEulerAngles = new(0F, (entity!.ID * 350F) % 360F, 90F);
+                    meshTransform.localEulerAngles = new(0F, 0F, 90F);
 
                     var offset = -0.5F + (packManager.GeneratedItemModelThickness / 32F);
-                    meshTransform.localPosition = new(0F, offset, 0F);
+                    meshTransform.localPosition = new(0.5F, offset, -0.5F);
+
+                    visual!.localEulerAngles = new(0F, (entity!.ID * 71F) % 360F, 0F);
                 }
                 else // Just apply random rotation
                 {
                     var meshTransform = itemMeshRenderer.transform;
                     meshTransform.localEulerAngles = new(0F, (entity!.ID * 350F) % 360F, 0F);
+
+                    meshTransform.localPosition = new(0.5F, 0F, -0.5F);
                 }
+
+                
             }
             else
             {
