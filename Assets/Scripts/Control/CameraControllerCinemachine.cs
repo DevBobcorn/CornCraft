@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 using Cinemachine;
-using MinecraftClient.Event;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
 {
@@ -76,6 +76,9 @@ namespace MinecraftClient.Control
                 DisableFixedMode();
             else
                 EnableFixedMode();
+            
+            game!.PlayerData.Perspective = Perspective.FirstPerson;
+            SetPerspective(Perspective.FirstPerson);
         }
 
         void Update() => ManagedUpdate(Time.deltaTime);

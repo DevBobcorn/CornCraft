@@ -228,8 +228,6 @@ namespace MinecraftClient
                 playerData.Perspective = Perspective.FirstPerson;
             
             cameraController?.SetPerspective(playerData.Perspective);
-
-            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(playerData.Perspective));
         }
 
         #endregion
