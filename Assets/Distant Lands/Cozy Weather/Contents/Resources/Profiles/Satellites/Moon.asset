@@ -20,14 +20,14 @@ MonoBehaviour:
   distance: 1
   useLight: 1
   flare: {fileID: 12100000, guid: 7f27290990cd1754c94eba89ca2dafa8, type: 2}
-  lightColorMultiplier: {r: 0.4745906, g: 0.6207166, b: 0.745283, a: 1}
+  lightColorMultiplier: {r: 0.67358494, g: 0.8486191, b: 1, a: 1}
   castShadows: 2
   orbitOffset: 90
   initialRotation: {x: 0, y: 0, z: 0}
   satelliteRotateSpeed: 0
-  satelliteRotateAxis: {x: 1, y: 1, z: 0}
-  satelliteDirection: 0
+  satelliteRotateAxis: {x: 0, y: 1, z: 0}
+  satelliteDirection: 180
   satelliteRotation: 209058.1
   satellitePitch: 0
   changedLastFrame: 0
-  open: 0
+  open: 1
