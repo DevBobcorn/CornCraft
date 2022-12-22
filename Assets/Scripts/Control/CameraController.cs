@@ -1,5 +1,6 @@
 #nullable enable
 using UnityEngine;
+using MinecraftClient.Event;
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
@@ -25,6 +26,8 @@ namespace MinecraftClient.Control
                     DisableFixedMode();
                     break;
             }
+
+            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(perspective));
         }
 
         public virtual Ray? GetViewportCenterRay()
