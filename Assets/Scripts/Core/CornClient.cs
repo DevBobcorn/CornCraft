@@ -1710,7 +1710,7 @@ namespace MinecraftClient
 
         }
 
-        public void OnEntityRotation(int EntityID, float yaw, float pitch, bool onGround, int flag)
+        public void OnEntityRotation(int EntityID, float yaw, float pitch, bool onGround)
         {
             if (entities.ContainsKey(EntityID))
             {
@@ -1721,7 +1721,7 @@ namespace MinecraftClient
                 entities[EntityID].Pitch = pitch;
 
                 Loom.QueueOnMainThread(() => {
-                    entityRenderManager?.RotateEntityRender(EntityID, yaw, pitch, flag);
+                    entityRenderManager?.RotateEntityRender(EntityID, yaw, pitch);
                 });
             }
 
@@ -1736,7 +1736,7 @@ namespace MinecraftClient
                 entities[EntityID].HeadYaw = headYaw;
 
                 Loom.QueueOnMainThread(() => {
-                    entityRenderManager?.UpdateEntityRenderHeadYaw(EntityID, headYaw);
+                    entityRenderManager?.RotateEntityRenderHead(EntityID, headYaw);
                 });
             }
 
