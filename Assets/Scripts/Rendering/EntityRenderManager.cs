@@ -46,6 +46,7 @@ namespace MinecraftClient.Rendering
         [SerializeField] private GameObject? mooshroomPrefab;
         [SerializeField] private GameObject? sheepPrefab;
         [SerializeField] private GameObject? itemPrefab;
+        [SerializeField] private GameObject? experienceOrbPrefab;
 
         private CornClient? game;
 
@@ -56,17 +57,17 @@ namespace MinecraftClient.Rendering
         public EntityInfoTagType GetInfoTagTypeForType(EntityType type) =>
                 infoTagTypes.GetValueOrDefault(type, EntityInfoTagType.None);
 
-        private readonly Dictionary<int, EntityRender> entities = new();
+        private readonly Dictionary<int, EntityRender> entityRenders = new();
         private readonly HashSet<int> nearbyEntities = new();
 
         private const float NEARBY_THERESHOLD_INNER = 100F;
         private const float NEARBY_THERESHOLD_OUTER = 128F;
 
-        public string GetDebugInfo() => $"Ent: {entities.Count}";
+        public string GetDebugInfo() => $"Ent: {entityRenders.Count}";
 
-        public void AddEntity(Entity entity)
+        public void AddEntityRender(Entity entity)
         {
-            if (entities.ContainsKey(entity.ID))
+            if (entityRenders.ContainsKey(entity.ID))
                 return;
 
             GameObject? entityPrefab;
@@ -84,21 +85,21 @@ namespace MinecraftClient.Rendering
                 var entityRender = entityObj!.GetComponent<EntityRender>();
 
                 entityRender.Entity = entity;
-                entities.Add(entity.ID, entityRender);
+                entityRenders.Add(entity.ID, entityRender);
 
                 entityObj.name = $"{entity.ID} {entity.Type}";
                 entityObj.transform.parent = transform;
             }
         }
 
-        public void RemoveEntities(int[] entityIds)
+        public void RemoveEntityRenders(int[] entityIds)
         {
             foreach (var id in entityIds)
             {
-                if (entities.ContainsKey(id))
+                if (entityRenders.ContainsKey(id))
                 {
-                    entities[id].Unload();
-                    entities.Remove(id);
+                    entityRenders[id].Unload();
+                    entityRenders.Remove(id);
                 }
 
                 if (nearbyEntities.Contains(id))
@@ -107,51 +108,51 @@ namespace MinecraftClient.Rendering
 
         }
 
-        public void MoveEntity(int entityId, Location location)
+        public void MoveEntityRender(int entityId, Location location)
         {
-            if (entities.ContainsKey(entityId))
-                entities[entityId].MoveTo(CoordConvert.MC2Unity(location));
+            if (entityRenders.ContainsKey(entityId))
+                entityRenders[entityId].MoveTo(CoordConvert.MC2Unity(location));
         }
 
-        public void RotateEntity(int entityId, float yaw, float pitch, int flag)
+        public void RotateEntityRender(int entityId, float yaw, float pitch, int flag)
         {
-            if (entities.ContainsKey(entityId))
-                entities[entityId].RotateTo(yaw, pitch);
+            if (entityRenders.ContainsKey(entityId))
+                entityRenders[entityId].RotateTo(yaw, pitch);
         }
 
-        public void UpdateEntityHeadYaw(int entityId, float headYaw)
+        public void UpdateEntityRenderHeadYaw(int entityId, float headYaw)
         {
-            if (entities.ContainsKey(entityId))
-                entities[entityId].RotateHeadTo(headYaw);
+            if (entityRenders.ContainsKey(entityId))
+                entityRenders[entityId].RotateHeadTo(headYaw);
         }
 
-        public void UnloadEntities()
+        public void UnloadEntityRenders()
         {
-            entities.Clear();
+            entityRenders.Clear();
             nearbyEntities.Clear();
 
             // Reset instance
             instance = null;
         }
 
-        public void ReloadEntities()
+        public void ReloadEntityRenders()
         {
-            var ids = entities.Keys.ToArray();
+            var ids = entityRenders.Keys.ToArray();
 
             foreach (var id in ids)
-                entities[id].Unload();
+                entityRenders[id].Unload();
 
-            entities.Clear();
+            entityRenders.Clear();
             nearbyEntities.Clear();
 
         }
 
         public HashSet<int> GetNearbyEntities() => nearbyEntities;
 
-        public EntityRender? GetEntity(int entityId)
+        public EntityRender? GetEntityRender(int entityId)
         {
-            if (entities.ContainsKey(entityId))
-                return entities[entityId];
+            if (entityRenders.ContainsKey(entityId))
+                return entityRenders[entityId];
             
             return null;
         }
@@ -183,6 +184,8 @@ namespace MinecraftClient.Rendering
             // ...
             // Miscellaneous Entities
             entityPrefabs.Add(EntityType.Item,             itemPrefab);
+            entityPrefabs.Add(EntityType.ExperienceOrb,    experienceOrbPrefab);
+            //entityPrefabs.Add(EntityType.ExperienceBottle, experienceOrbPrefab);
             // ...
 
             // Register entity info tag types ===========================================
@@ -195,10 +198,12 @@ namespace MinecraftClient.Rendering
             infoTagTypes.Add(EntityType.Creeper,          EntityInfoTagType.Monster);
             // ...
             // Passive Mobs
-            infoTagTypes.Add(EntityType.Villager, EntityInfoTagType.NPC);
+            infoTagTypes.Add(EntityType.Villager,         EntityInfoTagType.NPC);
             // ...
             // Neutral Mobs
             // ...
+            // Player Entities
+            infoTagTypes.Add(EntityType.Player,           EntityInfoTagType.NPC);
             // Miscellaneous Entities
             // ...
 
@@ -215,7 +220,7 @@ namespace MinecraftClient.Rendering
         {
             var playerPos = game!.PlayerController?.transform.position;
 
-            foreach (var render in entities.Values)
+            foreach (var render in entityRenders.Values)
             {
                 // Call managed update
                 render.ManagedUpdate(game!.GetTickMilSec());

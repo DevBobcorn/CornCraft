@@ -117,6 +117,7 @@ MonoBehaviour:
   playerAbility: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
   cameraRef: {fileID: 2122183053340044964}
   visualTransform: {fileID: 9216438237624256684}
+  physicMaterial: {fileID: 0}
 --- !u!114 &9066864819563880320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,6 +159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   infoAnchor: {fileID: 8085631553305989884}
+  visual: {fileID: 9216438237624256684}
   usePlayerSkin: 1
 --- !u!114 &-5358038262404015315
 MonoBehaviour:

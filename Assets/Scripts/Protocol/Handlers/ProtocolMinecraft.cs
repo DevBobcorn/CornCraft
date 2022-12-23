@@ -1160,6 +1160,16 @@ namespace MinecraftClient.Protocol.Handlers
                             handler.OnSpawnPlayer(entityId, UUID, location, yaw, pitch);
                             break;
                         }
+                    case PacketTypesIn.SpawnExperienceOrb:
+                        {
+                            int entityId = dataTypes.ReadNextVarInt(packetData);
+                            double x = dataTypes.ReadNextDouble(packetData);
+                            double y = dataTypes.ReadNextDouble(packetData);
+                            double z = dataTypes.ReadNextDouble(packetData);
+                            dataTypes.ReadNextShort(packetData); // TODO Use this value
+                            handler.OnSpawnEntity(new(entityId, EntityType.ExperienceOrb, new(x, y, z), 0, 0, 0, 0));
+                            break;
+                        }
                     case PacketTypesIn.EntityEffect:
                         {
                             int entityId = dataTypes.ReadNextVarInt(packetData);

@@ -130,7 +130,7 @@ namespace MinecraftClient.Mapping
         /// <param name="ID">Entity ID</param>
         /// <param name="type">Entity Type Enum</param>
         /// <param name="location">Entity location</param>
-        public Entity(int ID, EntityType type, Location location, byte yaw, byte pitch, int objectData)
+        public Entity(int ID, EntityType type, Location location, byte yaw, byte pitch, byte headYaw, int objectData)
         {
             this.ID = ID;
             this.Type = type;
@@ -141,6 +141,7 @@ namespace MinecraftClient.Mapping
             this.Item = new ItemStack(Mapping.Item.AIR_ITEM, 0, null);
             this.Yaw = AngleConvert.MC2Unity(yaw);
             this.Pitch = AngleConvert.MC2Unity(pitch);
+            this.HeadYaw = AngleConvert.MC2Unity(headYaw);
             this.ObjectData = objectData;
         }
 
