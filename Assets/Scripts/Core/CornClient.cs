@@ -573,7 +573,7 @@ namespace MinecraftClient
                 // so it is neccessary to run it on Unity thread via Loom
                 () => {
                     chunkRenderManager?.UnloadWorld();
-                    entityRenderManager?.UnloadEntities();
+                    entityRenderManager?.UnloadEntityRenders();
 
                     screenControl?.ClearScreens();
 
@@ -1321,7 +1321,7 @@ namespace MinecraftClient
 
             Loom.QueueOnMainThread(() => {
                 chunkRenderManager?.ReloadWorld();
-                entityRenderManager?.ReloadEntities();
+                entityRenderManager?.ReloadEntityRenders();
             });
 
         }
@@ -1596,7 +1596,7 @@ namespace MinecraftClient
             entities.Add(entity.ID, entity);
 
             Loom.QueueOnMainThread(() => {
-                entityRenderManager?.AddEntity(entity);
+                entityRenderManager?.AddEntityRender(entity);
             });
 
         }
@@ -1681,7 +1681,7 @@ namespace MinecraftClient
             }
 
             Loom.QueueOnMainThread(() => {
-                entityRenderManager?.RemoveEntities(Entities);
+                entityRenderManager?.RemoveEntityRenders(Entities);
             });
         }
 
@@ -1704,7 +1704,7 @@ namespace MinecraftClient
                 entities[EntityID].Location = location;
 
                 Loom.QueueOnMainThread(() => {
-                    entityRenderManager?.MoveEntity(EntityID, location);
+                    entityRenderManager?.MoveEntityRender(EntityID, location);
                 });
             }
 
@@ -1721,7 +1721,7 @@ namespace MinecraftClient
                 entities[EntityID].Pitch = pitch;
 
                 Loom.QueueOnMainThread(() => {
-                    entityRenderManager?.RotateEntity(EntityID, yaw, pitch, flag);
+                    entityRenderManager?.RotateEntityRender(EntityID, yaw, pitch, flag);
                 });
             }
 
@@ -1736,7 +1736,7 @@ namespace MinecraftClient
                 entities[EntityID].HeadYaw = headYaw;
 
                 Loom.QueueOnMainThread(() => {
-                    entityRenderManager?.UpdateEntityHeadYaw(EntityID, headYaw);
+                    entityRenderManager?.UpdateEntityRenderHeadYaw(EntityID, headYaw);
                 });
             }
 
@@ -1758,7 +1758,7 @@ namespace MinecraftClient
                 entities[EntityID].Location = location;
 
                 Loom.QueueOnMainThread(() => {
-                    entityRenderManager?.MoveEntity(EntityID, location);
+                    entityRenderManager?.MoveEntityRender(EntityID, location);
                 });
             }
         }

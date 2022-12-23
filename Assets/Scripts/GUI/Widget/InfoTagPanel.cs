@@ -93,7 +93,7 @@ namespace MinecraftClient.UI
 
                 for (int i = 0;i < validTagOwners.Count;i++)
                 {
-                    AddTagInfo(validTagOwners[i], entityManager!.GetEntity(validTagOwners[i]));
+                    AddTagInfo(validTagOwners[i], entityManager!.GetEntityRender(validTagOwners[i]));
                 }
             }
 
@@ -105,7 +105,7 @@ namespace MinecraftClient.UI
 
                 foreach (var pair in infoTags)
                 {
-                    var entity = entityManager!.GetEntity(pair.Key);
+                    var entity = entityManager!.GetEntityRender(pair.Key);
 
                     if (entity is null) // This entity is no longer there, also remove its tag
                     {

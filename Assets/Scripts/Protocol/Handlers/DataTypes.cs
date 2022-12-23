@@ -397,9 +397,7 @@ namespace MinecraftClient.Protocol.Handlers
         public Entity ReadNextEntity(Queue<byte> cache, EntityPalette entityPalette, bool living)
         {
             int entityID = ReadNextVarInt(cache);
-            Guid entityUUID = Guid.Empty;
-
-            entityUUID = ReadNextUUID(cache); // MC 1.8+
+            Guid entityUUID = ReadNextUUID(cache); // MC 1.8+
 
             EntityType entityType;
             // Entity type data type change from byte to varint after 1.14
@@ -410,20 +408,24 @@ namespace MinecraftClient.Protocol.Handlers
             Double entityZ = ReadNextDouble(cache);
             byte entityPitch = ReadNextByte(cache);
             byte entityYaw = ReadNextByte(cache);
+            byte entityHeadYaw = entityYaw;
 
             int metadata = -1;
+
             if (living)
             {
+                /* TODO Check the meaning of this byte value
                 if (protocolversion == ProtocolMinecraft.MC_1_18_2_Version)
                     entityYaw = ReadNextByte(cache);
                 else
-                    entityPitch = ReadNextByte(cache);
+                    entityPitch = ReadNextByte(cache); */
+                entityHeadYaw = ReadNextByte(cache);
             }
             else
             {
                 if (protocolversion >= ProtocolMinecraft.MC_1_19_Version)
                 {
-                    entityYaw = ReadNextByte(cache);
+                    entityHeadYaw = ReadNextByte(cache);
                     metadata = ReadNextVarInt(cache);
                 }
                 else
@@ -434,7 +436,7 @@ namespace MinecraftClient.Protocol.Handlers
             short velocityY = ReadNextShort(cache);
             short velocityZ = ReadNextShort(cache);
 
-            return new Entity(entityID, entityType, new Location(entityX, entityY, entityZ), entityYaw, entityPitch, metadata);
+            return new Entity(entityID, entityType, new Location(entityX, entityY, entityZ), entityYaw, entityPitch, entityHeadYaw, metadata);
         }
 
         /// <summary>
