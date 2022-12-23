@@ -194,7 +194,7 @@ namespace MinecraftClient.Protocol
         /// <param name="onGround">TRUE if on ground</param>
         void OnEntityPosition(int entityId, Double dx, Double dy, Double dz, bool onGround);
 
-        void OnEntityRotation(int entityId, float yaw, float pitch, bool onGround, int flag);
+        void OnEntityRotation(int entityId, float yaw, float pitch, bool onGround);
 
         void OnEntityHeadLook(int entityId, float headYaw);
 

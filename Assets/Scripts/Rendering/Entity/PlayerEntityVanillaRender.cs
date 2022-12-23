@@ -25,7 +25,7 @@ namespace MinecraftClient.Rendering
 
         public void UpdateEntity(Entity entity) => base.Entity = entity;
 
-        public void UpdateVelocity(Vector3 velocity) => SetCurrentVelocity(velocity);
+        public void UpdateVelocity(Vector3 velocity) => SetVisualMovementVelocity(velocity);
 
         public void UpdateVisual(float tickMilSec) => UpdateAnimation(tickMilSec);
 

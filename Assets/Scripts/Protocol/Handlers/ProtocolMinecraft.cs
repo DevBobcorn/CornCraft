@@ -1232,7 +1232,7 @@ namespace MinecraftClient.Protocol.Handlers
                             deltaY = deltaY / (128 * 32);
                             deltaZ = deltaZ / (128 * 32);
                             handler.OnEntityPosition(entityId, deltaX, deltaY, deltaZ, onGround);
-                            handler.OnEntityRotation(entityId, yaw, pitch, onGround, 1);
+                            handler.OnEntityRotation(entityId, yaw, pitch, onGround);
                             break;
                         }
                     case PacketTypesIn.EntityRotation:
@@ -1241,7 +1241,7 @@ namespace MinecraftClient.Protocol.Handlers
                             byte yaw = dataTypes.ReadNextByte(packetData);
                             byte pitch = dataTypes.ReadNextByte(packetData);
                             bool onGround = dataTypes.ReadNextBool(packetData);
-                            handler.OnEntityRotation(entityId, yaw, pitch, onGround, 0);
+                            handler.OnEntityRotation(entityId, yaw, pitch, onGround);
                             break;
                         }
                     case PacketTypesIn.EntityHeadLook:

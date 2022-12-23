@@ -45,9 +45,9 @@ namespace MinecraftClient.Rendering
 
         public void UpdateEntity(Entity entity) => base.Entity = entity;
 
-        public override void SetCurrentVelocity(Vector3 velocity)
+        public override void SetVisualMovementVelocity(Vector3 velocity)
         {
-            base.SetCurrentVelocity(velocity);
+            base.SetVisualMovementVelocity(velocity);
 
             if (animatorPresent)
             {
@@ -56,7 +56,7 @@ namespace MinecraftClient.Rendering
             }
         }
 
-        public void UpdateVelocity(Vector3 velocity) => SetCurrentVelocity(velocity);
+        public void UpdateVelocity(Vector3 velocity) => SetVisualMovementVelocity(velocity);
 
         public void UpdateStateMachine(PlayerStatus info)
         {

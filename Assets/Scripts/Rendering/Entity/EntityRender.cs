@@ -7,12 +7,12 @@ namespace MinecraftClient.Rendering
 {
     public class EntityRender : MonoBehaviour
     {
-        private const float MOVE_THRESHOLD = 5F * 5F; // Treat as teleport if move more than 5 meters at once
+        protected const float MOVE_THRESHOLD = 5F * 5F; // Treat as teleport if move more than 5 meters at once
         protected Vector3? lastPosition = null, targetPosition = null;
         protected float lastYaw = 0F, targetYaw = 0F;
         protected float lastHeadYaw = 0F, targetHeadYaw = 0F;
         protected float lastPitch = 0F, targetPitch = 0F;
-        protected Vector3 currentVelocity = Vector3.zero;
+        protected Vector3 visualMovementVelocity = Vector3.zero;
 
         [SerializeField] protected Transform? infoAnchor, visual;
         public Transform InfoAnchor => infoAnchor is null ? transform : infoAnchor;
@@ -74,7 +74,7 @@ namespace MinecraftClient.Rendering
             }
         }
 
-        public void UpdateTransform(float tickMilSec)
+        public virtual void UpdateTransform(float tickMilSec)
         {
             // Update position
             if (lastPosition is not null && targetPosition is not null)
@@ -82,7 +82,7 @@ namespace MinecraftClient.Rendering
                 if ((targetPosition.Value - transform.position).sqrMagnitude > MOVE_THRESHOLD) // Treat as teleport
                     transform.position = targetPosition.Value;
                 else // Smoothly move to current position
-                    transform.position = Vector3.SmoothDamp(transform.position, targetPosition.Value, ref currentVelocity, tickMilSec);
+                    transform.position = Vector3.SmoothDamp(transform.position, targetPosition.Value, ref visualMovementVelocity, tickMilSec);
 
             }
 
@@ -101,7 +101,7 @@ namespace MinecraftClient.Rendering
                 lastHeadYaw = Mathf.MoveTowardsAngle(lastHeadYaw, targetHeadYaw, Time.deltaTime * 150F);
             else
             {
-                if (currentVelocity.magnitude < 0.1F)
+                if (visualMovementVelocity.magnitude < 0.1F)
                     targetYaw = targetHeadYaw;
             }
             
@@ -113,10 +113,10 @@ namespace MinecraftClient.Rendering
 
         }
 
-        public virtual void SetCurrentVelocity(Vector3 velocity)
+        public virtual void SetVisualMovementVelocity(Vector3 velocity)
         {
             velocity.y = 0; // Ignore y velocity by default
-            currentVelocity = velocity;
+            visualMovementVelocity = velocity;
         }
 
         public virtual void UpdateAnimation(float tickMilSec) { }

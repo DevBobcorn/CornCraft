@@ -46,6 +46,7 @@ namespace MinecraftClient.Rendering
         [SerializeField] private GameObject? mooshroomPrefab;
         [SerializeField] private GameObject? sheepPrefab;
         [SerializeField] private GameObject? itemPrefab;
+        [SerializeField] private GameObject? arrowPrefab;
         [SerializeField] private GameObject? experienceOrbPrefab;
 
         private CornClient? game;
@@ -114,13 +115,13 @@ namespace MinecraftClient.Rendering
                 entityRenders[entityId].MoveTo(CoordConvert.MC2Unity(location));
         }
 
-        public void RotateEntityRender(int entityId, float yaw, float pitch, int flag)
+        public void RotateEntityRender(int entityId, float yaw, float pitch)
         {
             if (entityRenders.ContainsKey(entityId))
                 entityRenders[entityId].RotateTo(yaw, pitch);
         }
 
-        public void UpdateEntityRenderHeadYaw(int entityId, float headYaw)
+        public void RotateEntityRenderHead(int entityId, float headYaw)
         {
             if (entityRenders.ContainsKey(entityId))
                 entityRenders[entityId].RotateHeadTo(headYaw);
@@ -183,6 +184,7 @@ namespace MinecraftClient.Rendering
             // Neutral Mobs
             // ...
             // Miscellaneous Entities
+            entityPrefabs.Add(EntityType.Arrow,            arrowPrefab);
             entityPrefabs.Add(EntityType.Item,             itemPrefab);
             entityPrefabs.Add(EntityType.ExperienceOrb,    experienceOrbPrefab);
             //entityPrefabs.Add(EntityType.ExperienceBottle, experienceOrbPrefab);
