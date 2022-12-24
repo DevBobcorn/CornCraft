@@ -61,7 +61,7 @@ namespace MinecraftClient.UI
                     firstPersonPanelObj.transform.localPosition = Vector3.up;
 
                     firstPersonPanel = firstPersonPanelObj.GetComponent<FirstPersonGUI>();
-                    firstPersonPanel.SetViewTransform(cameraCon.GetTransform());
+                    firstPersonPanel.SetInfo(playerCon.visualTransform!, cameraCon);
 
                     return true;
                 }
@@ -76,7 +76,7 @@ namespace MinecraftClient.UI
                 return;
             
             if (Input.GetKeyDown(KeyCode.Escape))
-                CornClient.Instance.ScreenControl?.TryPopScreen();
+                game!.ScreenControl?.TryPopScreen();
 
         }
 

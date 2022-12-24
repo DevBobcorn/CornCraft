@@ -2,12 +2,25 @@
 using System.Linq;
 using UnityEngine;
 
+using MinecraftClient.Inventory;
+using MinecraftClient.Protocol;
+
 namespace MinecraftClient.UI
 {
     public class FirstPersonMenu_Items : FirstPersonMenu
     {
         private const string EMPTY = "Empty~  >_<";
         private CornClient? game;
+
+        private string GetItemStackString(ItemStack itemStack)
+        {
+            if (!string.IsNullOrWhiteSpace(itemStack.DisplayName))
+                return $"{itemStack.DisplayName} x{itemStack.Count}";
+            
+            var itemId = itemStack.Type.ItemId;
+            string itemName = ChatParser.TranslateString($"item.{itemId.Namespace}.{itemId.Path}");
+            return $"{itemName} x{itemStack.Count}";
+        }
 
         protected override bool InitializeContent()
         {
@@ -38,7 +51,7 @@ namespace MinecraftClient.UI
                     itemObj.name = invItem.ToString();
 
                     var item = itemObj.GetComponent<FirstPersonListItem>();
-                    item.SetContent(this, itemIcons[0], itemIcons[1], $"[{slot}] {invItem}");
+                    item.SetContent(this, itemIcons[0], itemIcons[1], GetItemStackString(invItem));
 
                     item.SetAlpha(0F);
                     items.Add(item);
