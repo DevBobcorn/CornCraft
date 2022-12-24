@@ -11,8 +11,10 @@ namespace MinecraftClient.Control
         protected CameraInfo cameraInfo = new();
         // Camera used for actual rendering
         protected Camera? renderCamera;
+
+        public Camera? RenderCamera => renderCamera;
+
         // Flag variables
-        
         protected bool initialized = false, renderCameraPresent = false;
 
         public virtual void SetPerspective(Perspective perspective)

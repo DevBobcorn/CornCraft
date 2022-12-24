@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Coffee.UISoftMask;
+
+using MinecraftClient.Control;
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.UI
@@ -28,7 +30,7 @@ namespace MinecraftClient.UI
         public float maxDeltaAngle = 30F;
         private CornClient? game;
 
-        private Transform? viewTransform;
+        private Transform? playerTransform, cameraTransform;
 
         private Canvas?   canvas;
         private Animator? canvasAnim;
@@ -309,8 +311,13 @@ namespace MinecraftClient.UI
                 return;
             
             // First calculate and set rotation
-            var cameraRot = Camera.main.transform.eulerAngles.y;
-            transform.eulerAngles = new(0F, cameraRot, 0F);
+            if (cameraTransform is not null && playerTransform is not null)
+            {
+                if (game!.PlayerData.Perspective == Perspective.FirstPerson)
+                    transform.eulerAngles = new(0F, cameraTransform.eulerAngles.y, 0F); // Follow player view direction
+                else
+                    transform.eulerAngles = new(0F, playerTransform.eulerAngles.y, 0F); // Follow player orientation
+            }
 
             // Teleport panel to the right position
             var canvasTransform = canvas!.transform;
@@ -343,16 +350,14 @@ namespace MinecraftClient.UI
             HideChatPanel();
         }
 
-        public void SetViewTransform(Transform transform)
+        public void SetInfo(Transform playerTransform, CameraController camControl)
         {
             EnsureInitialized();
 
-            viewTransform = transform;
+            this.playerTransform = playerTransform;
+            this.cameraTransform = camControl.GetTransform();
 
-            if (Camera.main is not null)
-                canvas!.worldCamera = Camera.main;
-            else
-                Debug.LogWarning("Main camera not found, canvas camera left unassigned.");
+            canvas!.worldCamera = camControl.RenderCamera;
         }
 
         void Start() => EnsureInitialized();
@@ -470,9 +475,16 @@ namespace MinecraftClient.UI
                 }
 
                 // Follow player view
-                if (game!.PlayerData.Perspective == Perspective.FirstPerson && viewTransform is not null)
+                if (playerTransform is not null && cameraTransform is not null)
                 {
-                    var viewRot = viewTransform.eulerAngles.y;
+                    Transform refTransform;
+
+                    if (game!.PlayerData.Perspective == Perspective.FirstPerson)
+                        refTransform = cameraTransform; // Follow player view direction
+                    else
+                        refTransform = playerTransform; // Follow player orientation
+
+                    var viewRot = refTransform.eulerAngles.y;
                     var ownRot = transform.eulerAngles.y;
 
                     var deltaRot = Mathf.DeltaAngle(ownRot, viewRot);
