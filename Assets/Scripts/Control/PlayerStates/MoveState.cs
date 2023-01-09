@@ -64,6 +64,10 @@ namespace MinecraftClient.Control
                 else
                     moveSpeed = (info.WalkMode ? ability.WalkSpeed : ability.RunSpeed) *  Mathf.Sqrt(info.BrakeTime / RUN_BRAKE_TIME);
 
+                // Limit move speed if player is going off an edge
+                if (!info.Sprinting && info.FrontDownDist > 0.7F)
+                    moveSpeed = Mathf.Min(ability.RunSpeed * 0.65F, moveSpeed);
+
                 // Use the target visual yaw as actual movement direction
                 var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
                 moveVelocity.y = rigidbody.velocity.y;
