@@ -647,7 +647,7 @@ namespace MinecraftClient.Rendering
             columns.Clear();
         }
 
-        public const int BUILD_COUNT_LIMIT = 8;
+        public const int BUILD_COUNT_LIMIT = 4;
         private float operationCooldown  = 0;
         private int   operationAction    = 0;
 
