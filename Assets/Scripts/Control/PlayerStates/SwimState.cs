@@ -53,7 +53,7 @@ namespace MinecraftClient.Control
                             player.StartForceMoveOperation("Climb to land",
                                         new ForceMoveOperation[] {
                                                 new(org,  dest, 0.01F + Mathf.Max(info.LiquidDist - info.FrontDownDist - 0.2F, 0F) * 0.5F),
-                                                new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.95F,
+                                                new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 1F,
                                                     init: (info, ability, rigidbody, player) =>
                                                         player.CrossFadeState(PlayerAbility.CLIMB_1M),
                                                     update: (interval, inputData, info, ability, rigidbody, player) =>
