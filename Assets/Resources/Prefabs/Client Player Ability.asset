@@ -810,7 +810,7 @@ MonoBehaviour:
   WalkSpeed: 1.2
   RunSpeed: 5
   SprintSpeed: 8
-  JumpSpeed: 3.5
+  JumpSpeed: 4.5
   SteerSpeed: 20
   MaxStamina: 20
   SprintMinStamina: 2
