@@ -10,10 +10,8 @@ namespace MinecraftClient.Control
         public const float THRESHOLD_CLIMB_UP = -0.85F;
         public const float THRESHOLD_STEP_UP  = -0.01F;
 
-        public const float MOVE_PERSISTANCE = 0.1F;
-
         public const float RUN_BRAKE_TIME    = 0.2F;
-        public const float SPRINT_BRAKE_TIME = 0.5F;
+        public const float SPRINT_BRAKE_TIME = 0.3F;
 
         public const float THRESHOLD_SPRINT_STOP   = 50F;
         public const float THRESHOLD_ANGLE_FORWARD = 70F;
@@ -22,7 +20,7 @@ namespace MinecraftClient.Control
         {
             if (inputData.horInputNormalized != Vector2.zero)
             {
-                info.MovePersistence = MOVE_PERSISTANCE;
+                info.Moving = true;
                 info.BrakeTime = info.Sprinting ? SPRINT_BRAKE_TIME : RUN_BRAKE_TIME;
 
                 // Stop sprinting if steer angle too sharp
@@ -30,17 +28,12 @@ namespace MinecraftClient.Control
                     info.Sprinting = false;
             }
             else
-                info.MovePersistence -= interval;
+                info.Moving = false;
 
             if (info.BrakeTime > 0F)
             {
-                info.Moving = info.MovePersistence > 0F;
-
                 if (!info.Moving)
-                {
-                    info.BrakeTime -= interval;
-                    info.Sprinting = false;
-                }
+                    info.BrakeTime = Mathf.Max(0F, info.BrakeTime - interval);
                 
                 bool costStamina = false;
 
@@ -67,9 +60,9 @@ namespace MinecraftClient.Control
                     info.Sprinting = false;
                 
                 if (info.Sprinting)
-                    moveSpeed = ability.SprintSpeed * (info.BrakeTime / SPRINT_BRAKE_TIME);
+                    moveSpeed = ability.SprintSpeed * Mathf.Sqrt(info.BrakeTime / SPRINT_BRAKE_TIME);
                 else
-                    moveSpeed = (info.WalkMode ? ability.WalkSpeed : ability.RunSpeed) * info.BrakeTime / RUN_BRAKE_TIME;
+                    moveSpeed = (info.WalkMode ? ability.WalkSpeed : ability.RunSpeed) *  Mathf.Sqrt(info.BrakeTime / RUN_BRAKE_TIME);
 
                 // Use the target visual yaw as actual movement direction
                 var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
@@ -108,7 +101,7 @@ namespace MinecraftClient.Control
                         player.StartForceMoveOperation("Climb over barrier",
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.1F),
-                                        new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.95F,
+                                        new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 1F,
                                             init: (info, ability, rigidbody, player) =>
                                                 player.CrossFadeState(PlayerAbility.CLIMB_1M),
                                             update: (interval, inputData, info, ability, rigidbody, player) =>
@@ -158,14 +151,13 @@ namespace MinecraftClient.Control
                 // Stop moving and clear sprinting flag anyway
                 info.Moving = false;
                 info.Sprinting = false;
-                
             }
 
         }
 
         public bool ShouldEnter(PlayerStatus info)
         {
-            if (!info.Spectating && info.Grounded && !info.OnWall && !info.InLiquid && info.Moving)
+            if (!info.Spectating && info.Grounded && !info.OnWall && !info.InLiquid && (info.Moving || info.BrakeTime > 0F))
                 return true;
             return false;
         }
@@ -175,7 +167,7 @@ namespace MinecraftClient.Control
             if (info.Spectating)
                 return true;
 
-            if (!info.Grounded || info.OnWall || info.InLiquid || !info.Moving)
+            if (!info.Grounded || info.OnWall || info.InLiquid || (!info.Moving && info.BrakeTime <= 0F))
                 return true;
             return false;
         }
