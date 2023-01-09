@@ -35,7 +35,7 @@ namespace MinecraftClient
             return screenControl is not null
                     && hudScreen is not null
                     && cameraController is not null
-                    && cozyWeather is not null
+                    // && cozyWeather is not null
                     && entityRenderManager is not null
                     && chunkRenderManager is not null
                     && playerPrefab is not null;
