@@ -1,6 +1,5 @@
 #nullable enable
 using UnityEngine;
-using MinecraftClient.Event;
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
@@ -17,20 +16,7 @@ namespace MinecraftClient.Control
         // Flag variables
         protected bool initialized = false, renderCameraPresent = false;
 
-        public virtual void SetPerspective(Perspective perspective)
-        {
-            switch (perspective)
-            {
-                case Perspective.FirstPerson:
-                    EnableFixedMode();
-                    break;
-                case Perspective.ThirdPerson:
-                    DisableFixedMode();
-                    break;
-            }
-
-            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(perspective));
-        }
+        public abstract void SetPerspective(Perspective perspective);
 
         public virtual Ray? GetViewportCenterRay()
         {
@@ -45,9 +31,11 @@ namespace MinecraftClient.Control
 
         public abstract Transform? GetTarget();
 
+        public abstract bool IsFixed();
+
         public virtual Vector3 GetTargetScreenPos()
         {
-            if (cameraInfo.FixedMode)
+            if (IsFixed())
                 return renderCameraPresent ? renderCamera!.ViewportToScreenPoint(VIEWPORT_CENTER) : Vector3.zero;
             
             EnsureInitialized();
@@ -78,10 +66,6 @@ namespace MinecraftClient.Control
         public abstract Vector3? GetPosition();
 
         public abstract Transform GetTransform();
-
-        public abstract void EnableFixedMode();
-
-        public abstract void DisableFixedMode();
 
     }
 }

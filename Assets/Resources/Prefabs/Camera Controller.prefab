@@ -170,10 +170,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nearFov: 55
   farFov: 65
+  godFov: 10
+  godPitch: 25
   cameraZOffsetNear: 1
   cameraZOffsetFar: 4
   cameraYOffsetNear: 0.5
   cameraYOffsetFar: -0.5
+  cameraGodOffsetNear: 50
+  cameraGodOffsetFar: 200
   scaleSmoothFactor: 4
   scrollSensitivity: 0.2
 --- !u!1 &2514416844597822599
@@ -250,7 +254,7 @@ MonoBehaviour:
   m_DeadZoneDepth: 0
   m_UnlimitedSoftZone: 0
   m_SoftZoneWidth: 0.3
-  m_SoftZoneHeight: 0.5
+  m_SoftZoneHeight: 0.12
   m_BiasX: 0
   m_BiasY: 0
   m_CenterOnActivate: 1
@@ -427,7 +431,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8176676211365517047}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0.18973608, y: 0.012186925, z: -0.0023552673, w: 0.9817567}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -532,7 +536,7 @@ MonoBehaviour:
   m_RendererIndex: -1
   m_VolumeLayerMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 65536
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 1
@@ -576,7 +580,7 @@ MonoBehaviour:
   volumeTrigger: {fileID: 2894759996291240063}
   volumeLayer:
     serializedVersion: 2
-    m_Bits: 2
+    m_Bits: 65536
   stopNaNPropagation: 1
   finalBlitToCameraTarget: 0
   antialiasingMode: 2
@@ -633,7 +637,7 @@ GameObject:
   - component: {fileID: 3867813560441928994}
   - component: {fileID: 8998297413378684068}
   m_Layer: 0
-  m_Name: Normal Virtual
+  m_Name: Follow Virtual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
