@@ -220,14 +220,21 @@ namespace MinecraftClient
 
         public static void ShowNotification(string notification, float duration, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, duration, type));
 
-        public void TogglePerspective()
+        public void SwitchPerspective()
         {
-            if (playerData.Perspective == Perspective.FirstPerson)
-                playerData.Perspective = Perspective.ThirdPerson;
-            else
-                playerData.Perspective = Perspective.FirstPerson;
+            // Switch to next perspective
+            Perspective newPersp = playerData.Perspective switch
+            {
+                Perspective.FirstPerson    => Perspective.ThirdPerson,
+                Perspective.ThirdPerson    => Perspective.GodPerspective,
+                Perspective.GodPerspective => Perspective.FirstPerson,
+
+                _                          => Perspective.FirstPerson
+            };
             
-            cameraController?.SetPerspective(playerData.Perspective);
+            ShowNotification($"Perspective switched to {newPersp}");
+
+            cameraController?.SetPerspective(newPersp);
         }
 
         #endregion

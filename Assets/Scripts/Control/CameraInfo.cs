@@ -5,8 +5,6 @@ namespace MinecraftClient.Control
 {
     public class CameraInfo
     {
-        public bool FixedMode = false;
-
         public Vector3 TargetLocalPosition  = Vector3.zero;
         public Vector3 CurrentVelocity = Vector3.zero;
         public Transform? Target;
