@@ -244,7 +244,7 @@ namespace MinecraftClient.UI
             }
 
             if (Input.GetKeyDown(KeyCode.F5))
-                game.TogglePerspective();
+                game.SwitchPerspective();
 
             if (Input.GetKeyDown(KeyCode.Slash))
             {   // Open chat screen and input a slash
