@@ -19,8 +19,6 @@ namespace MinecraftClient.Control
         private Rigidbody? playerRigidbody;
         private Collider? playerCollider;
 
-        private bool entityDisabled = false;
-
         private readonly PlayerUserInputData inputData = new();
         private PlayerUserInput? userInput;
         private PlayerStatusUpdater? statusUpdater;
@@ -36,19 +34,20 @@ namespace MinecraftClient.Control
 
         public void DisableEntity()
         {
-            entityDisabled = true;
             // Update components state...
             playerCollider!.enabled = false;
-            playerRigidbody!.velocity = Vector3.zero;
             playerRigidbody!.useGravity = false;
+
+            // Reset player status
+            playerRigidbody!.velocity = Vector3.zero;
+            Status.Grounded = false;
+            Status.Sprinting = false;
 
             Status.Spectating = true;
         }
 
         public void EnableEntity()
         {
-            // Update and control...
-            entityDisabled = false;
             // Update components state...
             playerCollider!.enabled = true;
             playerRigidbody!.useGravity = true;
@@ -106,9 +105,10 @@ namespace MinecraftClient.Control
             interactionUpdater.UpdateInteractions(game!.GetWorld());
 
             // Update player status (in water, grounded, etc)
-            statusUpdater!.UpdatePlayerStatus(game!.GetWorld(), visualTransform!.forward);
+            if (!Status.Spectating)
+                statusUpdater!.UpdatePlayerStatus(game!.GetWorld(), visualTransform!.forward);
 
-            var status = statusUpdater.Status;
+            var status = statusUpdater!.Status;
 
             // Update current player state
             if (CurrentState.ShouldExit(status))
@@ -292,7 +292,7 @@ namespace MinecraftClient.Control
             // Visually swap xz velocity to fit vanilla
             var veloInfo = $"Vel:\t{velocity.z:0.00}\t{velocity.y:0.00}\t{velocity.x:0.00}\n({velocity.magnitude:0.000})";
 
-            if (entityDisabled)
+            if (!statusUpdater!.Status.Spectating)
                 return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
             else
                 return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\n{statusUpdater!.Status}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";

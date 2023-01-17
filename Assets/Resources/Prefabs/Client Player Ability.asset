@@ -809,14 +809,14 @@ MonoBehaviour:
     m_RotationOrder: 4
   WalkSpeed: 1.2
   RunSpeed: 5
-  SprintSpeed: 8
+  SprintSpeed: 10
   JumpSpeed: 4.5
   SteerSpeed: 20
   MaxStamina: 20
   SprintMinStamina: 2
-  SprintStaminaCost: 8
+  SprintStaminaCost: 20
   SwimStaminaCost: 1
-  StaminaRestore: 6
+  StaminaRestore: 5
   MaxFallSpeed: -10
   MaxWaterMoveSpeed: 2.3
   MaxWaterFallSpeed: -0.5
