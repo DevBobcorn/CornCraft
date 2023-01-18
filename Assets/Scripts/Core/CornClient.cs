@@ -71,6 +71,7 @@ namespace MinecraftClient
             // TODO Decently implement resource pack selection
             CornCraft.ResourceOverrides.Clear();
             CornCraft.ResourceOverrides.Add("vanilla_fix");
+            //CornCraft.ResourceOverrides.Add("classic_3d");
             //CornCraft.ResourceOverrides.Add("VanillaBDcraft 64x MC116");
         }
 

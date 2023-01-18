@@ -70,63 +70,23 @@ namespace MinecraftClient.Resource
                         var texturesDir = new DirectoryInfo($"{nameSpaceDir}/textures/");
                         int texDirLen = texturesDir.FullName.Length;
 
-                        if (new DirectoryInfo($"{nameSpaceDir}/textures/block").Exists)
+                        if (texturesDir.Exists)
                         {
-                            foreach (var texFile in texturesDir.GetFiles("block/*.png", SearchOption.AllDirectories)) // Allow sub folders...
+                            foreach (var texFile in texturesDir.GetFiles("*.png", SearchOption.AllDirectories)) // Allow sub folders...
                             {
                                 string texId = texFile.FullName.Replace('\\', '/');
                                 texId = texId.Substring(texDirLen); // e.g. 'block/grass_block_top.png'
-                                texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'block/grass_block_top'
-                                ResourceLocation identifier = new ResourceLocation(nameSpace, texId);
-                                if (!manager.TextureFileTable.ContainsKey(identifier))
-                                {
-                                    // This texture is not provided by previous resource packs, so add it here...
-                                    manager.TextureFileTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
-                                }
-                                else // Overwrite it
-                                    manager.TextureFileTable[identifier] = texFile.FullName.Replace('\\', '/');
-                                
-                                count++;
-                                if (count % 100 == 0)
-                                {
-                                    loadStateInfo.infoText = $"Gathering block texture {identifier}";
-                                    yield return null;
-                                }
-                            }
-                        }
-                        
-                        if (new DirectoryInfo($"{nameSpaceDir}/textures/item").Exists)
-                        {
-                            foreach (var texFile in texturesDir.GetFiles("item/*.png", SearchOption.AllDirectories)) // Allow sub folders...
-                            {
-                                string texId = texFile.FullName.Replace('\\', '/');
-                                texId = texId.Substring(texDirLen); // e.g. 'block/grass_block_top.png'
-                                texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'block/grass_block_top'
-                                ResourceLocation identifier = new ResourceLocation(nameSpace, texId);
-                                if (!manager.TextureFileTable.ContainsKey(identifier))
-                                {
-                                    // This texture is not provided by previous resource packs, so add it here...
-                                    manager.TextureFileTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
-                                }
-                                else // Overwrite it
-                                    manager.TextureFileTable[identifier] = texFile.FullName.Replace('\\', '/');
-                                
-                                count++;
-                                if (count % 100 == 0)
-                                {
-                                    loadStateInfo.infoText = $"Gathering item texture {identifier}";
-                                    yield return null;
-                                }
-                            }
-                        }
 
-                        if (new DirectoryInfo($"{nameSpaceDir}/textures/entity").Exists)
-                        {
-                            foreach (var texFile in texturesDir.GetFiles("entity/*.png", SearchOption.AllDirectories)) // Allow sub folders...
-                            {
-                                string texId = texFile.FullName.Replace('\\', '/');
-                                texId = texId.Substring(texDirLen); // e.g. 'entity/banner/base.png'
-                                texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'entity/banner/base'
+                                if (texId.StartsWith("effect/") || texId.StartsWith("font/") ||
+                                    texId.StartsWith("gui/")    || texId.StartsWith("misc/") ||
+                                    texId.StartsWith("mob_effect/") || texId.StartsWith("painting/"))
+                                {
+                                    // Debug.Log($"Skipping texture {texId}");
+                                    continue;
+                                }
+
+                                texId = texId.Substring(0, texId.LastIndexOf('.')); // e.g. 'block/grass_block_top'
+
                                 ResourceLocation identifier = new ResourceLocation(nameSpace, texId);
                                 if (!manager.TextureFileTable.ContainsKey(identifier))
                                 {
@@ -139,7 +99,7 @@ namespace MinecraftClient.Resource
                                 count++;
                                 if (count % 100 == 0)
                                 {
-                                    loadStateInfo.infoText = $"Gathering entity texture {identifier}";
+                                    loadStateInfo.infoText = $"Gathering texture {identifier}";
                                     yield return null;
                                 }
                             }
