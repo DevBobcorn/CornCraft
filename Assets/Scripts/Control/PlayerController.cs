@@ -40,7 +40,9 @@ namespace MinecraftClient.Control
 
             // Reset player status
             playerRigidbody!.velocity = Vector3.zero;
-            Status.Grounded = false;
+            Status.Grounded  = false;
+            Status.InLiquid  = false;
+            Status.OnWall    = false;
             Status.Sprinting = false;
 
             Status.Spectating = true;
