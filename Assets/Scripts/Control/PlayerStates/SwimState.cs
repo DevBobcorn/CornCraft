@@ -55,6 +55,7 @@ namespace MinecraftClient.Control
                                                 new(org,  dest, 0.01F + Mathf.Max(info.LiquidDist - info.FrontDownDist - 0.2F, 0F) * 0.5F),
                                                 new(dest, player.visualTransform!.rotation, 0F, 1F,
                                                     init: (info, ability, rigidbody, player) => {
+                                                        player.RandomizeMirroredFlag();
                                                         player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                                         player.UseRootMotion = true;
                                                     },

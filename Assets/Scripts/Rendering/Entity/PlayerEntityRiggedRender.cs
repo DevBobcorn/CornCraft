@@ -20,6 +20,8 @@ namespace MinecraftClient.Rendering
 
         private static readonly int ROOT_MOTION = Animator.StringToHash("RootMotion");
 
+        private static readonly int MIRRORED = Animator.StringToHash("Mirrored");
+
         private static readonly int VERTICAL_SPEED = Animator.StringToHash("VerticalSpeed");
         private static readonly int HORIZONTAL_SPEED = Animator.StringToHash("HorizontalSpeed");
 
@@ -73,6 +75,14 @@ namespace MinecraftClient.Rendering
 
                 playerAnimator.SetBool(ROOT_MOTION, info.PlayingRootMotion);
 
+            }
+        }
+
+        public void SetMirroredFlag(bool flag)
+        {
+            if (animatorPresent)
+            {
+                playerAnimator!.SetBool(MIRRORED, flag);
             }
         }
 

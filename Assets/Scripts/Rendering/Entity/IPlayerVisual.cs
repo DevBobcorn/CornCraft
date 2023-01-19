@@ -15,6 +15,8 @@ namespace MinecraftClient.Rendering
 
         public virtual void UpdateStateMachine(PlayerStatus info) { }
 
+        public virtual void SetMirroredFlag(bool flag) { }
+
         public virtual void CrossFadeState(string stateName, float time, int layer, float timeOffset) { }
     }
 }

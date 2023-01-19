@@ -36,7 +36,10 @@ namespace MinecraftClient.Control
                                         new(dest, ability.Climb2mCurves, player.visualTransform!.rotation, 0F, 2.2F,
                                             playbackSpeed: 1.5F,
                                             init: (info, ability, rigidbody, player) =>
-                                                player.CrossFadeState(PlayerAbility.CLIMB_2M),
+                                            {
+                                                player.RandomizeMirroredFlag();
+                                                player.CrossFadeState(PlayerAbility.CLIMB_2M);
+                                            },
                                             update: (interval, inputData, info, ability, rigidbody, player) =>
                                                 info.Moving = inputData.horInputNormalized != Vector2.zero
                                         )
@@ -55,6 +58,7 @@ namespace MinecraftClient.Control
                                         new(org,  dest, 0.1F),
                                         new(dest, player.visualTransform!.rotation, 0F, 0.9F,
                                             init: (info, ability, rigidbody, player) => {
+                                                player.RandomizeMirroredFlag();
                                                 player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                                 player.UseRootMotion = true;
                                             },

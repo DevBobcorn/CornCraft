@@ -79,6 +79,13 @@ namespace MinecraftClient.Control
             playerRender!.CrossFadeState(stateName, time, layer, timeOffset);
         }
 
+        public void RandomizeMirroredFlag()
+        {
+            var mirrored = game!.CurrentTimeOfDay % 2 == 0;
+            playerRender!.SetMirroredFlag(mirrored);
+            Debug.Log($"Animation mirrored: {mirrored}");
+        }
+
         private void CheckEntityEnabled()
         {
             if (game!.PlayerData.GameMode == GameMode.Spectator) // Spectating
