@@ -294,7 +294,7 @@ namespace MinecraftClient.Control
             // Visually swap xz velocity to fit vanilla
             var veloInfo = $"Vel:\t{velocity.z:0.00}\t{velocity.y:0.00}\t{velocity.x:0.00}\n({velocity.magnitude:0.000})";
 
-            if (!statusUpdater!.Status.Spectating)
+            if (statusUpdater!.Status.Spectating)
                 return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
             else
                 return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\n{statusUpdater!.Status}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
