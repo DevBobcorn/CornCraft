@@ -7,7 +7,6 @@ namespace MinecraftClient.Control
     {
         public readonly string Name;
         public readonly ForceMoveOperation[] Operations;
-        public Vector3 Origin => Operations[0].Origin;
 
         private int currentOperationIndex = 0;
 
@@ -43,19 +42,24 @@ namespace MinecraftClient.Control
             }
             else
             {
-                if (!currentOperation.UseRootMotionClipAsDisplacement)
+                switch (currentOperation.DisplacementType)
                 {
-                    var moveProgress = currentTime / currentOperation.TimeTotal;
-                    var curPosition = Vector3.Lerp(currentOperation.Destination!.Value, currentOperation.Origin, moveProgress);
+                    case ForceMoveDisplacementType.FixedDisplacement:
+                        var moveProgress = currentTime / currentOperation.TimeTotal;
+                        var curPosition1 = Vector3.Lerp(currentOperation.Destination!.Value, currentOperation.Origin, moveProgress);
 
-                    rigidbody.transform.position = curPosition;
-                }
-                else
-                {
-                    // Sample animation 
-                    var curPosition = currentOperation.SampleTargetAt(currentOperation.TimeTotal - currentTime);
-                    
-                    rigidbody.transform.position = curPosition;
+                        rigidbody.transform.position = curPosition1;
+                        break;
+                    case ForceMoveDisplacementType.CurvesDisplacement:
+                        // Sample animation 
+                        var curPosition2 = currentOperation.SampleTargetAt(currentOperation.TimeTotal - currentTime);
+                        
+                        rigidbody.transform.position = curPosition2;
+                        break;
+                    case ForceMoveDisplacementType.RootMotionDisplacement:
+                        // Do nothing
+                        
+                        break;
                 }
 
                 // Call operation update
@@ -76,7 +80,7 @@ namespace MinecraftClient.Control
                 currentTime = currentOperation.TimeTotal;
 
                 // TODO Check validity
-                info.PlayingForcedAnimation = currentOperation.UseRootMotionClipAsDisplacement;
+                info.PlayingRootMotion = currentOperation.DisplacementType != ForceMoveDisplacementType.FixedDisplacement;
             }
         }
 
@@ -86,14 +90,24 @@ namespace MinecraftClient.Control
             {
                 currentOperation.OperationExit?.Invoke(info, ability, rigidbody, player);
 
-                if (!currentOperation.UseRootMotionClipAsDisplacement)
+                if (currentOperation.DisplacementType == ForceMoveDisplacementType.FixedDisplacement)
                 {
                     // Perform last move with rigidbody.MovePosition()
                     rigidbody!.MovePosition(currentOperation.Destination!.Value);
                 }
 
-                info.PlayingForcedAnimation = false;
+                info.PlayingRootMotion = false;
             }
+        }
+
+        public Vector3 GetFakePlayerOffset()
+        {
+            if (currentOperation is not null)
+            {
+                return currentOperation.Origin;
+            }
+
+            return Vector3.zero;
         }
 
         // This is not used, use PlayerController.StartForceMoveOperation() to enter this state

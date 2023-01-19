@@ -21,7 +21,9 @@ namespace MinecraftClient.Control
         public bool Attacking  = false;
         public bool Spectating = false;
         public bool WalkMode   = false;
-        public bool PlayingForcedAnimation = false;
+
+        public bool PlayingRootMotion = false;
+        public float PositionValidateCooldown = 0F;
 
         // Reference values
         public float CenterDownDist = 0F;

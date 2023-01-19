@@ -146,7 +146,7 @@ namespace MinecraftClient
 
         #region Players and Entities
         private bool inventoryHandlingRequested = false;
-        private bool locationReceived = false, localLocationUpdated = false;
+        private bool locationReceived = false;
         public bool LocationReceived { get { return locationReceived; } }
         private ClientPlayerData playerData = new();
         public ClientPlayerData PlayerData => playerData;
@@ -489,7 +489,7 @@ namespace MinecraftClient
                 TrySendMessageToServer();
             }
 
-            if (locationReceived && localLocationUpdated)
+            if (locationReceived)
             {
                 lock (locationLock)
                 {
@@ -497,14 +497,24 @@ namespace MinecraftClient
                     playerData.Pitch = playerData._pitch == null ? playerData.Pitch : playerData._pitch.Value;
 
                     if (playerController is not null)
+                    {
+                        if (playerData.location != playerController.ServerLocation
+                            || playerData.Yaw != playerController.ServerYaw
+                            || playerData.Pitch != playerController.ServerPitch)
+                        {
+                            playerData._yaw = playerController.ServerYaw;
+                            playerData._pitch = playerController.ServerPitch;
+
+                            playerData.location = playerController.ServerLocation;
+                        }
+
                         handler!.SendLocationUpdate(playerData.location, playerController.Status.Grounded, playerData._yaw, playerData._pitch);
-                    
+                    }
+
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)
                     // Once yaw and pitch have been sent, switch back to location-only updates (without yaw and pitch)
                     playerData._yaw = null;
                     playerData._pitch = null;
-
-                    localLocationUpdated = false;
                 }
             }
 
@@ -1368,7 +1378,6 @@ namespace MinecraftClient
                 playerData._pitch = pitch;
 
                 playerData.location = location;
-                localLocationUpdated = false;
                 locationReceived = true;
 
                 Loom.QueueOnMainThread(() => {
@@ -1378,29 +1387,6 @@ namespace MinecraftClient
                 
             }
 
-        }
-
-        /// <summary>
-        /// Called by player controller each frame.
-        /// </summary>
-        /// <param name="location">The new location</param>
-        /// <param name="yaw">Yaw to look at</param>
-        /// <param name="pitch">Pitch to look at</param>
-        public void SyncLocation(Location location, float yaw, float pitch)
-        {
-            lock (locationLock)
-            {
-                if (playerData.location != location || playerData.Yaw != yaw || playerData.Pitch != pitch)
-                {
-                    playerData._yaw = yaw;
-                    playerData._pitch = pitch;
-
-                    playerData.location = location;
-                    localLocationUpdated = true;
-                }
-                
-            }
-            
         }
 
         /// <summary>
