@@ -19,8 +19,6 @@ namespace MinecraftClient.Control
         public static readonly string CLIMB_1M = "Climb1m";
         public static readonly string CLIMB_2M = "Climb2m";
 
-        [SerializeField] public AnimationCurve Climb1mX = new(), Climb1mY = new(), Climb1mZ = new();
-        public AnimationCurve[] Climb1mCurves => new[] { Climb1mX, Climb1mY, Climb1mZ };
         [SerializeField] public AnimationCurve Climb2mX = new(), Climb2mY = new(), Climb2mZ = new();
         public AnimationCurve[] Climb2mCurves => new[] { Climb2mX, Climb2mY, Climb2mZ };
 

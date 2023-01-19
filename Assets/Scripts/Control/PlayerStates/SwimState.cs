@@ -48,16 +48,21 @@ namespace MinecraftClient.Control
 
                             // Start force move operation
                             var org  = rigidbody.transform.position;
-                            var dest = org + (-info.FrontDownDist - 0.99F) * Vector3.up + moveHorDir * horOffset;
+                            var dest = org + (-info.FrontDownDist - 0.95F) * Vector3.up + moveHorDir * horOffset;
 
                             player.StartForceMoveOperation("Climb to land",
                                         new ForceMoveOperation[] {
                                                 new(org,  dest, 0.01F + Mathf.Max(info.LiquidDist - info.FrontDownDist - 0.2F, 0F) * 0.5F),
-                                                new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 1F,
-                                                    init: (info, ability, rigidbody, player) =>
-                                                        player.CrossFadeState(PlayerAbility.CLIMB_1M),
+                                                new(dest, player.visualTransform!.rotation, 0F, 1F,
+                                                    init: (info, ability, rigidbody, player) => {
+                                                        player.CrossFadeState(PlayerAbility.CLIMB_1M);
+                                                        player.UseRootMotion = true;
+                                                    },
                                                     update: (interval, inputData, info, ability, rigidbody, player) =>
-                                                        info.Moving = inputData.horInputNormalized != Vector2.zero
+                                                        info.Moving = inputData.horInputNormalized != Vector2.zero,
+                                                    exit: (info, ability, rigidbody, player) => {
+                                                        player.UseRootMotion = false;
+                                                    }
                                                 )
                                         } );
                         }

@@ -86,7 +86,7 @@ namespace MinecraftClient.Control
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.1F),
                                         new(dest, ability.Climb2mCurves, player.visualTransform!.rotation, 0F, 2.25F,
-                                            playbackSpeed: 1.8F,
+                                            playbackSpeed: 1.5F,
                                             init: (info, ability, rigidbody, player) =>
                                                 player.CrossFadeState(PlayerAbility.CLIMB_2M),
                                             update: (interval, inputData, info, ability, rigidbody, player) =>
@@ -105,7 +105,7 @@ namespace MinecraftClient.Control
                         player.StartForceMoveOperation("Climb over barrier",
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.1F),
-                                        new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 1F,
+                                        new(dest, player.visualTransform!.rotation, 0F, 1F,
                                             init: (info, ability, rigidbody, player) => {
                                                 player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                                 player.UseRootMotion = true;

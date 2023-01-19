@@ -27,11 +27,9 @@ namespace MinecraftClient.Rendering
             {
                 Vector3 newPosition = transform.parent.position;
 
-                newPosition -= animator!.deltaPosition;
-                Debug.Log($"Animator deltaPosition: {animator!.deltaPosition}");
-                //animator!.ApplyBuiltinRootMotion();
+                newPosition += animator!.deltaPosition;
 
-                transform.transform.position = newPosition;
+                transform.parent.position = newPosition;
             }
         }
     }

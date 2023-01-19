@@ -66,12 +66,11 @@ namespace MinecraftClient.Control
             OperationUpdate = update;
         }
 
-        public ForceMoveOperation(Vector3 origin, Quaternion rotation, float timeOffset, float time, float playbackSpeed = 1F, OperationInitAction? init = null, OperationExitAction? exit = null, OperationUpdateAction? update = null)
+        public ForceMoveOperation(Vector3 origin, Quaternion rotation, float timeOffset, float time, OperationInitAction? init = null, OperationExitAction? exit = null, OperationUpdateAction? update = null)
         {
             DisplacementType = ForceMoveDisplacementType.RootMotionDisplacement;
 
             Origin = origin;
-            RootMotionPlaybackSpeed = playbackSpeed;
 
             RootMotionRotation = rotation;
             RootMotionTimeOffset = timeOffset;
