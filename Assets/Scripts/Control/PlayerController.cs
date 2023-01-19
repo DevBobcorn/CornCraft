@@ -27,6 +27,17 @@ namespace MinecraftClient.Control
         private PlayerInteractionUpdater? interactionUpdater;
 
         private IPlayerState CurrentState = PlayerStates.IDLE;
+        private bool useRootMotion = false;
+        public bool UseRootMotion
+        {
+            get {
+                return useRootMotion;
+            }
+
+            set {
+                useRootMotion = value;
+            }
+        }
 
         private CameraController? camControl;
         private IPlayerVisual? playerRender;
@@ -166,7 +177,7 @@ namespace MinecraftClient.Control
             if (CurrentState is ForceMoveState)
             // Use move origin as the player location to tell to server, to
             // prevent sending invalid positions during a force move operation
-                rawLocation = CoordConvert.Unity2MC(((ForceMoveState) CurrentState).Origin);
+                rawLocation = CoordConvert.Unity2MC(((ForceMoveState) CurrentState).GetFakePlayerOffset());
             else
                 rawLocation = CoordConvert.Unity2MC(transform.position);
 
@@ -174,8 +185,15 @@ namespace MinecraftClient.Control
             if ((status.Grounded || status.CenterDownDist < 0.5F) && rawLocation.Y - (int)rawLocation.Y > 0.9D)
                 rawLocation.Y = (int)rawLocation.Y + 1;
 
-            CornClient.Instance.SyncLocation(rawLocation, visualTransform!.eulerAngles.y - 90F, 0F);
+            // Get server yaw for networking thread
+            ServerLocation = rawLocation;
+            ServerYaw = visualTransform!.eulerAngles.y - 90F;
         }
+
+        // Access for networking thread
+        public Location ServerLocation;
+        public float ServerYaw = 0F;
+        public float ServerPitch = 0F;
 
         public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)
         {

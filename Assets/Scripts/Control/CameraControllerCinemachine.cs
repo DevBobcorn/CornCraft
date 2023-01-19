@@ -16,8 +16,9 @@ namespace MinecraftClient.Control
 
         [SerializeField] private float cameraZOffsetNear =   2F;
         [SerializeField] private float cameraZOffsetFar  =  20F;
-        [SerializeField] private float cameraYOffsetNear = 0.1F;
-        [SerializeField] private float cameraYOffsetFar  = 0.5F;
+        [SerializeField] private float cameraYOffsetNear =  0.4F;
+        [SerializeField] private float cameraYOffsetFar  = -0.4F;
+        [SerializeField] private float cameraYOffsetClip =  0.1F;
 
         [SerializeField] private float cameraGodOffsetNear =  40F;
         [SerializeField] private float cameraGodOffsetFar  =  60F;
@@ -85,7 +86,7 @@ namespace MinecraftClient.Control
             virtualCameraFollow!.m_Lens.FieldOfView = fov;
             virtualCameraFixed!.m_Lens.FieldOfView  = fov;
 
-            SetPerspective(Perspective.FirstPerson);
+            SetPerspective(Perspective.ThirdPerson);
         }
 
         void Update() => ManagedUpdate(Time.deltaTime);
@@ -123,7 +124,7 @@ namespace MinecraftClient.Control
 
                     if (curPersp == Perspective.ThirdPerson) // Update target local position
                     {
-                        framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale), 0F);
+                        framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
                         framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
                     }
                 }
@@ -231,7 +232,7 @@ namespace MinecraftClient.Control
             virtualCameraFixed!.m_Lens.FieldOfView  = fov;
 
             // Update target offset
-            framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale), 0F);
+            framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
             framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
 
             // Enable follow camera collider

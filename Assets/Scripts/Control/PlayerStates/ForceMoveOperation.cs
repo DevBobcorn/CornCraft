@@ -1,12 +1,18 @@
 #nullable enable
 using UnityEngine;
-using UnityEditor;
 
 namespace MinecraftClient.Control
 {
+    public enum ForceMoveDisplacementType
+    {
+        FixedDisplacement,
+        RootMotionDisplacement,
+        CurvesDisplacement
+    }
+
     public class ForceMoveOperation
     {
-        public readonly bool UseRootMotionClipAsDisplacement;
+        public readonly ForceMoveDisplacementType DisplacementType;
         public readonly Vector3 Origin;
 
         // Offset using curves
@@ -39,6 +45,8 @@ namespace MinecraftClient.Control
 
         public ForceMoveOperation(Vector3 origin, AnimationCurve[] curves, Quaternion rotation, float timeOffset, float time, float playbackSpeed = 1F, OperationInitAction? init = null, OperationExitAction? exit = null, OperationUpdateAction? update = null)
         {
+            DisplacementType = ForceMoveDisplacementType.CurvesDisplacement;
+
             Origin = origin;
             RootMotionPlaybackSpeed = playbackSpeed;
 
@@ -56,12 +64,30 @@ namespace MinecraftClient.Control
             OperationInit = init;
             OperationExit = exit;
             OperationUpdate = update;
-
-            UseRootMotionClipAsDisplacement = true;
         }
+
+        public ForceMoveOperation(Vector3 origin, Quaternion rotation, float timeOffset, float time, float playbackSpeed = 1F, OperationInitAction? init = null, OperationExitAction? exit = null, OperationUpdateAction? update = null)
+        {
+            DisplacementType = ForceMoveDisplacementType.RootMotionDisplacement;
+
+            Origin = origin;
+            RootMotionPlaybackSpeed = playbackSpeed;
+
+            RootMotionRotation = rotation;
+            RootMotionTimeOffset = timeOffset;
+
+            TimeTotal = time;
+
+            OperationInit = init;
+            OperationExit = exit;
+            OperationUpdate = update;
+        }
+
 
         public ForceMoveOperation(Vector3 origin, Vector3 dest, float time, OperationInitAction? init = null, OperationExitAction? exit = null, OperationUpdateAction? update = null)
         {
+            DisplacementType = ForceMoveDisplacementType.FixedDisplacement;
+
             Origin = origin;
             Destination = dest;
             TimeTotal = time;
@@ -69,8 +95,6 @@ namespace MinecraftClient.Control
             OperationInit = init;
             OperationExit = exit;
             OperationUpdate = update;
-
-            UseRootMotionClipAsDisplacement = false;
         }
 
         public delegate void OperationInitAction(PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player);

@@ -18,7 +18,7 @@ namespace MinecraftClient.Rendering
         private static readonly int WALK_MODE = Animator.StringToHash("WalkMode");
         private static readonly int CENTER_DOWN_DIST = Animator.StringToHash("CenterDownDist");
 
-        private static readonly int FORCED_ANIMATION = Animator.StringToHash("ForcedAnimation");
+        private static readonly int ROOT_MOTION = Animator.StringToHash("RootMotion");
 
         private static readonly int VERTICAL_SPEED = Animator.StringToHash("VerticalSpeed");
         private static readonly int HORIZONTAL_SPEED = Animator.StringToHash("HorizontalSpeed");
@@ -71,7 +71,7 @@ namespace MinecraftClient.Rendering
                 playerAnimator.SetBool(WALK_MODE, info.WalkMode);
                 playerAnimator.SetFloat(CENTER_DOWN_DIST, info.CenterDownDist);
 
-                playerAnimator.SetBool(FORCED_ANIMATION, info.PlayingForcedAnimation);
+                playerAnimator.SetBool(ROOT_MOTION, info.PlayingRootMotion);
 
             }
         }

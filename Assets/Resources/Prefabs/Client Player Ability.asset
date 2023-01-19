@@ -810,13 +810,12 @@ MonoBehaviour:
   WalkSpeed: 1.2
   RunSpeed: 5
   SprintSpeed: 10
-  JumpSpeed: 4.5
-  SteerSpeed: 20
+  JumpSpeed: 4
+  SteerSpeed: 12
   MaxStamina: 20
-  SprintMinStamina: 2
-  SprintStaminaCost: 20
+  SprintStaminaCost: 36
   SwimStaminaCost: 1
-  StaminaRestore: 5
+  StaminaRestore: 4
   MaxFallSpeed: -10
   MaxWaterMoveSpeed: 2.3
   MaxWaterFallSpeed: -0.5

@@ -18,6 +18,37 @@ namespace MinecraftClient.Control
             
             if (inputData.ascend) // Jump in place
                 rigidbody.velocity = new(0F, ability.JumpSpeed, 0F);
+            
+            if (inputData.descend)
+            {
+                var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+                        var horOffset = info.BarrierDist - 1.0F;
+
+                        var org  = rigidbody.transform.position;
+                        var dest = org + Vector3.up * 2;
+
+                        player.StartForceMoveOperation("Climb over barrier",
+                                new ForceMoveOperation[] {
+                                        new(org,  dest, 0.1F),
+                                        new(dest, player.visualTransform!.rotation, 0F, 1F,
+                                            init: (info, ability, rigidbody, player) => {
+                                                rigidbody.isKinematic = true;
+                                                rigidbody.detectCollisions = false;
+
+                                                player.CrossFadeState(PlayerAbility.CLIMB_1M);
+                                                player.UseRootMotion = true;
+                                            },
+                                            update: (interval, inputData, info, ability, rigidbody, player) =>
+                                                info.Moving = inputData.horInputNormalized != Vector2.zero,
+                                            exit: (info, ability, rigidbody, player) => {
+                                                rigidbody.isKinematic = false;
+                                                rigidbody.detectCollisions = true;
+
+                                                player.UseRootMotion = false;
+                                            }
+                                        )
+                                } );
+            }
 
             // Restore stamina
             info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);

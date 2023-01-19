@@ -51,7 +51,7 @@ namespace MinecraftClient.Control
 
                 float moveSpeed;
 
-                if ((inputData.sprint || info.Sprinting) && info.StaminaLeft > ability.SprintMinStamina)
+                if ((inputData.sprint || info.Sprinting) && info.StaminaLeft > 0F)
                 {
                     info.Sprinting = true;
                     costStamina = true;
@@ -64,12 +64,12 @@ namespace MinecraftClient.Control
                 else
                     moveSpeed = (info.WalkMode ? ability.WalkSpeed : ability.RunSpeed) *  Mathf.Sqrt(info.BrakeTime / RUN_BRAKE_TIME);
 
-                // Limit move speed if player is going off an edge
-                if (!info.Sprinting && info.FrontDownDist > 0.7F)
-                    moveSpeed = Mathf.Min(ability.RunSpeed * 0.65F, moveSpeed);
-
                 // Use the target visual yaw as actual movement direction
                 var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
+
+                // Simulate player inertia
+                moveVelocity = Vector3.Lerp(rigidbody.velocity, moveVelocity, interval * 30F);
+
                 moveVelocity.y = rigidbody.velocity.y;
 
                 if (inputData.horInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
@@ -106,10 +106,15 @@ namespace MinecraftClient.Control
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.1F),
                                         new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 1F,
-                                            init: (info, ability, rigidbody, player) =>
-                                                player.CrossFadeState(PlayerAbility.CLIMB_1M),
+                                            init: (info, ability, rigidbody, player) => {
+                                                player.CrossFadeState(PlayerAbility.CLIMB_1M);
+                                                player.UseRootMotion = true;
+                                            },
                                             update: (interval, inputData, info, ability, rigidbody, player) =>
-                                                info.Moving = inputData.horInputNormalized != Vector2.zero
+                                                info.Moving = inputData.horInputNormalized != Vector2.zero,
+                                            exit: (info, ability, rigidbody, player) => {
+                                                player.UseRootMotion = false;
+                                            }
                                         )
                                 } );
                     }
@@ -140,7 +145,9 @@ namespace MinecraftClient.Control
                 }
 
                 if (inputData.ascend) // Jump up, keep horizontal speed
-                    moveVelocity.y = ability.JumpSpeed;
+                {
+                    moveVelocity.y = ability.JumpSpeed + Mathf.Min(1F, moveSpeed);
+                }
 
                 // Apply new velocity to rigidbody
                 rigidbody.velocity = moveVelocity;
