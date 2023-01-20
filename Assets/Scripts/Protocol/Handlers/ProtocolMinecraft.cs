@@ -644,9 +644,6 @@ namespace MinecraftClient.Protocol.Handlers
 
                                 if (pTerrain.ProcessChunkColumnData(chunkX, chunkZ, verticalStripBitmask, packetData))
                                     Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
-
-                                // Block Entity data: ignored
-                                // Light data: ignored
                             }
                             else
                             {
@@ -1186,7 +1183,8 @@ namespace MinecraftClient.Protocol.Handlers
                                 if (protocolVersion >= MC_1_19_Version)
                                 {
                                     hasFactorData = dataTypes.ReadNextBool(packetData);
-                                    factorCodec = dataTypes.ReadNextNbt(packetData);
+                                    // Temp disabled to avoid crashing TODO Check how it works
+                                    //factorCodec = dataTypes.ReadNextNbt(packetData);
                                 }
 
                                 handler.OnEntityEffect(entityId, effect, amplifier, duration, flags, hasFactorData, factorCodec);
