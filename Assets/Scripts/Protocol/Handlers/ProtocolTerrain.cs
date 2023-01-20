@@ -139,7 +139,9 @@ namespace MinecraftClient.Protocol.Handlers
         /// </summary>
         private void ReadBiomesField(int chunkY, int[] biomes, Queue<byte> cache)
         {
-            int biomeYOffset = chunkY << 2;
+            // Vertical offset of a 'cell' which is 4*4*4
+            int cellYOffset = chunkY << 2;
+
             byte bitsPerEntry = dataTypes.ReadNextByte(cache); // Bits Per Entry
 
             // Direct Mode: Bit mask covering bitsPerEntry bits
@@ -153,7 +155,7 @@ namespace MinecraftClient.Protocol.Handlers
                 // Data Array must be empty
 
                 // Fill the whole section with this biome
-                Array.Fill(biomes, biomeId, biomeYOffset << 4, 64);
+                Array.Fill(biomes, biomeId, cellYOffset << 4, 64);
             }
             else // Indirect
             {
@@ -175,9 +177,9 @@ namespace MinecraftClient.Protocol.Handlers
                     Span<long> entryDataLong = MemoryMarshal.Cast<byte, long>(entryDataByte); // Faster than MemoryMarshal.Read<long>
 
                     int startOffset = 64; // Read the first data immediately
-                    for (int biomeY = 0; biomeY < 4; biomeY++)
-                        for (int biomeZ = 0; biomeZ < 4; biomeZ++)
-                            for (int biomeX = 0; biomeX < 4; biomeX++)
+                    for (int cellY = 0; cellY < 4; cellY++)
+                        for (int cellZ = 0; cellZ < 4; cellZ++)
+                            for (int cellX = 0; cellX < 4; cellX++) // Each 'cell' here means a 4*4*4 area
                             {
                                 // Calculate location of next block ID inside the array of Longs
                                 if ((startOffset += bitsPerEntry) > (64 - bitsPerEntry))
@@ -196,18 +198,18 @@ namespace MinecraftClient.Protocol.Handlers
                                 // Map small IDs to actual larger biome IDs
                                 if (paletteLength <= biomeId)
                                 {
-                                    int biomeNumber = (biomeY * 4 + biomeZ) * 4 + biomeX;
-                                    throw new IndexOutOfRangeException(String.Format("Biome ID {0} is outside Palette range 0-{1}! (bitsPerBlock: {2}, blockNumber: {3})",
+                                    int cellIndex = (cellY * 4 + cellZ) * 4 + cellX;
+                                    throw new IndexOutOfRangeException(String.Format("Biome ID {0} is outside Palette range 0-{1}! (bitsPerEntry: {2}, cellIndex: {3})",
                                         biomeId,
                                         paletteLength - 1,
                                         bitsPerEntry,
-                                        biomeNumber));
+                                        cellIndex));
                                 }
 
                                 biomeId = palette[(int)biomeId];
 
                                 // Set it in biome array
-                                biomes[((biomeY + biomeYOffset) << 4) | (biomeZ << 2) | biomeX] = (int)biomeId;
+                                biomes[((cellY + cellYOffset) << 4) | (cellZ << 2) | cellX] = (int)biomeId;
                                 
                             }
                     
@@ -237,9 +239,11 @@ namespace MinecraftClient.Protocol.Handlers
             int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
             int chunkMask = 0;
 
+            int dataSize;
+
             if (protocolVersion >= ProtocolMinecraft.MC_1_18_1_Version) // 1.18, 1.18.1 and above
             {
-                int dataSize = dataTypes.ReadNextVarInt(cache); // Size
+                dataSize = dataTypes.ReadNextVarInt(cache); // Size
 
                 // Prepare an empty array and do nothing else here
                 biomes = new int[64 * chunkColumnSize];
@@ -253,8 +257,12 @@ namespace MinecraftClient.Protocol.Handlers
                 for (int i = 0; i < biomesLength; i++)
                     biomes[i] = dataTypes.ReadNextVarInt(cache); // Biomes
                 
-                int dataSize = dataTypes.ReadNextVarInt(cache); // Size
+                dataSize = dataTypes.ReadNextVarInt(cache); // Size
             }
+
+            //var aaa = dataTypes.ReadData(dataSize, cache);
+
+            int totalSize = cache.Count;
 
             // 1.17 and above chunk format
             // Unloading chunks is handled by a separate packet
@@ -266,7 +274,7 @@ namespace MinecraftClient.Protocol.Handlers
                     ((verticalStripBitmask![chunkY / 64] & (1UL << (chunkY % 64))) != 0))
                 {
                     // Non-air block count inside chunk section, for lighting purposes
-                    int blockCnt = dataTypes.ReadNextShort(cache);
+                    int blockCount = dataTypes.ReadNextShort(cache);
                     
                     // Read Block states (Type: Paletted Container)
                     var chunk = ReadBlockStatesField(world, cache);
@@ -284,8 +292,49 @@ namespace MinecraftClient.Protocol.Handlers
                 
             }
 
-            // Don't worry about skipping remaining data since there is no useful data afterwards in 1.9
-            // (plus, it would require parsing the tile entity lists' NBT)
+            int consumedSize = totalSize - cache.Count;
+            int error = dataSize - consumedSize;
+
+            //UnityEngine.Debug.Log($"Data size: {dataSize} Consumed size: {consumedSize} Bytes left: {cache.Count} Error: {error}");
+
+            if (error > 0) // Error correction
+                dataTypes.ReadData(error, cache);
+
+            // Skip tile entity data
+            int blockEntityCount = dataTypes.ReadNextVarInt(cache);
+
+            if (blockEntityCount != 0)
+            {
+                //UnityEngine.Debug.Log($"Block entities: {blockEntityCount} | Bytes left: {cache.Count}");
+
+                for (int i = 0; i < blockEntityCount; i++) {
+                    var packedXZ = dataTypes.ReadNextByte(cache);
+                    var y = dataTypes.ReadNextShort(cache);
+                    var type = dataTypes.ReadNextVarInt(cache);
+
+                    var tag = dataTypes.ReadNextNbt(cache);
+
+                    /* Output tile entity data
+                    
+                    int x = (chunkX << 4) + (packedXZ >> 4);
+                    int z = (chunkZ << 4) + (packedXZ & 15);
+
+                    var sb = new StringBuilder($"{x} {y} {z} => Some Tile Entity, tag count: {tag.Keys.Count}\n");
+
+                    if (tag.Keys.Count > 0)
+                    {
+                        foreach (var pair in tag)
+                        sb.Append($"{pair.Key}: {pair.Value}\n");
+                    }
+
+                    UnityEngine.Debug.Log(sb.ToString());*/
+                }
+            }
+            
+            UnityEngine.Debug.Log($"Bytes left (should be lighting data): {cache.Count}");
+            
+            // TODO Parse lighting data
+
 
             // Set the column's chunk mask and load state
             var c = world[chunkX, chunkZ];
@@ -466,8 +515,20 @@ namespace MinecraftClient.Protocol.Handlers
                 }
             }
 
-            // Don't worry about skipping remaining data since there is no useful data afterwards in 1.9
-            // (plus, it would require parsing the tile entity lists' NBT)
+            // Skip tile entity data
+            int blockEntityCount = dataTypes.ReadNextVarInt(cache);
+
+            //if (blockEntityCount > 0)
+            //    UnityEngine.Debug.Log($"{blockEntityCount} block entities in chunk column [{chunkX}, {chunkZ}]");
+
+            for (int i = 0; i < blockEntityCount; i++) {
+                var tag = dataTypes.ReadNextNbt(cache);
+                //UnityEngine.Debug.Log($"{tag["x"]} {tag["y"]} {tag["z"]} => {tag["id"]}");
+
+                // TODO Make use of these data
+            }
+
+            // All data in packet should be parsed now, with nothing left
 
             // Set the column's chunk mask and load state
             var c = world[chunkX, chunkZ];
