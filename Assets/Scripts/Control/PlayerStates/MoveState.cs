@@ -68,7 +68,7 @@ namespace MinecraftClient.Control
                 var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
 
                 // Simulate player inertia
-                moveVelocity = Vector3.Lerp(rigidbody.velocity, moveVelocity, interval * 30F);
+                moveVelocity = Vector3.Lerp(rigidbody.velocity, moveVelocity, interval * 20F);
 
                 moveVelocity.y = rigidbody.velocity.y;
 

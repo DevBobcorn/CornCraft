@@ -81,9 +81,9 @@ namespace MinecraftClient.Control
 
         public void RandomizeMirroredFlag()
         {
-            var mirrored = game!.CurrentTimeOfDay % 2 == 0;
+            var mirrored = Time.frameCount % 2 == 0;
             playerRender!.SetMirroredFlag(mirrored);
-            Debug.Log($"Animation mirrored: {mirrored}");
+            //Debug.Log($"Animation mirrored: {mirrored}");
         }
 
         private void CheckEntityEnabled()
