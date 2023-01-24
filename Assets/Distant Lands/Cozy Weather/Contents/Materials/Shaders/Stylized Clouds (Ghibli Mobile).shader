@@ -1,4 +1,4 @@
-// Made with Amplify Shader Editor v1.9.0.2
+// Made with Amplify Shader Editor v1.9.1.3
 // Available at the Unity Asset Store - http://u3d.as/y3X 
 Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 {
@@ -41,15 +41,19 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 		Stencil
 		{
 			Ref 221
+			Comp Always
 			Pass Zero
+			Fail Keep
+			ZFail Keep
 		}
 
 		HLSLINCLUDE
-
-		#pragma target 3.0
-
+		#pragma target 3.5
 		#pragma prefer_hlslcc gles
-		#pragma exclude_renderers d3d11_9x 
+		// ensure rendering platforms toggle list is visible
+
+		#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+		#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
 
 		#ifndef ASE_TESS_FUNCS
 		#define ASE_TESS_FUNCS
@@ -57,7 +61,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 		{
 			return tessValue;
 		}
-		
+
 		float CalcDistanceTessFactor (float4 vertex, float minDist, float maxDist, float tess, float4x4 o2w, float3 cameraPos )
 		{
 			float3 wpos = mul(o2w,vertex).xyz;
@@ -152,7 +156,6 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 			return tess;
 		}
 		#endif //ASE_TESS_FUNCS
-
 		ENDHLSL
 
 		
@@ -161,7 +164,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 			
 			Name "Forward"
 			Tags { "LightMode"="UniversalForward" }
-			
+
 			Blend One Zero, One Zero
 			ZWrite On
 			ZTest LEqual
@@ -173,7 +176,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 			HLSLPROGRAM
 
 			#pragma multi_compile_instancing
-			#define ASE_SRP_VERSION 110000
+			#define ASE_SRP_VERSION 100801
 
 
 			#pragma vertex vert
@@ -184,7 +187,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-			
+
 			#include "Packages/com.unity.shadergraph/ShaderGraphLibrary/Functions.hlsl"
 
 
@@ -225,7 +228,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 			float _MainCloudScale;
 			float _ShadowingDistance;
 			float _ClippingThreshold;
-			#ifdef TESSELLATION_ON
+			#ifdef ASE_TESSELLATION
 				float _TessPhongStrength;
 				float _TessValue;
 				float _TessMin;
@@ -238,14 +241,14 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 			
 
 			
-					float2 voronoihash35_g45( float2 p )
+					float2 voronoihash35_g48( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi35_g45( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi35_g48( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
@@ -256,7 +259,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash35_g45( n + g );
+						 		float2 o = voronoihash35_g48( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -271,14 +274,14 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 						return F1;
 					}
 			
-					float2 voronoihash13_g45( float2 p )
+					float2 voronoihash13_g48( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi13_g45( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi13_g48( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
@@ -289,7 +292,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash13_g45( n + g );
+						 		float2 o = voronoihash13_g48( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -304,14 +307,14 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 						return F1;
 					}
 			
-					float2 voronoihash11_g45( float2 p )
+					float2 voronoihash11_g48( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi11_g45( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi11_g48( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
@@ -322,7 +325,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash11_g45( n + g );
+						 		float2 o = voronoihash11_g48( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -458,14 +461,14 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 				return float4(color, alpha);
 			}
 			
-					float2 voronoihash35_g44( float2 p )
+					float2 voronoihash35_g47( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi35_g44( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi35_g47( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
@@ -476,7 +479,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash35_g44( n + g );
+						 		float2 o = voronoihash35_g47( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -491,14 +494,14 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 						return F1;
 					}
 			
-					float2 voronoihash13_g44( float2 p )
+					float2 voronoihash13_g47( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi13_g44( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi13_g47( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
@@ -509,7 +512,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash13_g44( n + g );
+						 		float2 o = voronoihash13_g47( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -524,14 +527,14 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 						return F1;
 					}
 			
-					float2 voronoihash11_g44( float2 p )
+					float2 voronoihash11_g47( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi11_g44( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi11_g47( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
@@ -542,7 +545,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash11_g44( n + g );
+						 		float2 o = voronoihash11_g47( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -609,7 +612,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 				return o;
 			}
 
-			#if defined(TESSELLATION_ON)
+			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
@@ -715,71 +718,71 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 				float2 temp_output_1043_0 = ( texCoord1042 - float2( 0.5,0.5 ) );
 				float dotResult1045 = dot( temp_output_1043_0 , temp_output_1043_0 );
 				float Dot1071 = saturate( (0.85 + (dotResult1045 - 0.0) * (3.0 - 0.85) / (1.0 - 0.0)) );
-				float time35_g45 = 0.0;
-				float2 voronoiSmoothId35_g45 = 0;
+				float time35_g48 = 0.0;
+				float2 voronoiSmoothId35_g48 = 0;
 				float2 texCoord955 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 CentralUV998 = ( texCoord955 + float2( -0.5,-0.5 ) );
-				float2 temp_output_21_0_g45 = (CentralUV998*1.58 + 0.0);
-				float2 break2_g45 = abs( temp_output_21_0_g45 );
-				float saferPower4_g45 = abs( break2_g45.x );
-				float saferPower3_g45 = abs( break2_g45.y );
-				float saferPower6_g45 = abs( ( pow( saferPower4_g45 , 2.0 ) + pow( saferPower3_g45 , 2.0 ) ) );
+				float2 temp_output_21_0_g48 = (CentralUV998*1.58 + 0.0);
+				float2 break2_g48 = abs( temp_output_21_0_g48 );
+				float saferPower4_g48 = abs( break2_g48.x );
+				float saferPower3_g48 = abs( break2_g48.y );
+				float saferPower6_g48 = abs( ( pow( saferPower4_g48 , 2.0 ) + pow( saferPower3_g48 , 2.0 ) ) );
 				float Spherize1078 = _Spherize;
 				float Flatness1076 = ( 20.0 * _Spherize );
 				float mulTime61 = _TimeParameters.x * ( 0.001 * _WindSpeed );
 				float Time152 = mulTime61;
 				float2 Wind1035 = ( Time152 * float2( 0.1,0.2 ) );
-				float2 temp_output_10_0_g45 = (( ( temp_output_21_0_g45 * ( pow( saferPower6_g45 , Spherize1078 ) * Flatness1076 ) ) + float2( 0.5,0.5 ) )*( 2.0 / 5.0 ) + Wind1035);
-				float2 coords35_g45 = temp_output_10_0_g45 * 60.0;
-				float2 id35_g45 = 0;
-				float2 uv35_g45 = 0;
-				float fade35_g45 = 0.5;
-				float voroi35_g45 = 0;
-				float rest35_g45 = 0;
-				for( int it35_g45 = 0; it35_g45 <2; it35_g45++ ){
-				voroi35_g45 += fade35_g45 * voronoi35_g45( coords35_g45, time35_g45, id35_g45, uv35_g45, 0,voronoiSmoothId35_g45 );
-				rest35_g45 += fade35_g45;
-				coords35_g45 *= 2;
-				fade35_g45 *= 0.5;
-				}//Voronoi35_g45
-				voroi35_g45 /= rest35_g45;
-				float time13_g45 = 0.0;
-				float2 voronoiSmoothId13_g45 = 0;
-				float2 coords13_g45 = temp_output_10_0_g45 * 25.0;
-				float2 id13_g45 = 0;
-				float2 uv13_g45 = 0;
-				float fade13_g45 = 0.5;
-				float voroi13_g45 = 0;
-				float rest13_g45 = 0;
-				for( int it13_g45 = 0; it13_g45 <2; it13_g45++ ){
-				voroi13_g45 += fade13_g45 * voronoi13_g45( coords13_g45, time13_g45, id13_g45, uv13_g45, 0,voronoiSmoothId13_g45 );
-				rest13_g45 += fade13_g45;
-				coords13_g45 *= 2;
-				fade13_g45 *= 0.5;
-				}//Voronoi13_g45
-				voroi13_g45 /= rest13_g45;
-				float time11_g45 = 17.23;
-				float2 voronoiSmoothId11_g45 = 0;
-				float2 coords11_g45 = temp_output_10_0_g45 * 9.0;
-				float2 id11_g45 = 0;
-				float2 uv11_g45 = 0;
-				float fade11_g45 = 0.5;
-				float voroi11_g45 = 0;
-				float rest11_g45 = 0;
-				for( int it11_g45 = 0; it11_g45 <2; it11_g45++ ){
-				voroi11_g45 += fade11_g45 * voronoi11_g45( coords11_g45, time11_g45, id11_g45, uv11_g45, 0,voronoiSmoothId11_g45 );
-				rest11_g45 += fade11_g45;
-				coords11_g45 *= 2;
-				fade11_g45 *= 0.5;
-				}//Voronoi11_g45
-				voroi11_g45 /= rest11_g45;
+				float2 temp_output_10_0_g48 = (( ( temp_output_21_0_g48 * ( pow( saferPower6_g48 , Spherize1078 ) * Flatness1076 ) ) + float2( 0.5,0.5 ) )*( 2.0 / 5.0 ) + Wind1035);
+				float2 coords35_g48 = temp_output_10_0_g48 * 60.0;
+				float2 id35_g48 = 0;
+				float2 uv35_g48 = 0;
+				float fade35_g48 = 0.5;
+				float voroi35_g48 = 0;
+				float rest35_g48 = 0;
+				for( int it35_g48 = 0; it35_g48 <2; it35_g48++ ){
+				voroi35_g48 += fade35_g48 * voronoi35_g48( coords35_g48, time35_g48, id35_g48, uv35_g48, 0,voronoiSmoothId35_g48 );
+				rest35_g48 += fade35_g48;
+				coords35_g48 *= 2;
+				fade35_g48 *= 0.5;
+				}//Voronoi35_g48
+				voroi35_g48 /= rest35_g48;
+				float time13_g48 = 0.0;
+				float2 voronoiSmoothId13_g48 = 0;
+				float2 coords13_g48 = temp_output_10_0_g48 * 25.0;
+				float2 id13_g48 = 0;
+				float2 uv13_g48 = 0;
+				float fade13_g48 = 0.5;
+				float voroi13_g48 = 0;
+				float rest13_g48 = 0;
+				for( int it13_g48 = 0; it13_g48 <2; it13_g48++ ){
+				voroi13_g48 += fade13_g48 * voronoi13_g48( coords13_g48, time13_g48, id13_g48, uv13_g48, 0,voronoiSmoothId13_g48 );
+				rest13_g48 += fade13_g48;
+				coords13_g48 *= 2;
+				fade13_g48 *= 0.5;
+				}//Voronoi13_g48
+				voroi13_g48 /= rest13_g48;
+				float time11_g48 = 17.23;
+				float2 voronoiSmoothId11_g48 = 0;
+				float2 coords11_g48 = temp_output_10_0_g48 * 9.0;
+				float2 id11_g48 = 0;
+				float2 uv11_g48 = 0;
+				float fade11_g48 = 0.5;
+				float voroi11_g48 = 0;
+				float rest11_g48 = 0;
+				for( int it11_g48 = 0; it11_g48 <2; it11_g48++ ){
+				voroi11_g48 += fade11_g48 * voronoi11_g48( coords11_g48, time11_g48, id11_g48, uv11_g48, 0,voronoiSmoothId11_g48 );
+				rest11_g48 += fade11_g48;
+				coords11_g48 *= 2;
+				fade11_g48 *= 0.5;
+				}//Voronoi11_g48
+				voroi11_g48 /= rest11_g48;
 				float2 texCoord1055 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_1056_0 = ( texCoord1055 - float2( 0.5,0.5 ) );
 				float dotResult1057 = dot( temp_output_1056_0 , temp_output_1056_0 );
 				float ModifiedCohesion1074 = ( _CloudCohesion * 1.0 * ( 1.0 - dotResult1057 ) );
-				float lerpResult15_g45 = lerp( saturate( ( voroi35_g45 + voroi13_g45 ) ) , voroi11_g45 , ModifiedCohesion1074);
+				float lerpResult15_g48 = lerp( saturate( ( voroi35_g48 + voroi13_g48 ) ) , voroi11_g48 , ModifiedCohesion1074);
 				float CumulusCoverage376 = ( _CumulusCoverageMultiplier * _MaxCloudCover );
-				float lerpResult16_g45 = lerp( lerpResult15_g45 , 1.0 , ( ( 1.0 - CumulusCoverage376 ) + -0.7 ));
+				float lerpResult16_g48 = lerp( lerpResult15_g48 , 1.0 , ( ( 1.0 - CumulusCoverage376 ) + -0.7 ));
 				float time35_g46 = 0.0;
 				float2 voronoiSmoothId35_g46 = 0;
 				float2 temp_output_21_0_g46 = CentralUV998;
@@ -836,67 +839,67 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 				float lerpResult16_g46 = lerp( lerpResult15_g46 , 1.0 , ( ( 1.0 - CumulusCoverage376 ) + -0.7 ));
 				float temp_output_1183_0 = saturate( (0.0 + (( Dot1071 * ( 1.0 - lerpResult16_g46 ) ) - 0.6) * (1.0 - 0.0) / (1.0 - 0.6)) );
 				float IT2PreAlpha1184 = temp_output_1183_0;
-				float temp_output_1143_0 = (0.0 + (( Dot1071 * ( 1.0 - lerpResult16_g45 ) ) - 0.6) * (IT2PreAlpha1184 - 0.0) / (1.5 - 0.6));
+				float temp_output_1143_0 = (0.0 + (( Dot1071 * ( 1.0 - lerpResult16_g48 ) ) - 0.6) * (IT2PreAlpha1184 - 0.0) / (1.5 - 0.6));
 				float clampResult1158 = clamp( temp_output_1143_0 , 0.0 , 0.9 );
 				float AdditionalLayer1147 = SampleGradient( gradient1145, clampResult1158 ).r;
 				float4 lerpResult1150 = lerp( CloudColor332 , ( CloudColor332 * _CloudTextureColor ) , AdditionalLayer1147);
 				float4 ModifiedCloudColor1165 = lerpResult1150;
 				Gradient gradient1198 = NewGradient( 0, 2, 2, float4( 0.06119964, 0.06119964, 0.06119964, 0.4411841 ), float4( 1, 1, 1, 0.5794156 ), 0, 0, 0, 0, 0, 0, float2( 1, 0 ), float2( 1, 1 ), 0, 0, 0, 0, 0, 0 );
-				float time35_g44 = 0.0;
-				float2 voronoiSmoothId35_g44 = 0;
+				float time35_g47 = 0.0;
+				float2 voronoiSmoothId35_g47 = 0;
 				float2 ShadowUV997 = ( CentralUV998 + ( CentralUV998 * float2( -1,-1 ) * _ShadowingDistance * Dot1071 ) );
-				float2 temp_output_21_0_g44 = ShadowUV997;
-				float2 break2_g44 = abs( temp_output_21_0_g44 );
-				float saferPower4_g44 = abs( break2_g44.x );
-				float saferPower3_g44 = abs( break2_g44.y );
-				float saferPower6_g44 = abs( ( pow( saferPower4_g44 , 2.0 ) + pow( saferPower3_g44 , 2.0 ) ) );
-				float2 temp_output_10_0_g44 = (( ( temp_output_21_0_g44 * ( pow( saferPower6_g44 , Spherize1078 ) * Flatness1076 ) ) + float2( 0.5,0.5 ) )*( 2.0 / ( Scale1080 * 1.5 ) ) + ( Wind1035 * float2( 0.5,0.5 ) ));
-				float2 coords35_g44 = temp_output_10_0_g44 * 60.0;
-				float2 id35_g44 = 0;
-				float2 uv35_g44 = 0;
-				float fade35_g44 = 0.5;
-				float voroi35_g44 = 0;
-				float rest35_g44 = 0;
-				for( int it35_g44 = 0; it35_g44 <2; it35_g44++ ){
-				voroi35_g44 += fade35_g44 * voronoi35_g44( coords35_g44, time35_g44, id35_g44, uv35_g44, 0,voronoiSmoothId35_g44 );
-				rest35_g44 += fade35_g44;
-				coords35_g44 *= 2;
-				fade35_g44 *= 0.5;
-				}//Voronoi35_g44
-				voroi35_g44 /= rest35_g44;
-				float time13_g44 = 0.0;
-				float2 voronoiSmoothId13_g44 = 0;
-				float2 coords13_g44 = temp_output_10_0_g44 * 25.0;
-				float2 id13_g44 = 0;
-				float2 uv13_g44 = 0;
-				float fade13_g44 = 0.5;
-				float voroi13_g44 = 0;
-				float rest13_g44 = 0;
-				for( int it13_g44 = 0; it13_g44 <2; it13_g44++ ){
-				voroi13_g44 += fade13_g44 * voronoi13_g44( coords13_g44, time13_g44, id13_g44, uv13_g44, 0,voronoiSmoothId13_g44 );
-				rest13_g44 += fade13_g44;
-				coords13_g44 *= 2;
-				fade13_g44 *= 0.5;
-				}//Voronoi13_g44
-				voroi13_g44 /= rest13_g44;
-				float time11_g44 = 17.23;
-				float2 voronoiSmoothId11_g44 = 0;
-				float2 coords11_g44 = temp_output_10_0_g44 * 9.0;
-				float2 id11_g44 = 0;
-				float2 uv11_g44 = 0;
-				float fade11_g44 = 0.5;
-				float voroi11_g44 = 0;
-				float rest11_g44 = 0;
-				for( int it11_g44 = 0; it11_g44 <2; it11_g44++ ){
-				voroi11_g44 += fade11_g44 * voronoi11_g44( coords11_g44, time11_g44, id11_g44, uv11_g44, 0,voronoiSmoothId11_g44 );
-				rest11_g44 += fade11_g44;
-				coords11_g44 *= 2;
-				fade11_g44 *= 0.5;
-				}//Voronoi11_g44
-				voroi11_g44 /= rest11_g44;
-				float lerpResult15_g44 = lerp( saturate( ( voroi35_g44 + voroi13_g44 ) ) , voroi11_g44 , ( ModifiedCohesion1074 * 1.1 ));
-				float lerpResult16_g44 = lerp( lerpResult15_g44 , 1.0 , ( ( 1.0 - CumulusCoverage376 ) + -0.7 ));
-				float4 lerpResult1206 = lerp( CloudHighlightColor334 , ModifiedCloudColor1165 , saturate( SampleGradient( gradient1198, saturate( (0.0 + (( Dot1071 * ( 1.0 - lerpResult16_g44 ) ) - 0.6) * (1.0 - 0.0) / (1.0 - 0.6)) ) ).r ));
+				float2 temp_output_21_0_g47 = ShadowUV997;
+				float2 break2_g47 = abs( temp_output_21_0_g47 );
+				float saferPower4_g47 = abs( break2_g47.x );
+				float saferPower3_g47 = abs( break2_g47.y );
+				float saferPower6_g47 = abs( ( pow( saferPower4_g47 , 2.0 ) + pow( saferPower3_g47 , 2.0 ) ) );
+				float2 temp_output_10_0_g47 = (( ( temp_output_21_0_g47 * ( pow( saferPower6_g47 , Spherize1078 ) * Flatness1076 ) ) + float2( 0.5,0.5 ) )*( 2.0 / ( Scale1080 * 1.5 ) ) + ( Wind1035 * float2( 0.5,0.5 ) ));
+				float2 coords35_g47 = temp_output_10_0_g47 * 60.0;
+				float2 id35_g47 = 0;
+				float2 uv35_g47 = 0;
+				float fade35_g47 = 0.5;
+				float voroi35_g47 = 0;
+				float rest35_g47 = 0;
+				for( int it35_g47 = 0; it35_g47 <2; it35_g47++ ){
+				voroi35_g47 += fade35_g47 * voronoi35_g47( coords35_g47, time35_g47, id35_g47, uv35_g47, 0,voronoiSmoothId35_g47 );
+				rest35_g47 += fade35_g47;
+				coords35_g47 *= 2;
+				fade35_g47 *= 0.5;
+				}//Voronoi35_g47
+				voroi35_g47 /= rest35_g47;
+				float time13_g47 = 0.0;
+				float2 voronoiSmoothId13_g47 = 0;
+				float2 coords13_g47 = temp_output_10_0_g47 * 25.0;
+				float2 id13_g47 = 0;
+				float2 uv13_g47 = 0;
+				float fade13_g47 = 0.5;
+				float voroi13_g47 = 0;
+				float rest13_g47 = 0;
+				for( int it13_g47 = 0; it13_g47 <2; it13_g47++ ){
+				voroi13_g47 += fade13_g47 * voronoi13_g47( coords13_g47, time13_g47, id13_g47, uv13_g47, 0,voronoiSmoothId13_g47 );
+				rest13_g47 += fade13_g47;
+				coords13_g47 *= 2;
+				fade13_g47 *= 0.5;
+				}//Voronoi13_g47
+				voroi13_g47 /= rest13_g47;
+				float time11_g47 = 17.23;
+				float2 voronoiSmoothId11_g47 = 0;
+				float2 coords11_g47 = temp_output_10_0_g47 * 9.0;
+				float2 id11_g47 = 0;
+				float2 uv11_g47 = 0;
+				float fade11_g47 = 0.5;
+				float voroi11_g47 = 0;
+				float rest11_g47 = 0;
+				for( int it11_g47 = 0; it11_g47 <2; it11_g47++ ){
+				voroi11_g47 += fade11_g47 * voronoi11_g47( coords11_g47, time11_g47, id11_g47, uv11_g47, 0,voronoiSmoothId11_g47 );
+				rest11_g47 += fade11_g47;
+				coords11_g47 *= 2;
+				fade11_g47 *= 0.5;
+				}//Voronoi11_g47
+				voroi11_g47 /= rest11_g47;
+				float lerpResult15_g47 = lerp( saturate( ( voroi35_g47 + voroi13_g47 ) ) , voroi11_g47 , ( ModifiedCohesion1074 * 1.1 ));
+				float lerpResult16_g47 = lerp( lerpResult15_g47 , 1.0 , ( ( 1.0 - CumulusCoverage376 ) + -0.7 ));
+				float4 lerpResult1206 = lerp( CloudHighlightColor334 , ModifiedCloudColor1165 , saturate( SampleGradient( gradient1198, saturate( (0.0 + (( Dot1071 * ( 1.0 - lerpResult16_g47 ) ) - 0.6) * (1.0 - 0.0) / (1.0 - 0.6)) ) ).r ));
 				float4 IT2Color1207 = lerpResult1206;
 				Gradient gradient1199 = NewGradient( 0, 2, 2, float4( 0.06119964, 0.06119964, 0.06119964, 0.4617685 ), float4( 1, 1, 1, 0.5117723 ), 0, 0, 0, 0, 0, 0, float2( 1, 0 ), float2( 1, 1 ), 0, 0, 0, 0, 0, 0 );
 				float IT2Alpha1202 = SampleGradient( gradient1199, temp_output_1183_0 ).r;
@@ -939,17 +942,15 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 			ColorMask 0
 
 			HLSLPROGRAM
-			
-			#pragma multi_compile_instancing
-			#define ASE_SRP_VERSION 110000
 
-			
+			#pragma multi_compile_instancing
+			#define ASE_SRP_VERSION 100801
+
+
 			#pragma vertex vert
 			#pragma fragment frag
 
-			#if ASE_SRP_VERSION >= 110000
-				#pragma multi_compile _ _CASTING_PUNCTUAL_LIGHT_SHADOW
-			#endif
+			
 
 			#define SHADERPASS SHADERPASS_SHADOWCASTER
 
@@ -994,7 +995,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 			float _MainCloudScale;
 			float _ShadowingDistance;
 			float _ClippingThreshold;
-			#ifdef TESSELLATION_ON
+			#ifdef ASE_TESSELLATION
 				float _TessPhongStrength;
 				float _TessValue;
 				float _TessMin;
@@ -1008,7 +1009,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 
 			
 			float3 _LightDirection;
-			#if ASE_SRP_VERSION >= 110000 
+			#if ASE_SRP_VERSION >= 110000
 				float3 _LightPosition;
 			#endif
 
@@ -1045,14 +1046,14 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 
 				float3 normalWS = TransformObjectToWorldDir( v.ase_normal );
 
-				#if ASE_SRP_VERSION >= 110000 
-				#if _CASTING_PUNCTUAL_LIGHT_SHADOW
-					float3 lightDirectionWS = normalize(_LightPosition - positionWS);
-				#else
-					float3 lightDirectionWS = _LightDirection;
-				#endif
+				#if ASE_SRP_VERSION >= 110000
+					#if _CASTING_PUNCTUAL_LIGHT_SHADOW
+						float3 lightDirectionWS = normalize(_LightPosition - positionWS);
+					#else
+						float3 lightDirectionWS = _LightDirection;
+					#endif
 
-				float4 clipPos = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
+					float4 clipPos = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
 
 					#if UNITY_REVERSED_Z
 						clipPos.z = min(clipPos.z, UNITY_NEAR_CLIP_VALUE);
@@ -1060,13 +1061,13 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 						clipPos.z = max(clipPos.z, UNITY_NEAR_CLIP_VALUE);
 					#endif
 				#else
-						float4 clipPos = TransformWorldToHClip( ApplyShadowBias( positionWS, normalWS, _LightDirection ) );
+					float4 clipPos = TransformWorldToHClip( ApplyShadowBias( positionWS, normalWS, _LightDirection ) );
 
-						#if UNITY_REVERSED_Z
-							clipPos.z = min(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
-						#else
-							clipPos.z = max(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
-						#endif
+					#if UNITY_REVERSED_Z
+						clipPos.z = min(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
+					#else
+						clipPos.z = max(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
+					#endif
 				#endif
 
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
@@ -1081,7 +1082,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 				return o;
 			}
 
-			#if defined(TESSELLATION_ON)
+			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
@@ -1213,11 +1214,11 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 			AlphaToMask Off
 
 			HLSLPROGRAM
-			
-			#pragma multi_compile_instancing
-			#define ASE_SRP_VERSION 110000
 
-			
+			#pragma multi_compile_instancing
+			#define ASE_SRP_VERSION 100801
+
+
 			#pragma vertex vert
 			#pragma fragment frag
 
@@ -1262,7 +1263,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 			float _MainCloudScale;
 			float _ShadowingDistance;
 			float _ClippingThreshold;
-			#ifdef TESSELLATION_ON
+			#ifdef ASE_TESSELLATION
 				float _TessPhongStrength;
 				float _TessValue;
 				float _TessMin;
@@ -1317,7 +1318,7 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 				return o;
 			}
 
-			#if defined(TESSELLATION_ON)
+			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
@@ -1435,13 +1436,12 @@ Shader "Distant Lands/Cozy/Stylized Clouds Ghibli Mobile"
 	
 	}
 	
-	
+	CustomEditor "EmptyShaderGUI"
 	Fallback "Hidden/InternalErrorShader"
 	
 }
 /*ASEBEGIN
-Version=19002
-6.285715;1085.143;2181.714;596.1429;1724.37;629.9566;1;True;False
+Version=19103
 Node;AmplifyShaderEditor.CommentaryNode;1168;-1275.921,-2528.838;Inherit;False;2636.823;1492.163;;2;1170;1169;Iteration 2;1,0.8737146,0.572549,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;1169;-1211.921,-2464.838;Inherit;False;2070.976;624.3994;Alpha;20;1202;1201;1199;1184;1183;1182;1181;1179;1180;1178;1212;1211;1210;1173;1176;1175;1172;1177;1171;1174;;1,0.8737146,0.572549,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;1167;1522.421,-2232.243;Inherit;False;2326.557;1124.512;;25;1150;1165;1154;1152;1127;1151;1144;1147;1146;1158;1145;1143;1142;1141;1140;1139;1133;1134;1138;1149;1135;1137;1136;1132;1209;Additional Layer;0.7721605,0.4669811,1,1;0;0
@@ -1525,7 +1525,7 @@ Node;AmplifyShaderEditor.RegisterLocalVarNode;1147;3524.822,-1718.374;Inherit;Fa
 Node;AmplifyShaderEditor.OneMinusNode;1193;-315.9215,-1520.838;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.ColorNode;36;-4018.127,-2611.486;Inherit;False;Property;_CloudColor;Cloud Color;0;3;[HideInInspector];[HDR];[Header];Create;True;1;General Cloud Settings;0;0;False;0;False;0.7264151,0.7264151,0.7264151,0;0.1897503,0.2106195,0.236762,1;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.GradientNode;1145;2980.822,-1750.374;Inherit;False;0;2;2;0,0,0,0.8676432;1,1,1,0.9294118;1,0;1,1;0;1;OBJECT;0
-Node;AmplifyShaderEditor.FunctionNode;1192;-667.9213,-1520.838;Inherit;True;Ghibli Clouds;-1;;44;bce7362c867d47d49a15818b7e6650d4;0;7;37;FLOAT2;0,0;False;21;FLOAT2;0,0;False;19;FLOAT;1;False;20;FLOAT;1;False;23;FLOAT;1;False;24;FLOAT;0;False;27;FLOAT;0.5;False;2;FLOAT;33;FLOAT;0
+Node;AmplifyShaderEditor.FunctionNode;1192;-667.9213,-1520.838;Inherit;True;Ghibli Clouds;-1;;47;bce7362c867d47d49a15818b7e6650d4;0;7;37;FLOAT2;0,0;False;21;FLOAT2;0,0;False;19;FLOAT;1;False;20;FLOAT;1;False;23;FLOAT;1;False;24;FLOAT;0;False;27;FLOAT;0.5;False;2;FLOAT;33;FLOAT;0
 Node;AmplifyShaderEditor.GetLocalVarNode;1194;-315.9215,-1600.838;Inherit;False;1071;Dot;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.ClampOpNode;1158;2996.822,-1606.374;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0.9;False;1;FLOAT;0
 Node;AmplifyShaderEditor.OneMinusNode;1141;2420.822,-1638.374;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
@@ -1547,7 +1547,7 @@ Node;AmplifyShaderEditor.SaturateNode;1197;180.0785,-1536.838;Inherit;False;1;0;
 Node;AmplifyShaderEditor.GradientNode;1198;116.0785,-1616.838;Inherit;False;0;2;2;0.06119964,0.06119964,0.06119964,0.4411841;1,1,1,0.5794156;1,0;1,1;0;1;OBJECT;0
 Node;AmplifyShaderEditor.ColorNode;52;-4015.761,-2428.211;Inherit;False;Property;_CloudHighlightColor;Cloud Highlight Color;1;2;[HideInInspector];[HDR];Create;True;0;0;0;False;0;False;1,1,1,0;0.6376311,0.5267081,0.4950157,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.LerpOp;1150;2372.822,-2086.374;Inherit;True;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.FunctionNode;1139;2020.822,-1654.374;Inherit;True;Ghibli Clouds;-1;;45;bce7362c867d47d49a15818b7e6650d4;0;7;37;FLOAT2;0,0;False;21;FLOAT2;0,0;False;19;FLOAT;1;False;20;FLOAT;1;False;23;FLOAT;5;False;24;FLOAT;0;False;27;FLOAT;0.5;False;2;FLOAT;33;FLOAT;0
+Node;AmplifyShaderEditor.FunctionNode;1139;2020.822,-1654.374;Inherit;True;Ghibli Clouds;-1;;48;bce7362c867d47d49a15818b7e6650d4;0;7;37;FLOAT2;0,0;False;21;FLOAT2;0,0;False;19;FLOAT;1;False;20;FLOAT;1;False;23;FLOAT;5;False;24;FLOAT;0;False;27;FLOAT;0.5;False;2;FLOAT;33;FLOAT;0
 Node;AmplifyShaderEditor.GradientSampleNode;1200;324.0785,-1584.838;Inherit;True;2;0;OBJECT;;False;1;FLOAT;0;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RegisterLocalVarNode;334;-3796.106,-2428.746;Inherit;False;CloudHighlightColor;-1;True;1;0;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.GetLocalVarNode;1217;-927,-319;Inherit;False;1202;IT2Alpha;1;0;OBJECT;;False;1;FLOAT;0
@@ -1566,11 +1566,11 @@ Node;AmplifyShaderEditor.RegisterLocalVarNode;1202;628.0785,-2352.838;Inherit;Fa
 Node;AmplifyShaderEditor.GradientSampleNode;1201;308.0785,-2368.838;Inherit;True;2;0;OBJECT;;False;1;FLOAT;0;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SaturateNode;1203;724.0786,-1520.838;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;1206;932.0785,-1584.838;Inherit;False;3;0;COLOR;1,1,1,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1233;-406.0242,-441.7039;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1230;-406.0242,-441.7039;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1231;-406.0242,-441.7039;Float;False;True;-1;2;;0;12;Distant Lands/Cozy/Stylized Clouds Ghibli Mobile;2992e84f91cbeb14eab234972e07ea9d;True;Forward;0;1;Forward;8;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;1;False;;False;False;False;False;False;False;False;False;True;True;True;221;False;;255;False;;255;False;;7;False;;2;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Transparent=Queue=0;True;2;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;Hidden/InternalErrorShader;0;0;Standard;22;Surface;0;0;  Blend;0;0;Two Sided;2;637952267559032767;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;0;0;Built-in Fog;0;0;DOTS Instancing;0;0;Meta Pass;0;0;Extra Pre Pass;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Vertex Position,InvertActionOnDeselection;1;0;0;5;False;True;True;True;False;False;;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1232;-406.0242,-441.7039;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1234;-406.0242,-441.7039;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1233;-406.0242,-441.7039;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;3;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1230;-406.0242,-441.7039;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;3;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1231;-406.0242,-441.7039;Float;False;True;-1;2;EmptyShaderGUI;0;13;Distant Lands/Cozy/Stylized Clouds Ghibli Mobile;2992e84f91cbeb14eab234972e07ea9d;True;Forward;0;1;Forward;8;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;1;False;;False;False;False;False;False;False;False;False;True;True;True;221;False;;255;False;;255;False;;7;False;;2;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Transparent=Queue=0;True;3;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;Hidden/InternalErrorShader;0;0;Standard;22;Surface;0;0;  Blend;0;0;Two Sided;2;637952267559032767;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;0;0;Built-in Fog;0;0;DOTS Instancing;0;0;Meta Pass;0;0;Extra Pre Pass;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Vertex Position,InvertActionOnDeselection;1;0;0;5;False;True;True;True;False;False;;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1232;-406.0242,-441.7039;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;3;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1234;-406.0242,-441.7039;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;3;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 WireConnection;1057;0;1056;0
 WireConnection;1057;1;1056;0
 WireConnection;152;0;61;0
@@ -1679,4 +1679,4 @@ WireConnection;1206;1;1205;0
 WireConnection;1206;2;1203;0
 WireConnection;1231;2;1223;0
 ASEEND*/
-//CHKSM=6B1395EB7E6BA9EEC172C2BC4C6F2CD934E79C69
+//CHKSM=9E61466CC605C8EA632B3B5E5A480CE2AE7C7E73
