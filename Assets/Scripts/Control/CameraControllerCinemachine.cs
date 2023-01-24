@@ -206,9 +206,6 @@ namespace MinecraftClient.Control
             virtualCameraFollow!.m_Lens.FieldOfView = fov;
             virtualCameraFixed!.m_Lens.FieldOfView  = fov;
             
-            // Enable fog
-            RenderSettings.fog = true;
-            
             // Make fixed virtual camera the live camera
             virtualCameraFixed!.MoveToTopOfPrioritySubqueue();
         }
@@ -238,9 +235,6 @@ namespace MinecraftClient.Control
             // Enable follow camera collider
             virtualCameraFollow!.GetComponent<CinemachineCollider>().enabled = true;
 
-            // Enable fog
-            RenderSettings.fog = true;
-
             // Make normal virtual camera the live camera
             virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
         }
@@ -265,9 +259,6 @@ namespace MinecraftClient.Control
             // Update target offset
             framingTransposer!.m_TrackedObjectOffset = Vector3.zero;
             framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraGodOffsetNear, cameraGodOffsetFar, cameraInfo.CurrentScale);
-
-            // Disable fog
-            RenderSettings.fog = false;
 
             // Make normal virtual camera the live camera
             virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
