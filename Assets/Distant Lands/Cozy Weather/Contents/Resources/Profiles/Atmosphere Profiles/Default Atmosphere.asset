@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58971c84a8da56f46bc72a85a31d8a2d, type: 3}
   m_Name: Default Atmosphere
   m_EditorClassIdentifier: 
-  win1: 1
-  win2: 1
-  win3: 1
+  win1: 0
+  win2: 0
+  win3: 0
   win4: 0
   skyZenithColor:
     mode: 0
@@ -3583,7 +3583,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    systemContainsProp: 1
+    systemContainsProp: 0
   textureAmount:
     mode: 1
     colorVal: {r: 1, g: 1, b: 1, a: 1}

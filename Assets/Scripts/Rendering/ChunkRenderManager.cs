@@ -157,6 +157,8 @@ namespace MinecraftClient.Rendering
 
             chunksBeingBuilt.Add(chunkRender);
             chunkRender.State = BuildState.Building;
+
+            int2 chunkPos = new(chunkRender.ChunkX << 4, chunkRender.ChunkZ << 4);
             
             Task.Factory.StartNew(() => {
                 try
@@ -206,7 +208,7 @@ namespace MinecraftClient.Rendering
                                     int waterCullFlags = chunkData.GetCullFlags(loc, bloc, waterSurface);
                                     if (waterCullFlags != 0)
                                     {
-                                        FluidGeometry.Build(ref visualBuffer[waterLayerIndex], WATER_STILL, x, y, z, waterCullFlags, world.GetWaterColor(loc));
+                                        FluidGeometry.Build(ref visualBuffer[waterLayerIndex], WATER_STILL, x, y, z, chunkPos, waterCullFlags, world.GetWaterColor(loc));
                                         layerMask |= (1 << waterLayerIndex);
                                         isAllEmpty = false;
                                     }
@@ -216,7 +218,7 @@ namespace MinecraftClient.Rendering
                                     int lavaCullFlags = chunkData.GetCullFlags(loc, bloc, lavaSurface);
                                     if (lavaCullFlags != 0)
                                     {
-                                        FluidGeometry.Build(ref visualBuffer[lavaLayerIndex], LAVA_STILL, x, y, z, lavaCullFlags, BlockGeometry.DEFAULT_COLOR);
+                                        FluidGeometry.Build(ref visualBuffer[lavaLayerIndex], LAVA_STILL, x, y, z, chunkPos, lavaCullFlags, BlockGeometry.DEFAULT_COLOR);
                                         layerMask |= (1 << lavaLayerIndex);
                                         isAllEmpty = false;
                                     }
@@ -377,6 +379,7 @@ namespace MinecraftClient.Rendering
 
                             visualMesh.RecalculateNormals();
                             visualMesh.RecalculateBounds();
+                            visualMesh.RecalculateTangents();
 
                             chunkRender.GetComponent<MeshFilter>().sharedMesh = visualMesh;
                             chunkRender.GetComponent<MeshRenderer>().sharedMaterials = materialArr;
