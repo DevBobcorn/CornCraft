@@ -62,7 +62,7 @@ Transform:
   m_Children:
   - {fileID: 6237468791271435812}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3731584999858743492
 MonoBehaviour:
@@ -81,6 +81,6 @@ MonoBehaviour:
   reflectionTextureScale: 0.5
   reflectLayers:
     serializedVersion: 2
-    m_Bits: 1664
+    m_Bits: 3712
   reflectMaterial: {fileID: 2100000, guid: 07efb615be7e3854eb6e0cd54e248400, type: 2}
   m_planeOffset: 0
