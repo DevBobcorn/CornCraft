@@ -239,10 +239,10 @@ namespace MinecraftClient
             Perspective newPersp = playerData.Perspective switch
             {
                 Perspective.FirstPerson    => Perspective.ThirdPerson,
-                Perspective.ThirdPerson    => Perspective.GodPerspective,
-                Perspective.GodPerspective => Perspective.FirstPerson,
+                Perspective.ThirdPerson    => Perspective.FirstPerson,
 
-                _                          => Perspective.FirstPerson
+                Perspective.GodPerspective => Perspective.ThirdPerson,
+                _                          => Perspective.ThirdPerson
             };
             
             ShowNotification($"Perspective switched to {newPersp}");
