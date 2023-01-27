@@ -11,10 +11,10 @@ namespace MinecraftClient.Rendering
 
         private readonly Dictionary<int, ChunkRender> chunks = new Dictionary<int, ChunkRender>();
 
-        private ChunkRender CreateChunk(int chunkY)
+        private ChunkRender CreateChunkRender(int chunkY)
         {
             // Create this chunk...
-            GameObject chunkObj = new GameObject("Chunk " + chunkY.ToString());
+            GameObject chunkObj = new GameObject($"Chunk [{chunkY}]");
             chunkObj.layer = UnityEngine.LayerMask.NameToLayer(ChunkRenderManager.OBSTACLE_LAYER_NAME);
             ChunkRender newChunk = chunkObj.AddComponent<ChunkRender>();
             newChunk.ChunkX = this.ChunkX;
@@ -27,11 +27,22 @@ namespace MinecraftClient.Rendering
             return newChunk;
         }
 
-        public bool HasChunk(int chunkY) => chunks.ContainsKey(chunkY);
+        public bool HasChunkRender(int chunkY) => chunks.ContainsKey(chunkY);
 
-        public Dictionary<int, ChunkRender> GetChunks() => chunks;
+        public Dictionary<int, ChunkRender> GetChunkRenders() => chunks;
 
-        public ChunkRender GetChunk(int chunkY, bool createIfEmpty)
+        public bool IsReady()
+        {
+            foreach (var chunk in chunks.Values)
+            {
+                if (chunk.State != BuildState.Ready)
+                    return false;
+            }
+
+            return true;
+        }
+
+        public ChunkRender GetChunkRender(int chunkY, bool createIfEmpty)
         {
             if (chunks.ContainsKey(chunkY))
             {
@@ -44,7 +55,7 @@ namespace MinecraftClient.Rendering
                 {
                     if (createIfEmpty)
                     {
-                        ChunkRender newChunk = CreateChunk(chunkY);
+                        ChunkRender newChunk = CreateChunkRender(chunkY);
                         chunks.Add(chunkY, newChunk);
                         return newChunk;
                     }

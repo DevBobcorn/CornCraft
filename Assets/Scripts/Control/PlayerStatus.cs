@@ -22,6 +22,8 @@ namespace MinecraftClient.Control
         public bool Spectating = false;
         public bool WalkMode   = false;
 
+        public bool GravityDisabled = false;
+
         public bool PlayingRootMotion = false;
         public float PositionValidateCooldown = 0F;
 
