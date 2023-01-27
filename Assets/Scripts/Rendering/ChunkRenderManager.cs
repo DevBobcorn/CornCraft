@@ -49,10 +49,10 @@ namespace MinecraftClient.Rendering
         public string GetDebugInfo() => $"QueC: {chunksToBeBuild.Count}\t BldC: {chunksBeingBuilt.Count}";
 
         #region Chunk management
-        private ChunkRenderColumn CreateColumn(int chunkX, int chunkZ)
+        private ChunkRenderColumn CreateChunkRenderColumn(int chunkX, int chunkZ)
         {
             // Create this chunk column...
-            GameObject columnObj = new GameObject("Column [" + chunkX.ToString() + ", " + chunkZ.ToString() + "]");
+            GameObject columnObj = new GameObject($"Column [{chunkX}, {chunkZ}]");
             ChunkRenderColumn newColumn = columnObj.AddComponent<ChunkRenderColumn>();
             newColumn.ChunkX = chunkX;
             newColumn.ChunkZ = chunkZ;
@@ -63,7 +63,7 @@ namespace MinecraftClient.Rendering
             return newColumn;
         }
 
-        private ChunkRenderColumn? GetChunkColumn(int chunkX, int chunkZ, bool createIfEmpty)
+        private ChunkRenderColumn? GetChunkRenderColumn(int chunkX, int chunkZ, bool createIfEmpty)
         {
             int2 chunkCoord = new(chunkX, chunkZ);
             if (columns.ContainsKey(chunkCoord))
@@ -71,7 +71,7 @@ namespace MinecraftClient.Rendering
 
             if (createIfEmpty)
             {
-                ChunkRenderColumn newColumn = CreateColumn(chunkX, chunkZ);
+                ChunkRenderColumn newColumn = CreateChunkRenderColumn(chunkX, chunkZ);
                 columns.Add(chunkCoord, newColumn);
                 return newColumn;
             }
@@ -79,9 +79,19 @@ namespace MinecraftClient.Rendering
             return null;
         }
 
-        public ChunkRender? GetChunk(int chunkX, int chunkY, int chunkZ)
+        public ChunkRender? GetChunkRender(int chunkX, int chunkY, int chunkZ)
         {
-            return GetChunkColumn(chunkX, chunkZ, false)?.GetChunk(chunkY, false);
+            return GetChunkRenderColumn(chunkX, chunkZ, false)?.GetChunkRender(chunkY, false);
+        }
+
+        public bool IsChunkRenderColumnReady(int chunkX, int chunkZ)
+        {
+            var column = GetChunkRenderColumn(chunkX, chunkZ, false);
+
+            if (column is null)
+                return false;
+            
+            return column.IsReady();
         }
 
         public bool IsChunkDataReady(int chunkX, int chunkY, int chunkZ)
@@ -110,7 +120,6 @@ namespace MinecraftClient.Rendering
         #endregion
 
         #region Chunk building
-        //private static readonly Chunk.BlockCheck notFullSolid = new Chunk.BlockCheck((self, neighbor) => { return !neighbor.State.FullSolid; });
         private static readonly Chunk.BlockCheck waterSurface = new Chunk.BlockCheck((self, neighbor) => { return !(neighbor.State.InWater || neighbor.State.FullSolid); });
         private static readonly Chunk.BlockCheck lavaSurface  = new Chunk.BlockCheck((self, neighbor) => { return !(neighbor.State.InLava  || neighbor.State.FullSolid); });
 
@@ -121,7 +130,7 @@ namespace MinecraftClient.Rendering
         private static readonly int waterLayerIndex = ChunkRender.TypeIndex(RenderType.WATER);
         private static readonly int lavaLayerIndex  = ChunkRender.TypeIndex(RenderType.SOLID);
 
-        public void BuildChunk(ChunkRender chunkRender)
+        public void BuildChunkRender(ChunkRender chunkRender)
         {
             var chunkColumnData = game!.GetWorld()[chunkRender.ChunkX, chunkRender.ChunkZ];
             if (chunkColumnData is null) // Chunk column data unloaded, cancel
@@ -147,7 +156,7 @@ namespace MinecraftClient.Rendering
             // Save neighbors' status(present or not) right before mesh building
             chunkRender.UpdateNeighborStatus();
 
-            if (!chunkRender.AllNeighborDataPresent) // TODO: Check if this is reasonable
+            if (!chunkRender.AllNeighborDataPresent)
             {
                 chunkRender.State = BuildState.Cancelled;
                 return; // Not all neighbor data ready, just cancel
@@ -166,8 +175,10 @@ namespace MinecraftClient.Rendering
                     var table = CornClient.Instance?.PackManager?.StateModelTable;
                     if (table is null)
                     {
-                        chunksBeingBuilt.Remove(chunkRender);
-                        chunkRender.State = BuildState.Cancelled;
+                        Loom.QueueOnMainThread(() => {
+                            chunksBeingBuilt.Remove(chunkRender);
+                            chunkRender.State = BuildState.Cancelled;
+                        });
                         return;
                     }
 
@@ -191,9 +202,10 @@ namespace MinecraftClient.Rendering
                             {
                                 if (ts.IsCancellationRequested)
                                 {
-                                    //Debug.Log(chunkRender.ToString() + " cancelled. (Building Mesh)");
-                                    chunksBeingBuilt.Remove(chunkRender);
-                                    chunkRender.State = BuildState.Cancelled;
+                                    Loom.QueueOnMainThread(() => {
+                                        chunksBeingBuilt.Remove(chunkRender);
+                                        chunkRender.State = BuildState.Cancelled;
+                                    });
                                     return;
                                 }
 
@@ -475,8 +487,8 @@ namespace MinecraftClient.Rendering
         {   // Get this chunk's build priority based on its current distance to the player,
             // a smaller value means a higher priority...
             chunk.Priority = (int)(
-                new Location(chunk.ChunkX * Chunk.SizeX + ChunkCenterX, chunk.ChunkY * Chunk.SizeY + ChunkCenterY + offsetY, chunk.ChunkZ * Chunk.SizeZ + ChunkCenterZ)
-                    .DistanceTo(currentLocation) / 16);
+                    new Location(chunk.ChunkX * Chunk.SizeX + ChunkCenterX, chunk.ChunkY * Chunk.SizeY + ChunkCenterY + offsetY,
+                            chunk.ChunkZ * Chunk.SizeZ + ChunkCenterZ).DistanceTo(currentLocation) / 16);
         }
 
         // Add new chunks into render list
@@ -505,17 +517,17 @@ namespace MinecraftClient.Rendering
                     
                     if (world.isChunkColumnReady(chunkX, chunkZ))
                     {
-                        var column = GetChunkColumn(chunkX, chunkZ, false);
+                        var column = GetChunkRenderColumn(chunkX, chunkZ, false);
                         if (column is null)
                         {   // Chunks data is ready, but chunk render column is not
                             int chunkMask = world[chunkX, chunkZ]!.ChunkMask;
                             // Create it and add the whole column to render list...
-                            columnRender = GetChunkColumn(chunkX, chunkZ, true)!;
+                            columnRender = GetChunkRenderColumn(chunkX, chunkZ, true)!;
                             for (int chunkY = 0;chunkY < chunkColumnSize;chunkY++)
                             {   // Create chunk renders and queue them...
                                 if ((chunkMask & (1 << chunkY)) != 0)
                                 {   // This chunk is not empty and needs to be added and queued
-                                    var chunk = columnRender.GetChunk(chunkY, true);
+                                    var chunk = columnRender.GetChunkRender(chunkY, true);
                                     UpdateBuildPriority(location, chunk, offsetY);
                                     QueueChunkBuild(chunk);
                                 }
@@ -524,7 +536,7 @@ namespace MinecraftClient.Rendering
                         }
                         else
                         {
-                            foreach (var chunk in column.GetChunks().Values)
+                            foreach (var chunk in column.GetChunkRenders().Values)
                             {
                                 if (chunk.State == BuildState.Delayed || chunk.State == BuildState.Cancelled)
                                 {   // Queue delayed or cancelled chunk builds...
@@ -849,11 +861,11 @@ namespace MinecraftClient.Rendering
                 var chunkData = game?.GetWorld()?[chunkX, chunkZ];
                 if (chunkData is null) return;
                 
-                var column = GetChunkColumn(loc.ChunkX, loc.ChunkZ, false);
+                var column = GetChunkRenderColumn(loc.ChunkX, loc.ChunkZ, false);
 
                 if (column is not null) // Queue this chunk to rebuild list...
                 {   // Create the chunk render object if not present (previously empty)
-                    var chunk = column.GetChunk(chunkY, true);
+                    var chunk = column.GetChunkRender(chunkY, true);
                     chunkData.ChunkMask |= 1 << chunkY;
 
                     // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
@@ -861,30 +873,30 @@ namespace MinecraftClient.Rendering
 
                     if (loc.ChunkBlockY == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
                     {   // Queue the chunk below, if it isn't empty
-                        QueueChunkBuildIfNotEmpty(column.GetChunk(chunkY - 1, false));
+                        QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY - 1, false));
                     }
                     else if (loc.ChunkBlockY == Chunk.SizeY - 1 && ((chunkY + 1) * Chunk.SizeY) < World.GetDimension().height) // In the top layer of this chunk
                     {   // Queue the chunk above, if it isn't empty
-                        QueueChunkBuildIfNotEmpty(column.GetChunk(chunkY + 1, false));
+                        QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY + 1, false));
                     }
                 }
 
                 if (loc.ChunkBlockX == 0) // Check MC X direction neighbors
                 {
-                    QueueChunkBuildIfNotEmpty(GetChunk(chunkX - 1, chunkY, chunkZ));
+                    QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX - 1, chunkY, chunkZ));
                 }
                 else if (loc.ChunkBlockX == Chunk.SizeX - 1)
                 {
-                    QueueChunkBuildIfNotEmpty(GetChunk(chunkX + 1, chunkY, chunkZ));
+                    QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX + 1, chunkY, chunkZ));
                 }
 
                 if (loc.ChunkBlockZ == 0) // Check MC Z direction neighbors
                 {
-                    QueueChunkBuildIfNotEmpty(GetChunk(chunkX, chunkY, chunkZ - 1));
+                    QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ - 1));
                 }
                 else if (loc.ChunkBlockZ == Chunk.SizeZ - 1)
                 {
-                    QueueChunkBuildIfNotEmpty(GetChunk(chunkX, chunkY, chunkZ + 1));
+                    QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ + 1));
                 }
 
                 terrainColliderDirty = true;
@@ -902,11 +914,11 @@ namespace MinecraftClient.Rendering
                     var chunkData = world[chunkX, chunkZ];
                     if (chunkData is null) continue;
                     
-                    var column = GetChunkColumn(loc.ChunkX, loc.ChunkZ, false);
+                    var column = GetChunkRenderColumn(loc.ChunkX, loc.ChunkZ, false);
 
                     if (column is not null) // Queue this chunk to rebuild list...
                     {   // Create the chunk render object if not present (previously empty)
-                        var chunk = column.GetChunk(chunkY, true);
+                        var chunk = column.GetChunkRender(chunkY, true);
                         chunkData.ChunkMask |= 1 << chunkY;
 
                         // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
@@ -914,23 +926,23 @@ namespace MinecraftClient.Rendering
 
                         if (loc.ChunkBlockY == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
                         {   // Queue the chunk below, if it isn't empty
-                            QueueChunkBuildIfNotEmpty(column.GetChunk(chunkY - 1, false));
+                            QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY - 1, false));
                         }
                         else if (loc.ChunkBlockY == Chunk.SizeY - 1 && ((chunkY + 1) * Chunk.SizeY) < World.GetDimension().height) // In the top layer of this chunk
                         {   // Queue the chunk above, if it isn't empty
-                            QueueChunkBuildIfNotEmpty(column.GetChunk(chunkY + 1, false));
+                            QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY + 1, false));
                         }
                     }
 
                     if (loc.ChunkBlockX == 0) // Check MC X direction neighbors
-                        QueueChunkBuildIfNotEmpty(GetChunk(chunkX - 1, chunkY, chunkZ));
+                        QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX - 1, chunkY, chunkZ));
                     else if (loc.ChunkBlockX == Chunk.SizeX - 1)
-                        QueueChunkBuildIfNotEmpty(GetChunk(chunkX + 1, chunkY, chunkZ));
+                        QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX + 1, chunkY, chunkZ));
 
                     if (loc.ChunkBlockZ == 0) // Check MC Z direction neighbors
-                        QueueChunkBuildIfNotEmpty(GetChunk(chunkX, chunkY, chunkZ - 1));
+                        QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ - 1));
                     else if (loc.ChunkBlockZ == Chunk.SizeZ - 1)
-                        QueueChunkBuildIfNotEmpty(GetChunk(chunkX, chunkY, chunkZ + 1));
+                        QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ + 1));
                 }
 
                 terrainColliderDirty = true;
@@ -955,14 +967,14 @@ namespace MinecraftClient.Rendering
                     {   // Chunk is unloaded while waiting in the queue, ignore it...
                         continue;
                     }
-                    else if (GetChunkColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) is null)
+                    else if (GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) is null)
                     {   // Chunk column is unloaded while waiting in the queue, ignore it...
                         nextChunk.State = BuildState.Cancelled;
                         continue;
                     }
                     else
                     {
-                        BuildChunk(nextChunk);
+                        BuildChunkRender(nextChunk);
                         newCount--;
                     }
 

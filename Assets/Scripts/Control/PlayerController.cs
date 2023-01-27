@@ -57,6 +57,7 @@ namespace MinecraftClient.Control
             Status.Sprinting = false;
 
             Status.Spectating = true;
+            Status.GravityDisabled = true;
         }
 
         public void EnableEntity()
@@ -66,6 +67,7 @@ namespace MinecraftClient.Control
             playerRigidbody!.useGravity = true;
 
             Status.Spectating = false;
+            Status.GravityDisabled = false;
         }
 
         public void ToggleWalkMode()
@@ -86,14 +88,6 @@ namespace MinecraftClient.Control
             //Debug.Log($"Animation mirrored: {mirrored}");
         }
 
-        private void CheckEntityEnabled()
-        {
-            if (game!.PlayerData.GameMode == GameMode.Spectator) // Spectating
-                DisableEntity();
-            else
-                EnableEntity();
-        }
-
         public void SetEntityId(int entityId)
         {
             fakeEntity.ID = entityId;
@@ -103,30 +97,50 @@ namespace MinecraftClient.Control
 
         public void SetLocation(Location loc)
         {
+            ServerLocation = loc;
             transform.position = CoordConvert.MC2Unity(loc);
+
             Debug.Log($"Position set to {transform.position}");
-
-            CheckEntityEnabled();
         }
-
-        public Location GetLocation() => CoordConvert.Unity2MC(transform.position);
 
         void Update() => ManagedUpdate(Time.deltaTime);
 
         public void ManagedUpdate(float interval)
         {
+            if (!game!.IsMovementReady())
+            {
+                playerRigidbody!.useGravity = false;
+                playerRigidbody!.velocity = Vector3.zero;
+
+                Status.GravityDisabled = true;
+            }
+            else
+            {
+                if (Status.GravityDisabled != Status.Spectating)
+                {
+                    playerRigidbody!.useGravity = !Status.Spectating;
+                    Status.GravityDisabled = !Status.Spectating;
+                }
+            }
+
             // Update user input
             userInput!.UpdateInputs(inputData, game!.PlayerData.Perspective);
+
+            // Update player status (in water, grounded, etc)
+            if (!Status.Spectating)
+                statusUpdater!.UpdatePlayerStatus(game!.GetWorld(), visualTransform!.forward);
 
             // Update target block selection
             interactionUpdater!.UpdateBlockSelection(camControl!.GetViewportCenterRay());
 
             // Update player interactions
             interactionUpdater.UpdateInteractions(game!.GetWorld());
+            
+            // Update target block selection
+            interactionUpdater!.UpdateBlockSelection(camControl!.GetViewportCenterRay());
 
-            // Update player status (in water, grounded, etc)
-            if (!Status.Spectating)
-                statusUpdater!.UpdatePlayerStatus(game!.GetWorld(), visualTransform!.forward);
+            // Update player interactions
+            interactionUpdater.UpdateInteractions(game!.GetWorld());
 
             var status = statusUpdater!.Status;
 

@@ -142,12 +142,21 @@ namespace MinecraftClient
         private ChunkRenderManager? chunkRenderManager;
         public ChunkRenderManager? ChunkRenderManager => chunkRenderManager;
         private CozyWeather? cozyWeather;
+        public bool IsMovementReady()
+        {
+            if (!locationReceived || chunkRenderManager is null)
+                return false;
+            
+            var loc = playerData.location;
+            
+            return chunkRenderManager.IsChunkRenderColumnReady(loc.ChunkX, loc.ChunkZ);
+        }
         #endregion
 
         #region Players and Entities
         private bool inventoryHandlingRequested = false;
         private bool locationReceived = false;
-        public bool LocationReceived { get { return locationReceived; } }
+        public bool LocationReceived => locationReceived;
         private ClientPlayerData playerData = new();
         public ClientPlayerData PlayerData => playerData;
 
@@ -190,7 +199,10 @@ namespace MinecraftClient
             }
 
             if (Input.GetKeyDown(KeyCode.Q))
+            {
                 ShowNotification("Moew~");
+
+            }
 
             // Time update
             timeElapsedSinceUpdate += Time.unscaledDeltaTime;
@@ -198,7 +210,7 @@ namespace MinecraftClient
         }
 
         private ScreenControl? screenControl;
-        public ScreenControl ScreenControl { get { return screenControl!; } }
+        public ScreenControl ScreenControl => screenControl!;
 
         public bool IsPaused()
         {

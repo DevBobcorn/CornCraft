@@ -28,7 +28,7 @@ namespace MinecraftClient.Rendering
         };
 
         public int ChunkX, ChunkY, ChunkZ;
-        public Chunk Chunk;
+        public Chunk ChunkData;
         public BuildState State = BuildState.None;
 
         public CancellationTokenSource TokenSource = null;
@@ -51,7 +51,11 @@ namespace MinecraftClient.Rendering
             InteractionCollider.sharedMesh = colliderMesh;
         }
 
-        public void ClearCollider() => InteractionCollider?.sharedMesh.Clear();
+        public void ClearCollider()
+        {
+            InteractionCollider?.sharedMesh.Clear();
+            
+        }
 
         public int CompareTo(ChunkRender chunkRender) => Priority - chunkRender.Priority;
 
@@ -68,7 +72,6 @@ namespace MinecraftClient.Rendering
 
         public void Unload()
         {
-            //Debug.Log("Unloading Chunk " + ToString());
             TokenSource?.Cancel();
             Destroy(this.gameObject);
         }

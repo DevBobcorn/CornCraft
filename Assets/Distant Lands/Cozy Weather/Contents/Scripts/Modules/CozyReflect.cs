@@ -24,7 +24,7 @@ namespace DistantLands.Cozy
 
             base.SetupModule();
             reflectionCubemap = Resources.Load("Materials/Reflection Cubemap") as Cubemap;
-            RenderSettings.customReflection = reflectionCubemap;
+            RenderSettings.customReflectionTexture = reflectionCubemap;
             RenderSettings.defaultReflectionMode = UnityEngine.Rendering.DefaultReflectionMode.Custom;
             weatherSphere.fogMesh.gameObject.layer = ToLayer(layerMask);
             weatherSphere.skyMesh.gameObject.layer = ToLayer(layerMask);
@@ -73,7 +73,7 @@ namespace DistantLands.Cozy
             if (reflectionCamera)
                 DestroyImmediate(reflectionCamera.gameObject);
 
-            RenderSettings.customReflection = null;
+            RenderSettings.customReflectionTexture = null;
 
         }
 

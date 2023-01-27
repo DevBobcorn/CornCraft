@@ -51,12 +51,12 @@ namespace MinecraftClient.Control
                         var horOffset = info.BarrierDist - 1.0F;
 
                         var org  = rigidbody.transform.position;
-                        var dest = org + (-info.FrontDownDist - 0.99F) * Vector3.up + moveHorDir * horOffset;
+                        var dest = org + (-info.FrontDownDist - 0.95F) * Vector3.up + moveHorDir * horOffset;
 
                         player.StartForceMoveOperation("Climb over barrier",
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.1F),
-                                        new(dest, player.visualTransform!.rotation, 0F, 0.9F,
+                                        new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.9F,
                                             init: (info, ability, rigidbody, player) => {
                                                 player.RandomizeMirroredFlag();
                                                 player.CrossFadeState(PlayerAbility.CLIMB_1M);
