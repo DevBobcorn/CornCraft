@@ -39,6 +39,12 @@ namespace MinecraftClient.Control
             }
         }
 
+
+        // Access for networking thread
+        [HideInInspector] public Location ServerLocation;
+        [HideInInspector] public float ServerYaw = 0F;
+        [HideInInspector] public float ServerPitch = 0F;
+
         private CameraController? camControl;
         private IPlayerVisual? playerRender;
         private Entity fakeEntity = new(0, EntityType.Player, new());
@@ -135,12 +141,6 @@ namespace MinecraftClient.Control
 
             // Update player interactions
             interactionUpdater.UpdateInteractions(game!.GetWorld());
-            
-            // Update target block selection
-            interactionUpdater!.UpdateBlockSelection(camControl!.GetViewportCenterRay());
-
-            // Update player interactions
-            interactionUpdater.UpdateInteractions(game!.GetWorld());
 
             var status = statusUpdater!.Status;
 
@@ -211,11 +211,6 @@ namespace MinecraftClient.Control
             ServerYaw = visualTransform!.eulerAngles.y - 90F;
         }
 
-        // Access for networking thread
-        public Location ServerLocation;
-        public float ServerYaw = 0F;
-        public float ServerPitch = 0F;
-
         public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)
         {
             CurrentState.OnExit(statusUpdater!.Status, playerAbility!, playerRigidbody!, this);
@@ -241,6 +236,7 @@ namespace MinecraftClient.Control
             playerRender.UpdateEntity(fakeEntity);
 
             playerRigidbody = GetComponent<Rigidbody>();
+            playerRigidbody.useGravity = true;
 
             statusUpdater = GetComponent<PlayerStatusUpdater>();
             userInput = GetComponent<PlayerUserInput>();
