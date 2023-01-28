@@ -99,7 +99,7 @@ namespace MinecraftClient.UI
 
             var camController = game!.CameraController;
 
-            if (camController is not null) // Update existing info tags
+            if (camController?.GetPosition() is not null) // Update existing info tags
             {
                 var camPos = camController.GetPosition()!.Value;
 
