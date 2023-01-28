@@ -77,10 +77,21 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7087057527021025680}
-  serializedVersion: 2
+  serializedVersion: 4
   m_Mass: 100
   m_Drag: 0
   m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 1
@@ -113,7 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Actions: {fileID: -944628639613478452, guid: b3193f5e7d28c184fa4cf31151a0fa00, type: 3}
+  m_Actions: {fileID: 0}
   m_NotificationBehavior: 0
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
@@ -1365,6 +1376,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 7087057527021025683}
     m_Modifications:
     - target: {fileID: -9142819462288079499, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
@@ -3072,6 +3084,42 @@ PrefabInstance:
       value: 9
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7087057528477006746}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7087057527324457778}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7087057527887821372}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7087057527724402164}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7087057527724402167}
+    - targetCorrespondingSourceObject: {fileID: 8948836454381462458, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7087057528185137036}
+    - targetCorrespondingSourceObject: {fileID: -4154788014149441867, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7087057526472418511}
+    - targetCorrespondingSourceObject: {fileID: -8600492256526224408, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7087057528427990388}
+    - targetCorrespondingSourceObject: {fileID: -3398446616898061902, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7087057527382951340}
+    - targetCorrespondingSourceObject: {fileID: -8818590238463050250, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7087057526585849727}
+    - targetCorrespondingSourceObject: {fileID: 487660814054874407, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7087057527248151076}
   m_SourcePrefab: {fileID: 100100000, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}
 --- !u!4 &28350133475726406 stripped
 Transform:
@@ -3800,7 +3848,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &7087057527724402164
 Animator:
-  serializedVersion: 4
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -3817,7 +3865,7 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
 --- !u!114 &7087057527724402167
 MonoBehaviour:
   m_ObjectHideFlags: 0

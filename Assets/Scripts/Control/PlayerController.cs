@@ -119,6 +119,8 @@ namespace MinecraftClient.Control
                 playerRigidbody!.velocity = Vector3.zero;
 
                 Status.GravityDisabled = true;
+
+                transform.position = CoordConvert.MC2Unity(ServerLocation);
             }
             else
             {
