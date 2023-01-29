@@ -520,7 +520,9 @@ namespace MinecraftClient
                             playerData.location = playerController.ServerLocation;
                         }
 
-                        handler!.SendLocationUpdate(playerData.location, playerController.Status.Grounded, playerData._yaw, playerData._pitch);
+                        bool grounded = playerController.Status?.Grounded ?? false;
+
+                        handler!.SendLocationUpdate(playerData.location, grounded, playerData._yaw, playerData._pitch);
                     }
 
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)

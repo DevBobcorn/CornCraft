@@ -22,7 +22,7 @@ namespace MinecraftClient.Control
         private readonly PlayerUserInputData inputData = new();
         private PlayerUserInput? userInput;
         private PlayerStatusUpdater? statusUpdater;
-        public PlayerStatus Status => statusUpdater!.Status;
+        public PlayerStatus? Status => statusUpdater?.Status;
 
         private PlayerInteractionUpdater? interactionUpdater;
 
@@ -57,7 +57,7 @@ namespace MinecraftClient.Control
 
             // Reset player status
             playerRigidbody!.velocity = Vector3.zero;
-            Status.Grounded  = false;
+            Status!.Grounded  = false;
             Status.InLiquid  = false;
             Status.OnWall    = false;
             Status.Sprinting = false;
@@ -72,13 +72,13 @@ namespace MinecraftClient.Control
             playerCollider!.enabled = true;
             playerRigidbody!.useGravity = true;
 
-            Status.Spectating = false;
+            Status!.Spectating = false;
             Status.GravityDisabled = false;
         }
 
         public void ToggleWalkMode()
         {
-            Status.WalkMode = !Status.WalkMode;
+            Status!.WalkMode = !Status.WalkMode;
             CornClient.ShowNotification(Status.WalkMode ? "Switched to walk mode" : "Switched to rush mode");
         }
 
@@ -118,13 +118,13 @@ namespace MinecraftClient.Control
                 playerRigidbody!.useGravity = false;
                 playerRigidbody!.velocity = Vector3.zero;
 
-                Status.GravityDisabled = true;
+                Status!.GravityDisabled = true;
 
                 transform.position = CoordConvert.MC2Unity(ServerLocation);
             }
             else
             {
-                if (Status.GravityDisabled != Status.Spectating)
+                if (Status!.GravityDisabled != Status.Spectating)
                 {
                     playerRigidbody!.useGravity = !Status.Spectating;
                     Status.GravityDisabled = !Status.Spectating;
@@ -293,7 +293,7 @@ namespace MinecraftClient.Control
                 statusUpdater.UseBoxCastForGroundedCheck = boxcast;
 
                 // Set stamina to max value
-                Status.StaminaLeft = playerAbility!.MaxStamina;
+                Status!.StaminaLeft = playerAbility!.MaxStamina;
                 // And broadcast current stamina
                 EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, true));
                 // Initialize health value
