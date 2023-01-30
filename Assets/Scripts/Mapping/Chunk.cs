@@ -86,78 +86,177 @@ namespace MinecraftClient.Mapping
 
         public delegate bool BlockCheck(Block self, Block neighbor);
 
+        public static byte GetLiquidHeight(BlockState state)
+        {
+            if (state.InWater || state.InLava)
+            {
+                if (state.Properties.ContainsKey("level"))
+                {
+                    return state.Properties["level"] switch {
+                        "0"  => 14,
+                        "1"  => 12,
+                        "2"  => 10,
+                        "3"  =>  8,
+                        "4"  =>  7,
+                        "5"  =>  5,
+                        "6"  =>  3,
+                        "7"  =>  1,
+
+                        _    => 16
+                    };
+                }
+
+                return 16;
+            }
+
+            return 0;
+        }
+
+        private static byte getLiquidHeight(BlockState state)
+        {
+            if (state.InWater || state.InLava)
+            {
+                if (state.Properties.ContainsKey("level"))
+                {
+                    return state.Properties["level"] switch {
+                        "0"  => 14,
+                        "1"  => 12,
+                        "2"  => 10,
+                        "3"  =>  8,
+                        "4"  =>  7,
+                        "5"  =>  5,
+                        "6"  =>  3,
+                        "7"  =>  1,
+
+                        _    => 16
+                    };
+                }
+
+                return 16;
+            }
+
+            return 0;
+        }
+
+        public byte[] GetLiquidHeights(Location location)
+        {
+            // Height References
+            //  NE---E---SE
+            //  |         |
+            //  N    @    S
+            //  |         |
+            //  NW---W---SW
+
+            return new byte[] {
+                getLiquidHeight(getNEBlock(location).State),    getLiquidHeight(getEastBlock(location).State), getLiquidHeight(getSEBlock(location).State),
+                getLiquidHeight(getNorthBlock(location).State), getLiquidHeight(GetBlock(location).State),     getLiquidHeight(getSouthBlock(location).State),
+                getLiquidHeight(getNWBlock(location).State),    getLiquidHeight(getWestBlock(location).State), getLiquidHeight(getSWBlock(location).State)
+            };
+        }
+
         public int GetCullFlags(Location location, Block self, BlockCheck check)
         {
             int cullFlags = 0;
 
-            if (hasUpFace(location,    self, check))
+            if (check(self, getUpBlock(location)))
                 cullFlags |= (1 << 0);
 
-            if (hasDownFace(location,  self, check))
+            if (check(self, getDownBlock(location)))
                 cullFlags |= (1 << 1);
             
-            if (hasSouthFace(location, self, check))
+            if (check(self, getSouthBlock(location)))
                 cullFlags |= (1 << 2);
 
-            if (hasNorthFace(location, self, check))
+            if (check(self, getNorthBlock(location)))
                 cullFlags |= (1 << 3);
             
-            if (hasEastFace(location,  self, check))
+            if (check(self, getEastBlock(location)))
                 cullFlags |= (1 << 4);
 
-            if (hasWestFace(location,  self, check))
+            if (check(self, getWestBlock(location)))
                 cullFlags |= (1 << 5);
             
             return cullFlags;
-
         }
 
-        private bool hasUpFace(Location location, Block self, BlockCheck check) // MC Y Pos
+        private Block getUpBlock(Location location) // MC Y Pos
         {
             if (location.ChunkBlockY == Chunk.SizeY - 1)
-                return check(self, world.GetBlock(location.Up()));
+                return world.GetBlock(location.Up());
             
-            return check(self, GetBlock(location.Up()));
+            return GetBlock(location.Up());
         }
 
-        private bool hasDownFace(Location location, Block self, BlockCheck check) // MC Y Neg
+        private Block getDownBlock(Location location) // MC Y Neg
         {
             if (location.ChunkBlockY == 0)
-                return check(self, world.GetBlock(location.Down()));
+                return world.GetBlock(location.Down());
             
-            return check(self, GetBlock(location.Down()));
+            return GetBlock(location.Down());
         }
 
-        private bool hasEastFace(Location location, Block self, BlockCheck check) // MC X Pos
+        private Block getEastBlock(Location location) // MC X Pos
         {
             if (location.ChunkBlockX == Chunk.SizeX - 1)
-                return check(self, world.GetBlock(location.East()));
+                return world.GetBlock(location.East());
             
-            return check(self, GetBlock(location.East()));
+            return GetBlock(location.East());
         }
 
-        private bool hasWestFace(Location location, Block self, BlockCheck check) // MC X Neg
+        private Block getWestBlock(Location location) // MC X Neg
         {
             if (location.ChunkBlockX == 0)
-                return check(self, world.GetBlock(location.West()));
+                return world.GetBlock(location.West());
             
-            return check(self, GetBlock(location.West()));
+            return GetBlock(location.West());
         }
 
-        private bool hasSouthFace(Location location, Block self, BlockCheck check) // MC Z Pos
+        private Block getSouthBlock(Location location) // MC Z Pos
         {
             if (location.ChunkBlockZ == Chunk.SizeZ - 1)
-                return check(self, world.GetBlock(location.South()));
+                return world.GetBlock(location.South());
             
-            return check(self, GetBlock(location.South()));
+            return GetBlock(location.South());
         }
 
-        private bool hasNorthFace(Location location, Block self, BlockCheck check) // MC Z Neg
+        private Block getNorthBlock(Location location) // MC Z Neg
         {
             if (location.ChunkBlockZ == 0)
-                return check(self, world.GetBlock(location.North()));
+                return world.GetBlock(location.North());
             
-            return check(self, GetBlock(location.North()));
+            return GetBlock(location.North());
+        }
+
+        private Block getNEBlock(Location location)
+        {
+            if (location.ChunkBlockZ == 0 || location.ChunkBlockX == Chunk.SizeX - 1)
+                return world.GetBlock(location.North().East());
+            
+            return GetBlock(location.North().East());
+        }
+
+        private Block getNWBlock(Location location)
+        {
+            if (location.ChunkBlockZ == 0 || location.ChunkBlockX == 0)
+                return world.GetBlock(location.North().West());
+            
+            return GetBlock(location.North().West());
+        }
+
+        private Block getSEBlock(Location location)
+        {
+            if (location.ChunkBlockZ == Chunk.SizeZ - 1 || location.ChunkBlockX == Chunk.SizeX - 1)
+                return world.GetBlock(location.South().East());
+            
+            return GetBlock(location.South().East());
+        }
+
+        private Block getSWBlock(Location location)
+        {
+            if (location.ChunkBlockZ == Chunk.SizeZ - 1 || location.ChunkBlockX == 0)
+                return world.GetBlock(location.South().West());
+            
+            return GetBlock(location.South().West());
         }
 
     }
