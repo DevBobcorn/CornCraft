@@ -75,7 +75,6 @@ GameObject:
   - component: {fileID: 9066864819563880320}
   - component: {fileID: 3847149906659861788}
   - component: {fileID: 398729457473980423}
-  - component: {fileID: -5358038262404015315}
   - component: {fileID: 1563744187988215178}
   - component: {fileID: 3274409208979769479}
   m_Layer: 9
@@ -118,6 +117,8 @@ MonoBehaviour:
   cameraRef: {fileID: 2122183053340044964}
   visualTransform: {fileID: 9216438237624256684}
   physicMaterial: {fileID: 0}
+  ServerYaw: 0
+  ServerPitch: 0
 --- !u!114 &9066864819563880320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,10 +138,21 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9066864819563880324}
-  serializedVersion: 2
+  serializedVersion: 4
   m_Mass: 100
   m_Drag: 0
   m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 1
@@ -161,36 +173,6 @@ MonoBehaviour:
   infoAnchor: {fileID: 8085631553305989884}
   visual: {fileID: 9216438237624256684}
   usePlayerSkin: 1
---- !u!114 &-5358038262404015315
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9066864819563880324}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Actions: {fileID: -944628639613478452, guid: b3193f5e7d28c184fa4cf31151a0fa00, type: 3}
-  m_NotificationBehavior: 0
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents: []
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
-  m_DefaultActionMap: Gameplay
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
 --- !u!114 &1563744187988215178
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -236,6 +218,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 9066864819563880327}
     m_Modifications:
     - target: {fileID: -9158266751133657646, guid: d8d573645a25ec045a2f29447df1afbf, type: 3}
@@ -387,6 +370,15 @@ PrefabInstance:
       value: 9
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: d8d573645a25ec045a2f29447df1afbf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2122183053340044964}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d8d573645a25ec045a2f29447df1afbf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7901036731802146325}
   m_SourcePrefab: {fileID: 100100000, guid: d8d573645a25ec045a2f29447df1afbf, type: 3}
 --- !u!1 &8407249719643574806 stripped
 GameObject:
