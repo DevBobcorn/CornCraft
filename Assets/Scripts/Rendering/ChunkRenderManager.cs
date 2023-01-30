@@ -125,8 +125,8 @@ namespace MinecraftClient.Rendering
 
         private static readonly Chunk.BlockCheck notFullSolid = new Chunk.BlockCheck((self, neighbor) => { return !neighbor.State.FullSolid; });
         
-        private static readonly ResourceLocation WATER_STILL = new("block/water_still");
-        private static readonly ResourceLocation LAVA_STILL  = new("block/lava_still");
+        private static readonly ResourceLocation[] liquidTextures = new ResourceLocation[]
+                { new("block/water_still"), new("block/lava_still") };
         private static readonly int waterLayerIndex = ChunkRender.TypeIndex(RenderType.WATER);
         private static readonly int lavaLayerIndex  = ChunkRender.TypeIndex(RenderType.SOLID);
 
@@ -166,8 +166,6 @@ namespace MinecraftClient.Rendering
 
             chunksBeingBuilt.Add(chunkRender);
             chunkRender.State = BuildState.Building;
-
-            int2 chunkPos = new(chunkRender.ChunkX << 4, chunkRender.ChunkZ << 4);
             
             Task.Factory.StartNew(() => {
                 try
@@ -215,23 +213,22 @@ namespace MinecraftClient.Rendering
                                 var state = bloc.State;
                                 var stateId = bloc.StateId;
 
-                                if (state.InWater) // Build water here
+                                if (state.InLiquid) // Build liquid here
                                 {
-                                    int waterCullFlags = chunkData.GetCullFlags(loc, bloc, waterSurface);
-                                    if (waterCullFlags != 0)
+                                    int liquidCullFlags = chunkData.GetCullFlags(loc, bloc, waterSurface);
+                                    var liquidHeights = chunkData.GetLiquidHeights(loc);
+
+                                    var liquidLayerIndex = state.InWater ? waterLayerIndex : lavaLayerIndex;
+                                    var liquidTexture = liquidTextures[state.InWater ? 0 : 1];
+
+                                    if (liquidCullFlags != 0)
                                     {
-                                        FluidGeometry.Build(ref visualBuffer[waterLayerIndex], WATER_STILL, x, y, z, chunkPos, waterCullFlags, world.GetWaterColor(loc));
-                                        layerMask |= (1 << waterLayerIndex);
-                                        isAllEmpty = false;
-                                    }
-                                }
-                                else if (state.InLava) // Build lava here
-                                {
-                                    int lavaCullFlags = chunkData.GetCullFlags(loc, bloc, lavaSurface);
-                                    if (lavaCullFlags != 0)
-                                    {
-                                        FluidGeometry.Build(ref visualBuffer[lavaLayerIndex], LAVA_STILL, x, y, z, chunkPos, lavaCullFlags, BlockGeometry.DEFAULT_COLOR);
-                                        layerMask |= (1 << lavaLayerIndex);
+                                        FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], liquidTexture, x, y, z, liquidHeights, liquidCullFlags, world.GetWaterColor(loc));
+                                        
+                                        // TODO Remove later
+                                        FluidGeometry.BuildCollider(ref colliderVerts, x, y, z, liquidCullFlags);
+
+                                        layerMask |= (1 << liquidLayerIndex);
                                         isAllEmpty = false;
                                     }
                                 }
