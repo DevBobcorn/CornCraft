@@ -633,6 +633,7 @@ namespace MinecraftClient.Protocol.Handlers
                             
                             int chunkX = dataTypes.ReadNextInt(packetData);
                             int chunkZ = dataTypes.ReadNextInt(packetData);
+
                             if (protocolVersion >= MC_1_17_Version)
                             {
                                 ulong[]? verticalStripBitmask = null;
@@ -642,7 +643,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                                 dataTypes.ReadNextNbt(packetData); // Heightmaps
 
-                                if (pTerrain.ProcessChunkColumnData(chunkX, chunkZ, verticalStripBitmask, packetData))
+                                if (pTerrain.ProcessChunkColumnData17(chunkX, chunkZ, verticalStripBitmask, packetData))
                                     Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
                             }
                             else
@@ -650,13 +651,26 @@ namespace MinecraftClient.Protocol.Handlers
                                 bool chunksContinuous = dataTypes.ReadNextBool(packetData);
                                 if (protocolVersion >= MC_1_16_Version && protocolVersion <= MC_1_16_1_Version)
                                     dataTypes.ReadNextBool(packetData); // Ignore old data - 1.16 to 1.16.1 only
+                                
                                 ushort chunkMask = (ushort)dataTypes.ReadNextVarInt(packetData);
 
                                 dataTypes.ReadNextNbt(packetData);  // Heightmaps - 1.14 and above
 
-                                if (pTerrain.ProcessChunkColumnData(chunkX, chunkZ, chunkMask, 0, false, chunksContinuous, currentDimension, packetData))
+                                if (pTerrain.ProcessChunkColumnData16(chunkX, chunkZ, chunkMask, 0, false, chunksContinuous, currentDimension, packetData))
                                     Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
                             }
+                            break;
+                        }
+                    case PacketTypesIn.UpdateLight:
+                        {
+                            int chunkX = dataTypes.ReadNextVarInt(packetData);
+                            int chunkZ = dataTypes.ReadNextVarInt(packetData);
+
+                            if (protocolVersion >= MC_1_17_Version)
+                                pTerrain.ProcessChunkColumnLightingData17(chunkX, chunkZ, null, packetData);
+                            else
+                                pTerrain.ProcessChunkColumnLightingData16(chunkX, chunkZ, null, packetData);
+
                             break;
                         }
                     case PacketTypesIn.MapData:
@@ -807,7 +821,7 @@ namespace MinecraftClient.Protocol.Handlers
                                     int blockZ = (sectionZ * 16) + localZ;
                                     var loc1 = new Location(blockX, blockY, blockZ);
                                     handler.GetWorld().SetBlock(loc1, bloc);
-                                    locs.Add((loc1));
+                                    locs.Add(loc1);
                                 }
                             }
                             else
@@ -868,7 +882,6 @@ namespace MinecraftClient.Protocol.Handlers
                             break;
                         }
                     case PacketTypesIn.ChangeGameState:
-                        if (protocolVersion >= MC_1_15_2_Version)
                         {
                             byte changeReason = dataTypes.ReadNextByte(packetData);
                             float changeValue = dataTypes.ReadNextFloat(packetData);
@@ -894,7 +907,7 @@ namespace MinecraftClient.Protocol.Handlers
                         // TODO handler.OnChatPreviewSettingUpdate(previewsChatSetting);
                         break;
                     case PacketTypesIn.ChatPreview:
-                        // TODO Currently noy implemented
+                        // TODO Currently not implemented
                         break;
                     case PacketTypesIn.PlayerInfo:
                         {

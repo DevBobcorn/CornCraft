@@ -137,7 +137,7 @@ namespace MinecraftClient.Protocol.Handlers
         /// Reading the "Biomes" field: consists of 64 entries, representing all the biomes in the chunk section.
         /// See https://wiki.vg/Chunk_Format#Data_structure
         /// </summary>
-        private void ReadBiomesField(int chunkY, int[] biomes, Queue<byte> cache)
+        private void ReadBiomesField(int chunkY, short[] biomes, Queue<byte> cache)
         {
             // Vertical offset of a 'cell' which is 4*4*4
             int cellYOffset = chunkY << 2;
@@ -150,7 +150,7 @@ namespace MinecraftClient.Protocol.Handlers
 
             if (bitsPerEntry == 0) // Single valued
             {
-                int biomeId = dataTypes.ReadNextVarInt(cache); // Value
+                short biomeId = (short) dataTypes.ReadNextVarInt(cache); // Value
                 dataTypes.SkipNextVarInt(cache); // Data Array Length
                 // Data Array must be empty
 
@@ -209,7 +209,7 @@ namespace MinecraftClient.Protocol.Handlers
                                 biomeId = palette[(int)biomeId];
 
                                 // Set it in biome array
-                                biomes[((cellY + cellYOffset) << 4) | (cellZ << 2) | cellX] = (int)biomeId;
+                                biomes[((cellY + cellYOffset) << 4) | (cellZ << 2) | cellX] = (short) biomeId;
                                 
                             }
                     
@@ -229,10 +229,10 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="verticalStripBitmask">Chunk mask for reading data, store in bitset, used in 1.17 and 1.17.1</param>
         /// <param name="cache">Cache for reading chunk data</param>
         /// <returns>true if successfully loaded</returns>
-        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ulong[]? verticalStripBitmask, Queue<byte> cache)
+        public bool ProcessChunkColumnData17(int chunkX, int chunkZ, ulong[]? verticalStripBitmask, Queue<byte> cache)
         {
             // Biome data of this whole chunk column
-            int[]? biomes = null;
+            short[]? biomes = null;
             
             var world = handler.GetWorld();
 
@@ -246,16 +246,16 @@ namespace MinecraftClient.Protocol.Handlers
                 dataSize = dataTypes.ReadNextVarInt(cache); // Size
 
                 // Prepare an empty array and do nothing else here
-                biomes = new int[64 * chunkColumnSize];
+                biomes = new short[64 * chunkColumnSize];
             }
             else // 1.17 and 1.17.1, read biome data right here
             {
                 int biomesLength = dataTypes.ReadNextVarInt(cache); // Biomes length
-                biomes = new int[biomesLength];
+                biomes = new short[biomesLength];
 
                 // Read all biome data at once before other chunk data
                 for (int i = 0; i < biomesLength; i++)
-                    biomes[i] = dataTypes.ReadNextVarInt(cache); // Biomes
+                    biomes[i] = (short) dataTypes.ReadNextVarInt(cache); // Biomes
                 
                 dataSize = dataTypes.ReadNextVarInt(cache); // Size
             }
@@ -331,10 +331,10 @@ namespace MinecraftClient.Protocol.Handlers
                 }
             }
             
-            UnityEngine.Debug.Log($"Bytes left (should be lighting data): {cache.Count}");
-            
-            // TODO Parse lighting data
+            // Parse lighting data
+            ProcessChunkColumnLightingData17(chunkX, chunkZ, null, cache);
 
+            // All data in packet should be parsed now, with nothing left
 
             // Set the column's chunk mask and load state
             var c = world[chunkX, chunkZ];
@@ -358,7 +358,7 @@ namespace MinecraftClient.Protocol.Handlers
         }
 
         /// <summary>
-        /// Process chunk column data from the server and (un)load the chunk from the Minecraft world - 1.17 below
+        /// Process chunk column data from the server and (un)load the chunk from the Minecraft world - 1.16
         /// </summary>
         /// <param name="chunkX">Chunk X location</param>
         /// <param name="chunkZ">Chunk Z location</param>
@@ -369,21 +369,21 @@ namespace MinecraftClient.Protocol.Handlers
         /// <param name="currentDimension">Current dimension type (0 = overworld)</param>
         /// <param name="cache">Cache for reading chunk data</param>
         /// <returns>true if successfully loaded</returns>
-        public bool ProcessChunkColumnData(int chunkX, int chunkZ, ushort chunkMask, ushort chunkMask2, bool hasSkyLight, bool chunksContinuous, int currentDimension, Queue<byte> cache)
+        public bool ProcessChunkColumnData16(int chunkX, int chunkZ, ushort chunkMask, ushort chunkMask2, bool hasSkyLight, bool chunksContinuous, int currentDimension, Queue<byte> cache)
         {
             int biomesLength = 0;
                                 
             if (protocolVersion >= ProtocolMinecraft.MC_1_16_2_Version && chunksContinuous)
                 biomesLength = dataTypes.ReadNextVarInt(cache); // Biomes length - 1.16.2 and above
             
-            int[] biomes = new int[biomesLength];
+            short[] biomes = new short[biomesLength];
 
             if (protocolVersion >= ProtocolMinecraft.MC_1_15_Version && chunksContinuous)
             {
                 if (protocolVersion >= ProtocolMinecraft.MC_1_16_2_Version)
                 {
                     for (int i = 0; i < biomesLength; i++) // Biomes - 1.16.2 and above
-                        biomes[i] = dataTypes.ReadNextVarInt(cache);
+                        biomes[i] = (short) dataTypes.ReadNextVarInt(cache);
                 }
                 else
                     dataTypes.ReadData(1024 * 4, cache); // Biomes - 1.15 and above
@@ -548,6 +548,86 @@ namespace MinecraftClient.Protocol.Handlers
                 EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new(chunkX, chunkZ))
             );
             return true;
+        }
+
+        /// <summary>
+        /// Process chunk column lighting data from the server - 1.17 and above
+        /// </summary>
+        public void ProcessChunkColumnLightingData17(int chunkX, int chunkZ, byte[]? lighting, Queue<byte> cache)
+        {
+            var trustEdges = dataTypes.ReadNextBool(cache);
+
+            // Sky Light Mask
+            var skyLightMask = dataTypes.ReadNextULongArray(cache);
+
+            // Block Light Mask
+            var blockLightMask = dataTypes.ReadNextULongArray(cache);
+
+            // Empty Sky Light Mask
+            var emptySkyLightMask = dataTypes.ReadNextULongArray(cache);
+
+            // Empty Block Light Mask
+            var emptyBlockLightMask = dataTypes.ReadNextULongArray(cache);
+
+            // Sky Light Arrays
+            int skyLightArrayCount = dataTypes.ReadNextVarInt(cache);
+
+            for (int i = 0;i < skyLightArrayCount;i++)
+            {
+                var skyLightArray = dataTypes.ReadNextByteArray(cache);
+
+            }
+            
+            // Block Light Arrays
+            int blockLightArrayCount = dataTypes.ReadNextVarInt(cache);
+
+            for (int i = 0;i < blockLightArrayCount;i++)
+            {
+                var blockLightArray = dataTypes.ReadNextByteArray(cache);
+
+            }
+        }
+
+        /// <summary>
+        /// Process chunk column lighting data from the server - 1.16
+        /// </summary>
+        public void ProcessChunkColumnLightingData16(int chunkX, int chunkZ, byte[]? lighting, Queue<byte> cache)
+        {
+            var trustEdges = dataTypes.ReadNextBool(cache);
+            
+            // Sky Light Mask
+            var skyLightMask = dataTypes.ReadNextVarInt(cache);
+
+            // Block Light Mask
+            var blockLightMask = dataTypes.ReadNextVarInt(cache);
+
+            // Empty Sky Light Mask
+            var emptySkyLightMask = dataTypes.ReadNextVarInt(cache);
+
+            // Empty Block Light Mask
+            var emptyBlockLightMask = dataTypes.ReadNextVarInt(cache);
+
+            int skyLightArrayCount = 0, blockLightArrayCount = 0;
+
+            // Sky light arrays From one chunk below bottom to one chunk above top, 18 chunks of lighting data in a column
+            for (int i = 0;i < 18;i++)
+            {
+                if ((skyLightMask & (1 << i)) == 0)
+                    continue; // Skip
+
+                var skyLightArray = dataTypes.ReadNextByteArray(cache);
+                skyLightArrayCount++;
+            }
+            
+            // Sky light arrays From one chunk below bottom to one chunk above top, 18 chunks of lighting data in a column
+            for (int i = 0;i < 18;i++)
+            {
+                if ((blockLightMask & (1 << i)) == 0)
+                    continue; // Skip
+
+                var blockLightArray = dataTypes.ReadNextByteArray(cache);
+                blockLightArrayCount++;
+            }
         }
 
     }
