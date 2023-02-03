@@ -21,7 +21,11 @@ namespace MinecraftClient.Mapping
         /// </summary>
         private readonly Chunk?[] chunks;
 
-        private readonly int[]    biomes;
+        private readonly short[] biomes;
+        private readonly byte[] lighting;
+
+        private bool lightingPresent = false;
+        public bool LightingPresent => lightingPresent;
 
         /// <summary>
         /// Create a new ChunkColumn
@@ -31,7 +35,9 @@ namespace MinecraftClient.Mapping
             world = parent;
             ColumnSize = size;
             chunks = new Chunk?[size];
-            biomes = new int[4 * 4 * 4 * size];
+            biomes = new short[64 * size];
+            lighting = new byte[4096 * (size + 2)];
+            Array.Fill<byte>(lighting, 0xFF);
         }
 
         /// <summary>
@@ -68,7 +74,7 @@ namespace MinecraftClient.Mapping
             }
         }
 
-        public void SetBiomes(int[] biomes)
+        public void SetBiomes(short[] biomes)
         {
             if (biomes.Length == this.biomes.Length)
                 Array.Copy(biomes, this.biomes, biomes.Length);
@@ -82,11 +88,18 @@ namespace MinecraftClient.Mapping
             return index < biomes.Length ? BiomePalette.INSTANCE.FromId(biomes[index]) : BiomePalette.EMPTY;
         }
 
-        public int GetBiomeId(Location location)
+        public short GetBiomeId(Location location)
         {
             int index = (location.ChunkBlockY << 4) | (location.ChunkBlockZ << 2) | location.ChunkBlockX;
-            return index < biomes.Length ? biomes[index] : -1;
+            return index < biomes.Length ? biomes[index] : (short) -1;
         }
 
+        public void SetLighting(byte[] lighting)
+        {
+            if (lighting.Length == this.lighting.Length)
+                Array.Copy(lighting, this.lighting, lighting.Length);
+            else
+                Debug.LogWarning($"Lighting data length inconsistent: {lighting.Length} {this.lighting.Length}");
+        }
     }
 }
