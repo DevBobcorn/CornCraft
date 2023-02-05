@@ -666,11 +666,7 @@ namespace MinecraftClient.Protocol.Handlers
                             int chunkX = dataTypes.ReadNextVarInt(packetData);
                             int chunkZ = dataTypes.ReadNextVarInt(packetData);
 
-                            if (protocolVersion >= MC_1_17_Version)
-                                pTerrain.ProcessChunkColumnLightingData17(chunkX, chunkZ, null, packetData);
-                            else
-                                pTerrain.ProcessChunkColumnLightingData16(chunkX, chunkZ, null, packetData);
-
+                            pTerrain.ProcessChunkLightData(chunkX, chunkZ, packetData);
                             break;
                         }
                     case PacketTypesIn.MapData:

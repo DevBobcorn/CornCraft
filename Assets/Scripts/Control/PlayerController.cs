@@ -315,7 +315,7 @@ namespace MinecraftClient.Control
         public string GetDebugInfo()
         {
             string targetBlockInfo = string.Empty;
-            var loc = CoordConvert.Unity2MC(transform.position);
+            var loc = ServerLocation;
             var world = game!.GetWorld();
 
             var target = interactionUpdater!.TargetLocation;
@@ -327,14 +327,16 @@ namespace MinecraftClient.Control
                     targetBlockInfo = targetBlock.ToString();
             }
 
+            var lightInfo = $"sky {world?.GetSkyLight(loc)} block {world?.GetBlockLight(loc)}";
+
             var velocity = playerRigidbody!.velocity;
             // Visually swap xz velocity to fit vanilla
             var veloInfo = $"Vel:\t{velocity.z:0.00}\t{velocity.y:0.00}\t{velocity.x:0.00}\n({velocity.magnitude:0.000})";
 
             if (statusUpdater!.Status.Spectating)
-                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
+                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nLighting:\t{lightInfo}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
             else
-                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\n{statusUpdater!.Status}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
+                return $"Position:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nLighting:\t{lightInfo}\n{statusUpdater!.Status}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
 
         }
 

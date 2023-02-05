@@ -22,7 +22,7 @@ namespace MinecraftClient.Mapping
         private readonly Chunk?[] chunks;
 
         private readonly short[] biomes;
-        private readonly byte[] lighting;
+        private readonly byte[] skyLight, blockLight;
 
         private bool lightingPresent = false;
         public bool LightingPresent => lightingPresent;
@@ -36,8 +36,8 @@ namespace MinecraftClient.Mapping
             ColumnSize = size;
             chunks = new Chunk?[size];
             biomes = new short[64 * size];
-            lighting = new byte[4096 * (size + 2)];
-            Array.Fill<byte>(lighting, 0xFF);
+            skyLight = new byte[4096 * (size + 2)];
+            blockLight = new byte[4096 * (size + 2)];
         }
 
         /// <summary>
@@ -94,12 +94,32 @@ namespace MinecraftClient.Mapping
             return index < biomes.Length ? biomes[index] : (short) -1;
         }
 
-        public void SetLighting(byte[] lighting)
+        public void SetLights(byte[] skyLight, byte[] blockLight)
         {
-            if (lighting.Length == this.lighting.Length)
-                Array.Copy(lighting, this.lighting, lighting.Length);
+            if (skyLight.Length == this.skyLight.Length && blockLight.Length == this.blockLight.Length)
+            {
+                Array.Copy(skyLight,   this.skyLight,   skyLight.Length);
+                Array.Copy(blockLight, this.blockLight, blockLight.Length);
+
+                lightingPresent = true;
+            }
             else
-                Debug.LogWarning($"Lighting data length inconsistent: {lighting.Length} {this.lighting.Length}");
+                Debug.LogWarning($"Lighting data length inconsistent: Sky Light: {skyLight.Length} {this.skyLight.Length} Block Light: {blockLight.Length} {this.blockLight.Length}");
         }
+
+        public byte GetSkyLight(Location location)
+        {
+            // Move up by one chunk
+            int index = (((int) location.Y + Chunk.SizeY) << 8) | (location.ChunkBlockZ << 4) | location.ChunkBlockX;
+            return lightingPresent ? skyLight[index] : (byte) 0;
+        }
+
+        public byte GetBlockLight(Location location)
+        {
+            // Move up by one chunk
+            int index = (((int) location.Y + Chunk.SizeY) << 8) | (location.ChunkBlockZ << 4) | location.ChunkBlockX;
+            return lightingPresent ? blockLight[index] : (byte) 0;
+        }
+
     }
 }
