@@ -181,7 +181,7 @@ namespace MinecraftClient.Mapping
             if (column != null)
                 return column.GetSkyLight(location);
             
-            return (byte) 7; // Not available
+            return (byte) 0; // Not available
         }
 
         public byte GetBlockLight(Location location)
@@ -190,7 +190,7 @@ namespace MinecraftClient.Mapping
             if (column != null)
                 return column.GetBlockLight(location);
             
-            return (byte) 6; // Not available
+            return (byte) 0; // Not available
         }
 
         private const int radius = 2;

@@ -84,14 +84,22 @@ namespace MinecraftClient.Mapping
 
         public Biome GetBiome(Location location)
         {
-            int index = (location.ChunkBlockY << 4) | (location.ChunkBlockZ << 2) | location.ChunkBlockX;
-            return index < biomes.Length ? BiomePalette.INSTANCE.FromId(biomes[index]) : BiomePalette.EMPTY;
+            int index = ((((int) location.Y - World.GetDimension().minY) >> 2) << 4) | ((location.ChunkBlockZ >> 2) << 2) | (location.ChunkBlockX >> 2);
+
+            if (index < 0 || index >= biomes.Length)
+                return BiomePalette.EMPTY;
+
+            return BiomePalette.INSTANCE.FromId(biomes[index]);
         }
 
         public short GetBiomeId(Location location)
         {
-            int index = (location.ChunkBlockY << 4) | (location.ChunkBlockZ << 2) | location.ChunkBlockX;
-            return index < biomes.Length ? biomes[index] : (short) -1;
+            int index = ((((int) location.Y - World.GetDimension().minY) >> 2) << 4) | ((location.ChunkBlockZ >> 2) << 2) | (location.ChunkBlockX >> 2);
+
+            if (index < 0 || index >= biomes.Length)
+                return (short) -1;
+
+            return biomes[index];
         }
 
         public void SetLights(byte[] skyLight, byte[] blockLight)
@@ -110,14 +118,22 @@ namespace MinecraftClient.Mapping
         public byte GetSkyLight(Location location)
         {
             // Move up by one chunk
-            int index = (((int) location.Y + Chunk.SizeY) << 8) | (location.ChunkBlockZ << 4) | location.ChunkBlockX;
+            int index = (((int) location.Y - World.GetDimension().minY + Chunk.SizeY) << 8) | (location.ChunkBlockZ << 4) | location.ChunkBlockX;
+            
+            if (index < 0 || index >= skyLight.Length)
+                return (byte) 0;
+            
             return lightingPresent ? skyLight[index] : (byte) 0;
         }
 
         public byte GetBlockLight(Location location)
         {
             // Move up by one chunk
-            int index = (((int) location.Y + Chunk.SizeY) << 8) | (location.ChunkBlockZ << 4) | location.ChunkBlockX;
+            int index = (((int) location.Y - World.GetDimension().minY + Chunk.SizeY) << 8) | (location.ChunkBlockZ << 4) | location.ChunkBlockX;
+            
+            if (index < 0 || index >= blockLight.Length)
+                return (byte) 0;
+
             return lightingPresent ? blockLight[index] : (byte) 0;
         }
 
