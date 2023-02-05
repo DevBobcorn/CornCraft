@@ -25,8 +25,6 @@ using MinecraftClient.UI;
 using MinecraftClient.Mapping;
 using MinecraftClient.Inventory;
 
-using DistantLands.Cozy;
-
 namespace MinecraftClient
 {
     public class CornClient : MonoBehaviour, IMinecraftComHandler
@@ -141,7 +139,6 @@ namespace MinecraftClient
         public World GetWorld() => world;
         private ChunkRenderManager? chunkRenderManager;
         public ChunkRenderManager? ChunkRenderManager => chunkRenderManager;
-        private CozyWeather? cozyWeather;
         public bool IsMovementReady()
         {
             if (!locationReceived || chunkRenderManager is null)
@@ -417,8 +414,6 @@ namespace MinecraftClient
             chunkRenderManager = holder.chunkRenderManager;
             // Get entity render manager
             entityRenderManager = holder.entityRenderManager;
-            // Get cozy weather object
-            cozyWeather = holder.cozyWeather;
 
             // Create player entity
             var playerObj = GameObject.Instantiate(holder.playerPrefab);
@@ -1797,23 +1792,6 @@ namespace MinecraftClient
 
             this.timeOfDay = TimeOfDay;
             timeElapsedSinceUpdate = 0F;
-
-            if (cozyWeather is not null) // Update cozy weather time
-            {
-                var timeProfile = cozyWeather.perennialProfile;
-
-                // Update pause time
-                if (TimeElapsing == timeProfile.pauseTime)
-                    timeProfile.pauseTime = !TimeElapsing;
-
-                int cozyTick = (int)((CurrentTimeOfDay + 6000L) % 24000L);
-
-                if (Mathf.Abs(cozyWeather.currentTicks - cozyTick) > 25F)
-                {
-                    cozyWeather.currentTicks = cozyTick;
-                    Debug.Log($"Weather time set to {cozyTick}");
-                }
-            }
 
             // calculate server tps
             if (lastAge != 0)
