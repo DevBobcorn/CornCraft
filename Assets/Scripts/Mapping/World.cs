@@ -14,7 +14,9 @@ namespace MinecraftClient.Mapping
         /// <summary>
         /// The chunks contained into the Minecraft world
         /// </summary>
-        private ConcurrentDictionary<int2, ChunkColumn> chunks = new();
+        private readonly ConcurrentDictionary<int2, ChunkColumn> chunks = new();
+
+        public readonly ConcurrentDictionary<int2, Queue<byte>> LightDataCache = new();
         
         /// <summary>
         /// The dimension info of the world
@@ -171,6 +173,24 @@ namespace MinecraftClient.Mapping
                 return column.GetBiomeId(location);
             
             return -1; // Not available
+        }
+
+        public byte GetSkyLight(Location location)
+        {
+            var column = GetChunkColumn(location);
+            if (column != null)
+                return column.GetSkyLight(location);
+            
+            return (byte) 7; // Not available
+        }
+
+        public byte GetBlockLight(Location location)
+        {
+            var column = GetChunkColumn(location);
+            if (column != null)
+                return column.GetBlockLight(location);
+            
+            return (byte) 6; // Not available
         }
 
         private const int radius = 2;
@@ -354,7 +374,7 @@ namespace MinecraftClient.Mapping
         /// </summary>
         public void Clear()
         {
-            chunks = new();
+            chunks.Clear();
             chunkCnt = chunkLoadNotCompleted = 0;
         }
 

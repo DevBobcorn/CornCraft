@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Unity.Mathematics;
+
 using MinecraftClient.Event;
 using MinecraftClient.Mapping;
 
@@ -332,7 +334,10 @@ namespace MinecraftClient.Protocol.Handlers
             }
             
             // Parse lighting data
-            ProcessChunkColumnLightingData17(chunkX, chunkZ, null, cache);
+            var skyLight   = new byte[4096 * (chunkColumnSize + 2)];
+            var blockLight = new byte[4096 * (chunkColumnSize + 2)];
+
+            ReadChunkColumnLightData17(ref skyLight, ref blockLight, cache);
 
             // All data in packet should be parsed now, with nothing left
 
@@ -345,6 +350,8 @@ namespace MinecraftClient.Protocol.Handlers
                 else if (biomes.Length > 0)
                     UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}, should be {c.ColumnSize * 64}");
                 
+                c.SetLights(skyLight, blockLight);
+
                 c!.ChunkMask = chunkMask;
                 c!.FullyLoaded = true;
             }
@@ -538,7 +545,24 @@ namespace MinecraftClient.Protocol.Handlers
                     c.SetBiomes(biomes);
                 else if (biomes.Length > 0)
                     UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}, should be {c.ColumnSize * 64}");
-                
+
+                // Check if light data for this chunk column is present
+                Queue<byte>? lightData;
+                int2 chunkKey = new(chunkX, chunkZ);
+
+                if (world.LightDataCache.TryRemove(chunkKey, out lightData))
+                {
+                    // Parse lighting data
+                    var skyLight   = new byte[4096 * (chunkColumnSize + 2)];
+                    var blockLight = new byte[4096 * (chunkColumnSize + 2)];
+
+                    ReadChunkColumnLightData16(ref skyLight, ref blockLight, lightData);
+
+                    c.SetLights(skyLight, blockLight);
+
+                    //UnityEngine.Debug.Log($"Lighting up chunk column [{chunkX}, {chunkZ}]");
+                }
+                    
                 c!.ChunkMask = chunkMask;
                 c!.FullyLoaded = true;
             }
@@ -551,9 +575,9 @@ namespace MinecraftClient.Protocol.Handlers
         }
 
         /// <summary>
-        /// Process chunk column lighting data from the server - 1.17 and above
+        /// Read chunk column light data from the server - 1.17 and above
         /// </summary>
-        public void ProcessChunkColumnLightingData17(int chunkX, int chunkZ, byte[]? lighting, Queue<byte> cache)
+        public void ReadChunkColumnLightData17(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
         {
             var trustEdges = dataTypes.ReadNextBool(cache);
 
@@ -589,9 +613,9 @@ namespace MinecraftClient.Protocol.Handlers
         }
 
         /// <summary>
-        /// Process chunk column lighting data from the server - 1.16
+        /// Read chunk column light data from the server - 1.16
         /// </summary>
-        public void ProcessChunkColumnLightingData16(int chunkX, int chunkZ, byte[]? lighting, Queue<byte> cache)
+        public void ReadChunkColumnLightData16(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
         {
             var trustEdges = dataTypes.ReadNextBool(cache);
             
@@ -617,9 +641,26 @@ namespace MinecraftClient.Protocol.Handlers
 
                 var skyLightArray = dataTypes.ReadNextByteArray(cache);
                 skyLightArrayCount++;
+
+                var chunkBlockY = i * 16;
+
+                // 3 bits for x, 4 bits for z
+                for (int halfX = 0;halfX < 8;halfX++)
+                    for (int z = 0;z < 16;z++)
+                        for (int y = 0;y < 16;y++)
+                        {
+                            int srcIndex = (y << 7) + (z << 3) + halfX;
+                            int dstIndex = ((y + chunkBlockY) << 8) + (z << 4) + (halfX << 1);
+
+                            // Low bits => even x indices
+                            skyLight[dstIndex] = (byte) (skyLightArray[srcIndex] & 0xF);
+
+                            // High bits => odd x indices
+                            skyLight[dstIndex + 1] = (byte) (skyLightArray[srcIndex] >> 4);
+                        }
             }
             
-            // Sky light arrays From one chunk below bottom to one chunk above top, 18 chunks of lighting data in a column
+            // Block light arrays From one chunk below bottom to one chunk above top, 18 chunks of lighting data in a column
             for (int i = 0;i < 18;i++)
             {
                 if ((blockLightMask & (1 << i)) == 0)
@@ -627,8 +668,58 @@ namespace MinecraftClient.Protocol.Handlers
 
                 var blockLightArray = dataTypes.ReadNextByteArray(cache);
                 blockLightArrayCount++;
+
+                var chunkBlockY = i * 16;
+
+                // 3 bits for x, 4 bits for z
+                for (int halfX = 0;halfX < 8;halfX++)
+                    for (int z = 0;z < 16;z++)
+                        for (int y = 0;y < 16;y++)
+                        {
+                            int srcIndex = (y << 7) + (z << 3) + halfX;
+                            int dstIndex = ((y + chunkBlockY) << 8) + (z << 4) + (halfX << 1);
+
+                            // Low bits => even x indices
+                            blockLight[dstIndex] = (byte) (blockLightArray[srcIndex] & 0xF);
+
+                            // High bits => odd x indices
+                            blockLight[dstIndex + 1] = (byte) (blockLightArray[srcIndex] >> 4);
+                        }
+
             }
         }
 
+        /// <summary>
+        /// Process chunk column light data from the server
+        /// </summary>
+        public void ProcessChunkLightData(int chunkX, int chunkZ, Queue<byte> cache)
+        {
+            World world = handler.GetWorld();
+            var chunkColumn = world.GetChunkColumn(chunkX, chunkZ);
+
+            if (chunkColumn is null)
+            {
+                // Save light data for later use (when the chunk data is ready)
+                world.LightDataCache.AddOrUpdate(new(chunkX, chunkZ), (_) => cache, (_, _) => cache);
+
+            }
+            else
+            {
+                int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
+
+                var skyLight   = new byte[4096 * (chunkColumnSize + 2)];
+                var blockLight = new byte[4096 * (chunkColumnSize + 2)];
+                
+                if (protocolVersion >= ProtocolMinecraft.MC_1_17_Version)
+                    ReadChunkColumnLightData17(ref skyLight, ref blockLight, cache);
+                else
+                    ReadChunkColumnLightData16(ref skyLight, ref blockLight, cache);
+                
+                chunkColumn.SetLights(skyLight, blockLight);
+
+                //UnityEngine.Debug.Log($"Updating light data for chunk [{chunkX}, {chunkZ}]");
+            }
+            
+        }
     }
 }
