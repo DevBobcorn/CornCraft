@@ -449,7 +449,7 @@ namespace MinecraftClient.Rendering
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e.Message + ":" + e.StackTrace);
+                    Debug.LogError($"{e.Message}: {e.StackTrace}");
 
                     // Remove chunk from list
                     if (chunkRender is not null)
