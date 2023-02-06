@@ -198,39 +198,6 @@ namespace MinecraftClient
             if (Input.GetKeyDown(KeyCode.Q))
             {
                 ShowNotification("Moew~");
-
-                var playerLoc = playerData.location;
-                
-                var baseX = playerLoc.ChunkX << 4;
-                var baseY = 0; // playerLoc.ChunkY << 4;
-                var baseZ = playerLoc.ChunkZ << 4;
-
-                var ballScale = new Vector3(0.2F, 0.2F, 0.2F);
-
-                var column = world.GetChunkColumn(playerLoc.ChunkX, playerLoc.ChunkZ);
-
-                for (int x = 0;x < 16;x++)
-                    for (int y = 0;y < 256;y++)
-                        for (int z = 0;z < 16;z++)
-                        {
-                            var ballLoc = new Location(baseX + x, baseY + y, baseZ + z);
-                            var blockLight = world.GetBlockLight(ballLoc);
-
-                            if (blockLight > 0)
-                            {
-                                var ball = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                                ball.name = $"Light {blockLight}";
-
-                                ball.transform.position = CoordConvert.MC2Unity(ballLoc);
-                                ball.transform.localScale = ballScale;
-                                
-                                ball.GetComponent<MeshRenderer>().material.color = new Color32((byte) (blockLight << 4),
-                                        (byte) (blockLight << 4), (byte) (blockLight << 4), 255);
-                                
-                            }
-
-                        }
-                Debug.Log($"Debugging chunk [{playerLoc.ChunkX}, {playerLoc.ChunkZ}]");
             }
 
             // Time update
