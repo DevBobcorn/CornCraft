@@ -593,22 +593,49 @@ namespace MinecraftClient.Protocol.Handlers
             // Empty Block Light Mask
             var emptyBlockLightMask = dataTypes.ReadNextULongArray(cache);
 
+            int ptr = 0, ulLen = sizeof(ulong) << 3;
+
             // Sky Light Arrays
             int skyLightArrayCount = dataTypes.ReadNextVarInt(cache);
+            var skyLightIndices = new int[skyLightArrayCount];
+
+            for (int li = 0;li < skyLightMask.Length;li++)
+                for (int bit = 0;bit < ulLen;bit++)
+                {
+                    if ((skyLightMask[li] & (1UL << bit)) != 0)
+                        skyLightIndices[ptr++] = li * ulLen + bit;
+                }
+            
+            if (ptr != skyLightArrayCount)
+                UnityEngine.Debug.Log($"Sky light data mismatch with data: {skyLightArrayCount} {ptr} {skyLightMask[0]}");
 
             for (int i = 0;i < skyLightArrayCount;i++)
             {
                 var skyLightArray = dataTypes.ReadNextByteArray(cache);
+                var chunkBlockY = skyLightIndices[i] * 16;
 
+                ReadLightArray(skyLightArray, chunkBlockY, ref skyLight);
             }
             
             // Block Light Arrays
             int blockLightArrayCount = dataTypes.ReadNextVarInt(cache);
+            var blockLightIndices = new int[blockLightArrayCount];
+
+            ptr = 0;
+
+            for (int li = 0;li < blockLightMask.Length;li++)
+                for (int bit = 0;bit < ulLen;bit++)
+                {
+                    if ((blockLightMask[li] & (1UL << bit)) != 0)
+                        blockLightIndices[ptr++] = li * ulLen + bit;
+                }
 
             for (int i = 0;i < blockLightArrayCount;i++)
             {
                 var blockLightArray = dataTypes.ReadNextByteArray(cache);
+                var chunkBlockY = blockLightIndices[i] * 16;
 
+                ReadLightArray(blockLightArray, chunkBlockY, ref blockLight);
             }
         }
 
@@ -631,62 +658,47 @@ namespace MinecraftClient.Protocol.Handlers
             // Empty Block Light Mask
             var emptyBlockLightMask = dataTypes.ReadNextVarInt(cache);
 
-            int skyLightArrayCount = 0, blockLightArrayCount = 0;
-
-            // Sky light arrays From one chunk below bottom to one chunk above top, 18 chunks of lighting data in a column
-            for (int i = 0;i < 18;i++)
+            // Sky light arrays
+            for (int i = 0;i < 18;i++) //  // From one chunk below bottom to one chunk above top, 18 chunks in a column
             {
                 if ((skyLightMask & (1 << i)) == 0)
                     continue; // Skip
 
                 var skyLightArray = dataTypes.ReadNextByteArray(cache);
-                skyLightArrayCount++;
-
                 var chunkBlockY = i * 16;
 
-                // 3 bits for x, 4 bits for z
-                for (int halfX = 0;halfX < 8;halfX++)
-                    for (int z = 0;z < 16;z++)
-                        for (int y = 0;y < 16;y++)
-                        {
-                            int srcIndex = (y << 7) + (z << 3) + halfX;
-                            int dstIndex = ((y + chunkBlockY) << 8) + (z << 4) + (halfX << 1);
-
-                            // Low bits => even x indices
-                            skyLight[dstIndex] = (byte) (skyLightArray[srcIndex] & 0xF);
-
-                            // High bits => odd x indices
-                            skyLight[dstIndex + 1] = (byte) (skyLightArray[srcIndex] >> 4);
-                        }
+                ReadLightArray(skyLightArray, chunkBlockY, ref skyLight);
             }
             
-            // Block light arrays From one chunk below bottom to one chunk above top, 18 chunks of lighting data in a column
-            for (int i = 0;i < 18;i++)
+            // Block light arrays
+            for (int i = 0;i < 18;i++) // From one chunk below bottom to one chunk above top, 18 chunks in a column
             {
                 if ((blockLightMask & (1 << i)) == 0)
                     continue; // Skip
 
                 var blockLightArray = dataTypes.ReadNextByteArray(cache);
-                blockLightArrayCount++;
-
                 var chunkBlockY = i * 16;
 
-                // 3 bits for x, 4 bits for z
-                for (int halfX = 0;halfX < 8;halfX++)
-                    for (int z = 0;z < 16;z++)
-                        for (int y = 0;y < 16;y++)
-                        {
-                            int srcIndex = (y << 7) + (z << 3) + halfX;
-                            int dstIndex = ((y + chunkBlockY) << 8) + (z << 4) + (halfX << 1);
-
-                            // Low bits => even x indices
-                            blockLight[dstIndex] = (byte) (blockLightArray[srcIndex] & 0xF);
-
-                            // High bits => odd x indices
-                            blockLight[dstIndex + 1] = (byte) (blockLightArray[srcIndex] >> 4);
-                        }
-
+                ReadLightArray(blockLightArray, chunkBlockY, ref blockLight);
             }
+        }
+
+        private void ReadLightArray(byte[] srcArray, int chunkBlockY, ref byte[] light)
+        {
+            // 3 bits for x, 4 bits for z
+            for (int halfX = 0;halfX < 8;halfX++)
+                for (int z = 0;z < 16;z++)
+                    for (int y = 0;y < 16;y++)
+                    {
+                        int srcIndex = (y << 7) + (z << 3) + halfX;
+                        int dstIndex = ((y + chunkBlockY) << 8) + (z << 4) + (halfX << 1);
+
+                        // Low bits => even x indices
+                        light[dstIndex] = (byte) (srcArray[srcIndex] & 0xF);
+
+                        // High bits => odd x indices
+                        light[dstIndex + 1] = (byte) (srcArray[srcIndex] >> 4);
+                    }
         }
 
         /// <summary>
