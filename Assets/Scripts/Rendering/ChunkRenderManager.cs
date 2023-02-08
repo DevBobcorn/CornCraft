@@ -2,7 +2,6 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 using UnityEngine;
@@ -38,15 +37,17 @@ namespace MinecraftClient.Rendering
         private Dictionary<int2, ChunkRenderColumn> columns = new();
 
         // Both manipulated on Unity main thread only
-        private PriorityQueue<ChunkRender> chunksToBeBuild = new();
-        private List<ChunkRender>         chunksBeingBuilt = new();
+        private PriorityQueue<ChunkRender> chunkRendersToBeBuilt = new();
+        private List<ChunkRender> chunksBeingBuilt = new();
 
         private CornClient? game;
+        private World? world;
+        private ChunkRenderBuilder? builder;
 
         // Terrain collider for movement
         private MeshCollider? movementCollider, liquidCollider;
 
-        public string GetDebugInfo() => $"QueC: {chunksToBeBuild.Count}\t BldC: {chunksBeingBuilt.Count}";
+        public string GetDebugInfo() => $"QueC: {chunkRendersToBeBuilt.Count}\t BldC: {chunksBeingBuilt.Count}";
 
         #region Chunk management
         private ChunkRenderColumn CreateChunkRenderColumn(int chunkX, int chunkZ)
@@ -93,55 +94,25 @@ namespace MinecraftClient.Rendering
             
             return column.IsReady();
         }
-
-        public bool IsChunkDataReady(int chunkX, int chunkY, int chunkZ)
-        {
-            if (chunkY < 0 || chunkY * Chunk.SizeY >= World.GetDimension().height)
-            {
-                // Above the sky or below the bedrock, treat it as ready empty chunks...
-                return true;
-            }
-            else
-            {
-                var column = game!.GetWorld().GetChunkColumn(chunkX, chunkZ);
-                if (column is not null)
-                {
-                    // Chunk position is valid. If this chunk we're getting
-                    // is null, it means this chunks is filled with air,
-                    // and in this case the chunk data is also ready.
-                    return true;
-                }
-                else // Chunk position is valid, but its data is still not known (not loaded)
-                    return false;
-                
-            }
-        }
-
         #endregion
 
         #region Chunk building
-        private static readonly Chunk.BlockCheck waterSurface = new Chunk.BlockCheck((self, neighbor) => { return !(neighbor.State.InWater || neighbor.State.FullSolid); });
-        private static readonly Chunk.BlockCheck lavaSurface  = new Chunk.BlockCheck((self, neighbor) => { return !(neighbor.State.InLava  || neighbor.State.FullSolid); });
-
-        private static readonly Chunk.BlockCheck notFullSolid = new Chunk.BlockCheck((self, neighbor) => { return !neighbor.State.FullSolid; });
-        
-        private static readonly ResourceLocation[] liquidTextures = new ResourceLocation[]
-                { new("block/water_still"), new("block/lava_still") };
-        private static readonly int waterLayerIndex = ChunkRender.TypeIndex(RenderType.WATER);
-        private static readonly int lavaLayerIndex  = ChunkRender.TypeIndex(RenderType.SOLID);
-
         public void BuildChunkRender(ChunkRender chunkRender)
         {
-            var chunkColumnData = game!.GetWorld()[chunkRender.ChunkX, chunkRender.ChunkZ];
+            if (world is null)
+                return;
+
+            var chunkColumnData = world[chunkRender.ChunkX, chunkRender.ChunkZ];
+
             if (chunkColumnData is null) // Chunk column data unloaded, cancel
             {
                 int2 chunkCoord = new(chunkRender.ChunkX, chunkRender.ChunkZ);
                 if (columns.ContainsKey(chunkCoord))
                 {
-                    columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
+                    columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunkRendersToBeBuilt);
                     columns.Remove(chunkCoord);
                 }
-                chunkRender.State = BuildState.Cancelled;
+                chunkRender.State = ChunkBuildState.Cancelled;
                 return;
             }
 
@@ -149,7 +120,7 @@ namespace MinecraftClient.Rendering
 
             if (chunkData is null) // Chunk not available, delay
             {
-                chunkRender.State = BuildState.Delayed;
+                chunkRender.State = ChunkBuildState.Delayed;
                 return;
             }
 
@@ -158,310 +129,28 @@ namespace MinecraftClient.Rendering
 
             if (!chunkRender.AllNeighborDataPresent)
             {
-                chunkRender.State = BuildState.Cancelled;
-                return; // Not all neighbor data ready, just cancel
+                chunkRender.State = ChunkBuildState.Delayed;
+                return; // Not all neighbor data ready, delay it
             }
 
-            var ts = chunkRender.TokenSource = new CancellationTokenSource();
-
             chunksBeingBuilt.Add(chunkRender);
-            chunkRender.State = BuildState.Building;
+            chunkRender.State = ChunkBuildState.Building;
+
+            chunkRender.TokenSource = new();
             
             Task.Factory.StartNew(() => {
-                try
-                {
-                    var table = CornClient.Instance?.PackManager?.StateModelTable;
-                    if (table is null)
-                    {
-                        Loom.QueueOnMainThread(() => {
-                            chunksBeingBuilt.Remove(chunkRender);
-                            chunkRender.State = BuildState.Cancelled;
-                        });
-                        return;
-                    }
+                var buildResult = builder!.Build(world, chunkData, chunkRender);
 
-                    bool isAllEmpty = true;
-                    int count = ChunkRender.TYPES.Length, layerMask = 0;
-                    int offsetY = World.GetDimension().minY;
-                    var world = game!.GetWorld();
-
-                    var visualBuffer = new VertexBuffer[count];
-                    for (int i = 0;i < count;i++)
-                        visualBuffer[i] = new();
-                    
-                    float3[] colliderVerts = { };
-
-                    // Build chunk mesh block by block
-                    for (int x = 0;x < Chunk.SizeX;x++)
-                    {
-                        for (int y = 0;y < Chunk.SizeY;y++)
-                        {
-                            for (int z = 0;z < Chunk.SizeZ;z++)
-                            {
-                                if (ts.IsCancellationRequested)
-                                {
-                                    Loom.QueueOnMainThread(() => {
-                                        chunksBeingBuilt.Remove(chunkRender);
-                                        chunkRender.State = BuildState.Cancelled;
-                                    });
-                                    return;
-                                }
-
-                                var loc = GetLocationInChunkRender(chunkRender, x, y, z, offsetY);
-
-                                var bloc = chunkData[x, y, z];
-                                var state = bloc.State;
-                                var stateId = bloc.StateId;
-
-                                if (state.InLiquid) // Build liquid here
-                                {
-                                    int liquidCullFlags = chunkData.GetCullFlags(loc, bloc, waterSurface);
-                                    var liquidHeights = chunkData.GetLiquidHeights(loc);
-
-                                    var liquidLayerIndex = state.InWater ? waterLayerIndex : lavaLayerIndex;
-                                    var liquidTexture = liquidTextures[state.InWater ? 0 : 1];
-
-                                    if (liquidCullFlags != 0)
-                                    {
-                                        FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], liquidTexture, x, y, z, liquidHeights, liquidCullFlags, world.GetWaterColor(loc));
-                                        
-                                        // TODO Remove later
-                                        FluidGeometry.BuildCollider(ref colliderVerts, x, y, z, liquidCullFlags);
-
-                                        layerMask |= (1 << liquidLayerIndex);
-                                        isAllEmpty = false;
-                                    }
-                                }
-
-                                // If air-like (air, water block, etc), ignore it...
-                                if (state.LikeAir) continue;
-                                
-                                int cullFlags = chunkData.GetCullFlags(loc, bloc, notFullSolid); // TODO Make it more accurate
-                                
-                                if (cullFlags != 0 && table is not null && table.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
-                                {
-                                    int layerIndex = ChunkRender.TypeIndex(table[stateId].RenderType);
-
-                                    var models = table[stateId].Geometries;
-                                    var chosen = (x + y + z) % models.Length;
-                                    var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, loc, state);
-
-                                    if (state.NoCollision)
-                                        models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, color);
-                                    else
-                                        models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags, color);
-                                    
-                                    layerMask |= (1 << layerIndex);
-                                    isAllEmpty = false;
-                                }
-                                
-                            }
-                        }
-                    }
-
-                    if (isAllEmpty)
-                    {
-                        // Skip empty chunks...
-                        Loom.QueueOnMainThread(() => {
-                            // Mission cancelled...
-                            if (ts.IsCancellationRequested || !chunkRender || !chunkRender.gameObject)
-                            {
-                                //Debug.Log(chunkRender?.ToString() + " cancelled. (Skipping Empty Mesh)");
-                                if (chunkRender is not null)
-                                {
-                                    chunksBeingBuilt.Remove(chunkRender);
-                                    chunkRender.State = BuildState.Cancelled;
-                                }
-                                return;
-                            }
-
-                            // TODO Improve below cleaning
-                            chunkRender.GetComponent<MeshFilter>().sharedMesh?.Clear(false);
-
-                            chunkRender.ClearCollider();
-
-                            chunksBeingBuilt.Remove(chunkRender);
-                            chunkRender.State = BuildState.Ready;
-
-                        });
-                    }
-                    else
-                    {
-                        Loom.QueueOnMainThread(() => {
-                            // Mission cancelled...
-                            if (ts.IsCancellationRequested || !chunkRender || !chunkRender.gameObject)
-                            {
-                                //Debug.Log(chunkRender?.ToString() + " cancelled. (Applying Mesh)");
-                                if (chunkRender is not null)
-                                {
-                                    chunksBeingBuilt.Remove(chunkRender);
-                                    chunkRender.State = BuildState.Cancelled;
-                                }
-                                return;
-                            }
-
-                            // Visual Mesh
-                            // Count layers, vertices and face indices
-                            int layerCount = 0, totalVertCount = 0;
-                            for (int layer = 0;layer < count;layer++)
-                            {
-                                if ((layerMask & (1 << layer)) != 0)
-                                {
-                                    layerCount++;
-                                    totalVertCount += visualBuffer[layer].vert.Length;
-                                }
-                            }
-                            
-                            var meshDataArr  = Mesh.AllocateWritableMeshData(1);
-                            var materialArr  = new UnityEngine.Material[layerCount];
-                            int vertOffset = 0;
-
-                            var meshData = meshDataArr[0];
-                            meshData.subMeshCount = layerCount;
-
-                            // Set mesh attributes
-                            var visVertAttrs = new NativeArray<VertexAttributeDescriptor>(3, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-                            visVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3, stream: 0);
-                            visVertAttrs[1]  = new(VertexAttribute.TexCoord0, dimension: 3, stream: 1);
-                            visVertAttrs[2]  = new(VertexAttribute.Color,     dimension: 3, stream: 2);
-
-                            meshData.SetVertexBufferParams(totalVertCount,          visVertAttrs);
-                            meshData.SetIndexBufferParams((totalVertCount / 2) * 3, IndexFormat.UInt32);
-
-                            visVertAttrs.Dispose();
-
-                            // Prepare source data arrays
-                            var allVerts = new float3[totalVertCount];
-                            var allUVs   = new float3[totalVertCount];
-                            var allTints = new float3[totalVertCount];
-
-                            for (int layer = 0;layer < count;layer++)
-                            {
-                                if ((layerMask & (1 << layer)) != 0)
-                                {
-                                    visualBuffer[layer].vert.CopyTo(allVerts, vertOffset);
-                                    visualBuffer[layer].txuv.CopyTo(allUVs, vertOffset);
-                                    visualBuffer[layer].tint.CopyTo(allTints, vertOffset);
-
-                                    vertOffset += visualBuffer[layer].vert.Length;
-                                }
-                            }
-
-                            // Copy the source arrays to mesh data
-                            var positions  = meshData.GetVertexData<float3>(0);
-                            positions.CopyFrom(allVerts);
-                            var texCoords  = meshData.GetVertexData<float3>(1);
-                            texCoords.CopyFrom(allUVs);
-                            var vertColors = meshData.GetVertexData<float3>(2);
-                            vertColors.CopyFrom(allTints);
-
-                            // Generate triangle arrays
-                            var triIndices = meshData.GetIndexData<uint>();
-                            uint vi = 0; int ti = 0;
-                            for (;vi < totalVertCount;vi += 4U, ti += 6)
-                            {
-                                triIndices[ti]     = vi;
-                                triIndices[ti + 1] = vi + 3U;
-                                triIndices[ti + 2] = vi + 2U;
-                                triIndices[ti + 3] = vi;
-                                triIndices[ti + 4] = vi + 1U;
-                                triIndices[ti + 5] = vi + 3U;
-                            }
-
-                            int subMeshIndex = 0;
-                            vertOffset = 0;
-
-                            for (int layer = 0;layer < count;layer++)
-                            {
-                                if ((layerMask & (1 << layer)) != 0)
-                                {
-                                    materialArr[subMeshIndex] = MaterialManager.GetAtlasMaterial(ChunkRender.TYPES[layer]);
-                                    int vertCount = visualBuffer[layer].vert.Length;
-                                    meshData.SetSubMesh(subMeshIndex, new((vertOffset / 2) * 3, (vertCount / 2) * 3){ vertexCount = vertCount });
-                                    vertOffset += vertCount;
-                                    subMeshIndex++;
-                                }
-                            }
-
-                            var visualMesh = new Mesh { subMeshCount = layerCount };
-                            Mesh.ApplyAndDisposeWritableMeshData(meshDataArr, visualMesh);
-
-                            visualMesh.RecalculateNormals();
-                            visualMesh.RecalculateBounds();
-                            visualMesh.RecalculateTangents();
-
-                            chunkRender.GetComponent<MeshFilter>().sharedMesh = visualMesh;
-                            chunkRender.GetComponent<MeshRenderer>().sharedMaterials = materialArr;
-
-                            // Collider Mesh
-                            int colVertCount = colliderVerts.Length;
-
-                            if (colVertCount > 0)
-                            {
-                                var colMeshDataArr  = Mesh.AllocateWritableMeshData(1);
-                                var colMeshData = colMeshDataArr[0];
-                                colMeshData.subMeshCount = 1;
-
-                                // Set mesh attributes
-                                var colVertAttrs = new NativeArray<VertexAttributeDescriptor>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-                                colVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3);
-
-                                colMeshData.SetVertexBufferParams(colVertCount,          colVertAttrs);
-                                colMeshData.SetIndexBufferParams((colVertCount / 2) * 3, IndexFormat.UInt32);
-
-                                colVertAttrs.Dispose();
-
-                                // Copy the source arrays to mesh data
-                                var colPositions  = colMeshData.GetVertexData<float3>(0);
-                                colPositions.CopyFrom(colliderVerts);
-
-                                // Generate triangle arrays
-                                var colTriIndices = colMeshData.GetIndexData<uint>();
-                                vi = 0; ti = 0;
-                                for (;vi < colliderVerts.Length;vi += 4U, ti += 6)
-                                {
-                                    colTriIndices[ti]     = vi;
-                                    colTriIndices[ti + 1] = vi + 3U;
-                                    colTriIndices[ti + 2] = vi + 2U;
-                                    colTriIndices[ti + 3] = vi;
-                                    colTriIndices[ti + 4] = vi + 1U;
-                                    colTriIndices[ti + 5] = vi + 3U;
-                                }
-
-                                colMeshData.SetSubMesh(0, new(0, (colVertCount / 2) * 3){ vertexCount = colVertCount });
-                                var colliderMesh = new Mesh { subMeshCount = 1 };
-                                Mesh.ApplyAndDisposeWritableMeshData(colMeshDataArr, colliderMesh);
-
-                                colliderMesh.RecalculateNormals();
-                                colliderMesh.RecalculateBounds();
-
-                                chunkRender.UpdateCollider(colliderMesh);
-
-                            }
-                            else
-                                chunkRender.ClearCollider();
-
-                            chunksBeingBuilt.Remove(chunkRender);
-                            chunkRender.State = BuildState.Ready;
-
-                        });
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"{e.Message}: {e.StackTrace}");
-
-                    // Remove chunk from list
+                Loom.QueueOnMainThread(() => {
                     if (chunkRender is not null)
                     {
-                        Loom.QueueOnMainThread(() => {
-                            chunksBeingBuilt.Remove(chunkRender);
-                        });
-                        chunkRender.State = BuildState.Cancelled;
+                        if (buildResult == ChunkBuildResult.Cancelled)
+                            chunkRender.State = ChunkBuildState.Cancelled;
+                        
+                        chunksBeingBuilt.Remove(chunkRender);
                     }
-                }
-
-            }, ts.Token);
+                });
+            }, chunkRender.TokenSource.Token);
         }
         #endregion
 
@@ -470,11 +159,6 @@ namespace MinecraftClient.Rendering
         Action<UnloadChunkColumnEvent>? columnCallBack2;
         Action<BlockUpdateEvent>? blockCallBack;
         Action<BlocksUpdateEvent>? blocksCallBack;
-
-        private Location GetLocationInChunkRender(ChunkRender chunk, int x, int y, int z, int offsetY)
-        {   // Offset y coordinate by the current dimension's minY...
-            return new Location(chunk.ChunkX * Chunk.SizeX + x, chunk.ChunkY * Chunk.SizeY + y + offsetY, chunk.ChunkZ * Chunk.SizeZ + z);
-        }
 
         private const int ChunkCenterX = Chunk.SizeX / 2 + 1;
         private const int ChunkCenterY = Chunk.SizeY / 2 + 1;
@@ -493,8 +177,6 @@ namespace MinecraftClient.Rendering
         {
             World world = game!.GetWorld();
             if (world is null) return;
-
-            // Add nearby chunks
             var location = game!.GetCurrentLocation();
             ChunkRenderColumn columnRender;
 
@@ -504,6 +186,7 @@ namespace MinecraftClient.Rendering
             int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
             int offsetY = World.GetDimension().minY;
 
+            // Add nearby chunks
             for (int cx = -viewDist;cx <= viewDist;cx++)
                 for (int cz = -viewDist;cz <= viewDist;cz++)
                 {
@@ -526,7 +209,7 @@ namespace MinecraftClient.Rendering
                                 {   // This chunk is not empty and needs to be added and queued
                                     var chunk = columnRender.GetChunkRender(chunkY, true);
                                     UpdateBuildPriority(location, chunk, offsetY);
-                                    QueueChunkBuild(chunk);
+                                    QueueChunkRenderBuild(chunk);
                                 }
                                 
                             }
@@ -535,10 +218,10 @@ namespace MinecraftClient.Rendering
                         {
                             foreach (var chunk in column.GetChunkRenders().Values)
                             {
-                                if (chunk.State == BuildState.Delayed || chunk.State == BuildState.Cancelled)
+                                if (chunk.State == ChunkBuildState.Delayed || chunk.State == ChunkBuildState.Cancelled)
                                 {   // Queue delayed or cancelled chunk builds...
                                     UpdateBuildPriority(location, chunk, offsetY);
-                                    QueueChunkBuild(chunk);
+                                    QueueChunkRenderBuild(chunk);
                                 }
                             }
                         }
@@ -563,7 +246,7 @@ namespace MinecraftClient.Rendering
             {
                 if (Mathf.Abs(location.ChunkX - chunkCoord.x) > unloadDist || Mathf.Abs(location.ChunkZ - chunkCoord.y) > unloadDist)
                 {
-                    columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
+                    columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunkRendersToBeBuilt);
                     columns.Remove(chunkCoord);
                 }
 
@@ -571,12 +254,12 @@ namespace MinecraftClient.Rendering
 
         }
 
-        public void QueueChunkBuild(ChunkRender chunkRender)
+        public void QueueChunkRenderBuild(ChunkRender chunkRender)
         {
-            if (!chunksToBeBuild.Contains(chunkRender))
+            if (!chunkRendersToBeBuilt.Contains(chunkRender))
             {
-                chunksToBeBuild.Enqueue(chunkRender);
-                chunkRender.State = BuildState.Pending;
+                chunkRendersToBeBuilt.Enqueue(chunkRender);
+                chunkRender.State = ChunkBuildState.Pending;
             }
 
         }
@@ -584,13 +267,13 @@ namespace MinecraftClient.Rendering
         public void QueueChunkBuildIfNotEmpty(ChunkRender? chunkRender)
         {
             if (chunkRender is not null) // Not empty(air) chunk
-                QueueChunkBuild(chunkRender);
+                QueueChunkRenderBuild(chunkRender);
         }
 
         public void UnloadWorld()
         {
             // Clear the queue first...
-            chunksToBeBuild.Clear();
+            chunkRendersToBeBuilt.Clear();
 
             // And cancel current chunk builds
             foreach (var chunk in chunksBeingBuilt)
@@ -639,7 +322,7 @@ namespace MinecraftClient.Rendering
         public void ReloadWorld()
         {
             // Clear the queue first...
-            chunksToBeBuild.Clear();
+            chunkRendersToBeBuilt.Clear();
 
             // And cancel current chunk builds
             foreach (var chunk in chunksBeingBuilt)
@@ -652,7 +335,7 @@ namespace MinecraftClient.Rendering
 
             foreach (var chunkCoord in chunkCoords)
             {
-                columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
+                columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunkRendersToBeBuilt);
                 columns.Remove(chunkCoord);
             }
 
@@ -708,12 +391,13 @@ namespace MinecraftClient.Rendering
                             var bloc = world.GetBlock(loc);
                             var state = bloc.State;
 
-                            if (state.InWater || state.InLava) // Build fluid collider
+                            if (state.InWater || state.InLava) // Build liquid collider
                             {
-                                int fluidCullFlags = world.GetCullFlags(loc, bloc, waterSurface);
+                                var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
+                                int liquidCullFlags = world.GetCullFlags(loc, bloc, neighborCheck);
 
-                                if (fluidCullFlags != 0)
-                                    FluidGeometry.BuildCollider(ref fluidVerts, (int)loc.X, (int)loc.Y, (int)loc.Z, fluidCullFlags);
+                                if (liquidCullFlags != 0)
+                                    FluidGeometry.BuildCollider(ref fluidVerts, (int)loc.X, (int)loc.Y, (int)loc.Z, liquidCullFlags);
                             }
 
                             if (state.LikeAir || state.NoCollision)
@@ -721,7 +405,7 @@ namespace MinecraftClient.Rendering
                             
                             // Build collider here
                             var stateId = bloc.StateId;
-                            int cullFlags = world.GetCullFlags(loc, bloc, notFullSolid);
+                            int cullFlags = world.GetCullFlags(loc, bloc, BlockNeighborChecks.NON_FULL_SOLID);
                             
                             if (cullFlags != 0 && table is not null && table.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
@@ -827,6 +511,10 @@ namespace MinecraftClient.Rendering
         void Start()
         {
             game = CornClient.Instance;
+            world = game!.GetWorld();
+
+            var modelTable = game!.PackManager.StateModelTable;
+            builder = new(modelTable);
 
             var movementColliderObj = new GameObject("Movement Collider");
             movementColliderObj.layer = LayerMask.NameToLayer(MOVEMENT_LAYER_NAME);
@@ -846,7 +534,7 @@ namespace MinecraftClient.Rendering
                 int2 chunkCoord = new(e.ChunkX, e.ChunkZ);
                 if (columns.ContainsKey(chunkCoord))
                 {
-                    columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunksToBeBuild);
+                    columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunkRendersToBeBuilt);
                     columns.Remove(chunkCoord);
                 }
             });
@@ -866,7 +554,7 @@ namespace MinecraftClient.Rendering
                     chunkData.ChunkMask |= 1 << chunkY;
 
                     // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
-                    QueueChunkBuild(chunk);
+                    QueueChunkRenderBuild(chunk);
 
                     if (loc.ChunkBlockY == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
                     {   // Queue the chunk below, if it isn't empty
@@ -919,7 +607,7 @@ namespace MinecraftClient.Rendering
                         chunkData.ChunkMask |= 1 << chunkY;
 
                         // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
-                        QueueChunkBuild(chunk);
+                        QueueChunkRenderBuild(chunk);
 
                         if (loc.ChunkBlockY == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
                         {   // Queue the chunk below, if it isn't empty
@@ -956,9 +644,9 @@ namespace MinecraftClient.Rendering
             if (newCount > 0)
             {
                 // Start chunk building tasks...
-                while (chunksToBeBuild.Count > 0 && newCount > 0)
+                while (chunkRendersToBeBuilt.Count > 0 && newCount > 0)
                 {
-                    var nextChunk = chunksToBeBuild.Dequeue();
+                    var nextChunk = chunkRendersToBeBuilt.Dequeue();
 
                     if (nextChunk is null)
                     {   // Chunk is unloaded while waiting in the queue, ignore it...
@@ -966,7 +654,7 @@ namespace MinecraftClient.Rendering
                     }
                     else if (GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) is null)
                     {   // Chunk column is unloaded while waiting in the queue, ignore it...
-                        nextChunk.State = BuildState.Cancelled;
+                        nextChunk.State = ChunkBuildState.Cancelled;
                         continue;
                     }
                     else

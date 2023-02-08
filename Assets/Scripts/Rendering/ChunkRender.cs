@@ -29,7 +29,7 @@ namespace MinecraftClient.Rendering
 
         public int ChunkX, ChunkY, ChunkZ;
         public Chunk ChunkData;
-        public BuildState State = BuildState.None;
+        public ChunkBuildState State = ChunkBuildState.None;
 
         public CancellationTokenSource TokenSource = null;
         public int Priority = 0;

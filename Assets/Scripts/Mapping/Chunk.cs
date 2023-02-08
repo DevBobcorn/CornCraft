@@ -84,34 +84,6 @@ namespace MinecraftClient.Mapping
             return world.GetBlock(location);
         }
 
-        public delegate bool BlockCheck(Block self, Block neighbor);
-
-        public static byte GetLiquidHeight(BlockState state)
-        {
-            if (state.InWater || state.InLava)
-            {
-                if (state.Properties.ContainsKey("level"))
-                {
-                    return state.Properties["level"] switch {
-                        "0"  => 14,
-                        "1"  => 12,
-                        "2"  => 10,
-                        "3"  =>  8,
-                        "4"  =>  7,
-                        "5"  =>  5,
-                        "6"  =>  3,
-                        "7"  =>  1,
-
-                        _    => 16
-                    };
-                }
-
-                return 16;
-            }
-
-            return 0;
-        }
-
         private static byte getLiquidHeight(BlockState state)
         {
             if (state.InWater || state.InLava)
@@ -154,7 +126,7 @@ namespace MinecraftClient.Mapping
             };
         }
 
-        public int GetCullFlags(Location location, Block self, BlockCheck check)
+        public int GetCullFlags(Location location, Block self, BlockNeighborCheck check)
         {
             int cullFlags = 0;
 

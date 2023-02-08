@@ -59,7 +59,7 @@ namespace MinecraftClient.Mapping
         public bool isChunkColumnReady(int chunkX, int chunkZ)
         {
             if (chunks.TryGetValue(new(chunkX, chunkZ), out ChunkColumn? chunkColumn))
-                return (chunkColumn is not null && chunkColumn.FullyLoaded);
+                return (chunkColumn is not null && chunkColumn.FullyLoaded && chunkColumn.LightingPresent);
             return false;
         }
 
@@ -288,7 +288,7 @@ namespace MinecraftClient.Mapping
             return false;
         }
 
-        public int GetCullFlags(Location location, Block self, Chunk.BlockCheck check)
+        public int GetCullFlags(Location location, Block self, BlockNeighborCheck check)
         {
             int cullFlags = 0;
             if (check(self, GetBlock(location.Up())))
