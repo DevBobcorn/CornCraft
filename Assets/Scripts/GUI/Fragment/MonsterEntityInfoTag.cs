@@ -18,7 +18,7 @@ namespace MinecraftClient.UI
             var entity = entityRender.Entity;
 
             if (levelText is not null)
-                levelText.text = $"Lv.{entity.ID}";
+                levelText.text = $"Lv.{entity.MaxHealth}";
             
             if (healthBar is not null)
             {
