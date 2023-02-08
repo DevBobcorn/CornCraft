@@ -1,6 +1,6 @@
 namespace MinecraftClient.Rendering
 {
-    public enum BuildState
+    public enum ChunkBuildState
     {
         None,
         Pending,
