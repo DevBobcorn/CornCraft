@@ -10,7 +10,7 @@ namespace MinecraftClient.Commands
 
         public override string Run(CornClient handler, string command, Dictionary<string, object> localVars)
         {
-            CornClient.StopClient();
+            CornClient.Instance?.Disconnect();
             return "";
         }
 

@@ -44,7 +44,7 @@ namespace MinecraftClient.UI
 
         public void QuitGame()
         {
-            CornClient.StopClient();
+            CornClient.Instance?.Disconnect();
         }
 
         protected override bool Initialize()

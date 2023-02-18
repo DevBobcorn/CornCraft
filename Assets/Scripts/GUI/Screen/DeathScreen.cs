@@ -48,7 +48,7 @@ namespace MinecraftClient.UI
 
         public void QuitGame()
         {
-            CornClient.StopClient();
+            CornClient.Instance?.Disconnect();
         }
 
         private Action<HealthUpdateEvent>? healthCallback;

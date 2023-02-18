@@ -13,6 +13,7 @@ using MinecraftClient.Protocol;
 using MinecraftClient.Protocol.Handlers.Forge;
 using MinecraftClient.Protocol.Keys;
 using MinecraftClient.Protocol.Session;
+using MinecraftClient.Protocol.Handlers;
 
 namespace MinecraftClient.UI
 {
@@ -45,6 +46,9 @@ namespace MinecraftClient.UI
             string[] sip = server.Split(':');
             host = sip[0];
             port = 25565;
+
+            if (host.Equals(ProtocolPseudo.SERVER_NAME)) // Local pseudo world
+                return true;
 
             if (sip.Length > 1)
             {
@@ -91,9 +95,9 @@ namespace MinecraftClient.UI
             PlayerKeyPair? playerKeyPair = null;
 
             var result = ProtocolHandler.LoginResult.LoginRequired;
-            var online = loginDropDown!.value == 0; // Dropdown value is 0 if use Microsoft login
+            var microsoftLogin = loginDropDown!.value == 0; // Dropdown value is 0 if use Microsoft login
 
-            if (!online)
+            if (!microsoftLogin)
             {
                 if (!CornCraft.IsValidName(account))
                 {
@@ -190,7 +194,7 @@ namespace MinecraftClient.UI
                 if (CornCraft.SessionCaching != CacheType.None)
                     SessionCache.Store(accountLower, session);
 
-                if (online && CornCraft.LoginWithSecureProfile)
+                if (microsoftLogin && CornCraft.LoginWithSecureProfile)
                 {
                     // Load cached profile key from disk if necessary
                     if (CornCraft.ProfileKeyCaching == CacheType.Disk)
@@ -226,15 +230,20 @@ namespace MinecraftClient.UI
                 if (CornCraft.DebugMode)
                     Translations.Log("debug.session_id", session.ID);
 
-                if (host == string.Empty)
-                {   // Request host
-                    CornClient.ShowNotification("Please input your host!", Notification.Type.Warning);
-                    yield break;
-                }
-
                 // Get server version
                 int protocolVersion = 0;
                 ForgeInfo? forgeInfo = null;
+
+                // Local pseudo world
+                if (host.Equals(ProtocolPseudo.SERVER_NAME)) 
+                {
+                    protocolVersion = ProtocolPseudo.DEFAULT_PROTOCOL;
+                    Translations.Notify("mcc.server_protocol", "<Pseudo>", protocolVersion);
+
+                    game!.StartLogin(session, playerKeyPair, host, port, protocolVersion, null, loadStateInfo, accountLower);
+                    tryingConnect = false;
+                    yield break;
+                }
 
                 // Not realms
                 Translations.Log("mcc.retrieve"); // Retrieve server information
