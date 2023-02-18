@@ -24,6 +24,7 @@ using MinecraftClient.Resource;
 using MinecraftClient.UI;
 using MinecraftClient.Mapping;
 using MinecraftClient.Inventory;
+using MinecraftClient.Protocol.Handlers;
 
 namespace MinecraftClient
 {
@@ -95,14 +96,6 @@ namespace MinecraftClient
 
         private bool connected = false;
         public bool Connected { get { return connected; } }
-
-        public static void StopClient()
-        {
-            if (instance is not null)
-            {
-                instance.Disconnect();
-            }
-        }
 
         #endregion
 
@@ -251,7 +244,7 @@ namespace MinecraftClient
         void OnApplicationQuit()
         {
             if (Connected)
-                StopClient();
+                Disconnect();
             
         }
 
@@ -427,46 +420,57 @@ namespace MinecraftClient
             // Destroy the object holder
             Destroy(holder.gameObject);
 
-            try
+            if (!serverIp.Equals(ProtocolPseudo.SERVER_NAME))
             {
-                // Setup tcp client
-                tcpClient = ProxyHandler.newTcpClient(host, port);
-                tcpClient.ReceiveBufferSize = 1024 * 1024;
-                tcpClient.ReceiveTimeout = 30000; // 30 seconds
-
-                // Create handler
-                handler = Protocol.ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
-
-                // Start update loop
-                timeoutdetector = Tuple.Create(new Thread(new ParameterizedThreadStart(TimeoutDetector)), new CancellationTokenSource());
-                timeoutdetector.Item1.Name = "Connection Timeout Detector";
-                timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
-
-                if (handler.Login(this.playerKeyPair, session, accountLower)) // Login
+                try
                 {
-                    Translations.Notify("mcc.joined", CornCraft.internalCmdChar);
-                    connected = true;
+                    // Setup tcp client
+                    tcpClient = ProxyHandler.newTcpClient(host, port);
+                    tcpClient.ReceiveBufferSize = 1024 * 1024;
+                    tcpClient.ReceiveTimeout = 30000; // 30 seconds
+
+                    // Create handler
+                    handler = Protocol.ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
+
+                    // Start update loop
+                    timeoutdetector = Tuple.Create(new Thread(new ParameterizedThreadStart(TimeoutDetector)), new CancellationTokenSource());
+                    timeoutdetector.Item1.Name = "Connection Timeout Detector";
+                    timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
+
+                    if (handler.Login(this.playerKeyPair, session, accountLower)) // Login
+                    {
+                        Translations.Notify("mcc.joined", CornCraft.internalCmdChar);
+                        connected = true;
+                    }
+                    else
+                    {
+                        Translations.LogError("error.login_failed");
+                        Disconnect();
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    Translations.LogError("error.login_failed");
+                    tcpClient = ProxyHandler.newTcpClient(host, port);
+                    tcpClient.ReceiveBufferSize = 1024 * 1024;
+                    tcpClient.ReceiveTimeout = 30000; // 30 seconds
+
+                    Translations.LogError("error.connect");
+                    Debug.LogError(e.Message);
+                    Debug.LogError(e.StackTrace);
                     Disconnect();
                 }
+                finally
+                {
+                    loadStateInfo.loggingIn = false;
+                }
             }
-            catch (Exception e)
+            else
             {
-                tcpClient = ProxyHandler.newTcpClient(host, port);
-                tcpClient.ReceiveBufferSize = 1024 * 1024;
-                tcpClient.ReceiveTimeout = 30000; // 30 seconds
-
-                Translations.LogError("error.connect");
-                Debug.LogError(e.Message);
-                Debug.LogError(e.StackTrace);
-                Disconnect();
-            }
-            finally
-            {
+                // Create handler
+                handler = new ProtocolPseudo(protocol, this);
                 loadStateInfo.loggingIn = false;
+
+                connected = true;
             }
 
         }

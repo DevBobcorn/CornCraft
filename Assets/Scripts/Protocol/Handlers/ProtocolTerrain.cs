@@ -522,7 +522,7 @@ namespace MinecraftClient.Protocol.Handlers
                 }
             }
 
-            // Skip tile entity data
+            // Read tile entity data
             int blockEntityCount = dataTypes.ReadNextVarInt(cache);
 
             //if (blockEntityCount > 0)
