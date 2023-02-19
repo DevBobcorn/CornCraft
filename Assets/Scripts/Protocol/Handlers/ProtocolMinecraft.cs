@@ -2,12 +2,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
 using MinecraftClient.Crypto;
 using MinecraftClient.Event;
@@ -141,7 +141,7 @@ namespace MinecraftClient.Protocol.Handlers
 
             try
             {
-                Stopwatch stopWatch = new();
+                System.Diagnostics.Stopwatch stopWatch = new();
                 while (!packetQueue.IsAddingCompleted)
                 {
                     cancelToken.ThrowIfCancellationRequested();
@@ -1779,9 +1779,7 @@ namespace MinecraftClient.Protocol.Handlers
                     string result = dataTypes.ReadNextString(packetData); //Get the Json data
 
                     if (CornCraft.DebugMode)
-                    {
-                        UnityEngine.Debug.Log(result);
-                    }
+                        Debug.Log(result);
 
                     if (!String.IsNullOrEmpty(result) && result.StartsWith("{") && result.EndsWith("}"))
                     {

@@ -359,13 +359,15 @@ namespace MinecraftClient.Mapping
         public void SetBlock(Location location, Block block)
         {
             var column = this[location.ChunkX, location.ChunkZ];
-            if (column != null && column.ColumnSize >= location.ChunkY)
+            if (column is not null)
             {
                 var chunk = column.GetChunk(location);
-                if (chunk == null)
+                if (chunk is null)
                     column[location.ChunkY] = chunk = new Chunk(this);
                 chunk[location.ChunkBlockX, location.ChunkBlockY, location.ChunkBlockZ] = block;
             }
+            else
+                UnityEngine.Debug.LogWarning($"Failed to set {block.State} at {location}: chunk column not loaded");
 
         }
 

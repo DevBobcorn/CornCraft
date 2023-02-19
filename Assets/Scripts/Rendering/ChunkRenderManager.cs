@@ -118,9 +118,9 @@ namespace MinecraftClient.Rendering
 
             var chunkData = chunkColumnData[chunkRender.ChunkY];
 
-            if (chunkData is null) // Chunk not available, delay
+            if (chunkData is null) // Chunk not available, cancel
             {
-                chunkRender.State = ChunkBuildState.Delayed;
+                chunkRender.State = ChunkBuildState.Cancelled;
                 return;
             }
 
@@ -200,12 +200,12 @@ namespace MinecraftClient.Rendering
                         var column = GetChunkRenderColumn(chunkX, chunkZ, false);
                         if (column is null)
                         {   // Chunks data is ready, but chunk render column is not
-                            int chunkMask = world[chunkX, chunkZ]!.ChunkMask;
+                            //int chunkMask = world[chunkX, chunkZ]!.ChunkMask;
                             // Create it and add the whole column to render list...
                             columnRender = GetChunkRenderColumn(chunkX, chunkZ, true)!;
                             for (int chunkY = 0;chunkY < chunkColumnSize;chunkY++)
                             {   // Create chunk renders and queue them...
-                                if ((chunkMask & (1 << chunkY)) != 0)
+                                if (!world[chunkX, chunkZ]!.ChunkIsEmpty(chunkY))
                                 {   // This chunk is not empty and needs to be added and queued
                                     var chunk = columnRender.GetChunkRender(chunkY, true);
                                     UpdateBuildPriority(location, chunk, offsetY);
@@ -218,7 +218,8 @@ namespace MinecraftClient.Rendering
                         {
                             foreach (var chunk in column.GetChunkRenders().Values)
                             {
-                                if (chunk.State == ChunkBuildState.Delayed || chunk.State == ChunkBuildState.Cancelled)
+                                //if (chunk.State == ChunkBuildState.Delayed || chunk.State == ChunkBuildState.Cancelled)
+                                if (chunk.State == ChunkBuildState.Delayed)
                                 {   // Queue delayed or cancelled chunk builds...
                                     UpdateBuildPriority(location, chunk, offsetY);
                                     QueueChunkRenderBuild(chunk);
@@ -551,7 +552,6 @@ namespace MinecraftClient.Rendering
                 if (column is not null) // Queue this chunk to rebuild list...
                 {   // Create the chunk render object if not present (previously empty)
                     var chunk = column.GetChunkRender(chunkY, true);
-                    chunkData.ChunkMask |= 1 << chunkY;
 
                     // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                     QueueChunkRenderBuild(chunk);
@@ -604,7 +604,6 @@ namespace MinecraftClient.Rendering
                     if (column is not null) // Queue this chunk to rebuild list...
                     {   // Create the chunk render object if not present (previously empty)
                         var chunk = column.GetChunkRender(chunkY, true);
-                        chunkData.ChunkMask |= 1 << chunkY;
 
                         // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                         QueueChunkRenderBuild(chunk);
