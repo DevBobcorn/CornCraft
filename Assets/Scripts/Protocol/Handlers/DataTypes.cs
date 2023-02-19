@@ -5,6 +5,8 @@ using System.Text;
 using MinecraftClient.Mapping;
 using MinecraftClient.Inventory;
 using MinecraftClient.Mapping.EntityPalettes;
+using System.IO;
+using System.IO.Compression;
 
 namespace MinecraftClient.Protocol.Handlers
 {
@@ -366,6 +368,22 @@ namespace MinecraftClient.Protocol.Handlers
         public Dictionary<string, object> ReadNextNbt(Queue<byte> cache)
         {
             return ReadNextNbt(cache, true);
+        }
+
+        /// <summary>
+        /// Read Named Binary Tag from compressed bytes
+        /// </summary>
+        public Dictionary<string, object> ReadNbtFromBytes(byte[] bytes)
+        {
+            using (var compressedStream = new MemoryStream(bytes))
+                using (var zipStream = new GZipStream(compressedStream, CompressionMode.Decompress))
+                    using (var memStream = new MemoryStream())
+                    {
+                        zipStream.CopyTo(memStream);
+                        bytes = memStream.ToArray();
+                    }
+                
+            return ReadNextNbt(new(bytes), true);
         }
 
         /// <summary>

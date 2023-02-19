@@ -352,7 +352,6 @@ namespace MinecraftClient.Protocol.Handlers
                 
                 c.SetLights(skyLight, blockLight);
 
-                c!.ChunkMask = chunkMask;
                 c!.FullyLoaded = true;
             }
 
@@ -562,8 +561,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                     //UnityEngine.Debug.Log($"Lighting up chunk column [{chunkX}, {chunkZ}]");
                 }
-                    
-                c!.ChunkMask = chunkMask;
+
                 c!.FullyLoaded = true;
             }
 

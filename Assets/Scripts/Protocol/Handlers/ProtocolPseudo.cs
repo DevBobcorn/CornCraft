@@ -9,7 +9,7 @@ using MinecraftClient.Mapping;
 using MinecraftClient.Protocol.Keys;
 using MinecraftClient.Protocol.Session;
 using MinecraftClient.Event;
-using System.Diagnostics;
+using System.IO;
 
 namespace MinecraftClient.Protocol.Handlers
 {
@@ -21,11 +21,13 @@ namespace MinecraftClient.Protocol.Handlers
         private int protocolVersion;
 
         IMinecraftComHandler handler;
+        DataTypes dataTypes;
         Tuple<Thread, CancellationTokenSource>? netMain = null; // Net main thread
 
         public ProtocolPseudo(int protocolVersion, IMinecraftComHandler handler)
         {
             ChatParser.InitTranslations();
+            this.dataTypes = new(protocolVersion);
             this.handler = handler;
             this.protocolVersion = protocolVersion;
 
@@ -46,7 +48,7 @@ namespace MinecraftClient.Protocol.Handlers
 
             try
             {
-                Stopwatch stopWatch = new();
+                System.Diagnostics.Stopwatch stopWatch = new();
                 while (true)
                 {
                     cancelToken.ThrowIfCancellationRequested();
@@ -103,7 +105,6 @@ namespace MinecraftClient.Protocol.Handlers
             }
 
             int chunkY = 0, testSize = 5;
-            var chunkMask = 0b1;
 
             for (int chunkX = -testSize;chunkX <= testSize;chunkX++)
                 for (int chunkZ = -testSize;chunkZ <= testSize;chunkZ++)
@@ -130,7 +131,6 @@ namespace MinecraftClient.Protocol.Handlers
                     c!.SetLights(skyLight, blockLight);
                     c!.SetBiomes(biomes);
 
-                    c.ChunkMask = chunkMask;
                     c.FullyLoaded = true;
 
                     // Broadcast event to update world render
@@ -143,7 +143,7 @@ namespace MinecraftClient.Protocol.Handlers
             // Initialize player position
             handler.OnPlayerJoin(new(handler.GetUserUUID(), handler.GetUsername(), null, 0, 0, null, null, null, null));
 
-            handler.UpdateLocation(new(5, 10, 5), 0F, 0F);
+            handler.UpdateLocation(new(8, 64, 8), 0F, 0F);
         }
 
         public void Disconnect() { }
@@ -209,7 +209,7 @@ namespace MinecraftClient.Protocol.Handlers
             if (String.IsNullOrEmpty(message))
                 return false;
 
-            if (message.Contains("gamemode"))
+            if (message.StartsWith("/gamemode "))
             {
                 var mode = message.Split(' ')[1].ToLower();
 
@@ -228,12 +228,124 @@ namespace MinecraftClient.Protocol.Handlers
                         handler.OnGamemodeUpdate(handler.GetUserUUID(), 3);
                         break;
                     default:
-                        UnityEngine.Debug.LogWarning($"Unknown gamemode: {mode}");
+                        Debug.LogWarning($"Unknown gamemode: {mode}");
                         break;
                 }
             }
 
+            if (message.StartsWith("/struct "))
+            {
+                var name = message.Split(' ')[1].ToLower();
+                var path = PathHelper.GetExtraDataFile($"structures/{name}.nbt");
+
+                putStructure(path, 0, 16, 0);
+            }
+
             return true;
+        }
+
+        private void putStructure(string path, int offsetX, int offsetY, int offsetZ)
+        {
+            if (File.Exists(path))
+            {
+                var bytes = File.ReadAllBytes(path);
+                var nbt = dataTypes.ReadNbtFromBytes(bytes);
+
+                var size = (object[]) nbt["size"];
+                int sizeX = (int) size[0], sizeY = (int) size[1], sizeZ = (int) size[2];
+
+                var offset = new Location(offsetX, offsetY, offsetZ);
+
+                var palette = (object[]) nbt["palette"];
+                var mapping = new Block[palette.Length]; // Palette index => Numeral blockstate id
+
+                var stateListTable = BlockStatePalette.INSTANCE.StateListTable;
+                var statesTable = BlockStatePalette.INSTANCE.StatesTable;
+
+                for (var entryIdx = 0;entryIdx < palette.Length;entryIdx++)
+                {
+                    var entryObj = (Dictionary<string, object>) palette[entryIdx];
+                    var blockId = ResourceLocation.fromString(entryObj["Name"].ToString());
+
+                    int entryStateId = 0; // Air by default
+
+                    if (!stateListTable.ContainsKey(blockId)) // Block not found in registry, ignore this entry
+                    {
+                        Debug.Log($"Block with numeral id {blockId} cannot be found, using empty block instead");
+
+                    }
+                    else // Get the exact blockstate id (in current palatte)
+                    {
+                        if (entryObj.ContainsKey("Properties")) // Find the specific variant of this block
+                        {
+                            var propDict = (Dictionary<string, object>) entryObj["Properties"];
+                            var conditions = new Dictionary<string, string>();
+
+                            foreach (var prop in propDict.Keys)
+                                conditions.Add(prop, propDict[prop].ToString());
+
+                            var predicate = new BlockStatePredicate(conditions);
+
+                            foreach (var stateId in stateListTable[blockId])
+                            {
+                                if (!statesTable.ContainsKey(stateId))
+                                    continue;
+                                
+                                if (predicate.check(statesTable[stateId]))
+                                {
+                                    entryStateId = stateId;
+                                    break;
+                                }
+                            }
+                        }
+                        else // Use the default variant of this block
+                        {
+                            foreach (var stateId in stateListTable[blockId])
+                            {
+                                entryStateId = stateId;
+                                break;
+                            }
+                        }
+                    }
+
+                    mapping[entryIdx] = new((ushort) entryStateId);
+                }
+
+                var world = handler.GetWorld();
+
+                var blocks = (object[]) nbt["blocks"];
+
+                for (int blockIdx = 0;blockIdx < blocks.Length;blockIdx++)
+                {
+                    var blockInfo = (Dictionary<string, object>) blocks[blockIdx];
+                    var pos = (object[]) blockInfo["pos"];
+                    int posX = (int) pos[0], posY = (int) pos[1], posZ = (int) pos[2];
+                    var block = mapping[(int) blockInfo["state"]];
+
+                    var loc = new Location(posX, posY, posZ) + offset;
+
+                    world.SetBlock(loc, block);
+                }
+
+                List<Location> locs = new();
+
+                for (int x = offsetX;x < offsetX + sizeX;x += Chunk.SizeX)
+                    for (int z = offsetZ;z < offsetZ + sizeZ;z += Chunk.SizeZ)
+                        for (int y = offsetY;y < offsetY + sizeY;y += Chunk.SizeY)
+                        {
+                            var loc = new Location(x, y, z);
+                            locs.Add(loc);
+                        }
+
+                // Broadcast event to update world render
+                Loom.QueueOnMainThread(() => {
+                        EventManager.Instance.Broadcast<BlocksUpdateEvent>(new(locs));
+                    }
+                );
+
+            }
+            else
+                Debug.LogWarning($"Structure file not found at {path}");
         }
 
         public bool SendClientSettings(string language, byte viewDistance, byte difficulty, byte chatMode, bool chatColors, byte skinParts, byte mainHand)

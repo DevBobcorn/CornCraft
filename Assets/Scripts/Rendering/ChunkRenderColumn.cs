@@ -35,7 +35,7 @@ namespace MinecraftClient.Rendering
         {
             foreach (var chunk in chunks.Values)
             {
-                if (chunk.State != ChunkBuildState.Ready)
+                if (chunk.State != ChunkBuildState.Ready && chunk.State != ChunkBuildState.Cancelled)
                     return false;
             }
 

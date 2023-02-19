@@ -14,12 +14,18 @@ namespace MinecraftClient.Mapping
         public bool FullyLoaded = false;
 
         private World world;
-        public int ChunkMask;
 
         /// <summary>
         /// Blocks contained into the chunk
         /// </summary>
         private readonly Chunk?[] chunks;
+
+        public bool ChunkIsEmpty(int chunkY)
+        {
+            if (chunkY >= 0 && chunkY < ColumnSize)
+                return chunks[chunkY] is null;
+            return true;
+        }
 
         private readonly short[] biomes;
         private readonly byte[] skyLight, blockLight;
