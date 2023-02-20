@@ -13,6 +13,13 @@ using System.IO;
 
 namespace MinecraftClient.Protocol.Handlers
 {
+    /// <summary>
+    /// Pseudo implementation for Minecraft Protocol
+    /// </summary>
+    /// <remarks>
+    /// Runs without networking and simulates world manipulation,
+    /// used only for testing chunk building and player controller
+    /// </remarks>
     public class ProtocolPseudo : IMinecraftCom
     {
         public const int DEFAULT_PROTOCOL = ProtocolMinecraft.MC_1_16_5_Version;
@@ -133,7 +140,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                     c.FullyLoaded = true;
 
-                    // Broadcast event to update world render
+                    // Broadcast event to update world render (Event is not used yet)
                     Loom.QueueOnMainThread(() => {
                             EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new(chunkX, chunkZ));
                         }
@@ -229,22 +236,47 @@ namespace MinecraftClient.Protocol.Handlers
                         break;
                     default:
                         Debug.LogWarning($"Unknown gamemode: {mode}");
-                        break;
+                        return false;
                 }
             }
 
             if (message.StartsWith("/struct "))
             {
-                var name = message.Split(' ')[1].ToLower();
-                var path = PathHelper.GetExtraDataFile($"structures/{name}.nbt");
+                var parameters = message.Split(' ');
 
-                putStructure(path, 0, 16, 0);
+                if (parameters.Length != 5)
+                {
+                    
+                    CornClient.ShowNotification($"Structure parameters incorrect: {string.Join(", ", parameters[1..])}",
+                            UI.Notification.Type.Warning);
+
+                    return false;
+                }
+
+                int offsetX, offsetY, offsetZ;
+
+                if (int.TryParse(parameters[1], out offsetX) &&
+                    int.TryParse(parameters[2], out offsetY) &&
+                    int.TryParse(parameters[3], out offsetZ))
+                {
+                    var name = parameters[4].ToLower();
+                    var path = PathHelper.GetExtraDataFile($"structures/{name}.nbt");
+
+                    return putStructure(path, offsetX, offsetY, offsetZ);
+                }
+                else
+                {
+                    CornClient.ShowNotification($"Structure coordinates invalid: ({parameters[1]}, {parameters[2]}, {parameters[3]})",
+                            UI.Notification.Type.Warning);
+                    
+                    return false;
+                }
             }
 
             return true;
         }
 
-        private void putStructure(string path, int offsetX, int offsetY, int offsetZ)
+        private bool putStructure(string path, int offsetX, int offsetY, int offsetZ)
         {
             if (File.Exists(path))
             {
@@ -343,9 +375,18 @@ namespace MinecraftClient.Protocol.Handlers
                     }
                 );
 
+                CornClient.ShowNotification($"Structure generated at ({offsetX}, {offsetY}, {offsetZ})",
+                        UI.Notification.Type.Success);
+                
+                return true;
             }
             else
-                Debug.LogWarning($"Structure file not found at {path}");
+            {
+                CornClient.ShowNotification($"Structure file not found at {path}",
+                        UI.Notification.Type.Error);
+
+                return false;
+            }
         }
 
         public bool SendClientSettings(string language, byte viewDistance, byte difficulty, byte chatMode, bool chatColors, byte skinParts, byte mainHand)
