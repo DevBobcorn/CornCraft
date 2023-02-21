@@ -30,7 +30,7 @@ namespace MinecraftClient.Rendering
 
                 var packManager = CornClient.Instance!.PackManager;
 
-                var itemNumId = ItemPalette.INSTANCE.ToNumId(itemStack.Type);
+                var itemNumId = ItemPalette.INSTANCE.ToNumId(itemStack.Type.ItemId);
                 ItemModel? itemModel = null;
                 packManager!.ItemModelTable.TryGetValue(itemNumId, out itemModel);
 

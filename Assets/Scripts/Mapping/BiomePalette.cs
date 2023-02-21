@@ -17,24 +17,24 @@ namespace MinecraftClient.Mapping
         public static readonly int DEFAULT_WATER   = 0x3F76E4;
 
         public static readonly BiomePalette INSTANCE = new();
-        public static readonly Biome EMPTY = new(-1, ResourceLocation.INVALID)
+        public static readonly Biome EMPTY = new(ResourceLocation.INVALID)
         {
             FoliageColor = DEFAULT_FOLIAGE,
             GrassColor   = DEFAULT_GRASS,
             WaterColor   = DEFAULT_WATER
         };
 
-        private readonly Dictionary<int, Biome> biomesTable = new();
+        private readonly Dictionary<int, Biome> biomeTable = new();
 
-        public Biome FromId(int biomeId) => biomesTable.GetValueOrDefault(biomeId, EMPTY);
+        public Biome FromId(int biomeId) => biomeTable.GetValueOrDefault(biomeId, EMPTY);
 
         public IEnumerator PrepareData(string dataVersion, string resourcePackName, DataLoadFlag flag, LoadStateInfo loadStateInfo)
         {
             // Clear loaded stuff...
-            biomesTable.Clear();
+            biomeTable.Clear();
             loadStateInfo.infoText = $"Loading biome definitions";
 
-            biomesTable.Add(-1, EMPTY);
+            biomeTable.Add(-1, EMPTY);
 
             // Read color map from resource pack
             var colorMapPath = PathHelper.GetPackDirectoryNamed(resourcePackName) + "/assets/minecraft/textures/colormap";
@@ -143,7 +143,7 @@ namespace MinecraftClient.Mapping
                         else
                             Debug.LogWarning($"Biome definition for {biomeId} not found at {biomeDefPath}");
 
-                        Biome newBiome = new(numId, biomeId)
+                        Biome newBiome = new(biomeId)
                         {
                             Temperature = temp,
                             Downfall = rain,
@@ -156,7 +156,7 @@ namespace MinecraftClient.Mapping
                             WaterFogColor = waterFog
                         };
 
-                        biomesTable.TryAdd(numId, newBiome);
+                        biomeTable.TryAdd(numId, newBiome);
                         //Debug.Log($"Loading biome {numId} {biome.Value.StringValue}");
                     }
                     else

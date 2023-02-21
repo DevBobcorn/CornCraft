@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace MinecraftClient.Mapping
 {
-    public class BlockState
+    public record BlockState
     {
-        public static readonly ResourceLocation AIR_ID      = new ResourceLocation("air");
-        public static readonly ResourceLocation CAVE_AIR_ID = new ResourceLocation("cave_air");
-        public static readonly ResourceLocation VOID_AIR_ID = new ResourceLocation("void_air");
+        public static readonly ResourceLocation AIR_ID      = new("air");
+        public static readonly ResourceLocation CAVE_AIR_ID = new("cave_air");
+        public static readonly ResourceLocation VOID_AIR_ID = new("void_air");
 
-        public static readonly BlockState AIR_STATE = new BlockState(new ResourceLocation("air"));
+        public static readonly BlockState AIR_STATE = new(new ResourceLocation("air"));
 
         public readonly ResourceLocation BlockId; // Something like 'minecraft:grass_block'
         public readonly Dictionary<string, string> Properties;

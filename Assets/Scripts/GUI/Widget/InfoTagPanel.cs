@@ -32,7 +32,7 @@ namespace MinecraftClient.UI
         {
             if (render is not null && !infoTags.ContainsKey(entityId))
             {
-                var infoTagPrefab = GetTagPrefab(EntityRenderManager.Instance.GetInfoTagTypeForType(render.Entity.Type));
+                var infoTagPrefab = GetTagPrefab(EntityRenderManager.Instance.GetInfoTagTypeForType(render.Entity.Type.EntityId));
 
                 if (infoTagPrefab is null)
                     return;

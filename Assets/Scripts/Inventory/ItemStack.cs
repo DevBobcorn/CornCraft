@@ -50,7 +50,7 @@ namespace MinecraftClient.Inventory
         {
             get
             {
-                return Type == Item.AIR_ITEM || Count == 0;
+                return Type.ItemId == Item.AIR_ID || Count == 0;
             }
         }
 

@@ -51,11 +51,11 @@ namespace MinecraftClient.Rendering
 
         private CornClient? game;
 
-        private readonly Dictionary<EntityType, GameObject?> entityPrefabs = new();
-        private readonly Dictionary<EntityType, EntityInfoTagType> infoTagTypes = new();
+        private readonly Dictionary<ResourceLocation, GameObject?> entityPrefabs = new();
+        private readonly Dictionary<ResourceLocation, EntityInfoTagType> infoTagTypes = new();
 
-        private GameObject? GetPrefabForType(EntityType type) => entityPrefabs.GetValueOrDefault(type, defaultPrefab);
-        public EntityInfoTagType GetInfoTagTypeForType(EntityType type) =>
+        private GameObject? GetPrefabForType(ResourceLocation type) => entityPrefabs.GetValueOrDefault(type, defaultPrefab);
+        public EntityInfoTagType GetInfoTagTypeForType(ResourceLocation type) =>
                 infoTagTypes.GetValueOrDefault(type, EntityInfoTagType.None);
 
         private readonly Dictionary<int, EntityRender> entityRenders = new();
@@ -73,12 +73,12 @@ namespace MinecraftClient.Rendering
 
             GameObject? entityPrefab;
 
-            if (entity.Type == EntityType.Player) // TODO Apply right model
+            if (entity.Type.EntityId == EntityType.PLAYER_ID) // TODO Apply right model
             {
                 entityPrefab = serverSlimPlayerPrefab;
             }
             else
-                entityPrefab = GetPrefabForType(entity.Type);
+                entityPrefab = GetPrefabForType(entity.Type.EntityId);
 
             if (entityPrefab is not null)
             {
@@ -168,44 +168,44 @@ namespace MinecraftClient.Rendering
 
             // Register entity render prefabs ===========================================
             // Hostile Mobs
-            entityPrefabs.Add(EntityType.Skeleton,         skeletonPrefab);
-            entityPrefabs.Add(EntityType.WitherSkeleton,   witherSkeletonPrefab);
-            entityPrefabs.Add(EntityType.Stray,            strayPrefab);
-            entityPrefabs.Add(EntityType.Zombie,           zombiePrefab);
-            entityPrefabs.Add(EntityType.Husk,             huskPrefab);
-            entityPrefabs.Add(EntityType.Drowned,          drownedPrefab);
-            entityPrefabs.Add(EntityType.Creeper,          creeperPrefab);
+            entityPrefabs.Add(EntityType.SKELETON_ID,          skeletonPrefab);
+            entityPrefabs.Add(EntityType.WITHER_SKELETON_ID,   witherSkeletonPrefab);
+            entityPrefabs.Add(EntityType.STRAY_ID,             strayPrefab);
+            entityPrefabs.Add(EntityType.ZOMBIE_ID,            zombiePrefab);
+            entityPrefabs.Add(EntityType.HUSK_ID,              huskPrefab);
+            entityPrefabs.Add(EntityType.DROWNED_ID,           drownedPrefab);
+            entityPrefabs.Add(EntityType.CREEPER_ID,           creeperPrefab);
             // ...
             // Passive Mobs
-            entityPrefabs.Add(EntityType.Pig,              pigPrefab);
-            entityPrefabs.Add(EntityType.Cow,              cowPrefab);
-            entityPrefabs.Add(EntityType.Mooshroom,        mooshroomPrefab);
-            entityPrefabs.Add(EntityType.Sheep,            sheepPrefab);
+            entityPrefabs.Add(EntityType.PIG_ID,               pigPrefab);
+            entityPrefabs.Add(EntityType.COW_ID,               cowPrefab);
+            entityPrefabs.Add(EntityType.MOOSHROOM_ID,         mooshroomPrefab);
+            entityPrefabs.Add(EntityType.SHEEP_ID,             sheepPrefab);
             // Neutral Mobs
             // ...
             // Miscellaneous Entities
-            entityPrefabs.Add(EntityType.Arrow,            arrowPrefab);
-            entityPrefabs.Add(EntityType.Item,             itemPrefab);
-            entityPrefabs.Add(EntityType.ExperienceOrb,    experienceOrbPrefab);
-            //entityPrefabs.Add(EntityType.ExperienceBottle, experienceOrbPrefab);
+            entityPrefabs.Add(EntityType.ARROW_ID,             arrowPrefab);
+            entityPrefabs.Add(EntityType.ITEM_ID,              itemPrefab);
+            entityPrefabs.Add(EntityType.EXPERIENCE_ORB_ID,    experienceOrbPrefab);
+            entityPrefabs.Add(EntityType.EXPERIENCE_BOTTLE_ID, experienceOrbPrefab);
             // ...
 
             // Register entity info tag types ===========================================
-            infoTagTypes.Add(EntityType.Skeleton,         EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.WitherSkeleton,   EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.Stray,            EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.Zombie,           EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.Husk,             EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.Drowned,          EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.Creeper,          EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.SKELETON_ID,          EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.WITHER_SKELETON_ID,   EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.STRAY_ID,             EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.ZOMBIE_ID,            EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.HUSK_ID,              EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.DROWNED_ID,           EntityInfoTagType.Monster);
+            infoTagTypes.Add(EntityType.CREEPER_ID,           EntityInfoTagType.Monster);
             // ...
             // Passive Mobs
-            infoTagTypes.Add(EntityType.Villager,         EntityInfoTagType.NPC);
+            infoTagTypes.Add(EntityType.VILLAGER_ID,          EntityInfoTagType.NPC);
             // ...
             // Neutral Mobs
             // ...
             // Player Entities
-            infoTagTypes.Add(EntityType.Player,           EntityInfoTagType.NPC);
+            infoTagTypes.Add(EntityType.PLAYER_ID,            EntityInfoTagType.NPC);
             // Miscellaneous Entities
             // ...
 

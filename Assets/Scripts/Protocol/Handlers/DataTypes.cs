@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Text;
 using MinecraftClient.Mapping;
 using MinecraftClient.Inventory;
-using MinecraftClient.Mapping.EntityPalettes;
 using System.IO;
 using System.IO.Compression;
 
@@ -398,7 +397,7 @@ namespace MinecraftClient.Protocol.Handlers
             bool itemPresent = ReadNextBool(cache);
             if (itemPresent)
             {
-                Item type = itemPalette.FromId(ReadNextVarInt(cache));
+                Item type = itemPalette.FromNumId(ReadNextVarInt(cache));
                 byte itemCount = ReadNextByte(cache);
                 Dictionary<string, object> nbt = ReadNextNbt(cache);
                 return new ItemStack(type, itemCount, nbt);
@@ -419,7 +418,7 @@ namespace MinecraftClient.Protocol.Handlers
 
             EntityType entityType;
             // Entity type data type change from byte to varint after 1.14
-            entityType = entityPalette.FromId(ReadNextVarInt(cache), living);
+            entityType = entityPalette.FromNumId(ReadNextVarInt(cache));
 
             Double entityX = ReadNextDouble(cache);
             Double entityY = ReadNextDouble(cache);
@@ -1040,7 +1039,7 @@ namespace MinecraftClient.Protocol.Handlers
             else
             {
                 slotData.AddRange(GetBool(true)); // Item is present
-                slotData.AddRange(GetVarInt(itemPalette.ToNumId(item.Type)));
+                slotData.AddRange(GetVarInt(itemPalette.ToNumId(item.Type.ItemId)));
                 slotData.Add((byte)item.Count);
                 slotData.AddRange(GetNbt(item.NBT));
             }

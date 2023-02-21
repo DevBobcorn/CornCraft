@@ -13,7 +13,6 @@ using MinecraftClient.Crypto;
 using MinecraftClient.Event;
 using MinecraftClient.Proxy;
 using MinecraftClient.Mapping;
-using MinecraftClient.Mapping.EntityPalettes;
 using MinecraftClient.Inventory;
 using MinecraftClient.Protocol.Handlers.PacketPalettes;
 using MinecraftClient.Protocol.Handlers.Forge;
@@ -63,7 +62,6 @@ namespace MinecraftClient.Protocol.Handlers
         ProtocolForge pForge;
         ProtocolTerrain pTerrain;
         IMinecraftComHandler handler;
-        EntityPalette entityPalette;
         PacketTypePalette packetPalette;
         SocketWrapper socketWrapper;
         DataTypes dataTypes;
@@ -82,21 +80,6 @@ namespace MinecraftClient.Protocol.Handlers
             this.pTerrain = new ProtocolTerrain(protocolVersion, dataTypes, handler);
             this.packetPalette = new PacketTypeHandler(protocolVersion, forgeInfo != null).GetTypeHandler();
             this.randomGen = RandomNumberGenerator.Create();
-
-            // Entity palette
-            if (this.protocolVersion > MC_1_19_2_Version)
-                throw new NotImplementedException(Translations.Get("exception.palette.entity"));
-            
-            if (this.protocolVersion >= MC_1_19_Version)
-                entityPalette = new EntityPalette119();  // 1.19   ~ 1.19.2
-            else if (this.protocolVersion >= MC_1_17_Version)
-                entityPalette = new EntityPalette117();  // 1.17   ~ 1.18.2
-            else if (this.protocolVersion >= MC_1_16_2_Version)
-                entityPalette = new EntityPalette1162(); // 1.16.2 ~ 1.16.5
-            else if (this.protocolVersion >= MC_1_16_Version)
-                entityPalette = new EntityPalette1161(); // 1.16   ~ 1.16.1
-            else
-                throw new NotImplementedException(Translations.Get("exception.palette.entity"));
 
             // MessageType 
             // You can find it in https://wiki.vg/Protocol#Player_Chat_Message or /net/minecraft/network/message/MessageType.java
@@ -1116,7 +1099,7 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                     case PacketTypesIn.SpawnEntity:
                         {
-                            Entity entity = dataTypes.ReadNextEntity(packetData, entityPalette, false);
+                            Entity entity = dataTypes.ReadNextEntity(packetData, EntityPalette.INSTANCE, false);
                             handler.OnSpawnEntity(entity);
                             break;
                         }
@@ -1146,7 +1129,7 @@ namespace MinecraftClient.Protocol.Handlers
                         }
                    case PacketTypesIn.SpawnLivingEntity:
                         {
-                            Entity entity = dataTypes.ReadNextEntity(packetData, entityPalette, true);
+                            Entity entity = dataTypes.ReadNextEntity(packetData, EntityPalette.INSTANCE, true);
                             // packet before 1.15 has metadata at the end
                             // this is not handled in dataTypes.ReadNextEntity()
                             // we are simply ignoring leftover data in packet
@@ -1173,7 +1156,8 @@ namespace MinecraftClient.Protocol.Handlers
                             double y = dataTypes.ReadNextDouble(packetData);
                             double z = dataTypes.ReadNextDouble(packetData);
                             dataTypes.ReadNextShort(packetData); // TODO Use this value
-                            handler.OnSpawnEntity(new(entityId, EntityType.ExperienceOrb, new(x, y, z), 0, 0, 0, 0));
+                            handler.OnSpawnEntity(new(entityId, EntityPalette.INSTANCE.FromId(EntityType.EXPERIENCE_ORB_ID),
+                                    new(x, y, z), 0, 0, 0, 0));
                             break;
                         }
                     case PacketTypesIn.EntityEffect:
