@@ -128,10 +128,13 @@ namespace MinecraftClient.Mapping
 
         public ResourceLocation EntityId { get; }
 
-        public EntityType(int numId, ResourceLocation id)
+        public bool ContainsItem { get; }
+
+        public EntityType(int numId, ResourceLocation id, bool containsItem = false)
         {
             NumeralId = numId;
             EntityId = id;
+            ContainsItem = containsItem;
         }
     }
 }
