@@ -47,7 +47,7 @@ namespace MinecraftClient.Mapping
             return FromNumId(ToNumId(identifier));
         }
 
-        public IEnumerator PrepareData(string dataVersion, DataLoadFlag flag, LoadStateInfo loadStateInfo)
+        public IEnumerator PrepareData(string entityVersion, DataLoadFlag flag, LoadStateInfo loadStateInfo)
         {
             // Clear loaded stuff...
             entityTypeTable.Clear();
@@ -55,7 +55,7 @@ namespace MinecraftClient.Mapping
 
             loadStateInfo.infoText = $"Loading entity definitions";
 
-            var entityTypeListPath = PathHelper.GetExtraDataFile($"entity_types-{dataVersion}.json");
+            var entityTypeListPath = PathHelper.GetExtraDataFile($"entity_types-{entityVersion}.json");
 
             if (!File.Exists(entityTypeListPath))
             {

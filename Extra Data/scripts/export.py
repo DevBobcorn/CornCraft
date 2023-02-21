@@ -14,9 +14,11 @@ with open(f'D:/Minecraft/Servers/MC{mc_ver}Pure/generated/reports/registries.jso
 
     with open(f'Extra Data/entity_types_code-1.{mc_ver}.txt', 'w+') as out:
         for key, value in entries.items():
-            itemList[value['protocol_id']] = key
-            print(f'[{value["protocol_id"]}] {key}')
-            code = f'public static readonly ResourceLocation {key.split(":")[1].upper()}_ID = new("{key}");\n'
+            numId = int(value['protocol_id'])
+            itemList[numId] = key
+            print(f'[{numId}] {key}')
+            name = key.split(":")[1]
+            code = f'public static readonly ResourceLocation {name.upper()}_ID = new("{name}");\n'
             out.write(code)
 
     with open(f'Extra Data/entity_types-1.{mc_ver}.json', 'w+') as out:
