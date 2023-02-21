@@ -40,7 +40,12 @@ namespace MinecraftClient.Protocol.Handlers
 
             StartUpdating();
 
-            SetupTestScene();
+            GenerateChunkData(true, CornCraft.MCSettings_RenderDistance);
+
+            // Initialize player position
+            handler.OnPlayerJoin(new(handler.GetUserUUID(), handler.GetUsername(), null, 0, 0, null, null, null, null));
+
+            handler.UpdateLocation(new(8, 64, 8), 0F, 0F);
         }
 
         /// <summary>
@@ -59,6 +64,9 @@ namespace MinecraftClient.Protocol.Handlers
                 while (true)
                 {
                     cancelToken.ThrowIfCancellationRequested();
+
+                    // Generate environment chunks
+                    GenerateChunkData(false, CornCraft.MCSettings_RenderDistance);
 
                     handler.OnUpdate();
                     stopWatch.Restart();
@@ -88,8 +96,18 @@ namespace MinecraftClient.Protocol.Handlers
             threadUpdater.Start(netMain.Item2.Token);
         }
 
-        private void SetupTestScene()
+        private int playerChunkX, playerChunkZ;
+
+        private void GenerateChunkData(bool forceUpdate, int size)
         {
+            var playerLoc = CornClient.Instance.PlayerData.location;
+
+            if (!forceUpdate && playerLoc.ChunkX == playerChunkX && playerLoc.ChunkZ == playerChunkZ)
+                return;
+            
+            playerChunkX = playerLoc.ChunkX;
+            playerChunkZ = playerLoc.ChunkZ;
+
             var world = handler.GetWorld();
             const int chunkColumnSize = 16;
             int biomeLength = chunkColumnSize * 64;
@@ -111,11 +129,14 @@ namespace MinecraftClient.Protocol.Handlers
                 break;
             }
 
-            int chunkY = 0, testSize = 5;
+            int chunkY = 0;
 
-            for (int chunkX = -testSize;chunkX <= testSize;chunkX++)
-                for (int chunkZ = -testSize;chunkZ <= testSize;chunkZ++)
+            for (int chunkX = -size + playerChunkX;chunkX <= size + playerChunkX;chunkX++)
+                for (int chunkZ = -size + playerChunkZ;chunkZ <= size + playerChunkZ;chunkZ++)
                 {
+                    if (world.GetChunkColumn(chunkX, chunkZ) is not null)
+                        continue; // Chunk data already presents, skip
+
                     Chunk chunk = new(world);
 
                     for (int x = 0;x < Chunk.SizeX;x++)
@@ -147,10 +168,7 @@ namespace MinecraftClient.Protocol.Handlers
                     );
                 }
             
-            // Initialize player position
-            handler.OnPlayerJoin(new(handler.GetUserUUID(), handler.GetUsername(), null, 0, 0, null, null, null, null));
-
-            handler.UpdateLocation(new(8, 64, 8), 0F, 0F);
+            
         }
 
         public void Disconnect() { }
@@ -262,7 +280,7 @@ namespace MinecraftClient.Protocol.Handlers
                     var name = parameters[4].ToLower();
                     var path = PathHelper.GetExtraDataFile($"structures/{name}.nbt");
 
-                    return putStructure(path, offsetX, offsetY, offsetZ);
+                    return LoadStructure(path, offsetX, offsetY, offsetZ);
                 }
                 else
                 {
@@ -276,7 +294,7 @@ namespace MinecraftClient.Protocol.Handlers
             return true;
         }
 
-        private bool putStructure(string path, int offsetX, int offsetY, int offsetZ)
+        private bool LoadStructure(string path, int offsetX, int offsetY, int offsetZ)
         {
             if (File.Exists(path))
             {
