@@ -7,8 +7,6 @@ namespace MinecraftClient.Mapping
     /// </summary>
     public record Biome
     {
-        public int NumeralId { get; }
-
         public float Temperature = 0F;
         public float Downfall    = 0F;
         
@@ -64,9 +62,8 @@ namespace MinecraftClient.Mapping
 
         public ResourceLocation BiomeId { get; }
 
-        public Biome(int numId, ResourceLocation id)
+        public Biome(ResourceLocation id)
         {
-            NumeralId = numId;
             BiomeId = id;
         }
 

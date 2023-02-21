@@ -15,15 +15,16 @@ namespace MinecraftClient.Mapping
     {
         public static readonly ItemPalette INSTANCE = new();
 
-        private readonly Dictionary<int, Item> itemsTable = new Dictionary<int, Item>();
+        private readonly Dictionary<int, Item> itemsTable = new();
         public Dictionary<int, Item> ItemsTable { get { return itemsTable; } }
 
-        private readonly Dictionary<Item, int> dictReverse = new Dictionary<Item, int>();
-        private readonly Dictionary<ResourceLocation, int> dictId = new Dictionary<ResourceLocation, int>();
-
+        private readonly Dictionary<ResourceLocation, int> dictId = new();
         private readonly Dictionary<int, Func<ItemStack, float3[]>> itemColorRules = new();
 
-        public Item FromId(int id)
+        /// <summary>
+        /// Get item from numeral id
+        /// </summary>
+        public Item FromNumId(int id)
         {
             // Unknown item types may appear on Forge servers for custom items
             if (!itemsTable.ContainsKey(id))
@@ -32,14 +33,23 @@ namespace MinecraftClient.Mapping
             return itemsTable[id];
         }
 
-        public int ToNumId(Item itemType)
-        {
-            return dictReverse[itemType];
-        }
-
+        /// <summary>
+        /// Get numeral id from item identifier
+        /// </summary>
         public int ToNumId(ResourceLocation identifier)
         {
-            return dictId[identifier];
+            if (dictId.ContainsKey(identifier))
+                return dictId[identifier];
+            
+            throw new System.IO.InvalidDataException($"Unknown Item {identifier}");
+        }
+
+        /// <summary>
+        /// Get item from item identifier
+        /// </summary>
+        public Item FromId(ResourceLocation identifier)
+        {
+            return FromNumId(ToNumId(identifier));
         }
 
         public bool IsTintable(int itemNumId)
@@ -58,7 +68,6 @@ namespace MinecraftClient.Mapping
         {
             // Clear loaded stuff...
             itemsTable.Clear();
-            dictReverse.Clear();
             dictId.Clear();
 
             string itemsPath = PathHelper.GetExtraDataFile($"items-{dataVersion}.json");
@@ -141,6 +150,7 @@ namespace MinecraftClient.Mapping
                         };
 
                         itemsTable.TryAdd(numId, newItem);
+                        dictId.TryAdd(itemId, numId);
                         //UnityEngine.Debug.Log($"Loading item {numId} {item.Value.StringValue}");
                     }
 
@@ -150,20 +160,8 @@ namespace MinecraftClient.Mapping
                 }
             }
 
-            yield return null;
-
-            // Index reverse mappings for use in ToId()
-            foreach (KeyValuePair<int, Item> entry in itemsTable)
-            {
-                dictReverse.Add(entry.Value, entry.Key);
-                dictId.Add(entry.Value.ItemId, entry.Key);
-            }
-
             // Hardcoded placeholder types for internal and network use
-            dictReverse[Item.UNKNOWN] = -2;
             dictId[Item.UNKNOWN.ItemId] = -2;
-
-            dictReverse[Item.NULL] = -1;
             dictId[Item.NULL.ItemId] = -1;
 
             yield return null;

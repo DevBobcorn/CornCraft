@@ -121,7 +121,7 @@ namespace MinecraftClient.Mapping
             this.Health = 1F;
             this.MaxHealth = 1F;
             this.Equipment = new Dictionary<int, ItemStack>();
-            this.Item = new ItemStack(Mapping.Item.AIR_ITEM, 0, null);
+            this.Item = new ItemStack(ItemPalette.INSTANCE.FromId(Mapping.Item.AIR_ID), 0, null);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace MinecraftClient.Mapping
             this.Health = 1F;
             this.MaxHealth = 1F;
             this.Equipment = new Dictionary<int, ItemStack>();
-            this.Item = new ItemStack(Mapping.Item.AIR_ITEM, 0, null);
+            this.Item = new ItemStack(ItemPalette.INSTANCE.FromId(Mapping.Item.AIR_ID), 0, null);
             this.Yaw = AngleConvert.MC2Unity(yaw);
             this.Pitch = AngleConvert.MC2Unity(pitch);
             this.HeadYaw = AngleConvert.MC2Unity(headYaw);
@@ -163,7 +163,7 @@ namespace MinecraftClient.Mapping
             this.Health = 1F;
             this.MaxHealth = 1F;
             this.Equipment = new Dictionary<int, ItemStack>();
-            this.Item = new ItemStack(Mapping.Item.AIR_ITEM, 0, null);
+            this.Item = new ItemStack(ItemPalette.INSTANCE.FromId(Mapping.Item.AIR_ID), 0, null);
         }
 
         public override string ToString()

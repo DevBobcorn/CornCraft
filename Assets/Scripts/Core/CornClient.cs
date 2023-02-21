@@ -352,6 +352,13 @@ namespace MinecraftClient
 
             while (!loadFlag.Finished)
                 yield return null;
+            
+            // Load entity definitions
+            loadFlag.Finished = false;
+            StartCoroutine(EntityPalette.INSTANCE.PrepareData(dataVersion, loadFlag, loadStateInfo));
+
+            while (!loadFlag.Finished)
+                yield return null;
 
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
@@ -1269,7 +1276,7 @@ namespace MinecraftClient
         /// Teleporting to other entityies is NOT implemented yet
         public bool Spectate(Entity entity)
         {
-            if(entity.Type == EntityType.Player)
+            if (entity.Type.EntityId == EntityType.PLAYER_ID)
                 return SpectateByUUID(entity.UUID);
             return false;
         }
@@ -1620,7 +1627,7 @@ namespace MinecraftClient
             string? playerName = null;
             if (onlinePlayers.ContainsKey(uuid))
                 playerName = onlinePlayers[uuid].Name;
-            Entity playerEntity = new Entity(entityID, EntityType.Player, location, uuid, playerName);
+            Entity playerEntity = new Entity(entityID, EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID), location, uuid, playerName);
             OnSpawnEntity(playerEntity);
         }
 
@@ -1972,35 +1979,7 @@ namespace MinecraftClient
         /// </summary>
         /// <param name="entityID">Entity ID</param>
         /// <param name="metadata">The metadata of the entity</param>
-        public void OnEntityMetadata(int entityID, Dictionary<int, object?> metadata)
-        {
-            if (entities.ContainsKey(entityID))
-            {
-                Entity entity = entities[entityID];
-                entity.Metadata = metadata;
-                if (entity.Type.ContainsItem() && metadata.TryGetValue(7, out object? itemObj) && itemObj != null && itemObj.GetType() == typeof(ItemStack))
-                {
-                    ItemStack item = (ItemStack)itemObj;
-                    if (item == null)
-                        entity.Item = new ItemStack(Item.AIR_ITEM, 0, null);
-                    else entity.Item = item;
-                }
-                if (metadata.TryGetValue(6, out object? poseObj) && poseObj != null && poseObj.GetType() == typeof(Int32))
-                {
-                    entity.Pose = (EntityPose)poseObj;
-                }
-                if (metadata.TryGetValue(2, out object? nameObj) && nameObj != null && nameObj.GetType() == typeof(string))
-                {
-                    string name = nameObj.ToString()!;
-                    entity.CustomNameJson = name;
-                    entity.CustomName = ChatParser.ParseText(name);
-                }
-                if (metadata.TryGetValue(3, out object? nameVisableObj) && nameVisableObj != null && nameVisableObj.GetType() == typeof(bool))
-                {
-                    entity.IsCustomNameVisible = bool.Parse(nameVisableObj.ToString()!);
-                }
-            }
-        }
+        public void OnEntityMetadata(int entityID, Dictionary<int, object?> metadata) { }
 
         /// <summary>
         /// Called when tradeList is recieved after interacting with villager

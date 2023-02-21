@@ -47,7 +47,7 @@ namespace MinecraftClient.Control
 
         private CameraController? camControl;
         private IPlayerVisual? playerRender;
-        private Entity fakeEntity = new(0, EntityType.Player, new());
+        private Entity fakeEntity = new(0, EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID), new());
 
         public void DisableEntity()
         {
