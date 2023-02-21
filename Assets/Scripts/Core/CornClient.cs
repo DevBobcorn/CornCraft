@@ -1984,7 +1984,35 @@ namespace MinecraftClient
         /// </summary>
         /// <param name="entityID">Entity ID</param>
         /// <param name="metadata">The metadata of the entity</param>
-        public void OnEntityMetadata(int entityID, Dictionary<int, object?> metadata) { }
+        public void OnEntityMetadata(int entityID, Dictionary<int, object?> metadata)
+        {
+            if (entities.ContainsKey(entityID))
+            {
+                Entity entity = entities[entityID];
+                entity.Metadata = metadata;
+                if (entity.Type.ContainsItem && metadata.TryGetValue(7, out object? itemObj) && itemObj != null && itemObj.GetType() == typeof(ItemStack))
+                {
+                    var item = (ItemStack) itemObj;
+                    if (item is null)
+                        entity.Item = new ItemStack(ItemPalette.INSTANCE.FromId(Item.AIR_ID), 0, null);
+                    else entity.Item = item;
+                }
+                if (metadata.TryGetValue(6, out object? poseObj) && poseObj != null && poseObj.GetType() == typeof(Int32))
+                {
+                    entity.Pose = (EntityPose)poseObj;
+                }
+                if (metadata.TryGetValue(2, out object? nameObj) && nameObj != null && nameObj.GetType() == typeof(string))
+                {
+                    string name = nameObj.ToString()!;
+                    entity.CustomNameJson = name;
+                    entity.CustomName = ChatParser.ParseText(name);
+                }
+                if (metadata.TryGetValue(3, out object? nameVisableObj) && nameVisableObj != null && nameVisableObj.GetType() == typeof(bool))
+                {
+                    entity.IsCustomNameVisible = bool.Parse(nameVisableObj.ToString()!);
+                }
+            }
+        }
 
         /// <summary>
         /// Called when tradeList is recieved after interacting with villager
