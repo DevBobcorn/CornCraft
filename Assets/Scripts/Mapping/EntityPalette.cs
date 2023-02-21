@@ -56,14 +56,41 @@ namespace MinecraftClient.Mapping
             loadStateInfo.infoText = $"Loading entity definitions";
 
             var entityTypeListPath = PathHelper.GetExtraDataFile($"entity_types-{entityVersion}.json");
+            string listsPath  = PathHelper.GetExtraDataFile("entity_lists.json");
 
-            if (!File.Exists(entityTypeListPath))
+            if (!File.Exists(entityTypeListPath) || !File.Exists(listsPath))
             {
                 loadStateInfo.infoText = "Entity data not complete!";
                 flag.Finished = true;
                 flag.Failed = true;
                 yield break;
             }
+
+            // First read special item lists...
+            var lists = new Dictionary<string, HashSet<ResourceLocation>>();
+            lists.Add("contains_item", new());
+
+            Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
+            loadStateInfo.infoText = $"Reading special lists from {listsPath}";
+
+            int count = 0, yieldCount = 200;
+
+            foreach (var pair in lists)
+            {
+                if (spLists.Properties.ContainsKey(pair.Key))
+                {
+                    foreach (var block in spLists.Properties[pair.Key].DataArray)
+                    {
+                        pair.Value.Add(ResourceLocation.fromString(block.StringValue));
+                        count++;
+                        if (count % yieldCount == 0)
+                            yield return null;
+                    }
+                }
+            }
+
+            // References for later use
+            var containsItem = lists["contains_item"];
 
             try
             {
@@ -76,7 +103,9 @@ namespace MinecraftClient.Mapping
                     {
                         var entityTypeId = ResourceLocation.fromString(entityType.Value.StringValue);
 
-                        entityTypeTable.TryAdd(numId, new(numId, entityTypeId));
+                        entityTypeTable.TryAdd(numId, new EntityType(numId,
+                                entityTypeId, containsItem.Contains(entityTypeId)));
+                        
                         dictId.TryAdd(entityTypeId, numId);
                     }
                     else

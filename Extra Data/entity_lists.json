@@ -1,0 +1,13 @@
+{
+    "contains_item": [
+        "minecraft:glow_item_frame",
+        "minecraft:item",
+        "minecraft:item_frame",
+        "minecraft:eye_of_ender",
+        "minecraft:egg",
+        "minecraft:ender_pearl",
+        "minecraft:potion",
+        "minecraft:fireball",
+        "minecraft:firework_rocket"
+    ]
+}
