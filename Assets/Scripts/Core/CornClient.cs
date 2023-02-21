@@ -278,6 +278,7 @@ namespace MinecraftClient
             var versionDictPath = PathHelper.GetExtraDataFile("versions.json");
 
             var dataVersion     = string.Empty;
+            var entityVersion   = string.Empty;
             var resourceVersion = string.Empty;
 
             try
@@ -291,6 +292,10 @@ namespace MinecraftClient
                     var entries = versions.Properties[version].Properties;
 
                     dataVersion = entries["data"].StringValue;
+                    if (entries.ContainsKey("entity"))
+                        entityVersion = entries["entity"].StringValue;
+                    else
+                        entityVersion = dataVersion;
                     resourceVersion = entries["resource"].StringValue;
                 }
             }
@@ -355,7 +360,7 @@ namespace MinecraftClient
             
             // Load entity definitions
             loadFlag.Finished = false;
-            StartCoroutine(EntityPalette.INSTANCE.PrepareData(dataVersion, loadFlag, loadStateInfo));
+            StartCoroutine(EntityPalette.INSTANCE.PrepareData(entityVersion, loadFlag, loadStateInfo));
 
             while (!loadFlag.Finished)
                 yield return null;
