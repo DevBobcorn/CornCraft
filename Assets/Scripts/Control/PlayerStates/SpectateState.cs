@@ -36,9 +36,9 @@ namespace MinecraftClient.Control
             rigidbody.velocity = moveVelocity;
         }
 
-        public bool ShouldEnter(PlayerStatus info) => info.Spectating;
+        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info) => info.Spectating;
 
-        public bool ShouldExit(PlayerStatus info)  => !info.Spectating;
+        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)  => !info.Spectating;
 
         public override string ToString() => "Spectate";
 

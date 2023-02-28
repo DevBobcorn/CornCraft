@@ -21,8 +21,6 @@ namespace MinecraftClient.Control
         private static readonly Vector3 IN_WATER_CHECK_POINT_LOWER = new(0F, 0.3F, 0F);
         private static readonly Vector3 IN_WATER_CHECK_POINT_UPPER = new(0F, 0.8F, 0F);
 
-        public const float SURFING_LIQUID_DIST_THERSHOLD = -0.6F;
-
         [SerializeField] public LayerMask GroundLayer;
         [SerializeField] public LayerMask LiquidLayer;
 
@@ -79,7 +77,12 @@ namespace MinecraftClient.Control
             
             Debug.DrawRay(rayFront,  transform.up * -GROUND_RAYCAST_DIST, Color.green);
 
-            if (Status.Grounded)
+            if (Status.InLiquid && Status.CenterDownDist < 1F)
+            {
+                if (Status.LiquidDist > -0.4F)
+                    Status.Grounded = true;
+            }
+            else if (Status.Grounded)
             {
                 // Extra check to make sure the player is just walking on some bumped surface and happen to leave the ground
                 // for a really small amount of time (for example walking from grass block to grass path block)

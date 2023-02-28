@@ -47,7 +47,13 @@ namespace MinecraftClient.Control
 
         private CameraController? camControl;
         private IPlayerVisual? playerRender;
-        private Entity fakeEntity = new(0, EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID), new());
+        private Entity? fakeEntity;
+
+        public PlayerAttackManager AttackManager = new(
+            () => { },
+            () => { },
+            () => { }
+        );
 
         public void DisableEntity()
         {
@@ -96,7 +102,7 @@ namespace MinecraftClient.Control
 
         public void SetEntityId(int entityId)
         {
-            fakeEntity.ID = entityId;
+            fakeEntity!.ID = entityId;
             // Reassign this entity to refresh
             playerRender!.UpdateEntity(fakeEntity);
         }
@@ -147,12 +153,12 @@ namespace MinecraftClient.Control
             var status = statusUpdater!.Status;
 
             // Update current player state
-            if (CurrentState.ShouldExit(status))
+            if (CurrentState.ShouldExit(inputData, status))
             {
                 // Try to exit current state and enter another one
                 foreach (var state in PlayerStates.STATES)
                 {
-                    if (state != CurrentState && state.ShouldEnter(status))
+                    if (state != CurrentState && state.ShouldEnter(inputData, status))
                     {
                         CurrentState.OnExit(status, playerAbility!, playerRigidbody!, this);
 
@@ -233,6 +239,7 @@ namespace MinecraftClient.Control
             // Initialize player visuals
             playerRender = GetComponent<IPlayerVisual>();
 
+            fakeEntity = new(0, EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID), new());
             fakeEntity.Name = game!.GetUsername();
             fakeEntity.ID   = 0;
             playerRender.UpdateEntity(fakeEntity);
@@ -334,10 +341,14 @@ namespace MinecraftClient.Control
             // Visually swap xz velocity to fit vanilla
             var veloInfo = $"Vel:\t{velocity.z:0.00}\t{velocity.y:0.00}\t{velocity.x:0.00}\n({velocity.magnitude:0.000})";
 
+            string statusInfo;
+
             if (statusUpdater!.Status.Spectating)
-                return $"Lcl Pos:\t{loc}\nSvr Pos:\t{loc2}\nState:\t{CurrentState}\n{veloInfo}\nLighting:\t{lightInfo}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
+                statusInfo = string.Empty;
             else
-                return $"Lcl Pos:\t{loc}\nSvr Pos:\t{loc2}\nState:\t{CurrentState}\n{veloInfo}\nLighting:\t{lightInfo}\n{statusUpdater!.Status}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
+                statusInfo = statusUpdater!.Status.ToString();
+            
+            return $"Lcl Pos:\t{loc}\nSvr Pos:\t{loc2}\nState:\t{CurrentState}\n{veloInfo}\nLighting:\t{lightInfo}\n{statusInfo}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
 
         }
 

@@ -813,7 +813,7 @@ MonoBehaviour:
   JumpSpeed: 3.2
   SteerSpeed: 12
   MaxStamina: 20
-  SprintStaminaCost: 36
+  SprintStaminaCost: 3
   SwimStaminaCost: 1
   StaminaRestore: 4
   MaxFallSpeed: -10
