@@ -72,33 +72,33 @@ namespace MinecraftClient.Control
                     }
                 }
             }
+
+            Vector3 moveVelocity = rigidbody.velocity;
+
+            moveVelocity.y = Mathf.Max(rigidbody.velocity.y, ability.MaxFallSpeed);
+
+            // Apply new velocity to rigidbody
+            rigidbody.AddForce((moveVelocity - rigidbody.velocity) * 0.2F, ForceMode.VelocityChange);
             
-            var moveSpeed = rigidbody.velocity;
-
-            // Check and constrain fall speed
-            if (moveSpeed.y < ability.MaxFallSpeed)
-                moveSpeed = new(moveSpeed.x, ability.MaxFallSpeed, moveSpeed.z);
-            // Otherwise free fall, leave velocity unchanged
-
-            rigidbody.velocity = moveSpeed;
+            if (info.Grounded) // Restore stamina
+                info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
 
             // Leave stamina value unchanged
         }
 
-        public bool ShouldEnter(PlayerStatus info)
+        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
         {
             if (!info.Spectating && !info.Grounded && !info.OnWall && !info.InLiquid)
                 return true;
+            
             return false;
         }
 
-        public bool ShouldExit(PlayerStatus info)
+        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (info.Spectating)
+            if (info.Spectating || info.Grounded || info.OnWall || info.InLiquid)
                 return true;
             
-            if (info.Grounded || info.OnWall || info.InLiquid)
-                return true;
             return false;
         }
 

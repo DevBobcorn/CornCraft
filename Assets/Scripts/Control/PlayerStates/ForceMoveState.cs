@@ -111,9 +111,10 @@ namespace MinecraftClient.Control
         }
 
         // This is not used, use PlayerController.StartForceMoveOperation() to enter this state
-        public bool ShouldEnter(PlayerStatus info) => false;
+        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info) => false;
 
-        public bool ShouldExit(PlayerStatus info) => currentOperationIndex >= Operations.Length && currentTime <= 0F;
+        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info) =>
+                currentOperationIndex >= Operations.Length && currentTime <= 0F;
 
         public void OnEnter(PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
         {

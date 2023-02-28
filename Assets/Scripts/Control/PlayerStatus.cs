@@ -16,16 +16,12 @@ namespace MinecraftClient.Control
         public bool Moving    = false;
         public bool Sprinting = false;
 
-        public float BrakeTime       = 0F;
-
-        public bool Attacking  = false;
         public bool Spectating = false;
         public bool WalkMode   = false;
 
         public bool GravityDisabled = false;
 
         public bool PlayingRootMotion = false;
-        public float PositionValidateCooldown = 0F;
 
         // Reference values
         public float CenterDownDist = 0F;
@@ -45,7 +41,7 @@ namespace MinecraftClient.Control
         public Location? TargetBlockPos = null;
 
         public override string ToString() => 
-            $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nGrounded:\t{Sprinting}\nGround Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}\n\nBrake Time:\t{BrakeTime:0.00}";
+            $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nGrounded:\t{Sprinting}\nGround Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}";
 
     }
 }
