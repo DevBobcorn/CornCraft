@@ -240,6 +240,9 @@ namespace MinecraftClient.UI
                     protocolVersion = ProtocolPseudo.DEFAULT_PROTOCOL;
                     Translations.Notify("mcc.server_protocol", "<Pseudo>", protocolVersion);
 
+                    // Authentication completed, hide the panel...
+                    HideLoginPanel();
+
                     game!.StartLogin(session, playerKeyPair, host, port, protocolVersion, null, loadStateInfo, accountLower);
                     tryingConnect = false;
                     yield break;
