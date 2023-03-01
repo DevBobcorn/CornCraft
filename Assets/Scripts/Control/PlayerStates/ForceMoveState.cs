@@ -20,7 +20,7 @@ namespace MinecraftClient.Control
             Operations = op;
         }
 
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             if (currentOperation is null)
                 return;
@@ -30,14 +30,14 @@ namespace MinecraftClient.Control
             if (currentTime <= 0F)
             {
                 // Finish current operation
-                FinishOperation(info, ability, rigidbody, player);
+                FinishOperation(info, rigidbody, player);
 
                 currentOperationIndex++;
 
                 if (currentOperationIndex < Operations.Length)
                 {
                     // Start next operation in sequence
-                    StartOperation(info, ability, rigidbody, player);
+                    StartOperation(info, rigidbody, player);
                 }
             }
             else
@@ -63,11 +63,11 @@ namespace MinecraftClient.Control
                 }
 
                 // Call operation update
-                currentOperation.OperationUpdate?.Invoke(interval, inputData, info, ability, rigidbody, player);
+                currentOperation.OperationUpdate?.Invoke(interval, inputData, info, rigidbody, player);
             }
         }
 
-        private void StartOperation(PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        private void StartOperation(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             // Update current operation
             currentOperation = Operations[currentOperationIndex];
@@ -75,7 +75,7 @@ namespace MinecraftClient.Control
             if (currentOperation is not null)
             {
                 // Invoke operation init if present
-                currentOperation.OperationInit?.Invoke(info, ability, rigidbody, player);
+                currentOperation.OperationInit?.Invoke(info, rigidbody, player);
                 
                 currentTime = currentOperation.TimeTotal;
 
@@ -84,11 +84,11 @@ namespace MinecraftClient.Control
             }
         }
 
-        private void FinishOperation(PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        private void FinishOperation(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             if (currentOperation is not null)
             {
-                currentOperation.OperationExit?.Invoke(info, ability, rigidbody, player);
+                currentOperation.OperationExit?.Invoke(info, rigidbody, player);
 
                 if (currentOperation.DisplacementType == ForceMoveDisplacementType.FixedDisplacement)
                 {
@@ -116,15 +116,15 @@ namespace MinecraftClient.Control
         public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info) =>
                 currentOperationIndex >= Operations.Length && currentTime <= 0F;
 
-        public void OnEnter(PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        public void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             if (Operations.Length > currentOperationIndex)
-                StartOperation(info, ability, rigidbody, player);
+                StartOperation(info, rigidbody, player);
             
             //info.PlayingForcedAnimation = true;
         }
 
-        public void OnExit(PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             //info.PlayingForcedAnimation = false;
 

@@ -8,8 +8,10 @@ namespace MinecraftClient.Control
         public const float THRESHOLD_LAND_PLATFORM  = -1.4F;
         public const float SURFING_LIQUID_DIST_THERSHOLD = -0.2F;
 
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
+            var ability = player.Ability;
+            
             info.Sprinting = false;
             info.Moving = true;
 
@@ -45,14 +47,14 @@ namespace MinecraftClient.Control
                                     new ForceMoveOperation[] {
                                             new(org,  dest, 0.01F + Mathf.Max(info.LiquidDist - info.FrontDownDist - 0.2F, 0F) * 0.5F),
                                             new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 1.1F,
-                                                init: (info, ability, rigidbody, player) => {
+                                                init: (info, rigidbody, player) => {
                                                     player.RandomizeMirroredFlag();
                                                     player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                                     player.UseRootMotion = true;
                                                 },
-                                                update: (interval, inputData, info, ability, rigidbody, player) =>
+                                                update: (interval, inputData, info, rigidbody, player) =>
                                                     info.Moving = inputData.horInputNormalized != Vector2.zero,
-                                                exit: (info, ability, rigidbody, player) => {
+                                                exit: (info, rigidbody, player) => {
                                                     player.UseRootMotion = false;
                                                 }
                                             )
@@ -71,7 +73,7 @@ namespace MinecraftClient.Control
                         player.StartForceMoveOperation("Swim over barrier underwater",
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.8F,
-                                            update: (interval, inputData, info, ability, rigidbody, player) =>
+                                            update: (interval, inputData, info, rigidbody, player) =>
                                                 info.Moving = true
                                         )
                                 } );
@@ -87,7 +89,7 @@ namespace MinecraftClient.Control
                         player.StartForceMoveOperation("Swim over barrier underwater",
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.5F,
-                                            update: (interval, inputData, info, ability, rigidbody, player) =>
+                                            update: (interval, inputData, info, rigidbody, player) =>
                                                 info.Moving = true
                                         )
                                 } );

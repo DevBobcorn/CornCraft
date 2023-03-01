@@ -13,8 +13,10 @@ namespace MinecraftClient.Control
         public const float THRESHOLD_SPRINT_STOP   = 50F;
         public const float THRESHOLD_ANGLE_FORWARD = 70F;
 
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
+            var ability = player.Ability;
+
             info.Moving = true;
 
             // Smooth rotation for player model
@@ -51,12 +53,12 @@ namespace MinecraftClient.Control
                                     new(org,  dest, 0.1F),
                                     new(dest, ability.Climb2mCurves, player.visualTransform!.rotation, 0F, 2.25F,
                                         playbackSpeed: 1.5F,
-                                        init: (info, ability, rigidbody, player) =>
+                                        init: (info, rigidbody, player) =>
                                         {
                                             player.RandomizeMirroredFlag();
                                             player.CrossFadeState(PlayerAbility.CLIMB_2M);
                                         },
-                                        update: (interval, inputData, info, ability, rigidbody, player) =>
+                                        update: (interval, inputData, info, rigidbody, player) =>
                                             info.Moving = inputData.horInputNormalized != Vector2.zero
                                     )
                             } );
@@ -73,14 +75,14 @@ namespace MinecraftClient.Control
                             new ForceMoveOperation[] {
                                     new(org,  dest, 0.1F),
                                     new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 1.1F,
-                                        init: (info, ability, rigidbody, player) => {
+                                        init: (info, rigidbody, player) => {
                                             player.RandomizeMirroredFlag();
                                             player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                             player.UseRootMotion = true;
                                         },
-                                        update: (interval, inputData, info, ability, rigidbody, player) =>
+                                        update: (interval, inputData, info, rigidbody, player) =>
                                             info.Moving = inputData.horInputNormalized != Vector2.zero,
-                                        exit: (info, ability, rigidbody, player) => {
+                                        exit: (info, rigidbody, player) => {
                                             player.UseRootMotion = false;
                                         }
                                     )
@@ -99,12 +101,12 @@ namespace MinecraftClient.Control
 
                         player.StartForceMoveOperation("Walk up stairs", new ForceMoveOperation[] {
                                 new(org, dest, time,
-                                    update: (interval, inputData, info, ability, rigidbody, player) =>
+                                    update: (interval, inputData, info, rigidbody, player) =>
                                     {
                                         // Force grounded while doing the move
                                         info.Grounded = true;
                                         // Update player yaw
-                                        info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability!.SteerSpeed * interval);
+                                        info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval);
                                     })
                                 } );
                     }
@@ -149,7 +151,7 @@ namespace MinecraftClient.Control
             return false;
         }
 
-        public void OnExit(PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             info.Sprinting = false;
         }

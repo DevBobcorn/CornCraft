@@ -18,7 +18,7 @@ namespace MinecraftClient.Control
                 else
                     inputData.horInputNormalized = new Vector2(h, v).normalized;
 
-                inputData.attack  = Input.GetButton("Attack");
+                inputData.attack  = Input.GetButtonDown("Attack");
 
                 if (perspective == Perspective.ThirdPerson)
                 {
