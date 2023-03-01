@@ -7,7 +7,7 @@ namespace MinecraftClient.Control
     public class PlayerStatus
     {
         // Player data
-        public float    StaminaLeft = 0F;
+        public float StaminaLeft = 0F;
 
         // Player status
         public bool InLiquid  = false;
@@ -15,6 +15,9 @@ namespace MinecraftClient.Control
         public bool OnWall    = false;
         public bool Moving    = false;
         public bool Sprinting = false;
+
+        public bool Attacking = false;
+        public AttackStatus AttackStatus = new();
 
         public bool Spectating = false;
         public bool WalkMode   = false;
@@ -40,8 +43,13 @@ namespace MinecraftClient.Control
         // Block selection data
         public Location? TargetBlockPos = null;
 
-        public override string ToString() => 
-            $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\nMoving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nGrounded:\t{Sprinting}\nGround Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}";
-
+        public override string ToString()
+        {
+            var moveInfo = $"Moving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nSprinting:\t{Sprinting}";
+            var envInfo = $"Ground Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}";
+            var atkInfo = Attacking ? AttackStatus.ToString() : "\n";
+            
+            return $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\n{moveInfo}\n{envInfo}\n{atkInfo}";
+        }
     }
 }

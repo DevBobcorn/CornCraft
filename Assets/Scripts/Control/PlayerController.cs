@@ -10,7 +10,12 @@ namespace MinecraftClient.Control
     [RequireComponent(typeof (Rigidbody), typeof (EntityRender), typeof (PlayerStatusUpdater))]
     public class PlayerController : MonoBehaviour, IPlayerController
     {
-        [SerializeField] public PlayerAbility? playerAbility;
+        [SerializeField] public PlayerAbility? ability;
+        public PlayerAbility Ability => ability!;
+
+        [SerializeField] public PlayerMeleeAttack? meleeAttack;
+        public PlayerMeleeAttack MeleeAttack => meleeAttack!;
+        
         [SerializeField] public Transform? cameraRef;
         [SerializeField] public Transform? visualTransform;
         [SerializeField] public PhysicMaterial? physicMaterial;
@@ -27,18 +32,7 @@ namespace MinecraftClient.Control
         private PlayerInteractionUpdater? interactionUpdater;
 
         private IPlayerState CurrentState = PlayerStates.IDLE;
-        private bool useRootMotion = false;
-        public bool UseRootMotion
-        {
-            get {
-                return useRootMotion;
-            }
-
-            set {
-                useRootMotion = value;
-            }
-        }
-
+        public bool UseRootMotion = false;
 
         // Access for networking thread
         [HideInInspector] public Location ServerLocation;
@@ -48,12 +42,6 @@ namespace MinecraftClient.Control
         private CameraController? camControl;
         private IPlayerVisual? playerRender;
         private Entity? fakeEntity;
-
-        public PlayerAttackManager AttackManager = new(
-            () => { },
-            () => { },
-            () => { }
-        );
 
         public void DisableEntity()
         {
@@ -160,12 +148,12 @@ namespace MinecraftClient.Control
                 {
                     if (state != CurrentState && state.ShouldEnter(inputData, status))
                     {
-                        CurrentState.OnExit(status, playerAbility!, playerRigidbody!, this);
+                        CurrentState.OnExit(status, playerRigidbody!, this);
 
                         // Exit previous state and enter this state
                         CurrentState = state;
                         
-                        CurrentState.OnEnter(status, playerAbility!, playerRigidbody!, this);
+                        CurrentState.OnEnter(status, playerRigidbody!, this);
                         break;
                     }
                 }
@@ -183,11 +171,11 @@ namespace MinecraftClient.Control
             }
             
             // Update player physics and transform using updated current state
-            CurrentState.UpdatePlayer(interval, inputData, status, playerAbility!, playerRigidbody!, this);
+            CurrentState.UpdatePlayer(interval, inputData, status, playerRigidbody!, this);
 
             // Broadcast current stamina if changed
             if (prevStamina != status.StaminaLeft)
-                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, status.StaminaLeft >= playerAbility!.MaxStamina));
+                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, status.StaminaLeft >= ability!.MaxStamina));
 
             // Apply updated visual yaw to visual transform
             visualTransform!.eulerAngles = new(0F, Status.CurrentVisualYaw, 0F);
@@ -221,11 +209,30 @@ namespace MinecraftClient.Control
 
         public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)
         {
-            CurrentState.OnExit(statusUpdater!.Status, playerAbility!, playerRigidbody!, this);
-
+            CurrentState.OnExit(statusUpdater!.Status, playerRigidbody!, this);
             // Enter a new force move state
             CurrentState = new ForceMoveState(name, ops);
-            CurrentState.OnEnter(statusUpdater!.Status, playerAbility!, playerRigidbody!, this);
+            CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
+        }
+
+        public bool TryStartAttack()
+        {
+            if (statusUpdater!.Status.AttackStatus.AttackCooldown <= 0F)
+            {
+                Debug.Log("ATK");
+
+                CurrentState.OnExit(statusUpdater!.Status, playerRigidbody!, this);
+                // Enter melee attack state
+                CurrentState = PlayerStates.MELEE;
+
+                Debug.Log($"Current state: {CurrentState}");
+
+                CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
+
+                return true;
+            }
+            
+            return false;
         }
  
         private Action<PerspectiveUpdateEvent>? perspectiveCallback;
@@ -263,21 +270,21 @@ namespace MinecraftClient.Control
             EventManager.Instance.Register(perspectiveCallback);
             EventManager.Instance.Register(gameModeCallback);
 
-            if (playerAbility is null)
+            if (ability is null)
                 Debug.LogError("Player ability not assigned!");
             else
             {
-                var boxcast = playerAbility.ColliderType == PlayerAbility.PlayerColliderType.Box;
+                var boxcast = ability.ColliderType == PlayerAbility.PlayerColliderType.Box;
 
                 if (boxcast)
                 {
                     // Attach box collider
                     var box = gameObject.AddComponent<BoxCollider>();
-                    var sideLength = playerAbility.ColliderRadius * 2F;
-                    box.size = new(sideLength, playerAbility.ColliderHeight, sideLength);
-                    box.center = new(0F, playerAbility.ColliderHeight / 2F, 0F);
+                    var sideLength = ability.ColliderRadius * 2F;
+                    box.size = new(sideLength, ability.ColliderHeight, sideLength);
+                    box.center = new(0F, ability.ColliderHeight / 2F, 0F);
 
-                    statusUpdater.GroundBoxcastHalfSize = new(playerAbility.ColliderRadius, 0.01F, playerAbility.ColliderRadius);
+                    statusUpdater.GroundBoxcastHalfSize = new(ability.ColliderRadius, 0.01F, ability.ColliderRadius);
 
                     playerCollider = box;
                 }
@@ -285,12 +292,12 @@ namespace MinecraftClient.Control
                 {
                     // Attach capsule collider
                     var capsule = gameObject.AddComponent<CapsuleCollider>();
-                    capsule.height = playerAbility.ColliderHeight;
-                    capsule.radius = playerAbility.ColliderRadius;
-                    capsule.center = new(0F, playerAbility.ColliderHeight / 2F, 0F);
+                    capsule.height = ability.ColliderHeight;
+                    capsule.radius = ability.ColliderRadius;
+                    capsule.center = new(0F, ability.ColliderHeight / 2F, 0F);
 
-                    statusUpdater.GroundSpherecastRadius = playerAbility.ColliderRadius;
-                    statusUpdater.GroundSpherecastCenter = new(0F, playerAbility.ColliderRadius + 0.05F, 0F);
+                    statusUpdater.GroundSpherecastRadius = ability.ColliderRadius;
+                    statusUpdater.GroundSpherecastCenter = new(0F, ability.ColliderRadius + 0.05F, 0F);
 
                     playerCollider = capsule;
                 }
@@ -300,7 +307,7 @@ namespace MinecraftClient.Control
                 statusUpdater.UseBoxCastForGroundedCheck = boxcast;
 
                 // Set stamina to max value
-                Status!.StaminaLeft = playerAbility!.MaxStamina;
+                Status!.StaminaLeft = ability!.MaxStamina;
                 // And broadcast current stamina
                 EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, true));
                 // Initialize health value

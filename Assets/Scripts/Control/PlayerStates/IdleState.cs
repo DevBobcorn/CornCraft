@@ -5,15 +5,18 @@ namespace MinecraftClient.Control
 {
     public class IdleState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
+            var ability = player.Ability;
+
             info.Sprinting = false;
             info.Moving = false;
 
-            //rigidbody.AddForce(-rigidbody.velocity * 0.2F, ForceMode.VelocityChange);
-
-            if (inputData.attack) // Try start attacking
-                player.AttackManager.TryStart();
+            if (inputData.attack) // Attack available
+            {
+                player.TryStartAttack();
+                
+            }
             else if (inputData.ascend) // Jump in place
                 rigidbody.velocity = new(0F, ability.JumpSpeed, 0F);
 

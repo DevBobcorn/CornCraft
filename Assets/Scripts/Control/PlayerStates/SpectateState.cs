@@ -5,8 +5,10 @@ namespace MinecraftClient.Control
 {
     public class SpectateState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
+            var ability = player.Ability;
+
             info.Sprinting = false;
 
             Vector3 moveVelocity = Vector3.zero;
@@ -16,7 +18,7 @@ namespace MinecraftClient.Control
                 info.Moving = true;
 
                 // Smooth rotation for player model
-                info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval);
+                info.CurrentVisualYaw = info.TargetVisualYaw;
 
                 var moveSpeed = info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
 

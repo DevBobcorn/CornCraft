@@ -96,10 +96,10 @@ namespace MinecraftClient.Control
             OperationUpdate = update;
         }
 
-        public delegate void OperationInitAction(PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player);
+        public delegate void OperationInitAction(PlayerStatus info, Rigidbody rigidbody, PlayerController player);
 
-        public delegate void OperationExitAction(PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player);
+        public delegate void OperationExitAction(PlayerStatus info, Rigidbody rigidbody, PlayerController player);
 
-        public delegate void OperationUpdateAction(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player);
+        public delegate void OperationUpdateAction(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player);
     }
 }

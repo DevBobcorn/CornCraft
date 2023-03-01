@@ -11,8 +11,10 @@ namespace MinecraftClient.Control
 
         public const float THRESHOLD_ANGLE_FORWARD = 40F;
 
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, PlayerAbility ability, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
+            var ability = player.Ability;
+
             info.Sprinting = false;
 
             if (inputData.horInputNormalized != Vector2.zero)
@@ -35,12 +37,12 @@ namespace MinecraftClient.Control
                                         new(org,  dest, 0.1F),
                                         new(dest, ability.Climb2mCurves, player.visualTransform!.rotation, 0F, 2.2F,
                                             playbackSpeed: 1.5F,
-                                            init: (info, ability, rigidbody, player) =>
+                                            init: (info, rigidbody, player) =>
                                             {
                                                 player.RandomizeMirroredFlag();
                                                 player.CrossFadeState(PlayerAbility.CLIMB_2M);
                                             },
-                                            update: (interval, inputData, info, ability, rigidbody, player) =>
+                                            update: (interval, inputData, info, rigidbody, player) =>
                                                 info.Moving = inputData.horInputNormalized != Vector2.zero
                                         )
                                 } );
@@ -57,14 +59,14 @@ namespace MinecraftClient.Control
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.1F),
                                         new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.9F,
-                                            init: (info, ability, rigidbody, player) => {
+                                            init: (info, rigidbody, player) => {
                                                 player.RandomizeMirroredFlag();
                                                 player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                                 player.UseRootMotion = true;
                                             },
-                                            update: (interval, inputData, info, ability, rigidbody, player) =>
+                                            update: (interval, inputData, info, rigidbody, player) =>
                                                 info.Moving = inputData.horInputNormalized != Vector2.zero,
-                                            exit: (info, ability, rigidbody, player) => {
+                                            exit: (info, rigidbody, player) => {
                                                 player.UseRootMotion = false;
                                             }
                                         )
