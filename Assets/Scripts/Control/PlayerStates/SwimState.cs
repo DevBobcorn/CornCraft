@@ -50,13 +50,9 @@ namespace MinecraftClient.Control
                                                 init: (info, rigidbody, player) => {
                                                     player.RandomizeMirroredFlag();
                                                     player.CrossFadeState(PlayerAbility.CLIMB_1M);
-                                                    player.UseRootMotion = true;
                                                 },
                                                 update: (interval, inputData, info, rigidbody, player) =>
-                                                    info.Moving = inputData.horInputNormalized != Vector2.zero,
-                                                exit: (info, rigidbody, player) => {
-                                                    player.UseRootMotion = false;
-                                                }
+                                                    info.Moving = inputData.horInputNormalized != Vector2.zero
                                             )
                                     } );
                         }
@@ -144,7 +140,7 @@ namespace MinecraftClient.Control
             }
 
             // Apply new velocity to rigidbody
-            rigidbody.AddForce((moveVelocity - rigidbody.velocity) * 0.2F, ForceMode.VelocityChange);
+            info.MoveVelocity = moveVelocity;
             
             if (info.Grounded) // Restore stamina
                 info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);

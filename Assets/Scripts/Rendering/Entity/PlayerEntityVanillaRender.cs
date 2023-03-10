@@ -5,7 +5,7 @@ using MinecraftClient.Resource;
 
 namespace MinecraftClient.Rendering
 {
-    public class PlayerEntityVanillaRender : BipedEntityRender, IPlayerVisual
+    public class PlayerEntityVanillaRender : BipedEntityRender
     {
         public Transform? leftArm, rightArm;
 
@@ -22,12 +22,6 @@ namespace MinecraftClient.Rendering
             
             UpdateSkinMaterial();
         }
-
-        public void UpdateEntity(Entity entity) => base.Entity = entity;
-
-        public void UpdateVelocity(Vector3 velocity) => SetVisualMovementVelocity(velocity);
-
-        public void UpdateVisual(float tickMilSec) => UpdateAnimation(tickMilSec);
 
         public override void UpdateAnimation(float tickMilSec)
         {

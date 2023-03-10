@@ -19,6 +19,8 @@ namespace MinecraftClient.Control
             }
             else if (inputData.ascend) // Jump in place
                 rigidbody.velocity = new(0F, ability.JumpSpeed, 0F);
+            
+            info.MoveVelocity = Vector3.zero;
 
             // Restore stamina
             info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
