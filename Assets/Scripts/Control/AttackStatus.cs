@@ -11,7 +11,7 @@ namespace MinecraftClient.Control
         public override string ToString()
         {
 
-            return $"Atk Cd:\t{AttackCooldown}\nAtk St\t{AttackStage}";
+            return $"Atk Cd:\t{AttackCooldown}\nAtk St:\t{AttackStage}";
         }
 
     }

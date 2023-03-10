@@ -13,6 +13,7 @@ namespace MinecraftClient.Control
             info.Moving = inputData.horInputNormalized != Vector2.zero;
 
             info.Grounded = true; // Force grounded
+            info.MoveVelocity = Vector3.zero; // Cancel move
 
             var attackStatus = info.AttackStatus;
 
