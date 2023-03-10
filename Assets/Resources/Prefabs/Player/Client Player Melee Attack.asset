@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Client Player Melee Attack
   m_EditorClassIdentifier: 
   StageDurations:
-  - 0.4
-  - 1
-  - 0.8
   - 0.6
-  IdleTimeout: -0.9
+  - 0.6
+  - 0.6
+  - 0.6
+  IdleTimeout: -2.1

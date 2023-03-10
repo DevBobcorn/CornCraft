@@ -1,12 +1,11 @@
 #nullable enable
 using UnityEngine;
 using MinecraftClient.Control;
-using MinecraftClient.Mapping;
 using MinecraftClient.Resource;
 
 namespace MinecraftClient.Rendering
 {
-    public class PlayerEntityRiggedRender : EntityRender, IPlayerVisual
+    public class PlayerEntityRiggedRender : AnimatorEntityRender
     {
         [SerializeField] private bool usePlayerSkin = false;
 
@@ -19,70 +18,31 @@ namespace MinecraftClient.Rendering
         private static readonly int CENTER_DOWN_DIST = Animator.StringToHash("CenterDownDist");
 
         private static readonly int ROOT_MOTION = Animator.StringToHash("RootMotion");
-
-        private static readonly int MIRRORED = Animator.StringToHash("Mirrored");
-
-        private static readonly int VERTICAL_SPEED = Animator.StringToHash("VerticalSpeed");
-        private static readonly int HORIZONTAL_SPEED = Animator.StringToHash("HorizontalSpeed");
-
-        private Animator? playerAnimator;
-
-        private bool animatorPresent = false;
+        private static readonly int ATTACKING = Animator.StringToHash("Attacking");
 
         protected override void Initialize()
         {
             base.Initialize();
 
-            // Get animator component
-            playerAnimator = GetComponentInChildren<Animator>();
-
-            if (playerAnimator is not null)
-                animatorPresent = true;
-            else
-                Debug.LogWarning("Player animator not found!");
-
             if (usePlayerSkin)
                 UpdateSkinMaterial();
         }
 
-        public void UpdateEntity(Entity entity) => base.Entity = entity;
-
-        public override void SetVisualMovementVelocity(Vector3 velocity)
-        {
-            base.SetVisualMovementVelocity(velocity);
-
-            if (animatorPresent)
-            {
-                playerAnimator!.SetFloat(VERTICAL_SPEED, velocity.y);
-                playerAnimator.SetFloat(HORIZONTAL_SPEED, Mathf.Sqrt(velocity.x * velocity.x + velocity.z * velocity.z));
-            }
-        }
-
-        public void UpdateVelocity(Vector3 velocity) => SetVisualMovementVelocity(velocity);
-
-        public void UpdateStateMachine(PlayerStatus info)
+        public override void UpdateStateMachine(PlayerStatus info)
         {
             if (animatorPresent)
             {
                 // Update animator parameters
-                playerAnimator!.SetBool(GROUNDED, info.Grounded);
-                playerAnimator.SetBool(IN_LIQUID, info.InLiquid);
-                playerAnimator.SetBool(ON_WALL, info.OnWall);
-                playerAnimator.SetBool(MOVING, info.Moving);
-                playerAnimator.SetBool(SPRINTING, info.Sprinting);
-                playerAnimator.SetBool(WALK_MODE, info.WalkMode);
-                playerAnimator.SetFloat(CENTER_DOWN_DIST, info.CenterDownDist);
+                entityAnimator!.SetBool(GROUNDED, info.Grounded);
+                entityAnimator.SetBool(IN_LIQUID, info.InLiquid);
+                entityAnimator.SetBool(ON_WALL, info.OnWall);
+                entityAnimator.SetBool(MOVING, info.Moving);
+                entityAnimator.SetBool(SPRINTING, info.Sprinting);
+                entityAnimator.SetBool(WALK_MODE, info.WalkMode);
+                entityAnimator.SetFloat(CENTER_DOWN_DIST, info.CenterDownDist);
 
-                playerAnimator.SetBool(ROOT_MOTION, info.PlayingRootMotion);
-
-            }
-        }
-
-        public void SetMirroredFlag(bool flag)
-        {
-            if (animatorPresent)
-            {
-                playerAnimator!.SetBool(MIRRORED, flag);
+                entityAnimator.SetBool(ROOT_MOTION, info.PlayingRootMotion);
+                entityAnimator.SetBool(ATTACKING, info.Attacking);
             }
         }
 
@@ -102,12 +62,6 @@ namespace MinecraftClient.Rendering
                     renderer.sharedMaterial = mat;
 
             }
-        }
-
-        public void CrossFadeState(string stateName, float time, int layer, float timeOffset)
-        {
-            if (animatorPresent)
-                playerAnimator!.CrossFade(stateName, time, layer, timeOffset);
         }
 
     }

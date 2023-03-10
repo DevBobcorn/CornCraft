@@ -34,7 +34,7 @@ namespace MinecraftClient.Control
 
                         player.StartForceMoveOperation("Climb over wall",
                                 new ForceMoveOperation[] {
-                                        new(org,  dest, 0.1F),
+                                        new(org,  dest, 0.01F),
                                         new(dest, ability.Climb2mCurves, player.visualTransform!.rotation, 0F, 2.2F,
                                             playbackSpeed: 1.5F,
                                             init: (info, rigidbody, player) =>
@@ -57,18 +57,14 @@ namespace MinecraftClient.Control
 
                         player.StartForceMoveOperation("Climb over barrier",
                                 new ForceMoveOperation[] {
-                                        new(org,  dest, 0.1F),
+                                        new(org,  dest, 0.01F),
                                         new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.9F,
                                             init: (info, rigidbody, player) => {
                                                 player.RandomizeMirroredFlag();
                                                 player.CrossFadeState(PlayerAbility.CLIMB_1M);
-                                                player.UseRootMotion = true;
                                             },
                                             update: (interval, inputData, info, rigidbody, player) =>
-                                                info.Moving = inputData.horInputNormalized != Vector2.zero,
-                                            exit: (info, rigidbody, player) => {
-                                                player.UseRootMotion = false;
-                                            }
+                                                info.Moving = inputData.horInputNormalized != Vector2.zero
                                         )
                                 } );
                     }
@@ -76,11 +72,10 @@ namespace MinecraftClient.Control
             }
 
             Vector3 moveVelocity = rigidbody.velocity;
-
             moveVelocity.y = Mathf.Max(rigidbody.velocity.y, ability.MaxFallSpeed);
 
             // Apply new velocity to rigidbody
-            rigidbody.AddForce((moveVelocity - rigidbody.velocity) * 0.2F, ForceMode.VelocityChange);
+            info.MoveVelocity = moveVelocity;
             
             if (info.Grounded) // Restore stamina
                 info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);

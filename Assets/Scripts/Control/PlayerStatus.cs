@@ -16,6 +16,8 @@ namespace MinecraftClient.Control
         public bool Moving    = false;
         public bool Sprinting = false;
 
+        public Vector3 MoveVelocity = Vector3.zero;
+
         public bool Attacking = false;
         public AttackStatus AttackStatus = new();
 

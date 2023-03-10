@@ -40,7 +40,11 @@ namespace MinecraftClient.Control
         [HideInInspector] public float ServerPitch = 0F;
 
         private CameraController? camControl;
-        private IPlayerVisual? playerRender;
+        private AnimatorEntityRender? playerRender;
+        private PlayerAccessoryWidget? accessoryWidget;
+
+        public PlayerAccessoryWidget AccessoryWidget => accessoryWidget!;
+
         private Entity? fakeEntity;
 
         public void DisableEntity()
@@ -92,7 +96,7 @@ namespace MinecraftClient.Control
         {
             fakeEntity!.ID = entityId;
             // Reassign this entity to refresh
-            playerRender!.UpdateEntity(fakeEntity);
+            //playerRender!.UpdateEntity(fakeEntity);
         }
 
         public void SetLocation(Location loc)
@@ -103,9 +107,11 @@ namespace MinecraftClient.Control
             Debug.Log($"Position set to {transform.position}");
         }
 
-        void Update() => ManagedUpdate(Time.deltaTime);
+        void Update() => LogicalUpdate(Time.deltaTime);
 
-        public void ManagedUpdate(float interval)
+        void FixedUpdate() => PhysicalUpdate(Time.fixedDeltaTime);
+
+        public void LogicalUpdate(float interval)
         {
             if (!game!.IsMovementReady())
             {
@@ -183,10 +189,10 @@ namespace MinecraftClient.Control
             // Update player render state machine
             playerRender!.UpdateStateMachine(status);
             // Update player render velocity
-            playerRender.UpdateVelocity(playerRigidbody!.velocity);
+            playerRender.SetVisualMovementVelocity(playerRigidbody!.velocity);
 
             // Update render
-            playerRender!.UpdateVisual(game!.GetTickMilSec());
+            playerRender!.UpdateAnimation(game!.GetTickMilSec());
 
             // Tell server our current position
             Location rawLocation;
@@ -205,6 +211,23 @@ namespace MinecraftClient.Control
             // Get server yaw for networking thread
             ServerLocation = rawLocation;
             ServerYaw = visualTransform!.eulerAngles.y - 90F;
+        }
+
+        public void PhysicalUpdate(float interval)
+        {
+            var info = Status!;
+
+            if (info.MoveVelocity != Vector3.zero)
+            {
+                // The player is actively moving
+                playerRigidbody!.AddForce((info.MoveVelocity - playerRigidbody!.velocity) * interval * 10F, ForceMode.VelocityChange);
+
+            }
+            else
+            {
+                // Leave the player rigidbody untouched
+
+            }
         }
 
         public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)
@@ -242,14 +265,13 @@ namespace MinecraftClient.Control
         {
             camControl = GameObject.FindObjectOfType<CameraController>();
             game = CornClient.Instance;
-            
+
             // Initialize player visuals
-            playerRender = GetComponent<IPlayerVisual>();
+            playerRender = GetComponent<AnimatorEntityRender>();
 
             fakeEntity = new(0, EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID), new());
             fakeEntity.Name = game!.GetUsername();
             fakeEntity.ID   = 0;
-            playerRender.UpdateEntity(fakeEntity);
 
             playerRigidbody = GetComponent<Rigidbody>();
             playerRigidbody.useGravity = true;
@@ -257,6 +279,7 @@ namespace MinecraftClient.Control
             statusUpdater = GetComponent<PlayerStatusUpdater>();
             userInput = GetComponent<PlayerUserInput>();
             interactionUpdater = GetComponent<PlayerInteractionUpdater>();
+            accessoryWidget = visualTransform!.GetComponent<PlayerAccessoryWidget>();
 
             perspectiveCallback = (e) => { };
 

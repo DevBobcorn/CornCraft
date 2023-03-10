@@ -14,6 +14,8 @@ namespace MinecraftClient.Rendering
 
         public void FootR() { }
 
+        public void Hit() { }
+
         void Awake()
         {
             player = GetComponentInParent<PlayerController>();

@@ -23,7 +23,7 @@ namespace MinecraftClient.Control
                 moveVelocity.y = rigidbody.velocity.y;
 
             // Apply new velocity to rigidbody
-            rigidbody.AddForce((moveVelocity - 1.2F * rigidbody.velocity) * 0.2F, ForceMode.VelocityChange);
+            info.MoveVelocity = moveVelocity;
             
             if (info.Grounded) // Restore stamina
                 info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);

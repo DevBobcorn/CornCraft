@@ -34,8 +34,8 @@ namespace MinecraftClient.Control
             else if (inputData.descend)
                 moveVelocity.y = -ability.WalkSpeed * 3F;
 
-            // Apply movement...
-            rigidbody.velocity = moveVelocity;
+            // Apply new velocity to rigidbody
+            info.MoveVelocity = moveVelocity;
         }
 
         public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info) => info.Spectating;

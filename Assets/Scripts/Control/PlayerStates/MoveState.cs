@@ -38,7 +38,12 @@ namespace MinecraftClient.Control
             // Use the target visual yaw as actual movement direction
             var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
 
-            if (inputData.horInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
+            if (inputData.attack) // Attack available
+            {
+                player.TryStartAttack();
+                
+            }
+            else if (inputData.horInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
             {
                 if (info.FrontDownDist <= THRESHOLD_CLIMB_1M && info.FrontDownDist > THRESHOLD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
                 {
@@ -78,13 +83,9 @@ namespace MinecraftClient.Control
                                         init: (info, rigidbody, player) => {
                                             player.RandomizeMirroredFlag();
                                             player.CrossFadeState(PlayerAbility.CLIMB_1M);
-                                            player.UseRootMotion = true;
                                         },
                                         update: (interval, inputData, info, rigidbody, player) =>
-                                            info.Moving = inputData.horInputNormalized != Vector2.zero,
-                                        exit: (info, rigidbody, player) => {
-                                            player.UseRootMotion = false;
-                                        }
+                                            info.Moving = inputData.horInputNormalized != Vector2.zero
                                     )
                             } );
                 }
@@ -120,7 +121,7 @@ namespace MinecraftClient.Control
                 moveVelocity.y = rigidbody.velocity.y;
 
             // Apply new velocity to rigidbody
-            rigidbody.AddForce((moveVelocity - rigidbody.velocity) * 0.2F, ForceMode.VelocityChange);
+            info.MoveVelocity = moveVelocity;
 
             if (info.Sprinting) // Cost stamina
                 info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, 0F, interval * ability.SprintStaminaCost);

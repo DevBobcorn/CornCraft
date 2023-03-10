@@ -10,7 +10,9 @@ namespace MinecraftClient.Control
             var meleeAttack = player.MeleeAttack;
 
             info.Sprinting = false;
-            info.Moving = false;
+            info.Moving = inputData.horInputNormalized != Vector2.zero;
+
+            info.Grounded = true; // Force grounded
 
             var attackStatus = info.AttackStatus;
 
@@ -32,10 +34,9 @@ namespace MinecraftClient.Control
                 else if (inputData.attack) // Enter next attack stage
                 {
                     info.Attacking = true;
-                    attackStatus.AttackStage = (attackStatus.AttackStage + 1) % meleeAttack.StageCount;
+                    var nextStage = (attackStatus.AttackStage + 1) % meleeAttack.StageCount;
 
-                    attackStatus.AttackCooldown =
-                            meleeAttack.StageDurations[attackStatus.AttackStage];
+                    StartMeleeStage(meleeAttack, attackStatus, false, nextStage, player);
                     
                 }
                 
@@ -47,12 +48,21 @@ namespace MinecraftClient.Control
             
         }
 
+        private void StartMeleeStage(PlayerMeleeAttack meleeAttack, AttackStatus attackStatus, bool init, int stage, PlayerController player)
+        {
+            attackStatus.AttackStage = stage;
+            attackStatus.AttackCooldown = meleeAttack.StageDurations[stage];
+
+            player.CrossFadeState($"Melee{stage}", init ? 0F : 0.2F);
+
+        }
+
         public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
         {
             if (!info.Attacking)
                 return false;
             
-            if (info.Spectating || !info.Grounded || info.OnWall || info.InLiquid)
+            if (info.Spectating || info.InLiquid)
                 return false;
             
             return false;
@@ -63,7 +73,7 @@ namespace MinecraftClient.Control
             if (!info.Attacking)
                 return true;
             
-            if (info.Spectating || !info.Grounded || info.OnWall || info.InLiquid)
+            if (info.Spectating || info.InLiquid)
                 return true;
             
             return false;
@@ -76,12 +86,11 @@ namespace MinecraftClient.Control
             var attackStatus = info.AttackStatus;
             var meleeAttack = player.MeleeAttack;
 
-            attackStatus.AttackStage = 0;
-
-            attackStatus.AttackCooldown =
-                    meleeAttack.StageDurations[attackStatus.AttackStage];
+            StartMeleeStage(meleeAttack, attackStatus, true, 0, player);
 
             //Debug.Log("Attack starts!");
+            player.AccessoryWidget.HoldWeapon();
+            player.UseRootMotion = true;
             
         }
 
@@ -89,7 +98,13 @@ namespace MinecraftClient.Control
         {
             info.Attacking = false;
 
+            var attackStatus = info.AttackStatus;
+
+            attackStatus.AttackCooldown = 0F;
+
             //Debug.Log("Attack ends!");
+            player.AccessoryWidget.MountWeapon();
+            player.UseRootMotion = false;
 
         }
 
