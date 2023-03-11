@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
+
 using UnityEngine;
 
 namespace MinecraftClient
@@ -68,23 +70,23 @@ namespace MinecraftClient
 
         private static string GetTMPCloseTags(int formatFlag)
         {
-            string closeTags = string.Empty;
-            if ((formatFlag & 1 << 0) != 0) // 1st bit on, obfuscated
-                closeTags += "</rotate>";
-            if ((formatFlag & 1 << 1) != 0) // 2nd bit on, bold
-                closeTags += "</b>";
-            if ((formatFlag & 1 << 2) != 0) // 3rd bit on, strikethrough
-                closeTags += "</s>";
-            if ((formatFlag & 1 << 3) != 0) // 4th bit on, underline
-                closeTags += "</u>";
-            if ((formatFlag & 1 << 4) != 0) // 5th bit on, italic
-                closeTags += "</i>";
-            if ((formatFlag & 1 << 5) != 0) // 6th bit on, colored
-                closeTags += "</color>";
-            return closeTags;
-        }
+            var closeTags = new StringBuilder();
 
-        //private static char defaultColor = 'b'; // TODO White 'f'
+            if ((formatFlag & 1 << 0) != 0) // 1st bit on, obfuscated
+                closeTags.Append("</rotate>");
+            if ((formatFlag & 1 << 1) != 0) // 2nd bit on, bold
+                closeTags.Append("</b>");
+            if ((formatFlag & 1 << 2) != 0) // 3rd bit on, strikethrough
+                closeTags.Append("</s>");
+            if ((formatFlag & 1 << 3) != 0) // 4th bit on, underline
+                closeTags.Append("</u>");
+            if ((formatFlag & 1 << 4) != 0) // 5th bit on, italic
+                closeTags.Append("</i>");
+            if ((formatFlag & 1 << 5) != 0) // 6th bit on, line colored
+                closeTags.Append("</color>");
+            
+            return closeTags.ToString();
+        }
 
         private static string GetTMPColorTag(char color)
         {
@@ -115,14 +117,16 @@ namespace MinecraftClient
         // The result text can somehow also be used in Unity Console
         public static string MC2TMP(string original)
         {
-            var processed = string.Empty;
-            Stack<char> prevColors  = new Stack<char>();
+            var processed = new StringBuilder();
+            
             Stack<char> fieldColors = new Stack<char>();
 
-            // curColor:  The color used by next character (from original text)
-            // lastColor: The color used by last character (from original text)
-            char curColor = ' ', lastColor = ' ';
+            // lineColor: Color used outside of bracket fields
+            // curColor:  Color used to print next character
+            // lastColor: Color used to print last character
+            char lineColor = ' ', curColor = ' ', lastColor = ' ';
             int formatFlag = 0;
+
             for (int ptr = 0;ptr < original.Length;ptr++)
             {
                 if (original[ptr] == '§' && (ptr + 1) < original.Length)
@@ -134,129 +138,152 @@ namespace MinecraftClient
 
                     if (code >= '0' && code <= '9' || code >= 'a' && code <= 'g')
                     {
-                        // Text is already in that color, ignore it
-                        if (code == curColor)
+                        if (lastColor == code) // Ignore it, and don't touch anything
                             continue;
                         
-                        // Reset all formatting codes when applying color codes (like vanilla Minecraft)
-                        string prefix = GetTMPCloseTags(formatFlag);
-                        formatFlag = 1 << 5; // Only the 'colored' flag bit is on, other bits are all turned off
-                        prefix += GetTMPColorTag(code); 
+                        // Mark the new current color
                         curColor = code;
-                        processed += prefix; // No original text appended, color tags only
+
+                        // Close all format tags, but don't append color tags yet. Color tags will be applied later
+                        processed.Append(GetTMPCloseTags(formatFlag));
+                        
+                        // Preserve only the line color bit
+                        formatFlag = formatFlag & (1 << 5);
                     }
                     else
                     {
-                        string prefix;
+                        string text2append = string.Empty;
+
                         switch (code)
                         {   // Format codes...
                             case'k':  // obfuscated
-                                prefix = "<rotate=45>";
+                                if ((formatFlag & (1 << 0)) == 0)
+                                    text2append = "<rotate=45>";
                                 formatFlag |= 1 << 0;
                                 break;
                             case'l':  // bold
-                                prefix = "<b>";
+                                if ((formatFlag & (1 << 1)) == 0)
+                                    text2append = "<b>";
                                 formatFlag |= 1 << 1;
                                 break;
                             case'm':  // strikethrough
-                                prefix = "<s>";
+                                if ((formatFlag & (1 << 2)) == 0)
+                                    text2append = "<s>";
                                 formatFlag |= 1 << 2;
                                 break;
                             case'n':  // underline
-                                prefix = "<u>";
+                                if ((formatFlag & (1 << 3)) == 0)
+                                    text2append = "<u>";
                                 formatFlag |= 1 << 3;
                                 break;
                             case'o':  // italic
-                                prefix = "<i>";
+                                if ((formatFlag & (1 << 4)) == 0)
+                                    text2append = "<i>";
                                 formatFlag |= 1 << 4;
                                 break;
                             case 'r': // reset
-                                prefix = GetTMPCloseTags(formatFlag);
+                                text2append = GetTMPCloseTags(formatFlag);
                                 formatFlag = 0;
-                                curColor = ' ';
-                                // prevColors.Clear(); // TODO
+                                if (fieldColors.Count == 0) // Not a a bracket field now
+                                    lineColor = curColor = ' ';
                                 break;
                             default:
-                                prefix = string.Empty;
+                                text2append = string.Empty;
                                 break;
                         };
-                        processed += prefix; // No original text appended, format tags only
+
+                        processed.Append(text2append); // No original text appended, format tags only
                     }
 
                 }
                 else if (original[ptr] == '[') // Left bracket, a field starts...
                 {
+                    if ((formatFlag & (1 << 5)) != 0)
+                    {
+                        formatFlag -= (1 << 5); // Clear line color flag
+                        processed.Append("</color>"); // Close line color tag
+                    }
+
                     // push color
-                    if (lastColor != ' ')
-                        prevColors.Push(lastColor);
-                    else
-                        prevColors.Push(' ');
-                    
-                    processed += '['; // Append part of original text
-                    lastColor  = curColor;
+                    fieldColors.Push(curColor);
 
                     if (curColor != ' ')
-                        fieldColors.Push(curColor);
-                    else
-                        fieldColors.Push(' ');
+                        processed.Append(GetTMPColorTag(curColor));
                     
-                }
-                else if (original[ptr] == ']') // Right bracket, a field ends...
-                {
-                    string bracket;
-
-                    if (fieldColors.Count > 0)
-                    {
-                        char fieldColor = fieldColors.Pop();
-
-                        if (fieldColor != curColor)
-                            bracket = (GetTMPColorTag(fieldColor) + "]</color>");
-                        else
-                            bracket = "]";
-                        
-                    }
-                    else
-                        bracket = "]";
-                    
-                    if (prevColors.Count > 0)
-                    {
-                        char preserved = prevColors.Pop();
-                        if (curColor != preserved) // Then apply(restore to) this color...
-                        {
-                            string suffix = string.Empty;
-
-                            // End prev color if present
-                            if ((formatFlag & (1 << 5)) > 0)
-                                suffix = "</color>";
-                            // Then apply this color
-                            suffix += GetTMPColorTag(preserved);
-
-                            formatFlag |= 1 << 5; // Turn the 'colored' flag bit to on, and leave other flags unchanged
-
-                            processed += bracket + suffix;
-
-                            curColor = preserved;
-                        }
-                        else
-                            processed += bracket;
-                    }
-                    else
-                        processed += bracket;
+                    processed.Append("["); // Append part of original text
                     
                     lastColor = curColor;
                 }
-                else
+                else if (original[ptr] == ']') // Right bracket, a field ends...
                 {
-                    processed += original[ptr];  // Append part of original text
+                    string text2append;
+
+                    if (fieldColors.Count > 0) // End this bracket field and close the color tag of this field
+                    {
+                        char fieldColor = fieldColors.Pop();
+
+                        if (fieldColor != ' ')
+                            text2append = "]</color>";
+                        else
+                            text2append = "]";
+                    }
+                    else
+                        text2append = "]";
+                    
+                    if (fieldColors.Count > 0) // Then we enter an outer field
+                    {
+                        if (fieldColors.Peek() != ' ')
+                        {
+                            // Switch to the color of this out bracket field
+                            text2append += GetTMPColorTag(fieldColors.Peek());
+                        }
+                    }
+                    else // Then we're not in any bracket fields now, use line color
+                    {
+                        if (lineColor != ' ' && curColor != lineColor) // Then apply(restore to) this color...
+                        {
+                            // End line color if present
+                            if ((formatFlag & (1 << 5)) != 0)
+                                text2append = "</color>";
+                            
+                            // Then apply this color
+                            text2append += GetTMPColorTag(lineColor);
+                            formatFlag |= (1 << 5);
+
+                            processed.Append(text2append);
+
+                            curColor = lineColor;
+                        }
+                        else
+                            processed.Append(text2append);
+                    }
+
+                    lastColor = curColor;
+                }
+                else // Normal characters, output as-is
+                {
+                    if (curColor != lastColor)
+                    {
+                        if (fieldColors.Count == 0) // Not currently in any bracket fields
+                        {
+                            processed.Append(GetTMPColorTag(curColor));
+                            lineColor = curColor;
+
+                            formatFlag |= 1 << 5; // Only the 'line colored' flag bit is on, other bits are all turned off
+                        }
+                    }
+
+                    processed.Append(original[ptr]); // Append part of original text
+
                     lastColor = curColor;
                 }
 
             }
 
-            if (formatFlag > 0) // There're still unclosed tags, close 'em...
-                return processed + GetTMPCloseTags(formatFlag);
+            if (formatFlag != 0) // There're still unclosed tags, close 'em...
+                processed.Append(GetTMPCloseTags(formatFlag));
 
-            return processed;
+            return processed.ToString();
 
         }
 
