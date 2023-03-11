@@ -242,13 +242,9 @@ namespace MinecraftClient.Control
         {
             if (statusUpdater!.Status.AttackStatus.AttackCooldown <= 0F)
             {
-                Debug.Log("ATK");
-
                 CurrentState.OnExit(statusUpdater!.Status, playerRigidbody!, this);
                 // Enter melee attack state
                 CurrentState = PlayerStates.MELEE;
-
-                Debug.Log($"Current state: {CurrentState}");
 
                 CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
 
@@ -256,6 +252,30 @@ namespace MinecraftClient.Control
             }
             
             return false;
+        }
+
+        public void AttackDamage(bool enable)
+        {
+            if (statusUpdater!.Status.Attacking)
+            {
+                statusUpdater!.Status.AttackStatus.CausingDamage = enable;
+            }
+            else
+            {
+                Debug.LogWarning("Trying to toggle attack damage when not attacking!");
+            }
+        }
+
+        public void ClearAttackCooldown()
+        {
+            if (statusUpdater!.Status.Attacking)
+            {
+                statusUpdater!.Status.AttackStatus.AttackCooldown = 0F;
+            }
+            else
+            {
+                Debug.LogWarning("Trying to clear attack cooldown when not attacking!");
+            }
         }
  
         private Action<PerspectiveUpdateEvent>? perspectiveCallback;

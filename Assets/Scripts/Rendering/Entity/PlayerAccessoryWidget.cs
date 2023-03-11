@@ -1,62 +1,97 @@
 #nullable enable
 using UnityEngine;
 
+using MinecraftClient.Control;
+
+
+namespace MinecraftClient.Rendering
+{
 public class PlayerAccessoryWidget : MonoBehaviour
 {
-    public Transform? mainHandBone;
+        private PlayerController? player;
 
-    public Transform? weaponRef;
-    private Vector3 weaponPosition;
-    public Transform? weaponSlotBone;
+        public Transform? mainHandBone;
 
-    public GameObject? currentWeapon;
+        public Transform? weaponRef;
+        private Vector3 weaponPosition;
+        public Transform? weaponSlotBone;
 
-    public void HoldWeapon()
-    {
-        if (currentWeapon is not null)
+        public MeleeWeapon? currentWeapon;
+        public TrailRenderer? meleeTrail;
+
+        public void HoldWeapon()
         {
-            currentWeapon.transform.SetParent(mainHandBone, true);
-            currentWeapon.transform.localPosition = Vector3.zero;
-            currentWeapon.transform.localRotation = Quaternion.identity;
+            if (currentWeapon is not null)
+            {
+                currentWeapon.transform.SetParent(mainHandBone, true);
+                currentWeapon.transform.localPosition = Vector3.zero;
+                currentWeapon.transform.localRotation = Quaternion.identity;
+                
+            }
+        }
+
+        public void MountWeapon()
+        {
+            if (currentWeapon is not null)
+            {
+                currentWeapon.transform.SetParent(weaponSlotBone, true);
+                currentWeapon.transform.localPosition = Vector3.zero;
+                currentWeapon.transform.localRotation = Quaternion.identity;
+
+            }
+        }
+
+        public void DamageStart()
+        {
+            player!.AttackDamage(true);
             
+            if (meleeTrail is not null)
+                meleeTrail.emitting = true;
+            
+            currentWeapon!.StartSlash();
         }
-    }
 
-    public void MountWeapon()
-    {
-        if (currentWeapon is not null)
+        public void DamageStop()
         {
-            currentWeapon.transform.SetParent(weaponSlotBone, true);
-            currentWeapon.transform.localPosition = Vector3.zero;
-            currentWeapon.transform.localRotation = Quaternion.identity;
+            player!.AttackDamage(false);
 
+            if (meleeTrail is not null)
+                meleeTrail.emitting = false;
+            
+            currentWeapon!.EndSlash();
         }
-    }
 
-    void Start()
-    {
-        if (weaponRef is null || weaponSlotBone is null)
+        public void StageEnding()
         {
-            Debug.Log("Weapon transforms are not assigned!");
-            return;
+            player!.ClearAttackCooldown();
         }
 
-        weaponPosition = weaponSlotBone.position;
+        void Start()
+        {
+            if (weaponRef is null || weaponSlotBone is null)
+            {
+                Debug.Log("Weapon transforms are not assigned!");
+                return;
+            }
 
-        weaponSlotBone.position = weaponPosition;
-        weaponSlotBone.rotation = weaponRef.rotation;
+            player = GetComponentInParent<PlayerController>();
+            weaponPosition = weaponSlotBone.position;
 
-        MountWeapon();
-    }
+            weaponSlotBone.position = weaponPosition;
+            weaponSlotBone.rotation = weaponRef.rotation;
 
-    void Update()
-    {
-        if (weaponRef is null || weaponSlotBone is null)
-            return;
+            MountWeapon();
+        }
 
-        weaponPosition = Vector3.Lerp(weaponPosition, weaponRef.position, Time.deltaTime * 10F);
+        void Update()
+        {
+            if (weaponRef is null || weaponSlotBone is null)
+                return;
 
-        weaponSlotBone.position = weaponPosition;
-        weaponSlotBone.rotation = weaponRef.rotation;
+            weaponPosition = Vector3.Lerp(weaponPosition, weaponRef.position, Time.deltaTime * 10F);
+
+            weaponSlotBone.position = weaponPosition;
+            weaponSlotBone.rotation = weaponRef.rotation;
+        }
     }
 }

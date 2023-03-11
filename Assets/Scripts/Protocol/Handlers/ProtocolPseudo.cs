@@ -51,7 +51,7 @@ namespace MinecraftClient.Protocol.Handlers
             for (int deg = 0;deg < 360;deg += 20)
             {
                 float rad = Mathf.Deg2Rad * deg;
-                var loc = new Location(Mathf.Sin(rad) * radius, 4, Mathf.Cos(rad) * radius);
+                var loc = new Location(Mathf.Sin(rad) * radius, 2, Mathf.Cos(rad) * radius);
 
                 var entity = new Entity(entityId++, EntityPalette.INSTANCE.FromId(EntityType.PIG_ID), loc);
                 handler.OnSpawnEntity(entity);
@@ -154,7 +154,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                     for (int x = 0;x < Chunk.SizeX;x++)
                         for (int z = 0;z < Chunk.SizeZ;z++)
-                            for (int y = 0;y < ((chunkX + chunkZ) % 2 == 0 ? 1 : 2);y++)
+                            for (int y = 0;y < ((chunkX + chunkZ) % 2 == 0 ? 2 : 1);y++)
                                 chunk[x, y, z] = (chunkX + chunkZ) % 2 == 0 ? new(StateAId) : new(StateBId);
                     
                     world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
