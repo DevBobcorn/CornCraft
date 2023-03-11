@@ -12,9 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88d582769fd5a7f48830e466a271858b, type: 3}
   m_Name: Client Player Melee Attack
   m_EditorClassIdentifier: 
-  StageDurations:
-  - 0.6
-  - 0.6
-  - 0.6
-  - 0.6
-  IdleTimeout: -2.1
+  MaxStageDuration: 10
+  IdleTimeout: -0.9
+  StageCount: 4

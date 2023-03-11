@@ -136,5 +136,10 @@ namespace MinecraftClient.Mapping
             EntityId = id;
             ContainsItem = containsItem;
         }
+
+        public override string ToString()
+        {
+            return EntityId.ToString();
+        }
     }
 }

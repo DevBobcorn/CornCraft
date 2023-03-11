@@ -8,6 +8,8 @@ namespace MinecraftClient.Control
         public float AttackCooldown = 0F;
         public int AttackStage = 0;
 
+        public bool CausingDamage = false;
+
         public override string ToString()
         {
 

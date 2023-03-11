@@ -91,6 +91,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 5171779837212712022}
     m_Modifications:
     - target: {fileID: -8794981702300419948, guid: c6ef79af918031444a2403502004ed47, type: 3}
@@ -206,6 +207,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: 73e983ca2a359444f9a7000258033ceb, type: 2}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c6ef79af918031444a2403502004ed47, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8513157979690716291}
   m_SourcePrefab: {fileID: 100100000, guid: c6ef79af918031444a2403502004ed47, type: 3}
 --- !u!4 &2829092200162745753 stripped
 Transform:
@@ -222,6 +229,32 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2389032305928245333, guid: c6ef79af918031444a2403502004ed47, type: 3}
   m_PrefabInstance: {fileID: 8785207576479647290}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &8442624701186898795 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_PrefabInstance: {fileID: 8785207576479647290}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &8513157979690716291
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8442624701186898795}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.6, y: 0.6, z: 1}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!4 &8749899508757009915 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 37911711452255169, guid: c6ef79af918031444a2403502004ed47, type: 3}

@@ -16,7 +16,7 @@ namespace MinecraftClient.Rendering
 
         public void Hit() { }
 
-        void Awake()
+        void Start()
         {
             player = GetComponentInParent<PlayerController>();
             animator = GetComponent<Animator>();
@@ -25,7 +25,7 @@ namespace MinecraftClient.Rendering
 
         void OnAnimatorMove()
         {
-            if (player!.UseRootMotion)
+            if (player is not null && player.UseRootMotion)
             {
                 Vector3 newPosition = transform.parent.position;
 
