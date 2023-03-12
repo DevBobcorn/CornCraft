@@ -1,5 +1,6 @@
 #nullable enable
 using UnityEngine;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Rendering
 {
@@ -7,9 +8,9 @@ namespace MinecraftClient.Rendering
     {
         public Transform? frontLeftLeg, frontRightLeg, rearLeftLeg, rearRightLeg;
 
-        protected override void Initialize()
+        public override void Initialize(EntityType entityType, Entity entity)
         {
-            base.Initialize();
+            base.Initialize(entityType, entity);
             
             if (frontLeftLeg is null || frontRightLeg is null || rearLeftLeg is null || rearRightLeg is null)
                 Debug.LogWarning("Legs of quadruped entity not properly assigned!");

@@ -16,8 +16,8 @@ public class PlayerAccessoryWidget : MonoBehaviour
         private Vector3 weaponPosition;
         public Transform? weaponSlotBone;
 
-        public MeleeWeapon? currentWeapon;
-        public TrailRenderer? meleeTrail;
+        public GameObject? meleeWeaponPrefab;
+        private MeleeWeapon? currentWeapon;
 
         public void HoldWeapon()
         {
@@ -45,18 +45,12 @@ public class PlayerAccessoryWidget : MonoBehaviour
         {
             player!.AttackDamage(true);
             
-            if (meleeTrail is not null)
-                meleeTrail.emitting = true;
-            
             currentWeapon!.StartSlash();
         }
 
         public void DamageStop()
         {
             player!.AttackDamage(false);
-
-            if (meleeTrail is not null)
-                meleeTrail.emitting = false;
             
             currentWeapon!.EndSlash();
         }
@@ -73,6 +67,9 @@ public class PlayerAccessoryWidget : MonoBehaviour
                 Debug.Log("Weapon transforms are not assigned!");
                 return;
             }
+
+            var weaponObj = GameObject.Instantiate(meleeWeaponPrefab);
+            currentWeapon = weaponObj!.GetComponent<MeleeWeapon>();
 
             player = GetComponentInParent<PlayerController>();
             weaponPosition = weaponSlotBone.position;

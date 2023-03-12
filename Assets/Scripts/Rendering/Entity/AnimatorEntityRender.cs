@@ -2,6 +2,7 @@
 using UnityEngine;
 
 using MinecraftClient.Control;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Rendering
 {
@@ -15,15 +16,18 @@ namespace MinecraftClient.Rendering
         protected Animator? entityAnimator;
         protected bool animatorPresent = false;
 
-        protected override void Initialize()
+        public override void Initialize(EntityType entityType, Entity entity)
         {
-            base.Initialize();
+            base.Initialize(entityType, entity);
 
             // Get animator component
             entityAnimator = GetComponentInChildren<Animator>();
 
             if (entityAnimator is not null)
+            {
                 animatorPresent = true;
+                Debug.Log("Meow!");
+            }
             else
                 Debug.LogWarning("Player animator not found!");
         }

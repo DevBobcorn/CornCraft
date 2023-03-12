@@ -1,6 +1,8 @@
 #nullable enable
 using UnityEngine;
+
 using MinecraftClient.Control;
+using MinecraftClient.Mapping;
 using MinecraftClient.Resource;
 
 namespace MinecraftClient.Rendering
@@ -20,12 +22,12 @@ namespace MinecraftClient.Rendering
         private static readonly int ROOT_MOTION = Animator.StringToHash("RootMotion");
         private static readonly int ATTACKING = Animator.StringToHash("Attacking");
 
-        protected override void Initialize()
+        public override void Initialize(EntityType entityType, Entity entity)
         {
-            base.Initialize();
+            base.Initialize(entityType, entity);
 
             if (usePlayerSkin)
-                UpdateSkinMaterial();
+                UpdateSkinMaterial(entity);
         }
 
         public override void UpdateStateMachine(PlayerStatus info)
@@ -46,9 +48,9 @@ namespace MinecraftClient.Rendering
             }
         }
 
-        private void UpdateSkinMaterial()
+        private void UpdateSkinMaterial(Entity player)
         {
-            var nameLower = entity!.Name?.ToLower();
+            var nameLower = player.Name?.ToLower();
 
             // Find skin and change materials
             if (nameLower is not null && SkinManager.SkinMaterials.ContainsKey(nameLower))

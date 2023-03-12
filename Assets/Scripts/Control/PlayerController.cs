@@ -34,11 +34,6 @@ namespace MinecraftClient.Control
         private IPlayerState CurrentState = PlayerStates.IDLE;
         public bool UseRootMotion = false;
 
-        // Access for networking thread
-        [HideInInspector] public Location ServerLocation;
-        [HideInInspector] public float ServerYaw = 0F;
-        [HideInInspector] public float ServerPitch = 0F;
-
         private CameraController? camControl;
         private AnimatorEntityRender? playerRender;
         private PlayerAccessoryWidget? accessoryWidget;
@@ -101,7 +96,6 @@ namespace MinecraftClient.Control
 
         public void SetLocation(Location loc)
         {
-            ServerLocation = loc;
             transform.position = CoordConvert.MC2Unity(loc);
 
             Debug.Log($"Position set to {transform.position}");
@@ -120,7 +114,7 @@ namespace MinecraftClient.Control
 
                 Status!.GravityDisabled = true;
 
-                transform.position = CoordConvert.MC2Unity(ServerLocation);
+                transform.position = CoordConvert.MC2Unity(game!.PlayerData.Location);
             }
             else
             {
@@ -195,22 +189,29 @@ namespace MinecraftClient.Control
             playerRender!.UpdateAnimation(game!.GetTickMilSec());
 
             // Tell server our current position
-            Location rawLocation;
+            Location newLocation;
 
             if (CurrentState is ForceMoveState)
             // Use move origin as the player location to tell to server, to
             // prevent sending invalid positions during a force move operation
-                rawLocation = CoordConvert.Unity2MC(((ForceMoveState) CurrentState).GetFakePlayerOffset());
+                newLocation = CoordConvert.Unity2MC(((ForceMoveState) CurrentState).GetFakePlayerOffset());
             else
-                rawLocation = CoordConvert.Unity2MC(transform.position);
+                newLocation = CoordConvert.Unity2MC(transform.position);
 
             // Preprocess the location before sending it (to avoid position correction from server)
-            if ((status.Grounded || status.CenterDownDist < 0.5F) && rawLocation.Y - (int)rawLocation.Y > 0.9D)
-                rawLocation.Y = (int)rawLocation.Y + 1;
+            if ((status.Grounded || status.CenterDownDist < 0.5F) && newLocation.Y - (int)newLocation.Y > 0.9D)
+                newLocation.Y = (int)newLocation.Y + 1;
 
-            // Get server yaw for networking thread
-            ServerLocation = rawLocation;
-            ServerYaw = visualTransform!.eulerAngles.y - 90F;
+            // Update client player data
+            lock (game.movementLock)
+            {
+                var playerData = game.PlayerData;
+
+                playerData.Location = newLocation;
+                playerData.Yaw =  visualTransform!.eulerAngles.y - 90F;
+                playerData.Grounded = Status.Grounded;
+                
+            }
         }
 
         public void PhysicalUpdate(float interval)
@@ -286,12 +287,16 @@ namespace MinecraftClient.Control
             camControl = GameObject.FindObjectOfType<CameraController>();
             game = CornClient.Instance;
 
-            // Initialize player visuals
-            playerRender = GetComponent<AnimatorEntityRender>();
+            // Create player entity
+            var playerEntityType = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);
 
-            fakeEntity = new(0, EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID), new());
+            fakeEntity = new(0, playerEntityType, new());
             fakeEntity.Name = game!.GetUsername();
             fakeEntity.ID   = 0;
+
+            // Initialize player visuals
+            playerRender = GetComponent<AnimatorEntityRender>();
+            playerRender.Initialize(playerEntityType, fakeEntity);
 
             playerRigidbody = GetComponent<Rigidbody>();
             playerRigidbody.useGravity = true;
@@ -372,8 +377,7 @@ namespace MinecraftClient.Control
         public string GetDebugInfo()
         {
             string targetBlockInfo = string.Empty;
-            var loc = ServerLocation;
-            var loc2 = game!.GetCurrentLocation();
+            var loc = game!.GetCurrentLocation();
             var world = game!.GetWorld();
 
             var target = interactionUpdater!.TargetLocation;
@@ -398,7 +402,7 @@ namespace MinecraftClient.Control
             else
                 statusInfo = statusUpdater!.Status.ToString();
             
-            return $"Lcl Pos:\t{loc}\nSvr Pos:\t{loc2}\nState:\t{CurrentState}\n{veloInfo}\nLighting:\t{lightInfo}\n{statusInfo}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
+            return $"Pos:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nLighting:\t{lightInfo}\n{statusInfo}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
 
         }
 

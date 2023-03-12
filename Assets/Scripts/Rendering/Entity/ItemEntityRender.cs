@@ -14,9 +14,9 @@ namespace MinecraftClient.Rendering
         public MeshFilter? itemMeshFilter;
         public MeshRenderer? itemMeshRenderer;
 
-        protected override void Initialize()
+        public override void Initialize(EntityType entityType, Entity entity)
         {
-            base.Initialize();
+            base.Initialize(entityType, entity);
             
             if (itemMeshFilter is not null && itemMeshRenderer is not null)
             {
