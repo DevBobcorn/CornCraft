@@ -90,6 +90,9 @@ namespace MinecraftClient.Rendering
 
                 entityObj.name = $"{entity.ID} {entity.Type}";
                 entityObj.transform.parent = transform;
+
+                // Initialize the entity
+                entityRender.Initialize(entity.Type, entity);
             }
         }
 

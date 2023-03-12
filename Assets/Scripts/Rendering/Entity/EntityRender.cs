@@ -39,17 +39,6 @@ namespace MinecraftClient.Rendering
             }
         }
 
-        private void EnsureInitialized()
-        {
-            if (initialized)
-                return;
-            
-            Initialize();
-            initialized = true;
-        }
-
-        void Start() => EnsureInitialized();
-
         public void Unload() => Destroy(this.gameObject);
 
         public void MoveTo(Vector3 position) => targetPosition = position;
@@ -65,7 +54,7 @@ namespace MinecraftClient.Rendering
             targetHeadYaw = headYaw;
         }
 
-        protected virtual void Initialize()
+        public virtual void Initialize(EntityType entityType, Entity entity)
         {
             if (visual is null)
             {

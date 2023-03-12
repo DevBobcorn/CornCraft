@@ -10,11 +10,13 @@ namespace MinecraftClient
         public Perspective Perspective = 0;
         public GameMode GameMode = 0;
 
-        public Location location;
+        public Location Location;
         public float? _yaw; // Used for calculation ONLY!!! Doesn't reflect the client yaw
         public float? _pitch; // Used for calculation ONLY!!! Doesn't reflect the client pitch
         public float Yaw;
         public float Pitch;
+        public bool Grounded;
+
         public int SequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
 
         public int EntityID;

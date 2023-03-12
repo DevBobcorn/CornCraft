@@ -1,5 +1,6 @@
 #nullable enable
 using UnityEngine;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Rendering
 {
@@ -9,9 +10,9 @@ namespace MinecraftClient.Rendering
 
         protected bool armsPresent = false;
 
-        protected override void Initialize()
+        public override void Initialize(EntityType entityType, Entity entity)
         {
-            base.Initialize();
+            base.Initialize(entityType, entity);
 
             if (leftArm is null || rightArm is null)
                 Debug.LogWarning("Arms of skeleton entity not properly assigned!");

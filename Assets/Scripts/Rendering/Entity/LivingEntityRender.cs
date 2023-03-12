@@ -1,5 +1,6 @@
 #nullable enable
 using UnityEngine;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Rendering
 {
@@ -8,9 +9,9 @@ namespace MinecraftClient.Rendering
         public Transform? head;
         protected bool headPresent = false;
 
-        protected override void Initialize()
+        public override void Initialize(EntityType entityType, Entity entity)
         {
-            base.Initialize();
+            base.Initialize(entityType, entity);
 
             headPresent = head is not null;
         }

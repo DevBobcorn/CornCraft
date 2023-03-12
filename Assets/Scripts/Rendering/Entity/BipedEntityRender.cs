@@ -1,5 +1,6 @@
 #nullable enable
 using UnityEngine;
+using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Rendering
 {
@@ -7,9 +8,9 @@ namespace MinecraftClient.Rendering
     {
         public Transform? leftLeg, rightLeg;
 
-        protected override void Initialize()
+        public override void Initialize(EntityType entityType, Entity entity)
         {
-            base.Initialize();
+            base.Initialize(entityType, entity);
 
             if (leftLeg is null || rightLeg is null)
                 Debug.LogWarning("Legs of biped entity not properly assigned!");

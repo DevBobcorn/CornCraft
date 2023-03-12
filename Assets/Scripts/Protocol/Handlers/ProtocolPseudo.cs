@@ -113,7 +113,7 @@ namespace MinecraftClient.Protocol.Handlers
 
         private void GenerateChunkData(bool forceUpdate, int size)
         {
-            var playerLoc = CornClient.Instance.PlayerData.location;
+            var playerLoc = CornClient.Instance.PlayerData.Location;
 
             if (!forceUpdate && playerLoc.ChunkX == playerChunkX && playerLoc.ChunkZ == playerChunkZ)
                 return;

@@ -137,21 +137,31 @@ namespace MinecraftClient
             if (!locationReceived || chunkRenderManager is null)
                 return false;
             
-            var loc = playerData.location;
+            lock (movementLock)
+            {
+                var loc = playerData.Location;
             
-            return chunkRenderManager.IsChunkRenderColumnReady(loc.ChunkX, loc.ChunkZ);
+                return chunkRenderManager.IsChunkRenderColumnReady(loc.ChunkX, loc.ChunkZ);
+            }
         }
+
         #endregion
 
         #region Players and Entities
         private bool inventoryHandlingRequested = false;
         private bool locationReceived = false;
         public bool LocationReceived => locationReceived;
-        private ClientPlayerData playerData = new();
+        private readonly ClientPlayerData playerData = new();
         public ClientPlayerData PlayerData => playerData;
 
-        public object locationLock = new();
-        public Location GetCurrentLocation() => playerData.location;
+        public object movementLock = new();
+        public Location GetCurrentLocation()
+        {
+            lock (movementLock)
+            {
+                return playerData.Location;
+            }
+        }
 
         private PlayerController? playerController;
         private CameraController? cameraController;
@@ -513,27 +523,12 @@ namespace MinecraftClient
 
             if (locationReceived)
             {
-                lock (locationLock)
+                lock (movementLock)
                 {
                     playerData.Yaw = playerData._yaw == null ? playerData.Yaw : playerData._yaw.Value;
                     playerData.Pitch = playerData._pitch == null ? playerData.Pitch : playerData._pitch.Value;
 
-                    if (playerController is not null)
-                    {
-                        if (playerData.location != playerController.ServerLocation
-                            || playerData.Yaw != playerController.ServerYaw
-                            || playerData.Pitch != playerController.ServerPitch)
-                        {
-                            playerData._yaw = playerController.ServerYaw;
-                            playerData._pitch = playerController.ServerPitch;
-
-                            playerData.location = playerController.ServerLocation;
-                        }
-
-                        bool grounded = playerController.Status?.Grounded ?? false;
-
-                        handler!.SendLocationUpdate(playerData.location, grounded, playerData._yaw, playerData._pitch);
-                    }
+                    handler!.SendLocationUpdate(playerData.Location, playerData.Grounded, playerData._yaw, playerData._pitch);
 
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)
                     // Once yaw and pitch have been sent, switch back to location-only updates (without yaw and pitch)
@@ -1396,12 +1391,12 @@ namespace MinecraftClient
         /// <param name="pitch">Pitch to look at</param>
         public void UpdateLocation(Location location, float yaw, float pitch)
         {
-            lock (locationLock)
+            lock (movementLock)
             {
                 playerData._yaw = yaw;
                 playerData._pitch = pitch;
 
-                playerData.location = location;
+                playerData.Location = location;
                 locationReceived = true;
 
                 Loom.QueueOnMainThread(() => {
