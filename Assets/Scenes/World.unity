@@ -647,7 +647,7 @@ MonoBehaviour:
   cameraController: {fileID: 5003336745837788658}
   entityRenderManager: {fileID: 1463427177}
   chunkRenderManager: {fileID: 2012416857}
-  playerPrefab: {fileID: 9066864819563880324, guid: ace528a13a29b4c4888426177d420df6, type: 3}
+  playerPrefab: {fileID: 7087057527021025680, guid: ce3cfa6b434e67c4b8c3fc6f0ef21a0e, type: 3}
 --- !u!4 &331478945
 Transform:
   m_ObjectHideFlags: 0
@@ -3029,7 +3029,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1493826817}
   m_Direction: 2
   m_Value: 1
-  m_Size: 1
+  m_Size: 0.9999964
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

@@ -21,8 +21,6 @@ namespace MinecraftClient.Rendering
         // several mobs of a same type moving synchronisedly, which looks unnatural
         protected float pseudoRandomOffset = 0F;
 
-        private bool initialized = false;
-
         protected Entity? entity;
 
         public Entity Entity
