@@ -113,13 +113,18 @@ namespace MinecraftClient.Protocol.Handlers
 
         private void GenerateChunkData(bool forceUpdate, int size)
         {
-            var playerLoc = CornClient.Instance.PlayerData.Location;
-
-            if (!forceUpdate && playerLoc.ChunkX == playerChunkX && playerLoc.ChunkZ == playerChunkZ)
-                return;
+            var game = CornClient.Instance;
             
-            playerChunkX = playerLoc.ChunkX;
-            playerChunkZ = playerLoc.ChunkZ;
+            lock (game.movementLock)
+            {
+                var playerLoc = CornClient.Instance.PlayerData.Location;
+
+                if (!forceUpdate && playerLoc.ChunkX == playerChunkX && playerLoc.ChunkZ == playerChunkZ)
+                    return;
+                
+                playerChunkX = playerLoc.ChunkX;
+                playerChunkZ = playerLoc.ChunkZ;
+            }
 
             var world = handler.GetWorld();
             const int chunkColumnSize = 16;

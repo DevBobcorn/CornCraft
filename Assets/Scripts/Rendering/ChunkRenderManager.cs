@@ -683,7 +683,12 @@ namespace MinecraftClient.Rendering
             }
             else
             {
-                var playerLoc = game!.PlayerData.Location.ToFloor();
+                Location playerLoc;
+                
+                lock (game!.movementLock)
+                {
+                    playerLoc = game.PlayerData.Location.ToFloor();;
+                }
                 
                 if (terrainColliderDirty || lastPlayerLoc != playerLoc)
                 {

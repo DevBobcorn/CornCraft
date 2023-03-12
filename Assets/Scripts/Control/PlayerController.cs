@@ -114,7 +114,10 @@ namespace MinecraftClient.Control
 
                 Status!.GravityDisabled = true;
 
-                transform.position = CoordConvert.MC2Unity(game!.PlayerData.Location);
+                lock (game.movementLock)
+                {
+                    transform.position = CoordConvert.MC2Unity(game.PlayerData.Location);
+                }
             }
             else
             {
@@ -208,7 +211,7 @@ namespace MinecraftClient.Control
                 var playerData = game.PlayerData;
 
                 playerData.Location = newLocation;
-                playerData.Yaw =  visualTransform!.eulerAngles.y - 90F;
+                playerData.Yaw = visualTransform!.eulerAngles.y - 90F;
                 playerData.Grounded = Status.Grounded;
                 
             }
