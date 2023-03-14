@@ -383,10 +383,6 @@ namespace MinecraftClient
                 yield break;
             }
 
-            // Preserve camera in login scene for a while
-            var loginCamera = Component.FindObjectOfType<Camera>();
-            DontDestroyOnLoad(loginCamera.gameObject);
-
             loadStateInfo.infoText = "Loading world scene";
 
             // Prepare scene and unity objects
@@ -434,8 +430,7 @@ namespace MinecraftClient
             playerObj!.name = $"{session.PlayerName} (Player)";
             playerController = playerObj.GetComponent<PlayerController>();
 
-            // Destroy previous camera and get camera for player
-            Destroy(loginCamera.gameObject);
+            // Get camera for player
             cameraController = holder.cameraController!;
             cameraController.SetTarget(playerController.cameraRef!);
 
