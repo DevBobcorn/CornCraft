@@ -94,11 +94,20 @@ namespace MinecraftClient.Control
             //playerRender!.UpdateEntity(fakeEntity);
         }
 
-        public void SetLocation(Location loc)
+        public void SetLocation(Location loc, bool resetVelocity = false)
         {
-            transform.position = CoordConvert.MC2Unity(loc);
+            if (playerRigidbody is null)
+            {
+                Debug.LogWarning("Trying to move player when rigidbody is not available!");
+                return;
+            }
 
-            Debug.Log($"Position set to {transform.position}");
+            if (resetVelocity) // Reset rigidbody velocity
+                playerRigidbody.velocity = Vector3.zero;
+            
+            playerRigidbody.position = CoordConvert.MC2Unity(loc);
+
+            Debug.Log($"Position set to {playerRigidbody.position}");
         }
 
         void Update() => LogicalUpdate(Time.deltaTime);
@@ -229,7 +238,10 @@ namespace MinecraftClient.Control
             }
             else
             {
-                // Leave the player rigidbody untouched
+                if (info.Spectating)
+                    playerRigidbody!.velocity = Vector3.zero;
+                
+                // Otherwise leave the player rigidbody untouched
 
             }
         }

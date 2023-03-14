@@ -24,10 +24,7 @@ namespace MinecraftClient.Rendering
             entityAnimator = GetComponentInChildren<Animator>();
 
             if (entityAnimator is not null)
-            {
                 animatorPresent = true;
-                Debug.Log("Meow!");
-            }
             else
                 Debug.LogWarning("Player animator not found!");
         }
