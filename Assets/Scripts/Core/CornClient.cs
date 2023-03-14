@@ -1400,8 +1400,15 @@ namespace MinecraftClient
                 locationReceived = true;
 
                 Loom.QueueOnMainThread(() => {
+                    // Force refresh environment collider
+                    chunkRenderManager?.RefreshTerrainCollider(location.Up());
+
+                    // Then update player location
                     playerController?.SetLocation(location);
+
                     // TODO Set player rotation
+
+                    
                 });
                 
             }
