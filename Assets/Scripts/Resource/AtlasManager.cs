@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using Unity.Mathematics;
@@ -106,17 +107,46 @@ namespace MinecraftClient.Resource
 
             int count = 0;
 
-            var textures = new Texture2D[texDict.Count];
-            var ids = new ResourceLocation[texDict.Count];
+            var textureIdSet = new HashSet<ResourceLocation>();
 
-            foreach (var pair in texDict) // Load texture files...
+            // Collect referenced textures
+            var modelFilePaths = packManager.BlockModelFileTable.Values.ToList();
+            modelFilePaths.AddRange(packManager.ItemModelFileTable.Values);
+            
+            foreach (var modelFile in modelFilePaths)
             {
-                var texFilePath = pair.Value;
-                ids[count] = pair.Key;
-                //Debug.Log($"Loading {texId} from {pair.Key}");
+                var model = Json.ParseJson(File.ReadAllText(modelFile));
+
+                if (model.Properties.ContainsKey("textures"))
+                {
+                    var texData = model.Properties["textures"].Properties;
+                    foreach (var texItem in texData)
+                    {
+                        if (!texItem.Value.StringValue.StartsWith('#'))
+                        {
+                            var texId = ResourceLocation.fromString(texItem.Value.StringValue);
+
+                            if (texDict.ContainsKey(texId))
+                                textureIdSet.Add(texId);
+                            else
+                                Debug.LogWarning($"Texture {texId} not found in dictionary! (Referenced in {modelFile})");
+                        }
+                            
+                    }
+                }
+            }
+
+            var textures = new Texture2D[textureIdSet.Count];
+            var ids = new ResourceLocation[textureIdSet.Count];
+
+            foreach (var texId in textureIdSet) // Load texture files...
+            {
+                var texFilePath = texDict[texId];
+                ids[count] = texId;
+                //Debug.Log($"Loading {texId} from {texFilePath}");
 
                 Texture2D tex = new(2, 2);
-                tex.name = pair.Key.ToString();
+                tex.name = texId.ToString();
                 tex.LoadImage(File.ReadAllBytes(texFilePath));
 
                 textures[count] = tex;
@@ -124,7 +154,7 @@ namespace MinecraftClient.Resource
                 count++;
                 if (count % 20 == 0)
                 {
-                    loadStateInfo.infoText = $"Loading texture file {pair.Key}";
+                    loadStateInfo.infoText = $"Loading texture file {texId}";
                     yield return null;
                 }
             }
@@ -144,7 +174,7 @@ namespace MinecraftClient.Resource
 
                 while (true)
                 {
-                    if (lastTexIndex >= texDict.Count - 1)
+                    if (lastTexIndex >= textureIdSet.Count - 1)
                         break;
 
                     var nextTex = textures[lastTexIndex + 1];
@@ -215,7 +245,7 @@ namespace MinecraftClient.Resource
                 yield return null;
 
             }
-            while (curTexIndex < texDict.Count);
+            while (curTexIndex < textureIdSet.Count);
 
             var atlasArray0 = new Texture2DArray(ATLAS_SIZE, ATLAS_SIZE, curAtlasIndex, TextureFormat.RGBA32,  2, false);
             var atlasArray1 = new Texture2DArray(ATLAS_SIZE, ATLAS_SIZE, curAtlasIndex, TextureFormat.RGBA32,  4, false);
