@@ -9,6 +9,7 @@ namespace MinecraftClient.UI
 {
     public class InfoTagPanel : MonoBehaviour
     {
+        private static readonly Vector3 HIDDEN_POS = new(0F, 0F, -1000F);
         private CornClient? game;
         private Dictionary<int, EntityInfoTag> infoTags = new();
 
@@ -118,7 +119,8 @@ namespace MinecraftClient.UI
                     var tagTransform = pair.Value.transform;
 
                     // Update tag position
-                    tagTransform.position = camController.GetTransfromScreenPos(entity.InfoAnchor);
+                    var screenPos = camController.GetTransfromScreenPos(entity.InfoAnchor);
+                    tagTransform.position = screenPos ?? HIDDEN_POS;
                     
                     var scale = tagScaleCurve!.Evaluate(Vector3.Distance(camPos, entity.InfoAnchor.position));
                     tagTransform.localScale = new(scale, scale, scale);

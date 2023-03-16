@@ -47,7 +47,7 @@ namespace MinecraftClient.Control
             return Vector3.zero;
         }
 
-        public virtual Vector3 GetTransfromScreenPos(Transform? t)
+        public virtual Vector3? GetTransfromScreenPos(Transform? t)
         {
             EnsureInitialized();
 
@@ -58,7 +58,7 @@ namespace MinecraftClient.Control
                     return renderCamera!.WorldToScreenPoint(targetPos.Value);
             }
             
-            return Vector3.zero;
+            return null;
         }
 
         public abstract float GetYaw();

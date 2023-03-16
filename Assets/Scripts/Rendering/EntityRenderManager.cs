@@ -208,6 +208,7 @@ namespace MinecraftClient.Rendering
             // Neutral Mobs
             // ...
             // Player Entities
+            infoTagTypes.Add(EntityType.PIG_ID,               EntityInfoTagType.Monster);
             infoTagTypes.Add(EntityType.PLAYER_ID,            EntityInfoTagType.NPC);
             // Miscellaneous Entities
             // ...
