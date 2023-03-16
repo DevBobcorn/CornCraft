@@ -27,11 +27,9 @@ namespace MinecraftClient.Rendering
         {
             if (player is not null && player.UseRootMotion)
             {
-                Vector3 newPosition = transform.parent.position;
+                var rb = player.PlayerRigidbody;
 
-                newPosition += animator!.deltaPosition;
-
-                transform.parent.position = newPosition;
+                rb.position += animator!.deltaPosition;
             }
         }
     }

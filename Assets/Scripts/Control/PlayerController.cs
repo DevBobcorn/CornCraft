@@ -22,6 +22,7 @@ namespace MinecraftClient.Control
 
         private CornClient? game;
         private Rigidbody? playerRigidbody;
+        public Rigidbody PlayerRigidbody => playerRigidbody!;
         private Collider? playerCollider;
 
         private readonly PlayerUserInputData inputData = new();
