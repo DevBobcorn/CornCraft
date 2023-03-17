@@ -490,7 +490,7 @@ namespace MinecraftClient.UI
             }
 
             // TODO Also initialize server with cached values
-            serverInput.text = ProtocolPseudo.SERVER_NAME; // "127.0.0.1";
+            serverInput.text = CornCraft.DefaultServer;
             if (cachedNames.Length > 0)
                 usernameInput.text = cachedNames[0];
             

@@ -14,6 +14,8 @@ namespace MinecraftClient
         public const string Version = "1.0.0";
         public const string BrandInfo = "CornCraft/" + Version;
 
+        public const string DefaultServer = "127.0.0.1";
+
         public const char internalCmdChar = '>';
 
         #region Global Settings and Variables

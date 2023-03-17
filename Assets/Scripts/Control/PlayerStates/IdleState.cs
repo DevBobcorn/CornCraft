@@ -18,7 +18,10 @@ namespace MinecraftClient.Control
                 
             }
             else if (inputData.ascend) // Jump in place
+            {
                 rigidbody.velocity = new(0F, ability.JumpSpeed, 0F);
+                info.Grounded = false;
+            }
             
             info.MoveVelocity = Vector3.zero;
 

@@ -24,6 +24,7 @@ namespace MinecraftClient.Control
         private Rigidbody? playerRigidbody;
         public Rigidbody PlayerRigidbody => playerRigidbody!;
         private Collider? playerCollider;
+        public Collider PlayerCollider => playerCollider!;
 
         private readonly PlayerUserInputData inputData = new();
         private PlayerUserInput? userInput;
