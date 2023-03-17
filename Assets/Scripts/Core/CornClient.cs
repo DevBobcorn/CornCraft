@@ -1392,19 +1392,21 @@ namespace MinecraftClient
                 playerData._pitch = pitch;
 
                 playerData.Location = location;
+                
+                if (!locationReceived)
+                    Loom.QueueOnMainThread(() => {
+                        // Force refresh environment collider
+                        chunkRenderManager?.RefreshTerrainCollider(location.Up());
+
+                        // Then update player location
+                        playerController?.SetLocation(location);
+
+                        // TODO Set player rotation
+
+                        
+                    });
+
                 locationReceived = true;
-
-                Loom.QueueOnMainThread(() => {
-                    // Force refresh environment collider
-                    chunkRenderManager?.RefreshTerrainCollider(location.Up());
-
-                    // Then update player location
-                    playerController?.SetLocation(location);
-
-                    // TODO Set player rotation
-
-                    
-                });
                 
             }
 

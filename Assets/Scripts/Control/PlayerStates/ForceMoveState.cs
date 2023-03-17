@@ -48,13 +48,17 @@ namespace MinecraftClient.Control
                         var moveProgress = currentTime / currentOperation.TimeTotal;
                         var curPosition1 = Vector3.Lerp(currentOperation.Destination!.Value, currentOperation.Origin, moveProgress);
 
-                        rigidbody.transform.position = curPosition1;
+                        //rigidbody.position = curPosition1;
+                        //player.transform.position = curPosition1;
+                        rigidbody.MovePosition(curPosition1);
                         break;
                     case ForceMoveDisplacementType.CurvesDisplacement:
                         // Sample animation 
                         var curPosition2 = currentOperation.SampleTargetAt(currentOperation.TimeTotal - currentTime);
                         
-                        rigidbody.transform.position = curPosition2;
+                        //rigidbody.position = curPosition2;
+                        player.transform.position = curPosition2;
+                        //rigidbody.MovePosition(curPosition2);
                         break;
                     case ForceMoveDisplacementType.RootMotionDisplacement:
                         // Do nothing
@@ -79,8 +83,19 @@ namespace MinecraftClient.Control
                 
                 currentTime = currentOperation.TimeTotal;
 
-                // TODO Check validity
-                info.PlayingRootMotion = currentOperation.DisplacementType != ForceMoveDisplacementType.FixedDisplacement;
+                switch (currentOperation.DisplacementType)
+                {
+                    case ForceMoveDisplacementType.FixedDisplacement:
+                        //rigidbody.isKinematic = true;
+                        break;
+                    case ForceMoveDisplacementType.CurvesDisplacement:
+                        info.PlayingRootMotion = true;
+                        //rigidbody.isKinematic = true;
+                        break;
+                    case ForceMoveDisplacementType.RootMotionDisplacement:
+                        info.PlayingRootMotion = true;
+                        break;
+                }
             }
         }
 
@@ -90,13 +105,23 @@ namespace MinecraftClient.Control
             {
                 currentOperation.OperationExit?.Invoke(info, rigidbody, player);
 
-                if (currentOperation.DisplacementType == ForceMoveDisplacementType.FixedDisplacement)
+                switch (currentOperation.DisplacementType)
                 {
-                    // Perform last move with rigidbody.MovePosition()
-                    rigidbody!.MovePosition(currentOperation.Destination!.Value);
+                    case ForceMoveDisplacementType.FixedDisplacement:
+                        // Perform last move with rigidbody.MovePosition()
+                        rigidbody!.MovePosition(currentOperation.Destination!.Value);
+                        //rigidbody.isKinematic = false;
+                        break;
+                    case ForceMoveDisplacementType.CurvesDisplacement:
+                        info.PlayingRootMotion = false;
+                        //rigidbody.isKinematic = false;
+                        rigidbody.velocity = Vector3.zero;
+                        break;
+                    case ForceMoveDisplacementType.RootMotionDisplacement:
+                        info.PlayingRootMotion = false;
+                        
+                        break;
                 }
-
-                info.PlayingRootMotion = false;
             }
         }
 
@@ -127,7 +152,6 @@ namespace MinecraftClient.Control
         public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             //info.PlayingForcedAnimation = false;
-
         }
 
         public override string ToString() => $"ForceMove [{Name}] {currentOperationIndex + 1}/{Operations.Length} ({currentTime:0.00}/{currentOperation?.TimeTotal:0.00})";

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 626338d7e82f32b4893ae4cf50bbdfc2, type: 3}
   m_Name: Client Player Ability
   m_EditorClassIdentifier: 
-  ColliderType: 0
+  ColliderType: 1
   ColliderRadius: 0.31
   ColliderHeight: 1.8
   Climb1mX:

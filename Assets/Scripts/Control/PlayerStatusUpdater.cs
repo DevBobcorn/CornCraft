@@ -8,7 +8,7 @@ namespace MinecraftClient.Control
     {
         // Ground distance check
         private const float GROUND_RAYCAST_START   = 2.5F;
-        private const float GROUND_RAYCAST_DIST    = 4.0F;
+        private const float GROUND_RAYCAST_DIST    = 5.0F;
         private const float GROUND_RAYCAST_OFFSET  = 0.8F; // The distance to move forward for front raycast
         private static readonly Vector3 GROUND_BOXCAST_START_POINT = new(0F, GROUND_RAYCAST_START, 0F);
 
@@ -85,8 +85,7 @@ namespace MinecraftClient.Control
             else if (Status.Grounded)
             {
                 // Extra check to make sure the player is just walking on some bumped surface and happen to leave the ground
-                // for a really small amount of time (for example walking from grass block to grass path block)
-                if (!groundCheck && Status.CenterDownDist > 0.2F)
+                if (!groundCheck && Status.CenterDownDist > 1.75F)
                     Status.Grounded = false;
             }
             else

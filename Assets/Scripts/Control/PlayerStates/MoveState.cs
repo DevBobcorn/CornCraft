@@ -116,7 +116,10 @@ namespace MinecraftClient.Control
             }
 
             if (inputData.ascend) // Jump up, keep horizontal speed
+            {
                 moveVelocity.y = ability.JumpSpeed + Mathf.Min(1F, moveSpeed);
+                info.Grounded = false;
+            }
             else
                 moveVelocity.y = rigidbody.velocity.y;
 

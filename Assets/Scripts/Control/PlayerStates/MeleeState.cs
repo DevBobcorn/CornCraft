@@ -92,6 +92,9 @@ namespace MinecraftClient.Control
             //Debug.Log("Attack starts!");
             player.AccessoryWidget.HoldWeapon();
             player.UseRootMotion = true;
+
+            rigidbody.velocity = Vector3.zero;
+            info.MoveVelocity = Vector3.zero;
             
         }
 
