@@ -128,13 +128,17 @@ namespace MinecraftClient.Resource
 
                             if (texDict.ContainsKey(texId))
                                 textureIdSet.Add(texId);
-                            else
-                                Debug.LogWarning($"Texture {texId} not found in dictionary! (Referenced in {modelFile})");
+                            //else
+                            //    Debug.LogWarning($"Texture {texId} not found in dictionary! (Referenced in {modelFile})");
                         }
                             
                     }
                 }
             }
+
+            // Append liquid textures, which are not referenced in model files, but will be used by fluid mesh
+            foreach (var liquidTex in FluidGeometry.LiquidTextures)
+                textureIdSet.Add(liquidTex);
 
             var textures = new Texture2D[textureIdSet.Count];
             var ids = new ResourceLocation[textureIdSet.Count];

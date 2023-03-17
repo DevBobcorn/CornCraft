@@ -8,6 +8,14 @@ namespace MinecraftClient.Resource
 {
     public static class FluidGeometry
     {
+        public static readonly ResourceLocation[] LiquidTextures = new ResourceLocation[]
+        {
+            new("block/water_still"),
+            new("block/lava_still"),
+            new("block/water_flow"),
+            new("block/lava_flow")
+        };
+
         private static readonly Vector4 FULL = new(0, 0, 1, 1);
 
         // Add a subtle offset to sides of water to avoid z-fighting

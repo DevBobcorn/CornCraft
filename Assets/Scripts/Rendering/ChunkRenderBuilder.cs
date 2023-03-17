@@ -14,8 +14,6 @@ namespace MinecraftClient.Rendering
 {
     public class ChunkRenderBuilder
     {
-        private static readonly ResourceLocation[] liquidTextures = new ResourceLocation[]
-                { new("block/water_still"), new("block/lava_still") };
         private static readonly int waterLayerIndex = ChunkRender.TypeIndex(RenderType.WATER);
         private static readonly int lavaLayerIndex  = ChunkRender.TypeIndex(RenderType.SOLID);
 
@@ -70,7 +68,7 @@ namespace MinecraftClient.Rendering
                                 var liquidHeights = chunkData.GetLiquidHeights(loc);
 
                                 var liquidLayerIndex = state.InWater ? waterLayerIndex : lavaLayerIndex;
-                                var liquidTexture = liquidTextures[state.InWater ? 0 : 1];
+                                var liquidTexture = FluidGeometry.LiquidTextures[state.InWater ? 0 : 1];
 
                                 if (liquidCullFlags != 0)
                                 {
