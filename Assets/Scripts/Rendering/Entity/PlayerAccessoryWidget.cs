@@ -3,7 +3,6 @@ using UnityEngine;
 
 using MinecraftClient.Control;
 
-
 namespace MinecraftClient.Rendering
 {
 public class PlayerAccessoryWidget : MonoBehaviour
@@ -51,8 +50,8 @@ public class PlayerAccessoryWidget : MonoBehaviour
         public void DamageStop()
         {
             player!.AttackDamage(false);
-            
-            currentWeapon!.EndSlash();
+
+            player.DealDamage(currentWeapon!.EndSlash());
         }
 
         public void StageEnding()

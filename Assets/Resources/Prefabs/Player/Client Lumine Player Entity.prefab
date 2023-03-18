@@ -3945,6 +3945,7 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &7087057527724402167
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3972,7 +3973,7 @@ MonoBehaviour:
   mainHandBone: {fileID: 8123635}
   weaponRef: {fileID: 1276741242010410039}
   weaponSlotBone: {fileID: 3235073680967696545}
-  meleeWeaponPrefab: {fileID: 1253769739086221749, guid: 918b376d614231a459f0583e24616a48, type: 3}
+  meleeWeaponPrefab: {fileID: 3614610430203578208, guid: 918b376d614231a459f0583e24616a48, type: 3}
 --- !u!4 &8033972592986212914 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 946933242221382679, guid: 0a6ae5a9fc9564c43943400e0e34bc21, type: 3}

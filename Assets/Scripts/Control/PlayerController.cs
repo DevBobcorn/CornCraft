@@ -1,6 +1,8 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+
 using MinecraftClient.Event;
 using MinecraftClient.Mapping;
 using MinecraftClient.Rendering;
@@ -281,6 +283,16 @@ namespace MinecraftClient.Control
             else
             {
                 Debug.LogWarning("Trying to toggle attack damage when not attacking!");
+            }
+        }
+
+        public void DealDamage(List<AttackHitInfo> hitInfos)
+        {
+            foreach (var hitInfo in hitInfos)
+            {
+                // Send attack packets to server
+                game!.InteractEntity(hitInfo.EntityRender.Entity.ID, 1);
+
             }
         }
 
