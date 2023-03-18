@@ -4,50 +4,56 @@ using UnityEngine;
 
 using MinecraftClient.Rendering;
 
-public class MeleeWeapon : MonoBehaviour
+namespace MinecraftClient.Control
 {
-    private readonly List<Collider> slashHits = new();
-    private bool slashActive = false;
-
-    public TrailRenderer? slashTrail;
-
-    public void StartSlash()
+    public class MeleeWeapon : MonoBehaviour
     {
-        slashHits.Clear();
-        slashActive = true;
+        private readonly List<Collider> slashHits = new();
+        private bool slashActive = false;
 
-        if (slashTrail is not null)
-            slashTrail.emitting = true;
-    }
+        public TrailRenderer? slashTrail;
 
-    public Collider[] EndSlash()
-    {
-        slashActive = false;
-
-        if (slashTrail is not null)
-            slashTrail.emitting = false;
-
-        return slashHits.ToArray();
-    }
-
-    void OnTriggerEnter(Collider hit)
-    {
-        if (!slashActive)
-            return;
-        
-        if (!slashHits.Contains(hit))
+        public void StartSlash()
         {
-            EntityRender? entity;
+            slashHits.Clear();
+            slashActive = true;
 
-            if (entity = hit.GetComponentInParent<EntityRender>())
+            if (slashTrail is not null)
+                slashTrail.emitting = true;
+        }
+
+        public List<AttackHitInfo> EndSlash()
+        {
+            slashActive = false;
+
+            if (slashTrail is not null)
+                slashTrail.emitting = false;
+            
+            List<AttackHitInfo> infos = new();
+
+            foreach (var hit in slashHits)
             {
-                slashHits.Add(hit);
-                Debug.Log($"Slash hit {entity.gameObject.name}");
+                EntityRender? entityRender;
+
+                if (entityRender = hit.GetComponentInParent<EntityRender>())
+                {
+                    Debug.Log($"Slash hit {entityRender.gameObject.name}");
+                    infos.Add(new(entityRender, hit));
+                }
             }
 
-
+            return infos;
         }
-        
-    }
 
+        void OnTriggerEnter(Collider hit)
+        {
+            if (!slashActive)
+                return;
+            
+            if (!slashHits.Contains(hit))
+                slashHits.Add(hit);
+            
+        }
+
+    }
 }
