@@ -5,6 +5,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 220461004892892150, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
@@ -71,6 +72,10 @@ PrefabInstance:
       propertyPath: infoAnchor
       value: 
       objectReference: {fileID: 8299503759999353212}
+    - target: {fileID: 6033660137571719628, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
+      propertyPath: ragdollPrefab
+      value: 
+      objectReference: {fileID: 8996889979576193348, guid: 7e80d5df74d20cf4d9b09b48d3a7f03f, type: 3}
     - target: {fileID: 6353004117845051208, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -148,6 +153,9 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: a588f5a21531d5d4280bcf90ee43c646, type: 2}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
 --- !u!4 &615427450611365247 stripped
 Transform:
