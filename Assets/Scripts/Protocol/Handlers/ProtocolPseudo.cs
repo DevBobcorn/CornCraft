@@ -46,6 +46,8 @@ namespace MinecraftClient.Protocol.Handlers
 
         }
 
+        private readonly Dictionary<int, Entity> worldEntities = new();
+
         private IEnumerator SetupWorld()
         {
             // Generate initial chunks
@@ -61,16 +63,18 @@ namespace MinecraftClient.Protocol.Handlers
             int entityId = 0;
             float radius = 7F;
 
-            for (int deg = 0;deg < 360;deg += 20)
+            for (int deg = 0;deg < 360;deg += 15)
             {
                 float rad = Mathf.Deg2Rad * deg;
                 var loc = new Location(8 + Mathf.Sin(rad) * radius, 2, 8 + Mathf.Cos(rad) * radius);
 
                 var entity = new Entity(entityId++, EntityPalette.INSTANCE.FromId(EntityType.PIG_ID), loc);
+                entity.Yaw = -deg;
+                worldEntities.Add(entity.ID, entity);
+
                 handler.OnSpawnEntity(entity);
                 yield return new WaitForSeconds(0.2F);
             }
-
             
         }
 
@@ -87,14 +91,37 @@ namespace MinecraftClient.Protocol.Handlers
             try
             {
                 System.Diagnostics.Stopwatch stopWatch = new();
+                List<int> entitiesToDestroy = new();
+
                 while (true)
                 {
                     cancelToken.ThrowIfCancellationRequested();
 
                     // Generate environment chunks
                     GenerateChunkData(false, CornCraft.MCSettings_RenderDistance);
+                    
+                    // Update entities
+                    entitiesToDestroy.Clear();
+                    foreach (var pair in worldEntities)
+                    {
+                        if (pair.Value.Health <= 0F)
+                        {
+                            // Mark this entity as to be destroyed
+                            entitiesToDestroy.Add(pair.Key);
+
+                        }
+                    }
+
+                    if (entitiesToDestroy.Count > 0)
+                    {
+                        handler.OnDestroyEntities(entitiesToDestroy.ToArray());
+                        
+                        foreach (var entityId in entitiesToDestroy)
+                            worldEntities.Remove(entityId);
+                    }
 
                     handler.OnUpdate();
+
                     stopWatch.Restart();
 
                     int sleepLength = 50 - stopWatch.Elapsed.Milliseconds;
@@ -465,7 +492,7 @@ namespace MinecraftClient.Protocol.Handlers
 
         public bool SendInteractEntity(int entityId, int type)
         {
-            return true;
+            return SendInteractEntity(entityId, type, 0);
         }
 
         public bool SendInteractEntity(int entityId, int type, float X, float Y, float Z, int hand)
@@ -480,6 +507,16 @@ namespace MinecraftClient.Protocol.Handlers
 
         public bool SendInteractEntity(int entityId, int type, int hand)
         {
+            if (type == 1)
+            {
+                if (worldEntities.ContainsKey(entityId))
+                {
+                    worldEntities[entityId].Health -= 1F;
+                }
+                else
+                    return false;
+            }
+
             return true;
         }
 

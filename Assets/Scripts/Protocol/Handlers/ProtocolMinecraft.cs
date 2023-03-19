@@ -2278,6 +2278,7 @@ namespace MinecraftClient.Protocol.Handlers
             catch (System.IO.IOException) { return false; }
             catch (ObjectDisposedException) { return false; }
         }
+        
         public bool SendInteractEntity(int entityId, int type, int hand)
         {
             try
@@ -2298,6 +2299,7 @@ namespace MinecraftClient.Protocol.Handlers
             catch (System.IO.IOException) { return false; }
             catch (ObjectDisposedException) { return false; }
         }
+
         public bool SendInteractEntity(int entityId, int type, float X, float Y, float Z)
         {
             return false;

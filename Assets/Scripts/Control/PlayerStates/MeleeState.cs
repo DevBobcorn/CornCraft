@@ -55,6 +55,7 @@ namespace MinecraftClient.Control
             attackStatus.AttackCooldown = meleeAttack.MaxStageDuration;
 
             player.CrossFadeState($"Melee{stage}", init ? 0F : 0.2F);
+            player.TurnToAttackTarget();
 
         }
 

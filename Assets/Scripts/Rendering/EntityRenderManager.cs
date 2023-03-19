@@ -59,10 +59,12 @@ namespace MinecraftClient.Rendering
                 infoTagTypes.GetValueOrDefault(type, EntityInfoTagType.None);
 
         private readonly Dictionary<int, EntityRender> entityRenders = new();
-        private readonly HashSet<int> nearbyEntities = new();
+        
+        // Entity Id => Square distance to player
+        private readonly Dictionary<int, float> nearbyEntities = new();
 
-        private const float NEARBY_THERESHOLD_INNER = 100F;
-        private const float NEARBY_THERESHOLD_OUTER = 128F;
+        private const float NEARBY_THERESHOLD_INNER = 100F; // 10 * 10
+        private const float NEARBY_THERESHOLD_OUTER = 121F; // 11 * 11
 
         public string GetDebugInfo() => $"Ent: {entityRenders.Count}";
 
@@ -106,7 +108,7 @@ namespace MinecraftClient.Rendering
                     entityRenders.Remove(id);
                 }
 
-                if (nearbyEntities.Contains(id))
+                if (nearbyEntities.ContainsKey(id))
                     nearbyEntities.Remove(id);
             }
 
@@ -151,7 +153,7 @@ namespace MinecraftClient.Rendering
 
         }
 
-        public HashSet<int> GetNearbyEntities() => nearbyEntities;
+        public Dictionary<int, float> GetNearbyEntities() => nearbyEntities;
 
         public EntityRender? GetEntityRender(int entityId)
         {
@@ -226,23 +228,37 @@ namespace MinecraftClient.Rendering
         {
             var playerPos = game!.PlayerController?.transform.position;
 
+            if (playerPos is null) // Game is not ready, cancel update
+                return;
+
             foreach (var render in entityRenders.Values)
             {
                 // Call managed update
                 render.ManagedUpdate(game!.GetTickMilSec());
 
-                // Update entity set around the player
-                if (playerPos is not null)
+                // Update entities around the player
+                float dist = (render.transform.position - playerPos.Value).sqrMagnitude;
+                int entityId = render.Entity.ID;
+
+                bool inDict = nearbyEntities.ContainsKey(entityId);
+
+                if (dist < NEARBY_THERESHOLD_INNER) // Add entity to dictionary
                 {
-                    float dist = (render.transform.position - playerPos.Value).sqrMagnitude;
-
-                    if (dist < NEARBY_THERESHOLD_INNER)
-                        nearbyEntities.Add(render.Entity.ID);
-                    else if (dist > NEARBY_THERESHOLD_OUTER)
-                        nearbyEntities.Remove(render.Entity.ID);
-                    
+                    if (inDict)
+                        nearbyEntities[entityId] = dist;
+                    else
+                        nearbyEntities.Add(entityId, dist);
                 }
-
+                else if (dist > NEARBY_THERESHOLD_OUTER) // Remove entity from dictionary
+                {
+                    if (inDict)
+                        nearbyEntities.Remove(entityId);
+                }
+                else // Update entity's distance to the player if it is in the dictionary, otherwise do nothing
+                {
+                    if (inDict)
+                        nearbyEntities[entityId] = dist;
+                }
 
             }
         }

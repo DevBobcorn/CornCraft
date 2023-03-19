@@ -36,7 +36,7 @@ namespace MinecraftClient.Control
         private PlayerInteractionUpdater? interactionUpdater;
 
         private IPlayerState CurrentState = PlayerStates.IDLE;
-        public bool UseRootMotion = false;
+        [HideInInspector] public bool UseRootMotion = false;
 
         private CameraController? camControl;
         private AnimatorEntityRender? playerRender;
@@ -274,6 +274,47 @@ namespace MinecraftClient.Control
             return false;
         }
 
+        public void TurnToAttackTarget()
+        {
+            var entityManager = game!.EntityRenderManager;
+            var nearbyEntities = entityManager?.GetNearbyEntities();
+
+            if (nearbyEntities is null || nearbyEntities.Count == 0) // Nothing to do
+                return;
+            
+            float minDist = float.MaxValue;
+            Vector3? targetPos = null;
+
+            foreach (var pair in nearbyEntities)
+            {
+                if (pair.Value < minDist)
+                {
+                    var render = entityManager?.GetEntityRender(pair.Key);
+
+                    if (render!.Entity.Type.ContainsItem) // Not a valid target
+                        continue;
+
+                    var pos = render.transform.position;
+                    
+                    if (pair.Value <= 16F && pos.y - transform.position.y < 2F)
+                        targetPos = pos;
+                }
+            }
+
+            if (targetPos is null) // Failed to get attack target's position, do nothing
+                return;
+
+            var posOffset = targetPos.Value - transform.position;
+
+            var attackYaw = AngleConvert.GetYawFromVector2(new(posOffset.x, posOffset.z));
+
+            statusUpdater!.Status.TargetVisualYaw = attackYaw;
+            statusUpdater!.Status.CurrentVisualYaw = attackYaw;
+
+            visualTransform!.eulerAngles = new(0F, attackYaw, 0F);
+
+        }
+
         public void AttackDamage(bool enable)
         {
             if (statusUpdater!.Status.Attacking)
@@ -291,7 +332,10 @@ namespace MinecraftClient.Control
             foreach (var hitInfo in hitInfos)
             {
                 // Send attack packets to server
-                game!.InteractEntity(hitInfo.EntityRender.Entity.ID, 1);
+                var entityId = hitInfo.EntityRender?.Entity?.ID;
+
+                if (entityId is not null)
+                    game!.InteractEntity(entityId.Value, 1);
 
             }
         }
