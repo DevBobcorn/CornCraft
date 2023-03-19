@@ -36,10 +36,7 @@ namespace MinecraftClient.Control
                 EntityRender? entityRender;
 
                 if (entityRender = hit.GetComponentInParent<EntityRender>())
-                {
-                    Debug.Log($"Slash hit {entityRender.gameObject.name}");
                     infos.Add(new(entityRender, hit));
-                }
             }
 
             return infos;
