@@ -14,7 +14,7 @@ namespace MinecraftClient.Rendering
         protected float lastPitch = 0F, targetPitch = 0F;
         protected Vector3 visualMovementVelocity = Vector3.zero;
 
-        protected bool isDead = false;
+        protected bool turnedIntoRagdoll = false;
 
         [SerializeField] protected Transform? infoAnchor, visual;
         public Transform InfoAnchor => infoAnchor is null ? transform : infoAnchor;
@@ -41,7 +41,13 @@ namespace MinecraftClient.Rendering
             }
         }
 
-        public void Unload() => Destroy(this.gameObject);
+        public void Unload()
+        {
+            if (!turnedIntoRagdoll)
+                TurnIntoRagdoll();
+            
+            Destroy(this.gameObject);
+        }
 
         public void MoveTo(Vector3 position) => targetPosition = position;
 
@@ -58,7 +64,7 @@ namespace MinecraftClient.Rendering
 
         public virtual void Initialize(EntityType entityType, Entity entity)
         {
-            if (visual is null)
+            if (visual == null)
             {
                 Debug.LogWarning("Visual transform for entity render not assigned!");
                 visual = transform;
@@ -116,35 +122,38 @@ namespace MinecraftClient.Rendering
 
         public virtual void CheckIfDead()
         {
-            if (entity!.Health <= 0F && !isDead)
+            if (entity!.Health <= 0F && !turnedIntoRagdoll)
+                TurnIntoRagdoll();
+            
+        }
+
+        protected virtual void TurnIntoRagdoll()
+        {
+            // 'ragdollPrefab is not null' is not properly supported in Unity yet, so just use '!='
+            if (ragdollPrefab != null) // Create ragdoll in place
             {
-                // 'ragdollPrefab is not null' is not properly supported in Unity yet, so just use '!='
-                if (ragdollPrefab != null) // Create ragdoll in place
+                var ragdollObj = GameObject.Instantiate(ragdollPrefab)!;
+
+                ragdollObj.transform.position = transform.position;
+
+                var ragdoll = ragdollObj.GetComponentInChildren<EntityRagdoll>();
+
+                if (ragdoll != null)
                 {
-                    var ragdollObj = GameObject.Instantiate(ragdollPrefab)!;
+                    ragdoll.Visual.rotation = visual!.rotation;
+                    ragdoll.Visual.localScale = visual.localScale;
 
-                    ragdollObj.transform.position = transform.position;
-                    ragdollObj.transform.rotation = visual!.rotation;
-                    ragdollObj.transform.localScale = visual.lossyScale;
-
-                    var ragdoll = ragdollObj.GetComponentInChildren<EntityRagdoll>();
-
-                    if (ragdoll != null)
-                    {
-                        // Make it fly!
-                        if (visualMovementVelocity.sqrMagnitude > 0F)
-                            ragdoll.mainRigidbody?.AddForce(visualMovementVelocity.normalized * 15F, ForceMode.VelocityChange);
-                        else
-                            ragdoll.mainRigidbody?.AddForce(Vector3.up * 10F, ForceMode.VelocityChange);
-                    }
+                    // Make it fly!
+                    if (visualMovementVelocity.sqrMagnitude > 0F)
+                        ragdoll.mainRigidbody?.AddForce(visualMovementVelocity.normalized * 15F, ForceMode.VelocityChange);
+                    else
+                        ragdoll.mainRigidbody?.AddForce(Vector3.up * 10F, ForceMode.VelocityChange);
                 }
-
-                visual?.gameObject.SetActive(false);
-
-                isDead = true;
             }
 
-            
+            visual?.gameObject.SetActive(false);
+
+            turnedIntoRagdoll = true;
         }
 
         public virtual void ManagedUpdate(float tickMilSec)

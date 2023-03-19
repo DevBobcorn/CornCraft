@@ -68,7 +68,7 @@ namespace MinecraftClient.Protocol.Handlers
                 float rad = Mathf.Deg2Rad * deg;
                 var loc = new Location(8 + Mathf.Sin(rad) * radius, 2, 8 + Mathf.Cos(rad) * radius);
 
-                var entity = new Entity(entityId++, EntityPalette.INSTANCE.FromId(EntityType.PIG_ID), loc);
+                var entity = new Entity(entityId++, EntityPalette.INSTANCE.FromId(EntityType.ZOMBIE_ID), loc);
                 entity.Yaw = -deg;
                 worldEntities.Add(entity.ID, entity);
 
