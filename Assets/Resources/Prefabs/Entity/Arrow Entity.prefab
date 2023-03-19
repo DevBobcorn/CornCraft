@@ -48,6 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   infoAnchor: {fileID: 1002350574447168253}
   visual: {fileID: 7182432277891111638}
+  ragdollPrefab: {fileID: 0}
 --- !u!1 &2716930875251792988
 GameObject:
   m_ObjectHideFlags: 0
@@ -84,6 +85,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 1993495832377569330}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: fd272930b87934e418ad1e65e4055f14, type: 3}
@@ -130,6 +132,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7406237035679384562, guid: fd272930b87934e418ad1e65e4055f14, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: -3477864577585124648, guid: fd272930b87934e418ad1e65e4055f14, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: -250075705364349728, guid: fd272930b87934e418ad1e65e4055f14, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -138,11 +148,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Visual
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: fd272930b87934e418ad1e65e4055f14, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 8280704227580990285, guid: fd272930b87934e418ad1e65e4055f14, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 9943acda5d5d0a741a40aeabab064160, type: 2}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fd272930b87934e418ad1e65e4055f14, type: 3}
 --- !u!4 &7182432277891111638 stripped
 Transform:

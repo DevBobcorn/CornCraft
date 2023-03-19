@@ -22,10 +22,13 @@ namespace MinecraftClient.UI
         {
             return type switch
             {
-                EntityInfoTagType.Monster => monsterInfoTagPrefab,
-                EntityInfoTagType.NPC     => npcInfoTagPrefab,
+                EntityInfoTagType.Monster   => monsterInfoTagPrefab,
+                EntityInfoTagType.Creature  => monsterInfoTagPrefab,
+                EntityInfoTagType.NPC       => npcInfoTagPrefab,
 
-                _                         => null
+                EntityInfoTagType.None      => null,
+
+                _                           => npcInfoTagPrefab
             };
         }
 

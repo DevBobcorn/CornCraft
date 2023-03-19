@@ -11,6 +11,7 @@ namespace MinecraftClient.Rendering
     {
         NPC,
         Monster,
+        Creature,
         None
     }
 
@@ -205,12 +206,15 @@ namespace MinecraftClient.Rendering
             infoTagTypes.Add(EntityType.CREEPER_ID,           EntityInfoTagType.Monster);
             // ...
             // Passive Mobs
+            infoTagTypes.Add(EntityType.PIG_ID,               EntityInfoTagType.Creature);
+            infoTagTypes.Add(EntityType.COW_ID,               EntityInfoTagType.Creature);
+            infoTagTypes.Add(EntityType.MOOSHROOM_ID,         EntityInfoTagType.Creature);
+            infoTagTypes.Add(EntityType.SHEEP_ID,             EntityInfoTagType.Creature);
             infoTagTypes.Add(EntityType.VILLAGER_ID,          EntityInfoTagType.NPC);
             // ...
             // Neutral Mobs
             // ...
             // Player Entities
-            infoTagTypes.Add(EntityType.PIG_ID,               EntityInfoTagType.Monster);
             infoTagTypes.Add(EntityType.PLAYER_ID,            EntityInfoTagType.NPC);
             // Miscellaneous Entities
             // ...
