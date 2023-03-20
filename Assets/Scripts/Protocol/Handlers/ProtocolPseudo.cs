@@ -59,7 +59,22 @@ namespace MinecraftClient.Protocol.Handlers
 
             yield return new WaitForSeconds(1F);
 
-            // Generate a pig ring
+            // Generate an entity ring
+            var entityTypes = new ResourceLocation[]{
+                EntityType.SKELETON_ID,
+                EntityType.WITHER_SKELETON_ID,
+                EntityType.STRAY_ID,
+                EntityType.ZOMBIE_ID,
+                EntityType.HUSK_ID,
+                EntityType.DROWNED_ID,
+                EntityType.CREEPER_ID,
+
+                EntityType.PIG_ID,
+                EntityType.COW_ID,
+                EntityType.SHEEP_ID,
+                EntityType.VILLAGER_ID,
+            };
+
             int entityId = 0;
             float radius = 7F;
 
@@ -67,12 +82,17 @@ namespace MinecraftClient.Protocol.Handlers
             {
                 float rad = Mathf.Deg2Rad * deg;
                 var loc = new Location(8 + Mathf.Sin(rad) * radius, 2, 8 + Mathf.Cos(rad) * radius);
+                var type = EntityPalette.INSTANCE.FromId(
+                        entityTypes[entityId % entityTypes.Length]);
 
-                var entity = new Entity(entityId++, EntityPalette.INSTANCE.FromId(EntityType.HUSK_ID), loc);
+                var entity = new Entity(entityId, type, loc);
                 entity.Yaw = -deg;
-                worldEntities.Add(entity.ID, entity);
+                worldEntities.Add(entityId, entity);
 
                 handler.OnSpawnEntity(entity);
+
+                entityId++;
+
                 yield return new WaitForSeconds(0.2F);
             }
             
