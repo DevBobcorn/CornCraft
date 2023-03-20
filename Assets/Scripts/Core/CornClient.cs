@@ -437,7 +437,7 @@ namespace MinecraftClient
             // Destroy the object holder
             Destroy(holder.gameObject);
 
-            if (!serverIp.Equals(ProtocolPseudo.SERVER_NAME))
+            if (!serverIp.Equals(ProtocolPseudo.ENTRY_NAME))
             {
                 try
                 {

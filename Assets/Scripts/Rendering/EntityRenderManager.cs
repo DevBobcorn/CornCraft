@@ -217,6 +217,8 @@ namespace MinecraftClient.Rendering
             // Player Entities
             infoTagTypes.Add(EntityType.PLAYER_ID,            EntityInfoTagType.NPC);
             // Miscellaneous Entities
+            infoTagTypes.Add(EntityType.ITEM_ID,              EntityInfoTagType.None);
+            infoTagTypes.Add(EntityType.EXPERIENCE_ORB_ID,    EntityInfoTagType.None);
             // ...
 
             foreach (var prefabItem in entityPrefabs)
