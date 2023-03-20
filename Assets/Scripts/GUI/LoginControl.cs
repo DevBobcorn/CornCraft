@@ -2,7 +2,6 @@
 using System;
 using System.Linq;
 using System.Collections;
-using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,10 +18,13 @@ namespace MinecraftClient.UI
 {
     public class LoginControl : MonoBehaviour
     {
+        private const string LOCALHOST_ADDRESS = "127.0.0.1";
+
         private CornClient? game;
         private TMP_InputField? serverInput, usernameInput, authCodeInput;
         private Button?         loginButton, quitButton, authConfirmButton, authCancelButton;
         private Button?         loginCloseButton, authLinkButton, authCloseButton;
+        private Button?         localhostButton, pseudoServerButton;
         private TMP_Text?       loadStateInfoText, usernameOptions, usernamePlaceholder, authLinkText;
         private CanvasGroup?    loginPanel, usernamePanel, authPanel, loginPanelButton;
         private TMP_Dropdown?   loginDropDown;
@@ -47,7 +49,7 @@ namespace MinecraftClient.UI
             host = sip[0];
             port = 25565;
 
-            if (host.Equals(ProtocolPseudo.SERVER_NAME)) // Local pseudo world
+            if (host.Equals(ProtocolPseudo.ENTRY_NAME)) // Local pseudo world
                 return true;
 
             if (sip.Length > 1)
@@ -235,7 +237,7 @@ namespace MinecraftClient.UI
                 ForgeInfo? forgeInfo = null;
 
                 // Local pseudo world
-                if (host.Equals(ProtocolPseudo.SERVER_NAME)) 
+                if (host.Equals(ProtocolPseudo.ENTRY_NAME)) 
                 {
                     protocolVersion = ProtocolPseudo.DEFAULT_PROTOCOL;
                     Translations.Notify("mcc.server_protocol", "<Pseudo>", protocolVersion);
@@ -449,6 +451,8 @@ namespace MinecraftClient.UI
             authPanel = authPanelObj.GetComponent<CanvasGroup>();
 
             serverInput     = loginPanelObj.transform.Find("Server Input").GetComponent<TMP_InputField>();
+            localhostButton = serverInput.transform.Find("Localhost Button").GetComponent<Button>();
+            pseudoServerButton = serverInput.transform.Find("Pseudo Server Button").GetComponent<Button>();
 
             usernameInput   = loginPanelObj.transform.Find("Username Input").GetComponent<TMP_InputField>();
             usernamePlaceholder = FindHelper.FindChildRecursively(usernameInput.transform,
@@ -490,7 +494,7 @@ namespace MinecraftClient.UI
             }
 
             // TODO Also initialize server with cached values
-            serverInput.text = CornCraft.DefaultServer;
+            serverInput.text = LOCALHOST_ADDRESS;
             if (cachedNames.Length > 0)
                 usernameInput.text = cachedNames[0];
             
@@ -502,6 +506,9 @@ namespace MinecraftClient.UI
             HideAuthPanel();
 
             // Add listeners
+            localhostButton.onClick.AddListener(() => serverInput.text = LOCALHOST_ADDRESS);
+            pseudoServerButton.onClick.AddListener(() => serverInput.text = ProtocolPseudo.ENTRY_NAME);
+
             usernameInput.onValueChanged.AddListener(this.UpdateUsernamePanel);
             usernameInput.onSelect.AddListener(this.UpdateUsernamePanel);
             usernameInput.onEndEdit.AddListener(this.HideUsernamePanel);

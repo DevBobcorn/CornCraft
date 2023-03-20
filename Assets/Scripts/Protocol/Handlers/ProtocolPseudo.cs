@@ -24,7 +24,7 @@ namespace MinecraftClient.Protocol.Handlers
     public class ProtocolPseudo : IMinecraftCom
     {
         public const int DEFAULT_PROTOCOL = ProtocolMinecraft.MC_1_16_5_Version;
-        public const string SERVER_NAME = "world.execute(me);";
+        public const string ENTRY_NAME = "world.execute(me);";
 
         private int protocolVersion;
 
