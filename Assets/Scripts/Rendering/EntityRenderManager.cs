@@ -57,7 +57,7 @@ namespace MinecraftClient.Rendering
 
         private GameObject? GetPrefabForType(ResourceLocation type) => entityPrefabs.GetValueOrDefault(type, defaultPrefab);
         public EntityInfoTagType GetInfoTagTypeForType(ResourceLocation type) =>
-                infoTagTypes.GetValueOrDefault(type, EntityInfoTagType.None);
+                infoTagTypes.GetValueOrDefault(type, EntityInfoTagType.NPC); // Use NPC as default value to reveal the type of the entity
 
         private readonly Dictionary<int, EntityRender> entityRenders = new();
         

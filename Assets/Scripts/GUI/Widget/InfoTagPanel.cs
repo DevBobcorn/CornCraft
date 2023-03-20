@@ -27,8 +27,7 @@ namespace MinecraftClient.UI
                 EntityInfoTagType.NPC       => npcInfoTagPrefab,
 
                 EntityInfoTagType.None      => null,
-
-                _                           => npcInfoTagPrefab
+                _                           => null
             };
         }
 
