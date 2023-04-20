@@ -25,6 +25,7 @@ using MinecraftClient.UI;
 using MinecraftClient.Mapping;
 using MinecraftClient.Inventory;
 using MinecraftClient.Protocol.Handlers;
+using System.Threading.Tasks;
 
 namespace MinecraftClient
 {
@@ -260,10 +261,10 @@ namespace MinecraftClient
 
         public void StartLogin(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo loadStateInfo, string accountLower)
         {
-            if (loadStateInfo.loggingIn)
+            if (loadStateInfo.Loading)
                 return;
             
-            loadStateInfo.loggingIn = true;
+            loadStateInfo.Loading = true;
 
             this.sessionId = session.ID;
             if (!Guid.TryParse(session.PlayerID, out this.uuid))
@@ -280,7 +281,7 @@ namespace MinecraftClient
 
         IEnumerator StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo loadStateInfo, string accountLower)
         {
-            loadStateInfo.loggingIn = true;
+            loadStateInfo.Loading = true;
 
             if (!internalCommandsLoaded)
                 LoadInternalCommands();
@@ -317,19 +318,20 @@ namespace MinecraftClient
 
             if (dataVersion == string.Empty || resourceVersion == string.Empty) // Data not ready, cancel login
             {
-                loadStateInfo.loggingIn = false;
+                loadStateInfo.Loading = false;
                 yield break;
             }
 
-            DataLoadFlag loadFlag = new();
-
-            StartCoroutine(BlockStatePalette.INSTANCE.PrepareData(dataVersion, loadFlag, loadStateInfo));
+            // First load all possible Block States...
+            var loadFlag = new DataLoadFlag();
+            Task.Run(() => BlockStatePalette.INSTANCE.PrepareData(dataVersion, loadFlag, loadStateInfo));
 
             while (!loadFlag.Finished)
                 yield return null;
-            
+
+            // Then load all Items...
             loadFlag.Finished = false;
-            StartCoroutine(ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag, loadStateInfo));
+            Task.Run(() => ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag, loadStateInfo));
 
             while (!loadFlag.Finished)
                 yield return null;
@@ -350,7 +352,7 @@ namespace MinecraftClient
                 packManager.AddPack(new(packName));
             // Load valid packs...
             loadFlag.Finished = false;
-            StartCoroutine(packManager.LoadPacks(this, loadFlag, loadStateInfo));
+            Task.Run(() => packManager.LoadPacks(loadFlag, loadStateInfo));
 
             while (!loadFlag.Finished)
                 yield return null;
@@ -377,13 +379,13 @@ namespace MinecraftClient
 
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
-                loadStateInfo.loggingIn = false;
-                loadStateInfo.infoText = "Failed to load all resources >_<";
+                loadStateInfo.Loading = false;
+                loadStateInfo.InfoText = "Failed to load all resources >_<";
                 ShowNotification("Failed to load all resources!", Notification.Type.Error);
                 yield break;
             }
 
-            loadStateInfo.infoText = "Loading world scene";
+            loadStateInfo.InfoText = "Loading world scene";
 
             // Prepare scene and unity objects
             var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
@@ -478,14 +480,14 @@ namespace MinecraftClient
                 }
                 finally
                 {
-                    loadStateInfo.loggingIn = false;
+                    loadStateInfo.Loading = false;
                 }
             }
             else
             {
                 // Create handler
                 handler = new ProtocolPseudo(protocol, this);
-                loadStateInfo.loggingIn = false;
+                loadStateInfo.Loading = false;
 
                 connected = true;
             }

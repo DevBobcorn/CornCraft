@@ -75,7 +75,7 @@ namespace MinecraftClient.UI
         
         public void TryConnectServer()
         {
-            if (tryingConnect || loadStateInfo.loggingIn)
+            if (tryingConnect || loadStateInfo.Loading)
             {
                 CornClient.ShowNotification("Already loggin' in!", Notification.Type.Warning);
                 return;
@@ -105,7 +105,7 @@ namespace MinecraftClient.UI
                 {
                     CornClient.ShowNotification("The offline username is not valid!", Notification.Type.Warning);
                     tryingConnect = false;
-                    loadStateInfo.infoText = ">_<";
+                    loadStateInfo.InfoText = ">_<";
                     yield break;
                 }
 
@@ -189,7 +189,7 @@ namespace MinecraftClient.UI
                 {
                     CornClient.ShowNotification("Failed to parse server name or address!", Notification.Type.Warning);
                     tryingConnect = false;
-                    loadStateInfo.infoText = ">_<";
+                    loadStateInfo.InfoText = ">_<";
                     yield break;
                 }
 
@@ -252,14 +252,14 @@ namespace MinecraftClient.UI
 
                 // Not realms
                 Translations.Log("mcc.retrieve"); // Retrieve server information
-                loadStateInfo.infoText = Translations.Get("mcc.retrieve");
+                loadStateInfo.InfoText = Translations.Get("mcc.retrieve");
                 yield return null;
 
                 if (!ProtocolHandler.GetServerInfo(host, port, ref protocolVersion, ref forgeInfo))
                 {
                     Translations.NotifyError("error.ping");
                     tryingConnect = false;
-                    loadStateInfo.infoText = ">_<";
+                    loadStateInfo.InfoText = ">_<";
                     yield break;
                 }
 
@@ -303,7 +303,7 @@ namespace MinecraftClient.UI
                     _                                                => "error.login.unknown"
                 };
                 failureMessage += Translations.Get(failureReason);
-                loadStateInfo.infoText = ">_<";
+                loadStateInfo.InfoText = ">_<";
                 CornClient.ShowNotification(failureMessage, Notification.Type.Error);
 
                 if (result == ProtocolHandler.LoginResult.SSLError)
@@ -528,7 +528,7 @@ namespace MinecraftClient.UI
 
             // Used for testing MC format code parsing
             // loadStateInfo.infoText = StringConvert.MC2TMP("Hello world §a[§a§a-1, §a1 §6[Bl§b[HHH]ah] Hello §c[Color RE§rD]  §a1§r] (blah)");
-            loadStateInfo.infoText = $"CornCraft {CornCraft.Version} Powered by <u>Minecraft Console Client</u>";
+            loadStateInfo.InfoText = $"CornCraft {CornCraft.Version} Powered by <u>Minecraft Console Client</u>";
 
         }
 
@@ -562,9 +562,9 @@ namespace MinecraftClient.UI
 
         void FixedUpdate()
         {
-            if (loadStateInfoText!.text != loadStateInfo.infoText)
+            if (loadStateInfoText!.text != loadStateInfo.InfoText)
             {
-                loadStateInfoText.text = loadStateInfo.infoText;
+                loadStateInfoText.text = loadStateInfo.InfoText;
             }
 
         }

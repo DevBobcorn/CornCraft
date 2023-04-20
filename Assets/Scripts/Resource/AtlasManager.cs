@@ -99,7 +99,7 @@ namespace MinecraftClient.Resource
 
         public const int ATLAS_SIZE = 512;
         
-        public static IEnumerator Generate(ResourcePackManager packManager, LoadStateInfo loadStateInfo)
+        public static IEnumerator Generate(ResourcePackManager packManager, LoadStateInfo loadStateInfo, DataLoadFlag atlasFlag)
         {
             texAtlasTable.Clear(); // Clear previously loaded table...
 
@@ -158,7 +158,7 @@ namespace MinecraftClient.Resource
                 count++;
                 if (count % 20 == 0)
                 {
-                    loadStateInfo.infoText = $"Loading texture file {texId}";
+                    loadStateInfo.InfoText = $"Loading texture file {texId}";
                     yield return null;
                 }
             }
@@ -171,7 +171,7 @@ namespace MinecraftClient.Resource
 
             do
             {
-                loadStateInfo.infoText = $"Stitching texture atlas #{curAtlasIndex}";
+                loadStateInfo.InfoText = $"Stitching texture atlas #{curAtlasIndex}";
                 
                 // First count all the textures to be stitched onto this atlas
                 int lastTexIndex = curTexIndex - 1, curVolume = 0; // lastTexIndex is inclusive
@@ -262,7 +262,7 @@ namespace MinecraftClient.Resource
                 atlasArray0.SetPixels(atlases[index].GetPixels(), index, 0);
                 atlasArray1.SetPixels(atlases[index].GetPixels(), index, 0);
 
-                loadStateInfo.infoText = $"Creating atlas array element #{curAtlasIndex}";
+                loadStateInfo.InfoText = $"Creating atlas array element #{curAtlasIndex}";
                 yield return null;
             }
 
@@ -272,6 +272,7 @@ namespace MinecraftClient.Resource
             atlasArrays[0] = atlasArray0;
             atlasArrays[1] = atlasArray1;
 
+            atlasFlag.Finished = true;
         }
 
     }
