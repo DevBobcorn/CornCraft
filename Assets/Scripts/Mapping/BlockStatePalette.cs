@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +6,7 @@ using System.Text;
 
 using UnityEngine;
 using Unity.Mathematics;
+
 using MinecraftClient.Rendering;
 using MinecraftClient.Resource;
 
@@ -51,7 +51,7 @@ namespace MinecraftClient.Mapping
             return BlockGeometry.DEFAULT_COLOR;
         } 
 
-        public IEnumerator PrepareData(string dataVersion, DataLoadFlag flag, LoadStateInfo loadStateInfo)
+        public void PrepareData(string dataVersion, DataLoadFlag flag, LoadStateInfo loadStateInfo)
         {
             // Clean up first...
             statesTable.Clear();
@@ -69,10 +69,10 @@ namespace MinecraftClient.Mapping
 
             if (!File.Exists(statesPath) || !File.Exists(listsPath) || !File.Exists(colorsPath) || !File.Exists(renderTypePath))
             {
-                loadStateInfo.infoText = "Block data not complete!";
+                loadStateInfo.InfoText = "Block data not complete!";
                 flag.Finished = true;
                 flag.Failed = true;
-                yield break;
+                return;
             }
 
             // First read special block lists...
@@ -84,21 +84,14 @@ namespace MinecraftClient.Mapping
             lists.Add("empty_blocks", new());
 
             Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
-            loadStateInfo.infoText = $"Reading special lists from {listsPath}";
-
-            int count = 0, yieldCount = 200;
+            loadStateInfo.InfoText = $"Reading special lists from {listsPath}";
 
             foreach (var pair in lists)
             {
                 if (spLists.Properties.ContainsKey(pair.Key))
                 {
                     foreach (var block in spLists.Properties[pair.Key].DataArray)
-                    {
                         pair.Value.Add(ResourceLocation.fromString(block.StringValue));
-                        count++;
-                        if (count % yieldCount == 0)
-                            yield return null;
-                    }
                 }
             }
 
@@ -113,7 +106,8 @@ namespace MinecraftClient.Mapping
             // Then read block states...
             Json.JSONData palette = Json.ParseJson(File.ReadAllText(statesPath, Encoding.UTF8));
             Debug.Log("Reading block states from " + statesPath);
-            count = 0;
+            loadStateInfo.InfoText = $"Loading block states";
+
             foreach (KeyValuePair<string, Json.JSONData> item in palette.Properties)
             {
                 ResourceLocation blockId = ResourceLocation.fromString(item.Key);
@@ -173,23 +167,13 @@ namespace MinecraftClient.Mapping
                             FullSolid = (!noOcclusion.Contains(blockId)) && alwaysFulls.Contains(blockId)
                         };
                     }
-
-                    // Count per state so that loading time can be more evenly distributed
-                    count++;
-                    if (count % 10 == 0)
-                    {
-                        loadStateInfo.infoText = $"Loading states of block {item.Key}";
-                        yield return null;
-                    }
-
                 }
             }
 
             Debug.Log($"{statesTable.Count} block states loaded.");
 
             // Load block color rules...
-            loadStateInfo.infoText = $"Loading block color rules";
-            yield return null;
+            loadStateInfo.InfoText = $"Loading block color rules";
 
             Json.JSONData colorRules = Json.ParseJson(File.ReadAllText(colorsPath, Encoding.UTF8));
 
@@ -223,12 +207,8 @@ namespace MinecraftClient.Mapping
                                     Debug.LogWarning($"Failed to apply dynamic color rules to {blockId} ({stateId})!");
                             }
                         }
-                        else
-                            Debug.LogWarning($"Applying dynamic color rules to undefined block {blockId}!");
-                        
-                        count++;
-                        if (count % yieldCount == 0)
-                            yield return null;
+                        //else
+                        //    Debug.LogWarning($"Applying dynamic color rules to undefined block {blockId}!");
                     }
                 }
             }
@@ -248,21 +228,15 @@ namespace MinecraftClient.Mapping
                         {
                             if (!blockColorRules.TryAdd(stateId, ruleFunc))
                                 Debug.LogWarning($"Failed to apply fixed color rules to {blockId} ({stateId})!");
-                            count++;
-                            if (count % yieldCount == 0)
-                                yield return null;
                         }
                     }
-                    else
-                        Debug.LogWarning($"Applying fixed color rules to undefined block {blockId}!");
+                    //else
+                    //    Debug.LogWarning($"Applying fixed color rules to undefined block {blockId}!");
                 }
             }
-
-            yield return null;
             
             // Load and apply block render types...
-            loadStateInfo.infoText = $"Loading block render types";
-            yield return null;
+            loadStateInfo.InfoText = $"Loading block render types";
 
             try
             {
@@ -303,7 +277,7 @@ namespace MinecraftClient.Mapping
             catch (IOException e)
             {
                 Debug.LogWarning($"Failed to load block render types: {e.Message}");
-                loadStateInfo.infoText = $"Failed to load block render types: {e.Message}";
+                loadStateInfo.InfoText = $"Failed to load block render types: {e.Message}";
                 flag.Failed = true;
             }
 

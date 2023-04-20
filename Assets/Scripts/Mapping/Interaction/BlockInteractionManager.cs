@@ -23,7 +23,7 @@ namespace MinecraftClient.Mapping
 
             if (!File.Exists(interactionPath))
             {
-                loadStateInfo.infoText = "Block interaction definition not found!";
+                loadStateInfo.InfoText = "Block interaction definition not found!";
                 flag.Finished = true;
                 flag.Failed = true;
                 yield break;
@@ -31,7 +31,7 @@ namespace MinecraftClient.Mapping
             
             // Load block interaction definitions...
             interactionTable.Clear();
-            loadStateInfo.infoText = $"Loading block interaction definitions";
+            loadStateInfo.InfoText = $"Loading block interaction definitions";
             yield return null;
 
             var interactions = Json.ParseJson(File.ReadAllText(interactionPath, Encoding.UTF8));

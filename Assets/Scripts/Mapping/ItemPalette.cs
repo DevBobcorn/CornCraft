@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -64,7 +63,7 @@ namespace MinecraftClient.Mapping
             return null;
         }
 
-        public IEnumerator PrepareData(string dataVersion, DataLoadFlag flag, LoadStateInfo loadStateInfo)
+        public void PrepareData(string dataVersion, DataLoadFlag flag, LoadStateInfo loadStateInfo)
         {
             // Clear loaded stuff...
             itemsTable.Clear();
@@ -76,10 +75,10 @@ namespace MinecraftClient.Mapping
 
             if (!File.Exists(itemsPath) || !File.Exists(listsPath) || !File.Exists(colorsPath))
             {
-                loadStateInfo.infoText = "Item data not complete!";
+                loadStateInfo.InfoText = "Item data not complete!";
                 flag.Finished = true;
                 flag.Failed = true;
-                yield break;
+                return;
             }
 
             // First read special item lists...
@@ -91,21 +90,14 @@ namespace MinecraftClient.Mapping
             lists.Add("epic", new());
 
             Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
-            loadStateInfo.infoText = $"Reading special lists from {listsPath}";
-
-            int count = 0, yieldCount = 200;
+            loadStateInfo.InfoText = $"Reading special lists from {listsPath}";
 
             foreach (var pair in lists)
             {
                 if (spLists.Properties.ContainsKey(pair.Key))
                 {
                     foreach (var block in spLists.Properties[pair.Key].DataArray)
-                    {
                         pair.Value.Add(ResourceLocation.fromString(block.StringValue));
-                        count++;
-                        if (count % yieldCount == 0)
-                            yield return null;
-                    }
                 }
             }
 
@@ -153,10 +145,6 @@ namespace MinecraftClient.Mapping
                         dictId.TryAdd(itemId, numId);
                         //UnityEngine.Debug.Log($"Loading item {numId} {item.Value.StringValue}");
                     }
-
-                    count++;
-                    if (count % yieldCount == 0)
-                        yield return null;
                 }
             }
 
@@ -164,12 +152,9 @@ namespace MinecraftClient.Mapping
             dictId[Item.UNKNOWN.ItemId] = -2;
             dictId[Item.NULL.ItemId] = -1;
 
-            yield return null;
-
             // Load item color rules...
             itemColorRules.Clear();
-            loadStateInfo.infoText = $"Loading item color rules";
-            yield return null;
+            loadStateInfo.InfoText = $"Loading item color rules";
 
             Json.JSONData colorRules = Json.ParseJson(File.ReadAllText(colorsPath, Encoding.UTF8));
 
@@ -188,9 +173,6 @@ namespace MinecraftClient.Mapping
 
                         if (!itemColorRules.TryAdd(numId, ruleFunc))
                             Debug.LogWarning($"Failed to apply fixed color rules to {itemId} ({numId})!");
-                        count++;
-                        if (count % yieldCount == 0)
-                            yield return null;
                         
                     }
                     else
@@ -218,9 +200,6 @@ namespace MinecraftClient.Mapping
 
                         if (!itemColorRules.TryAdd(numId, ruleFunc))
                             Debug.LogWarning($"Failed to apply fixed multi-color rules to {itemId} ({numId})!");
-                        count++;
-                        if (count % yieldCount == 0)
-                            yield return null;
                         
                     }
                     else

@@ -53,14 +53,14 @@ namespace MinecraftClient.Mapping
             entityTypeTable.Clear();
             dictId.Clear();
 
-            loadStateInfo.infoText = $"Loading entity definitions";
+            loadStateInfo.InfoText = $"Loading entity definitions";
 
             var entityTypeListPath = PathHelper.GetExtraDataFile($"entity_types-{entityVersion}.json");
             string listsPath  = PathHelper.GetExtraDataFile("entity_lists.json");
 
             if (!File.Exists(entityTypeListPath) || !File.Exists(listsPath))
             {
-                loadStateInfo.infoText = "Entity data not complete!";
+                loadStateInfo.InfoText = "Entity data not complete!";
                 flag.Finished = true;
                 flag.Failed = true;
                 yield break;
@@ -71,7 +71,7 @@ namespace MinecraftClient.Mapping
             lists.Add("contains_item", new());
 
             Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
-            loadStateInfo.infoText = $"Reading special lists from {listsPath}";
+            loadStateInfo.InfoText = $"Reading special lists from {listsPath}";
 
             int count = 0, yieldCount = 200;
 
@@ -115,7 +115,7 @@ namespace MinecraftClient.Mapping
             catch (Exception e)
             {
                 Debug.LogError($"Error loading entity types: {e.Message}");
-                loadStateInfo.infoText = $"Error loading entity types: {e.Message}";
+                loadStateInfo.InfoText = $"Error loading entity types: {e.Message}";
                 flag.Failed = true;
             }
 

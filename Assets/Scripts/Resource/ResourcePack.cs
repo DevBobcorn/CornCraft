@@ -1,4 +1,3 @@
-using System.Collections;
 using System.IO;
 using UnityEngine;
 
@@ -33,28 +32,30 @@ namespace MinecraftClient.Resource
                         if (packData.Properties.ContainsKey("pack_format"))
                         {
                             string packFormat = packData.Properties["pack_format"].StringValue;
-                            Debug.Log("Pack " + packName + " is valid, with pack format version " + packFormat);
+                            Debug.Log($"Pack [{packName}] is valid, with pack format version {packFormat}");
                             isValid = true;
                         }
 
                         if (packData.Properties.ContainsKey("description"))
                         {
                             string desc = packData.Properties["description"].StringValue;
-                            Debug.Log("Description: " + desc);
+                            Debug.Log($"Description: {desc}");
                         }
 
                     }
                 }
             }
             else
-                Debug.LogWarning("No resource pack found at " + packDir);
+                Debug.LogWarning($"No resource pack found at {packDir}");
 
         }
 
-        public IEnumerator GatherResources(ResourcePackManager manager, LoadStateInfo loadStateInfo)
+        public void GatherResources(ResourcePackManager manager, LoadStateInfo loadStateInfo)
         {
             if (isValid)
             {
+                loadStateInfo.InfoText = $"Gathering resources from {packName}";
+                
                 // Assets folder...
                 var assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed($"{packName}/assets"));
                 if (assetsDir.Exists)
@@ -62,8 +63,6 @@ namespace MinecraftClient.Resource
                     // Load textures and models
                     foreach (var nameSpaceDir in assetsDir.GetDirectories())
                     {
-                        int count = 0;
-
                         string nameSpace = nameSpaceDir.Name;
 
                         // Load and store all texture files...
@@ -95,13 +94,6 @@ namespace MinecraftClient.Resource
                                 }
                                 else // Overwrite it
                                     manager.TextureFileTable[identifier] = texFile.FullName.Replace('\\', '/');
-                                
-                                count++;
-                                if (count % 100 == 0)
-                                {
-                                    loadStateInfo.infoText = $"Gathering texture {identifier}";
-                                    yield return null;
-                                }
                             }
                         }
 
@@ -124,13 +116,6 @@ namespace MinecraftClient.Resource
                                 }
                                 else // Overwrite it
                                     manager.BlockModelFileTable[identifier] = modelFile.FullName.Replace('\\', '/');
-
-                                count++;
-                                if (count % 100 == 0)
-                                {
-                                    loadStateInfo.infoText =  $"Gathering block model {identifier}";
-                                    yield return null;
-                                }
                             }
                         }
 
@@ -150,13 +135,6 @@ namespace MinecraftClient.Resource
                                 }
                                 else // Overwrite it
                                     manager.ItemModelFileTable[identifier] = modelFile.FullName.Replace('\\', '/');
-                                
-                                count++;
-                                if (count % 100 == 0)
-                                {
-                                    loadStateInfo.infoText =  $"Gathering item model {identifier}";
-                                    yield return null;
-                                }
                             }
                         }
 
@@ -179,13 +157,6 @@ namespace MinecraftClient.Resource
                                 }
                                 else // Overwrite it
                                     manager.BlockStateFileTable[identifier] = statesFile.FullName.Replace('\\', '/');
-                                
-                                count++;
-                                if (count % 100 == 0)
-                                {
-                                    loadStateInfo.infoText = $"Gathering block state model definition for {identifier}";
-                                    yield return null;
-                                }
                             }
                         }
 
