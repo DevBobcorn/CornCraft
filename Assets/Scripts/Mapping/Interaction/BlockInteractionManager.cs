@@ -17,23 +17,20 @@ namespace MinecraftClient.Mapping
 
         public Dictionary<int, BlockInteractionDefinition> InteractionTable => interactionTable;
 
-        public IEnumerator PrepareData(DataLoadFlag flag, LoadStateInfo loadStateInfo)
+        public void PrepareData(DataLoadFlag flag)
         {
             string interactionPath = PathHelper.GetExtraDataFile("block_interaction.json");
 
             if (!File.Exists(interactionPath))
             {
-                loadStateInfo.InfoText = "Block interaction definition not found!";
+                Debug.LogWarning("Block interaction definition not found!");
                 flag.Finished = true;
                 flag.Failed = true;
-                yield break;
+                return;
             }
             
             // Load block interaction definitions...
             interactionTable.Clear();
-            loadStateInfo.InfoText = $"Loading block interaction definitions";
-            yield return null;
-
             var interactions = Json.ParseJson(File.ReadAllText(interactionPath, Encoding.UTF8));
 
             var stateListTable = BlockStatePalette.INSTANCE.StateListTable;

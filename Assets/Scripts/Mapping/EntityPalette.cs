@@ -47,23 +47,21 @@ namespace MinecraftClient.Mapping
             return FromNumId(ToNumId(identifier));
         }
 
-        public IEnumerator PrepareData(string entityVersion, DataLoadFlag flag, LoadStateInfo loadStateInfo)
+        public void PrepareData(string entityVersion, DataLoadFlag flag)
         {
             // Clear loaded stuff...
             entityTypeTable.Clear();
             dictId.Clear();
-
-            loadStateInfo.InfoText = $"Loading entity definitions";
 
             var entityTypeListPath = PathHelper.GetExtraDataFile($"entity_types-{entityVersion}.json");
             string listsPath  = PathHelper.GetExtraDataFile("entity_lists.json");
 
             if (!File.Exists(entityTypeListPath) || !File.Exists(listsPath))
             {
-                loadStateInfo.InfoText = "Entity data not complete!";
+                Debug.LogWarning("Entity data not complete!");
                 flag.Finished = true;
                 flag.Failed = true;
-                yield break;
+                return;
             }
 
             // First read special item lists...
@@ -71,21 +69,12 @@ namespace MinecraftClient.Mapping
             lists.Add("contains_item", new());
 
             Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
-            loadStateInfo.InfoText = $"Reading special lists from {listsPath}";
-
-            int count = 0, yieldCount = 200;
-
             foreach (var pair in lists)
             {
                 if (spLists.Properties.ContainsKey(pair.Key))
                 {
                     foreach (var block in spLists.Properties[pair.Key].DataArray)
-                    {
                         pair.Value.Add(ResourceLocation.fromString(block.StringValue));
-                        count++;
-                        if (count % yieldCount == 0)
-                            yield return null;
-                    }
                 }
             }
 
@@ -115,7 +104,6 @@ namespace MinecraftClient.Mapping
             catch (Exception e)
             {
                 Debug.LogError($"Error loading entity types: {e.Message}");
-                loadStateInfo.InfoText = $"Error loading entity types: {e.Message}";
                 flag.Failed = true;
             }
 

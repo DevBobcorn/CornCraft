@@ -77,21 +77,17 @@ namespace MinecraftClient.Resource
             sw.Start();
 
             // Gather all textures and model files
-            foreach (var pack in packs)
-            {
-                if (pack.IsValid)
-                    pack.GatherResources(this, loadStateInfo);
-                
-            }
+            loadStateInfo.InfoText = $"Gathering resources";
+            foreach (var pack in packs) pack.GatherResources(this);
 
-            var atlasFlag = new DataLoadFlag();
+            var atlasGenFlag = new DataLoadFlag();
 
             // Load texture atlas (on main thread)...
             Loom.QueueOnMainThread(() => {
-                Loom.Current.StartCoroutine(AtlasManager.Generate(this, loadStateInfo, atlasFlag));
+                Loom.Current.StartCoroutine(AtlasManager.Generate(this, atlasGenFlag));
             });
             
-            while (!atlasFlag.Finished) { /* Wait */ }
+            while (!atlasGenFlag.Finished) { /* Wait */ }
 
             // Load block models...
             foreach (var blockModelId in BlockModelFileTable.Keys)
@@ -109,8 +105,10 @@ namespace MinecraftClient.Resource
                 ItemModelLoader.LoadItemModel(itemModelId);
             }
 
+            loadStateInfo.InfoText = $"Building block state geometries";
             BuildStateGeometries(loadStateInfo);
 
+            loadStateInfo.InfoText = $"Building item geometries";
             BuildItemGeometries(loadStateInfo);
 
             // Perform integrity check...
@@ -134,8 +132,6 @@ namespace MinecraftClient.Resource
 
         public void BuildStateGeometries(LoadStateInfo loadStateInfo)
         {
-            loadStateInfo.InfoText = $"Building block state geometries";
-
             // Load all blockstate files and build their block meshes...
             foreach (var blockPair in BlockStatePalette.INSTANCE.StateListTable)
             {
@@ -157,8 +153,6 @@ namespace MinecraftClient.Resource
 
         public void BuildItemGeometries(LoadStateInfo loadStateInfo)
         {
-            loadStateInfo.InfoText = $"Building item geometries";
-
             // Load all item model files and build their item meshes...
             foreach (var numId in ItemPalette.INSTANCE.ItemsTable.Keys)
             {

@@ -50,12 +50,10 @@ namespace MinecraftClient.Resource
 
         }
 
-        public void GatherResources(ResourcePackManager manager, LoadStateInfo loadStateInfo)
+        public void GatherResources(ResourcePackManager manager)
         {
             if (isValid)
             {
-                loadStateInfo.InfoText = $"Gathering resources from {packName}";
-                
                 // Assets folder...
                 var assetsDir = new DirectoryInfo(PathHelper.GetPackDirectoryNamed($"{packName}/assets"));
                 if (assetsDir.Exists)
