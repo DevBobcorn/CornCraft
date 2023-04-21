@@ -153,11 +153,8 @@ namespace MinecraftClient.Resource
                 tex.name = texId.ToString();
                 tex.LoadImage(File.ReadAllBytes(texFilePath));
 
-                textures[count] = tex;
-
-                count++;
-
-                yield return null;
+                textures[count++] = tex;
+                if (count % 5 == 0) yield return null;
             }
             
             int curTexIndex = 0, curAtlasIndex = 0;
