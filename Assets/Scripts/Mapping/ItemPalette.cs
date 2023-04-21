@@ -63,7 +63,7 @@ namespace MinecraftClient.Mapping
             return null;
         }
 
-        public void PrepareData(string dataVersion, DataLoadFlag flag, LoadStateInfo loadStateInfo)
+        public void PrepareData(string dataVersion, DataLoadFlag flag)
         {
             // Clear loaded stuff...
             itemsTable.Clear();
@@ -75,7 +75,7 @@ namespace MinecraftClient.Mapping
 
             if (!File.Exists(itemsPath) || !File.Exists(listsPath) || !File.Exists(colorsPath))
             {
-                loadStateInfo.InfoText = "Item data not complete!";
+                Debug.LogWarning("Item data not complete!");
                 flag.Finished = true;
                 flag.Failed = true;
                 return;
@@ -90,8 +90,6 @@ namespace MinecraftClient.Mapping
             lists.Add("epic", new());
 
             Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
-            loadStateInfo.InfoText = $"Reading special lists from {listsPath}";
-
             foreach (var pair in lists)
             {
                 if (spLists.Properties.ContainsKey(pair.Key))
@@ -154,8 +152,6 @@ namespace MinecraftClient.Mapping
 
             // Load item color rules...
             itemColorRules.Clear();
-            loadStateInfo.InfoText = $"Loading item color rules";
-
             Json.JSONData colorRules = Json.ParseJson(File.ReadAllText(colorsPath, Encoding.UTF8));
 
             if (colorRules.Properties.ContainsKey("fixed"))

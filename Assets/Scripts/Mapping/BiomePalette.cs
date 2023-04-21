@@ -28,11 +28,12 @@ namespace MinecraftClient.Mapping
 
         public Biome FromId(int biomeId) => biomeTable.GetValueOrDefault(biomeId, EMPTY);
 
-        public IEnumerator PrepareData(string dataVersion, string resourcePackName, DataLoadFlag flag, LoadStateInfo loadStateInfo)
+        public IEnumerator PrepareData(string dataVersion, string resourcePackName, DataLoadFlag flag)
         {
             // Clear loaded stuff...
             biomeTable.Clear();
-            loadStateInfo.InfoText = $"Loading biome definitions";
+
+            yield return null;
 
             biomeTable.Add(-1, EMPTY);
 
@@ -45,7 +46,7 @@ namespace MinecraftClient.Mapping
 
             if (!File.Exists(grassColorMapPath) || !File.Exists(foliageColorMapPath) || !File.Exists(biomeListPath))
             {
-                loadStateInfo.InfoText = "Biome data not complete!";
+                Debug.LogWarning("Biome data not complete!");
                 flag.Finished = true;
                 flag.Failed = true;
                 yield break;
@@ -167,7 +168,6 @@ namespace MinecraftClient.Mapping
             catch (Exception e)
             {
                 Debug.LogError($"Error loading biomes: {e.Message}");
-                loadStateInfo.InfoText = $"Error loading biomes: {e.Message}";
                 flag.Failed = true;
             }
 

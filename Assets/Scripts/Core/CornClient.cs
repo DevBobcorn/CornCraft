@@ -314,33 +314,24 @@ namespace MinecraftClient
             {
                 Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
                 ShowNotification("Data for gameplay is not available!", Notification.Type.Error);
-            }
-
-            if (dataVersion == string.Empty || resourceVersion == string.Empty) // Data not ready, cancel login
-            {
                 loadStateInfo.Loading = false;
                 yield break;
             }
 
             // First load all possible Block States...
             var loadFlag = new DataLoadFlag();
-            Task.Run(() => BlockStatePalette.INSTANCE.PrepareData(dataVersion, loadFlag, loadStateInfo));
-
-            while (!loadFlag.Finished)
-                yield return null;
+            Task.Run(() => BlockStatePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            while (!loadFlag.Finished) yield return null;
 
             // Then load all Items...
             loadFlag.Finished = false;
-            Task.Run(() => ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag, loadStateInfo));
-
+            Task.Run(() => ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished)
                 yield return null;
             
             loadFlag.Finished = false;
-            StartCoroutine(BlockInteractionManager.INSTANCE.PrepareData(loadFlag, loadStateInfo));
-
-            while (!loadFlag.Finished)
-                yield return null;
+            Task.Run(() => BlockInteractionManager.INSTANCE.PrepareData(loadFlag));
+            while (!loadFlag.Finished)  yield return null;
 
             // Load resource packs...
             packManager.ClearPacks();
@@ -353,9 +344,7 @@ namespace MinecraftClient
             // Load valid packs...
             loadFlag.Finished = false;
             Task.Run(() => packManager.LoadPacks(loadFlag, loadStateInfo));
-
-            while (!loadFlag.Finished)
-                yield return null;
+            while (!loadFlag.Finished) yield return null;
             
             // Load player skin overrides...
             SkinManager.Load();
@@ -363,19 +352,13 @@ namespace MinecraftClient
             // Reset atlas materials
             MaterialManager.ClearInitializedFlag();
 
-            // Load biome definitions (After colormaps in resource packs are loaded)...
-            loadFlag.Finished = false;
-            StartCoroutine(BiomePalette.INSTANCE.PrepareData(dataVersion, $"vanilla-{resourceVersion}", loadFlag, loadStateInfo));
-
-            while (!loadFlag.Finished)
-                yield return null;
+            // Load biome definitions (After colormaps in resource packs are loaded) (on main thread)...
+            yield return BiomePalette.INSTANCE.PrepareData(dataVersion, $"vanilla-{resourceVersion}", loadFlag);
             
             // Load entity definitions
             loadFlag.Finished = false;
-            StartCoroutine(EntityPalette.INSTANCE.PrepareData(entityVersion, loadFlag, loadStateInfo));
-
-            while (!loadFlag.Finished)
-                yield return null;
+            Task.Run(() => EntityPalette.INSTANCE.PrepareData(entityVersion, loadFlag));
+            while (!loadFlag.Finished) yield return null;
 
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
@@ -391,8 +374,7 @@ namespace MinecraftClient
             var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
             op.allowSceneActivation = false;
 
-            while (op.progress < 0.9F)
-                yield return null;
+            while (op.progress < 0.9F) yield return null;
 
             // Scene is loaded, activate it
             op.allowSceneActivation = true;

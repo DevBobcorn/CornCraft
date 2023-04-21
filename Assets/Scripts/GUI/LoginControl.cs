@@ -13,6 +13,7 @@ using MinecraftClient.Protocol.Handlers.Forge;
 using MinecraftClient.Protocol.Keys;
 using MinecraftClient.Protocol.Session;
 using MinecraftClient.Protocol.Handlers;
+using System.Threading.Tasks;
 
 namespace MinecraftClient.UI
 {
@@ -255,7 +256,15 @@ namespace MinecraftClient.UI
                 loadStateInfo.InfoText = Translations.Get("mcc.retrieve");
                 yield return null;
 
-                if (!ProtocolHandler.GetServerInfo(host, port, ref protocolVersion, ref forgeInfo))
+                bool pingFinished = false, pingResult = false;
+                Task.Run(() => {
+                    pingResult = ProtocolHandler.GetServerInfo(host, port, ref protocolVersion, ref forgeInfo);
+                    pingFinished = true;
+                });
+
+                while (!pingFinished) yield return null;
+
+                if (!pingResult)
                 {
                     Translations.NotifyError("error.ping");
                     tryingConnect = false;
