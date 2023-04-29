@@ -71,8 +71,6 @@ namespace MinecraftClient
             // TODO Decently implement resource pack selection
             CornCraft.ResourceOverrides.Clear();
             CornCraft.ResourceOverrides.Add("vanilla_fix");
-            //CornCraft.ResourceOverrides.Add("classic_3d");
-            //CornCraft.ResourceOverrides.Add("VanillaBDcraft 64x MC116");
         }
 
         public static void EnsureInitialized()
@@ -259,13 +257,10 @@ namespace MinecraftClient
             
         }
 
-        public void StartLogin(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo loadStateInfo, string accountLower)
-        {
-            if (loadStateInfo.Loading)
-                return;
-            
-            loadStateInfo.Loading = true;
 
+        public void StartLogin(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
+                int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
+        {
             this.sessionId = session.ID;
             if (!Guid.TryParse(session.PlayerID, out this.uuid))
                 this.uuid = Guid.Empty;
@@ -276,13 +271,12 @@ namespace MinecraftClient
             this.protocolVersion = protocol;
             this.playerKeyPair = playerKeyPair;
 
-            StartCoroutine(StartClient(session, playerKeyPair, serverIp, port, protocol, forgeInfo, loadStateInfo, accountLower));
+            StartCoroutine(StartClient(session, playerKeyPair, serverIp, port, protocol, forgeInfo, callback, updateStatus, accountLower));
         }
 
-        IEnumerator StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port, int protocol, ForgeInfo? forgeInfo, LoadStateInfo loadStateInfo, string accountLower)
+        IEnumerator StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
+                int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
         {
-            loadStateInfo.Loading = true;
-
             if (!internalCommandsLoaded)
                 LoadInternalCommands();
 
@@ -314,7 +308,7 @@ namespace MinecraftClient
             {
                 Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
                 ShowNotification("Data for gameplay is not available!", Notification.Type.Error);
-                loadStateInfo.Loading = false;
+                callback.Invoke(false);
                 yield break;
             }
 
@@ -343,7 +337,9 @@ namespace MinecraftClient
                 packManager.AddPack(new(packName));
             // Load valid packs...
             loadFlag.Finished = false;
-            Task.Run(() => packManager.LoadPacks(loadFlag, loadStateInfo));
+            // Load valid packs...
+            loadFlag.Finished = false;
+            Task.Run(() => packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus.Invoke(status))));
             while (!loadFlag.Finished) yield return null;
             
             // Load player skin overrides...
@@ -362,13 +358,12 @@ namespace MinecraftClient
 
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
-                loadStateInfo.Loading = false;
-                loadStateInfo.InfoText = "Failed to load all resources >_<";
                 ShowNotification("Failed to load all resources!", Notification.Type.Error);
+                callback.Invoke(false);
                 yield break;
             }
 
-            loadStateInfo.InfoText = "Loading world scene";
+            updateStatus("Loading world scene");
 
             // Prepare scene and unity objects
             var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
@@ -394,7 +389,7 @@ namespace MinecraftClient
             if (holder is null || !holder.AllPresent()) // Cancel login and return to login scene
             {
                 Translations.LogError("error.scene_objects_load_failed");
-                Disconnect();
+                callback.Invoke(false);
                 yield break;
             }
             // Otherwise all the game objects and prefabs should be ready
@@ -421,8 +416,10 @@ namespace MinecraftClient
             // Destroy the object holder
             Destroy(holder.gameObject);
 
-            if (!serverIp.Equals(ProtocolPseudo.ENTRY_NAME))
+            if (!serverIp.Equals(ProtocolPseudo.ENTRY_NAME)) // Enter online server
             {
+                Debug.Log("Meow");
+
                 try
                 {
                     // Setup tcp client
@@ -462,14 +459,14 @@ namespace MinecraftClient
                 }
                 finally
                 {
-                    loadStateInfo.Loading = false;
+                    callback(connected);
                 }
             }
-            else
+            else // Enter pseudo local server
             {
                 // Create handler
                 handler = new ProtocolPseudo(protocol, this);
-                loadStateInfo.Loading = false;
+                callback(true);
 
                 connected = true;
             }
