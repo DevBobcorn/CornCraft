@@ -44,7 +44,8 @@ namespace MinecraftClient.Rendering
         public void Unload()
         {
             if (!turnedIntoRagdoll)
-                TurnIntoRagdoll();
+                if (entity is not null && entity.Health <= 0F)
+                    TurnIntoRagdoll();
             
             Destroy(this.gameObject);
         }

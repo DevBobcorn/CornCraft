@@ -29,6 +29,12 @@ namespace MinecraftClient.Rendering
             this.modelTable = modelTable;
         }
 
+        private float GetLight(World world, Location loc)
+        {
+            //return Mathf.Max(world.GetBlockLight(loc), world.GetSkyLight(loc)) / 15F;
+            return Mathf.Max(world.GetBlockLight(loc), 4) / 15F;
+        }
+
         public ChunkBuildResult Build(World world, Chunk chunkData, ChunkRender chunkRender)
         {
             try
@@ -74,9 +80,6 @@ namespace MinecraftClient.Rendering
                                 {
                                     FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], liquidTexture, x, y, z, liquidHeights, liquidCullFlags, world.GetWaterColor(loc));
                                     
-                                    // TODO Remove later
-                                    FluidGeometry.BuildCollider(ref colliderVerts, x, y, z, liquidCullFlags);
-
                                     layerMask |= (1 << liquidLayerIndex);
                                     isAllEmpty = false;
                                 }
