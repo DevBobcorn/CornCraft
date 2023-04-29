@@ -1,8 +1,10 @@
+#nullable enable
+using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 using MinecraftClient.Mapping;
-using System.IO;
 using MinecraftClient.Rendering;
 
 namespace MinecraftClient.Resource
@@ -55,10 +57,7 @@ namespace MinecraftClient.Resource
             ItemModelLoader = new ItemModelLoader(this);
         }
 
-        public void AddPack(ResourcePack pack)
-        {
-            packs.Add(pack);
-        }
+        public void AddPack(ResourcePack pack) => packs.Add(pack);
 
         public void ClearPacks()
         {
@@ -71,26 +70,26 @@ namespace MinecraftClient.Resource
             GeneratedItemModels.Clear();
         }
 
-        public void LoadPacks(DataLoadFlag flag, LoadStateInfo loadStateInfo)
+        public void LoadPacks(DataLoadFlag flag, Action<string> updateStatus)
         {
             System.Diagnostics.Stopwatch sw = new();
             sw.Start();
 
             // Gather all textures and model files
-            loadStateInfo.InfoText = $"Gathering resources";
+            updateStatus("status.info.gather_resource");
             foreach (var pack in packs) pack.GatherResources(this);
 
             var atlasGenFlag = new DataLoadFlag();
 
             // Load texture atlas (on main thread)...
-            loadStateInfo.InfoText = $"Creating textures";
+            updateStatus("status.info.create_texture");
             Loom.QueueOnMainThread(() => {
                 Loom.Current.StartCoroutine(AtlasManager.Generate(this, atlasGenFlag));
             });
             
             while (!atlasGenFlag.Finished) { /* Wait */ }
 
-            loadStateInfo.InfoText = $"Loading models";
+            updateStatus("status.info.load_block_model");
 
             // Load block models...
             foreach (var blockModelId in BlockModelFileTable.Keys)
@@ -108,11 +107,11 @@ namespace MinecraftClient.Resource
                 ItemModelLoader.LoadItemModel(itemModelId);
             }
 
-            loadStateInfo.InfoText = $"Building block state geometries";
-            BuildStateGeometries(loadStateInfo);
+            updateStatus("status.info.build_blockstate_geometry");
+            BuildStateGeometries();
 
-            loadStateInfo.InfoText = $"Building item geometries";
-            BuildItemGeometries(loadStateInfo);
+            updateStatus("status.info.build_item_geometry");
+            BuildItemGeometries();
 
             // Perform integrity check...
             var statesTable = BlockStatePalette.INSTANCE.StatesTable;
@@ -125,15 +124,13 @@ namespace MinecraftClient.Resource
                 }
             }
 
-            loadStateInfo.InfoText = string.Empty;
-
             Debug.Log($"Resource packs loaded in {sw.ElapsedMilliseconds} ms.");
             Debug.Log($"Built {StateModelTable.Count} block state geometry lists.");
 
             flag.Finished = true;
         }
 
-        public void BuildStateGeometries(LoadStateInfo loadStateInfo)
+        public void BuildStateGeometries()
         {
             // Load all blockstate files and build their block meshes...
             foreach (var blockPair in BlockStatePalette.INSTANCE.StateListTable)
@@ -154,7 +151,7 @@ namespace MinecraftClient.Resource
 
         }
 
-        public void BuildItemGeometries(LoadStateInfo loadStateInfo)
+        public void BuildItemGeometries()
         {
             // Load all item model files and build their item meshes...
             foreach (var numId in ItemPalette.INSTANCE.ItemsTable.Keys)
