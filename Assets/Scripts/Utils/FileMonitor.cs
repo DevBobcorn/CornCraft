@@ -24,7 +24,7 @@ namespace MinecraftClient
         /// <param name="handler">Callback for file changes</param>
         public FileMonitor(string folder, string filename, FileSystemEventHandler handler)
         {
-            if (CornCraft.DebugMode)
+            if (CornGlobal.DebugMode)
             {
                 string callerClass = new System.Diagnostics.StackFrame(1).GetMethod().DeclaringType.Name;
                 Translations.Log("filemonitor.init", callerClass, Path.Combine(folder, filename));
@@ -42,7 +42,7 @@ namespace MinecraftClient
             }
             catch
             {
-                if (CornCraft.DebugMode)
+                if (CornGlobal.DebugMode)
                 {
                     string callerClass = new System.Diagnostics.StackFrame(1).GetMethod().DeclaringType.Name;
                     Translations.LogError("filemonitor.fail", callerClass);

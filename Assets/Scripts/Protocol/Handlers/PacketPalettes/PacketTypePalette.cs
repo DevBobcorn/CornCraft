@@ -63,7 +63,7 @@ namespace MinecraftClient.Protocol.Handlers.PacketPalettes
             }
             else if (forgeEnabled)
             {
-                if (CornCraft.DebugMode)
+                if (CornGlobal.DebugMode)
                     Debug.Log("Ignoring unknown packet ID of 0x" + packetId.ToString("X2"));
                 return PacketTypesIn.Unknown;
             }
@@ -95,7 +95,7 @@ namespace MinecraftClient.Protocol.Handlers.PacketPalettes
             }
             else if (forgeEnabled)
             {
-                if (CornCraft.DebugMode)
+                if (CornGlobal.DebugMode)
                     Debug.Log("Ignoring unknown packet ID of 0x" + packetId.ToString("X2"));
                 return PacketTypesOut.Unknown;
             }

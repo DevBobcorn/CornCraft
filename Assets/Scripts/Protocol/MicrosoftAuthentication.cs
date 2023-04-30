@@ -58,7 +58,7 @@ namespace MinecraftClient.Protocol
         private static LoginResponse RequestToken(string postData)
         {
             var request = new ProxiedWebRequest(tokenUrl);
-            request.UserAgent = "CornCraft/" + CornCraft.Version;
+            request.UserAgent = "CornCraft/" + CornGlobal.Version;
             var response = request.Post("application/x-www-form-urlencoded", postData);
             var jsonData = Json.ParseJson(response.Body);
 
@@ -197,7 +197,7 @@ namespace MinecraftClient.Protocol
 
             var response = request.Post("application/x-www-form-urlencoded", postData);
 
-            if (CornCraft.DebugMode)
+            if (CornGlobal.DebugMode)
             {
                 UnityEngine.Debug.Log(response.ToString());
             }
@@ -277,7 +277,7 @@ namespace MinecraftClient.Protocol
                 + "\"TokenType\": \"JWT\""
                 + "}";
             var response = request.Post("application/json", payload);
-            if (CornCraft.DebugMode)
+            if (CornGlobal.DebugMode)
             {
                 UnityEngine.Debug.Log(response.ToString());
             }
@@ -325,7 +325,7 @@ namespace MinecraftClient.Protocol
                 + "\"TokenType\": \"JWT\""
                 + "}";
             var response = request.Post("application/json", payload);
-            if (CornCraft.DebugMode)
+            if (CornGlobal.DebugMode)
             {
                 UnityEngine.Debug.Log(response.ToString());
             }
@@ -403,7 +403,7 @@ namespace MinecraftClient.Protocol
             string payload = "{\"identityToken\": \"XBL3.0 x=" + userHash + ";" + xstsToken + "\"}";
             var response = request.Post("application/json", payload);
 
-            if (CornCraft.DebugMode)
+            if (CornGlobal.DebugMode)
             {
                 UnityEngine.Debug.Log(response.ToString());
             }
@@ -424,7 +424,7 @@ namespace MinecraftClient.Protocol
             request.Headers.Add("Authorization", string.Format("Bearer {0}", accessToken));
             var response = request.Get();
 
-            if (CornCraft.DebugMode)
+            if (CornGlobal.DebugMode)
             {
                 UnityEngine.Debug.Log(response.ToString());
             }
@@ -440,7 +440,7 @@ namespace MinecraftClient.Protocol
             request.Headers.Add("Authorization", string.Format("Bearer {0}", accessToken));
             var response = request.Get();
 
-            if (CornCraft.DebugMode)
+            if (CornGlobal.DebugMode)
             {
                 UnityEngine.Debug.Log(response.ToString());
             }

@@ -384,8 +384,8 @@ namespace MinecraftClient.Protocol.Handlers
                                 Guid senderUUID;
                                 //Hide system messages or xp bar messages?
                                 messageType = dataTypes.ReadNextByte(packetData);
-                                if ((messageType == 1 && !CornCraft.DisplaySystemMessages)
-                                    || (messageType == 2 && !CornCraft.DisplayXPBarMessages))
+                                if ((messageType == 1 && !CornGlobal.DisplaySystemMessages)
+                                    || (messageType == 2 && !CornGlobal.DisplayXPBarMessages))
                                     break;
 
                                 if (protocolVersion >= MC_1_16_5_Version)
@@ -402,8 +402,8 @@ namespace MinecraftClient.Protocol.Handlers
                                 string? unsignedChatContent = hasUnsignedChatContent ? dataTypes.ReadNextString(packetData) : null;
 
                                 messageType = dataTypes.ReadNextVarInt(packetData);
-                                if ((messageType == 1 && !CornCraft.DisplaySystemMessages)
-                                        || (messageType == 2 && !CornCraft.DisplayXPBarMessages))
+                                if ((messageType == 1 && !CornGlobal.DisplaySystemMessages)
+                                        || (messageType == 2 && !CornGlobal.DisplayXPBarMessages))
                                     break;
 
                                 Guid senderUUID = dataTypes.ReadNextUUID(packetData);
@@ -1762,7 +1762,7 @@ namespace MinecraftClient.Protocol.Handlers
                 {
                     string result = dataTypes.ReadNextString(packetData); //Get the Json data
 
-                    if (CornCraft.DebugMode)
+                    if (CornGlobal.DebugMode)
                         Debug.Log(result);
 
                     if (!String.IsNullOrEmpty(result) && result.StartsWith("{") && result.EndsWith("}"))
@@ -1865,12 +1865,12 @@ namespace MinecraftClient.Protocol.Handlers
         /// <returns> List< Argument Name, Argument Value > </returns>
         private List<Tuple<string, string>>? CollectCommandArguments(string command)
         {
-            if (!isOnlineMode || !CornCraft.SignMessageInCommand)
+            if (!isOnlineMode || !CornGlobal.SignMessageInCommand)
                 return null;
             
             List<Tuple<string, string>> needSigned = new();
 
-            if (!CornCraft.SignMessageInCommand)
+            if (!CornGlobal.SignMessageInCommand)
                 return needSigned;
 
             string[] argStage1 = command.Split(' ', 2, StringSplitOptions.None);
@@ -2008,7 +2008,7 @@ namespace MinecraftClient.Protocol.Handlers
                     DateTimeOffset timeNow = DateTimeOffset.UtcNow;
                     fields.AddRange(dataTypes.GetLong(timeNow.ToUnixTimeMilliseconds()));
 
-                    if (!isOnlineMode || playerKeyPair == null || !CornCraft.SignChat)
+                    if (!isOnlineMode || playerKeyPair == null || !CornGlobal.SignChat)
                     {
                         fields.AddRange(dataTypes.GetLong(0));   // Salt: Long
                         fields.AddRange(dataTypes.GetVarInt(0)); // Signature Length: VarInt

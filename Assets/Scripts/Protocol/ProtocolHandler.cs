@@ -425,7 +425,7 @@ namespace MinecraftClient.Protocol
             List<String> http_request = new List<string>();
             http_request.Add("POST " + endpoint + " HTTP/1.1");
             http_request.Add("Host: " + host);
-            http_request.Add("User-Agent: CornCraft/" + CornCraft.Version);
+            http_request.Add("User-Agent: CornCraft/" + CornGlobal.Version);
             http_request.Add("Content-Type: application/json");
             http_request.Add("Content-Length: " + Encoding.ASCII.GetBytes(request).Length);
             http_request.Add("Connection: close");
@@ -452,7 +452,7 @@ namespace MinecraftClient.Protocol
             {
                 try
                 {
-                    if (CornCraft.DebugMode)
+                    if (CornGlobal.DebugMode)
                         Translations.Log("debug.request", host);
 
                     //TcpClient client = ProxyHandler.newTcpClient(host, 443, true);

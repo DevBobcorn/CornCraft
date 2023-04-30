@@ -65,8 +65,8 @@ namespace MinecraftClient
             Loom.Initialize();
 
             // TODO Decently implement resource pack selection
-            CornCraft.ResourceOverrides.Clear();
-            CornCraft.ResourceOverrides.Add("vanilla_fix");
+            CornGlobal.ResourceOverrides.Clear();
+            CornGlobal.ResourceOverrides.Add("vanilla_fix");
         }
 
         public static void EnsureInitialized()
@@ -331,7 +331,7 @@ namespace MinecraftClient
                 yield break;
             }
             // Then append overrides
-            foreach (var packName in CornCraft.ResourceOverrides)
+            foreach (var packName in CornGlobal.ResourceOverrides)
                 packManager.AddPack(new(packName));
             // Load valid packs...
             loadFlag.Finished = false;
@@ -424,54 +424,43 @@ namespace MinecraftClient
             yield return EnterWorldScene();
 
             // Start up client
-            if (!serverIp.Equals(ProtocolPseudo.ENTRY_NAME)) // Enter online server
+            try
             {
-                try
+                // Setup tcp client
+                tcpClient = ProxyHandler.newTcpClient(host, port);
+                tcpClient.ReceiveBufferSize = 1024 * 1024;
+                tcpClient.ReceiveTimeout = 30000; // 30 seconds
+
+                // Create handler
+                handler = Protocol.ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
+
+                // Start update loop
+                timeoutdetector = Tuple.Create(new Thread(new ParameterizedThreadStart(TimeoutDetector)), new CancellationTokenSource());
+                timeoutdetector.Item1.Name = "Connection Timeout Detector";
+                timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
+
+                if (handler.Login(this.playerKeyPair, session, accountLower)) // Login
+                    connected = true;
+                else
                 {
-                    // Setup tcp client
-                    tcpClient = ProxyHandler.newTcpClient(host, port);
-                    tcpClient.ReceiveBufferSize = 1024 * 1024;
-                    tcpClient.ReceiveTimeout = 30000; // 30 seconds
-
-                    // Create handler
-                    handler = Protocol.ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
-
-                    // Start update loop
-                    timeoutdetector = Tuple.Create(new Thread(new ParameterizedThreadStart(TimeoutDetector)), new CancellationTokenSource());
-                    timeoutdetector.Item1.Name = "Connection Timeout Detector";
-                    timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
-
-                    if (handler.Login(this.playerKeyPair, session, accountLower)) // Login
-                        connected = true;
-                    else
-                    {
-                        Translations.LogError("error.login_failed");
-                        Disconnect();
-                    }
-                }
-                catch (Exception e)
-                {
-                    tcpClient = ProxyHandler.newTcpClient(host, port);
-                    tcpClient.ReceiveBufferSize = 1024 * 1024;
-                    tcpClient.ReceiveTimeout = 30000; // 30 seconds
-
-                    Translations.LogError("error.connect");
-                    Debug.LogError(e.Message);
-                    Debug.LogError(e.StackTrace);
+                    Translations.LogError("error.login_failed");
                     Disconnect();
                 }
-                finally
-                {
-                    callback(connected);
-                }
             }
-            else // Enter pseudo local server
+            catch (Exception e)
             {
-                // Create handler
-                handler = new ProtocolPseudo(protocol, this);
-                callback(true);
+                tcpClient = ProxyHandler.newTcpClient(host, port);
+                tcpClient.ReceiveBufferSize = 1024 * 1024;
+                tcpClient.ReceiveTimeout = 30000; // 30 seconds
 
-                connected = true;
+                Translations.LogError("error.connect");
+                Debug.LogError(e.Message);
+                Debug.LogError(e.StackTrace);
+                Disconnect();
+            }
+            finally
+            {
+                callback(connected);
             }
 
         }
@@ -486,7 +475,7 @@ namespace MinecraftClient
             {
                 string text = chatQueue.Dequeue();
                 handler!.SendChatMessage(text, playerKeyPair);
-                nextMessageSendTime = DateTime.Now + TimeSpan.FromSeconds(CornCraft.MessageCooldown);
+                nextMessageSendTime = DateTime.Now + TimeSpan.FromSeconds(CornGlobal.MessageCooldown);
             }
         }
 
@@ -1178,17 +1167,17 @@ namespace MinecraftClient
         /// </summary>
         public void OnGameJoined()
         {
-            handler!.SendBrandInfo(CornCraft.BrandInfo.Trim());
+            handler!.SendBrandInfo(CornGlobal.BrandInfo.Trim());
 
-            if (CornCraft.MCSettings_Enabled)
+            if (CornGlobal.MCSettings.Enabled)
                 handler.SendClientSettings(
-                    CornCraft.MCSettings_Locale,
-                    CornCraft.MCSettings_RenderDistance,
-                    CornCraft.MCSettings_Difficulty,
-                    CornCraft.MCSettings_ChatMode,
-                    CornCraft.MCSettings_ChatColors,
-                    CornCraft.MCSettings_Skin_All,
-                    CornCraft.MCSettings_MainHand);
+                    CornGlobal.MCSettings.Locale,
+                    CornGlobal.MCSettings.RenderDistance,
+                    CornGlobal.MCSettings.Difficulty,
+                    CornGlobal.MCSettings.ChatMode,
+                    CornGlobal.MCSettings.ChatColors,
+                    CornGlobal.MCSettings.Skin_All,
+                    CornGlobal.MCSettings.MainHand);
 
 
             if (inventoryHandlingRequested)
@@ -1292,7 +1281,7 @@ namespace MinecraftClient
 
             if (message.isSignedChat)
             {
-                if (!CornCraft.ShowIllegalSignedChat && !message.isSystemChat && !(bool)message.isSignatureLegal!)
+                if (!CornGlobal.ShowIllegalSignedChat && !message.isSystemChat && !(bool)message.isSignatureLegal!)
                     return;
                 messageText = ChatParser.ParseSignedChat(message, links);
             }

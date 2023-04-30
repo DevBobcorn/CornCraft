@@ -46,7 +46,7 @@ namespace MinecraftClient.Protocol
         /// <returns>Returns the translated text</returns>
         public static string ParseSignedChat(ChatMessage message, List<string>? links = null)
         {
-            string chatContent = CornCraft.ShowModifiedChat && message.unsignedContent != null ? message.unsignedContent : message.content;
+            string chatContent = CornGlobal.ShowModifiedChat && message.unsignedContent != null ? message.unsignedContent : message.content;
             string content = message.isJson ? ParseText(chatContent, links) : chatContent;
             string sender = message.displayName!;
 
@@ -106,27 +106,27 @@ namespace MinecraftClient.Protocol
             string color = string.Empty;
             if (message.isSystemChat)
             {
-                if (CornCraft.MarkSystemMessage)
+                if (CornGlobal.MarkSystemMessage)
                     color = "§z §r "; // Custom color code §z : Background Gray
             }
             else
             {
                 if ((bool)message.isSignatureLegal!)
                 {
-                    if (CornCraft.ShowModifiedChat && message.unsignedContent != null)
+                    if (CornGlobal.ShowModifiedChat && message.unsignedContent != null)
                     {
-                        if (CornCraft.MarkModifiedMsg)
+                        if (CornGlobal.MarkModifiedMsg)
                             color = "§x §r "; // Custom color code §x : Background Yellow
                     }
                     else
                     {
-                        if (CornCraft.MarkLegallySignedMsg)
+                        if (CornGlobal.MarkLegallySignedMsg)
                             color = "§y §r "; // Custom color code §y : Background Green
                     }
                 }
                 else
                 {
-                    if (CornCraft.MarkIllegallySignedMsg)
+                    if (CornGlobal.MarkIllegallySignedMsg)
                         color = "§w §r "; // Custom color code §w : Background Red
                 }
             }
@@ -198,20 +198,20 @@ namespace MinecraftClient.Protocol
             if (!Directory.Exists("lang"))
                 Directory.CreateDirectory("lang");
 
-            string langFile = "lang" + Path.DirectorySeparatorChar + CornCraft.Language + ".lang";
+            string langFile = "lang" + Path.DirectorySeparatorChar + CornGlobal.Language + ".lang";
 
             //File not found? Try downloading language file from Mojang's servers?
             if (!File.Exists(langFile))
             {
-                Translations.Log("chat.download", CornCraft.Language);
+                Translations.Log("chat.download", CornGlobal.Language);
                 try
                 {
                     string assets_index = DownloadString(Translations.TranslationsFile_Website_Index);
-                    string[] tmp = assets_index.Split(new string[] { "minecraft/lang/" + CornCraft.Language.ToLower() + ".json" }, StringSplitOptions.None);
+                    string[] tmp = assets_index.Split(new string[] { "minecraft/lang/" + CornGlobal.Language.ToLower() + ".json" }, StringSplitOptions.None);
                     tmp = tmp[1].Split(new string[] { "hash\": \"" }, StringSplitOptions.None);
                     string hash = tmp[1].Split('"')[0]; //Translations file identifier on Mojang's servers
                     string translation_file_location = Translations.TranslationsFile_Website_Download + '/' + hash.Substring(0, 2) + '/' + hash;
-                    if (CornCraft.DebugMode)
+                    if (CornGlobal.DebugMode)
                         Translations.Log("chat.request", translation_file_location);
 
                     StringBuilder stringBuilder = new StringBuilder();
@@ -253,7 +253,7 @@ namespace MinecraftClient.Protocol
                     }
                 }
 
-                if (CornCraft.DebugMode)
+                if (CornGlobal.DebugMode)
                     Translations.Log("chat.loaded");
             }
             else //No external dictionary found.
