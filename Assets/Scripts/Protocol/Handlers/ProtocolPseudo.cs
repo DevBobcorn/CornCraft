@@ -40,16 +40,7 @@ namespace MinecraftClient.Protocol.Handlers
             this.protocolVersion = protocolVersion;
 
             var game = CornClient.Instance;
-            game.StartCoroutine(SetupWorld());
-
-            StartUpdating();
-
-        }
-
-        private readonly Dictionary<int, Entity> worldEntities = new();
-
-        private IEnumerator SetupWorld()
-        {
+            
             // Generate initial chunks
             GenerateChunkData(true, CornCraft.MCSettings_RenderDistance);
 
@@ -57,46 +48,11 @@ namespace MinecraftClient.Protocol.Handlers
             handler.OnPlayerJoin(new(handler.GetUserUUID(), handler.GetUsername(), null, 0, 0, null, null, null, null));
             handler.UpdateLocation(new(8, 2, 8), 0F, 0F);
 
-            yield return new WaitForSeconds(1F);
+            StartUpdating();
 
-            // Generate an entity ring
-            var entityTypes = new ResourceLocation[]{
-                EntityType.SKELETON_ID,
-                EntityType.WITHER_SKELETON_ID,
-                EntityType.STRAY_ID,
-                EntityType.ZOMBIE_ID,
-                EntityType.HUSK_ID,
-                EntityType.DROWNED_ID,
-                EntityType.CREEPER_ID,
-
-                EntityType.PIG_ID,
-                EntityType.COW_ID,
-                EntityType.SHEEP_ID,
-                EntityType.VILLAGER_ID,
-            };
-
-            int entityId = 0;
-            float radius = 7F;
-
-            for (int deg = 0;deg < 360;deg += 15)
-            {
-                float rad = Mathf.Deg2Rad * deg;
-                var loc = new Location(8 + Mathf.Sin(rad) * radius, 2, 8 + Mathf.Cos(rad) * radius);
-                var type = EntityPalette.INSTANCE.FromId(
-                        entityTypes[entityId % entityTypes.Length]);
-
-                var entity = new Entity(entityId, type, loc);
-                entity.Yaw = -deg;
-                worldEntities.Add(entityId, entity);
-
-                handler.OnSpawnEntity(entity);
-
-                entityId++;
-
-                yield return new WaitForSeconds(0.2F);
-            }
-            
         }
+
+        private readonly Dictionary<int, Entity> worldEntities = new();
 
         /// <summary>
         /// Separate thread. Timer loop.

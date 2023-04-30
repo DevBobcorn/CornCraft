@@ -271,15 +271,12 @@ namespace MinecraftClient
             this.protocolVersion = protocol;
             this.playerKeyPair = playerKeyPair;
 
+            // Start client
             StartCoroutine(StartClient(session, playerKeyPair, serverIp, port, protocol, forgeInfo, callback, updateStatus, accountLower));
         }
 
-        IEnumerator StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
-                int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
+        private IEnumerator PrepareDataAndResource(DataLoadFlag startUpFlag, Action<string> updateStatus)
         {
-            if (!internalCommandsLoaded)
-                LoadInternalCommands();
-
             var versionDictPath = PathHelper.GetExtraDataFile("versions.json");
 
             var dataVersion     = string.Empty;
@@ -308,7 +305,8 @@ namespace MinecraftClient
             {
                 Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
                 ShowNotification("Data for gameplay is not available!", Notification.Type.Error);
-                callback.Invoke(false);
+                updateStatus(">_<");
+                startUpFlag.Failed = true;
                 yield break;
             }
 
@@ -332,6 +330,14 @@ namespace MinecraftClient
             // First add base resources
             ResourcePack basePack = new($"vanilla-{resourceVersion}");
             packManager.AddPack(basePack);
+            // Check base pack availability
+            if (!basePack.IsValid)
+            {
+                ShowNotification("Default resource pack is invalid!", Notification.Type.Error);
+                updateStatus(">_<");
+                startUpFlag.Failed = true;
+                yield break;
+            }
             // Then append overrides
             foreach (var packName in CornCraft.ResourceOverrides)
                 packManager.AddPack(new(packName));
@@ -339,7 +345,7 @@ namespace MinecraftClient
             loadFlag.Finished = false;
             // Load valid packs...
             loadFlag.Finished = false;
-            Task.Run(() => packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus.Invoke(status))));
+            Task.Run(() => packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status))));
             while (!loadFlag.Finished) yield return null;
             
             // Load player skin overrides...
@@ -359,12 +365,14 @@ namespace MinecraftClient
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
                 ShowNotification("Failed to load all resources!", Notification.Type.Error);
-                callback.Invoke(false);
+                updateStatus(">_<");
+                startUpFlag.Failed = true;
                 yield break;
             }
+        }
 
-            updateStatus("Loading world scene");
-
+        private IEnumerator EnterWorldScene()
+        {
             // Prepare scene and unity objects
             var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
             op.allowSceneActivation = false;
@@ -373,53 +381,62 @@ namespace MinecraftClient
 
             // Scene is loaded, activate it
             op.allowSceneActivation = true;
+            bool fullyLoaded = false;
 
             // Wait till everything's ready
-            var wait = new WaitForSecondsRealtime(0.1F);
-            var loadTime = 0F;
-            SceneObjectHolder? holder = null;
-            while (holder is null && loadTime <= 3F) // Allow up to 3 seconds to find the object holder
+            op.completed += (operation) =>
             {
-                yield return wait;
-                loadTime += 0.1F;
-                holder = Component.FindObjectOfType<SceneObjectHolder>();
-            }
+                SceneObjectHolder holder = Component.FindObjectOfType<SceneObjectHolder>();
 
-            // Short-circuit logic here
-            if (holder is null || !holder.AllPresent()) // Cancel login and return to login scene
+                // Get screen control
+                screenControl = holder.screenControl!;
+                // Push HUD Screen on start
+                screenControl.PushScreen(holder.hudScreen!);
+
+                // Get chunk render manager
+                chunkRenderManager = holder.chunkRenderManager;
+                // Get entity render manager
+                entityRenderManager = holder.entityRenderManager;
+
+                // Create player entity
+                var playerObj = GameObject.Instantiate(holder.playerPrefab);
+                playerController = playerObj!.GetComponent<PlayerController>();
+
+                // Get camera for player
+                cameraController = holder.cameraController!;
+                cameraController.SetTarget(playerController.cameraRef!);
+
+                // Destroy the object holder
+                Destroy(holder.gameObject);
+
+                fullyLoaded = true;
+            };
+
+            while (fullyLoaded) yield return null;
+        }
+
+        private IEnumerator StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
+                int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
+        {
+            if (!internalCommandsLoaded)
+                LoadInternalCommands();
+
+            // Prepare resources
+            var dataLoadFlag = new DataLoadFlag();
+            yield return PrepareDataAndResource(dataLoadFlag, updateStatus);
+            if (dataLoadFlag.Failed)
             {
-                Translations.LogError("error.scene_objects_load_failed");
-                callback.Invoke(false);
+                callback(false);
                 yield break;
             }
-            // Otherwise all the game objects and prefabs should be ready
 
-            // Get screen control
-            screenControl = holder!.screenControl!;
-            // Push HUD Screen on start
-            screenControl.PushScreen(holder.hudScreen!);
+            // Enter world scene
+            updateStatus("status.info.enter_world_scene");
+            yield return EnterWorldScene();
 
-            // Get chunk render manager
-            chunkRenderManager = holder.chunkRenderManager;
-            // Get entity render manager
-            entityRenderManager = holder.entityRenderManager;
-
-            // Create player entity
-            var playerObj = GameObject.Instantiate(holder.playerPrefab);
-            playerObj!.name = $"{session.PlayerName} (Player)";
-            playerController = playerObj.GetComponent<PlayerController>();
-
-            // Get camera for player
-            cameraController = holder.cameraController!;
-            cameraController.SetTarget(playerController.cameraRef!);
-
-            // Destroy the object holder
-            Destroy(holder.gameObject);
-
+            // Start up client
             if (!serverIp.Equals(ProtocolPseudo.ENTRY_NAME)) // Enter online server
             {
-                Debug.Log("Meow");
-
                 try
                 {
                     // Setup tcp client

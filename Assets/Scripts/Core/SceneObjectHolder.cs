@@ -24,16 +24,6 @@ namespace MinecraftClient
         // Game Prefabs =========================================================
         // Player Prefab
         [SerializeField] public GameObject? playerPrefab;
-
-        public bool AllPresent()
-        {
-            return screenControl is not null
-                    && hudScreen is not null
-                    && cameraController is not null
-                    && entityRenderManager is not null
-                    && chunkRenderManager is not null
-                    && playerPrefab is not null;
-        }
     }
 
 }
