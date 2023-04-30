@@ -30,9 +30,6 @@ namespace MinecraftClient.Protocol
         PlayerInfo? GetPlayerInfo(Guid uuid);
         Location GetCurrentLocation();
         World GetWorld();
-        bool GetIsSupportPreviewsChat();
-        int GetProtocolVersion();
-        Container? GetInventory(int inventoryID);
 
         /// <summary>
         /// Invoke a task on the main thread, wait for completion and retrieve return value.
