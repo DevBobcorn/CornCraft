@@ -51,6 +51,9 @@ namespace MinecraftClient
         public static void InitializeApp()
         {
             Loom.Initialize();
+
+            // Ensure CornApp instance is created
+            var i = Instance;
             CornGlobal.ResourceOverrides.Clear();
             CornGlobal.ResourceOverrides.Add("vanilla_fix");
         }
@@ -167,14 +170,13 @@ namespace MinecraftClient
             op.completed += (operation) =>
             {
                 client = Component.FindObjectOfType<CornClient>();
-                Debug.Log($"Client object: {client}");
                 fullyLoaded = true;
             };
 
             while (!fullyLoaded) yield return null;
         }
 
-        public void TryStartLogin(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
+        public void StartLoginCoroutine(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
                 int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
         {
             StartCoroutine(StartLogin(session, playerKeyPair, serverIp, port, protocol, forgeInfo, callback, updateStatus, accountLower));
