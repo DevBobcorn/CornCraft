@@ -40,12 +40,14 @@ namespace MinecraftClient.Rendering
         private PriorityQueue<ChunkRender> chunkRendersToBeBuilt = new();
         private List<ChunkRender> chunksBeingBuilt = new();
 
-        private CornClient? game;
+        private CornClient? client;
         private World? world;
         private ChunkRenderBuilder? builder;
 
         // Terrain collider for movement
         private MeshCollider? movementCollider, liquidCollider;
+
+        public void SetClient(CornClient client) => this.client = client;
 
         public string GetDebugInfo() => $"QueC: {chunkRendersToBeBuilt.Count}\t BldC: {chunksBeingBuilt.Count}";
 
@@ -175,9 +177,9 @@ namespace MinecraftClient.Rendering
         // Add new chunks into render list
         public void UpdateChunkRendersListAdd()
         {
-            World world = game!.GetWorld();
+            var world = client?.GetWorld();
             if (world is null) return;
-            var location = game!.GetCurrentLocation();
+            var location = client!.GetCurrentLocation();
             ChunkRenderColumn columnRender;
 
             int viewDist = CornGlobal.MCSettings.RenderDistance;
@@ -234,11 +236,11 @@ namespace MinecraftClient.Rendering
         // Remove far chunks from render list
         public void UpdateChunkRendersListRemove()
         {
-            World world = game!.GetWorld();
+            var world = client?.GetWorld();
             if (world is null) return;
 
             // Add nearby chunks
-            var location   = game.GetCurrentLocation();
+            var location   = client!.GetCurrentLocation();
             int unloadDist = Mathf.RoundToInt(CornGlobal.MCSettings.RenderDistance * 2F);
 
             var chunkCoords = columns.Keys.ToArray();
@@ -364,10 +366,10 @@ namespace MinecraftClient.Rendering
             // Build nearby collider
             Task.Factory.StartNew(() => {
                 terrainColliderDirty = false;
-                var world = game!.GetWorld();
+                var world = client?.GetWorld();
 
-                var table = CornClient.Instance?.PackManager?.StateModelTable;
-                if (table is null)
+                var table = CornApp.Instance.PackManager?.StateModelTable;
+                if (world is null || table is null)
                     return;
 
                 int offsetY = World.GetDimension().minY;
@@ -511,10 +513,10 @@ namespace MinecraftClient.Rendering
 
         void Start()
         {
-            game = CornClient.Instance;
-            world = game!.GetWorld();
+            client = CornApp.CurrentClient;
+            world = client?.GetWorld();
 
-            var modelTable = game!.PackManager.StateModelTable;
+            var modelTable = CornApp.Instance.PackManager.StateModelTable;
             builder = new(modelTable);
 
             var movementColliderObj = new GameObject("Movement Collider");
@@ -544,7 +546,7 @@ namespace MinecraftClient.Rendering
                 var loc = e.Location;
                 int chunkX = loc.ChunkX, chunkY = loc.ChunkY, chunkZ = loc.ChunkZ;
 
-                var chunkData = game?.GetWorld()?[chunkX, chunkZ];
+                var chunkData = client?.GetWorld()?[chunkX, chunkZ];
                 if (chunkData is null) return;
                 
                 var column = GetChunkRenderColumn(loc.ChunkX, loc.ChunkZ, false);
@@ -589,7 +591,7 @@ namespace MinecraftClient.Rendering
             });
 
             EventManager.Instance.Register(blocksCallBack = (e) => {
-                World world = game!.GetWorld();
+                var world = client?.GetWorld();
                 if (world is null) return;
                 
                 foreach (var loc in e.Locations)
@@ -685,9 +687,9 @@ namespace MinecraftClient.Rendering
             {
                 Location playerLoc;
                 
-                lock (game!.movementLock)
+                lock (client!.movementLock)
                 {
-                    playerLoc = game.PlayerData.Location.ToFloor();;
+                    playerLoc = client.PlayerData.Location.ToFloor();;
                 }
                 
                 if (terrainColliderDirty || lastPlayerLoc != playerLoc)

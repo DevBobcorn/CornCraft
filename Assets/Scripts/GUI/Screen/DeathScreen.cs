@@ -43,12 +43,12 @@ namespace MinecraftClient.UI
 
         public void Respawn()
         {
-            CornClient.Instance.SendRespawnPacket();
+            CornApp.CurrentClient?.SendRespawnPacket();
         }
 
         public void QuitGame()
         {
-            CornClient.Instance?.Disconnect();
+            CornApp.CurrentClient?.Disconnect();
         }
 
         private Action<HealthUpdateEvent>? healthCallback;
@@ -65,16 +65,10 @@ namespace MinecraftClient.UI
             quitButton.onClick.AddListener(this.QuitGame);
 
             healthCallback = (e) => {
-                if (e.Health <= 0F && !isActive)
-                {
-                    if (!this.isActive) // Show death screen
-                        CornClient.Instance.ScreenControl.PushScreen(this);
-                }
-                else
-                {
-                    if (this.isActive) // Hide death screen
-                        CornClient.Instance.ScreenControl?.TryPopScreen();  
-                }
+                if (e.Health <= 0F && !this.isActive)
+                    CornApp.CurrentClient?.ScreenControl?.PushScreen(this);
+                else if (e.Health > 0F && this.isActive) // Hide death screen
+                    CornApp.CurrentClient?.ScreenControl?.TryPopScreen();
             };
 
             EventManager.Instance.Register(healthCallback);

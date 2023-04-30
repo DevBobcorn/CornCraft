@@ -17,19 +17,6 @@ namespace MinecraftClient.Rendering
 
     public class EntityRenderManager : MonoBehaviour
     {
-        private static EntityRenderManager? instance;
-        public static EntityRenderManager Instance
-        {
-            get {
-                if (instance is null)
-                {
-                    instance = Component.FindObjectOfType<EntityRenderManager>();
-                }
-                
-                return instance;
-            }
-        }
-
         [SerializeField] private GameObject? defaultPrefab;
 
         [SerializeField] private GameObject? serverPlayerPrefab;
@@ -49,8 +36,6 @@ namespace MinecraftClient.Rendering
         [SerializeField] private GameObject? itemPrefab;
         [SerializeField] private GameObject? arrowPrefab;
         [SerializeField] private GameObject? experienceOrbPrefab;
-
-        private CornClient? game;
 
         private readonly Dictionary<ResourceLocation, GameObject?> entityPrefabs = new();
         private readonly Dictionary<ResourceLocation, EntityInfoTagType> infoTagTypes = new();
@@ -137,9 +122,6 @@ namespace MinecraftClient.Rendering
         {
             entityRenders.Clear();
             nearbyEntities.Clear();
-
-            // Reset instance
-            instance = null;
         }
 
         public void ReloadEntityRenders()
@@ -166,8 +148,6 @@ namespace MinecraftClient.Rendering
 
         void Start()
         {
-            game = CornClient.Instance;
-
             // Clear loaded things
             entityPrefabs.Clear();
             infoTagTypes.Clear();
@@ -232,18 +212,18 @@ namespace MinecraftClient.Rendering
 
         void Update()
         {
-            var playerPos = game!.PlayerController?.transform.position;
+            var client = CornApp.CurrentClient;
 
-            if (playerPos is null) // Game is not ready, cancel update
+            if (client is null) // Game is not ready, cancel update
                 return;
 
             foreach (var render in entityRenders.Values)
             {
                 // Call managed update
-                render.ManagedUpdate(game!.GetTickMilSec());
+                render.ManagedUpdate(client!.GetTickMilSec());
 
                 // Update entities around the player
-                float dist = (render.transform.position - playerPos.Value).sqrMagnitude;
+                float dist = (render.transform.position - CoordConvert.MC2Unity(client.GetCurrentLocation())).sqrMagnitude;
                 int entityId = render.Entity.ID;
 
                 bool inDict = nearbyEntities.ContainsKey(entityId);

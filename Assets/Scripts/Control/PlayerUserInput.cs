@@ -8,7 +8,7 @@ namespace MinecraftClient.Control
     {
         public void UpdateInputs(PlayerUserInputData inputData, Perspective perspective)
         {
-            if (!CornClient.Instance.IsPaused())
+            if (!CornApp.CurrentClient.IsPaused())
             {
                 float h = GetNormalized(Input.GetKey(KeyCode.D), Input.GetKey(KeyCode.A));
                 float v = GetNormalized(Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S));

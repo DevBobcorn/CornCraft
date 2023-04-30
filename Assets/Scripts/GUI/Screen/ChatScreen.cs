@@ -117,7 +117,7 @@ namespace MinecraftClient.UI
             
             string chat = chatInput.text;
             // Send if client exists...
-            CornClient.Instance?.TrySendChat(chat);
+            CornApp.CurrentClient?.TrySendChat(chat);
             chatInput.text = string.Empty;
 
             // Remove the chat text from previous history if present
@@ -130,7 +130,7 @@ namespace MinecraftClient.UI
 
         public void RequestAutoCompleteChat(string message)
         {
-            CornClient.Instance?.AutoComplete(message);
+            CornApp.CurrentClient?.AutoComplete(message);
         }
 
         public void PrevChatMessage()
@@ -290,7 +290,7 @@ namespace MinecraftClient.UI
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                CornClient.Instance.ScreenControl?.TryPopScreen();
+                CornApp.CurrentClient.ScreenControl?.TryPopScreen();
                 return;
             }
 

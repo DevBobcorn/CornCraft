@@ -22,7 +22,8 @@ namespace MinecraftClient.Control
         [SerializeField] public Transform? visualTransform;
         [SerializeField] public PhysicMaterial? physicMaterial;
 
-        private CornClient? game;
+        private CornClient? client;
+        private CameraController? cameraController;
         private Rigidbody? playerRigidbody;
         public Rigidbody PlayerRigidbody => playerRigidbody!;
         private Collider? playerCollider;
@@ -37,14 +38,18 @@ namespace MinecraftClient.Control
 
         private IPlayerState CurrentState = PlayerStates.IDLE;
         [HideInInspector] public bool UseRootMotion = false;
-
-        private CameraController? camControl;
         private AnimatorEntityRender? playerRender;
         private PlayerAccessoryWidget? accessoryWidget;
 
         public PlayerAccessoryWidget AccessoryWidget => accessoryWidget!;
 
-        private Entity? fakeEntity;
+        private Entity? dummyEntity;
+
+        public void SetClientAndCamera(CornClient client, CameraController camController)
+        {
+            this.client = client;
+            this.cameraController = camController;
+        }
 
         public void DisableEntity()
         {
@@ -76,7 +81,7 @@ namespace MinecraftClient.Control
         public void ToggleWalkMode()
         {
             Status!.WalkMode = !Status.WalkMode;
-            CornClient.ShowNotification(Status.WalkMode ? "Switched to walk mode" : "Switched to rush mode");
+            CornApp.ShowNotification(Status.WalkMode ? "Switched to walk mode" : "Switched to rush mode");
         }
 
         public void CrossFadeState(string stateName, float time = 0.2F, int layer = 0, float timeOffset = 0F)
@@ -93,7 +98,7 @@ namespace MinecraftClient.Control
 
         public void SetEntityId(int entityId)
         {
-            fakeEntity!.ID = entityId;
+            dummyEntity!.ID = entityId;
             // Reassign this entity to refresh
             //playerRender!.UpdateEntity(fakeEntity);
         }
@@ -120,16 +125,16 @@ namespace MinecraftClient.Control
 
         public void LogicalUpdate(float interval)
         {
-            if (!game!.IsMovementReady())
+            if (!client!.IsMovementReady())
             {
                 playerRigidbody!.useGravity = false;
                 playerRigidbody!.velocity = Vector3.zero;
 
                 Status!.GravityDisabled = true;
 
-                lock (game.movementLock)
+                lock (client.movementLock)
                 {
-                    transform.position = CoordConvert.MC2Unity(game.PlayerData.Location);
+                    transform.position = CoordConvert.MC2Unity(client.PlayerData.Location);
                 }
             }
             else
@@ -142,17 +147,17 @@ namespace MinecraftClient.Control
             }
 
             // Update user input
-            userInput!.UpdateInputs(inputData, game!.PlayerData.Perspective);
+            userInput!.UpdateInputs(inputData, client!.PlayerData.Perspective);
 
             // Update player status (in water, grounded, etc)
             if (!Status.Spectating)
-                statusUpdater!.UpdatePlayerStatus(game!.GetWorld(), visualTransform!.forward);
+                statusUpdater!.UpdatePlayerStatus(client!.GetWorld(), visualTransform!.forward);
 
             // Update target block selection
-            interactionUpdater!.UpdateBlockSelection(camControl!.GetViewportCenterRay());
+            interactionUpdater!.UpdateBlockSelection(cameraController!.GetViewportCenterRay());
 
             // Update player interactions
-            interactionUpdater.UpdateInteractions(game!.GetWorld());
+            interactionUpdater.UpdateInteractions(client!.GetWorld());
 
             var status = statusUpdater!.Status;
 
@@ -183,7 +188,7 @@ namespace MinecraftClient.Control
             if (inputData.horInputNormalized != Vector2.zero)
             {
                 Status.UserInputYaw = AngleConvert.GetYawFromVector2(inputData.horInputNormalized);
-                Status.TargetVisualYaw = camControl!.GetYaw() + Status.UserInputYaw;
+                Status.TargetVisualYaw = cameraController!.GetYaw() + Status.UserInputYaw;
             }
             
             // Update player physics and transform using updated current state
@@ -202,7 +207,7 @@ namespace MinecraftClient.Control
             playerRender.SetVisualMovementVelocity(playerRigidbody!.velocity);
 
             // Update render
-            playerRender!.UpdateAnimation(game!.GetTickMilSec());
+            playerRender!.UpdateAnimation(client!.GetTickMilSec());
 
             // Tell server our current position
             Location newLocation;
@@ -219,9 +224,9 @@ namespace MinecraftClient.Control
                 newLocation.Y = (int)newLocation.Y + 1;
 
             // Update client player data
-            lock (game.movementLock)
+            lock (client.movementLock)
             {
-                var playerData = game.PlayerData;
+                var playerData = client.PlayerData;
 
                 playerData.Location = newLocation;
                 playerData.Yaw = visualTransform!.eulerAngles.y - 90F;
@@ -276,7 +281,7 @@ namespace MinecraftClient.Control
 
         public void TurnToAttackTarget()
         {
-            var entityManager = game!.EntityRenderManager;
+            var entityManager = client!.EntityRenderManager;
             var nearbyEntities = entityManager?.GetNearbyEntities();
 
             if (nearbyEntities is null || nearbyEntities.Count == 0) // Nothing to do
@@ -335,7 +340,7 @@ namespace MinecraftClient.Control
                 var entityId = hitInfo.EntityRender?.Entity?.ID;
 
                 if (entityId is not null)
-                    game!.InteractEntity(entityId.Value, 1);
+                    client!.InteractEntity(entityId.Value, 1);
 
             }
         }
@@ -357,19 +362,16 @@ namespace MinecraftClient.Control
 
         void Start()
         {
-            camControl = GameObject.FindObjectOfType<CameraController>();
-            game = CornClient.Instance;
-
             // Create player entity
             var playerEntityType = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);
 
-            fakeEntity = new(0, playerEntityType, new());
-            fakeEntity.Name = game!.GetUsername();
-            fakeEntity.ID   = 0;
+            dummyEntity = new(0, playerEntityType, new());
+            dummyEntity.Name = client!.GetUsername();
+            dummyEntity.ID   = 0;
 
             // Initialize player visuals
             playerRender = GetComponent<AnimatorEntityRender>();
-            playerRender.Initialize(playerEntityType, fakeEntity);
+            playerRender.Initialize(playerEntityType, dummyEntity);
 
             playerRigidbody = GetComponent<Rigidbody>();
             playerRigidbody.useGravity = true;
@@ -382,7 +384,7 @@ namespace MinecraftClient.Control
             perspectiveCallback = (e) => { };
 
             gameModeCallback = (e) => {
-                if (e.GameMode != GameMode.Spectator && game!.LocationReceived)
+                if (e.GameMode != GameMode.Spectator && client!.LocationReceived)
                     EnableEntity();
                 else
                     DisableEntity();
@@ -433,7 +435,7 @@ namespace MinecraftClient.Control
                 EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, true));
                 // Initialize health value
                 EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
-                game.PlayerData.MaxHealth = 20F;
+                client.PlayerData.MaxHealth = 20F;
             }
 
         }
@@ -449,11 +451,13 @@ namespace MinecraftClient.Control
 
         public string GetDebugInfo()
         {
-            string targetBlockInfo = string.Empty;
-            var loc = game!.GetCurrentLocation();
-            var world = game!.GetWorld();
+            if (client == null) return string.Empty;
 
-            var target = interactionUpdater!.TargetLocation;
+            string targetBlockInfo = string.Empty;
+            var loc = client.GetCurrentLocation();
+            var world = client.GetWorld();
+
+            var target = interactionUpdater?.TargetLocation;
 
             if (target is not null)
             {
@@ -464,13 +468,13 @@ namespace MinecraftClient.Control
 
             var lightInfo = $"sky {world?.GetSkyLight(loc)} block {world?.GetBlockLight(loc)}";
 
-            var velocity = playerRigidbody!.velocity;
+            var velocity = playerRigidbody?.velocity;
             // Visually swap xz velocity to fit vanilla
-            var veloInfo = $"Vel:\t{velocity.z:0.00}\t{velocity.y:0.00}\t{velocity.x:0.00}\n({velocity.magnitude:0.000})";
+            var veloInfo = $"Vel:\t{velocity?.z:0.00}\t{velocity?.y:0.00}\t{velocity?.x:0.00}\n({velocity?.magnitude:0.000})";
 
             string statusInfo;
 
-            if (statusUpdater!.Status.Spectating)
+            if (statusUpdater?.Status.Spectating ?? true)
                 statusInfo = string.Empty;
             else
                 statusInfo = statusUpdater!.Status.ToString();

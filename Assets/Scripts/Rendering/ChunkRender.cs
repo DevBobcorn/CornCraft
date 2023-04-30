@@ -61,7 +61,7 @@ namespace MinecraftClient.Rendering
 
         public void UpdateNeighborStatus()
         {
-            var world = CornClient.Instance?.GetWorld();
+            var world = CornApp.CurrentClient?.GetWorld();
             if (world is null) return;
             // Check if neighbor chunks' data is currently present...
             ZNegDataPresent = world.isChunkColumnReady(ChunkX, ChunkZ - 1); // ZNeg neighbor

@@ -77,10 +77,12 @@ namespace MinecraftClient.Rendering
             // Unload this chunk column...
             foreach (int i in chunks.Keys)
             {
+                var chunk = chunks[i];
+
                 // Unload all chunks in this column, except empty chunks...
-                if (chunks[i] is not null)
+                if (chunk != null)
                 {   // Before destroying the chunk object, do one last thing
-                    var chunk = chunks[i];
+                    
 
                     if (chunks2Build.Contains(chunk))
                         chunks2Build.Remove(chunk);
@@ -91,7 +93,9 @@ namespace MinecraftClient.Rendering
 
             }
             chunks.Clear();
-            Destroy(this.gameObject);
+
+            if (this != null)
+                Destroy(this.gameObject);
         }
 
         public override string ToString() => $"[ChunkRenderColumn {ChunkX}, {ChunkZ}]";

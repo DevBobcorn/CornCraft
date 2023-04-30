@@ -274,7 +274,7 @@ namespace MinecraftClient
 
         private static void Notify(string text, UI.Notification.Type type)
         {
-            CornClient.ShowNotification(text, type);
+            CornApp.ShowNotification(text, type);
         }
 
         public static string RemoveFormatting(string original)

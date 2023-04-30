@@ -10,7 +10,6 @@ namespace MinecraftClient.UI
     public class InfoTagPanel : MonoBehaviour
     {
         private static readonly Vector3 HIDDEN_POS = new(0F, 0F, -1000F);
-        private CornClient? game;
         private Dictionary<int, EntityInfoTag> infoTags = new();
 
         [SerializeField] public GameObject? npcInfoTagPrefab;
@@ -35,6 +34,7 @@ namespace MinecraftClient.UI
         {
             if (render is not null && !infoTags.ContainsKey(entityId))
             {
+                /* TODO: Refactor
                 var infoTagPrefab = GetTagPrefab(EntityRenderManager.Instance.GetInfoTagTypeForType(render.Entity.Type.EntityId));
 
                 if (infoTagPrefab == null)
@@ -49,7 +49,7 @@ namespace MinecraftClient.UI
 
                 infoTag.SetInfo(this, entityId, render);
 
-                infoTags.Add(entityId, infoTag);
+                infoTags.Add(entityId, infoTag); */
             }
         }
 
@@ -67,25 +67,17 @@ namespace MinecraftClient.UI
             
         }
 
-        void Start()
-        {
-            // First get the game instance
-            game = CornClient.Instance;
-
-            infoTags.Clear();
-
-        }
+        void Start() => infoTags.Clear();
 
         void Update()
         {
-            var entityManager = game!.EntityRenderManager;
-
-            // Add or remove info tags
-            var tagOwners = infoTags.Keys.ToArray();
+            var entityManager = CornApp.CurrentClient?.EntityRenderManager;
             var validTagOwners = entityManager?.GetNearbyEntities().Keys.ToList();
 
             if (validTagOwners is not null)
             {
+                var tagOwners = infoTags.Keys.ToArray();
+
                 for (int i = 0;i < tagOwners.Length;i++)
                 {
                     if (!validTagOwners.Contains(tagOwners[i])) // Remove this tag
@@ -100,7 +92,7 @@ namespace MinecraftClient.UI
                 }
             }
 
-            var camController = game!.CameraController;
+            var camController = CornApp.CurrentClient?.CameraController;
 
             if (camController?.GetPosition() is not null) // Update existing info tags
             {
