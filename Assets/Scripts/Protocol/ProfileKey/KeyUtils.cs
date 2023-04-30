@@ -48,11 +48,7 @@ namespace MinecraftClient.Protocol.Keys
             catch (Exception e)
             {
                 int code = (response == null) ? 0 : response.StatusCode;
-                StringConvert.LogError("§cFetch profile key failed: HttpCode = " + code + ", Error = " + e.Message);
-                if (CornCraft.DebugMode)
-                {
-                    StringConvert.LogError("§c" + e.StackTrace);
-                }
+                Debug.LogError("Fetch profile key failed: HttpCode = " + code + ", Error = " + e.Message);
                 return null;
             }
         }

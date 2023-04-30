@@ -87,7 +87,7 @@ namespace MinecraftClient.Protocol.Session
             Guid temp;
             if (!JwtRegex.IsMatch(session.ID))
                 throw new InvalidDataException("Invalid session ID");
-            if (!CornCraft.IsValidName(session.PlayerName))
+            if (!StringHelper.IsValidName(session.PlayerName))
                 throw new InvalidDataException("Invalid player name");
             if (!Guid.TryParseExact(session.PlayerID, "N", out temp))
                 throw new InvalidDataException("Invalid player ID");

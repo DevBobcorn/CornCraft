@@ -1,9 +1,4 @@
-using System;
-using System.Linq;
-using System.Text;
 using System.Collections.Generic;
-using System.Reflection;
-
 using MinecraftClient.Proxy;
 using MinecraftClient.Protocol.Session;
 
@@ -13,10 +8,6 @@ namespace MinecraftClient
     {
         public const string Version = "1.0.0";
         public const string BrandInfo = "CornCraft/" + Version;
-
-        public const char internalCmdChar = '>';
-
-        #region Global Settings and Variables
         public static bool DebugMode { get; set; } = true;
 
         public static bool DisplaySystemMessages  { get; set; } =  true;
@@ -84,133 +75,6 @@ namespace MinecraftClient
         }
 
         public static List<string> ResourceOverrides { get; } = new();
-
-        /// <summary>
-        /// Set a custom %variable% which will be available through expandVars()
-        /// </summary>
-        /// <param name="varName">Name of the variable</param>
-        /// <param name="varData">Value of the variable</param>
-        /// <returns>True if the parameters were valid</returns>
-        public static bool SetVar(string varName, object varData)
-        {
-            lock (AppVars)
-            {
-                varName = new string(varName.TakeWhile(char.IsLetterOrDigit).ToArray()).ToLower();
-                if (varName.Length > 0)
-                {
-                    AppVars[varName] = varData;
-                    return true;
-                }
-                else return false;
-            }
-        }
-
-        /// <summary>
-        /// Get a custom %variable% or null if the variable does not exist
-        /// </summary>
-        /// <param name="varName">Variable name</param>
-        /// <returns>The value or null if the variable does not exists</returns>
-        public static object GetVar(string varName)
-        {
-            if (AppVars.ContainsKey(varName))
-                return AppVars[varName];
-            return null;
-        }
-
-        /// <summary>
-        /// Replace %variables% with their value from global AppVars
-        /// </summary>
-        /// <param name="str">String to parse</param>
-        /// <param name="localContext">Optional local variables overriding global variables</param>
-        /// <returns>Modifier string</returns>
-        public static string ExpandVars(string str, Dictionary<string, object> localVars = null)
-        {
-            StringBuilder result = new StringBuilder();
-            for (int i = 0; i < str.Length; i++)
-            {
-                if (str[i] == '%')
-                {
-                    bool varname_ok = false;
-                    StringBuilder var_name = new StringBuilder();
-
-                    for (int j = i + 1; j < str.Length; j++)
-                    {
-                        if (!char.IsLetterOrDigit(str[j]) && str[j] != '_')
-                        {
-                            if (str[j] == '%')
-                                varname_ok = var_name.Length > 0;
-                            break;
-                        }
-                        else var_name.Append(str[j]);
-                    }
-
-                    if (varname_ok)
-                    {
-                        string varname = var_name.ToString();
-                        string varname_lower = varname.ToLower();
-                        i = i + varname.Length + 1;
-
-                        switch (varname_lower)
-                        {
-                            case "username": result.Append(CornClient.Instance?.GetUsername() ?? "<username>"); break;
-                            //case "login": result.Append(Account); break;
-                            case "serverip": result.Append(CornClient.Instance?.GetServerHost() ?? "<serverip>"); break;
-                            case "serverport": result.Append(CornClient.Instance?.GetServerPort().ToString() ?? "<serverport>"); break;
-                            default:
-                                if (localVars != null && localVars.ContainsKey(varname_lower))
-                                {
-                                    result.Append(localVars[varname_lower].ToString());
-                                }
-                                else if (AppVars.ContainsKey(varname_lower))
-                                {
-                                    result.Append(AppVars[varname_lower].ToString());
-                                }
-                                else result.Append("%" + varname + '%');
-                                break;
-                        }
-                    }
-                    else result.Append(str[i]);
-                }
-                else result.Append(str[i]);
-            }
-            return result.ToString();
-        }
-
-        #endregion
-
-        #region Util Functions
-
-        /// <summary>
-        /// Verify that a string contains only a-z A-Z 0-9 or _ and meanwhile being not longer than 16 characters.
-        /// </summary>
-        public static bool IsValidName(string username)
-        {
-            if (String.IsNullOrEmpty(username))
-                return false;
-
-            foreach (char c in username)
-                if (!((c >= 'a' && c <= 'z')
-                        || (c >= 'A' && c <= 'Z')
-                        || (c >= '0' && c <= '9')
-                        || c == '_') )
-                    return false;
-
-            return username.Length <= 16;
-        }
-
-        /// <summary>
-        /// Enumerate types in namespace through reflection
-        /// </summary>
-        /// <param name="nameSpace">Namespace to process</param>
-        /// <param name="assembly">Assembly to use. Default is Assembly.GetExecutingAssembly()</param>
-        /// <returns></returns>
-        public static Type[] GetTypesInNamespace(string nameSpace, Assembly assembly = null)
-        {
-            if (assembly == null) { assembly = Assembly.GetExecutingAssembly(); }
-            return assembly.GetTypes().Where(t => String.Equals(t.Namespace, nameSpace, StringComparison.Ordinal)).ToArray();
-        }
-
-        #endregion
 
     }
 

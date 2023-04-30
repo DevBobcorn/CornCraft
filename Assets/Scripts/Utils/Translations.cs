@@ -211,7 +211,7 @@ namespace MinecraftClient
         public static void Log(string key, params object[] args)
         {
             string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.Log(StringConvert.MC2TMP(text));
+            Debug.Log(StringHelper.MC2TMP(text));
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace MinecraftClient
         public static void Notify(string key, params object[] args)
         {
             string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.Log(StringConvert.MC2TMP(text));
+            Debug.Log(StringHelper.MC2TMP(text));
             Loom.QueueOnMainThread(() => Notify(RemoveFormatting(text), UI.Notification.Type.Notify));
         }
 
@@ -234,7 +234,7 @@ namespace MinecraftClient
         public static void LogWarning(string key, params object[] args)
         {
             string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.LogWarning(StringConvert.MC2TMP("§e" + text));
+            Debug.LogWarning(StringHelper.MC2TMP("§e" + text));
         }
 
         /// <summary>
@@ -245,7 +245,7 @@ namespace MinecraftClient
         public static void NotifyWarning(string key, params object[] args)
         {
             string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.LogWarning(StringConvert.MC2TMP("§e" + text)); // Add yellow color prefix
+            Debug.LogWarning(StringHelper.MC2TMP("§e" + text)); // Add yellow color prefix
             Loom.QueueOnMainThread(() => Notify(RemoveFormatting(text), UI.Notification.Type.Warning));
         }
 
@@ -257,7 +257,7 @@ namespace MinecraftClient
         public static void LogError(string key, params object[] args)
         {
             string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.LogError(StringConvert.MC2TMP("§4" + text)); // Add red color prefix
+            Debug.LogError(StringHelper.MC2TMP("§4" + text)); // Add red color prefix
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace MinecraftClient
         public static void NotifyError(string key, params object[] args)
         {
             string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.LogError(StringConvert.MC2TMP("§4" + text));
+            Debug.LogError(StringHelper.MC2TMP("§4" + text));
             Loom.QueueOnMainThread(() => Notify(RemoveFormatting(text), UI.Notification.Type.Error));
         }
 
