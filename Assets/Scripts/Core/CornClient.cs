@@ -10,7 +10,6 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-using MinecraftClient.Commands;
 using MinecraftClient.Control;
 using MinecraftClient.Event;
 using MinecraftClient.Protocol;
@@ -82,10 +81,6 @@ namespace MinecraftClient
                 instance = magic.AddComponent<CornClient>();
             }
         }
-
-        private static readonly List<string> cmdNames = new();
-        private static readonly Dictionary<string, Command> cmds = new();
-        private static bool internalCommandsLoaded = false;
 
         private Queue<Action> threadTasks = new();
         private object threadTasksLock = new();
@@ -418,9 +413,6 @@ namespace MinecraftClient
         private IEnumerator StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
                 int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
         {
-            if (!internalCommandsLoaded)
-                LoadInternalCommands();
-
             // Prepare resources
             var dataLoadFlag = new DataLoadFlag();
             yield return PrepareDataAndResource(dataLoadFlag, updateStatus);
@@ -453,10 +445,7 @@ namespace MinecraftClient
                     timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
 
                     if (handler.Login(this.playerKeyPair, session, accountLower)) // Login
-                    {
-                        Translations.Notify("mcc.joined", CornCraft.internalCmdChar);
                         connected = true;
-                    }
                     else
                     {
                         Translations.LogError("error.login_failed");
@@ -662,15 +651,15 @@ namespace MinecraftClient
             switch (reason)
             {
                 case DisconnectReason.ConnectionLost:
-                    StringConvert.Log(Translations.Get("mcc.disconnect.lost"));
+                    Debug.Log(Translations.Get("mcc.disconnect.lost"));
                     break;
 
                 case DisconnectReason.InGameKick:
-                    StringConvert.Log(Translations.Get("mcc.disconnect.server") + message);
+                    Debug.Log(Translations.Get("mcc.disconnect.server") + message);
                     break;
 
                 case DisconnectReason.LoginRejected:
-                    StringConvert.Log(Translations.Get("mcc.disconnect.login") + message);
+                    Debug.Log(Translations.Get("mcc.disconnect.login") + message);
                     break;
 
                 case DisconnectReason.UserLogout:
@@ -686,42 +675,15 @@ namespace MinecraftClient
         /// <summary>
         /// Allows the user to send chat messages, commands, and leave the server.
         /// </summary>
-        public void CommandPrompt(string text)
+        public void TrySendChat(string text)
         {
+            if (string.IsNullOrWhiteSpace(text)) return;
             try
             {
-                InvokeOnNetMainThread(() => HandleCommandPromptText(text));
+                InvokeOnNetMainThread(() => SendChat(text));
             }
             catch (IOException) { }
             catch (NullReferenceException) { }
-        }
-
-        /// <summary>
-        /// Allows the user to send chat messages or internal commands
-        /// </summary>
-        private void HandleCommandPromptText(string text)
-        {
-            text = text.Trim();
-            if (text.Length > 0) // Not empty...
-            {
-                if (text[0] == CornCraft.internalCmdChar)
-                {
-                    string response = string.Empty;
-                    string command = text.Substring(1); // Remove the leading command prefix
-                    if (!PerformInternalCommand(CornCraft.ExpandVars(command), ref response) && CornCraft.internalCmdChar == '/')
-                    {   // Not an internal command, send it to the server
-                        SendText(text);
-                    }
-                    else if (response.Length > 0)
-                    {   // Internal command performed, log the result...
-                        Debug.Log(response);
-                        Loom.QueueOnMainThread(
-                            () => ShowNotification(response.Length <= 35 ? response : $"{response[..32]}...")
-                        );
-                    }
-                }
-                else SendText(text);
-            }
         }
 
         /// <summary>
@@ -738,77 +700,6 @@ namespace MinecraftClient
             }
             catch (IOException) { }
             catch (NullReferenceException) { }
-        }
-
-        /// <summary>
-        /// Perform an internal MCC command (not a server command, use SendText() instead for that!)
-        /// </summary>
-        /// <param name="command">The command</param>
-        /// <param name="response">May contain a confirmation or error message after processing the command, or "" otherwise.</param>
-        /// <param name="localVars">Local variables passed along with the command</param>
-        /// <returns>TRUE if the command was indeed an internal MCC command</returns>
-        public bool PerformInternalCommand(string command, ref string response, Dictionary<string, object>? localVars = null)
-        {
-            /* Process the provided command */
-
-            string command_name = command.Split(' ')[0].ToLower();
-            if (command_name == "help")
-            {
-                if (Command.hasArg(command))
-                {
-                    string help_cmdname = Command.getArgs(command)[0].ToLower();
-                    if (help_cmdname == "help")
-                    {
-                        response = Translations.Get("icmd.help");
-                    }
-                    else if (cmds.ContainsKey(help_cmdname))
-                    {
-                        response = cmds[help_cmdname].GetCmdDescTranslated();
-                    }
-                    else response = Translations.Get("icmd.unknown", command_name);
-                }
-                else response = Translations.Get("icmd.list", String.Join(", ", cmdNames.ToArray()), CornCraft.internalCmdChar);
-            }
-            else if (cmds.ContainsKey(command_name))
-            {
-                response = cmds[command_name].Run(this, command, localVars);
-            }
-            else
-            {
-                response = Translations.Get("icmd.unknown", command_name);
-                return false;
-            }
-
-            return true;
-        }
-
-        public static void LoadInternalCommands()
-        {
-            /* Load commands from the 'Commands' namespace */
-
-            if (!internalCommandsLoaded)
-            {
-                Type[] cmds_classes = CornCraft.GetTypesInNamespace("MinecraftClient.Commands");
-                foreach (Type type in cmds_classes)
-                {
-                    if (type.IsSubclassOf(typeof(Command)))
-                    {
-                        try
-                        {
-                            Command cmd = (Command)Activator.CreateInstance(type);
-                            cmds[cmd.CmdName.ToLower()] = cmd;
-                            cmdNames.Add(cmd.CmdName.ToLower());
-                            foreach (string alias in cmd.getCMDAliases())
-                                cmds[alias.ToLower()] = cmd;
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogWarning(e.Message);
-                        }
-                    }
-                }
-                internalCommandsLoaded = true;
-            }
         }
 
         #endregion
@@ -1009,7 +900,7 @@ namespace MinecraftClient
         /// Send a chat message or command to the server
         /// </summary>
         /// <param name="text">Text to send to the server</param>
-        public void SendText(string text)
+        private void SendChat(string text)
         {
             if (String.IsNullOrEmpty(text))
                 return;
@@ -1563,7 +1454,7 @@ namespace MinecraftClient
         public void OnPlayerJoin(PlayerInfo player)
         {
             //Ignore placeholders eg 0000tab# from TabListPlus
-            if (!CornCraft.IsValidName(player.Name))
+            if (!StringHelper.IsValidName(player.Name))
                 return;
 
             if (player.Name == username)
@@ -1848,9 +1739,6 @@ namespace MinecraftClient
             
             playerData.CurHealth= health;
             playerData.FoodSaturation = food;
-
-            if (health <= 0)
-                Translations.Notify("mcc.player_dead", CornCraft.internalCmdChar);
 
             Loom.QueueOnMainThread(() => {
                 EventManager.Instance.Broadcast<HealthUpdateEvent>(new(health, updateMaxHealth));

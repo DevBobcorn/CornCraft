@@ -117,7 +117,7 @@ namespace MinecraftClient.UI
             
             string chat = chatInput.text;
             // Send if client exists...
-            CornClient.Instance?.CommandPrompt(chat);
+            CornClient.Instance?.TrySendChat(chat);
             chatInput.text = string.Empty;
 
             // Remove the chat text from previous history if present
@@ -229,7 +229,7 @@ namespace MinecraftClient.UI
 
             // Register callbacks
             chatCallback = (e) => {
-                chatTexts.text += StringConvert.MC2TMP(e.Message) + '\n';
+                chatTexts.text += StringHelper.MC2TMP(e.Message) + '\n';
             };
 
             autoCompleteCallback = (e) => {

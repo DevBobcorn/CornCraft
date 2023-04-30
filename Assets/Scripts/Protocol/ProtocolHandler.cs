@@ -235,35 +235,6 @@ namespace MinecraftClient.Protocol
         public enum LoginResult { OtherError, ServiceUnavailable, SSLError, Success, WrongPassword, AccountMigrated, NotPremium, LoginRequired, InvalidToken, InvalidResponse, NullError, UserCancel };
 
         /// <summary>
-        /// Sign-in to Microsoft Account without using browser. Only works if 2FA is disabled.
-        /// Might not work well in some rare cases.
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="password"></param>
-        /// <param name="session"></param>
-        /// <returns></returns>
-        private static LoginResult MicrosoftMCCLogin(string email, string password, out SessionToken session, ref string account)
-        {
-            try
-            {
-                var msaResponse = XboxLive.UserLogin(email, password, XboxLive.PreAuth());
-                // Remove refresh token for MCC sign method
-                msaResponse.RefreshToken = string.Empty;
-                return MicrosoftLogin(msaResponse, out session, ref account);
-            }
-            catch (Exception e)
-            {
-                session = new SessionToken() { ClientID = Guid.NewGuid().ToString().Replace("-", "") };
-                Debug.LogError("Microsoft authenticate failed: " + e.Message);
-                if (CornCraft.DebugMode)
-                {
-                    StringConvert.LogError("§c" + e.StackTrace);
-                }
-                return LoginResult.WrongPassword; // Might not always be wrong password
-            }
-        }
-
-        /// <summary>
         /// Sign-in to Microsoft Account by asking user to open sign-in page using browser. 
         /// </summary>
         /// <remarks>

@@ -217,7 +217,7 @@ namespace MinecraftClient.UI
                     modePanelShown = false;
 
                     if (selectedMode != (int)game.PlayerData.GameMode) // Commit switch request
-                        game.SendText($"/gamemode {modeIdentifiers[selectedMode]}");
+                        game.TrySendChat($"/gamemode {modeIdentifiers[selectedMode]}");
                     
                     // Restore crosshair if necessary
                     if (game.PlayerData.Perspective == Perspective.FirstPerson)
@@ -265,9 +265,9 @@ namespace MinecraftClient.UI
             }
 
             if (debugInfo)
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.PlayerData.GameMode}\n{game.PlayerController?.GetDebugInfo()}\n{game.ChunkRenderManager?.GetDebugInfo()}\n{game.EntityRenderManager?.GetDebugInfo()}\nSvr TPS: {game.GetServerTPS():00.00}\nTime: {StringConvert.TimeOfDay2String(game.CurrentTimeOfDay)} ({game.CurrentTimeOfDay})";
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.PlayerData.GameMode}\n{game.PlayerController?.GetDebugInfo()}\n{game.ChunkRenderManager?.GetDebugInfo()}\n{game.EntityRenderManager?.GetDebugInfo()}\nSvr TPS: {game.GetServerTPS():00.00}\nTime: {StringHelper.GetTimeString(game.CurrentTimeOfDay)} ({game.CurrentTimeOfDay})";
             else
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.PlayerData.GameMode}\nTime: {StringConvert.TimeOfDay2String(game.CurrentTimeOfDay)}";
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.PlayerData.GameMode}\nTime: {StringHelper.GetTimeString(game.CurrentTimeOfDay)}";
 
             var realLatency = game.GetOwnLatency();
             if (displayedLatency != realLatency)

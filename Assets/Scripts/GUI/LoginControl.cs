@@ -102,7 +102,7 @@ namespace MinecraftClient.UI
 
             if (!microsoftLogin)
             {
-                if (!CornCraft.IsValidName(account))
+                if (!StringHelper.IsValidName(account))
                 {
                     CornClient.ShowNotification("The offline username is not valid!", Notification.Type.Warning);
                     tryingConnect = false;
