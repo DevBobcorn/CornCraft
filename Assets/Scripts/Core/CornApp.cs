@@ -106,17 +106,34 @@ namespace MinecraftClient
             
             loadFlag.Finished = false;
             Task.Run(() => BlockInteractionManager.INSTANCE.PrepareData(loadFlag));
-            while (!loadFlag.Finished)  yield return null;
+            while (!loadFlag.Finished) yield return null;
 
             // Load resource packs...
             packManager.ClearPacks();
+            // Download base pack if not present
+            if (!Directory.Exists(PathHelper.GetPackDirectoryNamed($"vanilla-{resourceVersion}"))) // Prepare resources first
+            {
+                Debug.Log($"Resources for {resourceVersion} not present. Downloading...");
+                bool downloadSucceeded = false;
+                yield return StartCoroutine(ResourceDownloader.DownloadResource(resourceVersion,
+                        updateStatus, () => { },
+                        (succeeded) => downloadSucceeded = succeeded));
+                
+                if (!downloadSucceeded)
+                {
+                    ShowNotification("Failed to download base resource pack!", Notification.Type.Error);
+                    updateStatus(">_<");
+                    startUpFlag.Failed = true;
+                    yield break;
+                }
+            }
             // First add base resources
             ResourcePack basePack = new($"vanilla-{resourceVersion}");
             packManager.AddPack(basePack);
             // Check base pack availability
             if (!basePack.IsValid)
             {
-                ShowNotification("Default resource pack is invalid!", Notification.Type.Error);
+                ShowNotification("Base resource pack is invalid!", Notification.Type.Error);
                 updateStatus(">_<");
                 startUpFlag.Failed = true;
                 yield break;
