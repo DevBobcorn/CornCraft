@@ -20,18 +20,7 @@ For <code>1.19.1</code> or higher servers, it is also necessary to set <code>enf
 ## > Building & Running
 The project is made and tested with Unity 2022.2.16f1, so it is recommended to use this version(or newer) of Unity to build this game.
 
-You'll need to manually prepare resource packs containing full vanilla resources (textures, models and blockstates) and put them under the <code>Resource Packs</code> folder to actually play it on a server. The path of resources should be like <code>\<Your Project Path\>\Resource Packs\vanilla-\<version\>\assets\XXX</code>, and <code>\<version\></code> can be one of <code>1.16.5</code>, <code>1.17.1</code> and <code>1.19.2</code> (Minecraft 1.18.X should also use 1.17.1 resource pack since there's no new block added in 1.18).
-
-Then, add a <code>pack.mcmeta</code> in each  of  the resource folders. In this file you could simply write
-```json
-{
-  "pack": {
-    "pack_format": 6,
-    "description": "Blah blah blah"
-  }
-}
-```
-and that'll do the trick. The value of <code>pack_format</code> is not used by CornCraft yet, so it actually doesn't have to match the game version.
+Resource files will now be automatically downloaded if they're not present, so manual downloading is no longer necessary.
 
 ## > Controls
 Most basic controls in CornCraft are similar to vanilla Java Edition. They're hard-coded for now, but will be configurable in the future. Here's a list of currently supported actions:
