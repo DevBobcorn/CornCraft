@@ -34,11 +34,10 @@ namespace MinecraftClient.UI
         {
             if (render is not null && !infoTags.ContainsKey(entityId))
             {
-                /* TODO: Refactor
-                var infoTagPrefab = GetTagPrefab(EntityRenderManager.Instance.GetInfoTagTypeForType(render.Entity.Type.EntityId));
-
-                if (infoTagPrefab == null)
-                    return;
+                var entityManager = CornApp.CurrentClient?.EntityRenderManager;
+                if (entityManager == null) return;
+                var infoTagPrefab = GetTagPrefab(entityManager.GetInfoTagTypeForType(render.Entity.Type.EntityId));
+                if (infoTagPrefab == null) return;
 
                 // Make a new notification here...
                 var infoTagObj = GameObject.Instantiate(infoTagPrefab);
@@ -49,7 +48,7 @@ namespace MinecraftClient.UI
 
                 infoTag.SetInfo(this, entityId, render);
 
-                infoTags.Add(entityId, infoTag); */
+                infoTags.Add(entityId, infoTag);
             }
         }
 
