@@ -259,17 +259,13 @@ namespace MinecraftClient.UI
                         // Authentication completed, hide the panel...
                         HideLoginPanel();
 
-                        try // Login to Server
-                        {
-                            CornApp.Instance.TryStartLogin(session, playerKeyPair, host, port, protocolVersion, null,
-                                    (succeeded) => tryingConnect = false,
-                                    (status) => loadStateInfoText!.text = status, accountLower);
-                            yield break;
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogError("Unexpected error: " + e.StackTrace);
-                        }
+                        // We cannot directly use StartCoroutine to call StartLogin here, which will stop running when
+                        // this scene is unloaded and LoginControl object is destroyed
+                        CornApp.Instance.StartLoginCoroutine(session, playerKeyPair, host, port, protocolVersion, null,
+                                (succeeded) => tryingConnect = false,
+                                (status) => loadStateInfoText!.text = status, accountLower);
+
+                        yield break;
                     }
                     else
                         Translations.NotifyError("error.unsupported");
