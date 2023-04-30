@@ -12,7 +12,6 @@ using MinecraftClient.Protocol;
 using MinecraftClient.Protocol.Handlers.Forge;
 using MinecraftClient.Protocol.Keys;
 using MinecraftClient.Protocol.Session;
-using MinecraftClient.Protocol.Handlers;
 using System.Threading.Tasks;
 
 namespace MinecraftClient.UI
@@ -24,8 +23,7 @@ namespace MinecraftClient.UI
         private CornClient? game;
         private TMP_InputField? serverInput, usernameInput, authCodeInput;
         private Button?         loginButton, quitButton, authConfirmButton, authCancelButton;
-        private Button?         loginCloseButton, authLinkButton, authCloseButton;
-        private Button?         localhostButton, pseudoServerButton;
+        private Button?         loginCloseButton, authLinkButton, authCloseButton, localhostButton;
         private TMP_Text?       loadStateInfoText, usernameOptions, usernamePlaceholder, authLinkText;
         private CanvasGroup?    loginPanel, usernamePanel, authPanel, loginPanelButton;
         private TMP_Dropdown?   loginDropDown;
@@ -48,9 +46,6 @@ namespace MinecraftClient.UI
             host = sip[0];
             port = 25565;
 
-            if (host.Equals(ProtocolPseudo.ENTRY_NAME)) // Local pseudo world
-                return true;
-
             if (sip.Length > 1)
             {
                 try
@@ -63,7 +58,7 @@ namespace MinecraftClient.UI
             if (host == "localhost" || host.Contains('.'))
             {
                 // Server IP (IP or domain names contains at least a dot)
-                if (sip.Length == 1 && host.Contains('.') && host.Any(c => char.IsLetter(c)) && CornCraft.ResolveSrvRecords)
+                if (sip.Length == 1 && host.Contains('.') && host.Any(c => char.IsLetter(c)) && CornGlobal.ResolveSrvRecords)
                     //Domain name without port may need Minecraft SRV Record lookup
                     ProtocolHandler.MinecraftServiceLookup(ref host, ref port);
                 return true;
@@ -118,7 +113,7 @@ namespace MinecraftClient.UI
             }
             else
             {   // Validate cached session or login new session.
-                if (CornCraft.SessionCaching != CacheType.None && SessionCache.Contains(accountLower))
+                if (CornGlobal.SessionCaching != CacheType.None && SessionCache.Contains(accountLower))
                 {
                     session = SessionCache.Get(accountLower);
                     result = ProtocolHandler.GetTokenValidation(session);
@@ -194,20 +189,20 @@ namespace MinecraftClient.UI
                     yield break;
                 }
 
-                if (CornCraft.SessionCaching != CacheType.None)
+                if (CornGlobal.SessionCaching != CacheType.None)
                     SessionCache.Store(accountLower, session);
 
-                if (microsoftLogin && CornCraft.LoginWithSecureProfile)
+                if (microsoftLogin && CornGlobal.LoginWithSecureProfile)
                 {
                     // Load cached profile key from disk if necessary
-                    if (CornCraft.ProfileKeyCaching == CacheType.Disk)
+                    if (CornGlobal.ProfileKeyCaching == CacheType.Disk)
                     {
                         bool cacheKeyLoaded = KeysCache.InitializeDiskCache();
-                        if (CornCraft.DebugMode)
+                        if (CornGlobal.DebugMode)
                             Translations.Log(cacheKeyLoaded ? "debug.keys_cache_ok" : "debug.keys_cache_fail");
                     }
 
-                    if (CornCraft.ProfileKeyCaching != CacheType.None && KeysCache.Contains(accountLower))
+                    if (CornGlobal.ProfileKeyCaching != CacheType.None && KeysCache.Contains(accountLower))
                     {
                         playerKeyPair = KeysCache.Get(accountLower);
                         if (playerKeyPair.NeedRefresh())
@@ -220,7 +215,7 @@ namespace MinecraftClient.UI
                     {
                         Translations.Log("mcc.fetching_key");
                         playerKeyPair = KeyUtils.GetKeys(session.ID);
-                        if (CornCraft.ProfileKeyCaching != CacheType.None && playerKeyPair != null)
+                        if (CornGlobal.ProfileKeyCaching != CacheType.None && playerKeyPair != null)
                         {
                             KeysCache.Store(accountLower, playerKeyPair);
                         }
@@ -230,27 +225,12 @@ namespace MinecraftClient.UI
                 // Update the in-game user name
                 username = session.PlayerName;
 
-                if (CornCraft.DebugMode)
+                if (CornGlobal.DebugMode)
                     Translations.Log("debug.session_id", session.ID);
 
                 // Get server version
                 int protocolVersion = 0;
                 ForgeInfo? forgeInfo = null;
-
-                // Local pseudo world
-                if (host.Equals(ProtocolPseudo.ENTRY_NAME)) 
-                {
-                    protocolVersion = ProtocolPseudo.DEFAULT_PROTOCOL;
-                    Translations.Notify("mcc.server_protocol", "<Pseudo>", protocolVersion);
-
-                    // Authentication completed, hide the panel...
-                    HideLoginPanel();
-
-                    game!.StartLogin(session, playerKeyPair, host, port, protocolVersion, null,
-                            (succeeded) => tryingConnect = false,
-                            (status) => loadStateInfoText!.text = status, accountLower);
-                    yield break;
-                }
 
                 // Not realms
                 Translations.Log("mcc.retrieve"); // Retrieve server information
@@ -463,7 +443,6 @@ namespace MinecraftClient.UI
 
             serverInput     = loginPanelObj.transform.Find("Server Input").GetComponent<TMP_InputField>();
             localhostButton = serverInput.transform.Find("Localhost Button").GetComponent<Button>();
-            pseudoServerButton = serverInput.transform.Find("Pseudo Server Button").GetComponent<Button>();
 
             usernameInput   = loginPanelObj.transform.Find("Username Input").GetComponent<TMP_InputField>();
             usernamePlaceholder = FindHelper.FindChildRecursively(usernameInput.transform,
@@ -492,16 +471,14 @@ namespace MinecraftClient.UI
             loginPanelButton  = transform.Find("Login Panel Button").GetComponent<CanvasGroup>();
 
             //Load cached sessions from disk if necessary
-            if (CornCraft.SessionCaching == CacheType.Disk)
+            if (CornGlobal.SessionCaching == CacheType.Disk)
             {
                 bool cacheLoaded = SessionCache.InitializeDiskCache();
-                if (CornCraft.DebugMode)
+                if (CornGlobal.DebugMode)
                     Translations.Log(cacheLoaded ? "debug.session_cache_ok" : "debug.session_cache_fail");
                 
                 if (cacheLoaded)
-                {
                     cachedNames = SessionCache.GetCachedLogins();
-                }
             }
 
             // TODO Also initialize server with cached values
@@ -518,7 +495,6 @@ namespace MinecraftClient.UI
 
             // Add listeners
             localhostButton.onClick.AddListener(() => serverInput.text = LOCALHOST_ADDRESS);
-            pseudoServerButton.onClick.AddListener(() => serverInput.text = ProtocolPseudo.ENTRY_NAME);
 
             usernameInput.onValueChanged.AddListener(this.UpdateUsernamePanel);
             usernameInput.onSelect.AddListener(this.UpdateUsernamePanel);
@@ -539,7 +515,7 @@ namespace MinecraftClient.UI
 
             // Used for testing MC format code parsing
             // loadStateInfoText!.text = StringConvert.MC2TMP("Hello world §a[§a§a-1, §a1 §6[Bl§b[HHH]ah] Hello §c[Color RE§rD]  §a1§r] (blah)");
-            loadStateInfoText!.text = $"CornCraft {CornCraft.Version} Powered by <u>Minecraft Console Client</u>";
+            loadStateInfoText!.text = $"CornCraft {CornGlobal.Version} Powered by <u>Minecraft Console Client</u>";
 
         }
 

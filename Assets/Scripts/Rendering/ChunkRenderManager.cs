@@ -180,7 +180,7 @@ namespace MinecraftClient.Rendering
             var location = game!.GetCurrentLocation();
             ChunkRenderColumn columnRender;
 
-            int viewDist = CornCraft.MCSettings_RenderDistance;
+            int viewDist = CornGlobal.MCSettings.RenderDistance;
             int viewDistSqr = viewDist * viewDist;
 
             int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
@@ -239,7 +239,7 @@ namespace MinecraftClient.Rendering
 
             // Add nearby chunks
             var location   = game.GetCurrentLocation();
-            int unloadDist = Mathf.RoundToInt(CornCraft.MCSettings_RenderDistance * 2F);
+            int unloadDist = Mathf.RoundToInt(CornGlobal.MCSettings.RenderDistance * 2F);
 
             var chunkCoords = columns.Keys.ToArray();
 

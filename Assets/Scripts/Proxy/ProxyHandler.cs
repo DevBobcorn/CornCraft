@@ -29,11 +29,11 @@ namespace MinecraftClient.Proxy
         {
             try
             {
-                if (login ? CornCraft.ProxyEnabledLogin : CornCraft.ProxyEnabledIngame)
+                if (login ? CornGlobal.ProxyEnabledLogin : CornGlobal.ProxyEnabledIngame)
                 {
                     ProxyType innerProxytype = ProxyType.Http;
 
-                    switch (CornCraft.ProxyType)
+                    switch (CornGlobal.ProxyType)
                     {
                         case Type.HTTP: innerProxytype = ProxyType.Http; break;
                         case Type.SOCKS4: innerProxytype = ProxyType.Socks4; break;
@@ -41,15 +41,15 @@ namespace MinecraftClient.Proxy
                         case Type.SOCKS5: innerProxytype = ProxyType.Socks5; break;
                     }
 
-                    if (CornCraft.ProxyUsername != "" && CornCraft.ProxyPassword != "")
+                    if (CornGlobal.ProxyUsername != "" && CornGlobal.ProxyPassword != "")
                     {
-                        proxy = factory.CreateProxyClient(innerProxytype, CornCraft.ProxyHost, CornCraft.ProxyPort, CornCraft.ProxyUsername, CornCraft.ProxyPassword);
+                        proxy = factory.CreateProxyClient(innerProxytype, CornGlobal.ProxyHost, CornGlobal.ProxyPort, CornGlobal.ProxyUsername, CornGlobal.ProxyPassword);
                     }
-                    else proxy = factory.CreateProxyClient(innerProxytype, CornCraft.ProxyHost, CornCraft.ProxyPort);
+                    else proxy = factory.CreateProxyClient(innerProxytype, CornGlobal.ProxyHost, CornGlobal.ProxyPort);
 
                     if (!proxy_ok)
                     {
-                        Translations.Log("proxy.connected", CornCraft.ProxyHost, CornCraft.ProxyPort);
+                        Translations.Log("proxy.connected", CornGlobal.ProxyHost, CornGlobal.ProxyPort);
                         proxy_ok = true;
                     }
 

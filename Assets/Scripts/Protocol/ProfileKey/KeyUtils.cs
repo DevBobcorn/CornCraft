@@ -27,7 +27,7 @@ namespace MinecraftClient.Protocol.Keys
 
                 response = request.Post("application/json", "");
 
-                if (CornCraft.DebugMode)
+                if (CornGlobal.DebugMode)
                 {
                     Debug.Log(response.Body.ToString());
                 }

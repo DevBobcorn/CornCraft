@@ -57,7 +57,7 @@ namespace MinecraftClient.Protocol
         private void SetupBasicHeaders()
         {
             Headers.Add("Host", host);
-            Headers.Add("User-Agent", "CornCraft/" + CornCraft.Version);
+            Headers.Add("User-Agent", "CornCraft/" + CornGlobal.Version);
             Headers.Add("Accept", "*/*");
             Headers.Add("Connection", "close");
         }
