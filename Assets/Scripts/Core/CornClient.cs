@@ -39,11 +39,8 @@ namespace MinecraftClient
         private Guid uuid;
         private string? sessionId;
         private PlayerKeyPair? playerKeyPair;
-        private bool isSupportPreviewsChat;
-        public bool GetIsSupportPreviewsChat() => isSupportPreviewsChat;
         public string GetServerHost() => host!;
         public int GetServerPort() => port;
-        public int GetProtocolVersion() => protocolVersion;
         public string GetUsername() => username!;
         public Guid GetUserUUID() => uuid;
         public string GetUserUUIDStr() => uuidStr!;
@@ -839,26 +836,7 @@ namespace MinecraftClient
                     return null;
             }
         }
-
-        /// <summary>
-        /// Get client player's inventory items
-        /// </summary>
-        /// <param name="inventoryID">Window ID of the requested inventory</param>
-        /// <returns> Item Dictionary indexed by Slot ID (Check wiki.vg for slot ID)</returns>
-        public Container? GetInventory(int inventoryID)
-        {
-            if (InvokeRequired)
-                return InvokeOnNetMainThread(() => GetInventory(inventoryID));
-
-            return playerData.GetInventory(inventoryID);
-        }
-
-        /// <summary>
-        /// Get client player's inventory items
-        /// </summary>
-        /// <returns> Item Dictionary indexed by Slot ID (Check wiki.vg for slot ID)</returns>
-        public Container GetPlayerInventory() => GetInventory(0)!;
-
+        
         /// <summary>
         /// Get a set of online player names
         /// </summary>
@@ -1960,19 +1938,13 @@ namespace MinecraftClient
         /// <param name="hasIcon">Indicates if the server has a an icon</param>
         /// <param name="iconBase64">Server icon in Base 64 format</param>
         /// <param name="previewsChat">Indicates if the server previews chat</param>
-        public void OnServerDataReceived(bool hasMotd, string motd, bool hasIcon, string iconBase64, bool previewsChat)
-        {
-            this.isSupportPreviewsChat = previewsChat;
-        }
+        public void OnServerDataReceived(bool hasMotd, string motd, bool hasIcon, string iconBase64, bool previewsChat) { }
 
         /// <summary>
         /// Called when the protocol handler receives "Set Display Chat Preview" packet
         /// </summary>
         /// <param name="previewsChat">Indicates if the server previews chat</param>
-        public void OnChatPreviewSettingUpdate(bool previewsChat)
-        {
-            this.isSupportPreviewsChat = previewsChat;
-        }
+        public void OnChatPreviewSettingUpdate(bool previewsChat) { }
 
         /// <summary>
         /// Called when the protocol handler receives "Login Success" packet
