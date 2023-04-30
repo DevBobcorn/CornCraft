@@ -16,8 +16,6 @@ namespace MinecraftClient.UI
 
         [SerializeField] private GameObject? interactionOptionPrefab;
 
-        private CornClient? game;
-
         private Animator? scrollHint;
         private ScrollRect? scrollRect;
 
@@ -33,9 +31,6 @@ namespace MinecraftClient.UI
 
         void Start()
         {
-            // First get the game instance
-            game = CornClient.Instance;
-
             // Initialize controls
             container = FindHelper.FindChildRecursively(transform, "Interactions");
             scrollHint = transform.Find("Scroll Hint").GetComponent<Animator>();
@@ -105,7 +100,7 @@ namespace MinecraftClient.UI
             if (selectedIndex >= 0 && selectedIndex < interactionOptions.Count)
             {
                 var targetOption = interactionOptions[selectedIndex];
-                targetOption.Execute(game!);
+                targetOption.Execute(CornApp.CurrentClient);
             }
         }
 

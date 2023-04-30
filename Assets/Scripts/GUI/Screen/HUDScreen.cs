@@ -16,8 +16,6 @@ namespace MinecraftClient.UI
         private static readonly string[] modeIdentifiers = { "survival", "creative", "adventure", "spectator" };
         private const float HEALTH_MULTIPLIER = 10F;
 
-        private CornClient game;
-
         private TMP_Text    latencyText, debugText, modeText;
         private Animator    modePanel, crosshair, statusPanel, staminaBarAnimator;
         private Button[]    modeButtons = new Button[4];
@@ -70,8 +68,6 @@ namespace MinecraftClient.UI
 
         protected override bool Initialize()
         {
-            game = CornClient.Instance;
-
             // Initialize controls...
             debugText = FindHelper.FindChildRecursively(transform, "Debug Text").GetComponent<TMP_Text>();
             debugText.text = "Initializing...";
@@ -177,8 +173,11 @@ namespace MinecraftClient.UI
 
         void Update()
         {
-            if (!initialized || !IsActive || !game!.Connected)
+            if (!initialized || !IsActive)
                 return;
+            
+            var game = CornApp.CurrentClient;
+            if (game == null) return;
 
             if (Input.GetKey(KeyCode.F3))
             {
@@ -193,7 +192,7 @@ namespace MinecraftClient.UI
                     }
                     else // Show gamemode switch
                     {
-                        selectedMode = (int)game.PlayerData.GameMode;
+                        selectedMode = (int) game.PlayerData.GameMode;
                         if (selectedMode >= 0 && selectedMode < modeButtons.Length)
                         {
                             modeText.text = ((GameMode)selectedMode).ToString();
@@ -214,7 +213,7 @@ namespace MinecraftClient.UI
                     modePanel.SetBool(SHOW, false);
                     modePanelShown = false;
 
-                    if (selectedMode != (int)game.PlayerData.GameMode) // Commit switch request
+                    if (selectedMode != (int) game.PlayerData.GameMode) // Commit switch request
                         game.TrySendChat($"/gamemode {modeIdentifiers[selectedMode]}");
                     
                     // Restore crosshair if necessary
@@ -246,19 +245,19 @@ namespace MinecraftClient.UI
 
             if (Input.GetKeyDown(KeyCode.Slash))
             {   // Open chat screen and input a slash
-                CornClient.Instance.ScreenControl?.PushScreen(chatScreen);
+                game.ScreenControl?.PushScreen(chatScreen);
                 chatScreen?.SetChatMessage("/", 1);
             }
             else if (Input.GetKeyDown(KeyCode.T)) // Just open chat screen
-                CornClient.Instance.ScreenControl?.PushScreen(chatScreen);
+                game.ScreenControl?.PushScreen(chatScreen);
 
             if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                CornClient.Instance.ScreenControl?.PushScreen(pauseScreen);
-            }
+                game.ScreenControl?.PushScreen(pauseScreen);
+            
+            
 
             if (debugInfo)
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.PlayerData.GameMode}\n{game.PlayerController?.GetDebugInfo()}\n{game.ChunkRenderManager?.GetDebugInfo()}\n{game.EntityRenderManager?.GetDebugInfo()}\nSvr TPS: {game.GetServerTPS():00.00}\nTime: {StringHelper.GetTimeString(game.CurrentTimeOfDay)} ({game.CurrentTimeOfDay})";
+                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.PlayerData.GameMode}\n{game.PlayerDebugInfo}\n{game.ChunkRenderManager?.GetDebugInfo()}\n{game.EntityRenderManager?.GetDebugInfo()}\nSvr TPS: {game.GetServerTPS():00.00}\nTime: {StringHelper.GetTimeString(game.CurrentTimeOfDay)} ({game.CurrentTimeOfDay})";
             else
                 debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.PlayerData.GameMode}\nTime: {StringHelper.GetTimeString(game.CurrentTimeOfDay)}";
 

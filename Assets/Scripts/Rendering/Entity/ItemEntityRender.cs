@@ -28,7 +28,7 @@ namespace MinecraftClient.Rendering
                     return;
                 }
 
-                var packManager = CornClient.Instance!.PackManager;
+                var packManager = CornApp.Instance.PackManager;
 
                 var itemNumId = ItemPalette.INSTANCE.ToNumId(itemStack.Type.ItemId);
                 ItemModel? itemModel = null;

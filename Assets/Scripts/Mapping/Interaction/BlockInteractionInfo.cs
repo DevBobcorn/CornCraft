@@ -20,15 +20,15 @@ namespace MinecraftClient.Mapping
             return Definition.Hint;
         }
 
-        public override void RunInteraction(CornClient game)
+        public override void RunInteraction(CornClient client)
         {
             switch (Definition.Type)
             {
                 case BlockInteractionType.Interact:
-                    game.PlaceBlock(Location, Direction.Down);
+                    client.PlaceBlock(Location, Direction.Down);
                     break;
                 case BlockInteractionType.Break:
-                    game.DigBlock(Location, true, false);
+                    client.DigBlock(Location, true, false);
                     break;
             }
             

@@ -8,8 +8,6 @@ namespace MinecraftClient.UI
         private bool isPaused;
         public bool IsPaused { get { return isPaused; } }
 
-        private CornClient game;
-
         private void PauseGame()
         {
             isPaused = true;
@@ -111,15 +109,6 @@ namespace MinecraftClient.UI
             }
 
             Cursor.lockState = releaseCursor ? CursorLockMode.None : CursorLockMode.Locked;
-
-        }
-
-        void Start()
-        {
-            if (CornClient.Instance is null)
-                Debug.LogWarning("No Minecraft Client connected");
-            else
-                game = CornClient.Instance;
 
         }
 

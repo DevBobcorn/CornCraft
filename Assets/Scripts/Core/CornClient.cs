@@ -1,14 +1,11 @@
 #nullable enable
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.IO;
 
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 using MinecraftClient.Control;
 using MinecraftClient.Event;
@@ -19,12 +16,9 @@ using MinecraftClient.Protocol.Message;
 using MinecraftClient.Protocol.Session;
 using MinecraftClient.Proxy;
 using MinecraftClient.Rendering;
-using MinecraftClient.Resource;
 using MinecraftClient.UI;
 using MinecraftClient.Mapping;
 using MinecraftClient.Inventory;
-using MinecraftClient.Protocol.Handlers;
-using System.Threading.Tasks;
 
 namespace MinecraftClient
 {
@@ -48,45 +42,11 @@ namespace MinecraftClient
         #endregion
 
         #region Client Control
-        private static CornClient? instance;
-        public static CornClient Instance
-        {
-            get {
-                EnsureInitialized();
-                return instance!;
-            }
-        }
-
-        // Runs before a scene gets loaded
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        public static void InitializeApp()
-        {
-            EnsureInitialized();
-            Loom.Initialize();
-
-            // TODO Decently implement resource pack selection
-            CornGlobal.ResourceOverrides.Clear();
-            CornGlobal.ResourceOverrides.Add("vanilla_fix");
-        }
-
-        public static void EnsureInitialized()
-        {
-            if (instance is null)
-            {
-                GameObject magic = new GameObject("Corn Craft");
-                GameObject.DontDestroyOnLoad(magic);
-                instance = magic.AddComponent<CornClient>();
-            }
-        }
-
         private Queue<Action> threadTasks = new();
         private object threadTasksLock = new();
 
         private Queue<string> chatQueue = new();
         private DateTime nextMessageSendTime = DateTime.MinValue;
-
-        private bool connected = false;
-        public bool Connected { get { return connected; } }
 
         #endregion
 
@@ -121,24 +81,24 @@ namespace MinecraftClient
         private bool worldAndMovementsRequested = false;
         private World world = new();
         public World GetWorld() => world;
-        private ChunkRenderManager? chunkRenderManager;
-        public ChunkRenderManager? ChunkRenderManager => chunkRenderManager;
+        [SerializeField] public ChunkRenderManager? ChunkRenderManager;
         public bool IsMovementReady()
         {
-            if (!locationReceived || chunkRenderManager is null)
+            if (!locationReceived || ChunkRenderManager is null)
                 return false;
             
             lock (movementLock)
             {
                 var loc = playerData.Location;
             
-                return chunkRenderManager.IsChunkRenderColumnReady(loc.ChunkX, loc.ChunkZ);
+                return ChunkRenderManager.IsChunkRenderColumnReady(loc.ChunkX, loc.ChunkZ);
             }
         }
 
         #endregion
 
         #region Players and Entities
+        [SerializeField] public GameObject? PlayerPrefab;
         private bool inventoryHandlingRequested = false;
         private bool locationReceived = false;
         public bool LocationReceived => locationReceived;
@@ -154,74 +114,45 @@ namespace MinecraftClient
             }
         }
 
+        [SerializeField] public CameraController? CameraController;
         private PlayerController? playerController;
-        private CameraController? cameraController;
-        public PlayerController? PlayerController => playerController;
-        public CameraController? CameraController => cameraController;
-        
+        public string? PlayerDebugInfo => playerController?.GetDebugInfo();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         private Dictionary<int, Entity> entities = new();
-        private EntityRenderManager? entityRenderManager;
-        public EntityRenderManager? EntityRenderManager => entityRenderManager!;
+        [SerializeField] public EntityRenderManager? EntityRenderManager;
         #endregion
 
-        #region Resources management
-        private readonly ResourcePackManager packManager = new ResourcePackManager();
-        public ResourcePackManager PackManager => packManager;
-        
-        public const int WINDOWED_APP_WIDTH = 1600, WINDOWED_APP_HEIGHT = 900;
+        void Start()
+        {
+            // Push HUD Screen on start
+            ScreenControl!.PushScreen(HUDScreen!);
+
+            // Setup chunk render manager
+            ChunkRenderManager!.SetClient(this);
+
+            // Create player entity
+            var playerObj = GameObject.Instantiate(PlayerPrefab);
+            playerController = playerObj!.GetComponent<PlayerController>();
+            playerController.SetClientAndCamera(this, CameraController!);
+
+            // Set up camera controller
+            CameraController!.SetClient(this);
+            CameraController.SetTarget(playerController.cameraRef!);
+        }
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.F11)) // Toggle full screen
-            {
-                if (Screen.fullScreen)
-                {
-                    Screen.SetResolution(WINDOWED_APP_WIDTH, WINDOWED_APP_HEIGHT, false);
-                    Screen.fullScreen = false;
-                }
-                else
-                {
-                    var maxRes = Screen.resolutions[Screen.resolutions.Length - 1];
-                    Screen.SetResolution(maxRes.width, maxRes.height, true);
-                    Screen.fullScreen = true;
-                }
-                
-            }
-
-            if (Input.GetKeyDown(KeyCode.Q))
-            {
-                ShowNotification("Moew~");
-            }
-
             // Time update
             timeElapsedSinceUpdate += Time.unscaledDeltaTime;
 
         }
 
-        private ScreenControl? screenControl;
-        public ScreenControl ScreenControl => screenControl!;
+        [SerializeField] public ScreenControl? ScreenControl;
+        [SerializeField] public HUDScreen? HUDScreen;
 
-        public bool IsPaused()
-        {
-            if (screenControl is not null)
-                return screenControl.IsPaused;
-            return true;
-        }
+        public bool IsPaused() => ScreenControl!.IsPaused;
 
-        public bool MouseScrollAbsorbed()
-        {
-            if (screenControl is not null)
-                return screenControl.GetTopScreen().AbsorbMouseScroll();
-            return false;
-        }
-
-        // Should be called from the Unity thread only, not net read thread
-        public static void ShowNotification(string notification) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification));
-
-        public static void ShowNotification(string notification, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, 6F, type));
-
-        public static void ShowNotification(string notification, float duration, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, duration, type));
+        public bool MouseScrollAbsorbed() => ScreenControl!.GetTopScreen().AbsorbMouseScroll();
 
         public void SwitchPerspective()
         {
@@ -231,27 +162,15 @@ namespace MinecraftClient
                 Perspective.FirstPerson    => Perspective.ThirdPerson,
                 Perspective.ThirdPerson    => Perspective.FirstPerson,
 
-                Perspective.GodPerspective => Perspective.ThirdPerson,
                 _                          => Perspective.ThirdPerson
             };
             
-            ShowNotification($"Perspective switched to {newPersp}");
-
-            cameraController?.SetPerspective(newPersp);
+            CornApp.ShowNotification($"Perspective switched to {newPersp}");
+            CameraController?.SetPerspective(newPersp);
         }
 
-        #endregion
-
-        void OnApplicationQuit()
-        {
-            if (Connected)
-                Disconnect();
-            
-        }
-
-
-        public void StartLogin(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
-                int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
+        public bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
+                int protocol, ForgeInfo? forgeInfo, Action<string> updateStatus, string accountLower)
         {
             this.sessionId = session.ID;
             if (!Guid.TryParse(session.PlayerID, out this.uuid))
@@ -262,166 +181,6 @@ namespace MinecraftClient
             this.port = port;
             this.protocolVersion = protocol;
             this.playerKeyPair = playerKeyPair;
-
-            // Start client
-            StartCoroutine(StartClient(session, playerKeyPair, serverIp, port, protocol, forgeInfo, callback, updateStatus, accountLower));
-        }
-
-        private IEnumerator PrepareDataAndResource(DataLoadFlag startUpFlag, Action<string> updateStatus)
-        {
-            var versionDictPath = PathHelper.GetExtraDataFile("versions.json");
-
-            var dataVersion     = string.Empty;
-            var entityVersion   = string.Empty;
-            var resourceVersion = string.Empty;
-
-            try
-            {
-                // Read data version dictionary
-                var versions = Json.ParseJson(File.ReadAllText(versionDictPath, Encoding.UTF8));
-                var version = protocolVersion.ToString();
-
-                if (versions.Properties.ContainsKey(version))
-                {
-                    var entries = versions.Properties[version].Properties;
-
-                    dataVersion = entries["data"].StringValue;
-                    if (entries.ContainsKey("entity"))
-                        entityVersion = entries["entity"].StringValue;
-                    else
-                        entityVersion = dataVersion;
-                    resourceVersion = entries["resource"].StringValue;
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
-                ShowNotification("Data for gameplay is not available!", Notification.Type.Error);
-                updateStatus(">_<");
-                startUpFlag.Failed = true;
-                yield break;
-            }
-
-            // First load all possible Block States...
-            var loadFlag = new DataLoadFlag();
-            Task.Run(() => BlockStatePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
-            while (!loadFlag.Finished) yield return null;
-
-            // Then load all Items...
-            loadFlag.Finished = false;
-            Task.Run(() => ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
-            while (!loadFlag.Finished)
-                yield return null;
-            
-            loadFlag.Finished = false;
-            Task.Run(() => BlockInteractionManager.INSTANCE.PrepareData(loadFlag));
-            while (!loadFlag.Finished)  yield return null;
-
-            // Load resource packs...
-            packManager.ClearPacks();
-            // First add base resources
-            ResourcePack basePack = new($"vanilla-{resourceVersion}");
-            packManager.AddPack(basePack);
-            // Check base pack availability
-            if (!basePack.IsValid)
-            {
-                ShowNotification("Default resource pack is invalid!", Notification.Type.Error);
-                updateStatus(">_<");
-                startUpFlag.Failed = true;
-                yield break;
-            }
-            // Then append overrides
-            foreach (var packName in CornGlobal.ResourceOverrides)
-                packManager.AddPack(new(packName));
-            // Load valid packs...
-            loadFlag.Finished = false;
-            // Load valid packs...
-            loadFlag.Finished = false;
-            Task.Run(() => packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status))));
-            while (!loadFlag.Finished) yield return null;
-            
-            // Load player skin overrides...
-            SkinManager.Load();
-
-            // Reset atlas materials
-            MaterialManager.ClearInitializedFlag();
-
-            // Load biome definitions (After colormaps in resource packs are loaded) (on main thread)...
-            yield return BiomePalette.INSTANCE.PrepareData(dataVersion, $"vanilla-{resourceVersion}", loadFlag);
-            
-            // Load entity definitions
-            loadFlag.Finished = false;
-            Task.Run(() => EntityPalette.INSTANCE.PrepareData(entityVersion, loadFlag));
-            while (!loadFlag.Finished) yield return null;
-
-            if (loadFlag.Failed) // Cancel login if resources are not properly loaded
-            {
-                ShowNotification("Failed to load all resources!", Notification.Type.Error);
-                updateStatus(">_<");
-                startUpFlag.Failed = true;
-                yield break;
-            }
-        }
-
-        private IEnumerator EnterWorldScene()
-        {
-            // Prepare scene and unity objects
-            var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
-            op.allowSceneActivation = false;
-
-            while (op.progress < 0.9F) yield return null;
-
-            // Scene is loaded, activate it
-            op.allowSceneActivation = true;
-            bool fullyLoaded = false;
-
-            // Wait till everything's ready
-            op.completed += (operation) =>
-            {
-                SceneObjectHolder holder = Component.FindObjectOfType<SceneObjectHolder>();
-
-                // Get screen control
-                screenControl = holder.screenControl!;
-                // Push HUD Screen on start
-                screenControl.PushScreen(holder.hudScreen!);
-
-                // Get chunk render manager
-                chunkRenderManager = holder.chunkRenderManager;
-                // Get entity render manager
-                entityRenderManager = holder.entityRenderManager;
-
-                // Create player entity
-                var playerObj = GameObject.Instantiate(holder.playerPrefab);
-                playerController = playerObj!.GetComponent<PlayerController>();
-
-                // Get camera for player
-                cameraController = holder.cameraController!;
-                cameraController.SetTarget(playerController.cameraRef!);
-
-                // Destroy the object holder
-                Destroy(holder.gameObject);
-
-                fullyLoaded = true;
-            };
-
-            while (fullyLoaded) yield return null;
-        }
-
-        private IEnumerator StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
-                int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
-        {
-            // Prepare resources
-            var dataLoadFlag = new DataLoadFlag();
-            yield return PrepareDataAndResource(dataLoadFlag, updateStatus);
-            if (dataLoadFlag.Failed)
-            {
-                callback(false);
-                yield break;
-            }
-
-            // Enter world scene
-            updateStatus("status.info.enter_world_scene");
-            yield return EnterWorldScene();
 
             // Start up client
             try
@@ -440,7 +199,7 @@ namespace MinecraftClient
                 timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
 
                 if (handler.Login(this.playerKeyPair, session, accountLower)) // Login
-                    connected = true;
+                    return true; // Client successfully started
                 else
                 {
                     Translations.LogError("error.login_failed");
@@ -455,14 +214,10 @@ namespace MinecraftClient
 
                 Translations.LogError("error.connect");
                 Debug.LogError(e.Message);
-                Debug.LogError(e.StackTrace);
                 Disconnect();
             }
-            finally
-            {
-                callback(connected);
-            }
 
+            return false; // Failed to start client
         }
 
         /// <summary>
@@ -568,44 +323,11 @@ namespace MinecraftClient
             }
         }
 
-        private void PrepareDisconnect()
-        {
-            connected = false;
-
-            // Dispose objects in current client
-            Loom.QueueOnMainThread(
-                // Called by protocol handler from net read thread
-                // so it is neccessary to run it on Unity thread via Loom
-                () => {
-                    chunkRenderManager?.UnloadWorld();
-                    entityRenderManager?.UnloadEntityRenders();
-
-                    screenControl?.ClearScreens();
-
-                    // Release cursor anyway
-                    Cursor.lockState = CursorLockMode.None;
-
-                    // Clear objects in world scene (no need to destroy them manually, tho)
-                    chunkRenderManager   = null;
-                    screenControl = null;
-                    playerController = null;
-                    cameraController = null;
-
-                    // Reset this marker, so that it's not gonna cause troubles next time we log in
-                    locationReceived = false;
-
-                    playerData._yaw   = null;
-                    playerData._pitch = null;
-                });
-        }
-
         /// <summary>
         /// Disconnect the client from the server
         /// </summary>
         public void Disconnect()
         {
-            PrepareDisconnect();
-
             handler?.Disconnect();
             handler?.Dispose();
             handler = null;
@@ -616,6 +338,7 @@ namespace MinecraftClient
             tcpClient?.Close();
             tcpClient = null;
             
+            CornApp.Instance.BackToLogin();
         }
 
         /// <summary>
@@ -623,16 +346,8 @@ namespace MinecraftClient
         /// </summary>
         public void OnConnectionLost(DisconnectReason reason, string message)
         {
-            // Ensure Unity objects are cleared first
-            PrepareDisconnect();
-
             // Clear world data
             world.Clear();
-
-            // Go back to login scene
-            Loom.QueueOnMainThread(() => {
-                SceneManager.LoadScene("Login");
-            });
 
             switch (reason)
             {
@@ -652,11 +367,10 @@ namespace MinecraftClient
                     throw new InvalidOperationException(Translations.Get("exception.user_logout"));
             }
 
+            Disconnect();
         }
 
         #endregion
-
-        #region Command prompt and internal MCC commands
 
         /// <summary>
         /// Allows the user to send chat messages, commands, and leave the server.
@@ -687,8 +401,6 @@ namespace MinecraftClient
             catch (IOException) { }
             catch (NullReferenceException) { }
         }
-
-        #endregion
 
         #region Thread-Invoke: Cross-thread method calls
 
@@ -783,12 +495,6 @@ namespace MinecraftClient
         {
             return new char[] { (char)167, (char)127 }; // Minecraft color code and ASCII code DEL
         }
-
-        /// <summary>
-        /// Get all player.inventories. ID 0 is the player inventory.
-        /// </summary>
-        /// <returns>All player.inventories</returns>
-        public Dictionary<int, Container> GetInventories() => playerData.Inventories;
 
         /// <summary>
         /// Get all Entities
@@ -1208,8 +914,8 @@ namespace MinecraftClient
             ClearInventories();
 
             Loom.QueueOnMainThread(() => {
-                chunkRenderManager?.ReloadWorld();
-                entityRenderManager?.ReloadEntityRenders();
+                ChunkRenderManager?.ReloadWorld();
+                EntityRenderManager?.ReloadEntityRenders();
             });
 
         }
@@ -1252,14 +958,12 @@ namespace MinecraftClient
                 if (!locationReceived)
                     Loom.QueueOnMainThread(() => {
                         // Force refresh environment collider
-                        chunkRenderManager?.RefreshTerrainCollider(location.Up());
+                        ChunkRenderManager?.RefreshTerrainCollider(location.Up());
 
                         // Then update player location
                         playerController?.SetLocation(location);
-
                         // TODO Set player rotation
 
-                        
                     });
 
                 locationReceived = true;
@@ -1469,7 +1173,7 @@ namespace MinecraftClient
             entities.Add(entity.ID, entity);
 
             Loom.QueueOnMainThread(() => {
-                entityRenderManager?.AddEntityRender(entity);
+                EntityRenderManager?.AddEntityRender(entity);
             });
 
         }
@@ -1535,7 +1239,7 @@ namespace MinecraftClient
                         playerData.GameMode = newMode;
                         EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(playerData.GameMode));
 
-                        ShowNotification("Gamemode updated to " + newMode, Notification.Type.Success);
+                        CornApp.ShowNotification($"Gamemode updated to {newMode}", Notification.Type.Success);
                     });
                 }
             }
@@ -1554,7 +1258,7 @@ namespace MinecraftClient
             }
 
             Loom.QueueOnMainThread(() => {
-                entityRenderManager?.RemoveEntityRenders(Entities);
+                EntityRenderManager?.RemoveEntityRenders(Entities);
             });
         }
 
@@ -1577,7 +1281,7 @@ namespace MinecraftClient
                 entities[EntityID].Location = location;
 
                 Loom.QueueOnMainThread(() => {
-                    entityRenderManager?.MoveEntityRender(EntityID, location);
+                    EntityRenderManager?.MoveEntityRender(EntityID, location);
                 });
             }
 
@@ -1594,7 +1298,7 @@ namespace MinecraftClient
                 entities[EntityID].Pitch = pitch;
 
                 Loom.QueueOnMainThread(() => {
-                    entityRenderManager?.RotateEntityRender(EntityID, yaw, pitch);
+                    EntityRenderManager?.RotateEntityRender(EntityID, yaw, pitch);
                 });
             }
 
@@ -1609,7 +1313,7 @@ namespace MinecraftClient
                 entities[EntityID].HeadYaw = headYaw;
 
                 Loom.QueueOnMainThread(() => {
-                    entityRenderManager?.RotateEntityRenderHead(EntityID, headYaw);
+                    EntityRenderManager?.RotateEntityRenderHead(EntityID, headYaw);
                 });
             }
 
@@ -1631,7 +1335,7 @@ namespace MinecraftClient
                 entities[EntityID].Location = location;
 
                 Loom.QueueOnMainThread(() => {
-                    entityRenderManager?.MoveEntityRender(EntityID, location);
+                    EntityRenderManager?.MoveEntityRender(EntityID, location);
                 });
             }
         }

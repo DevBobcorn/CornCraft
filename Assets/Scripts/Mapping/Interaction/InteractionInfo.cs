@@ -8,6 +8,6 @@ namespace MinecraftClient.Mapping
 
         public abstract string GetHint();
 
-        public abstract void RunInteraction(CornClient game);
+        public abstract void RunInteraction(CornClient client);
     }
 }

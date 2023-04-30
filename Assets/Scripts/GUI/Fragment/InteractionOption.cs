@@ -46,12 +46,12 @@ namespace MinecraftClient.UI
             anim?.SetBool(EXPIRED, true);
         }
 
-        public void Execute(CornClient game)
+        public void Execute(CornClient? client)
         {
-            // Execution visual feedback
-            anim?.SetTrigger(EXECUTED);
+            anim?.SetTrigger(EXECUTED); // Execution visual feedback
 
-            interactionInfo?.RunInteraction(game);
+            if (client == null) return;
+            interactionInfo?.RunInteraction(client);
         }
 
         // Called by animator after hide animation ends...

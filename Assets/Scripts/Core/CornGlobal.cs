@@ -29,7 +29,6 @@ namespace MinecraftClient
         public static bool DebugMode { get; set; } = true;
 
         // Custom app variables
-        private static readonly Dictionary<string, object> AppVars = new Dictionary<string, object>();
         public static CacheType SessionCaching = CacheType.Disk;
         public static CacheType ProfileKeyCaching = CacheType.Disk;
         public static bool ResolveSrvRecords = true;

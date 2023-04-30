@@ -20,7 +20,6 @@ namespace MinecraftClient.UI
     {
         private const string LOCALHOST_ADDRESS = "127.0.0.1";
 
-        private CornClient? game;
         private TMP_InputField? serverInput, usernameInput, authCodeInput;
         private Button?         loginButton, quitButton, authConfirmButton, authCancelButton;
         private Button?         loginCloseButton, authLinkButton, authCloseButton, localhostButton;
@@ -71,7 +70,7 @@ namespace MinecraftClient.UI
         {
             if (tryingConnect)
             {
-                CornClient.ShowNotification("Already loggin' in!", Notification.Type.Warning);
+                CornApp.ShowNotification("Already loggin' in!", Notification.Type.Warning);
                 return;
             }
 
@@ -99,7 +98,7 @@ namespace MinecraftClient.UI
             {
                 if (!StringHelper.IsValidName(account))
                 {
-                    CornClient.ShowNotification("The offline username is not valid!", Notification.Type.Warning);
+                    CornApp.ShowNotification("The offline username is not valid!", Notification.Type.Warning);
                     tryingConnect = false;
                     loadStateInfoText!.text = ">_<";
                     yield break;
@@ -183,7 +182,7 @@ namespace MinecraftClient.UI
 
                 if (!ParseServerIP(serverText, out host, ref port))
                 {
-                    CornClient.ShowNotification("Failed to parse server name or address!", Notification.Type.Warning);
+                    CornApp.ShowNotification("Failed to parse server name or address!", Notification.Type.Warning);
                     tryingConnect = false;
                     loadStateInfoText!.text = ">_<";
                     yield break;
@@ -234,7 +233,7 @@ namespace MinecraftClient.UI
 
                 // Not realms
                 Translations.Log("mcc.retrieve"); // Retrieve server information
-                loadStateInfoText!.text = ">_<";
+                loadStateInfoText!.text = Translations.Get("mcc.retrieve");
                 yield return null;
 
                 bool pingFinished = false, pingResult = false;
@@ -262,7 +261,7 @@ namespace MinecraftClient.UI
 
                         try // Login to Server
                         {
-                            game!.StartLogin(session, playerKeyPair, host, port, protocolVersion, null,
+                            CornApp.Instance.TryStartLogin(session, playerKeyPair, host, port, protocolVersion, null,
                                     (succeeded) => tryingConnect = false,
                                     (status) => loadStateInfoText!.text = status, accountLower);
                             yield break;
@@ -295,7 +294,7 @@ namespace MinecraftClient.UI
                 };
                 failureMessage += Translations.Get(failureReason);
                 loadStateInfoText!.text = ">_<";
-                CornClient.ShowNotification(failureMessage, Notification.Type.Error);
+                CornApp.ShowNotification(failureMessage, Notification.Type.Error);
 
                 if (result == ProtocolHandler.LoginResult.SSLError)
                     Translations.NotifyError("error.login.ssl_help");
@@ -372,7 +371,7 @@ namespace MinecraftClient.UI
         public void CopyAuthLink()
         {
             GUIUtility.systemCopyBuffer = authLinkText!.text;
-            CornClient.ShowNotification("Link copied to clipboard.", Notification.Type.Success);
+            CornApp.ShowNotification("Link copied to clipboard.", Notification.Type.Success);
         }
 
         public void PasteAuthCode()
@@ -417,7 +416,7 @@ namespace MinecraftClient.UI
 
             if (String.IsNullOrEmpty(code))
             {
-                CornClient.ShowNotification("Authentication code is empty!", Notification.Type.Warning);
+                CornApp.ShowNotification("Authentication code is empty!", Notification.Type.Warning);
                 return;
             }
 
@@ -433,8 +432,6 @@ namespace MinecraftClient.UI
 
         void Start()
         {
-            game = CornClient.Instance;
-
             // Initialize controls
             var loginPanelObj = transform.Find("Login Panel");
             loginPanel = loginPanelObj.GetComponent<CanvasGroup>();
@@ -517,6 +514,8 @@ namespace MinecraftClient.UI
             // loadStateInfoText!.text = StringConvert.MC2TMP("Hello world §a[§a§a-1, §a1 §6[Bl§b[HHH]ah] Hello §c[Color RE§rD]  §a1§r] (blah)");
             loadStateInfoText!.text = $"CornCraft {CornGlobal.Version} Powered by <u>Minecraft Console Client</u>";
 
+            // Release cursor (Useful when re-entering login scene from game)
+            Cursor.lockState = CursorLockMode.None;
         }
 
         void Update()

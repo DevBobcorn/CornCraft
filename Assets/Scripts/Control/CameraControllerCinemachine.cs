@@ -11,22 +11,14 @@ namespace MinecraftClient.Control
         [SerializeField] private float nearFov = 40F;
         [SerializeField] private float farFov  = 80F;
 
-        [SerializeField] private float godFov   = 10F;
-        [SerializeField] private float godPitch = 45F;
-
-        [SerializeField] private float cameraZOffsetNear =   2F;
-        [SerializeField] private float cameraZOffsetFar  =  20F;
+        [SerializeField] private float cameraZOffsetNear =    2F;
+        [SerializeField] private float cameraZOffsetFar  =   20F;
         [SerializeField] private float cameraYOffsetNear =  0.4F;
         [SerializeField] private float cameraYOffsetFar  = -0.4F;
         [SerializeField] private float cameraYOffsetClip =  0.1F;
 
-        [SerializeField] private float cameraGodOffsetNear =  40F;
-        [SerializeField] private float cameraGodOffsetFar  =  60F;
-
         [SerializeField] [Range(0F, 20F)] private float scaleSmoothFactor = 4.0F;
         [SerializeField] [Range(0F,  2F)] private float scrollSensitivity = 0.5F;
-
-        private CornClient? game;
 
         // Virtual camera and camera components
         private CinemachineVirtualCamera? virtualCameraFollow;
@@ -42,9 +34,6 @@ namespace MinecraftClient.Control
         {
             if (!initialized)
             {
-                // Get game instance
-                game = CornClient.Instance;
-
                 // Get virtual and render cameras
                 var followObj = transform.Find("Follow Virtual");
                 virtualCameraFollow = followObj.GetComponent<CinemachineVirtualCamera>();
@@ -63,12 +52,7 @@ namespace MinecraftClient.Control
                     Debug.LogWarning("Render camera not found!");
 
                 // Override input axis to disable input when paused
-                CinemachineCore.GetInputAxis = (axisName) => {
-                    if (game.PlayerData.Perspective == Perspective.GodPerspective && axisName.Equals("Mouse Y"))
-                        return 0F;
-                    
-                    return game.IsPaused() ? 0F : Input.GetAxis(axisName);
-                };
+                CinemachineCore.GetInputAxis = (axisName) => (CornApp.CurrentClient?.IsPaused() ?? true) ? 0F : Input.GetAxis(axisName);
 
                 initialized = true;
             }
@@ -94,7 +78,7 @@ namespace MinecraftClient.Control
         void ManagedUpdate(float interval)
         {
             // Disable input when game is paused, see EnsureInitialized() above
-            if (!game!.MouseScrollAbsorbed())
+            if (!client!.MouseScrollAbsorbed())
             {
                 float scroll = CinemachineCore.GetInputAxis("Mouse ScrollWheel");
 
@@ -103,31 +87,22 @@ namespace MinecraftClient.Control
                     cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - scroll * scrollSensitivity);
             }
 
-            var curPersp = game!.PlayerData.Perspective;
+            var curPersp = client!.PlayerData.Perspective;
             
             if (cameraInfo.TargetScale != cameraInfo.CurrentScale)
             {
                 cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, interval * scaleSmoothFactor);
+
+                var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
+                virtualCameraFollow!.m_Lens.FieldOfView = fov;
+                virtualCameraFixed!.m_Lens.FieldOfView  = fov;
+
+                if (curPersp == Perspective.ThirdPerson) // Update target local position
+                {
+                    framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
+                    framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
+                }
                 
-                if (curPersp == Perspective.GodPerspective)
-                {
-                    virtualCameraFollow!.m_Lens.FieldOfView = godFov;
-
-                    framingTransposer!.m_TrackedObjectOffset = Vector3.zero;
-                    framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraGodOffsetNear, cameraGodOffsetFar, cameraInfo.CurrentScale);
-                }
-                else
-                {
-                    var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
-                    virtualCameraFollow!.m_Lens.FieldOfView = fov;
-                    virtualCameraFixed!.m_Lens.FieldOfView  = fov;
-
-                    if (curPersp == Perspective.ThirdPerson) // Update target local position
-                    {
-                        framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
-                        framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
-                    }
-                }
             }
 
         }
@@ -162,18 +137,15 @@ namespace MinecraftClient.Control
             switch (perspective)
             {
                 case Perspective.FirstPerson:
-                    EnterFirstPersonMode(game!.PlayerData.Perspective);
+                    EnterFirstPersonMode(client!.PlayerData.Perspective);
                     break;
                 case Perspective.ThirdPerson:
-                    EnterThirdPersonMode(game!.PlayerData.Perspective);
-                    break;
-                case Perspective.GodPerspective:
-                    EnterGodPerspective(game!.PlayerData.Perspective);
+                    EnterThirdPersonMode(client!.PlayerData.Perspective);
                     break;
             }
 
             // Update player data
-            game!.PlayerData.Perspective = perspective;
+            client!.PlayerData.Perspective = perspective;
 
             // Broadcast perspective change
             EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(perspective));
@@ -182,12 +154,12 @@ namespace MinecraftClient.Control
         public override bool IsFixed()
         {
             // Camera controller is fixed when player's in first person mode
-            return game!.PlayerData.Perspective == Perspective.FirstPerson;
+            return client!.PlayerData.Perspective == Perspective.FirstPerson;
         }
 
         private void EnterFirstPersonMode(Perspective prevPersp)
         {
-            if (prevPersp == Perspective.ThirdPerson || prevPersp == Perspective.GodPerspective)
+            if (prevPersp == Perspective.ThirdPerson)
             {
                 // Sync virtual camera rotation
                 fixedPOV!.m_HorizontalAxis.Value = followPOV!.m_HorizontalAxis.Value;
@@ -234,31 +206,6 @@ namespace MinecraftClient.Control
 
             // Enable follow camera collider
             virtualCameraFollow!.GetComponent<CinemachineCollider>().enabled = true;
-
-            // Make normal virtual camera the live camera
-            virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
-        }
-
-        private void EnterGodPerspective(Perspective prevPersp)
-        {
-            // Disable follow camera collider
-            virtualCameraFollow!.GetComponent<CinemachineCollider>().enabled = false;
-
-            if (prevPersp == Perspective.FirstPerson) // Sync virtual camera rotation
-                followPOV!.m_HorizontalAxis.Value = fixedPOV!.m_HorizontalAxis.Value;
-            
-            followPOV!.m_VerticalAxis.Value = godPitch;
-
-            // Render player on this camera
-            if (renderCameraPresent)
-                renderCamera!.cullingMask = renderCamera.cullingMask | (1 << LayerMask.NameToLayer("Player"));
-            
-            // Update field of view
-            virtualCameraFollow!.m_Lens.FieldOfView = godFov;
-
-            // Update target offset
-            framingTransposer!.m_TrackedObjectOffset = Vector3.zero;
-            framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraGodOffsetNear, cameraGodOffsetFar, cameraInfo.CurrentScale);
 
             // Make normal virtual camera the live camera
             virtualCameraFollow!.MoveToTopOfPrioritySubqueue();

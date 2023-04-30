@@ -39,12 +39,12 @@ namespace MinecraftClient.UI
 
         public void Back2Game()
         {
-            CornClient.Instance.ScreenControl?.TryPopScreen();
+            CornApp.CurrentClient.ScreenControl?.TryPopScreen();
         }
 
         public void QuitGame()
         {
-            CornClient.Instance?.Disconnect();
+            CornApp.CurrentClient.Disconnect();
         }
 
         protected override bool Initialize()
