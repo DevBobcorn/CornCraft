@@ -1,7 +1,6 @@
 #nullable enable
 using UnityEngine;
 using MinecraftClient.Mapping;
-using MinecraftClient.Resource;
 
 namespace MinecraftClient.Rendering
 {
@@ -38,12 +37,13 @@ namespace MinecraftClient.Rendering
         private void UpdateSkinMaterial()
         {
             var nameLower = entity!.Name?.ToLower();
+            var skinMats = CornApp.CurrentClient?.MaterialManager?.SkinMaterials;
 
             // Find skin and change materials
-            if (nameLower is not null && SkinManager.SkinMaterials.ContainsKey(nameLower))
+            if (nameLower is not null && skinMats is not null && skinMats.ContainsKey(nameLower))
             {
                 var renderers = visual!.gameObject.GetComponentsInChildren<MeshRenderer>();
-                var mat = SkinManager.SkinMaterials[nameLower];
+                var mat = skinMats[nameLower];
 
                 foreach (var renderer in renderers)
                     renderer.sharedMaterial = mat;

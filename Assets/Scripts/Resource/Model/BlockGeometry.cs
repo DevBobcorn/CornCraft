@@ -441,7 +441,7 @@ namespace MinecraftClient.Resource
                 // state rotation, and it rotates the area of texture which is used on the face
                 int uvAreaRot = stateRotated && uvlock ? uvlockMap[zyRot][facePair.Key] : 0;
 
-                float3[] remappedUVs = RemapUVs(face.uv / MC_UV_SCALE, texIdentifier, uvAreaRot);
+                float3[] remappedUVs = CornApp.ActivePackManager.GetUVs(texIdentifier, face.uv / MC_UV_SCALE, uvAreaRot);
 
                 // This rotation doesn't change the area of texture used...
                 // See https://minecraft.fandom.com/wiki/Model#Block_models
@@ -484,11 +484,6 @@ namespace MinecraftClient.Resource
                 vertIndexOffset[cullDir] += 4; // Four vertices per quad
             }
 
-        }
-
-        private static float3[] RemapUVs(float4 uvs, ResourceLocation source, int areaRot)
-        {
-            return AtlasManager.GetUVs(source, uvs, areaRot);
         }
 
         private static Dictionary<int2, Dictionary<FaceDir, int>> CreateUVLockMap()

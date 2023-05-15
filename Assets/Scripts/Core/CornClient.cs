@@ -24,6 +24,17 @@ namespace MinecraftClient
 {
     public class CornClient : MonoBehaviour, IMinecraftComHandler
     {
+        #region Inspector Fields
+        [SerializeField] public ChunkRenderManager? ChunkRenderManager;
+        [SerializeField] public EntityRenderManager? EntityRenderManager;
+        [SerializeField] public MaterialManager? MaterialManager;
+        [SerializeField] public GameObject? PlayerPrefab;
+        [SerializeField] public CameraController? CameraController;
+        [SerializeField] public ScreenControl? ScreenControl;
+        [SerializeField] public HUDScreen? HUDScreen;
+
+        #endregion
+
         #region Login Information
         private string? host;
         private int port;
@@ -81,7 +92,6 @@ namespace MinecraftClient
         private bool worldAndMovementsRequested = false;
         private World world = new();
         public World GetWorld() => world;
-        [SerializeField] public ChunkRenderManager? ChunkRenderManager;
         public bool IsMovementReady()
         {
             if (!locationReceived || ChunkRenderManager is null)
@@ -98,7 +108,6 @@ namespace MinecraftClient
         #endregion
 
         #region Players and Entities
-        [SerializeField] public GameObject? PlayerPrefab;
         private bool inventoryHandlingRequested = false;
         private bool locationReceived = false;
         public bool LocationReceived => locationReceived;
@@ -114,12 +123,11 @@ namespace MinecraftClient
             }
         }
 
-        [SerializeField] public CameraController? CameraController;
+
         private PlayerController? playerController;
         public string? PlayerDebugInfo => playerController?.GetDebugInfo();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         private Dictionary<int, Entity> entities = new();
-        [SerializeField] public EntityRenderManager? EntityRenderManager;
         #endregion
 
         void Start()
@@ -146,9 +154,6 @@ namespace MinecraftClient
             timeElapsedSinceUpdate += Time.unscaledDeltaTime;
 
         }
-
-        [SerializeField] public ScreenControl? ScreenControl;
-        [SerializeField] public HUDScreen? HUDScreen;
 
         public bool IsPaused() => ScreenControl!.IsPaused;
 

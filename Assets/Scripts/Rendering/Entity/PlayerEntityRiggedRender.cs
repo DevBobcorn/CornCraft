@@ -26,8 +26,7 @@ namespace MinecraftClient.Rendering
         {
             base.Initialize(entityType, entity);
 
-            if (usePlayerSkin)
-                UpdateSkinMaterial(entity);
+            if (usePlayerSkin) UpdateSkinMaterial();
         }
 
         public override void UpdateStateMachine(PlayerStatus info)
@@ -48,17 +47,16 @@ namespace MinecraftClient.Rendering
             }
         }
 
-        private void UpdateSkinMaterial(Entity player)
+        private void UpdateSkinMaterial()
         {
-            var nameLower = player.Name?.ToLower();
+            var nameLower = entity!.Name?.ToLower();
+            var skinMats = CornApp.CurrentClient?.MaterialManager?.SkinMaterials;
 
             // Find skin and change materials
-            if (nameLower is not null && SkinManager.SkinMaterials.ContainsKey(nameLower))
+            if (nameLower is not null && skinMats is not null && skinMats.ContainsKey(nameLower))
             {
-                var visualObj = visual!.gameObject;
-
-                var renderers = visualObj.GetComponentsInChildren<SkinnedMeshRenderer>();
-                var mat = SkinManager.SkinMaterials[nameLower];
+                var renderers = visual!.gameObject.GetComponentsInChildren<MeshRenderer>();
+                var mat = skinMats[nameLower];
 
                 foreach (var renderer in renderers)
                     renderer.sharedMaterial = mat;

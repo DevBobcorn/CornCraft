@@ -61,8 +61,8 @@ namespace MinecraftClient.Resource
             for (int fti = vertOffset;fti < newLength;fti++)
                 tints[fti] = fluidColor;
 
-            float3[] fullUVs = AtlasManager.GetUVs(liquid, FULL, 0);
-            //float3[] sideUVs = AtlasManager.GetUVs(liquid, new(0, 1 - h, 1, 1), 0);
+            float3[] fullUVs = CornApp.ActivePackManager.GetUVs(liquid, FULL, 0);
+            //float3[] sideUVs = CornApp.ActivePackManager.GetUVs(liquid, new(0, 1 - h, 1, 1), 0);
             float3[] sideUVs = fullUVs;
 
             if ((cullFlags & (1 << 0)) != 0) // Up

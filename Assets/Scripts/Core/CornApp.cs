@@ -12,7 +12,6 @@ using MinecraftClient.Event;
 using MinecraftClient.Protocol.Keys;
 using MinecraftClient.Protocol.Handlers.Forge;
 using MinecraftClient.Protocol.Session;
-using MinecraftClient.Rendering;
 using MinecraftClient.Resource;
 using MinecraftClient.UI;
 using MinecraftClient.Mapping;
@@ -44,7 +43,7 @@ namespace MinecraftClient
         }
 
         private readonly ResourcePackManager packManager = new ResourcePackManager();
-        public ResourcePackManager PackManager => packManager;
+        public static ResourcePackManager ActivePackManager => Instance.packManager;
 
         // Runs before a scene gets loaded
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -54,8 +53,6 @@ namespace MinecraftClient
 
             // Ensure CornApp instance is created
             var i = Instance;
-            CornGlobal.ResourceOverrides.Clear();
-            CornGlobal.ResourceOverrides.Add("vanilla_fix");
         }
 
         private IEnumerator PrepareDataAndResource(int protocolVersion, DataLoadFlag startUpFlag, Action<string> updateStatus)
@@ -139,20 +136,13 @@ namespace MinecraftClient
                 yield break;
             }
             // Then append overrides
-            foreach (var packName in CornGlobal.ResourceOverrides)
-                packManager.AddPack(new(packName));
+            packManager.AddPack(new("vanilla_fix"));
             // Load valid packs...
             loadFlag.Finished = false;
             // Load valid packs...
             loadFlag.Finished = false;
             Task.Run(() => packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status))));
             while (!loadFlag.Finished) yield return null;
-            
-            // Load player skin overrides...
-            SkinManager.Load();
-
-            // Reset atlas materials
-            MaterialManager.ClearInitializedFlag();
 
             // Load biome definitions (After colormaps in resource packs are loaded) (on main thread)...
             yield return BiomePalette.INSTANCE.PrepareData(dataVersion, $"vanilla-{resourceVersion}", loadFlag);

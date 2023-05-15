@@ -44,7 +44,6 @@ namespace MinecraftClient
 
         // Minecraft Settings
         public static MCSettings MCSettings { get; } = new();
-        public static List<string> ResourceOverrides { get; } = new();
 
     }
 
