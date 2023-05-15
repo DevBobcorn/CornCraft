@@ -130,7 +130,7 @@ namespace MinecraftClient.Resource
 
                 ResourceLocation texIdentifier = model.resolveTextureName(face.texName);
 
-                float3[] remappedUVs = RemapUVs(face.uv / MC_UV_SCALE, texIdentifier, 0);
+                float3[] remappedUVs = CornApp.ActivePackManager.GetUVs(texIdentifier, face.uv / MC_UV_SCALE, 0);
 
                 // This rotation doesn't change the area of texture used...
                 // See https://minecraft.fandom.com/wiki/Model#Block_models
@@ -168,11 +168,6 @@ namespace MinecraftClient.Resource
                 
             }
 
-        }
-
-        private static float3[] RemapUVs(float4 uvs, ResourceLocation source, int areaRot)
-        {
-            return AtlasManager.GetUVs(source, uvs, areaRot);
         }
 
     }

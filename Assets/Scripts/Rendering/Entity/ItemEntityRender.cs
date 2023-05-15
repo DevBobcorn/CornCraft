@@ -28,11 +28,11 @@ namespace MinecraftClient.Rendering
                     return;
                 }
 
-                var packManager = CornApp.Instance.PackManager;
+                var packManager = CornApp.ActivePackManager;
 
                 var itemNumId = ItemPalette.INSTANCE.ToNumId(itemStack.Type.ItemId);
                 ItemModel? itemModel = null;
-                packManager!.ItemModelTable.TryGetValue(itemNumId, out itemModel);
+                packManager.ItemModelTable.TryGetValue(itemNumId, out itemModel);
 
                 if (itemModel is null)
                 {
@@ -120,7 +120,7 @@ namespace MinecraftClient.Rendering
                 mesh.RecalculateNormals();
 
                 itemMeshFilter.sharedMesh = mesh;
-                itemMeshRenderer.sharedMaterial = MaterialManager.GetAtlasMaterial(itemModel.RenderType);
+                itemMeshRenderer.sharedMaterial = CornApp.CurrentClient!.MaterialManager!.GetAtlasMaterial(itemModel.RenderType);
 
                 if (itemGeometry.isGenerated) // Put it onto the ground, instead of floating in the air
                 {
