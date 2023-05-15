@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
+using MinecraftClient.Resource;
+
 namespace MinecraftClient.Rendering
 {
     public class MaterialManager : MonoBehaviour
@@ -80,7 +82,7 @@ namespace MinecraftClient.Rendering
         private void Initialize()
         {
             atlasMaterials.Clear();
-            var packManager = CornApp.ActivePackManager;
+            var packManager = ResourcePackManager.Instance;
 
             // Solid
             var solid = new Material(AtlasSolid!);

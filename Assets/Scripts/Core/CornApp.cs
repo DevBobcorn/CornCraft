@@ -42,8 +42,6 @@ namespace MinecraftClient
             }
         }
 
-        private readonly ResourcePackManager packManager = new ResourcePackManager();
-        public static ResourcePackManager ActivePackManager => Instance.packManager;
 
         // Runs before a scene gets loaded
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -104,6 +102,8 @@ namespace MinecraftClient
             loadFlag.Finished = false;
             Task.Run(() => BlockInteractionManager.INSTANCE.PrepareData(loadFlag));
             while (!loadFlag.Finished) yield return null;
+
+            var packManager = ResourcePackManager.Instance;
 
             // Load resource packs...
             packManager.ClearPacks();
