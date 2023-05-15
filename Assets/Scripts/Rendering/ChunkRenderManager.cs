@@ -368,7 +368,7 @@ namespace MinecraftClient.Rendering
                 terrainColliderDirty = false;
                 var world = client?.GetWorld();
 
-                var table = CornApp.ActivePackManager.StateModelTable;
+                var table = ResourcePackManager.Instance.StateModelTable;
                 if (world is null || table is null)
                     return;
 
@@ -516,7 +516,7 @@ namespace MinecraftClient.Rendering
             client = CornApp.CurrentClient;
             world = client?.GetWorld();
 
-            var modelTable = CornApp.ActivePackManager.StateModelTable;
+            var modelTable = ResourcePackManager.Instance.StateModelTable;
             builder = new(modelTable);
 
             var movementColliderObj = new GameObject("Movement Collider");

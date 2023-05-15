@@ -51,7 +51,9 @@ namespace MinecraftClient.Resource
 
         private readonly List<ResourcePack> packs = new List<ResourcePack>();
 
-        public ResourcePackManager()
+        public static readonly ResourcePackManager Instance = new();
+
+        private ResourcePackManager()
         {
             // Block model loaders
             BlockModelLoader = new BlockModelLoader(this);

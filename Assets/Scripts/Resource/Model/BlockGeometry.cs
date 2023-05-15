@@ -441,7 +441,7 @@ namespace MinecraftClient.Resource
                 // state rotation, and it rotates the area of texture which is used on the face
                 int uvAreaRot = stateRotated && uvlock ? uvlockMap[zyRot][facePair.Key] : 0;
 
-                float3[] remappedUVs = CornApp.ActivePackManager.GetUVs(texIdentifier, face.uv / MC_UV_SCALE, uvAreaRot);
+                float3[] remappedUVs = ResourcePackManager.Instance.GetUVs(texIdentifier, face.uv / MC_UV_SCALE, uvAreaRot);
 
                 // This rotation doesn't change the area of texture used...
                 // See https://minecraft.fandom.com/wiki/Model#Block_models
