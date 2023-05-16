@@ -124,6 +124,8 @@ namespace MinecraftClient.Mapping
         public static readonly ResourceLocation ZOMBIE_VILLAGER_ID = new("zombie_villager");
         public static readonly ResourceLocation ZOMBIFIED_PIGLIN_ID = new("zombified_piglin");
 
+        public static readonly EntityType DUMMY_ENTITY_TYPE = new(0, ResourceLocation.INVALID);
+
         public int NumeralId { get; }
 
         public ResourceLocation EntityId { get; }

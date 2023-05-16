@@ -27,6 +27,7 @@ namespace MinecraftClient
         public CornClient? Client => client;
 
         public static CornClient? CurrentClient => Instance.Client;
+        public static void SetCurrentClient(CornClient c) => Instance.client = c;
 
         private static CornApp? instance;
         public static CornApp Instance

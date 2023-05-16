@@ -114,7 +114,7 @@ namespace MinecraftClient
         public Perspective Perspective = 0;
         private GameMode gameMode = GameMode.Survival;
         public GameMode GameMode => gameMode;
-        private readonly Entity clientEntity = new(0, EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID), Location.Zero);
+        private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         public Entity PlayerEntity => clientEntity;
         public float? YawToSend = null, PitchToSend = null;
         public bool Grounded = false;
@@ -138,6 +138,12 @@ namespace MinecraftClient
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         private Dictionary<int, Entity> entities = new();
         #endregion
+
+        void Awake() // In case where the client wasn't properly assigned before
+        {
+            if (CornApp.CurrentClient is null)
+                CornApp.SetCurrentClient(this);
+        }
 
         void Start()
         {
@@ -195,6 +201,7 @@ namespace MinecraftClient
             this.protocolVersion = protocol;
             this.playerKeyPair = playerKeyPair;
 
+            clientEntity.Type = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);
             clientEntity.Name = session.PlayerName;
             clientEntity.MaxHealth = 20F;
 
@@ -1548,10 +1555,8 @@ namespace MinecraftClient
                 entity.Metadata = metadata;
                 if (entity.Type.ContainsItem && metadata.TryGetValue(7, out object? itemObj) && itemObj != null && itemObj.GetType() == typeof(ItemStack))
                 {
-                    var item = (ItemStack) itemObj;
-                    if (item is null)
-                        entity.Item = new ItemStack(ItemPalette.INSTANCE.FromId(Item.AIR_ID), 0, null);
-                    else entity.Item = item;
+                    var item = (ItemStack?) itemObj;
+                    entity.Item = item;
                 }
                 if (metadata.TryGetValue(6, out object? poseObj) && poseObj != null && poseObj.GetType() == typeof(Int32))
                 {

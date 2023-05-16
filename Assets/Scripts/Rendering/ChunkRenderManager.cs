@@ -401,9 +401,9 @@ namespace MinecraftClient.Rendering
             operationCode = (operationCode + 1) % OPERATION_CYCLE_LENGTH;
 
             // Update terrain collider if necessary
-            var playerLoc = client!.PlayerEntity.Location.ToFloor();
-            if (terrainColliderDirty || lastPlayerLoc != playerLoc)
-                RebuildTerrainCollider(playerLoc);
+            var playerLoc = client?.PlayerEntity.Location.ToFloor();
+            if (playerLoc != null && (terrainColliderDirty || lastPlayerLoc != playerLoc))
+                RebuildTerrainCollider(playerLoc.Value);
         }
         #endregion
 
