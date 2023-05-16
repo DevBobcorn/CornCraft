@@ -21,19 +21,6 @@ namespace MinecraftClient.Rendering
         public const string OBSTACLE_LAYER_NAME = "Obstacle";
         public const string LIQUID_LAYER_NAME   = "Liquid";
 
-        private static ChunkRenderManager? instance;
-        public static ChunkRenderManager Instance
-        {
-            get {
-                if (instance is null)
-                {
-                    instance = Component.FindObjectOfType<ChunkRenderManager>();
-                }
-                
-                return instance;
-            }
-        }
-
         private Dictionary<int2, ChunkRenderColumn> columns = new();
 
         // Both manipulated on Unity main thread only
@@ -101,9 +88,9 @@ namespace MinecraftClient.Rendering
         #region Chunk building
         public void BuildChunkRender(ChunkRender chunkRender)
         {
-            if (world is null)
-                return;
+            if (world is null) return;
 
+            int chunkX = chunkRender.ChunkX, chunkZ = chunkRender.ChunkZ;
             var chunkColumnData = world[chunkRender.ChunkX, chunkRender.ChunkZ];
 
             if (chunkColumnData is null) // Chunk column data unloaded, cancel
@@ -120,16 +107,16 @@ namespace MinecraftClient.Rendering
 
             var chunkData = chunkColumnData[chunkRender.ChunkY];
 
-            if (chunkData is null) // Chunk not available, cancel
+            if (chunkData is null) // Chunk not available or is empty(air chunk), cancel
             {
                 chunkRender.State = ChunkBuildState.Cancelled;
                 return;
             }
 
-            // Save neighbors' status(present or not) right before mesh building
-            chunkRender.UpdateNeighborStatus();
-
-            if (!chunkRender.AllNeighborDataPresent)
+            if (!(  world.isChunkColumnReady(chunkX, chunkZ - 1) && // ZNeg neighbor present
+                    world.isChunkColumnReady(chunkX, chunkZ + 1) && // ZPos neighbor present
+                    world.isChunkColumnReady(chunkX - 1, chunkZ) && // XNeg neighbor present
+                    world.isChunkColumnReady(chunkX + 1, chunkZ) )) // XPos neighbor present
             {
                 chunkRender.State = ChunkBuildState.Delayed;
                 return; // Not all neighbor data ready, delay it
@@ -165,6 +152,7 @@ namespace MinecraftClient.Rendering
         private const int ChunkCenterX = Chunk.SizeX / 2 + 1;
         private const int ChunkCenterY = Chunk.SizeY / 2 + 1;
         private const int ChunkCenterZ = Chunk.SizeZ / 2 + 1;
+        private const int OPERATION_CYCLE_LENGTH = 64;
 
         private void UpdateBuildPriority(Location currentLocation, ChunkRender chunk, int offsetY)
         {   // Get this chunk's build priority based on its current distance to the player,
@@ -174,11 +162,11 @@ namespace MinecraftClient.Rendering
                             chunk.ChunkZ * Chunk.SizeZ + ChunkCenterZ).DistanceTo(currentLocation) / 16);
         }
 
-        // Add new chunks into render list
         public void UpdateChunkRendersListAdd()
         {
             var world = client?.GetWorld();
             if (world is null) return;
+
             var location = client!.GetCurrentLocation();
             ChunkRenderColumn columnRender;
 
@@ -192,8 +180,7 @@ namespace MinecraftClient.Rendering
             for (int cx = -viewDist;cx <= viewDist;cx++)
                 for (int cz = -viewDist;cz <= viewDist;cz++)
                 {
-                    if (cx * cx + cz * cz >= viewDistSqr)
-                        continue;
+                    if (cx * cx + cz * cz >= viewDistSqr) continue;
 
                     int chunkX = location.ChunkX + cx, chunkZ = location.ChunkZ + cz;
                     
@@ -213,7 +200,6 @@ namespace MinecraftClient.Rendering
                                     UpdateBuildPriority(location, chunk, offsetY);
                                     QueueChunkRenderBuild(chunk);
                                 }
-                                
                             }
                         }
                         else
@@ -233,7 +219,6 @@ namespace MinecraftClient.Rendering
 
         }
 
-        // Remove far chunks from render list
         public void UpdateChunkRendersListRemove()
         {
             var world = client?.GetWorld();
@@ -273,55 +258,6 @@ namespace MinecraftClient.Rendering
                 QueueChunkRenderBuild(chunkRender);
         }
 
-        public void UnloadWorld()
-        {
-            // Clear the queue first...
-            chunkRendersToBeBuilt.Clear();
-
-            // And cancel current chunk builds
-            foreach (var chunk in chunksBeingBuilt)
-                chunk.TokenSource?.Cancel();
-            
-            chunksBeingBuilt.Clear();
-
-            // Clear all chunk columns in world
-            var chunkCoords = columns.Keys.ToArray();
-
-            foreach (var chunkCoord in chunkCoords)
-                columns.Remove(chunkCoord);
-
-            columns.Clear();
-
-            // Unregister callbacks
-            if (columnCallBack1 is not null)
-            {
-                EventManager.Instance.Unregister(columnCallBack1);
-                columnCallBack1 = null;
-            }
-            
-            if (columnCallBack2 is not null)
-            {
-                EventManager.Instance.Unregister(columnCallBack2);
-                columnCallBack2 = null;
-            }
-
-            if (blockCallBack is not null)
-            {
-                EventManager.Instance.Unregister(blockCallBack);
-                blockCallBack = null;
-            }
-            
-            if (blocksCallBack is not null)
-            {
-                EventManager.Instance.Unregister(blocksCallBack);
-                blocksCallBack = null;
-            }
-
-            // Reset instance
-            instance = null;
-
-        }
-
         public void ReloadWorld()
         {
             // Clear the queue first...
@@ -346,170 +282,11 @@ namespace MinecraftClient.Rendering
         }
 
         public const int BUILD_COUNT_LIMIT = 4;
-        private float operationCooldown  = 0;
-        private int   operationAction    = 0;
+        private int operationCode    = 0;
 
         private static readonly Block AIR_INSTANCE = new Block(0);
-        public const int MOVEMENT_RADIUS = 3;
-        public const int MOVEMENT_RADIUS_SQR = MOVEMENT_RADIUS * MOVEMENT_RADIUS;
-
         private Location? lastPlayerLoc = null;
         private bool terrainColliderDirty = true;
-
-        // For player movement, it is not favorable to use per-chunk mesh colliders
-        // because player can get stuck on the edge of chunks due to a bug of Unity
-        // (or say PhysX) bug, so we dynamically build the mesh collider around the
-        // player as a solution to this. See the problem discussion at
-        // https://forum.unity.com/threads/ball-rolling-on-mesh-hits-edges.772760/
-        public void RefreshTerrainCollider(Location playerLoc)
-        {
-            // Build nearby collider
-            Task.Factory.StartNew(() => {
-                terrainColliderDirty = false;
-                var world = client?.GetWorld();
-
-                var table = ResourcePackManager.Instance.StateModelTable;
-                if (world is null || table is null)
-                    return;
-
-                int offsetY = World.GetDimension().minY;
-                
-                float3[] movementVerts = { }, fluidVerts = { };
-
-                for (int x = -MOVEMENT_RADIUS;x <= MOVEMENT_RADIUS;x++)
-                    for (int y = -MOVEMENT_RADIUS;y <= MOVEMENT_RADIUS;y++)
-                        for (int z = -MOVEMENT_RADIUS;z <= MOVEMENT_RADIUS;z++)
-                        {
-                            if (x * x + y * y + z * z > MOVEMENT_RADIUS_SQR)
-                                continue;
-
-                            var loc  = playerLoc + new Location(x, y, z);
-                            var column = world.GetChunkColumn(loc);
-                            if (column is null || !column.FullyLoaded)
-                            {
-                                terrainColliderDirty = true;
-                                return;
-                            }
-
-                            var bloc = world.GetBlock(loc);
-                            var state = bloc.State;
-
-                            if (state.InWater || state.InLava) // Build liquid collider
-                            {
-                                var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                                int liquidCullFlags = world.GetCullFlags(loc, bloc, neighborCheck);
-
-                                if (liquidCullFlags != 0)
-                                    FluidGeometry.BuildCollider(ref fluidVerts, (int)loc.X, (int)loc.Y, (int)loc.Z, liquidCullFlags);
-                            }
-
-                            if (state.LikeAir || state.NoCollision)
-                                continue;
-                            
-                            // Build collider here
-                            var stateId = bloc.StateId;
-                            int cullFlags = world.GetCullFlags(loc, bloc, BlockNeighborChecks.NON_FULL_SOLID);
-                            
-                            if (cullFlags != 0 && table is not null && table.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
-                            {
-                                // They all have the same collider so we just pick the 1st one
-                                table[stateId].Geometries[0].BuildCollider(ref movementVerts, new((float)loc.Z, (float)loc.Y, (float)loc.X), cullFlags);
-                            }
-
-                        }
-                
-                Loom.QueueOnMainThread(() => {
-                    int movVertCount = movementVerts.Length;
-                    int fldVertCount = fluidVerts.Length;
-
-                    // Make vertex attributes
-                    var colVertAttrs = new NativeArray<VertexAttributeDescriptor>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-                    colVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3);
-
-                    if (movVertCount > 0)
-                    {
-                        var colMeshDataArr  = Mesh.AllocateWritableMeshData(1);
-                        var colMeshData = colMeshDataArr[0];
-                        colMeshData.subMeshCount = 1;
-
-                        colMeshData.SetVertexBufferParams(movVertCount,          colVertAttrs);
-                        colMeshData.SetIndexBufferParams((movVertCount / 2) * 3, IndexFormat.UInt32);
-
-                        // Copy the source arrays to mesh data
-                        var colPositions = colMeshData.GetVertexData<float3>(0);
-                        colPositions.CopyFrom(movementVerts);
-
-                        // Generate triangle arrays
-                        var colTriIndices = colMeshData.GetIndexData<uint>();
-                        uint vi = 0; int ti = 0;
-                        for (;vi < movVertCount;vi += 4U, ti += 6)
-                        {
-                            colTriIndices[ti]     = vi;
-                            colTriIndices[ti + 1] = vi + 3U;
-                            colTriIndices[ti + 2] = vi + 2U;
-                            colTriIndices[ti + 3] = vi;
-                            colTriIndices[ti + 4] = vi + 1U;
-                            colTriIndices[ti + 5] = vi + 3U;
-                        }
-
-                        colMeshData.SetSubMesh(0, new(0, (movVertCount / 2) * 3){ vertexCount = movVertCount });
-                        var colliderMesh = new Mesh { subMeshCount = 1 };
-                        Mesh.ApplyAndDisposeWritableMeshData(colMeshDataArr, colliderMesh);
-
-                        colliderMesh.RecalculateNormals();
-                        colliderMesh.RecalculateBounds();
-
-                        movementCollider!.sharedMesh = colliderMesh;
-
-                    }
-                    else
-                        movementCollider!.sharedMesh?.Clear();
-                    
-                    if (fldVertCount > 0)
-                    {
-                        var colMeshDataArr  = Mesh.AllocateWritableMeshData(1);
-                        var colMeshData = colMeshDataArr[0];
-                        colMeshData.subMeshCount = 1;
-
-                        colMeshData.SetVertexBufferParams(fldVertCount,          colVertAttrs);
-                        colMeshData.SetIndexBufferParams((fldVertCount / 2) * 3, IndexFormat.UInt32);
-
-                        // Copy the source arrays to mesh data
-                        var colPositions = colMeshData.GetVertexData<float3>(0);
-                        colPositions.CopyFrom(fluidVerts);
-
-                        // Generate triangle arrays
-                        var colTriIndices = colMeshData.GetIndexData<uint>();
-                        uint vi = 0; int ti = 0;
-                        for (;vi < fldVertCount;vi += 4U, ti += 6)
-                        {
-                            colTriIndices[ti]     = vi;
-                            colTriIndices[ti + 1] = vi + 3U;
-                            colTriIndices[ti + 2] = vi + 2U;
-                            colTriIndices[ti + 3] = vi;
-                            colTriIndices[ti + 4] = vi + 1U;
-                            colTriIndices[ti + 5] = vi + 3U;
-                        }
-
-                        colMeshData.SetSubMesh(0, new(0, (fldVertCount / 2) * 3){ vertexCount = fldVertCount });
-                        var colliderMesh = new Mesh { subMeshCount = 1 };
-                        Mesh.ApplyAndDisposeWritableMeshData(colMeshDataArr, colliderMesh);
-
-                        colliderMesh.RecalculateNormals();
-                        colliderMesh.RecalculateBounds();
-
-                        liquidCollider!.sharedMesh = colliderMesh;
-
-                    }
-                    else
-                        liquidCollider!.sharedMesh?.Clear();
-                    
-                    colVertAttrs.Dispose();
-
-                });
-                
-            });
-        }
 
         void Start()
         {
@@ -528,10 +305,7 @@ namespace MinecraftClient.Rendering
             liquidCollider = liquidColliderObj.AddComponent<MeshCollider>();
 
             // Register event callbacks
-            EventManager.Instance.Register(columnCallBack1 = (e) => {
-                // TODO Implement
-
-            });
+            EventManager.Instance.Register(columnCallBack1 = (e) => { });
 
             EventManager.Instance.Register(columnCallBack2 = (e) => {
                 int2 chunkCoord = new(e.ChunkX, e.ChunkZ);
@@ -543,98 +317,55 @@ namespace MinecraftClient.Rendering
             });
 
             EventManager.Instance.Register(blockCallBack = (e) => {
-                var loc = e.Location;
-                int chunkX = loc.ChunkX, chunkY = loc.ChunkY, chunkZ = loc.ChunkZ;
-
-                var chunkData = client?.GetWorld()?[chunkX, chunkZ];
-                if (chunkData is null) return;
-                
-                var column = GetChunkRenderColumn(loc.ChunkX, loc.ChunkZ, false);
-
-                if (column is not null) // Queue this chunk to rebuild list...
-                {   // Create the chunk render object if not present (previously empty)
-                    var chunk = column.GetChunkRender(chunkY, true);
-
-                    // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
-                    QueueChunkRenderBuild(chunk);
-
-                    if (loc.ChunkBlockY == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
-                    {   // Queue the chunk below, if it isn't empty
-                        QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY - 1, false));
-                    }
-                    else if (loc.ChunkBlockY == Chunk.SizeY - 1 && ((chunkY + 1) * Chunk.SizeY) < World.GetDimension().height) // In the top layer of this chunk
-                    {   // Queue the chunk above, if it isn't empty
-                        QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY + 1, false));
-                    }
-                }
-
-                if (loc.ChunkBlockX == 0) // Check MC X direction neighbors
-                {
-                    QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX - 1, chunkY, chunkZ));
-                }
-                else if (loc.ChunkBlockX == Chunk.SizeX - 1)
-                {
-                    QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX + 1, chunkY, chunkZ));
-                }
-
-                if (loc.ChunkBlockZ == 0) // Check MC Z direction neighbors
-                {
-                    QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ - 1));
-                }
-                else if (loc.ChunkBlockZ == Chunk.SizeZ - 1)
-                {
-                    QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ + 1));
-                }
-
-                terrainColliderDirty = true;
-
+                UpdateBlockAt(e.Location);
             });
 
             EventManager.Instance.Register(blocksCallBack = (e) => {
-                var world = client?.GetWorld();
-                if (world is null) return;
-                
                 foreach (var loc in e.Locations)
-                {
-                    int chunkX = loc.ChunkX, chunkY = loc.ChunkY, chunkZ = loc.ChunkZ;
-
-                    var chunkData = world[chunkX, chunkZ];
-                    if (chunkData is null) continue;
-                    
-                    var column = GetChunkRenderColumn(loc.ChunkX, loc.ChunkZ, false);
-
-                    if (column is not null) // Queue this chunk to rebuild list...
-                    {   // Create the chunk render object if not present (previously empty)
-                        var chunk = column.GetChunkRender(chunkY, true);
-
-                        // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
-                        QueueChunkRenderBuild(chunk);
-
-                        if (loc.ChunkBlockY == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
-                        {   // Queue the chunk below, if it isn't empty
-                            QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY - 1, false));
-                        }
-                        else if (loc.ChunkBlockY == Chunk.SizeY - 1 && ((chunkY + 1) * Chunk.SizeY) < World.GetDimension().height) // In the top layer of this chunk
-                        {   // Queue the chunk above, if it isn't empty
-                            QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY + 1, false));
-                        }
-                    }
-
-                    if (loc.ChunkBlockX == 0) // Check MC X direction neighbors
-                        QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX - 1, chunkY, chunkZ));
-                    else if (loc.ChunkBlockX == Chunk.SizeX - 1)
-                        QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX + 1, chunkY, chunkZ));
-
-                    if (loc.ChunkBlockZ == 0) // Check MC Z direction neighbors
-                        QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ - 1));
-                    else if (loc.ChunkBlockZ == Chunk.SizeZ - 1)
-                        QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ + 1));
-                }
-
-                terrainColliderDirty = true;
-
+                    UpdateBlockAt(loc);
             });
+        }
 
+        private void UpdateBlockAt(Location loc)
+        {
+            int chunkX = loc.ChunkX, chunkY = loc.ChunkY, chunkZ = loc.ChunkZ;
+            var column = GetChunkRenderColumn(loc.ChunkX, loc.ChunkZ, false);
+            if (column is not null) // Queue this chunk to rebuild list...
+            {   // Create the chunk render object if not present (previously empty)
+                var chunk = column.GetChunkRender(chunkY, true);
+
+                // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
+                QueueChunkRenderBuild(chunk);
+
+                if (loc.ChunkBlockY == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
+                {   // Queue the chunk below, if it isn't empty
+                    QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY - 1, false));
+                }
+                else if (loc.ChunkBlockY == Chunk.SizeY - 1 && ((chunkY + 1) * Chunk.SizeY) < World.GetDimension().height) // In the top layer of this chunk
+                {   // Queue the chunk above, if it isn't empty
+                    QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY + 1, false));
+                }
+            }
+
+            if (loc.ChunkBlockX == 0) // Check MC X direction neighbors
+                QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX - 1, chunkY, chunkZ));
+            else if (loc.ChunkBlockX == Chunk.SizeX - 1)
+                QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX + 1, chunkY, chunkZ));
+
+            if (loc.ChunkBlockZ == 0) // Check MC Z direction neighbors
+                QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ - 1));
+            else if (loc.ChunkBlockZ == Chunk.SizeZ - 1)
+                QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ + 1));
+            
+            if (loc.DistanceSquared(client!.PlayerEntity.Location) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)
+                terrainColliderDirty = true; // Terrain collider needs to be updated
+        }
+
+        public void RebuildTerrainCollider(Location playerLoc)
+        {
+            terrainColliderDirty = false;
+            Task.Factory.StartNew(() => builder!.BuildTerrainCollider(client!.GetWorld(), playerLoc, movementCollider!, liquidCollider!));
+            lastPlayerLoc = playerLoc;
         }
 
         void FixedUpdate()
@@ -649,13 +380,8 @@ namespace MinecraftClient.Rendering
                 {
                     var nextChunk = chunkRendersToBeBuilt.Dequeue();
 
-                    if (nextChunk is null)
+                    if (nextChunk is null || GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) is null)
                     {   // Chunk is unloaded while waiting in the queue, ignore it...
-                        continue;
-                    }
-                    else if (GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) is null)
-                    {   // Chunk column is unloaded while waiting in the queue, ignore it...
-                        nextChunk.State = ChunkBuildState.Cancelled;
                         continue;
                     }
                     else
@@ -667,40 +393,17 @@ namespace MinecraftClient.Rendering
                 }
             }
 
-            if (operationCooldown <= 0F)
-            {   // TODO Make this better
-                switch (operationAction)
-                {
-                    case 0:
-                        UpdateChunkRendersListAdd();
-                        break;
-                    case 1:
-                        UpdateChunkRendersListRemove();
-                        break;
-                }
-                
-                operationAction = (operationAction + 1) % 2;
+            if (operationCode == 8)
+                UpdateChunkRendersListAdd();
+            else if (operationCode == 16)
+                UpdateChunkRendersListRemove();
+            
+            operationCode = (operationCode + 1) % OPERATION_CYCLE_LENGTH;
 
-                operationCooldown = 0.5F;
-            }
-            else
-            {
-                Location playerLoc;
-                
-                lock (client!.movementLock)
-                {
-                    playerLoc = client!.PlayerEntity.Location.ToFloor();
-                }
-                
-                if (terrainColliderDirty || lastPlayerLoc != playerLoc)
-                {
-                    RefreshTerrainCollider(playerLoc.Up());
-                    lastPlayerLoc = playerLoc;
-                }
-            }
-
-            operationCooldown -= Time.fixedDeltaTime;
-
+            // Update terrain collider if necessary
+            var playerLoc = client!.PlayerEntity.Location.ToFloor();
+            if (terrainColliderDirty || lastPlayerLoc != playerLoc)
+                RebuildTerrainCollider(playerLoc);
         }
         #endregion
 
