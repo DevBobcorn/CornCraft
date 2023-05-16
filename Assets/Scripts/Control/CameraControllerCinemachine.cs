@@ -87,7 +87,7 @@ namespace MinecraftClient.Control
                     cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - scroll * scrollSensitivity);
             }
 
-            var curPersp = client!.PlayerData.Perspective;
+            var curPersp = client!.Perspective;
             
             if (cameraInfo.TargetScale != cameraInfo.CurrentScale)
             {
@@ -126,6 +126,12 @@ namespace MinecraftClient.Control
 
         public override float GetYaw() => renderCameraPresent ? renderCamera!.transform.eulerAngles.y : 0F;
 
+        public override void SetYaw(float yaw)
+        {
+            followPOV!.m_HorizontalAxis.Value = yaw;
+            fixedPOV!.m_HorizontalAxis.Value = yaw;
+        }
+
         public override Vector3? GetPosition() => renderCameraPresent ? renderCamera!.transform.position : null;
 
         public override Transform GetTransform() => renderCameraPresent ? renderCamera!.transform : transform;
@@ -137,15 +143,15 @@ namespace MinecraftClient.Control
             switch (perspective)
             {
                 case Perspective.FirstPerson:
-                    EnterFirstPersonMode(client!.PlayerData.Perspective);
+                    EnterFirstPersonMode(client!.Perspective);
                     break;
                 case Perspective.ThirdPerson:
-                    EnterThirdPersonMode(client!.PlayerData.Perspective);
+                    EnterThirdPersonMode(client!.Perspective);
                     break;
             }
 
             // Update player data
-            client!.PlayerData.Perspective = perspective;
+            client!.Perspective = perspective;
 
             // Broadcast perspective change
             EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(perspective));
@@ -154,7 +160,7 @@ namespace MinecraftClient.Control
         public override bool IsFixed()
         {
             // Camera controller is fixed when player's in first person mode
-            return client!.PlayerData.Perspective == Perspective.FirstPerson;
+            return client!.Perspective == Perspective.FirstPerson;
         }
 
         private void EnterFirstPersonMode(Perspective prevPersp)

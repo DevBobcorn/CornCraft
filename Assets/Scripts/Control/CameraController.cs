@@ -65,6 +65,8 @@ namespace MinecraftClient.Control
 
         public abstract float GetYaw();
 
+        public abstract void SetYaw(float yaw);
+
         public abstract Vector3? GetPosition();
 
         public abstract Transform GetTransform();

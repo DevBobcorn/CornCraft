@@ -689,7 +689,7 @@ namespace MinecraftClient.Rendering
                 
                 lock (client!.movementLock)
                 {
-                    playerLoc = client.PlayerData.Location.ToFloor();;
+                    playerLoc = client!.PlayerEntity.Location.ToFloor();
                 }
                 
                 if (terrainColliderDirty || lastPlayerLoc != playerLoc)
