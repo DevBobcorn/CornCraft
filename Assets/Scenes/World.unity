@@ -666,6 +666,9 @@ MonoBehaviour:
   CameraController: {fileID: 5003336745837788658}
   ScreenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
+  Perspective: 0
+  Grounded: 0
+  currentSlot: 0
 --- !u!114 &331478947
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -769,7 +772,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 48
+  m_fontSize: 46
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -904,7 +907,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 48
+  m_fontSize: 46
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2409,7 +2412,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 37
+  m_fontSize: 35.45
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2544,7 +2547,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 37
+  m_fontSize: 35.45
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2679,7 +2682,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 37
+  m_fontSize: 35.45
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3746,7 +3749,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 37
+  m_fontSize: 35.45
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4408,6 +4411,12 @@ MonoBehaviour:
   cameraYOffsetClip: 0.1
   scaleSmoothFactor: 4
   scrollSensitivity: 0.2
+  thirdPersonCullingMask:
+    serializedVersion: 2
+    m_Bits: 81792
+  firstPersonCullingMask:
+    serializedVersion: 2
+    m_Bits: 77184
 --- !u!114 &5099407533699436924
 MonoBehaviour:
   m_ObjectHideFlags: 3
