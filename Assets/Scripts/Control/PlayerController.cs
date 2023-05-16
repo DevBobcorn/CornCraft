@@ -40,10 +40,7 @@ namespace MinecraftClient.Control
         [HideInInspector] public bool UseRootMotion = false;
         private AnimatorEntityRender? playerRender;
         private PlayerAccessoryWidget? accessoryWidget;
-
         public PlayerAccessoryWidget AccessoryWidget => accessoryWidget!;
-
-        private Entity? dummyEntity;
 
         public void SetClientAndCamera(CornClient client, CameraController camController)
         {
@@ -96,27 +93,18 @@ namespace MinecraftClient.Control
             //Debug.Log($"Animation mirrored: {mirrored}");
         }
 
-        public void SetEntityId(int entityId)
+        public void SetLocation(Location loc, bool resetVelocity = false, float yaw = 0F)
         {
-            dummyEntity!.ID = entityId;
-            // Reassign this entity to refresh
-            //playerRender!.UpdateEntity(fakeEntity);
-        }
-
-        public void SetLocation(Location loc, bool resetVelocity = false)
-        {
-            if (playerRigidbody is null)
-            {
-                Debug.LogWarning("Trying to move player when rigidbody is not available!");
-                return;
-            }
+            if (playerRigidbody is null) return;
 
             if (resetVelocity) // Reset rigidbody velocity
                 playerRigidbody.velocity = Vector3.zero;
             
             playerRigidbody.position = CoordConvert.MC2Unity(loc);
+            visualTransform!.eulerAngles = new(0F, yaw + 90F, 0F);
+            cameraController?.SetYaw(yaw + 90F);
 
-            Debug.Log($"Position set to {playerRigidbody.position}");
+            Debug.Log($"Position set to {playerRigidbody.position} with yaw {yaw}");
         }
 
         void Update() => LogicalUpdate(Time.deltaTime);
@@ -134,7 +122,7 @@ namespace MinecraftClient.Control
 
                 lock (client.movementLock)
                 {
-                    transform.position = CoordConvert.MC2Unity(client.PlayerData.Location);
+                    transform.position = CoordConvert.MC2Unity(client.PlayerEntity.Location);
                 }
             }
             else
@@ -147,7 +135,7 @@ namespace MinecraftClient.Control
             }
 
             // Update user input
-            userInput!.UpdateInputs(inputData, client!.PlayerData.Perspective);
+            userInput!.UpdateInputs(inputData, client.Perspective);
 
             // Update player status (in water, grounded, etc)
             if (!Status.Spectating)
@@ -226,11 +214,23 @@ namespace MinecraftClient.Control
             // Update client player data
             lock (client.movementLock)
             {
-                var playerData = client.PlayerData;
+                var playerEntity = client.PlayerEntity;
 
-                playerData.Location = newLocation;
-                playerData.Yaw = visualTransform!.eulerAngles.y - 90F;
-                playerData.Grounded = Status.Grounded;
+                // Update player location
+                playerEntity.Location = newLocation;
+
+                // Update player yaw and pitch
+                var newYaw = visualTransform!.eulerAngles.y - 90F;
+                var newPitch = 0F;
+                if (playerEntity.Yaw != newYaw || playerEntity.Pitch != newPitch)
+                {
+                    client.YawToSend = newYaw;
+                    playerEntity.Yaw = newYaw;
+                    client.PitchToSend = newPitch;
+                    playerEntity.Pitch = newPitch;
+                }
+                
+                client.Grounded = Status.Grounded;
                 
             }
         }
@@ -243,7 +243,6 @@ namespace MinecraftClient.Control
             {
                 // The player is actively moving
                 playerRigidbody!.AddForce((info.MoveVelocity - playerRigidbody!.velocity) * interval * 10F, ForceMode.VelocityChange);
-
             }
             else
             {
@@ -251,7 +250,6 @@ namespace MinecraftClient.Control
                     playerRigidbody!.velocity = Vector3.zero;
                 
                 // Otherwise leave the player rigidbody untouched
-
             }
         }
 
@@ -363,15 +361,11 @@ namespace MinecraftClient.Control
         void Start()
         {
             // Create player entity
-            var playerEntityType = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);
-
-            dummyEntity = new(0, playerEntityType, new());
-            dummyEntity.Name = client!.GetUsername();
-            dummyEntity.ID   = 0;
+            var playerEntity = CornApp.CurrentClient!.PlayerEntity;
 
             // Initialize player visuals
             playerRender = GetComponent<AnimatorEntityRender>();
-            playerRender.Initialize(playerEntityType, dummyEntity);
+            playerRender.Initialize(playerEntity.Type, playerEntity);
 
             playerRigidbody = GetComponent<Rigidbody>();
             playerRigidbody.useGravity = true;
@@ -435,7 +429,6 @@ namespace MinecraftClient.Control
                 EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, true));
                 // Initialize health value
                 EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
-                client.PlayerData.MaxHealth = 20F;
             }
 
         }
