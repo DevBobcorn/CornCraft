@@ -20,6 +20,9 @@ namespace MinecraftClient.Control
         [SerializeField] [Range(0F, 20F)] private float scaleSmoothFactor = 4.0F;
         [SerializeField] [Range(0F,  2F)] private float scrollSensitivity = 0.5F;
 
+        [SerializeField] private LayerMask thirdPersonCullingMask;
+        [SerializeField] private LayerMask firstPersonCullingMask;
+
         // Virtual camera and camera components
         private CinemachineVirtualCamera? virtualCameraFollow;
         private CinemachineFramingTransposer? framingTransposer;
@@ -177,7 +180,7 @@ namespace MinecraftClient.Control
 
             // Don't render player on this camera
             if (renderCameraPresent)
-                renderCamera!.cullingMask = renderCamera.cullingMask & ~(1 << LayerMask.NameToLayer("Player"));
+                renderCamera!.cullingMask = firstPersonCullingMask;
             
             // Update field of view
             var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
@@ -199,7 +202,7 @@ namespace MinecraftClient.Control
 
             // Render player on this camera
             if (renderCameraPresent)
-                renderCamera!.cullingMask = renderCamera.cullingMask | (1 << LayerMask.NameToLayer("Player"));
+                renderCamera!.cullingMask = thirdPersonCullingMask;
             
             // Update field of view
             var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
