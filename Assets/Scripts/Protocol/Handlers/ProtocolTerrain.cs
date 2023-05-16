@@ -726,8 +726,6 @@ namespace MinecraftClient.Protocol.Handlers
                     ReadChunkColumnLightData16(ref skyLight, ref blockLight, cache);
                 
                 chunkColumn.SetLights(skyLight, blockLight);
-
-                //UnityEngine.Debug.Log($"Updating light data for chunk [{chunkX}, {chunkZ}]");
             }
             
         }

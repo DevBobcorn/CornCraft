@@ -16,6 +16,8 @@ namespace MinecraftClient.Rendering
     {
         private static readonly int waterLayerIndex = ChunkRender.TypeIndex(RenderType.WATER);
         private static readonly int lavaLayerIndex  = ChunkRender.TypeIndex(RenderType.SOLID);
+        public const int MOVEMENT_RADIUS = 3;
+        public const int MOVEMENT_RADIUS_SQR = MOVEMENT_RADIUS * MOVEMENT_RADIUS;
 
         private static Location GetLocationInChunkRender(ChunkRender chunk, int x, int y, int z, int offsetY)
         {   // Offset y coordinate by the current dimension's minY...
@@ -90,7 +92,7 @@ namespace MinecraftClient.Rendering
                             
                             int cullFlags = chunkData.GetCullFlags(loc, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
                             
-                            if (cullFlags != 0 && modelTable is not null && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
+                            if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
                                 int layerIndex = ChunkRender.TypeIndex(modelTable[stateId].RenderType);
 
@@ -285,6 +287,140 @@ namespace MinecraftClient.Rendering
 
                 return ChunkBuildResult.Cancelled;
             }
+        }
+
+        // For player movement, it is not favorable to use per-chunk mesh colliders
+        // because player can get stuck on the edge of chunks due to a bug of Unity
+        // (or say PhysX) bug, so we dynamically build the mesh collider around the
+        // player as a solution to this. See the problem discussion at
+        // https://forum.unity.com/threads/ball-rolling-on-mesh-hits-edges.772760/
+        public void BuildTerrainCollider(World world, Location playerLoc, MeshCollider movementCollider, MeshCollider liquidCollider)
+        {
+            int offsetY = World.GetDimension().minY;
+            
+            float3[] movementVerts = { }, fluidVerts = { };
+
+            for (int x = -MOVEMENT_RADIUS;x <= MOVEMENT_RADIUS;x++)
+                for (int y = -MOVEMENT_RADIUS;y <= MOVEMENT_RADIUS;y++)
+                    for (int z = -MOVEMENT_RADIUS;z <= MOVEMENT_RADIUS;z++)
+                    {
+                        if (x * x + y * y + z * z > MOVEMENT_RADIUS_SQR)
+                            continue;
+
+                        var loc  = playerLoc + new Location(x, y, z);
+                        var bloc = world.GetBlock(loc);
+                        var state = bloc.State;
+
+                        if (state.InWater || state.InLava) // Build liquid collider
+                        {
+                            var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
+                            int liquidCullFlags = world.GetCullFlags(loc, bloc, neighborCheck);
+
+                            if (liquidCullFlags != 0)
+                                FluidGeometry.BuildCollider(ref fluidVerts, (int)loc.X, (int)loc.Y, (int)loc.Z, liquidCullFlags);
+                        }
+
+                        if (state.LikeAir || state.NoCollision)
+                            continue;
+                        
+                        // Build collider here
+                        var stateId = bloc.StateId;
+                        int cullFlags = world.GetCullFlags(loc, bloc, BlockNeighborChecks.NON_FULL_SOLID);
+                        
+                        if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
+                        {
+                            // They all have the same collider so we just pick the 1st one
+                            modelTable[stateId].Geometries[0].BuildCollider(ref movementVerts, new((float)loc.Z, (float)loc.Y, (float)loc.X), cullFlags);
+                        }
+                    }
+                
+            Loom.QueueOnMainThread(() => {
+                int movVertCount = movementVerts.Length;
+                int fldVertCount = fluidVerts.Length;
+
+                // Make vertex attributes
+                var colVertAttrs = new NativeArray<VertexAttributeDescriptor>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+                colVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3);
+
+                if (movVertCount > 0)
+                {
+                    var colMeshDataArr  = Mesh.AllocateWritableMeshData(1);
+                    var colMeshData = colMeshDataArr[0];
+                    colMeshData.subMeshCount = 1;
+
+                    colMeshData.SetVertexBufferParams(movVertCount,          colVertAttrs);
+                    colMeshData.SetIndexBufferParams((movVertCount / 2) * 3, IndexFormat.UInt32);
+
+                    // Copy the source arrays to mesh data
+                    var colPositions = colMeshData.GetVertexData<float3>(0);
+                    colPositions.CopyFrom(movementVerts);
+
+                    // Generate triangle arrays
+                    var colTriIndices = colMeshData.GetIndexData<uint>();
+                    uint vi = 0; int ti = 0;
+                    for (;vi < movVertCount;vi += 4U, ti += 6)
+                    {
+                        colTriIndices[ti]     = vi;
+                        colTriIndices[ti + 1] = vi + 3U;
+                        colTriIndices[ti + 2] = vi + 2U;
+                        colTriIndices[ti + 3] = vi;
+                        colTriIndices[ti + 4] = vi + 1U;
+                        colTriIndices[ti + 5] = vi + 3U;
+                    }
+
+                    colMeshData.SetSubMesh(0, new(0, (movVertCount / 2) * 3){ vertexCount = movVertCount });
+                    var colliderMesh = new Mesh { subMeshCount = 1 };
+                    Mesh.ApplyAndDisposeWritableMeshData(colMeshDataArr, colliderMesh);
+
+                    colliderMesh.RecalculateNormals();
+                    colliderMesh.RecalculateBounds();
+
+                    movementCollider!.sharedMesh = colliderMesh;
+                }
+                else
+                    movementCollider!.sharedMesh?.Clear();
+                
+                if (fldVertCount > 0)
+                {
+                    var colMeshDataArr  = Mesh.AllocateWritableMeshData(1);
+                    var colMeshData = colMeshDataArr[0];
+                    colMeshData.subMeshCount = 1;
+
+                    colMeshData.SetVertexBufferParams(fldVertCount,          colVertAttrs);
+                    colMeshData.SetIndexBufferParams((fldVertCount / 2) * 3, IndexFormat.UInt32);
+
+                    // Copy the source arrays to mesh data
+                    var colPositions = colMeshData.GetVertexData<float3>(0);
+                    colPositions.CopyFrom(fluidVerts);
+
+                    // Generate triangle arrays
+                    var colTriIndices = colMeshData.GetIndexData<uint>();
+                    uint vi = 0; int ti = 0;
+                    for (;vi < fldVertCount;vi += 4U, ti += 6)
+                    {
+                        colTriIndices[ti]     = vi;
+                        colTriIndices[ti + 1] = vi + 3U;
+                        colTriIndices[ti + 2] = vi + 2U;
+                        colTriIndices[ti + 3] = vi;
+                        colTriIndices[ti + 4] = vi + 1U;
+                        colTriIndices[ti + 5] = vi + 3U;
+                    }
+
+                    colMeshData.SetSubMesh(0, new(0, (fldVertCount / 2) * 3){ vertexCount = fldVertCount });
+                    var colliderMesh = new Mesh { subMeshCount = 1 };
+                    Mesh.ApplyAndDisposeWritableMeshData(colMeshDataArr, colliderMesh);
+
+                    colliderMesh.RecalculateNormals();
+                    colliderMesh.RecalculateBounds();
+
+                    liquidCollider!.sharedMesh = colliderMesh;
+                }
+                else
+                    liquidCollider!.sharedMesh?.Clear();
+                
+                colVertAttrs.Dispose();
+
+            });
         }
 
     }

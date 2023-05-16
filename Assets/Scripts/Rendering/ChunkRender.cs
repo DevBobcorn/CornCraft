@@ -2,8 +2,6 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-using MinecraftClient.Mapping;
-
 namespace MinecraftClient.Rendering
 {
     [RequireComponent(typeof (MeshFilter), typeof (MeshRenderer))]
@@ -28,21 +26,11 @@ namespace MinecraftClient.Rendering
         };
 
         public int ChunkX, ChunkY, ChunkZ;
-        public Chunk ChunkData;
-        public ChunkBuildState State = ChunkBuildState.None;
+        public ChunkBuildState State = ChunkBuildState.Pending;
 
         public CancellationTokenSource TokenSource = null;
         public int Priority = 0;
         public MeshCollider InteractionCollider;
-        
-        // Stores whether its neighbor chunks are present (when self is being built)...
-        public bool ZNegDataPresent, ZPosDataPresent, XNegDataPresent, XPosDataPresent;
-        public bool AllNeighborDataPresent
-        {
-            get {
-                return ZNegDataPresent && ZPosDataPresent && XNegDataPresent && XPosDataPresent;
-            }
-        }
 
         public void UpdateCollider(Mesh colliderMesh)
         {
@@ -58,17 +46,6 @@ namespace MinecraftClient.Rendering
         }
 
         public int CompareTo(ChunkRender chunkRender) => Priority - chunkRender.Priority;
-
-        public void UpdateNeighborStatus()
-        {
-            var world = CornApp.CurrentClient?.GetWorld();
-            if (world is null) return;
-            // Check if neighbor chunks' data is currently present...
-            ZNegDataPresent = world.isChunkColumnReady(ChunkX, ChunkZ - 1); // ZNeg neighbor
-            ZPosDataPresent = world.isChunkColumnReady(ChunkX, ChunkZ + 1); // ZPos neighbor
-            XNegDataPresent = world.isChunkColumnReady(ChunkX - 1, ChunkZ); // XNeg neighbor
-            XPosDataPresent = world.isChunkColumnReady(ChunkX + 1, ChunkZ); // XPos neighbor
-        }
 
         public void Unload()
         {

@@ -969,7 +969,7 @@ namespace MinecraftClient
                 if (!locationReceived)
                     Loom.QueueOnMainThread(() => {
                         // Force refresh environment collider
-                        ChunkRenderManager?.RefreshTerrainCollider(location.Up());
+                        ChunkRenderManager?.RebuildTerrainCollider(location.ToFloor());
 
                         // Then update player location
                         playerController?.SetLocation(location, yaw: yaw);
