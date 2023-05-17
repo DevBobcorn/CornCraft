@@ -168,29 +168,31 @@ namespace MinecraftClient.Protocol
         /// <summary>
         /// Set of translation rules for formatting text
         /// </summary>
-        private static Dictionary<string, string> TranslationRules = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> translationRules = new();
 
         /// <summary>
         /// Rule initialization method.
         /// </summary>
-        public static void InitTranslationRules(string langFile)
+        public static void LoadTranslationRules(string langFile)
         {
+            translationRules.Clear(); // Clear loaded stuffs
+
             // Small default dictionnary of translation rules
-            TranslationRules["chat.type.admin"] = "[%s: %s]";
-            TranslationRules["chat.type.announcement"] = "§d[%s] %s";
-            TranslationRules["chat.type.emote"] = " * %s %s";
-            TranslationRules["chat.type.text"] = "<%s> %s";
-            TranslationRules["multiplayer.player.joined"] = "§e%s joined the game.";
-            TranslationRules["multiplayer.player.left"] = "§e%s left the game.";
-            TranslationRules["commands.message.display.incoming"] = "§7%s whispers to you: %s";
-            TranslationRules["commands.message.display.outgoing"] = "§7You whisper to %s: %s";
+            translationRules["chat.type.admin"] = "[%s: %s]";
+            translationRules["chat.type.announcement"] = "§d[%s] %s";
+            translationRules["chat.type.emote"] = " * %s %s";
+            translationRules["chat.type.text"] = "<%s> %s";
+            translationRules["multiplayer.player.joined"] = "§e%s joined the game.";
+            translationRules["multiplayer.player.left"] = "§e%s left the game.";
+            translationRules["commands.message.display.incoming"] = "§7%s whispers to you: %s";
+            translationRules["commands.message.display.outgoing"] = "§7You whisper to %s: %s";
 
             // Load the external dictionnary of translation rules or display an error message
             if (File.Exists(langFile))
             {
                 var translations = Json.ParseJson(File.ReadAllText(langFile));
                 foreach (var text in translations.Properties)
-                    TranslationRules[text.Key] = text.Value.StringValue;
+                    translationRules[text.Key] = text.Value.StringValue;
 
                 if (CornGlobal.DebugMode)
                     Debug.Log(Translations.Get("chat.loaded"));
@@ -208,12 +210,12 @@ namespace MinecraftClient.Protocol
         /// <returns>Returns the formatted text according to the given data</returns>
         public static string TranslateString(string rulename, List<string>? using_data = null)
         {
-            if (TranslationRules.ContainsKey(rulename))
+            if (translationRules.ContainsKey(rulename))
             {
                 if (using_data is not null)
                 {
                     int using_idx = 0;
-                    string rule = TranslationRules[rulename];
+                    string rule = translationRules[rulename];
                     StringBuilder result = new StringBuilder();
                     for (int i = 0; i < rule.Length; i++)
                     {
@@ -251,7 +253,7 @@ namespace MinecraftClient.Protocol
                     return result.ToString();
                 }
                 else
-                    return TranslationRules[rulename];
+                    return translationRules[rulename];
                 
             }
             else

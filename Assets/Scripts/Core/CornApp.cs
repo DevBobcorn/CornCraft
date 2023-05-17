@@ -94,7 +94,7 @@ namespace MinecraftClient
             var langFile = PathHelper.GetPackDirectoryNamed(
                     $"vanilla-{resourceVersion}{s}assets{s}minecraft{s}lang{s}{CornGlobal.Language}.json");
             
-            Protocol.ChatParser.InitTranslationRules(langFile);
+            Protocol.ChatParser.LoadTranslationRules(langFile);
 
             // First load all possible Block States...
             var loadFlag = new DataLoadFlag();
