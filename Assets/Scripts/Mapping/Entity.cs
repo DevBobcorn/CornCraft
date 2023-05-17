@@ -61,14 +61,18 @@ namespace MinecraftClient.Mapping
         public float Yaw = 0;
 
         /// <summary>
+        /// Entity head pitch
+        /// </summary>
+        public float Pitch = 0;
+
+        /// <summary>
         /// Entity head yaw
         /// </summary>
         public float HeadYaw = 0;
 
-        /// <summary>
-        /// Entity head pitch
-        /// </summary>
-        public float Pitch = 0;
+        public float SetYawFromByte(byte yaw) => Yaw = (yaw / 256F * 360F) + 90F;
+        public float SetPitchFromByte(byte pitch) => Pitch = pitch / 256F * 360F;
+        public float SetHeadYawFromByte(byte headYaw) => HeadYaw = (headYaw / 256F * 360F) + 90F;
 
         /// <summary>
         /// Used in Item Frame, Falling Block and Fishing Float.
@@ -139,9 +143,9 @@ namespace MinecraftClient.Mapping
             this.MaxHealth = 1F;
             this.Equipment = new Dictionary<int, ItemStack>();
             this.Item = null;
-            this.Yaw = AngleConvert.MC2Unity(yaw);
-            this.Pitch = AngleConvert.MC2Unity(pitch);
-            this.HeadYaw = AngleConvert.MC2Unity(headYaw);
+            SetYawFromByte(yaw);
+            SetPitchFromByte(pitch);
+            SetHeadYawFromByte(headYaw);
             this.ObjectData = objectData;
         }
 

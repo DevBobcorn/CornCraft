@@ -175,7 +175,7 @@ namespace MinecraftClient.Control
             // Prepare current and target player visual yaw before updating it
             if (inputData.horInputNormalized != Vector2.zero)
             {
-                Status.UserInputYaw = AngleConvert.GetYawFromVector2(inputData.horInputNormalized);
+                Status.UserInputYaw = getYawFromVector2(inputData.horInputNormalized);
                 Status.TargetVisualYaw = cameraController!.GetYaw() + Status.UserInputYaw;
             }
             
@@ -309,7 +309,7 @@ namespace MinecraftClient.Control
 
             var posOffset = targetPos.Value - transform.position;
 
-            var attackYaw = AngleConvert.GetYawFromVector2(new(posOffset.x, posOffset.z));
+            var attackYaw = getYawFromVector2(new(posOffset.x, posOffset.z));
 
             statusUpdater!.Status.TargetVisualYaw = attackYaw;
             statusUpdater!.Status.CurrentVisualYaw = attackYaw;
@@ -353,6 +353,16 @@ namespace MinecraftClient.Control
             {
                 Debug.LogWarning("Trying to clear attack cooldown when not attacking!");
             }
+        }
+
+        private float getYawFromVector2(Vector2 direction)
+        {
+            if (direction.y > 0F)
+                return Mathf.Atan(direction.x / direction.y) * Mathf.Rad2Deg;
+            else if (direction.y < 0F)
+                return Mathf.Atan(direction.x / direction.y) * Mathf.Rad2Deg + 180F;
+            else
+                return direction.x > 0 ? 90F : 270F;
         }
  
         private Action<PerspectiveUpdateEvent>? perspectiveCallback;
