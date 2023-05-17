@@ -1298,15 +1298,12 @@ namespace MinecraftClient
 
         }
 
-        public void OnEntityRotation(int EntityID, float yaw, float pitch, bool onGround)
+        public void OnEntityRotation(int EntityID, byte yaw, byte pitch, bool onGround)
         {
             if (entities.ContainsKey(EntityID))
             {
-                yaw = AngleConvert.MCYaw2Unity(yaw);
-                pitch = AngleConvert.MC2Unity(pitch);
-
-                entities[EntityID].Yaw = yaw;
-                entities[EntityID].Pitch = pitch;
+                entities[EntityID].SetYawFromByte(yaw);
+                entities[EntityID].SetPitchFromByte(pitch);
 
                 Loom.QueueOnMainThread(() => {
                     EntityRenderManager?.RotateEntityRender(EntityID, yaw, pitch);
@@ -1315,13 +1312,11 @@ namespace MinecraftClient
 
         }
 
-        public void OnEntityHeadLook(int EntityID, float headYaw)
+        public void OnEntityHeadLook(int EntityID, byte headYaw)
         {
             if (entities.ContainsKey(EntityID))
             {
-                headYaw = AngleConvert.MCYaw2Unity(headYaw);
-
-                entities[EntityID].HeadYaw = headYaw;
+                entities[EntityID].SetHeadYawFromByte(headYaw);
 
                 Loom.QueueOnMainThread(() => {
                     EntityRenderManager?.RotateEntityRenderHead(EntityID, headYaw);
