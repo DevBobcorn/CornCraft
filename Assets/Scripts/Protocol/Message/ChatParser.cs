@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using UnityEngine;
+
 using MinecraftClient.Protocol.Message;
 
 namespace MinecraftClient.Protocol
@@ -164,27 +166,16 @@ namespace MinecraftClient.Protocol
         }
 
         /// <summary>
-        /// Specify whether translation rules have been loaded
-        /// </summary>
-        private static bool RulesInitialized = false;
-
-        /// <summary>
         /// Set of translation rules for formatting text
         /// </summary>
         private static Dictionary<string, string> TranslationRules = new Dictionary<string, string>();
 
         /// <summary>
-        /// Initialize translation rules.
-        /// Necessary for properly printing some chat messages.
+        /// Rule initialization method.
         /// </summary>
-        public static void InitTranslations() { if (!RulesInitialized) { InitRules(); RulesInitialized = true; } }
-
-        /// <summary>
-        /// Internal rule initialization method. Looks for local rule file or download it from Mojang asset servers.
-        /// </summary>
-        private static void InitRules()
+        public static void InitTranslationRules(string langFile)
         {
-            //Small default dictionnary of translation rules
+            // Small default dictionnary of translation rules
             TranslationRules["chat.type.admin"] = "[%s: %s]";
             TranslationRules["chat.type.announcement"] = "§d[%s] %s";
             TranslationRules["chat.type.emote"] = " * %s %s";
@@ -194,72 +185,18 @@ namespace MinecraftClient.Protocol
             TranslationRules["commands.message.display.incoming"] = "§7%s whispers to you: %s";
             TranslationRules["commands.message.display.outgoing"] = "§7You whisper to %s: %s";
 
-            //Language file in a subfolder, depending on the language setting
-            if (!Directory.Exists("lang"))
-                Directory.CreateDirectory("lang");
-
-            string langFile = "lang" + Path.DirectorySeparatorChar + CornGlobal.Language + ".lang";
-
-            //File not found? Try downloading language file from Mojang's servers?
-            if (!File.Exists(langFile))
-            {
-                Translations.Log("chat.download", CornGlobal.Language);
-                try
-                {
-                    string assets_index = DownloadString(Translations.TranslationsFile_Website_Index);
-                    string[] tmp = assets_index.Split(new string[] { "minecraft/lang/" + CornGlobal.Language.ToLower() + ".json" }, StringSplitOptions.None);
-                    tmp = tmp[1].Split(new string[] { "hash\": \"" }, StringSplitOptions.None);
-                    string hash = tmp[1].Split('"')[0]; //Translations file identifier on Mojang's servers
-                    string translation_file_location = Translations.TranslationsFile_Website_Download + '/' + hash.Substring(0, 2) + '/' + hash;
-                    if (CornGlobal.DebugMode)
-                        Translations.Log("chat.request", translation_file_location);
-
-                    StringBuilder stringBuilder = new StringBuilder();
-                    foreach (KeyValuePair<string, Json.JSONData> entry in Json.ParseJson(DownloadString(translation_file_location)).Properties)
-                    {
-                        stringBuilder.Append(entry.Key + "=" + entry.Value.StringValue + Environment.NewLine);
-                    }
-
-                    File.WriteAllText(langFile, stringBuilder.ToString());
-                    Translations.Log("chat.done", langFile);
-                }
-                catch
-                {
-                    Translations.LogWarning("chat.fail");
-                }
-            }
-
-            //Download Failed? Defaulting to en_GB.lang if the game is installed
-            if (!File.Exists(langFile) //Try en_GB.lang
-              && File.Exists(Translations.TranslationsFile_FromMCDir))
-            {
-                langFile = Translations.TranslationsFile_FromMCDir;
-                Translations.Log("chat.from_dir");
-            }
-
-            //Load the external dictionnary of translation rules or display an error message
+            // Load the external dictionnary of translation rules or display an error message
             if (File.Exists(langFile))
             {
-                string[] translations = File.ReadAllLines(langFile);
-                foreach (string line in translations)
-                {
-                    if (line.Length > 0)
-                    {
-                        string[] splitted = line.Split('=');
-                        if (splitted.Length == 2)
-                        {
-                            TranslationRules[splitted[0]] = splitted[1];
-                        }
-                    }
-                }
+                var translations = Json.ParseJson(File.ReadAllText(langFile));
+                foreach (var text in translations.Properties)
+                    TranslationRules[text.Key] = text.Value.StringValue;
 
                 if (CornGlobal.DebugMode)
-                    Translations.Log("chat.loaded");
+                    Debug.Log(Translations.Get("chat.loaded"));
             }
-            else //No external dictionary found.
-            {
-                Translations.Log("chat.not_found", langFile);
-            }
+            else // No external dictionary found.
+                Debug.Log(Translations.Get("chat.not_found", langFile));
         }
 
         /// <summary>
@@ -271,7 +208,6 @@ namespace MinecraftClient.Protocol
         /// <returns>Returns the formatted text according to the given data</returns>
         public static string TranslateString(string rulename, List<string>? using_data = null)
         {
-            if (!RulesInitialized) { InitRules(); RulesInitialized = true; }
             if (TranslationRules.ContainsKey(rulename))
             {
                 if (using_data is not null)
@@ -392,21 +328,5 @@ namespace MinecraftClient.Protocol
             return "";
         }
 
-        /// <summary>
-        /// Do a HTTP request to get a webpage or text data from a server file
-        /// </summary>
-        /// <param name="url">URL of resource</param>
-        /// <returns>Returns resource data if success, otherwise a WebException is raised</returns>
-        private static string DownloadString(string url)
-        {
-            System.Net.HttpWebRequest myRequest = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url);
-            myRequest.Method = "GET";
-            System.Net.WebResponse myResponse = myRequest.GetResponse();
-            System.IO.StreamReader sr = new System.IO.StreamReader(myResponse.GetResponseStream(), System.Text.Encoding.UTF8);
-            string result = sr.ReadToEnd();
-            sr.Close();
-            myResponse.Close();
-            return result;
-        }
     }
 }

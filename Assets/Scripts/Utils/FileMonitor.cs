@@ -27,7 +27,7 @@ namespace MinecraftClient
             if (CornGlobal.DebugMode)
             {
                 string callerClass = new System.Diagnostics.StackFrame(1).GetMethod().DeclaringType.Name;
-                Translations.Log("filemonitor.init", callerClass, Path.Combine(folder, filename));
+                UnityEngine.Debug.Log(Translations.Get("filemonitor.init", callerClass, Path.Combine(folder, filename)));
             }
 
             try
@@ -45,7 +45,7 @@ namespace MinecraftClient
                 if (CornGlobal.DebugMode)
                 {
                     string callerClass = new System.Diagnostics.StackFrame(1).GetMethod().DeclaringType.Name;
-                    Translations.LogError("filemonitor.fail", callerClass);
+                    UnityEngine.Debug.LogError(Translations.Get("filemonitor.fail", callerClass));
                 }
 
                 monitor = null;

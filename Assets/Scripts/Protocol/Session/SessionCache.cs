@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Timers;
+using UnityEngine;
 
 namespace MinecraftClient.Protocol.Session
 {
@@ -129,8 +130,7 @@ namespace MinecraftClient.Protocol.Session
             //Grab sessions in the Minecraft directory
             if (File.Exists(SessionCacheFileMinecraft))
             {
-                if (CornGlobal.DebugMode)
-                    Translations.Log("cache.loading", Path.GetFileName(SessionCacheFileMinecraft));
+                if (CornGlobal.DebugMode) Debug.Log(Translations.Get("cache.loading", Path.GetFileName(SessionCacheFileMinecraft)));
                 Json.JSONData mcSession = new Json.JSONData(Json.JSONData.DataType.String);
                 try
                 {
@@ -164,7 +164,7 @@ namespace MinecraftClient.Protocol.Session
                                         clientID
                                     ));
                                     if (CornGlobal.DebugMode)
-                                        Translations.Log("cache.loaded", login, session.ID);
+                                        Debug.Log(Translations.Get("cache.loaded", login, session.ID));
                                     sessions[login] = session;
                                 }
                                 catch (InvalidDataException) { /* Not a valid session */ }
@@ -178,7 +178,7 @@ namespace MinecraftClient.Protocol.Session
             if (File.Exists(SessionCacheFileSerialized))
             {
                 if (CornGlobal.DebugMode)
-                    Translations.Log("cache.converting", SessionCacheFileSerialized);
+                    Debug.Log(Translations.Get("cache.converting", SessionCacheFileSerialized));
 
                 try
                 {
@@ -188,18 +188,18 @@ namespace MinecraftClient.Protocol.Session
                         foreach (KeyValuePair<string, SessionToken> item in sessionsTemp)
                         {
                             if (CornGlobal.DebugMode)
-                                Translations.Log("cache.loaded", item.Key, item.Value.ID);
+                                Debug.Log(Translations.Get("cache.loaded", item.Key, item.Value.ID));
                             sessions[item.Key] = item.Value;
                         }
                     }
                 }
                 catch (IOException ex)
                 {
-                    Translations.LogError("cache.read_fail", ex.Message);
+                    Debug.LogError(Translations.Get("cache.read_fail", ex.Message));
                 }
                 catch (SerializationException ex2)
                 {
-                    Translations.LogError("cache.malformed", ex2.Message);
+                    Debug.LogError(Translations.Get("cache.malformed", ex2.Message));
                 }
             }
 
@@ -207,7 +207,7 @@ namespace MinecraftClient.Protocol.Session
             if (File.Exists(SessionCacheFilePlaintext))
             {
                 if (CornGlobal.DebugMode)
-                    Translations.Log("cache.loading_session", SessionCacheFilePlaintext);
+                    Debug.Log(Translations.Get("cache.loading_session", SessionCacheFilePlaintext));
 
                 try
                 {
@@ -223,25 +223,25 @@ namespace MinecraftClient.Protocol.Session
                                     string login = keyValue[0].ToLower();
                                     SessionToken session = SessionToken.FromString(keyValue[1]);
                                     if (CornGlobal.DebugMode)
-                                        Translations.Log("cache.loaded", login, session.ID);
+                                        Debug.Log(Translations.Get("cache.loaded", login, session.ID));
                                     sessions[login] = session;
                                 }
                                 catch (InvalidDataException e)
                                 {
                                     if (CornGlobal.DebugMode)
-                                        Translations.Log("cache.ignore_string", keyValue[1], e.Message);
+                                        Debug.Log(Translations.Get("cache.ignore_string", keyValue[1], e.Message));
                                 }
                             }
                             else if (CornGlobal.DebugMode)
                             {
-                                Translations.Log("cache.ignore_line", line);
+                                Debug.Log(Translations.Get("cache.ignore_line", line));
                             }
                         }
                     }
                 }
                 catch (IOException e)
                 {
-                    Translations.Log("cache.read_fail_plain", e.Message);
+                    Debug.Log(Translations.Get("cache.read_fail_plain", e.Message));
                 }
             }
 
@@ -254,7 +254,7 @@ namespace MinecraftClient.Protocol.Session
         private static void SaveToDisk()
         {
             if (CornGlobal.DebugMode)
-                Translations.Log("cache.saving");
+                Debug.Log(Translations.Get("cache.saving"));
 
             List<string> sessionCacheLines = new List<string>();
             sessionCacheLines.Add("# Generated by CornClient " + CornGlobal.Version + " - Edit at own risk!");
@@ -268,7 +268,7 @@ namespace MinecraftClient.Protocol.Session
             }
             catch (IOException e)
             {
-                Translations.LogError("cache.save_fail", e.Message);
+                Debug.LogError(Translations.Get("cache.save_fail", e.Message));
             }
         }
     }

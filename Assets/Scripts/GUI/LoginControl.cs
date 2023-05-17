@@ -70,7 +70,7 @@ namespace MinecraftClient.UI
         {
             if (tryingConnect)
             {
-                CornApp.ShowNotification("Already loggin' in!", Notification.Type.Warning);
+                CornApp.Notify("Already loggin' in!", Notification.Type.Warning);
                 return;
             }
 
@@ -98,14 +98,14 @@ namespace MinecraftClient.UI
             {
                 if (!StringHelper.IsValidName(account))
                 {
-                    CornApp.ShowNotification("The offline username is not valid!", Notification.Type.Warning);
+                    CornApp.Notify("The offline username is not valid!", Notification.Type.Warning);
                     tryingConnect = false;
                     loadStateInfoText!.text = ">_<";
                     yield break;
                 }
 
                 // Enter offline mode
-                Translations.Notify("mcc.offline");
+                CornApp.Notify(Translations.Get("mcc.offline"));
                 result = ProtocolHandler.LoginResult.Success;
                 session.PlayerID = "0";
                 session.PlayerName = account;
@@ -118,7 +118,7 @@ namespace MinecraftClient.UI
                     result = ProtocolHandler.GetTokenValidation(session);
                     if (result != ProtocolHandler.LoginResult.Success)
                     {
-                        Translations.Log("mcc.session_invalid");
+                        Debug.Log(Translations.Get("mcc.session_invalid"));
                         // Try to refresh access token
                         if (!string.IsNullOrWhiteSpace(session.RefreshToken))
                         {
@@ -134,12 +134,12 @@ namespace MinecraftClient.UI
                         }
                     }
                     else
-                        Translations.Log("mcc.session_valid", session.PlayerName);
+                        Debug.Log(Translations.Get("mcc.session_valid", session.PlayerName));
                 }
 
                 if (result != ProtocolHandler.LoginResult.Success)
                 {
-                    Translations.Log("mcc.connecting", "Microsoft");
+                    Debug.Log(Translations.Get("mcc.connecting", "Microsoft"));
                     authenticating = true;
 
                     // Start brower and open the page...
@@ -182,7 +182,7 @@ namespace MinecraftClient.UI
 
                 if (!ParseServerIP(serverText, out host, ref port))
                 {
-                    CornApp.ShowNotification("Failed to parse server name or address!", Notification.Type.Warning);
+                    CornApp.Notify("Failed to parse server name or address!", Notification.Type.Warning);
                     tryingConnect = false;
                     loadStateInfoText!.text = ">_<";
                     yield break;
@@ -198,21 +198,21 @@ namespace MinecraftClient.UI
                     {
                         bool cacheKeyLoaded = KeysCache.InitializeDiskCache();
                         if (CornGlobal.DebugMode)
-                            Translations.Log(cacheKeyLoaded ? "debug.keys_cache_ok" : "debug.keys_cache_fail");
+                            Debug.Log(Translations.Get(cacheKeyLoaded ? "debug.keys_cache_ok" : "debug.keys_cache_fail"));
                     }
 
                     if (CornGlobal.ProfileKeyCaching != CacheType.None && KeysCache.Contains(accountLower))
                     {
                         playerKeyPair = KeysCache.Get(accountLower);
                         if (playerKeyPair.NeedRefresh())
-                            Translations.Log("mcc.profile_key_invalid");
+                            Debug.Log(Translations.Get("mcc.profile_key_invalid"));
                         else
-                            Translations.Log("mcc.profile_key_valid", session.PlayerName);
+                            Debug.Log(Translations.Get("mcc.profile_key_valid", session.PlayerName));
                     }
 
                     if (playerKeyPair == null || playerKeyPair.NeedRefresh())
                     {
-                        Translations.Log("mcc.fetching_key");
+                        Debug.Log(Translations.Get("mcc.fetching_key"));
                         playerKeyPair = KeyUtils.GetKeys(session.ID);
                         if (CornGlobal.ProfileKeyCaching != CacheType.None && playerKeyPair != null)
                         {
@@ -225,14 +225,14 @@ namespace MinecraftClient.UI
                 username = session.PlayerName;
 
                 if (CornGlobal.DebugMode)
-                    Translations.Log("debug.session_id", session.ID);
+                    Debug.Log(Translations.Get("debug.session_id", session.ID));
 
                 // Get server version
                 int protocolVersion = 0;
                 ForgeInfo? forgeInfo = null;
 
                 // Not realms
-                Translations.Log("mcc.retrieve"); // Retrieve server information
+                Debug.Log(Translations.Get("mcc.retrieve")); // Retrieve server information
                 loadStateInfoText!.text = Translations.Get("mcc.retrieve");
                 yield return null;
 
@@ -246,7 +246,7 @@ namespace MinecraftClient.UI
 
                 if (!pingResult)
                 {
-                    Translations.NotifyError("error.ping");
+                    CornApp.Notify(Translations.Get("error.ping"), Notification.Type.Error);
                     tryingConnect = false;
                     loadStateInfoText!.text = ">_<";
                     yield break;
@@ -268,10 +268,10 @@ namespace MinecraftClient.UI
                         yield break;
                     }
                     else
-                        Translations.NotifyError("error.unsupported");
+                        CornApp.Notify(Translations.Get("error.unsupported"), Notification.Type.Error);
                 }
                 else // Unable to determine server version
-                    Translations.NotifyError("error.determine");
+                    CornApp.Notify(Translations.Get("error.determine"), Notification.Type.Error);
             }
             else
             {
@@ -290,10 +290,10 @@ namespace MinecraftClient.UI
                 };
                 failureMessage += Translations.Get(failureReason);
                 loadStateInfoText!.text = ">_<";
-                CornApp.ShowNotification(failureMessage, Notification.Type.Error);
+                CornApp.Notify(failureMessage, Notification.Type.Error);
 
                 if (result == ProtocolHandler.LoginResult.SSLError)
-                    Translations.NotifyError("error.login.ssl_help");
+                    CornApp.Notify(Translations.Get("error.login.ssl_help"), Notification.Type.Error);
                 
                 Debug.LogError(failureMessage);
             }
@@ -367,7 +367,7 @@ namespace MinecraftClient.UI
         public void CopyAuthLink()
         {
             GUIUtility.systemCopyBuffer = authLinkText!.text;
-            CornApp.ShowNotification("Link copied to clipboard.", Notification.Type.Success);
+            CornApp.Notify("Link copied to clipboard.", Notification.Type.Success);
         }
 
         public void PasteAuthCode()
@@ -412,7 +412,7 @@ namespace MinecraftClient.UI
 
             if (String.IsNullOrEmpty(code))
             {
-                CornApp.ShowNotification("Authentication code is empty!", Notification.Type.Warning);
+                CornApp.Notify("Authentication code is empty!", Notification.Type.Warning);
                 return;
             }
 
@@ -468,7 +468,7 @@ namespace MinecraftClient.UI
             {
                 bool cacheLoaded = SessionCache.InitializeDiskCache();
                 if (CornGlobal.DebugMode)
-                    Translations.Log(cacheLoaded ? "debug.session_cache_ok" : "debug.session_cache_fail");
+                    Debug.Log(Translations.Get(cacheLoaded ? "debug.session_cache_ok" : "debug.session_cache_fail"));
                 
                 if (cacheLoaded)
                     cachedNames = SessionCache.GetCachedLogins();

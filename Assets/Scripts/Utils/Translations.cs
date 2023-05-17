@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using UnityEngine;
 
@@ -16,12 +14,7 @@ namespace MinecraftClient
     /// </remarks>
     public static class Translations
     {
-        public static string TranslationsFile_FromMCDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\.minecraft\assets\objects\8b\8bf1298bd44b0e5b21d747394a8acd2c218e09ed"; //MC 1.17 en_GB.lang
-        public static string TranslationsFile_Website_Index = "https://launchermeta.mojang.com/v1/packages/e5af543d9b3ce1c063a97842c38e50e29f961f00/1.17.json";
-        public static string TranslationsFile_Website_Download = "http://resources.download.minecraft.net";
-
         private static Dictionary<string, string> translations;
-        private static string translationFilePath = "Lang" + Path.DirectorySeparatorChar + "mcc";
         private static Regex translationKeyRegex = new Regex(@"\(\[(.*?)\]\)", RegexOptions.Compiled); // Extract string inside ([ ])
 
         /// <summary>
@@ -74,81 +67,33 @@ namespace MinecraftClient
             else return translated;
         }
 
-        private static string ReplaceKey(Match m)
-        {
-            return Get(m.Groups[1].Value);
-        }
+        private static string ReplaceKey(Match m) => Get(m.Groups[1].Value);
 
         /// <summary>
-        /// Initialize translations depending on system language.
-        /// English is the default for all unknown system languages.
+        /// Initialize app translations.
         /// </summary>
         static Translations()
         {
             translations = new Dictionary<string, string>();
-            LoadDefaultTranslationsFile();
+            LoadTranslationsFile(CornGlobal.Language);
         }
 
         /// <summary>
-        /// Load default translation file (English)
+        /// Load translation file for current language
         /// </summary>
-        /// <remarks>
-        /// This will be loaded during program start up.
-        /// </remarks>
-        private static void LoadDefaultTranslationsFile()
+        private static void LoadTranslationsFile(string language)
         {
             string path = string.Empty, defaultTexts;
             try {
-                path = Application.streamingAssetsPath + "/Lang/en.ini";
+                path = PathHelper.GetExtraDataFile($"app_lang{Path.DirectorySeparatorChar}{language}.lang");
                 defaultTexts = File.ReadAllText(path);
             } catch {
                 defaultTexts = string.Empty;
-                Debug.LogWarning("Failed to load default translation texts from " + path);
+                Debug.LogWarning($"Failed to load default translation texts from {path}");
             }
 
             string[] engLang = defaultTexts.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None); // use embedded translations
             ParseTranslationContent(engLang);
-        }
-
-        /// <summary>
-        /// Load translation file depends on system language or by giving a file path. Default to English if translation file does not exist
-        /// </summary>
-        public static void LoadExternalTranslationFile(string language)
-        {
-            /*
-             * External translation files
-             * These files are loaded from the installation directory as:
-             * Lang/abc.ini, e.g. Lang/eng.ini which is the default language file
-             * Useful for adding new translations of fixing typos without recompiling
-             */
-
-            // Try to convert Minecraft language file name to two letters language name
-            if (language == "zh_cn")
-                language = "zh-CHS";
-            else if (language == "zh_tw")
-                language = "zh-CHT";
-            else
-                language = language.Split('_')[0];
-
-            string systemLanguage = string.IsNullOrEmpty(CultureInfo.CurrentCulture.Parent.Name) // Parent.Name might be empty
-                    ? CultureInfo.CurrentCulture.Name
-                    : CultureInfo.CurrentCulture.Parent.Name;
-            string langDir = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + translationFilePath + Path.DirectorySeparatorChar;
-            string langFileSystemLanguage = langDir + systemLanguage + ".ini";
-            string langFileConfigLanguage = langDir + language + ".ini";
-
-            if (File.Exists(langFileConfigLanguage))
-            {// Language set in ini config
-                ParseTranslationContent(File.ReadAllLines(langFileConfigLanguage));
-                return;
-            }
-
-            if (File.Exists(langFileSystemLanguage))
-            {// Fallback to system language
-                ParseTranslationContent(File.ReadAllLines(langFileSystemLanguage));
-                return;
-            }
-
         }
 
         /// <summary>
@@ -176,88 +121,5 @@ namespace MinecraftClient
             }
         }
 
-        #region Console writing method wrapper
-
-        /// <summary>
-        /// Translate the key, format the result and write it to Unity Console
-        /// </summary>
-        /// <param name="key">Translation key</param>
-        /// <param name="args"></param>
-        public static void Log(string key, params object[] args)
-        {
-            string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.Log(StringHelper.MC2TMP(text));
-        }
-
-        /// <summary>
-        /// Translate the key, format the result and display it as notification
-        /// </summary>
-        /// <param name="key">Translation key</param>
-        /// <param name="args"></param>
-        public static void Notify(string key, params object[] args)
-        {
-            string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.Log(StringHelper.MC2TMP(text));
-            Loom.QueueOnMainThread(() => Notify(RemoveFormatting(text), UI.Notification.Type.Notify));
-        }
-
-        /// <summary>
-        /// Translate the key, format the result and write it to Unity Console as warning message
-        /// </summary>
-        /// <param name="key">Translation key</param>
-        /// <param name="args"></param>
-        public static void LogWarning(string key, params object[] args)
-        {
-            string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.LogWarning(StringHelper.MC2TMP("§e" + text));
-        }
-
-        /// <summary>
-        /// Translate the key, format the result and display it as warning notification
-        /// </summary>
-        /// <param name="key">Translation key</param>
-        /// <param name="args"></param>
-        public static void NotifyWarning(string key, params object[] args)
-        {
-            string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.LogWarning(StringHelper.MC2TMP("§e" + text)); // Add yellow color prefix
-            Loom.QueueOnMainThread(() => Notify(RemoveFormatting(text), UI.Notification.Type.Warning));
-        }
-
-        /// <summary>
-        /// Translate the key, format the result and write it to Unity Console as error message
-        /// </summary>
-        /// <param name="key">Translation key</param>
-        /// <param name="args"></param>
-        public static void LogError(string key, params object[] args)
-        {
-            string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.LogError(StringHelper.MC2TMP("§4" + text)); // Add red color prefix
-        }
-
-        /// <summary>
-        /// Translate the key, format the result and display it as error notification
-        /// </summary>
-        /// <param name="key">Translation key</param>
-        /// <param name="args"></param>
-        public static void NotifyError(string key, params object[] args)
-        {
-            string text = args.Length > 0 ? string.Format(Get(key), args) : Get(key);
-            Debug.LogError(StringHelper.MC2TMP("§4" + text));
-            Loom.QueueOnMainThread(() => Notify(RemoveFormatting(text), UI.Notification.Type.Error));
-        }
-
-        private static void Notify(string text, UI.Notification.Type type)
-        {
-            CornApp.ShowNotification(text, type);
-        }
-
-        public static string RemoveFormatting(string original)
-        {
-            // Remove all Minecraft formatting codes from it
-            return Regex.Replace(original, "§.", "");
-        }
-
-        #endregion
     }
 }

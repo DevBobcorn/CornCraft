@@ -78,7 +78,7 @@ namespace MinecraftClient.Control
         public void ToggleWalkMode()
         {
             Status!.WalkMode = !Status.WalkMode;
-            CornApp.ShowNotification(Status.WalkMode ? "Switched to walk mode" : "Switched to rush mode");
+            CornApp.Notify(Status.WalkMode ? "Switched to walk mode" : "Switched to rush mode");
         }
 
         public void CrossFadeState(string stateName, float time = 0.2F, int layer = 0, float timeOffset = 0F)

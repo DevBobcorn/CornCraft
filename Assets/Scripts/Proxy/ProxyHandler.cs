@@ -49,7 +49,7 @@ namespace MinecraftClient.Proxy
 
                     if (!proxy_ok)
                     {
-                        Translations.Log("proxy.connected", CornGlobal.ProxyHost, CornGlobal.ProxyPort);
+                        Debug.Log(Translations.Get("proxy.connected", CornGlobal.ProxyHost, CornGlobal.ProxyPort));
                         proxy_ok = true;
                     }
 
