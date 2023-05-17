@@ -1,0 +1,168 @@
+[mcc]
+# Messages from MCC itself
+mcc.offline=您正在使用离线模式。
+mcc.session_invalid=缓存无效或已过期。
+mcc.session_valid={0}的缓存仍然有效。
+mcc.profile_key_invalid=缓存的聊天签名密钥需要刷新。
+mcc.profile_key_valid={0}的聊天签名密钥缓存仍然有效。
+mcc.connecting=正在连接至{0}...
+mcc.fetching_key=正在从Microsoft获取用户密匙。
+mcc.ip=服务器IP：
+mcc.use_version=正在运行Minecraft版本{0} (v{1}协议)
+mcc.unknown_version=未知或不受支持的Minecraft版本{0}。\n正在切换至自动检测模式。
+mcc.forge=检查服务器是否正在运行Forge...
+mcc.forgeforce=正在强制启动Forge支持。
+mcc.resolve=正在解析{0}...
+mcc.found=已找到服务器{0}:{1}，域名：{2}
+mcc.not_found=无法执行{0}的SRV解析\n{1}：{2}
+mcc.retrieve=正在获取服务器信息...
+mcc.restart=正在重启Minecraft Console Client...
+mcc.restart_delay=等待{0}秒后重启...
+mcc.server_version=服务器版本：
+mcc.disconnected=未连接至任何服务器。输入 '{0}help' 获得帮助。
+mcc.press_exit=或者敲击回车退出Minecraft Console Client。
+mcc.version_supported=该版本受到支持\n正在登录...
+mcc.single_cmd=§7已发送命令 {0}
+mcc.joined=已成功加入服务器。\n输入 '{0}quit' 离开服务器。
+mcc.reconnect=等待5秒 (剩余{0}次尝试)...
+mcc.disconnect.lost=失去连接。
+mcc.disconnect.server=从服务器断开：
+mcc.disconnect.login=连接失败：
+mcc.link=链接：{0}
+mcc.server_offline=服务器正处于离线模式。
+mcc.session=检查会话...
+mcc.session_fail=检查会话失败
+mcc.server_protocol=服务器版本：{0} (v{1}协议)
+mcc.handshake=握手成功。(服务器ID：{0})
+mcc.realms_available==您可以访问以下Realms世界
+mcc.realms_join=请使用realms:<序号>作为服务器IP加入Realms世界
+
+[debug]
+# Messages from MCC Debug Mode
+debug.session_cache_ok=已成功从磁盘中加载会话数据。
+debug.session_cache_fail=无法从磁盘加载会话
+debug.keys_cache_ok=已成功从磁盘中加载聊天签名密钥。
+debug.keys_cache_fail=无法从磁盘中加载聊天签名密钥。
+debug.session_id=成功！(会话ID：{0})
+debug.crypto=密钥和哈希值已生成：
+debug.request=正在请求{0}
+
+[error]
+# Error messages from MCC 
+error.ping=ping此IP失败。
+error.unsupported=无法连接到服务器：不支持此版本！
+error.determine=无法确定服务器版本。
+error.forgeforce=无法为此Minecraft版本强制启动Forge支持！
+error.login=登录失败：
+error.login.migrated=帐户已迁移，使用电子邮件作为用户名。
+error.login.server=登录服务器不可用。请稍后再试。
+error.login.blocked=密码错误、IP被禁用或登录次数过多。
+error.login.response=服务器响应无效。
+error.login.premium=不是Premium用户。
+error.login.network=网络错误。
+error.login.ssl=SSL错误。
+error.login.unknown=未知错误。
+error.login.ssl_help=您似乎正在使用Mono运行此程序.\n当第一次运行，您必须使用以下命令导入HTTPS证书：\nmozroots --import --ask-remove
+error.login.cancel=用户取消。
+error.login_failed=无法登录到此服务器。
+error.join=加入服务器时发生错误。
+error.connect=无法连接到此IP：{0}
+error.timeout=连接超时
+error.unexpect_response=来自服务器的意外响应（这是Minecraft服务器吗？）
+error.invalid_response=对握手包的响应无效
+error.invalid_encrypt=对StartEncryption数据包的响应无效
+error.version_different=服务器报告的版本与手动设置的版本不同。登录可能无法工作。
+error.no_version_report=服务器未报告其协议版本，自动检测将不起作用。
+error.connection_timeout=尝试连接到此IP时超时。
+error.forge=Forge登录握手未成功完成
+error.forge_encrypt=Forge StartEncryption握手未成功完成
+error.setting.str2int=无法将'{0}'转换为整数。请检查设置。
+error.setting.argument_syntax={0}：无效语法，应为 --argname=value 或 --section.argname=value
+error.setting.unknown_section={0}：未知设置部分'{1}'
+error.setting.unknown_or_invalid={0}：未知设置或无效值
+error.http_code=接收到服务器错误：{0}
+error.auth=在刷新身份验证时接收到服务器错误：{0}
+error.realms.ip_error=无法获取您Realms世界的服务器IP
+error.realms.access_denied=此Realms世界不存在或访问被拒绝
+error.realms.server_unavailable=Realms服务器可能需要一些时间来启动。请稍后再试。
+error.realms.server_id=Realms服务器ID无效或未知。
+error.realms.disabled=正在尝试加入Realms世界，但配置中禁用了Realms支持
+error.missing.argument=缺少参数{0}
+error.usage=用法：
+
+[exception]
+# Exception messages threw by MCC
+exception.user_logout=用户发起的注销应该通过调用Disconnect()来完成
+exception.unknown_direction=未知方向
+exception.palette.block=请为此Minecraft版本更新方块类型处理。详细请参考 Material.cs
+exception.palette.entity=请为此Minecraft版本更新实体类型处理。详细请参考 EntityType.cs
+exception.palette.item=请为此Minecraft版本更新物品类型处理。详细请参考 ItemType.cs
+exception.palette.packet=请为此Minecraft版本更新数据包类型调色板。详细请参考 PacketTypePalette.cs
+exception.packet_process=无法处理传入的{0}类型的数据包。(数据包ID：{1}，协议：{2}，登陆阶段：{3}，内部异常：{4})。
+exception.version_unsupport=版本{0}的协议未被支持。
+
+[filemonitor]
+# FileMonitor
+filemonitor.init=[{0}] 正在为文件{1}初始化FileSystemWatcher
+filemonitor.fail=[{0}] 无法初始化FileSystemWatcher，正在使用轮询重试
+
+[extra]
+extra.inventory_interact=请使用 /inventory 来与其交互。
+extra.inventory_open=物品栏# {0}已开启：{1}
+extra.inventory_close=物品栏# {0}已关闭。
+
+[gameplay]
+gameplay.interaction.go_to_bed=睡觉
+gameplay.interaction.open_door=开门
+gameplay.interaction.close_door=关门
+
+[forge]
+# Messages from Forge handler
+forge.version=Forge协议版本：{0}
+forge.send_mod=向服务器发送伪造的forge模组列表...
+forge.accept=接受来自的服务器模组列表...
+forge.registry=已接收的注册表包含{0}个条目
+forge.registry_2=已接收注册表{0}，包含{1}个条目
+forge.accept_registry=接受服务器注册表...
+forge.complete=Forge服务器连接完成!
+forge.with_mod=服务器正在运行Forge，有{0}个模组。
+forge.no_mod=正在运行的服务器没有Forge模组。
+forge.mod_list=模组列表:
+# FML2
+forge.fml2.mod=收到FM2服务器模组列表
+forge.fml2.mod_send=发回FML2客户端的模组列表
+forge.fml2.registry=确认FML2服务器注册表：{0}
+forge.fml2.config=确认FML2服务器配置：{0}
+forge.fml2.unknown=收到未知的FML2握手信息，编号：{0}
+forge.fml2.unknown_channel=忽略未知的FML2登录消息通道：{0}
+
+[cache]
+# Session Cache
+cache.loading=加载Minecraft配置文件：{0}
+cache.loaded=已加载会话：{0}:{1}
+cache.converting=从磁盘转换会话缓存：{0}
+cache.read_fail=无法从磁盘读取序列化会话缓存：{0}
+cache.malformed=从磁盘读取序列化会话缓存时，获取到格式错误的数据：{0}
+cache.loading_session=从磁盘加载会话缓存：{0}
+cache.ignore_string=忽略会话令牌字符串'{0}'：{1}
+cache.ignore_line=忽略无效的会话令牌行：{0}
+cache.read_fail_plain=无法从磁盘读取会话缓存：{0}
+cache.saving=将会话缓存保存到磁盘
+cache.save_fail=无法将会话缓存写入磁盘：{0}
+# Profile Key Cache
+cache.loading_keys=从磁盘加载聊天签名密钥缓存: {0}
+cache.loaded_keys=已加载签名密钥，下次刷新于 {0}
+cache.ignore_string_keys=忽略聊天签名密钥字符串 '{0}'：{1}
+cache.ignore_line_keys=忽略无效的聊天签名密钥行：{0}
+cache.read_fail_plain_keys=无法从磁盘读取聊天签名密钥缓存：{0}
+cache.saving_keys=将聊天签名密钥保存到磁盘
+cache.save_fail_keys=无法将聊天签名密钥写入磁盘：{0}
+
+[proxy]
+proxy.connected=已连接到代理{0}:{1}
+
+[chat]
+# Chat Parser
+chat.loaded=已加载翻译文件。
+chat.not_found=找不到翻译文件：'{0}'\n如果没有此文件，某些信息将无法正确打印。
+chat.message_chain_broken=玩家{0}的消息链已被破坏。

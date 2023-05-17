@@ -108,7 +108,6 @@ namespace MinecraftClient
         #endregion
 
         #region Players and Entities
-        private bool inventoryHandlingRequested = false;
         private bool locationReceived = false;
         public bool LocationReceived => locationReceived;
         public Perspective Perspective = 0;
@@ -225,7 +224,7 @@ namespace MinecraftClient
                     return true; // Client successfully started
                 else
                 {
-                    Translations.LogError("error.login_failed");
+                    Debug.LogError(Translations.Get("error.login_failed"));
                     Disconnect();
                 }
             }
@@ -235,8 +234,7 @@ namespace MinecraftClient
                 tcpClient.ReceiveBufferSize = 1024 * 1024;
                 tcpClient.ReceiveTimeout = 30000; // 30 seconds
 
-                Translations.LogError("error.connect");
-                Debug.LogError(e.Message);
+                Debug.LogError(Translations.Get("error.connect", e.Message));
                 Disconnect();
             }
 
@@ -903,13 +901,6 @@ namespace MinecraftClient
                     CornGlobal.MCSettings.Skin_All,
                     CornGlobal.MCSettings.MainHand);
 
-
-            if (inventoryHandlingRequested)
-            {
-                inventoryHandlingRequested = false;
-                Debug.Log(Translations.Get("extra.inventory_enabled"));
-            }
-
             ClearInventories();
         }
 
@@ -1016,9 +1007,6 @@ namespace MinecraftClient
             Loom.QueueOnMainThread(
                 () => EventManager.Instance.Broadcast<ChatMessageEvent>(new(messageText))
             );
-
-            foreach (string link in links)
-                Translations.Log("mcc.link", link);
 
         }
 
@@ -1250,7 +1238,7 @@ namespace MinecraftClient
                         this.gameMode = (GameMode) gamemode;
                         EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(this.gameMode));
 
-                        CornApp.ShowNotification($"Gamemode updated to {this.gameMode}", Notification.Type.Success);
+                        CornApp.Notify($"Gamemode updated to {this.gameMode}", Notification.Type.Success);
                     });
                 }
             }

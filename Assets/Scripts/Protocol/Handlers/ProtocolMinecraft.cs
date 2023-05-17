@@ -71,7 +71,6 @@ namespace MinecraftClient.Protocol.Handlers
 
         public ProtocolMinecraft(TcpClient Client, int protocolVersion, IMinecraftComHandler handler, ForgeInfo forgeInfo)
         {
-            ChatParser.InitTranslations();
             this.socketWrapper = new SocketWrapper(Client);
             this.dataTypes = new DataTypes(protocolVersion);
             this.protocolVersion = protocolVersion;
@@ -487,7 +486,7 @@ namespace MinecraftClient.Protocol.Handlers
                                         bool lastVerifyResult = player.IsMessageChainLegal();
                                         verifyResult = player.VerifyMessage(signedChat, timestamp, salt, ref headerSignature, ref precedingSignature, lastSeenMessages);
                                         if (lastVerifyResult && !verifyResult)
-                                            Translations.LogWarning("chat.message_chain_broken", senderDisplayName);
+                                            Debug.LogWarning(Translations.Get("chat.message_chain_broken", senderDisplayName));
                                     }
                                 }
 
@@ -521,7 +520,7 @@ namespace MinecraftClient.Protocol.Handlers
                                     bool lastVerifyResult = player.IsMessageChainLegal();
                                     verifyResult = player.VerifyMessageHead(ref precedingSignature, ref headerSignature, ref bodyDigest);
                                     if (lastVerifyResult && !verifyResult)
-                                        Translations.LogWarning("chat.message_chain_broken", player.Name);
+                                        Debug.LogWarning(Translations.Get("chat.message_chain_broken", player.Name));
                                 }
                             }
                         }
@@ -1578,12 +1577,12 @@ namespace MinecraftClient.Protocol.Handlers
                 }
                 else if (packetId == 0x02) // Login successful
                 {
-                    Translations.Log("mcc.server_offline");
+                    Debug.Log(Translations.Get("mcc.server_offline"));
                     login_phase = false;
 
                     if (!pForge.CompleteForgeHandshake())
                     {
-                        Translations.LogError("error.forge");
+                        Debug.LogError(Translations.Get("error.forge"));
                         return false;
                     }
 
@@ -1603,11 +1602,11 @@ namespace MinecraftClient.Protocol.Handlers
             RSACryptoServiceProvider RSAService = CryptoHandler.DecodeRSAPublicKey(serverPublicKey);
             byte[] secretKey = CryptoHandler.ClientAESPrivateKey ?? CryptoHandler.GenerateAESPrivateKey();
 
-            Translations.Log("debug.crypto");
+            Debug.Log(Translations.Get("debug.crypto"));
 
             if (serverIdhash != "-")
             {
-                Translations.Log("mcc.session");
+                Debug.Log(Translations.Get("mcc.session"));
 
                 bool needCheckSession = true;
                 if (session.ServerPublicKey != null && session.SessionPreCheckTask != null
@@ -1708,7 +1707,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                     if (!pForge.CompleteForgeHandshake())
                     {
-                        Translations.LogError("error.forge_encrypt");
+                        Debug.Log(Translations.Get("error.forge_encrypt"));
                         return false;
                     }
 
@@ -1782,8 +1781,9 @@ namespace MinecraftClient.Protocol.Handlers
 
                             // Check for forge on the server.
                             ProtocolForge.ServerInfoCheckForge(jsonData, ref forgeInfo);
-
-                            Translations.Notify("mcc.server_protocol", version, protocol + (forgeInfo != null ? Translations.Get("mcc.with_forge") : ""));
+                            int p = protocol;
+                            Loom.QueueOnMainThread(() => CornApp.Notify(
+                                    Translations.Get("mcc.server_protocol", version, p)));
 
                             return true;
                         }

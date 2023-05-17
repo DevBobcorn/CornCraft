@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MinecraftClient.Protocol.Handlers.Forge;
 using System.Threading;
+using UnityEngine;
+
+using MinecraftClient.Protocol.Handlers.Forge;
 
 namespace MinecraftClient.Protocol.Handlers
 {
@@ -131,7 +133,7 @@ namespace MinecraftClient.Protocol.Handlers
                             byte fmlProtocolVersion = dataTypes.ReadNextByte(packetData);
 
                             if (CornGlobal.DebugMode)
-                                Translations.Log("forge.version", fmlProtocolVersion);
+                                Debug.Log(Translations.Get("forge.version", fmlProtocolVersion));
 
                             if (fmlProtocolVersion >= 1)
                                 currentDimension = dataTypes.ReadNextInt(packetData);
@@ -141,7 +143,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                             // Then tell the server that we're running the same mods.
                             if (CornGlobal.DebugMode)
-                                Translations.Log("forge.send_mod");
+                                Debug.Log(Translations.Get("forge.send_mod"));
                             byte[][] mods = new byte[forgeInfo.Mods.Count][];
                             for (int i = 0; i < forgeInfo.Mods.Count; i++)
                             {
@@ -161,7 +163,7 @@ namespace MinecraftClient.Protocol.Handlers
                             Thread.Sleep(2000);
 
                             if (CornGlobal.DebugMode)
-                                Translations.Log("forge.accept");
+                                Debug.Log(Translations.Get("forge.accept"));
                             // Tell the server that yes, we are OK with the mods it has
                             // even though we don't actually care what mods it has.
 
@@ -181,7 +183,7 @@ namespace MinecraftClient.Protocol.Handlers
                             string registryName = dataTypes.ReadNextString(packetData);
                             int registrySize = dataTypes.ReadNextVarInt(packetData);
                             if (CornGlobal.DebugMode)
-                                Translations.Log("forge.registry_2", registryName, registrySize);
+                                Debug.Log(Translations.Get("forge.registry_2", registryName, registrySize));
                             if (!hasNextRegistry)
                                 fmlHandshakeState = FMLHandshakeClientState.PENDINGCOMPLETE;
 
@@ -192,7 +194,7 @@ namespace MinecraftClient.Protocol.Handlers
                             if (discriminator != FMLHandshakeDiscriminator.HandshakeAck)
                                 return false;
                             if (CornGlobal.DebugMode)
-                                Translations.Log("forge.accept_registry");
+                                Debug.Log(Translations.Get("forge.accept_registry"));
                             SendForgeHandshakePacket(FMLHandshakeDiscriminator.HandshakeAck,
                                 new byte[] { (byte)FMLHandshakeClientState.PENDINGCOMPLETE });
                             fmlHandshakeState = FMLHandshakeClientState.COMPLETE;
@@ -206,7 +208,7 @@ namespace MinecraftClient.Protocol.Handlers
                             SendForgeHandshakePacket(FMLHandshakeDiscriminator.HandshakeAck,
                                 new byte[] { (byte)FMLHandshakeClientState.COMPLETE });
                             if (CornGlobal.DebugMode)
-                                Translations.Log("forge.complete");
+                                Debug.Log(Translations.Get("forge.complete"));
                             fmlHandshakeState = FMLHandshakeClientState.DONE;
                             return true;
                     }
@@ -286,7 +288,7 @@ namespace MinecraftClient.Protocol.Handlers
                             // [1]: Version is usually set to "FML2" for FML stuff and "1" for mods
 
                             if (CornGlobal.DebugMode)
-                                Translations.Log("forge.fml2.mod");
+                                Debug.Log(Translations.Get("forge.fml2.mod"));
 
                             List<string> mods = new List<string>();
                             int modCount = dataTypes.ReadNextVarInt(packetData);
@@ -318,7 +320,7 @@ namespace MinecraftClient.Protocol.Handlers
                             // In MCC, we just want to send a valid response so we'll reply back with data collected from the server.
 
                             if (CornGlobal.DebugMode)
-                                Translations.Log("forge.fml2.mod_send");
+                                Debug.Log(Translations.Get("forge.fml2.mod_send"));
 
                             // Packet ID 2: Client to Server Mod List
                             fmlResponsePacket.AddRange(dataTypes.GetVarInt(2));
@@ -356,7 +358,7 @@ namespace MinecraftClient.Protocol.Handlers
                             if (CornGlobal.DebugMode)
                             {
                                 string registryName = dataTypes.ReadNextString(packetData);
-                                Translations.Log("forge.fml2.registry", registryName);
+                                Debug.Log(Translations.Get("forge.fml2.registry", registryName));
                             }
 
                             fmlResponsePacket.AddRange(dataTypes.GetVarInt(99));
@@ -375,7 +377,7 @@ namespace MinecraftClient.Protocol.Handlers
                             if (CornGlobal.DebugMode)
                             {
                                 string configName = dataTypes.ReadNextString(packetData);
-                                Translations.Log("forge.fml2.config", configName);
+                                Debug.Log(Translations.Get("forge.fml2.config", configName));
                             }
 
                             fmlResponsePacket.AddRange(dataTypes.GetVarInt(99));
@@ -384,7 +386,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                         default:
                             if (CornGlobal.DebugMode)
-                                Translations.Log("forge.fml2.unknown", packetID);
+                                Debug.Log(Translations.Get("forge.fml2.unknown", packetID));
                             break;
                     }
 
@@ -400,7 +402,7 @@ namespace MinecraftClient.Protocol.Handlers
                 }
                 else if (CornGlobal.DebugMode)
                 {
-                    Translations.Log("forge.fml2.unknown_channel", fmlChannel);
+                    Debug.Log(Translations.Get("forge.fml2.unknown_channel", fmlChannel));
                 }
             }
             return false;
@@ -494,7 +496,7 @@ namespace MinecraftClient.Protocol.Handlers
                         Translations.Get("forge.with_mod", forgeInfo.Mods.Count);
                         if (CornGlobal.DebugMode)
                         {
-                            Translations.Log("forge.mod_list");
+                            Debug.Log(Translations.Get("forge.mod_list"));
                             foreach (ForgeInfo.ForgeMod mod in forgeInfo.Mods)
                                 UnityEngine.Debug.Log("  " + mod.ToString());
                         }
@@ -502,7 +504,7 @@ namespace MinecraftClient.Protocol.Handlers
                     }
                     else
                     {
-                        Translations.Log("forge.no_mod");
+                        Debug.Log(Translations.Get("forge.no_mod"));
                         forgeInfo = null;
                     }
                 }

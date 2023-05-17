@@ -24,8 +24,7 @@ namespace MinecraftClient
 
         public static bool LoginWithSecureProfile { get; set; } = false;
 
-        // CornClient Language, not in-game language
-        public static string Language { get; set; } = "en_GB";
+        public static string Language { get; set; } = "en_us";
         public static bool DebugMode { get; set; } = true;
 
         // Custom app variables

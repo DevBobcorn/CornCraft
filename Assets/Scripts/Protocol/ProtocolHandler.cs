@@ -41,13 +41,13 @@ namespace MinecraftClient.Protocol
                 {
                     try
                     {
-                        Translations.Log("mcc.resolve", domainVal);
+                        Debug.Log(Translations.Get("mcc.resolve", domainVal));
                         // TODO Find a DNS lookup better solution
                         var response = Dns.GetHostEntry(domainVal);
                         if (response.AddressList.Any())
                         {
                             var target = response.AddressList[0];
-                            Translations.Log("mcc.found", target, portVal, domainVal);
+                            Debug.Log(Translations.Get("mcc.found", target, portVal, domainVal));
                             domainVal = target.ToString();
                             foundService = true;
                         }
@@ -55,7 +55,7 @@ namespace MinecraftClient.Protocol
                     }
                     catch (Exception e)
                     {
-                        Translations.LogError("mcc.not_found", domainVal, e.GetType().FullName, e.Message);
+                        Debug.LogError(Translations.Get("mcc.not_found", domainVal, e.GetType().FullName, e.Message));
                     }
                 }, TimeSpan.FromSeconds(20));
             }
@@ -86,18 +86,19 @@ namespace MinecraftClient.Protocol
                     {
                         success = true;
                     }
-                    else Translations.LogError("error.unexpect_response");
+                    else
+                        Debug.LogError(Translations.Get("error.unexpect_response"));
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(String.Format("{0}: {1}", e.GetType().FullName, e.Message).Split('\n')[0]);
+                    Debug.LogError(e);
                 }
-            }, TimeSpan.FromSeconds(20)))
+            }, TimeSpan.FromSeconds(10)))
             {
                 if (protocolversion != 0 && protocolversion != protocolversionTmp)
-                    Translations.LogError("error.version_different");
+                    Debug.LogError(Translations.Get("error.version_different"));
                 if (protocolversion == 0 && protocolversionTmp <= 1)
-                    Translations.LogError("error.no_version_report");
+                    Debug.LogError(Translations.Get("error.no_version_report"));
                 if (protocolversion == 0)
                     protocolversion = protocolversionTmp;
                 forgeInfo = forgeInfoTmp;
@@ -105,7 +106,7 @@ namespace MinecraftClient.Protocol
             }
             else
             {
-                Translations.LogError("error.connection_timeout");
+                Debug.LogError(Translations.Get("error.connection_timeout"));
                 return false;
             }
         }
@@ -452,7 +453,7 @@ namespace MinecraftClient.Protocol
                     return Convert.ToInt32(str.Trim());
                 }
                 catch {
-                    Translations.LogError("error.setting.str2int", str);
+                    Debug.LogError(Translations.Get("error.setting.str2int", str));
                     return 0;
                 }
             };
@@ -465,7 +466,7 @@ namespace MinecraftClient.Protocol
                 try
                 {
                     if (CornGlobal.DebugMode)
-                        Translations.Log("debug.request", host);
+                        Debug.Log(Translations.Get("debug.request", host));
 
                     //TcpClient client = ProxyHandler.newTcpClient(host, 443, true);
                     TcpClient client = new TcpClient(host, 443);

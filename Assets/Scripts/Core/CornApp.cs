@@ -83,11 +83,18 @@ namespace MinecraftClient
             catch (Exception e)
             {
                 Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
-                ShowNotification("Data for gameplay is not available!", Notification.Type.Error);
+                Notify("Data for gameplay is not available!", Notification.Type.Error);
                 updateStatus(">_<");
                 startUpFlag.Failed = true;
                 yield break;
             }
+
+            // Load in-game translations
+            var s = Path.DirectorySeparatorChar;
+            var langFile = PathHelper.GetPackDirectoryNamed(
+                    $"vanilla-{resourceVersion}{s}assets{s}minecraft{s}lang{s}{CornGlobal.Language}.json");
+            
+            Protocol.ChatParser.InitTranslationRules(langFile);
 
             // First load all possible Block States...
             var loadFlag = new DataLoadFlag();
@@ -119,7 +126,7 @@ namespace MinecraftClient
                 
                 if (!downloadSucceeded)
                 {
-                    ShowNotification("Failed to download base resource pack!", Notification.Type.Error);
+                    Notify("Failed to download base resource pack!", Notification.Type.Error);
                     updateStatus(">_<");
                     startUpFlag.Failed = true;
                     yield break;
@@ -131,7 +138,7 @@ namespace MinecraftClient
             // Check base pack availability
             if (!basePack.IsValid)
             {
-                ShowNotification("Base resource pack is invalid!", Notification.Type.Error);
+                Notify("Base resource pack is invalid!", Notification.Type.Error);
                 updateStatus(">_<");
                 startUpFlag.Failed = true;
                 yield break;
@@ -155,7 +162,7 @@ namespace MinecraftClient
 
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
-                ShowNotification("Failed to load all resources!", Notification.Type.Error);
+                Notify("Failed to load all resources!", Notification.Type.Error);
                 updateStatus(">_<");
                 startUpFlag.Failed = true;
                 yield break;
@@ -229,11 +236,11 @@ namespace MinecraftClient
         public void BackToLogin() => SceneManager.LoadScene("Login");
 
         // Should be called from the Unity thread only, not net read thread
-        public static void ShowNotification(string notification) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification));
+        public static void Notify(string notification) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification));
 
-        public static void ShowNotification(string notification, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, 6F, type));
+        public static void Notify(string notification, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, 6F, type));
 
-        public static void ShowNotification(string notification, float duration, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, duration, type));
+        public static void Notify(string notification, float duration, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, duration, type));
 
 
         void Update()
