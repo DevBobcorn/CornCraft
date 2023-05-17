@@ -22,7 +22,6 @@ namespace MinecraftClient
 
         private static Dictionary<string, string> translations;
         private static string translationFilePath = "Lang" + Path.DirectorySeparatorChar + "mcc";
-        private static string defaultTranslation = "en.ini";
         private static Regex translationKeyRegex = new Regex(@"\(\[(.*?)\]\)", RegexOptions.Compiled); // Extract string inside ([ ])
 
         /// <summary>
@@ -175,30 +174,6 @@ namespace MinecraftClient
                     translations[translationName] = translationValue;
                 }
             }
-        }
-
-        /// <summary>
-        /// Write the default translation file (English) to the disk.
-        /// </summary>
-        private static void WriteDefaultTranslation()
-        {
-            string defaultPath = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + translationFilePath + Path.DirectorySeparatorChar + defaultTranslation;
-
-            if (!Directory.Exists(translationFilePath))
-            {
-                Directory.CreateDirectory(translationFilePath);
-            }
-
-            string path = string.Empty, defaultTexts;
-            try {
-                path = Application.streamingAssetsPath + "/Lang/en.ini";
-                defaultTexts = File.ReadAllText(path);
-            } catch {
-                defaultTexts = string.Empty;
-                Debug.LogWarning("Failed to load default translation texts from " + path);
-            }
-
-            File.WriteAllText(defaultPath, defaultTexts, Encoding.UTF8);
         }
 
         #region Console writing method wrapper

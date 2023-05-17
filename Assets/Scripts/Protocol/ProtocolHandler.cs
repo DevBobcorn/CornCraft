@@ -445,6 +445,18 @@ namespace MinecraftClient.Protocol
         /// <returns>HTTP Status code</returns>
         private static int DoHTTPSRequest(List<string> headers, string host, ref string result)
         {
+            int str2int(string str)
+            {
+                try
+                {
+                    return Convert.ToInt32(str.Trim());
+                }
+                catch {
+                    Translations.LogError("error.setting.str2int", str);
+                    return 0;
+                }
+            };
+
             string? postResult = null;
             int statusCode = 520;
             Exception? exception = null;
@@ -467,7 +479,7 @@ namespace MinecraftClient.Protocol
                     if (raw_result.StartsWith("HTTP/1.1"))
                     {
                         postResult = raw_result.Substring(raw_result.IndexOf("\r\n\r\n") + 4);
-                        statusCode = StringConvert.str2int(raw_result.Split(' ')[1]);
+                        statusCode = str2int(raw_result.Split(' ')[1]);
                     }
                     else statusCode = 520; // Web server is returning an unknown error
                 }
