@@ -2,6 +2,8 @@ using System;
 using System.Threading;
 using UnityEngine;
 
+using MinecraftClient.Resource;
+
 namespace MinecraftClient.Rendering
 {
     [RequireComponent(typeof (MeshFilter), typeof (MeshRenderer))]

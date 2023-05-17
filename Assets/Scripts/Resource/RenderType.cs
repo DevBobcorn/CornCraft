@@ -1,7 +1,6 @@
-namespace MinecraftClient.Rendering
+namespace MinecraftClient.Resource
 {
-    public enum RenderType
-    {
+    public enum RenderType {
         SOLID,
         CUTOUT,
         CUTOUT_MIPPED,

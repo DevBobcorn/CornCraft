@@ -41,7 +41,7 @@ namespace MinecraftClient.Rendering
                 }
 
                 // Make and set mesh...
-                var visualBuffer = new VertexBuffer();
+                var visualBuffer = (vert: new float3[0], txuv: new float3[0], tint: new float3[0]);
 
                 int fluidVertexCount = visualBuffer.vert.Length;
                 int fluidTriIdxCount = (fluidVertexCount / 2) * 3;
