@@ -47,9 +47,9 @@ namespace MinecraftClient.Rendering
                 int count = ChunkRender.TYPES.Length, layerMask = 0;
                 int offsetY = World.GetDimension().minY;
 
-                var visualBuffer = new VertexBuffer[count];
+                var visualBuffer = new (float3[] vert, float3[] txuv, float3[] tint)[count];
                 for (int i = 0;i < count;i++)
-                    visualBuffer[i] = new();
+                    visualBuffer[i] = (vert: new float3[0], txuv: new float3[0], tint: new float3[0]);
                 
                 float3[] colliderVerts = { };
 

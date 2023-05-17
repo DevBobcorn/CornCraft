@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using MinecraftClient.Rendering;
 
 namespace MinecraftClient.Resource
 {

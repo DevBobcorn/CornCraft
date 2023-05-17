@@ -5,11 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 using Unity.Mathematics;
 
 using MinecraftClient.Mapping;
-using MinecraftClient.Rendering;
 
 namespace MinecraftClient.Resource
 {

@@ -1,4 +1,3 @@
-using UnityEngine;
 using Unity.Mathematics;
 
 namespace MinecraftClient.Resource

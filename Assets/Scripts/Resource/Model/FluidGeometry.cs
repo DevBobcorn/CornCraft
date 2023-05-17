@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
 
-using MinecraftClient.Rendering;
-
 namespace MinecraftClient.Resource
 {
     public static class FluidGeometry
@@ -33,7 +31,8 @@ namespace MinecraftClient.Resource
             return (h1 + h2 + h3 + h4) / 16F / cnt;
         }
 
-        public static void Build(ref VertexBuffer buffer, ResourceLocation liquid, int x, int y, int z, byte[] heights, int cullFlags, float3 fluidColor)
+        public static void Build(ref (float3[] vert, float3[] txuv, float3[] tint) buffer, ResourceLocation liquid,
+                int x, int y, int z, byte[] heights, int cullFlags, float3 fluidColor)
         {
             // Unity                   Minecraft            Top Quad Vertices     Height References
             //  A +Z (East)             A +X (East)          v0---v1               NE---SE

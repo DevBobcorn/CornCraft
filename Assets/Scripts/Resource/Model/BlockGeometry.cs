@@ -5,8 +5,6 @@ using System.Linq;
 using UnityEngine;
 using Unity.Mathematics;
 
-using MinecraftClient.Rendering;
-
 namespace MinecraftClient.Resource
 {
     public class BlockGeometry
@@ -93,7 +91,7 @@ namespace MinecraftClient.Resource
             return vertexCount;
         }
 
-        public void Build(ref VertexBuffer buffer, float3 posOffset, int cullFlags, float3 blockTint)
+        public void Build(ref (float3[] vert, float3[] txuv, float3[] tint) buffer, float3 posOffset, int cullFlags, float3 blockTint)
         {
             // Compute value if absent
             int vertexCount = buffer.vert.Length + ((sizeCache.ContainsKey(cullFlags)) ? sizeCache[cullFlags] : (sizeCache[cullFlags] = CalculateArraySize(cullFlags)));
@@ -191,24 +189,25 @@ namespace MinecraftClient.Resource
 
         }
 
-        public void BuildWithCollider(ref VertexBuffer visualBuffer, ref float3[] colliderVerts, float3 posOffset, int cullFlags, float3 blockTint)
+        public void BuildWithCollider(ref (float3[] vert, float3[] txuv, float3[] tint) buffer,
+                ref float3[] colliderVerts, float3 posOffset, int cullFlags, float3 blockTint)
         {
             // Compute value if absent
             int extraVertCount  = sizeCache.ContainsKey(cullFlags) ? sizeCache[cullFlags] : (sizeCache[cullFlags] = CalculateArraySize(cullFlags));
-            int vVertexCount = visualBuffer.vert.Length + extraVertCount;
+            int vVertexCount = buffer.vert.Length + extraVertCount;
 
             var verts = new float3[vVertexCount];
             var txuvs = new float3[vVertexCount];
             var tints = new float3[vVertexCount];
 
-            visualBuffer.vert.CopyTo(verts, 0);
-            visualBuffer.txuv.CopyTo(txuvs, 0);
-            visualBuffer.tint.CopyTo(tints, 0);
+            buffer.vert.CopyTo(verts, 0);
+            buffer.txuv.CopyTo(txuvs, 0);
+            buffer.tint.CopyTo(tints, 0);
 
             var cVerts = new float3[colliderVerts.Length + extraVertCount];
             colliderVerts.CopyTo(cVerts, 0);
 
-            uint i, vertOffset = (uint)visualBuffer.vert.Length;
+            uint i, vertOffset = (uint)buffer.vert.Length;
             uint offsetAtStart = vertOffset;
 
             if (vertexArrs[CullDir.NONE].Length > 0)
@@ -291,9 +290,9 @@ namespace MinecraftClient.Resource
             // Copy from visual buffer to collider
             Array.Copy(verts, offsetAtStart, cVerts, colliderVerts.Length, extraVertCount);
 
-            visualBuffer.vert = verts;
-            visualBuffer.txuv = txuvs;
-            visualBuffer.tint = tints;
+            buffer.vert = verts;
+            buffer.txuv = txuvs;
+            buffer.tint = tints;
 
             colliderVerts = cVerts;
 
