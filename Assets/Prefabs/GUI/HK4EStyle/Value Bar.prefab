@@ -300,7 +300,7 @@ GameObject:
   - component: {fileID: 3613304825452136448}
   - component: {fileID: 3613304825452136454}
   m_Layer: 5
-  m_Name: Health Bar
+  m_Name: Value Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -321,7 +321,7 @@ RectTransform:
   - {fileID: 3613304826189428403}
   - {fileID: 3613304825081441618}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
@@ -378,16 +378,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee7e82110441e6d478e8161fde817ebe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  barText: {fileID: 3613304825081441619}
+  textFormat: '{0:0}/{1:0}'
   normalColor: {r: 0.5882353, g: 0.84313726, b: 0.13333334, a: 1}
   reduceColor: {r: 0.8980392, g: 0.69411767, b: 0, a: 1}
   increaseColor: {r: 0.5882353, g: 0.84313726, b: 0.13333334, a: 1}
-  smoothSpeed: 30
   warningColor: {r: 1, g: 0.5445545, b: 0, a: 1}
   dangerColor: {r: 0.7924528, g: 0.15849058, b: 0, a: 1}
   warningThreshold: 0.3
   dangerThreshold: 0.1
   barAxis: 0
-  barText: {fileID: 3613304825081441619}
+  smoothSpeed: 30
+  barFillTransform: {fileID: 3613304826189428403}
+  deltaFillTransform: {fileID: 3613304824780718450}
+  displayFillTransform: {fileID: 3613304824825672159}
 --- !u!1 &3613304826189428402
 GameObject:
   m_ObjectHideFlags: 0
