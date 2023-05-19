@@ -1290,11 +1290,11 @@ namespace MinecraftClient
         {
             if (entities.ContainsKey(EntityID))
             {
-                entities[EntityID].SetYawFromByte(yaw);
-                entities[EntityID].SetPitchFromByte(pitch);
+                var renderYaw = entities[EntityID].SetYawFromByte(yaw);
+                var renderPitch = entities[EntityID].SetPitchFromByte(pitch);
 
                 Loom.QueueOnMainThread(() => {
-                    EntityRenderManager?.RotateEntityRender(EntityID, yaw, pitch);
+                    EntityRenderManager?.RotateEntityRender(EntityID, renderYaw, renderPitch);
                 });
             }
 
@@ -1304,10 +1304,10 @@ namespace MinecraftClient
         {
             if (entities.ContainsKey(EntityID))
             {
-                entities[EntityID].SetHeadYawFromByte(headYaw);
+                var renderHeadYaw = entities[EntityID].SetHeadYawFromByte(headYaw);
 
                 Loom.QueueOnMainThread(() => {
-                    EntityRenderManager?.RotateEntityRenderHead(EntityID, headYaw);
+                    EntityRenderManager?.RotateEntityRenderHead(EntityID, renderHeadYaw);
                 });
             }
 

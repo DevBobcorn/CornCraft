@@ -72,7 +72,8 @@ namespace MinecraftClient.Rendering
                 visual = transform;
             }
 
-            targetHeadYaw = lastHeadYaw = targetYaw = lastYaw = entity.Yaw;
+            targetYaw = lastYaw = entity.Yaw;
+            targetHeadYaw = lastHeadYaw = entity.HeadYaw;
             visual.eulerAngles = new(0F, lastYaw, 0F);
         }
 
