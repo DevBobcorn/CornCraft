@@ -80,6 +80,7 @@ MonoBehaviour:
   infoAnchor: {fileID: 1165613711076197239}
   visual: {fileID: 4243557724092460427}
   ragdollPrefab: {fileID: 4077839186716515674, guid: fe03ecd4d3cfc7949854d712d3398d3f, type: 3}
+  FloatingInfoPrefab: {fileID: 5300854894600073256, guid: a5ce75fb1da55354cbcd9bce37bf79c4, type: 3}
   head: {fileID: 4168515927556775934}
   cycleTime: 1
   legAngle: 45

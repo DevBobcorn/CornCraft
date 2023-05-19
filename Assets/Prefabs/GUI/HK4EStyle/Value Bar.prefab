@@ -378,7 +378,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee7e82110441e6d478e8161fde817ebe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barText: {fileID: 3613304825081441619}
+  barText: {fileID: 0}
   textFormat: '{0:0}/{1:0}'
   normalColor: {r: 0.5882353, g: 0.84313726, b: 0.13333334, a: 1}
   reduceColor: {r: 0.8980392, g: 0.69411767, b: 0, a: 1}
