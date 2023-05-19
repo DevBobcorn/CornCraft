@@ -20,6 +20,7 @@ namespace MinecraftClient.Rendering
         public Transform InfoAnchor => infoAnchor is null ? transform : infoAnchor;
 
         [SerializeField] protected GameObject? ragdollPrefab;
+        [SerializeField] public GameObject? FloatingInfoPrefab;
 
         // A number made from the entity's numeral id, used in animations to prevent
         // several mobs of a same type moving synchronisedly, which looks unnatural

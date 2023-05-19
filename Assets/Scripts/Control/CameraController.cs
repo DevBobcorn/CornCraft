@@ -10,7 +10,6 @@ namespace MinecraftClient.Control
         protected CameraInfo cameraInfo = new();
         // Camera used for actual rendering
         protected Camera? renderCamera;
-        public Camera? RenderCamera => renderCamera;
 
         protected CornClient? client;
         public void SetClient(CornClient client) => this.client = client;
@@ -35,6 +34,12 @@ namespace MinecraftClient.Control
 
         public abstract bool IsFixed();
 
+        public virtual Vector3? GetViewEularAngles()
+        {
+            EnsureInitialized();
+
+            return renderCamera?.transform.eulerAngles;
+        }
         public virtual Vector3 GetTargetScreenPos()
         {
             if (IsFixed())
@@ -47,20 +52,6 @@ namespace MinecraftClient.Control
                 return renderCamera!.WorldToScreenPoint(targetPos.Value);
             
             return Vector3.zero;
-        }
-
-        public virtual Vector3? GetTransfromScreenPos(Transform? t)
-        {
-            EnsureInitialized();
-
-            var targetPos = t?.position;
-            if (renderCameraPresent && targetPos is not null)
-            {
-                if (renderCamera!.WorldToViewportPoint(targetPos.Value).z > 0F)
-                    return renderCamera!.WorldToScreenPoint(targetPos.Value);
-            }
-            
-            return null;
         }
 
         public abstract float GetYaw();
