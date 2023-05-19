@@ -16,7 +16,6 @@ namespace MinecraftClient.UI
         [SerializeField] [Range(0.1F, 1F)] private float dangerThreshold  = 0.1F;
 
         [SerializeField] private RectTransform.Axis barAxis = RectTransform.Axis.Horizontal;
-        [SerializeField] [Range(500F, 5000F)] private float smoothSpeed = 1000F;
 
         [SerializeField] private RectTransform? barFillTransform, deltaFillTransform, displayFillTransform;
         private Image? displayFillImage, deltaFillImage;
@@ -42,7 +41,7 @@ namespace MinecraftClient.UI
             if (displayValue > curValue) // Reduce visual fill
             {
                 // Calculate new display value
-                displayValue = Mathf.Max(displayValue - smoothSpeed * Time.deltaTime, curValue);
+                displayValue = Mathf.Max(displayValue - maxValue * Time.deltaTime, curValue);
                 // Then update visuals
                 float curValuePos = (curValue / maxValue) * fullBarLength;
                 displayFillTransform!.SetSizeWithCurrentAnchors(barAxis, curValuePos);
@@ -53,7 +52,7 @@ namespace MinecraftClient.UI
             else // Increase visual fill
             {
                 // Calculate new display value
-                displayValue = Mathf.Min(displayValue + smoothSpeed * Time.deltaTime, curValue);
+                displayValue = Mathf.Min(displayValue + maxValue * Time.deltaTime, curValue);
                 // Then update visuals
                 float displayValuePos = (displayValue / maxValue) * fullBarLength;
                 displayFillTransform!.SetSizeWithCurrentAnchors(barAxis, displayValuePos);
