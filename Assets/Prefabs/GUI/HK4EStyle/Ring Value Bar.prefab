@@ -166,7 +166,7 @@ GameObject:
   - component: {fileID: 458378407161183676}
   - component: {fileID: 6998394234830974677}
   m_Layer: 5
-  m_Name: Stamina Bar
+  m_Name: Ring Value Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -186,7 +186,7 @@ RectTransform:
   m_Children:
   - {fileID: 4786477356735864611}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -213,16 +213,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dabc2cfb63e5c84a88e79faa8d77537, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  barText: {fileID: 0}
+  textFormat: '{0:0}/{1:0}'
   normalColor: {r: 1, g: 0.72203434, b: 0.04150939, a: 1}
-  smoothSpeed: 1000
   warningColor: {r: 1, g: 0.47412714, b: 0.015686274, a: 1}
   dangerColor: {r: 1, g: 0, b: 0, a: 1}
   warningThreshold: 0.3
   dangerThreshold: 0.1
   fullBarDegree: 70
+  smoothSpeed: 1000
+  backgroundImage: {fileID: 4194177186363650275}
+  fillImage: {fileID: 4194177184941904449}
 --- !u!95 &458378407161183676
 Animator:
-  serializedVersion: 4
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -239,7 +243,8 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!225 &6998394234830974677
 CanvasGroup:
   m_ObjectHideFlags: 0
