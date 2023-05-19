@@ -7,20 +7,20 @@ using MinecraftClient.Protocol;
 
 namespace MinecraftClient.UI
 {
-    public class FloatingUI : MonoBehaviour
+    public class EntityNameUI : FloatingUI
     {
-        [SerializeField] TMP_Text? nameText;
-        [SerializeField] TMP_Text? descriptionText;
+        [SerializeField] private TMP_Text? nameText;
+        [SerializeField] private TMP_Text? descriptionText;
 
-        private FloatingUIManager? manager;
-
-        public void SetInfo(FloatingUIManager manager, Entity entity)
+        public override void SetInfo(FloatingUIManager manager, Entity entity)
         {
+            this.manager = manager;
+            this.entity = entity;
+
             if (nameText != null)
             {
                 nameText.text = (entity.Name ?? entity.CustomName) ??
                         ChatParser.TranslateString(entity.Type.EntityId.GetTranslationKey("entity"));
-
 
             }
 
@@ -28,13 +28,6 @@ namespace MinecraftClient.UI
             {
                 descriptionText.text = $"<{entity.Type.EntityId}>";
             }
-        }
-
-        public void Destroy()
-        {
-            // TODO Fade out
-
-            Destroy(gameObject);
         }
     }
 }
