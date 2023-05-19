@@ -7,14 +7,6 @@ using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Rendering
 {
-    public enum EntityInfoTagType
-    {
-        NPC,
-        Monster,
-        Creature,
-        None
-    }
-
     public class EntityRenderManager : MonoBehaviour
     {
         [SerializeField] private GameObject? defaultPrefab;
@@ -38,11 +30,7 @@ namespace MinecraftClient.Rendering
         [SerializeField] private GameObject? experienceOrbPrefab;
 
         private readonly Dictionary<ResourceLocation, GameObject?> entityPrefabs = new();
-        private readonly Dictionary<ResourceLocation, EntityInfoTagType> infoTagTypes = new();
-
         private GameObject? GetPrefabForType(ResourceLocation type) => entityPrefabs.GetValueOrDefault(type, defaultPrefab);
-        public EntityInfoTagType GetInfoTagTypeForType(ResourceLocation type) =>
-                infoTagTypes.GetValueOrDefault(type, EntityInfoTagType.NPC); // Use NPC as default value to reveal the type of the entity
 
         private readonly Dictionary<int, EntityRender> entityRenders = new();
         
@@ -150,7 +138,6 @@ namespace MinecraftClient.Rendering
         {
             // Clear loaded things
             entityPrefabs.Clear();
-            infoTagTypes.Clear();
 
             // Register entity render prefabs ===========================================
             // Hostile Mobs
@@ -174,31 +161,6 @@ namespace MinecraftClient.Rendering
             entityPrefabs.Add(EntityType.ITEM_ID,              itemPrefab);
             entityPrefabs.Add(EntityType.EXPERIENCE_ORB_ID,    experienceOrbPrefab);
             entityPrefabs.Add(EntityType.EXPERIENCE_BOTTLE_ID, experienceOrbPrefab);
-            // ...
-
-            // Register entity info tag types ===========================================
-            infoTagTypes.Add(EntityType.SKELETON_ID,          EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.WITHER_SKELETON_ID,   EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.STRAY_ID,             EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.ZOMBIE_ID,            EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.HUSK_ID,              EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.DROWNED_ID,           EntityInfoTagType.Monster);
-            infoTagTypes.Add(EntityType.CREEPER_ID,           EntityInfoTagType.Monster);
-            // ...
-            // Passive Mobs
-            infoTagTypes.Add(EntityType.PIG_ID,               EntityInfoTagType.Creature);
-            infoTagTypes.Add(EntityType.COW_ID,               EntityInfoTagType.Creature);
-            infoTagTypes.Add(EntityType.MOOSHROOM_ID,         EntityInfoTagType.Creature);
-            infoTagTypes.Add(EntityType.SHEEP_ID,             EntityInfoTagType.Creature);
-            infoTagTypes.Add(EntityType.VILLAGER_ID,          EntityInfoTagType.NPC);
-            // ...
-            // Neutral Mobs
-            // ...
-            // Player Entities
-            infoTagTypes.Add(EntityType.PLAYER_ID,            EntityInfoTagType.NPC);
-            // Miscellaneous Entities
-            infoTagTypes.Add(EntityType.ITEM_ID,              EntityInfoTagType.None);
-            infoTagTypes.Add(EntityType.EXPERIENCE_ORB_ID,    EntityInfoTagType.None);
             // ...
 
             foreach (var prefabItem in entityPrefabs)
