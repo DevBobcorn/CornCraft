@@ -14,9 +14,6 @@ namespace MinecraftClient.UI
         [SerializeField] [Range(0.1F, 1F)] private float warningThreshold = 0.3F;
         [SerializeField] [Range(0.1F, 1F)] private float dangerThreshold  = 0.1F;
 
-        [SerializeField] private RectTransform.Axis barAxis = RectTransform.Axis.Horizontal;
-        [SerializeField] [Range(500F, 5000F)] private float smoothSpeed = 1000F;
-
         [SerializeField] private SpriteRenderer? displayFillRenderer, deltaFillRenderer;
         private Transform? displayTransform, deltaTransform;
 
@@ -34,34 +31,28 @@ namespace MinecraftClient.UI
             if (displayValue > curValue) // Reduce visual fill
             {
                 // Calculate new display value
-                displayValue = Mathf.Max(displayValue - smoothSpeed * Time.deltaTime, curValue);
+                displayValue = Mathf.Max(displayValue - maxValue * Time.deltaTime, curValue);
                 // Then update visuals
                 var deltaValue = displayValue - curValue;
 
                 displayTransform!.localScale = new(curValue / maxValue, 1F, 1F);
                 displayTransform!.localPosition = new((curValue / 2F) / maxValue - 0.5F, 0F, 0F);
 
-                //deltaTransform!.localScale = new(deltaValue / maxValue, 1F, 1F);
-                //deltaTransform!.localPosition = new((curValue + (deltaValue / 2F)) / maxValue - 0.5F, 0F, 0F);
-
-                deltaTransform!.localScale = new(1F, 1F, 1F);
-                deltaTransform!.localPosition = new((curValue + (maxValue / 2F)) / maxValue - 0.5F, 0F, 0F);
+                deltaTransform!.localScale = new(deltaValue / maxValue, 1F, 1F);
+                deltaTransform!.localPosition = new((curValue + (deltaValue / 2F)) / maxValue - 0.5F, 0F, 0F);
             }
             else // Increase visual fill
             {
                 // Calculate new display value
-                displayValue = Mathf.Min(displayValue + smoothSpeed * Time.deltaTime, curValue);
+                displayValue = Mathf.Min(displayValue + maxValue * Time.deltaTime, curValue);
                 // Then update visuals
                 var deltaValue = curValue - displayValue;
 
                 displayTransform!.localScale = new(displayValue / maxValue, 1F, 1F);
                 displayTransform!.localPosition = new((displayValue / 2F) / maxValue - 0.5F, 0F, 0F);
 
-                //deltaTransform!.localScale = new(deltaValue / maxValue, 1F, 1F);
-                //deltaTransform!.localPosition = new((displayValue + (deltaValue / 2F)) / maxValue - 0.5F, 0F, 0F);
-
-                deltaTransform!.localScale = new(1F, 1F, 1F);
-                deltaTransform!.localPosition = new((displayValue + (maxValue / 2F)) / maxValue - 0.5F, 0F, 0F);
+                deltaTransform!.localScale = new(deltaValue / maxValue, 1F, 1F);
+                deltaTransform!.localPosition = new((displayValue + (deltaValue / 2F)) / maxValue - 0.5F, 0F, 0F);
             }
 
             float displayFrac = displayValue / maxValue;

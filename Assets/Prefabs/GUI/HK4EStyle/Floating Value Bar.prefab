@@ -234,7 +234,7 @@ Transform:
   - {fileID: 8212691612673053287}
   - {fileID: 4404340322419832644}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7437413893603162986
 SpriteRenderer:
@@ -310,7 +310,7 @@ MonoBehaviour:
   warningThreshold: 0.3
   dangerThreshold: 0.1
   barAxis: 0
-  smoothSpeed: 500
+  smoothSpeed: 10
   displayFillRenderer: {fileID: 9131402660689459246}
   deltaFillRenderer: {fileID: 9138806618825133927}
 --- !u!1 &8679627734270550727

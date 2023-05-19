@@ -13,8 +13,7 @@ namespace MinecraftClient.UI
         [SerializeField] [Range(0.1F, 1F)] private float warningThreshold = 0.3F;
         [SerializeField] [Range(0.1F, 1F)] private float dangerThreshold  = 0.1F;
 
-        [SerializeField] private float fullBarDegree = 40F;
-        [SerializeField] [Range(500F, 5000F)] private float smoothSpeed = 1000F;
+        [SerializeField] [Range(30F, 360F)] private float fullBarDegree = 40F;
 
         [SerializeField] private Image? backgroundImage, fillImage;
 
@@ -33,7 +32,7 @@ namespace MinecraftClient.UI
         protected override void UpdateValue()
         {
             // Calculate new display value
-            displayValue = Mathf.MoveTowards(displayValue, curValue, smoothSpeed * Time.deltaTime);
+            displayValue = Mathf.MoveTowards(displayValue, curValue, maxValue * Time.deltaTime);
             
             // Then update visuals
             float displayFrac = displayValue / maxValue;
