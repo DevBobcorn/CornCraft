@@ -12,6 +12,10 @@ namespace MinecraftClient.UI
 
         public abstract void SetInfo(Entity entity);
 
-        public abstract void Destroy(Action callback);
+        public virtual void Destroy(Action callback)
+        {
+            callback?.Invoke();
+            Destroy(gameObject);
+        }
     }
 }
