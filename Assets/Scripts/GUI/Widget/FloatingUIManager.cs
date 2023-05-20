@@ -25,7 +25,7 @@ namespace MinecraftClient.UI
                 fUIObj!.transform.localPosition = Vector3.zero;
 
                 var fUI = fUIObj.GetComponent<FloatingUI>();
-                fUI.SetInfo(this, render.Entity);
+                fUI.SetInfo(render.Entity);
 
                 entityFloatingUIs.Add(entityId, fUI);
             }
@@ -34,9 +34,8 @@ namespace MinecraftClient.UI
         public void RemoveForEntity(int entityId)
         {
             if (entityFloatingUIs.ContainsKey(entityId))
-                entityFloatingUIs[entityId].Destroy();
+                entityFloatingUIs[entityId].Destroy(() => entityFloatingUIs.Remove(entityId));
             
-            entityFloatingUIs.Remove(entityId);
         }
 
         void Update()

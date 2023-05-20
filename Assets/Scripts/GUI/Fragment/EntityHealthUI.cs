@@ -1,9 +1,9 @@
 #nullable enable
+using System;
 using UnityEngine;
 using TMPro;
 
 using MinecraftClient.Mapping;
-using MinecraftClient.Protocol;
 
 namespace MinecraftClient.UI
 {
@@ -13,9 +13,8 @@ namespace MinecraftClient.UI
         [SerializeField] private FloatingValueBar? healthBar;
         [SerializeField] private string textFormat = "Lv.{0:0}";
 
-        public override void SetInfo(FloatingUIManager manager, Entity entity)
+        public override void SetInfo(Entity entity)
         {
-            this.manager = manager;
             this.entity = entity;
 
             if (levelText != null)
@@ -33,6 +32,12 @@ namespace MinecraftClient.UI
                 healthBar.MaxValue = entity.MaxHealth;
                 healthBar.CurValue = entity.Health;
             }
+        }
+
+        public override void Destroy(Action callback)
+        {
+            callback?.Invoke();
+            Destroy(gameObject);
         }
     }
 }
