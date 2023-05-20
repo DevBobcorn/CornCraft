@@ -70,7 +70,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 1ec24b7860ab373408b8d8a63cc85fe1, type: 2}
+  m_Motion: {fileID: 7400000, guid: 5e80c6360de139e46a677a95cf76ec7b, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -82,7 +82,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: NPCInfoTag
+  m_Name: EntityNameUI
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: Expired
@@ -125,7 +125,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 3c34cda33f61bae46a66347a026ad6f3, type: 2}
+  m_Motion: {fileID: 7400000, guid: b7af205c22a4ea1418daaffa5a97ae2e, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
