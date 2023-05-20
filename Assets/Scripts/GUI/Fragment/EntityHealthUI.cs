@@ -12,6 +12,7 @@ namespace MinecraftClient.UI
         [SerializeField] private TMP_Text? levelText;
         [SerializeField] private FloatingValueBar? healthBar;
         [SerializeField] private string textFormat = "Lv.{0:0}";
+        private float lastHealth, lastMaxHealth;
 
         public override void SetInfo(Entity entity)
         {
@@ -19,8 +20,14 @@ namespace MinecraftClient.UI
 
             if (levelText != null)
             {
-                levelText.text = string.Format(textFormat, entity.MaxHealth);
+                levelText.text = string.Format(textFormat, entity.MaxHealth * 2);
 
+            }
+
+            if (healthBar != null)
+            {
+                healthBar.MaxValue = lastMaxHealth = entity.MaxHealth;
+                healthBar.CurValue = lastHealth = entity.Health;
             }
             
         }
@@ -29,15 +36,12 @@ namespace MinecraftClient.UI
         {
             if (healthBar != null && entity != null)
             {
-                healthBar.MaxValue = entity.MaxHealth;
-                healthBar.CurValue = entity.Health;
+                if (entity.MaxHealth != lastMaxHealth || entity.Health != lastHealth)
+                {
+                    healthBar.MaxValue = lastMaxHealth = entity.MaxHealth;
+                    healthBar.CurValue = lastHealth = entity.Health;
+                }
             }
-        }
-
-        public override void Destroy(Action callback)
-        {
-            callback?.Invoke();
-            Destroy(gameObject);
         }
     }
 }
