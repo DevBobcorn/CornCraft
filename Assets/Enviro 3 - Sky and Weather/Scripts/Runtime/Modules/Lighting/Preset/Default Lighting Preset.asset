@@ -137,8 +137,8 @@ MonoBehaviour:
       serializedVersion: 2
       key0: {r: 0, g: 0, b: 0, a: 1}
       key1: {r: 0.009433985, g: 0.009433985, b: 0.009433985, a: 1}
-      key2: {r: 0.46471164, g: 0.5037812, b: 0.5566038, a: 0}
-      key3: {r: 0.8502581, g: 0.87486047, b: 0.9339623, a: 0}
+      key2: {r: 0.20783195, g: 0.22986981, b: 0.26415092, a: 0}
+      key3: {r: 0.3253827, g: 0.34023294, b: 0.3773585, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
@@ -160,7 +160,7 @@ MonoBehaviour:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: -1
+      m_ColorSpace: 0
       m_NumColorKeys: 4
       m_NumAlphaKeys: 2
     sunIntensityCurveHDRP:
@@ -477,15 +477,15 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    directLightIntensityModifier: 1
+    directLightIntensityModifier: 0.99999994
     setAmbientLighting: 1
     ambientMode: 3
     ambientSkyColorGradient:
       serializedVersion: 2
-      key0: {r: 0.23584908, g: 0.23584908, b: 0.23584908, a: 1}
-      key1: {r: 0.23529412, g: 0.23529412, b: 0.23529412, a: 1}
+      key0: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 1}
+      key1: {r: 0.047169805, g: 0.047169805, b: 0.047169805, a: 1}
       key2: {r: 0.23202205, g: 0.257332, b: 0.5188679, a: 0}
-      key3: {r: 0.43853682, g: 0.527192, b: 0.6698113, a: 0}
+      key3: {r: 0.294482, g: 0.35000935, b: 0.4433962, a: 0}
       key4: {r: 0.59053046, g: 0.6704166, b: 0.8301887, a: 0}
       key5: {r: 0.5298594, g: 0.60636276, b: 0.764151, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
@@ -512,11 +512,11 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     ambientEquatorColorGradient:
       serializedVersion: 2
-      key0: {r: 0, g: 0, b: 0, a: 1}
-      key1: {r: 0.010946958, g: 0.015512637, b: 0.05660379, a: 1}
-      key2: {r: 0.15356888, g: 0.16649368, b: 0.2735849, a: 0}
-      key3: {r: 0.33931115, g: 0.43156135, b: 0.5754717, a: 0}
-      key4: {r: 0.5298594, g: 0.60636276, b: 0.764151, a: 0}
+      key0: {r: 0.047169805, g: 0.047169805, b: 0.047169805, a: 1}
+      key1: {r: 0.2924528, g: 0.2924528, b: 0.2924528, a: 1}
+      key2: {r: 0.23202205, g: 0.257332, b: 0.5188679, a: 0}
+      key3: {r: 0.294482, g: 0.35000935, b: 0.4433962, a: 0}
+      key4: {r: 0.59053046, g: 0.6704166, b: 0.8301887, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
@@ -537,16 +537,16 @@ MonoBehaviour:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: -1
+      m_ColorSpace: 0
       m_NumColorKeys: 5
       m_NumAlphaKeys: 2
     ambientGroundColorGradient:
       serializedVersion: 2
-      key0: {r: 0, g: 0, b: 0, a: 1}
-      key1: {r: 0.010946958, g: 0.015512637, b: 0.05660379, a: 1}
-      key2: {r: 0.15356888, g: 0.16649368, b: 0.2735849, a: 0}
-      key3: {r: 0.33931115, g: 0.43156135, b: 0.5754717, a: 0}
-      key4: {r: 0.5298594, g: 0.60636276, b: 0.764151, a: 0}
+      key0: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 1}
+      key1: {r: 0.1509434, g: 0.1509434, b: 0.1509434, a: 1}
+      key2: {r: 0.23202205, g: 0.257332, b: 0.5188679, a: 0}
+      key3: {r: 0.294482, g: 0.35000935, b: 0.4433962, a: 0}
+      key4: {r: 0.59053046, g: 0.6704166, b: 0.8301887, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
@@ -594,7 +594,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    ambientIntensityModifier: 1
+    ambientIntensityModifier: 0.99999994
     ambientSkyboxUpdateIntervall: 0.5
     updateReflectionProbe: 1
     globalReflectionCustomRendering: 1
@@ -615,6 +615,6 @@ MonoBehaviour:
   preset: {fileID: 11400000}
   lastReflectionUpdate: 0
   lastReflectionUpdatePos: {x: 0, y: 0, z: 0}
-  showDirectLightingControls: 0
+  showDirectLightingControls: 1
   showAmbientLightingControls: 1
   showReflectionControls: 0
