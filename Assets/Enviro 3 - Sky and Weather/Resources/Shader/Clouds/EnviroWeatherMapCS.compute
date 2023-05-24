@@ -1,0 +1,102 @@
+﻿#pragma kernel CSMain
+#include "../Includes/NoiseInclude.cginc"
+
+RWTexture2D<float4> Result;
+
+float _CoverageLayer1;  
+float _CoverageLayer2;  
+float _CloudsTypeLayer1;
+float _CloudsTypeLayer2;
+int _TilingLayer1;
+int _TilingLayer2;
+float _WorleyFreqLayer1; 
+float _WorleyFreqLayer2; 
+
+float _DilateCoverageLayer1; 
+float _DilateCoverageLayer2; 
+float _DilateTypeLayer1; 
+float _DilateTypeLayer2;
+
+float _CloudsTypeModifierLayer1; 
+float _CloudsTypeModifierLayer2;
+
+float4 _LocationOffset;
+float3 _WindDirection;
+float _WindSpeed;
+ 
+
+float3 IDToUv(uint3 id) {
+	return saturate(float3((id.x + 0.5f) / 512, (id.y + 0.5f) / 512, (id.z) / 1));
+}
+
+[numthreads(16,16,1)] 
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float3 uv = IDToUv(id);
+
+
+    float2 windOffsetLayer1 = _WindDirection.xy * 10 * _WindSpeed;
+    float2 fillerUV = uv.xy + windOffsetLayer1 + _LocationOffset.xy;
+
+    float covFiller = worleyFbm2DFiller(fillerUV * 2, 2) * 1.2;
+
+    ///////Layer 1
+    float2 offset_pos_Layer1_1 = windOffsetLayer1 + float2(0.1,0.5) + _LocationOffset.xy;
+    float2 offset_pos_Layer1_2 = windOffsetLayer1 + float2(0.4,-0.5) + _LocationOffset.xy;
+    float2 offset_pos_Layer1_3 = windOffsetLayer1 + float2(-0.2,0.9) + _LocationOffset.xy;
+
+    float2 sampling_pos_Layer1_1 = float2(uv.xy + offset_pos_Layer1_1) * _TilingLayer1;
+    float2 sampling_pos_Layer1_2 = float2(uv.xy + offset_pos_Layer1_2) * _TilingLayer1;
+    float2 sampling_pos_Layer1_3 = float2(uv.xy + offset_pos_Layer1_3) * _TilingLayer1;
+
+    //Perlin Noises
+    float perlin_Layer1_1 = saturate(CalculatePerlinTileing(sampling_pos_Layer1_1.xy,float2(_TilingLayer1, _TilingLayer1)));
+    float perlin_Layer1_2 = saturate(CalculatePerlinTileing(sampling_pos_Layer1_2.xy,float2(_TilingLayer1, _TilingLayer1)));
+    float perlin_Layer1_3 = saturate(CalculatePerlinTileing(sampling_pos_Layer1_3.xy,float2(_TilingLayer1, _TilingLayer1)));
+    float perlin_Layer1_Combined = saturate(perlin_Layer1_1 + (perlin_Layer1_2 - perlin_Layer1_3));
+
+    //Worley Noise
+    float worleyLayer1 = worley2(windOffsetLayer1 + _LocationOffset.xy + uv.xy * _WorleyFreqLayer1, 1);
+
+    float dilateCoverageLayer1 = dilate_perlin_worley(perlin_Layer1_Combined,worleyLayer1,_DilateCoverageLayer1); 
+
+    //Coverage Layer
+    float coverageLayer1 = saturate(dilateCoverageLayer1 + (covFiller * _CoverageLayer1));
+    //float coverageLayer1 = saturate(dilateCoverageLayer1 + (_CoverageLayer1 * dilateCoverageLayer1));
+  
+    float dilateTypeLayer1 = dilate_perlin_worley(perlin_Layer1_Combined,worleyLayer1,_DilateTypeLayer1);
+    float typeLayer1 = saturate(dilateTypeLayer1 * _CloudsTypeModifierLayer1);
+    ///Layer 1 End
+
+    ///////Layer 2
+    float2 offset_pos_Layer2_1 = float2(0.78,-0.5) + _LocationOffset.zw;
+    float2 offset_pos_Layer2_2 = float2(0.2,0.9) + _LocationOffset.zw;
+    float2 offset_pos_Layer2_3 = float2(-0.5,0.14) + _LocationOffset.zw;
+
+    float2 sampling_pos_Layer2_1 = float2(uv.xy + offset_pos_Layer2_1) * _TilingLayer2;
+    float2 sampling_pos_Layer2_2 = float2(uv.xy + offset_pos_Layer2_2) * _TilingLayer2;
+    float2 sampling_pos_Layer2_3 = float2(uv.xy + offset_pos_Layer2_3) * _TilingLayer2;
+
+    //Perlin Noises
+    float perlin_Layer2_1 = saturate(CalculatePerlinTileing(sampling_pos_Layer2_1.xy,float2(_TilingLayer2, _TilingLayer2)));
+    float perlin_Layer2_2 = saturate(CalculatePerlinTileing(sampling_pos_Layer2_2.xy,float2(_TilingLayer2, _TilingLayer2)));
+    float perlin_Layer2_3 = saturate(CalculatePerlinTileing(sampling_pos_Layer2_3.xy,float2(_TilingLayer2, _TilingLayer2)));
+    float perlin_Layer2_Combined = saturate(perlin_Layer2_1 + (perlin_Layer2_2 - perlin_Layer2_3));
+
+    //Worley Noise
+    float worleyLayer2 = worley2(uv.xy + windOffsetLayer1 + _LocationOffset.zw * _WorleyFreqLayer2, 1);
+
+    float dilateCoverageLayer2 = dilate_perlin_worley(perlin_Layer2_Combined,worleyLayer2,_DilateCoverageLayer2); 
+
+    //Coverage Layer
+    //float covFiller = worleyFbm2DFiller(uv.xy * 4, 4) * 1.2;
+    float coverageLayer2 = saturate(dilateCoverageLayer2 + (covFiller * _CoverageLayer2));
+    //float coverageLayer1 = saturate(dilateCoverageLayer1 + (_CoverageLayer1 * dilateCoverageLayer1));
+  
+    float dilateTypeLayer2 = dilate_perlin_worley(perlin_Layer2_Combined,worleyLayer2,_DilateTypeLayer2);
+    float typeLayer2 = saturate(dilateTypeLayer2 * _CloudsTypeModifierLayer2);
+    ///Layer 2 End
+
+
+    Result[id.xy] = float4(coverageLayer1,typeLayer1,coverageLayer2,typeLayer2);
+}

@@ -1,0 +1,67 @@
+Enviro 3.0.0
+
+----------------------------------------------------------------------------------
+v3.0.0			Initial release...
+----------------------------------------------------------------------------------
+v3.0.1
+
+* Added auto assignment of main camera. Leave camera field empty will show a CameraTag selection.
+* Fixed an issue and warning with compute buffer may not released correctly.
+* Fixed an issue where fog may not rendering correctly when volumetrics are deactivated.
+* Fixed some issue with gamma colorspace. (Linear colorspace recommended for realistic lighting!)
+* Fixed typo in Microsplat integration class name. It should show in components menu correctly now. (Thanks to erik!)
+* Some code restructuring for Enviro Manager. 
+----------------------------------------------------------------------------------
+v3.0.2
+
+* Fixed an issue in weather inspector when some modules not used.
+* Fixed errors when opening the Enviro prefab context from a non Enviro scene.
+* Fixed a possible error related to EnviroVolumetricFogLight.
+* Change in ChangeWeather functions to also change zone weather.
+----------------------------------------------------------------------------------
+v3.0.3
+ 
+* Added wind support. Please check the Environment module and clouds modules for settings.
+* Added support for "Audio Mixer Groups". You can assign a audio mixer group now for each sound effect in the audio module.
+* Added additional sky intensity curve in sky settings. Use this to change the intensity of sky based on sun position. 
+* Enviro will set the sky reflection intensity now based on the global reflection intensity in Built-in and URP and if Update Default Environment Reflections is activated.
+* Fixed an issue where Enviro Renderer component was added in URP / HDRP. This could lead to errors when opning prefabs in HDRP. Please remove the Enviro Renderer component from your main cameras!
+* Fixed an issue in Unity 2022 where clouds not rendering correctly in builds. (Camera Depth Texture Texel Size not auto set correctly in these cases)
+* Fixed some rendering issues with OpenGlCore. 
+* Fixed multiple issues in HDRP 12+.
+* Fixed error when opening the Envrio External Window in a non Enviro scene.
+----------------------------------------------------------------------------------
+v3.0.4
+* Added audio effect volume modifiers for each audio category for custom game logic.
+* Added define symbol for Enviro 3: ENVIRO_3 
+* Added assetPath string in EnviroHelper script. Change it when you move the Enviro folder to a different folder in your project.
+* Added new setting in HDRP to set the skyAmbient mode in your sky module. Set it to "Static" when you want to use static baked lighting.
+* Improved volumetric clouds blending. More improvements for this in next updates.
+* Improved volumetric clouds detail rendering. 
+* Fixed some artifacts with point and spot volumetric lights and fixed an issue with directional volumetrics are not blurred anymore. There will be more improvements in next updates!
+* Fixed a possible error with Effect Removal Zones.
+* Fixed possible error in metal api with compute buffers not set correctly.
+* Fixed an issue with fog/volumetrics in SPI rendering.
+* Fixed a bug in Enviro Manager inspector where Flat Clouds and Aurora buttons might be disabled even when not added to the configuration.
+* Fixed rain splash effect not working anymore.
+* Fixed small issue with sun disc in sky reflections.
+
+----------------------------------------------------------------------------------
+v3.0.5
+
+* Added feature to offset clouds position for floating point precision offset systems.
+* Added day night switch setting like in Enviro 2.
+* Added ChangeCamera function in EnviroManager to quickly change the camera in runtime.
+* Added setting to control how often the skybox ambient will be updated.
+* Added setting to update lighting not on every frame. Set it to "0" for every frame updates.
+* Added flat and cirrus clouds toggles to quality presets.
+* Added option in Aurora module to easily deactivated, also added this and steps setting to quality presets.
+* Added a sample UI for the sample scenes or your own scenes.  
+* Fixed an issue with the SetTimeOfDay function and values over 24.
+* Fixed possible flickering issues in HDRP related to reflection probe updates. (Workaround) (This actually might be a HDRP bug related to updating reflection probe/camera on demand together with directional light and sky exposure)
+* Fixed and reworked Event UI to correctly support assignement of scene objects.
+* Fixed issue where Enviro Effects rendering on all cameras in URP even those that are not assigned. (Fixes preview windows for example)
+* Fixed some issues with the HDRP lighting default settings.
+* Increased volumetric clouds "travel speed".
+
+ 
