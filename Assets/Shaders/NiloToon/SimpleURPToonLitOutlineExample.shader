@@ -253,10 +253,24 @@ Shader "SimpleURPToonLitExample(With Outline)"
 
         // DepthOnly pass. Used for rendering URP's offscreen depth prepass (you can search DepthOnlyPass.cs in URP package)
         // For example, when depth texture is on, we need to perform this offscreen depth prepass for this toon shader. 
+        /*
         Pass
         {
             Name "DepthOnly"
             Tags{"LightMode" = "DepthOnly"}
+
+            //...
+        }
+        */
+
+        // Starting from version 10.0.x, URP can generate a normal texture called _CameraNormalsTexture. 
+        // To render to this texture in your custom shader, add a Pass with the name DepthNormals. 
+        // For example, see the implementation in Lit.shader.
+        // TODO: DepthNormals pass (see URP's Lit.shader)
+        Pass
+        {
+            Name "DepthNormals"
+            Tags{"LightMode" = "DepthNormals"}
 
             // more explict render state to avoid confusion
             ZWrite On // the only goal of this pass is to write depth!
@@ -280,20 +294,6 @@ Shader "SimpleURPToonLitExample(With Outline)"
 
             ENDHLSL
         }
-
-        // Starting from version 10.0.x, URP can generate a normal texture called _CameraNormalsTexture. 
-        // To render to this texture in your custom shader, add a Pass with the name DepthNormals. 
-        // For example, see the implementation in Lit.shader.
-        // TODO: DepthNormals pass (see URP's Lit.shader)
-        /*
-        Pass
-        {
-            Name "DepthNormals"
-            Tags{"LightMode" = "DepthNormals"}
-
-            //...
-        }
-        */
     }
 
     FallBack "Hidden/Universal Render Pipeline/FallbackError"
