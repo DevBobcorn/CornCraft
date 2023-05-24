@@ -1,0 +1,263 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3e0fff1aca044c40b9f5dc9d0bfaaa3, type: 3}
+  m_Name: Default Audio Preset
+  m_EditorClassIdentifier: 
+  showModuleInspector: 1
+  showSaveLoad: 0
+  active: 1
+  Settings:
+    ambientClips:
+    - showEditor: 0
+      name: Day
+      audioClip: {fileID: 8300000, guid: 3e0b793299afd7c4086f6dfcd604aaba, type: 3}
+      audioMixerGroup: {fileID: 0}
+      playBackType: 1
+      myAudioSource: {fileID: 0}
+      loop: 1
+      volume: 1
+      volumeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: -0.000000659857
+          outSlope: -0.000000659857
+          tangentMode: 34
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.33333334
+        - serializedVersion: 3
+          time: 0.496813
+          value: -0.00000032782555
+          inSlope: 0.026825864
+          outSlope: 0.026825864
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.12836285
+        - serializedVersion: 3
+          time: 0.5332272
+          value: 0.69103265
+          inSlope: 2.2555194
+          outSlope: 2.2555194
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.0717938
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0.050087996
+          outSlope: 0.050087996
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.15470096
+          outWeight: 0.33333334
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      maxVolume: 1
+    - showEditor: 0
+      name: Night
+      audioClip: {fileID: 8300000, guid: eef01bfe93973f4419f0b3dd1b7a6a06, type: 3}
+      audioMixerGroup: {fileID: 0}
+      playBackType: 1
+      myAudioSource: {fileID: 0}
+      loop: 1
+      volume: 1
+      volumeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0.0058403015
+          value: 0.003780365
+          inSlope: 0.40376505
+          outSlope: 0.40376505
+          tangentMode: 34
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.33333334
+        - serializedVersion: 3
+          time: 0.30587992
+          value: 0.12492588
+          inSlope: 0.9373293
+          outSlope: 0.9373293
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.33333334
+        - serializedVersion: 3
+          time: 0.45850945
+          value: 0.39840025
+          inSlope: -0.15356094
+          outSlope: -0.15356094
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.3681847
+          outWeight: 0.09808861
+        - serializedVersion: 3
+          time: 0.51107603
+          value: 0.00567906
+          inSlope: -0.03341259
+          outSlope: -0.03341259
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.11550105
+        - serializedVersion: 3
+          time: 1.0029275
+          value: 0.0013360546
+          inSlope: -0.07205321
+          outSlope: -0.07205321
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.15684973
+          outWeight: 0.33333334
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      maxVolume: 1
+    weatherClips:
+    - showEditor: 0
+      name: Light Rain
+      audioClip: {fileID: 8300000, guid: 84e5ea3df3fc44749b4bf8e1fe360d49, type: 3}
+      audioMixerGroup: {fileID: 0}
+      playBackType: 0
+      myAudioSource: {fileID: 0}
+      loop: 1
+      volume: 0
+      volumeCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      maxVolume: 1
+    - showEditor: 0
+      name: Medium Rain
+      audioClip: {fileID: 8300000, guid: c2b83583de6cc7c4ca613942c6fe8a76, type: 3}
+      audioMixerGroup: {fileID: 0}
+      playBackType: 0
+      myAudioSource: {fileID: 0}
+      loop: 1
+      volume: 0
+      volumeCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      maxVolume: 1
+    - showEditor: 0
+      name: Heavy Rain
+      audioClip: {fileID: 8300000, guid: 6ff8b8db3a3fd6e4cbfa0995856ebaca, type: 3}
+      audioMixerGroup: {fileID: 0}
+      playBackType: 0
+      myAudioSource: {fileID: 0}
+      loop: 1
+      volume: 0
+      volumeCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      maxVolume: 1
+    thunderClips:
+    - showEditor: 0
+      name: Thunder 1
+      audioClip: {fileID: 8300000, guid: 6ca3bddd35a48a745b4dcecc9f65a83f, type: 3}
+      audioMixerGroup: {fileID: 0}
+      playBackType: 0
+      myAudioSource: {fileID: 0}
+      loop: 0
+      volume: 1
+      volumeCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      maxVolume: 1
+    - showEditor: 0
+      name: Thunder 2
+      audioClip: {fileID: 8300000, guid: dd76e0dd59e215946a75c7338c043951, type: 3}
+      audioMixerGroup: {fileID: 0}
+      playBackType: 0
+      myAudioSource: {fileID: 0}
+      loop: 0
+      volume: 1
+      volumeCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      maxVolume: 1
+    - showEditor: 0
+      name: Thunder 3
+      audioClip: {fileID: 8300000, guid: ee17606ad258a3543a73a326bf5bc5da, type: 3}
+      audioMixerGroup: {fileID: 0}
+      playBackType: 0
+      myAudioSource: {fileID: 0}
+      loop: 0
+      volume: 1
+      volumeCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      maxVolume: 1
+    - showEditor: 0
+      name: Thunder 4
+      audioClip: {fileID: 8300000, guid: eb8c1b0f82ffe784da2459bc295b4854, type: 3}
+      audioMixerGroup: {fileID: 0}
+      playBackType: 0
+      myAudioSource: {fileID: 0}
+      loop: 0
+      volume: 1
+      volumeCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      maxVolume: 1
+    - showEditor: 0
+      name: Thunder 5
+      audioClip: {fileID: 8300000, guid: e410de94ef87c1b4998b2d4731a717bc, type: 3}
+      audioMixerGroup: {fileID: 0}
+      playBackType: 0
+      myAudioSource: {fileID: 0}
+      loop: 0
+      volume: 1
+      volumeCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      maxVolume: 1
+    ambientMasterVolume: 1
+    weatherMasterVolume: 1
+    thunderMasterVolume: 1
+  preset: {fileID: 0}
+  ambientVolumeModifier: 0
+  weatherVolumeModifier: 0
+  thunderVolumeModifier: 0
+  showAmbientSetupControls: 0
+  showWeatherSetupControls: 0
+  showThunderSetupControls: 0
+  showAudioControls: 0

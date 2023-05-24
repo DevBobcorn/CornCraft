@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7aa6806f1fff5b489f26777d053c723, type: 3}
+  m_Name: Default Effects Preset
+  m_EditorClassIdentifier: 
+  showModuleInspector: 1
+  showSaveLoad: 0
+  active: 1
+  Settings:
+    effectTypes:
+    - controlType: 0
+      mySystem: {fileID: 0}
+      name: Rain
+      prefab: {fileID: 6936246916098640434, guid: bf3881f9fe64de14597de578d2acee5d, type: 3}
+      localPositionOffset: {x: 0, y: 25, z: 0}
+      localRotationOffset: {x: -90, y: 0, z: 0}
+      maxEmission: 5000
+    - controlType: 2
+      mySystem: {fileID: 0}
+      name: Snow
+      prefab: {fileID: 1000011163096958, guid: 6ec12b7d8fc5e704fbbbe1641e4a6c56, type: 3}
+      localPositionOffset: {x: 0, y: 25, z: 0}
+      localRotationOffset: {x: -90, y: 0, z: 0}
+      maxEmission: 2500
+    rain1Emission: 0
+    rain2Emission: 0
+    snow1Emission: 0
+    snow2Emission: 0
+    custom1Emission: 0
+    custom2Emission: 0
+  preset: {fileID: 0}
+  showSetupControls: 0
+  showEmissionControls: 0

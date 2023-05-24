@@ -1,0 +1,107 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cbac6e678443724c9bd2baf5d564c1d, type: 3}
+  m_Name: Snow
+  m_EditorClassIdentifier: 
+  showEditor: 0
+  showEffectControls: 0
+  showCloudControls: 0
+  showFlatCloudControls: 0
+  showFogControls: 0
+  showLightingControls: 0
+  showAuroraControls: 0
+  showEnvironmentControls: 1
+  showAudioControls: 0
+  showAmbientAudioControls: 0
+  showWeatherAudioControls: 0
+  showLightningControls: 0
+  cloudsOverride:
+    showLayer1: 0
+    coverageLayer1: 0.29
+    dilateCoverageLayer1: 1
+    dilateTypeLayer1: 1
+    typeModifierLayer1: 0.86
+    anvilBiasLayer1: 1
+    scatteringIntensityLayer1: 0.31
+    multiScatteringALayer1: 0.687
+    multiScatteringBLayer1: 0.074
+    multiScatteringCLayer1: 0.107
+    powderIntensityLayer1: 0.7
+    silverLiningSpreadLayer1: 0.8
+    ligthAbsorbtionLayer1: 0.5
+    densityLayer1: 0.15
+    baseErosionIntensityLayer1: 1
+    detailErosionIntensityLayer1: 0.5
+    curlIntensityLayer1: 0.15
+    showLayer2: 0
+    coverageLayer2: 0
+    dilateCoverageLayer2: 0.5
+    dilateTypeLayer2: 0.5
+    typeModifierLayer2: 0.5
+    anvilBiasLayer2: 0
+    scatteringIntensityLayer2: 1.5
+    multiScatteringALayer2: 0.5
+    multiScatteringBLayer2: 0.5
+    multiScatteringCLayer2: 0.5
+    powderIntensityLayer2: 0.3
+    silverLiningSpreadLayer2: 0.8
+    ligthAbsorbtionLayer2: 1
+    densityLayer2: 0.3
+    baseErosionIntensityLayer2: 0
+    detailErosionIntensityLayer2: 0.3
+    curlIntensityLayer2: 0.05
+  flatCloudsOverride:
+    cirrusCloudsAlpha: 0.5
+    cirrusCloudsCoverage: 0.5
+    cirrusCloudsColorPower: 1
+    flatCloudsCoverage: 1
+    flatCloudsDensity: 1
+    flatCloudsLightIntensity: 1
+    flatCloudsAmbientIntensity: 1
+    flatCloudsAbsorbtion: 0.6
+  lightingOverride:
+    directLightIntensityModifier: 0.6
+    ambientIntensityModifier: 0.75
+  fogOverride:
+    fogDensity: 0.087
+    fogHeightFalloff: 0.0021
+    fogHeight: 0
+    fogDensity2: 0.072
+    fogHeightFalloff2: 0.04
+    fogHeight2: 0
+    fogColorBlend: 0.5
+    scattering: 0.13
+    extinction: 0.229
+    anistropy: 0.579
+  auroraOverride:
+    auroraIntensity: 1
+  effectsOverride:
+    rain1Emission: 0
+    rain2Emission: 0
+    snow1Emission: 1
+    snow2Emission: 0
+    custom1Emission: 0
+    custom2Emission: 0
+  audioOverride:
+    ambientOverride: []
+    weatherOverride: []
+  lightningOverride:
+    lightningStorm: 0
+    randomLightningDelay: 1
+  environmentOverride:
+    temperatureWeatherMod: -10
+    wetnessTarget: 0
+    snowTarget: 1
+    windDirectionX: 1
+    windDirectionY: -1
+    windSpeed: 0.25
+    windTurbulence: 0.25

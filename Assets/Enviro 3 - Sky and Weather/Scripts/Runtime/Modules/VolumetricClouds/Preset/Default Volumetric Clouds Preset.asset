@@ -1,0 +1,204 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cae96c4b3ef46947a21c9615a74e6e4, type: 3}
+  m_Name: Default Volumetric Clouds Preset
+  m_EditorClassIdentifier: 
+  showModuleInspector: 0
+  showSaveLoad: 0
+  active: 1
+  settingsLayer1:
+    cloudsWindDirectionXModifier: 1
+    cloudsWindDirectionYModifier: 1
+    windSpeedModifier: 0.005
+    windUpwards: 0.02
+    coverage: -0.105
+    worleyFreq2: 1
+    worleyFreq1: 4
+    dilateCoverage: 0.514
+    dilateType: 0.512
+    cloudsTypeModifier: 0.581
+    locationOffset: {x: 0.1, y: 0}
+    bottomCloudsHeight: 2000
+    topCloudsHeight: 8000
+    density: 0.072
+    scatteringIntensity: 1.5
+    silverLiningSpread: 0.82
+    powderIntensity: 0.75
+    curlIntensity: 0.25
+    lightStepModifier: 0.075
+    lightAbsorbtion: 0.5
+    multiScatteringA: 0.5
+    multiScatteringB: 0.7
+    multiScatteringC: 1
+    baseNoiseUV: 6
+    detailNoiseUV: 28
+    baseErosionIntensity: 0
+    detailErosionIntensity: 0.5
+    anvilBias: 0
+  settingsLayer2:
+    cloudsWindDirectionXModifier: -1
+    cloudsWindDirectionYModifier: -1
+    windSpeedModifier: 0.005
+    windUpwards: 0.02
+    coverage: 0
+    worleyFreq2: 2
+    worleyFreq1: 10
+    dilateCoverage: 0.5
+    dilateType: 0.5
+    cloudsTypeModifier: 0.5
+    locationOffset: {x: 0, y: 0}
+    bottomCloudsHeight: 8000
+    topCloudsHeight: 12000
+    density: 0.3
+    scatteringIntensity: 1.5
+    silverLiningSpread: 0.8
+    powderIntensity: 0.3
+    curlIntensity: 0.05
+    lightStepModifier: 0.05
+    lightAbsorbtion: 1
+    multiScatteringA: 0.5
+    multiScatteringB: 0.5
+    multiScatteringC: 0.5
+    baseNoiseUV: 6
+    detailNoiseUV: 34
+    baseErosionIntensity: 0
+    detailErosionIntensity: 0.3
+    anvilBias: 0
+  settingsGlobal:
+    dualLayer: 0
+    floatingPointOriginMod: {x: 0, y: 0, z: 0}
+    sunLightColorGradient:
+      serializedVersion: 2
+      key0: {r: 0, g: 0, b: 0, a: 1}
+      key1: {r: 0, g: 0, b: 0, a: 1}
+      key2: {r: 1, g: 0.18127085, b: 0, a: 0}
+      key3: {r: 0.91764706, g: 0.78431374, b: 0.6431373, a: 0}
+      key4: {r: 1, g: 0.78234506, b: 0.5518868, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 29696
+      ctime2: 31641
+      ctime3: 36700
+      ctime4: 65535
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_ColorSpace: -1
+      m_NumColorKeys: 5
+      m_NumAlphaKeys: 2
+    moonLightColorGradient:
+      serializedVersion: 2
+      key0: {r: 0, g: 0, b: 0, a: 1}
+      key1: {r: 0.009433985, g: 0.009433985, b: 0.009433985, a: 1}
+      key2: {r: 0.17488432, g: 0.19651124, b: 0.2830189, a: 0}
+      key3: {r: 0.066082254, g: 0.07146038, b: 0.084905684, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 27563
+      ctime2: 65535
+      ctime3: 65535
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_ColorSpace: -1
+      m_NumColorKeys: 3
+      m_NumAlphaKeys: 2
+    ambientColorGradient:
+      serializedVersion: 2
+      key0: {r: 0, g: 0, b: 0, a: 1}
+      key1: {r: 0.009433985, g: 0.009433985, b: 0.009433985, a: 1}
+      key2: {r: 0.17319329, g: 0.2085657, b: 0.26415092, a: 0}
+      key3: {r: 0.6637148, g: 0.7245256, b: 0.8962264, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 29491
+      ctime2: 33539
+      ctime3: 65535
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_ColorSpace: -1
+      m_NumColorKeys: 4
+      m_NumAlphaKeys: 2
+    sunLightColor: {r: 0, g: 0, b: 0, a: 0}
+    moonLightColor: {r: 0, g: 0, b: 0, a: 0}
+    ambientColor: {r: 0, g: 0, b: 0, a: 0}
+    depthBlending: 0
+    noise: {fileID: 11700000, guid: c901165679d774b46bb79227f2dfa3fa, type: 2}
+    detailNoise: {fileID: 11700000, guid: ade9bb66636d08a428cb5d6009b0ff5d, type: 2}
+    curlTex: {fileID: 2800000, guid: b7acf882b3b0d6c4a9d1a04c10fe146a, type: 3}
+    blueNoise: {fileID: 2800000, guid: 3f714f8f28ab17e499e2e6c690af70cc, type: 3}
+    cloudsWorldScale: 5000000
+    atmosphereColorSaturateDistance: 25000
+    ambientLighIntensity: 1
+    cloudShadows: 0
+    cloudShadowsIntensity: 2
+    cloudsTravelSpeed: 0.25
+  settingsQuality:
+    volumetricClouds: 1
+    downsampling: 4
+    stepsLayer1: 128
+    stepsLayer2: 64
+    blueNoiseIntensity: 1
+    reprojectionBlendTime: 10
+    lodDistance: 0.25
+  preset: {fileID: 0}
+  showGlobalControls: 0
+  showLayer1Controls: 0
+  showLayer2Controls: 0
+  showCoverageControls: 0
+  showLightingControls: 0
+  showDensityControls: 0
+  showTextureControls: 0
+  showWindControls: 0
+  cloudAnimLayer1: {x: 0, y: 0, z: 0}
+  cloudAnimLayer2: {x: 0, y: 0, z: 0}
+  cloudAnimNonScaledLayer1: {x: 0, y: 0, z: 0}
+  cloudAnimNonScaledLayer2: {x: 0, y: 0, z: 0}
+  weatherMap: {fileID: 0}

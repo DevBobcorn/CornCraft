@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfcd10a1b99270a488a19072f6176530, type: 3}
+  m_Name: High
+  m_EditorClassIdentifier: 
+  showEditor: 0
+  showVolumeClouds: 0
+  showFog: 0
+  showFlatClouds: 0
+  showEffects: 0
+  showAurora: 0
+  volumetricCloudsOverride:
+    volumetricClouds: 1
+    dualLayer: 0
+    downsampling: 2
+    stepsLayer1: 128
+    stepsLayer2: 64
+    blueNoiseIntensity: 2
+    reprojectionBlendTime: 2
+    lodDistance: 0.7
+  fogOverride:
+    fog: 1
+    volumetrics: 1
+    quality: 1
+    steps: 32
+  flatCloudsOverride:
+    cirrusClouds: 1
+    flatClouds: 0
+  auroraOverride:
+    aurora: 1
+    steps: 32
