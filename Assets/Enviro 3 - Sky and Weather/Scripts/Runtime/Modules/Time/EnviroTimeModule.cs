@@ -195,7 +195,7 @@ namespace Enviro
                 t = (24.0f / 60.0f) / (Settings.cycleLengthInMinutes * timeProgressionModifier);           
                 t = t * 3600f * Time.deltaTime;
 
-                if(t < 1f)
+                /*if(t < 1f)
                 {
                    internalTimeOverflow += t;
                 }
@@ -207,7 +207,12 @@ namespace Enviro
                 seconds += (int)(internalTimeOverflow);
 
                 if(internalTimeOverflow >= 1f)
-                   internalTimeOverflow = 0f; 
+                   internalTimeOverflow = 0f; */
+
+                internalTimeOverflow += t;
+                
+                seconds += (int)(internalTimeOverflow);
+                internalTimeOverflow -= (int)(internalTimeOverflow);
             } 
  
             SetDateTime(Settings.secSerial,Settings.minSerial,Settings.hourSerial,Settings.daySerial,Settings.monthSerial,Settings.yearSerial);

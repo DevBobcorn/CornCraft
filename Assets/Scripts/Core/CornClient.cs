@@ -27,6 +27,7 @@ namespace MinecraftClient
         #region Inspector Fields
         [SerializeField] public ChunkRenderManager? ChunkRenderManager;
         [SerializeField] public EntityRenderManager? EntityRenderManager;
+        [SerializeField] public BaseEnvironmentManager? EnvironmentManager;
         [SerializeField] public MaterialManager? MaterialManager;
         [SerializeField] public GameObject? PlayerPrefab;
         [SerializeField] public CameraController? CameraController;
@@ -64,15 +65,7 @@ namespace MinecraftClient
         #region Time and Networking
         private DateTime lastKeepAlive;
         private object lastKeepAliveLock = new();
-        private long lastAge = 0L, timeOfDay = 0L;
-        private float timeElapsedSinceUpdate = 0F; 
-        public long CurrentTimeOfDay {
-            get {
-                // When time of day is negetive, it means gamerule doDaylightCycle is set to false
-                return timeOfDay >= 0L ? timeOfDay + (long)(timeElapsedSinceUpdate * 20F) : -timeOfDay;
-            }
-        }
-        public bool TimeElapsing => timeOfDay > 0L;
+        private long lastAge = 0L;
         private DateTime lastTime;
         private double serverTPS = 0;
         private double averageTPS = 20;
@@ -162,13 +155,6 @@ namespace MinecraftClient
             CameraController.SetTarget(playerController.cameraRef!);
         }
 
-        void Update()
-        {
-            // Time update
-            timeElapsedSinceUpdate += Time.unscaledDeltaTime;
-
-        }
-
         public bool IsPaused() => ScreenControl!.IsPaused;
 
         public bool MouseScrollAbsorbed() => ScreenControl!.GetTopScreen().AbsorbMouseScroll();
@@ -185,6 +171,14 @@ namespace MinecraftClient
             };
             
             CameraController?.SetPerspective(newPersp);
+        }
+
+        public string GetInfoString(bool withDebugInfo)
+        {
+            if (withDebugInfo)
+                return $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{GameMode}\n{PlayerDebugInfo}\n{ChunkRenderManager?.GetDebugInfo()}\n{EntityRenderManager?.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}\nTime: {EnvironmentManager!.GetTimeString()}";
+            
+            return $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}";
         }
 
         public bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
@@ -1351,23 +1345,24 @@ namespace MinecraftClient
         /// <summary>
         /// Called when server sent a Time Update packet.
         /// </summary>
-        /// <param name="WorldAge"></param>
-        /// <param name="TimeOfDay"></param>
-        public void OnTimeUpdate(long WorldAge, long TimeOfDay)
+        /// <param name="worldAge"></param>
+        /// <param name="timeOfDay"></param>
+        public void OnTimeUpdate(long worldAge, long timeOfDay)
         {
             // TimeUpdate sent every server tick hence used as timeout detect
             UpdateKeepAlive();
 
-            this.timeOfDay = TimeOfDay;
-            timeElapsedSinceUpdate = 0F;
+            Loom.QueueOnMainThread(() => {
+                EnvironmentManager!.SetTime(timeOfDay);
+            });
 
             // calculate server tps
             if (lastAge != 0)
             {
                 DateTime currentTime = DateTime.Now;
-                long tickDiff = WorldAge - lastAge;
+                long tickDiff = worldAge - lastAge;
                 Double tps = tickDiff / (currentTime - lastTime).TotalSeconds;
-                lastAge = WorldAge;
+                lastAge = worldAge;
                 lastTime = currentTime;
                 if (tps <= 20 && tps > 0)
                 {
@@ -1386,7 +1381,7 @@ namespace MinecraftClient
             }
             else
             {
-                lastAge = WorldAge;
+                lastAge = worldAge;
                 lastTime = DateTime.Now;
             }
         }
