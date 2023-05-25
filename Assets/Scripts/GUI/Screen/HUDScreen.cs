@@ -254,12 +254,7 @@ namespace MinecraftClient.UI
             if (Input.GetKeyDown(KeyCode.Escape))
                 game.ScreenControl?.PushScreen(pauseScreen);
             
-            
-
-            if (debugInfo)
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GameMode}\n{game.PlayerDebugInfo}\n{game.ChunkRenderManager?.GetDebugInfo()}\n{game.EntityRenderManager?.GetDebugInfo()}\nSvr TPS: {game.GetServerTPS():00.00}\nTime: {StringHelper.GetTimeString(game.CurrentTimeOfDay)} ({game.CurrentTimeOfDay})";
-            else
-                debugText.text = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{game.GameMode}\nTime: {StringHelper.GetTimeString(game.CurrentTimeOfDay)}";
+            debugText.text = game.GetInfoString(debugInfo);
 
             var realLatency = game.GetOwnLatency();
             if (displayedLatency != realLatency)
