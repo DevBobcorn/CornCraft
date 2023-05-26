@@ -653,7 +653,7 @@ MonoBehaviour:
     intensity: 0.5
     sunScale: 7
     moonScale: 7
-    moonPhase: -1.6322229
+    moonPhase: -1.3742601
     skyExposureHDRP:
       serializedVersion: 2
       m_Curve:

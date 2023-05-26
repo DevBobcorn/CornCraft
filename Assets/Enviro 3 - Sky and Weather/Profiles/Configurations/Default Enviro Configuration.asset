@@ -32,7 +32,7 @@ MonoBehaviour:
     environmentTransitionSpeed: 1
     audioTransitionSpeed: 1
   preset: {fileID: 11400000, guid: 8c4e279017d5e44458e3e4663b6ab460, type: 2}
-  targetWeatherType: {fileID: 11400000, guid: 3e61e22e1ac8ba045a3b0e53c22b3629, type: 2}
+  targetWeatherType: {fileID: 11400000, guid: 11fdd63974de7ae44b1c689d499953f6, type: 2}
   currentZone: {fileID: 0}
   triggerCollider: {fileID: 0}
   triggerRB: {fileID: 0}
@@ -750,7 +750,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7aa6806f1fff5b489f26777d053c723, type: 3}
   m_Name: Effects Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 0
+  showModuleInspector: 1
   showSaveLoad: 0
   active: 1
   Settings:
@@ -776,8 +776,8 @@ MonoBehaviour:
     custom1Emission: 0
     custom2Emission: 0
   preset: {fileID: 11400000, guid: 59a8076f06e540343b875f850ac3b6a4, type: 2}
-  showSetupControls: 0
-  showEmissionControls: 0
+  showSetupControls: 1
+  showEmissionControls: 1
 --- !u!114 &-2917269256795556972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1416,30 +1416,30 @@ MonoBehaviour:
     cloudsWindDirectionYModifier: 1
     windSpeedModifier: 0.005
     windUpwards: 0.02
-    coverage: -1
+    coverage: -0.105
     worleyFreq2: 1
     worleyFreq1: 4
-    dilateCoverage: 0.929
-    dilateType: 1
-    cloudsTypeModifier: 1
+    dilateCoverage: 0.514
+    dilateType: 0.512
+    cloudsTypeModifier: 0.581
     locationOffset: {x: 0.1, y: 0}
     bottomCloudsHeight: 2000
     topCloudsHeight: 8000
-    density: 0.55
-    scatteringIntensity: 1.05
-    silverLiningSpread: 0.8
-    powderIntensity: 0.848
-    curlIntensity: 0.1
+    density: 0.072
+    scatteringIntensity: 1.5
+    silverLiningSpread: 0.82
+    powderIntensity: 0.75
+    curlIntensity: 0.25
     lightStepModifier: 0.075
-    lightAbsorbtion: 1.01
-    multiScatteringA: 0.575
-    multiScatteringB: 0.227
-    multiScatteringC: 0
+    lightAbsorbtion: 0.5
+    multiScatteringA: 0.5
+    multiScatteringB: 0.7
+    multiScatteringC: 1
     baseNoiseUV: 6
     detailNoiseUV: 28
-    baseErosionIntensity: 0.184
-    detailErosionIntensity: 0.3
-    anvilBias: 0.398
+    baseErosionIntensity: 0
+    detailErosionIntensity: 0.5
+    anvilBias: 0
   settingsLayer2:
     cloudsWindDirectionXModifier: -1
     cloudsWindDirectionYModifier: -1
@@ -1593,10 +1593,10 @@ MonoBehaviour:
   showDensityControls: 0
   showTextureControls: 0
   showWindControls: 0
-  cloudAnimLayer1: {x: 0.86239296, y: 0.3915141, z: -0.4326381}
+  cloudAnimLayer1: {x: 0.39584577, y: -0.07504991, z: -0.56500137}
   cloudAnimLayer2: {x: 0.3174014, y: -0.67647, z: 0.67947596}
-  cloudAnimNonScaledLayer1: {x: -1.052757, y: 1.3452814, z: -58.94793}
-  cloudAnimNonScaledLayer2: {x: -0.18404372, y: 0.23280904, z: -56.609207}
+  cloudAnimNonScaledLayer1: {x: -0.9760845, y: 1.4219494, z: -59.255817}
+  cloudAnimNonScaledLayer2: {x: -0.26071772, y: 0.15613371, z: -56.917095}
   weatherMap: {fileID: 0}
 --- !u!114 &-304633943039718671
 MonoBehaviour:
@@ -1617,8 +1617,8 @@ MonoBehaviour:
     volumetrics: 1
     steps: 64
     quality: 1
-    scattering: 0.02
-    extinction: 0.089
+    scattering: 0.015
+    extinction: 0.035
     anistropy: 0.6
     maxRange: 1000
     maxRangePointSpot: 100
@@ -1628,15 +1628,15 @@ MonoBehaviour:
     noise: {fileID: 0}
     ditheringTex: {fileID: 2800000, guid: 711e788cbc742bb439b3c7cad60651e3, type: 3}
     fog: 1
-    fogDensity: 0.018
-    fogHeightFalloff: 0.0145
+    fogDensity: 0.027
+    fogHeightFalloff: 0.0008
     fogHeight: 0
-    fogDensity2: 0.016
-    fogHeightFalloff2: 0.0015
+    fogDensity2: 0.053
+    fogHeightFalloff2: 0.05
     fogHeight2: 0
     fogMaxOpacity: 1
     startDistance: 0
-    fogColorBlend: 1
+    fogColorBlend: 0.75
     ambientColorGradient:
       serializedVersion: 2
       key0: {r: 0, g: 0, b: 0, a: 1}
@@ -1671,6 +1671,13 @@ MonoBehaviour:
   showFogControls: 0
   showVolumetricsControls: 1
   fogLights:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -1772,7 +1779,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0081d4f9e5d6e0a4d9fe8e7a8d7256b6, type: 3}
   m_Name: Time Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 1
+  showModuleInspector: 0
   showSaveLoad: 0
   active: 1
   Settings:

@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showEditor: 0
   showEffectControls: 0
-  showCloudControls: 0
+  showCloudControls: 1
   showFlatCloudControls: 0
-  showFogControls: 0
-  showLightingControls: 0
+  showFogControls: 1
+  showLightingControls: 1
   showAuroraControls: 0
   showEnvironmentControls: 0
   showAudioControls: 0
@@ -25,7 +25,7 @@ MonoBehaviour:
   showWeatherAudioControls: 0
   showLightningControls: 0
   cloudsOverride:
-    showLayer1: 1
+    showLayer1: 0
     coverageLayer1: 0.22
     dilateCoverageLayer1: 0.147
     dilateTypeLayer1: 0.457
@@ -69,19 +69,19 @@ MonoBehaviour:
     flatCloudsAmbientIntensity: 1
     flatCloudsAbsorbtion: 0.6
   lightingOverride:
-    directLightIntensityModifier: 0.5
-    ambientIntensityModifier: 0.6
+    directLightIntensityModifier: 0.2
+    ambientIntensityModifier: 1
   fogOverride:
-    fogDensity: 0.038
-    fogHeightFalloff: 0.0016
+    fogDensity: 0
+    fogHeightFalloff: 0.001
     fogHeight: 0
-    fogDensity2: 0.718
-    fogHeightFalloff2: 0.0417
+    fogDensity2: 1
+    fogHeightFalloff2: 0
     fogHeight2: -40
     fogColorBlend: 0.5
-    scattering: 0.39
-    extinction: 0.232
-    anistropy: 0.105
+    scattering: 0.07
+    extinction: 0.097
+    anistropy: 0.197
   auroraOverride:
     auroraIntensity: 1
   effectsOverride:
