@@ -19,7 +19,7 @@ namespace MinecraftClient.UI
                 var infoTagPrefab = render.FloatingInfoPrefab;
                 if (infoTagPrefab == null) return;
 
-                // Make a new notification here...
+                // Make a new floating UI here...
                 var fUIObj = GameObject.Instantiate(infoTagPrefab);
                 fUIObj!.transform.SetParent(render.InfoAnchor, true);
                 fUIObj!.transform.localPosition = Vector3.zero;
@@ -34,7 +34,14 @@ namespace MinecraftClient.UI
         public void RemoveForEntity(int entityId)
         {
             if (entityFloatingUIs.ContainsKey(entityId))
-                entityFloatingUIs[entityId].Destroy(() => entityFloatingUIs.Remove(entityId));
+            {
+                var target = entityFloatingUIs[entityId];
+
+                if (target != null)
+                    target.Destroy(() => entityFloatingUIs.Remove(entityId));
+                else
+                    entityFloatingUIs.Remove(entityId);
+            }
             
         }
 
@@ -57,8 +64,14 @@ namespace MinecraftClient.UI
 
                 for (int i = 0;i < validTagOwners.Count;i++)
                 {
-                    AddForEntity(validTagOwners[i], entityManager!.GetEntityRender(validTagOwners[i]));
-                    Debug.Log($"Adding floating UI for {validTagOwners[i]}");
+                    var render = entityManager!.GetEntityRender(validTagOwners[i]);
+
+                    if (render?.FloatingInfoPrefab != null)
+                    {
+                        AddForEntity(validTagOwners[i], render);
+                        //Debug.Log($"Adding floating UI for #{validTagOwners[i]}");
+                    }
+                    
                 }
             }
 

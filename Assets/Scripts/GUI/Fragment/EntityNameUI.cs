@@ -34,7 +34,7 @@ namespace MinecraftClient.UI
 
         public override void Destroy(Action callback)
         {
-            GetComponent<Animator>().SetBool("Expired", true);
+            GetComponent<Animator>()?.SetBool("Expired", true);
 
             // Store this for later invocation
             destroyCallback = callback;
