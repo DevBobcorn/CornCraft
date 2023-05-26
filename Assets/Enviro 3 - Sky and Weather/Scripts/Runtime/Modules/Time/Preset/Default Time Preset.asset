@@ -16,18 +16,18 @@ MonoBehaviour:
   showSaveLoad: 0
   active: 1
   Settings:
-    simulate: 0
-    secSerial: 0
-    minSerial: 0
-    hourSerial: 12
-    daySerial: 14
-    monthSerial: 3
-    yearSerial: 2021
-    timeOfDay: 12
-    latitude: 24
-    longitude: 67
-    utcOffset: 5
-    cycleLengthInMinutes: 10
+    simulate: 1
+    secSerial: 19
+    minSerial: 44
+    hourSerial: 18
+    daySerial: 1
+    monthSerial: 1
+    yearSerial: 1
+    timeOfDay: 18.738613
+    latitude: 0
+    longitude: 0
+    utcOffset: 0
+    cycleLengthInMinutes: 20
     dayLengthModifier: 1
     nightLengthModifier: 1
   preset: {fileID: 0}

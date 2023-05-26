@@ -16,7 +16,7 @@ MonoBehaviour:
   showEffectControls: 0
   showCloudControls: 0
   showFlatCloudControls: 0
-  showFogControls: 0
+  showFogControls: 1
   showLightingControls: 0
   showAuroraControls: 0
   showEnvironmentControls: 0
@@ -73,10 +73,10 @@ MonoBehaviour:
     ambientIntensityModifier: 1
   fogOverride:
     fogDensity: 1
-    fogHeightFalloff: 0.0005
+    fogHeightFalloff: 0.001
     fogHeight: 0
     fogDensity2: 1
-    fogHeightFalloff2: 0.0346
+    fogHeightFalloff2: 0.0287
     fogHeight2: -50
     fogColorBlend: 0.5
     scattering: 0.04
