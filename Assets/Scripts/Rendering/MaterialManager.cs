@@ -107,7 +107,7 @@ namespace MinecraftClient.Rendering
 
             // Water
             var water = new Material(AtlasWater!);
-            translucent.SetTexture("_BaseMap", packManager.GetAtlasArray(RenderType.TRANSLUCENT));
+            water.SetTexture("_BaseMap", packManager.GetAtlasArray(RenderType.TRANSLUCENT));
             atlasMaterials.Add(RenderType.WATER, water);
 
             // Player Skins

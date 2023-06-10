@@ -47,9 +47,9 @@ namespace MinecraftClient.Rendering
                 int count = ChunkRender.TYPES.Length, layerMask = 0;
                 int offsetY = World.GetDimension().minY;
 
-                var visualBuffer = new (float3[] vert, float3[] txuv, float3[] tint)[count];
+                var visualBuffer = new VertexBuffer[count];
                 for (int i = 0;i < count;i++)
-                    visualBuffer[i] = (vert: new float3[0], txuv: new float3[0], tint: new float3[0]);
+                    visualBuffer[i] = new();
                 
                 float3[] colliderVerts = { };
 
@@ -154,10 +154,11 @@ namespace MinecraftClient.Rendering
                         meshData.subMeshCount = layerCount;
 
                         // Set mesh attributes
-                        var visVertAttrs = new NativeArray<VertexAttributeDescriptor>(3, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+                        var visVertAttrs = new NativeArray<VertexAttributeDescriptor>(4, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
                         visVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3, stream: 0);
                         visVertAttrs[1]  = new(VertexAttribute.TexCoord0, dimension: 3, stream: 1);
-                        visVertAttrs[2]  = new(VertexAttribute.Color,     dimension: 3, stream: 2);
+                        visVertAttrs[2]  = new(VertexAttribute.TexCoord1, dimension: 4, stream: 2);
+                        visVertAttrs[3]  = new(VertexAttribute.Color,     dimension: 3, stream: 3);
 
                         meshData.SetVertexBufferParams(totalVertCount,          visVertAttrs);
                         meshData.SetIndexBufferParams((totalVertCount / 2) * 3, IndexFormat.UInt32);
@@ -167,6 +168,7 @@ namespace MinecraftClient.Rendering
                         // Prepare source data arrays
                         var allVerts = new float3[totalVertCount];
                         var allUVs   = new float3[totalVertCount];
+                        var allAnims = new float4[totalVertCount];
                         var allTints = new float3[totalVertCount];
 
                         for (int layer = 0;layer < count;layer++)
@@ -174,7 +176,8 @@ namespace MinecraftClient.Rendering
                             if ((layerMask & (1 << layer)) != 0)
                             {
                                 visualBuffer[layer].vert.CopyTo(allVerts, vertOffset);
-                                visualBuffer[layer].txuv.CopyTo(allUVs, vertOffset);
+                                visualBuffer[layer].txuv.CopyTo(allUVs,   vertOffset);
+                                visualBuffer[layer].uvan.CopyTo(allAnims, vertOffset);
                                 visualBuffer[layer].tint.CopyTo(allTints, vertOffset);
 
                                 vertOffset += visualBuffer[layer].vert.Length;
@@ -186,7 +189,9 @@ namespace MinecraftClient.Rendering
                         positions.CopyFrom(allVerts);
                         var texCoords  = meshData.GetVertexData<float3>(1);
                         texCoords.CopyFrom(allUVs);
-                        var vertColors = meshData.GetVertexData<float3>(2);
+                        var texAnims   = meshData.GetVertexData<float4>(2);
+                        texAnims.CopyFrom(allAnims);
+                        var vertColors = meshData.GetVertexData<float3>(3);
                         vertColors.CopyFrom(allTints);
 
                         // Generate triangle arrays

@@ -31,8 +31,7 @@ namespace MinecraftClient.Rendering
                 var packManager = ResourcePackManager.Instance;
 
                 var itemNumId = ItemPalette.INSTANCE.ToNumId(itemStack.Type.ItemId);
-                ItemModel? itemModel = null;
-                packManager.ItemModelTable.TryGetValue(itemNumId, out itemModel);
+                packManager.ItemModelTable.TryGetValue(itemNumId, out ItemModel? itemModel);
 
                 if (itemModel is null)
                 {
@@ -41,7 +40,7 @@ namespace MinecraftClient.Rendering
                 }
 
                 // Make and set mesh...
-                var visualBuffer = (vert: new float3[0], txuv: new float3[0], tint: new float3[0]);
+                var visualBuffer = new VertexBuffer();
 
                 int fluidVertexCount = visualBuffer.vert.Length;
                 int fluidTriIdxCount = (fluidVertexCount / 2) * 3;

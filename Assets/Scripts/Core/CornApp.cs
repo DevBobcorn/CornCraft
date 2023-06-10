@@ -145,6 +145,7 @@ namespace MinecraftClient
             }
             // Then append overrides
             packManager.AddPack(new("vanilla_fix"));
+            //packManager.AddPack(new("VanillaBDCraft 64x MC116"));
             // Load valid packs...
             loadFlag.Finished = false;
             // Load valid packs...
