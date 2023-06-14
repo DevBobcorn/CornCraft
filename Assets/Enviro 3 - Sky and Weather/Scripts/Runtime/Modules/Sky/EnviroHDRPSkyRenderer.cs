@@ -54,12 +54,22 @@ namespace UnityEngine.Rendering.HighDefinition
                 Shader.SetGlobalMatrix("_PixelCoordToViewDirWS", builtinParams.pixelCoordToViewDirMatrix);
                 Shader.SetGlobalFloat("_EnviroSkyIntensity", GetSkyIntensity(enviroSky, builtinParams.debugSettings)); 
             }
-    
-            
+   
+            if(Enviro.EnviroManager.instance.Objects.directionalLight != null)
+                Enviro.EnviroManager.instance.Objects.directionalLight.transform.position = Vector3.zero;
+
+            if(Enviro.EnviroManager.instance.Objects.additionalDirectionalLight != null)
+                Enviro.EnviroManager.instance.Objects.additionalDirectionalLight.transform.position = Vector3.zero;
+
             if (builtinParams.hdCamera.camera.cameraType != CameraType.Reflection)
                 Enviro.EnviroManager.instance.Sky.mySkyboxMat = skyMat; 
  
-            CoreUtils.DrawFullScreen(builtinParams.commandBuffer, skyMat, m_PropertyBlock, renderForCubemap ? 0 : 1);
+            if(Enviro.EnviroManager.instance.Camera != null && builtinParams.hdCamera.camera != Enviro.EnviroManager.instance.Camera && renderForCubemap)
+            {
+                return;
+            }
+     
+               CoreUtils.DrawFullScreen(builtinParams.commandBuffer, skyMat, m_PropertyBlock, renderForCubemap ? 0 : 1);
             }
         }
     }

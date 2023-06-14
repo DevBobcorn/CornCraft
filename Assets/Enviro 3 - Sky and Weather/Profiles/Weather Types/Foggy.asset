@@ -16,7 +16,7 @@ MonoBehaviour:
   showEffectControls: 0
   showCloudControls: 0
   showFlatCloudControls: 0
-  showFogControls: 1
+  showFogControls: 0
   showLightingControls: 0
   showAuroraControls: 0
   showEnvironmentControls: 0
@@ -25,6 +25,7 @@ MonoBehaviour:
   showWeatherAudioControls: 0
   showLightningControls: 0
   cloudsOverride:
+    ambientLightIntensity: 1
     showLayer1: 1
     coverageLayer1: 0.03
     dilateCoverageLayer1: 0.127
@@ -39,6 +40,7 @@ MonoBehaviour:
     silverLiningSpreadLayer1: 0.8
     ligthAbsorbtionLayer1: 0.24
     densityLayer1: 0.706
+    densitySmoothnessLayer1: 1
     baseErosionIntensityLayer1: 0.784
     detailErosionIntensityLayer1: 0.2
     curlIntensityLayer1: 0.15
@@ -56,6 +58,7 @@ MonoBehaviour:
     silverLiningSpreadLayer2: 0.8
     ligthAbsorbtionLayer2: 1
     densityLayer2: 0.3
+    densitySmoothnessLayer2: 1
     baseErosionIntensityLayer2: 0
     detailErosionIntensityLayer2: 0.3
     curlIntensityLayer2: 0.05
@@ -72,11 +75,11 @@ MonoBehaviour:
     directLightIntensityModifier: 1
     ambientIntensityModifier: 1
   fogOverride:
-    fogDensity: 1
-    fogHeightFalloff: 0.001
+    fogDensity: 0.116
+    fogHeightFalloff: 0.0005
     fogHeight: 0
     fogDensity2: 1
-    fogHeightFalloff2: 0.0287
+    fogHeightFalloff2: 0.0346
     fogHeight2: -50
     fogColorBlend: 0.5
     scattering: 0.04

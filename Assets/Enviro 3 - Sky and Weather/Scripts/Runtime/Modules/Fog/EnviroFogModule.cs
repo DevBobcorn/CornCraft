@@ -532,6 +532,13 @@ namespace Enviro
             if(volumetricsMat == null)
                volumetricsMat = new Material(Shader.Find("Hidden/VolumetricsURP"));
 
+
+#if UNITY_2022_2_OR_NEWER 
+    volumetricsMat.EnableKeyword("UNITY_2022_2_NEWER");
+#else
+    volumetricsMat.DisableKeyword("UNITY_2022_2_NEWER");
+#endif
+
             if(blurMat == null)
                blurMat = new Material(Shader.Find("Hidden/EnviroBlur"));
 

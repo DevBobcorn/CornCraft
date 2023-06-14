@@ -4,20 +4,20 @@ using UnityEngine;
 
 namespace Enviro
 {
-    [System.Serializable] 
-    public class GeneralObjects 
+    [System.Serializable]
+    public class GeneralObjects
     {
         public GameObject sun;
         public GameObject moon;
         public GameObject stars;
-        public Light directionalLight; 
-        public Light additionalDirectionalLight; 
+        public Light directionalLight;
+        public Light additionalDirectionalLight;
         public EnviroReflectionProbe globalReflectionProbe;
         public GameObject effects;
         public GameObject audio;
         public WindZone windZone;
-        public GameObject worldAnchor; 
-    } 
+        public GameObject worldAnchor;
+    }
 
     [System.Serializable]
     public class EnviroCameras
@@ -30,14 +30,15 @@ namespace Enviro
     {
         //Modules
         public EnviroConfiguration configuration;
- 
+
         [SerializeField]
         private EnviroConfiguration lastConfiguration;
 
         public EnviroTimeModule Time;
         public EnviroLightingModule Lighting;
+        public EnviroReflectionsModule Reflections;
         public EnviroSkyModule Sky;
-        public EnviroFogModule Fog; 
+        public EnviroFogModule Fog;
         public EnviroVolumetricCloudsModule VolumetricClouds;
         public EnviroFlatCloudsModule FlatClouds;
         public EnviroWeatherModule Weather;
@@ -54,13 +55,14 @@ namespace Enviro
         {
             Time,
             Lighting,
+            Reflections,
             Sky,
-            Fog,  
+            Fog,
             VolumetricClouds,
-            FlatClouds, 
+            FlatClouds,
             Weather,
             Aurora,
-            Effects, 
+            Effects,
             Lightning,
             Environment,
             Audio,
@@ -77,10 +79,13 @@ namespace Enviro
 
             if(Lighting != null)
                Lighting.Enable();
-               
+
+            if(Reflections != null)
+               Reflections.Enable();
+
             if(VolumetricClouds != null)
                VolumetricClouds.Enable();
-            
+
             if(FlatClouds != null)
                FlatClouds.Enable();
 
@@ -106,7 +111,7 @@ namespace Enviro
                Lightning.Enable();
 
             if(Quality != null)
-               Quality.Enable();   
+               Quality.Enable();
         }
 
         public void DisableModules()
@@ -119,7 +124,10 @@ namespace Enviro
 
             if(Lighting != null)
                Lighting.Disable();
-               
+
+            if(Reflections != null)
+               Reflections.Disable();
+
             if(VolumetricClouds != null)
                VolumetricClouds.Disable();
 
@@ -143,7 +151,7 @@ namespace Enviro
 
             if(Effects != null)
                Effects.Disable();
-            
+
             if(Lightning != null)
                Lightning.Disable();
 
@@ -170,7 +178,13 @@ namespace Enviro
                 Lighting.Disable();
                 Lighting = null;
             }
-               
+
+            if(Reflections != null)
+            {
+                Reflections.Disable();
+                Reflections = null;
+            }
+
             if(VolumetricClouds != null)
             {
                 VolumetricClouds.Disable();
@@ -245,8 +259,13 @@ namespace Enviro
             }
 
             if(Lighting != null)
-            { 
+            {
                Lighting = Instantiate(Lighting);
+            }
+
+            if(Reflections != null)
+            {
+               Reflections = Instantiate(Reflections);
             }
 
             if(Fog != null)
@@ -311,6 +330,9 @@ namespace Enviro
             if(Lighting != null)
                Lighting.UpdateModule();
 
+            if(Reflections != null)
+               Reflections.UpdateModule();
+
             if(Fog != null)
                Fog.UpdateModule();
 
@@ -322,10 +344,10 @@ namespace Enviro
 
             if(Weather != null)
                Weather.UpdateModule();
-     
+
             if(Aurora != null)
                Aurora.UpdateModule();
-          
+
             if(Environment != null)
                Environment.UpdateModule();
 
@@ -354,6 +376,9 @@ namespace Enviro
             if(Lighting != null && Lighting.preset != null)
                Lighting.SaveModuleValues(Lighting.preset);
 
+            if(Reflections != null && Reflections.preset != null)
+               Reflections.SaveModuleValues(Reflections.preset);
+
             if(Fog != null && Fog.preset != null)
                Fog.SaveModuleValues(Fog.preset);
 
@@ -371,7 +396,7 @@ namespace Enviro
 
             if(Environment != null && Environment.preset != null)
                Environment.SaveModuleValues(Environment.preset);
- 
+
             if(Audio != null && Audio.preset != null)
                Audio.SaveModuleValues(Audio.preset);
 
@@ -390,7 +415,7 @@ namespace Enviro
 
         //Loads all the modules settings from its assigned presets.
         public void LoadAllModules()
-        { 
+        {
             if(Time != null)
                Time.LoadModuleValues();
 
@@ -400,7 +425,10 @@ namespace Enviro
             if(Lighting != null)
                Lighting.LoadModuleValues();
 
-            if(Fog != null) 
+            if(Reflections != null)
+               Reflections.LoadModuleValues();
+
+            if(Fog != null)
                Fog.LoadModuleValues();
 
             if(VolumetricClouds != null)
@@ -408,13 +436,13 @@ namespace Enviro
 
             if(FlatClouds != null)
                FlatClouds.LoadModuleValues();
- 
+
             if(Weather != null)
                Weather.LoadModuleValues();
-            
+
             if(Aurora != null)
                Aurora.LoadModuleValues();
-                  
+
             if(Environment != null)
                Environment.LoadModuleValues();
 
@@ -443,8 +471,9 @@ namespace Enviro
                 DisableModules();
 
                 Time = configuration.timeModule;
-                Sky = configuration.Sky; 
+                Sky = configuration.Sky;
                 Lighting = configuration.lightingModule;
+                Reflections = configuration.reflectionsModule;
                 VolumetricClouds = configuration.volumetricCloudModule;
                 FlatClouds = configuration.flatCloudModule;
                 Fog = configuration.fogModule;
@@ -454,11 +483,11 @@ namespace Enviro
                 Audio = configuration.Audio;
                 Effects = configuration.Effects;
                 Lightning = configuration.Lightning;
-                Quality = configuration.Quality; 
+                Quality = configuration.Quality;
 
                 if(configuration != lastConfiguration)
                 EnableModules();
-                
+
                 lastConfiguration = configuration;
             }
             else if (configuration == null)
@@ -468,7 +497,7 @@ namespace Enviro
         //Adds a module based on ModelType
         public void AddModule (ModuleType type)
         {
-            switch (type) 
+            switch (type)
             {
                 case ModuleType.Time:
                     if(Time != null)
@@ -511,7 +540,7 @@ namespace Enviro
                         Sky.preset = (EnviroSkyModule)EnviroHelper.GetDefaultPreset("Default Sky Preset");
                         Sky.LoadModuleValues();
                         Sky.Enable();
-                        
+
                         if(configuration != null && !Application.isPlaying)
                         {
                             configuration.Sky = Sky;
@@ -530,7 +559,7 @@ namespace Enviro
                         Debug.Log("Lighting module already attached!");
                         return;
                     }
-                    else 
+                    else
                     {
                         Lighting = ScriptableObject.CreateInstance<EnviroLightingModule>();
                         Lighting.name = "Lighting Module";
@@ -550,13 +579,39 @@ namespace Enviro
                     }
                 break;
 
+                case ModuleType.Reflections:
+                    if(Reflections != null)
+                    {
+                        Debug.Log("Reflections module already attached!");
+                        return;
+                    }
+                    else
+                    {
+                        Reflections = ScriptableObject.CreateInstance<EnviroReflectionsModule>();
+                        Reflections.name = "Reflections Module";
+                        Reflections.preset = (EnviroReflectionsModule)EnviroHelper.GetDefaultPreset("Default Reflections Preset");
+                        Reflections.LoadModuleValues();
+                        Reflections.Enable();
+
+                        if(configuration != null && !Application.isPlaying)
+                        {
+                            configuration.reflectionsModule = Reflections;
+                            #if UNITY_EDITOR
+                            UnityEditor.AssetDatabase.AddObjectToAsset(Reflections,configuration);
+                            UnityEditor.AssetDatabase.SaveAssets();
+                            UnityEditor.AssetDatabase.Refresh();
+                            #endif
+                        }
+                    }
+                break;
+
                 case ModuleType.Fog:
                     if(Fog != null)
                     {
                         Debug.Log("Fog module already attached!");
                         return;
                     }
-                    else 
+                    else
                     {
                         Fog = ScriptableObject.CreateInstance<EnviroFogModule>();
                         Fog.name = "Fog Module";
@@ -582,7 +637,7 @@ namespace Enviro
                         Debug.Log("Volumetric clouds module already attached!");
                         return;
                     }
-                    else 
+                    else
                     {
                         VolumetricClouds = ScriptableObject.CreateInstance<EnviroVolumetricCloudsModule>();
                         VolumetricClouds.name = "Volumetric Cloud Module";
@@ -608,7 +663,7 @@ namespace Enviro
                         Debug.Log("Flat clouds module already attached!");
                         return;
                     }
-                    else 
+                    else
                     {
                         FlatClouds = ScriptableObject.CreateInstance<EnviroFlatCloudsModule>();
                         FlatClouds.name = "Flat Clouds Module";
@@ -634,7 +689,7 @@ namespace Enviro
                         Debug.Log("Weather module already attached!");
                         return;
                     }
-                    else 
+                    else
                     {
                         Weather = ScriptableObject.CreateInstance<EnviroWeatherModule>();
                         Weather.name = "Weather Module";
@@ -660,7 +715,7 @@ namespace Enviro
                         Debug.Log("Aurora module already attached!");
                         return;
                     }
-                    else 
+                    else
                     {
                         Aurora = ScriptableObject.CreateInstance<EnviroAuroraModule>();
                         Aurora.name = "Aurora Module";
@@ -686,7 +741,7 @@ namespace Enviro
                         Debug.Log("Environment module already attached!");
                         return;
                     }
-                    else 
+                    else
                     {
                         Environment = ScriptableObject.CreateInstance<EnviroEnvironmentModule>();
                         Environment.name = "Environment Module";
@@ -712,14 +767,14 @@ namespace Enviro
                         Debug.Log("Audio module already attached!");
                         return;
                     }
-                    else 
+                    else
                     {
                         Audio = ScriptableObject.CreateInstance<EnviroAudioModule>();
                         Audio.name = "Audio Module";
                         Audio.preset = (EnviroAudioModule)EnviroHelper.GetDefaultPreset("Default Audio Preset");
                         Audio.LoadModuleValues();
                         Audio.Enable();
-           
+
                         if(configuration != null && !Application.isPlaying)
                         {
                             configuration.Audio = Audio;
@@ -738,7 +793,7 @@ namespace Enviro
                         Debug.Log("Effects module already attached!");
                         return;
                     }
-                    else 
+                    else
                     {
                         Effects = ScriptableObject.CreateInstance<EnviroEffectsModule>();
                         Effects.name = "Effects Module";
@@ -764,7 +819,7 @@ namespace Enviro
                         Debug.Log("Lighting module already attached!");
                         return;
                     }
-                    else 
+                    else
                     {
                         Lightning = ScriptableObject.CreateInstance<EnviroLightningModule>();
                         Lightning.name = "Lightning Module";
@@ -790,7 +845,7 @@ namespace Enviro
                         Debug.Log("Quality module already attached!");
                         return;
                     }
-                    else 
+                    else
                     {
                         Quality = ScriptableObject.CreateInstance<EnviroQualityModule>();
                         Quality.name = "Quality Module";
@@ -816,20 +871,20 @@ namespace Enviro
         public void RemoveModule (ModuleType type)
         {
             switch (type)
-            { 
+            {
                 case ModuleType.Time:
                     if(Time != null)
                     {
                         Time.Disable();
                         DestroyImmediate(Time,true);
-                        
+
                         if(!Application.isPlaying)
                         {
                             #if UNITY_EDITOR
                             DestroyImmediate(configuration.timeModule,true);
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
 
@@ -852,7 +907,7 @@ namespace Enviro
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -868,7 +923,7 @@ namespace Enviro
                     {
                         Lighting.Disable();
                         DestroyImmediate(Lighting,true);
-                       
+
                         if(!Application.isPlaying)
                         {
                             if(configuration != null)
@@ -876,7 +931,7 @@ namespace Enviro
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -887,12 +942,36 @@ namespace Enviro
                     }
                 break;
 
+                case ModuleType.Reflections:
+                    if(Reflections != null)
+                    {
+                        Reflections.Disable();
+                        DestroyImmediate(Reflections,true);
+
+                        if(!Application.isPlaying)
+                        {
+                            if(configuration != null)
+                            DestroyImmediate(configuration.reflectionsModule,true);
+                            #if UNITY_EDITOR
+                            UnityEditor.EditorUtility.SetDirty(configuration);
+                            UnityEditor.AssetDatabase.SaveAssets();
+                            UnityEditor.AssetDatabase.Refresh();
+                            #endif
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("No reflections module attached!");
+                        return;
+                    }
+                break;
+
                 case ModuleType.Fog:
                     if(Fog != null)
                     {
                         Fog.Disable();
                         DestroyImmediate(Fog,true);
-                       
+
                         if(!Application.isPlaying)
                         {
                             if(configuration != null)
@@ -900,7 +979,7 @@ namespace Enviro
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -924,7 +1003,7 @@ namespace Enviro
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -948,7 +1027,7 @@ namespace Enviro
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -966,13 +1045,13 @@ namespace Enviro
                         DestroyImmediate(Weather,true);
 
                         if(!Application.isPlaying)
-                        {                     
+                        {
                             if(configuration != null)
                             DestroyImmediate(configuration.Weather,true);
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -990,13 +1069,13 @@ namespace Enviro
                         DestroyImmediate(Aurora,true);
 
                         if(!Application.isPlaying)
-                        {                     
+                        {
                             if(configuration != null)
                             DestroyImmediate(configuration.Aurora,true);
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -1014,13 +1093,13 @@ namespace Enviro
                         DestroyImmediate(Environment,true);
 
                         if(!Application.isPlaying)
-                        {                     
+                        {
                             if(configuration != null)
                             DestroyImmediate(configuration.Environment,true);
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -1043,7 +1122,7 @@ namespace Enviro
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -1066,7 +1145,7 @@ namespace Enviro
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -1075,7 +1154,7 @@ namespace Enviro
                         Debug.Log("No effects module attached!");
                         return;
                     }
-                break; 
+                break;
 
                 case ModuleType.Lightning:
                     if(Lightning != null)
@@ -1089,7 +1168,7 @@ namespace Enviro
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -1112,7 +1191,7 @@ namespace Enviro
                             #if UNITY_EDITOR
                             UnityEditor.EditorUtility.SetDirty(configuration);
                             UnityEditor.AssetDatabase.SaveAssets();
-                            UnityEditor.AssetDatabase.Refresh(); 
+                            UnityEditor.AssetDatabase.Refresh();
                             #endif
                         }
                     }
@@ -1121,7 +1200,7 @@ namespace Enviro
                         Debug.Log("No quality module attached!");
                         return;
                     }
-                break; 
+                break;
             }
         }
 

@@ -13,13 +13,13 @@ namespace Enviro
         
         noise, detailNoise, curlTex, blueNoise, cloudsWorldScale, atmosphereColorSaturateDistance, cloudsTravelSpeed;
         //Properties Layer 1
-        private SerializedProperty bottomCloudsHeightLayer1,topCloudsHeightLayer1,densityLayer1, coverageLayer1,worleyFreq1Layer1, worleyFreq2Layer1, dilateCoverageLayer1, dilateTypeLayer1,cloudsTypeModifierLayer1, locationOffsetLayer1,
+        private SerializedProperty bottomCloudsHeightLayer1,topCloudsHeightLayer1,densityLayer1,densitySmoothnessLayer1, coverageLayer1,worleyFreq1Layer1, worleyFreq2Layer1, dilateCoverageLayer1, dilateTypeLayer1,cloudsTypeModifierLayer1, locationOffsetLayer1,
         scatteringIntensityLayer1, silverLiningSpreadLayer1, powderIntensityLayer1, 
         curlIntensityLayer1, lightStepModifierLayer1, lightAbsorbtionLayer1,baseNoiseUVLayer1, detailNoiseUVLayer1,
         baseErosionIntensityLayer1, detailErosionIntensityLayer1, multiScatteringALayer1, multiScatteringBLayer1,multiScatteringCLayer1,anvilBiasLayer1;  
     
         //Properties Layer 2
-        private SerializedProperty bottomCloudsHeightLayer2,topCloudsHeightLayer2,densityLayer2,coverageLayer2,worleyFreq1Layer2, worleyFreq2Layer2, dilateCoverageLayer2, dilateTypeLayer2,cloudsTypeModifierLayer2, locationOffsetLayer2,
+        private SerializedProperty bottomCloudsHeightLayer2,topCloudsHeightLayer2,densityLayer2,densitySmoothnessLayer2, coverageLayer2,worleyFreq1Layer2, worleyFreq2Layer2, dilateCoverageLayer2, dilateTypeLayer2,cloudsTypeModifierLayer2, locationOffsetLayer2,
         scatteringIntensityLayer2, silverLiningSpreadLayer2, powderIntensityLayer2, 
         curlIntensityLayer2, lightStepModifierLayer2, lightAbsorbtionLayer2, baseNoiseUVLayer2, detailNoiseUVLayer2,
         baseErosionIntensityLayer2, detailErosionIntensityLayer2, multiScatteringALayer2, multiScatteringBLayer2,multiScatteringCLayer2, anvilBiasLayer2;  
@@ -74,6 +74,7 @@ namespace Enviro
             cloudsTypeModifierLayer1 = serializedObj.FindProperty("settingsLayer1.cloudsTypeModifier"); 
             locationOffsetLayer1 = serializedObj.FindProperty("settingsLayer1.locationOffset"); 
             densityLayer1 = serializedObj.FindProperty("settingsLayer1.density");  
+            densitySmoothnessLayer1 = serializedObj.FindProperty("settingsLayer1.densitySmoothness");  
             scatteringIntensityLayer1 = serializedObj.FindProperty("settingsLayer1.scatteringIntensity");  
             silverLiningSpreadLayer1 = serializedObj.FindProperty("settingsLayer1.silverLiningSpread");  
             powderIntensityLayer1 = serializedObj.FindProperty("settingsLayer1.powderIntensity");  
@@ -105,6 +106,7 @@ namespace Enviro
             cloudsTypeModifierLayer2 = serializedObj.FindProperty("settingsLayer2.cloudsTypeModifier"); 
             locationOffsetLayer2 = serializedObj.FindProperty("settingsLayer2.locationOffset"); 
             densityLayer2 = serializedObj.FindProperty("settingsLayer2.density");
+            densitySmoothnessLayer2 = serializedObj.FindProperty("settingsLayer2.densitySmoothness");  
             scatteringIntensityLayer2 = serializedObj.FindProperty("settingsLayer2.scatteringIntensity");  
             silverLiningSpreadLayer2 = serializedObj.FindProperty("settingsLayer2.silverLiningSpread");  
             powderIntensityLayer2 = serializedObj.FindProperty("settingsLayer2.powderIntensity");  
@@ -195,7 +197,9 @@ namespace Enviro
                     EditorGUILayout.PropertyField(sunLightColorGradient);
                     EditorGUILayout.PropertyField(moonLightColorGradient);
                     EditorGUILayout.PropertyField(ambientColorGradient);
+                    DisableInputStart();
                     EditorGUILayout.PropertyField(ambientLighIntensity);
+                    DisableInputEnd();
                     EditorGUILayout.PropertyField(atmosphereColorSaturateDistance);
                     GUILayout.Space(10);
                     GUILayout.Label("Wind", headerStyle);
@@ -270,6 +274,7 @@ namespace Enviro
                     {
                         DisableInputStart();
                         EditorGUILayout.PropertyField(densityLayer1); 
+                        EditorGUILayout.PropertyField(densitySmoothnessLayer1);            
                         DisableInputEnd();   
                         EditorGUILayout.PropertyField(baseNoiseUVLayer1);   
                         EditorGUILayout.PropertyField(detailNoiseUVLayer1);
@@ -359,6 +364,7 @@ namespace Enviro
                     {
                         DisableInputStart();
                         EditorGUILayout.PropertyField(densityLayer2);    
+                        EditorGUILayout.PropertyField(densitySmoothnessLayer2);  
                         DisableInputEnd();
                         EditorGUILayout.PropertyField(baseNoiseUVLayer2);   
                         EditorGUILayout.PropertyField(detailNoiseUVLayer2); 

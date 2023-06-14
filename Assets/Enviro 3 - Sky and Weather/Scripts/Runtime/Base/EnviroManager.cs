@@ -174,8 +174,8 @@ namespace Enviro
         }
 
         //Lighting updates
-        public bool updateSkyAndLighting = false;
-        public bool updateSkyAndLightingHDRP = false;
+        public bool updateSkyAndLighting = true;
+        public bool updateSkyAndLightingHDRP = true;
  
         // HDRP
 #if ENVIRO_HDRP 
@@ -191,6 +191,9 @@ namespace Enviro
             if(UnityEditor.PrefabUtility.IsPartOfAnyPrefab(gameObject))
                UnityEditor.PrefabUtility.UnpackPrefabInstance(gameObject,UnityEditor.PrefabUnpackMode.OutermostRoot,UnityEditor.InteractionMode.UserAction);
     #endif
+
+            if(configuration == null)
+               Debug.LogError("Please create or assign a configuration asset in your Enviro Manager!");
 
             CreateGeneralObjects ();
     #if ENVIRO_HDRP
@@ -242,6 +245,7 @@ namespace Enviro
 
         void Start ()
         {   
+
             // Set dont destroy on load on start
             if(dontDestroyOnLoad && Application.isPlaying)
                 DontDestroyOnLoad(gameObject);
@@ -447,6 +451,13 @@ namespace Enviro
                     }
                 }
             }
+        }
+
+        public IEnumerator StopLightingUpdateHDRP()
+        {
+            updateSkyAndLightingHDRP = false;
+            yield return null;
+            updateSkyAndLightingHDRP = true;
         }
 
         //Events

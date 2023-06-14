@@ -31,6 +31,9 @@ https://magicasoft.jp/magica-cloth-install/
 
 
 ■更新履歴
+[v1.12.12]
+修正: Collections 2.1.x以上のパッケージでエラーが発生する問題を修正しました。Collections2.xを利用する場合は2.1以上のパッケージをインストールして下さい。
+
 [v1.12.11]
 修正: Collections 2.xパッケージでエラーが発生する問題を修正しました。
 

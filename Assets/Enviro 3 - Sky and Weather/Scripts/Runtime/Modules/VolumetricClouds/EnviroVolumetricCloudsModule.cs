@@ -90,6 +90,8 @@ namespace Enviro
         [Range(0f,2f)]
         public float density = 0.3f;
         [Range(0f,2f)]
+        public float densitySmoothness = 1.0f;
+        [Range(0f,2f)]
         public float scatteringIntensity = 1f;
         [Range(0f,1f)] 
         public float silverLiningSpread = 0.8f;
@@ -585,12 +587,12 @@ namespace Enviro
             
             renderer.raymarchMat.SetVector("_CloudsParameter", new Vector4(layer1.bottomCloudsHeight, layer1.topCloudsHeight, 1 / (layer1.topCloudsHeight - layer1.bottomCloudsHeight), settingsGlobal.cloudsWorldScale));
             renderer.raymarchMat.SetVector("_CloudsParameter2", new Vector4(layer2.bottomCloudsHeight, layer2.topCloudsHeight, 1 / (layer2.topCloudsHeight - layer2.bottomCloudsHeight), settingsGlobal.cloudsWorldScale));
-  
-            renderer.raymarchMat.SetVector("_CloudDensityScale", new Vector4(layer1.density, layer2.density, blueNoiseIntensity, 0f));
+            renderer.raymarchMat.SetFloat("_BlueNoiseIntensity",blueNoiseIntensity);
+            renderer.raymarchMat.SetVector("_CloudDensityScale", new Vector4(layer1.density, layer2.density, layer1.densitySmoothness, layer2.densitySmoothness));
             renderer.raymarchMat.SetVector("_CloudsCoverageSettings", new Vector4(layer1.coverage, 0f, layer1.anvilBias, layer2.anvilBias));
             renderer.raymarchMat.SetVector("_CloudsAnimation", new Vector4(cloudAnimLayer1.x, cloudAnimLayer1.y, cloudAnimLayer1.z, 0f));
             if(EnviroManager.instance.Environment != null)
-            {
+            { 
                 renderer.raymarchMat.SetVector("_CloudsWindDirection", new Vector4(EnviroManager.instance.Environment.Settings.windDirectionX * settingsLayer1.cloudsWindDirectionXModifier, EnviroManager.instance.Environment.Settings.windDirectionY * settingsLayer1.cloudsWindDirectionYModifier, 0f,0f));
             }         
             else
@@ -862,8 +864,8 @@ namespace Enviro
                                     
                     cloudAnimLayer2 = EnviroHelper.PingPong(cloudAnimLayer2);
                 }
-                cloudAnimNonScaledLayer1 += new Vector3((settingsLayer1.windSpeedModifier * EnviroManager.instance.Environment.Settings.windSpeed * EnviroManager.instance.Environment.Settings.windDirectionX * settingsLayer1.cloudsWindDirectionXModifier) * Time.deltaTime, (settingsLayer1.windSpeedModifier * EnviroManager.instance.Environment.Settings.windSpeed * EnviroManager.instance.Environment.Settings.windDirectionY * settingsLayer1.cloudsWindDirectionYModifier) * Time.deltaTime, -1f * EnviroManager.instance.Environment.Settings.windSpeed * Time.deltaTime) * settingsGlobal.cloudsTravelSpeed * 0.2f;
-                cloudAnimNonScaledLayer2 += new Vector3((settingsLayer2.windSpeedModifier * EnviroManager.instance.Environment.Settings.windSpeed * EnviroManager.instance.Environment.Settings.windDirectionX  * settingsLayer2.cloudsWindDirectionXModifier) * Time.deltaTime, (settingsLayer2.windSpeedModifier * EnviroManager.instance.Environment.Settings.windSpeed * EnviroManager.instance.Environment.Settings.windDirectionY * settingsLayer2.cloudsWindDirectionYModifier) * Time.deltaTime, -1f * EnviroManager.instance.Environment.Settings.windSpeed * Time.deltaTime) * settingsGlobal.cloudsTravelSpeed * 0.2f;
+                cloudAnimNonScaledLayer1 += new Vector3((settingsLayer1.windSpeedModifier * EnviroManager.instance.Environment.Settings.windSpeed * EnviroManager.instance.Environment.Settings.windDirectionX * settingsLayer1.cloudsWindDirectionXModifier) * Time.deltaTime * 4f, (settingsLayer1.windSpeedModifier * EnviroManager.instance.Environment.Settings.windSpeed * EnviroManager.instance.Environment.Settings.windDirectionY * settingsLayer1.cloudsWindDirectionYModifier) * Time.deltaTime* 4f, -1f * EnviroManager.instance.Environment.Settings.windSpeed * Time.deltaTime ) * settingsGlobal.cloudsTravelSpeed * 0.2f;
+                cloudAnimNonScaledLayer2 += new Vector3((settingsLayer2.windSpeedModifier * EnviroManager.instance.Environment.Settings.windSpeed * EnviroManager.instance.Environment.Settings.windDirectionX  * settingsLayer2.cloudsWindDirectionXModifier) * Time.deltaTime* 4f, (settingsLayer2.windSpeedModifier * EnviroManager.instance.Environment.Settings.windSpeed * EnviroManager.instance.Environment.Settings.windDirectionY * settingsLayer2.cloudsWindDirectionYModifier) * Time.deltaTime* 4f, -1f * EnviroManager.instance.Environment.Settings.windSpeed * Time.deltaTime) * settingsGlobal.cloudsTravelSpeed * 0.2f;
             }
             else 
             {
@@ -884,8 +886,8 @@ namespace Enviro
                     cloudAnimLayer2 = EnviroHelper.PingPong(cloudAnimLayer2);
                 } 
 
-                cloudAnimNonScaledLayer1 += new Vector3((settingsLayer1.windSpeedModifier * settingsLayer1.cloudsWindDirectionXModifier) * Time.deltaTime, (settingsLayer1.windSpeedModifier * settingsLayer1.cloudsWindDirectionYModifier) * Time.deltaTime, -1f * settingsLayer1.windUpwards * Time.deltaTime) * settingsGlobal.cloudsTravelSpeed * 0.2f;
-                cloudAnimNonScaledLayer2 += new Vector3((settingsLayer2.windSpeedModifier * settingsLayer2.cloudsWindDirectionXModifier) * Time.deltaTime, (settingsLayer2.windSpeedModifier * settingsLayer2.cloudsWindDirectionYModifier) * Time.deltaTime, -1f * settingsLayer2.windUpwards * Time.deltaTime) * settingsGlobal.cloudsTravelSpeed * 0.2f;
+                cloudAnimNonScaledLayer1 += new Vector3((settingsLayer1.windSpeedModifier * settingsLayer1.cloudsWindDirectionXModifier) * Time.deltaTime* 4f, (settingsLayer1.windSpeedModifier * settingsLayer1.cloudsWindDirectionYModifier) * Time.deltaTime* 4f, -1f * settingsLayer1.windUpwards * Time.deltaTime) * settingsGlobal.cloudsTravelSpeed * 0.2f;
+                cloudAnimNonScaledLayer2 += new Vector3((settingsLayer2.windSpeedModifier * settingsLayer2.cloudsWindDirectionXModifier) * Time.deltaTime* 4f, (settingsLayer2.windSpeedModifier * settingsLayer2.cloudsWindDirectionYModifier) * Time.deltaTime* 4f, -1f * settingsLayer2.windUpwards * Time.deltaTime) * settingsGlobal.cloudsTravelSpeed * 0.2f;
             }
         
         }

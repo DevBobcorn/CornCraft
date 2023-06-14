@@ -39,7 +39,7 @@ float Mie(float costh, float g)
     return (1 - k * k) / ((4 * 3.14159265f) * (1 - kcosth) * (1 - kcosth));
 }
 
-float Remap(float org_val, float org_min, float org_max, float new_min, float new_max)
+float RemapEnviro(float org_val, float org_min, float org_max, float new_min, float new_max)
 {
     return new_min + saturate(((org_val - org_min) / (org_max - org_min))*(new_max - new_min));
 }
@@ -79,7 +79,7 @@ float4 CirrusClouds(float3 uvs)
     if (uvs.y < 0) 
         finalClouds.a = 0;
 
-    finalClouds.rgb = finalClouds.a * pow(_CirrusCloudColor,_CirrusCloudColorPower);
+    finalClouds.rgb = finalClouds.a * pow(_CirrusCloudColor,max(_CirrusCloudColorPower,0.0001));
     finalClouds.rgb = pow(finalClouds.rgb, saturate(1 - _CirrusCloudCoverage));
 
     return finalClouds;
@@ -122,11 +122,11 @@ float CalculateCloudDensity(float2 posBase, float2 posDetail,float3 worldPos, fl
 {
     float4 baseNoise = tex2D(_FlatCloudsBaseTexture, posBase);
     float low_freq_fBm = (baseNoise.g * 0.625) + (baseNoise.b * 0.25) + (baseNoise.a * 0.125);
-    float base_cloud = Remap(baseNoise.r, -(1.0 - low_freq_fBm), 1.0, 0.0, 1.0) * coverage;
+    float base_cloud = RemapEnviro(baseNoise.r, -(1.0 - low_freq_fBm), 1.0, 0.0, 1.0) * coverage;
  
     float4 detailNoise = tex2D(_FlatCloudsDetailTexture, posDetail * 2);
     float high_freq_fBm = (detailNoise.r * 0.625) + (detailNoise.g * 0.25) + (detailNoise.b * 0.125);
-    float density = Remap(base_cloud, 1-high_freq_fBm * 0.5, 1.0, 0.0, 1.0);
+    float density = RemapEnviro(base_cloud, 1-high_freq_fBm * 0.5, 1.0, 0.0, 1.0);
 
     density *= pow(high_freq_fBm, 0.4);
     density *= _FlatCloudsParams.y;
@@ -183,11 +183,11 @@ float4 GetSkyColor (float3 viewDir, float mieSize)
     float3 frontBack4 = lerp(_FrontColor4.rgb,_BackColor4.rgb,cosTheta);
     float3 frontBack5 = lerp(_FrontColor5.rgb,_BackColor5.rgb,cosTheta);
 
-    float heightS1 = Remap(viewDir.y,-0.75,_frontBackDistribution0,0,1);
-    float heightS2 = Remap(viewDir.y,_frontBackDistribution0,_frontBackDistribution1,0,1);
-    float heightS3 = Remap(viewDir.y,_frontBackDistribution1,_frontBackDistribution2,0,1);
-    float heightS4 = Remap(viewDir.y,_frontBackDistribution2,_frontBackDistribution3,0,1);
-    float heightS5 = Remap(viewDir.y,_frontBackDistribution3,1,0,1);
+    float heightS1 = RemapEnviro(viewDir.y,-0.75,_frontBackDistribution0,0,1);
+    float heightS2 = RemapEnviro(viewDir.y,_frontBackDistribution0,_frontBackDistribution1,0,1);
+    float heightS3 = RemapEnviro(viewDir.y,_frontBackDistribution1,_frontBackDistribution2,0,1);
+    float heightS4 = RemapEnviro(viewDir.y,_frontBackDistribution2,_frontBackDistribution3,0,1);
+    float heightS5 = RemapEnviro(viewDir.y,_frontBackDistribution3,1,0,1);
  
     float3 sky1 = lerp(frontBack0.rgb,frontBack1.rgb,heightS1);
     float3 sky2 = lerp(sky1.rgb,frontBack2.rgb,heightS2);  
@@ -220,11 +220,11 @@ float4 GetSkyAndCloudsColor (float3 viewDir, float mieSize)
     float3 frontBack4 = lerp(_FrontColor4.rgb,_BackColor4.rgb,cosTheta);
     float3 frontBack5 = lerp(_FrontColor5.rgb,_BackColor5.rgb,cosTheta);
 
-    float heightS1 = Remap(viewDir.y,-0.75,_frontBackDistribution0,0,1);
-    float heightS2 = Remap(viewDir.y,_frontBackDistribution0,_frontBackDistribution1,0,1);
-    float heightS3 = Remap(viewDir.y,_frontBackDistribution1,_frontBackDistribution2,0,1);
-    float heightS4 = Remap(viewDir.y,_frontBackDistribution2,_frontBackDistribution3,0,1);
-    float heightS5 = Remap(viewDir.y,_frontBackDistribution3,1,0,1);
+    float heightS1 = RemapEnviro(viewDir.y,-0.75,_frontBackDistribution0,0,1);
+    float heightS2 = RemapEnviro(viewDir.y,_frontBackDistribution0,_frontBackDistribution1,0,1);
+    float heightS3 = RemapEnviro(viewDir.y,_frontBackDistribution1,_frontBackDistribution2,0,1);
+    float heightS4 = RemapEnviro(viewDir.y,_frontBackDistribution2,_frontBackDistribution3,0,1);
+    float heightS5 = RemapEnviro(viewDir.y,_frontBackDistribution3,1,0,1);
  
     float3 sky1 = lerp(frontBack0.rgb,frontBack1.rgb,heightS1);
     float3 sky2 = lerp(sky1.rgb,frontBack2.rgb,heightS2);  

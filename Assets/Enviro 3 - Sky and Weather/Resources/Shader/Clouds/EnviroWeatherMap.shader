@@ -99,7 +99,7 @@
 				//Worley Noise
 				float worley1Layer1 = worley2(windOffsetLayer1 + _LocationOffset.xy + uv.xy * _WorleyFreq1Layer1, 1);
 				float worley2Layer1 = worley2(windOffsetLayer1 + _LocationOffset.xy + uv.xy * _WorleyFreq2Layer1, 1);
-
+ 
 				//float perlin_Layer1_Combined = saturate(perlin_Layer1_1 + (perlin_Layer1_2 - perlin_Layer1_3) + worleyLayer1);
 				float dilateCoverageLayer1 = dilate_perlin_worley(worley1Layer1,worley2Layer1,_DilateCoverageLayer1); 
 

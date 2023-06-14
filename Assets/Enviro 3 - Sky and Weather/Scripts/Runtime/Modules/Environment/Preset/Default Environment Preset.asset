@@ -16,7 +16,7 @@ MonoBehaviour:
   showSaveLoad: 0
   active: 1
   Settings:
-    season: 0
+    season: 3
     changeSeason: 1
     springStart: 60
     springEnd: 92
@@ -158,7 +158,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    temperature: 8.191157
+    temperature: 5.4481354
     temperatureWeatherMod: 0
     temperatureCustomMod: 0
     temperatureChangingSpeed: 0.1

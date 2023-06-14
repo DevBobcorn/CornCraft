@@ -15,9 +15,7 @@ namespace Enviro
         private SerializedProperty updateIntervallFrames,directLightIntensityModifier,sunIntensityCurve, moonIntensityCurve, sunColorGradient, moonColorGradient, lightingMode;  
         //Ambient Lighting
         private SerializedProperty ambientIntensityModifier,ambientMode, ambientSkyboxUpdateIntervall, ambientSkyColorGradient, ambientEquatorColorGradient, ambientGroundColorGradient, ambientIntensityCurve;
-        //Reflection Probe
-        private SerializedProperty updateReflectionProbe,updateDefaultEnvironmentReflections,globalReflectionCustomRendering, globalReflectionUseFog, globalReflectionTimeSlicing, globalReflectionsUpdateOnGameTime, globalReflectionsUpdateOnPosition, globalReflectionsIntensity, globalReflectionsTimeTreshold, globalReflectionsPositionTreshold, globalReflectionsScale, globalReflectionResolution, globalReflectionLayers;
-
+       
 #if ENVIRO_HDRP
         private SerializedProperty sunIntensityCurveHDRP, moonIntensityCurveHDRP, lightColorTemperatureHDRP, lightColorTintHDRP,ambientColorTintHDRP, controlExposure, sceneExposure, controlIndirectLighting, diffuseIndirectIntensity, reflectionIndirectIntensity;
 #endif
@@ -49,20 +47,6 @@ namespace Enviro
             ambientIntensityCurve = serializedObj.FindProperty("Settings.ambientIntensityCurve");
             ambientIntensityModifier = serializedObj.FindProperty("Settings.ambientIntensityModifier");
             ambientSkyboxUpdateIntervall = serializedObj.FindProperty("Settings.ambientSkyboxUpdateIntervall");
-            //Reflection Probe
-            updateReflectionProbe = serializedObj.FindProperty("Settings.updateReflectionProbe"); 
-            updateDefaultEnvironmentReflections = serializedObj.FindProperty("Settings.updateDefaultEnvironmentReflections"); 
-            globalReflectionCustomRendering = serializedObj.FindProperty("Settings.globalReflectionCustomRendering");
-            globalReflectionUseFog = serializedObj.FindProperty("Settings.globalReflectionUseFog");
-            globalReflectionTimeSlicing = serializedObj.FindProperty("Settings.globalReflectionTimeSlicing");
-            globalReflectionsUpdateOnGameTime = serializedObj.FindProperty("Settings.globalReflectionsUpdateOnGameTime");
-            globalReflectionsUpdateOnPosition = serializedObj.FindProperty("Settings.globalReflectionsUpdateOnPosition");
-            globalReflectionsIntensity = serializedObj.FindProperty("Settings.globalReflectionsIntensity");
-            globalReflectionsTimeTreshold = serializedObj.FindProperty("Settings.globalReflectionsTimeTreshold");
-            globalReflectionsPositionTreshold = serializedObj.FindProperty("Settings.globalReflectionsPositionTreshold");
-            globalReflectionsScale = serializedObj.FindProperty("Settings.globalReflectionsScale");
-            globalReflectionResolution = serializedObj.FindProperty("Settings.globalReflectionResolution");
-            globalReflectionLayers = serializedObj.FindProperty("Settings.globalReflectionLayers");
             #if ENVIRO_HDRP
             sunIntensityCurveHDRP = serializedObj.FindProperty("Settings.sunIntensityCurveHDRP");
             moonIntensityCurveHDRP = serializedObj.FindProperty("Settings.moonIntensityCurveHDRP");
@@ -222,46 +206,6 @@ namespace Enviro
                     EditorGUILayout.EndToggleGroup();
                 }
                 GUILayout.EndVertical();
-
-                GUI.backgroundColor = categoryModuleColor;
-                GUILayout.BeginVertical("",boxStyleModified);
-                GUI.backgroundColor = Color.white;
-                myTarget.showReflectionControls = GUILayout.Toggle(myTarget.showReflectionControls, "Reflection Controls", headerFoldout);              
-                if(myTarget.showReflectionControls)
-                {
-                    EditorGUILayout.PropertyField(updateReflectionProbe);      
-                    if(myTarget.Settings.updateReflectionProbe)
-                    {
-                        EditorGUILayout.PropertyField(globalReflectionsIntensity);
-                    #if !ENVIRO_HDRP
-                        EditorGUILayout.PropertyField(updateDefaultEnvironmentReflections);
-                        GUILayout.Space(5);
-
-                        EditorGUILayout.PropertyField(globalReflectionResolution);
-                    #endif
-                        EditorGUILayout.PropertyField(globalReflectionLayers);
-                        EditorGUILayout.PropertyField(globalReflectionsScale);
-                    #if !ENVIRO_HDRP
-                        GUILayout.Space(10);
-                        EditorGUILayout.PropertyField(globalReflectionCustomRendering);
-                        if(myTarget.Settings.globalReflectionCustomRendering)
-                        {
-                            //EditorGUILayout.PropertyField(globalReflectionUseFog);
-                            EditorGUILayout.PropertyField(globalReflectionTimeSlicing);
-                        }
-                    #endif
-                        GUILayout.Space(10);
-                        EditorGUILayout.PropertyField(globalReflectionsUpdateOnGameTime);
-                        if(myTarget.Settings.globalReflectionsUpdateOnGameTime)
-                        EditorGUILayout.PropertyField(globalReflectionsTimeTreshold);
-                         GUILayout.Space(5);
-                        EditorGUILayout.PropertyField(globalReflectionsUpdateOnPosition);
-                        if(myTarget.Settings.globalReflectionsUpdateOnPosition)
-                        EditorGUILayout.PropertyField(globalReflectionsPositionTreshold);
-                    }
-                }
-                GUILayout.EndVertical();
-               
 
                 /// Save Load
                 GUI.backgroundColor = categoryModuleColor;

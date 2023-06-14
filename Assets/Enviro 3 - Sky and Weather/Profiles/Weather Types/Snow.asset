@@ -25,6 +25,7 @@ MonoBehaviour:
   showWeatherAudioControls: 0
   showLightningControls: 0
   cloudsOverride:
+    ambientLightIntensity: 1
     showLayer1: 0
     coverageLayer1: 0.29
     dilateCoverageLayer1: 1
@@ -39,6 +40,7 @@ MonoBehaviour:
     silverLiningSpreadLayer1: 0.8
     ligthAbsorbtionLayer1: 0.5
     densityLayer1: 0.15
+    densitySmoothnessLayer1: 1
     baseErosionIntensityLayer1: 1
     detailErosionIntensityLayer1: 0.5
     curlIntensityLayer1: 0.15
@@ -56,6 +58,7 @@ MonoBehaviour:
     silverLiningSpreadLayer2: 0.8
     ligthAbsorbtionLayer2: 1
     densityLayer2: 0.3
+    densitySmoothnessLayer2: 1
     baseErosionIntensityLayer2: 0
     detailErosionIntensityLayer2: 0.3
     curlIntensityLayer2: 0.05

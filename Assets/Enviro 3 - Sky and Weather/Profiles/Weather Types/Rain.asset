@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showEditor: 0
   showEffectControls: 0
-  showCloudControls: 1
+  showCloudControls: 0
   showFlatCloudControls: 0
-  showFogControls: 1
-  showLightingControls: 1
+  showFogControls: 0
+  showLightingControls: 0
   showAuroraControls: 0
   showEnvironmentControls: 0
   showAudioControls: 0
@@ -25,23 +25,25 @@ MonoBehaviour:
   showWeatherAudioControls: 0
   showLightningControls: 0
   cloudsOverride:
-    showLayer1: 0
-    coverageLayer1: 0.22
-    dilateCoverageLayer1: 0.147
+    ambientLightIntensity: 1
+    showLayer1: 1
+    coverageLayer1: 0.21
+    dilateCoverageLayer1: 0.17
     dilateTypeLayer1: 0.457
-    typeModifierLayer1: 0.582
-    anvilBiasLayer1: 0.109
-    scatteringIntensityLayer1: 0.13
-    multiScatteringALayer1: 0.548
-    multiScatteringBLayer1: 0.19
-    multiScatteringCLayer1: 0.442
+    typeModifierLayer1: 0.633
+    anvilBiasLayer1: 0.28
+    scatteringIntensityLayer1: 0.05
+    multiScatteringALayer1: 0.44
+    multiScatteringBLayer1: 0.04
+    multiScatteringCLayer1: 0.44
     powderIntensityLayer1: 0.219
     silverLiningSpreadLayer1: 0.8
-    ligthAbsorbtionLayer1: 0.12
-    densityLayer1: 0.1
+    ligthAbsorbtionLayer1: 0.55
+    densityLayer1: 0.2
+    densitySmoothnessLayer1: 1.72
     baseErosionIntensityLayer1: 0
     detailErosionIntensityLayer1: 0.4
-    curlIntensityLayer1: 0.15
+    curlIntensityLayer1: 0.2
     showLayer2: 0
     coverageLayer2: -1
     dilateCoverageLayer2: 0.5
@@ -56,6 +58,7 @@ MonoBehaviour:
     silverLiningSpreadLayer2: 0.8
     ligthAbsorbtionLayer2: 1
     densityLayer2: 0.3
+    densitySmoothnessLayer2: 1
     baseErosionIntensityLayer2: 0
     detailErosionIntensityLayer2: 0.3
     curlIntensityLayer2: 0.05
@@ -69,19 +72,19 @@ MonoBehaviour:
     flatCloudsAmbientIntensity: 1
     flatCloudsAbsorbtion: 0.6
   lightingOverride:
-    directLightIntensityModifier: 0.2
-    ambientIntensityModifier: 1
+    directLightIntensityModifier: 0.5
+    ambientIntensityModifier: 0.6
   fogOverride:
-    fogDensity: 0
-    fogHeightFalloff: 0.001
+    fogDensity: 0.02
+    fogHeightFalloff: 0.0016
     fogHeight: 0
-    fogDensity2: 1
-    fogHeightFalloff2: 0
+    fogDensity2: 0.66
+    fogHeightFalloff2: 0.0417
     fogHeight2: -40
     fogColorBlend: 0.5
-    scattering: 0.07
-    extinction: 0.097
-    anistropy: 0.197
+    scattering: 0.39
+    extinction: 0.232
+    anistropy: 0.105
   auroraOverride:
     auroraIntensity: 1
   effectsOverride:

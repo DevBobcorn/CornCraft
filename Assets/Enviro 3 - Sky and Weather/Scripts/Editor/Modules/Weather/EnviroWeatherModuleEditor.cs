@@ -89,7 +89,10 @@ namespace Enviro
                     }
 
                     if(add)
+                    {
                       myTarget.Settings.weatherTypes.Add((EnviroWeatherType)selectedObject);
+                      EditorUtility.SetDirty(myTarget);
+                    }
                 }
 
                 if(GUILayout.Button("Create New"))
@@ -122,11 +125,12 @@ namespace Enviro
                                     myTarget.ChangeWeather(curWT);
                                     EditorUtility.SetDirty(curWT);
                                 } 
-                            }
+                            } 
 
                             if(GUILayout.Button("x", EditorStyles.miniButtonRight,GUILayout.Width(18), GUILayout.Height(18)))
                             {
                                 myTarget.RemoveWeatherType(curWT);
+                                EditorUtility.SetDirty(myTarget);
                             } 
                             
                             EditorGUILayout.EndHorizontal();
@@ -159,6 +163,7 @@ namespace Enviro
                                 {
                                     GUILayout.Space(5);
                                     GUILayout.BeginVertical ("", boxStyleModified);
+                                    
                                     curWT.cloudsOverride.showLayer1 = GUILayout.Toggle(curWT.cloudsOverride.showLayer1, "Layer 1", headerFoldout);
                                     if(curWT.cloudsOverride.showLayer1)
                                     {
@@ -175,8 +180,10 @@ namespace Enviro
                                         curWT.cloudsOverride.powderIntensityLayer1 = EditorGUILayout.Slider("Powder Intensity", curWT.cloudsOverride.powderIntensityLayer1,0f,1f);
                                         curWT.cloudsOverride.silverLiningSpreadLayer1 = EditorGUILayout.Slider("Silver Lining Spread", curWT.cloudsOverride.silverLiningSpreadLayer1,0f,1f);
                                         curWT.cloudsOverride.ligthAbsorbtionLayer1 = EditorGUILayout.Slider("Light Absorbtion", curWT.cloudsOverride.ligthAbsorbtionLayer1,0f,2f);
+                                        curWT.cloudsOverride.ambientLightIntensity = EditorGUILayout.Slider("Ambient Light Intensity", curWT.cloudsOverride.ambientLightIntensity,0f,2f);
                                         GUILayout.Space(10);
-                                        curWT.cloudsOverride.densityLayer1 = EditorGUILayout.Slider("Density", curWT.cloudsOverride.densityLayer1,0f,1f);
+                                        curWT.cloudsOverride.densityLayer1 = EditorGUILayout.Slider("Density", curWT.cloudsOverride.densityLayer1,0f,2f);
+                                        curWT.cloudsOverride.densitySmoothnessLayer1 = EditorGUILayout.Slider("Density Smoothness", curWT.cloudsOverride.densitySmoothnessLayer1,0f,2f);
                                         curWT.cloudsOverride.baseErosionIntensityLayer1 = EditorGUILayout.Slider("Base Erosion Intensity", curWT.cloudsOverride.baseErosionIntensityLayer1,0f,1f);
                                         curWT.cloudsOverride.detailErosionIntensityLayer1 = EditorGUILayout.Slider("Detail Erosion Intensity", curWT.cloudsOverride.detailErosionIntensityLayer1,0f,1f);
                                         curWT.cloudsOverride.curlIntensityLayer1 = EditorGUILayout.Slider("Curl Intensity", curWT.cloudsOverride.curlIntensityLayer1,0f,1f);
@@ -203,8 +210,10 @@ namespace Enviro
                                             curWT.cloudsOverride.powderIntensityLayer2 = EditorGUILayout.Slider("Powder Intensity", curWT.cloudsOverride.powderIntensityLayer2,0f,1f);
                                             curWT.cloudsOverride.silverLiningSpreadLayer2 = EditorGUILayout.Slider("Silver Lining Spread", curWT.cloudsOverride.silverLiningSpreadLayer2,0f,1f);
                                             curWT.cloudsOverride.ligthAbsorbtionLayer2 = EditorGUILayout.Slider("Light Absorbtion", curWT.cloudsOverride.ligthAbsorbtionLayer2,0f,2f);
+                                            curWT.cloudsOverride.ambientLightIntensity = EditorGUILayout.Slider("Ambient Light Intensity", curWT.cloudsOverride.ambientLightIntensity,0f,2f);
                                             GUILayout.Space(10);
-                                            curWT.cloudsOverride.densityLayer2 = EditorGUILayout.Slider("Density", curWT.cloudsOverride.densityLayer2,0f,1f);
+                                            curWT.cloudsOverride.densityLayer2 = EditorGUILayout.Slider("Density", curWT.cloudsOverride.densityLayer2,0f,2f);
+                                            curWT.cloudsOverride.densitySmoothnessLayer2 = EditorGUILayout.Slider("Density Smoothness", curWT.cloudsOverride.densitySmoothnessLayer2,0f,2f);
                                             curWT.cloudsOverride.baseErosionIntensityLayer2 = EditorGUILayout.Slider("Base Erosion Intensity", curWT.cloudsOverride.baseErosionIntensityLayer2,0f,1f);
                                             curWT.cloudsOverride.detailErosionIntensityLayer2 = EditorGUILayout.Slider("Detail Erosion Intensity", curWT.cloudsOverride.detailErosionIntensityLayer2,0f,1f);
                                             curWT.cloudsOverride.curlIntensityLayer2 = EditorGUILayout.Slider("Curl Intensity", curWT.cloudsOverride.curlIntensityLayer2,0f,1f);

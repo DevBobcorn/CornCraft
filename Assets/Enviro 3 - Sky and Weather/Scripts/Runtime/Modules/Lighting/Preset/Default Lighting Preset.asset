@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Default Lighting Preset
   m_EditorClassIdentifier: 
   showModuleInspector: 1
-  showSaveLoad: 1
+  showSaveLoad: 0
   active: 1
   Settings:
     lightingMode: 0
@@ -477,7 +477,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    directLightIntensityModifier: 0.20000008
+    directLightIntensityModifier: 1
     setAmbientLighting: 1
     ambientMode: 3
     ambientSkyColorGradient:
@@ -594,27 +594,9 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    ambientIntensityModifier: 0.99999994
+    ambientIntensityModifier: 1
     ambientSkyboxUpdateIntervall: 0.5
-    updateReflectionProbe: 1
-    globalReflectionCustomRendering: 1
-    globalReflectionUseFog: 0
-    globalReflectionTimeSlicing: 1
-    globalReflectionsUpdateOnGameTime: 1
-    globalReflectionsUpdateOnPosition: 1
-    globalReflectionsIntensity: 1
-    globalReflectionsTimeTreshold: 0.025
-    globalReflectionsPositionTreshold: 0.25
-    globalReflectionsScale: 10000
-    globalReflectionResolution: 3
-    globalReflectionLayers:
-      serializedVersion: 2
-      m_Bits: 0
-    updateDefaultEnvironmentReflections: 1
-    defaultSkyReflectionTex: {fileID: 0}
-  preset: {fileID: 11400000}
-  lastReflectionUpdate: 0
-  lastReflectionUpdatePos: {x: 0, y: 0, z: 0}
-  showDirectLightingControls: 1
-  showAmbientLightingControls: 1
+  preset: {fileID: 0}
+  showDirectLightingControls: 0
+  showAmbientLightingControls: 0
   showReflectionControls: 0

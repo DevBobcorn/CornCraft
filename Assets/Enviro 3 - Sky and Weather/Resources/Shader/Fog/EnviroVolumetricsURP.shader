@@ -15,6 +15,8 @@ Shader "Hidden/VolumetricsURP"
             #pragma vertex vert
             #pragma fragment frag
 
+            #pragma multi_compile __ UNITY_2022_2_NEWER
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
    
@@ -132,24 +134,28 @@ Shader "Hidden/VolumetricsURP"
 
             float DirectionalLight(float3 wpos)
 		    {
-                /*
                 float atten = 1.0f;
 
                 half cascadeIndex = ComputeCascadeIndex(wpos);
                 bool inside = dot(cascadeIndex, 1) < 4;
                 float4 coords = mul(_MainLightWorldToShadow[cascadeIndex], float4(wpos, 1.0));
-                                        
+                                         
                 ShadowSamplingData shadowSamplingData = GetMainLightShadowSamplingData();
                 half4 shadowParams = GetMainLightShadowParams();
-                float shadows = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture, sampler_MainLightShadowmapTexture), coords, shadowSamplingData, shadowParams, false).r;
-                          
+
+ #if defined(UNITY_2022_2_NEWER) 
+               float shadows = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture, sampler_LinearClampCompare), coords, shadowSamplingData, shadowParams, false).r;
+                 
+ #else
+                 float shadows = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture, sampler_MainLightShadowmapTexture), coords, shadowSamplingData, shadowParams, false).r;            
+ #endif
+             
                 atten = inside ? shadows : 1.0f; 
 
                 if(shadows > 0.0f)
                     atten = 1.0f;
 
-                return atten; */
-                return MainLightRealtimeShadow(TransformWorldToShadowCoord(wpos));
+                return atten; 
             }
 
             float3 PointLights(float3 pos)

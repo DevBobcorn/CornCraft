@@ -207,7 +207,7 @@ namespace Enviro
                         {
                             myTarget.Settings.thunderClips.Add (new EnviroAudioClip ());
                         }
-                    } 
+                    }  
                     else
                         EditorGUILayout.LabelField ("Can't add effects in runtime!");
 
@@ -280,6 +280,7 @@ namespace Enviro
                 /// Save Load End
 
                 ApplyChanges ();
+                EditorUtility.SetDirty (target);
             }
             GUILayout.EndVertical();
 

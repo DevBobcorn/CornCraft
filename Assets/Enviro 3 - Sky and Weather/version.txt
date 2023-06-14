@@ -63,5 +63,17 @@ v3.0.5
 * Fixed issue where Enviro Effects rendering on all cameras in URP even those that are not assigned. (Fixes preview windows for example)
 * Fixed some issues with the HDRP lighting default settings.
 * Increased volumetric clouds "travel speed".
-
  
+----------------------------------------------------------------------------------
+v3.0.6
+
+* Fixed volumetrics lighting shader error in Unity 2022.2 / URP 14.
+* Fixed issues where certain settings not getting saved correctly.
+* Fixed an issue with Cirrus cloud color set to zero.
+* Fixed shader error in HDRP 15+ related to Unity changes.
+* Fixed multiple sources that could lead to flickering issues in HDRP.
+* Reworked and improved reflection probe handling. Reflections handled now in its own module. This change also fixed some issues related to reflections. 
+  Special thanks to fendercodes for their code changes and extensive debugging to improve Enviro! Please check out their game "Hobble": https://store.steampowered.com/app/1761840/Hobble/
+* Added functions to change weather based on index. 
+* Added ambient light intensity slider for volumetric clouds in weather types.
+* Added new setting for volumetric clouds to control the clouds density smoothness. 
