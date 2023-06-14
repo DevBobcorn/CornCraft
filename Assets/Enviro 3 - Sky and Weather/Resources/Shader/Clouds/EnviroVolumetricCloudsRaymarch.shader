@@ -20,8 +20,9 @@ Shader "Hidden/EnviroCloudsRaymarch"
             #pragma multi_compile _ ENVIROURP
             #include "UnityCG.cginc"
             #include "../Includes/VolumetricCloudsInclude.cginc"
-
+ 
             int _Frame;
+            uniform float _BlueNoiseIntensity;
      
             struct v2f
             {
@@ -102,7 +103,7 @@ Shader "Hidden/EnviroCloudsRaymarch"
                 float raymarchEnd = GetRaymarchEndFromSceneDepth(Linear01Depth(sceneDepth), 100000); //* rayLenght
                 float raymarchEndShadows = GetRaymarchEndFromSceneDepth(Linear01Depth(sceneDepth), 1000);
 
-                float offset = tex2D(_BlueNoise, squareUV(i.uv + _Randomness.xy)).x * _CloudDensityScale.z;  
+                float offset = tex2D(_BlueNoise, squareUV(i.uv + _Randomness.xy)).x * _BlueNoiseIntensity;  
 
                 //offset = clamp(offset - 2,-2,2);
 

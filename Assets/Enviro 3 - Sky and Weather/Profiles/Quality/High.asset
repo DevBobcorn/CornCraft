@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: High
   m_EditorClassIdentifier: 
   showEditor: 0
-  showVolumeClouds: 0
+  showVolumeClouds: 1
   showFog: 0
   showFlatClouds: 0
   showEffects: 0

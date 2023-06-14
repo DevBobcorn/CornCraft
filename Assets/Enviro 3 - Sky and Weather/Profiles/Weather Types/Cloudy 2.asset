@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showEditor: 0
   showEffectControls: 0
-  showCloudControls: 0
+  showCloudControls: 1
   showFlatCloudControls: 0
   showFogControls: 0
   showLightingControls: 0
@@ -25,23 +25,25 @@ MonoBehaviour:
   showWeatherAudioControls: 0
   showLightningControls: 0
   cloudsOverride:
+    ambientLightIntensity: 1
     showLayer1: 1
-    coverageLayer1: -0.167
+    coverageLayer1: -0.15
     dilateCoverageLayer1: 0
     dilateTypeLayer1: 0
-    typeModifierLayer1: 1
-    anvilBiasLayer1: 0.588
+    typeModifierLayer1: 0.8
+    anvilBiasLayer1: 0.11
     scatteringIntensityLayer1: 0.88
     multiScatteringALayer1: 0.66
-    multiScatteringBLayer1: 0.1
+    multiScatteringBLayer1: 0.15
     multiScatteringCLayer1: 1
     powderIntensityLayer1: 0.8
     silverLiningSpreadLayer1: 0.8
-    ligthAbsorbtionLayer1: 0.2
-    densityLayer1: 0.75
-    baseErosionIntensityLayer1: 0.507
-    detailErosionIntensityLayer1: 0.4
-    curlIntensityLayer1: 0.3
+    ligthAbsorbtionLayer1: 0.33
+    densityLayer1: 1.01
+    densitySmoothnessLayer1: 1.31
+    baseErosionIntensityLayer1: 0.4
+    detailErosionIntensityLayer1: 0.22
+    curlIntensityLayer1: 0.47
     showLayer2: 1
     coverageLayer2: 0.1
     dilateCoverageLayer2: 1
@@ -56,6 +58,7 @@ MonoBehaviour:
     silverLiningSpreadLayer2: 0.8
     ligthAbsorbtionLayer2: 0.44
     densityLayer2: 0.079
+    densitySmoothnessLayer2: 1
     baseErosionIntensityLayer2: 0.739
     detailErosionIntensityLayer2: 0.521
     curlIntensityLayer2: 0.135
@@ -72,14 +75,14 @@ MonoBehaviour:
     directLightIntensityModifier: 1
     ambientIntensityModifier: 1
   fogOverride:
-    fogDensity: 0.007
+    fogDensity: 0.06
     fogHeightFalloff: 0.0039
     fogHeight: 0
-    fogDensity2: 0.022
+    fogDensity2: 0
     fogHeightFalloff2: 0.0058
     fogHeight2: 0
     fogColorBlend: 0.7
-    scattering: 0.183
+    scattering: 0.6
     extinction: 0.061
     anistropy: 0.3
   auroraOverride:

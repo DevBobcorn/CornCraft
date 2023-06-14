@@ -19,9 +19,9 @@ MonoBehaviour:
     volumetrics: 1
     steps: 64
     quality: 1
-    scattering: 0.06999996
-    extinction: 0.096999966
-    anistropy: 0.19699992
+    scattering: 0.015
+    extinction: 0.035
+    anistropy: 0.6
     maxRange: 1000
     maxRangePointSpot: 100
     noiseIntensity: 0
@@ -30,15 +30,15 @@ MonoBehaviour:
     noise: {fileID: 0}
     ditheringTex: {fileID: 2800000, guid: 711e788cbc742bb439b3c7cad60651e3, type: 3}
     fog: 1
-    fogDensity: 1.5792519e-16
-    fogHeightFalloff: 0.0010000004
-    fogHeight: -1e-45
-    fogDensity2: 0.99999994
-    fogHeightFalloff2: 4.532449e-18
-    fogHeight2: -40.00002
+    fogDensity: 0.027
+    fogHeightFalloff: 0.0008
+    fogHeight: 0
+    fogDensity2: 0.053
+    fogHeightFalloff2: 0.05
+    fogHeight2: 0
     fogMaxOpacity: 1
     startDistance: 0
-    fogColorBlend: 0.50000006
+    fogColorBlend: 0.75
     ambientColorGradient:
       serializedVersion: 2
       key0: {r: 0, g: 0, b: 0, a: 1}

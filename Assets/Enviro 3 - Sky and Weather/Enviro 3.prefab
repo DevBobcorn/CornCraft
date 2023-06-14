@@ -79,7 +79,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43b4e18e1baccc642a82a5e642fd6997, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  configuration: {fileID: 11400000, guid: 6cd5955e696c39a4289707c39d362701, type: 2}
+  configuration: {fileID: 11400000, guid: f542e85116feed24e8e28df88842ee3c, type: 2}
   lastConfiguration: {fileID: 0}
   Time: {fileID: 0}
   Lighting: {fileID: 0}
@@ -94,7 +94,6 @@ MonoBehaviour:
   Lightning: {fileID: 0}
   Quality: {fileID: 0}
   Environment: {fileID: 0}
-  Events: {fileID: 0}
   Objects:
     sun: {fileID: 336668471024284289}
     moon: {fileID: 336668470819454297}
@@ -105,13 +104,16 @@ MonoBehaviour:
     effects: {fileID: 5639973984760105397}
     audio: {fileID: 7565954089419449558}
     windZone: {fileID: 0}
+    worldAnchor: {fileID: 0}
   dontDestroyOnLoad: 0
   Camera: {fileID: 0}
   CameraTag: MainCamera
   Cameras: []
   showSetup: 0
   showModules: 0
+  showEvents: 0
   showThirdParty: 0
+  dayNightSwitch: 0.45
   isNight: 0
   solarTime: 0
   lunarTime: 0
@@ -122,6 +124,33 @@ MonoBehaviour:
   moonRotationX: 0
   moonRotationY: 0
   showNonTimeControls: 0
+  Events:
+    onHourPassedActions:
+      m_PersistentCalls:
+        m_Calls: []
+    onDayPassedActions:
+      m_PersistentCalls:
+        m_Calls: []
+    onYearPassedActions:
+      m_PersistentCalls:
+        m_Calls: []
+    onWeatherChangedActions:
+      m_PersistentCalls:
+        m_Calls: []
+    onSeasonChangedActions:
+      m_PersistentCalls:
+        m_Calls: []
+    onNightActions:
+      m_PersistentCalls:
+        m_Calls: []
+    onDayActions:
+      m_PersistentCalls:
+        m_Calls: []
+    onZoneChangedActions:
+      m_PersistentCalls:
+        m_Calls: []
+  updateSkyAndLighting: 0
+  updateSkyAndLightingHDRP: 0
 --- !u!1 &336668470694934243
 GameObject:
   m_ObjectHideFlags: 0

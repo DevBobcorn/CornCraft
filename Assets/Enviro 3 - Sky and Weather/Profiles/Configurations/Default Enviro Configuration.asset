@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ccdfb360c52f049bf71126aa74826f, type: 3}
   m_Name: Weather Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 0
+  showModuleInspector: 1
   showSaveLoad: 0
   active: 1
   Settings:
@@ -23,7 +23,6 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 9ba6458aa7df92d4494a7a3d40830a15, type: 2}
     - {fileID: 11400000, guid: f736e404e0b052942bc41c35c50dccad, type: 2}
     - {fileID: 11400000, guid: 96eebec6fa78a3c48ba2bc98ac5ab57f, type: 2}
-    - {fileID: 11400000, guid: 11fdd63974de7ae44b1c689d499953f6, type: 2}
     cloudsTransitionSpeed: 1
     fogTransitionSpeed: 1
     lightingTransitionSpeed: 1
@@ -32,7 +31,7 @@ MonoBehaviour:
     environmentTransitionSpeed: 1
     audioTransitionSpeed: 1
   preset: {fileID: 11400000, guid: 8c4e279017d5e44458e3e4663b6ab460, type: 2}
-  targetWeatherType: {fileID: 11400000, guid: 11fdd63974de7ae44b1c689d499953f6, type: 2}
+  targetWeatherType: {fileID: 11400000, guid: de555bbfb870a794d8ba3d0d8e68f475, type: 2}
   currentZone: {fileID: 0}
   triggerCollider: {fileID: 0}
   triggerRB: {fileID: 0}
@@ -750,7 +749,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7aa6806f1fff5b489f26777d053c723, type: 3}
   m_Name: Effects Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 1
+  showModuleInspector: 0
   showSaveLoad: 0
   active: 1
   Settings:
@@ -1374,25 +1373,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     ambientIntensityModifier: 1
     ambientSkyboxUpdateIntervall: 0.5
-    updateReflectionProbe: 1
-    globalReflectionCustomRendering: 1
-    globalReflectionUseFog: 0
-    globalReflectionTimeSlicing: 1
-    globalReflectionsUpdateOnGameTime: 1
-    globalReflectionsUpdateOnPosition: 1
-    globalReflectionsIntensity: 1
-    globalReflectionsTimeTreshold: 0.025
-    globalReflectionsPositionTreshold: 0.25
-    globalReflectionsScale: 10000
-    globalReflectionResolution: 3
-    globalReflectionLayers:
-      serializedVersion: 2
-      m_Bits: 0
-    updateDefaultEnvironmentReflections: 1
-    defaultSkyReflectionTex: {fileID: 0}
   preset: {fileID: 11400000, guid: 81d8b109102443243bcb0894975c0718, type: 2}
-  lastReflectionUpdate: 12.025
-  lastReflectionUpdatePos: {x: 0, y: 0, z: 0}
   showDirectLightingControls: 0
   showAmbientLightingControls: 1
   showReflectionControls: 0
@@ -1426,6 +1407,7 @@ MonoBehaviour:
     bottomCloudsHeight: 2000
     topCloudsHeight: 8000
     density: 0.072
+    densitySmoothness: 1
     scatteringIntensity: 1.5
     silverLiningSpread: 0.82
     powderIntensity: 0.75
@@ -1455,6 +1437,7 @@ MonoBehaviour:
     bottomCloudsHeight: 8000
     topCloudsHeight: 12000
     density: 0.3
+    densitySmoothness: 1
     scatteringIntensity: 1.5
     silverLiningSpread: 0.8
     powderIntensity: 0.3
@@ -1593,10 +1576,10 @@ MonoBehaviour:
   showDensityControls: 0
   showTextureControls: 0
   showWindControls: 0
-  cloudAnimLayer1: {x: 0.39584577, y: -0.07504991, z: -0.56500137}
+  cloudAnimLayer1: {x: -0.9270268, y: 0.60211605, z: 0.73032534}
   cloudAnimLayer2: {x: 0.3174014, y: -0.67647, z: 0.67947596}
-  cloudAnimNonScaledLayer1: {x: -0.9760845, y: 1.4219494, z: -59.255817}
-  cloudAnimNonScaledLayer2: {x: -0.26071772, y: 0.15613371, z: -56.917095}
+  cloudAnimNonScaledLayer1: {x: -0.84065396, y: 1.5573869, z: -59.389816}
+  cloudAnimNonScaledLayer2: {x: -0.3961511, y: 0.020700509, z: -57.051094}
   weatherMap: {fileID: 0}
 --- !u!114 &-304633943039718671
 MonoBehaviour:
@@ -1714,6 +1697,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeModule: {fileID: 7641771290446614687}
   lightingModule: {fileID: -2917269256795556972}
+  reflectionsModule: {fileID: 0}
   Sky: {fileID: -6309341873459469002}
   fogModule: {fileID: -304633943039718671}
   volumetricCloudModule: {fileID: -1908510324810229307}
@@ -1779,8 +1763,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0081d4f9e5d6e0a4d9fe8e7a8d7256b6, type: 3}
   m_Name: Time Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 0
-  showSaveLoad: 0
+  showModuleInspector: 1
+  showSaveLoad: 1
   active: 1
   Settings:
     simulate: 0
@@ -1797,7 +1781,7 @@ MonoBehaviour:
     cycleLengthInMinutes: 20
     dayLengthModifier: 1
     nightLengthModifier: 1
-  preset: {fileID: 11400000, guid: 82acdd278499d74498ad37dd931734d1, type: 2}
+  preset: {fileID: 11400000, guid: 1ebbe1737a658464584900b398052542, type: 2}
   showTimeControls: 1
   showLocationControls: 1
 --- !u!114 &7758816196944666623

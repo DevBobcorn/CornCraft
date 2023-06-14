@@ -274,16 +274,16 @@ namespace Enviro
                        enviroHDRPSky.exposure.value = Settings.skyExposureHDRP.Evaluate(EnviroManager.instance.solarTime);
 
                     enviroHDRPSky.updateMode.overrideState = true;
-                    enviroHDRPSky.updateMode.value = UnityEngine.Rendering.HighDefinition.EnvironmentUpdateMode.OnDemand;
+                    enviroHDRPSky.updateMode.value = UnityEngine.Rendering.HighDefinition.EnvironmentUpdateMode.Realtime;
 
-                    if (UnityEngine.Rendering.RenderPipelineManager.currentPipeline is UnityEngine.Rendering.HighDefinition.HDRenderPipeline) 
+                   /* if (UnityEngine.Rendering.RenderPipelineManager.currentPipeline is UnityEngine.Rendering.HighDefinition.HDRenderPipeline) 
                     {
                         if(EnviroManager.instance.updateSkyAndLightingHDRP)
                         {
                             UnityEngine.Rendering.HighDefinition.HDRenderPipeline hd = (UnityEngine.Rendering.HighDefinition.HDRenderPipeline)UnityEngine.Rendering.RenderPipelineManager.currentPipeline;
                             hd.RequestSkyEnvironmentUpdate();
-                        }            
-                    }                   
+                        }             
+                    }  */               
 
                 } 
             }

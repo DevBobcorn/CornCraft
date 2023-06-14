@@ -32,6 +32,9 @@ Then read the [System Overview] and proceed with the [Setup Guide] for a better 
 
 
 ### Release Notes
+[v1.12.12]
+Fixed: Fixed an issue that caused an error with Collections 2.1.x and above packages. If you use Collections2.x, please install the 2.1 or higher package.
+
 [v1.12.11]
 Fixed: Fixed an issue that caused an error with the Collections 2.x package.
 

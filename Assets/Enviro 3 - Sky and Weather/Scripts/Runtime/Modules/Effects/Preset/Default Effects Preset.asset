@@ -31,7 +31,7 @@ MonoBehaviour:
       localPositionOffset: {x: 0, y: 25, z: 0}
       localRotationOffset: {x: -90, y: 0, z: 0}
       maxEmission: 2500
-    rain1Emission: 0.49999985
+    rain1Emission: 0
     rain2Emission: 0
     snow1Emission: 0
     snow2Emission: 0

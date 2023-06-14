@@ -74,6 +74,7 @@
 
                 //Density
                 float density;
+                float densitySmoothness;
 
                 //Erosion
                 float baseErosion;
@@ -157,6 +158,7 @@
                 parameters.cloudsParameter = _CloudsParameter;
 
                 parameters.density = _CloudDensityScale.x;
+                parameters.densitySmoothness = _CloudDensityScale.z;
                  
                 parameters.baseErosion = _CloudsErosionIntensity.x;
                 parameters.detailErosion = _CloudsErosionIntensity.y;
@@ -192,6 +194,7 @@
                 parameters.cloudsParameter = _CloudsParameter2;
 
                 parameters.density = _CloudDensityScale.y;
+                parameters.densitySmoothness = _CloudDensityScale.w;
 
                 parameters.baseErosion = _CloudsErosionIntensity.x;
                 parameters.detailErosion = _CloudsErosionIntensity.y;
@@ -273,7 +276,7 @@
                 return k * (1.0 + cosTheta * cosTheta) / pow(abs(1.0 + g * g - 2.0 * g * cosTheta), 1.5);
             }
 
-            float Remap(float org_val, float org_min, float org_max, float new_min, float new_max)
+            float RemapEnviro(float org_val, float org_min, float org_max, float new_min, float new_max)
             {
                 return new_min + saturate(((org_val - org_min) / (org_max - org_min))*(new_max - new_min));
             }
@@ -340,12 +343,12 @@
                 float cloud_anvil_amount = 0.5;
                 float global_coverage = 0.5;
                 // Round bottom a bit
-                float ret_val = saturate(Remap(percent_height, 0.0, 0.07, 0.0, 1.0));
+                float ret_val = saturate(RemapEnviro(percent_height, 0.0, 0.07, 0.0, 1.0));
                 // Round top a lot
                 float stop_height = saturate(weather + 0.12);
-                ret_val *= saturate(Remap(percent_height, stop_height *	0.2, stop_height, 1.0, 0.0));
+                ret_val *= saturate(RemapEnviro(percent_height, stop_height *	0.2, stop_height, 1.0, 0.0));
                 // Apply anvil ( cumulonimbus /" giant storm" clouds)
-                ret_val = pow(ret_val, saturate(Remap(percent_height, 0.65, 0.95, 1.0, (1 - cloud_anvil_amount * global_coverage))));
+                ret_val = pow(ret_val, saturate(RemapEnviro(percent_height, 0.65, 0.95, 1.0, (1 - cloud_anvil_amount * global_coverage))));
                 return ret_val;
             }
 
@@ -355,14 +358,14 @@
                 float ret_val = percent_height;	
                 
                 // Reduce density at base
-                ret_val *= saturate(Remap(percent_height, 0.0, 0.2, 0.0, 1.0));
+                ret_val *= saturate(RemapEnviro(percent_height, 0.0, 0.2, 0.0, 1.0));
                 ret_val *= 2;	
                 
                 // Reduce density for the anvil (cumulonimbus clouds)
-                ret_val *= lerp(ret_val, saturate(Remap(pow(percent_height, 0.5), 0.4, 0.95, 1.0, 0.2)), 1-anvil);
+                ret_val *= lerp(ret_val, saturate(RemapEnviro(pow(percent_height, 0.5), 0.4, 0.95, 1.0, 0.2)), 1-anvil);
                
                 // Reduce density at top to make better transition
-                ret_val *= saturate(Remap(percent_height, 0.9, 1.0, 1.0, 0.0));	
+                ret_val *= saturate(RemapEnviro(percent_height, 0.9, 1.0, 1.0, 0.0));	
                 return ret_val;	
             }
 
@@ -394,7 +397,7 @@
                 baseNoise = _Noise.SampleLevel(sampler_Noise, coord.xyz,coord.w);
 
                 float low_freq_fBm = (baseNoise.g * 0.625) + (baseNoise.b * 0.25) + (baseNoise.a * 0.125);
-                float base_cloud = Remap(baseNoise.r, -(1.0 - low_freq_fBm) * parameters.baseErosionIntensity, 1.0, 0.0, 1.0);
+                float base_cloud = RemapEnviro(baseNoise.r, -(1.0 - low_freq_fBm) * parameters.baseErosionIntensity, 1.0, 0.0, 1.0);
 
                 float heightGradient = GradientStep(height, GetHeightGradient(saturate(weather.g * 2.0)));
  
@@ -407,7 +410,7 @@
 
                // cloud_coverage = pow(cloud_coverage, Remap(height, 0.7, 0.8, 1.0, lerp(1.0, 0.5, parameters.anvilBias)));
  
-                float cloudDensity = Remap(base_cloud, cloud_coverage, 1.0, 0.0, 1.0);
+                float cloudDensity = RemapEnviro(base_cloud, cloud_coverage, 1.0, 0.0, 1.0);
 
                 cloudDensity = max(cloudDensity * (1-cloud_coverage),0.0);
 
@@ -433,7 +436,7 @@
                     float high_freq_fBm = (detailNoise.r * 0.625) + (detailNoise.g * 0.25) + (detailNoise.b * 0.125);
                     float high_freq_noise_modifier = lerp(high_freq_fBm, 1.0f - high_freq_fBm, saturate(height * 10));
                     //float high_freq_noise_modifier = 1.0f - high_freq_fBm;	 		 	
-                    cloudDensity = Remap(cloudDensity, saturate(high_freq_noise_modifier * parameters.detailErosionIntensity), 1.0, 0.0, 1.0);
+                    cloudDensity = RemapEnviro(cloudDensity, saturate(high_freq_noise_modifier * parameters.detailErosionIntensity), 1.0, 0.0, 1.0);
                 } 
 
                 return cloudDensity; 
@@ -572,7 +575,7 @@
                 { 
                     float3 shellHit = innerShellHits > 0u ? innerShellHit : outerShellHit;
                     float hit = innerShellHits > 0u ? ih.x : oh.x;
-                    float height = Remap(pos.y, parameter.cloudsParameter.x, parameter.cloudsParameter.y * 0.75, 0, 1);
+                    float height = RemapEnviro(pos.y, parameter.cloudsParameter.x, parameter.cloudsParameter.y * 0.75, 0, 1);
                     hDistance = ResolveInside(pos.xyz, ray, lerp(25000, 50000, height), parameter);                      
                 } 
 
@@ -628,7 +631,7 @@
                 else
                     weather = GetWeather(pos).zw;
 
-                float dist = Remap(length(pos - cameraPos),0.0,length(sampleEndPos - cameraPos) * _LODDistance * 10.0,0.0,1.0);
+                float dist = RemapEnviro(length(pos - cameraPos),0.0,length(sampleEndPos - cameraPos) * _LODDistance * 10.0,0.0,1.0);
                 float lod = lerp(0.0,5.0,dist);
 
                 if (cloud_test > 0.0) 
@@ -643,7 +646,7 @@
 
                     if (zero_density_sample_count < 11 && sampled_density != 0.0)
                     { 
-                        float extinction = parameters.density * sampled_density; 
+                        float extinction = pow(max(parameters.density * sampled_density,0.001),parameters.densitySmoothness); 
                         float clampedExtinction = max(extinction, 1e-7);
                          
                         float transmittance = exp(-extinction * rayStepLength);      

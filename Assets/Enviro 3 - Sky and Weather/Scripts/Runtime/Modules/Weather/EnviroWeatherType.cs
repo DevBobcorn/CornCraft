@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
- 
+  
 
 namespace Enviro
 {
 	[Serializable] 
 	public class EnviroWeatherTypeCloudsOverride
-	{
+	{ 
+		public float ambientLightIntensity = 1f;
 		//Layer 1
 		public bool showLayer1;
 		public float coverageLayer1 = 0f;
@@ -24,6 +25,7 @@ namespace Enviro
 		public float silverLiningSpreadLayer1 = 0.8f;
 		public float ligthAbsorbtionLayer1 = 1.0f;
 		public float densityLayer1 = 0.3f;
+		public float densitySmoothnessLayer1 = 1.0f;  
 		public float baseErosionIntensityLayer1 = 0.0f;
 		public float detailErosionIntensityLayer1 = 0.3f;
 		public float curlIntensityLayer1 = 0.05f;
@@ -43,6 +45,7 @@ namespace Enviro
 		public float silverLiningSpreadLayer2 = 0.8f;
 		public float ligthAbsorbtionLayer2 = 1.0f;
 		public float densityLayer2 = 0.3f;
+		public float densitySmoothnessLayer2 = 1.0f;  
 		public float baseErosionIntensityLayer2 = 0.0f;
 		public float detailErosionIntensityLayer2 = 0.3f;
 		public float curlIntensityLayer2 = 0.05f;

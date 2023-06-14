@@ -82,13 +82,19 @@ namespace Enviro
         public void CreateNewWeatherType()
         {
             EnviroWeatherType type = EnviroWeatherTypeCreation.CreateMyAsset();
-            Settings.weatherTypes.Add(type);
+            Settings.weatherTypes.Add(type);       
+        #if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+        #endif
         }
 
         /// Removes the weather type from the list.
         public void RemoveWeatherType(EnviroWeatherType type)
         {
             Settings.weatherTypes.Remove(type);
+        #if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+        #endif
         }
 
         //Cleans the list from null entries.
@@ -213,8 +219,9 @@ namespace Enviro
         {
             EnviroVolumetricCloudsModule clouds = EnviroManager.instance.VolumetricClouds;
 
-            if(clouds != null)
-            { 
+            if(clouds != null) 
+            {   
+                clouds.settingsGlobal.ambientLighIntensity = Mathf.Lerp(clouds.settingsGlobal.ambientLighIntensity, targetWeatherType.cloudsOverride.ambientLightIntensity,blendTime);
                 clouds.settingsLayer1.coverage = Mathf.Lerp(clouds.settingsLayer1.coverage, targetWeatherType.cloudsOverride.coverageLayer1,blendTime);
                 clouds.settingsLayer1.dilateCoverage = Mathf.Lerp(clouds.settingsLayer1.dilateCoverage, targetWeatherType.cloudsOverride.dilateCoverageLayer1,blendTime);
                 clouds.settingsLayer1.dilateType = Mathf.Lerp(clouds.settingsLayer1.dilateType, targetWeatherType.cloudsOverride.dilateTypeLayer1,blendTime);
@@ -230,6 +237,7 @@ namespace Enviro
                 clouds.settingsLayer1.lightAbsorbtion = Mathf.Lerp(clouds.settingsLayer1.lightAbsorbtion, targetWeatherType.cloudsOverride.ligthAbsorbtionLayer1,blendTime);
                 
                 clouds.settingsLayer1.density = Mathf.Lerp(clouds.settingsLayer1.density, targetWeatherType.cloudsOverride.densityLayer1,blendTime);
+                clouds.settingsLayer1.densitySmoothness = Mathf.Lerp(clouds.settingsLayer1.densitySmoothness, targetWeatherType.cloudsOverride.densitySmoothnessLayer1,blendTime);
                 clouds.settingsLayer1.baseErosionIntensity = Mathf.Lerp(clouds.settingsLayer1.baseErosionIntensity, targetWeatherType.cloudsOverride.baseErosionIntensityLayer1,blendTime);
                 clouds.settingsLayer1.detailErosionIntensity = Mathf.Lerp(clouds.settingsLayer1.detailErosionIntensity, targetWeatherType.cloudsOverride.detailErosionIntensityLayer1,blendTime);
                 clouds.settingsLayer1.curlIntensity = Mathf.Lerp(clouds.settingsLayer1.curlIntensity, targetWeatherType.cloudsOverride.curlIntensityLayer1,blendTime);
@@ -251,6 +259,7 @@ namespace Enviro
                     clouds.settingsLayer2.lightAbsorbtion = Mathf.Lerp(clouds.settingsLayer2.lightAbsorbtion, targetWeatherType.cloudsOverride.ligthAbsorbtionLayer2,blendTime);
                     
                     clouds.settingsLayer2.density = Mathf.Lerp(clouds.settingsLayer2.density, targetWeatherType.cloudsOverride.densityLayer2,blendTime);
+                    clouds.settingsLayer2.densitySmoothness = Mathf.Lerp(clouds.settingsLayer2.densitySmoothness, targetWeatherType.cloudsOverride.densitySmoothnessLayer2,blendTime);
                     clouds.settingsLayer2.baseErosionIntensity = Mathf.Lerp(clouds.settingsLayer2.baseErosionIntensity, targetWeatherType.cloudsOverride.baseErosionIntensityLayer2,blendTime);
                     clouds.settingsLayer2.detailErosionIntensity = Mathf.Lerp(clouds.settingsLayer2.detailErosionIntensity, targetWeatherType.cloudsOverride.detailErosionIntensityLayer2,blendTime);
                     clouds.settingsLayer2.curlIntensity = Mathf.Lerp(clouds.settingsLayer2.curlIntensity, targetWeatherType.cloudsOverride.curlIntensityLayer2,blendTime);
@@ -388,6 +397,27 @@ namespace Enviro
                 }
             }
         }
+
+        public void ChangeWeather(int index)
+        {
+            for(int i = 0; i < Settings.weatherTypes.Count; i++)
+            {
+                if(i == index)
+                {
+                    if(targetWeatherType != Settings.weatherTypes[i])
+                    {
+                        EnviroManager.instance.NotifyWeatherChanged(Settings.weatherTypes[i]);
+                    }
+
+                    if(currentZone != null)
+                       currentZone.currentWeatherType = Settings.weatherTypes[i];
+
+                    targetWeatherType = Settings.weatherTypes[i];
+                    return;
+                }
+            }
+        }
+
         public void ChangeWeatherInstant(EnviroWeatherType type)
         {
             if(targetWeatherType != type)
@@ -400,6 +430,27 @@ namespace Enviro
 
             targetWeatherType = type;
             instantTransition = true;
+        }
+
+        public void ChangeWeatherInstant(int index)
+        {
+            for(int i = 0; i < Settings.weatherTypes.Count; i++)
+            {
+                if(i == index)
+                {
+                    if(targetWeatherType != Settings.weatherTypes[i])
+                    {
+                        EnviroManager.instance.NotifyWeatherChanged(Settings.weatherTypes[i]);
+                    }
+
+                    if(currentZone != null)
+                       currentZone.currentWeatherType = Settings.weatherTypes[i];
+
+                    targetWeatherType = Settings.weatherTypes[i];
+                    instantTransition = true;
+                    return;
+                }
+            }
         }
 
         //Save and Load

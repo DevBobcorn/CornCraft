@@ -19,29 +19,31 @@ MonoBehaviour:
   showFogControls: 0
   showLightingControls: 0
   showAuroraControls: 0
-  showEnvironmentControls: 1
+  showEnvironmentControls: 0
   showAudioControls: 0
   showAmbientAudioControls: 0
   showWeatherAudioControls: 0
   showLightningControls: 0
   cloudsOverride:
-    showLayer1: 1
-    coverageLayer1: -0.1
+    ambientLightIntensity: 1
+    showLayer1: 0
+    coverageLayer1: -0.05
     dilateCoverageLayer1: 1
     dilateTypeLayer1: 1
     typeModifierLayer1: 1
     anvilBiasLayer1: 0
     scatteringIntensityLayer1: 1
-    multiScatteringALayer1: 0.4
-    multiScatteringBLayer1: 0.083
+    multiScatteringALayer1: 0.45
+    multiScatteringBLayer1: 0.04
     multiScatteringCLayer1: 1
-    powderIntensityLayer1: 0.7
+    powderIntensityLayer1: 0.82
     silverLiningSpreadLayer1: 0.8
-    ligthAbsorbtionLayer1: 0.559
-    densityLayer1: 0.3
+    ligthAbsorbtionLayer1: 0.42
+    densityLayer1: 1.23
+    densitySmoothnessLayer1: 1.57
     baseErosionIntensityLayer1: 0
     detailErosionIntensityLayer1: 0.25
-    curlIntensityLayer1: 0.2
+    curlIntensityLayer1: 0.3
     showLayer2: 0
     coverageLayer2: 0.037
     dilateCoverageLayer2: 1
@@ -56,11 +58,12 @@ MonoBehaviour:
     silverLiningSpreadLayer2: 0.8
     ligthAbsorbtionLayer2: 0.301
     densityLayer2: 0.12
+    densitySmoothnessLayer2: 1
     baseErosionIntensityLayer2: 0
     detailErosionIntensityLayer2: 0.3
     curlIntensityLayer2: 0.15
   flatCloudsOverride:
-    cirrusCloudsAlpha: 0.575
+    cirrusCloudsAlpha: 0.5
     cirrusCloudsCoverage: 0.5
     cirrusCloudsColorPower: 1.309
     flatCloudsCoverage: 1.287
@@ -79,7 +82,7 @@ MonoBehaviour:
     fogHeightFalloff2: 0.009
     fogHeight2: 0
     fogColorBlend: 0.75
-    scattering: 0.5
+    scattering: 0.34
     extinction: 0.08
     anistropy: 0.5
   auroraOverride:

@@ -94,7 +94,7 @@ Shader "Hidden/Volumetrics"
                 return o;
             }
 
-            float4 GetCascadeWeights_SplitSpheres(float3 wpos)
+           float4 GetCascadeWeights_SplitSpheres(float3 wpos)
             {
                 float3 fromCenter0 = wpos - unity_ShadowSplitSpheres[0].xyz;
                 float3 fromCenter1 = wpos - unity_ShadowSplitSpheres[1].xyz;
@@ -103,13 +103,36 @@ Shader "Hidden/Volumetrics"
                 float4 distances2 = float4(dot(fromCenter0,fromCenter0), dot(fromCenter1,fromCenter1), dot(fromCenter2,fromCenter2), dot(fromCenter3,fromCenter3));
                 float4 weights = float4(distances2 >= unity_ShadowSplitSqRadii);
                 return weights;
-            }
+            }    
 
             float4 GetCascadeShadowCoord(float4 pos, float4 cascadeWeights)
             {
-                return mul(unity_WorldToShadow[(int)dot(cascadeWeights, float4(1,1,1,1))], pos);
+               return mul(unity_WorldToShadow[(int)dot(cascadeWeights, float4(1,1,1,1))], pos);
             }
 
+
+ /*
+             float GetCascadeWeights_SplitSpheres(float3 positionWS)
+            {
+                float3 fromCenter0 = positionWS - unity_ShadowSplitSpheres[0].xyz;
+                float3 fromCenter1 = positionWS - unity_ShadowSplitSpheres[1].xyz;
+                float3 fromCenter2 = positionWS - unity_ShadowSplitSpheres[2].xyz;
+                float3 fromCenter3 = positionWS - unity_ShadowSplitSpheres[3].xyz;
+                float4 distances2 = float4(dot(fromCenter0, fromCenter0), dot(fromCenter1, fromCenter1), dot(fromCenter2, fromCenter2), dot(fromCenter3, fromCenter3));
+
+                float4 weights = float4(distances2 >= unity_ShadowSplitSqRadii);
+                weights.yzw = saturate(weights.yzw - weights.xyz);
+ 
+                return float(4.0) - dot(weights, float4(4, 3, 2, 1));
+            }
+
+            float4 GetCascadeShadowCoord(float3 positionWS, half cascadeIndex)
+            {
+                float4 shadowCoord = mul(unity_WorldToShadow[cascadeIndex], float4(positionWS, 1.0));
+
+                return float4(shadowCoord.xyz, 0);
+            }
+*/
             float anisotropy(float costheta)
             {
                 float g = _MieG;

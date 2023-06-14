@@ -150,7 +150,7 @@ float dilate_perlin_worley(float p, float w, float x)
     {  
         x = (x - 0.5) / 0.5;
         float n = w + p * (1.0 - x);
-        return n * lerp(0.5, 1.0, pow(x, 1.0 / curve));
+        return n * lerp(0.5, 1.0, pow(x, max(1.0 / curve,0.0001)));
     }        
 }  
 
@@ -289,5 +289,5 @@ float worley2(float2 p, float freq)
     float fbm = worleyFbm2D(p*freq * 4, 4) * 1.2;
     float worl = worleyNoise2D(p*freq*2, 1) * .425 - worleyNoise2D(p*freq*2, 1) * .225;
 
-    return saturate(fbm - worl);
+    return saturate(fbm - worl); 
 } 

@@ -160,7 +160,8 @@ namespace Enviro
                 GUILayout.EndVertical();
                 /// Save Load End
 
-                ApplyChanges ();
+                ApplyChanges (); 
+                EditorUtility.SetDirty (target);
             }
             GUILayout.EndVertical();
 

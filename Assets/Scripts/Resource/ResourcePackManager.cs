@@ -381,7 +381,7 @@ namespace MinecraftClient.Resource
                     // Re-arrange the texture
                     Texture2D rearranged = new(framePerRow * frameSize, framePerCol * frameSize);
                     //Debug.Log($"Animated texture {texId} (pr: {framePerRow} pc: {framePerCol} f: {frameCount})");
-                    Debug.Log($"Animated texture {texId} (frames: {string.Join(",", frames)})");
+                    //Debug.Log($"Animated texture {texId} (frames: {string.Join(",", frames)})");
 
                     for (int fi = 0;fi < frameCount;fi++)
                     {

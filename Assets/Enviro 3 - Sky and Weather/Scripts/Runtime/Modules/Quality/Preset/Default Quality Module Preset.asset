@@ -16,7 +16,7 @@ MonoBehaviour:
   showSaveLoad: 0
   active: 1
   Settings:
-    defaultQuality: {fileID: 11400000, guid: ce2712a713d73094fa9c2775886f182d, type: 2}
+    defaultQuality: {fileID: 11400000, guid: 60e887b1524da0a4a8f1318ef102e22a, type: 2}
     Qualities:
     - {fileID: 11400000, guid: a002704085c17f1439758fcee25df529, type: 2}
     - {fileID: 11400000, guid: 2e0aaa075bca92245a9e8300b7eace9c, type: 2}

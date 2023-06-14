@@ -8,8 +8,8 @@ namespace Enviro{
     public class EnviroManagerInspector : EnviroBaseInspector
     {
         private EnviroManager myTarget;
-  
-        private Editor currentTimeModuleEditor, currentSkyModuleEditor, currentLightingModuleEditor, currentFogModuleEditor, currentVolumetricCloudModuleEditor,currentFlatCloudModuleEditor,currentWeatherModuleEditor,currentAuroraModuleEditor,currentLightningModuleEditor, currentAudioModuleEditor,currentEnvironmentModuleEditor,currentEffectsModuleEditor ,currentQualityModuleEditor;
+
+        private Editor currentTimeModuleEditor, currentSkyModuleEditor, currentLightingModuleEditor, currentReflectionsModuleEditor, currentFogModuleEditor, currentVolumetricCloudModuleEditor,currentFlatCloudModuleEditor,currentWeatherModuleEditor,currentAuroraModuleEditor,currentLightningModuleEditor, currentAudioModuleEditor,currentEnvironmentModuleEditor,currentEffectsModuleEditor ,currentQualityModuleEditor;
         private SerializedProperty configuration, modules, Camera, CameraTag, dontDestroyOnLoad ,worldAnchor;
         private SerializedProperty sunRotationX,sunRotationY,moonRotationX,moonRotationY,dayNightSwitch;
         //Events
@@ -19,25 +19,25 @@ namespace Enviro{
         {
             myTarget = (EnviroManager)target;
             serializedObj = new SerializedObject(myTarget);
-            configuration = serializedObj.FindProperty("configuration"); 
-            Camera = serializedObj.FindProperty("Camera"); 
-            CameraTag = serializedObj.FindProperty("CameraTag"); 
-            dontDestroyOnLoad = serializedObj.FindProperty("dontDestroyOnLoad"); 
-            sunRotationX = serializedObj.FindProperty("sunRotationX"); 
-            sunRotationY = serializedObj.FindProperty("sunRotationY"); 
-            moonRotationX = serializedObj.FindProperty("moonRotationX"); 
-            moonRotationY = serializedObj.FindProperty("moonRotationY"); 
-            dayNightSwitch = serializedObj.FindProperty("dayNightSwitch"); 
+            configuration = serializedObj.FindProperty("configuration");
+            Camera = serializedObj.FindProperty("Camera");
+            CameraTag = serializedObj.FindProperty("CameraTag");
+            dontDestroyOnLoad = serializedObj.FindProperty("dontDestroyOnLoad");
+            sunRotationX = serializedObj.FindProperty("sunRotationX");
+            sunRotationY = serializedObj.FindProperty("sunRotationY");
+            moonRotationX = serializedObj.FindProperty("moonRotationX");
+            moonRotationY = serializedObj.FindProperty("moonRotationY");
+            dayNightSwitch = serializedObj.FindProperty("dayNightSwitch");
             worldAnchor = serializedObj.FindProperty("Objects.worldAnchor");
             //Events
-            onHourPassedActions = serializedObj.FindProperty("Events.onHourPassedActions"); 
-            onDayPassedActions = serializedObj.FindProperty("Events.onDayPassedActions"); 
-            onYearPassedActions = serializedObj.FindProperty("Events.onYearPassedActions"); 
-            onWeatherChangedActions = serializedObj.FindProperty("Events.onWeatherChangedActions"); 
-            onSeasonChangedActions = serializedObj.FindProperty("Events.onSeasonChangedActions"); 
-            onNightActions = serializedObj.FindProperty("Events.onNightActions"); 
+            onHourPassedActions = serializedObj.FindProperty("Events.onHourPassedActions");
+            onDayPassedActions = serializedObj.FindProperty("Events.onDayPassedActions");
+            onYearPassedActions = serializedObj.FindProperty("Events.onYearPassedActions");
+            onWeatherChangedActions = serializedObj.FindProperty("Events.onWeatherChangedActions");
+            onSeasonChangedActions = serializedObj.FindProperty("Events.onSeasonChangedActions");
+            onNightActions = serializedObj.FindProperty("Events.onNightActions");
             onDayActions = serializedObj.FindProperty("Events.onDayActions");
-        } 
+        }
 
         public override void OnInspectorGUI()
         {
@@ -46,9 +46,9 @@ namespace Enviro{
             GUILayout.BeginVertical("", boxStyle);
             GUILayout.Label("Enviro - Sky and Weather Manager",headerStyleMid);
             GUILayout.Space(5);
-            GUILayout.Label("Version: 3.0.5", headerStyleMid);
-            
-  
+            GUILayout.Label("Version: 3.0.6", headerStyleMid);
+
+
             //Help Box Button
             //RenderHelpBoxButton();
 
@@ -59,51 +59,51 @@ namespace Enviro{
 
             GUILayout.BeginVertical("",boxStyle);
             myTarget.showSetup = GUILayout.Toggle(myTarget.showSetup, "Setup", headerFoldout);
-            
+
             EditorGUI.BeginChangeCheck();
 
             if(myTarget.showSetup)
             {
                 GUILayout.BeginVertical("",boxStyleModified);
                 GUILayout.Label("Camera Setup", headerStyle);
-           
+
                // GUILayout.Space(10);
                // GUILayout.Label("Main Camera", headerStyle);
                 EditorGUILayout.PropertyField(Camera);
-                
+
                 if(myTarget.Camera == null)
                    CameraTag.stringValue = EditorGUILayout.TagField("Camera Tag", CameraTag.stringValue);
-                
+
                 GUILayout.Space(10);
                 GUILayout.Label("Additional Cameras", headerStyle);
                 GUILayout.Space(5);
-                if (GUILayout.Button ("Add")) 
+                if (GUILayout.Button ("Add"))
                 {
                         myTarget.Cameras.Add (null);
                 }
                 GUILayout.Space(5);
                 for (int i = 0; i < myTarget.Cameras.Count; i++)
-                {     
+                {
                     GUILayout.BeginVertical("", boxStyleModified);
                     myTarget.Cameras[i].camera = (Camera)EditorGUILayout.ObjectField ("Camera", myTarget.Cameras[i].camera, typeof(Camera), true);
                     myTarget.Cameras[i].quality = (EnviroQuality)EditorGUILayout.ObjectField ("Quality", myTarget.Cameras[i].quality, typeof(EnviroQuality), true);
-                    if (GUILayout.Button ("Remove"))  
+                    if (GUILayout.Button ("Remove"))
                     {
                         myTarget.Cameras.RemoveAt (i);
                     }
-                       
+
                     GUILayout.EndVertical();
                 }
-                GUILayout.EndVertical(); 
+                GUILayout.EndVertical();
 
                 GUILayout.BeginVertical("",boxStyleModified);
                 GUILayout.Label("General Setup", headerStyle);
-                EditorGUILayout.PropertyField(dontDestroyOnLoad); 
-                EditorGUILayout.PropertyField(worldAnchor); 
+                EditorGUILayout.PropertyField(dontDestroyOnLoad);
+                EditorGUILayout.PropertyField(worldAnchor);
                 //GUILayout.Space(10);
                 //GUILayout.Label("Objects", headerStyle);
-                GUILayout.EndVertical(); 
-                       
+                GUILayout.EndVertical();
+
                 GUILayout.BeginVertical("", boxStyleModified);
                 //GUILayout.Space(10);
 
@@ -134,24 +134,24 @@ namespace Enviro{
 
     #if ENVIRO_URP || ENVIRO_HDRP
                 if (GUILayout.Button("Activate Legacy Support"))
-                    { 
+                    {
                         RemoveDefineSymbol("ENVIRO_URP");
                         RemoveDefineSymbol("ENVIRO_HDRP");
                     }
     #endif
-                GUILayout.EndVertical(); 
-            } 
-            GUILayout.EndVertical(); 
+                GUILayout.EndVertical();
+            }
+            GUILayout.EndVertical();
 
             GUILayout.BeginVertical("", boxStyle);
-            myTarget.showModules = GUILayout.Toggle(myTarget.showModules, "Modules", headerFoldout);   
+            myTarget.showModules = GUILayout.Toggle(myTarget.showModules, "Modules", headerFoldout);
             if(myTarget.showModules)
-            { 
-            
+            {
+
             if(myTarget.configuration == null)
             {
                 GUILayout.Label("Please assign or create a new configuration.");
-                EditorGUILayout.PropertyField(configuration);   
+                EditorGUILayout.PropertyField(configuration);
                     if(GUILayout.Button("Create new Configuration"))
                     {
                         myTarget.configuration = EnviroConfigurationCreation.CreateMyAsset();
@@ -159,13 +159,13 @@ namespace Enviro{
                     }
             }
             else
-            { 
+            {
                 GUILayout.BeginVertical("", boxStyleModified);
 
                 if(!Application.isPlaying)
-                EditorGUILayout.PropertyField(configuration); 
+                EditorGUILayout.PropertyField(configuration);
                   if(GUILayout.Button("Save all Modules"))
-                    {    
+                    {
                         myTarget.SaveAllModules();
                     }
                 if(GUILayout.Button("Load all Modules"))
@@ -173,7 +173,7 @@ namespace Enviro{
                         myTarget.LoadAllModules();
                     }
 
-                GUILayout.EndVertical();  
+                GUILayout.EndVertical();
 
                 GUILayout.BeginVertical("", wrapStyle);
                 GUILayout.BeginHorizontal("", headerStyle);
@@ -202,6 +202,14 @@ namespace Enviro{
                 }
                 EditorGUI.EndDisabledGroup();
 
+                EditorGUI.BeginDisabledGroup(myTarget.Reflections != null);
+                if(GUILayout.Button("Reflections"))
+                {
+                    if (myTarget.Reflections == null)
+                    myTarget.AddModule(EnviroManager.ModuleType.Reflections);
+                }
+                EditorGUI.EndDisabledGroup();
+
                 EditorGUI.BeginDisabledGroup(myTarget.Fog != null);
                 if(GUILayout.Button("Fog"))
                 {
@@ -212,7 +220,7 @@ namespace Enviro{
 
                 EditorGUI.BeginDisabledGroup(myTarget.VolumetricClouds != null);
                 if(GUILayout.Button("Volumetric Clouds"))
-                {
+                { 
                     if (myTarget.VolumetricClouds == null)
                     myTarget.AddModule(EnviroManager.ModuleType.VolumetricClouds);
                 }
@@ -237,10 +245,10 @@ namespace Enviro{
                 GUILayout.EndHorizontal();
 
                 //////////////////////////////////////
-                
+
                 GUILayout.BeginHorizontal("", headerStyle);
 
- 
+
                 EditorGUI.BeginDisabledGroup(myTarget.Environment != null);
                 if(GUILayout.Button("Environment"))
                 {
@@ -256,7 +264,7 @@ namespace Enviro{
                     myTarget.AddModule(EnviroManager.ModuleType.Lightning);
                 }
                 EditorGUI.EndDisabledGroup();
-            
+
 
                 EditorGUI.BeginDisabledGroup(myTarget.Weather != null);
                 if(GUILayout.Button("Weather"))
@@ -265,7 +273,7 @@ namespace Enviro{
                     myTarget.AddModule(EnviroManager.ModuleType.Weather);
                 }
                 EditorGUI.EndDisabledGroup();
-            
+
 
                 EditorGUI.BeginDisabledGroup(myTarget.Audio != null);
                 if(GUILayout.Button("Audio"))
@@ -305,7 +313,7 @@ namespace Enviro{
                     currentTimeModuleEditor.OnInspectorGUI();
                 }
                 else
-                {  
+                {
 
                     GUI.backgroundColor = baseModuleColor;
                     GUILayout.BeginVertical("",boxStyleModified);
@@ -321,17 +329,17 @@ namespace Enviro{
                         GUI.backgroundColor = categoryModuleColor;
                         GUILayout.BeginVertical("",boxStyleModified);
                         GUI.backgroundColor = Color.white;
- 
-                        EditorGUILayout.PropertyField(sunRotationX);   
-                        EditorGUILayout.PropertyField(sunRotationY);   
-                        EditorGUILayout.PropertyField(moonRotationX);   
-                        EditorGUILayout.PropertyField(moonRotationY); 
+
+                        EditorGUILayout.PropertyField(sunRotationX);
+                        EditorGUILayout.PropertyField(sunRotationY);
+                        EditorGUILayout.PropertyField(moonRotationX);
+                        EditorGUILayout.PropertyField(moonRotationY);
                         GUILayout.Space(5);
-                        EditorGUILayout.PropertyField(dayNightSwitch);                        
+                        EditorGUILayout.PropertyField(dayNightSwitch);
                         GUILayout.EndVertical();
                     }
                     GUILayout.EndVertical();
-                       
+
                     if(myTarget.showNonTimeControls)
                     GUILayout.Space(10);
                 }
@@ -342,7 +350,15 @@ namespace Enviro{
                     currentLightingModuleEditor = Editor.CreateEditor(myTarget.Lighting);
 
                     currentLightingModuleEditor.OnInspectorGUI();
-                } 
+                }
+
+                if(myTarget.Reflections != null)
+                {
+                    if(currentReflectionsModuleEditor == null)
+                    currentReflectionsModuleEditor = Editor.CreateEditor(myTarget.Reflections);
+
+                    currentReflectionsModuleEditor.OnInspectorGUI();
+                }
 
                 if(myTarget.Sky != null)
                 {
@@ -350,7 +366,7 @@ namespace Enviro{
                     currentSkyModuleEditor = Editor.CreateEditor(myTarget.Sky);
 
                     currentSkyModuleEditor.OnInspectorGUI();
-                } 
+                }
 
                 if(myTarget.Fog != null)
                 {
@@ -358,7 +374,7 @@ namespace Enviro{
                     currentFogModuleEditor = Editor.CreateEditor(myTarget.Fog);
 
                     currentFogModuleEditor.OnInspectorGUI();
-                } 
+                }
 
                 if(myTarget.VolumetricClouds != null)
                 {
@@ -366,15 +382,15 @@ namespace Enviro{
                     currentVolumetricCloudModuleEditor = Editor.CreateEditor(myTarget.VolumetricClouds);
 
                     currentVolumetricCloudModuleEditor.OnInspectorGUI();
-                } 
-         
+                }
+
                 if(myTarget.FlatClouds != null)
                 {
                     if(currentFlatCloudModuleEditor == null)
                     currentFlatCloudModuleEditor = Editor.CreateEditor(myTarget.FlatClouds);
 
                     currentFlatCloudModuleEditor.OnInspectorGUI();
-                } 
+                }
 
                 if(myTarget.Aurora != null)
                 {
@@ -382,7 +398,7 @@ namespace Enviro{
                     currentAuroraModuleEditor = Editor.CreateEditor(myTarget.Aurora);
 
                     currentAuroraModuleEditor.OnInspectorGUI();
-                } 
+                }
 
                 if(myTarget.Lightning != null)
                 {
@@ -390,7 +406,7 @@ namespace Enviro{
                     currentLightningModuleEditor = Editor.CreateEditor(myTarget.Lightning);
 
                     currentLightningModuleEditor.OnInspectorGUI();
-                } 
+                }
 
                 if(myTarget.Environment != null)
                 {
@@ -398,7 +414,7 @@ namespace Enviro{
                     currentEnvironmentModuleEditor = Editor.CreateEditor(myTarget.Environment);
 
                     currentEnvironmentModuleEditor.OnInspectorGUI();
-                } 
+                }
 
                 if(myTarget.Weather != null)
                 {
@@ -406,15 +422,15 @@ namespace Enviro{
                     currentWeatherModuleEditor = Editor.CreateEditor(myTarget.Weather);
 
                     currentWeatherModuleEditor.OnInspectorGUI();
-                } 
+                }
 
-                if(myTarget.Audio != null) 
+                if(myTarget.Audio != null)
                 {
                     if(currentAudioModuleEditor == null)
                     currentAudioModuleEditor = Editor.CreateEditor(myTarget.Audio);
 
                     currentAudioModuleEditor.OnInspectorGUI();
-                } 
+                }
 
                 if(myTarget.Effects != null)
                 {
@@ -422,15 +438,15 @@ namespace Enviro{
                     currentEffectsModuleEditor = Editor.CreateEditor(myTarget.Effects);
 
                     currentEffectsModuleEditor.OnInspectorGUI();
-                } 
-    
+                }
+
                 if(myTarget.Quality != null)
                 {
                     if(currentQualityModuleEditor == null)
                     currentQualityModuleEditor = Editor.CreateEditor(myTarget.Quality);
 
                     currentQualityModuleEditor.OnInspectorGUI();
-                }      
+                }
             }
             }
             GUILayout.EndVertical();
@@ -439,20 +455,20 @@ namespace Enviro{
 
             GUILayout.BeginVertical("",boxStyle);
             myTarget.showEvents = GUILayout.Toggle(myTarget.showEvents, "Events", headerFoldout);
-            
+
             if(myTarget.showEvents)
             {
-                GUI.backgroundColor = thirdPartyModuleColor;  
+                GUI.backgroundColor = thirdPartyModuleColor;
                 GUILayout.BeginVertical("", boxStyleModified);
                 GUI.backgroundColor = Color.white;
                 GUILayout.Space(5);
-                EditorGUILayout.PropertyField(onHourPassedActions);    
-                EditorGUILayout.PropertyField(onDayPassedActions);   
-                EditorGUILayout.PropertyField(onYearPassedActions);  
+                EditorGUILayout.PropertyField(onHourPassedActions);
+                EditorGUILayout.PropertyField(onDayPassedActions);
+                EditorGUILayout.PropertyField(onYearPassedActions);
                 GUILayout.Space(5);
-                EditorGUILayout.PropertyField(onWeatherChangedActions); 
-                EditorGUILayout.PropertyField(onSeasonChangedActions); 
-                GUILayout.Space(5); 
+                EditorGUILayout.PropertyField(onWeatherChangedActions);
+                EditorGUILayout.PropertyField(onSeasonChangedActions);
+                GUILayout.Space(5);
                 EditorGUILayout.PropertyField(onDayActions);
                 EditorGUILayout.PropertyField(onNightActions);
                  GUILayout.EndVertical();
@@ -461,13 +477,13 @@ namespace Enviro{
 
             GUILayout.BeginVertical("",boxStyle);
             myTarget.showThirdParty = GUILayout.Toggle(myTarget.showThirdParty, "Third Party Support", headerFoldout);
-            
+
             if(myTarget.showThirdParty)
             {
                 GUILayout.Space(5);
 
                 //WAPI
-                GUI.backgroundColor = thirdPartyModuleColor;  
+                GUI.backgroundColor = thirdPartyModuleColor;
                 GUILayout.BeginVertical("World Manager API", boxStyleModified);
                 GUI.backgroundColor = Color.white;
                 GUILayout.Space(20);
@@ -481,8 +497,8 @@ namespace Enviro{
 #endif
                 GUILayout.EndVertical();
 
-                //MicroSplat         
-                GUI.backgroundColor = thirdPartyModuleColor;      
+                //MicroSplat
+                GUI.backgroundColor = thirdPartyModuleColor;
                 GUILayout.BeginVertical("MicroSplat", boxStyleModified);
                 GUI.backgroundColor = Color.white;
                 GUILayout.Space(20);
@@ -491,7 +507,7 @@ namespace Enviro{
                 //////////
 
                 //Mirror
-                GUI.backgroundColor = thirdPartyModuleColor;    
+                GUI.backgroundColor = thirdPartyModuleColor;
                 GUILayout.BeginVertical("Mirror Networking", boxStyleModified);
                 GUI.backgroundColor = Color.white;
                 GUILayout.Space(20);
@@ -521,6 +537,6 @@ namespace Enviro{
             }
             GUILayout.EndVertical();
             ApplyChanges();
-        } 
+        }
     }
 }
