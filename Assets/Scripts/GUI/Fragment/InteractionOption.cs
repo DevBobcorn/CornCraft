@@ -3,7 +3,7 @@ using UnityEngine;
 using TMPro;
 
 using MinecraftClient.Event;
-using MinecraftClient.Mapping;
+using MinecraftClient.Interaction;
 
 namespace MinecraftClient.UI
 {

@@ -1,7 +1,7 @@
 #nullable enable
-using System;
+using MinecraftClient.Mapping;
 
-namespace MinecraftClient.Mapping
+namespace MinecraftClient.Interaction
 {
     public class BlockInteractionInfo : InteractionInfo
     {

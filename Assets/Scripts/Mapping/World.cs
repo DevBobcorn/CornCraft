@@ -9,7 +9,7 @@ namespace MinecraftClient.Mapping
     /// <summary>
     /// Represents a Minecraft World
     /// </summary>
-    public class World
+    public class World : AbstractWorld
     {
         /// <summary>
         /// The chunks contained into the Minecraft world
@@ -130,7 +130,7 @@ namespace MinecraftClient.Mapping
         /// <returns>The chunk column</returns>
         public ChunkColumn? GetChunkColumn(Location location)
         {
-            return this[location.ChunkX, location.ChunkZ];
+            return this[location.GetChunkX(), location.GetChunkZ()];
         }
 
         public ChunkColumn? GetChunkColumn(int chunkX, int chunkZ)
@@ -195,7 +195,7 @@ namespace MinecraftClient.Mapping
 
         private const int radius = 2;
 
-        public float3 GetFoliageColor(Location loc)
+        public override float3 GetFoliageColor(Location loc)
         {
             int cnt = 0;
             float3 colorSum = float3.zero;
@@ -214,7 +214,7 @@ namespace MinecraftClient.Mapping
             return colorSum / cnt;
         }
 
-        public float3 GetGrassColor(Location loc)
+        public override float3 GetGrassColor(Location loc)
         {
             int cnt = 0;
             float3 colorSum = float3.zero;
@@ -233,7 +233,7 @@ namespace MinecraftClient.Mapping
             return colorSum / cnt;
         }
 
-        public float3 GetWaterColor(Location loc)
+        public override float3 GetWaterColor(Location loc)
         {
             int cnt = 0;
             float3 colorSum = float3.zero;
@@ -358,13 +358,13 @@ namespace MinecraftClient.Mapping
         /// <param name="block">Block to set</param>
         public void SetBlock(Location location, Block block)
         {
-            var column = this[location.ChunkX, location.ChunkZ];
+            var column = this[location.GetChunkX(), location.GetChunkZ()];
             if (column is not null)
             {
                 var chunk = column.GetChunk(location);
                 if (chunk is null)
-                    column[location.ChunkY] = chunk = new Chunk(this);
-                chunk[location.ChunkBlockX, location.ChunkBlockY, location.ChunkBlockZ] = block;
+                    column[location.GetChunkY()] = chunk = new Chunk(this);
+                chunk[location.GetChunkBlockX(), location.GetChunkBlockY(), location.GetChunkBlockZ()] = block;
             }
             else
                 UnityEngine.Debug.LogWarning($"Failed to set {block.State} at {location}: chunk column not loaded");

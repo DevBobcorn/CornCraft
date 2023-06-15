@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace MinecraftClient.Mapping
+namespace MinecraftClient.Interaction
 {
     public enum BlockInteractionType
     {
