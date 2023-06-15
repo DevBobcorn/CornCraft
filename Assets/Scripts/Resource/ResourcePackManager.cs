@@ -13,6 +13,9 @@ namespace MinecraftClient.Resource
 {
     public class ResourcePackManager
     {
+        public static readonly ResourceLocation BLANK_TEXTURE = new("builtin", "blank");
+        public static readonly ResourceLocation MISSING_TEXTURE = new("builtin", "missingno");
+
         // Identifier -> Texture file path
         public readonly Dictionary<ResourceLocation, string> TextureFileTable = new();
 
@@ -247,8 +250,6 @@ namespace MinecraftClient.Resource
             }
 
         }
-        
-        public readonly TextureInfo DEFAULT_TEXTURE_INFO = new(new(), 0);
 
         private readonly Dictionary<ResourceLocation, TextureInfo> texAtlasTable = new();
 
@@ -294,7 +295,7 @@ namespace MinecraftClient.Resource
             if (texAtlasTable.ContainsKey(identifier))
                 return texAtlasTable[identifier];
             
-            return DEFAULT_TEXTURE_INFO;
+            return texAtlasTable[MISSING_TEXTURE];
         }
 
         private readonly Texture2DArray?[] atlasArrays = new Texture2DArray?[2];
@@ -401,14 +402,53 @@ namespace MinecraftClient.Resource
             return (tex, null);
         }
         
+        private Texture2D GetBlankTexture()
+        {
+            Texture2D tex = new(16, 16);
+            Color32 white = Color.white;
+
+            var colors = Enumerable.Repeat(white, 16 * 16).ToArray();
+            tex.SetPixels32(colors);
+
+            return tex;
+        }
+
+        private Texture2D GetMissingTexture()
+        {
+            Texture2D tex = new(16, 16);
+            Color32 black = Color.black;
+            Color32 magenta = Color.magenta;
+
+            var colors = new Color32[16 * 16];
+
+            for (int i = 0;i < 8;i++)
+            {
+                for (int j = 0;j < 8;j++)
+                    colors[(i << 4) + j] =   black;
+                
+                for (int j = 8;j < 16;j++)
+                    colors[(i << 4) + j] = magenta;
+            }
+
+            for (int i = 8;i < 16;i++)
+            {
+                for (int j = 0;j < 8;j++)
+                    colors[(i << 4) + j] = magenta;
+                
+                for (int j = 8;j < 16;j++)
+                    colors[(i << 4) + j] =   black;
+            }
+
+            tex.SetPixels32(colors);
+
+            return tex;
+        }
+
         private IEnumerator GenerateAtlas(DataLoadFlag atlasGenFlag)
         {
             texAtlasTable.Clear(); // Clear previously loaded table...
 
             var texDict = TextureFileTable;
-
-            int count = 0;
-
             var textureIdSet = new HashSet<ResourceLocation>();
 
             // Collect referenced textures
@@ -439,11 +479,29 @@ namespace MinecraftClient.Resource
             }
 
             // Append liquid textures, which are not referenced in model files, but will be used by fluid mesh
-            foreach (var liquidTex in FluidGeometry.LiquidTextures)
-                textureIdSet.Add(liquidTex);
+            foreach (var texId in FluidGeometry.LiquidTextures)
+            {
+                if (texDict.ContainsKey(texId))
+                {
+                    textureIdSet.Add(texId);
+                }
+            }
 
-            var textureInfos = new (Texture2D, TextureAnimationInfo?)[textureIdSet.Count];
-            var ids = new ResourceLocation[textureIdSet.Count];
+            // Array for textures in collection, plus one blank texture and one missing texture
+            var textureInfos = new (Texture2D, TextureAnimationInfo?)[2 + textureIdSet.Count];
+            var ids = new ResourceLocation[2 + textureIdSet.Count];
+
+            int count = 0;
+
+            // Blank texture
+            ids[count] = BLANK_TEXTURE;
+            textureInfos[count] = (GetBlankTexture(), null);
+            count++;
+
+            // Missing texture
+            ids[count] = MISSING_TEXTURE;
+            textureInfos[count] = (GetMissingTexture(), null);
+            count++;
 
             foreach (var texId in textureIdSet) // Load texture files...
             {
