@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 
-using MinecraftClient.Protocol;
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Inventory
@@ -68,7 +67,7 @@ namespace MinecraftClient.Inventory
                     {
                         string displayName = displayProperties["Name"] as string;
                         if (!String.IsNullOrEmpty(displayName))
-                            return ChatParser.ParseText(displayProperties["Name"].ToString());
+                            return displayProperties["Name"].ToString();
                     }
                 }
                 return null;
@@ -78,7 +77,7 @@ namespace MinecraftClient.Inventory
         /// <summary>
         /// Retrieve item lores from NBT properties. Returns null if no lores is defined.
         /// </summary>
-        public string[] Lores
+        public object[] Lores
         {
             get
             {
@@ -88,13 +87,7 @@ namespace MinecraftClient.Inventory
                     var displayProperties = NBT["display"] as Dictionary<string, object>;
                     if (displayProperties != null && displayProperties.ContainsKey("Lore"))
                     {
-                        object[] displayName = displayProperties["Lore"] as object[];
-                        foreach (string st in displayName)
-                        {
-                            string str = ChatParser.ParseText(st.ToString());
-                            lores.Add(str);
-                        }
-                        return lores.ToArray();
+                        return displayProperties["Lore"] as object[];
                     }
                 }
                 return null;
@@ -132,7 +125,7 @@ namespace MinecraftClient.Inventory
             int damage = Damage;
             if (damage != 0)
             {
-                sb.AppendFormat(" | {0}: {1}", Translations.Get("cmd.inventory.damage"), damage);
+                sb.AppendFormat(" | Damage: {1}", damage);
             }
             return sb.ToString();
         }

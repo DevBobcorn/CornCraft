@@ -182,7 +182,7 @@ namespace MinecraftClient.Rendering
                 {
                     if (cx * cx + cz * cz >= viewDistSqr) continue;
 
-                    int chunkX = location.ChunkX + cx, chunkZ = location.ChunkZ + cz;
+                    int chunkX = location.GetChunkX() + cx, chunkZ = location.GetChunkZ() + cz;
                     
                     if (world.isChunkColumnReady(chunkX, chunkZ))
                     {
@@ -232,7 +232,7 @@ namespace MinecraftClient.Rendering
 
             foreach (var chunkCoord in chunkCoords)
             {
-                if (Mathf.Abs(location.ChunkX - chunkCoord.x) > unloadDist || Mathf.Abs(location.ChunkZ - chunkCoord.y) > unloadDist)
+                if (Mathf.Abs(location.GetChunkX() - chunkCoord.x) > unloadDist || Mathf.Abs(location.GetChunkZ() - chunkCoord.y) > unloadDist)
                 {
                     columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunkRendersToBeBuilt);
                     columns.Remove(chunkCoord);
@@ -328,8 +328,8 @@ namespace MinecraftClient.Rendering
 
         private void UpdateBlockAt(Location loc)
         {
-            int chunkX = loc.ChunkX, chunkY = loc.ChunkY, chunkZ = loc.ChunkZ;
-            var column = GetChunkRenderColumn(loc.ChunkX, loc.ChunkZ, false);
+            int chunkX = loc.GetChunkX(), chunkY = loc.GetChunkY(), chunkZ = loc.GetChunkZ();
+            var column = GetChunkRenderColumn(loc.GetChunkX(), loc.GetChunkZ(), false);
             if (column is not null) // Queue this chunk to rebuild list...
             {   // Create the chunk render object if not present (previously empty)
                 var chunk = column.GetChunkRender(chunkY, true);
@@ -337,24 +337,24 @@ namespace MinecraftClient.Rendering
                 // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                 QueueChunkRenderBuild(chunk);
 
-                if (loc.ChunkBlockY == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
+                if (loc.GetChunkBlockY() == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
                 {   // Queue the chunk below, if it isn't empty
                     QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY - 1, false));
                 }
-                else if (loc.ChunkBlockY == Chunk.SizeY - 1 && ((chunkY + 1) * Chunk.SizeY) < World.GetDimension().height) // In the top layer of this chunk
+                else if (loc.GetChunkBlockY() == Chunk.SizeY - 1 && ((chunkY + 1) * Chunk.SizeY) < World.GetDimension().height) // In the top layer of this chunk
                 {   // Queue the chunk above, if it isn't empty
                     QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY + 1, false));
                 }
             }
 
-            if (loc.ChunkBlockX == 0) // Check MC X direction neighbors
+            if (loc.GetChunkBlockX() == 0) // Check MC X direction neighbors
                 QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX - 1, chunkY, chunkZ));
-            else if (loc.ChunkBlockX == Chunk.SizeX - 1)
+            else if (loc.GetChunkBlockX() == Chunk.SizeX - 1)
                 QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX + 1, chunkY, chunkZ));
 
-            if (loc.ChunkBlockZ == 0) // Check MC Z direction neighbors
+            if (loc.GetChunkBlockZ() == 0) // Check MC Z direction neighbors
                 QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ - 1));
-            else if (loc.ChunkBlockZ == Chunk.SizeZ - 1)
+            else if (loc.GetChunkBlockZ() == Chunk.SizeZ - 1)
                 QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ + 1));
             
             if (loc.DistanceSquared(client!.PlayerEntity.Location) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)

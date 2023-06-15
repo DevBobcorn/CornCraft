@@ -94,7 +94,7 @@ namespace MinecraftClient
             {
                 var loc = clientEntity.Location;
             
-                return ChunkRenderManager.IsChunkRenderColumnReady(loc.ChunkX, loc.ChunkZ);
+                return ChunkRenderManager.IsChunkRenderColumnReady(loc.GetChunkX(), loc.GetChunkZ());
             }
         }
 

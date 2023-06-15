@@ -76,7 +76,7 @@ namespace MinecraftClient.Mapping
         /// <returns>The block</returns>
         public Block GetBlock(Location location)
         {
-            return this[location.ChunkBlockX, location.ChunkBlockY, location.ChunkBlockZ];
+            return this[location.GetChunkBlockX(), location.GetChunkBlockY(), location.GetChunkBlockZ()];
         }
 
         public Block GetBlockFromWorld(Location location)
@@ -153,7 +153,7 @@ namespace MinecraftClient.Mapping
 
         private Block getUpBlock(Location location) // MC Y Pos
         {
-            if (location.ChunkBlockY == Chunk.SizeY - 1)
+            if (location.GetChunkBlockY() == Chunk.SizeY - 1)
                 return world.GetBlock(location.Up());
             
             return GetBlock(location.Up());
@@ -161,7 +161,7 @@ namespace MinecraftClient.Mapping
 
         private Block getDownBlock(Location location) // MC Y Neg
         {
-            if (location.ChunkBlockY == 0)
+            if (location.GetChunkBlockY() == 0)
                 return world.GetBlock(location.Down());
             
             return GetBlock(location.Down());
@@ -169,7 +169,7 @@ namespace MinecraftClient.Mapping
 
         private Block getEastBlock(Location location) // MC X Pos
         {
-            if (location.ChunkBlockX == Chunk.SizeX - 1)
+            if (location.GetChunkBlockX() == Chunk.SizeX - 1)
                 return world.GetBlock(location.East());
             
             return GetBlock(location.East());
@@ -177,7 +177,7 @@ namespace MinecraftClient.Mapping
 
         private Block getWestBlock(Location location) // MC X Neg
         {
-            if (location.ChunkBlockX == 0)
+            if (location.GetChunkBlockX() == 0)
                 return world.GetBlock(location.West());
             
             return GetBlock(location.West());
@@ -185,7 +185,7 @@ namespace MinecraftClient.Mapping
 
         private Block getSouthBlock(Location location) // MC Z Pos
         {
-            if (location.ChunkBlockZ == Chunk.SizeZ - 1)
+            if (location.GetChunkBlockZ() == Chunk.SizeZ - 1)
                 return world.GetBlock(location.South());
             
             return GetBlock(location.South());
@@ -193,7 +193,7 @@ namespace MinecraftClient.Mapping
 
         private Block getNorthBlock(Location location) // MC Z Neg
         {
-            if (location.ChunkBlockZ == 0)
+            if (location.GetChunkBlockZ() == 0)
                 return world.GetBlock(location.North());
             
             return GetBlock(location.North());
@@ -201,7 +201,7 @@ namespace MinecraftClient.Mapping
 
         private Block getNEBlock(Location location)
         {
-            if (location.ChunkBlockZ == 0 || location.ChunkBlockX == Chunk.SizeX - 1)
+            if (location.GetChunkBlockZ() == 0 || location.GetChunkBlockX() == Chunk.SizeX - 1)
                 return world.GetBlock(location.North().East());
             
             return GetBlock(location.North().East());
@@ -209,7 +209,7 @@ namespace MinecraftClient.Mapping
 
         private Block getNWBlock(Location location)
         {
-            if (location.ChunkBlockZ == 0 || location.ChunkBlockX == 0)
+            if (location.GetChunkBlockZ() == 0 || location.GetChunkBlockX() == 0)
                 return world.GetBlock(location.North().West());
             
             return GetBlock(location.North().West());
@@ -217,7 +217,7 @@ namespace MinecraftClient.Mapping
 
         private Block getSEBlock(Location location)
         {
-            if (location.ChunkBlockZ == Chunk.SizeZ - 1 || location.ChunkBlockX == Chunk.SizeX - 1)
+            if (location.GetChunkBlockZ() == Chunk.SizeZ - 1 || location.GetChunkBlockX() == Chunk.SizeX - 1)
                 return world.GetBlock(location.South().East());
             
             return GetBlock(location.South().East());
@@ -225,7 +225,7 @@ namespace MinecraftClient.Mapping
 
         private Block getSWBlock(Location location)
         {
-            if (location.ChunkBlockZ == Chunk.SizeZ - 1 || location.ChunkBlockX == 0)
+            if (location.GetChunkBlockZ() == Chunk.SizeZ - 1 || location.GetChunkBlockX() == 0)
                 return world.GetBlock(location.South().West());
             
             return GetBlock(location.South().West());

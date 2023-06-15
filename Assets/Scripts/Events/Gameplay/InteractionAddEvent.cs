@@ -1,5 +1,5 @@
 #nullable enable
-using MinecraftClient.Mapping;
+using MinecraftClient.Interaction;
 
 namespace MinecraftClient.Event
 {

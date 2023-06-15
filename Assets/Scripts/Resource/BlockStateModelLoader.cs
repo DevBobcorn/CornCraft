@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-using MinecraftClient.Rendering;
 using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Resource
@@ -161,7 +160,6 @@ namespace MinecraftClient.Resource
             }
 
         }
-
     }
 
 }

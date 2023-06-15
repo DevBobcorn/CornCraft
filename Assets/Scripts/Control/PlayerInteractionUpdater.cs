@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+
 using MinecraftClient.Event;
 using MinecraftClient.Mapping;
+using MinecraftClient.Interaction;
 
 namespace MinecraftClient.Control
 {
@@ -87,7 +89,7 @@ namespace MinecraftClient.Control
                         
                         var loc = playerLoc + new Location(x, y, z);
                         // Hash locations in a 16*16*16 area
-                        int locHash = loc.ChunkBlockX + (loc.ChunkBlockY << 4) + (loc.ChunkBlockZ << 8);
+                        int locHash = loc.GetChunkBlockX() + (loc.GetChunkBlockY() << 4) + (loc.GetChunkBlockZ() << 8);
                         
                         var block = world.GetBlock(loc);
 

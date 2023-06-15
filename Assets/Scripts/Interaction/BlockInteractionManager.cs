@@ -1,13 +1,13 @@
 #nullable enable
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
 
+using MinecraftClient.Mapping;
 using MinecraftClient.Protocol;
 
-namespace MinecraftClient.Mapping
+namespace MinecraftClient.Interaction
 {
     public class BlockInteractionManager
     {

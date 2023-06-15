@@ -72,7 +72,7 @@ namespace MinecraftClient.Mapping
         {
             try
             {
-                return this[location.ChunkY];
+                return this[location.GetChunkY()];
             }
             catch (IndexOutOfRangeException)
             {
@@ -90,7 +90,7 @@ namespace MinecraftClient.Mapping
 
         public Biome GetBiome(Location location)
         {
-            int index = ((((int) location.Y - World.GetDimension().minY) >> 2) << 4) | ((location.ChunkBlockZ >> 2) << 2) | (location.ChunkBlockX >> 2);
+            int index = ((((int) location.Y - World.GetDimension().minY) >> 2) << 4) | ((location.GetChunkBlockZ() >> 2) << 2) | (location.GetChunkBlockX() >> 2);
 
             if (index < 0 || index >= biomes.Length)
                 return BiomePalette.EMPTY;
@@ -100,7 +100,7 @@ namespace MinecraftClient.Mapping
 
         public short GetBiomeId(Location location)
         {
-            int index = ((((int) location.Y - World.GetDimension().minY) >> 2) << 4) | ((location.ChunkBlockZ >> 2) << 2) | (location.ChunkBlockX >> 2);
+            int index = ((((int) location.Y - World.GetDimension().minY) >> 2) << 4) | ((location.GetChunkBlockZ() >> 2) << 2) | (location.GetChunkBlockX() >> 2);
 
             if (index < 0 || index >= biomes.Length)
                 return (short) -1;
@@ -124,7 +124,7 @@ namespace MinecraftClient.Mapping
         public byte GetSkyLight(Location location)
         {
             // Move up by one chunk
-            int index = (((int) location.Y - World.GetDimension().minY + Chunk.SizeY) << 8) | (location.ChunkBlockZ << 4) | location.ChunkBlockX;
+            int index = (((int) location.Y - World.GetDimension().minY + Chunk.SizeY) << 8) | (location.GetChunkBlockZ() << 4) | location.GetChunkBlockX();
             
             if (index < 0 || index >= skyLight.Length)
                 return (byte) 0;
@@ -135,7 +135,7 @@ namespace MinecraftClient.Mapping
         public byte GetBlockLight(Location location)
         {
             // Move up by one chunk
-            int index = (((int) location.Y - World.GetDimension().minY + Chunk.SizeY) << 8) | (location.ChunkBlockZ << 4) | location.ChunkBlockX;
+            int index = (((int) location.Y - World.GetDimension().minY + Chunk.SizeY) << 8) | (location.GetChunkBlockZ() << 4) | location.GetChunkBlockX();
             
             if (index < 0 || index >= blockLight.Length)
                 return (byte) 0;

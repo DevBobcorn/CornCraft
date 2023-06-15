@@ -817,7 +817,7 @@ namespace MinecraftClient.Protocol.Handlers
                                     int blockX = locationXZ >> 4;
                                     int blockZ = locationXZ & 0x0F;
                                     Block bloc = new Block(blockIdMeta);
-                                    var loc1 = new Location(chunkX, chunkZ, blockX, blockY, blockZ);
+                                    var loc1 = new Location(chunkX * Chunk.SizeX + blockX, blockY, chunkZ * Chunk.SizeZ + blockZ);
                                     handler.GetWorld().SetBlock(loc1, bloc);
                                     locs.Add(loc1);
                                 }

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using MinecraftClient.Event;
-using MinecraftClient.Mapping;
+using MinecraftClient.Interaction;
 
 namespace MinecraftClient.UI
 {
