@@ -83,7 +83,7 @@ namespace MinecraftClient
 
         #region Environment
         private bool worldAndMovementsRequested = false;
-        private World world = new();
+        private readonly World world = new();
         public World GetWorld() => world;
         public bool IsMovementReady()
         {

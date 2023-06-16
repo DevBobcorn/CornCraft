@@ -57,7 +57,7 @@ namespace MinecraftClient.Control
 
         private void UpdateInteractions(World world)
         {
-            var playerLoc = CoordConvert.Unity2MC(transform.position).ToFloor();
+            var playerLoc = client!.GetLocation().ToFloor();
             var table = BlockInteractionManager.INSTANCE.InteractionTable;
 
             // Remove expired interactions
