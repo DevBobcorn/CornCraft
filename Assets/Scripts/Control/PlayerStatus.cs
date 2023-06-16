@@ -1,6 +1,5 @@
 #nullable enable
 using UnityEngine;
-using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
 {
@@ -41,9 +40,6 @@ namespace MinecraftClient.Control
         public float CurrentVisualYaw = 0F;
 
         public float YawOffset => Mathf.Abs(Mathf.DeltaAngle(TargetVisualYaw, CurrentVisualYaw));
-
-        // Block selection data
-        public Location? TargetBlockPos = null;
 
         public override string ToString()
         {

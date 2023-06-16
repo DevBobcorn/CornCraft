@@ -9,14 +9,16 @@ using MinecraftClient.Interaction;
 
 namespace MinecraftClient.Control
 {
-    public class PlayerInteractionUpdater : MonoBehaviour
+    public class InteractionUpdater : MonoBehaviour
     {
         [SerializeField] public LayerMask BlockSelectionLayer;
 
         public readonly Dictionary<int, BlockInteractionInfo> interactionInfos = new();
         public Location? TargetLocation = null;
+        private CornClient? client;
+        private CameraController? cameraController;
 
-        public void UpdateBlockSelection(Ray? viewRay)
+        private void UpdateBlockSelection(Ray? viewRay)
         {
             if (viewRay is null)
                 return;
@@ -53,7 +55,7 @@ namespace MinecraftClient.Control
 
         public const int INTERACTION_RADIUS_SQR_PLUS = INTERACTION_RADIUS * INTERACTION_RADIUS + INTERACTION_RADIUS;
 
-        public void UpdateInteractions(World world)
+        private void UpdateInteractions(World world)
         {
             var playerLoc = CoordConvert.Unity2MC(transform.position).ToFloor();
             var table = BlockInteractionManager.INSTANCE.InteractionTable;
@@ -153,5 +155,20 @@ namespace MinecraftClient.Control
             return PointOnGridEdge(point.x) || PointOnGridEdge(point.y) || PointOnGridEdge(point.z);
         }
 
+        public void Initialize(CornClient client, CameraController camController)
+        {
+            this.client = client;
+            this.cameraController = camController;
+        }
+
+        void Update()
+        {
+            // Update target block selection
+            UpdateBlockSelection(cameraController!.GetViewportCenterRay());
+
+            // Update player interactions
+            UpdateInteractions(client!.GetWorld());
+
+        }
     }
 }
