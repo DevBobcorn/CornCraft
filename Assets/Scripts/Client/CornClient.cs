@@ -107,7 +107,6 @@ namespace MinecraftClient
         private GameMode gameMode = GameMode.Survival;
         public GameMode GameMode => gameMode;
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
-        public Entity PlayerEntity => clientEntity;
         public float? YawToSend = null, PitchToSend = null;
         public bool Grounded = false;
         private int clientSequenceId;
@@ -122,11 +121,62 @@ namespace MinecraftClient
             return null;
         }
 
-        public object movementLock = new();
-        public Location GetCurrentLocation() => clientEntity.Location;
+        private object movementLock = new();
+        public Location GetLocation() => clientEntity.Location;
+        public Vector3 GetPosition() => CoordConvert.MC2Unity(clientEntity.Location);
+        
+        public void UpdatePlayerStatus(Vector3 newPosition, float newYaw, float newPitch, bool newGrounded)
+        {
+            lock (movementLock)
+            {
+                // Update player location
+                clientEntity.Location = CoordConvert.Unity2MC(newPosition);
+
+                // Update player yaw and pitch
+                
+                if (clientEntity.Yaw != newYaw || clientEntity.Pitch != newPitch)
+                {
+                    YawToSend = newYaw;
+                    clientEntity.Yaw = newYaw;
+                    PitchToSend = newPitch;
+                    clientEntity.Pitch = newPitch;
+                }
+                
+                Grounded = newGrounded;
+            }
+        }
+
+        public Vector3? GetAttackTarget()
+        {
+            var nearbyEntities = EntityRenderManager!.GetNearbyEntities();
+            Vector3? targetPos = null;
+
+            if (nearbyEntities is null || nearbyEntities.Count == 0) // Nothing to do
+                return null;
+            
+            float minDist = float.MaxValue;
+
+            foreach (var pair in nearbyEntities)
+            {
+                if (pair.Value < minDist)
+                {
+                    var render = EntityRenderManager.GetEntityRender(pair.Key);
+
+                    if (render!.Entity.Type.ContainsItem) // Not a valid target
+                        continue;
+
+                    var pos = render.transform.position;
+                    
+                    if (pair.Value <= 16F && pos.y - transform.position.y < 2F)
+                        targetPos = pos;
+                }
+            }
+
+            return targetPos;
+        }
 
         private PlayerController? playerController;
-        public string? PlayerDebugInfo => playerController?.GetDebugInfo();
+        private InteractionUpdater? interactionUpdater;
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         private Dictionary<int, Entity> entities = new();
         #endregion
@@ -148,11 +198,18 @@ namespace MinecraftClient
             // Create player entity
             var playerObj = GameObject.Instantiate(PlayerPrefab);
             playerController = playerObj!.GetComponent<PlayerController>();
-            playerController.SetClientAndCamera(this, CameraController!);
+
+            // Update entity type for dummy client entity
+            clientEntity.Type = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);
+            playerController.Initialize(this, clientEntity, CameraController!);
 
             // Set up camera controller
             CameraController!.SetClient(this);
             CameraController.SetTarget(playerController.cameraRef!);
+
+            // Set up interaction updater
+            interactionUpdater = GetComponent<InteractionUpdater>();
+            interactionUpdater!.Initialize(this, CameraController);
         }
 
         public bool IsPaused() => ScreenControl!.IsPaused;
@@ -175,10 +232,34 @@ namespace MinecraftClient
 
         public string GetInfoString(bool withDebugInfo)
         {
+            string baseString = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}";
+
             if (withDebugInfo)
-                return $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{GameMode}\n{PlayerDebugInfo}\n{ChunkRenderManager?.GetDebugInfo()}\n{EntityRenderManager?.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}\nTime: {EnvironmentManager!.GetTimeString()}";
+            {
+                var targetLoc = interactionUpdater?.TargetLocation;
+                var loc = GetLocation();
+
+                string targetInfo;
+
+                if (targetLoc is not null)
+                {
+                    var targetBlock = world?.GetBlock(targetLoc.Value);
+                    if (targetBlock is not null)
+                        targetInfo = $"Target: {targetLoc}\n{targetBlock}";
+                    else
+                        targetInfo = $"Target: {targetLoc}\n";
+                }
+                else
+                {
+                    targetInfo = "\n";
+                }
+
+                var worldInfo = $"\nLoc: {loc}\nLighting:\nsky {world?.GetSkyLight(loc)} block {world?.GetBlockLight(loc)}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc)}\n{targetInfo}";
+                
+                return baseString + $"{worldInfo}\n{playerController?.GetDebugInfo()}\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
+            }
             
-            return $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}";
+            return baseString;
         }
 
         public bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
@@ -194,7 +275,6 @@ namespace MinecraftClient
             this.protocolVersion = protocol;
             this.playerKeyPair = playerKeyPair;
 
-            clientEntity.Type = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);
             clientEntity.Name = session.PlayerName;
             clientEntity.MaxHealth = 20F;
 
@@ -788,7 +868,7 @@ namespace MinecraftClient
 
             // Look at block before attempting to break it
             if (lookAtBlock)
-                UpdateLocation(GetCurrentLocation(), location);
+                UpdateLocation(GetLocation(), location);
 
             // Send dig start and dig end, will need to wait for server response to know dig result
             // See https://wiki.vg/How_to_Write_a_Client#Digging for more details

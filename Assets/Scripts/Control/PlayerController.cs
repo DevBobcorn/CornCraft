@@ -34,18 +34,20 @@ namespace MinecraftClient.Control
         private PlayerStatusUpdater? statusUpdater;
         public PlayerStatus? Status => statusUpdater?.Status;
 
-        private PlayerInteractionUpdater? interactionUpdater;
-
         private IPlayerState CurrentState = PlayerStates.IDLE;
         [HideInInspector] public bool UseRootMotion = false;
         private AnimatorEntityRender? playerRender;
         private PlayerAccessoryWidget? accessoryWidget;
         public PlayerAccessoryWidget AccessoryWidget => accessoryWidget!;
 
-        public void SetClientAndCamera(CornClient client, CameraController camController)
+        public void Initialize(CornClient client, Entity clientEntity, CameraController camController)
         {
             this.client = client;
             this.cameraController = camController;
+
+            // Initialize player render
+            playerRender = GetComponent<AnimatorEntityRender>();
+            playerRender.Initialize(clientEntity.Type, clientEntity);
         }
 
         public void DisableEntity()
@@ -120,10 +122,8 @@ namespace MinecraftClient.Control
 
                 Status!.GravityDisabled = true;
 
-                lock (client.movementLock)
-                {
-                    transform.position = CoordConvert.MC2Unity(client.PlayerEntity.Location);
-                }
+                // Re-sync player position
+                transform.position = client.GetPosition();
             }
             else
             {
@@ -140,12 +140,6 @@ namespace MinecraftClient.Control
             // Update player status (in water, grounded, etc)
             if (!Status.Spectating)
                 statusUpdater!.UpdatePlayerStatus(client!.GetWorld(), visualTransform!.forward);
-
-            // Update target block selection
-            interactionUpdater!.UpdateBlockSelection(cameraController!.GetViewportCenterRay());
-
-            // Update player interactions
-            interactionUpdater.UpdateInteractions(client!.GetWorld());
 
             var status = statusUpdater!.Status;
 
@@ -198,41 +192,20 @@ namespace MinecraftClient.Control
             playerRender!.UpdateAnimation(client!.GetTickMilSec());
 
             // Tell server our current position
-            Location newLocation;
+            Vector3 newPosition;
 
             if (CurrentState is ForceMoveState)
             // Use move origin as the player location to tell to server, to
             // prevent sending invalid positions during a force move operation
-                newLocation = CoordConvert.Unity2MC(((ForceMoveState) CurrentState).GetFakePlayerOffset());
+                newPosition = ((ForceMoveState) CurrentState).GetFakePlayerOffset();
             else
-                newLocation = CoordConvert.Unity2MC(transform.position);
-
-            // Preprocess the location before sending it (to avoid position correction from server)
-            if ((status.Grounded || status.CenterDownDist < 0.5F) && newLocation.Y - (int)newLocation.Y > 0.9D)
-                newLocation.Y = (int)newLocation.Y + 1;
+                newPosition = transform.position;
 
             // Update client player data
-            lock (client.movementLock)
-            {
-                var playerEntity = client.PlayerEntity;
-
-                // Update player location
-                playerEntity.Location = newLocation;
-
-                // Update player yaw and pitch
-                var newYaw = visualTransform!.eulerAngles.y - 90F;
-                var newPitch = 0F;
-                if (playerEntity.Yaw != newYaw || playerEntity.Pitch != newPitch)
-                {
-                    client.YawToSend = newYaw;
-                    playerEntity.Yaw = newYaw;
-                    client.PitchToSend = newPitch;
-                    playerEntity.Pitch = newPitch;
-                }
-                
-                client.Grounded = Status.Grounded;
-                
-            }
+            var newYaw = visualTransform!.eulerAngles.y - 90F;
+            var newPitch = 0F;
+            
+            client.UpdatePlayerStatus(newPosition, newYaw, newPitch, status.Grounded);
         }
 
         public void PhysicalUpdate(float interval)
@@ -279,30 +252,7 @@ namespace MinecraftClient.Control
 
         public void TurnToAttackTarget()
         {
-            var entityManager = client!.EntityRenderManager;
-            var nearbyEntities = entityManager?.GetNearbyEntities();
-
-            if (nearbyEntities is null || nearbyEntities.Count == 0) // Nothing to do
-                return;
-            
-            float minDist = float.MaxValue;
-            Vector3? targetPos = null;
-
-            foreach (var pair in nearbyEntities)
-            {
-                if (pair.Value < minDist)
-                {
-                    var render = entityManager?.GetEntityRender(pair.Key);
-
-                    if (render!.Entity.Type.ContainsItem) // Not a valid target
-                        continue;
-
-                    var pos = render.transform.position;
-                    
-                    if (pair.Value <= 16F && pos.y - transform.position.y < 2F)
-                        targetPos = pos;
-                }
-            }
+            Vector3? targetPos = client?.GetAttackTarget();
 
             if (targetPos is null) // Failed to get attack target's position, do nothing
                 return;
@@ -315,7 +265,6 @@ namespace MinecraftClient.Control
             statusUpdater!.Status.CurrentVisualYaw = attackYaw;
 
             visualTransform!.eulerAngles = new(0F, attackYaw, 0F);
-
         }
 
         public void AttackDamage(bool enable)
@@ -370,19 +319,12 @@ namespace MinecraftClient.Control
 
         void Start()
         {
-            // Create player entity
-            var playerEntity = CornApp.CurrentClient!.PlayerEntity;
-
-            // Initialize player visuals
-            playerRender = GetComponent<AnimatorEntityRender>();
-            playerRender.Initialize(playerEntity.Type, playerEntity);
-
+            // Get player entity
             playerRigidbody = GetComponent<Rigidbody>();
             playerRigidbody.useGravity = true;
 
             statusUpdater = GetComponent<PlayerStatusUpdater>();
             userInput = GetComponent<PlayerUserInput>();
-            interactionUpdater = GetComponent<PlayerInteractionUpdater>();
             accessoryWidget = visualTransform!.GetComponent<PlayerAccessoryWidget>();
 
             perspectiveCallback = (e) => { };
@@ -454,22 +396,7 @@ namespace MinecraftClient.Control
 
         public string GetDebugInfo()
         {
-            if (client == null) return string.Empty;
-
             string targetBlockInfo = string.Empty;
-            var loc = client.GetCurrentLocation();
-            var world = client.GetWorld();
-
-            var target = interactionUpdater?.TargetLocation;
-
-            if (target is not null)
-            {
-                var targetBlock = world?.GetBlock(target.Value);
-                if (targetBlock is not null)
-                    targetBlockInfo = targetBlock.ToString();
-            }
-
-            var lightInfo = $"sky {world?.GetSkyLight(loc)} block {world?.GetBlockLight(loc)}";
 
             var velocity = playerRigidbody?.velocity;
             // Visually swap xz velocity to fit vanilla
@@ -482,8 +409,7 @@ namespace MinecraftClient.Control
             else
                 statusInfo = statusUpdater!.Status.ToString();
             
-            return $"Pos:\t{loc}\nState:\t{CurrentState}\n{veloInfo}\nLighting:\t{lightInfo}\n{statusInfo}\nTarget Block:\t{target}\n{targetBlockInfo}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc).GetDescription()}";
-
+            return $"State:\t{CurrentState}\n{veloInfo}\n{statusInfo}";
         }
 
     }

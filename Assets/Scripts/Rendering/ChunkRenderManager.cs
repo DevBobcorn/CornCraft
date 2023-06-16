@@ -167,7 +167,7 @@ namespace MinecraftClient.Rendering
             var world = client?.GetWorld();
             if (world is null) return;
 
-            var location = client!.GetCurrentLocation();
+            var location = client!.GetLocation();
             ChunkRenderColumn columnRender;
 
             int viewDist = CornGlobal.MCSettings.RenderDistance;
@@ -225,7 +225,7 @@ namespace MinecraftClient.Rendering
             if (world is null) return;
 
             // Add nearby chunks
-            var location   = client!.GetCurrentLocation();
+            var location   = client!.GetLocation();
             int unloadDist = Mathf.RoundToInt(CornGlobal.MCSettings.RenderDistance * 2F);
 
             var chunkCoords = columns.Keys.ToArray();
@@ -357,7 +357,7 @@ namespace MinecraftClient.Rendering
             else if (loc.GetChunkBlockZ() == Chunk.SizeZ - 1)
                 QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ + 1));
             
-            if (loc.DistanceSquared(client!.PlayerEntity.Location) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)
+            if (loc.DistanceSquared(client!.GetLocation()) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)
                 terrainColliderDirty = true; // Terrain collider needs to be updated
         }
 
@@ -401,7 +401,7 @@ namespace MinecraftClient.Rendering
             operationCode = (operationCode + 1) % OPERATION_CYCLE_LENGTH;
 
             // Update terrain collider if necessary
-            var playerLoc = client?.PlayerEntity.Location.ToFloor();
+            var playerLoc = client?.GetLocation().ToFloor();
             if (playerLoc != null && (terrainColliderDirty || lastPlayerLoc != playerLoc))
                 RebuildTerrainCollider(playerLoc.Value);
         }

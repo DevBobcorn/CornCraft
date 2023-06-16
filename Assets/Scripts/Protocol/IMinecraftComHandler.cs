@@ -28,7 +28,7 @@ namespace MinecraftClient.Protocol
         string[] GetOnlinePlayers();
         Dictionary<string, string> GetOnlinePlayersWithUUID();
         PlayerInfo? GetPlayerInfo(Guid uuid);
-        Location GetCurrentLocation();
+        Location GetLocation();
         World GetWorld();
 
         /// <summary>

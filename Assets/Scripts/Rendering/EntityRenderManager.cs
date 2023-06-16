@@ -185,7 +185,7 @@ namespace MinecraftClient.Rendering
                 render.ManagedUpdate(client!.GetTickMilSec());
 
                 // Update entities around the player
-                float dist = (render.transform.position - CoordConvert.MC2Unity(client.GetCurrentLocation())).sqrMagnitude;
+                float dist = (render.transform.position - client.GetPosition()).sqrMagnitude;
                 int entityId = render.Entity.ID;
 
                 bool inDict = nearbyEntities.ContainsKey(entityId);
