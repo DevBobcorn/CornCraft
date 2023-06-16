@@ -148,31 +148,7 @@ namespace MinecraftClient
 
         public Vector3? GetAttackTarget()
         {
-            var nearbyEntities = EntityRenderManager!.GetNearbyEntities();
-            Vector3? targetPos = null;
-
-            if (nearbyEntities is null || nearbyEntities.Count == 0) // Nothing to do
-                return null;
-            
-            float minDist = float.MaxValue;
-
-            foreach (var pair in nearbyEntities)
-            {
-                if (pair.Value < minDist)
-                {
-                    var render = EntityRenderManager.GetEntityRender(pair.Key);
-
-                    if (render!.Entity.Type.ContainsItem) // Not a valid target
-                        continue;
-
-                    var pos = render.transform.position;
-                    
-                    if (pair.Value <= 16F && pos.y - transform.position.y < 2F)
-                        targetPos = pos;
-                }
-            }
-
-            return targetPos;
+            return EntityRenderManager!.GetAttackTarget(GetPosition());
         }
 
         private PlayerController? playerController;

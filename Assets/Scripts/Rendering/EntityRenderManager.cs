@@ -126,6 +126,33 @@ namespace MinecraftClient.Rendering
 
         public Dictionary<int, float> GetNearbyEntities() => nearbyEntities;
 
+        public Vector3? GetAttackTarget(Vector3 playerPos)
+        {
+            if (nearbyEntities.Count == 0) // Nothing to attack
+                return null;
+            
+            Vector3? targetPos = null;
+            float minDist = float.MaxValue;
+
+            foreach (var pair in nearbyEntities)
+            {
+                if (pair.Value < minDist)
+                {
+                    var render = GetEntityRender(pair.Key);
+
+                    if (render!.Entity.Type.ContainsItem) // Not a valid target
+                        continue;
+
+                    var pos = render.transform.position;
+                    
+                    if (pair.Value <= 16F && pos.y - playerPos.y < 2F)
+                        targetPos = pos;
+                }
+            }
+
+            return targetPos;
+        }
+
         public EntityRender? GetEntityRender(int entityId)
         {
             if (entityRenders.ContainsKey(entityId))
