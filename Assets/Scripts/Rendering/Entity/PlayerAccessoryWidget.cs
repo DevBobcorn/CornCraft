@@ -3,22 +3,21 @@ using UnityEngine;
 
 using MinecraftClient.Control;
 
+
 namespace MinecraftClient.Rendering
 {
-public class PlayerAccessoryWidget : MonoBehaviour
-{
+    public class PlayerAccessoryWidget : MonoBehaviour
+    {
+        [SerializeField] private Transform? mainHandBone;
+        [SerializeField] private Transform? weaponRef;
+        [SerializeField] public Transform? weaponSlotBone;
+        [SerializeField] public GameObject? meleeWeaponPrefab;
+
         private PlayerController? player;
-
-        public Transform? mainHandBone;
-
-        public Transform? weaponRef;
         private Vector3 weaponPosition;
-        public Transform? weaponSlotBone;
-
-        public GameObject? meleeWeaponPrefab;
         private MeleeWeapon? currentWeapon;
 
-        public void HoldWeapon()
+        private void HoldWeapon()
         {
             if (currentWeapon is not null)
             {
@@ -29,7 +28,7 @@ public class PlayerAccessoryWidget : MonoBehaviour
             }
         }
 
-        public void MountWeapon()
+        private void MountWeapon()
         {
             if (currentWeapon is not null)
             {
@@ -50,8 +49,8 @@ public class PlayerAccessoryWidget : MonoBehaviour
         public void DamageStop()
         {
             player!.AttackDamage(false);
-
-            player.DealDamage(currentWeapon!.EndSlash());
+            
+            currentWeapon!.EndSlash();
         }
 
         public void StageEnding()
@@ -71,6 +70,18 @@ public class PlayerAccessoryWidget : MonoBehaviour
             currentWeapon = weaponObj!.GetComponent<MeleeWeapon>();
 
             player = GetComponentInParent<PlayerController>();
+            player.OnWeaponStateChanged += (weaponState) => {
+                switch (weaponState)
+                {
+                    case PlayerController.WeaponState.Hold:
+                        HoldWeapon();
+                        break;
+                    case PlayerController.WeaponState.Mount:
+                        MountWeapon();
+                        break;
+                }
+            };
+
             weaponPosition = weaponSlotBone.position;
 
             weaponSlotBone.position = weaponPosition;

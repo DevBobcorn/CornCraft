@@ -6,7 +6,7 @@ using MinecraftClient.Event;
 
 namespace MinecraftClient.Control
 {
-    public class CameraControllerCinemachine : CameraController
+    public class SimpleCameraController : CameraController
     {
         [SerializeField] private float nearFov = 40F;
         [SerializeField] private float farFov  = 80F;
@@ -24,10 +24,10 @@ namespace MinecraftClient.Control
         [SerializeField] private LayerMask firstPersonCullingMask;
 
         // Virtual camera and camera components
-        private CinemachineVirtualCamera? virtualCameraFollow;
+        [SerializeField] private CinemachineVirtualCamera? virtualCameraFollow;
         private CinemachineFramingTransposer? framingTransposer;
         
-        private CinemachineVirtualCamera? virtualCameraFixed;
+        [SerializeField] private CinemachineVirtualCamera? virtualCameraFixed;
 
         private CinemachinePOV? followPOV, fixedPOV;
 
@@ -38,16 +38,10 @@ namespace MinecraftClient.Control
             if (!initialized)
             {
                 // Get virtual and render cameras
-                var followObj = transform.Find("Follow Virtual");
-                virtualCameraFollow = followObj.GetComponent<CinemachineVirtualCamera>();
-                followPOV = virtualCameraFollow.GetCinemachineComponent<CinemachinePOV>();
+                followPOV = virtualCameraFollow!.GetCinemachineComponent<CinemachinePOV>();
                 framingTransposer = virtualCameraFollow.GetCinemachineComponent<CinemachineFramingTransposer>();
 
-                var fixedObj = transform.Find("Fixed Virtual");
-                virtualCameraFixed = fixedObj.GetComponent<CinemachineVirtualCamera>();
-                fixedPOV = virtualCameraFixed.GetCinemachineComponent<CinemachinePOV>();
-
-                renderCamera = GetComponentInChildren<Camera>();
+                fixedPOV = virtualCameraFixed!.GetCinemachineComponent<CinemachinePOV>();
 
                 if (renderCamera is not null)
                     renderCameraPresent = true;
@@ -76,10 +70,10 @@ namespace MinecraftClient.Control
             SetPerspective(Perspective.ThirdPerson);
         }
 
-        void Update() => ManagedUpdate(Time.deltaTime);
-
-        void ManagedUpdate(float interval)
+        void Update()
         {
+            if (client == null) return;
+
             // Disable input when game is paused, see EnsureInitialized() above
             if (!client!.MouseScrollAbsorbed())
             {
@@ -89,25 +83,21 @@ namespace MinecraftClient.Control
                 if (scroll != 0F)
                     cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - scroll * scrollSensitivity);
             }
-
-            var curPersp = client!.Perspective;
             
             if (cameraInfo.TargetScale != cameraInfo.CurrentScale)
             {
-                cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, interval * scaleSmoothFactor);
+                cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, Time.deltaTime * scaleSmoothFactor);
 
                 var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
                 virtualCameraFollow!.m_Lens.FieldOfView = fov;
                 virtualCameraFixed!.m_Lens.FieldOfView  = fov;
 
-                if (curPersp == Perspective.ThirdPerson) // Update target local position
+                if (client!.Perspective == Perspective.ThirdPerson) // Update target local position
                 {
                     framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
                     framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
                 }
-                
             }
-
         }
 
         public override void SetTarget(Transform target)
@@ -120,14 +110,7 @@ namespace MinecraftClient.Control
             virtualCameraFixed!.Follow = target;
         }
 
-        public override Transform? GetTarget()
-        {
-            EnsureInitialized();
-            
-            return virtualCameraFollow!.Follow;
-        }
-
-        public override float GetYaw() => renderCameraPresent ? renderCamera!.transform.eulerAngles.y : 0F;
+        public override Transform? GetTarget() => virtualCameraFollow?.Follow;
 
         public override void SetYaw(float yaw)
         {
@@ -160,10 +143,22 @@ namespace MinecraftClient.Control
             EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(perspective));
         }
 
-        public override bool IsFixed()
+        private bool IsFixed()
         {
             // Camera controller is fixed when player's in first person mode
             return client!.Perspective == Perspective.FirstPerson;
+        }
+
+        public override Vector3 GetTargetScreenPos()
+        {
+            if (IsFixed())
+                return renderCameraPresent ? renderCamera!.ViewportToScreenPoint(VIEWPORT_CENTER) : Vector3.zero;
+            
+            var targetPos = GetTarget()?.position;
+            if (renderCameraPresent && targetPos is not null)
+                return renderCamera!.WorldToScreenPoint(targetPos.Value);
+            
+            return Vector3.zero;
         }
 
         private void EnterFirstPersonMode(Perspective prevPersp)

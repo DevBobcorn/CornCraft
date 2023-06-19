@@ -1577,10 +1577,10 @@ MonoBehaviour:
   showDensityControls: 0
   showTextureControls: 0
   showWindControls: 0
-  cloudAnimLayer1: {x: -0.7735269, y: 0.75561595, z: 0.11632456}
+  cloudAnimLayer1: {x: -0.07428296, y: -0.54617864, z: -0.67880315}
   cloudAnimLayer2: {x: 0.3174014, y: -0.67647, z: 0.67947596}
-  cloudAnimNonScaledLayer1: {x: -0.80995506, y: 1.5880867, z: -59.420387}
-  cloudAnimNonScaledLayer2: {x: -0.42685094, y: -0.009999535, z: -57.081665}
+  cloudAnimNonScaledLayer1: {x: -0.6701128, y: 1.7279297, z: -59.55981}
+  cloudAnimNonScaledLayer2: {x: -0.56669724, y: -0.14984834, z: -57.22109}
   weatherMap: {fileID: 0}
 --- !u!114 &-304633943039718671
 MonoBehaviour:
@@ -1681,6 +1681,17 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   fogMat: {fileID: 0}
   volumetricsMat: {fileID: 0}
   blurMat: {fileID: 0}
@@ -1723,7 +1734,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0081d4f9e5d6e0a4d9fe8e7a8d7256b6, type: 3}
   m_Name: Time Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 1
+  showModuleInspector: 0
   showSaveLoad: 1
   active: 1
   Settings:
