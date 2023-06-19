@@ -66,7 +66,8 @@ namespace MinecraftClient.UI
             if (!IsActive)
                 return;
             
-            if (Input.GetKeyDown(KeyCode.Escape))
+            // Escape key cannot be used here, otherwise it will push pause screen back after poping it
+            if (Input.GetKeyDown(KeyCode.Return))
                 Back2Game();
 
         }
