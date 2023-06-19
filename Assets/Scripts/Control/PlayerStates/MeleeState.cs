@@ -91,7 +91,7 @@ namespace MinecraftClient.Control
             StartMeleeStage(meleeAttack, attackStatus, true, 0, player);
 
             //Debug.Log("Attack starts!");
-            player.AccessoryWidget.HoldWeapon();
+            player.ChangeWeaponState(PlayerController.WeaponState.Hold);
             player.UseRootMotion = true;
 
             rigidbody.velocity = Vector3.zero;
@@ -108,7 +108,7 @@ namespace MinecraftClient.Control
             attackStatus.AttackCooldown = 0F;
 
             //Debug.Log("Attack ends!");
-            player.AccessoryWidget.MountWeapon();
+            player.ChangeWeaponState(PlayerController.WeaponState.Mount);
             player.UseRootMotion = false;
 
         }

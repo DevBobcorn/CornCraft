@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -14,6 +13,9 @@ namespace MinecraftClient.Mapping
         private readonly Dictionary<int, EntityType> entityTypeTable = new();
         private readonly Dictionary<ResourceLocation, int> dictId = new();
 
+        public static readonly EntityType UNKNOWN_ENTITY_TYPE = new(UNKNOWN_ENTITY_NUM_ID, new("unknown_entity"));
+        public const int UNKNOWN_ENTITY_NUM_ID = -1;
+
         /// <summary>
         /// Get entity type from numeral id
         /// </summary>
@@ -25,7 +27,7 @@ namespace MinecraftClient.Mapping
             if (entityTypeTable.ContainsKey(id))
                 return entityTypeTable[id];
 
-            throw new System.IO.InvalidDataException($"Unknown Entity ID {id} in palette {GetType()}");
+            return UNKNOWN_ENTITY_TYPE;
         }
 
         /// <summary>
@@ -36,7 +38,8 @@ namespace MinecraftClient.Mapping
             if (dictId.ContainsKey(identifier))
                 return dictId[identifier];
             
-            throw new System.IO.InvalidDataException($"Unknown Entity Type {identifier}");
+            Debug.LogWarning($"Unknown Entity Type {identifier}");
+            return UNKNOWN_ENTITY_NUM_ID;
         }
 
         /// <summary>

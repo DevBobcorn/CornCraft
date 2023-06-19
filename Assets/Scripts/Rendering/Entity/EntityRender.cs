@@ -66,6 +66,8 @@ namespace MinecraftClient.Rendering
 
         public virtual void Initialize(EntityType entityType, Entity entity)
         {
+            Entity = entity;
+
             if (visual == null)
             {
                 Debug.LogWarning("Visual transform for entity render not assigned!");

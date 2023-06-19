@@ -110,9 +110,6 @@ namespace MinecraftClient.Rendering
             water.SetTexture("_BaseMap", packManager.GetAtlasArray(RenderType.TRANSLUCENT));
             atlasMaterials.Add(RenderType.WATER, water);
 
-            // Player Skins
-            LoadPlayerSkins();
-
             initialized = true;
 
         }

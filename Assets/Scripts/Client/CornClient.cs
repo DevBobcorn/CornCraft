@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using System.IO;
 
 using UnityEngine;
@@ -41,7 +42,6 @@ namespace MinecraftClient
         private int port;
         private int protocolVersion;
         private string? username;
-        private string? uuidStr;
         private Guid uuid;
         private string? sessionId;
         private PlayerKeyPair? playerKeyPair;
@@ -49,7 +49,7 @@ namespace MinecraftClient
         public int GetServerPort() => port;
         public string GetUsername() => username!;
         public Guid GetUserUUID() => uuid;
-        public string GetUserUUIDStr() => uuidStr!;
+        public string GetUserUUIDStr() => uuid.ToString().Replace("-", string.Empty);
         public string GetSessionID() => sessionId!;
         #endregion
 
@@ -82,7 +82,6 @@ namespace MinecraftClient
         #endregion
 
         #region Environment
-        private bool worldAndMovementsRequested = false;
         private readonly World world = new();
         public World GetWorld() => world;
         public bool IsMovementReady()
@@ -102,10 +101,8 @@ namespace MinecraftClient
 
         #region Players and Entities
         private bool locationReceived = false;
-        public bool LocationReceived => locationReceived;
         public Perspective Perspective = 0;
-        private GameMode gameMode = GameMode.Survival;
-        public GameMode GameMode => gameMode;
+        public GameMode GameMode { get; private set; } = GameMode.Survival;
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         public float? YawToSend = null, PitchToSend = null;
         public bool Grounded = false;
@@ -165,6 +162,8 @@ namespace MinecraftClient
 
         void Start()
         {
+            MaterialManager!.LoadPlayerSkins();
+
             // Push HUD Screen on start
             ScreenControl!.PushScreen(HUDScreen!);
 
@@ -174,10 +173,7 @@ namespace MinecraftClient
             // Create player entity
             var playerObj = GameObject.Instantiate(PlayerPrefab);
             playerController = playerObj!.GetComponent<PlayerController>();
-
-            // Update entity type for dummy client entity
-            clientEntity.Type = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);
-            playerController.Initialize(this, clientEntity, CameraController!);
+            playerController.Initialize(this, CameraController!);
 
             // Set up camera controller
             CameraController!.SetClient(this);
@@ -244,15 +240,11 @@ namespace MinecraftClient
             this.sessionId = session.ID;
             if (!Guid.TryParse(session.PlayerID, out this.uuid))
                 this.uuid = Guid.Empty;
-            this.uuidStr = session.PlayerID;
             this.username = session.PlayerName;
             this.host = serverIp;
             this.port = port;
             this.protocolVersion = protocol;
             this.playerKeyPair = playerKeyPair;
-
-            clientEntity.Name = session.PlayerName;
-            clientEntity.MaxHealth = 20F;
 
             // Start up client
             try
@@ -271,7 +263,19 @@ namespace MinecraftClient
                 timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
 
                 if (handler.Login(this.playerKeyPair, session, accountLower)) // Login
+                {
+                    // Update entity type for dummy client entity
+                    clientEntity.Type = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);
+                    // Update client entity name
+                    clientEntity.Name = session.PlayerName;
+                    clientEntity.UUID = uuid;
+                    clientEntity.SetHeadYawFromByte(127);
+                    clientEntity.MaxHealth = 20F;
+
+                    playerController!.InitializePlayer(clientEntity, GameMode);
+
                     return true; // Client successfully started
+                }
                 else
                 {
                     Debug.LogError(Translations.Get("error.login_failed"));
@@ -681,6 +685,9 @@ namespace MinecraftClient
         /// <returns>True if packet successfully sent</returns>
         public bool SendRespawnPacket()
         {
+            // Reset location received flag
+            locationReceived = false;
+
             if (InvokeRequired)
                 return InvokeOnNetMainThread<bool>(SendRespawnPacket);
 
@@ -911,7 +918,7 @@ namespace MinecraftClient
         /// <param name="UUID">UUID of player/entity to teleport to</param>
         public bool SpectateByUUID(Guid UUID)
         {
-            if(gameMode == GameMode.Spectator)
+            if(GameMode == GameMode.Spectator)
             {
                 if(InvokeRequired)
                     return InvokeOnNetMainThread(() => SpectateByUUID(UUID));
@@ -961,14 +968,7 @@ namespace MinecraftClient
         {
             ClearTasks();
 
-            if (worldAndMovementsRequested)
-            {
-                worldAndMovementsRequested = false;
-                Debug.Log(Translations.Get("extra.terrainandmovement_enabled"));
-            }
-
             world.Clear();
-            
             entities.Clear();
             ClearInventories();
 
@@ -1161,11 +1161,11 @@ namespace MinecraftClient
         /// <summary>
         /// Set client player's ID for later receiving player's own properties
         /// </summary>
-        /// <param name="EntityID">Player Entity ID</param>
-        public void OnReceivePlayerEntityID(int EntityID)
+        /// <param name="entityID">Player Entity ID</param>
+        public void OnReceivePlayerEntityID(int entityID)
         {
-            clientEntity.ID = EntityID;
-            
+            clientEntity.ID = entityID;
+            Debug.Log($"Client entity id received: {entityID}");
         }
 
         /// <summary>
@@ -1181,8 +1181,9 @@ namespace MinecraftClient
             if (player.Name == username)
             {
                 // 1.19+ offline server is possible to return different uuid
-                this.uuidStr = player.UUID.ToString().Replace("-", string.Empty);
                 this.uuid = player.UUID;
+                // Also update client entity uuid
+                clientEntity.UUID = uuid;
             }
 
             lock (onlinePlayers)
@@ -1275,8 +1276,8 @@ namespace MinecraftClient
             if (uuid == Guid.Empty) // Initial gamemode on login
             {
                 Loom.QueueOnMainThread(() =>{
-                    this.gameMode = (GameMode) gamemode;
-                    EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(this.gameMode));
+                    GameMode = (GameMode) gamemode;
+                    EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
                 });
             }
             else if (onlinePlayers.ContainsKey(uuid)) // Further regular gamemode change events
@@ -1285,10 +1286,10 @@ namespace MinecraftClient
                 if (playerName == this.username)
                 {
                     Loom.QueueOnMainThread(() =>{
-                        this.gameMode = (GameMode) gamemode;
-                        EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(this.gameMode));
+                        GameMode = (GameMode) gamemode;
+                        EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
 
-                        CornApp.Notify($"Gamemode updated to {this.gameMode}", Notification.Type.Success);
+                        CornApp.Notify($"Gamemode updated to {GameMode}", Notification.Type.Success);
                     });
                 }
             }

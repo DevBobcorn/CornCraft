@@ -6,10 +6,10 @@ namespace MinecraftClient.Control
 {
     public abstract class CameraController : MonoBehaviour
     {
+        [SerializeField] protected Camera? renderCamera; // Camera used for actual rendering
         protected static readonly Vector3 VIEWPORT_CENTER    = new(0.5F,  0.5F, 0F);
         protected CameraInfo cameraInfo = new();
-        // Camera used for actual rendering
-        protected Camera? renderCamera;
+        public Camera? RenderCamera => renderCamera;
 
         protected CornClient? client;
         public void SetClient(CornClient client) => this.client = client;
@@ -32,21 +32,8 @@ namespace MinecraftClient.Control
 
         public abstract Transform? GetTarget();
 
-        public abstract bool IsFixed();
-
-        public virtual Vector3? GetViewEularAngles()
-        {
-            EnsureInitialized();
-
-            return renderCamera?.transform.eulerAngles;
-        }
         public virtual Vector3 GetTargetScreenPos()
         {
-            if (IsFixed())
-                return renderCameraPresent ? renderCamera!.ViewportToScreenPoint(VIEWPORT_CENTER) : Vector3.zero;
-            
-            EnsureInitialized();
-            
             var targetPos = GetTarget()?.position;
             if (renderCameraPresent && targetPos is not null)
                 return renderCamera!.WorldToScreenPoint(targetPos.Value);
@@ -54,7 +41,21 @@ namespace MinecraftClient.Control
             return Vector3.zero;
         }
 
-        public abstract float GetYaw();
+        public virtual Vector3? GetTransfromScreenPos(Transform? t)
+        {
+            EnsureInitialized();
+
+            var targetPos = t?.position;
+            if (renderCameraPresent && targetPos is not null)
+            {
+                if (renderCamera!.WorldToViewportPoint(targetPos.Value).z > 0F)
+                    return renderCamera!.WorldToScreenPoint(targetPos.Value);
+            }
+            
+            return null;
+        }
+
+        public virtual Vector3? GetViewEularAngles() => renderCamera?.transform.eulerAngles;
 
         public abstract void SetYaw(float yaw);
 
