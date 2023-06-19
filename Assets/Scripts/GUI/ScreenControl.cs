@@ -19,7 +19,6 @@ namespace MinecraftClient.UI
         }
 
         private Stack<BaseScreen> screenStack = new Stack<BaseScreen>();
-        private float screenChangeCooldown = 0F;
 
         public bool IsTopScreen(BaseScreen screen)
         {
@@ -36,9 +35,6 @@ namespace MinecraftClient.UI
 
         public void PushScreen(BaseScreen screen)
         {
-            if (screenChangeCooldown > 0F)
-                return;
-
             if (screen is not null && screen.EnsureInitialized())
             {
                 // Deactive previous top screen if present
@@ -53,17 +49,12 @@ namespace MinecraftClient.UI
                 screen.transform.SetAsLastSibling();
 
                 UpdateScreenStates();
-
-                screenChangeCooldown = 0.1F;
             }
 
         }
 
         public void TryPopScreen()
         {
-            if (screenChangeCooldown > 0F)
-                return;
-            
             if (screenStack.Count <= 0)
                 Debug.LogError("Trying to pop an already empty screen stack!");
 
@@ -78,8 +69,6 @@ namespace MinecraftClient.UI
                 screenStack.Peek().IsActive = true;
 
             UpdateScreenStates();
-
-            screenChangeCooldown = 0.1F;
 
         }
 
@@ -109,12 +98,6 @@ namespace MinecraftClient.UI
             }
 
             Cursor.lockState = releaseCursor ? CursorLockMode.None : CursorLockMode.Locked;
-
-        }
-
-        void Update()
-        {
-            screenChangeCooldown -= Time.deltaTime;
 
         }
 
