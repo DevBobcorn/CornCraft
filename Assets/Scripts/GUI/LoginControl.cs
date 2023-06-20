@@ -83,10 +83,7 @@ namespace MinecraftClient.UI
         {
             string serverText = serverInput!.text;
             string account = usernameInput!.text;
-
             string accountLower = account.ToLower();
-
-            string username; // In-game display name, will be set after connection
 
             SessionToken session = new SessionToken();
             PlayerKeyPair? playerKeyPair = null;
@@ -220,9 +217,6 @@ namespace MinecraftClient.UI
                         }
                     }
                 }
-
-                // Update the in-game user name
-                username = session.PlayerName;
 
                 if (CornGlobal.DebugMode)
                     Debug.Log(Translations.Get("debug.session_id", session.ID));
