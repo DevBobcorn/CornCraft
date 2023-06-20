@@ -66,11 +66,7 @@ namespace MinecraftClient.Control
             if (cameraInfo.TargetScale != cameraInfo.CurrentScale)
             {
                 cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, Time.deltaTime * scaleSmoothFactor);
-
-                if (client!.Perspective == Perspective.ThirdPerson) // Update target local position
-                {
-                    framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
-                }
+                framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
             }
         }
 
