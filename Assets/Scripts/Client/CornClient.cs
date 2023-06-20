@@ -409,7 +409,12 @@ namespace MinecraftClient
             tcpClient?.Close();
             tcpClient = null;
             
-            CornApp.Instance.BackToLogin();
+            Loom.QueueOnMainThread(() => {
+                // Return to login scene
+                CornApp.Instance.BackToLogin();
+                
+            });
+            
         }
 
         /// <summary>
