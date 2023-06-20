@@ -11,9 +11,9 @@ namespace MinecraftClient.Control
     {
         private PlayerEntityRiggedRender? playerRender;
 
-        public override void InitializePlayer(Entity clientEntity, GameMode initGameMode)
+        public override void SetClientEntity(Entity clientEntity)
         {
-            base.InitializePlayer(clientEntity, initGameMode);
+            base.SetClientEntity(clientEntity);
 
             // Initialize player render
             playerRender = GetComponent<PlayerEntityRiggedRender>();

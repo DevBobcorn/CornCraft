@@ -16,7 +16,6 @@ namespace MinecraftClient.Control
             Mount
         }
 
-
         [SerializeField] public PlayerMeleeAttack? meleeAttack;
         public PlayerMeleeAttack MeleeAttack => meleeAttack!;
 
@@ -94,17 +93,13 @@ namespace MinecraftClient.Control
 
             // Disable entity on start
             DisableEntity();
-        }
-
-        public virtual void InitializePlayer(Entity clientEntity, GameMode initGameMode)
-        {
-            // Initialize player controller with initial gamemode
-            SetGameMode(initGameMode);
 
             // Register gamemode events for updating gamemode
             gameModeCallback = (e) => SetGameMode(e.GameMode);
             EventManager.Instance.Register(gameModeCallback);
         }
+
+        public virtual void SetClientEntity(Entity clientEntity) { }
 
         protected void SetGameMode(GameMode gameMode)
         {
@@ -113,12 +108,12 @@ namespace MinecraftClient.Control
                 case GameMode.Survival:
                 case GameMode.Creative:
                 case GameMode.Adventure:
-                    EnableEntity();
                     Status!.Spectating = false;
+                    CheckMovement();
                     break;
                 case GameMode.Spectator:
-                    DisableEntity();
                     Status!.Spectating = true;
+                    CheckMovement();
                     break;
             }
         }
@@ -259,10 +254,16 @@ namespace MinecraftClient.Control
             }
             else // Movement is now ready
             {
-                if (Status!.GravityDisabled && !Status.Spectating) // Player entity was previously disabled, and this player is not in spector mode
+                if (Status!.GravityDisabled && !Status.Spectating) // Player entity was previously disabled, and this player is not in spectator mode
                 {
                     // Enable it back
                     EnableEntity();
+                }
+
+                if (!Status!.GravityDisabled && Status.Spectating) // Player entity was not disabled, but this player is in spectator mode
+                {
+                    // Disable entity
+                    DisableEntity();
                 }
             }
         }
@@ -376,10 +377,7 @@ namespace MinecraftClient.Control
                 playerRigidbody.velocity = Vector3.zero;
             
             playerRigidbody.position = CoordConvert.MC2Unity(loc);
-            visualTransform!.eulerAngles = new(0F, yaw + 90F, 0F);
-            cameraController?.SetYaw(yaw + 90F);
-
-            Debug.Log($"Position set to {playerRigidbody.position} with yaw {yaw}");
+            visualTransform!.eulerAngles = new(0F, yaw, 0F);
         }
 
         protected static float GetYawFromVector2(Vector2 direction)
