@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MinecraftClient.Control
 {
-    [CreateAssetMenu(fileName = "PlayerMeleeAttack", menuName = "CornCraft/PlayerMeleeAttack")]
+    [CreateAssetMenu(menuName = "CornCraft/PlayerMeleeAttack")]
     public class PlayerMeleeAttack : ScriptableObject
     {
         [SerializeField] [Range(0.1F, 10F)] public float MaxStageDuration = 10F;

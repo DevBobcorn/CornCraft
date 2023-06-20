@@ -174,7 +174,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4437c7076747dbd4fa52519dcbf8845e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  meleeAttack: {fileID: 11400000, guid: e215da3fa58399d4b89a7a92cd8a128a, type: 2}
+  meleeAttack: {fileID: 11400000, guid: 117382c7804f426429eeae8062de2c8e, type: 2}
   ability: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
   cameraRef: {fileID: 2122183053340044964}
   visualTransform: {fileID: 9216438237624256684}
