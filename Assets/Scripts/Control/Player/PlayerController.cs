@@ -110,10 +110,12 @@ namespace MinecraftClient.Control
                 case GameMode.Adventure:
                     Status!.Spectating = false;
                     CheckMovement();
+                    ShowRender();
                     break;
                 case GameMode.Spectator:
                     Status!.Spectating = true;
                     CheckMovement();
+                    HideRender();
                     break;
             }
         }
@@ -147,6 +149,16 @@ namespace MinecraftClient.Control
             playerRigidbody!.useGravity = true;
 
             Status!.GravityDisabled = false;
+        }
+
+        protected virtual void HideRender()
+        {
+            visualTransform?.gameObject.SetActive(false);
+        }
+
+        protected virtual void ShowRender()
+        {
+            visualTransform?.gameObject.SetActive(true);
         }
         
         public delegate void WeaponStateEventHandler(WeaponState weaponState);
