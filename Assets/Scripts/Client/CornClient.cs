@@ -272,7 +272,7 @@ namespace MinecraftClient
                     clientEntity.SetHeadYawFromByte(127);
                     clientEntity.MaxHealth = 20F;
 
-                    playerController!.InitializePlayer(clientEntity, GameMode);
+                    playerController!.SetClientEntity(clientEntity);
 
                     return true; // Client successfully started
                 }
@@ -1007,24 +1007,51 @@ namespace MinecraftClient
         /// <param name="pitch">Pitch to look at</param>
         public void UpdateLocation(Location location, float yaw, float pitch)
         {
+            yaw += 90F;
+
             lock (movementLock)
             {
                 YawToSend = clientEntity.Yaw = yaw;
                 PitchToSend = clientEntity.Pitch = pitch;
-
-                clientEntity.Location = location;
                 
-                if (!locationReceived)
+                if (!locationReceived) // On entering world or respawning
+                {
+                    clientEntity.Location = location;
+
                     Loom.QueueOnMainThread(() => {
                         // Force refresh environment collider
                         ChunkRenderManager?.RebuildTerrainCollider(location.ToFloor());
-
                         // Then update player location
-                        playerController?.SetLocation(location, yaw: yaw);
+                        playerController!.SetLocation(location, yaw: yaw);
+                        // Update camera yaw
+                        CameraController!.SetYaw(yaw);
+
+                        locationReceived = true;
                     });
 
-                locationReceived = true;
-                
+                    Debug.Log($"Loc initialized at {location} with yaw {yaw}");
+                }
+                else // Position correction from server
+                {                    
+                    Loom.QueueOnMainThread(() => {
+                        var offset = playerController!.transform.position - CoordConvert.MC2Unity(location);
+                        if (offset.magnitude < 8F)
+                        {
+                            return;
+                        }
+
+                        clientEntity.Location = location;
+
+                        // Force refresh environment collider
+                        ChunkRenderManager?.RebuildTerrainCollider(location.ToFloor());
+                        // Then update player location
+                        playerController!.SetLocation(location, yaw: yaw);
+
+                        Debug.Log($"Loc updated to {location} with yaw {yaw} error value: {offset.magnitude}");
+                    });
+
+                    
+                }    
             }
 
         }
