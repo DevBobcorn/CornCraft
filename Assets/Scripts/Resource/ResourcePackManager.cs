@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Mathematics;
 
@@ -455,28 +456,32 @@ namespace MinecraftClient.Resource
             var modelFilePaths = BlockModelFileTable.Values.ToList();
             modelFilePaths.AddRange(ItemModelFileTable.Values);
             
-            foreach (var modelFile in modelFilePaths)
-            {
-                var model = Json.ParseJson(File.ReadAllText(modelFile));
-
-                if (model.Properties.ContainsKey("textures"))
+            var gatherTexturesTask = Task.Run(() => {
+                foreach (var modelFile in modelFilePaths)
                 {
-                    var texData = model.Properties["textures"].Properties;
-                    foreach (var texItem in texData)
-                    {
-                        if (!texItem.Value.StringValue.StartsWith('#'))
-                        {
-                            var texId = ResourceLocation.fromString(texItem.Value.StringValue);
+                    var model = Json.ParseJson(File.ReadAllText(modelFile));
 
-                            if (texDict.ContainsKey(texId))
-                                textureIdSet.Add(texId);
-                            //else
-                            //    Debug.LogWarning($"Texture {texId} not found in dictionary! (Referenced in {modelFile})");
+                    if (model.Properties.ContainsKey("textures"))
+                    {
+                        var texData = model.Properties["textures"].Properties;
+                        foreach (var texItem in texData)
+                        {
+                            if (!texItem.Value.StringValue.StartsWith('#'))
+                            {
+                                var texId = ResourceLocation.fromString(texItem.Value.StringValue);
+
+                                if (texDict.ContainsKey(texId))
+                                    textureIdSet.Add(texId);
+                                //else
+                                //    Debug.LogWarning($"Texture {texId} not found in dictionary! (Referenced in {modelFile})");
+                            }
+                                
                         }
-                            
                     }
                 }
-            }
+            });
+
+            while (!gatherTexturesTask.IsCompleted) yield return null;
 
             // Append liquid textures, which are not referenced in model files, but will be used by fluid mesh
             foreach (var texId in FluidGeometry.LiquidTextures)
