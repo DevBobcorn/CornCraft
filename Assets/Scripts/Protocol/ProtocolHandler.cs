@@ -73,16 +73,17 @@ namespace MinecraftClient.Protocol
         /// <param name="serverPort">Server Port to ping</param>
         /// <param name="protocolversion">Will contain protocol version, if ping successful</param>
         /// <returns>TRUE if ping was successful</returns>
-        public static bool GetServerInfo(string serverIP, ushort serverPort, ref int protocolversion, ref ForgeInfo? forgeInfo)
+        public static bool GetServerInfo(string serverIP, ushort serverPort, ref string versionName, ref int protocolversion, ref ForgeInfo? forgeInfo)
         {
             bool success = false;
             int protocolversionTmp = 0;
             ForgeInfo? forgeInfoTmp = null;
+            string versionNameTmp = string.Empty;
             if (AutoTimeout.Perform(() =>
             {
                 try
                 {
-                    if (ProtocolMinecraft.doPing(serverIP, serverPort, ref protocolversionTmp, ref forgeInfoTmp))
+                    if (ProtocolMinecraft.doPing(serverIP, serverPort, ref versionNameTmp, ref protocolversionTmp, ref forgeInfoTmp))
                     {
                         success = true;
                     }
@@ -102,6 +103,7 @@ namespace MinecraftClient.Protocol
                 if (protocolversion == 0)
                     protocolversion = protocolversionTmp;
                 forgeInfo = forgeInfoTmp;
+                versionName = versionNameTmp;
                 return success;
             }
             else

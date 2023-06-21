@@ -222,21 +222,18 @@ namespace MinecraftClient.UI
                     Debug.Log(Translations.Get("debug.session_id", session.ID));
 
                 // Get server version
-                int protocolVersion = 0;
-                ForgeInfo? forgeInfo = null;
-
-                // Not realms
                 Debug.Log(Translations.Get("mcc.retrieve")); // Retrieve server information
                 loadStateInfoText!.text = Translations.Get("mcc.retrieve");
-                yield return null;
+                int protocolVersion = 0;
+                ForgeInfo? forgeInfo = null;
+                string receivedVersionName = string.Empty;
 
-                bool pingFinished = false, pingResult = false;
-                Task.Run(() => {
-                    pingResult = ProtocolHandler.GetServerInfo(host, port, ref protocolVersion, ref forgeInfo);
-                    pingFinished = true;
+                bool pingResult = false;
+                var pingTask = Task.Run(() => {
+                    pingResult = ProtocolHandler.GetServerInfo(host, port, ref receivedVersionName, ref protocolVersion, ref forgeInfo);
                 });
 
-                while (!pingFinished) yield return null;
+                while (!pingTask.IsCompleted) yield return null;
 
                 if (!pingResult)
                 {
@@ -244,6 +241,10 @@ namespace MinecraftClient.UI
                     tryingConnect = false;
                     loadStateInfoText!.text = ">_<";
                     yield break;
+                }
+                else
+                {
+                    CornApp.Notify(Translations.Get("mcc.server_protocol", receivedVersionName, protocolVersion));
                 }
 
                 if (protocolVersion != 0) // Proceed to server login
