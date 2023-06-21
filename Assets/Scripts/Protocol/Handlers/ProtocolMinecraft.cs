@@ -1730,9 +1730,8 @@ namespace MinecraftClient.Protocol.Handlers
         /// Ping a Minecraft server to get information about the server
         /// </summary>
         /// <returns>True if ping was successful</returns>
-        public static bool doPing(string host, int port, ref int protocol, ref ForgeInfo? forgeInfo)
+        public static bool doPing(string host, int port, ref string versionName, ref int protocol, ref ForgeInfo? forgeInfo)
         {
-            string version = "";
             TcpClient tcp = ProxyHandler.newTcpClient(host, port);
             tcp.ReceiveTimeout = 30000; // 30 seconds
             tcp.ReceiveBufferSize = 1024 * 1024;
@@ -1773,7 +1772,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                             // Retrieve display name of the Minecraft version
                             if (versionData.Properties.ContainsKey("name"))
-                                version = versionData.Properties["name"].StringValue;
+                                versionName = versionData.Properties["name"].StringValue;
 
                             // Retrieve protocol version number for handling this server
                             if (versionData.Properties.ContainsKey("protocol"))
@@ -1781,9 +1780,6 @@ namespace MinecraftClient.Protocol.Handlers
 
                             // Check for forge on the server.
                             ProtocolForge.ServerInfoCheckForge(jsonData, ref forgeInfo);
-                            int p = protocol;
-                            Loom.QueueOnMainThread(() => CornApp.Notify(
-                                    Translations.Get("mcc.server_protocol", version, p)));
 
                             return true;
                         }
