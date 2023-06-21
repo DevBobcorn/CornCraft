@@ -2,6 +2,7 @@
 using UnityEngine;
 using Cinemachine;
 using MinecraftClient.Mapping;
+using MinecraftClient.Event;
 
 namespace MinecraftClient.Control
 {
@@ -76,7 +77,17 @@ namespace MinecraftClient.Control
 
         public override Transform GetTransform() => renderCameraPresent ? renderCamera!.transform : transform;
 
-        public override void SetPerspective(Perspective perspective) { }
+        public override void SetPerspective(Perspective perspective)
+        {
+            EnsureInitialized();
+
+            // Only third person perspective is accepted, lock to it and discard the perspective change
+            // Update player data
+            client!.Perspective = Perspective.ThirdPerson;
+
+            // Broadcast perspective change
+            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(Perspective.ThirdPerson));
+        }
 
         public override void SetTarget(Transform target)
         {
