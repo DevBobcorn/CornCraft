@@ -1308,7 +1308,8 @@ namespace MinecraftClient
             if (uuid == Guid.Empty) // Initial gamemode on login
             {
                 Loom.QueueOnMainThread(() =>{
-                    EventManager.Instance.Broadcast<GameModeUpdateEvent>(new((GameMode) gamemode));
+                    GameMode = (GameMode) gamemode;
+                    EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
                 });
             }
             else if (onlinePlayers.ContainsKey(uuid)) // Further regular gamemode change events
@@ -1317,7 +1318,10 @@ namespace MinecraftClient
                 if (playerName == this.username)
                 {
                     Loom.QueueOnMainThread(() =>{
-                        EventManager.Instance.Broadcast<GameModeUpdateEvent>(new((GameMode) gamemode));
+                        GameMode = (GameMode) gamemode;
+                        EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
+
+                        CornApp.Notify($"Gamemode updated to {GameMode}", Notification.Type.Success);
                     });
                 }
             }
