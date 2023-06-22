@@ -113,8 +113,6 @@ namespace MinecraftClient.UI
                 };
 
                 statusPanel.SetBool(SHOW, showStatus);
-
-                CornApp.Notify($"Gamemode updated to {e.GameMode}", Notification.Type.Success);
             };
 
             healthCallback = (e) => {
