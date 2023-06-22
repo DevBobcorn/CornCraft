@@ -1,15 +1,13 @@
 #nullable enable
 using UnityEngine;
-
 using MinecraftClient.Control;
 using MinecraftClient.Mapping;
-using MinecraftClient.Resource;
 
 namespace MinecraftClient.Rendering
 {
     public class PlayerEntityRiggedRender : AnimatorEntityRender
     {
-        [SerializeField] private bool usePlayerSkin = false;
+        [SerializeField] private Renderer[] playerSkinRenderers = { };
 
         private static readonly int GROUNDED = Animator.StringToHash("Grounded");
         private static readonly int IN_LIQUID = Animator.StringToHash("InLiquid");
@@ -26,7 +24,7 @@ namespace MinecraftClient.Rendering
         {
             base.Initialize(entityType, entity);
 
-            if (usePlayerSkin) UpdateSkinMaterial();
+            UpdateSkinMaterial();
         }
 
         public override void UpdateStateMachine(PlayerStatus info)
@@ -49,18 +47,28 @@ namespace MinecraftClient.Rendering
 
         private void UpdateSkinMaterial()
         {
+            if (playerSkinRenderers.Length == 0)
+            {
+                // No render in this model uses player skin, no need to update
+                return;
+            }
+
             var nameLower = entity!.Name?.ToLower();
-            var skinMats = CornApp.CurrentClient?.MaterialManager?.SkinMaterials;
+            var skinMats = CornApp.CurrentClient!.MaterialManager!.SkinMaterials;
 
             // Find skin and change materials
-            if (nameLower is not null && skinMats is not null && skinMats.ContainsKey(nameLower))
+            if (nameLower is not null && skinMats.ContainsKey(nameLower))
             {
-                var renderers = visual!.gameObject.GetComponentsInChildren<MeshRenderer>();
                 var mat = skinMats[nameLower];
 
-                foreach (var renderer in renderers)
+                foreach (var renderer in playerSkinRenderers)
                     renderer.sharedMaterial = mat;
 
+                Debug.Log($"Skin applied to {nameLower}");
+            }
+            else
+            {
+                Debug.LogWarning($"Failed to apply skin for {nameLower}");
             }
         }
 

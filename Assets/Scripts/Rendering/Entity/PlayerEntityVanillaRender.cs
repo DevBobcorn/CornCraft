@@ -6,7 +6,8 @@ namespace MinecraftClient.Rendering
 {
     public class PlayerEntityVanillaRender : BipedEntityRender
     {
-        public Transform? leftArm, rightArm;
+        [SerializeField] private Renderer[] playerSkinRenderers = { };
+        [SerializeField] private Transform? leftArm, rightArm;
 
         protected bool armsPresent = false;
 
@@ -36,18 +37,28 @@ namespace MinecraftClient.Rendering
 
         private void UpdateSkinMaterial()
         {
+            if (playerSkinRenderers.Length == 0)
+            {
+                // No render in this model uses player skin, no need to update
+                return;
+            }
+
             var nameLower = entity!.Name?.ToLower();
-            var skinMats = CornApp.CurrentClient?.MaterialManager?.SkinMaterials;
+            var skinMats = CornApp.CurrentClient!.MaterialManager!.SkinMaterials;
 
             // Find skin and change materials
-            if (nameLower is not null && skinMats is not null && skinMats.ContainsKey(nameLower))
+            if (nameLower is not null && skinMats.ContainsKey(nameLower))
             {
-                var renderers = visual!.gameObject.GetComponentsInChildren<MeshRenderer>();
                 var mat = skinMats[nameLower];
 
-                foreach (var renderer in renderers)
+                foreach (var renderer in playerSkinRenderers)
                     renderer.sharedMaterial = mat;
 
+                Debug.Log($"Skin applied to {nameLower}");
+            }
+            else
+            {
+                Debug.LogWarning($"Failed to apply skin for {nameLower}");
             }
         }
 
