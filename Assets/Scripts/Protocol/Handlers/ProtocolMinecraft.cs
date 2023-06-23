@@ -262,9 +262,20 @@ namespace MinecraftClient.Protocol.Handlers
                     case PacketTypesIn.ServerData:
                         {
                             string motd = "-";
-                            bool hasMotd = dataTypes.ReadNextBool(packetData);
-                            if (hasMotd)
+
+                            bool hasMotd = false;
+                            if (protocolVersion < MC_1_19_4_Version)
+                            {
+                                hasMotd = dataTypes.ReadNextBool(packetData);
+
+                                if (hasMotd)
+                                    motd = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                            }
+                            else
+                            {
+                                hasMotd = true;
                                 motd = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                            }
 
                             string iconBase64 = "-";
                             bool hasIcon = dataTypes.ReadNextBool(packetData);
@@ -862,10 +873,10 @@ namespace MinecraftClient.Protocol.Handlers
                             // Teleport confirm packet
                             SendPacket(PacketTypesOut.TeleportConfirm, DataTypes.GetVarInt(teleportId));
                             
-                            if (protocolVersion >= MC_1_17_Version)
-                                dataTypes.ReadNextBool(packetData); // Dismount Vehicle - 1.17 and above
-                            break;
+                            if (protocolVersion >= MC_1_17_Version && protocolVersion < MC_1_19_4_Version)
+                                dataTypes.ReadNextBool(packetData); // Dismount Vehicle    - 1.17 to 1.19.3
                         }
+                        break;
                     case PacketTypesIn.ChunkData:
                         {
                             Interlocked.Increment(ref handler.GetWorld().chunkCnt);
@@ -1907,38 +1918,47 @@ namespace MinecraftClient.Protocol.Handlers
             string server_address = pForge.GetServerAddress(handler.GetServerHost());
             byte[] server_port = dataTypes.GetUShort((ushort)handler.GetServerPort());
             byte[] next_state = DataTypes.GetVarInt(2);
-            byte[] handshakePacket = dataTypes.ConcatBytes(protocol_version, dataTypes.GetString(server_address), server_port, next_state);
+            byte[] handshake_packet = dataTypes.ConcatBytes(protocol_version, dataTypes.GetString(server_address), server_port, next_state);
 
-            SendPacket(0x00, handshakePacket);
+            SendPacket(0x00, handshake_packet);
 
-            List<byte> fullLoginPacket = new List<byte>();
-            fullLoginPacket.AddRange(dataTypes.GetString(handler.GetUsername()));                             // Username
-            if (protocolVersion >= MC_1_19_Version)
+            List<byte> fullLoginPacket = new();
+            fullLoginPacket.AddRange(dataTypes.GetString(handler.GetUsername())); // Username
+
+            // 1.19 - 1.19.2
+            if (protocolVersion >= MC_1_19_Version && protocolVersion < MC_1_19_3_Version)
             {
                 if (playerKeyPair == null)
-                    fullLoginPacket.AddRange(dataTypes.GetBool(false));                                       // Has Sig Data
+                    fullLoginPacket.AddRange(dataTypes.GetBool(false)); // Has Sig Data
                 else
                 {
-                    fullLoginPacket.AddRange(dataTypes.GetBool(true));                                        // Has Sig Data
-                    fullLoginPacket.AddRange(DataTypes.GetLong(playerKeyPair.GetExpirationMilliseconds()));   // Expiration time
-                    fullLoginPacket.AddRange(dataTypes.GetArray(playerKeyPair.PublicKey.Key));                // Public key received from Microsoft API
+                    fullLoginPacket.AddRange(dataTypes.GetBool(true)); // Has Sig Data
+                    fullLoginPacket.AddRange(
+                        DataTypes.GetLong(playerKeyPair.GetExpirationMilliseconds())); // Expiration time
+                    fullLoginPacket.AddRange(
+                        dataTypes.GetArray(playerKeyPair.PublicKey.Key)); // Public key received from Microsoft API
                     if (protocolVersion >= MC_1_19_2_Version)
-                        fullLoginPacket.AddRange(dataTypes.GetArray(playerKeyPair.PublicKey.SignatureV2!));   // Public key signature received from Microsoft API
+                        fullLoginPacket.AddRange(
+                            dataTypes.GetArray(playerKeyPair.PublicKey.SignatureV2!)); // Public key signature received from Microsoft API
                     else
-                        fullLoginPacket.AddRange(dataTypes.GetArray(playerKeyPair.PublicKey.Signature!));     // Public key signature received from Microsoft API
+                        fullLoginPacket.AddRange(
+                            dataTypes.GetArray(playerKeyPair.PublicKey.Signature!)); // Public key signature received from Microsoft API
                 }
             }
+
             if (protocolVersion >= MC_1_19_2_Version)
             {
-                string uuid = handler.GetUserUUIDStr();
-                if (uuid == "0")
-                    fullLoginPacket.AddRange(dataTypes.GetBool(false));                                       // Has UUID
+                Guid uuid = handler.GetUserUuid();
+
+                if (uuid == Guid.Empty)
+                    fullLoginPacket.AddRange(dataTypes.GetBool(false)); // Has UUID
                 else
                 {
-                    fullLoginPacket.AddRange(dataTypes.GetBool(true));                                        // Has UUID
-                    fullLoginPacket.AddRange(DataTypes.GetUUID(Guid.Parse(uuid)));                            // UUID
+                    fullLoginPacket.AddRange(dataTypes.GetBool(true)); // Has UUID
+                    fullLoginPacket.AddRange(DataTypes.GetUUID(uuid)); // UUID
                 }
             }
+
             SendPacket(0x00, fullLoginPacket);
 
             while (true)
@@ -1951,11 +1971,12 @@ namespace MinecraftClient.Protocol.Handlers
                 }
                 else if (packetId == 0x01) // Encryption request
                 {
-                    this.isOnlineMode = true;
+                    isOnlineMode = true;
                     string serverId = dataTypes.ReadNextString(packetData);
                     byte[] serverPublicKey = dataTypes.ReadNextByteArray(packetData);
                     byte[] token = dataTypes.ReadNextByteArray(packetData);
-                    return StartEncryption(accountLower, handler.GetUserUUIDStr(), handler.GetSessionID(), token, serverId, serverPublicKey, playerKeyPair, session);
+                    return StartEncryption(accountLower, handler.GetUserUuidStr(), handler.GetSessionID(), token, serverId,
+                        serverPublicKey, playerKeyPair, session);
                 }
                 else if (packetId == 0x02) // Login successful
                 {
@@ -1992,7 +2013,8 @@ namespace MinecraftClient.Protocol.Handlers
 
                 bool needCheckSession = true;
                 if (session.ServerPublicKey != null && session.SessionPreCheckTask != null
-                    && serverIdhash == session.ServerIDhash && Enumerable.SequenceEqual(serverPublicKey, session.ServerPublicKey))
+                        && serverIdhash == session.ServerIDhash &&
+                        Enumerable.SequenceEqual(serverPublicKey, session.ServerPublicKey))
                 {
                     session.SessionPreCheckTask.Wait();
                     if (session.SessionPreCheckTask.Result) // PreCheck Successed
@@ -2001,7 +2023,7 @@ namespace MinecraftClient.Protocol.Handlers
 
                 if (needCheckSession)
                 {
-                    string serverHash = CryptoHandler.getServerHash(serverIdhash, serverPublicKey, secretKey);
+                    string serverHash = CryptoHandler.GetServerHash(serverIdhash, serverPublicKey, secretKey);
 
                     if (ProtocolHandler.SessionCheck(uuid, sessionId, serverHash))
                     {
@@ -2020,7 +2042,9 @@ namespace MinecraftClient.Protocol.Handlers
             // Encryption Response packet
             List<byte> encryptionResponse = new();
             encryptionResponse.AddRange(dataTypes.GetArray(RSAService.Encrypt(secretKey, false)));     // Shared Secret
-            if (protocolVersion >= MC_1_19_Version)
+            
+            // 1.19 - 1.19.2
+            if (protocolVersion >= MC_1_19_Version && protocolVersion < MC_1_19_3_Version)
             {
                 if (playerKeyPair is null)
                 {

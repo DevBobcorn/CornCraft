@@ -49,7 +49,7 @@ namespace MinecraftClient
         public int GetServerPort() => port;
         public string GetUsername() => username!;
         public Guid GetUserUuid() => uuid;
-        public string GetUserUUIDStr() => uuid.ToString().Replace("-", string.Empty);
+        public string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
         public string GetSessionID() => sessionId!;
         #endregion
 

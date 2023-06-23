@@ -134,7 +134,7 @@ namespace MinecraftClient.Crypto
         /// <param name="SecretKey">Secret key chosen by the client</param>
         /// <returns>Returns the corresponding SHA-1 hex hash</returns>
 
-        public static string getServerHash(string serverID, byte[] PublicKey, byte[] SecretKey)
+        public static string GetServerHash(string serverID, byte[] PublicKey, byte[] SecretKey)
         {
             byte[] hash = digest(new byte[][] { Encoding.GetEncoding("iso-8859-1").GetBytes(serverID), SecretKey, PublicKey });
             bool negative = (hash[0] & 0x80) == 0x80;
