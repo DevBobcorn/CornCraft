@@ -1,13 +1,9 @@
 #nullable enable
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using MinecraftClient.Protocol.Message;
 
-namespace MinecraftClient.Protocol.Keys
+namespace MinecraftClient.Protocol.ProfileKey
 {
     public class PublicKey
     {
@@ -19,26 +15,32 @@ namespace MinecraftClient.Protocol.Keys
 
         public PublicKey(string pemKey, string? sig = null, string? sigV2 = null)
         {
-            this.Key = KeyUtils.DecodePemKey(pemKey, "-----BEGIN RSA PUBLIC KEY-----", "-----END RSA PUBLIC KEY-----");
+            Key = KeyUtils.DecodePemKey(pemKey, "-----BEGIN RSA PUBLIC KEY-----", "-----END RSA PUBLIC KEY-----");
 
-            this.rsa = RSA.Create();
-            rsa.ImportSubjectPublicKeyInfo(this.Key, out _);
+            rsa = RSA.Create();
+            rsa.ImportSubjectPublicKeyInfo(Key, out _);
 
             if (!string.IsNullOrEmpty(sig))
-                this.Signature = Convert.FromBase64String(sig);
+                Signature = Convert.FromBase64String(sig);
 
             if (!string.IsNullOrEmpty(sigV2))
-                this.SignatureV2 = Convert.FromBase64String(sigV2!);
+                SignatureV2 = Convert.FromBase64String(sigV2!);
+
+            if (SignatureV2 == null || SignatureV2.Length == 0)
+                SignatureV2 = Signature;
+
+            if (Signature == null || Signature.Length == 0)
+                Signature = SignatureV2;
         }
 
         public PublicKey(byte[] key, byte[] signature)
         {
-            this.Key = key;
+            Key = key;
 
-            this.rsa = RSA.Create();
-            rsa.ImportSubjectPublicKeyInfo(this.Key, out _);
+            rsa = RSA.Create();
+            rsa.ImportSubjectPublicKeyInfo(Key, out _);
 
-            this.Signature = signature;
+            Signature = signature;
         }
 
         public bool VerifyData(byte[] data, byte[] signature)
@@ -63,7 +65,7 @@ namespace MinecraftClient.Protocol.Keys
         }
 
         /// <summary>
-        /// Verify message - 1.19.1 and above
+        /// Verify message - 1.19.1 and 1.19.2
         /// </summary>
         /// <param name="message">Message content</param>
         /// <param name="uuid">Sender uuid</param>
@@ -84,14 +86,17 @@ namespace MinecraftClient.Protocol.Keys
         }
 
         /// <summary>
-        /// Verify message head - 1.19.1 and above
+        /// Verify message head - 1.19.1 and 1.19.2
         /// </summary>
         /// <param name="bodyDigest">Message body hash</param>
         /// <param name="signature">Message signature</param>
         /// <returns>Is this message header vaild</returns>
-        public bool VerifyHeader(ref byte[] bodyDigest, ref byte[] signature)
+        public bool VerifyHeader(Guid uuid, ref byte[] bodyDigest, ref byte[] signature, ref byte[]? precedingSignature)
         {
-            return VerifyData(bodyDigest, signature);
+
+            byte[] msgSignData = KeyUtils.GetSignatureData(precedingSignature, uuid, bodyDigest);
+
+            return VerifyData(msgSignData, signature);
         }
 
     }

@@ -11,7 +11,7 @@ using UnityEngine;
 using MinecraftClient.Control;
 using MinecraftClient.Event;
 using MinecraftClient.Protocol;
-using MinecraftClient.Protocol.Keys;
+using MinecraftClient.Protocol.ProfileKey;
 using MinecraftClient.Protocol.Handlers.Forge;
 using MinecraftClient.Protocol.Message;
 using MinecraftClient.Protocol.Session;
@@ -1213,14 +1213,14 @@ namespace MinecraftClient
             if (player.Name == username)
             {
                 // 1.19+ offline server is possible to return different uuid
-                this.uuid = player.UUID;
+                this.uuid = player.Uuid;
                 // Also update client entity uuid
                 clientEntity.UUID = uuid;
             }
 
             lock (onlinePlayers)
             {
-                onlinePlayers[player.UUID] = player;
+                onlinePlayers[player.Uuid] = player;
             }
 
         }

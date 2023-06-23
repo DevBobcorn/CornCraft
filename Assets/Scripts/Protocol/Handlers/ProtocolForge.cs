@@ -151,7 +151,7 @@ namespace MinecraftClient.Protocol.Handlers
                                 mods[i] = dataTypes.ConcatBytes(dataTypes.GetString(mod.ModID), dataTypes.GetString(mod.Version));
                             }
                             SendForgeHandshakePacket(FMLHandshakeDiscriminator.ModList,
-                                dataTypes.ConcatBytes(dataTypes.GetVarInt(forgeInfo.Mods.Count), dataTypes.ConcatBytes(mods)));
+                                dataTypes.ConcatBytes(DataTypes.GetVarInt(forgeInfo.Mods.Count), dataTypes.ConcatBytes(mods)));
 
                             fmlHandshakeState = FMLHandshakeClientState.WAITINGSERVERDATA;
 
@@ -323,19 +323,19 @@ namespace MinecraftClient.Protocol.Handlers
                                 Debug.Log(Translations.Get("forge.fml2.mod_send"));
 
                             // Packet ID 2: Client to Server Mod List
-                            fmlResponsePacket.AddRange(dataTypes.GetVarInt(2));
-                            fmlResponsePacket.AddRange(dataTypes.GetVarInt(mods.Count));
+                            fmlResponsePacket.AddRange(DataTypes.GetVarInt(2));
+                            fmlResponsePacket.AddRange(DataTypes.GetVarInt(mods.Count));
                             foreach (string mod in mods)
                                 fmlResponsePacket.AddRange(dataTypes.GetString(mod));
 
-                            fmlResponsePacket.AddRange(dataTypes.GetVarInt(channels.Count));
+                            fmlResponsePacket.AddRange(DataTypes.GetVarInt(channels.Count));
                             foreach (KeyValuePair<string, string> item in channels)
                             {
                                 fmlResponsePacket.AddRange(dataTypes.GetString(item.Key));
                                 fmlResponsePacket.AddRange(dataTypes.GetString(item.Value));
                             }
 
-                            fmlResponsePacket.AddRange(dataTypes.GetVarInt(registries.Count));
+                            fmlResponsePacket.AddRange(DataTypes.GetVarInt(registries.Count));
                             foreach (string registry in registries)
                             {
                                 fmlResponsePacket.AddRange(dataTypes.GetString(registry));
@@ -361,7 +361,7 @@ namespace MinecraftClient.Protocol.Handlers
                                 Debug.Log(Translations.Get("forge.fml2.registry", registryName));
                             }
 
-                            fmlResponsePacket.AddRange(dataTypes.GetVarInt(99));
+                            fmlResponsePacket.AddRange(DataTypes.GetVarInt(99));
                             fmlResponseReady = true;
                             break;
 
@@ -380,7 +380,7 @@ namespace MinecraftClient.Protocol.Handlers
                                 Debug.Log(Translations.Get("forge.fml2.config", configName));
                             }
 
-                            fmlResponsePacket.AddRange(dataTypes.GetVarInt(99));
+                            fmlResponsePacket.AddRange(DataTypes.GetVarInt(99));
                             fmlResponseReady = true;
                             break;
 
@@ -395,7 +395,7 @@ namespace MinecraftClient.Protocol.Handlers
                         // Wrap our FML packet into a LoginPluginResponse payload
                         responseData.Clear();
                         responseData.AddRange(dataTypes.GetString(fmlChannel));
-                        responseData.AddRange(dataTypes.GetVarInt(fmlResponsePacket.Count));
+                        responseData.AddRange(DataTypes.GetVarInt(fmlResponsePacket.Count));
                         responseData.AddRange(fmlResponsePacket);
                         return true;
                     }

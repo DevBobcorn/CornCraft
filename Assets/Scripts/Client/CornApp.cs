@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 
 using MinecraftClient.Event;
 using MinecraftClient.Interaction;
-using MinecraftClient.Protocol.Keys;
+using MinecraftClient.Protocol.ProfileKey;
 using MinecraftClient.Protocol.Handlers.Forge;
 using MinecraftClient.Protocol.Session;
 using MinecraftClient.Resource;

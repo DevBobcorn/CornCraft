@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using MinecraftClient.Mapping;
 using MinecraftClient.Inventory;
-using MinecraftClient.Protocol.Keys;
+using MinecraftClient.Protocol.ProfileKey;
 using MinecraftClient.Protocol.Session;
 
 namespace MinecraftClient.Protocol
