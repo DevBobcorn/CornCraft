@@ -10,7 +10,7 @@ using TMPro;
 
 using MinecraftClient.Protocol;
 using MinecraftClient.Protocol.Handlers.Forge;
-using MinecraftClient.Protocol.Keys;
+using MinecraftClient.Protocol.ProfileKey;
 using MinecraftClient.Protocol.Session;
 using System.Threading.Tasks;
 
@@ -210,7 +210,7 @@ namespace MinecraftClient.UI
                     if (playerKeyPair == null || playerKeyPair.NeedRefresh())
                     {
                         Debug.Log(Translations.Get("mcc.fetching_key"));
-                        playerKeyPair = KeyUtils.GetKeys(session.ID);
+                        playerKeyPair = KeyUtils.GetNewProfileKeys(session.ID);
                         if (CornGlobal.ProfileKeyCaching != CacheType.None && playerKeyPair != null)
                         {
                             KeysCache.Store(accountLower, playerKeyPair);

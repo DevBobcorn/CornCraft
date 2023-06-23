@@ -1,14 +1,14 @@
 #nullable enable
 using System;
 using System.Linq;
-using MinecraftClient.Protocol.Keys;
 using MinecraftClient.Protocol.Message;
+using MinecraftClient.Protocol.ProfileKey;
 
 namespace MinecraftClient.Protocol
 {
     public class PlayerInfo
     {
-        public readonly Guid UUID;
+        public readonly Guid Uuid;
 
         public readonly string Name;
 
@@ -21,9 +21,21 @@ namespace MinecraftClient.Protocol
 
         public string? DisplayName;
 
-        private readonly PublicKey? PublicKey;
+        public bool Listed = true;
 
-        private readonly DateTime? KeyExpiresAt;
+        // Entity info
+
+        public Mapping.Entity? entity;
+
+        // For message signature
+
+        public int MessageIndex = -1;
+
+        public Guid ChatUuid = Guid.Empty;
+
+        private PublicKey? PublicKey;
+
+        private DateTime? KeyExpiresAt;
 
         private bool lastMessageVerified;
 
@@ -31,7 +43,7 @@ namespace MinecraftClient.Protocol
 
         public PlayerInfo(Guid uuid, string name, Tuple<string, string, string?>[]? property, int gamemode, int ping, string? displayName, long? timeStamp, byte[]? publicKey, byte[]? signature)
         {
-            UUID = uuid;
+            Uuid = uuid;
             Name = name;
             if (property != null)
                 Property = property;
@@ -59,21 +71,43 @@ namespace MinecraftClient.Protocol
         public PlayerInfo(string name, Guid uuid)
         {
             Name = name;
-            UUID = uuid;
+            Uuid = uuid;
             Gamemode = -1;
             Ping = 0;
             lastMessageVerified = true;
             precedingSignature = null;
         }
 
+        public void ClearPublicKey()
+        {
+            ChatUuid = Guid.Empty;
+            PublicKey = null;
+            KeyExpiresAt = null;
+        }
+
+        public void SetPublicKey(Guid chatUuid, long publicKeyExpiryTime, byte[] encodedPublicKey, byte[] publicKeySignature)
+        {
+            ChatUuid = chatUuid;
+            KeyExpiresAt = DateTimeOffset.FromUnixTimeMilliseconds(publicKeyExpiryTime).UtcDateTime;
+            try
+            {
+                PublicKey = new PublicKey(encodedPublicKey, publicKeySignature);
+                lastMessageVerified = true;
+            }
+            catch (System.Security.Cryptography.CryptographicException)
+            {
+                PublicKey = null;
+            }
+        }
+
         public bool IsMessageChainLegal()
         {
-            return this.lastMessageVerified;
+            return lastMessageVerified;
         }
 
         public bool IsKeyExpired()
         {
-            return DateTime.Now.ToUniversalTime() > this.KeyExpiresAt;
+            return DateTime.Now.ToUniversalTime() > KeyExpiresAt;
         }
 
         /// <summary>
@@ -95,12 +129,12 @@ namespace MinecraftClient.Protocol
                 byte[] saltByte = BitConverter.GetBytes(salt);
                 Array.Reverse(saltByte);
 
-                return PublicKey.VerifyMessage(message, UUID, timeOffset, ref saltByte, ref signature);
+                return PublicKey.VerifyMessage(message, Uuid, timeOffset, ref saltByte, ref signature);
             }
         }
 
         /// <summary>
-        /// Verify message - 1.19.1 and above
+        /// Verify message - 1.19.1 and 1.19.2
         /// </summary>
         /// <param name="message">Message content</param>
         /// <param name="timestamp">Timestamp</param>
@@ -111,16 +145,16 @@ namespace MinecraftClient.Protocol
         /// <returns>Is this message chain vaild</returns>
         public bool VerifyMessage(string message, long timestamp, long salt, ref byte[] signature, ref byte[]? precedingSignature, LastSeenMessageList lastSeenMessages)
         {
-            if (this.lastMessageVerified == false)
+            if (lastMessageVerified == false)
                 return false;
             if (PublicKey == null || IsKeyExpired() || (this.precedingSignature != null && precedingSignature == null))
             {
-                this.lastMessageVerified = false;
+                lastMessageVerified = false;
                 return false;
             }
             if (this.precedingSignature != null && !this.precedingSignature.SequenceEqual(precedingSignature!))
             {
-                this.lastMessageVerified = false;
+                lastMessageVerified = false;
                 return false;
             }
 
@@ -129,16 +163,16 @@ namespace MinecraftClient.Protocol
             byte[] saltByte = BitConverter.GetBytes(salt);
             Array.Reverse(saltByte);
 
-            bool res = PublicKey.VerifyMessage(message, UUID, timeOffset, ref saltByte, ref signature, ref precedingSignature, lastSeenMessages);
+            bool res = PublicKey.VerifyMessage(message, Uuid, timeOffset, ref saltByte, ref signature, ref precedingSignature, lastSeenMessages);
 
-            this.lastMessageVerified = res;
+            lastMessageVerified = res;
             this.precedingSignature = signature;
 
             return res;
         }
 
         /// <summary>
-        /// Verify message head - 1.19.1 and above
+        /// Verify message head - 1.19.1 and 1.19.2
         /// </summary>
         /// <param name="precedingSignature">Preceding message signature</param>
         /// <param name="headerSignature">Message signature</param>
@@ -146,25 +180,44 @@ namespace MinecraftClient.Protocol
         /// <returns>Is this message chain vaild</returns>
         public bool VerifyMessageHead(ref byte[]? precedingSignature, ref byte[] headerSignature, ref byte[] bodyDigest)
         {
-            if (this.lastMessageVerified == false)
+            if (lastMessageVerified == false)
                 return false;
             if (PublicKey == null || IsKeyExpired() || (this.precedingSignature != null && precedingSignature == null))
             {
-                this.lastMessageVerified = false;
+                lastMessageVerified = false;
                 return false;
             }
             if (this.precedingSignature != null && !this.precedingSignature.SequenceEqual(precedingSignature!))
             {
-                this.lastMessageVerified = false;
+                lastMessageVerified = false;
                 return false;
             }
 
-            bool res = PublicKey.VerifyHeader(ref bodyDigest, ref headerSignature);
+            bool res = PublicKey.VerifyHeader(Uuid, ref bodyDigest, ref headerSignature, ref precedingSignature);
 
-            this.lastMessageVerified = res;
+            lastMessageVerified = res;
             this.precedingSignature = headerSignature;
 
             return res;
+        }
+
+        /// <summary>
+        /// Verify message - 1.19.3 and above
+        /// </summary>
+        /// <param name="message">Message content</param>
+        /// <param name="timestamp">Timestamp</param>
+        /// <param name="salt">Salt</param>
+        /// <param name="signature">Message signature</param>
+        /// <param name="precedingSignature">Preceding message signature</param>
+        /// <param name="lastSeenMessages">LastSeenMessages</param>
+        /// <returns>Is this message chain vaild</returns>
+        public bool VerifyMessage(string message, Guid playerUuid, Guid chatUuid, int messageIndex, long timestamp, long salt, ref byte[] signature, Tuple<int, byte[]?>[] previousMessageSignatures)
+        {
+            if (PublicKey == null || IsKeyExpired())
+                return false;
+
+            // net.minecraft.server.network.ServerPlayNetworkHandler#validateMessage
+            return true;
         }
     }
 }
