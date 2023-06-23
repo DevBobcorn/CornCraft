@@ -198,21 +198,25 @@ namespace MinecraftClient.Protocol
         /// <returns>The 1.X.X version number, or unknown if could not determine protocol version</returns>
         public static string ProtocolVersion2MCVer(int protocol)
         {
-            switch (protocol)
+            return protocol switch
             {
-                case 735: return "1.16";
-                case 736: return "1.16.1";
-                case 751: return "1.16.2";
-                case 753: return "1.16.3";
-                case 754: return "1.16.5";
-                case 755: return "1.17";
-                case 756: return "1.17.1";
-                case 757: return "1.18.1";
-                case 758: return "1.18.2";
-                case 759: return "1.19";
-                case 760: return "1.19.2";
-                default: return "unknown";
-            }
+                735 => "1.16",
+                736 => "1.16.1",
+                751 => "1.16.2",
+                753 => "1.16.3",
+                754 => "1.16.5",
+                755 => "1.17",
+                756 => "1.17.1",
+                757 => "1.18.1",
+                758 => "1.18.2",
+                759 => "1.19",
+                760 => "1.19.2",
+                761 => "1.19.3",
+                762 => "1.19.4",
+                763 => "1.20",
+                
+                _   => "unknown"
+            };
         }
 
         /// <summary>

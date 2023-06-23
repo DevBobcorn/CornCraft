@@ -22,7 +22,7 @@ namespace MinecraftClient.Protocol
         int GetServerPort();
         string GetServerHost();
         string GetUsername();
-        Guid GetUserUUID();
+        Guid GetUserUuid();
         string GetUserUUIDStr();
         string GetSessionID();
         string[] GetOnlinePlayers();
@@ -30,6 +30,8 @@ namespace MinecraftClient.Protocol
         PlayerInfo? GetPlayerInfo(Guid uuid);
         Location GetLocation();
         World GetWorld();
+
+        public void SetCanSendMessage(bool canSendMessage);
 
         /// <summary>
         /// Invoke a task on the main thread, wait for completion and retrieve return value.

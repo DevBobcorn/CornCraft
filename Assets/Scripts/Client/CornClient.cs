@@ -48,7 +48,7 @@ namespace MinecraftClient
         public string GetServerHost() => host!;
         public int GetServerPort() => port;
         public string GetUsername() => username!;
-        public Guid GetUserUUID() => uuid;
+        public Guid GetUserUuid() => uuid;
         public string GetUserUUIDStr() => uuid.ToString().Replace("-", string.Empty);
         public string GetSessionID() => sessionId!;
         #endregion
@@ -59,6 +59,7 @@ namespace MinecraftClient
 
         private Queue<string> chatQueue = new();
         private DateTime nextMessageSendTime = DateTime.MinValue;
+        private bool canSendMessage = false;
 
         #endregion
 
@@ -301,6 +302,12 @@ namespace MinecraftClient
         /// </summary>
         private void TrySendMessageToServer()
         {
+            if (!canSendMessage)
+            {
+                Debug.LogWarning("Not allowed to send message now!");
+                return;
+            }
+
             while (chatQueue.Count > 0 && nextMessageSendTime < DateTime.Now)
             {
                 string text = chatQueue.Dequeue();
@@ -644,6 +651,11 @@ namespace MinecraftClient
         #endregion
 
         #region Action methods: Perform an action on the Server
+
+        public void SetCanSendMessage(bool canSendMessage)
+        {
+            this.canSendMessage = canSendMessage;
+        }
 
         /// <summary>
         /// Send a chat message or command to the server
