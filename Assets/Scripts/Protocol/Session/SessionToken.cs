@@ -38,7 +38,7 @@ namespace MinecraftClient.Protocol.Session
                 return false;
             if (Crypto.CryptoHandler.ClientAESPrivateKey == null)
                 Crypto.CryptoHandler.ClientAESPrivateKey = Crypto.CryptoHandler.GenerateAESPrivateKey();
-            string serverHash = Crypto.CryptoHandler.getServerHash(ServerIDhash, ServerPublicKey, Crypto.CryptoHandler.ClientAESPrivateKey);
+            string serverHash = Crypto.CryptoHandler.GetServerHash(ServerIDhash, ServerPublicKey, Crypto.CryptoHandler.ClientAESPrivateKey);
             if (ProtocolHandler.SessionCheck(PlayerID, ID, serverHash))
                 return true;
             return false;
