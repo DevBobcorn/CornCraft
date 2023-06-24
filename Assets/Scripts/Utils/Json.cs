@@ -190,6 +190,41 @@ namespace MinecraftClient
         }
 
         /// <summary>
+        /// Serialize a Dictionary<string, object> object into JSON string
+        /// </summary>
+        /// <param name="dictionary">Dictionary to serialize</param>
+        public static string Dictionary2Json(Dictionary<string, object> dictionary)
+        {
+            StringBuilder jsonBuilder = new StringBuilder();
+            jsonBuilder.Append("{");
+
+            foreach (KeyValuePair<string, object> entry in dictionary)
+            {
+                string valueString = entry.Value switch
+                {
+                    // Nested object
+                    Dictionary<string, object> dict => Dictionary2Json(dict),
+                    // String value, wrap with quoatation marks
+                    string strValue                 => $"\"{strValue}\"",
+                    // Boolean value, should be lowercase 'true' or 'false'
+                    bool boolValue                  => boolValue ? "true" : "false",
+                    // Other types, just convert to string
+                    _                               => valueString = entry.Value.ToString()
+                };
+
+                jsonBuilder.Append($"\"{entry.Key}\":{valueString},");
+            }
+
+            if (dictionary.Count > 0)
+            {
+                jsonBuilder.Length--; // Remove the trailing comma
+            }
+
+            jsonBuilder.Append("}");
+            return jsonBuilder.ToString();
+        }
+
+        /// <summary>
         /// Check if a char is an hexadecimal char (0-9 A-F a-f)
         /// </summary>
         /// <param name="c">Char to test</param>

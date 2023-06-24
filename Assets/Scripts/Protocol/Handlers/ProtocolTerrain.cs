@@ -346,7 +346,7 @@ namespace MinecraftClient.Protocol.Handlers
             if (c is not null)
             {
                 if (biomes!.Length == c.ColumnSize * 64)
-                    c.SetBiomes(biomes);
+                    c.SetBiomeIds(biomes);
                 else if (biomes.Length > 0)
                     UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}, should be {c.ColumnSize * 64}");
                 
@@ -541,7 +541,7 @@ namespace MinecraftClient.Protocol.Handlers
             if (c is not null)
             {
                 if (biomes.Length == c.ColumnSize * 64)
-                    c.SetBiomes(biomes);
+                    c.SetBiomeIds(biomes);
                 else if (biomes.Length > 0)
                     UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}, should be {c.ColumnSize * 64}");
 

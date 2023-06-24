@@ -23,7 +23,7 @@ using MinecraftClient.Protocol.Session;
 namespace MinecraftClient.Protocol.Handlers
 {
     /// <summary>
-    /// Implementation for Minecraft 1.13+ Protocols
+    /// Implementation for Minecraft 1.16+ Protocols
     /// </summary>
     /// <remarks>
     /// Typical update steps for implementing protocol changes for a new Minecraft version:
@@ -328,7 +328,17 @@ namespace MinecraftClient.Protocol.Handlers
                                 for (int i = 0; i < worldCount; i++)
                                     dataTypes.ReadNextString(packetData);                 // Dimension Names (World Names) - 1.16 and above
                                 var registryCodec = dataTypes.ReadNextNbt(packetData);    // Registry Codec (Dimension Codec) - 1.16 and above
+                                
+                                foreach (var entry in registryCodec)
+                                {
+                                    Debug.Log("Entry: " + entry.Key);
+                                }
+
+                                // Read and store defined dimensions 1.16.2 and above
                                 World.StoreDimensionList(registryCodec);
+
+                                // Read and store defined biomes 1.16.2 and above
+                                World.StoreBiomeList(registryCodec);
                             }
 
                             // Current dimension
@@ -401,6 +411,11 @@ namespace MinecraftClient.Protocol.Handlers
                                     dataTypes.SkipNextString(packetData);     // Death dimension name: Identifier
                                     dataTypes.ReadNextLocation(packetData);   // Death location
                                 }
+                            }
+                            // Enable chat
+                            if (protocolVersion < MC_1_19_Version)
+                            {
+                                handler.SetCanSendMessage(true);
                             }
                             break;
                         }

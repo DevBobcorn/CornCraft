@@ -80,22 +80,12 @@ namespace MinecraftClient.Mapping
             }
         }
 
-        public void SetBiomes(short[] biomes)
+        public void SetBiomeIds(short[] biomes)
         {
             if (biomes.Length == this.biomes.Length)
                 Array.Copy(biomes, this.biomes, biomes.Length);
             else
                 Debug.LogWarning($"Biomes data length inconsistent: {biomes.Length} {this.biomes.Length}");
-        }
-
-        public Biome GetBiome(Location location)
-        {
-            int index = ((((int) location.Y - World.GetDimension().minY) >> 2) << 4) | ((location.GetChunkBlockZ() >> 2) << 2) | (location.GetChunkBlockX() >> 2);
-
-            if (index < 0 || index >= biomes.Length)
-                return BiomePalette.EMPTY;
-
-            return BiomePalette.INSTANCE.FromId(biomes[index]);
         }
 
         public short GetBiomeId(Location location)

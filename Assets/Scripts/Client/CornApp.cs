@@ -60,7 +60,6 @@ namespace MinecraftClient
             var versionDictPath = PathHelper.GetExtraDataFile("versions.json");
 
             var dataVersion     = string.Empty;
-            var biomeVersion    = string.Empty;
             var entityVersion   = string.Empty;
             var resourceVersion = string.Empty;
 
@@ -75,12 +74,6 @@ namespace MinecraftClient
                     var entries = versions.Properties[version].Properties;
 
                     dataVersion = entries["data"].StringValue;
-
-                    // Check biome data version override
-                    if (entries.ContainsKey("biome"))
-                        biomeVersion = entries["biome"].StringValue;
-                    else
-                        biomeVersion = dataVersion;
 
                     // Check entity data version override
                     if (entries.ContainsKey("entity"))
@@ -163,9 +156,6 @@ namespace MinecraftClient
             loadFlag.Finished = false;
             Task.Run(() => packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status))));
             while (!loadFlag.Finished) yield return null;
-
-            // Load biome definitions (After colormaps in resource packs are loaded) (on main thread)...
-            yield return BiomePalette.INSTANCE.PrepareData(biomeVersion, $"vanilla-{resourceVersion}", loadFlag);
             
             // Load entity definitions
             loadFlag.Finished = false;

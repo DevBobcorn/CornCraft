@@ -16,6 +16,8 @@ namespace MinecraftClient.Resource
     {
         public static readonly ResourceLocation BLANK_TEXTURE = new("builtin", "blank");
         public static readonly ResourceLocation MISSING_TEXTURE = new("builtin", "missingno");
+        public static readonly ResourceLocation FOLIAGE_COLORMAP = new("colormap/foliage");
+        public static readonly ResourceLocation GRASS_COLORMAP = new("colormap/grass");
 
         // Identifier -> Texture file path
         public readonly Dictionary<ResourceLocation, string> TextureFileTable = new();
@@ -333,11 +335,7 @@ namespace MinecraftClient.Resource
 
         private (Texture2D, TextureAnimationInfo?) LoadSingleTexture(ResourceLocation texId, string texFilePath)
         {
-            Texture2D tex = new(2, 2)
-            {
-                name = texId.ToString()
-            };
-
+            Texture2D tex = new(2, 2);
             tex.LoadImage(File.ReadAllBytes(texFilePath));
 
             if (File.Exists($"{texFilePath}.mcmeta")) // Has animation info
@@ -444,6 +442,11 @@ namespace MinecraftClient.Resource
 
             return tex;
         }
+
+        public Color32[] FoliageColormapPixels { get; private set; } = { };
+        public Color32[] GrassColormapPixels { get; private set; } = { };
+
+        public int ColormapSize { get; private set; } = 0;
 
         private IEnumerator GenerateAtlas(DataLoadFlag atlasGenFlag)
         {
@@ -629,6 +632,34 @@ namespace MinecraftClient.Resource
 
             atlasArrays[0] = atlasArray0;
             atlasArrays[1] = atlasArray1;
+
+            // Read biome colormaps from resource pack
+            if (texDict.ContainsKey(FOLIAGE_COLORMAP))
+            {
+                Debug.Log($"Loading foliage colormap from {texDict[FOLIAGE_COLORMAP]}");
+                var mapTex = new Texture2D(2, 2);
+                mapTex.LoadImage(File.ReadAllBytes(texDict[FOLIAGE_COLORMAP]));
+                
+                ColormapSize = mapTex.width;
+                if (mapTex.height != ColormapSize)
+                    Debug.LogWarning($"Colormap size inconsistency: expected {ColormapSize}, got {mapTex.height}");
+
+                FoliageColormapPixels = mapTex.GetPixels32();
+            }
+            
+            if (texDict.ContainsKey(GRASS_COLORMAP))
+            {
+                Debug.Log($"Loading grass colormap from {texDict[GRASS_COLORMAP]}");
+                var mapTex = new Texture2D(2, 2);
+                mapTex.LoadImage(File.ReadAllBytes(texDict[GRASS_COLORMAP]));
+                
+                if (mapTex.width != ColormapSize)
+                    Debug.LogWarning($"Colormap size inconsistency: expected {ColormapSize}, got {mapTex.width}");
+                if (mapTex.height != ColormapSize)
+                    Debug.LogWarning($"Colormap size inconsistency: expected {ColormapSize}, got {mapTex.height}");
+
+                GrassColormapPixels = mapTex.GetPixels32();
+            }
 
             atlasGenFlag.Finished = true;
         }
