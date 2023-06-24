@@ -87,15 +87,12 @@ namespace MinecraftClient
         public World GetWorld() => world;
         public bool IsMovementReady()
         {
-            if (!locationReceived || ChunkRenderManager is null)
+            if (!locationReceived)
                 return false;
             
-            lock (movementLock)
-            {
-                var loc = clientEntity.Location;
-            
-                return ChunkRenderManager.IsChunkRenderColumnReady(loc.GetChunkX(), loc.GetChunkZ());
-            }
+            var loc = clientEntity.Location;
+            return ChunkRenderManager!.IsChunkRenderReady(
+                    loc.GetChunkX(), loc.GetChunkY(), loc.GetChunkZ());
         }
 
         #endregion
@@ -205,7 +202,7 @@ namespace MinecraftClient
 
         public string GetInfoString(bool withDebugInfo)
         {
-            string baseString = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}";
+            string baseString = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}\nREADY: {IsMovementReady()}";
 
             if (withDebugInfo)
             {

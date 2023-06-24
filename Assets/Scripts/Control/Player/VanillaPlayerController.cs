@@ -6,7 +6,7 @@ using MinecraftClient.Rendering;
 
 namespace MinecraftClient.Control
 {
-    [RequireComponent(typeof (Rigidbody), typeof (EntityRender), typeof (PlayerStatusUpdater))]
+    [RequireComponent(typeof (PlayerEntityVanillaRender))]
     public class VanillaPlayerController : PlayerController
     {
         private PlayerEntityVanillaRender? playerRender;

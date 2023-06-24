@@ -23,7 +23,7 @@ namespace MinecraftClient.Control
         public bool Spectating = false;
         public bool WalkMode   = false;
 
-        public bool GravityDisabled = false;
+        public bool EntityDisabled = false;
 
         public bool PlayingRootMotion = false;
 

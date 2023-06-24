@@ -31,17 +31,6 @@ namespace MinecraftClient.Rendering
 
         public Dictionary<int, ChunkRender> GetChunkRenders() => chunks;
 
-        public bool IsReady()
-        {
-            foreach (var chunk in chunks.Values)
-            {
-                if (chunk.State != ChunkBuildState.Ready && chunk.State != ChunkBuildState.Cancelled)
-                    return false;
-            }
-
-            return true;
-        }
-
         public ChunkRender GetChunkRender(int chunkY, bool createIfEmpty)
         {
             if (chunks.ContainsKey(chunkY))

@@ -8,6 +8,7 @@ using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
 {
+    [RequireComponent(typeof (Rigidbody), typeof (PlayerStatusUpdater))]
     public abstract class PlayerController : MonoBehaviour
     {
         public enum WeaponState
@@ -109,13 +110,11 @@ namespace MinecraftClient.Control
                 case GameMode.Creative:
                 case GameMode.Adventure:
                     Status!.Spectating = false;
-                    CheckMovement();
-                    ShowRender();
+                    CheckEntityEnabled();
                     break;
                 case GameMode.Spectator:
                     Status!.Spectating = true;
-                    CheckMovement();
-                    HideRender();
+                    CheckEntityEnabled();
                     break;
             }
         }
@@ -139,7 +138,10 @@ namespace MinecraftClient.Control
             Status.OnWall    = false;
             Status.Sprinting = false;
 
-            Status.GravityDisabled = true;
+            Status.EntityDisabled = true;
+
+            // Hide entity render
+            HideRender();
         }
 
         protected void EnableEntity()
@@ -148,7 +150,10 @@ namespace MinecraftClient.Control
             playerCollider!.enabled = true;
             playerRigidbody!.useGravity = true;
 
-            Status!.GravityDisabled = false;
+            Status!.EntityDisabled = false;
+
+            // Show entity render
+            ShowRender();
         }
 
         protected virtual void HideRender()
@@ -252,11 +257,14 @@ namespace MinecraftClient.Control
             }
         }
  
-        private void CheckMovement()
+        private void CheckEntityEnabled()
         {
             if (!client!.IsMovementReady()) // Movement is not ready, disable player entity
             {
-                if (!Status!.GravityDisabled) // If player entity is not disabled yet
+                // Set player velocity to zero to stop it from floating around
+                playerRigidbody!.velocity = Vector3.zero;
+
+                if (!Status!.EntityDisabled) // If player entity is not disabled yet
                 {
                     // Disable it
                     DisableEntity();
@@ -266,13 +274,13 @@ namespace MinecraftClient.Control
             }
             else // Movement is now ready
             {
-                if (Status!.GravityDisabled && !Status.Spectating) // Player entity was previously disabled, and this player is not in spectator mode
+                if (Status!.EntityDisabled && !Status.Spectating) // Player entity was previously disabled, and this player is not in spectator mode
                 {
                     // Enable it back
                     EnableEntity();
                 }
 
-                if (!Status!.GravityDisabled && Status.Spectating) // Player entity was not disabled, but this player is in spectator mode
+                if (!Status!.EntityDisabled && Status.Spectating) // Player entity was not disabled, but this player is in spectator mode
                 {
                     // Disable entity
                     DisableEntity();
@@ -282,14 +290,14 @@ namespace MinecraftClient.Control
 
         protected void PreLogicalUpdate(float interval)
         {
-            // Check if movement is available
-            CheckMovement();
+            // Check if entity should be enabled
+            CheckEntityEnabled();
 
             // Update user input
             userInput!.UpdateInputs(inputData, client!.Perspective);
 
             // Update player status (in water, grounded, etc)
-            if (!Status!.Spectating)
+            if (!Status!.EntityDisabled)
                 statusUpdater!.UpdatePlayerStatus(client!.GetWorld(), visualTransform!.forward);
             
             var status = statusUpdater!.Status;
@@ -417,7 +425,7 @@ namespace MinecraftClient.Control
             else
                 statusInfo = statusUpdater!.Status.ToString();
             
-            return $"State:\t{CurrentState}\n{veloInfo}\n{statusInfo}";
+            return $"State:\t{CurrentState}\n{statusInfo}";
         }
 
     }

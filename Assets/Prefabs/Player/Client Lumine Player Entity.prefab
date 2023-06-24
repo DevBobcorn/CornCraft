@@ -204,7 +204,8 @@ MonoBehaviour:
   visual: {fileID: 7336627919953519054}
   ragdollPrefab: {fileID: 0}
   FloatingInfoPrefab: {fileID: 0}
-  usePlayerSkin: 0
+  entityAnimator: {fileID: 7087057527724402164}
+  playerSkinRenderers: []
 --- !u!114 &7087057527021025673
 MonoBehaviour:
   m_ObjectHideFlags: 0
