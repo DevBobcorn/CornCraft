@@ -2,7 +2,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using UnityEngine;
 using Unity.Mathematics;
+
+using MinecraftClient.Resource;
 
 namespace MinecraftClient.Mapping
 {
@@ -15,15 +18,26 @@ namespace MinecraftClient.Mapping
         /// The chunks contained into the Minecraft world
         /// </summary>
         private readonly ConcurrentDictionary<int2, ChunkColumn> chunks = new();
-
         public readonly ConcurrentDictionary<int2, Queue<byte>> LightDataCache = new();
         
         /// <summary>
         /// The dimension info of the world
         /// </summary>
         private static Dimension curDimension = new();
-
         private static Dictionary<string, Dimension> dimensionList = new();
+
+        public static bool BiomesInitialized { get; private set; } = false;
+        public static readonly Biome DUMMY_BIOME = new(ResourceLocation.INVALID)
+        {
+            FoliageColor = DEFAULT_FOLIAGE,
+            GrassColor   = DEFAULT_GRASS,
+            WaterColor   = DEFAULT_WATER
+        };
+
+        /// <summary>
+        /// The biomes of the world
+        /// </summary>
+        private static Dictionary<int, Biome> biomeList = new();
 
         /// <summary>
         /// Chunk data parsing progress
@@ -79,6 +93,26 @@ namespace MinecraftClient.Mapping
         }
 
         /// <summary>
+        /// Storage of all dimensional data - 1.19.1 and above
+        /// </summary>
+        /// <param name="registryCodec">Registry Codec nbt data</param>
+        public static void StoreBiomeList(Dictionary<string, object> registryCodec)
+        {
+            var biomeListNbt = (object[])(((Dictionary<string, object>)registryCodec["minecraft:worldgen/biome"])["value"]);
+
+            var packManager = ResourcePackManager.Instance;
+            var grassMap = packManager.GrassColormapPixels;
+            var foliageMap = packManager.FoliageColormapPixels;
+            var mapSize = packManager.ColormapSize;
+
+            foreach (Dictionary<string, object> biomeNbt in biomeListNbt)
+            {
+                StoreOneBiome(biomeNbt, mapSize, grassMap, foliageMap);
+            }
+            BiomesInitialized = true;
+        }
+
+        /// <summary>
         /// Store one dimension - Directly used in 1.16.2 to 1.18.2
         /// </summary>
         /// <param name="dimensionName">Dimension name</param>
@@ -107,6 +141,105 @@ namespace MinecraftClient.Mapping
         public static Dimension GetDimension()
         {
             return curDimension;
+        }
+
+        /// <summary>
+        /// Store one biome
+        /// </summary>
+        /// <param name="biomeName">Biome name</param>
+        /// <param name="biomeData">Information of this biome</param>
+        public static void StoreOneBiome(Dictionary<string, object> biomeData, int mapSize,
+                Color32[] grassMap, Color32[] foliageMap)
+        {
+            var biomeName = (string)biomeData["name"];
+            var biomeNumId = (int)biomeData["id"];
+            var biomeId = ResourceLocation.fromString(biomeName);
+
+            if (biomeList.ContainsKey(biomeNumId))
+                biomeList.Remove(biomeNumId);
+            
+            //Debug.Log($"Biome registered:\n{Json.Dictionary2Json(biomeData)}");
+
+            int sky = 0, foliage = 0, grass = 0, water = 0, fog = 0, waterFog = 0;
+            float temperature = 0F, downfall = 0F, adjustedTemp = 0F, adjustedRain = 0F;
+            Precipitation precipitation = Precipitation.None;
+
+            var biomeDef = (Dictionary<string, object>)biomeData["element"];
+
+            if (biomeDef.ContainsKey("downfall"))
+                downfall = (float) biomeDef["downfall"];
+                            
+            if (biomeDef.ContainsKey("temperature"))
+                temperature = (float) biomeDef["temperature"];
+            
+            if (biomeDef.ContainsKey("precipitation"))
+            {
+                precipitation = ((string) biomeDef["precipitation"]).ToLower() switch
+                {
+                    "rain" => Precipitation.Rain,
+                    "snow" => Precipitation.Snow,
+                    "none" => Precipitation.None,
+
+                    _      => Precipitation.Unknown
+                };
+
+                if (precipitation == Precipitation.Unknown)
+                    Debug.LogWarning($"Unexpected precipitation type: {biomeDef["precipitation"]}");
+            }
+
+            if (biomeDef.ContainsKey("effects"))
+            {
+                var effects = (Dictionary<string, object>)biomeDef["effects"];
+
+                if (effects.ContainsKey("sky_color"))
+                    sky = (int) effects["sky_color"];
+                
+                adjustedTemp = Mathf.Clamp01(temperature);
+                adjustedRain = Mathf.Clamp01(downfall) * adjustedTemp;
+
+                int sampleX = (int)((1F - adjustedTemp) * mapSize);
+                int sampleY = (int)(adjustedRain * mapSize);
+
+                if (effects.ContainsKey("foliage_color"))
+                    foliage = (int)effects["foliage_color"];
+                else // Read foliage color from color map. See https://minecraft.fandom.com/wiki/Color
+                {
+                    var color = foliageMap[sampleY * mapSize + sampleX];
+                    foliage = ColorHelper.Unity2MC(color);
+                }
+                
+                if (effects.ContainsKey("grass_color"))
+                    grass = (int)effects["grass_color"];
+                else // Read grass color from color map. Same as above
+                {
+                    var color = grassMap[sampleY * mapSize + sampleX];
+                    grass = ColorHelper.Unity2MC(color);
+                }
+                
+                if (effects.ContainsKey("fog_color"))
+                    fog = (int)effects["fog_color"];
+                
+                if (effects.ContainsKey("water_color"))
+                    water = (int)effects["water_color"];
+                
+                if (effects.ContainsKey("water_fog_color"))
+                    waterFog = (int)effects["water_fog_color"];
+            }
+
+            Biome biome = new(biomeId)
+            {
+                Temperature = temperature,
+                Downfall = downfall,
+                Precipitation = precipitation,
+                SkyColor = sky,
+                FoliageColor = foliage,
+                GrassColor = grass,
+                WaterColor = water,
+                FogColor = fog,
+                WaterFogColor = waterFog
+            };
+
+            biomeList.Add(biomeNumId, biome);
         }
 
         /// <summary>
@@ -161,18 +294,9 @@ namespace MinecraftClient.Mapping
         {
             var column = GetChunkColumn(location);
             if (column != null)
-                return column.GetBiome(location);
+                return biomeList.GetValueOrDefault(column.GetBiomeId(location), DUMMY_BIOME);
             
-            return BiomePalette.EMPTY; // Not available
-        }
-
-        public int GetBiomeId(Location location)
-        {
-            var column = GetChunkColumn(location);
-            if (column != null)
-                return column.GetBiomeId(location);
-            
-            return -1; // Not available
+            return DUMMY_BIOME; // Not available
         }
 
         public byte GetSkyLight(Location location)
@@ -204,7 +328,7 @@ namespace MinecraftClient.Mapping
                     for (int z = -radius;z < radius;z++)
                     {
                         var b = GetBiome(loc + new Location(x, y, z));
-                        if (b != BiomePalette.EMPTY)
+                        if (b != DUMMY_BIOME)
                         {
                             cnt++;
                             colorSum += b.foliageColor;
@@ -223,7 +347,7 @@ namespace MinecraftClient.Mapping
                     for (int z = -radius;z < radius;z++)
                     {
                         var b = GetBiome(loc + new Location(x, y, z));
-                        if (b != BiomePalette.EMPTY)
+                        if (b != DUMMY_BIOME)
                         {
                             cnt++;
                             colorSum += b.grassColor;
@@ -242,7 +366,7 @@ namespace MinecraftClient.Mapping
                     for (int z = -radius;z < radius;z++)
                     {
                         var b = GetBiome(loc + new Location(x, y, z));
-                        if (b != BiomePalette.EMPTY)
+                        if (b != DUMMY_BIOME)
                         {
                             cnt++;
                             colorSum += b.waterColor;

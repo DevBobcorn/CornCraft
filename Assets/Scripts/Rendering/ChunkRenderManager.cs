@@ -21,6 +21,8 @@ namespace MinecraftClient.Rendering
         public const string OBSTACLE_LAYER_NAME = "Obstacle";
         public const string LIQUID_LAYER_NAME   = "Liquid";
 
+        public readonly World World = new();
+
         private Dictionary<int2, ChunkRenderColumn> columns = new();
 
         // Both manipulated on Unity main thread only
@@ -28,7 +30,6 @@ namespace MinecraftClient.Rendering
         private List<ChunkRender> chunksBeingBuilt = new();
 
         private CornClient? client;
-        private World? world;
         private ChunkRenderBuilder? builder;
 
         // Terrain collider for movement
@@ -91,10 +92,8 @@ namespace MinecraftClient.Rendering
         #region Chunk building
         public void BuildChunkRender(ChunkRender chunkRender)
         {
-            if (world is null) return;
-
             int chunkX = chunkRender.ChunkX, chunkZ = chunkRender.ChunkZ;
-            var chunkColumnData = world[chunkRender.ChunkX, chunkRender.ChunkZ];
+            var chunkColumnData = World[chunkRender.ChunkX, chunkRender.ChunkZ];
 
             if (chunkColumnData is null) // Chunk column data unloaded, cancel
             {
@@ -116,10 +115,10 @@ namespace MinecraftClient.Rendering
                 return;
             }
 
-            if (!(  world.isChunkColumnReady(chunkX, chunkZ - 1) && // ZNeg neighbor present
-                    world.isChunkColumnReady(chunkX, chunkZ + 1) && // ZPos neighbor present
-                    world.isChunkColumnReady(chunkX - 1, chunkZ) && // XNeg neighbor present
-                    world.isChunkColumnReady(chunkX + 1, chunkZ) )) // XPos neighbor present
+            if (!(  World.isChunkColumnReady(chunkX, chunkZ - 1) && // ZNeg neighbor present
+                    World.isChunkColumnReady(chunkX, chunkZ + 1) && // ZPos neighbor present
+                    World.isChunkColumnReady(chunkX - 1, chunkZ) && // XNeg neighbor present
+                    World.isChunkColumnReady(chunkX + 1, chunkZ) )) // XPos neighbor present
             {
                 chunkRender.State = ChunkBuildState.Delayed;
                 return; // Not all neighbor data ready, delay it
@@ -131,7 +130,7 @@ namespace MinecraftClient.Rendering
             chunkRender.TokenSource = new();
             
             Task.Factory.StartNew(() => {
-                var buildResult = builder!.Build(world, chunkData, chunkRender);
+                var buildResult = builder!.Build(World, chunkData, chunkRender);
 
                 Loom.QueueOnMainThread(() => {
                     if (chunkRender is not null)
@@ -167,9 +166,6 @@ namespace MinecraftClient.Rendering
 
         public void UpdateChunkRendersListAdd()
         {
-            var world = client?.GetWorld();
-            if (world is null) return;
-
             var location = client!.GetLocation();
             ChunkRenderColumn columnRender;
 
@@ -187,7 +183,7 @@ namespace MinecraftClient.Rendering
 
                     int chunkX = location.GetChunkX() + cx, chunkZ = location.GetChunkZ() + cz;
                     
-                    if (world.isChunkColumnReady(chunkX, chunkZ))
+                    if (World.isChunkColumnReady(chunkX, chunkZ))
                     {
                         var column = GetChunkRenderColumn(chunkX, chunkZ, false);
                         if (column is null)
@@ -197,7 +193,7 @@ namespace MinecraftClient.Rendering
                             columnRender = GetChunkRenderColumn(chunkX, chunkZ, true)!;
                             for (int chunkY = 0;chunkY < chunkColumnSize;chunkY++)
                             {   // Create chunk renders and queue them...
-                                if (!world[chunkX, chunkZ]!.ChunkIsEmpty(chunkY))
+                                if (!World[chunkX, chunkZ]!.ChunkIsEmpty(chunkY))
                                 {   // This chunk is not empty and needs to be added and queued
                                     var chunk = columnRender.GetChunkRender(chunkY, true);
                                     UpdateBuildPriority(location, chunk, offsetY);
@@ -224,9 +220,6 @@ namespace MinecraftClient.Rendering
 
         public void UpdateChunkRendersListRemove()
         {
-            var world = client?.GetWorld();
-            if (world is null) return;
-
             // Add nearby chunks
             var location   = client!.GetLocation();
             int unloadDist = Mathf.RoundToInt(CornGlobal.MCSettings.RenderDistance * 2F);
@@ -294,7 +287,6 @@ namespace MinecraftClient.Rendering
         void Start()
         {
             client = CornApp.CurrentClient;
-            world = client?.GetWorld();
 
             var modelTable = ResourcePackManager.Instance.StateModelTable;
             builder = new(modelTable);
@@ -367,12 +359,15 @@ namespace MinecraftClient.Rendering
         public void RebuildTerrainCollider(Location playerLoc)
         {
             terrainColliderDirty = false;
-            Task.Factory.StartNew(() => builder!.BuildTerrainCollider(client!.GetWorld(), playerLoc, movementCollider!, liquidCollider!));
+            Task.Factory.StartNew(() => builder!.BuildTerrainCollider(World, playerLoc, movementCollider!, liquidCollider!));
             lastPlayerLoc = playerLoc;
         }
 
         void FixedUpdate()
         {
+            // Don't build world until biomes are received and registered
+            if (!World.BiomesInitialized) return;
+
             int newCount = BUILD_COUNT_LIMIT - chunksBeingBuilt.Count;
 
             // Build chunks in queue...

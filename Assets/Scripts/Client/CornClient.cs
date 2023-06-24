@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks;
 using System.IO;
 
 using UnityEngine;
@@ -83,8 +82,7 @@ namespace MinecraftClient
         #endregion
 
         #region Environment
-        private readonly World world = new();
-        public World GetWorld() => world;
+        public World GetWorld() => ChunkRenderManager!.World;
         public bool IsMovementReady()
         {
             if (!locationReceived)
@@ -208,23 +206,21 @@ namespace MinecraftClient
             {
                 var targetLoc = interactionUpdater?.TargetLocation;
                 var loc = GetLocation();
+                var world = GetWorld();
 
                 string targetInfo;
 
                 if (targetLoc is not null)
                 {
-                    var targetBlock = world?.GetBlock(targetLoc.Value);
-                    if (targetBlock is not null)
-                        targetInfo = $"Target: {targetLoc}\n{targetBlock}";
-                    else
-                        targetInfo = $"Target: {targetLoc}\n";
+                    var targetBlock = world.GetBlock(targetLoc.Value);
+                    targetInfo = $"Target: {targetLoc}\n{targetBlock}";
                 }
                 else
                 {
                     targetInfo = "\n";
                 }
 
-                var worldInfo = $"\nLoc: {loc}\nLighting:\nsky {world?.GetSkyLight(loc)} block {world?.GetBlockLight(loc)}\nBiome:\n[{world?.GetBiomeId(loc)}] {world?.GetBiome(loc)}\n{targetInfo}";
+                var worldInfo = $"\nLoc: {loc}\nLighting:\nsky {world.GetSkyLight(loc)} block {world.GetBlockLight(loc)}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}";
                 
                 return baseString + $"{worldInfo}\n{playerController?.GetDebugInfo()}\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
             }
@@ -301,7 +297,7 @@ namespace MinecraftClient
         {
             if (!canSendMessage)
             {
-                Debug.LogWarning("Not allowed to send message now!");
+                //Debug.LogWarning("Not allowed to send message now!");
                 return;
             }
 
@@ -427,7 +423,7 @@ namespace MinecraftClient
         public void OnConnectionLost(DisconnectReason reason, string message)
         {
             // Clear world data
-            world.Clear();
+            GetWorld().Clear();
 
             switch (reason)
             {
@@ -982,7 +978,7 @@ namespace MinecraftClient
         {
             ClearTasks();
 
-            world.Clear();
+            GetWorld().Clear();
             entities.Clear();
             ClearInventories();
 

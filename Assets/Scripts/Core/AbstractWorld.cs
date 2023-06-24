@@ -9,9 +9,9 @@ namespace MinecraftClient.Mapping
     {
         // Using biome colors of minecraft:plains as default
         // See https://minecraft.fandom.com/wiki/Plains
-        public static readonly float3 DEFAULT_FOLIAGE = new float3(119, 171, 47) / 255F;
-        public static readonly float3 DEFAULT_GRASS   = new float3(145, 189, 89) / 255F;
-        public static readonly float3 DEFAULT_WATER   = new float3(63, 118, 228) / 255F;
+        public static readonly int DEFAULT_FOLIAGE = 0x77AB2F;
+        public static readonly int DEFAULT_GRASS   = 0x91BD59;
+        public static readonly int DEFAULT_WATER   = 0x3F76E4;
 
         public virtual float3 GetFoliageColor(Location loc) => DEFAULT_FOLIAGE;
 
