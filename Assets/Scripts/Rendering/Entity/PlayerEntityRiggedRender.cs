@@ -29,20 +29,17 @@ namespace MinecraftClient.Rendering
 
         public override void UpdateStateMachine(PlayerStatus info)
         {
-            if (animatorPresent)
-            {
-                // Update animator parameters
-                entityAnimator!.SetBool(GROUNDED, info.Grounded);
-                entityAnimator.SetBool(IN_LIQUID, info.InLiquid);
-                entityAnimator.SetBool(ON_WALL, info.OnWall);
-                entityAnimator.SetBool(MOVING, info.Moving);
-                entityAnimator.SetBool(SPRINTING, info.Sprinting);
-                entityAnimator.SetBool(WALK_MODE, info.WalkMode);
-                entityAnimator.SetFloat(CENTER_DOWN_DIST, info.CenterDownDist);
+            // Update animator parameters
+            entityAnimator!.SetBool(GROUNDED, info.Grounded);
+            entityAnimator.SetBool(IN_LIQUID, info.InLiquid);
+            entityAnimator.SetBool(ON_WALL, info.OnWall);
+            entityAnimator.SetBool(MOVING, info.Moving);
+            entityAnimator.SetBool(SPRINTING, info.Sprinting);
+            entityAnimator.SetBool(WALK_MODE, info.WalkMode);
+            entityAnimator.SetFloat(CENTER_DOWN_DIST, info.CenterDownDist);
 
-                entityAnimator.SetBool(ROOT_MOTION, info.PlayingRootMotion);
-                entityAnimator.SetBool(ATTACKING, info.Attacking);
-            }
+            entityAnimator.SetBool(ROOT_MOTION, info.PlayingRootMotion);
+            entityAnimator.SetBool(ATTACKING, info.Attacking);
         }
 
         private void UpdateSkinMaterial()

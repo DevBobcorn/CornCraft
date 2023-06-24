@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace MinecraftClient.Control
 {
-    [RequireComponent(typeof (Rigidbody), typeof (PlayerStatusUpdater))]
     public class SpritePlayerController : PlayerController
     {
         [SerializeField] Transform? spriteRootTransform;

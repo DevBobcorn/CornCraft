@@ -235,6 +235,7 @@ MonoBehaviour:
   visual: {fileID: 9216438237624256684}
   ragdollPrefab: {fileID: 0}
   FloatingInfoPrefab: {fileID: 0}
+  entityAnimator: {fileID: 2956456387092550358}
   playerSkinRenderers:
   - {fileID: 5608483759871130816}
 --- !u!114 &1563744187988215178
@@ -438,6 +439,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 8258886771692693958}
   m_SourcePrefab: {fileID: 100100000, guid: d8d573645a25ec045a2f29447df1afbf, type: 3}
+--- !u!95 &2956456387092550358 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: d8d573645a25ec045a2f29447df1afbf, type: 3}
+  m_PrefabInstance: {fileID: 8677843580789108551}
+  m_PrefabAsset: {fileID: 0}
 --- !u!137 &5608483759871130816 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3871040150251033479, guid: d8d573645a25ec045a2f29447df1afbf, type: 3}

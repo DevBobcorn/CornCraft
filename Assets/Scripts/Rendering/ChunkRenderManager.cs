@@ -74,14 +74,17 @@ namespace MinecraftClient.Rendering
             return GetChunkRenderColumn(chunkX, chunkZ, false)?.GetChunkRender(chunkY, false);
         }
 
-        public bool IsChunkRenderColumnReady(int chunkX, int chunkZ)
+        public bool IsChunkRenderReady(int chunkX, int chunkY, int chunkZ)
         {
             var column = GetChunkRenderColumn(chunkX, chunkZ, false);
 
             if (column is null)
                 return false;
             
-            return column.IsReady();
+            var chunk = column.GetChunkRender(chunkY, false);
+            
+            // Empty chunks (air) are null, those chunks are always ready
+            return chunk is null || chunk.State == ChunkBuildState.Ready;
         }
         #endregion
 
