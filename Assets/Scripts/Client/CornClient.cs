@@ -220,7 +220,7 @@ namespace MinecraftClient
                     targetInfo = "\n";
                 }
 
-                var worldInfo = $"\nLoc: {loc}\nLighting:\nsky {world.GetSkyLight(loc)} block {world.GetBlockLight(loc)}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}";
+                var worldInfo = $"\nLoc: {loc}\nLighting:\nsky {world.GetSkyLight(loc)} block {world.GetBlockLight(loc)}\nBiome:\t{world.GetBiome(loc).GetDescription()}\n{targetInfo}";
                 
                 return baseString + $"{worldInfo}\n{playerController?.GetDebugInfo()}\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
             }

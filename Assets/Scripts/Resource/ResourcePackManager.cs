@@ -15,7 +15,6 @@ namespace MinecraftClient.Resource
     public class ResourcePackManager
     {
         public static readonly ResourceLocation BLANK_TEXTURE = new("builtin", "blank");
-        public static readonly ResourceLocation MISSING_TEXTURE = new("builtin", "missingno");
         public static readonly ResourceLocation FOLIAGE_COLORMAP = new("colormap/foliage");
         public static readonly ResourceLocation GRASS_COLORMAP = new("colormap/grass");
 
@@ -71,13 +70,21 @@ namespace MinecraftClient.Resource
 
         public void ClearPacks()
         {
+            // Clear up pack list
             packs.Clear();
+
+            // Clear up loaded tables
             TextureFileTable.Clear();
             BlockModelTable.Clear();
             StateModelTable.Clear();
             RawItemModelTable.Clear();
             ItemModelTable.Clear();
             GeneratedItemModels.Clear();
+
+            // And clear up colormap data
+            ColormapSize = 0;
+            GrassColormapPixels = new Color32[]{ };
+            FoliageColormapPixels = new Color32[]{ };
         }
 
         public void LoadPacks(DataLoadFlag flag, Action<string> updateStatus)
@@ -298,7 +305,8 @@ namespace MinecraftClient.Resource
             if (texAtlasTable.ContainsKey(identifier))
                 return texAtlasTable[identifier];
             
-            return texAtlasTable[MISSING_TEXTURE];
+            // Return missing no texture
+            return texAtlasTable[ResourceLocation.INVALID];
         }
 
         private readonly Texture2DArray?[] atlasArrays = new Texture2DArray?[2];
@@ -507,7 +515,7 @@ namespace MinecraftClient.Resource
             count++;
 
             // Missing texture
-            ids[count] = MISSING_TEXTURE;
+            ids[count] = ResourceLocation.INVALID;
             textureInfos[count] = (GetMissingTexture(), null);
             count++;
 

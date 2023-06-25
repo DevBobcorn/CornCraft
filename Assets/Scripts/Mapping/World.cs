@@ -27,12 +27,6 @@ namespace MinecraftClient.Mapping
         private static Dictionary<string, Dimension> dimensionList = new();
 
         public static bool BiomesInitialized { get; private set; } = false;
-        public static readonly Biome DUMMY_BIOME = new(ResourceLocation.INVALID)
-        {
-            FoliageColor = DEFAULT_FOLIAGE,
-            GrassColor   = DEFAULT_GRASS,
-            WaterColor   = DEFAULT_WATER
-        };
 
         /// <summary>
         /// The biomes of the world
@@ -226,17 +220,11 @@ namespace MinecraftClient.Mapping
                     waterFog = (int)effects["water_fog_color"];
             }
 
-            Biome biome = new(biomeId)
+            Biome biome = new(biomeId, sky, foliage, grass, water, fog, waterFog)
             {
                 Temperature = temperature,
                 Downfall = downfall,
-                Precipitation = precipitation,
-                SkyColor = sky,
-                FoliageColor = foliage,
-                GrassColor = grass,
-                WaterColor = water,
-                FogColor = fog,
-                WaterFogColor = waterFog
+                Precipitation = precipitation
             };
 
             biomeList.Add(biomeNumId, biome);
@@ -331,7 +319,7 @@ namespace MinecraftClient.Mapping
                         if (b != DUMMY_BIOME)
                         {
                             cnt++;
-                            colorSum += b.foliageColor;
+                            colorSum += b.FoliageColor;
                         }
                     }
             cnt = (cnt == 0) ? 1 : cnt;
@@ -350,7 +338,7 @@ namespace MinecraftClient.Mapping
                         if (b != DUMMY_BIOME)
                         {
                             cnt++;
-                            colorSum += b.grassColor;
+                            colorSum += b.GrassColor;
                         }
                     }
             cnt = (cnt == 0) ? 1 : cnt;
@@ -369,7 +357,7 @@ namespace MinecraftClient.Mapping
                         if (b != DUMMY_BIOME)
                         {
                             cnt++;
-                            colorSum += b.waterColor;
+                            colorSum += b.WaterColor;
                         }
                     }
             cnt = (cnt == 0) ? 1 : cnt;
