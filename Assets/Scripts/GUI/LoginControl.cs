@@ -20,12 +20,12 @@ namespace MinecraftClient.UI
     {
         private const string LOCALHOST_ADDRESS = "127.0.0.1";
 
-        private TMP_InputField? serverInput, usernameInput, authCodeInput;
-        private Button?         loginButton, quitButton, authConfirmButton, authCancelButton;
-        private Button?         loginCloseButton, authLinkButton, authCloseButton, localhostButton;
-        private TMP_Text?       loadStateInfoText, usernameOptions, usernamePlaceholder, authLinkText;
-        private CanvasGroup?    loginPanel, usernamePanel, authPanel, loginPanelButton;
-        private TMP_Dropdown?   loginDropDown;
+        [SerializeField] private TMP_InputField? serverInput, usernameInput, authCodeInput;
+        [SerializeField] private Button?         loginButton, quitButton, authConfirmButton, authCancelButton;
+        [SerializeField] private Button?         loginCloseButton, authLinkButton, authCloseButton, localhostButton;
+        [SerializeField] private TMP_Text?       loadStateInfoText, usernameOptions, usernamePlaceholder, authLinkText;
+        [SerializeField] private CanvasGroup?    loginPanel, usernamePanel, authPanel, loginPanelButton;
+        [SerializeField] private TMP_Dropdown?   loginDropDown;
 
         private bool tryingConnect = false, authenticating = false, authCancelled = false;
 
@@ -424,39 +424,10 @@ namespace MinecraftClient.UI
         void Start()
         {
             // Initialize controls
-            var loginPanelObj = transform.Find("Login Panel");
-            loginPanel = loginPanelObj.GetComponent<CanvasGroup>();
-            var authPanelObj = transform.Find("Auth Panel");
-            authPanel = authPanelObj.GetComponent<CanvasGroup>();
+            usernameOptions!.text = string.Empty;
+            usernamePanel!.alpha  = 0F; // Hide at start
 
-            serverInput     = loginPanelObj.transform.Find("Server Input").GetComponent<TMP_InputField>();
-            localhostButton = serverInput.transform.Find("Localhost Button").GetComponent<Button>();
-
-            usernameInput   = loginPanelObj.transform.Find("Username Input").GetComponent<TMP_InputField>();
-            usernamePlaceholder = FindHelper.FindChildRecursively(usernameInput.transform,
-                                        "Placeholder").GetComponent<TMP_Text>();
-            usernamePanel   = loginPanelObj.transform.Find("Username Panel").GetComponent<CanvasGroup>();
-            usernameOptions = usernamePanel.transform.Find("Username Options").GetComponent<TMP_Text>();
-            usernameOptions.text = string.Empty;
-            usernamePanel.alpha  = 0F; // Hide at start
-
-            loginDropDown = loginPanelObj.transform.Find("Login Dropdown").GetComponent<TMP_Dropdown>();
-            loginDropDown.onValueChanged.AddListener(this.UpdateUsernamePlaceholder);
-            loginButton   = loginPanelObj.transform.Find("Login Button").GetComponent<Button>();
-
-            authCodeInput     = authPanelObj.transform.Find("Auth Code Input").GetComponent<TMP_InputField>();
-            authLinkButton    = authPanelObj.transform.Find("Auth Link Button").GetComponent<Button>();
-            authCancelButton  = authPanelObj.transform.Find("Auth Cancel Button").GetComponent<Button>();
-            authConfirmButton = authPanelObj.transform.Find("Auth Confirm Button").GetComponent<Button>();
-
-            loadStateInfoText = transform.Find("Load State Info Text").GetComponent<TMP_Text>();
-            authLinkText      = authLinkButton.transform.Find("Auth Link Text").GetComponent<TMP_Text>();
-
-            loginCloseButton  = loginPanelObj.transform.Find("Login Close Button").GetComponent<Button>();
-            authCloseButton   = authPanelObj.transform.Find("Auth Close Button").GetComponent<Button>();
-
-            quitButton        = transform.Find("Quit Button").GetComponent<Button>();
-            loginPanelButton  = transform.Find("Login Panel Button").GetComponent<CanvasGroup>();
+            loginDropDown!.onValueChanged.AddListener(this.UpdateUsernamePlaceholder);
 
             //Load cached sessions from disk if necessary
             if (CornGlobal.SessionCaching == CacheType.Disk)
@@ -470,9 +441,9 @@ namespace MinecraftClient.UI
             }
 
             // TODO Also initialize server with cached values
-            serverInput.text = LOCALHOST_ADDRESS;
+            serverInput!.text = LOCALHOST_ADDRESS;
             if (cachedNames.Length > 0)
-                usernameInput.text = cachedNames[0];
+                usernameInput!.text = cachedNames[0];
             
             loginDropDown.value = 0;
             UpdateUsernamePlaceholder(0);
@@ -482,24 +453,24 @@ namespace MinecraftClient.UI
             HideAuthPanel();
 
             // Add listeners
-            localhostButton.onClick.AddListener(() => serverInput.text = LOCALHOST_ADDRESS);
+            localhostButton!.onClick.AddListener(() => serverInput.text = LOCALHOST_ADDRESS);
 
-            usernameInput.onValueChanged.AddListener(this.UpdateUsernamePanel);
+            usernameInput!.onValueChanged.AddListener(this.UpdateUsernamePanel);
             usernameInput.onSelect.AddListener(this.UpdateUsernamePanel);
             usernameInput.onEndEdit.AddListener(this.HideUsernamePanel);
 
-            loginButton.onClick.AddListener(this.TryConnectServer);
-            quitButton.onClick.AddListener(this.QuitGame);
+            loginButton!.onClick.AddListener(this.TryConnectServer);
+            quitButton!.onClick.AddListener(this.QuitGame);
 
-            authLinkButton.onClick.AddListener(this.CopyAuthLink);
-            authCancelButton.onClick.AddListener(this.CancelAuth);
-            authConfirmButton.onClick.AddListener(this.ConfirmAuth);
-            authCodeInput.GetComponentInChildren<Button>().onClick.AddListener(this.PasteAuthCode);
+            authLinkButton!.onClick.AddListener(this.CopyAuthLink);
+            authCancelButton!.onClick.AddListener(this.CancelAuth);
+            authConfirmButton!.onClick.AddListener(this.ConfirmAuth);
+            authCodeInput!.GetComponentInChildren<Button>().onClick.AddListener(this.PasteAuthCode);
 
-            loginCloseButton.onClick.AddListener(this.HideLoginPanel);
-            loginPanelButton.GetComponent<Button>().onClick.AddListener(this.ShowLoginPanel);
+            loginCloseButton!.onClick.AddListener(this.HideLoginPanel);
+            loginPanelButton!.GetComponent<Button>().onClick.AddListener(this.ShowLoginPanel);
             // Cancel auth, not just hide panel (so basically this button is totally the same as authCancelButton)...
-            authCloseButton.onClick.AddListener(this.CancelAuth);
+            authCloseButton!.onClick.AddListener(this.CancelAuth);
 
             // Used for testing MC format code parsing
             // loadStateInfoText!.text = StringConvert.MC2TMP("Hello world §a[§a§a-1, §a1 §6[Bl§b[HHH]ah] Hello §c[Color RE§rD]  §a1§r] (blah)");

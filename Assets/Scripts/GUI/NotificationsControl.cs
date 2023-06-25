@@ -9,17 +9,15 @@ namespace MinecraftClient.UI
     public class NotificationsControl : MonoBehaviour
     {
         [SerializeField] private GameObject? notificationPrefab;
+        [SerializeField] private RectTransform? container;
         [SerializeField] private Sprite? notify, success, warning, error;
 
         private int nextNumeralID = 1;
-        private Transform? container;
 
         private Action<NotificationEvent>? showCallback;
 
         void Start()
         {
-            container = transform.Find("Notifications");
-
             showCallback = (e) => {
                 // Make a new notification here...
                 var notificationObj = GameObject.Instantiate(notificationPrefab);

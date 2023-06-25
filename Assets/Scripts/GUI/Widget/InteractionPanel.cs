@@ -15,6 +15,7 @@ namespace MinecraftClient.UI
         private static readonly int SHOW = Animator.StringToHash("Show");
 
         [SerializeField] private GameObject? interactionOptionPrefab;
+        [SerializeField] private RectTransform? container;
 
         private Animator? scrollHint;
         private ScrollRect? scrollRect;
@@ -22,7 +23,6 @@ namespace MinecraftClient.UI
         private readonly List<InteractionOption> interactionOptions = new();
 
         private int selectedIndex = 0;
-        private Transform? container;
 
         public bool ShouldAbsordMouseScroll => interactionOptions.Count > 1;
 
@@ -32,7 +32,6 @@ namespace MinecraftClient.UI
         void Start()
         {
             // Initialize controls
-            container = FindHelper.FindChildRecursively(transform, "Interactions");
             scrollHint = transform.Find("Scroll Hint").GetComponent<Animator>();
 
             scrollRect = GetComponent<ScrollRect>();

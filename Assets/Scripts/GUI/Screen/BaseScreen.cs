@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 
 namespace MinecraftClient.UI

@@ -112,7 +112,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 180, y: 180}
+  m_SizeDelta: {x: 181, y: 181}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4194177186363650274
 CanvasRenderer:
@@ -135,7 +135,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.3018868, g: 0.11953795, b: 0, a: 0.64705884}
+  m_Color: {r: 0.1981132, g: 0.09066242, b: 0, a: 0.5882353}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -186,7 +186,7 @@ RectTransform:
   m_Children:
   - {fileID: 4786477356735864611}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -216,12 +216,11 @@ MonoBehaviour:
   barText: {fileID: 0}
   textFormat: '{0:0}/{1:0}'
   normalColor: {r: 1, g: 0.72203434, b: 0.04150939, a: 1}
-  warningColor: {r: 1, g: 0.47412714, b: 0.015686274, a: 1}
+  warningColor: {r: 1, g: 0.4401363, b: 0.015686274, a: 1}
   dangerColor: {r: 1, g: 0, b: 0, a: 1}
   warningThreshold: 0.3
   dangerThreshold: 0.1
   fullBarDegree: 70
-  smoothSpeed: 1000
   backgroundImage: {fileID: 4194177186363650275}
   fillImage: {fileID: 4194177184941904449}
 --- !u!95 &458378407161183676
@@ -253,7 +252,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4194177186377170658}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0

@@ -80,7 +80,7 @@ MonoBehaviour:
   m_PixelsPerUnitMultiplier: 1
 --- !u!95 &3072778870617062665
 Animator:
-  serializedVersion: 4
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -97,7 +97,8 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!225 &2310142074047873014
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -145,7 +146,7 @@ RectTransform:
   - {fileID: 7249426671761368324}
   - {fileID: 5459016051046167977}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -203,6 +204,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactionOptionPrefab: {fileID: 1328062481274081314, guid: 3dd9dd6ac0936b040b04e41010ef0fea, type: 3}
+  container: {fileID: 7249426673302096163}
 --- !u!1 &7249426671761368325
 GameObject:
   m_ObjectHideFlags: 0
@@ -546,7 +548,7 @@ GameObject:
   - component: {fileID: 7249426673302096189}
   - component: {fileID: 7249426673302096162}
   m_Layer: 5
-  m_Name: Interactions
+  m_Name: Container
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
