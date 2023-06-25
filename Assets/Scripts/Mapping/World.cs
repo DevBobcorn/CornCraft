@@ -205,7 +205,7 @@ namespace MinecraftClient.Mapping
                 else // Read foliage color from color map. See https://minecraft.fandom.com/wiki/Color
                 {
                     var color = foliageMap[sampleY * mapSize + sampleX];
-                    foliage = ColorHelper.Unity2MC(color);
+                    foliage = (color.r << 16) | (color.g << 8) | color.b;
                 }
                 
                 if (effects.ContainsKey("grass_color"))
@@ -213,7 +213,7 @@ namespace MinecraftClient.Mapping
                 else // Read grass color from color map. Same as above
                 {
                     var color = grassMap[sampleY * mapSize + sampleX];
-                    grass = ColorHelper.Unity2MC(color);
+                    grass = (color.r << 16) | (color.g << 8) | color.b;
                 }
                 
                 if (effects.ContainsKey("fog_color"))

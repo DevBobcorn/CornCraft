@@ -17,45 +17,54 @@ namespace MinecraftClient.Mapping
         public float3 skyColor, foliageColor, grassColor;
         public float3 fogColor, waterColor, waterFogColor;
 
+        private static float3 GetFloat3Color(int color)
+        {
+            float r = ((color & 0xFF0000) >> 16) / 255F;
+            float g = ((color &   0xFF00) >>  8) / 255F;
+            float b = ((color &     0xFF))       / 255F;
+
+            return new(r, g, b);
+        }
+
         public int SkyColor
         {
             set {
-                skyColor = ColorHelper.MC2Float3(value);
+                skyColor = GetFloat3Color(value);
                 skyColorInt = value;
             }
         }
         public int FoliageColor
         {
             set {
-                foliageColor = ColorHelper.MC2Float3(value);
+                foliageColor = GetFloat3Color(value);
                 foliageColorInt = value;
             }
         }
         public int GrassColor
         {
             set {
-                grassColor = ColorHelper.MC2Float3(value);
+                grassColor = GetFloat3Color(value);
                 grassColorInt = value;
             }
         }
         public int FogColor
         {
             set {
-                fogColor = ColorHelper.MC2Float3(value);
+                fogColor = GetFloat3Color(value);
                 fogColorInt = value;
             }
         }
         public int WaterColor
         {
             set {
-                waterColor = ColorHelper.MC2Float3(value);
+                waterColor = GetFloat3Color(value);
                 waterColorInt = value;
             }
         }
         public int WaterFogColor
         {
             set {
-                waterFogColor = ColorHelper.MC2Float3(value);
+                waterFogColor = GetFloat3Color(value);
                 waterFogColorInt = value;
             }
         }
@@ -67,7 +76,16 @@ namespace MinecraftClient.Mapping
             BiomeId = id;
         }
 
-        public string GetDescription() => $"{BiomeId}\nTemperature: {Temperature:0.00}\tDownfall: {Precipitation} {Downfall:0.00}\n{ColorHelper.GetPreview(skyColorInt)} {ColorHelper.GetPreview(foliageColorInt)} {ColorHelper.GetPreview(grassColorInt)}\n{ColorHelper.GetPreview(fogColorInt)} {ColorHelper.GetPreview(waterColorInt)} {ColorHelper.GetPreview(waterFogColorInt)}";
+        private static string GetColorText(int color)
+        {
+            var colorCode = $"{color:x}".PadLeft(6, '0');
+            return $"<color=#{colorCode}>{colorCode}</color>";
+        }
+
+        public string GetDescription()
+        {
+            return $"{BiomeId}\nTemperature: {Temperature:0.00}\tDownfall: {Precipitation} {Downfall:0.00}\n{GetColorText(skyColorInt)} {GetColorText(foliageColorInt)} {GetColorText(grassColorInt)}\n{GetColorText(fogColorInt)} {GetColorText(waterColorInt)} {GetColorText(waterFogColorInt)}";
+        }
 
         public override string ToString() => BiomeId.ToString();
     }
