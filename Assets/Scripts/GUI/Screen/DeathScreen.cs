@@ -12,7 +12,9 @@ namespace MinecraftClient.UI
     {
         private bool isActive = false;
 
-        private Button? respawnButton, quitButton;
+        // UI controls and objects
+        [SerializeField] private Button? respawnButton, quitButton;
+        private CanvasGroup? screenGroup;
 
         public override bool IsActive
         {
@@ -27,9 +29,6 @@ namespace MinecraftClient.UI
                 return isActive;
             }
         }
-
-        // UI controls
-        private CanvasGroup? screenGroup;
 
         public override bool ReleaseCursor()
         {
@@ -58,11 +57,8 @@ namespace MinecraftClient.UI
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
 
-            respawnButton = transform.Find("Respawn Button").GetComponent<Button>();
-            quitButton   = transform.Find("Quit Button").GetComponent<Button>();
-
-            respawnButton.onClick.AddListener(this.Respawn);
-            quitButton.onClick.AddListener(this.QuitGame);
+            respawnButton!.onClick.AddListener(this.Respawn);
+            quitButton!.onClick.AddListener(this.QuitGame);
 
             healthCallback = (e) => {
                 if (e.Health <= 0F && !this.isActive)

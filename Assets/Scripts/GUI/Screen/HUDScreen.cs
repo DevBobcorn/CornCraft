@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,15 +17,17 @@ namespace MinecraftClient.UI
         private static readonly string[] modeIdentifiers = { "survival", "creative", "adventure", "spectator" };
         private const float HEALTH_MULTIPLIER = 10F;
 
-        private TMP_Text    latencyText, debugText, modeText;
-        private Animator    modePanel, crosshair, statusPanel, staminaBarAnimator;
-        private Button[]    modeButtons = new Button[4];
-        private ValueBar healthBar;
-        private RingValueBar staminaBar;
-        private InteractionPanel interactionPanel;
-
-        private ChatScreen  chatScreen;
-        private PauseScreen pauseScreen;
+        // UI controls and objects
+        [SerializeField] private TMP_Text? latencyText, debugText, modeText;
+        [SerializeField] private Animator? modePanelAnimator, crosshairAnimator, statusPanelAnimator;
+        [SerializeField] private Button[] modeButtons = new Button[4];
+        [SerializeField] private ValueBar? healthBar;
+        [SerializeField] private RingValueBar? staminaBar;
+        [SerializeField] private InteractionPanel? interactionPanel;
+        private Animator? staminaBarAnimator;
+        private ChatScreen? chatScreen;
+        private PauseScreen? pauseScreen;
+        private CanvasGroup? screenGroup;
 
         private bool isActive = false, debugInfo = true;
 
@@ -36,7 +39,7 @@ namespace MinecraftClient.UI
         {
             set {
                 isActive = value;
-                screenGroup.alpha = value ? 1F : 0F;
+                screenGroup!.alpha = value ? 1F : 0F;
                 screenGroup.blocksRaycasts = value;
                 screenGroup.interactable   = value;
             }
@@ -45,9 +48,6 @@ namespace MinecraftClient.UI
                 return isActive;
             }
         }
-
-        // UI controls
-        private CanvasGroup screenGroup;
 
         public override bool ReleaseCursor()
         {
@@ -69,35 +69,16 @@ namespace MinecraftClient.UI
         protected override bool Initialize()
         {
             // Initialize controls...
-            debugText = FindHelper.FindChildRecursively(transform, "Debug Text").GetComponent<TMP_Text>();
-            debugText.text = "Initializing...";
-
-            modePanel = transform.Find("Mode Panel").GetComponent<Animator>();
-            modeText  = modePanel.transform.Find("Mode Text").GetComponent<TMP_Text>();
-
-            modeButtons[0] = FindHelper.FindChildRecursively(transform, "Survival").GetComponent<Button>();
-            modeButtons[1] = FindHelper.FindChildRecursively(transform, "Creative").GetComponent<Button>();
-            modeButtons[2] = FindHelper.FindChildRecursively(transform, "Adventure").GetComponent<Button>();
-            modeButtons[3] = FindHelper.FindChildRecursively(transform, "Spectator").GetComponent<Button>();
-
-            crosshair   = transform.Find("Crosshair").GetComponent<Animator>();
-            statusPanel = transform.Find("Status Panel").GetComponent<Animator>();
-
-            interactionPanel = transform.Find("Interaction Panel").GetComponent<InteractionPanel>();
-
-            healthBar = statusPanel.transform.Find("Health Bar").GetComponent<ValueBar>();
-
-            staminaBar = transform.Find("Stamina Bar").GetComponent<RingValueBar>();
-            staminaBarAnimator = staminaBar.GetComponent<Animator>();
+            staminaBarAnimator = staminaBar!.GetComponent<Animator>();
 
             perspectiveCallback = (e) => {
                 switch (e.Perspective)
                 {
                     case Perspective.FirstPerson:
-                        crosshair.SetBool(SHOW, true);
+                        crosshairAnimator!.SetBool(SHOW, true);
                         break;
                     case Perspective.ThirdPerson:
-                        crosshair.SetBool(SHOW, false);
+                        crosshairAnimator!.SetBool(SHOW, false);
                         break;
                 }
             };
@@ -112,14 +93,14 @@ namespace MinecraftClient.UI
                     _                   => false
                 };
 
-                statusPanel.SetBool(SHOW, showStatus);
+                statusPanelAnimator!.SetBool(SHOW, showStatus);
             };
 
             healthCallback = (e) => {
                 if (e.UpdateMaxHealth)
-                    healthBar.MaxValue = e.Health * HEALTH_MULTIPLIER;
+                    healthBar!.MaxValue = e.Health * HEALTH_MULTIPLIER;
 
-                healthBar.CurValue = e.Health * HEALTH_MULTIPLIER;
+                healthBar!.CurValue = e.Health * HEALTH_MULTIPLIER;
             };
 
             staminaCallback = (e) => {
@@ -145,15 +126,14 @@ namespace MinecraftClient.UI
 
             // Initialize controls
             screenGroup = GetComponent<CanvasGroup>();
-            latencyText = FindHelper.FindChildRecursively(transform, "Latency Text").GetComponent<TMP_Text>();
             
             return true;
         }
 
-        private Action<PerspectiveUpdateEvent> perspectiveCallback;
-        private Action<GameModeUpdateEvent>    gameModeCallback;
-        private Action<HealthUpdateEvent>      healthCallback;
-        private Action<StaminaUpdateEvent>     staminaCallback;
+        private Action<PerspectiveUpdateEvent>? perspectiveCallback;
+        private Action<GameModeUpdateEvent>?    gameModeCallback;
+        private Action<HealthUpdateEvent>?      healthCallback;
+        private Action<StaminaUpdateEvent>?     staminaCallback;
 
         void OnDestroy()
         {
@@ -187,7 +167,7 @@ namespace MinecraftClient.UI
                     if (modePanelShown) // Select next gamemode
                     {
                         selectedMode = (selectedMode + 1) % buttonCount;
-                        modeText.text = ((GameMode)selectedMode).ToString();
+                        modeText!.text = ((GameMode)selectedMode).ToString();
                         modeButtons[selectedMode].Select();
                     }
                     else // Show gamemode switch
@@ -195,12 +175,12 @@ namespace MinecraftClient.UI
                         selectedMode = (int) game.GameMode;
                         if (selectedMode >= 0 && selectedMode < modeButtons.Length)
                         {
-                            modeText.text = ((GameMode)selectedMode).ToString();
-                            modePanel.SetBool(SHOW, true);
+                            modeText!.text = ((GameMode)selectedMode).ToString();
+                            modePanelAnimator!.SetBool(SHOW, true);
                             modePanelShown = true;
                             modeButtons[selectedMode].Select();
                             // Hide crosshair (if shown)
-                            crosshair.SetBool(SHOW, false);
+                            crosshairAnimator!.SetBool(SHOW, false);
                         }
                     }
                 }
@@ -210,7 +190,7 @@ namespace MinecraftClient.UI
             {
                 if (modePanelShown) // Hide gamemode switch
                 {
-                    modePanel.SetBool(SHOW, false);
+                    modePanelAnimator!.SetBool(SHOW, false);
                     modePanelShown = false;
 
                     if (selectedMode != (int) game.GameMode) // Commit switch request
@@ -218,7 +198,7 @@ namespace MinecraftClient.UI
                     
                     // Restore crosshair if necessary
                     if (game.Perspective == Perspective.FirstPerson)
-                        crosshair.SetBool(SHOW, true);
+                        crosshairAnimator!.SetBool(SHOW, true);
                     
                 }
                 else // Toggle debug info
@@ -226,9 +206,9 @@ namespace MinecraftClient.UI
             }
 
             if (Input.GetKeyDown(KeyCode.F)) // Execute interactions
-                interactionPanel.RunInteractionOption();
+                interactionPanel!.RunInteractionOption();
 
-            if (interactionPanel.ShouldAbsordMouseScroll)
+            if (interactionPanel!.ShouldAbsordMouseScroll)
             {
                 var scroll = Input.GetAxis("Mouse ScrollWheel");
                 if (scroll != 0F && interactionPanel is not null)
@@ -254,7 +234,7 @@ namespace MinecraftClient.UI
             if (Input.GetKeyDown(KeyCode.Escape))
                 game.ScreenControl?.PushScreen(pauseScreen);
             
-            debugText.text = game.GetInfoString(debugInfo);
+            debugText!.text = game.GetInfoString(debugInfo);
 
             var realLatency = game.GetOwnLatency();
             if (displayedLatency != realLatency)
@@ -265,15 +245,16 @@ namespace MinecraftClient.UI
                     displayedLatency--;
                 
                 if (displayedLatency >= 500)
-                    latencyText.text =  $"<color=red>{displayedLatency} ms</color>";
+                    latencyText!.text =  $"<color=red>{displayedLatency} ms</color>";
                 else if (displayedLatency >= 100)
-                    latencyText.text =  $"<color=orange>{displayedLatency} ms</color>";
-                else latencyText.text =  $"{displayedLatency} ms";
+                    latencyText!.text =  $"<color=orange>{displayedLatency} ms</color>";
+                else
+                    latencyText!.text =  $"{displayedLatency} ms";
             }
 
             // Update stamina bar position
-            staminaBar.transform.position = 
-                    Vector3.Lerp(staminaBar.transform.position, game!.CameraController.GetTargetScreenPos(), Time.deltaTime * 10F);
+            staminaBar!.transform.position = 
+                    Vector3.Lerp(staminaBar.transform.position, game!.CameraController!.GetTargetScreenPos(), Time.deltaTime * 10F);
 
         }
 

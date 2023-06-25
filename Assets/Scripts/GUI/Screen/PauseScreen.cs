@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,13 +9,15 @@ namespace MinecraftClient.UI
     {
         private bool isActive = false;
 
-        private Button resumeButton, quitButton;
+        // UI controls and objects
+        [SerializeField] private Button? resumeButton, quitButton;
+        private CanvasGroup? screenGroup;
 
         public override bool IsActive
         {
             set {
                 isActive = value;
-                screenGroup.alpha = value ? 1F : 0F;
+                screenGroup!.alpha = value ? 1F : 0F;
                 screenGroup.blocksRaycasts = value;
                 screenGroup.interactable   = value;
             }
@@ -23,9 +26,6 @@ namespace MinecraftClient.UI
                 return isActive;
             }
         }
-
-        // UI controls
-        private CanvasGroup screenGroup;
 
         public override bool ReleaseCursor()
         {
@@ -39,12 +39,12 @@ namespace MinecraftClient.UI
 
         public void Back2Game()
         {
-            CornApp.CurrentClient.ScreenControl?.TryPopScreen();
+            CornApp.CurrentClient!.ScreenControl!.TryPopScreen();
         }
 
         public void QuitGame()
         {
-            CornApp.CurrentClient.Disconnect();
+            CornApp.CurrentClient!.Disconnect();
         }
 
         protected override bool Initialize()
@@ -52,11 +52,8 @@ namespace MinecraftClient.UI
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
 
-            resumeButton = transform.Find("Resume Button").GetComponent<Button>();
-            quitButton   = transform.Find("Quit Button").GetComponent<Button>();
-
-            resumeButton.onClick.AddListener(this.Back2Game);
-            quitButton.onClick.AddListener(this.QuitGame);
+            resumeButton!.onClick.AddListener(this.Back2Game);
+            quitButton!.onClick.AddListener(this.QuitGame);
             
             return true;
         }

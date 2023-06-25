@@ -1,8 +1,8 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
-using UnityEngine.UIElements;
 using TMPro;
 
 using MinecraftClient.Event;
@@ -18,13 +18,13 @@ namespace MinecraftClient.UI
         {
             set {
                 isActive = value;
-                screenGroup.alpha = value ? 1F : 0F;
+                screenGroup!.alpha = value ? 1F : 0F;
                 screenGroup.blocksRaycasts = value;
                 screenGroup.interactable   = value;
                 // Focus chat input on enter chat screen
                 if (value)
                 {
-                    chatInput.text = string.Empty;
+                    chatInput!.text = string.Empty;
                     chatInput.ActivateInputField();
                 }
             }
@@ -35,10 +35,12 @@ namespace MinecraftClient.UI
         }
 
         // UI controls and objects
-        private CanvasGroup screenGroup, autoCompleteGroup;
-        private RectTransform chatScrollRect;
-        private TMP_InputField chatInput, chatInputGhost;
-        private TMP_Text chatTexts, autoCompleteOptions;
+        [SerializeField] private CanvasGroup? autoCompletePanelGroup;
+        [SerializeField] private RectTransform? chatScrollRectTransform;
+        [SerializeField] private TMP_InputField? chatInput;
+        [SerializeField] private TMP_Text? chatContent, autoCompleteOptions;
+        private CanvasGroup? screenGroup;
+        private TMP_InputField? chatInputGhost;
 
         // Chat message data
         private List<string> chatHistory = new List<string>();
@@ -60,23 +62,23 @@ namespace MinecraftClient.UI
 
         public void SetChatMessage(string message, int caretPos)
         {
-            chatInput.text = message;
+            chatInput!.text = message;
             chatInput.caretPosition = caretPos;
         }
 
         private void ShowCompletions()
         {
-            autoCompleteGroup.alpha = 1F;
-            autoCompleteGroup.interactable = true;
-            autoCompleteGroup.blocksRaycasts = true;
+            autoCompletePanelGroup!.alpha = 1F;
+            autoCompletePanelGroup.interactable = true;
+            autoCompletePanelGroup.blocksRaycasts = true;
             completionsShown = true;
         }
 
         private void HideCompletions()
         {
-            autoCompleteGroup.alpha = 0F;
-            autoCompleteGroup.interactable = false;
-            autoCompleteGroup.blocksRaycasts = false;
+            autoCompletePanelGroup!.alpha = 0F;
+            autoCompletePanelGroup.interactable = false;
+            autoCompletePanelGroup.blocksRaycasts = false;
             completionsShown = false;
             // Restart marker value...
             completionIndex = -1;
@@ -87,7 +89,7 @@ namespace MinecraftClient.UI
             if (message.StartsWith("/") && message.Length > 1)
             {
                 string requestText;
-                if (chatInput.caretPosition > 0 && chatInput.caretPosition < message.Length)
+                if (chatInput!.caretPosition > 0 && chatInput.caretPosition < message.Length)
                     requestText = message[0..chatInput.caretPosition];
                 else
                     requestText = message;
@@ -112,7 +114,7 @@ namespace MinecraftClient.UI
 
         public void SendChatMessage()
         {
-            if (chatInput.text.Trim() == string.Empty)
+            if (chatInput!.text.Trim() == string.Empty)
                 return;
             
             string chat = chatInput.text;
@@ -139,10 +141,10 @@ namespace MinecraftClient.UI
             {
                 if (chatIndex == chatHistory.Count)
                 {   // Store to buffer...
-                    chatBuffer = chatInput.text;
+                    chatBuffer = chatInput!.text;
                 }
                 chatIndex--;
-                chatInput.text = chatHistory[chatIndex];
+                chatInput!.text = chatHistory[chatIndex];
                 chatInput.caretPosition = chatHistory[chatIndex].Length;
             }
         }
@@ -155,12 +157,12 @@ namespace MinecraftClient.UI
                 if (chatIndex == chatHistory.Count)
                 {
                     // Restore buffer...
-                    chatInput.text = chatBuffer;
+                    chatInput!.text = chatBuffer;
                     chatInput.caretPosition = chatBuffer.Length;
                 }
                 else
                 {
-                    chatInput.text = chatHistory[chatIndex];
+                    chatInput!.text = chatHistory[chatIndex];
                     chatInput.caretPosition = chatHistory[chatIndex].Length;
                 }
             }
@@ -195,41 +197,34 @@ namespace MinecraftClient.UI
                     i == completionIndex ? $"<color=yellow>{completionOptions[i]}</color>" : completionOptions[i]
                 ).Append('\n');
             }
-            autoCompleteOptions.text = str.ToString();
+            autoCompleteOptions!.text = str.ToString();
         }
 
-        private Action<ChatMessageEvent> chatCallback;
-        private Action<AutoCompletionEvent> autoCompleteCallback;
+        private Action<ChatMessageEvent>? chatCallback;
+        private Action<AutoCompletionEvent>? autoCompleteCallback;
 
         protected override bool Initialize()
         {
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
-            chatScrollRect = transform.Find("Chat Scroll").GetComponent<RectTransform>();
 
-            chatInput = transform.Find("Chat Input").GetComponent<TMP_InputField>();
-            chatInput.onValueChanged.AddListener(this.OnChatInputChange);
+            chatInput!.onValueChanged.AddListener(this.OnChatInputChange);
 
             var chatInputGhostObj = GameObject.Instantiate(chatInput.gameObject, Vector3.zero, Quaternion.identity);
             chatInputGhostObj.name = "Chat Input Ghost";
             chatInputGhostObj.SetActive(false);
-
             chatInputGhost = chatInputGhostObj.GetComponent<TMP_InputField>();
 
-            chatTexts = FindHelper.FindChildRecursively(chatScrollRect, "Chat Texts").GetComponent<TMP_Text>();
-            chatTexts.text = string.Empty;
+            chatContent!.text = string.Empty;
 
-            autoCompleteGroup = transform.Find("Auto Complete Panel").GetComponent<CanvasGroup>();
-            autoCompleteGroup.alpha = 0F;
-            autoCompleteGroup.interactable = false;
-            autoCompleteGroup.blocksRaycasts = false;
-
-            autoCompleteOptions = autoCompleteGroup.transform.Find("Auto Complete Options").GetComponent<TMP_Text>();
-            autoCompleteOptions.text = string.Empty; // Clear up at start
+            autoCompletePanelGroup!.alpha = 0F;
+            autoCompletePanelGroup.interactable = false;
+            autoCompletePanelGroup.blocksRaycasts = false;
+            autoCompleteOptions!.text = string.Empty; // Clear up at start
 
             // Register callbacks
             chatCallback = (e) => {
-                chatTexts.text += StringHelper.MC2TMP(e.Message) + '\n';
+                chatContent.text += StringHelper.MC2TMP(e.Message) + '\n';
             };
 
             autoCompleteCallback = (e) => {
@@ -258,7 +253,7 @@ namespace MinecraftClient.UI
                     if (chatInputGhost.text.EndsWith(' '))
                         caretPosX += chatInputGhost.textComponent.fontSize * 0.5F;
                     
-                    autoCompleteGroup.GetComponent<RectTransform>().anchoredPosition = new(caretPosX, 0F);
+                    autoCompletePanelGroup.GetComponent<RectTransform>().anchoredPosition = new(caretPosX, 0F);
                 }
                 else // No option available
                 {
@@ -290,11 +285,11 @@ namespace MinecraftClient.UI
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                CornApp.CurrentClient.ScreenControl?.TryPopScreen();
+                CornApp.CurrentClient!.ScreenControl!.TryPopScreen();
                 return;
             }
 
-            if (chatInput.IsActive())
+            if (chatInput!.IsActive())
             {
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
