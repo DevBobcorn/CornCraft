@@ -3,6 +3,17 @@ using Unity.Mathematics;
 namespace MinecraftClient.Mapping
 {
     /// <summary>
+    /// Represents different types of precipitations
+    /// </summary>
+    public enum Precipitation
+    {
+        None,
+        Snow,
+        Rain,
+        Unknown
+    }
+
+    /// <summary>
     /// Represents a Minecraft Biome
     /// </summary>
     public record Biome
