@@ -614,6 +614,12 @@ namespace MinecraftClient.Protocol.Handlers
 
                 ReadLightArray(skyLightArray, chunkBlockY, ref skyLight);
             }
+
+            if (protocolVersion >= ProtocolMinecraft.MC_1_20_Version)
+            {
+                // TODO: Fix and implement
+                return;
+            }
             
             // Block Light Arrays
             int blockLightArrayCount = dataTypes.ReadNextVarInt(cache);
