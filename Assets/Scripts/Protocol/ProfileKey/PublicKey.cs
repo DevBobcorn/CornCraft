@@ -18,7 +18,11 @@ namespace MinecraftClient.Protocol.ProfileKey
             Key = KeyUtils.DecodePemKey(pemKey, "-----BEGIN RSA PUBLIC KEY-----", "-----END RSA PUBLIC KEY-----");
 
             rsa = RSA.Create();
-            rsa.ImportSubjectPublicKeyInfo(Key, out _);
+            try {
+                rsa.ImportSubjectPublicKeyInfo(Key, out _);
+            } catch (Exception e) {
+                UnityEngine.Debug.LogWarning($"Failed to import key info: {e}");
+            }
 
             if (!string.IsNullOrEmpty(sig))
                 Signature = Convert.FromBase64String(sig);
@@ -38,7 +42,11 @@ namespace MinecraftClient.Protocol.ProfileKey
             Key = key;
 
             rsa = RSA.Create();
-            rsa.ImportSubjectPublicKeyInfo(Key, out _);
+            try {
+                rsa.ImportSubjectPublicKeyInfo(Key, out _);
+            } catch (Exception e) {
+                UnityEngine.Debug.LogWarning($"Failed to import key info: {e}");
+            }
 
             Signature = signature;
         }
