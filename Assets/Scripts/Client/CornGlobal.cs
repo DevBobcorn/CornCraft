@@ -15,8 +15,8 @@ namespace MinecraftClient
         public static bool MarkLegallySignedMsg   { get; set; } = false;
         public static bool MarkSystemMessage      { get; set; } = false;
         public static bool MarkModifiedMsg        { get; set; } = false;
-        public static bool ShowModifiedChat       { get; set; } = false;
-        public static bool ShowIllegalSignedChat  { get; set; } = false;
+        public static bool ShowModifiedChat       { get; set; } =  true;
+        public static bool ShowIllegalSignedChat  { get; set; } =  true;
         public static bool SignMessageInCommand   { get; set; } = false;
         public static bool SignChat               { get; set; } = false;
 
