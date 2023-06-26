@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cbac6e678443724c9bd2baf5d564c1d, type: 3}
   m_Name: Cloudy 3
   m_EditorClassIdentifier: 
-  showEditor: 0
+  showEditor: 1
   showEffectControls: 0
   showCloudControls: 0
   showFlatCloudControls: 0
@@ -25,6 +25,7 @@ MonoBehaviour:
   showWeatherAudioControls: 0
   showLightningControls: 0
   cloudsOverride:
+    ambientLightIntensity: 1
     showLayer1: 1
     coverageLayer1: -0.105
     dilateCoverageLayer1: 0.514
@@ -39,6 +40,7 @@ MonoBehaviour:
     silverLiningSpreadLayer1: 0.82
     ligthAbsorbtionLayer1: 0.5
     densityLayer1: 0.072
+    densitySmoothnessLayer1: 1
     baseErosionIntensityLayer1: 0
     detailErosionIntensityLayer1: 0.5
     curlIntensityLayer1: 0.25
@@ -56,6 +58,7 @@ MonoBehaviour:
     silverLiningSpreadLayer2: 0.8
     ligthAbsorbtionLayer2: 1
     densityLayer2: 0.3
+    densitySmoothnessLayer2: 1
     baseErosionIntensityLayer2: 0
     detailErosionIntensityLayer2: 0.3
     curlIntensityLayer2: 0.05
@@ -72,9 +75,9 @@ MonoBehaviour:
     directLightIntensityModifier: 1
     ambientIntensityModifier: 1
   fogOverride:
-    fogDensity: 0.027
-    fogHeightFalloff: 0.0008
-    fogHeight: 0
+    fogDensity: 0.2
+    fogHeightFalloff: 0.05
+    fogHeight: 150
     fogDensity2: 0.053
     fogHeightFalloff2: 0.05
     fogHeight2: 0

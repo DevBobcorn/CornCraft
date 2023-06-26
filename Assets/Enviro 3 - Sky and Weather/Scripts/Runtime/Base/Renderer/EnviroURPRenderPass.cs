@@ -17,7 +17,7 @@ namespace Enviro
 
         public EnviroURPRenderPass (string name)
         {
-            renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
+            renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
             passName = name;
         } 
   
