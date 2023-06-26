@@ -412,6 +412,9 @@ namespace MinecraftClient.Protocol.Handlers
                                     dataTypes.ReadNextLocation(packetData);   // Death location
                                 }
                             }
+                            if (protocolVersion >= MC_1_20_Version)
+                                dataTypes.ReadNextVarInt(packetData); // Portal Cooldown - 1.20 and above
+                            
                             // Enable chat
                             if (protocolVersion < MC_1_19_Version)
                             {
@@ -864,6 +867,9 @@ namespace MinecraftClient.Protocol.Handlers
                                     dataTypes.ReadNextLocation(packetData); // Death location
                                 }
                             }
+                            if (protocolVersion >= MC_1_20_Version)
+                                dataTypes.ReadNextVarInt(packetData); // Portal Cooldown - 1.20 and above
+                            
                             handler.OnRespawn();
                             break;
                         }
@@ -1067,7 +1073,10 @@ namespace MinecraftClient.Protocol.Handlers
                                 int sectionX = (int)(chunkSection >> 42);
                                 int sectionY = (int)((chunkSection << 44) >> 44);
                                 int sectionZ = (int)((chunkSection << 22) >> 42);
-                                dataTypes.ReadNextBool(packetData); // Useless boolean
+                                
+                                if(protocolVersion < MC_1_20_Version)
+                                    dataTypes.ReadNextBool(packetData); // Useless boolean (Related to light update)
+
                                 int blocksSize = dataTypes.ReadNextVarInt(packetData);
                                 for (int i = 0; i < blocksSize; i++)
                                 {
