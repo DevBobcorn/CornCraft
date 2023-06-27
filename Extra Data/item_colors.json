@@ -120,6 +120,18 @@
                 29
             ]
         ],
+        "minecraft:frog_spawn_egg": [
+            [
+                208,
+                116,
+                68
+            ],
+            [
+                255,
+                199,
+                124
+            ]
+        ],
         "minecraft:ghast_spawn_egg": [
             [
                 249,
@@ -192,6 +204,18 @@
                 73
             ]
         ],
+        "minecraft:wither_spawn_egg": [
+            [
+                20,
+                20,
+                20
+            ],
+            [
+                77,
+                114,
+                160
+            ]
+        ],
         "minecraft:cow_spawn_egg": [
             [
                 68,
@@ -202,6 +226,18 @@
                 161,
                 161,
                 161
+            ]
+        ],
+        "minecraft:goat_spawn_egg": [
+            [
+                165,
+                148,
+                124
+            ],
+            [
+                85,
+                73,
+                62
             ]
         ],
         "minecraft:dolphin_spawn_egg": [
@@ -288,6 +324,30 @@
                 27
             ]
         ],
+        "minecraft:sniffer_spawn_egg": [
+            [
+                135,
+                30,
+                9
+            ],
+            [
+                37,
+                171,
+                112
+            ]
+        ],
+        "minecraft:warden_spawn_egg": [
+            [
+                15,
+                70,
+                73
+            ],
+            [
+                57,
+                214,
+                224
+            ]
+        ],
         "minecraft:sheep_spawn_egg": [
             [
                 231,
@@ -298,6 +358,18 @@
                 255,
                 181,
                 181
+            ]
+        ],
+        "minecraft:tadpole_spawn_egg": [
+            [
+                109,
+                83,
+                61
+            ],
+            [
+                22,
+                10,
+                0
             ]
         ],
         "minecraft:cod_spawn_egg": [
@@ -384,6 +456,18 @@
                 48
             ]
         ],
+        "minecraft:iron_golem_spawn_egg": [
+            [
+                219,
+                205,
+                194
+            ],
+            [
+                116,
+                163,
+                50
+            ]
+        ],
         "minecraft:tropical_fish_spawn_egg": [
             [
                 239,
@@ -432,6 +516,18 @@
                 32
             ]
         ],
+        "minecraft:glow_squid_spawn_egg": [
+            [
+                9,
+                86,
+                86
+            ],
+            [
+                133,
+                241,
+                188
+            ]
+        ],
         "minecraft:phantom_spawn_egg": [
             [
                 67,
@@ -458,14 +554,14 @@
         ],
         "minecraft:polar_bear_spawn_egg": [
             [
-                242,
-                242,
-                242
+                238,
+                238,
+                222
             ],
             [
-                149,
-                149,
-                144
+                213,
+                214,
+                205
             ]
         ],
         "minecraft:turtle_spawn_egg": [
@@ -624,6 +720,18 @@
                 0
             ]
         ],
+        "minecraft:camel_spawn_egg": [
+            [
+                252,
+                195,
+                105
+            ],
+            [
+                203,
+                147,
+                55
+            ]
+        ],
         "minecraft:vex_spawn_egg": [
             [
                 122,
@@ -696,6 +804,18 @@
                 26
             ]
         ],
+        "minecraft:snow_golem_spawn_egg": [
+            [
+                217,
+                242,
+                242
+            ],
+            [
+                129,
+                164,
+                164
+            ]
+        ],
         "minecraft:wandering_trader_spawn_egg": [
             [
                 69,
@@ -732,6 +852,18 @@
                 77
             ]
         ],
+        "minecraft:allay_spawn_egg": [
+            [
+                0,
+                218,
+                255
+            ],
+            [
+                0,
+                173,
+                255
+            ]
+        ],
         "minecraft:pufferfish_spawn_egg": [
             [
                 246,
@@ -754,6 +886,18 @@
                 112,
                 136,
                 153
+            ]
+        ],
+        "minecraft:axolotl_spawn_egg": [
+            [
+                251,
+                193,
+                227
+            ],
+            [
+                166,
+                45,
+                116
             ]
         ],
         "minecraft:enderman_spawn_egg": [
@@ -838,6 +982,18 @@
                 255,
                 0,
                 0
+            ]
+        ],
+        "minecraft:ender_dragon_spawn_egg": [
+            [
+                28,
+                28,
+                28
+            ],
+            [
+                224,
+                121,
+                250
             ]
         ]
     }
