@@ -479,7 +479,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     directLightIntensityModifier: 1
     setAmbientLighting: 1
-    ambientMode: 3
+    ambientMode: 0
     ambientSkyColorGradient:
       serializedVersion: 2
       key0: {r: 0.23584908, g: 0.23584908, b: 0.23584908, a: 1}

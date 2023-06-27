@@ -1,16 +1,26 @@
 #nullable enable
 using UnityEngine;
+using Enviro;
 
 namespace MinecraftClient.Rendering
 {
     public class Enviro3Manager : BaseEnvironmentManager
     {
-        [SerializeField] private Enviro.EnviroManager? enviroInstance;
+        [SerializeField] private EnviroManager? enviroInstance;
+        [SerializeField] private EnviroWeatherType? normalWeatherType;
+        [SerializeField] private EnviroWeatherType? rainWeatherType;
         private int timeOfDayRaw;
 
         public override void SetRain(bool raining)
         {
-            
+            if (!raining)
+            {
+                enviroInstance!.Weather.ChangeWeather(normalWeatherType);
+            }
+            else
+            {
+                enviroInstance!.Weather.ChangeWeather(rainWeatherType);
+            }
         }
 
         public override void SetTime(long timeRaw)

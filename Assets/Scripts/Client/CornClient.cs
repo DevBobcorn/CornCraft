@@ -1686,7 +1686,19 @@ namespace MinecraftClient
         /// Called every time rain(snow) starts or stops
         /// </summary>
         /// <param name="begin">true if the rain is starting</param>
-        public void OnRainChange(bool begin) { }
+        public void OnRainChange(bool begin)
+        {
+            if (begin)
+            {
+                Debug.Log("Rain starts");
+            }
+            else
+            {
+                Debug.Log("Rain stops");
+            }
+
+            EnvironmentManager!.SetRain(begin);
+        }
 
         /// <summary>
         /// Called when a Synchronization sequence is recevied, this sequence need to be sent when breaking or placing blocks

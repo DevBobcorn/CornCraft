@@ -12,17 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ccdfb360c52f049bf71126aa74826f, type: 3}
   m_Name: Weather Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 0
-  showSaveLoad: 0
+  showModuleInspector: 1
+  showSaveLoad: 1
   active: 1
   Settings:
     weatherTypes:
-    - {fileID: 11400000, guid: 3e61e22e1ac8ba045a3b0e53c22b3629, type: 2}
-    - {fileID: 11400000, guid: 6c589d06d1746d04a864437f71d0cc30, type: 2}
-    - {fileID: 11400000, guid: de555bbfb870a794d8ba3d0d8e68f475, type: 2}
-    - {fileID: 11400000, guid: 9ba6458aa7df92d4494a7a3d40830a15, type: 2}
     - {fileID: 11400000, guid: f736e404e0b052942bc41c35c50dccad, type: 2}
-    - {fileID: 11400000, guid: 96eebec6fa78a3c48ba2bc98ac5ab57f, type: 2}
     - {fileID: 11400000, guid: 11fdd63974de7ae44b1c689d499953f6, type: 2}
     cloudsTransitionSpeed: 1
     fogTransitionSpeed: 1
@@ -776,7 +771,7 @@ MonoBehaviour:
     custom1Emission: 0
     custom2Emission: 0
   preset: {fileID: 11400000, guid: 59a8076f06e540343b875f850ac3b6a4, type: 2}
-  showSetupControls: 1
+  showSetupControls: 0
   showEmissionControls: 1
 --- !u!114 &-2917269256795556972
 MonoBehaviour:
@@ -1577,10 +1572,10 @@ MonoBehaviour:
   showDensityControls: 0
   showTextureControls: 0
   showWindControls: 0
-  cloudAnimLayer1: {x: -0.07428296, y: -0.54617864, z: -0.67880315}
+  cloudAnimLayer1: {x: 0.57023513, y: 0.098339476, z: 0.744241}
   cloudAnimLayer2: {x: 0.3174014, y: -0.67647, z: 0.67947596}
-  cloudAnimNonScaledLayer1: {x: -0.6701128, y: 1.7279297, z: -59.55981}
-  cloudAnimNonScaledLayer2: {x: -0.56669724, y: -0.14984834, z: -57.22109}
+  cloudAnimNonScaledLayer1: {x: -0.541213, y: 1.8568302, z: -59.68845}
+  cloudAnimNonScaledLayer2: {x: -0.69559705, y: -0.2787527, z: -57.349728}
   weatherMap: {fileID: 0}
 --- !u!114 &-304633943039718671
 MonoBehaviour:
@@ -1601,8 +1596,8 @@ MonoBehaviour:
     volumetrics: 1
     steps: 64
     quality: 1
-    scattering: 0.015
-    extinction: 0.035
+    scattering: 0.01
+    extinction: 0.03
     anistropy: 0.6
     maxRange: 1000
     maxRangePointSpot: 100
@@ -1612,9 +1607,9 @@ MonoBehaviour:
     noise: {fileID: 0}
     ditheringTex: {fileID: 2800000, guid: 711e788cbc742bb439b3c7cad60651e3, type: 3}
     fog: 1
-    fogDensity: 0.027
-    fogHeightFalloff: 0.0008
-    fogHeight: 0
+    fogDensity: 0.1
+    fogHeightFalloff: 0.05
+    fogHeight: 150
     fogDensity2: 0.053
     fogHeightFalloff2: 0.05
     fogHeight2: 0
@@ -1655,6 +1650,11 @@ MonoBehaviour:
   showFogControls: 0
   showVolumetricsControls: 1
   fogLights:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
