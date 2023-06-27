@@ -17,10 +17,6 @@ MonoBehaviour:
   active: 1
   Settings:
     weatherTypes:
-    - {fileID: 11400000, guid: 3e61e22e1ac8ba045a3b0e53c22b3629, type: 2}
-    - {fileID: 11400000, guid: 6c589d06d1746d04a864437f71d0cc30, type: 2}
-    - {fileID: 11400000, guid: de555bbfb870a794d8ba3d0d8e68f475, type: 2}
-    - {fileID: 11400000, guid: 9ba6458aa7df92d4494a7a3d40830a15, type: 2}
     - {fileID: 11400000, guid: f736e404e0b052942bc41c35c50dccad, type: 2}
     - {fileID: 11400000, guid: 96eebec6fa78a3c48ba2bc98ac5ab57f, type: 2}
     - {fileID: 11400000, guid: 11fdd63974de7ae44b1c689d499953f6, type: 2}

@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cbac6e678443724c9bd2baf5d564c1d, type: 3}
   m_Name: Cloudy 3
   m_EditorClassIdentifier: 
-  showEditor: 1
+  showEditor: 0
   showEffectControls: 0
   showCloudControls: 0
   showFlatCloudControls: 0
   showFogControls: 1
-  showLightingControls: 0
+  showLightingControls: 1
   showAuroraControls: 0
   showEnvironmentControls: 0
   showAudioControls: 0
@@ -75,15 +75,15 @@ MonoBehaviour:
     directLightIntensityModifier: 1
     ambientIntensityModifier: 1
   fogOverride:
-    fogDensity: 0.2
+    fogDensity: 0.1
     fogHeightFalloff: 0.05
     fogHeight: 150
     fogDensity2: 0.053
     fogHeightFalloff2: 0.05
     fogHeight2: 0
     fogColorBlend: 0.75
-    scattering: 0.015
-    extinction: 0.035
+    scattering: 0.01
+    extinction: 0.03
     anistropy: 0.6
   auroraOverride:
     auroraIntensity: 1
