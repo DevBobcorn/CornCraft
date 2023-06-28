@@ -294,6 +294,12 @@ namespace MinecraftClient.Protocol.Handlers
                 
             }
 
+            if (chunkMask == 0) // The whole chunk column is empty (chunks around main island in the end, for example)
+            {
+                //UnityEngine.Debug.Log($"Received empty column: [{chunkX}, {chunkZ}]");
+                world.CreateEmptyChunkColumn(chunkX, chunkZ, chunkColumnSize);
+            }
+
             int consumedSize = totalSize - cache.Count;
             int error = dataSize - consumedSize;
 
@@ -401,123 +407,131 @@ namespace MinecraftClient.Protocol.Handlers
 
             const int chunkColumnSize = 16;
 
-            // 1.9 and above chunk format
-            // Unloading chunks is handled by a separate packet
-            for (int chunkY = 0; chunkY < chunkColumnSize; chunkY++)
+            if (chunkMask == 0) // The whole chunk column is empty (chunks around main island in the end, for example)
             {
-                if ((chunkMask & (1 << chunkY)) != 0)
+                //UnityEngine.Debug.Log($"Received empty column: [{chunkX}, {chunkZ}]");
+                world.CreateEmptyChunkColumn(chunkX, chunkZ, chunkColumnSize);
+            }
+            else
+            {
+                // 1.9 and above chunk format
+                // Unloading chunks is handled by a separate packet
+                for (int chunkY = 0; chunkY < chunkColumnSize; chunkY++)
                 {
-                    // 1.14 and above Non-air block count inside chunk section, for lighting purposes
-                    dataTypes.ReadNextShort(cache);
-
-                    byte bitsPerBlock = dataTypes.ReadNextByte(cache);
-                    bool usePalette = (bitsPerBlock <= 8);
-
-                    // Vanilla Minecraft will use at least 4 bits per block
-                    if (bitsPerBlock < 4)
-                        bitsPerBlock = 4;
-
-                    // MC 1.9 to 1.12 will set palette length field to 0 when palette
-                    // is not used, MC 1.13+ does not send the field at all in this case
-                    int paletteLength = 0; // Assume zero when length is absent
-                    if (usePalette)
-                        paletteLength = dataTypes.ReadNextVarInt(cache);
-
-                    int[] palette = new int[paletteLength];
-                    for (int i = 0; i < paletteLength; i++)
-                        palette[i] = dataTypes.ReadNextVarInt(cache);
-
-                    // Bit mask covering bitsPerBlock bits
-                    // EG, if bitsPerBlock = 5, valueMask = 00011111 in binary
-                    uint valueMask = (uint)((1 << bitsPerBlock) - 1);
-
-                    // Block IDs are packed in the array of 64-bits integers
-                    ulong[] dataArray = dataTypes.ReadNextULongArray(cache);
-
-                    Chunk chunk = new Chunk(world);
-
-                    if (dataArray.Length > 0)
+                    if ((chunkMask & (1 << chunkY)) != 0)
                     {
-                        int longIndex = 0;
-                        int startOffset = 0 - bitsPerBlock;
+                        // 1.14 and above Non-air block count inside chunk section, for lighting purposes
+                        dataTypes.ReadNextShort(cache);
 
-                        for (int blockY = 0; blockY < Chunk.SizeY; blockY++)
+                        byte bitsPerBlock = dataTypes.ReadNextByte(cache);
+                        bool usePalette = (bitsPerBlock <= 8);
+
+                        // Vanilla Minecraft will use at least 4 bits per block
+                        if (bitsPerBlock < 4)
+                            bitsPerBlock = 4;
+
+                        // MC 1.9 to 1.12 will set palette length field to 0 when palette
+                        // is not used, MC 1.13+ does not send the field at all in this case
+                        int paletteLength = 0; // Assume zero when length is absent
+                        if (usePalette)
+                            paletteLength = dataTypes.ReadNextVarInt(cache);
+
+                        int[] palette = new int[paletteLength];
+                        for (int i = 0; i < paletteLength; i++)
+                            palette[i] = dataTypes.ReadNextVarInt(cache);
+
+                        // Bit mask covering bitsPerBlock bits
+                        // EG, if bitsPerBlock = 5, valueMask = 00011111 in binary
+                        uint valueMask = (uint)((1 << bitsPerBlock) - 1);
+
+                        // Block IDs are packed in the array of 64-bits integers
+                        ulong[] dataArray = dataTypes.ReadNextULongArray(cache);
+
+                        Chunk chunk = new Chunk(world);
+
+                        if (dataArray.Length > 0)
                         {
-                            for (int blockZ = 0; blockZ < Chunk.SizeZ; blockZ++)
+                            int longIndex = 0;
+                            int startOffset = 0 - bitsPerBlock;
+
+                            for (int blockY = 0; blockY < Chunk.SizeY; blockY++)
                             {
-                                for (int blockX = 0; blockX < Chunk.SizeX; blockX++)
+                                for (int blockZ = 0; blockZ < Chunk.SizeZ; blockZ++)
                                 {
-                                    // NOTICE: In the future a single ushort may not store the entire block id;
-                                    // the Block class may need to change if block state IDs go beyond 65535
-                                    ushort blockId;
-
-                                    // Calculate location of next block ID inside the array of Longs
-                                    startOffset += bitsPerBlock;
-                                    bool overlap = false;
-
-                                    if ((startOffset + bitsPerBlock) > 64)
+                                    for (int blockX = 0; blockX < Chunk.SizeX; blockX++)
                                     {
-                                        if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
-                                        {
-                                            // In MC 1.16+, padding is applied to prevent overlapping between Longs:
-                                            // [      LONG INTEGER      ][      LONG INTEGER      ]
-                                            // [Block][Block][Block]XXXXX[Block][Block][Block]XXXXX
+                                        // NOTICE: In the future a single ushort may not store the entire block id;
+                                        // the Block class may need to change if block state IDs go beyond 65535
+                                        ushort blockId;
 
-                                            // When overlapping, move forward to the beginning of the next Long
-                                            startOffset = 0;
-                                            longIndex++;
-                                        }
-                                        else
-                                        {
-                                            // In MC 1.15 and lower, block IDs can overlap between Longs:
-                                            // [      LONG INTEGER      ][      LONG INTEGER      ]
-                                            // [Block][Block][Block][Blo  ck][Block][Block][Block][
+                                        // Calculate location of next block ID inside the array of Longs
+                                        startOffset += bitsPerBlock;
+                                        bool overlap = false;
 
-                                            // Detect when we reached the next Long or switch to overlap mode
-                                            if (startOffset >= 64)
+                                        if ((startOffset + bitsPerBlock) > 64)
+                                        {
+                                            if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
                                             {
-                                                startOffset -= 64;
+                                                // In MC 1.16+, padding is applied to prevent overlapping between Longs:
+                                                // [      LONG INTEGER      ][      LONG INTEGER      ]
+                                                // [Block][Block][Block]XXXXX[Block][Block][Block]XXXXX
+
+                                                // When overlapping, move forward to the beginning of the next Long
+                                                startOffset = 0;
                                                 longIndex++;
                                             }
-                                            else overlap = true;
-                                        }
-                                    }
+                                            else
+                                            {
+                                                // In MC 1.15 and lower, block IDs can overlap between Longs:
+                                                // [      LONG INTEGER      ][      LONG INTEGER      ]
+                                                // [Block][Block][Block][Blo  ck][Block][Block][Block][
 
-                                    // Extract Block ID
-                                    if (overlap)
-                                    {
-                                        int endOffset = 64 - startOffset;
-                                        blockId = (ushort)((dataArray[longIndex] >> startOffset | dataArray[longIndex + 1] << endOffset) & valueMask);
-                                    }
-                                    else
-                                        blockId = (ushort)((dataArray[longIndex] >> startOffset) & valueMask);
-                                    
-                                    // Map small IDs to actual larger block IDs
-                                    if (usePalette)
-                                    {
-                                        if (paletteLength <= blockId)
+                                                // Detect when we reached the next Long or switch to overlap mode
+                                                if (startOffset >= 64)
+                                                {
+                                                    startOffset -= 64;
+                                                    longIndex++;
+                                                }
+                                                else overlap = true;
+                                            }
+                                        }
+
+                                        // Extract Block ID
+                                        if (overlap)
                                         {
-                                            int blockNumber = (blockY * Chunk.SizeZ + blockZ) * Chunk.SizeX + blockX;
-                                            throw new IndexOutOfRangeException(String.Format("Block ID {0} is outside Palette range 0-{1}! (bitsPerBlock: {2}, blockNumber: {3})",
-                                                blockId,
-                                                paletteLength - 1,
-                                                bitsPerBlock,
-                                                blockNumber));
+                                            int endOffset = 64 - startOffset;
+                                            blockId = (ushort)((dataArray[longIndex] >> startOffset | dataArray[longIndex + 1] << endOffset) & valueMask);
+                                        }
+                                        else
+                                            blockId = (ushort)((dataArray[longIndex] >> startOffset) & valueMask);
+                                        
+                                        // Map small IDs to actual larger block IDs
+                                        if (usePalette)
+                                        {
+                                            if (paletteLength <= blockId)
+                                            {
+                                                int blockNumber = (blockY * Chunk.SizeZ + blockZ) * Chunk.SizeX + blockX;
+                                                throw new IndexOutOfRangeException(String.Format("Block ID {0} is outside Palette range 0-{1}! (bitsPerBlock: {2}, blockNumber: {3})",
+                                                    blockId,
+                                                    paletteLength - 1,
+                                                    bitsPerBlock,
+                                                    blockNumber));
+                                            }
+
+                                            blockId = (ushort)palette[blockId];
                                         }
 
-                                        blockId = (ushort)palette[blockId];
+                                        // We have our block, save the block into the chunk
+                                        chunk[blockX, blockY, blockZ] = new Block(blockId);
+
                                     }
-
-                                    // We have our block, save the block into the chunk
-                                    chunk[blockX, blockY, blockZ] = new Block(blockId);
-
                                 }
                             }
                         }
-                    }
 
-                    // We have our chunk, save the chunk into the world
-                    world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
+                        // We have our chunk, save the chunk into the world
+                        world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
+                    }
                 }
             }
 
@@ -538,7 +552,7 @@ namespace MinecraftClient.Protocol.Handlers
 
             // Set the column's chunk mask and load state
             var c = world[chunkX, chunkZ];
-            if (c is not null)
+            if (c is not null) // Receive and store biome and light data, these should be present even for empty chunk columns
             {
                 if (biomes.Length == c.ColumnSize * 64)
                     c.SetBiomeIds(biomes);

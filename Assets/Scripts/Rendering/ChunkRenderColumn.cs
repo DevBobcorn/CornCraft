@@ -55,7 +55,7 @@ namespace MinecraftClient.Rendering
                 }
                 else
                 {
-                    Debug.Log("Trying to get a chunk at invalid height: " + chunkY);
+                    //Debug.Log("Trying to get a chunk at invalid height: " + chunkY);
                     return null;
                 }
             }

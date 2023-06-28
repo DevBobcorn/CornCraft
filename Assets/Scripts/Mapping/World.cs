@@ -231,7 +231,7 @@ namespace MinecraftClient.Mapping
         }
 
         /// <summary>
-        /// Set chunk column at the specified location
+        /// Store chunk at the specified location
         /// </summary>
         /// <param name="chunkX">ChunkColumn X</param>
         /// <param name="chunkY">ChunkColumn Y</param>
@@ -242,6 +242,17 @@ namespace MinecraftClient.Mapping
         {
             ChunkColumn chunkColumn = chunks.GetOrAdd(new(chunkX, chunkZ), (_) => new(this, chunkColumnSize));
             chunkColumn[chunkY] = chunk;
+        }
+
+        /// <summary>
+        /// Create empty chunk column at the specified location
+        /// </summary>
+        /// <param name="chunkX">ChunkColumn X</param>
+        /// <param name="chunkZ">ChunkColumn Z</param>
+        /// <param name="chunkColumnSize">ChunkColumn size</param>
+        public void CreateEmptyChunkColumn(int chunkX, int chunkZ, int chunkColumnSize)
+        {
+            chunks.GetOrAdd(new(chunkX, chunkZ), (_) => new(this, chunkColumnSize));
         }
 
         /// <summary>
