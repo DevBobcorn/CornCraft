@@ -9,12 +9,11 @@ namespace MinecraftClient.Rendering
     public class PlayerAccessoryWidget : MonoBehaviour
     {
         [SerializeField] private Transform? mainHandBone;
-        [SerializeField] private Transform? weaponRef;
-        [SerializeField] public Transform? weaponSlotBone;
+        [SerializeField] public Transform? weaponRef;
         [SerializeField] public GameObject? meleeWeaponPrefab;
 
+        private Transform? weaponTransform;
         private PlayerController? player;
-        private Vector3 weaponPosition;
         private MeleeWeapon? currentWeapon;
 
         private void HoldWeapon()
@@ -32,7 +31,7 @@ namespace MinecraftClient.Rendering
         {
             if (currentWeapon is not null)
             {
-                currentWeapon.transform.SetParent(weaponSlotBone, true);
+                currentWeapon.transform.SetParent(weaponTransform, true);
                 currentWeapon.transform.localPosition = Vector3.zero;
                 currentWeapon.transform.localRotation = Quaternion.identity;
 
@@ -43,14 +42,14 @@ namespace MinecraftClient.Rendering
         {
             player!.AttackDamage(true);
             
-            currentWeapon!.StartSlash();
+            currentWeapon?.StartSlash();
         }
 
         public void DamageStop()
         {
             player!.AttackDamage(false);
             
-            currentWeapon!.EndSlash();
+            currentWeapon?.EndSlash();
         }
 
         public void StageEnding()
@@ -60,14 +59,23 @@ namespace MinecraftClient.Rendering
 
         void Start()
         {
-            if (weaponRef is null || weaponSlotBone is null)
+            if (weaponRef == null)
             {
-                Debug.Log("Weapon transforms are not assigned!");
-                return;
+                Debug.Log("Weapon transform reference not assigned!");
+                
+                weaponRef = transform;
             }
 
-            var weaponObj = GameObject.Instantiate(meleeWeaponPrefab);
-            currentWeapon = weaponObj!.GetComponent<MeleeWeapon>();
+            // Create weapon transform
+            var weaponTransformObject = new GameObject("Weapon Transform");
+            weaponTransform = weaponTransformObject.transform;
+            weaponTransform.SetParent(transform);
+
+            if (meleeWeaponPrefab != null)
+            {
+                var weaponObj = GameObject.Instantiate(meleeWeaponPrefab);
+                currentWeapon = weaponObj!.GetComponent<MeleeWeapon>();
+            }
 
             player = GetComponentInParent<PlayerController>();
             player.OnWeaponStateChanged += (weaponState) => {
@@ -82,23 +90,19 @@ namespace MinecraftClient.Rendering
                 }
             };
 
-            weaponPosition = weaponSlotBone.position;
-
-            weaponSlotBone.position = weaponPosition;
-            weaponSlotBone.rotation = weaponRef.rotation;
+            weaponTransform.position = weaponRef.position;
+            weaponTransform.rotation = weaponRef.rotation;
 
             MountWeapon();
         }
 
         void Update()
         {
-            if (weaponRef is null || weaponSlotBone is null)
+            if (weaponRef == null || weaponTransform == null)
                 return;
 
-            weaponPosition = Vector3.Lerp(weaponPosition, weaponRef.position, Time.deltaTime * 10F);
-
-            weaponSlotBone.position = weaponPosition;
-            weaponSlotBone.rotation = weaponRef.rotation;
+            weaponTransform.position = Vector3.Lerp(weaponTransform.position, weaponRef.position, Time.deltaTime * 10F);
+            weaponTransform.rotation = weaponRef.rotation;
         }
     }
 }

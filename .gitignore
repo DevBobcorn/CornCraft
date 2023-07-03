@@ -11,7 +11,7 @@
 # CornModel resources
 /[Rr]esource [Pp]acks/*/
 !/[Rr]esource [Pp]acks/vanilla_fix/
-/[Ll]ang/
+/[Aa]ssets/MMDModels/*
 /*.ini
 
 # MemoryCaptures can get excessive in size.
