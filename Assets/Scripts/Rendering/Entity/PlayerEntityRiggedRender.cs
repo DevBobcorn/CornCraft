@@ -27,6 +27,12 @@ namespace MinecraftClient.Rendering
             UpdateSkinMaterial();
         }
 
+        public void AssignFields(Transform visualTransform, Animator animator)
+        {
+            this.visual = visualTransform;
+            this.entityAnimator = animator;
+        }
+
         public override void UpdateStateMachine(PlayerStatus info)
         {
             // Update animator parameters
@@ -42,32 +48,7 @@ namespace MinecraftClient.Rendering
             entityAnimator.SetBool(ATTACKING, info.Attacking);
         }
 
-        private void UpdateSkinMaterial()
-        {
-            if (playerSkinRenderers.Length == 0)
-            {
-                // No render in this model uses player skin, no need to update
-                return;
-            }
-
-            var nameLower = entity!.Name?.ToLower();
-            var skinMats = CornApp.CurrentClient!.MaterialManager!.SkinMaterials;
-
-            // Find skin and change materials
-            if (nameLower is not null && skinMats.ContainsKey(nameLower))
-            {
-                var mat = skinMats[nameLower];
-
-                foreach (var renderer in playerSkinRenderers)
-                    renderer.sharedMaterial = mat;
-
-                Debug.Log($"Skin applied to {nameLower}");
-            }
-            else
-            {
-                Debug.LogWarning($"Failed to apply skin for {nameLower}");
-            }
-        }
+        private void UpdateSkinMaterial() { /* Dummy Method */ }
 
     }
 }
