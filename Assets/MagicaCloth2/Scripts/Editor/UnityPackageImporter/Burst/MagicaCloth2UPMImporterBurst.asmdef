@@ -1,0 +1,24 @@
+{
+    "name": "MagicaClothV2UPMImporterBurst",
+    "rootNamespace": "",
+    "references": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "!MC2_BURST"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.burst",
+            "expression": "1.8.1",
+            "define": "MC2_BURST"
+        }
+    ],
+    "noEngineReferences": false
+}
