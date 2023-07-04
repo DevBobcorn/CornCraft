@@ -29,7 +29,9 @@ namespace MinecraftClient
         [SerializeField] public EntityRenderManager? EntityRenderManager;
         [SerializeField] public BaseEnvironmentManager? EnvironmentManager;
         [SerializeField] public MaterialManager? MaterialManager;
-        [SerializeField] public GameObject? PlayerPrefab;
+        
+        [SerializeField] public GameObject? ClientPlayerPrefab;
+        [SerializeField] public GameObject[] PlayerVisualPrefabs = { };
         [SerializeField] public CameraController? CameraController;
         [SerializeField] public ScreenControl? ScreenControl;
         [SerializeField] public HUDScreen? HUDScreen;
@@ -100,6 +102,7 @@ namespace MinecraftClient
         public Perspective Perspective = 0;
         public GameMode GameMode { get; private set; } = GameMode.Survival;
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
+        private int selectedVisualIndex = 0;
         public float? YawToSend = null, PitchToSend = null;
         public bool Grounded = false;
         private int clientSequenceId;
@@ -166,10 +169,11 @@ namespace MinecraftClient
             // Setup chunk render manager
             ChunkRenderManager!.SetClient(this);
 
-            // Create player entity
-            var playerObj = GameObject.Instantiate(PlayerPrefab);
+            // Prepare player controller gameobject
+            var playerObj = GameObject.Instantiate(ClientPlayerPrefab);
             playerController = playerObj!.GetComponent<PlayerController>();
-            playerController.Initialize(this, CameraController!);
+            selectedVisualIndex = 0;
+            playerController.Initialize(this, PlayerVisualPrefabs[0], CameraController!);
 
             // Set up camera controller
             CameraController!.SetClient(this);
@@ -178,6 +182,20 @@ namespace MinecraftClient
             // Set up interaction updater
             interactionUpdater = GetComponent<InteractionUpdater>();
             interactionUpdater!.Initialize(this, CameraController);
+        }
+
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.LeftArrow)) // Select previous player visual
+            {
+                selectedVisualIndex = (selectedVisualIndex + 1) % PlayerVisualPrefabs.Length;
+                playerController?.UpdatePlayerVisual(PlayerVisualPrefabs[selectedVisualIndex]);
+            }
+            else if (Input.GetKeyDown(KeyCode.RightArrow)) // Select previous next visual
+            {
+                selectedVisualIndex = (selectedVisualIndex + PlayerVisualPrefabs.Length - 1) % PlayerVisualPrefabs.Length;
+                playerController?.UpdatePlayerVisual(PlayerVisualPrefabs[selectedVisualIndex]);
+            }
         }
 
         public bool IsPaused() => ScreenControl!.IsPaused;

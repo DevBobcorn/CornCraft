@@ -35,6 +35,7 @@ Transform:
   m_Children:
   - {fileID: 564165796040106859}
   - {fileID: 743968433924148952}
+  - {fileID: 2668946775412076044}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -52,6 +53,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meleeAttack: {fileID: 11400000, guid: 117382c7804f426429eeae8062de2c8e, type: 2}
   ability: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
+  meleeWeaponPrefab: {fileID: 3607843667057953232, guid: 92a649b5223bbb74499bff1c0c30402f, type: 3}
   cameraRef: {fileID: 2668946775412076044}
   visualTransform: {fileID: 564165796040106859}
   physicMaterial: {fileID: 13400000, guid: 11508097031b7f04c8ab9dcba71d230e, type: 2}
@@ -210,12 +212,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7519977221651880587}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.2, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 564165796040106859}
+  m_Father: {fileID: 555365335110124451}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &26714490789168256
@@ -408,10 +410,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: ad7d6bc0b7d305f45b326fe7248e1fff, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2668946775412076044}
+    m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ad7d6bc0b7d305f45b326fe7248e1fff, type: 3}
 --- !u!4 &171314523628604116 stripped
