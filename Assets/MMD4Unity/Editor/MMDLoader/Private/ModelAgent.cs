@@ -1,9 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
-
-using MinecraftClient.Control;
-using MinecraftClient.Rendering;
 using UnityEditor.Animations;
 
 namespace MMD {
@@ -36,10 +32,7 @@ namespace MMD {
         /// <param name='use_ik'>IKを使用するか</param>
         /// <param name='scale'>スケール</param>
         public void CreatePrefab(PMXConverter.PhysicsType physics_type, PMXConverter.AnimationType animation_type, bool use_ik, float scale,
-                GameObject entity_prefab, AnimatorController player_anim_controller) {
-            GameObject visual_game_object;
-            string prefab_path;
-
+                AnimatorController player_anim_controller) {
             //PMX Baseでインポートする
             //PMXファイルのインポート
             PMX.PMXFormat pmx_format = null;
@@ -50,56 +43,20 @@ namespace MMD {
                 Debug.LogWarning("Failed to read pmx file.");
             }
             header_ = pmx_format.header;
-            //ゲームオブジェクトの作成
-            visual_game_object = PMXConverter.CreateGameObject(pmx_format, physics_type, animation_type, use_ik, scale);
 
-            var char_name = pmx_format.meta_header.name;
+            //ゲームオブジェクトの作成
+            GameObject visualObj = PMXConverter.CreateGameObject(pmx_format, physics_type, animation_type, use_ik, scale);
+
+            // Assign animator controller
+            var player_animator = visualObj.GetComponent<Animator>();
+            player_animator.runtimeAnimatorController = player_anim_controller;
 
             // プレファブパスの設定
-            prefab_path = pmx_format.meta_header.folder + "/" + char_name + ".prefab";
+            string prefabPath = pmx_format.meta_header.folder + "/" + pmx_format.meta_header.name + ".prefab";
 
             // プレファブ化
-            //PrefabUtility.CreatePrefab(prefab_path, game_object, ReplacePrefabOptions.ConnectToPrefab);
-            PrefabUtility.SaveAsPrefabAssetAndConnect(visual_game_object, prefab_path, InteractionMode.AutomatedAction);
-
-            // Create Playable Player Entity GameObject
-            if (entity_prefab != null)
-            {
-                // Prepare player controller gameobject
-                var player_game_object = GameObject.Instantiate(entity_prefab);
-                player_game_object.name = $"Client {char_name} Player Controller";
-                var player_controller = player_game_object.GetComponent<PlayerController>();
-
-                // Post-process visual game object
-                visual_game_object.name = "Visual";
-                visual_game_object.transform.SetParent(player_game_object.transform);
-                player_controller.visualTransform = visual_game_object.transform;
-                // Add and initialize player widgets
-                visual_game_object.AddComponent<PlayerAnimatorWidget>();
-                var accessory_widget = visual_game_object.AddComponent<PlayerAccessoryWidget>();
-                var animator_render = player_controller.GetComponent<PlayerEntityRiggedRender>();
-                var player_animator = visual_game_object.GetComponent<Animator>();
-                player_animator.runtimeAnimatorController = player_anim_controller;
-                animator_render.AssignFields(visual_game_object.transform, player_animator);
-                var weapon_ref_object = new GameObject("Weapon Ref");
-                weapon_ref_object.transform.SetParent(visual_game_object.transform);
-                weapon_ref_object.transform.localPosition = new(0F, 0.7F, -0.35F);
-                weapon_ref_object.transform.localEulerAngles = new(-85F, 0F, 90F);
-                accessory_widget.weaponRef = weapon_ref_object.transform;
-
-                // Setup camera reference
-                var camera_ref_object = new GameObject("Camera Ref");
-                camera_ref_object.transform.SetParent(player_game_object.transform);
-                camera_ref_object.transform.localPosition = new(0F, 1.2F, 0F);
-                player_controller.cameraRef = camera_ref_object.transform;
-
-                // Update visual gameobject layer (do this last to ensure all children are present)
-                int player_layer = player_game_object.layer;
-                foreach (var child in visual_game_object.GetComponentsInChildren<Transform>())
-                {
-                    child.gameObject.layer = player_layer;
-                }
-            }
+            //PrefabUtility.CreatePrefab(prefabPath, visualObj, ReplacePrefabOptions.ConnectToPrefab);
+            PrefabUtility.SaveAsPrefabAssetAndConnect(visualObj, prefabPath, InteractionMode.AutomatedAction);
 
             // アセットリストの更新
             AssetDatabase.Refresh();

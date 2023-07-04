@@ -131,7 +131,6 @@ namespace MMD
         public PMXConverter.PhysicsType physics_type = PMXConverter.PhysicsType.UnityPhysics;
         public bool use_ik = true;
         public float scale = 0.085f;
-        public GameObject entity_prefab;
         public AnimatorController player_anim_controller;
         
         public override string GetTitle()
@@ -145,8 +144,6 @@ namespace MMD
             physics_type = (PMXConverter.PhysicsType)EditorGUILayout.EnumPopup("Physics Type", physics_type);
             use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
             scale = EditorGUILayout.Slider("Scale", scale, 0.001f, 1.0f);
-
-            entity_prefab = (GameObject)EditorGUILayout.ObjectField("Entity Prefab", entity_prefab, typeof (GameObject), false);
             player_anim_controller = (AnimatorController)EditorGUILayout.ObjectField("Animator Controller", player_anim_controller, typeof (AnimatorController), false);
 
             EditorGUILayout.BeginHorizontal();

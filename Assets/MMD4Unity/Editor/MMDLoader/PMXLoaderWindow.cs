@@ -45,7 +45,6 @@ public class PMXLoaderWindow : EditorWindow {
                                 , pmx_config.animation_type
                                 , pmx_config.use_ik
                                 , pmx_config.scale
-                                , pmx_config.entity_prefab
                                 , pmx_config.player_anim_controller
                                 );
         

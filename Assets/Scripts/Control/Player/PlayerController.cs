@@ -5,6 +5,7 @@ using UnityEngine;
 
 using MinecraftClient.Event;
 using MinecraftClient.Mapping;
+using MinecraftClient.Rendering;
 
 namespace MinecraftClient.Control
 {
@@ -21,9 +22,10 @@ namespace MinecraftClient.Control
         public PlayerMeleeAttack MeleeAttack => meleeAttack!;
 
         [SerializeField] protected PlayerAbility? ability;
+        [SerializeField] protected GameObject? meleeWeaponPrefab;
         [SerializeField] public Transform? cameraRef;
         [SerializeField] public Transform? visualTransform;
-        [SerializeField] public PhysicMaterial? physicMaterial;
+        [SerializeField] protected PhysicMaterial? physicMaterial;
         [HideInInspector] public bool UseRootMotion = false;
 
         public PlayerAbility Ability => ability!;
@@ -41,10 +43,66 @@ namespace MinecraftClient.Control
 
         private Action<GameModeUpdateEvent>? gameModeCallback;
 
-        public virtual void Initialize(CornClient client, CameraController camController)
+        public virtual void Initialize(CornClient client, GameObject visualPrefab, CameraController camController)
         {
             this.client = client;
+            // Initialize player visual
+            SetPlayerVisual(visualPrefab);
+            // Assign current camera controller
             this.cameraController = camController;
+        }
+
+        protected void SetPlayerVisual(GameObject visualPrefab)
+        {
+            // Process player visual game object
+            var visualObj = GameObject.Instantiate(visualPrefab);
+            visualObj!.name = $"Visual ({visualPrefab.name})";
+            visualObj.transform.SetParent(transform, false);
+            visualTransform = visualObj.transform;
+            
+            // Add and initialize player widgets
+            var playerAnimator = visualObj.GetComponent<Animator>();
+
+            if (playerAnimator != null) // Use rigged player visual
+            {
+                visualObj.AddComponent<PlayerAnimatorWidget>();
+                var accessoryWidget = visualObj.AddComponent<PlayerAccessoryWidget>();
+                var riggedRender = GetComponent<PlayerEntityRiggedRender>();
+                riggedRender.AssignFields(visualObj.transform, playerAnimator);
+                var weaponMountRefObj = new GameObject("Weapon Mount Ref");
+                weaponMountRefObj.transform.SetParent(visualObj.transform);
+                weaponMountRefObj.transform.localPosition = new(0F, 1.5F, -0.35F);
+                weaponMountRefObj.transform.localEulerAngles = new(-90F, 0F, 90F);
+                var weaponMountRef = weaponMountRefObj.transform;
+                var mainHandRef = playerAnimator.GetBoneTransform(HumanBodyBones.RightHand);
+                accessoryWidget.SetRefTransforms(mainHandRef, weaponMountRef);
+                accessoryWidget.CreateWeapon(meleeWeaponPrefab!);
+            }
+            else // Use vanilla player visual
+            {
+                // Do nothing here...
+            }
+
+            // Update visual gameobject layer (do this last to ensure all children are present)
+            foreach (var child in visualObj.GetComponentsInChildren<Transform>())
+            {
+                child.gameObject.layer = this.gameObject.layer;
+            }
+        }
+
+        public void UpdatePlayerVisual(GameObject visualPrefab)
+        {
+            var prevVisualObj = visualTransform?.gameObject;
+
+            // Initialize and assign new visual gameobject
+            SetPlayerVisual(visualPrefab);
+
+            if (prevVisualObj != null)
+            {
+                visualTransform!.rotation = prevVisualObj.transform.rotation;
+                // Dispose previous visual gameobject
+                Destroy(prevVisualObj);
+            }
         }
 
         void Start()
