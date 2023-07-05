@@ -17,7 +17,11 @@ namespace MinecraftClient.Rendering
         protected bool turnedIntoRagdoll = false;
 
         [SerializeField] protected Transform? infoAnchor, visual;
-        public Transform InfoAnchor => infoAnchor ?? transform;
+        public Transform InfoAnchor
+        {
+            get => infoAnchor ?? transform;
+            set => infoAnchor = value;
+        }
         public Transform VisualTransform
         {
             get => visual!;

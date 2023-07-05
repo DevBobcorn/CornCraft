@@ -48,11 +48,30 @@ namespace MinecraftClient.Control
             // Generate a dummy player render first, this will be replaced later
             var dummyRenderObj = new GameObject("Dummy Player Render");
             dummyRenderObj.transform.SetParent(transform, false);
-            playerRender = dummyRenderObj.AddComponent<PlayerEntitySimpleRender>();
+            playerRender = dummyRenderObj.AddComponent<EntityRender>();
             // Use dummy object's own transform as dummy visual transform
             playerRender.VisualTransform = playerRender.transform;
             // Assign current camera controller
             this.cameraController = camController;
+        }
+
+        protected GameObject CreateAnimatorRenderFromModel(GameObject visualPrefab)
+        {
+            var visualObj = GameObject.Instantiate(visualPrefab);
+            visualObj.name = "Visual";
+
+            var renderObj = new GameObject($"Player {visualPrefab.name} Entity");
+            var render = renderObj.AddComponent<PlayerEntityRiggedRender>();
+            render.VisualTransform = visualObj.transform;
+
+            var infoAnchorObj = new GameObject("Info Anchor");
+            infoAnchorObj.transform.SetParent(renderObj.transform, false);
+            infoAnchorObj.transform.localPosition = new(0F, 2F, 0F);
+            render.InfoAnchor = infoAnchorObj.transform;
+
+            visualObj.transform.SetParent(renderObj.transform, false);
+
+            return renderObj;
         }
 
         protected void SetPlayerRender(Entity entity, GameObject renderPrefab)
@@ -63,7 +82,18 @@ namespace MinecraftClient.Control
             OnWeaponStateChanged = null;
             OnCrossFadeState = null;
 
-            var renderObj = GameObject.Instantiate(renderPrefab);
+            GameObject renderObj;
+
+            if (renderPrefab.GetComponent<Animator>() != null) // Model prefab, wrap it up
+            {
+                renderObj = CreateAnimatorRenderFromModel(renderPrefab);
+                
+            }
+            else // Player render prefab, just instantiate
+            {
+                renderObj = GameObject.Instantiate(renderPrefab);
+            }
+
             renderObj!.name = $"Player Entity ({renderPrefab.name})";
             
             // Update controller's player render
@@ -109,12 +139,12 @@ namespace MinecraftClient.Control
 
         }
 
-        public void UpdatePlayerVisual(Entity entity, GameObject visualPrefab)
+        public void UpdatePlayerRender(Entity entity, GameObject renderPrefab)
         {
             var prevRender = playerRender;
 
             // Initialize and assign new visual gameobject
-            SetPlayerRender(entity, visualPrefab);
+            SetPlayerRender(entity, renderPrefab);
 
             if (prevRender != null)
             {
