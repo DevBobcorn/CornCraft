@@ -3,7 +3,6 @@ using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Control
 {
-    [RequireComponent(typeof (PlayerController))]
     public class PlayerUserInput : MonoBehaviour
     {
         public void UpdateInputs(PlayerUserInputData inputData, Perspective perspective)
@@ -33,9 +32,6 @@ namespace MinecraftClient.Control
 
                 inputData.ascend  = Input.GetButton("GoUp");
                 inputData.descend = Input.GetButton("GoDown");
-
-                if (Input.GetKeyDown(KeyCode.LeftControl))
-                    GetComponent<PlayerController>().ToggleWalkMode();
             }
             else
             {

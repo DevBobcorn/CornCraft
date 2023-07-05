@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 9200167350061427131}
   - component: {fileID: 855470746792120080}
   m_Layer: 10
-  m_Name: Server Defo Player Entity
+  m_Name: PlayerB Entity
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

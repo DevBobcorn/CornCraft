@@ -2,18 +2,17 @@
 using UnityEngine;
 
 using MinecraftClient.Control;
-using MinecraftClient.Mapping;
 
 namespace MinecraftClient.Rendering
 {
-    public class AnimatorEntityRender : EntityRender
+    public abstract class AnimatorEntityRender : EntityRender
     {
         protected static readonly int MIRRORED = Animator.StringToHash("Mirrored");
 
         protected static readonly int VERTICAL_SPEED = Animator.StringToHash("VerticalSpeed");
         protected static readonly int HORIZONTAL_SPEED = Animator.StringToHash("HorizontalSpeed");
 
-        [SerializeField] protected Animator? entityAnimator;
+        [HideInInspector] public Animator? entityAnimator;
 
         public override void SetVisualMovementVelocity(Vector3 velocity)
         {

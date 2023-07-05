@@ -31,37 +31,6 @@ Transform:
   m_Father: {fileID: 5325304902113657644}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &8081101861840880298
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7788096940870474880}
-  m_Layer: 9
-  m_Name: Info Anchor
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7788096940870474880
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8081101861840880298}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.2, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5325304902113657644}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8973392254440252464
 GameObject:
   m_ObjectHideFlags: 0
@@ -71,13 +40,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5325304902113657644}
-  - component: {fileID: 3388361284694758283}
-  - component: {fileID: 8279897914575916364}
-  - component: {fileID: 4743315889508510048}
-  - component: {fileID: 4919048086956920475}
+  - component: {fileID: 8936216958574950242}
   - component: {fileID: 2543192715876108228}
+  - component: {fileID: 4743315889508510048}
   m_Layer: 9
-  m_Name: Client Anim Player Entity
+  m_Name: Client Player Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -95,12 +62,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
-  - {fileID: 7788096940870474880}
   - {fileID: 2288748662104460795}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3388361284694758283
+--- !u!114 &8936216958574950242
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -109,17 +75,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 8973392254440252464}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4437c7076747dbd4fa52519dcbf8845e, type: 3}
+  m_Script: {fileID: 11500000, guid: 7d32161aaff9cb0419e64d4f69a5e1ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   meleeAttack: {fileID: 11400000, guid: 117382c7804f426429eeae8062de2c8e, type: 2}
   ability: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
   meleeWeaponPrefab: {fileID: 3607843667057953232, guid: 92a649b5223bbb74499bff1c0c30402f, type: 3}
   cameraRef: {fileID: 2288748662104460795}
-  visualTransform: {fileID: 0}
+  playerRender: {fileID: 0}
   physicMaterial: {fileID: 13400000, guid: 11508097031b7f04c8ab9dcba71d230e, type: 2}
   UseRootMotion: 0
---- !u!114 &8279897914575916364
+--- !u!114 &2543192715876108228
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -128,9 +94,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 8973392254440252464}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba15b1fd51d64b84e8ba32634c7e28f2, type: 3}
+  m_Script: {fileID: 11500000, guid: 97f9c4390573ed643b136abb835f0e17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GroundLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  LiquidLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  UseBoxCastForGroundedCheck: 0
+  GroundBoxcastCenter: {x: 0, y: 0.05, z: 0}
+  GroundBoxcastHalfSize: {x: 0.35, y: 0.01, z: 0.35}
+  GroundBoxcastDist: 0.1
+  GroundSpherecastCenter: {x: 0, y: 0.4, z: 0}
+  GroundSpherecastRadius: 0.35
+  GroundSpherecastDist: 0.1
 --- !u!54 &4743315889508510048
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -158,46 +137,3 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 2
---- !u!114 &4919048086956920475
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8973392254440252464}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e9e8643773ef3543bfffc0c928fd99c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  infoAnchor: {fileID: 7788096940870474880}
-  visual: {fileID: 0}
-  ragdollPrefab: {fileID: 0}
-  FloatingInfoPrefab: {fileID: 0}
-  entityAnimator: {fileID: 0}
-  playerSkinRenderers: []
---- !u!114 &2543192715876108228
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8973392254440252464}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97f9c4390573ed643b136abb835f0e17, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GroundLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  LiquidLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  UseBoxCastForGroundedCheck: 0
-  GroundBoxcastCenter: {x: 0, y: 0.05, z: 0}
-  GroundBoxcastHalfSize: {x: 0.35, y: 0.01, z: 0.35}
-  GroundBoxcastDist: 0.1
-  GroundSpherecastCenter: {x: 0, y: 0.4, z: 0}
-  GroundSpherecastRadius: 0.35
-  GroundSpherecastDist: 0.1
