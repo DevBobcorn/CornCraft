@@ -10,7 +10,7 @@ using MinecraftClient.Rendering;
 namespace MinecraftClient.Control
 {
     [RequireComponent(typeof (Rigidbody), typeof (PlayerStatusUpdater))]
-    public abstract class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour
     {
         public enum WeaponState
         {
@@ -24,7 +24,7 @@ namespace MinecraftClient.Control
         [SerializeField] protected PlayerAbility? ability;
         [SerializeField] protected GameObject? meleeWeaponPrefab;
         [SerializeField] public Transform? cameraRef;
-        [SerializeField] public Transform? visualTransform;
+        [SerializeField] public EntityRender? playerRender;
         [SerializeField] protected PhysicMaterial? physicMaterial;
         [HideInInspector] public bool UseRootMotion = false;
 
@@ -36,81 +36,98 @@ namespace MinecraftClient.Control
         protected Collider? playerCollider;
         public Collider PlayerCollider => playerCollider!;
         protected IPlayerState CurrentState = PlayerStates.IDLE;
-        protected readonly PlayerUserInputData inputData = new();
-        protected PlayerUserInput? userInput;
         protected PlayerStatusUpdater? statusUpdater;
         public PlayerStatus? Status => statusUpdater?.Status;
+        public Transform visualTransform => playerRender!.VisualTransform;
 
         private Action<GameModeUpdateEvent>? gameModeCallback;
 
-        public virtual void Initialize(CornClient client, GameObject visualPrefab, CameraController camController)
+        public virtual void Initialize(CornClient client, CameraController camController)
         {
             this.client = client;
-            // Initialize player visual
-            SetPlayerVisual(visualPrefab);
+            // Generate a dummy player render first, this will be replaced later
+            var dummyRenderObj = new GameObject("Dummy Player Render");
+            dummyRenderObj.transform.SetParent(transform, false);
+            playerRender = dummyRenderObj.AddComponent<PlayerEntitySimpleRender>();
+            // Use dummy object's own transform as dummy visual transform
+            playerRender.VisualTransform = playerRender.transform;
             // Assign current camera controller
             this.cameraController = camController;
         }
 
-        protected void SetPlayerVisual(GameObject visualPrefab)
+        protected void SetPlayerRender(Entity entity, GameObject renderPrefab)
         {
-            // Process player visual game object
-            var visualObj = GameObject.Instantiate(visualPrefab);
-            visualObj!.name = $"Visual ({visualPrefab.name})";
-            visualObj.transform.SetParent(transform, false);
-            visualTransform = visualObj.transform;
-            
-            // Add and initialize player widgets
-            var playerAnimator = visualObj.GetComponent<Animator>();
+            // Clear existing event subscriptions
+            OnLogicalUpdate = null;
+            OnRandomizeMirroredFlag = null;
+            OnWeaponStateChanged = null;
+            OnCrossFadeState = null;
 
-            if (playerAnimator != null) // Use rigged player visual
+            var renderObj = GameObject.Instantiate(renderPrefab);
+            renderObj!.name = $"Player Entity ({renderPrefab.name})";
+            
+            // Update controller's player render
+            playerRender = renderObj.GetComponent<EntityRender>();
+            playerRender.transform.SetParent(transform, false);
+
+            // Destroy these colliders, so that they won't affect our movement
+            foreach (var collider in playerRender.GetComponentsInChildren<Collider>())
             {
-                visualObj.AddComponent<PlayerAnimatorWidget>();
-                var accessoryWidget = visualObj.AddComponent<PlayerAccessoryWidget>();
-                var riggedRender = GetComponent<PlayerEntityRiggedRender>();
-                riggedRender.AssignFields(visualObj.transform, playerAnimator);
-                var weaponMountRefObj = new GameObject("Weapon Mount Ref");
-                weaponMountRefObj.transform.SetParent(visualObj.transform);
-                weaponMountRefObj.transform.localPosition = new(0F, 1.5F, -0.35F);
-                weaponMountRefObj.transform.localEulerAngles = new(-90F, 0F, 90F);
-                var weaponMountRef = weaponMountRefObj.transform;
-                var mainHandRef = playerAnimator.GetBoneTransform(HumanBodyBones.RightHand);
-                accessoryWidget.SetRefTransforms(mainHandRef, weaponMountRef);
-                accessoryWidget.CreateWeapon(meleeWeaponPrefab!);
+                Destroy(collider);
             }
-            else // Use vanilla player visual
+
+            // Initialize player entity render
+            playerRender.Initialize(entity.Type, entity);
+
+            // Update render gameobject layer (do this last to ensure all children are present)
+            foreach (var child in renderObj.GetComponentsInChildren<Transform>())
+            {
+                child.gameObject.layer = this.gameObject.layer;
+            }
+
+            var riggedRender = playerRender as PlayerEntityRiggedRender;
+            if (riggedRender != null) // If player render is rigged render
+            {
+                // Additionally, update player state machine for rigged renders
+                OnLogicalUpdate += (interval, status, rigidbody) => riggedRender.UpdateStateMachine(status);
+                // Create melee weapon
+                riggedRender.CreateWeapon(meleeWeaponPrefab!);
+            }
+            else // Player render is vanilla/entity render
             {
                 // Do nothing here...
             }
 
-            // Update visual gameobject layer (do this last to ensure all children are present)
-            foreach (var child in visualObj.GetComponentsInChildren<Transform>())
+            // Update player render state machine
+            OnLogicalUpdate += (interval, status, rigidbody) =>
             {
-                child.gameObject.layer = this.gameObject.layer;
-            }
+                // Update player render velocity
+                playerRender.SetVisualMovementVelocity(rigidbody!.velocity);
+                // Update render
+                playerRender.UpdateAnimation(0.05F);
+            };
+
         }
 
-        public void UpdatePlayerVisual(GameObject visualPrefab)
+        public void UpdatePlayerVisual(Entity entity, GameObject visualPrefab)
         {
-            var prevVisualObj = visualTransform?.gameObject;
+            var prevRender = playerRender;
 
             // Initialize and assign new visual gameobject
-            SetPlayerVisual(visualPrefab);
+            SetPlayerRender(entity, visualPrefab);
 
-            if (prevVisualObj != null)
+            if (prevRender != null)
             {
-                visualTransform!.rotation = prevVisualObj.transform.rotation;
-                // Dispose previous visual gameobject
-                Destroy(prevVisualObj);
+                visualTransform.rotation = prevRender.VisualTransform.rotation;
+                // Dispose previous render gameobject
+                Destroy(prevRender.gameObject);
             }
         }
 
         void Start()
         {
             playerRigidbody = GetComponent<Rigidbody>();
-
             statusUpdater = GetComponent<PlayerStatusUpdater>();
-            userInput = GetComponent<PlayerUserInput>();
 
             var boxcast = ability!.ColliderType == PlayerAbility.PlayerColliderType.Box;
 
@@ -157,8 +174,6 @@ namespace MinecraftClient.Control
             gameModeCallback = (e) => SetGameMode(e.GameMode);
             EventManager.Instance.Register(gameModeCallback);
         }
-
-        public virtual void SetClientEntity(Entity clientEntity) { }
 
         protected void SetGameMode(GameMode gameMode)
         {
@@ -216,20 +231,28 @@ namespace MinecraftClient.Control
 
         protected virtual void HideRender()
         {
-            visualTransform?.gameObject.SetActive(false);
+            playerRender?.gameObject.SetActive(false);
         }
 
         protected virtual void ShowRender()
         {
-            visualTransform?.gameObject.SetActive(true);
+            playerRender?.gameObject.SetActive(true);
         }
         
         public delegate void WeaponStateEventHandler(WeaponState weaponState);
         public event WeaponStateEventHandler? OnWeaponStateChanged;
         public void ChangeWeaponState(WeaponState weaponState) => OnWeaponStateChanged?.Invoke(weaponState);
 
-        public virtual void CrossFadeState(string stateName, float time = 0.2F, int layer = 0, float timeOffset = 0F) { }
-        public virtual void RandomizeMirroredFlag() { }
+        public delegate void CrossFadeStateEventHandler(string stateName, float time, int layer, float timeOffset);
+        public event CrossFadeStateEventHandler? OnCrossFadeState;
+        public void CrossFadeState(string stateName, float time = 0.2F, int layer = 0, float timeOffset = 0F)
+        {
+            OnCrossFadeState?.Invoke(stateName, time, layer, timeOffset);
+        }
+
+        public delegate void NoParamEventHandler();
+        public event NoParamEventHandler? OnRandomizeMirroredFlag;
+        public void RandomizeMirroredFlag() => OnRandomizeMirroredFlag?.Invoke();
 
         public void ToggleWalkMode()
         {
@@ -275,7 +298,7 @@ namespace MinecraftClient.Control
             statusUpdater!.Status.TargetVisualYaw = attackYaw;
             statusUpdater!.Status.CurrentVisualYaw = attackYaw;
 
-            visualTransform!.eulerAngles = new(0F, attackYaw, 0F);
+            visualTransform.eulerAngles = new(0F, attackYaw, 0F);
         }
 
         public void AttackDamage(bool enable)
@@ -351,12 +374,12 @@ namespace MinecraftClient.Control
             // Check if entity should be enabled
             CheckEntityEnabled();
 
-            // Update user input
-            userInput!.UpdateInputs(inputData, client!.Perspective);
+            // Get input data from client
+            var inputData = client!.InputData;
 
             // Update player status (in water, grounded, etc)
             if (!Status!.EntityDisabled)
-                statusUpdater!.UpdatePlayerStatus(client!.GetWorld(), visualTransform!.forward);
+                statusUpdater!.UpdatePlayerStatus(client!.GetWorld(), visualTransform.forward);
             
             var status = statusUpdater!.Status;
 
@@ -379,7 +402,7 @@ namespace MinecraftClient.Control
                 }
             }
 
-            Status!.CurrentVisualYaw = visualTransform!.eulerAngles.y;
+            Status!.CurrentVisualYaw = visualTransform.eulerAngles.y;
 
             float prevStamina = status.StaminaLeft;
 
@@ -398,7 +421,7 @@ namespace MinecraftClient.Control
                 EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, status.StaminaLeft >= ability!.MaxStamina));
 
             // Apply updated visual yaw to visual transform
-            visualTransform!.eulerAngles = new(0F, Status.CurrentVisualYaw, 0F);
+            visualTransform.eulerAngles = new(0F, Status.CurrentVisualYaw, 0F);
         }
 
         protected void PostLogicalUpdate()
@@ -414,29 +437,33 @@ namespace MinecraftClient.Control
                 newPosition = transform.position;
 
             // Update client player data
-            var newYaw = visualTransform!.eulerAngles.y - 90F;
+            var newYaw = visualTransform.eulerAngles.y - 90F;
             var newPitch = 0F;
             
             client!.UpdatePlayerStatus(newPosition, newYaw, newPitch, Status!.Grounded);
         }
 
-        protected virtual void LogicalUpdate(float interval)
+        // Used only by player renders, will be cleared and reassigned upon player render update
+        private delegate void PlayerUpdateEventHandler(float interval, PlayerStatus status, Rigidbody rigidbody);
+        private event PlayerUpdateEventHandler? OnLogicalUpdate;
+        void Update()
         {
-            PreLogicalUpdate(interval);
+            PreLogicalUpdate(Time.unscaledDeltaTime);
             
             // Visual updates...
+            OnLogicalUpdate?.Invoke(Time.unscaledDeltaTime, Status!, playerRigidbody!);
 
             PostLogicalUpdate();
         }
 
-        protected virtual void PhysicalUpdate(float interval)
+        void FixedUpdate()
         {
             var info = Status!;
 
             if (info.MoveVelocity != Vector3.zero)
             {
                 // The player is actively moving
-                playerRigidbody!.AddForce((info.MoveVelocity - playerRigidbody!.velocity) * interval * 10F, ForceMode.VelocityChange);
+                playerRigidbody!.AddForce((info.MoveVelocity - playerRigidbody!.velocity) * Time.fixedUnscaledDeltaTime * 10F, ForceMode.VelocityChange);
             }
             else
             {
@@ -455,7 +482,7 @@ namespace MinecraftClient.Control
                 playerRigidbody.velocity = Vector3.zero;
             
             playerRigidbody.position = CoordConvert.MC2Unity(loc);
-            visualTransform!.eulerAngles = new(0F, yaw, 0F);
+            visualTransform.eulerAngles = new(0F, yaw, 0F);
         }
 
         protected static float GetYawFromVector2(Vector2 direction)

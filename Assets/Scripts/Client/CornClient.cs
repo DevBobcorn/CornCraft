@@ -22,6 +22,7 @@ using MinecraftClient.Inventory;
 
 namespace MinecraftClient
 {
+    [RequireComponent(typeof (PlayerUserInput), typeof (InteractionUpdater))]
     public class CornClient : MonoBehaviour, IMinecraftComHandler
     {
         #region Inspector Fields
@@ -30,8 +31,8 @@ namespace MinecraftClient
         [SerializeField] public BaseEnvironmentManager? EnvironmentManager;
         [SerializeField] public MaterialManager? MaterialManager;
         
-        [SerializeField] public GameObject? ClientPlayerPrefab;
-        [SerializeField] public GameObject[] PlayerVisualPrefabs = { };
+        [SerializeField] public GameObject? PlayerControllerPrefab;
+        [SerializeField] public GameObject[] PlayerRenderPrefabs = { };
         [SerializeField] public CameraController? CameraController;
         [SerializeField] public ScreenControl? ScreenControl;
         [SerializeField] public HUDScreen? HUDScreen;
@@ -120,7 +121,10 @@ namespace MinecraftClient
         private object movementLock = new();
         public Location GetLocation() => clientEntity.Location;
         public Vector3 GetPosition() => CoordConvert.MC2Unity(clientEntity.Location);
-        
+
+        private PlayerUserInput? playerUserInput;
+        public readonly PlayerUserInputData InputData = new();
+
         public void UpdatePlayerStatus(Vector3 newPosition, float newYaw, float newPitch, bool newGrounded)
         {
             lock (movementLock)
@@ -169,11 +173,13 @@ namespace MinecraftClient
             // Setup chunk render manager
             ChunkRenderManager!.SetClient(this);
 
+            // Get player user input
+            playerUserInput = GetComponent<PlayerUserInput>();
+
             // Prepare player controller gameobject
-            var playerObj = GameObject.Instantiate(ClientPlayerPrefab);
+            var playerObj = GameObject.Instantiate(PlayerControllerPrefab);
             playerController = playerObj!.GetComponent<PlayerController>();
-            selectedVisualIndex = 0;
-            playerController.Initialize(this, PlayerVisualPrefabs[0], CameraController!);
+            playerController.Initialize(this, CameraController!);
 
             // Set up camera controller
             CameraController!.SetClient(this);
@@ -186,15 +192,18 @@ namespace MinecraftClient
 
         void Update()
         {
+            // Update player input
+            playerUserInput!.UpdateInputs(InputData, Perspective);
+
             if (Input.GetKeyDown(KeyCode.LeftArrow)) // Select previous player visual
             {
-                selectedVisualIndex = (selectedVisualIndex + 1) % PlayerVisualPrefabs.Length;
-                playerController?.UpdatePlayerVisual(PlayerVisualPrefabs[selectedVisualIndex]);
+                selectedVisualIndex = (selectedVisualIndex + 1) % PlayerRenderPrefabs.Length;
+                playerController?.UpdatePlayerVisual(clientEntity, PlayerRenderPrefabs[selectedVisualIndex]);
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow)) // Select previous next visual
             {
-                selectedVisualIndex = (selectedVisualIndex + PlayerVisualPrefabs.Length - 1) % PlayerVisualPrefabs.Length;
-                playerController?.UpdatePlayerVisual(PlayerVisualPrefabs[selectedVisualIndex]);
+                selectedVisualIndex = (selectedVisualIndex + PlayerRenderPrefabs.Length - 1) % PlayerRenderPrefabs.Length;
+                playerController?.UpdatePlayerVisual(clientEntity, PlayerRenderPrefabs[selectedVisualIndex]);
             }
         }
 
@@ -283,7 +292,7 @@ namespace MinecraftClient
                     clientEntity.SetHeadYawFromByte(127);
                     clientEntity.MaxHealth = 20F;
 
-                    playerController!.SetClientEntity(clientEntity);
+                    playerController!.UpdatePlayerVisual(clientEntity, PlayerRenderPrefabs[selectedVisualIndex]);
 
                     return true; // Client successfully started
                 }
@@ -300,6 +309,7 @@ namespace MinecraftClient
                 tcpClient.ReceiveTimeout = 30000; // 30 seconds
 
                 Debug.LogError(Translations.Get("error.connect", e.Message));
+                Debug.LogError(e.StackTrace);
                 Disconnect();
             }
 

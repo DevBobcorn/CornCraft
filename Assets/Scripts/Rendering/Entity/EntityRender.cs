@@ -17,7 +17,12 @@ namespace MinecraftClient.Rendering
         protected bool turnedIntoRagdoll = false;
 
         [SerializeField] protected Transform? infoAnchor, visual;
-        public Transform InfoAnchor => infoAnchor is null ? transform : infoAnchor;
+        public Transform InfoAnchor => infoAnchor ?? transform;
+        public Transform VisualTransform
+        {
+            get => visual!;
+            set => visual = value;
+        }
 
         [SerializeField] protected GameObject? ragdollPrefab;
         [SerializeField] public GameObject? FloatingInfoPrefab;
@@ -75,7 +80,8 @@ namespace MinecraftClient.Rendering
             }
 
             targetYaw = lastYaw = entity.Yaw;
-            targetHeadYaw = lastHeadYaw = entity.HeadYaw;
+            //targetHeadYaw = lastHeadYaw = entity.HeadYaw;
+            targetHeadYaw = lastHeadYaw = entity.Yaw;
             visual.eulerAngles = new(0F, lastYaw, 0F);
         }
 

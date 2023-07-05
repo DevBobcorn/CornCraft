@@ -24,13 +24,38 @@ namespace MinecraftClient.Rendering
         {
             base.Initialize(entityType, entity);
 
+            // Subscribe player events
+            var playerController = GetComponentInParent<PlayerController>();
+            playerController.OnCrossFadeState += this.CrossFadeState;
+            playerController.OnRandomizeMirroredFlag += () => {
+                var mirrored = Time.frameCount % 2 == 0;
+                SetMirroredFlag(mirrored);
+            };
+
+            var visualObj = visual!.gameObject;
+
+            // Get player animator
+            entityAnimator = visualObj.GetComponent<Animator>();
+
+            // Add and initialize player widgets
+            visualObj.AddComponent<PlayerAnimatorWidget>();
+            var accessoryWidget = visualObj.AddComponent<PlayerAccessoryWidget>();
+            
+            var weaponMountRefObj = new GameObject("Weapon Mount Ref");
+            weaponMountRefObj.transform.SetParent(visualObj.transform);
+            weaponMountRefObj.transform.localPosition = new(0F, 1.5F, -0.35F);
+            weaponMountRefObj.transform.localEulerAngles = new(-90F, 0F, 90F);
+            var weaponMountRef = weaponMountRefObj.transform;
+            var mainHandRef = entityAnimator.GetBoneTransform(HumanBodyBones.RightHand);
+            accessoryWidget.SetRefTransforms(mainHandRef, weaponMountRef);
+
             UpdateSkinMaterial();
         }
 
-        public void AssignFields(Transform visualTransform, Animator animator)
+        public void CreateWeapon(GameObject meleeWeaponPrefab)
         {
-            this.visual = visualTransform;
-            this.entityAnimator = animator;
+            var accessoryWidget = VisualTransform.GetComponent<PlayerAccessoryWidget>();
+            accessoryWidget.CreateWeapon(meleeWeaponPrefab);
         }
 
         public override void UpdateStateMachine(PlayerStatus info)
@@ -48,7 +73,32 @@ namespace MinecraftClient.Rendering
             entityAnimator.SetBool(ATTACKING, info.Attacking);
         }
 
-        private void UpdateSkinMaterial() { /* Dummy Method */ }
+        private void UpdateSkinMaterial()
+        {
+            if (playerSkinRenderers.Length == 0)
+            {
+                // No render in this model uses player skin, no need to update
+                return;
+            }
+
+            var nameLower = entity!.Name?.ToLower();
+            var skinMats = CornApp.CurrentClient!.MaterialManager!.SkinMaterials;
+
+            // Find skin and change materials
+            if (nameLower is not null && skinMats.ContainsKey(nameLower))
+            {
+                var mat = skinMats[nameLower];
+
+                foreach (var renderer in playerSkinRenderers)
+                    renderer.sharedMaterial = mat;
+
+                Debug.Log($"Skin applied to {nameLower}");
+            }
+            else
+            {
+                Debug.LogWarning($"Failed to apply skin for {nameLower}");
+            }
+        }
 
     }
 }

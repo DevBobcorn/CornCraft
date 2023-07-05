@@ -1,6 +1,7 @@
 #nullable enable
 using UnityEngine;
 using MinecraftClient.Mapping;
+using MinecraftClient.Control;
 
 namespace MinecraftClient.Rendering
 {
