@@ -2,8 +2,6 @@
 using UnityEditor;
 using UnityEditor.Animations;
 
-using MinecraftClient.Rendering;
-
 namespace MMD {
     
     public class ModelAgent {
@@ -48,28 +46,17 @@ namespace MMD {
 
             //ゲームオブジェクトの作成
             GameObject visualObj = PMXConverter.CreateGameObject(pmx_format, physics_type, animation_type, use_ik, scale);
-            visualObj.name = "Visual";
 
             // Assign animator controller
             var player_animator = visualObj.GetComponent<Animator>();
             player_animator.runtimeAnimatorController = player_anim_controller;
 
-            var renderObj = new GameObject($"Player {pmx_format.meta_header.name} Entity");
-            var render = renderObj.AddComponent<PlayerEntityRiggedRender>();
-            render.VisualTransform = visualObj.transform;
-
-            var infoAnchorObj = new GameObject("Info Anchor");
-            infoAnchorObj.transform.SetParent(renderObj.transform, false);
-            infoAnchorObj.transform.localPosition = new(0F, 2F, 0F);
-
-            visualObj.transform.SetParent(renderObj.transform, false);
-
             // プレファブパスの設定
-            string prefabPath = pmx_format.meta_header.folder + "/" + renderObj.name + ".prefab";
+            string prefabPath = pmx_format.meta_header.folder + "/" + pmx_format.meta_header.name + ".prefab";
 
             // プレファブ化
             //PrefabUtility.CreatePrefab(prefabPath, visualObj, ReplacePrefabOptions.ConnectToPrefab);
-            PrefabUtility.SaveAsPrefabAssetAndConnect(renderObj, prefabPath, InteractionMode.AutomatedAction);
+            PrefabUtility.SaveAsPrefabAssetAndConnect(visualObj, prefabPath, InteractionMode.AutomatedAction);
 
             // アセットリストの更新
             AssetDatabase.Refresh();
