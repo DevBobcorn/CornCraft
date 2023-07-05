@@ -103,7 +103,7 @@ namespace MinecraftClient
         public Perspective Perspective = 0;
         public GameMode GameMode { get; private set; } = GameMode.Survival;
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
-        private int selectedVisualIndex = 0;
+        private int selectedPlayerRenderIndex = 0;
         public float? YawToSend = null, PitchToSend = null;
         public bool Grounded = false;
         private int clientSequenceId;
@@ -197,13 +197,13 @@ namespace MinecraftClient
 
             if (Input.GetKeyDown(KeyCode.LeftArrow)) // Select previous player visual
             {
-                selectedVisualIndex = (selectedVisualIndex + 1) % PlayerRenderPrefabs.Length;
-                playerController?.UpdatePlayerVisual(clientEntity, PlayerRenderPrefabs[selectedVisualIndex]);
+                selectedPlayerRenderIndex = (selectedPlayerRenderIndex + 1) % PlayerRenderPrefabs.Length;
+                playerController?.UpdatePlayerRender(clientEntity, PlayerRenderPrefabs[selectedPlayerRenderIndex]);
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow)) // Select previous next visual
             {
-                selectedVisualIndex = (selectedVisualIndex + PlayerRenderPrefabs.Length - 1) % PlayerRenderPrefabs.Length;
-                playerController?.UpdatePlayerVisual(clientEntity, PlayerRenderPrefabs[selectedVisualIndex]);
+                selectedPlayerRenderIndex = (selectedPlayerRenderIndex + PlayerRenderPrefabs.Length - 1) % PlayerRenderPrefabs.Length;
+                playerController?.UpdatePlayerRender(clientEntity, PlayerRenderPrefabs[selectedPlayerRenderIndex]);
             }
         }
 
@@ -292,7 +292,7 @@ namespace MinecraftClient
                     clientEntity.SetHeadYawFromByte(127);
                     clientEntity.MaxHealth = 20F;
 
-                    playerController!.UpdatePlayerVisual(clientEntity, PlayerRenderPrefabs[selectedVisualIndex]);
+                    playerController!.UpdatePlayerRender(clientEntity, PlayerRenderPrefabs[selectedPlayerRenderIndex]);
 
                     return true; // Client successfully started
                 }

@@ -18,9 +18,8 @@ MonoBehaviour:
   pmx_config:
     animation_type: 1
     physics_type: 2
-    use_ik: 1
+    use_ik: 0
     scale: 0.1
-    entity_prefab: {fileID: 6639549427679486287, guid: 51b8087cdfed24041b1fa94df8112e5a, type: 3}
     player_anim_controller: {fileID: 9100000, guid: 83f3e64e2dca13b4e9c2b6153af51622, type: 2}
   vmd_config:
     createAnimationFile: 0
