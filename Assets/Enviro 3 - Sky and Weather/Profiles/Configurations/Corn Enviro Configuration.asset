@@ -784,7 +784,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b18a0693e95fd064e9d0a3b96e538236, type: 3}
   m_Name: Lighting Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 0
+  showModuleInspector: 1
   showSaveLoad: 1
   active: 1
   Settings:
@@ -1254,8 +1254,8 @@ MonoBehaviour:
     ambientMode: 3
     ambientSkyColorGradient:
       serializedVersion: 2
-      key0: {r: 0.23584908, g: 0.23584908, b: 0.23584908, a: 1}
-      key1: {r: 0.23529412, g: 0.23529412, b: 0.23529412, a: 1}
+      key0: {r: 0.6037736, g: 0.6037736, b: 0.6037736, a: 1}
+      key1: {r: 0.6226415, g: 0.6226415, b: 0.6226415, a: 1}
       key2: {r: 0.23202205, g: 0.257332, b: 0.5188679, a: 0}
       key3: {r: 0.43853682, g: 0.527192, b: 0.6698113, a: 0}
       key4: {r: 0.59053046, g: 0.6704166, b: 0.8301887, a: 0}
@@ -1571,10 +1571,10 @@ MonoBehaviour:
   showDensityControls: 0
   showTextureControls: 0
   showWindControls: 0
-  cloudAnimLayer1: {x: -0.2874885, y: -0.75946015, z: 0.17580254}
+  cloudAnimLayer1: {x: -0.21926244, y: -0.6912335, z: -0.09710166}
   cloudAnimLayer2: {x: 0.3174014, y: -0.67647, z: 0.67947596}
-  cloudAnimNonScaledLayer1: {x: -0.31274655, y: 2.0853002, z: -59.91825}
-  cloudAnimNonScaledLayer2: {x: -0.92406046, y: -0.50722, z: -57.57953}
+  cloudAnimNonScaledLayer1: {x: -0.2991015, y: 2.0989468, z: -59.931778}
+  cloudAnimNonScaledLayer2: {x: -0.9377054, y: -0.5208649, z: -57.593056}
   weatherMap: {fileID: 0}
 --- !u!114 &-304633943039718671
 MonoBehaviour:
@@ -1649,6 +1649,7 @@ MonoBehaviour:
   showFogControls: 0
   showVolumetricsControls: 1
   fogLights:
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
