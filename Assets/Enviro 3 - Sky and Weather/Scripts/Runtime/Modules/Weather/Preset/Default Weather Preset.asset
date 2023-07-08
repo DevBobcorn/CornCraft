@@ -17,8 +17,6 @@ MonoBehaviour:
   active: 1
   Settings:
     weatherTypes:
-    - {fileID: 11400000, guid: f736e404e0b052942bc41c35c50dccad, type: 2}
-    - {fileID: 11400000, guid: 96eebec6fa78a3c48ba2bc98ac5ab57f, type: 2}
     - {fileID: 11400000, guid: 11fdd63974de7ae44b1c689d499953f6, type: 2}
     cloudsTransitionSpeed: 1
     fogTransitionSpeed: 1

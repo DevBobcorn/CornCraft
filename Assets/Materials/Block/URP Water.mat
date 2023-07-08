@@ -98,16 +98,16 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - Vector1_17E53C12: 0.75
+    - Vector1_17E53C12: 0.05
     - Vector1_244B0600: 0.2
     - Vector1_36E8227: 0.5
-    - Vector1_3D886DA1: 0
-    - Vector1_46E42935: 0.266
-    - Vector1_47683D42: 0.133
+    - Vector1_3D886DA1: 0.266
+    - Vector1_46E42935: 0.584
+    - Vector1_47683D42: 0
     - Vector1_A0EAD698: 1
     - Vector1_A6A0BC26: 0.03
     - Vector1_B9F56378: 0.5
-    - Vector1_C360A163: 3
+    - Vector1_C360A163: 0
     - Vector1_E5C51606: 0
     - Vector1_F38B44AA: 0.07
     - _AlphaClip: 0
@@ -121,7 +121,7 @@ Material:
     - _Clipping: 0
     - _Cull: 2
     - _Cutoff: 0.5
-    - _DeepOpacity: 0.2
+    - _DeepOpacity: 0.8
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
@@ -136,7 +136,7 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _ShallowOpacity: 0.1
+    - _ShallowOpacity: 0.4
     - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -151,7 +151,7 @@ Material:
     m_Colors:
     - Color_7D9A58EC: {r: 0, g: 0.171549, b: 0.5283019, a: 0.15686275}
     - Color_F01C36BF: {r: 0, g: 0.3582738, b: 0.5283019, a: 0.0627451}
-    - Vector2_37B21477: {r: 0.02, g: 0.02, b: 0, a: 0}
+    - Vector2_37B21477: {r: 0.06, g: 0.06, b: 0, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
