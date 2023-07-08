@@ -17,7 +17,6 @@ MonoBehaviour:
   active: 1
   Settings:
     weatherTypes:
-    - {fileID: 11400000, guid: f736e404e0b052942bc41c35c50dccad, type: 2}
     - {fileID: 11400000, guid: 11fdd63974de7ae44b1c689d499953f6, type: 2}
     cloudsTransitionSpeed: 1
     fogTransitionSpeed: 1
@@ -1402,12 +1401,12 @@ MonoBehaviour:
     locationOffset: {x: 0.1, y: 0}
     bottomCloudsHeight: 2000
     topCloudsHeight: 8000
-    density: 0.072
-    densitySmoothness: 1
+    density: 0.5
+    densitySmoothness: 0.1
     scatteringIntensity: 1.5
     silverLiningSpread: 0.82
     powderIntensity: 0.75
-    curlIntensity: 0.25
+    curlIntensity: 0.5
     lightStepModifier: 0.075
     lightAbsorbtion: 0.5
     multiScatteringA: 0.5
@@ -1415,7 +1414,7 @@ MonoBehaviour:
     multiScatteringC: 1
     baseNoiseUV: 6
     detailNoiseUV: 28
-    baseErosionIntensity: 0
+    baseErosionIntensity: 1
     detailErosionIntensity: 0.5
     anvilBias: 0
   settingsLayer2:
@@ -1572,10 +1571,10 @@ MonoBehaviour:
   showDensityControls: 0
   showTextureControls: 0
   showWindControls: 0
-  cloudAnimLayer1: {x: 0.57023513, y: 0.098339476, z: 0.744241}
+  cloudAnimLayer1: {x: -0.2874885, y: -0.75946015, z: 0.17580254}
   cloudAnimLayer2: {x: 0.3174014, y: -0.67647, z: 0.67947596}
-  cloudAnimNonScaledLayer1: {x: -0.541213, y: 1.8568302, z: -59.68845}
-  cloudAnimNonScaledLayer2: {x: -0.69559705, y: -0.2787527, z: -57.349728}
+  cloudAnimNonScaledLayer1: {x: -0.31274655, y: 2.0853002, z: -59.91825}
+  cloudAnimNonScaledLayer2: {x: -0.92406046, y: -0.50722, z: -57.57953}
   weatherMap: {fileID: 0}
 --- !u!114 &-304633943039718671
 MonoBehaviour:
@@ -1650,6 +1649,8 @@ MonoBehaviour:
   showFogControls: 0
   showVolumetricsControls: 1
   fogLights:
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}

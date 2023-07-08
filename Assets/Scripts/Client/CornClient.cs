@@ -32,7 +32,7 @@ namespace MinecraftClient
         [SerializeField] public MaterialManager? MaterialManager;
         
         [SerializeField] public GameObject? PlayerControllerPrefab;
-        [SerializeField] public GameObject[] PlayerRenderPrefabs = { };
+        [SerializeField] public GameObject? PlayerRenderPrefab;
         [SerializeField] public CameraController? CameraController;
         [SerializeField] public ScreenControl? ScreenControl;
         [SerializeField] public HUDScreen? HUDScreen;
@@ -103,7 +103,6 @@ namespace MinecraftClient
         public Perspective Perspective = 0;
         public GameMode GameMode { get; private set; } = GameMode.Survival;
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
-        private int selectedPlayerRenderIndex = 0;
         public float? YawToSend = null, PitchToSend = null;
         public bool Grounded = false;
         private int clientSequenceId;
@@ -194,17 +193,6 @@ namespace MinecraftClient
         {
             // Update player input
             playerUserInput!.UpdateInputs(InputData, Perspective);
-
-            if (Input.GetKeyDown(KeyCode.LeftArrow)) // Select previous player visual
-            {
-                selectedPlayerRenderIndex = (selectedPlayerRenderIndex + 1) % PlayerRenderPrefabs.Length;
-                playerController?.UpdatePlayerRender(clientEntity, PlayerRenderPrefabs[selectedPlayerRenderIndex]);
-            }
-            else if (Input.GetKeyDown(KeyCode.RightArrow)) // Select previous next visual
-            {
-                selectedPlayerRenderIndex = (selectedPlayerRenderIndex + PlayerRenderPrefabs.Length - 1) % PlayerRenderPrefabs.Length;
-                playerController?.UpdatePlayerRender(clientEntity, PlayerRenderPrefabs[selectedPlayerRenderIndex]);
-            }
         }
 
         public bool IsPaused() => ScreenControl!.IsPaused;
@@ -292,7 +280,7 @@ namespace MinecraftClient
                     clientEntity.SetHeadYawFromByte(127);
                     clientEntity.MaxHealth = 20F;
 
-                    playerController!.UpdatePlayerRender(clientEntity, PlayerRenderPrefabs[selectedPlayerRenderIndex]);
+                    playerController!.UpdatePlayerRender(clientEntity, PlayerRenderPrefab!);
 
                     return true; // Client successfully started
                 }

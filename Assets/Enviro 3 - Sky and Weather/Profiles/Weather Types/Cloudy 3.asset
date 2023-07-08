@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showEditor: 0
   showEffectControls: 0
-  showCloudControls: 0
+  showCloudControls: 1
   showFlatCloudControls: 0
-  showFogControls: 1
+  showFogControls: 0
   showLightingControls: 1
   showAuroraControls: 0
   showEnvironmentControls: 0
@@ -39,11 +39,11 @@ MonoBehaviour:
     powderIntensityLayer1: 0.75
     silverLiningSpreadLayer1: 0.82
     ligthAbsorbtionLayer1: 0.5
-    densityLayer1: 0.072
-    densitySmoothnessLayer1: 1
-    baseErosionIntensityLayer1: 0
+    densityLayer1: 0.5
+    densitySmoothnessLayer1: 0.1
+    baseErosionIntensityLayer1: 1
     detailErosionIntensityLayer1: 0.5
-    curlIntensityLayer1: 0.25
+    curlIntensityLayer1: 0.5
     showLayer2: 0
     coverageLayer2: 0
     dilateCoverageLayer2: 0.5
