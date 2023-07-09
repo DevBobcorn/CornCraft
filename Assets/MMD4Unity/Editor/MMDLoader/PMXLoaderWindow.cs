@@ -44,6 +44,7 @@ public class PMXLoaderWindow : EditorWindow {
         model_agent.CreatePrefab(pmx_config.physics_type
                                 , pmx_config.animation_type
                                 , pmx_config.use_ik
+                                , pmx_config.use_leg_d_bones
                                 , pmx_config.scale
                                 , pmx_config.player_anim_controller
                                 );
