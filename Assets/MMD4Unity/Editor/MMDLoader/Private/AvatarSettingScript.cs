@@ -44,11 +44,12 @@ public class AvatarSettingScript
     /// <summary>
     /// 人型アバダーを設定する
     /// </summary>
+    /// <param name='use_leg_d_bones'>Whether or not to use D-bones for legs in avatar<param>
     /// <returns>アニメーター</returns>
     /// <remarks>
     /// モデルに依ってボーン構成に差が有るが、MMD標準モデルとの一致を優先する
     /// </remarks>
-    public Animator SettingHumanAvatar() {
+    public Animator SettingHumanAvatar(bool use_leg_d_bones) {
         //生成済みのボーンをUnity推奨ポーズに設定
         SetRequirePose();
         
@@ -62,7 +63,7 @@ public class AvatarSettingScript
         
         //ヒューマノイドアバター作成
         HumanDescription description = new HumanDescription();
-        description.human = CreateHumanBone();
+        description.human = CreateHumanBone(use_leg_d_bones);
         description.skeleton = CreateSkeletonBone();
         description.lowerArmTwist = 0.0f;
         description.upperArmTwist = 0.0f;
@@ -206,8 +207,9 @@ public class AvatarSettingScript
     /// <summary>
     /// MMD用ヒューマノイドボーン作成
     /// </summary>
+    /// <param name='use_leg_d_bones'>Whether or not to use D-bones for legs in avatar<param>
     /// <returns>ヒューマノイドボーン</returns>
-    HumanBone[] CreateHumanBone()
+    HumanBone[] CreateHumanBone(bool use_leg_d_bones)
     {
         System.Func<string, string, HumanBone> CreateHint = (key, value)=>{
                                                                             HumanBone human_bone = new HumanBone();
@@ -246,14 +248,23 @@ public class AvatarSettingScript
         }
         
         //足系
-        bone_name.Add(CreateHint("LeftUpperLeg",    "左足"        ));    //左脚上部◆
-        bone_name.Add(CreateHint("RightUpperLeg",    "右足"        ));    //右脚上部◆
-        bone_name.Add(CreateHint("LeftLowerLeg",    "左ひざ"    ));    //左脚◆
-        bone_name.Add(CreateHint("RightLowerLeg",    "右ひざ"    ));    //右脚◆
-        bone_name.Add(CreateHint("LeftFoot",        "左足首"    ));    //左足◆
-        bone_name.Add(CreateHint("RightFoot",        "右足首"    ));    //右足◆
-        bone_name.Add(CreateHint("LeftToes",        "左つま先"    ));    //左足指
-        bone_name.Add(CreateHint("RightToes",        "右つま先"    ));    //右足指
+        if (use_leg_d_bones) {
+            bone_name.Add(CreateHint("LeftUpperLeg",    "左足D"        ));    //左脚上部◆
+            bone_name.Add(CreateHint("RightUpperLeg",    "右足D"        ));    //右脚上部◆
+            bone_name.Add(CreateHint("LeftLowerLeg",    "左ひざD"    ));    //左脚◆
+            bone_name.Add(CreateHint("RightLowerLeg",    "右ひざD"    ));    //右脚◆
+            bone_name.Add(CreateHint("LeftFoot",        "左足首D"    ));    //左足◆
+            bone_name.Add(CreateHint("RightFoot",        "右足首D"    ));    //右足◆
+        } else {
+            bone_name.Add(CreateHint("LeftUpperLeg",    "左足"        ));    //左脚上部◆
+            bone_name.Add(CreateHint("RightUpperLeg",    "右足"        ));    //右脚上部◆
+            bone_name.Add(CreateHint("LeftLowerLeg",    "左ひざ"    ));    //左脚◆
+            bone_name.Add(CreateHint("RightLowerLeg",    "右ひざ"    ));    //右脚◆
+            bone_name.Add(CreateHint("LeftFoot",        "左足首"    ));    //左足◆
+            bone_name.Add(CreateHint("RightFoot",        "右足首"    ));    //右足◆
+            bone_name.Add(CreateHint("LeftToes",        "左つま先"    ));    //左足指
+            bone_name.Add(CreateHint("RightToes",        "右つま先"    ));    //右足指
+        }
         
         //手系
         bone_name.Add(CreateHint("LeftShoulder",    "左肩"        ));    //左肩

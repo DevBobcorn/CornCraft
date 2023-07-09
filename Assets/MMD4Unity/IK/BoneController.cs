@@ -80,17 +80,23 @@ public class BoneController : MonoBehaviour
     /// <param name='is_add_local'>ローカル付与か(true:ローカル付与, false:通常付与)</param>
     public LiteTransform GetDeltaTransform(bool is_add_local) {
         LiteTransform result;
-        if (is_add_local) {
-            //ローカル付与(親も含めた変形量算出)
-            result = new LiteTransform(transform.position - prev_global_.position
-                                    , Quaternion.Inverse(prev_global_.rotation) * transform.rotation
-                                    );
-        } else {
-            //通常付与(このボーン単体での変形量算出)
-            result = new LiteTransform(transform.localPosition - prev_local_.position
-                                    , Quaternion.Inverse(prev_local_.rotation) * transform.localRotation
-                                    );
+        try {
+            if (is_add_local) {
+                //ローカル付与(親も含めた変形量算出)
+                result = new LiteTransform(transform.position - prev_global_.position
+                                        , Quaternion.Inverse(prev_global_.rotation) * transform.rotation
+                                        );
+            } else {
+                //通常付与(このボーン単体での変形量算出)
+                result = new LiteTransform(transform.localPosition - prev_local_.position
+                                        , Quaternion.Inverse(prev_local_.rotation) * transform.localRotation
+                                        );
+            }
+        } catch {
+            //Debug.LogError($"Failed to update delta: {gameObject.name}");
+            result = new LiteTransform(Vector3.zero, Quaternion.identity);
         }
+
         return result;
     }
     

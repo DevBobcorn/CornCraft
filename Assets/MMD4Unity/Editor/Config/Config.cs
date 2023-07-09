@@ -129,7 +129,8 @@ namespace MMD
     {
         public PMXConverter.AnimationType animation_type = PMXConverter.AnimationType.HumanMecanim;
         public PMXConverter.PhysicsType physics_type = PMXConverter.PhysicsType.UnityPhysics;
-        public bool use_ik = true;
+        public bool use_ik = false;
+        public bool use_leg_d_bones = true;
         public float scale = 0.085f;
         public AnimatorController player_anim_controller;
         
@@ -143,6 +144,14 @@ namespace MMD
             animation_type = (PMXConverter.AnimationType)EditorGUILayout.EnumPopup("Animation Type", animation_type);
             physics_type = (PMXConverter.PhysicsType)EditorGUILayout.EnumPopup("Physics Type", physics_type);
             use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
+            if (!use_ik)
+            {
+                use_leg_d_bones = EditorGUILayout.Toggle("Use Leg D-Bones", use_leg_d_bones);
+            }
+            else
+            {
+                use_leg_d_bones = false;
+            }
             scale = EditorGUILayout.Slider("Scale", scale, 0.001f, 1.0f);
             player_anim_controller = (AnimatorController)EditorGUILayout.ObjectField("Animator Controller", player_anim_controller, typeof (AnimatorController), false);
 

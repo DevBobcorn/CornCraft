@@ -33,11 +33,12 @@ namespace MMD
         /// <param name='physics_type'>Which type of physics to use</param>
         /// <param name='animation_type'>アニメーションタイプ</param>
         /// <param name='use_ik'>IKを使用するか</param>
+        /// <param name='use_leg_d_bones'>Whether or not to directly use d-bones to manipulate leg animations.</param>
         /// <param name='scale'>スケール</param>
-        public static GameObject CreateGameObject(PMXFormat format, PhysicsType physics_type, AnimationType animation_type, bool use_ik, float scale) {
+        public static GameObject CreateGameObject(PMXFormat format, PhysicsType physics_type, AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale) {
             GameObject result;
             using (PMXConverter converter = new PMXConverter()) {
-                result = converter.CreateGameObject_(format, physics_type, animation_type, use_ik, scale);
+                result = converter.CreateGameObject_(format, physics_type, animation_type, use_ik, use_leg_d_bones, scale);
             }
             return result;
         }
@@ -67,10 +68,12 @@ namespace MMD
         /// <param name='physics_type'>剛体を使用するか</param>
         /// <param name='animation_type'>アニメーションタイプ</param>
         /// <param name='use_ik'>IKを使用するか</param>
+        /// <param name='use_leg_d_bones'>Whether or not to directly use d-bones to manipulate leg animations.</param>
         /// <param name='scale'>スケール</param>
-        private GameObject CreateGameObject_(PMXFormat format, PhysicsType physics_type, AnimationType animation_type, bool use_ik, float scale) {
+        private GameObject CreateGameObject_(PMXFormat format, PhysicsType physics_type, AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale) {
             format_ = format;
             use_ik_ = use_ik;
+            use_leg_d_bones_ = use_leg_d_bones;
             scale_ = scale;
             root_game_object_ = new GameObject(format_.meta_header.name);
             MMDEngine engine = root_game_object_.AddComponent<MMDEngine>(); //MMDEngine追加
@@ -120,7 +123,7 @@ namespace MMD
                     avatar_setting.SettingGenericAvatar();
                     break;
                 case AnimationType.HumanMecanim: //人型アバターでのMecanim
-                    avatar_setting.SettingHumanAvatar();
+                    avatar_setting.SettingHumanAvatar(use_leg_d_bones);
                     break;
                 default:
                     throw new System.ArgumentException();
@@ -1545,12 +1548,21 @@ namespace MMD
         {
             BoneController result = bones[bone_index].GetComponent<BoneController>();
             if (0.0f != bone.additional_rate) {
-                //付与親が有るなら
-                result.additive_parent = bones[bone.additional_parent_index].GetComponent<BoneController>();
-                result.additive_rate = bone.additional_rate;
-                result.add_local = (0 != (PMXFormat.Bone.Flag.AddLocal & bone.bone_flag));
-                result.add_move = (0 != (PMXFormat.Bone.Flag.AddMove & bone.bone_flag));
-                result.add_rotate = (0 != (PMXFormat.Bone.Flag.AddRotation & bone.bone_flag));
+                if (use_leg_d_bones_ && bone.bone_name.EndsWith("D"))
+                {
+                    Debug.Log($"Ignoring additive parent for d-bone: {bone.bone_name}");
+                    //bones[bone_index].transform.SetParent(bones[bone.additional_parent_index].transform);
+                    bones[bone.additional_parent_index].transform.SetParent(bones[bone_index].transform);
+                }
+                else
+                {
+                    //付与親が有るなら
+                    result.additive_parent = bones[bone.additional_parent_index].GetComponent<BoneController>();
+                    result.additive_rate = bone.additional_rate;
+                    result.add_local = (0 != (PMXFormat.Bone.Flag.AddLocal & bone.bone_flag));
+                    result.add_move = (0 != (PMXFormat.Bone.Flag.AddMove & bone.bone_flag));
+                    result.add_rotate = (0 != (PMXFormat.Bone.Flag.AddRotation & bone.bone_flag));
+                }
             }
             if (use_ik_) {
                 //IKを使用するなら
@@ -1605,9 +1617,10 @@ namespace MMD
 
         const uint    c_max_vertex_count_in_mesh = 65535; //meshに含まれる最大頂点数(Unity3D的には65536迄入ると思われるが、ushort.MaxValueは特別な値として使うのでその分を除外)
 
-        GameObject                root_game_object_;
-        PMXFormat                format_;
+        GameObject    root_game_object_;
+        PMXFormat               format_;
         bool                    use_ik_;
+        bool           use_leg_d_bones_;
         float                    scale_;
         AlphaReadableTexture    alpha_readable_texture_ = null;
     }

@@ -30,9 +30,10 @@ namespace MMD {
         /// <param name='physics_type'>Physicsタイプ</param>
         /// <param name='animation_type'>アニメーションタイプ</param>
         /// <param name='use_ik'>IKを使用するか</param>
+        /// <param name='use_leg_d_bones'>Whether or not to directly use d-bones to manipulate leg animations. Check it if d-bone is present and ik is not needed</param>
         /// <param name='scale'>スケール</param>
-        public void CreatePrefab(PMXConverter.PhysicsType physics_type, PMXConverter.AnimationType animation_type, bool use_ik, float scale,
-                AnimatorController player_anim_controller) {
+        public void CreatePrefab(PMXConverter.PhysicsType physics_type, PMXConverter.AnimationType animation_type, bool use_ik,
+                bool use_leg_d_bones, float scale, AnimatorController player_anim_controller) {
             //PMX Baseでインポートする
             //PMXファイルのインポート
             PMX.PMXFormat pmx_format = null;
@@ -45,7 +46,7 @@ namespace MMD {
             header_ = pmx_format.header;
 
             //ゲームオブジェクトの作成
-            GameObject visualObj = PMXConverter.CreateGameObject(pmx_format, physics_type, animation_type, use_ik, scale);
+            GameObject visualObj = PMXConverter.CreateGameObject(pmx_format, physics_type, animation_type, use_ik, use_leg_d_bones, scale);
 
             // Assign animator controller
             var player_animator = visualObj.GetComponent<Animator>();
@@ -111,7 +112,7 @@ namespace MMD {
             return result;
         }}
         
-        string                     file_path_;
+        string                  file_path_;
         PMX.PMXFormat.Header    header_;
     }
 }
