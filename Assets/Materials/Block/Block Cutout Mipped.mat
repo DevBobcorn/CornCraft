@@ -8,16 +8,18 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Block Cutout Mipped
-  m_Shader: {fileID: -6465566751694194690, guid: e57ad6db2ce2d7d4d8b017bee48be20f, type: 3}
+  m_Shader: {fileID: 4800000, guid: 550f6abc174fc2c4595c82177088bc37, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _ALPHATEST_ON
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
+  m_CustomRenderQueue: 2450
+  stringTagMap:
+    RenderType: TransparentCutout
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
@@ -83,7 +85,9 @@ Material:
     m_Floats:
     - _AlphaClip: 1
     - _AlphaCutoff: 0.5
+    - _AlphaToMask: 1
     - _Blend: 0
+    - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -93,9 +97,11 @@ Material:
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
+    - _GlossinessSource: 0
     - _GlossyReflections: 0
     - _Metallic: 0
     - _OcclusionStrength: 1
@@ -103,10 +109,14 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _Shininess: 0
     - _Smoothness: 0
+    - _SmoothnessSource: 0
     - _SmoothnessTextureChannel: 0
+    - _SpecSource: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _SrcBlendAlpha: 1
     - _Surface: 0
     - _WorkflowMode: 1
     - _ZWrite: 1

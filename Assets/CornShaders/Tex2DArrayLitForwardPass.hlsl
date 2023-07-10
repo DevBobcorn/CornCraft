@@ -9,19 +9,21 @@
 struct Attributes
 {
     float4 positionOS    : POSITION;
-    float4 color         : COLOR;
+    float3 color         : COLOR;
     float3 normalOS      : NORMAL;
     float4 tangentOS     : TANGENT;
     float3 texcoord      : TEXCOORD0;
-    float2 staticLightmapUV    : TEXCOORD1;
-    float2 dynamicLightmapUV    : TEXCOORD2;
+    float2 staticLightmapUV  : TEXCOORD1;
+    float2 dynamicLightmapUV : TEXCOORD2;
+    float4 animInfo      : TEXCOORD3;
+
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct Varyings
 {
     float3 uv                          : TEXCOORD0;
-    float4 color                       : COLOR;
+    float3 color                       : COLOR;
 
     float3 positionWS                  : TEXCOORD1;    // xyz: posWS
 
@@ -114,6 +116,22 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
 ///////////////////////////////////////////////////////////////////////////////
 //                  Vertex and Fragment functions                            //
 ///////////////////////////////////////////////////////////////////////////////
+float2 GetTexUVOffset(float AnimTime, float4 AnimInfo)
+{
+    uint frameCount = round(AnimInfo.x);
+
+    if (frameCount > 1) {
+        float frameInterval = AnimInfo.y;
+
+        float cycleTime = fmod(AnimTime, frameInterval * frameCount);
+        uint curFrame = floor(cycleTime / frameInterval);
+        uint framePerRow = round(AnimInfo.w);
+        
+        return float2((curFrame % framePerRow) * AnimInfo.z, (curFrame / framePerRow) * -AnimInfo.z);
+    } else {
+        return float2(0, 0);
+    }
+}
 
 // Used in Standard (Simple Lighting) shader
 Varyings LitPassVertexSimple(Attributes input)
@@ -134,7 +152,7 @@ Varyings LitPassVertexSimple(Attributes input)
 #endif
 
     //output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
-    output.uv = input.texcoord;
+    output.uv = input.texcoord + float3(GetTexUVOffset(_Time.y, input.animInfo), 0);
     output.color = input.color;
 
     output.positionWS.xyz = vertexInput.positionWS;
