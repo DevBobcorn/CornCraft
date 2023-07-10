@@ -8,10 +8,12 @@ namespace MinecraftClient.Control
 {
     public class MeleeWeapon : MonoBehaviour
     {
+        [SerializeField] public Vector3 slotPosition;
+        [SerializeField] public Vector3 slotEularAngles;
+        [SerializeField] private TrailRenderer? slashTrail;
+
         private readonly List<Collider> slashHits = new();
         private bool slashActive = false;
-
-        public TrailRenderer? slashTrail;
 
         public void StartSlash()
         {

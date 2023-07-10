@@ -9,13 +9,13 @@ namespace MinecraftClient.Rendering
     public class PlayerAccessoryWidget : MonoBehaviour
     {
         [HideInInspector] public Transform? mainHandRef;
-        [HideInInspector] public Transform? weaponMountRef;
+        [HideInInspector] public Transform? spineRef;
         private Transform? mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
-        private Transform? weaponMountSlot; // A slot smooth following weaponMountRef transform
+        private Transform? weaponMountPivot, weaponMountSlot;
         private PlayerController? player;
         private MeleeWeapon? currentWeapon;
 
-        public void SetRefTransforms(Transform mainHandRef, Transform weaponMountRef)
+        public void SetRefTransforms(Transform mainHandRef, Transform spineRef)
         {
             this.mainHandRef = mainHandRef;
             // Create weapon slot transform
@@ -26,14 +26,16 @@ namespace MinecraftClient.Rendering
             mainHandSlot.localPosition = Vector3.zero;
             mainHandSlot.localEulerAngles = Vector3.zero;
 
-            this.weaponMountRef = weaponMountRef;
-            // Create weapon slot transform
-            var weaponSlotObj = new GameObject("Weapon Slot");
+            this.spineRef = spineRef;
+
+            // Create weapon mount slot transform
+            var weaponPivotObj = new GameObject("Weapon Mount Pivot");
+            weaponMountPivot = weaponPivotObj.transform;
+            weaponMountPivot.SetParent(transform);
+
+            var weaponSlotObj = new GameObject("Weapon Mount Slot");
             weaponMountSlot = weaponSlotObj.transform;
-            weaponMountSlot.SetParent(transform);
-            // Initialize position and rotation
-            weaponMountSlot.position = weaponMountRef!.position;
-            weaponMountSlot.rotation = weaponMountRef.rotation;
+            weaponMountSlot.SetParent(weaponMountPivot);
         }
 
         public void CreateWeapon(GameObject weaponPrefab)
@@ -45,6 +47,12 @@ namespace MinecraftClient.Rendering
 
             var weaponObj = GameObject.Instantiate(weaponPrefab);
             currentWeapon = weaponObj!.GetComponent<MeleeWeapon>();
+
+            // Set weapon slot position and rotation
+            weaponMountPivot!.localPosition = new(0F, 1.3F, 0F);
+
+            weaponMountSlot!.localPosition = currentWeapon.slotPosition;
+            weaponMountSlot!.localEulerAngles = currentWeapon.slotEularAngles;
 
             // Mount weapon on start
             MountWeapon();
@@ -107,11 +115,10 @@ namespace MinecraftClient.Rendering
 
         void Update()
         {
-            if (weaponMountRef == null || weaponMountSlot == null)
+            if (spineRef == null || weaponMountPivot == null)
                 return;
 
-            weaponMountSlot.position = Vector3.Lerp(weaponMountSlot.position, weaponMountRef.position, Time.deltaTime * 10F);
-            weaponMountSlot.rotation = weaponMountRef.rotation;
+            weaponMountPivot.localEulerAngles = new Vector3(-spineRef.localEulerAngles.x, 0F, 0F);
         }
     }
 }

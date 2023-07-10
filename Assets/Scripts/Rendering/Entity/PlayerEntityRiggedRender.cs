@@ -40,12 +40,8 @@ namespace MinecraftClient.Rendering
             // Add and initialize player widgets
             visualObj.AddComponent<PlayerAnimatorWidget>();
             var accessoryWidget = visualObj.AddComponent<PlayerAccessoryWidget>();
-            
-            var weaponMountRefObj = new GameObject("Weapon Mount Ref");
-            weaponMountRefObj.transform.SetParent(visualObj.transform);
-            weaponMountRefObj.transform.localPosition = new(0F, 1.5F, -0.35F);
-            weaponMountRefObj.transform.localEulerAngles = new(-90F, 0F, 90F);
-            var weaponMountRef = weaponMountRefObj.transform;
+
+            var weaponMountRef = entityAnimator.GetBoneTransform(HumanBodyBones.Spine);
             var mainHandRef = entityAnimator.GetBoneTransform(HumanBodyBones.RightHand);
             accessoryWidget.SetRefTransforms(mainHandRef, weaponMountRef);
 
