@@ -82,7 +82,7 @@ void DepthNormalsFragment(
         half3 packedNormalWS = PackFloat2To888(remappedOctNormalWS);      // values between [ 0,  1]
         outNormalWS = half4(packedNormalWS, 0.0);
     #else
-        float2 uv = input.uv;
+        float2 uv = input.uv.xy;
 
         #if defined(_NORMALMAP)
             half3 normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap));
