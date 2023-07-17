@@ -20,7 +20,7 @@ namespace MinecraftClient.Resource
             this.manager = manager;
         }
 
-        // 
+        // Cached generated models
         private static Dictionary<int4, List<JsonModelElement>> generatedModels = new();
 
         public List<JsonModelElement> GetGeneratedItemModelElements(int layerCount, int precision, int thickness, bool useItemColor)
@@ -43,13 +43,13 @@ namespace MinecraftClient.Resource
                     elem.to   = new(8F + halfThick, 16F, 16F);
 
                     elem.faces.Add(FaceDir.NORTH, new() {
-                        uv = new(0F, 0F, 16F, 16F),
+                        uv = new(16F, 0F, 0F, 16F),
                         texName = layerTexName,
                         tintIndex = useItemColor ? layer : -1
                     });
 
                     elem.faces.Add(FaceDir.SOUTH, new() {
-                        uv = new(16F, 0F, 0F, 16F),
+                        uv = new(0F, 0F, 16F, 16F),
                         texName = layerTexName,
                         tintIndex = useItemColor ? layer : -1
                     });
@@ -71,25 +71,25 @@ namespace MinecraftClient.Resource
 
                         // Left faces
                         vertStripe.faces.Add(FaceDir.EAST, new() {
-                            uv = new(fracL1,       0F,       fracR1, 16F),
+                            uv = new(16F - fracR1, 0F, 16F - fracL1, 16F),
                             texName = layerTexName,
                             tintIndex = useItemColor ? layer : -1
                         });
                         // Right faces
                         vertStripe.faces.Add(FaceDir.WEST, new() {
-                            uv = new(16F - fracL2, 0F, 16F - fracR2, 16F),
+                            uv = new(      fracR2, 0F,       fracL2, 16F),
                             texName = layerTexName,
                             tintIndex = useItemColor ? layer : -1
                         });
                         // Top faces
                         horzStripe.faces.Add(FaceDir.UP, new() {
-                            uv = new(16F,       fracL1, 0F,       fracR1),
+                            uv = new(0F,       fracL1, 16F,       fracR1),
                             texName = layerTexName,
                             tintIndex = useItemColor ? layer : -1
                         });
                         // Bottom faces
                         horzStripe.faces.Add(FaceDir.DOWN, new() {
-                            uv = new(16F, 16F - fracL2, 0F, 16F - fracR2),
+                            uv = new(0F, 16F - fracL2, 16F, 16F - fracR2),
                             texName = layerTexName,
                             tintIndex = useItemColor ? layer : -1
                         });
@@ -127,6 +127,7 @@ namespace MinecraftClient.Resource
 
                 bool containsTextures = modelData.Properties.ContainsKey("textures");
                 bool containsElements = modelData.Properties.ContainsKey("elements");
+                bool containsDisplay  = modelData.Properties.ContainsKey("display");
 
                 if (modelData.Properties.ContainsKey("parent"))
                 {
@@ -157,7 +158,8 @@ namespace MinecraftClient.Resource
                                 // This parent is already loaded as a block model, get it...
                                 parentModel = manager.BlockModelTable[parentIdentifier];
                             }
-                            else {
+                            else
+                            {
                                 // This parent is not yet loaded or is a generated model, load it...
                                 parentModel = LoadItemModel(parentIdentifier);
                                 parentIsGenerated = manager.GeneratedItemModels.Contains(parentIdentifier);
@@ -185,6 +187,12 @@ namespace MinecraftClient.Resource
                                 {
                                     model.Elements.Add(elem);
                                 }
+                            }
+
+                            // Inherit parent display transforms...
+                            foreach (var trs in parentModel.DisplayTransforms)
+                            {
+                                model.DisplayTransforms.Add(trs.Key, trs.Value);
                             }
 
                             break;
@@ -216,7 +224,6 @@ namespace MinecraftClient.Resource
                             model.Textures.Add(texItem.Key, texRef);
                         }
                     }
-
                 }
 
                 if (containsElements) // Discard parent elements and use own ones
@@ -224,7 +231,32 @@ namespace MinecraftClient.Resource
                     var elemData = modelData.Properties["elements"].DataArray;
                     foreach (var elemItem in elemData)
                     {
-                        model.Elements.Add(JsonModelElement.fromJson(elemItem));
+                        model.Elements.Add(JsonModelElement.FromJson(elemItem));
+                    }
+                }
+
+                if (containsDisplay) // Add / Override display transforms...
+                {
+                    var trsData = modelData.Properties["display"].Properties;
+                    foreach (var trsItem in trsData)
+                    {
+                        var displayPos = DisplayPositionHelper.FromString(trsItem.Key);
+                        if (displayPos == DisplayPosition.Unknown)
+                        {
+                            Debug.LogWarning($"Unknown display position: {trsItem.Key}, skipping...");
+                            continue;
+                        }
+
+                        var displayTransform = VectorUtil.Json2DisplayTransform(trsItem.Value);
+
+                        if (model.DisplayTransforms.ContainsKey(displayPos)) // Override this display transform...
+                        {
+                            model.DisplayTransforms[displayPos] = displayTransform;
+                        }
+                        else // Add a new display transform...
+                        {
+                            model.DisplayTransforms.Add(displayPos, displayTransform);
+                        }
                     }
                 }
 

@@ -1,22 +1,24 @@
+using System.Collections.Generic;
 using Unity.Mathematics;
 
 namespace MinecraftClient.Resource
 {
     public class ItemGeometry
     {
-        public readonly bool isGenerated = false;
+        public readonly Dictionary<DisplayPosition, float3x3> DisplayTransforms;
         private readonly float3[] vertexArr;
         private readonly float3[] uvArr;
         private readonly float4[] uvAnimArr;
         private readonly int[] tintIndexArr;
 
-        public ItemGeometry(float3[] vArr, float3[] uvArr, float4[] aArr, int[] tArr, bool isGenerated)
+        public ItemGeometry(float3[] vArr, float3[] uvArr, float4[] aArr, int[] tArr,
+                Dictionary<DisplayPosition, float3x3> displayTransforms)
         {
             this.vertexArr = vArr;
             this.uvArr = uvArr;
             this.uvAnimArr = aArr;
             this.tintIndexArr = tArr;
-            this.isGenerated = isGenerated;
+            this.DisplayTransforms = displayTransforms;
         }
 
         public void Build(ref VertexBuffer buffer, float3 posOffset, float3[] itemTints)
@@ -50,7 +52,6 @@ namespace MinecraftClient.Resource
             buffer.txuv = txuvs;
             buffer.uvan = uvans;
             buffer.tint = tints;
-
         }
     }
 }

@@ -9,6 +9,7 @@ namespace MinecraftClient.Resource
         private const float MC_VERT_SCALE = 16F;
         private const float MC_UV_SCALE = 16F;
 
+        private readonly Dictionary<DisplayPosition, float3x3> displayTransforms;
         private readonly List<float3> verticies = new();
         private readonly List<float3> uvs       = new();
         private readonly List<float4> uvAnims   = new();
@@ -19,16 +20,18 @@ namespace MinecraftClient.Resource
             // Build things up!
             foreach (var elem in model.Elements)
                 AppendElement(model, elem);
+            
+            displayTransforms = model.DisplayTransforms;
         }
         
-        public ItemGeometry Build(bool isGenerated)
+        public ItemGeometry Build()
         {
             return new ItemGeometry(
                 verticies.ToArray(),
                 uvs.ToArray(),
                 uvAnims.ToArray(),
                 tintIndices.ToArray(),
-                isGenerated
+                displayTransforms
             );
         }
 

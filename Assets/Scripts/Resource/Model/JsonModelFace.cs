@@ -12,7 +12,7 @@ namespace MinecraftClient.Resource
         public CullDir cullDir = CullDir.NONE;
 
         // The last 3 parameters are passed in so that we can generate uvs if they're not there...
-        public static BlockModelFace fromJson(Json.JSONData data, FaceDir dir, float3 from, float3 to)
+        public static BlockModelFace FromJson(Json.JSONData data, FaceDir dir, float3 from, float3 to)
         {
             BlockModelFace face = new BlockModelFace();
             if (data.Properties.ContainsKey("texture"))
@@ -24,18 +24,6 @@ namespace MinecraftClient.Resource
             if (data.Properties.ContainsKey("uv"))
             {
                 face.uv = VectorUtil.Json2Float4(data.Properties["uv"]);
-
-                // Check uv rotation only when uv is present
-                if (data.Properties.ContainsKey("rotation"))
-                {
-                    face.rot = data.Properties["rotation"].StringValue switch
-                    {
-                        "90"  => Rotations.UVRot.UV_90,
-                        "180" => Rotations.UVRot.UV_180,
-                        "270" => Rotations.UVRot.UV_270,
-                        _     => Rotations.UVRot.UV_0
-                    };
-                }
             }
             else // uvs got omitted, we need to generate them by ourselves...
             {
@@ -57,6 +45,18 @@ namespace MinecraftClient.Resource
                     _             => new float4()
                 };
 
+            }
+
+            // Check uv rotation even when uv is not present (which might be specified in child models)
+            if (data.Properties.ContainsKey("rotation"))
+            {
+                face.rot = data.Properties["rotation"].StringValue switch
+                {
+                    "90"  => Rotations.UVRot.UV_90,
+                    "180" => Rotations.UVRot.UV_180,
+                    "270" => Rotations.UVRot.UV_270,
+                    _     => Rotations.UVRot.UV_0
+                };
             }
 
             if (data.Properties.ContainsKey("cullface"))
