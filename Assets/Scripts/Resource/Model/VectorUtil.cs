@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Unity.Mathematics;
 
@@ -48,6 +49,26 @@ namespace MinecraftClient.Resource
             
             Debug.LogWarning($"Cannot convert to float4: Invalid json array {data.StringValue}");
             return float4.zero;
+        }
+
+        // { "rotation": [ 30, 225, 0 ], "translation": [ 0, 1, 0], "scale":[ 0.5, 0.5, 0.5 ] } in Json
+        // -> float3x3(0, 1, 0, 0, 225, 30, 0.5, 0.5, 0.5) in Unity, with x and z values in translation
+        // and scale swapped. First translation, then rotation, and scale comes last
+        public static float3x3 Json2DisplayTransform(Json.JSONData data)
+        {
+            try
+            {
+                float3 t = data.Properties.ContainsKey("translation") ? Json2SwappedFloat3(data.Properties["translation"]) : float3.zero;
+                float3 r = data.Properties.ContainsKey("rotation") ? Json2Float3(data.Properties["rotation"]) : float3.zero;
+                float3 s = data.Properties.ContainsKey("scale") ? Json2SwappedFloat3(data.Properties["scale"]) : Vector3.one;
+
+                return new float3x3(t, r, s);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Cannot convert to float3x3: {e.Message}");
+            }
+            return new float3x3(float3.zero, float3.zero, Vector3.one);
         }
     }
 }

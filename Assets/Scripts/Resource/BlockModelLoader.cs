@@ -33,6 +33,7 @@ namespace MinecraftClient.Resource
 
                 bool containsTextures = modelData.Properties.ContainsKey("textures");
                 bool containsElements = modelData.Properties.ContainsKey("elements");
+                bool containsDisplay  = modelData.Properties.ContainsKey("display");
 
                 if (modelData.Properties.ContainsKey("parent"))
                 {
@@ -63,6 +64,12 @@ namespace MinecraftClient.Resource
                             model.Elements.Add(elem);
                         }
                     }
+
+                    // Inherit parent display transforms...
+                    foreach (var trs in parentModel.DisplayTransforms)
+                    {
+                        model.DisplayTransforms.Add(trs.Key, trs.Value);
+                    }
                 }
 
                 if (containsTextures) // Add / Override texture references
@@ -89,7 +96,6 @@ namespace MinecraftClient.Resource
                             model.Textures.Add(texItem.Key, texRef);
                         }
                     }
-
                 }
 
                 if (containsElements) // Discard parent elements and use own ones
@@ -97,7 +103,32 @@ namespace MinecraftClient.Resource
                     var elemData = modelData.Properties["elements"].DataArray;
                     foreach (var elemItem in elemData)
                     {
-                        model.Elements.Add(JsonModelElement.fromJson(elemItem));
+                        model.Elements.Add(JsonModelElement.FromJson(elemItem));
+                    }
+                }
+
+                if (containsDisplay) // Add / Override display transforms...
+                {
+                    var trsData = modelData.Properties["display"].Properties;
+                    foreach (var trsItem in trsData)
+                    {
+                        var displayPos = DisplayPositionHelper.FromString(trsItem.Key);
+                        if (displayPos == DisplayPosition.Unknown)
+                        {
+                            Debug.LogWarning($"Unknown display position: {trsItem.Key}, skipping...");
+                            continue;
+                        }
+
+                        var displayTransform = VectorUtil.Json2DisplayTransform(trsItem.Value);
+
+                        if (model.DisplayTransforms.ContainsKey(displayPos)) // Override this display transform...
+                        {
+                            model.DisplayTransforms[displayPos] = displayTransform;
+                        }
+                        else // Add a new display transform...
+                        {
+                            model.DisplayTransforms.Add(displayPos, displayTransform);
+                        }
                     }
                 }
 

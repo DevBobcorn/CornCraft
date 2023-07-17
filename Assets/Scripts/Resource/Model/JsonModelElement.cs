@@ -16,7 +16,7 @@ namespace MinecraftClient.Resource
         public Rotations.Axis axis;
         public bool rescale = false;
 
-        public static JsonModelElement fromJson(Json.JSONData data)
+        public static JsonModelElement FromJson(Json.JSONData data)
         {
             JsonModelElement elem = new JsonModelElement();
             if (data.Properties.ContainsKey("from") && data.Properties.ContainsKey("to") && data.Properties.ContainsKey("faces"))
@@ -31,7 +31,7 @@ namespace MinecraftClient.Resource
                     string dirName = faceDir.ToString().ToLower();
                     if (facesData.ContainsKey(dirName))
                     {
-                        elem.faces.Add(faceDir, BlockModelFace.fromJson(facesData[dirName], faceDir, elem.from, elem.to));
+                        elem.faces.Add(faceDir, BlockModelFace.FromJson(facesData[dirName], faceDir, elem.from, elem.to));
                     }
                 }
 

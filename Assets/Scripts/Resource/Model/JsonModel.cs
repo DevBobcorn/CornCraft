@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace MinecraftClient.Resource
 {
@@ -8,8 +9,9 @@ namespace MinecraftClient.Resource
         private const int MAXDEPTH = 50;
         
         // texName -> texture resource location
-        public readonly Dictionary<string, TextureReference> Textures = new Dictionary<string, TextureReference>();
-        public readonly List<JsonModelElement> Elements = new List<JsonModelElement>();
+        public readonly Dictionary<string, TextureReference> Textures = new();
+        public readonly List<JsonModelElement> Elements = new();
+        public readonly Dictionary<DisplayPosition, float3x3> DisplayTransforms = new();
 
         public ResourceLocation resolveTextureName(string texName)
         {
