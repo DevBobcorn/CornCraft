@@ -414,15 +414,15 @@ namespace MagicaCloth2
                 }
 
                 // 摩擦係数(friction)計算
-                if (collisionColliderId >= 0)
+                if (collisionColliderId >= 0 && cfr > 0.0f && math.lengthsq(collisionNormal) > 1e-06f)
                 {
                     // コライダーからの距離により変化(0.0～接地面1.0)
-                    Develop.Assert(cfr > 0.0f);
+                    //Develop.Assert(cfr > 0.0f);
                     var friction = 1.0f - math.saturate(mindist / cfr);
                     frictionArray[pindex] = math.max(friction, frictionArray[pindex]); // 大きい方
 
                     // 摩擦用接触法線平均化
-                    Develop.Assert(math.length(collisionNormal) > 0.0f);
+                    //Develop.Assert(math.length(collisionNormal) > 0.0f);
                     collisionNormal = math.normalize(collisionNormal);
                 }
                 collisionNormalArray[pindex] = collisionNormal;
@@ -755,10 +755,10 @@ namespace MagicaCloth2
                 }
 
                 // 摩擦係数(friction)集計
-                if (collisionColliderId >= 0)
+                if (collisionColliderId >= 0 && cfr > 0.0f && math.lengthsq(collisionNormal) > 1e-06f)
                 {
                     // コライダーからの距離により変化(0.0～接地面1.0)
-                    Develop.Assert(cfr > 0.0f);
+                    //Develop.Assert(cfr > 0.0f);
                     var friction = 1.0f - math.saturate(mindist / cfr);
 
                     // 大きい場合のみ上書き
@@ -766,7 +766,7 @@ namespace MagicaCloth2
                     InterlockUtility.Max(pE.y, friction, frictionPt);
 
                     // 摩擦用接触法線平均化
-                    Develop.Assert(math.length(collisionNormal) > 0.0f);
+                    //Develop.Assert(math.length(collisionNormal) > 0.0f);
                     collisionNormal = math.normalize(collisionNormal);
 
                     // 接触法線集計（すべて加算する）

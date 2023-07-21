@@ -414,7 +414,10 @@ namespace MagicaCloth2
             float3 ab = b - a;
             // パラメータ化されている位置d(t) = a + t * (b - a) の計算によりabにcを射影
             float dot = math.dot(ab, ab);
-            Develop.Assert(dot != 0.0f);
+            // abが同じ座標を考慮
+            if (dot == 0.0f)
+                return 0.0f;
+            //Develop.Assert(dot != 0.0f);
             float t = math.dot(c - a, ab) / dot;
             // 線分の外側にある場合、t(従ってd)を最近接点までクランプ
             t = math.saturate(t);
@@ -725,7 +728,8 @@ namespace MagicaCloth2
         }
 
         /// <summary>
-        /// トライアングルの接線を計算して返す
+        /// トライアングルの接線を計算して返す。
+        /// 接線は単位化される。ただし、状況により長さ０となるケースがありその場合はベクトル０を返す。
         /// </summary>
         /// <param name="p0"></param>
         /// <param name="p1"></param>
@@ -764,6 +768,13 @@ namespace MagicaCloth2
                 // 左手座標系に合わせる
                 tan = -tan;
             }
+
+            // 長さ０はベクトル０となる
+            tan = math.normalizesafe(tan, 0);
+            //#if MC2_DEBUG
+            //            Debug.Assert(math.length(tan) > Define.System.Epsilon);
+            //#endif
+            //            tan = math.normalize(tan);
 
             return tan;
         }

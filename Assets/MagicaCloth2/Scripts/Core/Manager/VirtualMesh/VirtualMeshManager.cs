@@ -1447,13 +1447,16 @@ namespace MagicaCloth2
                 var uv2 = uv[start + tri.y];
                 var uv3 = uv[start + tri.z];
                 var tan = MathUtility.TriangleTangent(pos1, pos2, pos3, uv1, uv2, uv3);
-                len = math.length(tan);
-                if (len > 1e-06f)
-                    outTriangleTangents[tindex] = tan / len;
-#if MC2_DEBUG
-                else
-                    Debug.LogWarning("CalcTriangleNormalTangentJob.tangent = 0!");
-#endif
+                if (math.lengthsq(tan) > 0.0f)
+                    outTriangleTangents[tindex] = tan;
+                //                len = math.length(tan);
+                //                if (len > 1e-06f)
+                //                    outTriangleTangents[tindex] = tan / len;
+                //#if MC2_DEBUG
+                //                else
+                //                    Debug.LogWarning("CalcTriangleNormalTangentJob.tangent = 0!");
+                //#endif
+
             }
         }
 
@@ -1523,7 +1526,10 @@ namespace MagicaCloth2
                         float dot = math.dot(nor, tan);
                         if (dot != 1.0f && dot != -1.0f)
                         {
-                            var rot = quaternion.LookRotation(tan, nor);
+                            // トライアングル回転は従法線から算出するように変更(v2.1.7)
+                            //var rot = quaternion.LookRotation(tan, nor);
+                            float3 binor = math.normalize(math.cross(nor, tan));
+                            var rot = quaternion.LookRotation(binor, nor);
 
                             // 法線調整用回転を乗算する（不要な場合は単位回転が入っている）
                             rot = math.mul(rot, normalAdjustmentRotations[vindex]);
