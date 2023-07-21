@@ -14,7 +14,7 @@ namespace MagicaCloth2
         [SerializeField]
         private Texture2D image = null;
 
-        public const string MagicaClothVersion = "2.1.6";
+        public const string MagicaClothVersion = "2.1.7";
 
         public static AboutMenu AboutWindow { get; set; }
         private const float windowWidth = 300;

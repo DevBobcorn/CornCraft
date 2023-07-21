@@ -705,8 +705,12 @@ namespace MagicaCloth2
                 float3 n2 = math.cross(nextPos3 - nextPos1, nextPos2 - nextPos1);
                 float n1_lengsq = math.lengthsq(n1);
                 float n2_lengsq = math.lengthsq(n2);
-                Develop.Assert(n1_lengsq > 0.0f);
-                Develop.Assert(n2_lengsq > 0.0f);
+
+                // 稀に発生する長さ０に対処
+                if (n1_lengsq == 0.0f || n2_lengsq == 0.0f)
+                    return false;
+                //Develop.Assert(n1_lengsq > 0.0f);
+                //Develop.Assert(n2_lengsq > 0.0f);
                 n1 /= n1_lengsq;
                 n2 /= n2_lengsq;
 

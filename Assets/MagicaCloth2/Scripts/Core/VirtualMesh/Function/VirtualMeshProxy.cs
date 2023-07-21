@@ -806,6 +806,7 @@ namespace MagicaCloth2
                 var uv1 = uv[tri.y];
                 var uv2 = uv[tri.z];
                 var tan = MathUtility.TriangleTangent(p0, p1, p2, uv0, uv1, uv2);
+                Develop.Assert(math.lengthsq(tan) > 0.0f);
                 triangleTangents[tindex] = tan;
             }
         }
@@ -982,10 +983,14 @@ namespace MagicaCloth2
                     }
 
                     nor = math.normalize(nor);
-                    tan = math.normalize(tan);
+
+                    // 従法線に変更(v2.1.7)
+                    //tan = math.normalize(tan);
+                    float3 binor = math.normalize(math.cross(nor, tan));
 
                     localNormals[vindex] = nor;
-                    localTangents[vindex] = tan;
+                    //localTangents[vindex] = tan;
+                    localTangents[vindex] = binor; // 従法線に変更(v2.1.7)
                 }
             }
         }
