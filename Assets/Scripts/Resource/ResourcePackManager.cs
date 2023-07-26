@@ -418,6 +418,9 @@ namespace MinecraftClient.Resource
 
             var colors = Enumerable.Repeat(white, 16 * 16).ToArray();
             tex.SetPixels32(colors);
+            // No need to update mipmap because it'll be
+            // stitched into the atlas later
+            tex.Apply(false);
 
             return tex;
         }
@@ -449,6 +452,9 @@ namespace MinecraftClient.Resource
             }
 
             tex.SetPixels32(colors);
+            // No need to update mipmap because it'll be
+            // stitched into the atlas later
+            tex.Apply(false);
 
             return tex;
         }
