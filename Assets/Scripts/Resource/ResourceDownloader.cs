@@ -56,40 +56,49 @@ namespace MinecraftClient.Resource
 
                         var jarUri = clientJarInfo.Properties["url"].StringValue;
                         // Download jar file
-                        var tempJarPath = PathHelper.GetPackDirectoryNamed("temp.jar");
-                        var jardownloadTask = webClient.DownloadFileTaskAsync(jarUri, tempJarPath);
+                        var jardownloadTask = webClient.DownloadDataTaskAsync(jarUri);
                         updateStatus("status.info.download_jar");
                         while (!jardownloadTask.IsCompleted) yield return null;
                         if (jardownloadTask.IsCompletedSuccessfully) // Jar downloaded, unzip it
                         {
-                            var targetFolder = PathHelper.GetPackDirectoryNamed($"vanilla-{resVersion}");
-                            var zipFile = ZipFile.OpenRead(tempJarPath);
-                            updateStatus("status.info.extract_asset");
-                            // Extract asset files
-                            foreach (var entry in zipFile.Entries.Where(x => x.FullName.StartsWith("assets")))
+                            try
                             {
-                                var entryPath = new FileInfo($"{targetFolder}{SP}{entry.FullName}");
-                                if (!entryPath.Directory.Exists) // Create the folder if not present
-                                    entryPath.Directory.Create();
-                                entry.ExtractToFile(entryPath.FullName);
+                                var targetFolder = PathHelper.GetPackDirectoryNamed($"vanilla-{resVersion}");
+                                var zipStream = new MemoryStream(jardownloadTask.Result);
+                                using (var zipFile = new ZipArchive(zipStream, ZipArchiveMode.Read))
+                                {
+                                    updateStatus("status.info.extract_asset");
+                                    // Extract asset files
+                                    //foreach (var entry in zipFile.Entries.Where(x => x.FullName.StartsWith("assets")))
+                                    foreach (var entry in zipFile.Entries.Where(x => x.FullName.StartsWith("assets")))
+                                    {
+                                        var entryPath = new FileInfo($"{targetFolder}{SP}{entry.FullName}");
+                                        if (!entryPath.Directory.Exists) // Create the folder if not present
+                                        {
+                                            entryPath.Directory.Create();
+                                        }
+                                        entry.ExtractToFile(entryPath.FullName);
+                                    }
+                                    
+                                    if (zipFile.GetEntry("pack.mcmeta") is not null) // Extract pack.mcmeta
+                                    {
+                                        zipFile.GetEntry("pack.mcmeta").ExtractToFile($"{targetFolder}{SP}pack.mcmeta");
+                                    }
+                                    else // Create pack.mcmeta
+                                    {
+                                        var metaText = "{ \"pack\": { \"description\": \"Meow~\", \"pack_format\": 4 } }";
+                                        File.WriteAllText($"{targetFolder}{SP}pack.mcmeta", metaText);
+                                    }
+
+                                    Debug.Log("Resources successfully downloaded and extrected.");
+                                }
+
+                                succeeded = true;
                             }
-                            
-                            if (zipFile.GetEntry("pack.mcmeta") is not null) // Extract pack.mcmeta
-                                zipFile.GetEntry("pack.mcmeta").ExtractToFile($"{targetFolder}{SP}pack.mcmeta");
-                            else // Create pack.mcmeta
+                            catch (Exception e)
                             {
-                                var metaText = "{ \"pack\": { \"description\": \"Meow~\", \"pack_format\": 4 } }";
-                                File.WriteAllText($"{targetFolder}{SP}pack.mcmeta", metaText);
+                                Debug.LogWarning($"Exception occurred when extracting jar file: {e}");
                             }
-
-                            Debug.Log("Resources successfully downloaded.");
-
-                            // Dispose zip file and clean up
-                            zipFile.Dispose();
-                            if (File.Exists(tempJarPath))
-                                File.Delete(tempJarPath);
-                            
-                            succeeded = true;
                         }
                         else
                             Debug.LogWarning($"Failed to download client jar: {jardownloadTask.Exception}");
