@@ -149,16 +149,17 @@ namespace MinecraftClient.Control
             return client!.Perspective == Perspective.FirstPerson;
         }
 
-        public override Vector3 GetTargetScreenPos()
+        public override Vector3 GetTargetViewportPos()
         {
             if (IsFixed())
-                return renderCameraPresent ? renderCamera!.ViewportToScreenPoint(VIEWPORT_CENTER) : Vector3.zero;
+                return VIEWPORT_CENTER;
             
             var targetPos = GetTarget()?.position;
             if (renderCameraPresent && targetPos is not null)
-                return renderCamera!.WorldToScreenPoint(targetPos.Value);
-            
-            return Vector3.zero;
+            {
+                return renderCamera!.WorldToViewportPoint(targetPos.Value);
+            }
+            return VIEWPORT_CENTER;
         }
 
         private void EnterFirstPersonMode(Perspective prevPersp)
