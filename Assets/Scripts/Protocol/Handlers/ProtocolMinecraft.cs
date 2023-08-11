@@ -1116,9 +1116,7 @@ namespace MinecraftClient.Protocol.Handlers
                                 }
                             }
                             //Debug.Log("Blocks change: " + locs[0] + ", etc");
-                            Loom.QueueOnMainThread(() => {
-                                EventManager.Instance.Broadcast<BlocksUpdateEvent>(new(locs));
-                            });
+                            EventManager.Instance.BroadcastOnUnityThread<BlocksUpdateEvent>(new(locs));
                             break;
                         }
                     case PacketTypesIn.BlockChange:
@@ -1126,9 +1124,7 @@ namespace MinecraftClient.Protocol.Handlers
                             var location = dataTypes.ReadNextLocation(packetData);
                             handler.GetWorld().SetBlock(location, new Block((ushort)dataTypes.ReadNextVarInt(packetData)));
                             //Debug.Log($"Block change: {location}");
-                            Loom.QueueOnMainThread(() => {
-                                EventManager.Instance.Broadcast<BlockUpdateEvent>(new(location));
-                            });
+                            EventManager.Instance.BroadcastOnUnityThread<BlockUpdateEvent>(new(location));
                             break;
                         }
                     case PacketTypesIn.UnloadChunk:
@@ -1142,9 +1138,7 @@ namespace MinecraftClient.Protocol.Handlers
                             
                             handler.GetWorld()[chunkX, chunkZ] = null;
 
-                            Loom.QueueOnMainThread(() => {
-                                EventManager.Instance.Broadcast<UnloadChunkColumnEvent>(new(chunkX, chunkZ));
-                            });
+                            EventManager.Instance.BroadcastOnUnityThread<UnloadChunkColumnEvent>(new(chunkX, chunkZ));
                             break;
                         }
                     case PacketTypesIn.ChangeGameState:
@@ -1399,21 +1393,18 @@ namespace MinecraftClient.Protocol.Handlers
                             }
                             if (completeResults.Count > 0)
                             {
-                                Loom.QueueOnMainThread(() =>
-                                    EventManager.Instance.Broadcast<AutoCompletionEvent>(new(completionStart, completionLength, completeResults.ToArray()))
-                                );
+                                EventManager.Instance.BroadcastOnUnityThread<AutoCompletionEvent>(
+                                        new(completionStart, completionLength, completeResults.ToArray()));
                             }
                             else
                             {
-                                Loom.QueueOnMainThread(() =>
-                                    EventManager.Instance.Broadcast(AutoCompletionEvent.EMPTY)
-                                );
+                                EventManager.Instance.BroadcastOnUnityThread(AutoCompletionEvent.EMPTY);
                             }
                             break;
                         }
                     case PacketTypesIn.PluginMessage:
                         {
-                            String channel = dataTypes.ReadNextString(packetData);
+                            string channel = dataTypes.ReadNextString(packetData);
                             // Length is unneeded as the whole remaining packetData is the entire payload of the packet.
                             //handler.OnPluginChannelMessage(channel, packetData.ToArray());
                             return pForge.HandlePluginMessage(channel, packetData, ref currentDimension);
@@ -1426,7 +1417,7 @@ namespace MinecraftClient.Protocol.Handlers
                             int windowId = dataTypes.ReadNextVarInt(packetData);
                             int windowType = dataTypes.ReadNextVarInt(packetData);
                             string title = dataTypes.ReadNextString(packetData);
-                            Container inventory = new Container(windowId, windowType, ChatParser.ParseText(title));
+                            var inventory = new Container(windowId, windowType, ChatParser.ParseText(title));
                             handler.OnInventoryOpen(windowId, inventory);
                         }
                         break;
@@ -1455,7 +1446,7 @@ namespace MinecraftClient.Protocol.Handlers
                                 dataTypes.ReadNextShort(packetData);
                             }
 
-                            Dictionary<int, ItemStack> inventorySlots = new Dictionary<int, ItemStack>();
+                            var inventorySlots = new Dictionary<int, ItemStack>();
                             for (int slotId = 0; slotId < elements; slotId++)
                             {
                                 ItemStack? item1 = dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
