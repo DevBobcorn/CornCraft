@@ -71,7 +71,7 @@ namespace MinecraftClient.UI
                 option.SetInfo(id, info);
                 interactionOptions.Add(option);
 
-                optionObj!.transform.SetParent(container);
+                optionObj!.transform.SetParent(container, false);
                 optionObj!.transform.localScale = Vector3.one;
                 optionObj!.transform.SetAsLastSibling();
 

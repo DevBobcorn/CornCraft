@@ -32,27 +32,14 @@ namespace MinecraftClient.Control
 
         public abstract Transform? GetTarget();
 
-        public virtual Vector3 GetTargetScreenPos()
+        public virtual Vector3 GetTargetViewportPos()
         {
             var targetPos = GetTarget()?.position;
             if (renderCameraPresent && targetPos is not null)
-                return renderCamera!.WorldToScreenPoint(targetPos.Value);
-            
-            return Vector3.zero;
-        }
-
-        public virtual Vector3? GetTransfromScreenPos(Transform? t)
-        {
-            EnsureInitialized();
-
-            var targetPos = t?.position;
-            if (renderCameraPresent && targetPos is not null)
             {
-                if (renderCamera!.WorldToViewportPoint(targetPos.Value).z > 0F)
-                    return renderCamera!.WorldToScreenPoint(targetPos.Value);
+                return renderCamera!.WorldToViewportPoint(targetPos.Value);
             }
-            
-            return null;
+            return VIEWPORT_CENTER;
         }
 
         public virtual Vector3? GetViewEularAngles() => renderCamera?.transform.eulerAngles;

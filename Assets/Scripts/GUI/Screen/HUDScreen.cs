@@ -24,6 +24,7 @@ namespace MinecraftClient.UI
         [SerializeField] private ValueBar? healthBar;
         [SerializeField] private RingValueBar? staminaBar;
         [SerializeField] private InteractionPanel? interactionPanel;
+        [SerializeField] private Camera? UICamera;
         private Animator? staminaBarAnimator;
         private ChatScreen? chatScreen;
         private PauseScreen? pauseScreen;
@@ -253,9 +254,11 @@ namespace MinecraftClient.UI
             }
 
             // Update stamina bar position
-            staminaBar!.transform.position = 
-                    Vector3.Lerp(staminaBar.transform.position, game!.CameraController!.GetTargetScreenPos(), Time.deltaTime * 10F);
+            var targetPosition = UICamera!.ViewportToWorldPoint(
+                    game!.CameraController!.GetTargetViewportPos());
 
+            staminaBar!.transform.position = Vector3.Lerp(
+                    staminaBar.transform.position, targetPosition, Time.deltaTime * 10F);
         }
 
     }
