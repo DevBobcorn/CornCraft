@@ -459,10 +459,10 @@ namespace MinecraftClient.Control
             // Tell server our current position
             Vector3 newPosition;
 
-            if (CurrentState is ForceMoveState)
+            if (CurrentState is ForceMoveState state)
             // Use move origin as the player location to tell to server, to
             // prevent sending invalid positions during a force move operation
-                newPosition = ((ForceMoveState) CurrentState).GetFakePlayerOffset();
+                newPosition = state.GetFakePlayerOffset();
             else
                 newPosition = transform.position;
 
@@ -527,12 +527,6 @@ namespace MinecraftClient.Control
 
         public string GetDebugInfo()
         {
-            string targetBlockInfo = string.Empty;
-
-            var velocity = playerRigidbody?.velocity;
-            // Visually swap xz velocity to fit vanilla
-            var veloInfo = $"Vel:\t{velocity?.z:0.00}\t{velocity?.y:0.00}\t{velocity?.x:0.00}\n({velocity?.magnitude:0.000})";
-
             string statusInfo;
 
             if (statusUpdater?.Status.Spectating ?? true)
