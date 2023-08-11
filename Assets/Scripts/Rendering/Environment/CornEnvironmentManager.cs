@@ -68,6 +68,8 @@ namespace MinecraftClient.Rendering
             ticks = serverTicks;
             // Reset delta seconds
             deltaSeconds = 0F;
+
+            UpdateTimeRelated();
         }
 
         private void UpdateTimeRelated()
