@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88d582769fd5a7f48830e466a271858b, type: 3}
   m_Name: Player Melee
   m_EditorClassIdentifier: 
-  MaxStageDuration: 10
+  MaxStageDuration: 0.1
   IdleTimeout: -0.9
   StageCount: 4
