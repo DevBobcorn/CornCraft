@@ -155,7 +155,7 @@ namespace MinecraftClient.Inventory
             {
                 foreach (var item in Items)
                 {
-                    if (item.Value.Type == itemType)
+                    if (item.Value.ItemType == itemType)
                         result.Add(item.Key);
                 }
             }

@@ -74,12 +74,14 @@ namespace MinecraftClient.Mapping
             }
 
             // First read special block lists...
-            var lists = new Dictionary<string, HashSet<ResourceLocation>>();
-            lists.Add("no_occlusion", new());
-            lists.Add("no_collision", new());
-            lists.Add("water_blocks", new());
-            lists.Add("always_fulls", new());
-            lists.Add("empty_blocks", new());
+            var lists = new Dictionary<string, HashSet<ResourceLocation>>
+            {
+                { "no_occlusion", new() },
+                { "no_collision", new() },
+                { "water_blocks", new() },
+                { "always_fulls", new() },
+                { "empty_blocks", new() }
+            };
 
             Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
             foreach (var pair in lists)
@@ -140,7 +142,7 @@ namespace MinecraftClient.Mapping
 
                         }
 
-                        statesTable[stateId] = new BlockState(blockId, props)
+                        statesTable[stateId] = new(blockId, props)
                         {
                             NoOcclusion = noOcclusion.Contains(blockId),
                             NoCollision = noCollision.Contains(blockId),
@@ -152,7 +154,7 @@ namespace MinecraftClient.Mapping
                     }
                     else
                     {
-                        statesTable[stateId] = new BlockState(blockId)
+                        statesTable[stateId] = new(blockId)
                         {
                             NoOcclusion = noOcclusion.Contains(blockId),
                             NoCollision = noCollision.Contains(blockId),

@@ -14,7 +14,7 @@ namespace MinecraftClient.Inventory
         /// <summary>
         /// Item Type
         /// </summary>
-        public Item Type;
+        public Item ItemType;
 
         /// <summary>
         /// Item Count
@@ -33,9 +33,9 @@ namespace MinecraftClient.Inventory
         /// <param name="itemType">Type of the item</param>
         /// <param name="count">Item Count</param>
         /// <param name="nbt">Item Metadata</param>
-        public ItemStack(Item itemType, int count, Dictionary<string, object>? nbt)
+        public ItemStack(Item itemType, int count, Dictionary<string, object>? nbt = null)
         {
-            this.Type = itemType;
+            this.ItemType = itemType;
             this.Count = count;
             this.NBT = nbt;
         }
@@ -49,7 +49,7 @@ namespace MinecraftClient.Inventory
         {
             get
             {
-                return Type.ItemId == Item.AIR_ID || Count == 0;
+                return ItemType.ItemId == Item.AIR_ID || Count == 0;
             }
         }
 
@@ -62,8 +62,7 @@ namespace MinecraftClient.Inventory
             {
                 if (NBT != null && NBT.ContainsKey("display"))
                 {
-                    var displayProperties = NBT["display"] as Dictionary<string, object>;
-                    if (displayProperties != null && displayProperties.ContainsKey("Name"))
+                    if (NBT["display"] is Dictionary<string, object> displayProperties && displayProperties.ContainsKey("Name"))
                     {
                         string displayName = displayProperties["Name"] as string;
                         if (!String.IsNullOrEmpty(displayName))
@@ -81,11 +80,9 @@ namespace MinecraftClient.Inventory
         {
             get
             {
-                List<string> lores = new List<string>();
                 if (NBT != null && NBT.ContainsKey("display"))
                 {
-                    var displayProperties = NBT["display"] as Dictionary<string, object>;
-                    if (displayProperties != null && displayProperties.ContainsKey("Lore"))
+                    if (NBT["display"] is Dictionary<string, object> displayProperties && displayProperties.ContainsKey("Lore"))
                     {
                         return displayProperties["Lore"] as object[];
                     }
@@ -115,10 +112,10 @@ namespace MinecraftClient.Inventory
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("x{0,-2} {1}", Count, Type.ToString());
+            var sb = new StringBuilder();
+            sb.AppendFormat("x{0,-2} {1}", Count, ItemType.ToString());
             string displayName = DisplayName;
-            if (!String.IsNullOrEmpty(displayName))
+            if (!string.IsNullOrEmpty(displayName))
             {
                 sb.AppendFormat(" - {0}§8", displayName);
             }
