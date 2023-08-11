@@ -362,10 +362,7 @@ namespace MinecraftClient.Protocol.Handlers
             }
 
             // Broadcast event to update world render
-            Loom.QueueOnMainThread(() => {
-                    EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new(chunkX, chunkZ));
-                }
-            );
+            EventManager.Instance.BroadcastOnUnityThread<ReceiveChunkColumnEvent>(new(chunkX, chunkZ));
             return true;
         }
 
@@ -560,10 +557,9 @@ namespace MinecraftClient.Protocol.Handlers
                     UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}, should be {c.ColumnSize * 64}");
 
                 // Check if light data for this chunk column is present
-                Queue<byte>? lightData;
                 int2 chunkKey = new(chunkX, chunkZ);
 
-                if (world.LightDataCache.TryRemove(chunkKey, out lightData))
+                if (world.LightDataCache.TryRemove(chunkKey, out Queue<byte>? lightData))
                 {
                     // Parse lighting data
                     var skyLight   = new byte[4096 * (chunkColumnSize + 2)];
@@ -580,9 +576,7 @@ namespace MinecraftClient.Protocol.Handlers
             }
 
             // Broadcast event to update world render
-            Loom.QueueOnMainThread(() =>
-                EventManager.Instance.Broadcast<ReceiveChunkColumnEvent>(new(chunkX, chunkZ))
-            );
+            EventManager.Instance.BroadcastOnUnityThread<ReceiveChunkColumnEvent>(new(chunkX, chunkZ));
             return true;
         }
 

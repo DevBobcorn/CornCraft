@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 using System.IO;
+using System.Linq;
 
 using UnityEngine;
 
@@ -153,7 +154,7 @@ namespace MinecraftClient
         private PlayerController? playerController;
         private InteractionUpdater? interactionUpdater;
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
-        private Dictionary<int, Entity> entities = new();
+        private readonly Dictionary<int, Entity> entities = new();
         #endregion
 
         void Awake() // In case where the client wasn't properly assigned before
@@ -215,7 +216,7 @@ namespace MinecraftClient
 
         public string GetInfoString(bool withDebugInfo)
         {
-            string baseString = $"FPS: {((int)(1F / Time.deltaTime)).ToString().PadLeft(4, ' ')}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}\nREADY: {IsMovementReady()}";
+            string baseString = $"FPS: {(int)(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}\nREADY: {IsMovementReady()}";
 
             if (withDebugInfo)
             {
@@ -1106,10 +1107,7 @@ namespace MinecraftClient
                     messageText = message.content;
             }
 
-            Loom.QueueOnMainThread(
-                () => EventManager.Instance.Broadcast<ChatMessageEvent>(new(messageText))
-            );
-
+            EventManager.Instance.BroadcastOnUnityThread<ChatMessageEvent>(new(messageText));
         }
 
         /// <summary>

@@ -63,10 +63,19 @@ namespace MinecraftClient.Event
             {
                 var registrations = eventTable[t] as EventRegistrations<T>;
 
-                if (registrations.actions != null)
-                {
-                    registrations.actions.Invoke(message);
-                }
+                registrations.actions?.Invoke(message);
+            }
+        }
+
+        public void BroadcastOnUnityThread<T>(T message)
+        {
+            Type t = typeof (T);
+
+            if (eventTable.ContainsKey(t) && eventTable[t] != null)
+            {
+                var registrations = eventTable[t] as EventRegistrations<T>;
+
+                Loom.QueueOnMainThread(() => registrations.actions?.Invoke(message));
             }
         }
     }
