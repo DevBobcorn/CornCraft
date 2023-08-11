@@ -185,7 +185,7 @@ namespace MinecraftClient.Resource
                     if (RawItemModelTable.ContainsKey(itemModelId))
                     {
                         var rawModel = RawItemModelTable[itemModelId];
-                        var tintable = ItemPalette.INSTANCE.IsTintable(numId);
+                        var tintable = ItemPalette.INSTANCE.IsTintable(itemId);
                         var generated = GeneratedItemModels.Contains(itemModelId);
 
                         if (generated) // This model should be generated

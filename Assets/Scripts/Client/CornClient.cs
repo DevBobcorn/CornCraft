@@ -747,7 +747,7 @@ namespace MinecraftClient
         /// <param name="changedSlots">Record changes</param>
         private static void StoreInNewSlot(Container inventory, ItemStack item, int slotId, int newSlotId, List<Tuple<short, ItemStack?>> changedSlots)
         {
-            ItemStack newItem = new(item.Type, item.Count, item.NBT);
+            ItemStack newItem = new(item.ItemType, item.Count, item.NBT);
             inventory.Items[newSlotId] = newItem;
             inventory.Items.Remove(slotId);
 

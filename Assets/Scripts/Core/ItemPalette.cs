@@ -18,7 +18,7 @@ namespace MinecraftClient.Mapping
         public Dictionary<int, Item> ItemsTable { get { return itemsTable; } }
 
         private readonly Dictionary<ResourceLocation, int> dictId = new();
-        private readonly Dictionary<int, Func<ItemStack, float3[]>> itemColorRules = new();
+        private readonly Dictionary<ResourceLocation, Func<ItemStack, float3[]>> itemColorRules = new();
 
         /// <summary>
         /// Get item from numeral id
@@ -40,7 +40,7 @@ namespace MinecraftClient.Mapping
             if (dictId.ContainsKey(identifier))
                 return dictId[identifier];
             
-            throw new System.IO.InvalidDataException($"Unknown Item {identifier}");
+            throw new InvalidDataException($"Unknown Item {identifier}");
         }
 
         /// <summary>
@@ -51,15 +51,15 @@ namespace MinecraftClient.Mapping
             return FromNumId(ToNumId(identifier));
         }
 
-        public bool IsTintable(int itemNumId)
+        public bool IsTintable(ResourceLocation identifier)
         {
-            return itemColorRules.ContainsKey(itemNumId);
+            return itemColorRules.ContainsKey(identifier);
         }
 
-        public Func<ItemStack, float3[]> GetTintRule(int itemNumId)
+        public Func<ItemStack, float3[]> GetTintRule(ResourceLocation identifier)
         {
-            if (itemColorRules.ContainsKey(itemNumId))
-                return itemColorRules[itemNumId];
+            if (itemColorRules.ContainsKey(identifier))
+                return itemColorRules[identifier];
             return null;
         }
 
@@ -82,12 +82,14 @@ namespace MinecraftClient.Mapping
             }
 
             // First read special item lists...
-            var lists = new Dictionary<string, HashSet<ResourceLocation>>();
-            lists.Add("non_stackable", new());
-            lists.Add("stacklimit_16", new());
-            lists.Add("uncommon", new());
-            lists.Add("rare", new());
-            lists.Add("epic", new());
+            var lists = new Dictionary<string, HashSet<ResourceLocation>>
+            {
+                { "non_stackable", new() },
+                { "stacklimit_16", new() },
+                { "uncommon", new() },
+                { "rare", new() },
+                { "epic", new() }
+            };
 
             Json.JSONData spLists = Json.ParseJson(File.ReadAllText(listsPath, Encoding.UTF8));
             foreach (var pair in lists)
@@ -112,8 +114,7 @@ namespace MinecraftClient.Mapping
 
                 foreach (var item in items.Properties)
                 {
-                    int numId;
-                    if (int.TryParse(item.Key, out numId))
+                    if (int.TryParse(item.Key, out int numId))
                     {
                         var itemId = ResourceLocation.fromString(item.Value.StringValue);
 
@@ -125,7 +126,7 @@ namespace MinecraftClient.Mapping
                             rarity = ItemRarity.Rare;
                         else if (rarityU.Contains(itemId))
                             rarity = ItemRarity.Uncommon;
-                        
+
                         int stackLimit = Item.DEFAULT_STACK_LIMIT;
 
                         if (nonStackables.Contains(itemId))
@@ -133,7 +134,7 @@ namespace MinecraftClient.Mapping
                         else if (stackLimit16s.Contains(itemId))
                             stackLimit = 16;
 
-                        Item newItem = new Item(itemId)
+                        Item newItem = new(itemId)
                         {
                             Rarity = rarity,
                             StackLimit = stackLimit
@@ -165,9 +166,9 @@ namespace MinecraftClient.Mapping
                         var numId = dictId[itemId];
 
                         var fixedColor = VectorUtil.Json2Float3(fixedRule.Value) / 255F;
-                        Func<ItemStack, float3[]> ruleFunc = (itemStack) => new float3[] { fixedColor };
+                        float3[] ruleFunc(ItemStack itemStack) => new float3[] { fixedColor };
 
-                        if (!itemColorRules.TryAdd(numId, ruleFunc))
+                        if (!itemColorRules.TryAdd(itemId, ruleFunc))
                             Debug.LogWarning($"Failed to apply fixed color rules to {itemId} ({numId})!");
                         
                     }
@@ -192,9 +193,9 @@ namespace MinecraftClient.Mapping
                         for (int c = 0;c < colorList.Length;c++)
                             fixedColors[c] = VectorUtil.Json2Float3(colorList[c]) / 255F;
 
-                        Func<ItemStack, float3[]> ruleFunc = (itemStack) => fixedColors;
+                        float3[] ruleFunc(ItemStack itemStack) => fixedColors;
 
-                        if (!itemColorRules.TryAdd(numId, ruleFunc))
+                        if (!itemColorRules.TryAdd(itemId, ruleFunc))
                             Debug.LogWarning($"Failed to apply fixed multi-color rules to {itemId} ({numId})!");
                         
                     }

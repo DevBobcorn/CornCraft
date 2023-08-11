@@ -30,12 +30,12 @@ namespace MinecraftClient.Rendering
 
                 var packManager = ResourcePackManager.Instance;
 
-                var itemNumId = ItemPalette.INSTANCE.ToNumId(itemStack.Type.ItemId);
+                var itemNumId = ItemPalette.INSTANCE.ToNumId(itemStack.ItemType.ItemId);
                 packManager.ItemModelTable.TryGetValue(itemNumId, out ItemModel? itemModel);
 
                 if (itemModel is null)
                 {
-                    Debug.LogWarning($"Item model for {itemStack.Type.ItemId} is not available!");
+                    Debug.LogWarning($"Item model for {itemStack.ItemType.ItemId} is not available!");
                     return;
                 }
 
