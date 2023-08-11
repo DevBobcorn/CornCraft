@@ -1075,11 +1075,8 @@ namespace MinecraftClient
 
                         Debug.Log($"Loc updated to {location} with yaw {yaw} error value: {offset.magnitude}");
                     });
-
-                    
                 }    
             }
-
         }
 
         /// <summary>
@@ -1159,12 +1156,26 @@ namespace MinecraftClient
         /// </summary>
         /// <param name="inventoryID">Inventory ID</param>
         /// <param name="itemList">Item list, key = slot ID, value = Item information</param>
-        public void OnWindowItems(byte inventoryID, Dictionary<int, Inventory.ItemStack> itemList, int stateId)
+        public void OnWindowItems(byte inventoryID, Dictionary<int, ItemStack> itemList, int stateId)
         {
             if (inventories.ContainsKey(inventoryID))
             {
-                inventories[inventoryID].Items = itemList;
-                inventories[inventoryID].StateID = stateId;
+                var container = inventories[inventoryID];
+
+                container.Items = itemList;
+                container.StateID = stateId;
+                
+                Loom.QueueOnMainThread(() => {
+                    foreach (var pair in itemList)
+                    {
+                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryID, pair.Key, pair.Value));
+
+                        if (container.IsHotbar(pair.Key, out int hotbarSlot))
+                        {
+                            EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, pair.Value));
+                        }
+                    }
+                });
             }
         }
 
@@ -1185,7 +1196,7 @@ namespace MinecraftClient
             // Handle cursor item
             if (inventoryID == 255 && slotID == -1)
             {
-                inventoryID = 0; // Prevent key not found for some bots relied to this event
+                //inventoryID = 0; // Prevent key not found for some bots relied to this event
                 if (inventories.ContainsKey(0))
                 {
                     if (item != null)
@@ -1198,12 +1209,23 @@ namespace MinecraftClient
             {
                 if (inventories.ContainsKey(inventoryID))
                 {
+                    var container = inventories[inventoryID];
+                    
                     if (item == null || item.IsEmpty)
                     {
-                        if (inventories[inventoryID].Items.ContainsKey(slotID))
-                            inventories[inventoryID].Items.Remove(slotID);
+                        if (container.Items.ContainsKey(slotID))
+                            container.Items.Remove(slotID);
                     }
-                    else inventories[inventoryID].Items[slotID] = item;
+                    else container.Items[slotID] = item;
+
+                    Loom.QueueOnMainThread(() => {
+                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryID, slotID, item));
+
+                        if (container.IsHotbar(slotID, out int hotbarSlot))
+                        {
+                            EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
+                        }
+                    });
                 }
             }
         }

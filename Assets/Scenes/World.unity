@@ -6452,6 +6452,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7576224443025202724, guid: efff0e61aed1fbb49b125d4c3cd57987, type: 3}
+      propertyPath: UICamera
+      value: 
+      objectReference: {fileID: 1307474302}
     - target: {fileID: 7576224443025202725, guid: efff0e61aed1fbb49b125d4c3cd57987, type: 3}
       propertyPath: m_Alpha
       value: 1
