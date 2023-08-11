@@ -221,7 +221,7 @@ namespace MinecraftClient
             // Start client
             if (client != null)
             {
-                var succeeded = client!.StartClient(session, playerKeyPair, serverIp, port, protocol, forgeInfo, updateStatus, accountLower);
+                var succeeded = client!.StartClient(session, playerKeyPair, serverIp, port, protocol, forgeInfo, accountLower);
                 callback(succeeded);
             }
             else // Failed to find client instance in scene

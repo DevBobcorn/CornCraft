@@ -114,33 +114,33 @@ namespace MinecraftClient.Inventory
         public static ContainerType GetContainerType(int typeID)
         {
             // https://wiki.vg/Inventory didn't state the inventory ID, assume that list start with 0
-            switch (typeID)
+            return typeID switch
             {
-                case 0: return ContainerType.Generic_9x1;
-                case 1: return ContainerType.Generic_9x2;
-                case 2: return ContainerType.Generic_9x3;
-                case 3: return ContainerType.Generic_9x4;
-                case 4: return ContainerType.Generic_9x5;
-                case 5: return ContainerType.Generic_9x6;
-                case 6: return ContainerType.Generic_3x3;
-                case 7: return ContainerType.Anvil;
-                case 8: return ContainerType.Beacon;
-                case 9: return ContainerType.BlastFurnace;
-                case 10: return ContainerType.BrewingStand;
-                case 11: return ContainerType.Crafting;
-                case 12: return ContainerType.Enchantment;
-                case 13: return ContainerType.Furnace;
-                case 14: return ContainerType.Grindstone;
-                case 15: return ContainerType.Hopper;
-                case 16: return ContainerType.Lectern;
-                case 17: return ContainerType.Loom;
-                case 18: return ContainerType.Merchant;
-                case 19: return ContainerType.ShulkerBox;
-                case 20: return ContainerType.Smoker;
-                case 21: return ContainerType.Cartography;
-                case 22: return ContainerType.Stonecutter;
-                default: return ContainerType.Unknown;
-            }
+                0 => ContainerType.Generic_9x1,
+                1 => ContainerType.Generic_9x2,
+                2 => ContainerType.Generic_9x3,
+                3 => ContainerType.Generic_9x4,
+                4 => ContainerType.Generic_9x5,
+                5 => ContainerType.Generic_9x6,
+                6 => ContainerType.Generic_3x3,
+                7 => ContainerType.Anvil,
+                8 => ContainerType.Beacon,
+                9 => ContainerType.BlastFurnace,
+                10 => ContainerType.BrewingStand,
+                11 => ContainerType.Crafting,
+                12 => ContainerType.Enchantment,
+                13 => ContainerType.Furnace,
+                14 => ContainerType.Grindstone,
+                15 => ContainerType.Hopper,
+                16 => ContainerType.Lectern,
+                17 => ContainerType.Loom,
+                18 => ContainerType.Merchant,
+                19 => ContainerType.ShulkerBox,
+                20 => ContainerType.Smoker,
+                21 => ContainerType.Cartography,
+                22 => ContainerType.Stonecutter,
+                _ => ContainerType.Unknown,
+            };
         }
 
         /// <summary>

@@ -56,10 +56,10 @@ namespace MinecraftClient
         #endregion
 
         #region Client Control
-        private Queue<Action> threadTasks = new();
-        private object threadTasksLock = new();
+        private readonly Queue<Action> threadTasks = new();
+        private readonly object threadTasksLock = new();
 
-        private Queue<string> chatQueue = new();
+        private readonly Queue<string> chatQueue = new();
         private DateTime nextMessageSendTime = DateTime.MinValue;
         private bool canSendMessage = false;
 
@@ -67,13 +67,13 @@ namespace MinecraftClient
 
         #region Time and Networking
         private DateTime lastKeepAlive;
-        private object lastKeepAliveLock = new();
+        private readonly object lastKeepAliveLock = new();
         private long lastAge = 0L;
         private DateTime lastTime;
         private double serverTPS = 0;
         private double averageTPS = 20;
         private const int maxSamples = 5;
-        private List<double> tpsSamples = new(maxSamples);
+        private readonly List<double> tpsSamples = new(maxSamples);
         private double sampleSum = 0;
         public double GetServerTPS() => averageTPS;
         public float GetTickMilSec() => (float)(1D / averageTPS);
@@ -107,7 +107,7 @@ namespace MinecraftClient
         public bool Grounded = false;
         private int clientSequenceId;
         private int foodSaturation, level, totalExperience;
-        private Dictionary<int, Container> inventories = new();
+        private readonly Dictionary<int, Container> inventories = new();
         public byte currentSlot = 0;
 
         public Container? GetInventory(int inventoryID)
@@ -117,7 +117,7 @@ namespace MinecraftClient
             return null;
         }
 
-        private object movementLock = new();
+        private readonly object movementLock = new();
         public Location GetLocation() => clientEntity.Location;
         public Vector3 GetPosition() => CoordConvert.MC2Unity(clientEntity.Location);
 
@@ -242,8 +242,8 @@ namespace MinecraftClient
             return baseString;
         }
 
-        public bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
-                int protocol, ForgeInfo? forgeInfo, Action<string> updateStatus, string accountLower)
+        public bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp,
+                ushort port, int protocol, ForgeInfo? forgeInfo, string accountLower)
         {
             this.sessionId = session.ID;
             if (!Guid.TryParse(session.PlayerID, out this.uuid))
