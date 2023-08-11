@@ -1,23 +1,25 @@
 #nullable enable
 using UnityEngine;
+using Unity.Mathematics;
+using TMPro;
 
 using MinecraftClient.Inventory;
 using MinecraftClient.Rendering;
 using MinecraftClient.Resource;
-using Unity.Mathematics;
 
 namespace MinecraftClient.UI
 {
     public class InventoryItemSlot : MonoBehaviour
     {
         [SerializeField] private GameObject? modelObject;
-
+        [SerializeField] private TMP_Text? itemText;
         [SerializeField] private MeshFilter? itemMeshFilter;
         [SerializeField] private MeshRenderer? itemMeshRenderer;
 
+        // Use null for empty items
         private ItemStack? itemStack = null;
 
-        public void UpdateItemStack(ItemStack newItemStack)
+        public void UpdateItemStack(ItemStack? newItemStack)
         {
             itemStack = newItemStack;
             // Update item mesh
@@ -36,7 +38,7 @@ namespace MinecraftClient.UI
                 // Handle GUI display transform
                 bool hasGUITransform = result.Value.transforms.TryGetValue(DisplayPosition.GUI, out float3x3 t);
                 // Make use of the debug text
-                //invItemObj.GetComponentInChildren<TMP_Text>().text = "";
+                itemText!.text = itemStack!.Count > 1 ? itemStack.Count.ToString() : string.Empty;
 
                 if (hasGUITransform) // Apply specified local transform
                 {
@@ -63,9 +65,10 @@ namespace MinecraftClient.UI
                     modelObject.transform.localScale = Vector3.one;
                 }
             }
-            else // If build failed
+            else // If build failed (item is empty or invalid)
             {
                 itemMeshFilter!.sharedMesh = null;
+                itemText!.text = string.Empty;
             }
         }
     }
