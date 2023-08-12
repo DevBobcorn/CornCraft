@@ -109,7 +109,7 @@ namespace MinecraftClient
         private int clientSequenceId;
         private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
-        public byte currentSlot = 0;
+        public byte CurrentSlot { get; private set; } = 0;
 
         public Container? GetInventory(int inventoryID)
         {
@@ -899,7 +899,10 @@ namespace MinecraftClient
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => ChangeSlot(slot));
 
-            currentSlot = Convert.ToByte(slot);
+            CurrentSlot = Convert.ToByte(slot);
+            // Broad cast hotbar selection change
+            EventManager.Instance.BroadcastOnUnityThread(new HeldItemChangeEvent(CurrentSlot));
+
             return handler!.SendHeldItemChange(slot);
         }
 
@@ -1581,7 +1584,12 @@ namespace MinecraftClient
         /// Called when held item change
         /// </summary>
         /// <param name="slot"> item slot</param>
-        public void OnHeldItemChange(byte slot) => currentSlot = slot;
+        public void OnHeldItemChange(byte slot)
+        {
+            CurrentSlot = slot;
+            // Broad cast hotbar selection change
+            EventManager.Instance.BroadcastOnUnityThread(new HeldItemChangeEvent(CurrentSlot));
+        }
 
         /// Called when an update of the map is sent by the server, take a look at https://wiki.vg/Protocol#Map_Data for more info on the fields
         /// Map format and colors: https://minecraft.fandom.com/wiki/Map_item_format

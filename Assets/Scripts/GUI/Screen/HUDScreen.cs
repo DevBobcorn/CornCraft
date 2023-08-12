@@ -224,6 +224,26 @@ namespace MinecraftClient.UI
             if (Input.GetKeyDown(KeyCode.F5))
                 game.SwitchPerspective();
 
+            // Hotbar slot switching
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+                game.ChangeSlot(0);
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+                game.ChangeSlot(1);
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+                game.ChangeSlot(2);
+            if (Input.GetKeyDown(KeyCode.Alpha4))
+                game.ChangeSlot(3);
+            if (Input.GetKeyDown(KeyCode.Alpha5))
+                game.ChangeSlot(4);
+            if (Input.GetKeyDown(KeyCode.Alpha6))
+                game.ChangeSlot(5);
+            if (Input.GetKeyDown(KeyCode.Alpha7))
+                game.ChangeSlot(6);
+            if (Input.GetKeyDown(KeyCode.Alpha8))
+                game.ChangeSlot(7);
+            if (Input.GetKeyDown(KeyCode.Alpha9))
+                game.ChangeSlot(8);
+
             if (Input.GetKeyDown(KeyCode.Slash))
             {   // Open chat screen and input a slash
                 game.ScreenControl?.PushScreen(chatScreen);
