@@ -3,12 +3,12 @@ using System;
 using UnityEngine;
 using Unity.Mathematics;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public class JsonModelElement // a cuboid element
     {
-        public static readonly float3 FULL   = new float3(16, 16, 16);
-        public static readonly float3 CENTER = new float3( 8,  8,  8);
+        public static readonly float3 FULL   = new(16, 16, 16);
+        public static readonly float3 CENTER = new( 8,  8,  8);
 
         public float3 from = float3.zero, to = FULL, pivot = CENTER;
         public Dictionary<FaceDir, BlockModelFace> faces = new();
@@ -18,7 +18,7 @@ namespace MinecraftClient.Resource
 
         public static JsonModelElement FromJson(Json.JSONData data)
         {
-            JsonModelElement elem = new JsonModelElement();
+            var elem = new JsonModelElement();
             if (data.Properties.ContainsKey("from") && data.Properties.ContainsKey("to") && data.Properties.ContainsKey("faces"))
             {
                 // Read vertex positions with xz values swapped...
@@ -62,9 +62,7 @@ namespace MinecraftClient.Resource
                     {
                         Debug.LogWarning("Invalid element rotation!");
                     }
-
                 }
-
             }
             else
             {
@@ -72,7 +70,5 @@ namespace MinecraftClient.Resource
             }
             return elem;
         }
-
     }
-
 }

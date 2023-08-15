@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public class ItemModel
     {
@@ -23,7 +23,5 @@ namespace MinecraftClient.Resource
                 Debug.LogWarning($"Trying to add predicate {predicate} to an item model twice!");
             }
         }
-
     }
-
 }

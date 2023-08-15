@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace MinecraftClient
+namespace CraftSharp
 {
     public class PathHelper
     {

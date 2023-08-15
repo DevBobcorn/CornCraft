@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace MinecraftClient
+namespace CraftSharp
 {
     /// <summary>
     /// Holds an asynchronous task with return value

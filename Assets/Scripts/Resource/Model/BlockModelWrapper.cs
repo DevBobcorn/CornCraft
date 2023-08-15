@@ -1,7 +1,7 @@
 using UnityEngine;
 using Unity.Mathematics;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public class BlockModelWrapper
     {
@@ -16,7 +16,7 @@ namespace MinecraftClient.Resource
             this.uvlock = uvlock;
         }
 
-        public static BlockModelWrapper fromJson(ResourcePackManager manager, Json.JSONData data)
+        public static BlockModelWrapper FromJson(ResourcePackManager manager, Json.JSONData data)
         {
             if (data.Properties.ContainsKey("model"))
             {
@@ -60,6 +60,5 @@ namespace MinecraftClient.Resource
             Debug.LogWarning("Invalid block model wrapper!");
             return null;
         }
-
     }
 }

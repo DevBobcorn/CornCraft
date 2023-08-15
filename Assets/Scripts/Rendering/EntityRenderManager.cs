@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-using MinecraftClient.Mapping;
-
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     public class EntityRenderManager : MonoBehaviour
     {

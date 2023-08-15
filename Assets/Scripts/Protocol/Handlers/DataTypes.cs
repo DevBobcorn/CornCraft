@@ -2,12 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using MinecraftClient.Mapping;
-using MinecraftClient.Inventory;
+using CraftSharp.Inventory;
 using System.IO;
 using System.IO.Compression;
 
-namespace MinecraftClient.Protocol.Handlers
+namespace CraftSharp.Protocol.Handlers
 {
     /// <summary>
     /// Handle data types encoding / decoding

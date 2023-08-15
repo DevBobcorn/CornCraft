@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MinecraftClient
+namespace CraftSharp
 {
     public static class StringHelper
     {

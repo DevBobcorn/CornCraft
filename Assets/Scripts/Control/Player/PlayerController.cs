@@ -3,11 +3,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-using MinecraftClient.Event;
-using MinecraftClient.Mapping;
-using MinecraftClient.Rendering;
+using CraftSharp.Event;
+using CraftSharp.Rendering;
 
-namespace MinecraftClient.Control
+namespace CraftSharp.Control
 {
     [RequireComponent(typeof (Rigidbody), typeof (PlayerStatusUpdater))]
     public class PlayerController : MonoBehaviour

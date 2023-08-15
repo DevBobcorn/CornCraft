@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace MinecraftClient
+namespace CraftSharp
 {
     /// <summary>
     /// Allow easy timeout on pieces of code

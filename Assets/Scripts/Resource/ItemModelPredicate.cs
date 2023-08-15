@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-using MinecraftClient.Inventory;
-
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public class ItemModelPredicate
     {
@@ -37,9 +35,7 @@ namespace MinecraftClient.Resource
         public bool check(ItemStack itemStack)
         {
             // TODO Implement
-
             return true;
-
         }
 
         public override string ToString()
@@ -57,7 +53,5 @@ namespace MinecraftClient.Resource
             }
             else return "{}";
         }
-
     }
-
 }

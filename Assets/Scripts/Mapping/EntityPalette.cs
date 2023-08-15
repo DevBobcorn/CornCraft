@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     public class EntityPalette
     {

@@ -6,7 +6,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace MinecraftClient.Protocol
+namespace CraftSharp.Protocol
 {
     static class Microsoft
     {

@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     public class LeggedEntityRender : LivingEntityRender
     {

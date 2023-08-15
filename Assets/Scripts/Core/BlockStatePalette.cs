@@ -6,9 +6,9 @@ using System.Text;
 using UnityEngine;
 using Unity.Mathematics;
 
-using MinecraftClient.Resource;
+using CraftSharp.Resource;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     public class BlockStatePalette
     {

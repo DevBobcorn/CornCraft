@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public class BlockStateModel
     {
@@ -12,7 +12,5 @@ namespace MinecraftClient.Resource
             Geometries = geometries.ToArray();
             RenderType = renderType;
         }
-
     }
-
 }

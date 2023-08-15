@@ -1,7 +1,7 @@
 #nullable enable
-using MinecraftClient.Interaction;
+using CraftSharp.Interaction;
 
-namespace MinecraftClient.Event
+namespace CraftSharp.Event
 {
     public record InteractionAddEvent : BaseEvent
     {

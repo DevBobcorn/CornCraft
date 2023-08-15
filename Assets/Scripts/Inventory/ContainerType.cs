@@ -1,4 +1,4 @@
-﻿namespace MinecraftClient.Inventory
+﻿namespace CraftSharp.Inventory
 {
     // For MC 1.14 after ONLY
     public enum ContainerType

@@ -2,9 +2,9 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-using MinecraftClient.Resource;
+using CraftSharp.Resource;
 
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     [RequireComponent(typeof (MeshFilter), typeof (MeshRenderer))]
     public class ChunkRender : MonoBehaviour, IComparable<ChunkRender>

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public static class CubeGeometry
     {
@@ -17,7 +17,7 @@ namespace MinecraftClient.Resource
             //  *---> +X (South)        *---> +Z (South)     v2---v3
 
             int vertOffset = buffer.vert.Length;
-            int newLength = vertOffset + arraySizeMap[cullFlags];
+            int newLength = vertOffset + ArraySizeMap[cullFlags];
 
             var verts = new float3[newLength];
             var txuvs = new float3[newLength];
@@ -106,10 +106,9 @@ namespace MinecraftClient.Resource
             buffer.txuv = txuvs;
             buffer.uvan = uvans;
             buffer.tint = tints;
-
         }
 
-        private static readonly Dictionary<int, int> arraySizeMap = CreateArraySizeMap();
+        public static readonly Dictionary<int, int> ArraySizeMap = CreateArraySizeMap();
 
         private static Dictionary<int, int> CreateArraySizeMap()
         {
@@ -130,9 +129,6 @@ namespace MinecraftClient.Resource
             }
 
             return sizeMap;
-
         }
-
     }
-
 }

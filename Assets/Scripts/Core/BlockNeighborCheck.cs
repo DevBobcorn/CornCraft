@@ -1,4 +1,4 @@
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     public delegate bool BlockNeighborCheck(Block self, Block neighbor);
 

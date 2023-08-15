@@ -1,4 +1,4 @@
-namespace MinecraftClient.Protocol
+namespace CraftSharp.Protocol
 {
     public enum EntityActionType
     {

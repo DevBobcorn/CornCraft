@@ -1,4 +1,4 @@
-namespace MinecraftClient.Event
+namespace CraftSharp.Event
 {
     public record HealthUpdateEvent : BaseEvent
     {

@@ -1,7 +1,7 @@
 ﻿using System;
-using MinecraftClient.Protocol.Handlers.PacketPalettes;
+using CraftSharp.Protocol.Handlers.PacketPalettes;
 
-namespace MinecraftClient.Protocol.Handlers
+namespace CraftSharp.Protocol.Handlers
 {
     public class PacketTypeHandler
     {

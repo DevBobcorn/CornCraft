@@ -4,10 +4,9 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-using MinecraftClient.Mapping;
-using MinecraftClient.Protocol;
+using CraftSharp.Protocol;
 
-namespace MinecraftClient.Interaction
+namespace CraftSharp.Interaction
 {
     public class BlockInteractionManager
     {

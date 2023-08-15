@@ -3,18 +3,18 @@ using System;
 using System.Linq;
 using System.Collections;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
 using TMPro;
 
-using MinecraftClient.Protocol;
-using MinecraftClient.Protocol.Handlers.Forge;
-using MinecraftClient.Protocol.ProfileKey;
-using MinecraftClient.Protocol.Session;
-using System.Threading.Tasks;
+using CraftSharp.Protocol;
+using CraftSharp.Protocol.Handlers.Forge;
+using CraftSharp.Protocol.ProfileKey;
+using CraftSharp.Protocol.Session;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     public class LoginControl : MonoBehaviour
     {

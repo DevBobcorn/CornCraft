@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace MinecraftClient.Protocol.Session
+namespace CraftSharp.Protocol.Session
 {
     [Serializable]
     public class SessionToken

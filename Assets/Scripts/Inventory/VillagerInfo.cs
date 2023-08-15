@@ -1,4 +1,4 @@
-﻿namespace MinecraftClient.Mapping
+﻿namespace CraftSharp
 {
     /// <summary>
     /// Properties of a villager

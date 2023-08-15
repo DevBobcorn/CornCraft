@@ -1,6 +1,6 @@
 using Unity.Mathematics;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     /// <summary>
     /// Represents different types of precipitations

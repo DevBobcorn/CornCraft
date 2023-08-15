@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public class ResourcePack
     {
@@ -41,13 +41,13 @@ namespace MinecraftClient.Resource
                             string desc = packData.Properties["description"].StringValue;
                             Debug.Log($"Description: {desc}");
                         }
-
                     }
                 }
             }
             else
+            {
                 Debug.LogWarning($"No resource pack found at {packDir}");
-
+            }
         }
 
         public void GatherResources(ResourcePackManager manager)
@@ -91,7 +91,9 @@ namespace MinecraftClient.Resource
                                     manager.TextureFileTable.Add(identifier, texFile.FullName.Replace('\\', '/'));
                                 }
                                 else // Overwrite it
+                                {
                                     manager.TextureFileTable[identifier] = texFile.FullName.Replace('\\', '/');
+                                }
                             }
                         }
 
@@ -113,7 +115,9 @@ namespace MinecraftClient.Resource
                                     manager.BlockModelFileTable.Add(identifier, modelFile.FullName.Replace('\\', '/'));
                                 }
                                 else // Overwrite it
+                                {
                                     manager.BlockModelFileTable[identifier] = modelFile.FullName.Replace('\\', '/');
+                                }
                             }
                         }
 
@@ -132,7 +136,9 @@ namespace MinecraftClient.Resource
                                     manager.ItemModelFileTable.Add(identifier, modelFile.FullName.Replace('\\', '/'));
                                 }
                                 else // Overwrite it
+                                {
                                     manager.ItemModelFileTable[identifier] = modelFile.FullName.Replace('\\', '/');
+                                }
                             }
                         }
 
@@ -154,23 +160,22 @@ namespace MinecraftClient.Resource
                                     manager.BlockStateFileTable.Add(identifier, statesFile.FullName.Replace('\\', '/'));
                                 }
                                 else // Overwrite it
+                                {
                                     manager.BlockStateFileTable[identifier] = statesFile.FullName.Replace('\\', '/');
+                                }
                             }
                         }
-
                     }
-
                 }
                 else
+                {
                     Debug.LogWarning($"Cannot find path {assetsDir.FullName}");
-
+                }
             }
             else
+            {
                 Debug.LogWarning("Trying to load resources from an invalid resource pack!");
-
+            }
         }
-
-        
     }
-
 }

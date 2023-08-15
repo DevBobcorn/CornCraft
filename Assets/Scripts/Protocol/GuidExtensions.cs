@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MinecraftClient.Protocol
+namespace CraftSharp.Protocol
 {
     public static class GuidExtensions
     {

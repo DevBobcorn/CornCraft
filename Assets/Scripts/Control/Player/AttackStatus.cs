@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace MinecraftClient.Control
+namespace CraftSharp.Control
 {
     public class AttackStatus
     {

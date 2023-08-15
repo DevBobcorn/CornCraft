@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Net.Sockets;
-using MinecraftClient.Crypto;
+using CraftSharp.Crypto;
 
-namespace MinecraftClient.Protocol.Handlers
+namespace CraftSharp.Protocol.Handlers
 {
     /// <summary>
     /// Wrapper for handling unencrypted & encrypted socket

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-namespace MinecraftClient
+namespace CraftSharp
 {
     /// <summary>
     /// Allows to localize MinecraftClient in different languages

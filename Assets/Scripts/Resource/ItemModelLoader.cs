@@ -3,7 +3,7 @@ using System.IO;
 using UnityEngine;
 using Unity.Mathematics;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public class ItemModelLoader
     {

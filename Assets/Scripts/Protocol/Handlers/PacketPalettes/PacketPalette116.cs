@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace MinecraftClient.Protocol.Handlers.PacketPalettes
+namespace CraftSharp.Protocol.Handlers.PacketPalettes
 {
     public class PacketPalette116 : PacketTypePalette
     {

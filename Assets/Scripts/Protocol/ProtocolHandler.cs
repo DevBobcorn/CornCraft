@@ -5,13 +5,13 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Net.Security;
-using MinecraftClient.Protocol.Handlers;
-using MinecraftClient.Protocol.Handlers.Forge;
-using MinecraftClient.Protocol.Session;
+using CraftSharp.Protocol.Handlers;
+using CraftSharp.Protocol.Handlers.Forge;
+using CraftSharp.Protocol.Session;
 using System.Security.Authentication;
 using UnityEngine;
 
-namespace MinecraftClient.Protocol
+namespace CraftSharp.Protocol
 {
     /// <summary>
     /// Handle login, session, server ping and provide a protocol handler for interacting with a minecraft server.

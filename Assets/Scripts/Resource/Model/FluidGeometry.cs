@@ -1,8 +1,7 @@
-using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public static class FluidGeometry
     {
@@ -47,7 +46,7 @@ namespace MinecraftClient.Resource
             var hsw = full ? 1F : GetAverageHeight(heights[4], heights[5], heights[7], heights[8]);
 
             int vertOffset = buffer.vert.Length;
-            int newLength = vertOffset + arraySizeMap[cullFlags];
+            int newLength = vertOffset + CubeGeometry.ArraySizeMap[cullFlags];
 
             var verts = new float3[newLength];
             var txuvs = new float3[newLength];
@@ -137,7 +136,6 @@ namespace MinecraftClient.Resource
             buffer.txuv = txuvs;
             buffer.uvan = uvans;
             buffer.tint = tints;
-
         }
 
         public static void BuildCollider(ref float3[] colliderVerts, int x, int y, int z, int cullFlags)
@@ -145,7 +143,7 @@ namespace MinecraftClient.Resource
             float h = (cullFlags & (1 << 0)) != 0 ? 0.875F : I;
 
             int vertOffset = colliderVerts.Length;
-            int newLength = vertOffset + arraySizeMap[cullFlags];
+            int newLength = vertOffset + CubeGeometry.ArraySizeMap[cullFlags];
 
             var verts = new float3[newLength];
 
@@ -206,33 +204,6 @@ namespace MinecraftClient.Resource
             }
 
             colliderVerts = verts;
-
         }
-
-        private static readonly Dictionary<int, int> arraySizeMap = CreateArraySizeMap();
-
-        private static Dictionary<int, int> CreateArraySizeMap()
-        {
-            Dictionary<int, int> sizeMap = new();
-
-            for (int cullFlags = 0b000000;cullFlags <= 0b111111;cullFlags++)
-            {
-                int vertexCount = 0;
-
-                for (int i = 0;i < 6;i++)
-                {
-                    if ((cullFlags & (1 << i)) != 0) // This face(side) presents
-                        vertexCount += 4;
-                }
-
-                sizeMap.Add(cullFlags, vertexCount);
-
-            }
-
-            return sizeMap;
-
-        }
-
     }
-
 }

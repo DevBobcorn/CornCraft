@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-using MinecraftClient.Mapping;
-
-namespace MinecraftClient.Inventory
+namespace CraftSharp
 {
     /// <summary>
     /// Represents an item stack

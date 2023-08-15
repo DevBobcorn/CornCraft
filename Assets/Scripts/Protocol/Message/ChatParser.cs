@@ -5,9 +5,9 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-using MinecraftClient.Protocol.Message;
+using CraftSharp.Protocol.Message;
 
-namespace MinecraftClient.Protocol
+namespace CraftSharp.Protocol
 {
     /// <summary>
     /// This class parses JSON chat data from MC 1.6+ and returns the appropriate string to be printed.

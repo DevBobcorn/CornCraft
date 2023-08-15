@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using MinecraftClient.Proxy;
-using MinecraftClient.Protocol.Session;
+using CraftSharp.Proxy;
+using CraftSharp.Protocol.Session;
 
-namespace MinecraftClient
+namespace CraftSharp
 {
     public static class CornGlobal
     {

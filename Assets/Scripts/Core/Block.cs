@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     /// <summary>
     /// Represents a Minecraft Block State

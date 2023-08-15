@@ -5,10 +5,9 @@ using System.Text;
 using Unity.Mathematics;
 using UnityEngine;
 
-using MinecraftClient.Resource;
-using MinecraftClient.Inventory;
+using CraftSharp.Resource;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     public class ItemPalette
     {

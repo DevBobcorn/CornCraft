@@ -1,9 +1,9 @@
 #nullable enable
 using System;
 using System.Security.Cryptography;
-using MinecraftClient.Protocol.Message;
+using CraftSharp.Protocol.Message;
 
-namespace MinecraftClient.Protocol.ProfileKey
+namespace CraftSharp.Protocol.ProfileKey
 {
     public class PublicKey
     {

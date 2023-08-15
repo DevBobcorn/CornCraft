@@ -8,17 +8,15 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-using MinecraftClient.Event;
-using MinecraftClient.Interaction;
-using MinecraftClient.Protocol.ProfileKey;
-using MinecraftClient.Protocol.Handlers.Forge;
-using MinecraftClient.Protocol.Session;
-using MinecraftClient.Resource;
-using MinecraftClient.UI;
-using MinecraftClient.Mapping;
+using CraftSharp.Event;
+using CraftSharp.Interaction;
+using CraftSharp.Protocol.ProfileKey;
+using CraftSharp.Protocol.Handlers.Forge;
+using CraftSharp.Protocol.Session;
+using CraftSharp.Resource;
+using CraftSharp.UI;
 
-
-namespace MinecraftClient
+namespace CraftSharp
 {
     public class CornApp : MonoBehaviour
     {

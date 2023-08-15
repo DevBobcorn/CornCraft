@@ -7,10 +7,9 @@ using UnityEngine.Rendering;
 using Unity.Collections;
 using Unity.Mathematics;
 
-using MinecraftClient.Mapping;
-using MinecraftClient.Resource;
+using CraftSharp.Resource;
 
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     public class ChunkRenderBuilder
     {

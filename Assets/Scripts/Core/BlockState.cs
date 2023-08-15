@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     public record BlockState
     {

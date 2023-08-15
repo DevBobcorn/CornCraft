@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public class BlockModelLoader
     {

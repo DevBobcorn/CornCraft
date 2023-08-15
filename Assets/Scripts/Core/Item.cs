@@ -1,4 +1,4 @@
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     public record Item
     {

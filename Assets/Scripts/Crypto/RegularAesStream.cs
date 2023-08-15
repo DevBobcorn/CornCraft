@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.IO;
 
-namespace MinecraftClient.Crypto.Streams
+namespace CraftSharp.Crypto.Streams
 {
     /// <summary>
     /// An encrypted stream using AES, used for encrypting network data on the fly using AES.

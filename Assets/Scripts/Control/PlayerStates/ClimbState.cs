@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace MinecraftClient.Control
+namespace CraftSharp.Control
 {
     public class ClimbState : IPlayerState
     {

@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-using MinecraftClient.Event;
-using MinecraftClient.Mapping;
-using MinecraftClient.Interaction;
+using CraftSharp.Event;
+using CraftSharp.Interaction;
 
-namespace MinecraftClient.Control
+namespace CraftSharp.Control
 {
     public class InteractionUpdater : MonoBehaviour
     {

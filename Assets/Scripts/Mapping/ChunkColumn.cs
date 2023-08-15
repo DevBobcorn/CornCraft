@@ -2,7 +2,7 @@
 using System;
 using UnityEngine;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     /// <summary>
     /// Represent a column of chunks of terrain in a Minecraft world

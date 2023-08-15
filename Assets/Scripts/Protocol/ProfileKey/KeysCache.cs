@@ -6,9 +6,9 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Timers;
 using UnityEngine;
 
-using MinecraftClient.Protocol.Session;
+using CraftSharp.Protocol.Session;
 
-namespace MinecraftClient.Protocol.ProfileKey
+namespace CraftSharp.Protocol.ProfileKey
 {
     /// <summary>
     /// Handle keys caching and storage.

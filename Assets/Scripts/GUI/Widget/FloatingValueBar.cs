@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     public class FloatingValueBar : BaseValueBar
     {

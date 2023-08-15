@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
-using MinecraftClient.Event;
-using MinecraftClient.Mapping;
+using CraftSharp.Event;
+using CraftSharp;
 
-namespace MinecraftClient.Protocol.Handlers
+namespace CraftSharp.Protocol.Handlers
 {
     /// <summary>
     /// Terrain Decoding handler for MC 1.15+

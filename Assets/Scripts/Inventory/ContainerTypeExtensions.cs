@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.IO;
-
-namespace MinecraftClient.Inventory
+﻿namespace CraftSharp.Inventory
 {
     public static class ContainerTypeExtensions
     {

@@ -2,7 +2,7 @@
 using Starksoft.Net.Proxy;
 using UnityEngine;
 
-namespace MinecraftClient.Proxy
+namespace CraftSharp.Proxy
 {
     /// <summary>
     /// Automatically handle proxies according to the app Settings.

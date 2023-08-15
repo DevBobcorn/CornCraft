@@ -8,7 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Timers;
 using UnityEngine;
 
-namespace MinecraftClient.Protocol.Session
+namespace CraftSharp.Protocol.Session
 {
     /// <summary>
     /// Handle sessions caching and storage.

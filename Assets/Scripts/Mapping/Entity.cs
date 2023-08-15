@@ -1,9 +1,8 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using MinecraftClient.Inventory;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     /// <summary>
     /// Represents an entity evolving into a Minecraft world

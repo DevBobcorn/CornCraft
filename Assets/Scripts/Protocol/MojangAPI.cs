@@ -9,7 +9,7 @@ using System.Net;
 /// Source: https://wiki.vg/Mojang_API
 /// !!! ATTENTION !!!
 
-namespace MinecraftClient.Protocol
+namespace CraftSharp.Protocol
 {
     // Enum to display the status of different services
     public enum ServiceStatus { red, yellow, green };

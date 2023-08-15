@@ -8,20 +8,20 @@ using System.Linq;
 
 using UnityEngine;
 
-using MinecraftClient.Control;
-using MinecraftClient.Event;
-using MinecraftClient.Protocol;
-using MinecraftClient.Protocol.ProfileKey;
-using MinecraftClient.Protocol.Handlers.Forge;
-using MinecraftClient.Protocol.Message;
-using MinecraftClient.Protocol.Session;
-using MinecraftClient.Proxy;
-using MinecraftClient.Rendering;
-using MinecraftClient.UI;
-using MinecraftClient.Mapping;
-using MinecraftClient.Inventory;
+using CraftSharp.Control;
+using CraftSharp.Event;
+using CraftSharp.Protocol;
+using CraftSharp.Protocol.ProfileKey;
+using CraftSharp.Protocol.Handlers.Forge;
+using CraftSharp.Protocol.Message;
+using CraftSharp.Protocol.Session;
+using CraftSharp.Proxy;
+using CraftSharp.Rendering;
+using CraftSharp.UI;
+using CraftSharp;
+using CraftSharp.Inventory;
 
-namespace MinecraftClient
+namespace CraftSharp
 {
     [RequireComponent(typeof (PlayerUserInput), typeof (InteractionUpdater))]
     public class CornClient : MonoBehaviour, IMinecraftComHandler

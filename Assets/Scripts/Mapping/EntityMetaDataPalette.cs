@@ -1,9 +1,9 @@
 #nullable enable
-using MinecraftClient.Protocol.Handlers;
+using CraftSharp.Protocol.Handlers;
 using System;
 using System.Collections.Generic;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     public class EntityMetadataPalette
     {

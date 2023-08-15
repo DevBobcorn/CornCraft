@@ -1,11 +1,10 @@
 #nullable enable
-using System;
 using UnityEngine;
 using TMPro;
 
-using MinecraftClient.Mapping;
+using CraftSharp;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     public class EntityHealthUI : FloatingUI
     {
