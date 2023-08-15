@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace MinecraftClient.Protocol.Message
+namespace CraftSharp.Protocol.Message
 {
     public class ChatMessage
     {

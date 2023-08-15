@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MinecraftClient.Event
+namespace CraftSharp.Event
 {
     // Singleton Event Manager
     public class EventManager

@@ -5,11 +5,11 @@ using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
 
-using MinecraftClient.Protocol.Handlers;
-using MinecraftClient.Protocol.Message;
-using static MinecraftClient.Protocol.Message.LastSeenMessageList;
+using CraftSharp.Protocol.Handlers;
+using CraftSharp.Protocol.Message;
+using static CraftSharp.Protocol.Message.LastSeenMessageList;
 
-namespace MinecraftClient.Protocol.ProfileKey
+namespace CraftSharp.Protocol.ProfileKey
 {
     static class KeyUtils
     {

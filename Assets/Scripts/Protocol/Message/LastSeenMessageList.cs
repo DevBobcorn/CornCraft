@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static MinecraftClient.Protocol.Message.LastSeenMessageList;
+using static CraftSharp.Protocol.Message.LastSeenMessageList;
 
-namespace MinecraftClient.Protocol.Message
+namespace CraftSharp.Protocol.Message
 {
     /// <summary>
     /// A list of messages a client has seen.

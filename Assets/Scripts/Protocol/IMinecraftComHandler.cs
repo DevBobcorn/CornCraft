@@ -1,11 +1,10 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using MinecraftClient.Mapping;
-using MinecraftClient.Protocol.Message;
-using MinecraftClient.Inventory;
+using CraftSharp.Protocol.Message;
+using CraftSharp.Inventory;
 
-namespace MinecraftClient.Protocol
+namespace CraftSharp.Protocol
 {
     public enum DisconnectReason { InGameKick, LoginRejected, ConnectionLost, UserLogout };
     

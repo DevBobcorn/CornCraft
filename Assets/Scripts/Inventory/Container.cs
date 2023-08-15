@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using MinecraftClient.Mapping;
 
-namespace MinecraftClient.Inventory
+namespace CraftSharp.Inventory
 {
     /// <summary>
     /// Represents a Minecraft inventory (player inventory, chest, etc.)

@@ -2,7 +2,7 @@
 using UnityEngine;
 using TMPro;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     public abstract class BaseValueBar : MonoBehaviour
     {

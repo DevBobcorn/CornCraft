@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     public static class Movement
     {

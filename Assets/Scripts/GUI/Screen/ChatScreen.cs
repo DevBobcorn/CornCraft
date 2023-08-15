@@ -5,9 +5,9 @@ using System.Text;
 using UnityEngine;
 using TMPro;
 
-using MinecraftClient.Event;
+using CraftSharp.Event;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     [RequireComponent(typeof (CanvasGroup))]
     public class ChatScreen : BaseScreen

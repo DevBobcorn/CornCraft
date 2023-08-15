@@ -1,10 +1,9 @@
 #nullable enable
 using UnityEngine;
 using Cinemachine;
-using MinecraftClient.Mapping;
-using MinecraftClient.Event;
+using CraftSharp.Event;
 
-namespace MinecraftClient.Control
+namespace CraftSharp.Control
 {
     public class SimpleCameraController : CameraController
     {

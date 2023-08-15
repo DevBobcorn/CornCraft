@@ -1,10 +1,10 @@
 #nullable enable
 using System;
 using System.Security.Cryptography;
-using MinecraftClient.Protocol.Message;
-using static MinecraftClient.Protocol.Message.LastSeenMessageList;
+using CraftSharp.Protocol.Message;
+using static CraftSharp.Protocol.Message.LastSeenMessageList;
 
-namespace MinecraftClient.Protocol.ProfileKey
+namespace CraftSharp.Protocol.ProfileKey
 {
     public class PrivateKey
     {

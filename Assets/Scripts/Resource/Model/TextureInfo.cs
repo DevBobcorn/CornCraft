@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public struct TextureInfo
     {

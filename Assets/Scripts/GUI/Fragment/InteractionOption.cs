@@ -2,10 +2,10 @@
 using UnityEngine;
 using TMPro;
 
-using MinecraftClient.Event;
-using MinecraftClient.Interaction;
+using CraftSharp.Event;
+using CraftSharp.Interaction;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     [RequireComponent(typeof (Animator))]
     public class InteractionOption : MonoBehaviour

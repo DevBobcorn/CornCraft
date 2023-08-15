@@ -1,9 +1,9 @@
 #nullable enable
 using UnityEngine;
 
-using MinecraftClient.Rendering;
+using CraftSharp.Rendering;
 
-namespace MinecraftClient.Control
+namespace CraftSharp.Control
 {
     public record AttackHitInfo
     {

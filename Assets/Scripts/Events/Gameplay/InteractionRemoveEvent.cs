@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace MinecraftClient.Event
+namespace CraftSharp.Event
 {
     public record InteractionRemoveEvent : BaseEvent
     {

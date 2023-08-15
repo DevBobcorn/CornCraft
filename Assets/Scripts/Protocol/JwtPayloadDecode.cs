@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace MinecraftClient.Protocol
+namespace CraftSharp.Protocol
 {
     // Thanks to https://stackoverflow.com/questions/60404612/parse-jwt-token-to-get-the-payload-content-only-without-external-library-in-c-sh
     public static class JwtPayloadDecode

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-using MinecraftClient.Rendering;
+using CraftSharp.Rendering;
 
-namespace MinecraftClient.Control
+namespace CraftSharp.Control
 {
     public class MeleeWeapon : MonoBehaviour
     {

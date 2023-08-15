@@ -1,4 +1,4 @@
-namespace MinecraftClient
+namespace CraftSharp
 {
     public class DataLoadFlag
     {

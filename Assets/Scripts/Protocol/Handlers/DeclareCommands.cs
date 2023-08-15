@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MinecraftClient.Protocol.Handlers
+namespace CraftSharp.Protocol.Handlers
 {
     internal static class DeclareCommands
     {

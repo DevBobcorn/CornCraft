@@ -5,15 +5,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using UnityEngine;
-using UnityEngine.Rendering;
-using Unity.Collections;
 using Unity.Mathematics;
 
-using MinecraftClient.Event;
-using MinecraftClient.Mapping;
-using MinecraftClient.Resource;
+using CraftSharp.Event;
+using CraftSharp.Resource;
 
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     public class ChunkRenderManager : MonoBehaviour
     {

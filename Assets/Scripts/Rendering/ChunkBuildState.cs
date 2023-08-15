@@ -1,4 +1,4 @@
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     public enum ChunkBuildState
     {

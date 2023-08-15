@@ -1,9 +1,8 @@
 #nullable enable
 using UnityEngine;
-using MinecraftClient.Control;
-using MinecraftClient.Mapping;
+using CraftSharp.Control;
 
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     public class PlayerEntityRiggedRender : AnimatorEntityRender
     {

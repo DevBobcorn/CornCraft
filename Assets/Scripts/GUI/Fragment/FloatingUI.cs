@@ -2,9 +2,7 @@
 using System;
 using UnityEngine;
 
-using MinecraftClient.Mapping;
-
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     public abstract class FloatingUI : MonoBehaviour
     {

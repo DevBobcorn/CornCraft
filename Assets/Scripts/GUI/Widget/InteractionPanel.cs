@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-using MinecraftClient.Event;
-using MinecraftClient.Interaction;
+using CraftSharp.Event;
+using CraftSharp.Interaction;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     [RequireComponent(typeof (ScrollRect))]
     public class InteractionPanel : MonoBehaviour

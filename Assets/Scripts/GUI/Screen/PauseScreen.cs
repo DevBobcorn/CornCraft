@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     [RequireComponent(typeof (CanvasGroup))]
     public class PauseScreen : BaseScreen

@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading;
 using UnityEngine;
 
-using MinecraftClient.Protocol.Handlers.Forge;
+using CraftSharp.Protocol.Handlers.Forge;
 
-namespace MinecraftClient.Protocol.Handlers
+namespace CraftSharp.Protocol.Handlers
 {
     /// <summary>
     /// Handler for the Minecraft Forge protocol

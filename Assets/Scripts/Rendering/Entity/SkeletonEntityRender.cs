@@ -1,8 +1,7 @@
 #nullable enable
 using UnityEngine;
-using MinecraftClient.Mapping;
 
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     public class SkeletonEntityRender : BipedEntityRender
     {

@@ -3,9 +3,9 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-using MinecraftClient.Event;
+using CraftSharp.Event;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     [RequireComponent(typeof (CanvasGroup))]
     public class DeathScreen : BaseScreen

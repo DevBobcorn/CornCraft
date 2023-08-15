@@ -1,4 +1,4 @@
-﻿namespace MinecraftClient.Crypto
+﻿namespace CraftSharp.Crypto
 {
     /// <summary>
     /// Interface for AES stream

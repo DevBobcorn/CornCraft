@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-using MinecraftClient.Rendering;
+using CraftSharp.Rendering;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     public class FloatingUIManager : MonoBehaviour
     {

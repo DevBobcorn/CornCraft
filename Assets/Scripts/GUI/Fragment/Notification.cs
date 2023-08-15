@@ -3,9 +3,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-using MinecraftClient.Event;
+using CraftSharp.Event;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     [RequireComponent(typeof (Animator))]
     public class Notification : MonoBehaviour

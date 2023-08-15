@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     /// <summary>
     /// Represent a chunk of terrain in a Minecraft world

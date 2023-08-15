@@ -1,4 +1,4 @@
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public enum FaceDir
     {
@@ -39,5 +39,4 @@ namespace MinecraftClient.Resource
             };
         }
     }
-
 }

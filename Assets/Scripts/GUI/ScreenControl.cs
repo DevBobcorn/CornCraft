@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     public class ScreenControl : MonoBehaviour
     {

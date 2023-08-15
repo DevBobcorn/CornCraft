@@ -1,4 +1,4 @@
-﻿namespace MinecraftClient.Protocol.Handlers
+﻿namespace CraftSharp.Protocol.Handlers
 {
     /// <summary>
     /// Outgoing packet types

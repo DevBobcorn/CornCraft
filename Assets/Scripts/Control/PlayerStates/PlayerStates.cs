@@ -1,7 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 
-namespace MinecraftClient.Control
+namespace CraftSharp.Control
 {
     public interface PlayerStates
     {

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-using MinecraftClient.Mapping;
+using CraftSharp;
 
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     public class ChunkRenderColumn : MonoBehaviour
     {

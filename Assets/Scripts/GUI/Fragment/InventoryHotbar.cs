@@ -2,9 +2,9 @@
 using System;
 using UnityEngine;
 
-using MinecraftClient.Event;
+using CraftSharp.Event;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     public class InventoryHotbar : MonoBehaviour
     {

@@ -4,11 +4,12 @@ using System.Text;
 using System.IO;
 using System.Collections.Specialized;
 using System.Net.Sockets;
-using MinecraftClient.Proxy;
 using System.Net.Security;
 using System.Security.Authentication;
 
-namespace MinecraftClient.Protocol
+using CraftSharp.Proxy;
+
+namespace CraftSharp.Protocol
 {
     /// <summary>
     /// Create a new http request and optionally with proxy according to setting

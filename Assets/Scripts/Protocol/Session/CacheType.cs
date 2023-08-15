@@ -1,4 +1,4 @@
-﻿namespace MinecraftClient.Protocol.Session
+﻿namespace CraftSharp.Protocol.Session
 {
     public enum CacheType
     {

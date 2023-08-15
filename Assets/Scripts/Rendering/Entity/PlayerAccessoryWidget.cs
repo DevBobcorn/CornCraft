@@ -1,10 +1,10 @@
 #nullable enable
 using UnityEngine;
 
-using MinecraftClient.Control;
+using CraftSharp.Control;
 
 
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     public class PlayerAccessoryWidget : MonoBehaviour
     {

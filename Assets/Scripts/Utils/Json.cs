@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MinecraftClient
+namespace CraftSharp
 {
     /// <summary>
     /// This class parses JSON data and returns an object describing that data.

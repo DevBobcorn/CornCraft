@@ -1,10 +1,10 @@
 #nullable enable
 using System;
 using System.Linq;
-using MinecraftClient.Protocol.Message;
-using MinecraftClient.Protocol.ProfileKey;
+using CraftSharp.Protocol.Message;
+using CraftSharp.Protocol.ProfileKey;
 
-namespace MinecraftClient.Protocol
+namespace CraftSharp.Protocol
 {
     public class PlayerInfo
     {
@@ -25,7 +25,7 @@ namespace MinecraftClient.Protocol
 
         // Entity info
 
-        public Mapping.Entity? entity;
+        public Entity? entity;
 
         // For message signature
 

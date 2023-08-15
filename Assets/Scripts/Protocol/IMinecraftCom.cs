@@ -1,12 +1,11 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using MinecraftClient.Mapping;
-using MinecraftClient.Inventory;
-using MinecraftClient.Protocol.ProfileKey;
-using MinecraftClient.Protocol.Session;
+using CraftSharp.Inventory;
+using CraftSharp.Protocol.ProfileKey;
+using CraftSharp.Protocol.Session;
 
-namespace MinecraftClient.Protocol
+namespace CraftSharp.Protocol
 {
     /// <summary>
     /// Interface for the Minecraft protocol handler.

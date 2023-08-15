@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace MinecraftClient.Interaction
+namespace CraftSharp.Interaction
 {
     public enum BlockInteractionType
     {

@@ -1,4 +1,4 @@
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     public enum WidgetState
     {

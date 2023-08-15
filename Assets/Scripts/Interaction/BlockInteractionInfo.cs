@@ -1,7 +1,5 @@
 #nullable enable
-using MinecraftClient.Mapping;
-
-namespace MinecraftClient.Interaction
+namespace CraftSharp.Interaction
 {
     public class BlockInteractionInfo : InteractionInfo
     {

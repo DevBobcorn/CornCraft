@@ -3,10 +3,9 @@ using System;
 using UnityEngine;
 using TMPro;
 
-using MinecraftClient.Mapping;
-using MinecraftClient.Protocol;
+using CraftSharp.Protocol;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     [RequireComponent(typeof (Animator))]
     public class EntityNameUI : FloatingUI

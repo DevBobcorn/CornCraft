@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     public class MapIcon
     {

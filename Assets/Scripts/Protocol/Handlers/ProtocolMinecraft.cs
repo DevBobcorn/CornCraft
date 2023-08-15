@@ -9,18 +9,17 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-using MinecraftClient.Crypto;
-using MinecraftClient.Event;
-using MinecraftClient.Proxy;
-using MinecraftClient.Mapping;
-using MinecraftClient.Inventory;
-using MinecraftClient.Protocol.Handlers.PacketPalettes;
-using MinecraftClient.Protocol.Handlers.Forge;
-using MinecraftClient.Protocol.ProfileKey;
-using MinecraftClient.Protocol.Message;
-using MinecraftClient.Protocol.Session;
+using CraftSharp.Crypto;
+using CraftSharp.Event;
+using CraftSharp.Proxy;
+using CraftSharp.Inventory;
+using CraftSharp.Protocol.Handlers.PacketPalettes;
+using CraftSharp.Protocol.Handlers.Forge;
+using CraftSharp.Protocol.ProfileKey;
+using CraftSharp.Protocol.Message;
+using CraftSharp.Protocol.Session;
 
-namespace MinecraftClient.Protocol.Handlers
+namespace CraftSharp.Protocol.Handlers
 {
     /// <summary>
     /// Implementation for Minecraft 1.16+ Protocols

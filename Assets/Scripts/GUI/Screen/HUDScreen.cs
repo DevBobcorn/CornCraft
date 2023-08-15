@@ -4,10 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-using MinecraftClient.Event;
-using MinecraftClient.Mapping;
+using CraftSharp.Event;
+using CraftSharp;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     [RequireComponent(typeof (CanvasGroup))]
     public class HUDScreen : BaseScreen

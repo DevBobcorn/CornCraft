@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace MinecraftClient.Protocol.Handlers.PacketPalettes
+namespace CraftSharp.Protocol.Handlers.PacketPalettes
 {
     /// <summary>
     /// Packet type palette

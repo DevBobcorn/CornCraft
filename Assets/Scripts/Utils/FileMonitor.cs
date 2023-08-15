@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 
-namespace MinecraftClient
+namespace CraftSharp
 {
     /// <summary>
     /// Monitor file changes on disk

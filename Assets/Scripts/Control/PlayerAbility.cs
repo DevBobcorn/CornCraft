@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace MinecraftClient.Control
+namespace CraftSharp.Control
 {
     [CreateAssetMenu(fileName = "PlayerAbility", menuName = "CornCraft/PlayerAbility")]
     public class PlayerAbility : ScriptableObject

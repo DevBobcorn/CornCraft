@@ -1,6 +1,6 @@
 using System;
 
-namespace MinecraftClient.Event
+namespace CraftSharp.Event
 {
     public interface IEventRegistrations { }
 

@@ -1,6 +1,4 @@
-using MinecraftClient.Mapping;
-
-namespace MinecraftClient.Event
+namespace CraftSharp.Event
 {
     public record GameModeUpdateEvent : BaseEvent
     {

@@ -1,4 +1,4 @@
-﻿namespace MinecraftClient.Inventory
+﻿namespace CraftSharp.Inventory
 {
     /// <summary>
     /// Represents mouse interactions with an inventory window

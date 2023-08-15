@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     public static class LocationExtension
     {

@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     public class ExperienceOrbEntityRender : EntityRender
     {

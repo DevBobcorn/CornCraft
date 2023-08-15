@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     public abstract class BaseScreen : MonoBehaviour
     {

@@ -3,11 +3,10 @@ using UnityEngine;
 using Unity.Mathematics;
 using TMPro;
 
-using MinecraftClient.Inventory;
-using MinecraftClient.Rendering;
-using MinecraftClient.Resource;
+using CraftSharp.Rendering;
+using CraftSharp.Resource;
 
-namespace MinecraftClient.UI
+namespace CraftSharp.UI
 {
     public class InventoryItemSlot : MonoBehaviour
     {

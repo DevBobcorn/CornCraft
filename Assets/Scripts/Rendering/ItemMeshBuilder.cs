@@ -5,11 +5,9 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-using MinecraftClient.Mapping;
-using MinecraftClient.Resource;
-using MinecraftClient.Inventory;
+using CraftSharp.Resource;
 
-namespace MinecraftClient.Rendering
+namespace CraftSharp.Rendering
 {
     public class ItemMeshBuilder
     {

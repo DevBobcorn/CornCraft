@@ -1,6 +1,4 @@
-using MinecraftClient.Inventory;
-
-namespace MinecraftClient.Event
+namespace CraftSharp.Event
 {
     public record SlotUpdateEvent : BaseEvent
     {

@@ -1,6 +1,6 @@
 using Unity.Mathematics;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public class BlockModelFace // A quad face
     {
@@ -71,6 +71,5 @@ namespace MinecraftClient.Resource
 
             return face;
         }
-
     }    
 }

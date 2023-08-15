@@ -1,6 +1,6 @@
-using MinecraftClient.UI;
+using CraftSharp.UI;
 
-namespace MinecraftClient.Event
+namespace CraftSharp.Event
 {
     public record NotificationEvent : BaseEvent
     {

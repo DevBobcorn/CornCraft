@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace MinecraftClient.Protocol.Handlers.Forge
+
+namespace CraftSharp.Protocol.Handlers.Forge
 {
     /// <summary>
     /// Contains information about a modded server install.

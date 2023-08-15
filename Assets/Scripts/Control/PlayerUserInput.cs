@@ -1,7 +1,6 @@
 using UnityEngine;
-using MinecraftClient.Mapping;
 
-namespace MinecraftClient.Control
+namespace CraftSharp.Control
 {
     public class PlayerUserInput : MonoBehaviour
     {

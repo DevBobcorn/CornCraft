@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 using Unity.Mathematics;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public class BlockGeometry
     {
@@ -190,6 +190,5 @@ namespace MinecraftClient.Resource
 
             colliderVerts = verts;
         }
-
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Unity.Mathematics;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public class BlockGeometryBuilder
     {
@@ -127,7 +127,7 @@ namespace MinecraftClient.Resource
                         break;
                 }
 
-                ResourceLocation texIdentifier = model.resolveTextureName(face.texName);
+                ResourceLocation texIdentifier = model.ResolveTextureName(face.texName);
 
                 // This value is mapped only when uvlock is on, according to this block state's
                 // state rotation, and it rotates the area of texture which is used on the face
@@ -180,7 +180,6 @@ namespace MinecraftClient.Resource
                 // Increament vertex index offset of this cull direction
                 vertIndexOffset[cullDir] += 4; // Four vertices per quad
             }
-
         }
 
         private static Dictionary<int2, Dictionary<FaceDir, int>> CreateUVLockMap()

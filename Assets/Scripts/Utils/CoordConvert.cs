@@ -1,8 +1,6 @@
 using UnityEngine;
 
-using MinecraftClient.Mapping;
-
-namespace MinecraftClient
+namespace CraftSharp
 {
     // Unity has a different coodinate system than Minecraft,
     // therefore we need to convert them in some occasions...

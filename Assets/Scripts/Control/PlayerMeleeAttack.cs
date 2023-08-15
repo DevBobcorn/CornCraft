@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace MinecraftClient.Control
+namespace CraftSharp.Control
 {
     [CreateAssetMenu(menuName = "CornCraft/PlayerMeleeAttack")]
     public class PlayerMeleeAttack : ScriptableObject

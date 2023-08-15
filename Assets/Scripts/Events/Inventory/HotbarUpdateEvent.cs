@@ -1,7 +1,5 @@
 #nullable enable
-using MinecraftClient.Inventory;
-
-namespace MinecraftClient.Event
+namespace CraftSharp.Event
 {
     public record HotbarUpdateEvent : BaseEvent
     {

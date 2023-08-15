@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
 
-using MinecraftClient.Resource;
+using CraftSharp.Resource;
 
-namespace MinecraftClient.Mapping
+namespace CraftSharp
 {
     /// <summary>
     /// Represents a Minecraft World

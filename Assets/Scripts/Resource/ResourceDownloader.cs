@@ -9,7 +9,7 @@ using System.Linq;
 using UnityEngine;
 using System.Text.RegularExpressions;
 
-namespace MinecraftClient.Resource
+namespace CraftSharp.Resource
 {
     public static class ResourceDownloader
     {
