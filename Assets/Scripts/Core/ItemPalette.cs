@@ -96,7 +96,7 @@ namespace CraftSharp
                 if (spLists.Properties.ContainsKey(pair.Key))
                 {
                     foreach (var block in spLists.Properties[pair.Key].DataArray)
-                        pair.Value.Add(ResourceLocation.fromString(block.StringValue));
+                        pair.Value.Add(ResourceLocation.FromString(block.StringValue));
                 }
             }
 
@@ -115,7 +115,7 @@ namespace CraftSharp
                 {
                     if (int.TryParse(item.Key, out int numId))
                     {
-                        var itemId = ResourceLocation.fromString(item.Value.StringValue);
+                        var itemId = ResourceLocation.FromString(item.Value.StringValue);
 
                         ItemRarity rarity = ItemRarity.Common;
 
@@ -158,7 +158,7 @@ namespace CraftSharp
             {
                 foreach (var fixedRule in colorRules.Properties["fixed"].Properties)
                 {
-                    var itemId = ResourceLocation.fromString(fixedRule.Key);
+                    var itemId = ResourceLocation.FromString(fixedRule.Key);
 
                     if (dictId.ContainsKey(itemId))
                     {
@@ -180,7 +180,7 @@ namespace CraftSharp
             {
                 foreach (var fixedRule in colorRules.Properties["fixed_multicolor"].Properties)
                 {
-                    var itemId = ResourceLocation.fromString(fixedRule.Key);
+                    var itemId = ResourceLocation.FromString(fixedRule.Key);
 
                     if (dictId.ContainsKey(itemId))
                     {

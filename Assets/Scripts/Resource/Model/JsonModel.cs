@@ -51,7 +51,7 @@ namespace CraftSharp.Resource
             }
 
             // Reach our destination, a tex ref whose name is a resource location
-            return ResourceLocation.fromString(texRef.name);
+            return ResourceLocation.FromString(texRef.name);
         }
     }
 }

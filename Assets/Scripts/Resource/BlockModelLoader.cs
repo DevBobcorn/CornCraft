@@ -37,7 +37,7 @@ namespace CraftSharp.Resource
 
                 if (modelData.Properties.ContainsKey("parent"))
                 {
-                    ResourceLocation parentIdentifier = ResourceLocation.fromString(modelData.Properties["parent"].StringValue.Replace('\\', '/'));
+                    ResourceLocation parentIdentifier = ResourceLocation.FromString(modelData.Properties["parent"].StringValue.Replace('\\', '/'));
                     JsonModel parentModel;
                     if (manager.BlockModelTable.ContainsKey(parentIdentifier))
                     {

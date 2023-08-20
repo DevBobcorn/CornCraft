@@ -42,7 +42,6 @@ namespace CraftSharp.Rendering
             {
                 var ts = chunkRender.TokenSource;
 
-                bool isAllEmpty = true;
                 int count = ChunkRender.TYPES.Length, layerMask = 0;
                 int offsetY = World.GetDimension().minY;
 
@@ -82,7 +81,6 @@ namespace CraftSharp.Rendering
                                     FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], liquidTexture, x, y, z, liquidHeights, liquidCullFlags, world.GetWaterColor(loc));
                                     
                                     layerMask |= (1 << liquidLayerIndex);
-                                    isAllEmpty = false;
                                 }
                             }
 
@@ -105,14 +103,12 @@ namespace CraftSharp.Rendering
                                     models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags, color);
                                 
                                 layerMask |= (1 << layerIndex);
-                                isAllEmpty = false;
                             }
-                            
                         }
                     }
                 }
 
-                if (isAllEmpty) // Skip empty chunks...
+                if (layerMask == 0) // Skip empty chunks...
                 {
                     Loom.QueueOnMainThread(() => {
                         if (chunkRender == null || chunkRender.gameObject == null)
@@ -147,8 +143,6 @@ namespace CraftSharp.Rendering
                         
                         var meshDataArr  = Mesh.AllocateWritableMeshData(1);
                         var materialArr  = new UnityEngine.Material[layerCount];
-                        int vertOffset = 0;
-
                         var meshData = meshDataArr[0];
                         meshData.subMeshCount = layerCount;
 
@@ -170,6 +164,7 @@ namespace CraftSharp.Rendering
                         var allAnims = new float4[totalVertCount];
                         var allTints = new float3[totalVertCount];
 
+                        int vertOffset = 0;
                         for (int layer = 0;layer < count;layer++)
                         {
                             if ((layerMask & (1 << layer)) != 0)
@@ -208,7 +203,6 @@ namespace CraftSharp.Rendering
 
                         int subMeshIndex = 0;
                         vertOffset = 0;
-
                         for (int layer = 0;layer < count;layer++)
                         {
                             if ((layerMask & (1 << layer)) != 0)

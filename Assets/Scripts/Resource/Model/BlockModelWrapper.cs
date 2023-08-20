@@ -20,7 +20,7 @@ namespace CraftSharp.Resource
         {
             if (data.Properties.ContainsKey("model"))
             {
-                ResourceLocation modelIdentifier = ResourceLocation.fromString(data.Properties["model"].StringValue);
+                ResourceLocation modelIdentifier = ResourceLocation.FromString(data.Properties["model"].StringValue);
                 // Check if the model can be found...
                 if (manager.BlockModelTable.ContainsKey(modelIdentifier))
                 {
