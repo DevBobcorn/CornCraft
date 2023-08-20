@@ -1,5 +1,7 @@
 #nullable enable
+using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Unity.Mathematics;
 
 namespace CraftSharp.Resource
@@ -62,7 +64,32 @@ namespace CraftSharp.Resource
                     // Get opposite z
                     origin.z = -origin.z - size.z;
 
-                    var uv = VectorUtil.Json2Float2(cubeData.Properties["uv"]);
+                    var uv = float2.zero;
+                    Dictionary<FaceDir, float4>? perFaceUV = null;
+                    if (cubeData.Properties.ContainsKey("uv"))
+                    {
+                        if (cubeData.Properties["uv"].Type == Json.JSONData.DataType.Array) // Use whole box uv mapping
+                        {
+                            uv = VectorUtil.Json2Float2(cubeData.Properties["uv"]);
+                        }
+                        else // Use per-face uv mapping
+                        {
+                            perFaceUV = new();
+                            foreach (var pair in cubeData.Properties["uv"].Properties)
+                            {
+                                var faceDir = Directions.FaceDirFromName(pair.Key);
+                                var faceData = pair.Value.Properties;
+
+                                float2 faceUV = float2.zero, faceUVSize = float2.zero;
+                                if (faceData.ContainsKey("uv"))
+                                    faceUV = VectorUtil.Json2Float2(faceData["uv"]);
+                                if (faceData.ContainsKey("uv_size"))
+                                    faceUVSize = VectorUtil.Json2Float2(faceData["uv_size"]);
+                                
+                                perFaceUV.Add(faceDir, new float4(faceUV, faceUVSize));
+                            }
+                        }
+                    }
 
                     var rotation = float3.zero;
                     if (cubeData.Properties.ContainsKey("rotation"))
@@ -91,6 +118,7 @@ namespace CraftSharp.Resource
                         Origin = origin,
                         Size = size,
                         UV = uv,
+                        PerFaceUV = perFaceUV,
                         Inflate = inflate,
                         Pivot = pivot,
                         Rotation = rotation,
@@ -100,8 +128,10 @@ namespace CraftSharp.Resource
 
             return new EntityModelBone
             {
-                ParentName = parentName,
-                Name = boneName,
+                // Bone names are NOT case sensitive, so we convert all bone names
+                // to lower case to make sure they'll be referenced correctly
+                ParentName = parentName?.ToLower(),
+                Name = boneName.ToLower(),
                 MirrorUV = boneMirrorUV,
                 Pivot = bonePivot,
                 Rotation = boneRotation,

@@ -77,7 +77,7 @@ namespace CraftSharp
                 if (spLists.Properties.ContainsKey(pair.Key))
                 {
                     foreach (var block in spLists.Properties[pair.Key].DataArray)
-                        pair.Value.Add(ResourceLocation.fromString(block.StringValue));
+                        pair.Value.Add(ResourceLocation.FromString(block.StringValue));
                 }
             }
 
@@ -93,7 +93,7 @@ namespace CraftSharp
                     int numId;
                     if (int.TryParse(entityType.Key, out numId))
                     {
-                        var entityTypeId = ResourceLocation.fromString(entityType.Value.StringValue);
+                        var entityTypeId = ResourceLocation.FromString(entityType.Value.StringValue);
 
                         entityTypeTable.TryAdd(numId, new EntityType(numId,
                                 entityTypeId, containsItem.Contains(entityTypeId)));

@@ -40,7 +40,7 @@ namespace CraftSharp.Interaction
                 var entries = interactions.Properties["pickable"].DataArray;
 
                 foreach (var entry in entries) {
-                    var blockId = ResourceLocation.fromString(entry.StringValue);
+                    var blockId = ResourceLocation.FromString(entry.StringValue);
 
                     if (stateListTable.ContainsKey(blockId)) {
                         foreach (var stateId in stateListTable[blockId]) {
@@ -81,7 +81,7 @@ namespace CraftSharp.Interaction
 
                         foreach (var trigger in triggers)
                         {
-                            var blockId = ResourceLocation.fromString(trigger.StringValue);
+                            var blockId = ResourceLocation.FromString(trigger.StringValue);
 
                             if (stateListTable.ContainsKey(blockId))
                             {

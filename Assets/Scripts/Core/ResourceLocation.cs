@@ -20,7 +20,7 @@ namespace CraftSharp
             this.Path = path;
         }
 
-        public static ResourceLocation fromString(string source)
+        public static ResourceLocation FromString(string source)
         {
             if (source.Contains(':'))
             {

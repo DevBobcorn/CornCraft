@@ -147,7 +147,7 @@ namespace CraftSharp
         {
             var biomeName = (string)biomeData["name"];
             var biomeNumId = (int)biomeData["id"];
-            var biomeId = ResourceLocation.fromString(biomeName);
+            var biomeId = ResourceLocation.FromString(biomeName);
 
             if (biomeList.ContainsKey(biomeNumId))
                 biomeList.Remove(biomeNumId);

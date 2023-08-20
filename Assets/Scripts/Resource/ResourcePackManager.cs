@@ -220,7 +220,7 @@ namespace CraftSharp.Resource
 
                             foreach (var o in overrides)
                             {
-                                var overrideModelId = ResourceLocation.fromString(o.Properties["model"].StringValue);
+                                var overrideModelId = ResourceLocation.FromString(o.Properties["model"].StringValue);
 
                                 if (RawItemModelTable.ContainsKey(overrideModelId)) // Build this override
                                 {
@@ -485,7 +485,7 @@ namespace CraftSharp.Resource
                         {
                             if (!texItem.Value.StringValue.StartsWith('#'))
                             {
-                                var texId = ResourceLocation.fromString(texItem.Value.StringValue);
+                                var texId = ResourceLocation.FromString(texItem.Value.StringValue);
 
                                 if (texDict.ContainsKey(texId))
                                     textureIdSet.Add(texId);

@@ -38,7 +38,7 @@ namespace CraftSharp
             if (state.Contains('['))
             {
                 string[] parts = state.Split('[', 2);
-                var blockId = ResourceLocation.fromString(parts[0]);
+                var blockId = ResourceLocation.FromString(parts[0]);
                 string[] propStrs = parts[1].Substring(0, parts[1].Length - 1).Split(',');
                 foreach (var prop in propStrs)
                 {
@@ -50,7 +50,7 @@ namespace CraftSharp
             else
             {
                 // Simple, only a block id
-                return new BlockState(ResourceLocation.fromString(state), props);
+                return new BlockState(ResourceLocation.FromString(state), props);
             }
 
         }
