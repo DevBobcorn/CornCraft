@@ -24,16 +24,10 @@ namespace CraftSharp.Control
                 // Get virtual and render cameras
                 var followObj = transform.Find("Follow Virtual");
                 virtualCameraFollow = followObj.GetComponent<CinemachineVirtualCamera>();
-                followPOV = virtualCameraFollow.GetCinemachineComponent<CinemachinePOV>();
                 framingTransposer = virtualCameraFollow.GetCinemachineComponent<CinemachineFramingTransposer>();
 
-                if (renderCamera is not null)
-                    renderCameraPresent = true;
-                else
-                    Debug.LogWarning("Render camera not found!");
-
                 // Override input axis to disable input when paused
-                CinemachineCore.GetInputAxis = (axisName) => (CornApp.CurrentClient?.IsPaused() ?? true) ? 0F : Input.GetAxis(axisName);
+                CinemachineCore.GetInputAxis = (axisName) => PlayerUserInputData.Current.Paused ? 0F : Input.GetAxis(axisName);
 
                 initialized = true;
             }
@@ -51,10 +45,8 @@ namespace CraftSharp.Control
 
         void Update()
         {
-            if (client == null) return;
-
             // Disable input when game is paused, see EnsureInitialized() above
-            if (!client!.MouseScrollAbsorbed())
+            if (!PlayerUserInputData.Current.MouseScrollAbsorbed)
             {
                 float scroll = CinemachineCore.GetInputAxis("Mouse ScrollWheel");
 
@@ -70,31 +62,28 @@ namespace CraftSharp.Control
             }
         }
 
+        public override void SetTarget(Transform target)
+        {
+            EnsureInitialized();
+            virtualCameraFollow!.Follow = target;
+        }
+
         public override Transform? GetTarget() => virtualCameraFollow?.Follow;
 
-        public override Vector3? GetPosition() => renderCameraPresent ? renderCamera!.transform.position : null;
+        public override void SetYaw(float yaw)
+        {
+            followPOV!.m_HorizontalAxis.Value = yaw;
+        }
 
-        public override Transform GetTransform() => renderCameraPresent ? renderCamera!.transform : transform;
-
-        public override void SetPerspective(Perspective perspective)
+        public override void SetPerspective(Perspective newPersp)
         {
             EnsureInitialized();
 
             // Only third person perspective is accepted, lock to it and discard the perspective change
-            // Update player data
-            client!.Perspective = Perspective.ThirdPerson;
+            perspective = Perspective.ThirdPerson;
 
             // Broadcast perspective change
             EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(Perspective.ThirdPerson));
         }
-
-        public override void SetTarget(Transform target)
-        {
-            EnsureInitialized();
-
-            virtualCameraFollow!.Follow = target;
-        }
-
-        public override void SetYaw(float yaw) { }
     }
 }

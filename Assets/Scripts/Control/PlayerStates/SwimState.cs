@@ -23,7 +23,7 @@ namespace CraftSharp.Control
 
             bool costStamina = true;
 
-            if (inputData.horInputNormalized != Vector2.zero) // Move horizontally
+            if (inputData.HorInputNormalized != Vector2.zero) // Move horizontally
             {
                 // Smooth rotation for player model
                 info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval);
@@ -46,13 +46,13 @@ namespace CraftSharp.Control
                             player.StartForceMoveOperation("Climb to land",
                                     new ForceMoveOperation[] {
                                             new(org,  dest, 0.01F + Mathf.Max(info.LiquidDist - info.FrontDownDist - 0.2F, 0F) * 0.5F),
-                                            new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 1.1F,
+                                            new(dest, ability.Climb1mCurves, player.GetRotation(), 0F, 1.1F,
                                                 init: (info, rigidbody, player) => {
                                                     player.RandomizeMirroredFlag();
                                                     player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                                 },
                                                 update: (interval, inputData, info, rigidbody, player) =>
-                                                    info.Moving = inputData.horInputNormalized != Vector2.zero
+                                                    info.Moving = inputData.HorInputNormalized != Vector2.zero
                                             )
                                     } );
                         }
@@ -104,7 +104,7 @@ namespace CraftSharp.Control
                 moveVelocity.y = rigidbody.velocity.y;
 
             // Check vertical movement...
-            if (inputData.ascend)
+            if (inputData.Ascend)
             {
                 if (distAboveLiquidSurface > 0F) // Free fall in air
                 {
@@ -118,14 +118,14 @@ namespace CraftSharp.Control
                 else
                     moveVelocity.y =  moveSpeed; // Move up
             }
-            else if (inputData.descend)
+            else if (inputData.Descend)
             {
                 if (!info.Grounded)
                     moveVelocity.y = -moveSpeed;
             }
             else // Not moving horizontally
             {
-                if (inputData.horInputNormalized != Vector2.zero) // Moving, cancel gravity
+                if (inputData.HorInputNormalized != Vector2.zero) // Moving, cancel gravity
                 {
                     if (movementAffected)
                     {
@@ -151,7 +151,7 @@ namespace CraftSharp.Control
 
         public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (inputData.horInputNormalized == Vector2.zero && !inputData.ascend && !inputData.descend)
+            if (inputData.HorInputNormalized == Vector2.zero && !inputData.Ascend && !inputData.Descend)
                 return false;
 
             if (!info.Spectating && info.InLiquid)
@@ -162,7 +162,7 @@ namespace CraftSharp.Control
 
         public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (inputData.horInputNormalized == Vector2.zero && !inputData.ascend && !inputData.descend)
+            if (inputData.HorInputNormalized == Vector2.zero && !inputData.Ascend && !inputData.Descend)
                 return true;
             
             if (info.Spectating || !info.InLiquid)

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 
 using CraftSharp.Event;
-using CraftSharp;
+using CraftSharp.Control;
 
 namespace CraftSharp.UI
 {
@@ -57,13 +57,6 @@ namespace CraftSharp.UI
 
         public override bool ShouldPause()
         {
-            return false;
-        }
-
-        public override bool AbsorbMouseScroll()
-        {
-            if (interactionPanel is not null)
-                return interactionPanel.ShouldAbsordMouseScroll;
             return false;
         }
 
@@ -127,6 +120,28 @@ namespace CraftSharp.UI
 
             // Initialize controls
             screenGroup = GetComponent<CanvasGroup>();
+
+            if (interactionPanel != null)
+            {
+                interactionPanel.OnItemCountChange += newCount =>
+                {
+                    // Absorb mouse scroll input if there're more than 1 interaction options
+                    PlayerUserInputData.Current.MouseScrollAbsorbed = newCount > 1;
+                };
+            }
+
+            var game = CornApp.CurrentClient;
+            if (game != null)
+            {
+                if (game.CameraController?.GetPerspective() == Perspective.FirstPerson)
+                {
+                    crosshairAnimator!.SetBool(SHOW, true);
+                }
+                else
+                {
+                    crosshairAnimator!.SetBool(SHOW, false);
+                }
+            }
             
             return true;
         }
@@ -149,7 +164,6 @@ namespace CraftSharp.UI
             
             if (staminaCallback is not null)
                 EventManager.Instance.Unregister(staminaCallback);
-
         }
 
         void Update()
@@ -195,15 +209,20 @@ namespace CraftSharp.UI
                     modePanelShown = false;
 
                     if (selectedMode != (int) game.GameMode) // Commit switch request
+                    {
                         game.TrySendChat($"/gamemode {modeIdentifiers[selectedMode]}");
+                    }
                     
                     // Restore crosshair if necessary
-                    if (game.Perspective == Perspective.FirstPerson)
+                    if (game.CameraController?.GetPerspective() == Perspective.FirstPerson)
+                    {
                         crosshairAnimator!.SetBool(SHOW, true);
-                    
+                    }
                 }
                 else // Toggle debug info
+                {
                     debugInfo = !debugInfo;
+                }
             }
 
             if (Input.GetKeyDown(KeyCode.F)) // Execute interactions
@@ -222,7 +241,9 @@ namespace CraftSharp.UI
             }
 
             if (Input.GetKeyDown(KeyCode.F5))
-                game.SwitchPerspective();
+            {
+                game.CameraController?.SwitchPerspective();
+            }
 
             // Hotbar slot switching
             if (Input.GetKeyDown(KeyCode.Alpha1))

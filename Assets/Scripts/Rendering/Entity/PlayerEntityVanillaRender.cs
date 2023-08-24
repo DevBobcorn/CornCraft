@@ -31,7 +31,6 @@ namespace CraftSharp.Rendering
                 leftArm!.localEulerAngles  = new(-currentLegAngle * currentMovFract, 0F, 0F);
                 rightArm!.localEulerAngles = new( currentLegAngle * currentMovFract, 0F, 0F);
             }
-
         }
 
         private void UpdateSkinMaterial()
@@ -60,6 +59,5 @@ namespace CraftSharp.Rendering
                 Debug.LogWarning($"Failed to apply skin for {nameLower}");
             }
         }
-
     }
 }

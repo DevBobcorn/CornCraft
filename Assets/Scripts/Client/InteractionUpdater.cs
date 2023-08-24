@@ -21,15 +21,13 @@ namespace CraftSharp.Control
         {
             if (viewRay is null)
                 return;
-
-            RaycastHit viewHit;
-
-            Vector3? castResultPos  = null;
-            Vector3? castSurfaceDir = null;
-
-            if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out viewHit, 10F, BlockSelectionLayer))
+            
+            Vector3? castResultPos;
+            Vector3? castSurfaceDir;
+            
+            if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out RaycastHit viewHit, 10F, BlockSelectionLayer))
             {
-                castResultPos  = viewHit.point;
+                castResultPos = viewHit.point;
                 castSurfaceDir = viewHit.normal;
             }
             else
@@ -45,8 +43,9 @@ namespace CraftSharp.Control
                 TargetLocation = CoordConvert.Unity2MC(selection);
             }
             else
+            {
                 TargetLocation = null;
-
+            }
         }
 
         public const int INTERACTION_RADIUS = 3;
@@ -76,8 +75,9 @@ namespace CraftSharp.Control
                 var block = world.GetBlock(loc);
 
                 if (!table.ContainsKey(block.StateId))
+                {
                     RemoveInteraction(id); // Remove this one
-                
+                }
             }
 
             // Append new available interactions
@@ -91,12 +91,9 @@ namespace CraftSharp.Control
                         var loc = playerLoc + new Location(x, y, z);
                         // Hash locations in a 16*16*16 area
                         int locHash = loc.GetChunkBlockX() + (loc.GetChunkBlockY() << 4) + (loc.GetChunkBlockZ() << 8);
-                        
                         var block = world.GetBlock(loc);
 
-                        BlockInteractionDefinition? newDef;
-                        
-                        if (table.TryGetValue(block.StateId, out newDef))
+                        if (table.TryGetValue(block.StateId, out BlockInteractionDefinition? newDef))
                         {
                             if (interactionInfos.ContainsKey(locHash))
                             {
@@ -112,10 +109,10 @@ namespace CraftSharp.Control
 
                             }
                             else // Add this interaction
+                            {
                                 AddInteraction(locHash, loc, newDef);
-                            
+                            }
                         }
-
                     }
         }
 
@@ -140,7 +137,6 @@ namespace CraftSharp.Control
 
                 //Debug.Log($"Remove {id} {info.GetHint()} at {info.Location}");
             }
-            
         }
 
         private static bool PointOnGridEdge(float value)
@@ -167,7 +163,6 @@ namespace CraftSharp.Control
 
             // Update player interactions
             UpdateInteractions(client!.GetWorld());
-
         }
     }
 }

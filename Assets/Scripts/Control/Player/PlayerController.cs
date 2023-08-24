@@ -1,6 +1,5 @@
 #nullable enable
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 using CraftSharp.Event;
@@ -21,15 +20,15 @@ namespace CraftSharp.Control
         public PlayerMeleeAttack MeleeAttack => meleeAttack!;
 
         [SerializeField] protected PlayerAbility? ability;
+        [SerializeField] private CameraController? cameraController;
         [SerializeField] protected GameObject? meleeWeaponPrefab;
         [SerializeField] public Transform? cameraRef;
-        [SerializeField] public EntityRender? playerRender;
+        
+        private EntityRender? playerRender;
         [SerializeField] protected PhysicMaterial? physicMaterial;
         [HideInInspector] public bool UseRootMotion = false;
 
         public PlayerAbility Ability => ability!;
-        protected CornClient? client;
-        protected CameraController? cameraController;
         protected Rigidbody? playerRigidbody;
         public Rigidbody PlayerRigidbody => playerRigidbody!;
         protected Collider? playerCollider;
@@ -37,117 +36,94 @@ namespace CraftSharp.Control
         protected IPlayerState CurrentState = PlayerStates.IDLE;
         protected PlayerStatusUpdater? statusUpdater;
         public PlayerStatus? Status => statusUpdater?.Status;
-        public Transform visualTransform => playerRender!.VisualTransform;
+
+        public Quaternion GetRotation()
+        {
+            if (playerRender != null) // If player render is present
+            {
+                return playerRender.VisualTransform.rotation;
+            }
+            return Quaternion.identity;
+        }
+
+        public Vector3 GetOrientation()
+        {
+            if (playerRender != null) // If player render is present
+            {
+                return playerRender.VisualTransform.forward;
+            }
+            return Vector3.forward;
+        }
 
         private Action<GameModeUpdateEvent>? gameModeCallback;
 
-        public virtual void Initialize(CornClient client, CameraController camController)
+        public void UpdatePlayerRender(Entity entity, GameObject renderObj)
         {
-            this.client = client;
-            // Generate a dummy player render first, this will be replaced later
-            var dummyRenderObj = new GameObject("Dummy Player Render");
-            dummyRenderObj.transform.SetParent(transform, false);
-            playerRender = dummyRenderObj.AddComponent<EntityRender>();
-            // Use dummy object's own transform as dummy visual transform
-            playerRender.VisualTransform = playerRender.transform;
-            // Assign current camera controller
-            this.cameraController = camController;
-        }
+            var prevRender = playerRender;
 
-        protected GameObject CreateAnimatorRenderFromModel(GameObject visualPrefab)
-        {
-            var visualObj = GameObject.Instantiate(visualPrefab);
-            visualObj.name = "Visual";
-
-            var renderObj = new GameObject($"Player {visualPrefab.name} Entity");
-            var render = renderObj.AddComponent<PlayerEntityRiggedRender>();
-            render.VisualTransform = visualObj.transform;
-
-            var infoAnchorObj = new GameObject("Info Anchor");
-            infoAnchorObj.transform.SetParent(renderObj.transform, false);
-            infoAnchorObj.transform.localPosition = new(0F, 2F, 0F);
-            render.InfoAnchor = infoAnchorObj.transform;
-
-            visualObj.transform.SetParent(renderObj.transform, false);
-
-            return renderObj;
-        }
-
-        protected void SetPlayerRender(Entity entity, GameObject renderPrefab)
-        {
+            // Initialize and assign new visual gameobject
             // Clear existing event subscriptions
             OnLogicalUpdate = null;
             OnRandomizeMirroredFlag = null;
             OnWeaponStateChanged = null;
             OnCrossFadeState = null;
-
-            GameObject renderObj;
-
-            if (renderPrefab.GetComponent<Animator>() != null) // Model prefab, wrap it up
-            {
-                renderObj = CreateAnimatorRenderFromModel(renderPrefab);
-                
-            }
-            else // Player render prefab, just instantiate
-            {
-                renderObj = GameObject.Instantiate(renderPrefab);
-            }
-
-            renderObj!.name = $"Player Entity ({renderPrefab.name})";
             
             // Update controller's player render
             playerRender = renderObj.GetComponent<EntityRender>();
-            playerRender.transform.SetParent(transform, false);
 
-            // Destroy these colliders, so that they won't affect our movement
-            foreach (var collider in playerRender.GetComponentsInChildren<Collider>())
+            if (playerRender != null)
             {
-                Destroy(collider);
+                playerRender.transform.SetParent(transform, false);
+
+                // Destroy these colliders, so that they won't affect our movement
+                foreach (var collider in playerRender.GetComponentsInChildren<Collider>())
+                {
+                    Destroy(collider);
+                }
+
+                // Initialize player entity render
+                playerRender.Initialize(entity.Type, entity);
+
+                // Update render gameobject layer (do this last to ensure all children are present)
+                foreach (var child in renderObj.GetComponentsInChildren<Transform>())
+                {
+                    child.gameObject.layer = this.gameObject.layer;
+                }
+
+                var riggedRender = playerRender as PlayerEntityRiggedRender;
+                if (riggedRender != null) // If player render is rigged render
+                {
+                    // Additionally, update player state machine for rigged renders
+                    OnLogicalUpdate += (interval, status, rigidbody) => riggedRender.UpdateStateMachine(status);
+                    // Create melee weapon
+                    riggedRender.CreateWeapon(meleeWeaponPrefab!);
+                }
+                else // Player render is vanilla/entity render
+                {
+                    // Do nothing here...
+                }
+
+                // Update player render state machine
+                OnLogicalUpdate += (interval, status, rigidbody) =>
+                {
+                    // Update player render velocity
+                    playerRender.SetVisualMovementVelocity(rigidbody!.velocity);
+                    // Update render
+                    playerRender.UpdateAnimation(0.05F);
+                };   
             }
-
-            // Initialize player entity render
-            playerRender.Initialize(entity.Type, entity);
-
-            // Update render gameobject layer (do this last to ensure all children are present)
-            foreach (var child in renderObj.GetComponentsInChildren<Transform>())
+            else
             {
-                child.gameObject.layer = this.gameObject.layer;
+                Debug.LogWarning("Player render not found in game object!");
             }
-
-            var riggedRender = playerRender as PlayerEntityRiggedRender;
-            if (riggedRender != null) // If player render is rigged render
-            {
-                // Additionally, update player state machine for rigged renders
-                OnLogicalUpdate += (interval, status, rigidbody) => riggedRender.UpdateStateMachine(status);
-                // Create melee weapon
-                riggedRender.CreateWeapon(meleeWeaponPrefab!);
-            }
-            else // Player render is vanilla/entity render
-            {
-                // Do nothing here...
-            }
-
-            // Update player render state machine
-            OnLogicalUpdate += (interval, status, rigidbody) =>
-            {
-                // Update player render velocity
-                playerRender.SetVisualMovementVelocity(rigidbody!.velocity);
-                // Update render
-                playerRender.UpdateAnimation(0.05F);
-            };
-
-        }
-
-        public void UpdatePlayerRender(Entity entity, GameObject renderPrefab)
-        {
-            var prevRender = playerRender;
-
-            // Initialize and assign new visual gameobject
-            SetPlayerRender(entity, renderPrefab);
 
             if (prevRender != null)
             {
-                visualTransform.rotation = prevRender.VisualTransform.rotation;
+                if (playerRender != null)
+                {
+                    playerRender.transform.rotation = prevRender.VisualTransform.rotation;
+                }
+                
                 // Dispose previous render gameobject
                 Destroy(prevRender.gameObject);
             }
@@ -212,11 +188,11 @@ namespace CraftSharp.Control
                 case GameMode.Creative:
                 case GameMode.Adventure:
                     Status!.Spectating = false;
-                    CheckEntityEnabled();
+                    EnableEntity();
                     break;
                 case GameMode.Spectator:
                     Status!.Spectating = true;
-                    CheckEntityEnabled();
+                    DisableEntity();
                     break;
             }
         }
@@ -235,7 +211,7 @@ namespace CraftSharp.Control
 
             // Reset player status
             playerRigidbody!.velocity = Vector3.zero;
-            Status!.Grounded  = false;
+            Status!.Grounded = false;
             Status.InLiquid  = false;
             Status.OnWall    = false;
             Status.Sprinting = false;
@@ -304,7 +280,6 @@ namespace CraftSharp.Control
                 CurrentState.OnExit(statusUpdater!.Status, playerRigidbody!, this);
                 // Enter melee attack state
                 CurrentState = PlayerStates.MELEE;
-
                 CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
 
                 return true;
@@ -313,102 +288,16 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public void TurnToAttackTarget()
-        {
-            Vector3? targetPos = client?.GetAttackTarget();
-
-            if (targetPos is null) // Failed to get attack target's position, do nothing
-                return;
-
-            var posOffset = targetPos.Value - transform.position;
-
-            var attackYaw = GetYawFromVector2(new(posOffset.x, posOffset.z));
-
-            statusUpdater!.Status.TargetVisualYaw = attackYaw;
-            statusUpdater!.Status.CurrentVisualYaw = attackYaw;
-
-            visualTransform.eulerAngles = new(0F, attackYaw, 0F);
-        }
-
-        public void AttackDamage(bool enable)
-        {
-            if (statusUpdater!.Status.Attacking)
-            {
-                statusUpdater!.Status.AttackStatus.CausingDamage = enable;
-            }
-            else
-            {
-                Debug.LogWarning("Trying to toggle attack damage when not attacking!");
-            }
-        }
-
-        public void DealDamage(List<AttackHitInfo> hitInfos)
-        {
-            foreach (var hitInfo in hitInfos)
-            {
-                // Send attack packets to server
-                var entityId = hitInfo.EntityRender?.Entity?.ID;
-
-                if (entityId is not null)
-                    client!.InteractEntity(entityId.Value, 1);
-
-            }
-        }
-
-        public void ClearAttackCooldown()
-        {
-            if (statusUpdater!.Status.Attacking)
-            {
-                statusUpdater!.Status.AttackStatus.AttackCooldown = 0F;
-            }
-            else
-            {
-                Debug.LogWarning("Trying to clear attack cooldown when not attacking!");
-            }
-        }
- 
-        private void CheckEntityEnabled()
-        {
-            if (!client!.IsMovementReady()) // Movement is not ready, disable player entity
-            {
-                // Set player velocity to zero to stop it from floating around
-                playerRigidbody!.velocity = Vector3.zero;
-
-                if (!Status!.EntityDisabled) // If player entity is not disabled yet
-                {
-                    // Disable it
-                    DisableEntity();
-                    // Re-sync player position
-                    transform.position = client.GetPosition();
-                }
-            }
-            else // Movement is now ready
-            {
-                if (Status!.EntityDisabled && !Status.Spectating) // Player entity was previously disabled, and this player is not in spectator mode
-                {
-                    // Enable it back
-                    EnableEntity();
-                }
-
-                if (!Status!.EntityDisabled && Status.Spectating) // Player entity was not disabled, but this player is in spectator mode
-                {
-                    // Disable entity
-                    DisableEntity();
-                }
-            }
-        }
-
         protected void PreLogicalUpdate(float interval)
         {
-            // Check if entity should be enabled
-            CheckEntityEnabled();
-
             // Get input data from client
-            var inputData = client!.InputData;
+            var inputData = PlayerUserInputData.Current;
 
             // Update player status (in water, grounded, etc)
             if (!Status!.EntityDisabled)
-                statusUpdater!.UpdatePlayerStatus(client!.GetWorld(), visualTransform.forward);
+            {
+                statusUpdater!.UpdatePlayerStatus(GetOrientation());
+            }
             
             var status = statusUpdater!.Status;
 
@@ -431,15 +320,19 @@ namespace CraftSharp.Control
                 }
             }
 
-            Status!.CurrentVisualYaw = visualTransform.eulerAngles.y;
+            if (playerRender != null)
+            {
+                Status!.CurrentVisualYaw = playerRender.VisualTransform.eulerAngles.y;
+            }
 
             float prevStamina = status.StaminaLeft;
 
             // Prepare current and target player visual yaw before updating it
-            if (inputData.horInputNormalized != Vector2.zero)
+            if (inputData.HorInputNormalized != Vector2.zero)
             {
-                Status.UserInputYaw = GetYawFromVector2(inputData.horInputNormalized);
-                Status.TargetVisualYaw = cameraController!.GetViewEularAngles()?.y + Status.UserInputYaw ?? Status.TargetVisualYaw;
+                Status.UserInputYaw = GetYawFromVector2(inputData.HorInputNormalized);
+                //Status.TargetVisualYaw = inputData.CameraEularAngles.y + Status.UserInputYaw;
+                Status.TargetVisualYaw = cameraController!.GetYaw() + Status.UserInputYaw;
             }
             
             // Update player physics and transform using updated current state
@@ -447,10 +340,16 @@ namespace CraftSharp.Control
 
             // Broadcast current stamina if changed
             if (prevStamina != status.StaminaLeft)
-                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, status.StaminaLeft >= ability!.MaxStamina));
+            {
+                EventManager.Instance.Broadcast(new StaminaUpdateEvent(
+                        status.StaminaLeft, status.StaminaLeft >= ability!.MaxStamina));
+            }
 
             // Apply updated visual yaw to visual transform
-            visualTransform.eulerAngles = new(0F, Status.CurrentVisualYaw, 0F);
+            if (playerRender != null)
+            {
+                playerRender.VisualTransform.eulerAngles = new(0F, Status.CurrentVisualYaw, 0F);
+            }
         }
 
         protected void PostLogicalUpdate()
@@ -465,16 +364,24 @@ namespace CraftSharp.Control
             else
                 newPosition = transform.position;
 
-            // Update client player data
-            var newYaw = visualTransform.eulerAngles.y - 90F;
-            var newPitch = 0F;
-            
-            client!.UpdatePlayerStatus(newPosition, newYaw, newPitch, Status!.Grounded);
+            if (playerRender != null)
+            {
+                // Update client player data
+                var newYaw = playerRender.VisualTransform.eulerAngles.y - 90F;
+                var newPitch = 0F;
+                
+                // TODO: Use event to broadcast changes
+                OnMovementUpdate?.Invoke(newPosition, newYaw, newPitch, Status!.Grounded);
+            }
         }
 
         // Used only by player renders, will be cleared and reassigned upon player render update
         private delegate void PlayerUpdateEventHandler(float interval, PlayerStatus status, Rigidbody rigidbody);
         private event PlayerUpdateEventHandler? OnLogicalUpdate;
+
+        public delegate void PlayerMovementEventHandler(Vector3 position, float yaw, float pitch, bool grounded);
+        public event PlayerMovementEventHandler? OnMovementUpdate;
+
         void Update()
         {
             PreLogicalUpdate(Time.unscaledDeltaTime);
@@ -511,7 +418,11 @@ namespace CraftSharp.Control
                 playerRigidbody.velocity = Vector3.zero;
             
             playerRigidbody.position = CoordConvert.MC2Unity(loc);
-            visualTransform.eulerAngles = new(0F, yaw, 0F);
+
+            if (playerRender != null)
+            {
+                playerRender.VisualTransform.eulerAngles = new(0F, yaw, 0F);
+            }
         }
 
         protected static float GetYawFromVector2(Vector2 direction)
@@ -535,6 +446,5 @@ namespace CraftSharp.Control
             
             return $"State:\t{CurrentState}\n{statusInfo}";
         }
-
     }
 }

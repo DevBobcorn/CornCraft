@@ -42,7 +42,6 @@ namespace CraftSharp.UI
                 else
                     entityFloatingUIs.Remove(entityId);
             }
-            
         }
 
         void Update()
@@ -71,12 +70,11 @@ namespace CraftSharp.UI
                         AddForEntity(validTagOwners[i], render);
                         //Debug.Log($"Adding floating UI for #{validTagOwners[i]}");
                     }
-                    
                 }
             }
 
             var camController = CornApp.CurrentClient?.CameraController;
-            var viewDir = camController?.GetViewEularAngles();
+            var viewDir = camController?.GetEularAngles();
             var camPos = camController?.GetPosition();
 
             if (viewDir is not null && camPos is not null)
@@ -87,11 +85,8 @@ namespace CraftSharp.UI
                     target.eulerAngles = viewDir.Value;
                     var scale = UIScaleCurve!.Evaluate((camPos.Value - target.position).magnitude);
                     target.localScale = new(scale, scale, 1F);
-
                 }
             }
-
         }
-
     }
 }

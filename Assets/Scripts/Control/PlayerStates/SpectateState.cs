@@ -13,7 +13,7 @@ namespace CraftSharp.Control
 
             Vector3 moveVelocity = Vector3.zero;
 
-            if (inputData.horInputNormalized != Vector2.zero)
+            if (inputData.HorInputNormalized != Vector2.zero)
             {
                 info.Moving = true;
 
@@ -29,9 +29,9 @@ namespace CraftSharp.Control
                 info.Moving = false;
 
             // Check vertical movement...
-            if (inputData.ascend)
+            if (inputData.Ascend)
                 moveVelocity.y =  ability.WalkSpeed * 3F;
-            else if (inputData.descend)
+            else if (inputData.Descend)
                 moveVelocity.y = -ability.WalkSpeed * 3F;
 
             // Apply new velocity to rigidbody

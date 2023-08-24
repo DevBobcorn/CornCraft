@@ -14,6 +14,25 @@ namespace CraftSharp.Rendering
 
         [HideInInspector] public Animator? entityAnimator;
 
+        public static GameObject CreateFromModel(GameObject visualPrefab)
+        {
+            var visualObj = GameObject.Instantiate(visualPrefab);
+            visualObj.name = "Visual";
+
+            var renderObj = new GameObject($"Player {visualPrefab.name} Entity");
+            var render = renderObj.AddComponent<PlayerEntityRiggedRender>();
+            render.VisualTransform = visualObj.transform;
+
+            var infoAnchorObj = new GameObject("Info Anchor");
+            infoAnchorObj.transform.SetParent(renderObj.transform, false);
+            infoAnchorObj.transform.localPosition = new(0F, 2F, 0F);
+            render.InfoAnchor = infoAnchorObj.transform;
+
+            visualObj.transform.SetParent(renderObj.transform, false);
+
+            return renderObj;
+        }
+
         public override void SetVisualMovementVelocity(Vector3 velocity)
         {
             base.SetVisualMovementVelocity(velocity);

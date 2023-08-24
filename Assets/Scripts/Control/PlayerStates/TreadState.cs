@@ -31,7 +31,7 @@ namespace CraftSharp.Control
 
         public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (inputData.horInputNormalized != Vector2.zero || inputData.ascend || inputData.descend)
+            if (inputData.HorInputNormalized != Vector2.zero || inputData.Ascend || inputData.Descend)
                 return false; 
             
             if (!info.Spectating && info.InLiquid)
@@ -42,7 +42,7 @@ namespace CraftSharp.Control
 
         public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (inputData.horInputNormalized != Vector2.zero || inputData.ascend || inputData.descend)
+            if (inputData.HorInputNormalized != Vector2.zero || inputData.Ascend || inputData.Descend)
                 return true; 
             
             if (info.Spectating || !info.InLiquid)

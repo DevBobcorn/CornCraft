@@ -4,41 +4,33 @@ namespace CraftSharp.Control
 {
     public class PlayerUserInput : MonoBehaviour
     {
-        public void UpdateInputs(PlayerUserInputData inputData, Perspective perspective)
+        void Update()
         {
-            if (!CornApp.CurrentClient.IsPaused())
+            var inputData = PlayerUserInputData.Current;
+            if (!inputData.Paused)
             {
                 float h = GetNormalized(Input.GetKey(KeyCode.D), Input.GetKey(KeyCode.A));
                 float v = GetNormalized(Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S));
 
                 if (h == 0 && v == 0)
-                    inputData.horInputNormalized = Vector2.zero;
+                    inputData.HorInputNormalized = Vector2.zero;
                 else
-                    inputData.horInputNormalized = new Vector2(h, v).normalized;
+                    inputData.HorInputNormalized = new Vector2(h, v).normalized;
 
-                inputData.attack  = Input.GetButtonDown("Attack");
+                inputData.Attack  = Input.GetButtonDown("Attack");
+                inputData.UseItem = Input.GetButtonDown("UseItem");
+                inputData.Sprint  = Input.GetButtonDown("Sprint");
 
-                if (perspective == Perspective.ThirdPerson)
-                {
-                    // Sprinting with use item button is also possible in third person mode
-                    inputData.sprint = Input.GetButtonDown("UseItem") || Input.GetButtonDown("Sprint");
-                }
-                else
-                {
-                    inputData.useItem = Input.GetButtonDown("UseItem");
-                    inputData.sprint  = Input.GetButtonDown("Sprint");
-                }
-
-                inputData.ascend  = Input.GetButton("GoUp");
-                inputData.descend = Input.GetButton("GoDown");
+                inputData.Ascend  = Input.GetButton("GoUp");
+                inputData.Descend = Input.GetButton("GoDown");
             }
             else
             {
-                inputData.horInputNormalized = Vector2.zero;
+                inputData.HorInputNormalized = Vector2.zero;
 
-                inputData.attack  = false;
-                inputData.ascend  = false;
-                inputData.descend = false;
+                inputData.Attack  = false;
+                inputData.Ascend  = false;
+                inputData.Descend = false;
             }
         }
 

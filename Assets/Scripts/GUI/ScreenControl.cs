@@ -1,24 +1,22 @@
 using System.Collections.Generic;
+using CraftSharp.Control;
 using UnityEngine;
 
 namespace CraftSharp.UI
 {
     public class ScreenControl : MonoBehaviour
     {
-        private bool isPaused;
-        public bool IsPaused { get { return isPaused; } }
-
         private void PauseGame()
         {
-            isPaused = true;
+            PlayerUserInputData.Current.Paused = true;
         }
 
         private void ResumeGame()
         {
-            isPaused = false;
+            PlayerUserInputData.Current.Paused = false;
         }
 
-        private Stack<BaseScreen> screenStack = new Stack<BaseScreen>();
+        private readonly Stack<BaseScreen> screenStack = new();
 
         public bool IsTopScreen(BaseScreen screen)
         {
@@ -50,7 +48,6 @@ namespace CraftSharp.UI
 
                 UpdateScreenStates();
             }
-
         }
 
         public void TryPopScreen()
@@ -69,7 +66,6 @@ namespace CraftSharp.UI
                 screenStack.Peek().IsActive = true;
 
             UpdateScreenStates();
-
         }
 
         // Called before exiting the main scene
@@ -89,7 +85,7 @@ namespace CraftSharp.UI
             //Debug.Log($"In window stack: {string.Join(' ', screenStack)}");
 
             // Update States
-            if (isPaused != shouldPauseGame)
+            if (PlayerUserInputData.Current.Paused != shouldPauseGame)
             {
                 if (shouldPauseGame)
                     PauseGame();
@@ -100,7 +96,5 @@ namespace CraftSharp.UI
             Cursor.lockState = releaseCursor ? CursorLockMode.None : CursorLockMode.Locked;
 
         }
-
     }
-
 }

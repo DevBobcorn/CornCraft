@@ -29,6 +29,9 @@ namespace CraftSharp.UI
         private Action<InteractionAddEvent>?     addCallback;
         private Action<InteractionRemoveEvent>?  removeCallback;
 
+        public delegate void ItemCountEventHandler(int newCount);
+        public event ItemCountEventHandler? OnItemCountChange;
+
         void Start()
         {
             // Initialize controls
@@ -58,7 +61,6 @@ namespace CraftSharp.UI
             
             if (removeCallback is not null)
                 EventManager.Instance.Unregister(removeCallback);
-
         }
 
         public void AddInteractionOption(int id, InteractionInfo info)
@@ -83,7 +85,7 @@ namespace CraftSharp.UI
                 else if (selectedIndex < 0 || selectedIndex >= interactionOptions.Count)
                     SetSelected(0); // There's at least 1 option available after adding
                 
-                scrollHint!.SetBool(SHOW, interactionOptions.Count > 1); // Show mouse hint
+                scrollHint!.SetBool(SHOW, interactionOptions.Count > 1); // Show or hide scroll hint
             }
             else
             {
@@ -92,6 +94,8 @@ namespace CraftSharp.UI
                 if (optionObj is not null)
                     Destroy(optionObj);
             }
+
+            OnItemCountChange?.Invoke(interactionOptions.Count);
         }
 
         public void RunInteractionOption()
@@ -127,7 +131,8 @@ namespace CraftSharp.UI
                 }
             }
 
-            scrollHint!.SetBool(SHOW, interactionOptions.Count > 1); // Show mouse hint
+            scrollHint!.SetBool(SHOW, interactionOptions.Count > 1); // Show or hide scroll hint
+            OnItemCountChange?.Invoke(interactionOptions.Count);
         }
 
         public void SelectPrevOption()
