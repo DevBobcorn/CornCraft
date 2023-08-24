@@ -9,19 +9,38 @@ namespace CraftSharp.Control
         protected static readonly Vector3 VIEWPORT_CENTER    = new(0.5F,  0.5F, 0F);
         protected CameraInfo cameraInfo = new();
         public Camera? RenderCamera => renderCamera;
-
-        protected CornClient? client;
-        public void SetClient(CornClient client) => this.client = client;
+        protected Perspective perspective = Perspective.ThirdPerson;
 
         // Flag variables
-        protected bool initialized = false, renderCameraPresent = false;
+        protected bool initialized = false;
 
-        public abstract void SetPerspective(Perspective perspective);
+        public abstract void SetPerspective(Perspective newPersp);
+
+        public void SwitchPerspective()
+        {
+            // Switch to next perspective
+            var newPersp = perspective switch
+            {
+                Perspective.FirstPerson    => Perspective.ThirdPerson,
+                Perspective.ThirdPerson    => Perspective.FirstPerson,
+
+                _                          => Perspective.ThirdPerson
+            };
+
+            SetPerspective(newPersp);
+        }
+
+        public Perspective GetPerspective()
+        {
+            return perspective;
+        }
 
         public virtual Ray? GetViewportCenterRay()
         {
-            if (renderCameraPresent)
-                return renderCamera!.ViewportPointToRay(VIEWPORT_CENTER);
+            if (renderCamera != null)
+            {
+                return renderCamera.ViewportPointToRay(VIEWPORT_CENTER);
+            }
             return null;
         }
 
@@ -34,20 +53,33 @@ namespace CraftSharp.Control
         public virtual Vector3 GetTargetViewportPos()
         {
             var targetPos = GetTarget()?.position;
-            if (renderCameraPresent && targetPos is not null)
+            if (renderCamera != null && targetPos is not null)
             {
-                return renderCamera!.WorldToViewportPoint(targetPos.Value);
+                return renderCamera.WorldToViewportPoint(targetPos.Value);
             }
             return VIEWPORT_CENTER;
         }
 
-        public virtual Vector3? GetViewEularAngles() => renderCamera?.transform.eulerAngles;
+        public virtual Transform GetTransform()
+        {
+            return renderCamera?.transform ?? transform;
+        }
+
+        public virtual float GetYaw()
+        {
+            return GetTransform().eulerAngles.y;
+        }
 
         public abstract void SetYaw(float yaw);
 
-        public abstract Vector3? GetPosition();
+        public virtual Vector3 GetPosition()
+        {
+            return GetTransform().position;
+        }
 
-        public abstract Transform GetTransform();
-
+        public virtual Vector3 GetEularAngles()
+        {
+            return GetTransform().eulerAngles;
+        }
     }
 }

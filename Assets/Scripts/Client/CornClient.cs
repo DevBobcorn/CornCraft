@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 using System.IO;
-using System.Linq;
-
 using UnityEngine;
 
 using CraftSharp.Control;
@@ -18,7 +16,6 @@ using CraftSharp.Protocol.Session;
 using CraftSharp.Proxy;
 using CraftSharp.Rendering;
 using CraftSharp.UI;
-using CraftSharp;
 using CraftSharp.Inventory;
 
 namespace CraftSharp
@@ -32,8 +29,8 @@ namespace CraftSharp
         [SerializeField] public BaseEnvironmentManager? EnvironmentManager;
         [SerializeField] public MaterialManager? MaterialManager;
         
-        [SerializeField] public GameObject? PlayerControllerPrefab;
-        [SerializeField] public GameObject? PlayerRenderPrefab;
+        [SerializeField] public PlayerController? PlayerController;
+        [SerializeField] private GameObject? playerRenderPrefab;
         [SerializeField] public CameraController? CameraController;
         [SerializeField] public ScreenControl? ScreenControl;
         [SerializeField] public HUDScreen? HUDScreen;
@@ -87,21 +84,11 @@ namespace CraftSharp
 
         #region Environment
         public World GetWorld() => ChunkRenderManager!.World;
-        public bool IsMovementReady()
-        {
-            if (!locationReceived)
-                return false;
-            
-            var loc = clientEntity.Location;
-            return ChunkRenderManager!.IsChunkRenderReady(
-                    loc.GetChunkX(), loc.GetChunkY(), loc.GetChunkZ());
-        }
 
         #endregion
 
         #region Players and Entities
         private bool locationReceived = false;
-        public Perspective Perspective = 0;
         public GameMode GameMode { get; private set; } = GameMode.Survival;
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         public float? YawToSend = null, PitchToSend = null;
@@ -151,7 +138,6 @@ namespace CraftSharp
             return EntityRenderManager!.GetAttackTarget(GetPosition());
         }
 
-        private PlayerController? playerController;
         private InteractionUpdater? interactionUpdater;
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         private readonly Dictionary<int, Entity> entities = new();
@@ -159,8 +145,10 @@ namespace CraftSharp
 
         void Awake() // In case where the client wasn't properly assigned before
         {
-            if (CornApp.CurrentClient is null)
+            if (CornApp.CurrentClient == null)
+            {
                 CornApp.SetCurrentClient(this);
+            }
         }
 
         void Start()
@@ -176,47 +164,17 @@ namespace CraftSharp
             // Get player user input
             playerUserInput = GetComponent<PlayerUserInput>();
 
-            // Prepare player controller gameobject
-            var playerObj = GameObject.Instantiate(PlayerControllerPrefab);
-            playerController = playerObj!.GetComponent<PlayerController>();
-            playerController.Initialize(this, CameraController!);
-
             // Set up camera controller
-            CameraController!.SetClient(this);
-            CameraController.SetTarget(playerController.cameraRef!);
+            CameraController!.SetTarget(PlayerController!.cameraRef!);
 
             // Set up interaction updater
             interactionUpdater = GetComponent<InteractionUpdater>();
             interactionUpdater!.Initialize(this, CameraController);
         }
 
-        void Update()
-        {
-            // Update player input
-            playerUserInput!.UpdateInputs(InputData, Perspective);
-        }
-
-        public bool IsPaused() => ScreenControl!.IsPaused;
-
-        public bool MouseScrollAbsorbed() => ScreenControl!.GetTopScreen().AbsorbMouseScroll();
-
-        public void SwitchPerspective()
-        {
-            // Switch to next perspective
-            var newPersp = Perspective switch
-            {
-                Perspective.FirstPerson    => Perspective.ThirdPerson,
-                Perspective.ThirdPerson    => Perspective.FirstPerson,
-
-                _                          => Perspective.ThirdPerson
-            };
-            
-            CameraController?.SetPerspective(newPersp);
-        }
-
         public string GetInfoString(bool withDebugInfo)
         {
-            string baseString = $"FPS: {(int)(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}\nREADY: {IsMovementReady()}";
+            string baseString = $"FPS: {(int)(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}";
 
             if (withDebugInfo)
             {
@@ -236,7 +194,7 @@ namespace CraftSharp
                     targetInfo = "\n";
                 }
                 
-                return baseString + $"\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
+                return baseString + $"\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{PlayerController?.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
             }
             
@@ -281,7 +239,27 @@ namespace CraftSharp
                     clientEntity.SetHeadYawFromByte(127);
                     clientEntity.MaxHealth = 20F;
 
-                    playerController!.UpdatePlayerRender(clientEntity, PlayerRenderPrefab!);
+                    if (playerRenderPrefab != null)
+                    {
+                        GameObject renderObj;
+                        if (playerRenderPrefab.GetComponent<Animator>() != null) // Model prefab, wrap it up
+                        {
+                            renderObj = AnimatorEntityRender.CreateFromModel(playerRenderPrefab);
+                        }
+                        else // Player render prefab, just instantiate
+                        {
+                            renderObj = GameObject.Instantiate(playerRenderPrefab);
+                        }
+                        renderObj!.name = $"Player Entity ({playerRenderPrefab.name})";
+
+                        PlayerController!.UpdatePlayerRender(clientEntity, renderObj);
+                        // Subscribe movement events
+                        PlayerController!.OnMovementUpdate += UpdatePlayerStatus;
+                    }
+                    else
+                    {
+                        throw new Exception("Player render prefab is not assigned for game client!");
+                    }
 
                     return true; // Client successfully started
                 }
@@ -1051,7 +1029,7 @@ namespace CraftSharp
                         // Force refresh environment collider
                         ChunkRenderManager?.RebuildTerrainCollider(location.ToFloor());
                         // Then update player location
-                        playerController!.SetLocation(location, yaw: yaw);
+                        PlayerController!.SetLocation(location, yaw: yaw);
                         // Update camera yaw
                         CameraController!.SetYaw(yaw);
 
@@ -1063,7 +1041,7 @@ namespace CraftSharp
                 else // Position correction from server
                 {                    
                     Loom.QueueOnMainThread(() => {
-                        var offset = playerController!.transform.position - CoordConvert.MC2Unity(location);
+                        var offset = PlayerController!.transform.position - CoordConvert.MC2Unity(location);
                         if (offset.magnitude < 8F)
                         {
                             return;
@@ -1074,7 +1052,7 @@ namespace CraftSharp
                         // Force refresh environment collider
                         ChunkRenderManager?.RebuildTerrainCollider(location.ToFloor());
                         // Then update player location
-                        playerController!.SetLocation(location, yaw: yaw);
+                        PlayerController!.SetLocation(location, yaw: yaw);
 
                         Debug.Log($"Loc updated to {location} with yaw {yaw} error value: {offset.magnitude}");
                     });

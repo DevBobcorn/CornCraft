@@ -30,8 +30,6 @@ namespace CraftSharp.Control
 
         private CinemachinePOV? followPOV, fixedPOV;
 
-        private float currentTargetDistance;
-
         public override void EnsureInitialized()
         {
             if (!initialized)
@@ -39,16 +37,10 @@ namespace CraftSharp.Control
                 // Get virtual and render cameras
                 followPOV = virtualCameraFollow!.GetCinemachineComponent<CinemachinePOV>();
                 framingTransposer = virtualCameraFollow.GetCinemachineComponent<CinemachineFramingTransposer>();
-
                 fixedPOV = virtualCameraFixed!.GetCinemachineComponent<CinemachinePOV>();
 
-                if (renderCamera is not null)
-                    renderCameraPresent = true;
-                else
-                    Debug.LogWarning("Render camera not found!");
-
                 // Override input axis to disable input when paused
-                CinemachineCore.GetInputAxis = (axisName) => (CornApp.CurrentClient?.IsPaused() ?? true) ? 0F : Input.GetAxis(axisName);
+                CinemachineCore.GetInputAxis = (axisName) => PlayerUserInputData.Current.Paused ? 0F : Input.GetAxis(axisName);
 
                 initialized = true;
             }
@@ -66,15 +58,14 @@ namespace CraftSharp.Control
             virtualCameraFollow!.m_Lens.FieldOfView = fov;
             virtualCameraFixed!.m_Lens.FieldOfView  = fov;
 
-            SetPerspective(Perspective.ThirdPerson);
+            // Set perspective to current value to initialize
+            SetPerspective(perspective);
         }
 
         void Update()
         {
-            if (client == null) return;
-
             // Disable input when game is paused, see EnsureInitialized() above
-            if (!client!.MouseScrollAbsorbed())
+            if (!PlayerUserInputData.Current.MouseScrollAbsorbed)
             {
                 float scroll = CinemachineCore.GetInputAxis("Mouse ScrollWheel");
 
@@ -91,7 +82,7 @@ namespace CraftSharp.Control
                 virtualCameraFollow!.m_Lens.FieldOfView = fov;
                 virtualCameraFixed!.m_Lens.FieldOfView  = fov;
 
-                if (client!.Perspective == Perspective.ThirdPerson) // Update target local position
+                if (perspective == Perspective.ThirdPerson) // Update target local position
                 {
                     framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
                     framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
@@ -117,35 +108,28 @@ namespace CraftSharp.Control
             fixedPOV!.m_HorizontalAxis.Value = yaw;
         }
 
-        public override Vector3? GetPosition() => renderCameraPresent ? renderCamera!.transform.position : null;
-
-        public override Transform GetTransform() => renderCameraPresent ? renderCamera!.transform : transform;
-
-        public override void SetPerspective(Perspective perspective)
+        public override void SetPerspective(Perspective newPersp)
         {
             EnsureInitialized();
 
-            switch (perspective)
+            switch (newPersp)
             {
                 case Perspective.FirstPerson:
-                    EnterFirstPersonMode(client!.Perspective);
+                    EnterFirstPersonMode();
                     break;
                 case Perspective.ThirdPerson:
-                    EnterThirdPersonMode(client!.Perspective);
+                    EnterThirdPersonMode();
                     break;
             }
 
-            // Update player data
-            client!.Perspective = perspective;
-
             // Broadcast perspective change
-            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(perspective));
+            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(newPersp));
         }
 
         private bool IsFixed()
         {
             // Camera controller is fixed when player's in first person mode
-            return client!.Perspective == Perspective.FirstPerson;
+            return perspective == Perspective.FirstPerson;
         }
 
         public override Vector3 GetTargetViewportPos()
@@ -154,16 +138,16 @@ namespace CraftSharp.Control
                 return VIEWPORT_CENTER;
             
             var targetPos = GetTarget()?.position;
-            if (renderCameraPresent && targetPos is not null)
+            if (renderCamera != null && targetPos is not null)
             {
                 return renderCamera!.WorldToViewportPoint(targetPos.Value);
             }
             return VIEWPORT_CENTER;
         }
 
-        private void EnterFirstPersonMode(Perspective prevPersp)
+        private void EnterFirstPersonMode()
         {
-            if (prevPersp == Perspective.ThirdPerson)
+            if (perspective == Perspective.ThirdPerson) // Previously third person
             {
                 // Sync virtual camera rotation
                 fixedPOV!.m_HorizontalAxis.Value = followPOV!.m_HorizontalAxis.Value;
@@ -174,8 +158,10 @@ namespace CraftSharp.Control
             }
 
             // Don't render player on this camera
-            if (renderCameraPresent)
-                renderCamera!.cullingMask = firstPersonCullingMask;
+            if (renderCamera != null)
+            {
+                renderCamera.cullingMask = firstPersonCullingMask;
+            }
             
             // Update field of view
             var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
@@ -184,11 +170,13 @@ namespace CraftSharp.Control
             
             // Make fixed virtual camera the live camera
             virtualCameraFixed!.MoveToTopOfPrioritySubqueue();
+
+            perspective = Perspective.FirstPerson;
         }
 
-        private void EnterThirdPersonMode(Perspective prevPersp)
+        private void EnterThirdPersonMode()
         {
-            if (prevPersp == Perspective.FirstPerson)
+            if (perspective == Perspective.FirstPerson) // Previously first person
             {
                 // Sync virtual camera rotation
                 followPOV!.m_HorizontalAxis.Value = fixedPOV!.m_HorizontalAxis.Value;
@@ -196,8 +184,10 @@ namespace CraftSharp.Control
             }
 
             // Render player on this camera
-            if (renderCameraPresent)
-                renderCamera!.cullingMask = thirdPersonCullingMask;
+            if (renderCamera != null)
+            {
+                renderCamera.cullingMask = thirdPersonCullingMask;
+            }
             
             // Update field of view
             var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
@@ -213,7 +203,8 @@ namespace CraftSharp.Control
 
             // Make normal virtual camera the live camera
             virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
-        }
 
+            perspective = Perspective.ThirdPerson;
+        }
     }
 }

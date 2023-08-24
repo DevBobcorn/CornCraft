@@ -12,12 +12,12 @@ namespace CraftSharp.Control
             info.Sprinting = false;
             info.Moving = false;
 
-            if (inputData.attack) // Attack available
+            if (inputData.Attack) // Attack available
             {
                 player.TryStartAttack();
                 
             }
-            else if (inputData.ascend) // Jump in place
+            else if (inputData.Ascend) // Jump in place
             {
                 rigidbody.velocity = new(0F, ability.JumpSpeed, 0F);
                 info.Grounded = false;
@@ -31,7 +31,7 @@ namespace CraftSharp.Control
 
         public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (inputData.horInputNormalized != Vector2.zero)
+            if (inputData.HorInputNormalized != Vector2.zero)
                 return false;
             
             if (!info.Spectating && info.Grounded && !info.OnWall && !info.InLiquid)
@@ -42,7 +42,7 @@ namespace CraftSharp.Control
 
         public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (inputData.horInputNormalized != Vector2.zero)
+            if (inputData.HorInputNormalized != Vector2.zero)
                 return true;
             
             if (info.Spectating || !info.Grounded || info.OnWall || info.InLiquid)

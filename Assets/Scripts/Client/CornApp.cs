@@ -8,6 +8,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+using CraftSharp.Control;
 using CraftSharp.Event;
 using CraftSharp.Interaction;
 using CraftSharp.Protocol.ProfileKey;

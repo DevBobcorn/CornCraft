@@ -10,7 +10,7 @@ namespace CraftSharp.Control
             var meleeAttack = player.MeleeAttack;
 
             info.Sprinting = false;
-            info.Moving = inputData.horInputNormalized != Vector2.zero;
+            info.Moving = inputData.HorInputNormalized != Vector2.zero;
 
             info.Grounded = true; // Force grounded
             info.MoveVelocity = Vector3.zero; // Cancel move
@@ -27,26 +27,19 @@ namespace CraftSharp.Control
             }
             else if (attackStatus.AttackCooldown <= 0F) // Attack available
             {
-                if (inputData.horInputNormalized != Vector2.zero) // Start moving, exit attack state
+                if (inputData.HorInputNormalized != Vector2.zero) // Start moving, exit attack state
                 {
                     info.Attacking = false;
                     attackStatus.AttackStage = -1;
                 }
-                else if (inputData.attack) // Enter next attack stage
+                else if (inputData.Attack) // Enter next attack stage
                 {
                     info.Attacking = true;
                     var nextStage = (attackStatus.AttackStage + 1) % meleeAttack.StageCount;
 
                     StartMeleeStage(meleeAttack, attackStatus, false, nextStage, player);
-                    
                 }
-                
             }
-            else // Cooldown not ready
-            {
-                
-            }
-            
         }
 
         private void StartMeleeStage(PlayerMeleeAttack meleeAttack, AttackStatus attackStatus, bool init, int stage, PlayerController player)
@@ -55,8 +48,7 @@ namespace CraftSharp.Control
             attackStatus.AttackCooldown = meleeAttack.MaxStageDuration;
 
             player.CrossFadeState($"Melee{stage}", init ? 0F : 0.2F);
-            player.TurnToAttackTarget();
-
+            //player.TurnToAttackTarget();
         }
 
         public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
@@ -96,7 +88,6 @@ namespace CraftSharp.Control
 
             rigidbody.velocity = Vector3.zero;
             info.MoveVelocity = Vector3.zero;
-            
         }
 
         public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
@@ -110,7 +101,6 @@ namespace CraftSharp.Control
             //Debug.Log("Attack ends!");
             player.ChangeWeaponState(PlayerController.WeaponState.Mount);
             player.UseRootMotion = false;
-
         }
 
         public override string ToString() => "Melee";

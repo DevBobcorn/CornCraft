@@ -94,6 +94,5 @@ namespace CraftSharp.Rendering
                 Debug.LogWarning($"Failed to apply skin for {nameLower}");
             }
         }
-
     }
 }

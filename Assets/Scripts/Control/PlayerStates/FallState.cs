@@ -17,12 +17,12 @@ namespace CraftSharp.Control
 
             info.Sprinting = false;
 
-            if (inputData.horInputNormalized != Vector2.zero)
+            if (inputData.HorInputNormalized != Vector2.zero)
             {
                 // Smooth rotation for player model
                 info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval * 0.05F);
 
-                if (inputData.horInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
+                if (inputData.HorInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
                 {
                     if (info.FrontDownDist <= THRESHOLD_CLIMB_1M && info.FrontDownDist > THRESHOLD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
                     {
@@ -35,7 +35,7 @@ namespace CraftSharp.Control
                         player.StartForceMoveOperation("Climb over wall",
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.01F),
-                                        new(dest, ability.Climb2mCurves, player.visualTransform!.rotation, 0F, 2.2F,
+                                        new(dest, ability.Climb2mCurves, player.GetRotation(), 0F, 2.2F,
                                             playbackSpeed: 1.5F,
                                             init: (info, rigidbody, player) =>
                                             {
@@ -43,7 +43,7 @@ namespace CraftSharp.Control
                                                 player.CrossFadeState(PlayerAbility.CLIMB_2M);
                                             },
                                             update: (interval, inputData, info, rigidbody, player) =>
-                                                info.Moving = inputData.horInputNormalized != Vector2.zero
+                                                info.Moving = inputData.HorInputNormalized != Vector2.zero
                                         )
                                 } );
                     }
@@ -58,13 +58,13 @@ namespace CraftSharp.Control
                         player.StartForceMoveOperation("Climb over barrier",
                                 new ForceMoveOperation[] {
                                         new(org,  dest, 0.01F),
-                                        new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 0.9F,
+                                        new(dest, ability.Climb1mCurves, player.GetRotation(), 0F, 0.9F,
                                             init: (info, rigidbody, player) => {
                                                 player.RandomizeMirroredFlag();
                                                 player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                             },
                                             update: (interval, inputData, info, rigidbody, player) =>
-                                                info.Moving = inputData.horInputNormalized != Vector2.zero
+                                                info.Moving = inputData.HorInputNormalized != Vector2.zero
                                         )
                                 } );
                     }

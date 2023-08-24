@@ -78,23 +78,22 @@ namespace CraftSharp.Rendering
             }
         }
 
+        // Called by animator event
         public void DamageStart()
         {
-            player!.AttackDamage(true);
-            
             currentWeapon?.StartSlash();
         }
 
+        // Called by animator event
         public void DamageStop()
         {
-            player!.AttackDamage(false);
-            
             currentWeapon?.EndSlash();
         }
 
+        // Called by animator event
         public void StageEnding()
         {
-            player!.ClearAttackCooldown();
+            
         }
 
         void Start()

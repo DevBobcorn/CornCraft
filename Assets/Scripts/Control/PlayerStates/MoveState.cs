@@ -25,7 +25,7 @@ namespace CraftSharp.Control
 
             float moveSpeed;
 
-            if ((inputData.sprint || info.Sprinting) && info.StaminaLeft > 0F)
+            if ((inputData.Sprint || info.Sprinting) && info.StaminaLeft > 0F)
                 info.Sprinting = true;
             else
                 info.Sprinting = false;
@@ -38,12 +38,12 @@ namespace CraftSharp.Control
             // Use the target visual yaw as actual movement direction
             var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
 
-            if (inputData.attack) // Attack available
+            if (inputData.Attack) // Attack available
             {
                 player.TryStartAttack();
                 
             }
-            else if (inputData.horInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
+            else if (inputData.HorInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
             {
                 if (info.FrontDownDist <= THRESHOLD_CLIMB_1M && info.FrontDownDist > THRESHOLD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
                 {
@@ -56,7 +56,7 @@ namespace CraftSharp.Control
                     player.StartForceMoveOperation("Climb over wall",
                             new ForceMoveOperation[] {
                                     new(org,  dest, 0.1F),
-                                    new(dest, ability.Climb2mCurves, player.visualTransform!.rotation, 0F, 2.25F,
+                                    new(dest, ability.Climb2mCurves, player.GetRotation(), 0F, 2.25F,
                                         playbackSpeed: 1.5F,
                                         init: (info, rigidbody, player) =>
                                         {
@@ -64,7 +64,7 @@ namespace CraftSharp.Control
                                             player.CrossFadeState(PlayerAbility.CLIMB_2M);
                                         },
                                         update: (interval, inputData, info, rigidbody, player) =>
-                                            info.Moving = inputData.horInputNormalized != Vector2.zero
+                                            info.Moving = inputData.HorInputNormalized != Vector2.zero
                                     )
                             } );
                 }
@@ -79,13 +79,13 @@ namespace CraftSharp.Control
                     player.StartForceMoveOperation("Climb over barrier",
                             new ForceMoveOperation[] {
                                     new(org,  dest, 0.1F),
-                                    new(dest, ability.Climb1mCurves, player.visualTransform!.rotation, 0F, 1.1F,
+                                    new(dest, ability.Climb1mCurves, player.GetRotation(), 0F, 1.1F,
                                         init: (info, rigidbody, player) => {
                                             player.RandomizeMirroredFlag();
                                             player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                         },
                                         update: (interval, inputData, info, rigidbody, player) =>
-                                            info.Moving = inputData.horInputNormalized != Vector2.zero
+                                            info.Moving = inputData.HorInputNormalized != Vector2.zero
                                     )
                             } );
                 }
@@ -115,7 +115,7 @@ namespace CraftSharp.Control
 
             }
 
-            if (inputData.ascend) // Jump up, keep horizontal speed
+            if (inputData.Ascend) // Jump up, keep horizontal speed
             {
                 moveVelocity.y = ability.JumpSpeed + Mathf.Min(1F, moveSpeed);
                 info.Grounded = false;
@@ -135,7 +135,7 @@ namespace CraftSharp.Control
 
         public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (inputData.horInputNormalized == Vector2.zero)
+            if (inputData.HorInputNormalized == Vector2.zero)
                 return false;
             
             if (!info.Spectating && info.Grounded && !info.OnWall && !info.InLiquid)
@@ -146,7 +146,7 @@ namespace CraftSharp.Control
 
         public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (inputData.horInputNormalized == Vector2.zero)
+            if (inputData.HorInputNormalized == Vector2.zero)
                 return true;
 
             if (info.Spectating || !info.Grounded || info.OnWall || info.InLiquid)

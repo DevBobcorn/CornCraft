@@ -13,12 +13,7 @@ namespace CraftSharp.Control
 
         private const float LIQUID_RAYCAST_START   = 2.0F; // Liquid raycast goes downward from top of player
         private const float LIQUID_RAYCAST_DIST    = 5.0F;
-        private static readonly Vector3 LIQUID_BOXCAST_START_POINT = new(0F, LIQUID_RAYCAST_START, 0F);
-
         private static readonly Vector3 ANGLE_CHECK_RAYCAST_START_POINT = new(0F, 0.02F, 0F);
-
-        private static readonly Vector3 IN_WATER_CHECK_POINT_LOWER = new(0F, 0.3F, 0F);
-        private static readonly Vector3 IN_WATER_CHECK_POINT_UPPER = new(0F, 0.8F, 0F);
 
         [SerializeField] public LayerMask GroundLayer;
         [SerializeField] public LayerMask LiquidLayer;
@@ -37,22 +32,17 @@ namespace CraftSharp.Control
 
         public PlayerStatus Status = new();
 
-        public void UpdatePlayerStatus(World world, Vector3 frontDirNormalized)
+        public void UpdatePlayerStatus(Vector3 frontDirNormalized)
         {
-            // Update player state - in water or not?
-            // ENABLED START
-            Status.InLiquid = world.IsWaterAt(CoordConvert.Unity2MC(transform.position + IN_WATER_CHECK_POINT_LOWER));
-            // ENABLED END */
-
-            bool groundCheck;
-
             // Update player state - on ground or not?
+            bool groundCheck;
             if (UseBoxCastForGroundedCheck) // Cast a box down to check if player is grounded
+            {
                 groundCheck = Physics.BoxCast(transform.position + GroundBoxcastCenter, GroundBoxcastHalfSize, -transform.up, Quaternion.identity, GroundBoxcastDist, GroundLayer);
+            }
             else
             {
-                RaycastHit hit;
-                groundCheck = Physics.SphereCast(transform.position + GroundSpherecastCenter, GroundSpherecastRadius, -transform.up, out hit, GroundSpherecastDist, GroundLayer);
+                groundCheck = Physics.SphereCast(transform.position + GroundSpherecastCenter, GroundSpherecastRadius, -transform.up, out _, GroundSpherecastDist, GroundLayer);
             }
 
             var rayCenter = transform.position + GROUND_BOXCAST_START_POINT;
@@ -60,8 +50,7 @@ namespace CraftSharp.Control
             var rayFront  = rayCenter + frontDirNormalized * GROUND_RAYCAST_OFFSET;
 
             // Cast a ray downwards
-            RaycastHit centerDownHit, frontDownHit;
-            if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, GROUND_RAYCAST_DIST, GroundLayer))
+            if (Physics.Raycast(rayCenter, -transform.up, out RaycastHit centerDownHit, GROUND_RAYCAST_DIST, GroundLayer))
                 Status.CenterDownDist = centerDownHit.distance - GROUND_RAYCAST_START;
             else
                 Status.CenterDownDist = GROUND_RAYCAST_DIST - GROUND_RAYCAST_START;
@@ -69,7 +58,7 @@ namespace CraftSharp.Control
             Debug.DrawRay(rayCenter, transform.up * -GROUND_RAYCAST_DIST, Color.cyan);
 
             // Cast another ray downwards in front of the player
-            if (Physics.Raycast(rayFront, -transform.up, out frontDownHit, GROUND_RAYCAST_DIST, GroundLayer))
+            if (Physics.Raycast(rayFront, -transform.up, out RaycastHit frontDownHit, GROUND_RAYCAST_DIST, GroundLayer))
                 Status.FrontDownDist = frontDownHit.distance - GROUND_RAYCAST_START;
             else
                 Status.FrontDownDist = GROUND_RAYCAST_DIST - GROUND_RAYCAST_START;
@@ -93,8 +82,6 @@ namespace CraftSharp.Control
             // Cast a ray downwards again, but check liquid layer this time
             if (Status.InLiquid)
             {
-                var rayLiquid = transform.position + LIQUID_BOXCAST_START_POINT;
-
                 if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, LIQUID_RAYCAST_DIST, LiquidLayer))
                 {
                     Status.LiquidDist = centerDownHit.distance - LIQUID_RAYCAST_START;
@@ -104,13 +91,11 @@ namespace CraftSharp.Control
             }
             else // Not in water
                 Status.LiquidDist = 0F;
-            
-            RaycastHit angleCheckHit;
 
             var angleCheckRayOrigin = transform.position + ANGLE_CHECK_RAYCAST_START_POINT;
 
             // Cast a ray forward from feet to figure out whether the slope angle before the player
-            if (Physics.Raycast(angleCheckRayOrigin, frontDirNormalized, out angleCheckHit, 1F, GroundLayer))
+            if (Physics.Raycast(angleCheckRayOrigin, frontDirNormalized, out RaycastHit angleCheckHit, 1F, GroundLayer))
             {
                 Debug.DrawRay(angleCheckHit.point, angleCheckHit.normal, Color.magenta);
 
@@ -136,28 +121,37 @@ namespace CraftSharp.Control
             }
 
             Debug.DrawRay(barrierCheckRayOrigin, frontDirNormalized, Color.blue);
-            
         }
 
-        /* DISABLED START
+        // Called by trigger collider
         void OnTriggerEnter(Collider trigger)
         {
             if ((LiquidLayer.value & (1 << trigger.gameObject.layer)) != 0)
             {
-                Debug.Log($"Into liquid");
-                Status.InLiquid = true;
+                IntoLiquid();
             }
         }
 
+        public void IntoLiquid()
+        {
+            Debug.Log($"Into liquid");
+            Status.InLiquid = true;
+        }
+
+        // Called by trigger collider
         void OnTriggerExit(Collider trigger)
         {
             if ((LiquidLayer.value & (1 << trigger.gameObject.layer)) != 0)
             {
-                Debug.Log($"Out of liquid");
-                Status.InLiquid = false;
+                OutOfLiquid();
             }
         }
-        // DISABLED END */
+
+        public void OutOfLiquid()
+        {
+            Debug.Log($"Out of liquid");
+            Status.InLiquid = false;
+        }
 
         void OnDrawGizmos()
         {
@@ -176,6 +170,5 @@ namespace CraftSharp.Control
                 Gizmos.DrawWireSphere(transform.position + GroundSpherecastCenter + Vector3.down * GroundSpherecastDist, GroundSpherecastRadius);
             }
         }
-
     }
 }

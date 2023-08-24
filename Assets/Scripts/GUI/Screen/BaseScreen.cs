@@ -9,7 +9,6 @@ namespace CraftSharp.UI
 
         public abstract bool ReleaseCursor();
         public abstract bool ShouldPause();
-        public virtual bool AbsorbMouseScroll() => false;
 
         protected bool initialized;
         protected abstract bool Initialize();
