@@ -12,15 +12,15 @@ TagManager:
   - Water
   - UI
   - Movement
-  - Obstacle
-  - Liquid
+  - Solid
+  - 
   - Player
   - Entity
   - Environment
   - Weapon
   - Ragdoll
-  - 
-  - 
+  - LiquidSurface
+  - LiquidVolume
   - PostProc
   - 
   - 

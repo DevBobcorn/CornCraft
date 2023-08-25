@@ -285,7 +285,7 @@ namespace CraftSharp.UI
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                CornApp.CurrentClient!.ScreenControl!.TryPopScreen();
+                CornApp.CurrentClient?.ScreenControl.TryPopScreen();
                 return;
             }
 

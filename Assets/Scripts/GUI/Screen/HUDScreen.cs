@@ -133,7 +133,7 @@ namespace CraftSharp.UI
             var game = CornApp.CurrentClient;
             if (game != null)
             {
-                if (game.CameraController?.GetPerspective() == Perspective.FirstPerson)
+                if (game.CameraController.GetPerspective() == Perspective.FirstPerson)
                 {
                     crosshairAnimator!.SetBool(SHOW, true);
                 }
@@ -214,7 +214,7 @@ namespace CraftSharp.UI
                     }
                     
                     // Restore crosshair if necessary
-                    if (game.CameraController?.GetPerspective() == Perspective.FirstPerson)
+                    if (game.CameraController.GetPerspective() == Perspective.FirstPerson)
                     {
                         crosshairAnimator!.SetBool(SHOW, true);
                     }
@@ -242,7 +242,7 @@ namespace CraftSharp.UI
 
             if (Input.GetKeyDown(KeyCode.F5))
             {
-                game.CameraController?.SwitchPerspective();
+                game.CameraController.SwitchPerspective();
             }
 
             // Hotbar slot switching
@@ -267,14 +267,14 @@ namespace CraftSharp.UI
 
             if (Input.GetKeyDown(KeyCode.Slash))
             {   // Open chat screen and input a slash
-                game.ScreenControl?.PushScreen(chatScreen);
+                game.ScreenControl.PushScreen(chatScreen);
                 chatScreen?.SetChatMessage("/", 1);
             }
             else if (Input.GetKeyDown(KeyCode.T)) // Just open chat screen
-                game.ScreenControl?.PushScreen(chatScreen);
+                game.ScreenControl.PushScreen(chatScreen);
 
             if (Input.GetKeyDown(KeyCode.Escape))
-                game.ScreenControl?.PushScreen(pauseScreen);
+                game.ScreenControl.PushScreen(pauseScreen);
             
             debugText!.text = game.GetInfoString(debugInfo);
 
@@ -296,7 +296,7 @@ namespace CraftSharp.UI
 
             // Update stamina bar position
             var targetPosition = UICamera!.ViewportToWorldPoint(
-                    game!.CameraController!.GetTargetViewportPos());
+                    game!.CameraController.GetTargetViewportPos());
 
             staminaBar!.transform.position = Vector3.Lerp(
                     staminaBar.transform.position, targetPosition, Time.deltaTime * 10F);

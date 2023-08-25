@@ -18,12 +18,12 @@ namespace CraftSharp.Rendering
         public Transform InfoAnchor
         {
             get => infoAnchor ?? transform;
-            set => infoAnchor = value;
+            protected set => infoAnchor = value;
         }
         public Transform VisualTransform
         {
             get => visual!;
-            set => visual = value;
+            protected set => visual = value;
         }
 
         [SerializeField] protected GameObject? ragdollPrefab;

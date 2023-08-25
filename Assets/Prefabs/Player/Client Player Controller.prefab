@@ -64,7 +64,7 @@ Transform:
   m_Children:
   - {fileID: 2288748662104460795}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8936216958574950242
 MonoBehaviour:
@@ -80,9 +80,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meleeAttack: {fileID: 11400000, guid: 117382c7804f426429eeae8062de2c8e, type: 2}
   ability: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
+  cameraController: {fileID: 0}
   meleeWeaponPrefab: {fileID: 3607843667057953232, guid: 92a649b5223bbb74499bff1c0c30402f, type: 3}
   cameraRef: {fileID: 2288748662104460795}
-  playerRender: {fileID: 0}
   physicMaterial: {fileID: 13400000, guid: 11508097031b7f04c8ab9dcba71d230e, type: 2}
   UseRootMotion: 0
 --- !u!114 &2543192715876108228
@@ -100,9 +100,12 @@ MonoBehaviour:
   GroundLayer:
     serializedVersion: 2
     m_Bits: 64
-  LiquidLayer:
+  LiquidSurfaceLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 16384
+  LiquidVolumeLayer:
+    serializedVersion: 2
+    m_Bits: 32768
   UseBoxCastForGroundedCheck: 0
   GroundBoxcastCenter: {x: 0, y: 0.05, z: 0}
   GroundBoxcastHalfSize: {x: 0.35, y: 0.01, z: 0.35}

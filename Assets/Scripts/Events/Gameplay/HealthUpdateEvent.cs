@@ -16,6 +16,5 @@ namespace CraftSharp.Event
             Health = health;
             UpdateMaxHealth = updateMax;
         }
-
     }
 }

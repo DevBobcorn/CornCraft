@@ -295,6 +295,7 @@ namespace CraftSharp.Rendering
         public void BuildTerrainCollider(World world, Location playerLoc, MeshCollider movementCollider, MeshCollider liquidCollider)
         {
             int offsetY = World.GetDimension().minY;
+            playerLoc = playerLoc.ToFloor();
             
             float3[] movementVerts = { }, fluidVerts = { };
 
@@ -417,7 +418,6 @@ namespace CraftSharp.Rendering
                     liquidCollider!.sharedMesh?.Clear();
                 
                 colVertAttrs.Dispose();
-
             });
         }
 

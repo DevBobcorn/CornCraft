@@ -39,12 +39,12 @@ namespace CraftSharp.UI
 
         public void Back2Game()
         {
-            CornApp.CurrentClient!.ScreenControl!.TryPopScreen();
+            CornApp.CurrentClient?.ScreenControl.TryPopScreen();
         }
 
         public void QuitGame()
         {
-            CornApp.CurrentClient!.Disconnect();
+            CornApp.CurrentClient?.Disconnect();
         }
 
         protected override bool Initialize()

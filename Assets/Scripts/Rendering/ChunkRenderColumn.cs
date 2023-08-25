@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-using CraftSharp;
-
 namespace CraftSharp.Rendering
 {
     public class ChunkRenderColumn : MonoBehaviour
@@ -15,7 +13,7 @@ namespace CraftSharp.Rendering
         {
             // Create this chunk...
             GameObject chunkObj = new GameObject($"Chunk [{chunkY}]");
-            chunkObj.layer = UnityEngine.LayerMask.NameToLayer(ChunkRenderManager.OBSTACLE_LAYER_NAME);
+            chunkObj.layer = UnityEngine.LayerMask.NameToLayer(ChunkRenderManager.SOLID_LAYER_NAME);
             ChunkRender newChunk = chunkObj.AddComponent<ChunkRender>();
             newChunk.ChunkX = this.ChunkX;
             newChunk.ChunkY = chunkY;

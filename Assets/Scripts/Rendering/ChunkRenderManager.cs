@@ -15,8 +15,11 @@ namespace CraftSharp.Rendering
     public class ChunkRenderManager : MonoBehaviour
     {
         public const string MOVEMENT_LAYER_NAME = "Movement";
-        public const string OBSTACLE_LAYER_NAME = "Obstacle";
-        public const string LIQUID_LAYER_NAME   = "Liquid";
+        public const string SOLID_LAYER_NAME = "Solid";
+        public const string LIQUID_SURFACE_LAYER_NAME = "LiquidSurface";
+
+        public float MIN_UPDATE_DISTANCE = 0.5F;
+        public Location BLOCK_CHECK_OFFSET = new(0D, 0.125D, 0D);
 
         public readonly World World = new();
 
@@ -276,8 +279,6 @@ namespace CraftSharp.Rendering
 
         public const int BUILD_COUNT_LIMIT = 4;
         private int operationCode    = 0;
-
-        private static readonly Block AIR_INSTANCE = new Block(0);
         private Location? lastPlayerLoc = null;
         private bool terrainColliderDirty = true;
 
@@ -293,7 +294,7 @@ namespace CraftSharp.Rendering
             movementCollider = movementColliderObj.AddComponent<MeshCollider>();
 
             var liquidColliderObj = new GameObject("Liquid Collider");
-            liquidColliderObj.layer = LayerMask.NameToLayer(LIQUID_LAYER_NAME);
+            liquidColliderObj.layer = LayerMask.NameToLayer(LIQUID_SURFACE_LAYER_NAME);
             liquidCollider = liquidColliderObj.AddComponent<MeshCollider>();
 
             // Register event callbacks
@@ -357,7 +358,6 @@ namespace CraftSharp.Rendering
         {
             terrainColliderDirty = false;
             Task.Factory.StartNew(() => builder!.BuildTerrainCollider(World, playerLoc, movementCollider!, liquidCollider!));
-            lastPlayerLoc = playerLoc;
         }
 
         void FixedUpdate()
@@ -396,9 +396,44 @@ namespace CraftSharp.Rendering
             operationCode = (operationCode + 1) % OPERATION_CYCLE_LENGTH;
 
             // Update terrain collider if necessary
-            var playerLoc = client?.GetLocation().ToFloor();
-            if (playerLoc != null && (terrainColliderDirty || lastPlayerLoc != playerLoc))
-                RebuildTerrainCollider(playerLoc.Value);
+            var playerLoc = client?.GetLocation();
+            if (playerLoc is not null)
+            {
+                if (lastPlayerLoc is not null)
+                {
+                    if (terrainColliderDirty || lastPlayerLoc.Value.DistanceTo(playerLoc.Value) >= MIN_UPDATE_DISTANCE)
+                    {
+                        RebuildTerrainCollider(playerLoc.Value);
+                        // Update player liquid state
+                        var inLiquid = World.GetBlock(playerLoc.Value + BLOCK_CHECK_OFFSET).State.InLiquid;
+                        var prevInLiquid = World.GetBlock(lastPlayerLoc.Value + BLOCK_CHECK_OFFSET).State.InLiquid;
+                        if (prevInLiquid != inLiquid) // Player liquid state changed, broadcast this change
+                        {
+                            EventManager.Instance.Broadcast(new PlayerLiquidEvent(inLiquid));
+
+                            if (inLiquid)
+                                Debug.Log($"Enter water at {playerLoc}");
+                            else
+                                Debug.Log($"Exit water at {playerLoc}");
+                        }
+                        // Update last location only if it is used
+                        lastPlayerLoc = playerLoc;
+                    }
+                }
+                else
+                {
+                    RebuildTerrainCollider(playerLoc.Value);
+                    // Update player liquid state
+                    var inLiquid = World.GetBlock(playerLoc.Value + BLOCK_CHECK_OFFSET).State.InLiquid;
+                    if (inLiquid) // Player liquid state changed, broadcast this change
+                    {
+                        EventManager.Instance.Broadcast(new PlayerLiquidEvent(true));
+                        Debug.Log($"Enter water at {playerLoc}");
+                    }
+                    // Update last location
+                    lastPlayerLoc = playerLoc;
+                }
+            }
         }
         #endregion
 

@@ -36,7 +36,7 @@ namespace CraftSharp.Sandbox
 
                 renderObj!.name = $"Player Entity ({playerRenderPrefab.name})";
                 
-                playerController?.UpdatePlayerRender(dummyEntity, renderObj);
+                playerController!.UpdatePlayerRender(dummyEntity, renderObj);
 
                 StartCoroutine(DelayedInit());
             }
@@ -46,11 +46,6 @@ namespace CraftSharp.Sandbox
         {
             yield return new WaitForSecondsRealtime(1F);
             EventManager.Instance.Broadcast(new GameModeUpdateEvent(GameMode.Creative));
-        }
-
-        void Update()
-        {
-            
         }
     }
 }

@@ -29,10 +29,12 @@ namespace CraftSharp
         [SerializeField] public BaseEnvironmentManager? EnvironmentManager;
         [SerializeField] public MaterialManager? MaterialManager;
         
-        [SerializeField] public PlayerController? PlayerController;
+        [SerializeField] private PlayerController? playerController;
         [SerializeField] private GameObject? playerRenderPrefab;
-        [SerializeField] public CameraController? CameraController;
-        [SerializeField] public ScreenControl? ScreenControl;
+        [SerializeField] private CameraController? cameraController;
+        public CameraController CameraController => cameraController!;
+        [SerializeField] private ScreenControl? screenControl;
+        public ScreenControl ScreenControl => screenControl!;
         [SerializeField] public HUDScreen? HUDScreen;
 
         #endregion
@@ -91,8 +93,8 @@ namespace CraftSharp
         private bool locationReceived = false;
         public GameMode GameMode { get; private set; } = GameMode.Survival;
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
-        public float? YawToSend = null, PitchToSend = null;
-        public bool Grounded = false;
+        private float? yawToSend = null, pitchToSend = null;
+        private bool grounded = false;
         private int clientSequenceId;
         private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
@@ -123,13 +125,13 @@ namespace CraftSharp
                 
                 if (clientEntity.Yaw != newYaw || clientEntity.Pitch != newPitch)
                 {
-                    YawToSend = newYaw;
+                    yawToSend = newYaw;
                     clientEntity.Yaw = newYaw;
-                    PitchToSend = newPitch;
+                    pitchToSend = newPitch;
                     clientEntity.Pitch = newPitch;
                 }
                 
-                Grounded = newGrounded;
+                grounded = newGrounded;
             }
         }
 
@@ -156,7 +158,7 @@ namespace CraftSharp
             MaterialManager!.LoadPlayerSkins();
 
             // Push HUD Screen on start
-            ScreenControl!.PushScreen(HUDScreen!);
+            ScreenControl.PushScreen(HUDScreen!);
 
             // Setup chunk render manager
             ChunkRenderManager!.SetClient(this);
@@ -165,7 +167,7 @@ namespace CraftSharp
             playerUserInput = GetComponent<PlayerUserInput>();
 
             // Set up camera controller
-            CameraController!.SetTarget(PlayerController!.cameraRef!);
+            CameraController.SetTarget(playerController!.cameraRef!);
 
             // Set up interaction updater
             interactionUpdater = GetComponent<InteractionUpdater>();
@@ -194,7 +196,7 @@ namespace CraftSharp
                     targetInfo = "\n";
                 }
                 
-                return baseString + $"\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{PlayerController?.GetDebugInfo()}" +
+                return baseString + $"\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
             }
             
@@ -222,7 +224,7 @@ namespace CraftSharp
                 tcpClient.ReceiveTimeout = 30000; // 30 seconds
 
                 // Create handler
-                handler = Protocol.ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
+                handler = ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
 
                 // Start update loop
                 timeoutdetector = Tuple.Create(new Thread(new ParameterizedThreadStart(TimeoutDetector)), new CancellationTokenSource());
@@ -252,9 +254,9 @@ namespace CraftSharp
                         }
                         renderObj!.name = $"Player Entity ({playerRenderPrefab.name})";
 
-                        PlayerController!.UpdatePlayerRender(clientEntity, renderObj);
+                        playerController!.UpdatePlayerRender(clientEntity, renderObj);
                         // Subscribe movement events
-                        PlayerController!.OnMovementUpdate += UpdatePlayerStatus;
+                        playerController!.OnMovementUpdate += UpdatePlayerStatus;
                     }
                     else
                     {
@@ -317,11 +319,11 @@ namespace CraftSharp
             {
                 lock (movementLock)
                 {
-                    handler!.SendLocationUpdate(clientEntity.Location, Grounded, YawToSend, PitchToSend);
+                    handler!.SendLocationUpdate(clientEntity.Location, grounded, yawToSend, pitchToSend);
 
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)
                     // Once yaw and pitch have been sent, switch back to location-only updates (without yaw and pitch)
-                    YawToSend = PitchToSend = null;
+                    yawToSend = pitchToSend = null;
                 }
             }
 
@@ -1018,8 +1020,8 @@ namespace CraftSharp
 
             lock (movementLock)
             {
-                YawToSend = clientEntity.Yaw = yaw;
-                PitchToSend = clientEntity.Pitch = pitch;
+                yawToSend = clientEntity.Yaw = yaw;
+                pitchToSend = clientEntity.Pitch = pitch;
                 
                 if (!locationReceived) // On entering world or respawning
                 {
@@ -1029,9 +1031,9 @@ namespace CraftSharp
                         // Force refresh environment collider
                         ChunkRenderManager?.RebuildTerrainCollider(location.ToFloor());
                         // Then update player location
-                        PlayerController!.SetLocation(location, yaw: yaw);
+                        playerController!.SetLocation(location, yaw: yaw);
                         // Update camera yaw
-                        CameraController!.SetYaw(yaw);
+                        CameraController.SetYaw(yaw);
 
                         locationReceived = true;
                     });
@@ -1041,7 +1043,7 @@ namespace CraftSharp
                 else // Position correction from server
                 {                    
                     Loom.QueueOnMainThread(() => {
-                        var offset = PlayerController!.transform.position - CoordConvert.MC2Unity(location);
+                        var offset = playerController!.transform.position - CoordConvert.MC2Unity(location);
                         if (offset.magnitude < 8F)
                         {
                             return;
@@ -1052,7 +1054,7 @@ namespace CraftSharp
                         // Force refresh environment collider
                         ChunkRenderManager?.RebuildTerrainCollider(location.ToFloor());
                         // Then update player location
-                        PlayerController!.SetLocation(location, yaw: yaw);
+                        playerController!.SetLocation(location, yaw: yaw);
 
                         Debug.Log($"Loc updated to {location} with yaw {yaw} error value: {offset.magnitude}");
                     });
