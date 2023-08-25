@@ -27,7 +27,7 @@ namespace CraftSharp.Control
         [SerializeField] [Range(0.1F,  4F)] public float WalkSpeed   =   1F;
         [SerializeField] [Range(0.1F, 10F)] public float RunSpeed    =   2F;
         [SerializeField] [Range(0.1F, 10F)] public float SprintSpeed = 3.5F;
-        [SerializeField] [Range(0.1F, 10F)] public float JumpSpeed   =   4F;
+        [SerializeField] public AnimationCurve JumpSpeedCurve = new();
         [SerializeField] [Range( 10F, 30F)] public float SteerSpeed  =  20F;
 
         [SerializeField] [Range(1F,  100F)] public float MaxStamina        =  20F;

@@ -35,7 +35,7 @@ namespace CraftSharp.Control
 
         public PlayerStatus Status = new();
 
-        public void UpdatePlayerStatus(Vector3 frontDirNormalized)
+        public void UpdatePlayerStatus(Vector3 velocity, Vector3 frontDirNormalized)
         {
             // Update player state - on ground or not?
             bool groundCheck;
@@ -73,14 +73,25 @@ namespace CraftSharp.Control
                 if (Status.LiquidDist > -0.4F)
                     Status.Grounded = true;
             }
-            else if (Status.Grounded)
+            else if (Status.Grounded) // Grounded in last update
             {
                 // Extra check to make sure the player is just walking on some bumped surface and happen to leave the ground
                 if (!groundCheck && Status.CenterDownDist > 1.75F)
+                {
                     Status.Grounded = false;
+                }
             }
-            else
-                Status.Grounded = groundCheck;
+            else // Not grounded in last update
+            {
+                if (velocity.y < 0.5F) // Not jumping up
+                {
+                    Status.Grounded = groundCheck;
+                }
+                else // Jumping up
+                {
+                    Status.Grounded = false;
+                }
+            }
             
             // Cast a ray downwards again, but check liquid layer this time
             if (Status.InLiquid)

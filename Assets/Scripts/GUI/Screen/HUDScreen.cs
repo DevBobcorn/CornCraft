@@ -301,6 +301,5 @@ namespace CraftSharp.UI
             staminaBar!.transform.position = Vector3.Lerp(
                     staminaBar.transform.position, targetPosition, Time.deltaTime * 10F);
         }
-
     }
 }

@@ -12,9 +12,7 @@ namespace CraftSharp.Control
 
         public override string ToString()
         {
-
-            return $"Atk Cd:\t{AttackCooldown}\nAtk St:\t{AttackStage}";
+            return $"Attack Stage: [{AttackStage}]\tCD: {AttackCooldown:0.00}";
         }
-
     }
 }

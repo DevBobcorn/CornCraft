@@ -1,17 +1,20 @@
 #nullable enable
+using System.Collections;
 using UnityEngine;
+using TMPro;
 
 using CraftSharp.Control;
 using CraftSharp.Rendering;
 using CraftSharp.Event;
-using System.Collections;
 
 namespace CraftSharp.Sandbox
 {
     public class Sandbox : MonoBehaviour
     {
         [SerializeField] private PlayerController? playerController;
+        [SerializeField] private CameraController? cameraController;
         [SerializeField] private GameObject? playerRenderPrefab;
+        [SerializeField] private TMP_Text? debugText, fpsText;
 
         void Start()
         {
@@ -39,6 +42,24 @@ namespace CraftSharp.Sandbox
                 playerController!.UpdatePlayerRender(dummyEntity, renderObj);
 
                 StartCoroutine(DelayedInit());
+            }
+        }
+
+        void Update()
+        {
+            if (debugText is not null && playerController is not null)
+            {
+                debugText.text = playerController.GetDebugInfo();
+            }
+
+            if (fpsText is not null)
+            {
+                fpsText.text = $"FPS: {(int)(1F / Time.deltaTime), 4}";
+            }
+
+            if (Input.GetKeyDown(KeyCode.F5))
+            {
+                cameraController?.SwitchPerspective();
             }
         }
 

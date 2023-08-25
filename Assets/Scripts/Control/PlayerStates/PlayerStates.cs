@@ -29,24 +29,25 @@ namespace CraftSharp.Control
         
         private static List<IPlayerState> GetPlayerStates()
         {
-            List<IPlayerState> list = new();
-
-            list.Add(IDLE);
-            list.Add(MOVE);
-
-            list.Add(MELEE);
-
-            list.Add(CLIMB);
-
-            list.Add(FALL);
-
-            list.Add(SWIM);
-            list.Add(TREAD);
-
-            list.Add(SPECTATE);
+            List<IPlayerState> list = new()
+            {
+                // Grounded
+                IDLE,
+                MOVE,
+                // Attack
+                MELEE,
+                // On wall
+                CLIMB,
+                // Airborne
+                FALL,
+                // In water
+                SWIM,
+                TREAD,
+                // Special
+                SPECTATE
+            };
 
             return list;
         }
-
     }
 }
