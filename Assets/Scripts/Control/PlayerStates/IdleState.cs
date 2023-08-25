@@ -17,10 +17,18 @@ namespace CraftSharp.Control
                 player.TryStartAttack();
                 
             }
-            else if (inputData.Ascend) // Jump in place
+            else if (inputData.JumpFlag) // Jump in place
             {
-                rigidbody.velocity = new(0F, ability.JumpSpeed, 0F);
+                // Preserve horizontal speed and change vertical speed
+                var newVelocity = rigidbody.velocity;
+                newVelocity.y = ability.JumpSpeedCurve.Evaluate(0F);
                 info.Grounded = false;
+                // Clear jump flag after jumping once to prevent playing
+                // from bouncing on ground when holding jump key
+                inputData.JumpFlag = false;
+
+                rigidbody.velocity = newVelocity;
+                //Debug.Log($"Jump [IDLE] velocity {rigidbody.velocity} ({Mathf.Sqrt(newVelocity.x * newVelocity.x + newVelocity.z * newVelocity.z)})");
             }
             
             info.MoveVelocity = Vector3.zero;
@@ -52,6 +60,5 @@ namespace CraftSharp.Control
         }
 
         public override string ToString() => "Idle";
-
     }
 }

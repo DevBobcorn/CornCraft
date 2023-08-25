@@ -23,6 +23,8 @@ namespace CraftSharp.Control
 
                 inputData.Ascend  = Input.GetButton("GoUp");
                 inputData.Descend = Input.GetButton("GoDown");
+
+                inputData.JumpFlag = Input.GetButtonDown("GoUp");
             }
             else
             {

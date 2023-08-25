@@ -296,7 +296,7 @@ namespace CraftSharp.Control
             // Update player status (in water, grounded, etc)
             if (!Status!.EntityDisabled)
             {
-                statusUpdater!.UpdatePlayerStatus(GetOrientation());
+                statusUpdater!.UpdatePlayerStatus(playerRigidbody!.velocity, GetOrientation());
             }
             
             var status = statusUpdater!.Status;
@@ -404,7 +404,9 @@ namespace CraftSharp.Control
             else
             {
                 if (info.Spectating)
+                {
                     playerRigidbody!.velocity = Vector3.zero;
+                }
                 
                 // Otherwise leave the player rigidbody untouched
             }

@@ -100,6 +100,5 @@ namespace CraftSharp.Control
         }
 
         public override string ToString() => "Fall";
-
     }
 }

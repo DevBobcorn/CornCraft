@@ -41,7 +41,6 @@ namespace CraftSharp.Control
             if (inputData.Attack) // Attack available
             {
                 player.TryStartAttack();
-                
             }
             else if (inputData.HorInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
             {
@@ -112,16 +111,23 @@ namespace CraftSharp.Control
                                 } );
                     }
                 }
-
             }
 
-            if (inputData.Ascend) // Jump up, keep horizontal speed
+            if (inputData.JumpFlag) // Jump up, keep horizontal speed
             {
-                moveVelocity.y = ability.JumpSpeed + Mathf.Min(1F, moveSpeed);
+                moveVelocity.y = ability.JumpSpeedCurve.Evaluate(moveSpeed);
                 info.Grounded = false;
+                // Clear jump flag after jumping once to prevent playing
+                // from bouncing on ground when holding jump key
+                inputData.JumpFlag = false;
+
+                rigidbody.velocity = moveVelocity;
+                //Debug.Log($"Jump [MOVE] velocity {rigidbody.velocity} ({moveSpeed})");
             }
-            else
+            else // Apply gravity from rigidbody
+            {
                 moveVelocity.y = rigidbody.velocity.y;
+            }
 
             // Apply new velocity to rigidbody
             info.MoveVelocity = moveVelocity;
@@ -130,7 +136,6 @@ namespace CraftSharp.Control
                 info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, 0F, interval * ability.SprintStaminaCost);
             else // Restore stamina 
                 info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
-
         }
 
         public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
@@ -161,6 +166,5 @@ namespace CraftSharp.Control
         }
 
         public override string ToString() => "Move";
-
     }
 }
