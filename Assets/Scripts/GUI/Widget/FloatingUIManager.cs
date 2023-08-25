@@ -74,16 +74,14 @@ namespace CraftSharp.UI
             }
 
             var camController = CornApp.CurrentClient?.CameraController;
-            var viewDir = camController?.GetEularAngles();
-            var camPos = camController?.GetPosition();
 
-            if (viewDir is not null && camPos is not null)
+            if (camController != null)
             {
                 foreach (var item in entityFloatingUIs)
                 {
                     var target = item.Value.transform;
-                    target.eulerAngles = viewDir.Value;
-                    var scale = UIScaleCurve!.Evaluate((camPos.Value - target.position).magnitude);
+                    target.eulerAngles = camController.GetEularAngles();
+                    var scale = UIScaleCurve!.Evaluate((camController.GetPosition() - target.position).magnitude);
                     target.localScale = new(scale, scale, 1F);
                 }
             }

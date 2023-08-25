@@ -62,9 +62,9 @@ namespace CraftSharp.UI
 
             healthCallback = (e) => {
                 if (e.Health <= 0F && !this.isActive)
-                    CornApp.CurrentClient?.ScreenControl?.PushScreen(this);
+                    CornApp.CurrentClient?.ScreenControl.PushScreen(this);
                 else if (e.Health > 0F && this.isActive) // Hide death screen
-                    CornApp.CurrentClient?.ScreenControl?.TryPopScreen();
+                    CornApp.CurrentClient?.ScreenControl.TryPopScreen();
             };
 
             EventManager.Instance.Register(healthCallback);
@@ -76,15 +76,12 @@ namespace CraftSharp.UI
         {
             if (healthCallback is not null)
                 EventManager.Instance.Unregister(healthCallback);
-
         }
 
         void Update()
         {
             if (!IsActive)
                 return;
-
         }
-
     }
 }

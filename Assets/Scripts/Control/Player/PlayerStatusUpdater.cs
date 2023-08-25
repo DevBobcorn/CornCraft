@@ -1,4 +1,6 @@
 #nullable enable
+using System;
+using CraftSharp.Event;
 using UnityEngine;
 
 namespace CraftSharp.Control
@@ -16,7 +18,8 @@ namespace CraftSharp.Control
         private static readonly Vector3 ANGLE_CHECK_RAYCAST_START_POINT = new(0F, 0.02F, 0F);
 
         [SerializeField] public LayerMask GroundLayer;
-        [SerializeField] public LayerMask LiquidLayer;
+        [SerializeField] public LayerMask LiquidSurfaceLayer;
+        [SerializeField] public LayerMask LiquidVolumeLayer;
 
         [HideInInspector] public bool UseBoxCastForGroundedCheck = false;
 
@@ -82,7 +85,7 @@ namespace CraftSharp.Control
             // Cast a ray downwards again, but check liquid layer this time
             if (Status.InLiquid)
             {
-                if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, LIQUID_RAYCAST_DIST, LiquidLayer))
+                if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, LIQUID_RAYCAST_DIST, LiquidSurfaceLayer | LiquidVolumeLayer))
                 {
                     Status.LiquidDist = centerDownHit.distance - LIQUID_RAYCAST_START;
                 }
@@ -126,31 +129,55 @@ namespace CraftSharp.Control
         // Called by trigger collider
         void OnTriggerEnter(Collider trigger)
         {
-            if ((LiquidLayer.value & (1 << trigger.gameObject.layer)) != 0)
+            if ((LiquidVolumeLayer.value & (1 << trigger.gameObject.layer)) != 0)
             {
-                IntoLiquid();
+                EventManager.Instance.Broadcast(new PlayerLiquidEvent(true));
             }
-        }
-
-        public void IntoLiquid()
-        {
-            Debug.Log($"Into liquid");
-            Status.InLiquid = true;
         }
 
         // Called by trigger collider
         void OnTriggerExit(Collider trigger)
         {
-            if ((LiquidLayer.value & (1 << trigger.gameObject.layer)) != 0)
+            if ((LiquidVolumeLayer.value & (1 << trigger.gameObject.layer)) != 0)
             {
-                OutOfLiquid();
+                EventManager.Instance.Broadcast(new PlayerLiquidEvent(false));
             }
+        }
+
+        public void IntoLiquid()
+        {
+            Status.InLiquid = true;
         }
 
         public void OutOfLiquid()
         {
-            Debug.Log($"Out of liquid");
             Status.InLiquid = false;
+        }
+
+        private Action<PlayerLiquidEvent>? playerLiquidCallback;
+
+        void Start()
+        {
+            playerLiquidCallback = (e) => {
+                if (e.Enter)
+                {
+                    IntoLiquid();
+                }
+                else
+                {
+                    OutOfLiquid();
+                }
+            };
+
+            EventManager.Instance.Register(playerLiquidCallback);
+        }
+
+        void OnDestroy()
+        {
+            if (playerLiquidCallback is not null)
+            {
+                EventManager.Instance.Unregister(playerLiquidCallback);
+            }
         }
 
         void OnDrawGizmos()

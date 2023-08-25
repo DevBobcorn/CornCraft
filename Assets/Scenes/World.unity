@@ -893,12 +893,11 @@ MonoBehaviour:
   EntityRenderManager: {fileID: 1463427177}
   EnvironmentManager: {fileID: 1917450542}
   MaterialManager: {fileID: 331478947}
-  PlayerController: {fileID: 195804746}
-  playerRenderPrefab: {fileID: 0}
-  CameraController: {fileID: 5003336745837788658}
-  ScreenControl: {fileID: 607892726}
+  playerController: {fileID: 195804746}
+  playerRenderPrefab: {fileID: 5283875576598358619, guid: 2fbc3437d775d8c4fa60f0d825c62dc4, type: 3}
+  cameraController: {fileID: 5003336745837788658}
+  screenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
-  Grounded: 0
 --- !u!114 &331478947
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1061,7 +1060,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.55
+  m_fontSize: 46.5
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1196,7 +1195,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.55
+  m_fontSize: 46.5
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2128,7 +2127,7 @@ GameObject:
   - component: {fileID: 607892725}
   - component: {fileID: 607892726}
   m_Layer: 5
-  m_Name: Screens Control
+  m_Name: Screen Control
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -13,6 +13,5 @@ namespace CraftSharp.Event
             InteractionId = id;
             Info = info;
         }
-
     }
 }

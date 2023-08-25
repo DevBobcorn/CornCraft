@@ -282,10 +282,10 @@ MonoBehaviour:
   scrollSensitivity: 0.2
   thirdPersonCullingMask:
     serializedVersion: 2
-    m_Bits: 81856
+    m_Bits: 81600
   firstPersonCullingMask:
     serializedVersion: 2
-    m_Bits: 77248
+    m_Bits: 76992
   virtualCameraFollow: {fileID: 8231872019064414601}
   virtualCameraFixed: {fileID: 4409463203126261892}
 --- !u!1 &2988304240145284854
@@ -465,7 +465,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 81879
+    m_Bits: 81856
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
