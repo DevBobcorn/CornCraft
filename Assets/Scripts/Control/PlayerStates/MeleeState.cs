@@ -25,7 +25,7 @@ namespace CraftSharp.Control
                 info.Attacking = false;
                 attackStatus.AttackStage = -1;
             }
-            else if (attackStatus.AttackCooldown <= 0F) // Attack available
+            else if (attackStatus.AttackCooldown <= 0F && meleeAttack.StageCount > 0) // Attack available
             {
                 if (inputData.HorInputNormalized != Vector2.zero) // Start moving, exit attack state
                 {
@@ -37,17 +37,18 @@ namespace CraftSharp.Control
                     info.Attacking = true;
                     var nextStage = (attackStatus.AttackStage + 1) % meleeAttack.StageCount;
 
-                    StartMeleeStage(meleeAttack, attackStatus, false, nextStage, player);
+                    StartMeleeStage(meleeAttack, attackStatus, nextStage, player);
                 }
             }
         }
 
-        private void StartMeleeStage(PlayerMeleeAttack meleeAttack, AttackStatus attackStatus, bool init, int stage, PlayerController player)
+        private void StartMeleeStage(PlayerMeleeAttack meleeAttack, AttackStatus attackStatus, int stage, PlayerController player)
         {
             attackStatus.AttackStage = stage;
-            attackStatus.AttackCooldown = meleeAttack.MaxStageDuration;
+            attackStatus.AttackCooldown = meleeAttack.StageDurations[stage];
 
-            player.CrossFadeState($"Melee{stage}", init ? 0F : 0.2F);
+            player.OverrideState(meleeAttack.DummyAnimationClip!, meleeAttack.AnimationClips[stage]);
+            player.CrossFadeState("Melee", 0F);
             //player.TurnToAttackTarget();
         }
 
@@ -80,7 +81,7 @@ namespace CraftSharp.Control
             var attackStatus = info.AttackStatus;
             var meleeAttack = player.MeleeAttack;
 
-            StartMeleeStage(meleeAttack, attackStatus, true, 0, player);
+            StartMeleeStage(meleeAttack, attackStatus, 0, player);
 
             //Debug.Log("Attack starts!");
             player.ChangeWeaponState(PlayerController.WeaponState.Hold);

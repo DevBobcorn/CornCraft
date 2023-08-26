@@ -12,7 +12,17 @@ namespace CraftSharp.Control
 
         public override string ToString()
         {
-            return $"Attack Stage: [{AttackStage}]\tCD: {AttackCooldown:0.00}";
+            string cdString;
+            if (AttackCooldown > 0F)
+            {
+                cdString = $"<color=red>{AttackCooldown:0.00}</color>";
+            }
+            else
+            {
+                cdString = $"<color=green>{AttackCooldown:0.00}</color>";
+            }
+
+            return $"Attack Stage: [{AttackStage}]\tCD: {cdString}";
         }
     }
 }
