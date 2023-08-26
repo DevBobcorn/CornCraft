@@ -10,6 +10,7 @@ namespace CraftSharp.Control
             var ability = player.Ability;
 
             info.Sprinting = false;
+            info.Gliding = false;
             info.Moving = false;
 
             if (inputData.Attack) // Attack available

@@ -13,6 +13,7 @@ namespace CraftSharp.Control
             var ability = player.Ability;
             
             info.Sprinting = false;
+            info.Gliding = false;
             info.Moving = true;
 
             var moveSpeed = (info.WalkMode ? ability.WalkSpeed : ability.RunSpeed) * ability.WaterMoveMultiplier;

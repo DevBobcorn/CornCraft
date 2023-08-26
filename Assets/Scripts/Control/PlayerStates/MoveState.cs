@@ -18,6 +18,7 @@ namespace CraftSharp.Control
             var ability = player.Ability;
 
             info.Moving = true;
+            info.Gliding = false;
 
             // Smooth rotation for player model
             info.CurrentVisualYaw =

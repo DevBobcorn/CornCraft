@@ -810,12 +810,13 @@ MonoBehaviour:
   WalkSpeed: 1.2
   RunSpeed: 5
   SprintSpeed: 10
+  GlideSpeed: 2.8
   JumpSpeedCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 2.5
+      value: 3.2
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -846,8 +847,10 @@ MonoBehaviour:
   SteerSpeed: 12
   MaxStamina: 20
   SprintStaminaCost: 3
-  SwimStaminaCost: 1
+  SwimStaminaCost: 0.8
+  GlideStaminaCost: 0.6
   StaminaRestore: 4
   MaxFallSpeed: -10
+  MaxGlideFallSpeed: -0.5
   MaxInLiquidFallSpeed: -1.1
   WaterMoveMultiplier: 0.6

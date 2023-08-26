@@ -17,7 +17,7 @@ namespace CraftSharp.Control
 
         // Airborne states
         public static readonly IPlayerState FALL  = new FallState();
-
+        public static readonly IPlayerState GLIDE = new GlideState();
         // In water states
         public static readonly IPlayerState SWIM  = new SwimState();
         public static readonly IPlayerState TREAD = new TreadState();
@@ -40,6 +40,7 @@ namespace CraftSharp.Control
                 CLIMB,
                 // Airborne
                 FALL,
+                GLIDE,
                 // In water
                 SWIM,
                 TREAD,
