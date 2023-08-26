@@ -12,7 +12,8 @@ namespace CraftSharp.Rendering
         protected static readonly int VERTICAL_SPEED = Animator.StringToHash("VerticalSpeed");
         protected static readonly int HORIZONTAL_SPEED = Animator.StringToHash("HorizontalSpeed");
 
-        [HideInInspector] public Animator? entityAnimator;
+        protected Animator? entityAnimator;
+        protected AnimatorOverrideController? animatorOverrideController;
 
         public static GameObject CreateFromModel(GameObject visualPrefab)
         {
@@ -51,6 +52,12 @@ namespace CraftSharp.Rendering
         public virtual void CrossFadeState(string stateName, float time, int layer, float timeOffset)
         {
             entityAnimator!.CrossFade(stateName, time, layer, timeOffset);
+        }
+
+        public virtual void OverrideState(AnimationClip dummyClip, AnimationClip animationClip)
+        {
+            // Apply animation clip override
+            animatorOverrideController![dummyClip] = animationClip;
         }
     }
 }

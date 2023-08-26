@@ -26,6 +26,7 @@ namespace CraftSharp.Rendering
             // Subscribe player events
             var playerController = GetComponentInParent<PlayerController>();
             playerController.OnCrossFadeState += this.CrossFadeState;
+            playerController.OnOverrideState += this.OverrideState;
             playerController.OnRandomizeMirroredFlag += () => {
                 var mirrored = Time.frameCount % 2 == 0;
                 SetMirroredFlag(mirrored);
@@ -35,12 +36,15 @@ namespace CraftSharp.Rendering
 
             // Get player animator
             entityAnimator = visualObj.GetComponent<Animator>();
+            // Apply overridden animator controller
+            animatorOverrideController = new AnimatorOverrideController(entityAnimator.runtimeAnimatorController);
+            entityAnimator.runtimeAnimatorController = animatorOverrideController;
 
             // Add and initialize player widgets
             visualObj.AddComponent<PlayerAnimatorWidget>();
             var accessoryWidget = visualObj.AddComponent<PlayerAccessoryWidget>();
 
-            var weaponMountRef = entityAnimator.GetBoneTransform(HumanBodyBones.Spine);
+            var weaponMountRef = entityAnimator!.GetBoneTransform(HumanBodyBones.Spine);
             var mainHandRef = entityAnimator.GetBoneTransform(HumanBodyBones.RightHand);
             accessoryWidget.SetRefTransforms(mainHandRef, weaponMountRef);
 

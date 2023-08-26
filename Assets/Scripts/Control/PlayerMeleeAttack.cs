@@ -8,7 +8,9 @@ namespace CraftSharp.Control
     {
         [SerializeField] [Range(0.1F, 10F)] public float MaxStageDuration = 10F;
         [SerializeField] [Range(-5F, -0.1F)] public float IdleTimeout = -0.9F;
-        [SerializeField] [Range(1, 10)] public int StageCount = 4;
-
+        [SerializeField] public AnimationClip? DummyAnimationClip;
+        [SerializeField] public AnimationClip[] AnimationClips = { };
+        [SerializeField] public float[] StageDurations = { };
+        public int StageCount => AnimationClips.Length;
     }
 }

@@ -255,6 +255,13 @@ namespace CraftSharp.Control
             OnCrossFadeState?.Invoke(stateName, time, layer, timeOffset);
         }
 
+        public delegate void OverrideStateEventHandler(AnimationClip dummyClip, AnimationClip animationClip);
+        public event OverrideStateEventHandler? OnOverrideState;
+        public void OverrideState(AnimationClip dummyClip, AnimationClip animationClip)
+        {
+            OnOverrideState?.Invoke(dummyClip, animationClip);
+        }
+
         public delegate void NoParamEventHandler();
         public event NoParamEventHandler? OnRandomizeMirroredFlag;
         public void RandomizeMirroredFlag() => OnRandomizeMirroredFlag?.Invoke();
