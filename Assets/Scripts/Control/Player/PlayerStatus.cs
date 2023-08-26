@@ -12,6 +12,7 @@ namespace CraftSharp.Control
         public bool InLiquid  = false;
         public bool Grounded  = false;
         public bool OnWall    = false;
+        public bool Gliding   = false;
         public bool Moving    = false;
         public bool Sprinting = false;
 
@@ -45,7 +46,7 @@ namespace CraftSharp.Control
         {
             var moveInfo = $"Moving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nSprinting:\t{Sprinting}";
             var envInfo = $"Ground Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}";
-            var atkInfo = Attacking ? AttackStatus.ToString() : "\n";
+            var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             
             return $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\n{moveInfo}\n{envInfo}\n{atkInfo}";
         }

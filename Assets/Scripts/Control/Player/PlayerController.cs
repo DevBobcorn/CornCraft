@@ -127,6 +127,8 @@ namespace CraftSharp.Control
                 // Dispose previous render gameobject
                 Destroy(prevRender.gameObject);
             }
+
+            playerRender!.transform.localPosition = Vector3.zero;
         }
 
         void Start()
@@ -295,16 +297,21 @@ namespace CraftSharp.Control
             return false;
         }
 
+        public void UpdatePlayerStatus()
+        {
+            if (!Status!.EntityDisabled)
+            {
+                statusUpdater!.UpdatePlayerStatus(playerRigidbody!.velocity, GetOrientation());
+            }
+        }
+
         protected void PreLogicalUpdate(float interval)
         {
             // Get input data from client
             var inputData = PlayerUserInputData.Current;
 
             // Update player status (in water, grounded, etc)
-            if (!Status!.EntityDisabled)
-            {
-                statusUpdater!.UpdatePlayerStatus(playerRigidbody!.velocity, GetOrientation());
-            }
+            UpdatePlayerStatus();
             
             var status = statusUpdater!.Status;
 
@@ -337,7 +344,7 @@ namespace CraftSharp.Control
             // Prepare current and target player visual yaw before updating it
             if (inputData.HorInputNormalized != Vector2.zero)
             {
-                Status.UserInputYaw = GetYawFromVector2(inputData.HorInputNormalized);
+                Status!.UserInputYaw = GetYawFromVector2(inputData.HorInputNormalized);
                 //Status.TargetVisualYaw = inputData.CameraEularAngles.y + Status.UserInputYaw;
                 Status.TargetVisualYaw = cameraController!.GetYaw() + Status.UserInputYaw;
             }
@@ -355,7 +362,7 @@ namespace CraftSharp.Control
             // Apply updated visual yaw to visual transform
             if (playerRender != null)
             {
-                playerRender.VisualTransform.eulerAngles = new(0F, Status.CurrentVisualYaw, 0F);
+                playerRender.VisualTransform.eulerAngles = new(0F, Status!.CurrentVisualYaw, 0F);
             }
         }
 

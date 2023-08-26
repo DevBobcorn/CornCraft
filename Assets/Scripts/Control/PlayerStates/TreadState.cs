@@ -10,6 +10,7 @@ namespace CraftSharp.Control
             var ability = player.Ability;
             
             info.Sprinting = false;
+            info.Gliding = false;
             info.Moving = false;
 
             // Whether movement should be slowed down by liquid, and whether the player can move around by swimming

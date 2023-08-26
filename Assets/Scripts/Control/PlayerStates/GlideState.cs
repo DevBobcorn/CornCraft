@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CraftSharp.Control
 {
-    public class FallState : IPlayerState
+    public class GlideState : IPlayerState
     {
         public const float THRESHOLD_CLIMB_2M = -2.05F;
         public const float THRESHOLD_CLIMB_1M = -1.55F;
@@ -17,17 +17,19 @@ namespace CraftSharp.Control
 
             info.Sprinting = false;
 
-            if (inputData.JumpFlag) // Check start gliding
+            if (inputData.JumpFlag) // Check stop gliding
             {
-                if (info.CenterDownDist > 2F && info.StaminaLeft > 0.01F) // Not so near to the ground, and we have stamina left
-                {
-                    info.Gliding = true;
-                }
+                info.Gliding = false;
             }
-            else if (inputData.HorInputNormalized != Vector2.zero) // Trying to move
+
+            Vector3 moveVelocity;
+            
+            if (inputData.HorInputNormalized != Vector2.zero) // Trying to move
             {
                 // Smooth rotation for player model
-                info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval * 0.05F);
+                info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval * 0.08F);
+                // Horizontal speed
+                moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * ability.GlideSpeed;
 
                 if (info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to move forward
                 {
@@ -77,22 +79,31 @@ namespace CraftSharp.Control
                     }
                 }
             }
+            else // No horizontal movement
+            {
+                moveVelocity = Vector3.zero;
+            }
 
-            Vector3 moveVelocity = rigidbody.velocity;
-            moveVelocity.y = Mathf.Max(rigidbody.velocity.y, ability.MaxFallSpeed);
+            // Vertical speed
+            moveVelocity.y = Mathf.Max(rigidbody.velocity.y, ability.MaxGlideFallSpeed);
 
             // Apply new velocity to rigidbody
             info.MoveVelocity = moveVelocity;
             
             if (info.Grounded) // Restore stamina
                 info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
+            else // Cost stamina
+                info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, 0F, interval * ability.GlideStaminaCost);
 
-            // Leave stamina value unchanged
+            if (info.StaminaLeft == 0) // Out of stamina, we're gonna FALL!
+            {
+                info.Gliding = false;
+            }
         }
 
         public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (!info.Spectating && !info.Grounded && !info.Gliding && !info.OnWall && !info.InLiquid)
+            if (!info.Spectating && !info.Grounded && info.Gliding && !info.OnWall && !info.InLiquid)
                 return true;
             
             return false;
@@ -100,7 +111,7 @@ namespace CraftSharp.Control
 
         public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (info.Spectating || info.Grounded || info.Gliding || info.OnWall || info.InLiquid)
+            if (info.Spectating || info.Grounded || !info.Gliding || info.OnWall || info.InLiquid)
                 return true;
             
             return false;

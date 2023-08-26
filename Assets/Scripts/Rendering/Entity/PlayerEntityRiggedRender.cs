@@ -11,6 +11,7 @@ namespace CraftSharp.Rendering
         private static readonly int GROUNDED = Animator.StringToHash("Grounded");
         private static readonly int IN_LIQUID = Animator.StringToHash("InLiquid");
         private static readonly int ON_WALL = Animator.StringToHash("OnWall");
+        private static readonly int GLIDING = Animator.StringToHash("Gliding");
         private static readonly int MOVING = Animator.StringToHash("Moving");
         private static readonly int SPRINTING = Animator.StringToHash("Sprinting");
         private static readonly int WALK_MODE = Animator.StringToHash("WalkMode");
@@ -63,6 +64,7 @@ namespace CraftSharp.Rendering
             entityAnimator!.SetBool(GROUNDED, info.Grounded);
             entityAnimator.SetBool(IN_LIQUID, info.InLiquid);
             entityAnimator.SetBool(ON_WALL, info.OnWall);
+            entityAnimator.SetBool(GLIDING, info.Gliding);
             entityAnimator.SetBool(MOVING, info.Moving);
             entityAnimator.SetBool(SPRINTING, info.Sprinting);
             entityAnimator.SetBool(WALK_MODE, info.WalkMode);

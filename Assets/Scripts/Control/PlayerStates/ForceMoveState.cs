@@ -55,7 +55,6 @@ namespace CraftSharp.Control
                     case ForceMoveDisplacementType.CurvesDisplacement:
                         // Sample animation 
                         var curPosition2 = currentOperation.SampleTargetAt(currentOperation.TimeTotal - currentTime);
-                        
                         //rigidbody.position = curPosition2;
                         player.transform.position = curPosition2;
                         //rigidbody.MovePosition(curPosition2);
@@ -90,7 +89,7 @@ namespace CraftSharp.Control
                         break;
                     case ForceMoveDisplacementType.CurvesDisplacement:
                         info.PlayingRootMotion = true;
-                        //rigidbody.isKinematic = true;
+                        rigidbody.isKinematic = true;
                         break;
                     case ForceMoveDisplacementType.RootMotionDisplacement:
                         info.PlayingRootMotion = true;
@@ -113,13 +112,22 @@ namespace CraftSharp.Control
                         //rigidbody.isKinematic = false;
                         break;
                     case ForceMoveDisplacementType.CurvesDisplacement:
+                        // Update ground dist
+                        player.UpdatePlayerStatus();
+                        //Debug.Log($"Ground dist after movement: {info.CenterDownDist}");
+                        if (info.CenterDownDist < 0F) // Move upward a bit to avoid rigidbody from bouncing off the ground
+                        {
+                            player.transform.position += new Vector3(0F, -info.CenterDownDist, 0F);
+                        }
                         info.PlayingRootMotion = false;
-                        //rigidbody.isKinematic = false;
+                        rigidbody.MovePosition(player.transform.position);
+                        rigidbody.isKinematic = false;
                         rigidbody.velocity = Vector3.zero;
+
+                        info.Grounded = true;
                         break;
                     case ForceMoveDisplacementType.RootMotionDisplacement:
                         info.PlayingRootMotion = false;
-                        
                         break;
                 }
             }

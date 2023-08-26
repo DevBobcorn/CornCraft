@@ -14,6 +14,10 @@
 /[Aa]ssets/MMDModels/*
 /*.ini
 
+# Third party utils
+/[Aa]ssets/VeryAnimation
+/[Aa]ssets/VeryAnimation.meta
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
