@@ -8,5 +8,4 @@ namespace CraftSharp.Control
 
         void Update() => transform.eulerAngles = new(0F, transform.eulerAngles.y + Time.deltaTime * rotateSpeed , 0F);
     }
-
 }
