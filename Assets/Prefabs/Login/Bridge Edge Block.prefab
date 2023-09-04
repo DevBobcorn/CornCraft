@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7160899437502440396}
   - component: {fileID: 5218408869799991560}
   m_Layer: 0
-  m_Name: Bridge Surface Block
+  m_Name: Bridge Edge Block
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -61,7 +61,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c9a1a51bfdc3c944fbe72268b470873d, type: 2}
+  - {fileID: 2100000, guid: e4ac5a148a33ea14393a3c6d9e8c6189, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -44,9 +44,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a350b7da89e0144db66fb9b214147ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeWidth: 4
-  bridgeConnectionLength: 8
-  bridgeBodyLength: 5
+  bridgeWidth: 3
+  bridgeConnectionLength: 6
+  bridgeBodyLength: 1
   perlinInitOffset: 0.16
   perlinSampleInterval: 0.7
   perlinSampleUnit: 0.1
+  defaultRiseSpeed: 1.8
+  targetHeight: 0
+  edgeOffset: 0.25

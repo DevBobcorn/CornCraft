@@ -894,7 +894,7 @@ MonoBehaviour:
   EnvironmentManager: {fileID: 1917450542}
   MaterialManager: {fileID: 331478947}
   playerController: {fileID: 195804746}
-  playerRenderPrefab: {fileID: 5283875576598358619, guid: 2fbc3437d775d8c4fa60f0d825c62dc4, type: 3}
+  playerRenderPrefab: {fileID: 1332614594968626728, guid: 2fbc3437d775d8c4fa60f0d825c62dc4, type: 3}
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
@@ -1060,7 +1060,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.5
+  m_fontSize: 47.25
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1195,7 +1195,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.5
+  m_fontSize: 47.25
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2524,7 +2524,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 35.85
+  m_fontSize: 36.4
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2659,7 +2659,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 35.85
+  m_fontSize: 36.4
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2794,7 +2794,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 35.85
+  m_fontSize: 36.4
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4131,6 +4131,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2436ab8bbfb9e484b9e87cfda7e8f8f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MIN_UPDATE_DISTANCE: 0.5
 --- !u!1 &2023534620
 GameObject:
   m_ObjectHideFlags: 0
@@ -4216,7 +4217,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 35.85
+  m_fontSize: 36.4
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4715,6 +4716,10 @@ PrefabInstance:
     - target: {fileID: 2555420394471349852, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Name
       value: Simple Camera Controller
+      objectReference: {fileID: 0}
+    - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -4
       objectReference: {fileID: 0}
     - target: {fileID: 9155130719897283015, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Cameras.Array.data[0]
