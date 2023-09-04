@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,61 +11,148 @@ public class BridgeFragment : MonoBehaviour
     [SerializeField] private float perlinSampleInterval = 0.7F;
     [SerializeField] private float perlinSampleUnit = 0.1F;
 
-    private readonly List<GameObject> surfaceBlocks = new();
-    private readonly List<GameObject> edgeBlocks = new();
+    [SerializeField] private float defaultRiseSpeed = 1F;
+    [SerializeField] private float targetHeight = 0F;
+    [SerializeField] private float edgeOffset = 0.25F;
 
-    private float SamplePerlinNoise(int index, int horizontalPos)
+    private readonly List<(GameObject, float, float)> bridgeBlocks = new();
+    private readonly List<(GameObject, float, Material)> railBlocks = new();
+
+    private float SamplePerlinNoise(int fragIndex, int horizontalPos)
     {
-        return Mathf.PerlinNoise1D(index * perlinSampleInterval + horizontalPos * perlinSampleUnit + perlinInitOffset);
+        return Mathf.PerlinNoise1D(fragIndex * perlinSampleInterval + horizontalPos * perlinSampleUnit + perlinInitOffset);
     }
 
-    public void BuildFragment(int fragIndex, GameObject surfaceBlock, GameObject edgeBlock)
+    private float GetBlockOffset(int posInFragment)
+    {
+        return Random.Range(0F, posInFragment / (bridgeConnectionLength + bridgeBodyLength)) * 0.2F + posInFragment * 0.2F;
+    }
+
+    private float GetRailBlockOffset(int posInFragment)
+    {
+        return posInFragment * 0.35F;
+    }
+
+    public void BuildFragment(int fragIndex, GameObject surfaceBlock,
+            GameObject edgeBlock, GameObject regularRail, GameObject poweredRail)
     {
         int forwardPos = fragIndex * (bridgeBodyLength + bridgeConnectionLength);
-        float verticalPos = (fragIndex % 2) * 0.1F;
+        float verticalPos = -2F; // (fragIndex % 2) * 0.1F;
 
         // Connection with previous fragment
         for (int i = -bridgeWidth + 1;i < bridgeWidth;i++)
         {
+            bool isEdge = Mathf.Abs(i) == bridgeWidth - 1;
+
             int prevConPos = forwardPos - bridgeConnectionLength;
             float sample = SamplePerlinNoise(fragIndex - 1, i);
 
-            for (float j = Mathf.RoundToInt(sample * bridgeConnectionLength);j < bridgeConnectionLength;j++)
+            for (int j = Mathf.RoundToInt(sample * bridgeConnectionLength);j < bridgeConnectionLength;j++)
             {
-                CreateBlock(surfaceBlock, new Vector3(i, verticalPos, prevConPos + j));
+                var newBlock = CreateBridgeBlock(isEdge ? edgeBlock : surfaceBlock,
+                        new Vector3(i, isEdge ? verticalPos + edgeOffset : verticalPos, prevConPos + j));
+                var riseSpeed = defaultRiseSpeed + Random.Range(-0.1F, 0.1F);
+                bridgeBlocks.Add((newBlock, riseSpeed, isEdge ? targetHeight + edgeOffset : targetHeight));
+
+                if (i == 0) // Block in the middle, place rail block
+                {
+                    var (railBlock, railMat) = CreateRailBlock(regularRail, new(i, targetHeight + 0.55F, prevConPos + j));
+                    railBlocks.Add((railBlock, Time.timeSinceLevelLoad, railMat));
+                }
             }
         }
 
         for (int i = -bridgeWidth + 1;i < bridgeWidth;i++)
         {
+            bool isEdge = Mathf.Abs(i) == bridgeWidth - 1;
+
             for (int j = 0;j < bridgeBodyLength;j++)
             {
-                CreateBlock(surfaceBlock, new Vector3(i, verticalPos, forwardPos + j));
+                float randomOffset = GetBlockOffset(j);
+                var newBlock = CreateBridgeBlock(isEdge ? edgeBlock : surfaceBlock,
+                        new Vector3(i, (isEdge ? verticalPos + edgeOffset : verticalPos) - randomOffset, forwardPos + j));
+                var riseSpeed = defaultRiseSpeed + Random.Range(-0.1F, 0.1F);
+                bridgeBlocks.Add((newBlock, riseSpeed, isEdge ? targetHeight + edgeOffset : targetHeight));
+
+                if (i == 0) // Block in the middle, place rail block
+                {
+                    var railOffset = GetRailBlockOffset(j);
+                    var (railBlock, railMat) = CreateRailBlock(poweredRail, new(i, targetHeight + 0.55F, forwardPos + j));
+                    railBlocks.Add((railBlock, Time.timeSinceLevelLoad + railOffset, railMat));
+                }
             }
         }
 
         // Connection with next fragment
         for (int i = -bridgeWidth + 1;i < bridgeWidth;i++)
         {
+            bool isEdge = Mathf.Abs(i) == bridgeWidth - 1;
+
             int nextConPos = forwardPos + bridgeBodyLength;
             float sample = SamplePerlinNoise(fragIndex, i);
 
-            for (float j = 0;j < Mathf.RoundToInt(sample * bridgeConnectionLength);j++)
+            for (int j = 0;j < Mathf.RoundToInt(sample * bridgeConnectionLength);j++)
             {
-                CreateBlock(surfaceBlock, new Vector3(i, verticalPos, nextConPos + j));
+                float randomOffset = GetBlockOffset(j + bridgeBodyLength);
+                var newBlock = CreateBridgeBlock(isEdge ? edgeBlock : surfaceBlock,
+                        new Vector3(i, (isEdge ? verticalPos + edgeOffset : verticalPos) - randomOffset, nextConPos + j));
+                var riseSpeed = defaultRiseSpeed + Random.Range(-0.1F, 0.1F);
+                bridgeBlocks.Add((newBlock, riseSpeed, isEdge ? targetHeight + edgeOffset : targetHeight));
+
+                if (i == 0) // Block in the middle, place rail block
+                {
+                    var railOffset = GetRailBlockOffset(j + bridgeBodyLength);
+                    var (railBlock, railMat) = CreateRailBlock(regularRail, new(i, targetHeight + 0.55F, nextConPos + j));
+                    railBlocks.Add((railBlock, Time.timeSinceLevelLoad + railOffset, railMat));
+                }
             }
         }
     }
 
-    private void CreateBlock(GameObject prefab, Vector3 position)
+    private GameObject CreateBridgeBlock(GameObject prefab, Vector3 position)
     {
         var newBlockObj = GameObject.Instantiate(prefab);
         newBlockObj.transform.SetParent(transform, false);
         newBlockObj.transform.position = position;
+
+        return newBlockObj;
+    }
+
+    private (GameObject, Material) CreateRailBlock(GameObject prefab, Vector3 position)
+    {
+        var newBlockObj = GameObject.Instantiate(prefab);
+        newBlockObj.transform.SetParent(transform, false);
+        newBlockObj.transform.position = position;
+
+        var renderer = newBlockObj.GetComponent<MeshRenderer>();
+
+        var selfMaterial = renderer.sharedMaterial;
+        // Make its own instance material
+        renderer.material = new Material(selfMaterial);
+        renderer.material.SetFloat("_FadeTime", 0F);
+
+        return (newBlockObj, renderer.material);
     }
 
     void Update()
     {
+        foreach (var (block, riseSpeed, target) in bridgeBlocks)
+        {
+            if (block.transform.position.y < target)
+            {
+                var newPos = block.transform.position;
+                newPos.y = Mathf.MoveTowards(newPos.y, target, riseSpeed * Time.deltaTime);
+
+                block.transform.position = newPos;
+            }
+        }
         
+        var curTime = Time.timeSinceLevelLoad;
+
+        foreach (var (railBlock, creationTime, railMat) in railBlocks)
+        {
+            var lifeTime = Mathf.Clamp01(curTime - creationTime - 1F);
+            railMat.SetFloat("_FadeTime", lifeTime);
+        }
     }
 }

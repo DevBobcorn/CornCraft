@@ -9,7 +9,8 @@ public class LoginBridge : MonoBehaviour
 
     [SerializeField] private GameObject bridgeBlock;
     [SerializeField] private GameObject bridgeEdge;
-    [SerializeField] private GameObject bridgePillar;
+    [SerializeField] private GameObject regularRail;
+    [SerializeField] private GameObject poweredRail;
 
     [SerializeField] private Transform viewerTransform;
 
@@ -36,7 +37,7 @@ public class LoginBridge : MonoBehaviour
         fragmentObj.name = $"Fragment #{fragmentIndex}";
 
         var fragment = fragmentObj.GetComponent<BridgeFragment>();
-        fragment.BuildFragment(fragmentIndex, bridgeBlock, bridgeEdge);
+        fragment.BuildFragment(fragmentIndex, bridgeBlock, bridgeEdge, regularRail, poweredRail);
 
         fragmentIndex++;
 
@@ -46,7 +47,7 @@ public class LoginBridge : MonoBehaviour
         {
             var target = existingFragments.Dequeue();
             
-            Debug.Log($"Destroying {target.gameObject.name}");
+            //Debug.Log($"Destroying {target.gameObject.name}");
             Destroy(target.gameObject);
         }
     }
