@@ -113,8 +113,8 @@ inline void SDFFaceUV(half reversal, half faceArea, out half2 result)
     {
         Light mainLight = GetMainLight();
         // MODIFICATION START
-        half2 lightDir = normalize(mainLight.direction.xz);
-        //half2 lightDir = -normalize(mainLight.direction.xz);
+        //half2 lightDir = normalize(mainLight.direction.xz);
+        half2 lightDir = -normalize(mainLight.direction.xz);
         // MODIFICATION END
 
         half2 Front = normalize(_FaceObjectToWorld._13_33);
