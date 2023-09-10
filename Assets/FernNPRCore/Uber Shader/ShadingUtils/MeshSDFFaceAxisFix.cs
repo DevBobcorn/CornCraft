@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 #if UNITY_EDITOR
 #endif
@@ -21,8 +22,10 @@ namespace FernNPRCore.Scripts.ShadingUtils
         [Header("Face Forward(Object Space)")] public FaceMeshAxisEnum forwardEnum = FaceMeshAxisEnum.ReverseY;
         [Header("Face Right(Object Space)")] public FaceMeshAxisEnum rightEnum = FaceMeshAxisEnum.X;
 
+        [SerializeField] private int[] targetMaterialIndices = { };
+
         private static readonly int faceObjectToWorld = Shader.PropertyToID("_FaceObjectToWorld");
-        private new MeshRenderer renderer;
+        private new SkinnedMeshRenderer renderer;
         private MaterialPropertyBlock faceMaterialblock;
 
         private Vector3 forward;
@@ -30,7 +33,8 @@ namespace FernNPRCore.Scripts.ShadingUtils
 
         private void OnEnable()
         {
-            renderer = GetComponent<MeshRenderer>();
+            renderer = GetComponent<SkinnedMeshRenderer>();
+
             if (faceMaterialblock == null)
             {
                 faceMaterialblock = new MaterialPropertyBlock();
@@ -81,13 +85,18 @@ namespace FernNPRCore.Scripts.ShadingUtils
 #if UNITY_EDITOR
             SetupFaceObjectAxis();
 #endif
-            renderer.GetPropertyBlock(faceMaterialblock);
-            Matrix4x4 faceObjectToWorldMatrix = Matrix4x4.zero;
-            faceObjectToWorldMatrix.SetColumn(0, right);
-            faceObjectToWorldMatrix.SetColumn(1, Vector4.zero);
-            faceObjectToWorldMatrix.SetColumn(2, forward);
-            faceMaterialblock.SetMatrix(faceObjectToWorld, faceObjectToWorldMatrix);
-            renderer.SetPropertyBlock(faceMaterialblock);
+
+            for (int i = 0; i < targetMaterialIndices.Length;i++)
+            {
+                renderer.GetPropertyBlock(faceMaterialblock, targetMaterialIndices[i]);
+                Matrix4x4 faceObjectToWorldMatrix = Matrix4x4.zero;
+                faceObjectToWorldMatrix.SetColumn(0, right);
+                faceObjectToWorldMatrix.SetColumn(1, Vector4.zero);
+                faceObjectToWorldMatrix.SetColumn(2, forward);
+                faceMaterialblock.SetMatrix(faceObjectToWorld, faceObjectToWorldMatrix);
+                renderer.SetPropertyBlock(faceMaterialblock, targetMaterialIndices[i]);
+            }
+
         }
     }
 }
