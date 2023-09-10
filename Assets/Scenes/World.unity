@@ -20,11 +20,11 @@ RenderSettings:
   m_FogDensity: 0.007
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.58738595, g: 0.6674535, b: 0.82687074, a: 1}
-  m_AmbientEquatorColor: {r: 0.6415094, g: 0.6415094, b: 0.6415094, a: 1}
-  m_AmbientGroundColor: {r: 0.25041997, g: 0.23096511, b: 0.27100885, a: 1}
+  m_AmbientSkyColor: {r: 0.19607843, g: 0.27450982, b: 0.39215687, a: 1}
+  m_AmbientEquatorColor: {r: 0.18431373, g: 0.30588236, b: 0.47058824, a: 1}
+  m_AmbientGroundColor: {r: 0, g: 0, b: 0.039215688, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 1
+  m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
@@ -190,7 +190,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.9713974, b: 0.88113207, a: 1}
   m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
@@ -894,7 +894,7 @@ MonoBehaviour:
   EnvironmentManager: {fileID: 1917450542}
   MaterialManager: {fileID: 331478947}
   playerController: {fileID: 195804746}
-  playerRenderPrefab: {fileID: 1332614594968626728, guid: 2fbc3437d775d8c4fa60f0d825c62dc4, type: 3}
+  playerRenderPrefab: {fileID: 4629627389257955861, guid: f203159209ba7b748b562080342c675e, type: 3}
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
@@ -1060,7 +1060,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 47.25
+  m_fontSize: 46.45
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1195,7 +1195,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 47.25
+  m_fontSize: 46.45
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2524,7 +2524,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36.4
+  m_fontSize: 35.8
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2659,7 +2659,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36.4
+  m_fontSize: 35.8
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2794,7 +2794,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36.4
+  m_fontSize: 35.8
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4217,7 +4217,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36.4
+  m_fontSize: 35.8
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
