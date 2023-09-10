@@ -147,10 +147,9 @@ namespace CraftSharp.Protocol
         void OnConnectionLost(DisconnectReason reason, string message);
 
         /// <summary>
-        /// Called ~10 times per second (10 ticks per second)
-        /// Useful for updating bots in other parts of the program
+        /// Called ~20 times per second (20 ticks per second)
         /// </summary>
-        void OnUpdate();
+        void OnHandlerUpdate();
 
         /// <summary>
         /// Called when an entity has spawned

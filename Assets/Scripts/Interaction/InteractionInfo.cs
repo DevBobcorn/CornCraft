@@ -8,6 +8,6 @@ namespace CraftSharp.Interaction
 
         public abstract string GetHint();
 
-        public abstract void RunInteraction(CornClient client);
+        public abstract void RunInteraction(BaseCornClient client);
     }
 }

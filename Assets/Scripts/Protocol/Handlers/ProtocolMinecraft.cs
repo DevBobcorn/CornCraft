@@ -137,7 +137,7 @@ namespace CraftSharp.Protocol.Handlers
                 {
                     cancelToken.ThrowIfCancellationRequested();
 
-                    handler.OnUpdate();
+                    handler.OnHandlerUpdate();
                     stopWatch.Restart();
 
                     while (packetQueue.TryTake(out Tuple<int, Queue<byte>>? packetInfo))
@@ -147,7 +147,7 @@ namespace CraftSharp.Protocol.Handlers
 
                         if (stopWatch.Elapsed.Milliseconds >= 50)
                         {
-                            handler.OnUpdate();
+                            handler.OnHandlerUpdate();
                             stopWatch.Restart();
                         }
                     }

@@ -18,7 +18,7 @@ namespace CraftSharp.Interaction
             return Definition.Hint;
         }
 
-        public override void RunInteraction(CornClient client)
+        public override void RunInteraction(BaseCornClient client)
         {
             switch (Definition.Type)
             {

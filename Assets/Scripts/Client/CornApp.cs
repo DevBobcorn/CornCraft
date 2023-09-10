@@ -8,7 +8,6 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-using CraftSharp.Control;
 using CraftSharp.Event;
 using CraftSharp.Interaction;
 using CraftSharp.Protocol.ProfileKey;
@@ -23,11 +22,11 @@ namespace CraftSharp
     {
         public const int WINDOWED_APP_WIDTH = 1600, WINDOWED_APP_HEIGHT = 900;
 
-        private CornClient? client = null;
-        public CornClient? Client => client;
+        private BaseCornClient? client = null;
+        public BaseCornClient? Client => client;
 
-        public static CornClient? CurrentClient => Instance.Client;
-        public static void SetCurrentClient(CornClient c) => Instance.client = c;
+        public static BaseCornClient? CurrentClient => Instance.Client;
+        public static void SetCurrentClient(BaseCornClient c) => Instance.client = c;
 
         private static CornApp? instance;
         public static CornApp Instance

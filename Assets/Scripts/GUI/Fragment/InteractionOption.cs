@@ -46,7 +46,7 @@ namespace CraftSharp.UI
             anim?.SetBool(EXPIRED, true);
         }
 
-        public void Execute(CornClient? client)
+        public void Execute(BaseCornClient? client)
         {
             anim?.SetTrigger(EXECUTED); // Execution visual feedback
 
