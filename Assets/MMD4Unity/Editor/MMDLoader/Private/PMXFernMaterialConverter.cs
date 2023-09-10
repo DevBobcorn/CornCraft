@@ -13,18 +13,6 @@ namespace MMD
 
         }
 
-        /// <summary>
-        /// MMDシェーダーパスの取得
-        /// </summary>
-        /// <returns>MMDシェーダーパス</returns>
-        string GetShaderPath()
-        {
-            string result = "FernRender/URP/FERNNPR";
-            result += "Standard";
-
-            return result;
-        }
-
         enum MaterialTypes
         {
             Body,
@@ -34,30 +22,29 @@ namespace MMD
             Metal
         }
 
-        enum DiffuseType
-        {
-            CelShading = 0,
-            RampShading = 1,
-            CellBandsShading = 2,
-            PBRShading = 3
-        }
 
-        void SetupDiffuse(Material fernMat, DiffuseType type)
+        /// <summary>
+        /// MMDシェーダーパスの取得
+        /// </summary>
+        /// <returns>MMDシェーダーパス</returns>
+        string GetShaderPath(MaterialTypes type)
         {
-            fernMat.SetFloat("_enum_diffuse", (float) type);
-        }
+            string result = "FernRender/URP/FERNNPR";
 
-        enum SpecularType
-        {
-            None = 0,
-            PBR_GGX = 1,
-            Stylized = 2,
-            Blinn_Phong = 3
-        }
+            switch (type)
+            {
+                case MaterialTypes.Face:
+                    result += "Face";
+                    break;
+                case MaterialTypes.Hair:
+                    result += "Hair";
+                    break;
+                default:
+                    result += "Standard";
+                    break;
+            }
 
-        void SetupSpecular(Material fernMat, SpecularType type)
-        {
-            fernMat.SetFloat("_enum_specular", (float) type);
+            return result;
         }
 
         /// <summary>
@@ -77,10 +64,21 @@ namespace MMD
                 string path = format_.meta_header.folder + "/" + texture_file_name;
                 main_texture = (Texture2D)AssetDatabase.LoadAssetAtPath(path, typeof(Texture2D));
             }
+
+            // Pick material type from name
+            var materialType = MaterialTypes.Body;
+            if (material.name.Contains("脸") || material.name.Contains("顔") || material.name.Contains("颜"))
+            {
+                materialType = MaterialTypes.Face;
+            }
+            else if (material.name.Contains("发") || material.name.Contains("髪"))
+            {
+                materialType = MaterialTypes.Hair;
+            }
             
             //マテリアルに設定
-            string shader_path = GetShaderPath();
-            Material result = new Material(Shader.Find(shader_path));
+            string shader_path = GetShaderPath(materialType);
+            Material result = new(Shader.Find(shader_path));
             // シェーダに依って値が有ったり無かったりするが、設定してもエラーに為らない様なので全部設定
             // TODO: result.SetColor("_BaseColor", material.diffuse_color);
             result.SetColor("_BaseColor", Color.white);
@@ -91,13 +89,35 @@ namespace MMD
                 SetSurfaceType(result, 0);
             }
 
-            SetupDiffuse(result, DiffuseType.CelShading);
-            result.SetFloat("_CELLThreshold", 0.3F);
-            result.SetFloat("_CELLSmoothing", 0.1F);
-            result.SetColor("_HighColor", new Color32(255, 255, 255, 255));
-            result.SetColor("_DarkColor", new Color32(220, 180, 150, 255));
+            Texture2D faceSDFTex = (Texture2D)UnityEditor.AssetDatabase.LoadAssetAtPath(
+                    format_.meta_header.folder + "/FaceSDF.png", typeof(Texture2D));
 
-            SetupSpecular(result, SpecularType.PBR_GGX);
+            switch (materialType)
+            {
+                case MaterialTypes.Face:
+                    result.SetFloat("_enum_diffuse", 4); // Standard Diffuse => SDFFaceShading
+                    result.SetFloat("_CELLThreshold", 0.3F);
+                    result.SetFloat("_CELLSmoothing", 0.1F);
+                    result.SetColor("_HighColor", new Color32(255, 255, 255, 255));
+                    result.SetColor("_DarkColor", new Color32(220, 180, 150, 255));
+                    result.SetFloat("_enum_specular", 0); // Standard Specular => None
+                    // Setup face SDF parameters
+                    result.SetTexture("_SDFFaceTex", faceSDFTex);
+                    result.SetFloat("_SDFFaceArea", 95F);
+                    result.SetFloat("_SDFShadingSoftness", 0.1F);
+                    // Turn off shadow receiving
+                    result.SetFloat("_RECEIVE_SHADOWS_OFF", 0F);
+                    break;
+
+                default:
+                    result.SetFloat("_enum_diffuse", 0); // Standard Diffuse => CelShading
+                    result.SetFloat("_CELLThreshold", 0.3F);
+                    result.SetFloat("_CELLSmoothing", 0.1F);
+                    result.SetColor("_HighColor", new Color32(255, 255, 255, 255));
+                    result.SetColor("_DarkColor", new Color32(220, 180, 150, 255));
+                    result.SetFloat("_enum_specular", 0); // Standard Specular => None
+                    break;
+            }
 
             result.SetFloat("_Smoothness", 0F);
             //result.SetColor("_AmbColor", material.ambient_color);

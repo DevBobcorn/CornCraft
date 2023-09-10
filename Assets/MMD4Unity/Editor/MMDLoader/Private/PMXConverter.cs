@@ -3,6 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 using MMD.PMX;
+using Unity.VisualScripting;
 
 namespace MMD
 {
@@ -99,10 +100,36 @@ namespace MMD
             MeshCreationInfo[] creation_info = CreateMeshCreationInfo();                // メッシュを作成する為の情報を作成
             Mesh[] mesh = CreateMesh(creation_info);                                    // メッシュの生成・設定
             Material[][] materials = CreateMaterials(material_type, creation_info);                    // マテリアルの生成・設定
+
             GameObject[] bones = CreateBones();                                            // ボーンの生成・設定
             SkinnedMeshRenderer[] renderers = BuildingBindpose(mesh, materials, bones);    // バインドポーズの作成
             CreateMorph(mesh, materials, bones, renderers, creation_info);                // モーフの生成・設定
             
+            // Fern NPR Face SDF helper script assigning
+            List<int> faceMaterialIndices = new();
+            for (int meshIndex = 0; meshIndex < materials.Length; meshIndex++)
+            {
+                for (int matIndex = 0; matIndex < materials[meshIndex].Length; matIndex++)
+                {
+                    var mat = materials[meshIndex][matIndex];
+                    if (mat.shader.name.EndsWith("FERNNPRFace"))
+                    {
+                        faceMaterialIndices.Add(matIndex);
+                    }
+                }
+
+                if (faceMaterialIndices.Count > 0)
+                {
+                    var helper = renderers[meshIndex].AddComponent<FernNPRCore.Scripts.ShadingUtils.MeshSDFFaceAxisFix>();
+                    helper.targetMaterialIndices = faceMaterialIndices.ToArray();
+                    helper.forwardEnum = FernNPRCore.Scripts.ShadingUtils.MeshSDFFaceAxisFix.FaceMeshAxisEnum.Z;
+                    helper.rightEnum   = FernNPRCore.Scripts.ShadingUtils.MeshSDFFaceAxisFix.FaceMeshAxisEnum.X;
+
+                    // Clear up for next iteration
+                    faceMaterialIndices.Clear();
+                }
+            }
+
             // BoneController・IKの登録(use_ik_を使った判定はEntryBoneController()の中で行う)
             {
                 engine.bone_controllers = EntryBoneController(bones);
