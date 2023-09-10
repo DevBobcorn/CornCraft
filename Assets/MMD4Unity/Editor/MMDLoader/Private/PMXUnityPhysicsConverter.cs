@@ -9,8 +9,8 @@ namespace MMD
 {
     public class PMXUnityPhysicsConverter : PMXBasePhysicsConverter
     {
-        public PMXUnityPhysicsConverter(MMDEngine engine, GameObject root_game_object, PMXFormat format, GameObject[] bones, float scale)
-                : base(engine, root_game_object, format, bones, scale)
+        public PMXUnityPhysicsConverter(GameObject root_game_object, PMXFormat format, GameObject[] bones, float scale)
+                : base(root_game_object, format, bones, scale)
         {
             // Something else to do here...
             
@@ -28,6 +28,8 @@ namespace MMD
             // 非衝突グループ
             List<int>[] ignoreGroups = SettingIgnoreRigidGroups(rigids);
             int[] groupTarget = GetRigidbodyGroupTargets(rigids);
+
+            MMDEngine engine_ = root_game_object_.GetComponent<MMDEngine>();
 
             MMDEngine.Initialize(engine_, groupTarget, ignoreGroups, rigids);
         }

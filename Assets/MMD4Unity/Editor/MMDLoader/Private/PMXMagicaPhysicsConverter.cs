@@ -12,8 +12,8 @@ namespace MMD
 {
     public class PMXMagicaPhysicsConverter : PMXBasePhysicsConverter
     {
-        public PMXMagicaPhysicsConverter(MMDEngine engine, GameObject root_game_object, PMXFormat format, GameObject[] bone_objs, float scale)
-                : base(engine, root_game_object, format, bone_objs, scale)
+        public PMXMagicaPhysicsConverter(GameObject root_game_object, PMXFormat format, GameObject[] bone_objs, float scale)
+                : base(root_game_object, format, bone_objs, scale)
         {
             // Something else to do here...
             

@@ -17,8 +17,10 @@ MonoBehaviour:
     use_vmd_preload: 1
   pmx_config:
     animation_type: 1
+    material_type: 2
     physics_type: 2
     use_ik: 0
+    use_leg_d_bones: 1
     scale: 0.1
     player_anim_controller: {fileID: 9100000, guid: 83f3e64e2dca13b4e9c2b6153af51622, type: 2}
   vmd_config:

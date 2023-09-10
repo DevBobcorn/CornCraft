@@ -16,6 +16,15 @@ namespace MMD
             HumanMecanim,        //人型アバターでのMecanim
             LegacyAnimation,    //旧式アニメーション
         }
+
+        /// <summary>
+        /// マテリアルタイプ
+        /// </summary>
+        public enum MaterialType {
+            MMDMaterial,
+            NiloMaterial,
+            FernMaterial
+        }
         
         /// <summary>
         /// Physicsタイプ
@@ -35,10 +44,12 @@ namespace MMD
         /// <param name='use_ik'>IKを使用するか</param>
         /// <param name='use_leg_d_bones'>Whether or not to directly use d-bones to manipulate leg animations.</param>
         /// <param name='scale'>スケール</param>
-        public static GameObject CreateGameObject(PMXFormat format, PhysicsType physics_type, AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale) {
+        public static GameObject CreateGameObject(PMXFormat format, MaterialType material_type, PhysicsType physics_type,
+                AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale) {
             GameObject result;
             using (PMXConverter converter = new PMXConverter()) {
-                result = converter.CreateGameObject_(format, physics_type, animation_type, use_ik, use_leg_d_bones, scale);
+                result = converter.CreateGameObject_(format, material_type, physics_type, animation_type,
+                        use_ik, use_leg_d_bones, scale);
             }
             return result;
         }
@@ -70,7 +81,7 @@ namespace MMD
         /// <param name='use_ik'>IKを使用するか</param>
         /// <param name='use_leg_d_bones'>Whether or not to directly use d-bones to manipulate leg animations.</param>
         /// <param name='scale'>スケール</param>
-        private GameObject CreateGameObject_(PMXFormat format, PhysicsType physics_type, AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale) {
+        private GameObject CreateGameObject_(PMXFormat format, MaterialType material_type, PhysicsType physics_type, AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale) {
             format_ = format;
             use_ik_ = use_ik;
             use_leg_d_bones_ = use_leg_d_bones;
@@ -87,7 +98,7 @@ namespace MMD
             
             MeshCreationInfo[] creation_info = CreateMeshCreationInfo();                // メッシュを作成する為の情報を作成
             Mesh[] mesh = CreateMesh(creation_info);                                    // メッシュの生成・設定
-            Material[][] materials = CreateMaterials(creation_info);                    // マテリアルの生成・設定
+            Material[][] materials = CreateMaterials(material_type, creation_info);                    // マテリアルの生成・設定
             GameObject[] bones = CreateBones();                                            // ボーンの生成・設定
             SkinnedMeshRenderer[] renderers = BuildingBindpose(mesh, materials, bones);    // バインドポーズの作成
             CreateMorph(mesh, materials, bones, renderers, creation_info);                // モーフの生成・設定
@@ -105,10 +116,10 @@ namespace MMD
             {
                 PMXBasePhysicsConverter physConv = physics_type switch
                 {
-                    PhysicsType.UnityPhysics  => new PMXUnityPhysicsConverter(engine, root_game_object_, format_, bones, scale_),
-                    PhysicsType.MagicaCloth2  => new PMXMagicaPhysicsConverter(engine, root_game_object_, format_, bones, scale_),
+                    PhysicsType.UnityPhysics  => new PMXUnityPhysicsConverter(root_game_object_, format_, bones, scale_),
+                    PhysicsType.MagicaCloth2  => new PMXMagicaPhysicsConverter(root_game_object_, format_, bones, scale_),
 
-                    _                         => new PMXUnityPhysicsConverter(engine, root_game_object_, format_, bones, scale_)
+                    _                         => new PMXUnityPhysicsConverter(root_game_object_, format_, bones, scale_)
                 };
 
                 physConv.Convert();
@@ -143,7 +154,7 @@ namespace MMD
         /// <summary>
         /// メッシュを作成する時に参照するデータの纏め
         /// </summary>
-        class MeshCreationInfo {
+        internal class MeshCreationInfo {
             public class Pack {
                 public uint        material_index;    //マテリアル
                 public uint[]    plane_indices;    //面
@@ -477,7 +488,7 @@ namespace MMD
         /// </summary>
         /// <returns>マテリアル</returns>
         /// <param name='creation_info'>メッシュ作成情報</param>
-        Material[][] CreateMaterials(MeshCreationInfo[] creation_info)
+        Material[][] CreateMaterials(MaterialType material_type, MeshCreationInfo[] creation_info)
         {
             // 適当なフォルダに投げる
             string path = format_.meta_header.folder + "/Materials/";
@@ -486,7 +497,7 @@ namespace MMD
             }
             
             //全マテリアルを作成
-            Material[] materials = EntryAttributesForMaterials();
+            Material[] materials = EntryAttributesForMaterials(material_type);
             CreateAssetForMaterials(materials);
 
             //メッシュ単位へ振り分け
@@ -502,12 +513,21 @@ namespace MMD
         /// マテリアルに基本情報(シェーダー・カラー・テクスチャ)を登録する
         /// </summary>
         /// <returns>マテリアル</returns>
-        Material[] EntryAttributesForMaterials()
+        Material[] EntryAttributesForMaterials(MaterialType material_type)
         {
             //材質モーフが透過を要望するか
             bool[] is_transparent_by_material = IsTransparentByMaterial(); //材質
             bool[] is_transparent_by_material_morph = IsTransparentByMaterialMorph(); //材質モーフ
             bool[] is_transparent_by_texture_alpha = IsTransparentByTextureAlpha(); //テクスチャのアルファ値(UV考慮済み)
+
+            PMXBaseMaterialConverter materialConv = material_type switch
+            {
+                MaterialType.MMDMaterial  => new PMXMMDMaterialConverter(root_game_object_, format_, scale_),
+                MaterialType.NiloMaterial => new PMXNiloMaterialConverter(root_game_object_, format_, scale_),
+                MaterialType.FernMaterial => new PMXFernMaterialConverter(root_game_object_, format_, scale_),
+
+                _                         => new PMXNiloMaterialConverter(root_game_object_, format_, scale_)
+            };
             
             return Enumerable.Range(0, format_.material_list.material.Length)
                     .Select(x=>new {
@@ -515,7 +535,7 @@ namespace MMD
                             is_transparent = is_transparent_by_material[x] || is_transparent_by_material_morph[x]
                                     || is_transparent_by_texture_alpha[x]
                     })
-                    .Select(x=>ConvertMaterial(x.material_index, x.is_transparent))
+                    .Select(x=>materialConv.Convert(x.material_index, x.is_transparent))
                     .ToArray();
         }
         
@@ -753,213 +773,6 @@ namespace MMD
                 //此処迄来たら不透明
                 result = false;
             } while(false);
-            return result;
-        }
-        
-        /// <summary>
-        /// マテリアルをUnity用に変換する
-        /// </summary>
-        /// <returns>Unity用マテリアル</returns>
-        /// <param name='material_index'>PMX用マテリアルインデックス</param>
-        /// <param name='is_transparent'>透過か</param>
-        Material ConvertMaterial(uint material_index, bool is_transparent)
-        {
-            PMXFormat.Material material = format_.material_list.material[material_index];
-
-            //先にテクスチャ情報を検索
-            Texture2D main_texture = null;
-            if (material.usually_texture_index < format_.texture_list.texture_file.Length) {
-                string texture_file_name = format_.texture_list.texture_file[material.usually_texture_index];
-                string path = format_.meta_header.folder + "/" + texture_file_name;
-                main_texture = (Texture2D)AssetDatabase.LoadAssetAtPath(path, typeof(Texture2D));
-            }
-            
-            //マテリアルに設定
-            string shader_path = GetMmdShaderPath(material, main_texture, is_transparent);
-            Material result = new Material(Shader.Find(shader_path));
-            // シェーダに依って値が有ったり無かったりするが、設定してもエラーに為らない様なので全部設定
-            //result.SetColor("_Color", material.diffuse_color);
-            result.SetColor("_BaseColor", material.diffuse_color);
-            //result.SetColor("_AmbColor", material.ambient_color);
-            //result.SetFloat("_Opacity", material.diffuse_color.a);
-            //result.SetColor("_SpecularColor", material.specular_color);
-            //result.SetFloat("_Shininess", material.specularity);
-            result.SetFloat("_UseAlphaClipping", is_transparent ? 1F : 0F);
-            // エッジ
-            const float c_default_scale = 0.085f; //0.085fの時にMMDと一致する様にしているので、それ以外なら補正
-            result.SetFloat("_OutlineWidth", material.edge_size * scale_ / c_default_scale);
-            result.SetColor("_OutlineColor", material.edge_color);
-            //カスタムレンダーキュー
-            {
-                MMDEngine engine = root_game_object_.GetComponent<MMDEngine>();
-                if (engine.enable_render_queue && is_transparent) {
-                    //カスタムレンダーキューが有効 かつ マテリアルが透過なら
-                    //マテリアル順に並べる
-                    result.renderQueue = engine.render_queue_value + (int)material_index;
-                } else {
-                    //非透明なら
-                    result.renderQueue = -1;
-                }
-            }
-            // スフィアテクスチャ
-            if (material.sphere_texture_index < format_.texture_list.texture_file.Length) {
-                string sphere_texture_file_name = format_.texture_list.texture_file[material.sphere_texture_index];
-                string path = format_.meta_header.folder + "/" + sphere_texture_file_name;
-                Texture2D sphere_texture = (Texture2D)UnityEditor.AssetDatabase.LoadAssetAtPath(path, typeof(Texture2D));
-                
-                switch (material.sphere_mode) {
-                case PMXFormat.Material.SphereMode.AddSphere: // 加算
-                    result.SetTexture("_SphereAddTex", sphere_texture);
-                    result.SetTextureScale("_SphereAddTex", new Vector2(1, -1));
-                    break;
-                case PMXFormat.Material.SphereMode.MulSphere: // 乗算
-                    result.SetTexture("_SphereMulTex", sphere_texture);
-                    result.SetTextureScale("_SphereMulTex", new Vector2(1, -1));
-                    break;
-                case PMXFormat.Material.SphereMode.SubTexture: // サブテクスチャ
-                    //サブテクスチャ用シェーダーが無いので設定しない
-                    break;
-                default:
-                    //empty.
-                    break;
-                    
-                }
-            }
-            /*
-            // トゥーンテクスチャ
-            {
-                string toon_texture_name = null;
-                string toon_texture_path = null;
-                if (0 < material.common_toon) {
-                    //共通トゥーン
-                    string resource_path = System.IO.Path.GetDirectoryName(UnityEditor.AssetDatabase.
-                            GetAssetPath(Shader.Find("Nilo/ToonShader")));
-                    
-                    toon_texture_name = "ToonTextures/toon" + material.common_toon.ToString("00") + ".bmp";
-                    toon_texture_path = System.IO.Path.Combine(resource_path, toon_texture_name);
-                } else if (material.toon_texture_index < format_.texture_list.texture_file.Length) {
-                    //自前トゥーン
-                    toon_texture_name = format_.texture_list.texture_file[material.toon_texture_index];
-                    toon_texture_path = System.IO.Path.Combine(format_.meta_header.folder, toon_texture_name);
-                }
-                if (!string.IsNullOrEmpty(toon_texture_path)) {
-                    Texture2D toon_texture = (Texture2D)UnityEditor.AssetDatabase.LoadAssetAtPath(toon_texture_path, typeof(Texture2D));
-                    result.SetTexture("_ToonTex", toon_texture);
-                    result.SetTextureScale("_ToonTex", new Vector2(1, -1));
-                }
-            }
-            */
-            // テクスチャが空でなければ登録
-            if (null != main_texture) {
-                result.mainTexture = main_texture;
-                result.mainTextureScale = new Vector2(1, -1);
-            }
-            
-            return result;
-        }
-        
-        /// <summary>
-        /// MMDシェーダーパスの取得
-        /// </summary>
-        /// <returns>MMDシェーダーパス</returns>
-        /// <param name='material'>シェーダーを設定するマテリアル</param>
-        /// <param name='texture'>シェーダーに設定するメインテクスチャ</param>
-        /// <param name='is_transparent'>透過か</param>
-        string GetMmdShaderPath(PMXFormat.Material material, Texture2D texture, bool is_transparent) {
-            /*
-            string result = "MMD/";
-            if (is_transparent) {
-                result += "Transparent/";
-            }
-            result += "PMDMaterial";
-            if (IsEdgeMaterial(material)) {
-                result += "-with-Outline";
-            }
-            if (IsCullBackMaterial(material)) {
-                result += "-CullBack";
-            }
-            if (IsNoCastShadowMaterial(material)) {
-                result += "-NoCastShadow";
-            }
-#if MFU_ENABLE_NO_RECEIVE_SHADOW_SHADER    //影受け無しのシェーダはまだ無いので無効化
-            if (IsNoReceiveShadowMaterial(material)) {
-                result += "-NoReceiveShadow";
-            }
-#endif //MFU_ENABLE_NO_RECEIVE_SHADOW_SHADER
-            */
-            string result = "Nilo/";
-            result += "ToonShader";
-
-            return result;
-        }
-        
-        /// <summary>
-        /// エッジマテリアル確認
-        /// </summary>
-        /// <returns>true:エッジ有り, false:無エッジ</returns>
-        /// <param name='material'>シェーダーを設定するマテリアル</param>
-        bool IsEdgeMaterial(PMXFormat.Material material) {
-            bool result;
-            if (0 != (PMXFormat.Material.Flag.Edge & material.flag)) {
-                //エッジ有りなら
-                result = true;
-            } else {
-                //エッジ無し
-                result = false;
-            }
-            return result;
-        }
-        
-        /// <summary>
-        /// 背面カリングマテリアル確認
-        /// </summary>
-        /// <returns>true:背面カリングする, false:背面カリングしない</returns>
-        /// <param name='material'>シェーダーを設定するマテリアル</param>
-        bool IsCullBackMaterial(PMXFormat.Material material) {
-            bool result;
-            if (0 != (PMXFormat.Material.Flag.Reversible & material.flag)) {
-                //両面描画なら
-                //背面カリングしない
-                result = false;
-            } else {
-                //両面描画で無いなら
-                //背面カリングする
-                result = true;
-            }
-            return result;
-        }
-        
-        /// <summary>
-        /// 無影マテリアル確認
-        /// </summary>
-        /// <returns>true:無影, false:影放ち</returns>
-        /// <param name='material'>シェーダーを設定するマテリアル</param>
-        bool IsNoCastShadowMaterial(PMXFormat.Material material) {
-            bool result;
-            if (0 != (PMXFormat.Material.Flag.CastShadow & material.flag)) {
-                //影放ち
-                result = false;
-            } else {
-                //無影
-                result = true;
-            }
-            return result;
-        }
-        
-        /// <summary>
-        /// 影受け無しマテリアル確認
-        /// </summary>
-        /// <returns>true:影受け無し, false:影受け</returns>
-        /// <param name='material'>シェーダーを設定するマテリアル</param>
-        bool IsNoReceiveShadowMaterial(PMXFormat.Material material) {
-            bool result;
-            if (0 != (PMXFormat.Material.Flag.ReceiveSelfShadow & material.flag)) {
-                //影受け
-                result = false;
-            } else {
-                //影受け無し
-                result = true;
-            }
             return result;
         }
         

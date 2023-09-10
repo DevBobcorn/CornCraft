@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEditor;
 
 public class VMDLoaderWindow : EditorWindow {
@@ -9,7 +8,7 @@ public class VMDLoaderWindow : EditorWindow {
 
     [MenuItem ("MMD for Unity/VMD Loader")]
     static void Init() {
-        var window = (VMDLoaderWindow)EditorWindow.GetWindow<VMDLoaderWindow>(true, "VMD Loader");
+        var window = GetWindow<VMDLoaderWindow>(true, "VMD Loader");
         window.Show();
     }
     
