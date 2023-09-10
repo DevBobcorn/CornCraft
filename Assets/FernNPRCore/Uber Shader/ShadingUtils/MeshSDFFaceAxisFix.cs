@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 #if UNITY_EDITOR
 #endif
@@ -22,7 +21,7 @@ namespace FernNPRCore.Scripts.ShadingUtils
         [Header("Face Forward(Object Space)")] public FaceMeshAxisEnum forwardEnum = FaceMeshAxisEnum.ReverseY;
         [Header("Face Right(Object Space)")] public FaceMeshAxisEnum rightEnum = FaceMeshAxisEnum.X;
 
-        [SerializeField] private int[] targetMaterialIndices = { };
+        public int[] targetMaterialIndices = { };
 
         private static readonly int faceObjectToWorld = Shader.PropertyToID("_FaceObjectToWorld");
         private new SkinnedMeshRenderer renderer;
@@ -82,9 +81,9 @@ namespace FernNPRCore.Scripts.ShadingUtils
         {
             if (renderer == null) return;
 
-#if UNITY_EDITOR
+//#if UNITY_EDITOR
             SetupFaceObjectAxis();
-#endif
+//#endif
 
             for (int i = 0; i < targetMaterialIndices.Length;i++)
             {
