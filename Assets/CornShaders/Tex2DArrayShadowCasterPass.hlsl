@@ -65,7 +65,7 @@ half4 ShadowPassFragment(Varyings input) : SV_TARGET
     Alpha(SampleAlbedoAlpha(input.uv, TEXTURE2D_ARRAY_ARGS(_BaseMap, sampler_BaseMap)).a, _BaseColor, _Cutoff);
 
 #ifdef LOD_FADE_CROSSFADE
-    LODFadeCrossFade(input.positionCS);
+    return 0; //LODFadeCrossFade(input.positionCS);
 #endif
 
     return 0;

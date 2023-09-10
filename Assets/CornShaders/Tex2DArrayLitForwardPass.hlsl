@@ -203,7 +203,7 @@ void LitPassFragmentSimple(
     InitializeSimpleLitSurfaceData(input.uv, input.color, surfaceData);
 
 #ifdef LOD_FADE_CROSSFADE
-    LODFadeCrossFade(input.positionCS);
+    //LODFadeCrossFade(input.positionCS);
 #endif
 
     InputData inputData;

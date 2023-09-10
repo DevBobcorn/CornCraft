@@ -7,15 +7,13 @@ namespace MMD
 {
     public abstract class PMXBasePhysicsConverter
     {
-        protected MMDEngine             engine_;
         protected GameObject            root_game_object_;
         protected GameObject[]          bone_game_objs;
         protected PMXFormat             format_;
         protected float                 scale_;
         
-        public PMXBasePhysicsConverter(MMDEngine engine, GameObject root_game_object, PMXFormat format, GameObject[] bones_objs, float scale)
+        public PMXBasePhysicsConverter(GameObject root_game_object, PMXFormat format, GameObject[] bones_objs, float scale)
         {
-            engine_ = engine;
             root_game_object_ = root_game_object;
             format_ = format;
             bone_game_objs = bones_objs;
