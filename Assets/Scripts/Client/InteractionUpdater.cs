@@ -14,7 +14,7 @@ namespace CraftSharp.Control
 
         public readonly Dictionary<int, BlockInteractionInfo> interactionInfos = new();
         public Location? TargetLocation = null;
-        private CornClient? client;
+        private BaseCornClient? client;
         private CameraController? cameraController;
 
         private void UpdateBlockSelection(Ray? viewRay)
@@ -150,7 +150,7 @@ namespace CraftSharp.Control
             return PointOnGridEdge(point.x) || PointOnGridEdge(point.y) || PointOnGridEdge(point.z);
         }
 
-        public void Initialize(CornClient client, CameraController camController)
+        public void Initialize(BaseCornClient client, CameraController camController)
         {
             this.client = client;
             this.cameraController = camController;

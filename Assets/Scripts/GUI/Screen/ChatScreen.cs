@@ -132,7 +132,7 @@ namespace CraftSharp.UI
 
         public void RequestAutoCompleteChat(string message)
         {
-            CornApp.CurrentClient?.AutoComplete(message);
+            CornApp.CurrentClient?.SendAutoCompleteRequest(message);
         }
 
         public void PrevChatMessage()

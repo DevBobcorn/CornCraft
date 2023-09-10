@@ -21,24 +21,8 @@ using CraftSharp.Inventory;
 namespace CraftSharp
 {
     [RequireComponent(typeof (PlayerUserInput), typeof (InteractionUpdater))]
-    public class CornClient : MonoBehaviour, IMinecraftComHandler
+    public class CornClient : BaseCornClient, IMinecraftComHandler
     {
-        #region Inspector Fields
-        [SerializeField] public ChunkRenderManager? ChunkRenderManager;
-        [SerializeField] public EntityRenderManager? EntityRenderManager;
-        [SerializeField] public BaseEnvironmentManager? EnvironmentManager;
-        [SerializeField] public MaterialManager? MaterialManager;
-        
-        [SerializeField] private PlayerController? playerController;
-        [SerializeField] private GameObject? playerRenderPrefab;
-        [SerializeField] private CameraController? cameraController;
-        public CameraController CameraController => cameraController!;
-        [SerializeField] private ScreenControl? screenControl;
-        public ScreenControl ScreenControl => screenControl!;
-        [SerializeField] public HUDScreen? HUDScreen;
-
-        #endregion
-
         #region Login Information
         private string? host;
         private int port;
@@ -47,15 +31,9 @@ namespace CraftSharp
         private Guid uuid;
         private string? sessionId;
         private PlayerKeyPair? playerKeyPair;
-        public string GetServerHost() => host!;
-        public int GetServerPort() => port;
-        public string GetUsername() => username!;
-        public Guid GetUserUuid() => uuid;
-        public string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
-        public string GetSessionID() => sessionId!;
         #endregion
 
-        #region Client Control
+        #region Thread and Chat Control
         private readonly Queue<Action> threadTasks = new();
         private readonly object threadTasksLock = new();
 
@@ -75,8 +53,6 @@ namespace CraftSharp
         private const int maxSamples = 5;
         private readonly List<double> tpsSamples = new(maxSamples);
         private double sampleSum = 0;
-        public double GetServerTPS() => averageTPS;
-        public float GetTickMilSec() => (float)(1D / averageTPS);
         
         TcpClient? tcpClient;
         IMinecraftCom? handler;
@@ -84,62 +60,16 @@ namespace CraftSharp
         Tuple<Thread, CancellationTokenSource>? timeoutdetector = null;
         #endregion
 
-        #region Environment
-        public World GetWorld() => ChunkRenderManager!.World;
-
-        #endregion
-
         #region Players and Entities
         private bool locationReceived = false;
-        public GameMode GameMode { get; private set; } = GameMode.Survival;
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private float? yawToSend = null, pitchToSend = null;
         private bool grounded = false;
         private int clientSequenceId;
         private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
-        public byte CurrentSlot { get; private set; } = 0;
-
-        public Container? GetInventory(int inventoryID)
-        {
-            if (inventories.ContainsKey(inventoryID))
-                return inventories[inventoryID];
-            return null;
-        }
-
         private readonly object movementLock = new();
-        public Location GetLocation() => clientEntity.Location;
-        public Vector3 GetPosition() => CoordConvert.MC2Unity(clientEntity.Location);
-
         private PlayerUserInput? playerUserInput;
-        public readonly PlayerUserInputData InputData = new();
-
-        public void UpdatePlayerStatus(Vector3 newPosition, float newYaw, float newPitch, bool newGrounded)
-        {
-            lock (movementLock)
-            {
-                // Update player location
-                clientEntity.Location = CoordConvert.Unity2MC(newPosition);
-
-                // Update player yaw and pitch
-                
-                if (clientEntity.Yaw != newYaw || clientEntity.Pitch != newPitch)
-                {
-                    yawToSend = newYaw;
-                    clientEntity.Yaw = newYaw;
-                    pitchToSend = newPitch;
-                    clientEntity.Pitch = newPitch;
-                }
-                
-                grounded = newGrounded;
-            }
-        }
-
-        public Vector3? GetAttackTarget()
-        {
-            return EntityRenderManager!.GetAttackTarget(GetPosition());
-        }
-
         private InteractionUpdater? interactionUpdater;
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         private readonly Dictionary<int, Entity> entities = new();
@@ -174,36 +104,7 @@ namespace CraftSharp
             interactionUpdater!.Initialize(this, CameraController);
         }
 
-        public string GetInfoString(bool withDebugInfo)
-        {
-            string baseString = $"FPS: {(int)(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}";
-
-            if (withDebugInfo)
-            {
-                var targetLoc = interactionUpdater?.TargetLocation;
-                var loc = GetLocation();
-                var world = GetWorld();
-
-                string targetInfo;
-
-                if (targetLoc is not null)
-                {
-                    var targetBlock = world.GetBlock(targetLoc.Value);
-                    targetInfo = $"Target: {targetLoc}\n{targetBlock}";
-                }
-                else
-                {
-                    targetInfo = "\n";
-                }
-                
-                return baseString + $"\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
-                        $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
-            }
-            
-            return baseString;
-        }
-
-        public bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp,
+        public override bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp,
                 ushort port, int protocol, ForgeInfo? forgeInfo, string accountLower)
         {
             this.sessionId = session.ID;
@@ -308,7 +209,7 @@ namespace CraftSharp
         /// <summary>
         /// Called ~20 times per second by the protocol handler (on net read thread)
         /// </summary>
-        public void OnUpdate()
+        public void OnHandlerUpdate()
         {
             lock (chatQueue)
             {
@@ -393,7 +294,7 @@ namespace CraftSharp
         /// <summary>
         /// Disconnect the client from the server
         /// </summary>
-        public void Disconnect()
+        public override void Disconnect()
         {
             handler?.Disconnect();
             handler?.Dispose();
@@ -443,36 +344,6 @@ namespace CraftSharp
         }
 
         #endregion
-
-        /// <summary>
-        /// Allows the user to send chat messages, commands, and leave the server.
-        /// </summary>
-        public void TrySendChat(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return;
-            try
-            {
-                InvokeOnNetMainThread(() => SendChat(text));
-            }
-            catch (IOException) { }
-            catch (NullReferenceException) { }
-        }
-
-        /// <summary>
-        /// Allows the user to send requests to complete current command
-        /// </summary>
-        public void AutoComplete(string text)
-        {
-            // We shouldn't trim the string here because spaces here really matter
-            // For example, auto completing '/gamemode ' returns the game modes as
-            // the result options while passing in '/gamemode' yields nothing...
-            try
-            {
-                InvokeOnNetMainThread(() => handler!.SendAutoCompleteText(text));
-            }
-            catch (IOException) { }
-            catch (NullReferenceException) { }
-        }
 
         #region Thread-Invoke: Cross-thread method calls
 
@@ -550,6 +421,77 @@ namespace CraftSharp
 
         #region Getters: Retrieve data for use in other methods
 
+        // Retrieve client connection info
+        public override string GetServerHost() => host!;
+        public override int GetServerPort() => port;
+        public override string GetUsername() => username!;
+        public override Guid GetUserUuid() => uuid;
+        public override string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
+        public override string GetSessionID() => sessionId!;
+        public override double GetServerTPS() => averageTPS;
+        public override float GetTickMilSec() => (float)(1D / averageTPS);
+
+        /// <summary>
+        /// Get current world
+        /// </summary>
+        public override World GetWorld()
+        {
+            return ChunkRenderManager!.World;
+        }
+
+        /// <summary>
+        /// Get player inventory with a given id
+        /// </summary>
+        public override Container? GetInventory(int inventoryId)
+        {
+            if (inventories.ContainsKey(inventoryId))
+                return inventories[inventoryId];
+            return null;
+        }
+
+        /// <summary>
+        /// Get current player location (in Minecraft world)
+        /// </summary>
+        public override Location GetLocation() => clientEntity.Location;
+
+        /// <summary>
+        /// Get current player position (in Unity scene)
+        /// </summary>
+        public override Vector3 GetPosition() => CoordConvert.MC2Unity(clientEntity.Location);
+
+        /// <summary>
+        /// Get current status about the client
+        /// </summary>
+        /// <returns>Status info string</returns>
+        public override string GetInfoString(bool withDebugInfo)
+        {
+            string baseString = $"FPS: {(int)(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}";
+
+            if (withDebugInfo)
+            {
+                var targetLoc = interactionUpdater?.TargetLocation;
+                var loc = GetLocation();
+                var world = GetWorld();
+
+                string targetInfo;
+
+                if (targetLoc is not null)
+                {
+                    var targetBlock = world.GetBlock(targetLoc.Value);
+                    targetInfo = $"Target: {targetLoc}\n{targetBlock}";
+                }
+                else
+                {
+                    targetInfo = "\n";
+                }
+                
+                return baseString + $"\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
+                        $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
+            }
+            
+            return baseString;
+        }
+
         /// <summary>
         /// Get max length for chat messages
         /// </summary>
@@ -562,7 +504,7 @@ namespace CraftSharp
         /// <summary>
         /// Get a list of disallowed characters in chat
         /// </summary>
-        /// <returns></returns>
+        /// <returns>An array of disallowed characters</returns>
         public static char[] GetDisallowedChatCharacters()
         {
             return new char[] { (char)167, (char)127 }; // Minecraft color code and ASCII code DEL
@@ -572,13 +514,21 @@ namespace CraftSharp
         /// Get all Entities
         /// </summary>
         /// <returns>All Entities</returns>
-        public Dictionary<int, Entity> GetEntities() => entities;
+        public override Dictionary<int, Entity> GetEntities() => entities;
+
+        /// <summary>
+        /// Get target entity for initiating an attack
+        /// </summary>
+        /// <returns>The current position of target</returns>
+        public override Vector3? GetAttackTarget()
+        {
+            return EntityRenderManager!.GetAttackTarget(GetPosition());
+        }
 
         /// <summary>
         /// Get all players latency
         /// </summary>
-        /// <returns>All players latency</returns>
-        public Dictionary<string, int> GetPlayersLatency()
+        public override Dictionary<string, int> GetPlayersLatency()
         {
             Dictionary<string, int> playersLatency = new();
             foreach (var player in onlinePlayers)
@@ -586,14 +536,16 @@ namespace CraftSharp
             return playersLatency;
         }
 
-        public int GetOwnLatency() => onlinePlayers.ContainsKey(uuid) ? onlinePlayers[uuid].Ping : 0;
+        /// <summary>
+        /// Get latency for current player
+        /// </summary>
+        public override int GetOwnLatency() => onlinePlayers.ContainsKey(uuid) ? onlinePlayers[uuid].Ping : 0;
 
         /// <summary>
         /// Get player info from uuid
         /// </summary>
         /// <param name="uuid">Player's UUID</param>
-        /// <returns>Player info</returns>
-        public PlayerInfo? GetPlayerInfo(Guid uuid)
+        public override PlayerInfo? GetPlayerInfo(Guid uuid)
         {
             lock (onlinePlayers)
             {
@@ -608,7 +560,7 @@ namespace CraftSharp
         /// Get a set of online player names
         /// </summary>
         /// <returns>Online player names</returns>
-        public string[] GetOnlinePlayers()
+        public override string[] GetOnlinePlayers()
         {
             lock (onlinePlayers)
             {
@@ -624,7 +576,7 @@ namespace CraftSharp
         /// Get a dictionary of online player names and their corresponding UUID
         /// </summary>
         /// <returns>Dictionay of online players, key is UUID, value is Player name</returns>
-        public Dictionary<string, string> GetOnlinePlayersWithUUID()
+        public override Dictionary<string, string> GetOnlinePlayersWithUUID()
         {
             Dictionary<string, string> uuid2Player = new Dictionary<string, string>();
             lock (onlinePlayers)
@@ -641,9 +593,44 @@ namespace CraftSharp
 
         #region Action methods: Perform an action on the Server
 
+        public override void UpdatePlayerStatus(Vector3 newPosition, float newYaw, float newPitch, bool newGrounded)
+        {
+            lock (movementLock)
+            {
+                // Update player location
+                clientEntity.Location = CoordConvert.Unity2MC(newPosition);
+
+                // Update player yaw and pitch
+                
+                if (clientEntity.Yaw != newYaw || clientEntity.Pitch != newPitch)
+                {
+                    yawToSend = newYaw;
+                    clientEntity.Yaw = newYaw;
+                    pitchToSend = newPitch;
+                    clientEntity.Pitch = newPitch;
+                }
+                
+                grounded = newGrounded;
+            }
+        }
+
         public void SetCanSendMessage(bool canSendMessage)
         {
             this.canSendMessage = canSendMessage;
+        }
+
+        /// <summary>
+        /// Allows the user to send chat messages, commands, and leave the server.
+        /// </summary>
+        public override void TrySendChat(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return;
+            try
+            {
+                InvokeOnNetMainThread(() => SendChat(text));
+            }
+            catch (IOException) { }
+            catch (NullReferenceException) { }
         }
 
         /// <summary>
@@ -689,7 +676,7 @@ namespace CraftSharp
         /// Allow to respawn after death
         /// </summary>
         /// <returns>True if packet successfully sent</returns>
-        public bool SendRespawnPacket()
+        public override bool SendRespawnPacket()
         {
             // Reset location received flag
             locationReceived = false;
@@ -704,16 +691,32 @@ namespace CraftSharp
         /// Send the Entity Action packet with the Specified ID
         /// </summary>
         /// <returns>TRUE if the item was successfully used</returns>
-        public bool SendEntityAction(EntityActionType entityAction)
+        public override bool SendEntityAction(EntityActionType entityAction)
         {
             return InvokeOnNetMainThread(() => handler!.SendEntityAction(clientEntity.ID, (int)entityAction));
+        }
+
+        /// <summary>
+        /// Allows the user to send requests to complete current command
+        /// </summary>
+        public override void SendAutoCompleteRequest(string text)
+        {
+            // We shouldn't trim the string here because spaces here really matter
+            // For example, auto completing '/gamemode ' returns the game modes as
+            // the result options while passing in '/gamemode' yields nothing...
+            try
+            {
+                InvokeOnNetMainThread(() => handler!.SendAutoCompleteText(text));
+            }
+            catch (IOException) { }
+            catch (NullReferenceException) { }
         }
 
         /// <summary>
         /// Use the item currently in the player's hand
         /// </summary>
         /// <returns>TRUE if the item was successfully used</returns>
-        public bool UseItemOnHand()
+        public override bool UseItemOnHand()
         {
             return InvokeOnNetMainThread(() => handler!.SendUseItem(0, clientSequenceId));
         }
@@ -836,7 +839,7 @@ namespace CraftSharp
         /// <param name="location">Location to place block to</param>
         /// <param name="blockFace">Block face (e.g. Direction.Down when clicking on the block below to place this block)</param>
         /// <returns>TRUE if successfully placed</returns>
-        public bool PlaceBlock(Location location, Direction blockFace, Hand hand = Hand.MainHand)
+        public override bool PlaceBlock(Location location, Direction blockFace, Hand hand = Hand.MainHand)
         {
             return InvokeOnNetMainThread(() => handler!.SendPlayerBlockPlacement((int)hand, location, blockFace, clientSequenceId));
         }
@@ -847,7 +850,7 @@ namespace CraftSharp
         /// <param name="location">Location of block to dig</param>
         /// <param name="swingArms">Also perform the "arm swing" animation</param>
         /// <param name="lookAtBlock">Also look at the block before digging</param>
-        public bool DigBlock(Location location, bool swingArms = true, bool lookAtBlock = true)
+        public override bool DigBlock(Location location, bool swingArms = true, bool lookAtBlock = true)
         {
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => DigBlock(location, swingArms, lookAtBlock));
@@ -871,7 +874,7 @@ namespace CraftSharp
         /// </summary>
         /// <param name="slot">Slot to activate (0 to 8)</param>
         /// <returns>TRUE if the slot was changed</returns>
-        public bool ChangeSlot(short slot)
+        public override bool ChangeSlot(short slot)
         {
             if (slot < 0 || slot > 8)
                 return false;

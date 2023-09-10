@@ -29,13 +29,13 @@ namespace CraftSharp.Rendering
         private PriorityQueue<ChunkRender> chunkRendersToBeBuilt = new();
         private List<ChunkRender> chunksBeingBuilt = new();
 
-        private CornClient? client;
+        private BaseCornClient? client;
         private ChunkRenderBuilder? builder;
 
         // Terrain collider for movement
         private MeshCollider? movementCollider, liquidCollider;
 
-        public void SetClient(CornClient client) => this.client = client;
+        public void SetClient(BaseCornClient client) => this.client = client;
 
         public string GetDebugInfo() => $"QueC: {chunkRendersToBeBuilt.Count}\t BldC: {chunksBeingBuilt.Count}";
 
