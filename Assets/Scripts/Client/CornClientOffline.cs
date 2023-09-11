@@ -28,10 +28,6 @@ namespace CraftSharp
 
         #region Client Control
 
-        private readonly Queue<string> chatQueue = new();
-        private DateTime nextMessageSendTime = DateTime.MinValue;
-        private bool canSendMessage = false;
-
         #endregion
 
         #region Players and Entities
@@ -76,6 +72,14 @@ namespace CraftSharp
             // Set up interaction updater
             interactionUpdater = GetComponent<InteractionUpdater>();
             interactionUpdater!.Initialize(this, CameraController);
+
+            // Post initialization
+            StartClient(new SessionToken(), null, string.Empty, 0, 0, null, "offline");
+
+            GameMode = GameMode.Creative;
+            EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
+
+
         }
 
         public override bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp,

@@ -13,6 +13,9 @@ namespace MMD
 
         }
 
+        public Color32 DIFFUSE_HIGH = new Color32(255, 240, 227, 255);
+        public Color32 DIFFUSE_DARK = new Color32(255, 199, 115, 255);
+
         enum MaterialTypes
         {
             Body,
@@ -98,8 +101,8 @@ namespace MMD
                     result.SetFloat("_enum_diffuse", 4); // Standard Diffuse => SDFFaceShading
                     result.SetFloat("_CELLThreshold", 0.3F);
                     result.SetFloat("_CELLSmoothing", 0.1F);
-                    result.SetColor("_HighColor", new Color32(255, 255, 255, 255));
-                    result.SetColor("_DarkColor", new Color32(220, 180, 150, 255));
+                    result.SetColor("_HighColor", DIFFUSE_HIGH);
+                    result.SetColor("_DarkColor", DIFFUSE_DARK);
                     result.SetFloat("_enum_specular", 0); // Standard Specular => None
                     // Setup face SDF parameters
                     result.SetTexture("_SDFFaceTex", faceSDFTex);
@@ -113,8 +116,8 @@ namespace MMD
                     result.SetFloat("_enum_diffuse", 0); // Standard Diffuse => CelShading
                     result.SetFloat("_CELLThreshold", 0.3F);
                     result.SetFloat("_CELLSmoothing", 0.1F);
-                    result.SetColor("_HighColor", new Color32(255, 255, 255, 255));
-                    result.SetColor("_DarkColor", new Color32(220, 180, 150, 255));
+                    result.SetColor("_HighColor", DIFFUSE_HIGH);
+                    result.SetColor("_DarkColor", DIFFUSE_DARK);
                     result.SetFloat("_enum_specular", 0); // Standard Specular => None
                     break;
             }
@@ -133,7 +136,7 @@ namespace MMD
                 // Enable outline on this material
                 result.SetFloat("_Outline", 1F);
                 // Set outline width and color
-                result.SetFloat("_OutlineWidth", material.edge_size * scale_ * 10F / c_default_scale);
+                result.SetFloat("_OutlineWidth", material.edge_size * scale_ * 15F / c_default_scale);
                 result.SetColor("_OutlineColor", material.edge_color);
             }
             //カスタムレンダーキュー
