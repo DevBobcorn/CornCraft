@@ -18,8 +18,8 @@ namespace CraftSharp.Rendering
         public const string SOLID_LAYER_NAME = "Solid";
         public const string LIQUID_SURFACE_LAYER_NAME = "LiquidSurface";
 
-        public float MIN_UPDATE_DISTANCE = 0.5F;
-        public Location BLOCK_CHECK_OFFSET = new(0D, 0.125D, 0D);
+        public const float MIN_UPDATE_DISTANCE = 0.5F;
+        public static readonly Location BLOCK_CHECK_OFFSET = new(0D, 0.125D, 0D);
 
         public readonly World World = new();
 

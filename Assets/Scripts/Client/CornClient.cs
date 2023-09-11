@@ -1333,7 +1333,8 @@ namespace CraftSharp
             
             if (uuid == Guid.Empty) // Initial gamemode on login
             {
-                Loom.QueueOnMainThread(() =>{
+                Loom.QueueOnMainThread(() =>
+                {
                     GameMode = (GameMode) gamemode;
                     EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
                 });
@@ -1343,7 +1344,8 @@ namespace CraftSharp
                 string playerName = onlinePlayers[uuid].Name;
                 if (playerName == this.username)
                 {
-                    Loom.QueueOnMainThread(() =>{
+                    Loom.QueueOnMainThread(() =>
+                    {
                         GameMode = (GameMode) gamemode;
                         EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
 
