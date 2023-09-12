@@ -9,7 +9,7 @@
 struct Attributes
 {
     float4 positionOS    : POSITION;
-    float3 color         : COLOR;
+    float4 color         : COLOR;
     float3 normalOS      : NORMAL;
     float4 tangentOS     : TANGENT;
     float3 texcoord      : TEXCOORD0;
@@ -23,7 +23,7 @@ struct Attributes
 struct Varyings
 {
     float3 uv                          : TEXCOORD0;
-    float3 color                       : COLOR;
+    float4 color                       : COLOR;
 
     float3 positionWS                  : TEXCOORD1;    // xyz: posWS
 
@@ -97,6 +97,9 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
 #else
     inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.vertexSH, inputData.normalWS);
 #endif
+
+    // Mix with block light
+    inputData.bakedGI = max(input.color.w, inputData.bakedGI);
 
     inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
     inputData.shadowMask = SAMPLE_SHADOWMASK(input.staticLightmapUV);
@@ -200,7 +203,7 @@ void LitPassFragmentSimple(
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
     SurfaceData surfaceData;
-    InitializeSimpleLitSurfaceData(input.uv, input.color, surfaceData);
+    InitializeSimpleLitSurfaceData(input.uv, input.color.xyz, surfaceData);
 
 #ifdef LOD_FADE_CROSSFADE
     //LODFadeCrossFade(input.positionCS);

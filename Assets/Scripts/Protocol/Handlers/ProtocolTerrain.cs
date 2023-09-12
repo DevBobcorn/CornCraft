@@ -357,6 +357,7 @@ namespace CraftSharp.Protocol.Handlers
                     UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}, should be {c.ColumnSize * 64}");
                 
                 c.SetLights(skyLight, blockLight);
+                c.RefreshIsOpaque();
 
                 c!.FullyLoaded = true;
             }

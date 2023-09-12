@@ -28,7 +28,7 @@ namespace CraftSharp.Resource
             var verts = new float3[vertexCount];
             var txuvs = new float3[vertexCount];
             var uvans = new float4[vertexCount];
-            var tints = new float3[vertexCount];
+            var tints = new float4[vertexCount];
 
             buffer.vert.CopyTo(verts, 0);
             buffer.txuv.CopyTo(txuvs, 0);
@@ -42,7 +42,8 @@ namespace CraftSharp.Resource
                 for (i = 0U;i < vertexArr.Length;i++)
                 {
                     verts[i + vertOffset] = vertexArr[i] + posOffset;
-                    tints[i + vertOffset] = tintIndexArr[i] >= 0 && tintIndexArr[i] < itemTints.Length ? itemTints[tintIndexArr[i]] : BlockGeometry.DEFAULT_COLOR;
+                    tints[i + vertOffset] = tintIndexArr[i] >= 0 && tintIndexArr[i] < itemTints.Length ?
+                            new(itemTints[tintIndexArr[i]], 1F) : new(BlockGeometry.DEFAULT_COLOR, 1F);
                 }
                 uvArr.CopyTo(txuvs, vertOffset);
                 uvAnimArr.CopyTo(uvans, vertOffset);

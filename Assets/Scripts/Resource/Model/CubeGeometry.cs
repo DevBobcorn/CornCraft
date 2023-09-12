@@ -9,7 +9,7 @@ namespace CraftSharp.Resource
         private static readonly Vector4 FULL = new(0, 0, 1, 1);
 
         public static void Build(ref VertexBuffer buffer, ResourceLocation tex,
-                int x, int y, int z, int cullFlags, float3 vertColor)
+                int x, int y, int z, int cullFlags, float4 vertColor)
         {
             // Unity                   Minecraft            Top Quad Vertices
             //  A +Z (East)             A +X (East)          v0---v1
@@ -22,7 +22,7 @@ namespace CraftSharp.Resource
             var verts = new float3[newLength];
             var txuvs = new float3[newLength];
             var uvans = new float4[newLength];
-            var tints = new float3[newLength];
+            var tints = new float4[newLength];
 
             buffer.vert.CopyTo(verts, 0);
             buffer.txuv.CopyTo(txuvs, 0);

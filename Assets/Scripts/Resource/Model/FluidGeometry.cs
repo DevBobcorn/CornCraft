@@ -51,7 +51,7 @@ namespace CraftSharp.Resource
             var verts = new float3[newLength];
             var txuvs = new float3[newLength];
             var uvans = new float4[newLength];
-            var tints = new float3[newLength];
+            var tints = new float4[newLength];
 
             buffer.vert.CopyTo(verts, 0);
             buffer.txuv.CopyTo(txuvs, 0);
@@ -59,7 +59,7 @@ namespace CraftSharp.Resource
             buffer.tint.CopyTo(tints, 0);
 
             for (int fti = vertOffset;fti < newLength;fti++)
-                tints[fti] = fluidColor;
+                tints[fti] = new(fluidColor, 1F);
 
             var (fullUVs, anim) = ResourcePackManager.Instance.GetUVs(liquid, FULL, 0);
             float3[] sideUVs = fullUVs;

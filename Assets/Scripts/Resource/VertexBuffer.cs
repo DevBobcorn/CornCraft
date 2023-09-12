@@ -20,8 +20,8 @@ namespace CraftSharp.Resource
         public float4[] uvan = { };
 
         /// <summary>
-        /// Tint index array
+        /// Tint color / block light array
         /// </summary>
-        public float3[] tint = { };
+        public float4[] tint = { };
     }
 }
