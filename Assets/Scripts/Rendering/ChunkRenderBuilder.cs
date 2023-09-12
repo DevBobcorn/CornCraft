@@ -8,6 +8,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 
 using CraftSharp.Resource;
+using System.Linq;
 
 namespace CraftSharp.Rendering
 {
@@ -33,7 +34,80 @@ namespace CraftSharp.Rendering
         private float GetLight(World world, Location loc)
         {
             //return Mathf.Max(world.GetBlockLight(loc), world.GetSkyLight(loc)) / 15F;
-            return Mathf.Max(world.GetBlockLight(loc), 4) / 15F;
+            return Mathf.Max(world.GetBlockLight(loc), 4) / 10F;
+        }
+
+        private float[] GetFaceLights(World world, Location loc)
+        {
+            return new float[]
+            {
+                // Sample neighbors
+                GetLight(world, loc.Up()),
+                GetLight(world, loc.Down()),
+                GetLight(world, loc.North()),
+                GetLight(world, loc.South()),
+                GetLight(world, loc.East()),
+                GetLight(world, loc.West()),
+                // Sample self
+                GetLight(world, loc)
+            };
+        }
+
+        private float[] GetCornerLights(World world, Location loc)
+        {
+            var result = new float[8];
+
+            for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
+            {
+                var sample = GetLight(world, loc + new Location(x - 1, y - 1, z - 1));
+
+                if (y != 2 && z != 2 && x != 2) // [0] x0z0 y0
+                {
+                    result[0] += sample;
+                }
+                if (y != 2 && z != 2 && x != 0) // [1] x1z0 y0
+                {
+                    result[1] += sample;
+                }
+                if (y != 2 && z != 0 && x != 2) // [2] x0z1 y0
+                {
+                    result[2] += sample;
+                }
+                if (y != 2 && z != 0 && x != 0) // [3] x1z1 y0
+                {
+                    result[3] += sample;
+                }
+                if (y != 0 && z != 2 && x != 2) // [4] x0z0 y1
+                {
+                    result[4] += sample;
+                }
+                if (y != 0 && z != 2 && x != 0) // [5] x1z0 y1
+                {
+                    result[5] += sample;
+                }
+                if (y != 0 && z != 0 && x != 2) // [6] x0z1 y1
+                {
+                    result[6] += sample;
+                }
+                if (y != 0 && z != 0 && x != 0) // [7] x1z1 y1
+                {
+                    result[7] += sample;
+                }
+            }
+
+            return result.Select(x => x / 8F).ToArray();
+        }
+
+        private bool[] GetAllNeighborOpaque(World world, Location loc)
+        {
+            var result = new bool[27];
+
+            for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
+            {
+                result[y * 9 + z * 3 + x] = world.GetIsOpaque(loc + new Location(x - 1, y - 1, z - 1));
+            }
+
+            return result;
         }
 
         public ChunkBuildResult Build(World world, Chunk chunkData, ChunkRender chunkRender)
@@ -96,11 +170,12 @@ namespace CraftSharp.Rendering
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;
                                 var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, loc, state);
+                                var lights = GetCornerLights(world, loc);
 
                                 if (state.NoCollision)
-                                    models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, color);
+                                    models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, lights, color);
                                 else
-                                    models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags, color);
+                                    models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags, lights, color);
                                 
                                 layerMask |= (1 << layerIndex);
                             }
@@ -151,7 +226,7 @@ namespace CraftSharp.Rendering
                         visVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3, stream: 0);
                         visVertAttrs[1]  = new(VertexAttribute.TexCoord0, dimension: 3, stream: 1);
                         visVertAttrs[2]  = new(VertexAttribute.TexCoord1, dimension: 4, stream: 2);
-                        visVertAttrs[3]  = new(VertexAttribute.Color,     dimension: 3, stream: 3);
+                        visVertAttrs[3]  = new(VertexAttribute.Color,     dimension: 4, stream: 3);
 
                         meshData.SetVertexBufferParams(totalVertCount,          visVertAttrs);
                         meshData.SetIndexBufferParams((totalVertCount / 2) * 3, IndexFormat.UInt32);
@@ -162,7 +237,7 @@ namespace CraftSharp.Rendering
                         var allVerts = new float3[totalVertCount];
                         var allUVs   = new float3[totalVertCount];
                         var allAnims = new float4[totalVertCount];
-                        var allTints = new float3[totalVertCount];
+                        var allTints = new float4[totalVertCount];
 
                         int vertOffset = 0;
                         for (int layer = 0;layer < count;layer++)
@@ -185,7 +260,7 @@ namespace CraftSharp.Rendering
                         texCoords.CopyFrom(allUVs);
                         var texAnims   = meshData.GetVertexData<float4>(2);
                         texAnims.CopyFrom(allAnims);
-                        var vertColors = meshData.GetVertexData<float3>(3);
+                        var vertColors = meshData.GetVertexData<float4>(3);
                         vertColors.CopyFrom(allTints);
 
                         // Generate triangle arrays

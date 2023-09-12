@@ -298,6 +298,15 @@ namespace CraftSharp
             return DUMMY_BIOME; // Not available
         }
 
+        public bool GetIsOpaque(Location location)
+        {
+            var column = GetChunkColumn(location);
+            if (column != null)
+                return column.GetIsOpaque(location);
+            
+            return false; // Not available
+        }
+
         public byte GetSkyLight(Location location)
         {
             var column = GetChunkColumn(location);

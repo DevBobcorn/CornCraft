@@ -52,7 +52,7 @@ namespace CraftSharp.Rendering
             var vertAttrs = new NativeArray<VertexAttributeDescriptor>(3, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             vertAttrs[0] = new(VertexAttribute.Position,  dimension: 3, stream: 0);
             vertAttrs[1] = new(VertexAttribute.TexCoord0, dimension: 3, stream: 1);
-            vertAttrs[2] = new(VertexAttribute.Color,     dimension: 3, stream: 2);
+            vertAttrs[2] = new(VertexAttribute.Color,     dimension: 4, stream: 2);
 
             // Set mesh params
             meshData.SetVertexBufferParams(vertexCount, vertAttrs);
@@ -68,7 +68,7 @@ namespace CraftSharp.Rendering
             var texCoords = meshData.GetVertexData<float3>(1);
             texCoords.CopyFrom(visualBuffer.txuv);
             // Vertex colors
-            var vertColors = meshData.GetVertexData<float3>(2);
+            var vertColors = meshData.GetVertexData<float4>(2);
             vertColors.CopyFrom(visualBuffer.tint);
 
             // Set face data
