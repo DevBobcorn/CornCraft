@@ -49,7 +49,7 @@ namespace CraftSharp
             skyLight = new byte[4096 * (size + 2)];
             blockLight = new byte[4096 * (size + 2)];
 
-            isOpaque = new bool[4096 + size];
+            isOpaque = new bool[4096 * size];
         }
 
         /// <summary>

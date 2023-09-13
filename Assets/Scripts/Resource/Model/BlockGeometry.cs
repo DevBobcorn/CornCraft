@@ -67,7 +67,64 @@ namespace CraftSharp.Resource
             );
         }
 
-        public void Build(ref VertexBuffer buffer, float3 posOffset, int cullFlags, float[] blockLights, float3 blockTint)
+        private float GetCornerAO(bool side1, bool corner, bool side2)
+        {
+            //return 1F - (side1 ? 0.33F : 0F) - (corner ? 0.33F : 0F) - (side2 ? 0.33F : 0F);
+            return 1F - (side1 ? 0.25F : 0F) - (corner ? 0.25F : 0F) - (side2 ? 0.25F : 0F);
+        }
+
+        // tl tm tr
+        // ml mm mr
+        // bl bm br
+        private float[] GetCornersAO(bool tl, bool tm, bool tr, bool ml, bool mr, bool bl, bool bm, bool br)
+        {
+            return new float[]
+            {
+                GetCornerAO(ml, tl, tm), // tl
+                GetCornerAO(tm, tr, mr), // tr
+                GetCornerAO(bm, bl, ml), // bl
+                GetCornerAO(mr, br, bm), // br
+            };
+        }
+
+        private static readonly float[] NO_AO = new float[] { 1F, 1F, 1F, 1F };
+
+        public float[] GetDirCornersAO(CullDir dir, bool[] isOpaque)
+        {
+            switch (dir)
+            {
+                case CullDir.DOWN:
+                    //  6  7  8    A unity x+ (South)
+                    //  3  4  5    |
+                    //  0  1  2    o--> unity z+ (East)
+                    return GetCornersAO(isOpaque[ 6], isOpaque[ 7], isOpaque[ 8], isOpaque[ 3], isOpaque[ 5], isOpaque[ 0], isOpaque[ 1], isOpaque[ 2]);
+                case CullDir.UP:
+                    // 20 23 26    A unity z+ (East)
+                    // 19 22 25    |
+                    // 18 21 24    o--> unity x+ (South)
+                    return GetCornersAO(isOpaque[20], isOpaque[23], isOpaque[26], isOpaque[19], isOpaque[25], isOpaque[18], isOpaque[21], isOpaque[24]);
+                
+                default:
+                    return NO_AO;
+            }
+        }
+
+        public float SampleVertexAO(CullDir dir, float[] cornersAO, float3 vertPosInBlock)
+        {
+            // AO Coord: 0 1
+            //           2 3
+            float2 AOCoord = dir switch
+            {
+                CullDir.DOWN   => vertPosInBlock.zx,
+                CullDir.UP     => vertPosInBlock.xz,
+
+                _              => float2.zero
+            };
+
+            return math.lerp(math.lerp(cornersAO[2], cornersAO[0], AOCoord.y), math.lerp(cornersAO[3], cornersAO[1], AOCoord.y), AOCoord.x);
+        }
+
+        public void Build(ref VertexBuffer buffer, float3 posOffset, int cullFlags, bool[] opaq, float[] blockLights, float3 blockTint)
         {
             // Compute value if absent
             int vertexCount = buffer.vert.Length + (sizeCache.ContainsKey(cullFlags) ? sizeCache[cullFlags] :
@@ -91,8 +148,8 @@ namespace CraftSharp.Resource
                 {
                     verts[i + vertOffset] = vertexArrs[CullDir.NONE][i] + posOffset;
                     float vertLight = GetVertexLight(vertexArrs[CullDir.NONE][i], blockLights);
-                    tints[i + vertOffset] = tintIndexArrs[CullDir.NONE][i] >= 0 ?
-                            new float4(blockTint, vertLight) : new float4(DEFAULT_COLOR, vertLight);
+                    float3 vertColor = (tintIndexArrs[CullDir.NONE][i] >= 0 ? blockTint : DEFAULT_COLOR);
+                    tints[i + vertOffset] = new float4(vertColor, vertLight);
                 }
                 uvArrs[CullDir.NONE].CopyTo(txuvs, vertOffset);
                 uvAnimArrs[CullDir.NONE].CopyTo(uvans, vertOffset);
@@ -105,12 +162,15 @@ namespace CraftSharp.Resource
 
                 if ((cullFlags & (1 << dirIdx)) != 0 && vertexArrs[dir].Length > 0)
                 {
+                    var cornersAO = GetDirCornersAO(dir, opaq);
+
                     for (i = 0U;i < vertexArrs[dir].Length;i++)
                     {
                         verts[i + vertOffset] = vertexArrs[dir][i] + posOffset;
                         float vertLight = GetVertexLight(vertexArrs[dir][i], blockLights);
-                        tints[i + vertOffset] = tintIndexArrs[dir][i] >= 0 ?
-                                new float4(blockTint, vertLight) : new float4(DEFAULT_COLOR, vertLight);
+                        float3 vertColor = (tintIndexArrs[dir][i] >= 0 ? blockTint : DEFAULT_COLOR)
+                                * SampleVertexAO(dir, cornersAO, vertexArrs[dir][i]);
+                        tints[i + vertOffset] = new float4(vertColor, vertLight);
                     }
                     uvArrs[dir].CopyTo(txuvs, vertOffset);
                     uvAnimArrs[dir].CopyTo(uvans, vertOffset);
@@ -125,7 +185,7 @@ namespace CraftSharp.Resource
         }
 
         public void BuildWithCollider(ref VertexBuffer buffer, ref float3[] colliderVerts,
-                float3 posOffset, int cullFlags, float[] blockLights, float3 blockTint)
+                float3 posOffset, int cullFlags, bool[] opaq, float[] blockLights, float3 blockTint)
         {
             // Compute value if absent
             int extraVertCount  = sizeCache.ContainsKey(cullFlags) ? sizeCache[cullFlags] :
@@ -154,8 +214,8 @@ namespace CraftSharp.Resource
                 {
                     verts[i + vertOffset] = vertexArrs[CullDir.NONE][i] + posOffset;
                     float vertLight = GetVertexLight(vertexArrs[CullDir.NONE][i], blockLights);
-                    tints[i + vertOffset] = tintIndexArrs[CullDir.NONE][i] >= 0 ?
-                            new float4(blockTint, vertLight) : new float4(DEFAULT_COLOR, vertLight);
+                    float3 vertColor = (tintIndexArrs[CullDir.NONE][i] >= 0 ? blockTint : DEFAULT_COLOR);
+                    tints[i + vertOffset] = new float4(vertColor, vertLight);
                 }
                 uvArrs[CullDir.NONE].CopyTo(txuvs, vertOffset);
                 uvAnimArrs[CullDir.NONE].CopyTo(uvans, vertOffset);
@@ -168,12 +228,15 @@ namespace CraftSharp.Resource
 
                 if ((cullFlags & (1 << dirIdx)) != 0 && vertexArrs[dir].Length > 0)
                 {
+                    var cornersAO = GetDirCornersAO(dir, opaq);
+
                     for (i = 0U;i < vertexArrs[dir].Length;i++)
                     {
                         verts[i + vertOffset] = vertexArrs[dir][i] + posOffset;
                         float vertLight = GetVertexLight(vertexArrs[dir][i], blockLights);
-                        tints[i + vertOffset] = tintIndexArrs[dir][i] >= 0 ?
-                                new float4(blockTint, vertLight) : new float4(DEFAULT_COLOR, vertLight);
+                        float3 vertColor = (tintIndexArrs[dir][i] >= 0 ? blockTint : DEFAULT_COLOR)
+                                * SampleVertexAO(dir, cornersAO, vertexArrs[dir][i]);
+                        tints[i + vertOffset] = new float4(vertColor, vertLight);
                     }
                     uvArrs[dir].CopyTo(txuvs, vertOffset);
                     uvAnimArrs[dir].CopyTo(uvans, vertOffset);
