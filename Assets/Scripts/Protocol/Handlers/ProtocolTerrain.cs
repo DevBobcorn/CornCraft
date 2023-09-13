@@ -569,6 +569,7 @@ namespace CraftSharp.Protocol.Handlers
                     ReadChunkColumnLightData16(ref skyLight, ref blockLight, lightData);
 
                     c.SetLights(skyLight, blockLight);
+                    c.RefreshIsOpaque();
 
                     //UnityEngine.Debug.Log($"Lighting up chunk column [{chunkX}, {chunkZ}]");
                 }

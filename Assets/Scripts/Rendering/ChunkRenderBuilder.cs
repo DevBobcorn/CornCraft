@@ -171,11 +171,12 @@ namespace CraftSharp.Rendering
                                 var chosen = (x + y + z) % models.Length;
                                 var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, loc, state);
                                 var lights = GetCornerLights(world, loc);
+                                var opaq = GetAllNeighborOpaque(world, loc);
 
                                 if (state.NoCollision)
-                                    models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, lights, color);
+                                    models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, opaq, lights, color);
                                 else
-                                    models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags, lights, color);
+                                    models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags, opaq, lights, color);
                                 
                                 layerMask |= (1 << layerIndex);
                             }
