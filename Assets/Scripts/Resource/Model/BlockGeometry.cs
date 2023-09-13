@@ -70,7 +70,7 @@ namespace CraftSharp.Resource
         private float GetCornerAO(bool side1, bool corner, bool side2)
         {
             //return 1F - (side1 ? 0.33F : 0F) - (corner ? 0.33F : 0F) - (side2 ? 0.33F : 0F);
-            return 1F - (side1 ? 0.25F : 0F) - (corner ? 0.25F : 0F) - (side2 ? 0.25F : 0F);
+            return 1F - (side1 ? 0.2F : 0F) - (corner ? 0.2F : 0F) - (side2 ? 0.2F : 0F);
         }
 
         // tl tm tr
@@ -103,7 +103,27 @@ namespace CraftSharp.Resource
                     // 19 22 25    |
                     // 18 21 24    o--> unity x+ (South)
                     return GetCornersAO(isOpaque[20], isOpaque[23], isOpaque[26], isOpaque[19], isOpaque[25], isOpaque[18], isOpaque[21], isOpaque[24]);
-                
+                case CullDir.SOUTH:
+                    // 24 25 26    A unity y+ (Up)
+                    // 15 16 17    |
+                    //  6  7  8    o--> unity z+ (East)
+                    return GetCornersAO(isOpaque[24], isOpaque[25], isOpaque[26], isOpaque[15], isOpaque[17], isOpaque[ 6], isOpaque[ 7], isOpaque[ 8]);
+                case CullDir.NORTH:
+                    //  2 11 20    A unity y+ (Up)
+                    //  1 10 19    |
+                    //  0  9 18    o--> unity z+ (East)
+                    return GetCornersAO(isOpaque[ 2], isOpaque[11], isOpaque[20], isOpaque[ 1], isOpaque[19], isOpaque[ 0], isOpaque[ 9], isOpaque[18]);
+                case CullDir.EAST:
+                    //  8 17 26    A unity x+ (South)
+                    //  5 14 23    |
+                    //  2 11 20    o--> unity y+ (Up)
+                    return GetCornersAO(isOpaque[ 8], isOpaque[17], isOpaque[26], isOpaque[ 5], isOpaque[23], isOpaque[ 2], isOpaque[11], isOpaque[20]);
+                case CullDir.WEST:
+                    // 18 21 24    A unity y+ (Up)
+                    //  9 12 15    |
+                    //  0  3  6    o--> unity x+ (South)
+                    return GetCornersAO(isOpaque[18], isOpaque[21], isOpaque[24], isOpaque[ 9], isOpaque[15], isOpaque[ 0], isOpaque[ 3], isOpaque[ 6]);
+
                 default:
                     return NO_AO;
             }
@@ -117,6 +137,10 @@ namespace CraftSharp.Resource
             {
                 CullDir.DOWN   => vertPosInBlock.zx,
                 CullDir.UP     => vertPosInBlock.xz,
+                CullDir.SOUTH  => vertPosInBlock.zy,
+                CullDir.NORTH  => vertPosInBlock.yz,
+                CullDir.EAST   => vertPosInBlock.yx,
+                CullDir.WEST   => vertPosInBlock.xy,
 
                 _              => float2.zero
             };
