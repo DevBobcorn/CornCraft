@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+using System.Collections.Generic;
 
 namespace CraftSharp.Inventory
 {
@@ -20,7 +21,7 @@ namespace CraftSharp.Inventory
         /// <summary>
         /// title of container
         /// </summary>
-        public string Title;
+        public string? Title;
 
         /// <summary>
         /// state of container
@@ -35,7 +36,10 @@ namespace CraftSharp.Inventory
         /// <summary>
         /// Create an empty container
         /// </summary>
-        public Container() { }
+        public Container()
+        {
+            Items = new Dictionary<int, ItemStack>();
+        }
 
         /// <summary>
         /// Create an empty container with ID, Type and Title
@@ -181,6 +185,20 @@ namespace CraftSharp.Inventory
         }
 
         /// <summary>
+        /// Get the slot ID of first hotbar slot in this container
+        /// </summary>
+        /// <returns>First hotbar slot in this container</returns>
+        public int GetFirstHotbarSlot()
+        {
+            int hotbarStart = Type.SlotCount() - 9;
+            // Remove offhand slot
+            if (Type == ContainerType.PlayerInventory)
+                hotbarStart--;
+            
+            return hotbarStart;
+        }
+
+        /// <summary>
         /// Check the given slot ID is a hotbar slot and give the hotbar number
         /// </summary>
         /// <param name="slotId">The slot ID to check</param>
@@ -188,10 +206,8 @@ namespace CraftSharp.Inventory
         /// <returns>True if given slot ID is a hotbar slot</returns>
         public bool IsHotbar(int slotId, out int hotbar)
         {
-            int hotbarStart = Type.SlotCount() - 9;
-            // Remove offhand slot
-            if (Type == ContainerType.PlayerInventory)
-                hotbarStart--;
+            int hotbarStart = GetFirstHotbarSlot();
+
             if ((slotId >= hotbarStart) && (slotId <= hotbarStart + 9))
             {
                 hotbar = slotId - hotbarStart;
@@ -202,6 +218,26 @@ namespace CraftSharp.Inventory
                 hotbar = -1;
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Check the given slot ID is a hotbar slot and give the hotbar number
+        /// </summary>
+        /// <param name="slot">Zero-based, 0-8</param>
+        /// <returns>True if given slot ID is a hotbar slot</returns>
+        public ItemStack? GetHotbarItem(short slot)
+        {
+            if (slot >= 0 && slot < 9)
+            {
+                var slotInContainer = slot + GetFirstHotbarSlot();
+
+                if (Items.ContainsKey(slotInContainer))
+                {
+                    return Items[slotInContainer];
+                }
+            }
+
+            return null;
         }
     }
 }

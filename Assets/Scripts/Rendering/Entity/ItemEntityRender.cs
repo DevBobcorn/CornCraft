@@ -14,7 +14,7 @@ namespace CraftSharp.Rendering
             
             if (itemMeshFilter is not null && itemMeshRenderer is not null)
             {
-                var result = ItemMeshBuilder.BuildItem(entity.Item);
+                var result = ItemMeshBuilder.BuildItem(entity.Item, true);
 
                 if (result != null) // If build suceeded
                 {

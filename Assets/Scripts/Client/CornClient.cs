@@ -882,10 +882,6 @@ namespace CraftSharp
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => ChangeSlot(slot));
 
-            CurrentSlot = Convert.ToByte(slot);
-            // Broad cast hotbar selection change
-            EventManager.Instance.BroadcastOnUnityThread(new HeldItemChangeEvent(CurrentSlot));
-
             return handler!.SendHeldItemChange(slot);
         }
 
@@ -1573,7 +1569,8 @@ namespace CraftSharp
         {
             CurrentSlot = slot;
             // Broad cast hotbar selection change
-            EventManager.Instance.BroadcastOnUnityThread(new HeldItemChangeEvent(CurrentSlot));
+            EventManager.Instance.BroadcastOnUnityThread(
+                    new HeldItemChangeEvent(CurrentSlot, inventories[0].GetHotbarItem(slot)));
         }
 
         /// Called when an update of the map is sent by the server, take a look at https://wiki.vg/Protocol#Map_Data for more info on the fields

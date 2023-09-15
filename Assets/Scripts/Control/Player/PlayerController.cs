@@ -16,14 +16,7 @@ namespace CraftSharp.Control
             Mount
         }
 
-        public enum ActionItemType
-        {
-            None,
-            MeleeWeaponSword,
-            RangedWeaponBow,
-        }
-
-        public ActionItemType CurrentItemType = ActionItemType.None;
+        public ItemActionType CurrentActionType = ItemActionType.None;
 
         [SerializeField] protected PlayerMeleeAttack? meleeAttack;
         public PlayerMeleeAttack MeleeAttack => meleeAttack!;
@@ -64,8 +57,6 @@ namespace CraftSharp.Control
             return Vector3.forward;
         }
 
-        private Action<GameModeUpdateEvent>? gameModeCallback;
-
         public void UpdatePlayerRender(Entity entity, GameObject renderObj)
         {
             var prevRender = playerRender;
@@ -74,7 +65,8 @@ namespace CraftSharp.Control
             // Clear existing event subscriptions
             OnLogicalUpdate = null;
             OnRandomizeMirroredFlag = null;
-            OnWeaponStateChanged = null;
+            OnCurrentItemChanged = null;
+            OnItemStateChanged = null;
             OnCrossFadeState = null;
             
             // Update controller's player render
@@ -104,8 +96,6 @@ namespace CraftSharp.Control
                 {
                     // Additionally, update player state machine for rigged renders
                     OnLogicalUpdate += (interval, status, rigidbody) => riggedRender.UpdateStateMachine(status);
-                    // Create melee weapon
-                    riggedRender.CreateWeapon(meleeWeaponPrefab!);
                 }
                 else // Player render is vanilla/entity render
                 {
@@ -139,6 +129,9 @@ namespace CraftSharp.Control
 
             playerRender!.transform.localPosition = Vector3.zero;
         }
+
+        private Action<GameModeUpdateEvent>? gameModeCallback;
+        private Action<HeldItemChangeEvent>? heldItemCallback;
 
         void Start()
         {
@@ -189,6 +182,24 @@ namespace CraftSharp.Control
             // Register gamemode events for updating gamemode
             gameModeCallback = (e) => SetGameMode(e.GameMode);
             EventManager.Instance.Register(gameModeCallback);
+
+            // Register hotbar item event for updating item visuals
+            heldItemCallback = (e) =>
+            {
+                OnCurrentItemChanged?.Invoke(e.ItemStack);
+                CurrentActionType = PlayerActionHelper.GetItemActionType(e.ItemStack);
+            };
+
+            EventManager.Instance.Register(heldItemCallback);
+        }
+
+        void OnDestroy()
+        {
+            if (gameModeCallback is not null)
+                EventManager.Instance.Unregister(gameModeCallback);
+            
+            if (heldItemCallback is not null)
+                EventManager.Instance.Unregister(heldItemCallback);
         }
 
         protected void SetGameMode(GameMode gameMode)
@@ -206,12 +217,6 @@ namespace CraftSharp.Control
                     DisableEntity();
                     break;
             }
-        }
-
-        void OnDestroy()
-        {
-            if (gameModeCallback is not null)
-                EventManager.Instance.Unregister(gameModeCallback);
         }
 
         protected void DisableEntity()
@@ -255,9 +260,12 @@ namespace CraftSharp.Control
             playerRender?.gameObject.SetActive(true);
         }
         
-        public delegate void WeaponStateEventHandler(CurrentItemState weaponState);
-        public event WeaponStateEventHandler? OnWeaponStateChanged;
-        public void ChangeWeaponState(CurrentItemState weaponState) => OnWeaponStateChanged?.Invoke(weaponState);
+        public delegate void ItemStateEventHandler(CurrentItemState weaponState);
+        public event ItemStateEventHandler? OnItemStateChanged;
+        public void ChangeItemState(CurrentItemState itemState) => OnItemStateChanged?.Invoke(itemState);
+
+        public delegate void ItemStackEventHandler(ItemStack? item);
+        public event ItemStackEventHandler? OnCurrentItemChanged;
 
         public delegate void CrossFadeStateEventHandler(string stateName, float time, int layer, float timeOffset);
         public event CrossFadeStateEventHandler? OnCrossFadeState;
@@ -295,10 +303,13 @@ namespace CraftSharp.Control
         {
             if (statusUpdater!.Status.AttackStatus.AttackCooldown <= 0F)
             {
-                CurrentState.OnExit(statusUpdater!.Status, playerRigidbody!, this);
-                // Enter melee attack state
-                CurrentState = PlayerStates.MELEE;
-                CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
+                if (CurrentActionType == ItemActionType.MeleeWeaponSword)
+                {
+                    CurrentState.OnExit(statusUpdater!.Status, playerRigidbody!, this);
+                    // Enter melee attack state
+                    CurrentState = PlayerStates.MELEE;
+                    CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
+                }
 
                 return true;
             }
@@ -469,7 +480,7 @@ namespace CraftSharp.Control
             else
                 statusInfo = statusUpdater!.Status.ToString();
             
-            return $"State:\t{CurrentState}\n{statusInfo}";
+            return $"ActionType:\t{CurrentActionType}\nState:\t{CurrentState}\n{statusInfo}";
         }
     }
 }

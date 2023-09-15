@@ -168,11 +168,14 @@ namespace CraftSharp
                         float3[] ruleFunc(ItemStack itemStack) => new float3[] { fixedColor };
 
                         if (!itemColorRules.TryAdd(itemId, ruleFunc))
+                        {
                             Debug.LogWarning($"Failed to apply fixed color rules to {itemId} ({numId})!");
-                        
+                        }
                     }
                     else
-                        Debug.LogWarning($"Applying fixed color rules to undefined item {itemId}!");
+                    {
+                        //Debug.LogWarning($"Applying fixed color rules to undefined item {itemId}!");
+                    }
                 }
             }
 
@@ -199,7 +202,9 @@ namespace CraftSharp
                         
                     }
                     else
-                        Debug.LogWarning($"Applying fixed multi-color rules to undefined item {itemId}!");
+                    {
+                        //Debug.LogWarning($"Applying fixed multi-color rules to undefined item {itemId}!");
+                    }
                 }
             }
 
