@@ -84,7 +84,7 @@ namespace CraftSharp.Control
             StartMeleeStage(meleeAttack, attackStatus, 0, player);
 
             //Debug.Log("Attack starts!");
-            player.ChangeWeaponState(PlayerController.WeaponState.Hold);
+            player.ChangeWeaponState(PlayerController.CurrentItemState.Hold);
             player.UseRootMotion = true;
 
             rigidbody.velocity = Vector3.zero;
@@ -100,7 +100,7 @@ namespace CraftSharp.Control
             attackStatus.AttackCooldown = 0F;
 
             //Debug.Log("Attack ends!");
-            player.ChangeWeaponState(PlayerController.WeaponState.Mount);
+            player.ChangeWeaponState(PlayerController.CurrentItemState.Mount);
             player.UseRootMotion = false;
         }
 

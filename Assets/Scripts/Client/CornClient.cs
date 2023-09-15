@@ -220,7 +220,7 @@ namespace CraftSharp
             {
                 lock (movementLock)
                 {
-                    handler!.SendLocationUpdate(clientEntity.Location, grounded, yawToSend, pitchToSend);
+                    handler?.SendLocationUpdate(clientEntity.Location, grounded, yawToSend, pitchToSend);
 
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)
                     // Once yaw and pitch have been sent, switch back to location-only updates (without yaw and pitch)
