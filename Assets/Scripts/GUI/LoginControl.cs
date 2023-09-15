@@ -21,13 +21,14 @@ namespace CraftSharp.UI
         private const string LOCALHOST_ADDRESS = "127.0.0.1";
 
         [SerializeField] private TMP_InputField? serverInput, usernameInput, authCodeInput;
-        [SerializeField] private Button?         loginButton, quitButton, authConfirmButton, authCancelButton;
+        [SerializeField] private Button?         loginButton, authConfirmButton, authCancelButton;
         [SerializeField] private Button?         loginCloseButton, authLinkButton, authCloseButton, localhostButton;
+        [SerializeField] private Button?         localGameButton, loginPanelButton, quitButton;
         [SerializeField] private TMP_Text?       loadStateInfoText, usernameOptions, usernamePlaceholder, authLinkText;
-        [SerializeField] private CanvasGroup?    loginPanel, usernamePanel, authPanel, loginPanelButton;
+        [SerializeField] private CanvasGroup?    loginPanel, usernamePanel, authPanel;
         [SerializeField] private TMP_Dropdown?   loginDropDown;
 
-        private bool tryingConnect = false, authenticating = false, authCancelled = false;
+        private bool preparingGame = false, authenticating = false, authCancelled = false;
 
         // Login auto-complete
         int  usernameIndex =  0;
@@ -68,18 +69,18 @@ namespace CraftSharp.UI
         
         public void TryConnectServer()
         {
-            if (tryingConnect)
+            if (preparingGame)
             {
                 CornApp.Notify("Already loggin' in!", Notification.Type.Warning);
                 return;
             }
 
-            tryingConnect = true;
+            preparingGame = true;
 
             StartCoroutine(ConnectServer());
         }
 
-        public IEnumerator ConnectServer()
+        private IEnumerator ConnectServer()
         {
             string serverText = serverInput!.text;
             string account = usernameInput!.text;
@@ -91,12 +92,13 @@ namespace CraftSharp.UI
             var result = ProtocolHandler.LoginResult.LoginRequired;
             var microsoftLogin = loginDropDown!.value == 0; // Dropdown value is 0 if use Microsoft login
 
+            // Login Microsoft/Offline player account
             if (!microsoftLogin)
             {
                 if (!StringHelper.IsValidName(account))
                 {
                     CornApp.Notify("The offline username is not valid!", Notification.Type.Warning);
-                    tryingConnect = false;
+                    preparingGame = false;
                     loadStateInfoText!.text = ">_<";
                     yield break;
                 }
@@ -172,6 +174,7 @@ namespace CraftSharp.UI
                 }
             }
 
+            // Proceed to target server
             if (result == ProtocolHandler.LoginResult.Success)
             {
                 string host;   // Server ip address
@@ -180,7 +183,7 @@ namespace CraftSharp.UI
                 if (!ParseServerIP(serverText, out host, ref port))
                 {
                     CornApp.Notify("Failed to parse server name or address!", Notification.Type.Warning);
-                    tryingConnect = false;
+                    preparingGame = false;
                     loadStateInfoText!.text = ">_<";
                     yield break;
                 }
@@ -238,7 +241,7 @@ namespace CraftSharp.UI
                 if (!pingResult)
                 {
                     CornApp.Notify(Translations.Get("error.ping"), Notification.Type.Error);
-                    tryingConnect = false;
+                    preparingGame = false;
                     loadStateInfoText!.text = ">_<";
                     yield break;
                 }
@@ -256,8 +259,8 @@ namespace CraftSharp.UI
 
                         // We cannot directly use StartCoroutine to call StartLogin here, which will stop running when
                         // this scene is unloaded and LoginControl object is destroyed
-                        CornApp.Instance.StartLoginCoroutine(session, playerKeyPair, host, port, protocolVersion, null,
-                                (succeeded) => tryingConnect = false,
+                        CornApp.Instance.StartLoginCoroutine(true, session, playerKeyPair, host, port, protocolVersion, null,
+                                (succeeded) => preparingGame = false,
                                 (status) => loadStateInfoText!.text = status, accountLower);
 
                         yield break;
@@ -293,7 +296,32 @@ namespace CraftSharp.UI
                 Debug.LogError(failureMessage);
             }
 
-            tryingConnect = false;
+            preparingGame = false;
+        }
+
+        private void TryConnectDummyServer()
+        {
+            if (preparingGame)
+            {
+                CornApp.Notify("Already loggin' in!", Notification.Type.Warning);
+                return;
+            }
+
+            preparingGame = true;
+
+            var serverVersionName = "<dummy>";
+            var protocolVersion = 754; // 1.16.5
+
+            CornApp.Notify(Translations.Get("mcc.server_protocol", serverVersionName, protocolVersion));
+
+            var session = new SessionToken { PlayerName = "OfflinePlayer" };
+            var accountLower = "dummy_user";
+
+            // We cannot directly use StartCoroutine to call StartLogin here, which will stop running when
+            // this scene is unloaded and LoginControl object is destroyed
+            CornApp.Instance.StartLoginCoroutine(false, session, null, "<local>", 0, protocolVersion, null,
+                    (succeeded) => preparingGame = false,
+                    (status) => loadStateInfoText!.text = status, accountLower);
         }
 
         public void ShowLoginPanel()
@@ -301,8 +329,7 @@ namespace CraftSharp.UI
             loginPanel!.alpha = 1F;
             loginPanel!.blocksRaycasts = true;
             loginPanel!.interactable = true;
-            loginPanelButton!.alpha = 0F;
-            loginPanelButton!.blocksRaycasts = false;
+            loginPanelButton!.gameObject.SetActive(false);
             loginPanelButton!.interactable = false;
         }
 
@@ -311,8 +338,7 @@ namespace CraftSharp.UI
             loginPanel!.alpha = 0F;
             loginPanel!.blocksRaycasts = false;
             loginPanel!.interactable = false;
-            loginPanelButton!.alpha = 1F;
-            loginPanelButton!.blocksRaycasts = true;
+            loginPanelButton!.gameObject.SetActive(true);
             loginPanelButton!.interactable = true;
         }
 
@@ -459,16 +485,17 @@ namespace CraftSharp.UI
             usernameInput.onSelect.AddListener(this.UpdateUsernamePanel);
             usernameInput.onEndEdit.AddListener(this.HideUsernamePanel);
 
-            loginButton!.onClick.AddListener(this.TryConnectServer);
+            localGameButton!.onClick.AddListener(this.TryConnectDummyServer);
             quitButton!.onClick.AddListener(this.QuitGame);
 
+            loginButton!.onClick.AddListener(this.TryConnectServer);
             authLinkButton!.onClick.AddListener(this.CopyAuthLink);
             authCancelButton!.onClick.AddListener(this.CancelAuth);
             authConfirmButton!.onClick.AddListener(this.ConfirmAuth);
             authCodeInput!.GetComponentInChildren<Button>().onClick.AddListener(this.PasteAuthCode);
 
             loginCloseButton!.onClick.AddListener(this.HideLoginPanel);
-            loginPanelButton!.GetComponent<Button>().onClick.AddListener(this.ShowLoginPanel);
+            loginPanelButton!.onClick.AddListener(this.ShowLoginPanel);
             // Cancel auth, not just hide panel (so basically this button is totally the same as authCancelButton)...
             authCloseButton!.onClick.AddListener(this.CancelAuth);
 
@@ -502,11 +529,8 @@ namespace CraftSharp.UI
                         usernameInput!.text = shownNames[usernameIndex];
                         usernameInput!.MoveTextEnd(false);
                     }
-                        
                 }
-
             }
         }
-
     }
 }

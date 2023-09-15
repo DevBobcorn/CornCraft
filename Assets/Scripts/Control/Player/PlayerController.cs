@@ -10,13 +10,22 @@ namespace CraftSharp.Control
     [RequireComponent(typeof (Rigidbody), typeof (PlayerStatusUpdater))]
     public class PlayerController : MonoBehaviour
     {
-        public enum WeaponState
+        public enum CurrentItemState
         {
             Hold,
             Mount
         }
 
-        [SerializeField] public PlayerMeleeAttack? meleeAttack;
+        public enum ActionItemType
+        {
+            None,
+            MeleeWeaponSword,
+            RangedWeaponBow,
+        }
+
+        public ActionItemType CurrentItemType = ActionItemType.None;
+
+        [SerializeField] protected PlayerMeleeAttack? meleeAttack;
         public PlayerMeleeAttack MeleeAttack => meleeAttack!;
 
         [SerializeField] protected PlayerAbility? ability;
@@ -246,9 +255,9 @@ namespace CraftSharp.Control
             playerRender?.gameObject.SetActive(true);
         }
         
-        public delegate void WeaponStateEventHandler(WeaponState weaponState);
+        public delegate void WeaponStateEventHandler(CurrentItemState weaponState);
         public event WeaponStateEventHandler? OnWeaponStateChanged;
-        public void ChangeWeaponState(WeaponState weaponState) => OnWeaponStateChanged?.Invoke(weaponState);
+        public void ChangeWeaponState(CurrentItemState weaponState) => OnWeaponStateChanged?.Invoke(weaponState);
 
         public delegate void CrossFadeStateEventHandler(string stateName, float time, int layer, float timeOffset);
         public event CrossFadeStateEventHandler? OnCrossFadeState;

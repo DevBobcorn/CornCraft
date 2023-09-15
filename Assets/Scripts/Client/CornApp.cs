@@ -169,10 +169,10 @@ namespace CraftSharp
             }
         }
 
-        private IEnumerator EnterWorldScene()
+        private IEnumerator EnterWorldScene(string sceneName)
         {
             // Prepare scene and unity objects
-            var op = SceneManager.LoadSceneAsync("World", LoadSceneMode.Single);
+            var op = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
             op.allowSceneActivation = false;
 
             while (op.progress < 0.9F) yield return null;
@@ -184,20 +184,20 @@ namespace CraftSharp
             // Wait till everything's ready
             op.completed += (operation) =>
             {
-                client = Component.FindObjectOfType<CornClient>();
+                client = Component.FindObjectOfType<BaseCornClient>();
                 fullyLoaded = true;
             };
 
             while (!fullyLoaded) yield return null;
         }
 
-        public void StartLoginCoroutine(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
+        public void StartLoginCoroutine(bool online, SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
                 int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
         {
-            StartCoroutine(StartLogin(session, playerKeyPair, serverIp, port, protocol, forgeInfo, callback, updateStatus, accountLower));
+            StartCoroutine(StartLogin(online, session, playerKeyPair, serverIp, port, protocol, forgeInfo, callback, updateStatus, accountLower));
         }
 
-        private IEnumerator StartLogin(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
+        private IEnumerator StartLogin(bool online, SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
                 int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
         {
             // Prepare resources
@@ -214,7 +214,7 @@ namespace CraftSharp
 
             // Enter world scene, and find the client instance in that scene
             updateStatus("status.info.enter_world_scene");
-            yield return EnterWorldScene();
+            yield return EnterWorldScene(online ? "World" : "World Offline");
 
             // Start client
             if (client != null)
@@ -227,7 +227,6 @@ namespace CraftSharp
                 callback(false);
                 BackToLogin();
             }
-
         }
 
         /// <summary>

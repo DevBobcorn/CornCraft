@@ -79,7 +79,9 @@ namespace CraftSharp
             GameMode = GameMode.Creative;
             EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
 
-
+            // Initialize inventory
+            DummyOnInventoryOpen(0, new Container(ContainerType.PlayerInventory));
+            DummyOnSetSlot(0, 36, new ItemStack(ItemPalette.INSTANCE.FromId(new("diamond_sword")), 1), 0);
         }
 
         public override bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp,
@@ -389,5 +391,73 @@ namespace CraftSharp
 
         #endregion
 
+        #region Dummy data updates
+
+        /// <summary>
+        /// When an inventory is opened
+        /// </summary>
+        /// <param name="inventory">The inventory</param>
+        /// <param name="inventoryID">Inventory ID</param>
+        public void DummyOnInventoryOpen(int inventoryID, Container inventory)
+        {
+            inventories[inventoryID] = inventory;
+
+            if (inventoryID != 0)
+            {
+                Debug.Log(Translations.Get("extra.inventory_open", inventoryID, inventory.Title));
+                Debug.Log(Translations.Get("extra.inventory_interact"));
+            }
+        }
+
+        /// <summary>
+        /// When a slot is set inside window items
+        /// </summary>
+        /// <param name="inventoryID">Window ID</param>
+        /// <param name="slotID">Slot ID</param>
+        /// <param name="item">Item (may be null for empty slot)</param>
+        public void DummyOnSetSlot(byte inventoryID, short slotID, ItemStack item, int stateId)
+        {
+            if (inventories.ContainsKey(inventoryID))
+                inventories[inventoryID].StateID = stateId;
+
+            // Handle inventoryID -2 - Add item to player inventory without animation
+            if (inventoryID == 254)
+                inventoryID = 0;
+            // Handle cursor item
+            if (inventoryID == 255 && slotID == -1)
+            {
+                //inventoryID = 0; // Prevent key not found for some bots relied to this event
+                if (inventories.ContainsKey(0))
+                {
+                    if (item != null)
+                        inventories[0].Items[-1] = item;
+                    else
+                        inventories[0].Items.Remove(-1);
+                }
+            }
+            else
+            {
+                if (inventories.ContainsKey(inventoryID))
+                {
+                    var container = inventories[inventoryID];
+                    
+                    if (item == null || item.IsEmpty)
+                    {
+                        if (container.Items.ContainsKey(slotID))
+                            container.Items.Remove(slotID);
+                    }
+                    else container.Items[slotID] = item;
+
+                    EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryID, slotID, item));
+
+                    if (container.IsHotbar(slotID, out int hotbarSlot))
+                    {
+                        EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
+                    }
+                }
+            }
+        }
+
+        #endregion
     }
 }

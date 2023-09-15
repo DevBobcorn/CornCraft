@@ -11,9 +11,9 @@ namespace CraftSharp.Rendering
         [HideInInspector] public Transform? mainHandRef;
         [HideInInspector] public Transform? spineRef;
         private Transform? mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
-        private Transform? weaponMountPivot, weaponMountSlot;
+        private Transform? itemMountPivot, itemMountSlot;
         private PlayerController? player;
-        private MeleeWeapon? currentWeapon;
+        private MeleeWeapon? currentItem;
 
         public void SetRefTransforms(Transform mainHandRef, Transform spineRef)
         {
@@ -29,65 +29,65 @@ namespace CraftSharp.Rendering
             this.spineRef = spineRef;
 
             // Create weapon mount slot transform
-            var weaponPivotObj = new GameObject("Weapon Mount Pivot");
-            weaponMountPivot = weaponPivotObj.transform;
-            weaponMountPivot.SetParent(transform);
+            var weaponPivotObj = new GameObject("Item Mount Pivot");
+            itemMountPivot = weaponPivotObj.transform;
+            itemMountPivot.SetParent(transform);
 
-            var weaponSlotObj = new GameObject("Weapon Mount Slot");
-            weaponMountSlot = weaponSlotObj.transform;
-            weaponMountSlot.SetParent(weaponMountPivot);
+            var weaponSlotObj = new GameObject("Item Mount Slot");
+            itemMountSlot = weaponSlotObj.transform;
+            itemMountSlot.SetParent(itemMountPivot);
         }
 
         public void CreateWeapon(GameObject weaponPrefab)
         {
-            if (currentWeapon != null)
+            if (currentItem != null)
             {
-                Destroy(currentWeapon);
+                Destroy(currentItem);
             }
 
             var weaponObj = GameObject.Instantiate(weaponPrefab);
-            currentWeapon = weaponObj!.GetComponent<MeleeWeapon>();
+            currentItem = weaponObj!.GetComponent<MeleeWeapon>();
 
             // Set weapon slot position and rotation
-            weaponMountPivot!.localPosition = new(0F, 1.3F, 0F);
+            itemMountPivot!.localPosition = new(0F, 1.3F, 0F);
 
-            weaponMountSlot!.localPosition = currentWeapon.slotPosition;
-            weaponMountSlot!.localEulerAngles = currentWeapon.slotEularAngles;
+            itemMountSlot!.localPosition = currentItem.slotPosition;
+            itemMountSlot!.localEulerAngles = currentItem.slotEularAngles;
 
             // Mount weapon on start
-            MountWeapon();
+            MountItem();
         }
 
-        private void HoldWeapon()
+        private void HoldItem()
         {
-            if (currentWeapon != null)
+            if (currentItem != null)
             {
-                currentWeapon.transform.SetParent(mainHandSlot, false);
-                currentWeapon.transform.localPosition = Vector3.zero;
-                currentWeapon.transform.localRotation = Quaternion.identity;
+                currentItem.transform.SetParent(mainHandSlot, false);
+                currentItem.transform.localPosition = Vector3.zero;
+                currentItem.transform.localRotation = Quaternion.identity;
             }
         }
 
-        private void MountWeapon()
+        private void MountItem()
         {
-            if (currentWeapon != null)
+            if (currentItem != null)
             {
-                currentWeapon.transform.SetParent(weaponMountSlot, false);
-                currentWeapon.transform.localPosition = Vector3.zero;
-                currentWeapon.transform.localRotation = Quaternion.identity;
+                currentItem.transform.SetParent(itemMountSlot, false);
+                currentItem.transform.localPosition = Vector3.zero;
+                currentItem.transform.localRotation = Quaternion.identity;
             }
         }
 
         // Called by animator event
         public void DamageStart()
         {
-            currentWeapon?.StartSlash();
+            currentItem?.StartSlash();
         }
 
         // Called by animator event
         public void DamageStop()
         {
-            currentWeapon?.EndSlash();
+            currentItem?.EndSlash();
         }
 
         // Called by animator event
@@ -102,11 +102,11 @@ namespace CraftSharp.Rendering
             player.OnWeaponStateChanged += (weaponState) => {
                 switch (weaponState)
                 {
-                    case PlayerController.WeaponState.Hold:
-                        HoldWeapon();
+                    case PlayerController.CurrentItemState.Hold:
+                        HoldItem();
                         break;
-                    case PlayerController.WeaponState.Mount:
-                        MountWeapon();
+                    case PlayerController.CurrentItemState.Mount:
+                        MountItem();
                         break;
                 }
             };
@@ -114,10 +114,10 @@ namespace CraftSharp.Rendering
 
         void Update()
         {
-            if (spineRef == null || weaponMountPivot == null)
+            if (spineRef == null || itemMountPivot == null)
                 return;
 
-            weaponMountPivot.localEulerAngles = new Vector3(-spineRef.localEulerAngles.x, 0F, 0F);
+            itemMountPivot.localEulerAngles = new Vector3(-spineRef.localEulerAngles.x, 0F, 0F);
         }
     }
 }
