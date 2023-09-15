@@ -357,7 +357,7 @@ namespace CraftSharp.Protocol.Handlers
                     UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}, should be {c.ColumnSize * 64}");
                 
                 c.SetLights(skyLight, blockLight);
-                c.RefreshIsOpaque();
+                c.RefreshAOSolid();
 
                 c!.FullyLoaded = true;
             }
@@ -569,7 +569,7 @@ namespace CraftSharp.Protocol.Handlers
                     ReadChunkColumnLightData16(ref skyLight, ref blockLight, lightData);
 
                     c.SetLights(skyLight, blockLight);
-                    c.RefreshIsOpaque();
+                    c.RefreshAOSolid();
 
                     //UnityEngine.Debug.Log($"Lighting up chunk column [{chunkX}, {chunkZ}]");
                 }
