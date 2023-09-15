@@ -3,7 +3,6 @@
 // https://magicasoft.jp
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Unity.Collections;
 using UnityEngine;
@@ -27,6 +26,8 @@ namespace MagicaCloth2
         public const int State_Build = 4;
         public const int State_Running = 5;
         public const int State_DisableAutoBuild = 6;
+        public const int State_CullingInvisible = 7; // チームデータの同フラグのコピー
+        public const int State_CullingKeep = 8; // チームデータの同フラグのコピー
 
         /// <summary>
         /// 現在の状態
@@ -54,7 +55,6 @@ namespace MagicaCloth2
         /// </summary>
         public class RenderMeshInfo
         {
-            //public int mixHash;
             public int renderHandle;
             public VirtualMesh renderMesh;
             public DataChunk mappingChunk;
@@ -120,14 +120,15 @@ namespace MagicaCloth2
         public VirtualMesh ProxyMesh { get; private set; } = null;
 
         /// <summary>
-        /// 現在有効なコライダー
+        /// コライダーリスト
+        /// コライダーが格納されるインデックスは他のデータのインデックスと一致している
         /// </summary>
-        internal ColliderComponent[] colliderArray;
+        internal List<ColliderComponent> colliderList = new List<ColliderComponent>();
 
         /// <summary>
-        /// 有効コライダー数
+        /// コライダー配列数
         /// </summary>
-        internal int ColliderCount => colliderArray?.Count(x => x != null) ?? 0;
+        internal int ColliderCapacity => colliderList.Count;
 
         //=========================================================================================
         /// <summary>
@@ -150,10 +151,16 @@ namespace MagicaCloth2
         /// </summary>
         internal TriangleBendingConstraint.ConstraintData bendingConstraintData;
 
+        //=========================================================================================
         /// <summary>
-        /// セルフコリジョン2制約データ
+        /// カリング用対象アニメーター
         /// </summary>
-        //internal SelfCollisionConstraint2.ConstraintData self2ConstraintData;
+        internal Animator cullingAnimator = null;
+
+        /// <summary>
+        /// カリング用アニメーター配下のレンダラーリスト
+        /// </summary>
+        internal List<Renderer> cullingAnimatorRenderers = new List<Renderer>();
 
         //=========================================================================================
         /// <summary>
@@ -204,11 +211,11 @@ namespace MagicaCloth2
             }
         }
 
-        public bool IsValid()
-        {
-            //return isValid;
-            return IsState(State_Valid);
-        }
+        public bool IsValid() => IsState(State_Valid);
+
+        public bool IsCullingInvisible() => IsState(State_CullingInvisible);
+
+        public bool IsCullingKeep() => IsState(State_CullingKeep);
 
         public bool IsEnable
         {
@@ -230,17 +237,13 @@ namespace MagicaCloth2
             }
         }
 
+        public string Name => cloth != null ? cloth.name : "(none)";
+
         //=========================================================================================
         public ClothProcess()
         {
             // 初期状態
             result = ResultCode.Empty;
-
-            // ビルド許可
-            //SetState(State_BuildPermission, true);
-
-            // コライダーコンポーネントリストを最大数で初期化
-            colliderArray = new ColliderComponent[Define.System.MaxColliderCount];
         }
 
         public void Dispose()
@@ -252,9 +255,6 @@ namespace MagicaCloth2
                 result.Clear();
                 cts.Cancel();
             }
-
-            //if (MagicaManager.IsPlaying() == false)
-            //    return;
 
             DisposeInternal();
             //Debug.Log($"ClothProcessData.Dispose()!");
@@ -302,7 +302,10 @@ namespace MagicaCloth2
                 ProxyMesh?.Dispose();
                 ProxyMesh = null;
 
-                colliderArray = null;
+                colliderList.Clear();
+
+                cullingAnimator = null;
+                cullingAnimatorRenderers.Clear();
             }
         }
 
@@ -359,7 +362,5 @@ namespace MagicaCloth2
             customSkinningBoneRecords.ForEach(rd => rd.ReplaceTransform(replaceDict));
             normalAdjustmentTransformRecord?.ReplaceTransform(replaceDict);
         }
-
-        public string Name => cloth?.name ?? "(none)";
     }
 }

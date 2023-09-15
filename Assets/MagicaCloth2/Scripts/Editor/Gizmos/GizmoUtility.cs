@@ -71,39 +71,26 @@ namespace MagicaCloth2
                 Gizmos.DrawLine(from, to);
         }
 
-        public static void DrawWireCapsule(Vector3 pos, Quaternion rot, Vector3 dir, Vector3 up, float sradius, float eradius, float len, Quaternion camRot, bool useHandles)
+        public static void DrawWireCapsule(Vector3 pos, Quaternion rot, Vector3 dir, Vector3 up, float sradius, float eradius, float len, bool alignedCenter, Quaternion camRot, bool useHandles)
         {
             if (useHandles)
             {
-                float slen = len * 0.5f;
-                float elen = len * 0.5f;
+                //float slen = len * 0.5f;
+                //float elen = len * 0.5f;
+                float slen = alignedCenter ? len * 0.5f : 0.0f;
+                float elen = alignedCenter ? len * 0.5f : (len - sradius);
                 slen = Mathf.Max(slen - sradius, 0.0f);
                 elen = Mathf.Max(elen - eradius, 0.0f);
                 Vector3 sl = dir * slen;
                 Vector3 el = -dir * elen;
 
-                //var spos = pos + rot * dir * len * 0.5f;
-                //var epos = pos - rot * dir * len * 0.5f;
                 var spos = pos + rot * sl;
                 var epos = pos + rot * el;
 
                 DrawWireSphere(spos, rot, sradius, camRot, true);
                 DrawWireSphere(epos, rot, eradius, camRot, true);
-                //Handles.CircleHandleCap(0, spos, camRot, sradius, EventType.Repaint);
-                //Handles.CircleHandleCap(0, spos, rot, sradius, EventType.Repaint);
-                //Handles.CircleHandleCap(0, spos, rot * Quaternion.Euler(90, 0, 0), sradius, EventType.Repaint);
-                //Handles.CircleHandleCap(0, spos, rot * Quaternion.Euler(0, 90, 0), sradius, EventType.Repaint);
 
-                //Handles.CircleHandleCap(0, epos, camRot, eradius, EventType.Repaint);
-                //Handles.CircleHandleCap(0, epos, rot, eradius, EventType.Repaint);
-                //Handles.CircleHandleCap(0, epos, rot * Quaternion.Euler(90, 0, 0), eradius, EventType.Repaint);
-                //Handles.CircleHandleCap(0, epos, rot * Quaternion.Euler(0, 90, 0), eradius, EventType.Repaint);
-
-                //var ps = spos + camRot * Vector3.up * sradius;
-                //var es = epos + camRot * Vector3.up * eradius;
-                //Handles.DrawLine(ps, es);
-
-                for (int i = 0; i < 360; i += 45) // 45?
+                for (int i = 0; i < 360; i += 45)
                 {
                     var q = Quaternion.AngleAxis(i, dir);
                     var up1 = q * (up * sradius);
@@ -199,14 +186,23 @@ namespace MagicaCloth2
                     case ColliderManager.ColliderType.Sphere:
                         DrawWireSphere(Vector3.zero, Quaternion.identity, size.x, camRot, true);
                         break;
-                    case ColliderManager.ColliderType.CapsuleX:
-                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.right, Vector3.up, size.x, size.y, size.z, camRot, true);
+                    case ColliderManager.ColliderType.CapsuleX_Center:
+                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.right, Vector3.up, size.x, size.y, size.z, true, camRot, true);
                         break;
-                    case ColliderManager.ColliderType.CapsuleY:
-                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.up, Vector3.right, size.x, size.y, size.z, camRot, true);
+                    case ColliderManager.ColliderType.CapsuleY_Center:
+                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.up, Vector3.right, size.x, size.y, size.z, true, camRot, true);
                         break;
-                    case ColliderManager.ColliderType.CapsuleZ:
-                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.forward, Vector3.up, size.x, size.y, size.z, camRot, true);
+                    case ColliderManager.ColliderType.CapsuleZ_Center:
+                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.forward, Vector3.up, size.x, size.y, size.z, true, camRot, true);
+                        break;
+                    case ColliderManager.ColliderType.CapsuleX_Start:
+                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.right, Vector3.up, size.x, size.y, size.z, false, camRot, true);
+                        break;
+                    case ColliderManager.ColliderType.CapsuleY_Start:
+                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.up, Vector3.right, size.x, size.y, size.z, false, camRot, true);
+                        break;
+                    case ColliderManager.ColliderType.CapsuleZ_Start:
+                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.forward, Vector3.up, size.x, size.y, size.z, false, camRot, true);
                         break;
                     case ColliderManager.ColliderType.Plane:
                         DrawWireCube(Vector3.zero, Quaternion.identity, new Vector3(1.0f, 0.0f, 1.0f) * 1.0f, true);

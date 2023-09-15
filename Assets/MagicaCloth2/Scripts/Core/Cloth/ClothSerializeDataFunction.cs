@@ -55,6 +55,7 @@ namespace MagicaCloth2
             reductionSetting.DataValidate();
             customSkinningSetting.DataValidate();
             normalAlignmentSetting.DataValidate();
+            cullingSettings.DataValidate();
 
             gravity = Mathf.Clamp(gravity, 0.0f, 20.0f);
             if (math.length(gravityDirection) > Define.System.Epsilon)
@@ -111,6 +112,7 @@ namespace MagicaCloth2
             hash += reductionSetting.GetHashCode();
             hash += customSkinningSetting.GetHashCode();
             hash += normalAlignmentSetting.GetHashCode();
+            hash += cullingSettings.GetHashCode();
             hash += (int)paintMode;
             foreach (var map in paintMaps)
             {
@@ -179,6 +181,9 @@ namespace MagicaCloth2
             MagicaCloth synchronization;
             float stablizationTimeAfterReset;
             float blendWeight;
+            CullingSettings.CameraCullingMode cullingMode;
+            CullingSettings.CameraCullingMethod cullingMethod;
+            List<Renderer> cullingRenderers;
 
             internal TempBuffer(ClothSerializeData sdata)
             {
@@ -205,6 +210,9 @@ namespace MagicaCloth2
                 synchronization = sdata.selfCollisionConstraint.syncPartner;
                 stablizationTimeAfterReset = sdata.stablizationTimeAfterReset;
                 blendWeight = sdata.blendWeight;
+                cullingMode = sdata.cullingSettings.cameraCullingMode;
+                cullingMethod = sdata.cullingSettings.cameraCullingMethod;
+                cullingRenderers = new List<Renderer>(sdata.cullingSettings.cameraCullingRenderers);
             }
 
             internal void Pop(ClothSerializeData sdata)
@@ -227,6 +235,9 @@ namespace MagicaCloth2
                 sdata.selfCollisionConstraint.syncPartner = synchronization;
                 sdata.stablizationTimeAfterReset = stablizationTimeAfterReset;
                 sdata.blendWeight = blendWeight;
+                sdata.cullingSettings.cameraCullingMode = cullingMode;
+                sdata.cullingSettings.cameraCullingMethod = cullingMethod;
+                sdata.cullingSettings.cameraCullingRenderers = cullingRenderers;
             }
         }
 
@@ -301,6 +312,7 @@ namespace MagicaCloth2
                 normalAxis = sdata.normalAxis;
                 stablizationTimeAfterReset = sdata.stablizationTimeAfterReset;
                 blendWeight = sdata.blendWeight;
+                cullingSettings = sdata.cullingSettings.Clone();
             }
 
             // parameters

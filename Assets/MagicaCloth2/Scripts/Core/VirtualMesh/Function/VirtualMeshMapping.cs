@@ -74,6 +74,7 @@ namespace MagicaCloth2
                     var avgDist = proxyMesh.averageVertexDistance.Value;
                     float weightLength = avgDist * 1.5f;
                     //Debug.Log($"avgDist:{avgDist}, weightLength:{weightLength}");
+                    using var useSet = new NativeParallelHashSet<ushort>(1024, Allocator.Persistent); // Unity2023.1.5対応
                     var calcDirectWeightJob = new Mapping_CalcDirectWeightJob()
                     {
                         vcnt = mappingWorkData.Length,
@@ -86,6 +87,8 @@ namespace MagicaCloth2
                         proxyLocalPositions = proxyMesh.localPositions.GetNativeArray(),
                         proxyVertexToVertexIndexArray = proxyMesh.vertexToVertexIndexArray,
                         proxyVertexToVertexDataArray = proxyMesh.vertexToVertexDataArray,
+
+                        useSet = useSet, // Unity2023.1.5対応
                     };
                     calcDirectWeightJob.Run();
                 }
@@ -256,10 +259,12 @@ namespace MagicaCloth2
             [Unity.Collections.ReadOnly]
             public NativeArray<ushort> proxyVertexToVertexDataArray;
 
+            public NativeParallelHashSet<ushort> useSet; // Unity2023.1.5対応
+
             public void Execute()
             {
                 // 処理済みセット
-                var useSet = new NativeParallelHashSet<ushort>(1024, Allocator.Temp);
+                //var useSet = new NativeParallelHashSet<ushort>(1024, Allocator.Temp); // Unity2023.1.5対応
                 var stack = new FixedList4096Bytes<ushort>();
 
                 for (int vindex = 0; vindex < vcnt; vindex++)

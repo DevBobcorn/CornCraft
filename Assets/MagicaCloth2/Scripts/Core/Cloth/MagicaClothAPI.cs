@@ -153,9 +153,8 @@ namespace MagicaCloth2
         {
             if (IsValid())
             {
-                var tdata = MagicaManager.Team.GetTeamData(Process.TeamId);
+                ref var tdata = ref MagicaManager.Team.GetTeamDataRef(Process.TeamId);
                 tdata.timeScale = Mathf.Clamp01(timeScale);
-                MagicaManager.Team.SetTeamData(Process.TeamId, tdata);
             }
         }
 
@@ -168,7 +167,7 @@ namespace MagicaCloth2
         {
             if (IsValid())
             {
-                var tdata = MagicaManager.Team.GetTeamData(Process.TeamId);
+                ref var tdata = ref MagicaManager.Team.GetTeamDataRef(Process.TeamId);
                 return tdata.timeScale;
             }
             else
@@ -179,14 +178,26 @@ namespace MagicaCloth2
         /// シミュレーションを初期状態にリセットします
         /// Reset the simulation to its initial state.
         /// </summary>
-        public void ResetCloth()
+        /// <param name="keepPose">If true, resume while maintaining posture.</param>
+        public void ResetCloth(bool keepPose = false)
         {
             if (IsValid())
             {
-                var tdata = MagicaManager.Team.GetTeamData(Process.TeamId);
-                tdata.flag.SetBits(TeamManager.Flag_Reset, true);
-                tdata.flag.SetBits(TeamManager.Flag_TimeReset, true);
-                MagicaManager.Team.SetTeamData(Process.TeamId, tdata);
+                ref var tdata = ref MagicaManager.Team.GetTeamDataRef(Process.TeamId);
+                if (keepPose)
+                {
+                    // Keep
+                    tdata.flag.SetBits(TeamManager.Flag_KeepTeleport, true);
+                }
+                else
+                {
+                    // Reset
+                    tdata.flag.SetBits(TeamManager.Flag_Reset, true);
+                    tdata.flag.SetBits(TeamManager.Flag_TimeReset, true);
+                    tdata.flag.SetBits(TeamManager.Flag_CullingKeep, false);
+                    Process.SetState(ClothProcess.State_CullingKeep, false);
+                    Process.UpdateRendererUse();
+                }
             }
         }
 
@@ -199,11 +210,28 @@ namespace MagicaCloth2
         {
             if (IsValid())
             {
-                var cdata = MagicaManager.Team.GetCenterData(Process.TeamId);
+                ref var cdata = ref MagicaManager.Team.GetCenterDataRef(Process.TeamId);
                 return ClothTransform.TransformPoint(cdata.frameLocalPosition);
             }
             else
                 return Vector3.zero;
+        }
+
+        /// <summary>
+        /// 外力を加えます
+        /// Add external force.
+        /// </summary>
+        /// <param name="forceDirection"></param>
+        /// <param name="forceVelocity">(m/s)</param>
+        /// <param name="fmode"></param>
+        public void AddForce(Vector3 forceDirection, float forceVelocity, ClothForceMode fmode = ClothForceMode.VelocityAdd)
+        {
+            if (IsValid() && forceDirection.magnitude > 0.0f && forceVelocity > 0.0f && fmode != ClothForceMode.None)
+            {
+                ref var tdata = ref MagicaManager.Team.GetTeamDataRef(Process.TeamId);
+                tdata.forceMode = fmode;
+                tdata.impactForce = forceDirection.normalized * forceVelocity;
+            }
         }
     }
 }

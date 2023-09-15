@@ -144,7 +144,7 @@ namespace MagicaCloth2
                 var t = windZone.transform;
 
                 // コンポーネントデータのコピー
-                var wind = windDataArray[windId];
+                ref var wind = ref windDataArray.GetRef(windId);
                 wind.mode = windZone.mode;
                 switch (windZone.mode)
                 {
@@ -195,8 +195,6 @@ namespace MagicaCloth2
                     // 減衰カーブ
                     wind.attenuation = DataUtility.ConvertAnimationCurve(windZone.attenuation);
                 }
-
-                windDataArray[windId] = wind;
             }
         }
 

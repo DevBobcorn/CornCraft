@@ -15,7 +15,7 @@ namespace MagicaCloth2
     /// ・スレッドで利用できるようにする
     /// ・頂点数は最大65535に制限、ただし一部を除きインデックスはintで扱う
     /// </summary>
-    public partial class VirtualMesh : IDisposable
+    public partial class VirtualMesh : IDisposable, IValid
     {
 
         public string name = string.Empty;
@@ -171,15 +171,14 @@ namespace MagicaCloth2
         // プロキシメッシュ
         //=========================================================================================
         /// <summary>
-        /// 頂点ごとの接続トライアングルインデックス（最大７つ）
+        /// 頂点ごとの接続トライアングルインデックスと法線接線フリップフラグ（最大７つ）
         /// これは法線を再計算するために用いられるもので７つあれば十分であると判断したもの。
         /// そのため正確なトライアングル接続を表していない。
-        /// インデックスがマイナスの場合は法線を反転して計算すること。
-        /// そして実際のインデックス＋１が入るので注意！（０を除外するため）
-        /// int index = math.abs(value) - 1;
-        /// bool flop = value < 0;
+        /// データは12-20bitのuintでパックされている
+        /// 12(hi) = 法線接線のフリップフラグ(法線:0x1,接線:0x2)。ONの場合フリップ。
+        /// 20(low) = トライアングルインデックス。
         /// </summary>
-        public NativeArray<FixedList32Bytes<int>> vertexToTriangles;
+        public NativeArray<FixedList32Bytes<uint>> vertexToTriangles;
 
         /// <summary>
         /// 頂点ごとの接続頂点インデックス
@@ -460,6 +459,22 @@ namespace MagicaCloth2
         public void SetName(string newName)
         {
             name = newName;
+        }
+
+        /// <summary>
+        /// 最低限のデータ検証
+        /// </summary>
+        /// <returns></returns>
+        public bool IsValid()
+        {
+            if (transformData == null)
+                return false;
+
+            // レンダラーが存在する場合はその存在を確認する
+            if (centerTransformIndex >= 0 && transformData.GetTransformFromIndex(centerTransformIndex) == null)
+                return false;
+
+            return true;
         }
 
         //=========================================================================================

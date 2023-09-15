@@ -237,6 +237,7 @@ namespace MagicaCloth2
 
         /// <summary>
         /// ２つのクォータニオンの角度を返します（ラジアン）
+        /// 不正なクォータニオンでは結果が不定になるので注意！例:(0,0,0,0)など
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
@@ -1455,6 +1456,23 @@ namespace MagicaCloth2
         public static bool IsNaN(quaternion q)
         {
             return math.any(math.isnan(q.value));
+        }
+
+        /// <summary>
+        /// 座標をPivotのローカル姿勢を保ちながらシフトさせる
+        /// 主に慣性シフト用
+        /// </summary>
+        /// <param name="oldPos">移動前座標</param>
+        /// <param name="oldPivotPosition">移動前のシフト中心座標</param>
+        /// <param name="shiftVector">シフト移動量</param>
+        /// <param name="shiftRotation">シフト回転量</param>
+        /// <returns></returns>
+        public static float3 ShiftPosition(in float3 oldPos, in float3 oldPivotPosition, in float3 shiftVector, in quaternion shiftRotation)
+        {
+            float3 lpos = oldPos - oldPivotPosition;
+            lpos = math.mul(shiftRotation, lpos);
+            lpos += shiftVector;
+            return oldPivotPosition + lpos;
         }
 
         //=========================================================================================

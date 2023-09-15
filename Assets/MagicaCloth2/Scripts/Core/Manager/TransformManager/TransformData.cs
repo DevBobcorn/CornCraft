@@ -162,7 +162,6 @@ namespace MagicaCloth2
         public int RootCount => rootIdList?.Count ?? 0;
         public bool IsDirty => isDirty;
 
-
         //=========================================================================================
         /// <summary>
         /// Transform単体を追加する(tidを指定するならスレッド可）

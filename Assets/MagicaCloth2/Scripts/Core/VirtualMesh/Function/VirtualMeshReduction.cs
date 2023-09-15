@@ -349,6 +349,8 @@ namespace MagicaCloth2
 
             // スキニングボーンのリマップデータ作成
             // 使用しているボーンインデックスを収集する
+            //Debug.Log($"workData.useSkinBoneMap count:{workData.useSkinBoneMap.Count()}");
+            using var useSkinBoneMapKeyList = new NativeList<int>(Allocator.Persistent); // Unity2023.1.5対応
             var collectUseSkinJob = new Organize_CollectUseSkinBoneJob()
             {
                 oldVertexCount = workData.oldVertexCount,
@@ -359,6 +361,7 @@ namespace MagicaCloth2
                 newSkinBoneTransformIndices = workData.newSkinBoneTransformIndices,
                 newSkinBoneBindPoses = workData.newSkinBoneBindPoseList,
                 newSkinBoneCount = workData.newSkinBoneCount,
+                useSkinBoneMapKeyList = useSkinBoneMapKeyList, // Unity2023.1.5対応
             };
             collectUseSkinJob.Run();
         }
@@ -419,9 +422,12 @@ namespace MagicaCloth2
             public NativeArray<float4x4> oldBindPoses;
 
             public NativeParallelHashMap<int, int> useSkinBoneMap;
+
             public NativeList<int> newSkinBoneTransformIndices;
             public NativeList<float4x4> newSkinBoneBindPoses;
             public NativeReference<int> newSkinBoneCount;
+
+            public NativeList<int> useSkinBoneMapKeyList; // Unity2023.1.5対応
 
             public void Execute()
             {
@@ -441,18 +447,27 @@ namespace MagicaCloth2
                             //Debug.Log(bw.boneIndices[i]);
 
                             // まずは旧ボーンインデックスを収集
+                            int index = bw.boneIndices[i];
                             useSkinBoneMap.TryAdd(bw.boneIndices[i], 0);
                         }
                     }
                 }
 
                 // 利用されるボーンに連番をふる
-                var oldBoneIndexArray = useSkinBoneMap.GetKeyArray(Allocator.Temp);
+                // Unity2023.1.5対応
+                //var oldBoneIndexArray = useSkinBoneMap.GetKeyArray(Allocator.Temp);
+                useSkinBoneMapKeyList.Clear();
+                foreach (var kv in useSkinBoneMap)
+                {
+                    useSkinBoneMapKeyList.Add(kv.Key);
+                }
 
                 // 不要なトランスフォームを削除した新しいスキニングボーンとバインドポーズのリストを作成する
-                for (int i = 0; i < oldBoneIndexArray.Length; i++)
+                //for (int i = 0; i < oldBoneIndexArray.Length; i++) // Unity2023.1.5対応
+                for (int i = 0; i < useSkinBoneMapKeyList.Length; i++) // Unity2023.1.5対応
                 {
-                    int oldBoneIndex = oldBoneIndexArray[i];
+                    //int oldBoneIndex = oldBoneIndexArray[i]; // Unity2023.1.5対応
+                    int oldBoneIndex = useSkinBoneMapKeyList[i]; // Unity2023.1.5対応
                     useSkinBoneMap[oldBoneIndex] = i;
 
                     // 新しいトランスフォームインデックス
@@ -463,7 +478,8 @@ namespace MagicaCloth2
                 }
 
                 // 最適化後のスキンボーン数
-                newSkinBoneCount.Value = oldBoneIndexArray.Length;
+                //newSkinBoneCount.Value = oldBoneIndexArray.Length; // Unity2023.1.5対応
+                newSkinBoneCount.Value = useSkinBoneMapKeyList.Length; // Unity2023.1.5対応
             }
         }
 

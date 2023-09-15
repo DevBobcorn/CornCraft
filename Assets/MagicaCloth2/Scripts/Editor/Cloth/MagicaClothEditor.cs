@@ -174,17 +174,27 @@ namespace MagicaCloth2
                 result = ClothEditorManager.GetResultCode(cloth);
             }
 
+            // normal / error
             MessageType mtype = MessageType.Info;
             if (result.IsError())
                 mtype = MessageType.Error;
-            else if (result.IsWarning())
-                mtype = MessageType.Warning;
 
             var infoMessage = result.GetResultInformation();
             if (infoMessage != null)
                 EditorGUILayout.HelpBox($"{result.GetResultString()}\n{infoMessage}", mtype);
             else
                 EditorGUILayout.HelpBox(result.GetResultString(), mtype);
+
+            // warning
+            if (result.IsWarning())
+            {
+                mtype = MessageType.Warning;
+                infoMessage = result.GetWarningInformation();
+                if (infoMessage != null)
+                    EditorGUILayout.HelpBox($"{result.GetWarningString()}\n{infoMessage}", mtype);
+                else
+                    EditorGUILayout.HelpBox(result.GetWarningString(), mtype);
+            }
         }
 
         void DispProxyMesh()
@@ -208,6 +218,8 @@ namespace MagicaCloth2
                 StaticStringBuilder.AppendLine("[Proxy Mesh]");
             else
                 StaticStringBuilder.AppendLine("[Edit Mesh]");
+            if (EditorApplication.isPlaying)
+                StaticStringBuilder.AppendLine($"Visible: {!cloth.Process.IsCullingInvisible()}");
             StaticStringBuilder.AppendLine($"Vertex: {vmesh.VertexCount}");
             StaticStringBuilder.AppendLine($"Edge: {vmesh.EdgeCount}");
             StaticStringBuilder.AppendLine($"Triangle: {vmesh.TriangleCount}");
@@ -221,6 +233,9 @@ namespace MagicaCloth2
         void ClothMainInspector()
         {
             var cloth = target as MagicaCloth;
+
+            // 同期状態
+            bool sync = EditorApplication.isPlaying && cloth.SyncCloth != null;
 
             EditorGUILayout.LabelField("Main", EditorStyles.boldLabel);
 
@@ -283,11 +298,45 @@ namespace MagicaCloth2
             {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.customSkinningSetting.skinningBones"));
             });
+
+            // Culling
+            Foldout("Culling", null, () =>
+            {
+                if (sync == false)
+                {
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.cullingSettings.cameraCullingMode"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.cullingSettings.cameraCullingMethod"));
+                    if (cloth.SerializeData.cullingSettings.cameraCullingMethod == CullingSettings.CameraCullingMethod.ManualRenderer)
+                    {
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.cullingSettings.cameraCullingRenderers"));
+                    }
+                }
+                else
+                {
+                    // 同期中は操作不可
+                    using (new EditorGUI.DisabledScope(true))
+                    {
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField("Camera Culling Mode");
+                            EditorGUILayout.LabelField("(Synchronizing)");
+                        }
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField("Camera Culling Method");
+                            EditorGUILayout.LabelField("(Synchronizing)");
+                        }
+                    }
+                }
+            });
         }
 
         void ClothParameterInspector()
         {
             var cloth = target as MagicaCloth;
+
+            // 同期状態
+            bool sync = EditorApplication.isPlaying && cloth.SyncCloth != null;
 
             ClothPresetUtility.DrawPresetButton(cloth, cloth.SerializeData);
 
@@ -329,12 +378,57 @@ namespace MagicaCloth2
             // Inertia
             Foldout("Inertia", null, () =>
             {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.movementInertia"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.rotationInertia"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.depthInertia"));
+                if (sync == false)
+                {
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.worldInertia"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.movementSpeedLimit"), new GUIContent("World Movement Speed Limit"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.rotationSpeedLimit"), new GUIContent("World Rotation Speed Limit"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.teleportMode"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.teleportDistance"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.teleportRotation"));
+                }
+                else
+                {
+                    // 同期中は操作不可
+                    using (new EditorGUI.DisabledScope(true))
+                    {
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField("World Inertia");
+                            EditorGUILayout.LabelField("(Synchronizing)");
+                        }
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField("World Movement Speed Limit");
+                            EditorGUILayout.LabelField("(Synchronizing)");
+                        }
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField("World Rotation Speed Limit");
+                            EditorGUILayout.LabelField("(Synchronizing)");
+                        }
+
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField("Teleport Mode");
+                            EditorGUILayout.LabelField("(Synchronizing)");
+                        }
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField("Teleport Distance");
+                            EditorGUILayout.LabelField("(Synchronizing)");
+                        }
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField("Teleport Rotation");
+                            EditorGUILayout.LabelField("(Synchronizing)");
+                        }
+                    }
+                }
+                EditorGUILayout.Space();
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.localInertia"), new GUIContent("Local Inertia"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.depthInertia"), new GUIContent("Local Depth Inertia"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.centrifualAcceleration"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.movementSpeedLimit"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.rotationSpeedLimit"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.particleSpeedLimit"));
             });
 

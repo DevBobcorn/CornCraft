@@ -330,7 +330,7 @@ namespace MagicaCloth2
             }
 
             // GUI
-            sceneView.BeginWindows();
+            //sceneView.BeginWindows();
             string title = string.Empty;
             switch (paintMode)
             {
@@ -341,7 +341,7 @@ namespace MagicaCloth2
                     title = "Max Distance/Backstop paint";
                     break;
             }
-            var rect = GUILayout.Window(1, windata.windowRect, DoWindow, title);
+            var rect = GUILayout.Window(71903439, windata.windowRect, DoWindow, title);
             //Debug.Log(windata.windowRect);
             // ウインドウをSceneViewの領域内にクランプする
             // sceneView.positionでrectが取れる
@@ -350,7 +350,7 @@ namespace MagicaCloth2
             rect.width = WindowWidth;
             rect.height = WindowHeight;
             windata.windowRect = rect;
-            sceneView.EndWindows();
+            //sceneView.EndWindows();
 
             // ポイントデータ更新
             if (updatePoint)
@@ -460,7 +460,7 @@ namespace MagicaCloth2
             [Unity.Collections.ReadOnly]
             public NativeArray<float3> localNormals;
             [Unity.Collections.ReadOnly]
-            public NativeArray<FixedList32Bytes<int>> vertexToTriangles;
+            public NativeArray<FixedList32Bytes<uint>> vertexToTriangles;
 
             [Unity.Collections.WriteOnly]
             public NativeArray<float3> pointWorldPositions;

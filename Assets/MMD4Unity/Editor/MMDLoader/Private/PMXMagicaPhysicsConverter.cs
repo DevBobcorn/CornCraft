@@ -340,7 +340,7 @@ namespace MMD
                 }
 
                 cloth_data.angleRestorationConstraint.stiffness.SetValue(0.8F);
-                cloth_data.inertiaConstraint.movementInertia = 1F;
+                cloth_data.inertiaConstraint.worldInertia = 1F;
                 cloth_data.inertiaConstraint.depthInertia = 1F;
                 cloth_data.gravity = 1F;
 

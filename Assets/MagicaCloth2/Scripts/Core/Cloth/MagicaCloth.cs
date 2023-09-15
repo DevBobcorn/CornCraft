@@ -27,7 +27,7 @@ namespace MagicaCloth2
         /// Hidden data that cannot be rewritten at runtime
         /// </summary>
         [SerializeField]
-        private ClothSerializeData2 serializeData2 = new ClothSerializeData2();
+        internal ClothSerializeData2 serializeData2 = new ClothSerializeData2();
 
 #if UNITY_EDITOR
         /// <summary>
@@ -102,7 +102,7 @@ namespace MagicaCloth2
         /// <returns></returns>
         public override int GetMagicaHashCode()
         {
-            int hash = SerializeData.GetHashCode();
+            int hash = SerializeData.GetHashCode() + serializeData2.GetHashCode();
             hash += isActiveAndEnabled ? GetInstanceID() : 0; // component active.
             return hash;
         }

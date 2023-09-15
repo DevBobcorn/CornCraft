@@ -3,6 +3,7 @@
 // https://magicasoft.jp
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Unity.Burst;
 using Unity.Collections;
@@ -22,11 +23,6 @@ namespace MagicaCloth2
         /// 参照カウント。０になると破棄される
         /// </summary>
         public int ReferenceCount { get; private set; }
-
-        /// <summary>
-        /// 利用カウント。０になると停止する
-        /// </summary>
-        //public int UseCount { get; private set; }
 
         /// <summary>
         /// 利用中のプロセス（＝利用カウント）
@@ -240,18 +236,7 @@ namespace MagicaCloth2
         /// </summary>
         public void StartUse(ClothProcess cprocess)
         {
-            //UseCount++;
-            useProcessSet.Add(cprocess);
-
-            //if (UseCount == 1)
-            if (useProcessSet.Count == 1)
-            {
-                // 利用開始
-                // カスタムメッシュに切り替え、および作業バッファ作成
-                // すでにカスタムメッシュが存在する場合は作業バッファのみ最初期化する
-                SwapCustomMesh();
-            }
-            ChangeCustomMesh = true;
+            UpdateUse(cprocess, 1);
         }
 
         /// <summary>
@@ -261,31 +246,53 @@ namespace MagicaCloth2
         /// </summary>
         public void EndUse(ClothProcess cprocess)
         {
-            //Debug.Assert(UseCount > 0);
-            //UseCount--;
             Debug.Assert(useProcessSet.Count > 0);
-            useProcessSet.Remove(cprocess);
+            UpdateUse(cprocess, -1);
+        }
 
-            //if (UseCount == 0)
-            if (useProcessSet.Count == 0)
+        internal void UpdateUse(ClothProcess cprocess, int add)
+        {
+            if (add > 0)
+            {
+                useProcessSet.Add(cprocess);
+            }
+            else if (add < 0)
+            {
+                Debug.Assert(useProcessSet.Count > 0);
+                useProcessSet.Remove(cprocess);
+            }
+
+            // Invisible状態
+            bool invisible = useProcessSet.Any(x => x.IsCullingInvisible() && x.IsCullingKeep() == false);
+
+            // 状態変更
+            if (invisible || useProcessSet.Count == 0)
             {
                 // 利用停止
                 // オリジナルメッシュに切り替え
                 SwapOriginalMesh();
+                ChangeCustomMesh = true;
             }
-            else
+            else if (useProcessSet.Count == 1)
+            {
+                // 利用開始
+                // カスタムメッシュに切り替え、および作業バッファ作成
+                // すでにカスタムメッシュが存在する場合は作業バッファのみ最初期化する
+                SwapCustomMesh();
+                ChangeCustomMesh = true;
+            }
+            else if (add != 0)
             {
                 // 複数から利用されている状態で１つが停止した。
                 // バッファを最初期化する
                 ResetCustomMeshWorkData();
+                ChangeCustomMesh = true;
             }
-            ChangeCustomMesh = true;
         }
 
         //=========================================================================================
         internal void WriteMesh()
         {
-            //if (UseCustomMesh == false || UseCount == 0)
             if (UseCustomMesh == false || useProcessSet.Count == 0)
                 return;
 

@@ -325,6 +325,60 @@ namespace MagicaCloth2
             return chunk;
         }
 
+        /// <summary>
+        /// 指定チャンクのデータ数を拡張し新しいチャンクを返す
+        /// 古いチャンクのデータは新しいチャンクにコピーされる
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="newDataLength"></param>
+        /// <returns></returns>
+        public DataChunk Expand(DataChunk c, int newDataLength)
+        {
+            Develop.Assert(c.IsValid);
+            if (c.IsValid == false)
+                return c;
+            if (newDataLength <= c.dataLength)
+                return c;
+
+            // 新しい領域を確保する
+            var nc = AddRange(newDataLength);
+
+            // 古い領域をコピーする
+            NativeArray<T>.Copy(nativeArray, c.startIndex, nativeArray, nc.startIndex, c.dataLength);
+
+            // 古い領域を開放する
+            Remove(c);
+
+            return nc;
+        }
+
+        /// <summary>
+        /// 指定チャンクのデータ数を拡張し新しいチャンクを返す
+        /// 古いチャンクのデータは新しいチャンクにコピーされる
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="newDataLength"></param>
+        /// <returns></returns>
+        public DataChunk ExpandAndFill(DataChunk c, int newDataLength, T fillData = default(T), T clearData = default(T))
+        {
+            Develop.Assert(c.IsValid);
+            if (c.IsValid == false)
+                return c;
+            if (newDataLength <= c.dataLength)
+                return c;
+
+            // 新しい領域を確保する
+            var nc = AddRange(newDataLength, fillData);
+
+            // 古い領域をコピーする
+            NativeArray<T>.Copy(nativeArray, c.startIndex, nativeArray, nc.startIndex, c.dataLength);
+
+            // 古い領域を開放する
+            RemoveAndFill(c, clearData);
+
+            return nc;
+        }
+
         public T[] ToArray()
         {
             return nativeArray.ToArray();
@@ -496,6 +550,18 @@ namespace MagicaCloth2
                 nativeArray[index] = value;
             }
         }
+
+        public unsafe ref T GetRef(int index)
+        {
+            T* p = (T*)nativeArray.GetUnsafePtr();
+            return ref *(p + index);
+        }
+
+        //public unsafe ref T GetRef(int index)
+        //{
+        //    var span = new Span<T>(nativeArray.GetUnsafePtr(), nativeArray.Length);
+        //    return ref span[index];
+        //}
 
         /// <summary>
         /// Jobで利用する場合はこの関数でNativeArrayに変換して受け渡す

@@ -458,14 +458,14 @@ namespace MagicaCloth2
 
             if (tm.ContainsTeamData(teamId) == false)
                 return;
-            var tdata = tm.GetTeamData(teamId);
+            ref var tdata = ref tm.GetTeamDataRef(teamId);
             var oldFlag = tdata.flag;
 
             // チームが消滅中かどうか
             bool exit = tdata.flag.IsSet(TeamManager.Flag_Exit);
 
             // 自身の状況を判定する
-            var parameter = tm.GetParameters(teamId);
+            ref var parameter = ref tm.GetParametersRef(teamId);
             var selfMode = exit ? SelfCollisionMode.None : parameter.selfCollisionConstraint.selfMode;
             var syncMode = exit ? SelfCollisionMode.None : parameter.selfCollisionConstraint.syncMode;
 
@@ -515,7 +515,7 @@ namespace MagicaCloth2
             // sync
             if (syncMode != SelfCollisionMode.None && tm.ContainsTeamData(tdata.syncTeamId))
             {
-                var stdata = tm.GetTeamData(tdata.syncTeamId);
+                ref var stdata = ref tm.GetTeamDataRef(tdata.syncTeamId);
                 if (syncMode == SelfCollisionMode.FullMesh)
                 {
                     if (tdata.EdgeCount > 0 && stdata.EdgeCount > 0)
@@ -550,10 +550,10 @@ namespace MagicaCloth2
                 for (int i = 0; i < tdata.syncParentTeamId.Length; i++)
                 {
                     int parentTeamId = tdata.syncParentTeamId[i];
-                    var ptdata = tm.GetTeamData(parentTeamId);
+                    ref var ptdata = ref tm.GetTeamDataRef(parentTeamId);
                     if (ptdata.IsValid)
                     {
-                        var parentParameter = tm.GetParameters(parentTeamId);
+                        ref var parentParameter = ref tm.GetParametersRef(parentTeamId);
                         var parentSyncMode = parentParameter.selfCollisionConstraint.syncMode;
                         if (parentSyncMode == SelfCollisionMode.FullMesh)
                         {
@@ -681,9 +681,6 @@ namespace MagicaCloth2
                 // remove
                 IntersectCount--;
             }
-
-            // 格納
-            tm.SetTeamData(teamId, tdata);
 
             // 同期対象に対して再帰する
             if (syncMode != SelfCollisionMode.None && tm.ContainsTeamData(tdata.syncTeamId))

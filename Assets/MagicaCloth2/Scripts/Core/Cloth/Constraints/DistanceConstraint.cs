@@ -339,13 +339,11 @@ namespace MagicaCloth2
         {
             if (cprocess?.distanceConstraintData?.IsValid() ?? false)
             {
-                var tdata = MagicaManager.Team.GetTeamData(cprocess.TeamId);
+                ref var tdata = ref MagicaManager.Team.GetTeamDataRef(cprocess.TeamId);
 
                 tdata.distanceStartChunk = indexArray.AddRange(cprocess.distanceConstraintData.indexArray);
                 tdata.distanceDataChunk = dataArray.AddRange(cprocess.distanceConstraintData.dataArray);
                 distanceArray.AddRange(cprocess.distanceConstraintData.distanceArray);
-
-                MagicaManager.Team.SetTeamData(cprocess.TeamId, tdata);
             }
         }
 
@@ -357,7 +355,7 @@ namespace MagicaCloth2
         {
             if (cprocess != null && cprocess.TeamId > 0)
             {
-                var tdata = MagicaManager.Team.GetTeamData(cprocess.TeamId);
+                ref var tdata = ref MagicaManager.Team.GetTeamDataRef(cprocess.TeamId);
 
                 indexArray.Remove(tdata.distanceStartChunk);
                 dataArray.Remove(tdata.distanceDataChunk);
@@ -365,8 +363,6 @@ namespace MagicaCloth2
 
                 tdata.distanceStartChunk.Clear();
                 tdata.distanceDataChunk.Clear();
-
-                MagicaManager.Team.SetTeamData(cprocess.TeamId, tdata);
             }
         }
 

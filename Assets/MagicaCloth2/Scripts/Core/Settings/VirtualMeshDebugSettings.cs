@@ -39,6 +39,7 @@ namespace MagicaCloth2
         public bool edgeNumber = false;
         public bool triangle = true;
         public bool triangleNormal = false;
+        public bool triangleTangent = false;
         public bool triangleNumber = false;
         public bool baseLine = false;
         public bool boneName = false;
