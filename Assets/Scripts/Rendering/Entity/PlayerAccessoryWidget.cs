@@ -1,7 +1,10 @@
 #nullable enable
+using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 using CraftSharp.Control;
+using CraftSharp.Resource;
 
 
 namespace CraftSharp.Rendering
@@ -13,7 +16,7 @@ namespace CraftSharp.Rendering
         private Transform? mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
         private Transform? itemMountPivot, itemMountSlot;
         private PlayerController? player;
-        private MeleeWeapon? currentItem;
+        private PlayerActionItem? currentItem;
 
         public void SetRefTransforms(Transform mainHandRef, Transform spineRef)
         {
@@ -29,24 +32,66 @@ namespace CraftSharp.Rendering
             this.spineRef = spineRef;
 
             // Create weapon mount slot transform
-            var weaponPivotObj = new GameObject("Item Mount Pivot");
-            itemMountPivot = weaponPivotObj.transform;
+            var itemMountPivotObj = new GameObject("Item Mount Pivot");
+            itemMountPivot = itemMountPivotObj.transform;
             itemMountPivot.SetParent(transform);
 
-            var weaponSlotObj = new GameObject("Item Mount Slot");
-            itemMountSlot = weaponSlotObj.transform;
+            var itemMountSlotObj = new GameObject("Item Mount Slot");
+            itemMountSlot = itemMountSlotObj.transform;
             itemMountSlot.SetParent(itemMountPivot);
         }
 
-        public void CreateWeapon(GameObject weaponPrefab)
+        private void CreateActionItem(ItemStack itemStack, ItemActionType actionType)
         {
             if (currentItem != null)
             {
-                Destroy(currentItem);
+                Destroy(currentItem.gameObject);
             }
 
-            var weaponObj = GameObject.Instantiate(weaponPrefab);
-            currentItem = weaponObj!.GetComponent<MeleeWeapon>();
+            //var itemObj = GameObject.Instantiate(itemPrefab);
+            //currentItem = itemObj!.GetComponent<PlayerActionItem>();
+
+            var itemObj = new GameObject("Action Item");
+            itemObj.layer = this.gameObject.layer;
+
+            currentItem = actionType switch
+            {
+                ItemActionType.MeleeWeaponSword => itemObj!.AddComponent<MeleeWeapon>(),
+
+                _                               => itemObj!.AddComponent<UselessActionItem>()
+            };
+
+            (Mesh mesh, Material material, Dictionary<DisplayPosition, float3x3> transforms)? meshData = null;
+
+            if (actionType == ItemActionType.None)
+            {
+                meshData = ItemMeshBuilder.BuildItem(itemStack, true);
+
+                currentItem.slotEularAngles = new(0F, 90F, 0F);
+                currentItem.slotPosition = new(0F, 0F, -0.5F);
+                mainHandSlot!.localPosition = Vector3.zero;
+                mainHandSlot.localEulerAngles = Vector3.zero;
+            }
+            else // Hand held melee weapon
+            {
+                meshData = ItemMeshBuilder.BuildItem(itemStack, false);
+
+                currentItem.slotEularAngles = new(135F, 90F, 0F);
+                currentItem.slotPosition = new(0F, 0F, -0.1F);
+                mainHandSlot!.localPosition = new(-0.2F, 0F, 0.2F);
+                mainHandSlot.localEulerAngles = new(-135F, 0F, 45F);
+            }
+
+            itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
+
+            if (meshData is not null)
+            {
+                var mesh = itemObj.AddComponent<MeshFilter>();
+                mesh.mesh = meshData.Value.mesh;
+
+                var renderer = itemObj.AddComponent<MeshRenderer>();
+                renderer.sharedMaterial = meshData.Value.material;
+            }
 
             // Set weapon slot position and rotation
             itemMountPivot!.localPosition = new(0F, 1.3F, 0F);
@@ -56,6 +101,14 @@ namespace CraftSharp.Rendering
 
             // Mount weapon on start
             MountItem();
+        }
+
+        private void DestroyActionItem()
+        {
+            if (currentItem != null)
+            {
+                Destroy(currentItem.gameObject);
+            }
         }
 
         private void HoldItem()
@@ -81,13 +134,13 @@ namespace CraftSharp.Rendering
         // Called by animator event
         public void DamageStart()
         {
-            currentItem?.StartSlash();
+            //currentItem?.StartSlash();
         }
 
         // Called by animator event
         public void DamageStop()
         {
-            currentItem?.EndSlash();
+            //currentItem?.EndSlash();
         }
 
         // Called by animator event
@@ -99,7 +152,8 @@ namespace CraftSharp.Rendering
         void Start()
         {
             player = GetComponentInParent<PlayerController>();
-            player.OnWeaponStateChanged += (weaponState) => {
+
+            player.OnItemStateChanged += (weaponState) => {
                 switch (weaponState)
                 {
                     case PlayerController.CurrentItemState.Hold:
@@ -108,6 +162,18 @@ namespace CraftSharp.Rendering
                     case PlayerController.CurrentItemState.Mount:
                         MountItem();
                         break;
+                }
+            };
+
+            player.OnCurrentItemChanged += (itemStack) => {
+                if (itemStack is null)
+                {
+                    DestroyActionItem();
+                }
+                else
+                {
+                    var actionType = PlayerActionHelper.GetItemActionType(itemStack);
+                    CreateActionItem(itemStack, actionType);
                 }
             };
         }

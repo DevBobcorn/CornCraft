@@ -15,6 +15,5 @@ namespace CraftSharp.Control
             EntityRender = entityRender;
             HitCollider = hitCollider;
         }
-
     }
 }

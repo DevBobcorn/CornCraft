@@ -6,16 +6,14 @@ using CraftSharp.Rendering;
 
 namespace CraftSharp.Control
 {
-    public class MeleeWeapon : MonoBehaviour
+    public class MeleeWeapon : PlayerActionItem
     {
-        [SerializeField] public Vector3 slotPosition;
-        [SerializeField] public Vector3 slotEularAngles;
         [SerializeField] private TrailRenderer? slashTrail;
 
         private readonly List<Collider> slashHits = new();
         private bool slashActive = false;
 
-        public void StartSlash()
+        public override void StartAction()
         {
             slashHits.Clear();
             slashActive = true;
@@ -24,7 +22,7 @@ namespace CraftSharp.Control
                 slashTrail.emitting = true;
         }
 
-        public List<AttackHitInfo> EndSlash()
+        public override void EndAction()
         {
             slashActive = false;
 
@@ -41,7 +39,7 @@ namespace CraftSharp.Control
                     infos.Add(new(entityRender, hit));
             }
 
-            return infos;
+            //return infos;
         }
 
         void OnTriggerEnter(Collider hit)
@@ -51,8 +49,6 @@ namespace CraftSharp.Control
             
             if (!slashHits.Contains(hit))
                 slashHits.Add(hit);
-            
         }
-
     }
 }

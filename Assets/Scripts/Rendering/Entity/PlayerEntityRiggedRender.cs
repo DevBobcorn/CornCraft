@@ -52,12 +52,6 @@ namespace CraftSharp.Rendering
             UpdateSkinMaterial();
         }
 
-        public void CreateWeapon(GameObject meleeWeaponPrefab)
-        {
-            var accessoryWidget = VisualTransform.GetComponent<PlayerAccessoryWidget>();
-            accessoryWidget.CreateWeapon(meleeWeaponPrefab);
-        }
-
         public override void UpdateStateMachine(PlayerStatus info)
         {
             // Update animator parameters

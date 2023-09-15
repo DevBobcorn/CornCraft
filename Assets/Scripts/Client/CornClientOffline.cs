@@ -79,9 +79,17 @@ namespace CraftSharp
             GameMode = GameMode.Creative;
             EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
 
-            // Initialize inventory
-            DummyOnInventoryOpen(0, new Container(ContainerType.PlayerInventory));
-            DummyOnSetSlot(0, 36, new ItemStack(ItemPalette.INSTANCE.FromId(new("diamond_sword")), 1), 0);
+            // Initialize inventory (requires mc data loaded first)
+            try
+            {
+                DummyOnInventoryOpen(0, new Container(ContainerType.PlayerInventory));
+                DummyOnSetSlot(0, 36, new ItemStack(ItemPalette.INSTANCE.FromId(new("diamond_sword")), 1), 0);
+                DummyOnSetSlot(0, 37, new ItemStack(ItemPalette.INSTANCE.FromId(new("grass_block")), 1), 0);
+            }
+            catch
+            {
+
+            }
         }
 
         public override bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp,
@@ -382,9 +390,7 @@ namespace CraftSharp
             if (slot < 0 || slot > 8)
                 return false;
 
-            CurrentSlot = Convert.ToByte(slot);
-            // Broad cast hotbar selection change
-            EventManager.Instance.BroadcastOnUnityThread(new HeldItemChangeEvent(CurrentSlot));
+            DummyOnHeldItemChange(Convert.ToByte(slot));
 
             return true;
         }
@@ -392,6 +398,18 @@ namespace CraftSharp
         #endregion
 
         #region Dummy data updates
+
+        /// <summary>
+        /// Called when held item change
+        /// </summary>
+        /// <param name="slot"> item slot</param>
+        public void DummyOnHeldItemChange(byte slot)
+        {
+            CurrentSlot = slot;
+            // Broad cast hotbar selection change
+            EventManager.Instance.BroadcastOnUnityThread(
+                    new HeldItemChangeEvent(CurrentSlot, inventories[0].GetHotbarItem(slot)));
+        }
 
         /// <summary>
         /// When an inventory is opened
@@ -423,6 +441,7 @@ namespace CraftSharp
             // Handle inventoryID -2 - Add item to player inventory without animation
             if (inventoryID == 254)
                 inventoryID = 0;
+            
             // Handle cursor item
             if (inventoryID == 255 && slotID == -1)
             {
@@ -450,9 +469,14 @@ namespace CraftSharp
 
                     EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryID, slotID, item));
 
-                    if (container.IsHotbar(slotID, out int hotbarSlot))
+                    if (container.IsHotbar(slotID, out int hotbarSlot)) // The updated slot is in the hotbar
                     {
                         EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
+
+                        if (hotbarSlot == CurrentSlot) // The currently held item is updated
+                        {
+                            EventManager.Instance.Broadcast(new HeldItemChangeEvent(hotbarSlot, item));
+                        }
                     }
                 }
             }
