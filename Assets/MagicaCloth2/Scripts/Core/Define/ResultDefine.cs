@@ -9,6 +9,7 @@ namespace MagicaCloth2
         public enum Result
         {
             None = 0,
+
             Empty = 1,
             Success = 2,
             Cancel = 3,
@@ -25,6 +26,9 @@ namespace MagicaCloth2
             // Warning(10000 - 19999)
             ///////////////////////////////////////////////////////////////////
             Warning = 10000,
+
+            RenderMesh_UnknownWarning = 10100,
+            RenderMesh_VertexWeightIs5BonesOrMore,
 
             ///////////////////////////////////////////////////////////////////
             // Error(20000 - )

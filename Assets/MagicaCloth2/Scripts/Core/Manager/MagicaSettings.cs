@@ -9,6 +9,7 @@ namespace MagicaCloth2
     /// Magica manger settings component
     /// </summary>
     [AddComponentMenu("MagicaCloth2/MagicaSettings")]
+    [HelpURL("https://magicasoft.jp/en/mc2_settings_component/")]
     public class MagicaSettings : ClothBehaviour
     {
         public enum RefreshMode

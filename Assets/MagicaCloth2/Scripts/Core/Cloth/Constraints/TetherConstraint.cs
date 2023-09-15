@@ -213,8 +213,12 @@ namespace MagicaCloth2
 
                 //Debug.Log($"[{pindex}] calcPos:{calcPos}, calcRootPos:{calcRootPos}, calcDistance:{calcDistance}");
 
+                // 初期位置がまったく同じ状況を考慮
+                if (calcDistance == 0.0f)
+                    return;
+
                 // 現在の伸縮割合
-                Develop.Assert(calcDistance > 0.0f);
+                //Develop.Assert(calcDistance > 0.0f);
                 float ratio = distance / calcDistance;
 #if true
                 // 距離が範囲内なら伸縮しない

@@ -210,6 +210,18 @@ namespace MagicaCloth2
                         var perVertexArray = mesh.GetBonesPerVertex();
                         boneWeightArray = new NativeArray<BoneWeight1>(weightArray, Allocator.Persistent);
                         bonesPerVertexArray = new NativeArray<byte>(perVertexArray, Allocator.Persistent);
+
+                        // ５ボーン以上を利用する頂点ウエイトは警告とする。一応無効となるだけで動くのでエラーにはしない。
+                        int vcnt = mesh.vertexCount;
+                        using var bonesPerVertexResult = new NativeReference<Define.Result>(Allocator.TempJob);
+                        var job = new VertexWeight5BoneCheckJob()
+                        {
+                            vcnt = vcnt,
+                            bonesPerVertexArray = bonesPerVertexArray,
+                            result = bonesPerVertexResult,
+                        };
+                        job.Run();
+                        result.SetWarning(bonesPerVertexResult.Value);
                     }
                     else
                     {
@@ -260,6 +272,32 @@ namespace MagicaCloth2
 
                 // 完了
                 result.SetSuccess();
+            }
+        }
+
+        [BurstCompile]
+        struct VertexWeight5BoneCheckJob : IJob
+        {
+            public int vcnt;
+
+            [Unity.Collections.ReadOnly]
+            public NativeArray<byte> bonesPerVertexArray;
+
+            [Unity.Collections.WriteOnly]
+            public NativeReference<Define.Result> result;
+
+            public void Execute()
+            {
+                result.Value = Define.Result.None;
+
+                for (int i = 0; i < vcnt; i++)
+                {
+                    if (bonesPerVertexArray[i] >= 5)
+                    {
+                        result.Value = Define.Result.RenderMesh_VertexWeightIs5BonesOrMore;
+                        break;
+                    }
+                }
             }
         }
 

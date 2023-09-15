@@ -26,6 +26,10 @@ namespace MagicaCloth2
             var directionValue = serializedObject.FindProperty("direction");
             EditorGUILayout.PropertyField(directionValue);
 
+            // aligned on center
+            var alignedOnCenterValue = serializedObject.FindProperty("alignedOnCenter");
+            EditorGUILayout.PropertyField(alignedOnCenterValue);
+
             var sizeValue = serializedObject.FindProperty("size");
             var size = sizeValue.vector3Value;
 

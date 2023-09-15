@@ -30,15 +30,14 @@ namespace MagicaCloth2
         public ExNativeArray<VertexAttribute> attributes;
 
         /// <summary>
-        /// 頂点ごとの接続トライアングルインデックス（最大７つ）
+        /// 頂点ごとの接続トライアングルインデックスと法線接線フリップフラグ（最大７つ）
         /// これは法線を再計算するために用いられるもので７つあれば十分であると判断したもの。
         /// そのため正確なトライアングル接続を表していない。
-        /// インデックスがマイナスの場合は法線を反転して計算すること。
-        /// そして実際のインデックス＋１が入るので注意！（０を除外するため）
-        /// int index = math.abs(value) - 1;
-        /// bool flop = value < 0;
+        /// データは12-20bitのuintでパックされている
+        /// 12(hi) = 法線接線のフリップフラグ(法線:0x1,接線:0x2)。ONの場合フリップ。
+        /// 20(low) = トライアングルインデックス。
         /// </summary>
-        public ExNativeArray<FixedList32Bytes<int>> vertexToTriangles;
+        public ExNativeArray<FixedList32Bytes<uint>> vertexToTriangles;
 
         /// <summary>
         /// 頂点ごとの接続頂点インデックス
@@ -329,7 +328,7 @@ namespace MagicaCloth2
             const bool create = true;
             teamIds = new ExNativeArray<short>(capacity, create);
             attributes = new ExNativeArray<VertexAttribute>(capacity, create);
-            vertexToTriangles = new ExNativeArray<FixedList32Bytes<int>>(capacity, create);
+            vertexToTriangles = new ExNativeArray<FixedList32Bytes<uint>>(capacity, create);
             //vertexToVertexIndexArray = new ExNativeArray<uint>(capacity, create);
             //vertexToVertexDataArray = new ExNativeArray<ushort>(capacity, create);
             vertexBindPosePositions = new ExNativeArray<float3>(capacity, create);
@@ -399,7 +398,7 @@ namespace MagicaCloth2
             if (isValid == false)
                 return;
 
-            var tdata = MagicaManager.Team.GetTeamData(teamId);
+            ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
 
             // mesh type
             tdata.proxyMeshType = proxyMesh.meshType;
@@ -475,20 +474,11 @@ namespace MagicaCloth2
             tdata.proxySkinBoneChunk = skinBoneTransformIndices.AddRange(proxyMesh.skinBoneTransformIndices);
             skinBoneBindPoses.AddRange(proxyMesh.skinBoneBindPoses);
 
-            // MeshCloth or CustomSkinning
-            //if (proxyMesh.meshType == VirtualMesh.MeshType.ProxyMesh || proxyMesh.CustomSkinningBoneCount > 0)
-            //{
-            //    tdata.proxySkinBoneChunk = skinBoneTransformIndices.AddRange(proxyMesh.skinBoneTransformIndices);
-            //    skinBoneBindPoses.AddRange(proxyMesh.skinBoneBindPoses);
-            //}
-
             // BoneClothのみ
             if (proxyMesh.meshType == VirtualMesh.MeshType.ProxyBoneMesh)
             {
                 tdata.proxyBoneChunk = vertexToTransformRotations.AddRange(proxyMesh.vertexToTransformRotations);
             }
-
-            MagicaManager.Team.SetTeamData(teamId, tdata);
         }
 
         /// <summary>
@@ -499,7 +489,7 @@ namespace MagicaCloth2
             if (isValid == false)
                 return;
 
-            var tdata = MagicaManager.Team.GetTeamData(teamId);
+            ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
 
             // Transform
             MagicaManager.Bone.RemoveTransform(tdata.proxyTransformChunk);
@@ -563,8 +553,6 @@ namespace MagicaCloth2
             vertexToTransformRotations.Remove(tdata.proxyBoneChunk);
             tdata.proxyBoneChunk.Clear();
 
-            MagicaManager.Team.SetTeamData(teamId, tdata);
-
             // 同時に連動するマッピングメッシュも解放する
             var mappingIndices = tdata.mappingDataIndexSet.ToArray();
             int mcnt = tdata.mappingDataIndexSet.Length;
@@ -587,7 +575,7 @@ namespace MagicaCloth2
             if (isValid == false)
                 return DataChunk.Empty;
 
-            var tdata = MagicaManager.Team.GetTeamData(teamId);
+            ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
 
             var mdata = new TeamManager.MappingData();
 
@@ -623,8 +611,6 @@ namespace MagicaCloth2
             MagicaManager.Team.mappingDataArray[mappingIndex] = mdata;
             tdata.mappingDataIndexSet.Set((short)mappingIndex);
 
-            MagicaManager.Team.SetTeamData(teamId, tdata);
-
             // vmeshにも記録する
             mappingMesh.mappingId = mappingIndex;
 
@@ -639,8 +625,8 @@ namespace MagicaCloth2
             if (isValid == false)
                 return;
 
-            var tdata = MagicaManager.Team.GetTeamData(teamId);
-            var mdata = MagicaManager.Team.mappingDataArray[mappingIndex];
+            ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
+            ref var mdata = ref MagicaManager.Team.mappingDataArray.GetRef(mappingIndex);
 
             // Transform解放
             MagicaManager.Bone.RemoveTransform(new DataChunk(mdata.centerTransformIndex, 1));
@@ -660,7 +646,6 @@ namespace MagicaCloth2
             tdata.mappingDataIndexSet.RemoveItemAtSwapBack((short)mappingIndex);
 
             MagicaManager.Team.mappingDataArray.RemoveAndFill(new DataChunk(mappingIndex, 1));
-            MagicaManager.Team.SetTeamData(teamId, tdata);
 
             Develop.DebugLog($"ExitMappingMesh. team:{teamId}, mappingIndex:{mappingIndex}");
         }
@@ -685,6 +670,7 @@ namespace MagicaCloth2
             sm.processingStepParticle.UpdateBuffer(bufferCount);
             sm.processingStepTriangleBending.UpdateBuffer(bufferCount); // mesh cloth (skinning)
             sm.processingStepEdgeCollision.UpdateBuffer(BaseLineCount);
+            sm.processingStepMotionParticle.UpdateBuffer(TriangleCount); // triangle
 
             // バッファクリア
             var clearJob = new ClearProxyMeshUpdateBufferJob()
@@ -692,6 +678,7 @@ namespace MagicaCloth2
                 processingCounter0 = sm.processingStepParticle.Counter,
                 processingCounter1 = sm.processingStepTriangleBending.Counter,
                 processingCounter2 = sm.processingStepEdgeCollision.Counter,
+                processingCounter3 = sm.processingStepMotionParticle.Counter,
             };
             jobHandle = clearJob.Schedule(jobHandle);
 
@@ -700,8 +687,6 @@ namespace MagicaCloth2
             {
                 teamDataArray = tm.teamDataArray.GetNativeArray(),
 
-                //processingCounter0 = sm.processingIntList0.Counter,
-                //processingList0 = sm.processingIntList0.Buffer,
                 processingCounter1 = sm.processingStepTriangleBending.Counter,
                 processingList1 = sm.processingStepTriangleBending.Buffer,
             };
@@ -758,12 +743,14 @@ namespace MagicaCloth2
             public NativeReference<int> processingCounter0;
             public NativeReference<int> processingCounter1;
             public NativeReference<int> processingCounter2;
+            public NativeReference<int> processingCounter3;
 
             public void Execute()
             {
                 processingCounter0.Value = 0;
                 processingCounter1.Value = 0;
                 processingCounter2.Value = 0;
+                processingCounter3.Value = 0;
             }
         }
 
@@ -796,6 +783,8 @@ namespace MagicaCloth2
 
                 var tdata = teamDataArray[teamId];
                 if (tdata.IsEnable == false)
+                    return;
+                if (tdata.IsCullingInvisible)
                     return;
 
                 // 頂点リストに追加
@@ -1006,6 +995,7 @@ namespace MagicaCloth2
                 processingCounter0 = sm.processingStepParticle.Counter,
                 processingCounter1 = sm.processingStepTriangleBending.Counter,
                 processingCounter2 = sm.processingStepEdgeCollision.Counter,
+                processingCounter3 = sm.processingStepMotionParticle.Counter,
             };
             jobHandle = clearJob.Schedule(jobHandle);
 
@@ -1025,6 +1015,10 @@ namespace MagicaCloth2
                 // Base line
                 processingCounter2 = sm.processingStepEdgeCollision.Counter,
                 processingList2 = sm.processingStepEdgeCollision.Buffer,
+
+                // Triangle
+                processingCounter3 = sm.processingStepMotionParticle.Counter,
+                processingList3 = sm.processingStepMotionParticle.Buffer,
             };
             jobHandle = createUpdateListJob.Schedule(tm.TeamCount, 1, jobHandle);
 
@@ -1065,6 +1059,8 @@ namespace MagicaCloth2
                 // （ローカル座標空間）
                 var triangleNormalTangentJob = new CalcTriangleNormalTangentJob()
                 {
+                    jobTriangleList = sm.processingStepMotionParticle.Buffer,
+
                     teamDataArray = tm.teamDataArray.GetNativeArray(),
 
                     triangleTeamIdArray = triangleTeamIdArray.GetNativeArray(),
@@ -1075,7 +1071,7 @@ namespace MagicaCloth2
                     positions = positions.GetNativeArray(),
                     uv = uv.GetNativeArray(),
                 };
-                jobHandle = triangleNormalTangentJob.Schedule(TriangleCount, 16, jobHandle);
+                jobHandle = triangleNormalTangentJob.Schedule(sm.processingStepMotionParticle.GetJobSchedulePtr(), 16, jobHandle);
 
                 // トライアングルの法線接線から頂点法線接線を平均化して求める
                 // （ローカル座標空間）
@@ -1165,6 +1161,14 @@ namespace MagicaCloth2
             [Unity.Collections.WriteOnly]
             public NativeArray<int> processingList2;
 
+            // triangle
+            [NativeDisableParallelForRestriction]
+            [Unity.Collections.WriteOnly]
+            public NativeReference<int> processingCounter3;
+            [NativeDisableParallelForRestriction]
+            [Unity.Collections.WriteOnly]
+            public NativeArray<int> processingList3;
+
             public void Execute(int teamId)
             {
                 // [0]はグローバルチームなのでスキップ
@@ -1172,6 +1176,8 @@ namespace MagicaCloth2
                     return;
                 var tdata = teamDataArray[teamId];
                 if (tdata.IsEnable == false)
+                    return;
+                if (tdata.IsCullingInvisible)
                     return;
 
                 // トライアングル[0]
@@ -1204,6 +1210,17 @@ namespace MagicaCloth2
                     {
                         int bindex = tdata.baseLineChunk.startIndex + j;
                         processingList2[start + j] = bindex;
+                    }
+                }
+
+                // トライアングル2
+                if (tdata.TriangleCount > 0)
+                {
+                    int start = processingCounter3.InterlockedStartIndex(tdata.proxyTriangleChunk.dataLength);
+                    for (int j = 0; j < tdata.proxyTriangleChunk.dataLength; j++)
+                    {
+                        int tindex = tdata.proxyTriangleChunk.startIndex + j;
+                        processingList3[start + j] = tindex;
                     }
                 }
 
@@ -1271,6 +1288,8 @@ namespace MagicaCloth2
                     return;
                 var tdata = teamDataArray[teamId];
                 if (tdata.IsEnable == false)
+                    return;
+                if (tdata.IsCullingInvisible)
                     return;
 
                 // parameter
@@ -1393,8 +1412,11 @@ namespace MagicaCloth2
         /// 座標系の変換は行わない
         /// </summary>
         [BurstCompile]
-        struct CalcTriangleNormalTangentJob : IJobParallelFor
+        struct CalcTriangleNormalTangentJob : IJobParallelForDefer
         {
+            [Unity.Collections.ReadOnly]
+            public NativeArray<int> jobTriangleList;
+
             // team
             [Unity.Collections.ReadOnly]
             public NativeArray<TeamManager.TeamData> teamDataArray;
@@ -1404,8 +1426,10 @@ namespace MagicaCloth2
             public NativeArray<short> triangleTeamIdArray;
             [Unity.Collections.ReadOnly]
             public NativeArray<int3> triangles;
+            [NativeDisableParallelForRestriction]
             [Unity.Collections.WriteOnly]
             public NativeArray<float3> outTriangleNormals;
+            [NativeDisableParallelForRestriction]
             [Unity.Collections.WriteOnly]
             public NativeArray<float3> outTriangleTangents;
 
@@ -1417,13 +1441,17 @@ namespace MagicaCloth2
 
 
             // トライアングルごと
-            public void Execute(int tindex)
+            public void Execute(int index)
             {
+                int tindex = jobTriangleList[index];
+
                 int teamId = triangleTeamIdArray[tindex];
                 if (teamId == 0)
                     return;
                 var tdata = teamDataArray[teamId];
                 if (tdata.IsEnable == false)
+                    return;
+                if (tdata.IsCullingInvisible)
                     return;
 
                 int3 tri = triangles[tindex];
@@ -1449,6 +1477,10 @@ namespace MagicaCloth2
                 var tan = MathUtility.TriangleTangent(pos1, pos2, pos3, uv1, uv2, uv3);
                 if (math.lengthsq(tan) > 0.0f)
                     outTriangleTangents[tindex] = tan;
+#if MC2_DEBUG
+                else
+                    Debug.LogWarning("CalcTriangleNormalTangentJob.tangent = 0!");
+#endif
                 //                len = math.length(tan);
                 //                if (len > 1e-06f)
                 //                    outTriangleTangents[tindex] = tan / len;
@@ -1481,7 +1513,7 @@ namespace MagicaCloth2
             [Unity.Collections.ReadOnly]
             public NativeArray<float3> triangleTangents;
             [Unity.Collections.ReadOnly]
-            public NativeArray<FixedList32Bytes<int>> vertexToTriangles;
+            public NativeArray<FixedList32Bytes<uint>> vertexToTriangles;
             [Unity.Collections.ReadOnly]
             public NativeArray<quaternion> normalAdjustmentRotations;
             [NativeDisableParallelForRestriction]
@@ -1497,7 +1529,6 @@ namespace MagicaCloth2
                     return;
                 var tdata = teamDataArray[teamId];
 
-
                 var tlist = vertexToTriangles[vindex];
                 if (tlist.Length > 0)
                 {
@@ -1505,6 +1536,18 @@ namespace MagicaCloth2
                     float3 tan = 0;
                     for (int i = 0; i < tlist.Length; i++)
                     {
+                        // 12-20bitのパックで格納されている
+                        // 12(hi) = 法線と接線のフリップフラグ
+                        // 20(low) = トライアングルインデックス
+                        uint data = tlist[i];
+                        int flipFlag = DataUtility.Unpack12_20Hi(data);
+                        int tindex = DataUtility.Unpack12_20Low(data);
+
+                        tindex += tdata.proxyTriangleChunk.startIndex;
+                        nor += triangleNormals[tindex] * ((flipFlag & 0x1) == 0 ? 1 : -1);
+                        tan += triangleTangents[tindex] * ((flipFlag & 0x2) == 0 ? 1 : -1);
+
+                        /*
                         // トライアングルインデックスが負の値ならば法線をフリップさせる
                         // トライアングルインデックスは＋１の値が格納されているので注意！
                         int tindex = tlist[i];
@@ -1514,7 +1557,11 @@ namespace MagicaCloth2
 
                         nor += triangleNormals[tindex] * flip;
                         tan += triangleTangents[tindex]; // 接線はフリップさせては駄目！
+                        */
                     }
+
+                    //Debug.Log($"Vertex:{vindex} nor:{nor}, tan:{tan}");
+
 
                     // 法線０を考慮する。法線を０にするとポリゴンが欠けるため
                     float ln = math.length(nor);
@@ -1705,6 +1752,7 @@ namespace MagicaCloth2
 
             // プロキシスキニングの実行
             // （マッピングメッシュのローカル座標空間）
+            // todo:カリングを考えてバッファにすべきかも
             var calcProxySkinningJob = new CalcProxySkinningJob()
             {
                 teamDataArray = tm.teamDataArray.GetNativeArray(),
@@ -1762,6 +1810,8 @@ namespace MagicaCloth2
                 var tdata = teamDataArray[mdata.teamId];
                 if (tdata.IsEnable == false)
                     return;
+                if (tdata.IsCullingInvisible)
+                    return;
 
                 // mapping
                 var pos = transformPositionArray[mdata.centerTransformIndex];
@@ -1796,7 +1846,7 @@ namespace MagicaCloth2
         }
 
         /// <summary>
-        /// プロキシメッシュ接続から頂点の座標・法線・接線を計算する
+        /// プロキシメッシュからマッピングメッシュの頂点の座標・法線・接線をスキニングして計算する
         /// </summary>
         [BurstCompile]
         struct CalcProxySkinningJob : IJobParallelFor
@@ -1854,6 +1904,8 @@ namespace MagicaCloth2
                 // team
                 var tdata = teamDataArray[mdata.teamId];
                 if (tdata.IsEnable == false)
+                    return;
+                if (tdata.IsCullingInvisible)
                     return;
 
                 // 無効頂点は無視する

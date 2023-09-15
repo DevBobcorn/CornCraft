@@ -118,6 +118,12 @@ namespace MagicaCloth2
             public const float ProxyMeshTrianglePairAngle = 20.0f;
 
             /// <summary>
+            /// [ProxyMesh]
+            /// BoneClothのMesh接続時にトライアングルとして判断される内角
+            /// </summary>
+            public const float ProxyMeshBoneClothTriangleAngle = 120.0f;
+
+            /// <summary>
             /// [Simulation]
             /// 摩擦(0.0 ~ 1.0)に対する増加重量
             /// </summary>
@@ -259,9 +265,9 @@ namespace MagicaCloth2
 
             /// <summary>
             /// [Collider Collision]
-            /// チームに登録できる最大のコライダー数
+            /// 一度に拡張するコライダー数
             /// </summary>
-            public const int MaxColliderCount = 32;
+            public const int ExpandedColliderCount = 8;
 
             /// <summary>
             /// [Collider Collision]

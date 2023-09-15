@@ -447,7 +447,7 @@ namespace MagicaCloth2
             var crot = scam.transform.rotation;
 
             // チームデータ
-            var tdata = MagicaManager.Team.GetTeamData(cprocess.TeamId);
+            var tdata = MagicaManager.Team.GetTeamDataRef(cprocess.TeamId);
             var cdata = MagicaManager.Team.centerDataArray[cprocess.TeamId];
             int pcnt = tdata.ParticleCount;
             int pstart = tdata.particleChunk.startIndex;

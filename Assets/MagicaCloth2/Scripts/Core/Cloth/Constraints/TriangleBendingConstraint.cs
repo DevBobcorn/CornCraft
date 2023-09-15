@@ -403,11 +403,10 @@ namespace MagicaCloth2
         {
             if (cprocess?.bendingConstraintData?.IsValid() ?? false)
             {
-                var tdata = MagicaManager.Team.GetTeamData(cprocess.TeamId);
+                ref var tdata = ref MagicaManager.Team.GetTeamDataRef(cprocess.TeamId);
 
                 var cdata = cprocess.bendingConstraintData;
                 tdata.bendingPairChunk = trianglePairArray.AddRange(cdata.trianglePairArray);
-                //tdata.bendingDataChunk = restAngleOrVolumeArray.AddRange(cdata.restAngleOrVolumeArray);
                 restAngleOrVolumeArray.AddRange(cdata.restAngleOrVolumeArray);
                 signOrVolumeArray.AddRange(cdata.signOrVolumeArray);
                 writeDataArray.AddRange(cdata.writeDataArray);
@@ -415,8 +414,6 @@ namespace MagicaCloth2
                 // write buffer
                 tdata.bendingWriteIndexChunk = writeIndexArray.AddRange(cdata.writeIndexArray);
                 tdata.bendingBufferChunk = writeBuffer.AddRange(cdata.writeBufferCount);
-
-                MagicaManager.Team.SetTeamData(cprocess.TeamId, tdata);
             }
         }
 
@@ -428,11 +425,9 @@ namespace MagicaCloth2
         {
             if (cprocess != null && cprocess.TeamId > 0)
             {
-                var tdata = MagicaManager.Team.GetTeamData(cprocess.TeamId);
+                ref var tdata = ref MagicaManager.Team.GetTeamDataRef(cprocess.TeamId);
 
                 trianglePairArray.Remove(tdata.bendingPairChunk);
-                //restAngleOrVolumeArray.Remove(tdata.bendingDataChunk);
-                //signOrVolumeArray.Remove(tdata.bendingDataChunk);
                 restAngleOrVolumeArray.Remove(tdata.bendingPairChunk);
                 signOrVolumeArray.Remove(tdata.bendingPairChunk);
                 writeDataArray.Remove(tdata.bendingPairChunk);
@@ -442,11 +437,8 @@ namespace MagicaCloth2
                 writeBuffer.Remove(tdata.bendingBufferChunk);
 
                 tdata.bendingPairChunk.Clear();
-                //tdata.bendingDataChunk.Clear();
                 tdata.bendingWriteIndexChunk.Clear();
                 tdata.bendingBufferChunk.Clear();
-
-                MagicaManager.Team.SetTeamData(cprocess.TeamId, tdata);
             }
         }
 

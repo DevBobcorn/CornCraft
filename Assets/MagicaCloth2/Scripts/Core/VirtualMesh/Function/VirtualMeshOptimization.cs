@@ -40,6 +40,9 @@ namespace MagicaCloth2
             using var edgeToTriangleList = new NativeParallelHashMap<int2, FixedList128Bytes<int>>(TriangleCount * 2, Allocator.Persistent);
             using var newTriangles = new NativeList<int3>(TriangleCount, Allocator.Persistent);
 
+            using var useQuadSet = new NativeParallelHashSet<int4>(TriangleCount / 4, Allocator.Persistent); // Unity2023.1.5対応
+            using var removeTriangleSet = new NativeParallelHashSet<int3>(TriangleCount / 4, Allocator.Persistent); // Unity2023.1.5対応
+
             var job1 = new Optimize_EdgeToTrianlgeJob()
             {
                 tcnt = TriangleCount,
@@ -47,6 +50,9 @@ namespace MagicaCloth2
                 localPositions = localPositions.GetNativeArray(),
                 edgeToTriangleList = edgeToTriangleList,
                 newTriangles = newTriangles,
+
+                useQuadSet = useQuadSet, // Unity2023.1.5対応
+                removeTriangleSet = removeTriangleSet, // Unity2023.1.5対応
             };
             job1.Run();
 
@@ -71,6 +77,9 @@ namespace MagicaCloth2
             public NativeParallelHashMap<int2, FixedList128Bytes<int>> edgeToTriangleList;
             [Unity.Collections.WriteOnly]
             public NativeList<int3> newTriangles;
+
+            public NativeParallelHashSet<int4> useQuadSet; // Unity2023.1.5対応
+            public NativeParallelHashSet<int3> removeTriangleSet; // Unity2023.1.5対応
 
             public void Execute()
             {
@@ -100,12 +109,15 @@ namespace MagicaCloth2
                 // debug
                 //foreach (var kv in edgeToTriangleList)
                 //{
-                //    Debug.Log($"edge[{kv.Key}] : {kv.Value}");
+                //    Debug.Log($"edge[{kv.Key}]");
+                //    var data = kv.Value;
+                //    for (int i = 0; i < data.Length; i++)
+                //        Debug.Log($":{data[i]}");
                 //}
 
                 // ほぼ水平なトライアングルペアを登録していき、ペアが重複した場合は１つをの残して削除対象とする
-                var useQuadSet = new NativeParallelHashSet<int4>(tcnt / 4, Allocator.Temp);
-                var removeTriangleSet = new NativeParallelHashSet<int3>(tcnt / 4, Allocator.Temp);
+                //var useQuadSet = new NativeParallelHashSet<int4>(tcnt / 4, Allocator.Temp); // Unity2023.1.5対応
+                //var removeTriangleSet = new NativeParallelHashSet<int3>(tcnt / 4, Allocator.Temp); // Unity2023.1.5対応
                 foreach (var kv in edgeToTriangleList)
                 {
                     int2 edge = kv.Key;

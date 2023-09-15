@@ -79,6 +79,8 @@ namespace MagicaCloth2
                     colliderList = new List<ColliderComponent>(colliderList),
                 };
             }
+
+            public int ColliderLength => colliderList.Count;
         }
 
         public struct ColliderCollisionConstraintParams
@@ -361,9 +363,12 @@ namespace MagicaCloth2
                         case ColliderManager.ColliderType.Sphere:
                             dist = PointSphereColliderDetection(ref _nextPos, radius, aabb, cwork, out n);
                             break;
-                        case ColliderManager.ColliderType.CapsuleX:
-                        case ColliderManager.ColliderType.CapsuleY:
-                        case ColliderManager.ColliderType.CapsuleZ:
+                        case ColliderManager.ColliderType.CapsuleX_Center:
+                        case ColliderManager.ColliderType.CapsuleY_Center:
+                        case ColliderManager.ColliderType.CapsuleZ_Center:
+                        case ColliderManager.ColliderType.CapsuleX_Start:
+                        case ColliderManager.ColliderType.CapsuleY_Start:
+                        case ColliderManager.ColliderType.CapsuleZ_Start:
                             dist = PointCapsuleColliderDetection(ref _nextPos, radius, aabb, cwork, out n);
                             break;
                         case ColliderManager.ColliderType.Plane:
@@ -702,9 +707,12 @@ namespace MagicaCloth2
                         case ColliderManager.ColliderType.Sphere:
                             dist = EdgeSphereColliderDetection(ref _nextPos, radiusE, aabbE, cfr, cwork, out n);
                             break;
-                        case ColliderManager.ColliderType.CapsuleX:
-                        case ColliderManager.ColliderType.CapsuleY:
-                        case ColliderManager.ColliderType.CapsuleZ:
+                        case ColliderManager.ColliderType.CapsuleX_Center:
+                        case ColliderManager.ColliderType.CapsuleY_Center:
+                        case ColliderManager.ColliderType.CapsuleZ_Center:
+                        case ColliderManager.ColliderType.CapsuleX_Start:
+                        case ColliderManager.ColliderType.CapsuleY_Start:
+                        case ColliderManager.ColliderType.CapsuleZ_Start:
                             dist = EdgeCapsuleColliderDetection(ref _nextPos, radiusE, aabbE, cfr, cwork, out n);
                             break;
                         case ColliderManager.ColliderType.Plane:

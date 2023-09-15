@@ -7,6 +7,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace MagicaCloth2
@@ -22,38 +23,40 @@ namespace MagicaCloth2
         public const int Flag_TimeReset = 3; // 時間リセット
         public const int Flag_Suspend = 4; // 一時停止
         public const int Flag_Running = 5; // 今回のフレームでシミュレーションが実行されたかどうか
-        //public const int Flag_UseAnimatedPosture = 5; // Base姿勢はアニメーションされた姿勢から計算する
-        public const int Flag_CustomSkinning = 6; // カスタムスキニングを使用
-        public const int Flag_Synchronization = 7; // 同期中
-        public const int Flag_StepRunning = 8; // ステップ実行中
-        public const int Flag_NormalAdjustment = 9; // 法線調整
-        public const int Flag_Exit = 10; // 存在消滅時
-        //public const int Flag_Wind = 11; // 風の影響あり
+        //public const int Flag_CustomSkinning = 6; // カスタムスキニングを使用(未使用)
+        //public const int Flag_NormalAdjustment = 9; // 法線調整(未使用)
+        public const int Flag_Synchronization = 6; // 同期中
+        public const int Flag_StepRunning = 7; // ステップ実行中
+        public const int Flag_Exit = 8; // 存在消滅時
+        public const int Flag_KeepTeleport = 9; // 姿勢保持テレポート
+        public const int Flag_InertiaShift = 10; // 慣性全体シフト
+        public const int Flag_CullingInvisible = 11; // カリングによる非表示状態
+        public const int Flag_CullingKeep = 12; // カリング時に姿勢を保つ
 
         // 以下セルフコリジョン
         // !これ以降の順番を変えないこと
-        public const int Flag_Self_PointPrimitive = 13; // PointPrimitive+Sortを保持し更新する
-        public const int Flag_Self_EdgePrimitive = 14; // EdgePrimitive+Sortを保持し更新する
-        public const int Flag_Self_TrianglePrimitive = 15; // TrianglePrimitive+Sortを保持し更新する
+        public const int Flag_Self_PointPrimitive = 14; // PointPrimitive+Sortを保持し更新する
+        public const int Flag_Self_EdgePrimitive = 15; // EdgePrimitive+Sortを保持し更新する
+        public const int Flag_Self_TrianglePrimitive = 16; // TrianglePrimitive+Sortを保持し更新する
 
-        public const int Flag_Self_EdgeEdge = 16;
-        public const int Flag_Sync_EdgeEdge = 17;
-        public const int Flag_PSync_EdgeEdge = 18;
+        public const int Flag_Self_EdgeEdge = 17;
+        public const int Flag_Sync_EdgeEdge = 18;
+        public const int Flag_PSync_EdgeEdge = 19;
 
-        public const int Flag_Self_PointTriangle = 19;
-        public const int Flag_Sync_PointTriangle = 20;
-        public const int Flag_PSync_PointTriangle = 21;
+        public const int Flag_Self_PointTriangle = 20;
+        public const int Flag_Sync_PointTriangle = 21;
+        public const int Flag_PSync_PointTriangle = 22;
 
-        public const int Flag_Self_TrianglePoint = 22;
-        public const int Flag_Sync_TrianglePoint = 23;
-        public const int Flag_PSync_TrianglePoint = 24;
+        public const int Flag_Self_TrianglePoint = 23;
+        public const int Flag_Sync_TrianglePoint = 24;
+        public const int Flag_PSync_TrianglePoint = 25;
 
-        public const int Flag_Self_EdgeTriangleIntersect = 25;
-        public const int Flag_Sync_EdgeTriangleIntersect = 26;
-        public const int Flag_PSync_EdgeTriangleIntersect = 27;
-        public const int Flag_Self_TriangleEdgeIntersect = 28;
-        public const int Flag_Sync_TriangleEdgeIntersect = 29;
-        public const int Flag_PSync_TriangleEdgeIntersect = 30;
+        public const int Flag_Self_EdgeTriangleIntersect = 26;
+        public const int Flag_Sync_EdgeTriangleIntersect = 27;
+        public const int Flag_PSync_EdgeTriangleIntersect = 28;
+        public const int Flag_Self_TriangleEdgeIntersect = 29;
+        public const int Flag_Sync_TriangleEdgeIntersect = 30;
+        public const int Flag_PSync_TriangleEdgeIntersect = 31;
 
         /// <summary>
         /// チーム基本データ
@@ -74,6 +77,8 @@ namespace MagicaCloth2
             /// １秒間の更新頻度
             /// </summary>
             //public int frequency;
+
+            public float frameDeltaTime;
 
             /// <summary>
             /// 更新計算用時間
@@ -158,6 +163,11 @@ namespace MagicaCloth2
             public FixedList32Bytes<int> syncParentTeamId;
 
             /// <summary>
+            /// 同期先チームのセンタートランスフォームインデックス（ダイレクト値）
+            /// </summary>
+            public int syncCenterTransformIndex;
+
+            /// <summary>
             /// 初期姿勢とアニメーション姿勢のブレンド率（制約で利用）
             /// </summary>
             public float animationPoseRatio;
@@ -171,6 +181,16 @@ namespace MagicaCloth2
             /// シミュレーション結果ブレンド割合(0.0 ~ 1.0)
             /// </summary>
             public float blendWeight;
+
+            /// <summary>
+            /// 外力モード
+            /// </summary>
+            public ClothForceMode forceMode;
+
+            /// <summary>
+            /// 外力
+            /// </summary>
+            public float3 impactForce;
 
             //-----------------------------------------------------------------
             /// <summary>
@@ -354,12 +374,22 @@ namespace MagicaCloth2
             /// <summary>
             /// 処理状態
             /// </summary>
-            public bool IsProcess => flag.IsSet(Flag_Enable) && flag.IsSet(Flag_Suspend) == false;
+            public bool IsProcess => flag.IsSet(Flag_Enable) && flag.IsSet(Flag_Suspend) == false && flag.IsSet(Flag_CullingInvisible) == false;
 
             /// <summary>
             /// 姿勢リセット有無
             /// </summary>
             public bool IsReset => flag.IsSet(Flag_Reset);
+
+            /// <summary>
+            /// 姿勢維持テレポートの有無
+            /// </summary>
+            public bool IsKeepReset => flag.IsSet(Flag_KeepTeleport);
+
+            /// <summary>
+            /// 慣性全体シフトの有無
+            /// </summary>
+            public bool IsInertiaShift => flag.IsSet(Flag_InertiaShift);
 
             /// <summary>
             /// 今回のフレームでシミュレーションが実行されたかどうか（１回以上実行された場合）
@@ -371,7 +401,9 @@ namespace MagicaCloth2
             /// </summary>
             public bool IsStepRunning => flag.IsSet(Flag_StepRunning);
 
-            //public bool IsAnimatedPosture => flag.IsSet(Flag_UseAnimatedPosture);
+            public bool IsCullingInvisible => flag.IsSet(Flag_CullingInvisible);
+
+            public bool IsCullingKeep => flag.IsSet(Flag_CullingKeep);
 
             public int ParticleCount => particleChunk.dataLength;
 
@@ -547,9 +579,6 @@ namespace MagicaCloth2
 
             //globalTimeScale = 1.0f;
             //fixedUpdateCount = 0;
-
-            //MagicaManager.afterFixedUpdateDelegate -= AfterFixedUpdate;
-            //MagicaManager.afterRenderingDelegate -= AfterRenderring;
         }
 
         public void EnterdEditMode()
@@ -580,9 +609,6 @@ namespace MagicaCloth2
             //globalTimeScale = 1.0f;
             //fixedUpdateCount = 0;
 
-            //MagicaManager.afterFixedUpdateDelegate += AfterFixedUpdate;
-            //MagicaManager.afterRenderingDelegate += AfterRenderring;
-
             isValid = true;
         }
 
@@ -590,19 +616,6 @@ namespace MagicaCloth2
         {
             return isValid;
         }
-
-        //=========================================================================================
-        //void AfterFixedUpdate()
-        //{
-        //    //Debug.Log($"AF. F:{Time.frameCount}");
-        //    fixedUpdateCount++;
-        //}
-
-        //void AfterRenderring()
-        //{
-        //    //Debug.Log($"AfterRenderring. F:{Time.frameCount}");
-        //    fixedUpdateCount = 0;
-        //}
 
         //=========================================================================================
         /// <summary>
@@ -623,8 +636,8 @@ namespace MagicaCloth2
             team.flag.SetBits(Flag_Valid, true);
             team.flag.SetBits(Flag_Reset, true);
             team.flag.SetBits(Flag_TimeReset, true);
-            team.flag.SetBits(Flag_CustomSkinning, cprocess.cloth.SerializeData.customSkinningSetting.enable);
-            team.flag.SetBits(Flag_NormalAdjustment, cprocess.cloth.SerializeData.normalAlignmentSetting.alignmentMode != NormalAlignmentSettings.AlignmentMode.None);
+            //team.flag.SetBits(Flag_CustomSkinning, cprocess.cloth.SerializeData.customSkinningSetting.enable);
+            //team.flag.SetBits(Flag_NormalAdjustment, cprocess.cloth.SerializeData.normalAlignmentSetting.alignmentMode != NormalAlignmentSettings.AlignmentMode.None);
             team.updateMode = cprocess.cloth.SerializeData.updateMode;
             //team.frequency = clothParams.solverFrequency;
             team.timeScale = 1.0f;
@@ -654,8 +667,7 @@ namespace MagicaCloth2
             // 慣性制約
             // 初期化時のセンターローカル位置を初期化
             var cdata = new InertiaConstraint.CenterData();
-            cdata.initLocalCenterPosition = cprocess.ProxyMesh.localCenterPosition.Value;
-            cdata.frameLocalPosition = cdata.initLocalCenterPosition;
+            cdata.frameLocalPosition = cprocess.ProxyMesh.localCenterPosition.Value;
             centerDataArray.Add(cdata);
 
             clothProcessDict.Add(teamId, cprocess);
@@ -673,12 +685,11 @@ namespace MagicaCloth2
                 return;
 
             // セルフコリジョン同期解除
-            var tdata = GetTeamData(teamId);
+            ref var tdata = ref GetTeamDataRef(teamId);
             if (tdata.syncTeamId > 0 && ContainsTeamData(tdata.syncTeamId))
             {
-                var stdata = GetTeamData(tdata.syncTeamId);
+                ref var stdata = ref GetTeamDataRef(tdata.syncTeamId);
                 RemoveSyncParent(ref stdata, teamId);
-                SetTeamData(tdata.syncTeamId, stdata);
             }
 
             // 制約データなど解除
@@ -702,10 +713,9 @@ namespace MagicaCloth2
         {
             if (isValid == false || teamId == 0)
                 return;
-            var team = teamDataArray[teamId];
+            ref var team = ref teamDataArray.GetRef(teamId);
             team.flag.SetBits(Flag_Enable, sw);
             team.flag.SetBits(Flag_Reset, sw);
-            teamDataArray[teamId] = team;
 
             if (sw)
                 enableTeamSet.Add(teamId);
@@ -729,44 +739,24 @@ namespace MagicaCloth2
 
         public bool ContainsTeamData(int teamId)
         {
-            //return teamId >= 0 && teamId < TeamCount;
             return teamId >= 0 && clothProcessDict.ContainsKey(teamId);
         }
 
-        public TeamData GetTeamData(int teamId)
+        public ref TeamData GetTeamDataRef(int teamId)
         {
-            if (isValid == false || ContainsTeamData(teamId) == false)
-                return default;
-            return teamDataArray[teamId];
+            return ref teamDataArray.GetRef(teamId);
         }
 
-        public void SetTeamData(int teamId, TeamData tdata)
+        public ref ClothParameters GetParametersRef(int teamId)
         {
-            if (isValid == false)
-                return;
-            teamDataArray[teamId] = tdata;
+            return ref parameterArray.GetRef(teamId);
         }
 
-        public ClothParameters GetParameters(int teamId)
+        internal ref InertiaConstraint.CenterData GetCenterDataRef(int teamId)
         {
-            if (isValid == false)
-                return default;
-            return parameterArray[teamId];
+            return ref centerDataArray.GetRef(teamId);
         }
 
-        public void SetParameters(int teamId, ClothParameters parameters)
-        {
-            if (isValid == false)
-                return;
-            parameterArray[teamId] = parameters;
-        }
-
-        internal InertiaConstraint.CenterData GetCenterData(int teamId)
-        {
-            if (isValid == false)
-                return default;
-            return centerDataArray[teamId];
-        }
 
         public ClothProcess GetClothProcess(int teamId)
         {
@@ -774,6 +764,131 @@ namespace MagicaCloth2
                 return clothProcessDict[teamId];
             else
                 return null;
+        }
+
+        //=========================================================================================
+        static readonly ProfilerMarker teamUpdateCullingProfiler = new ProfilerMarker("TeamUpdateCulling");
+
+        /// <summary>
+        /// カリング状態更新
+        /// </summary>
+        internal void TeamCullingUpdate()
+        {
+            teamUpdateCullingProfiler.Begin();
+
+            var cm = MagicaManager.Cloth;
+
+            // ジョブでは実行できないチーム更新
+            cm.ClearVisibleDict();
+            var clothSet = cm.clothSet;
+            foreach (var cprocess in clothSet)
+            {
+                int teamId = cprocess.TeamId;
+                ref var tdata = ref GetTeamDataRef(teamId);
+
+                // 動作判定 ----------------------------------------------------
+                if (tdata.flag.IsSet(Flag_Enable) == false || tdata.flag.IsSet(Flag_Suspend))
+                    continue;
+
+                //-------------------------------------------------------------
+                // 現在の状態
+                bool oldInvisible = tdata.IsCullingInvisible;
+                bool invisible;
+
+                MagicaCloth jugeCloth = cprocess.cloth;
+                CullingSettings jugeSettings = jugeCloth.SerializeData.cullingSettings;
+                ClothProcess jugeProcess = cprocess;
+
+                // 同期時は同期先を見る
+                if (tdata.syncTeamId > 0)
+                {
+                    var syncProcess = GetClothProcess(tdata.syncTeamId);
+                    if (syncProcess != null)
+                    {
+                        jugeCloth = syncProcess.cloth;
+                        jugeSettings = jugeCloth.SerializeData.cullingSettings;
+                        jugeProcess = jugeCloth.Process;
+                    }
+                }
+
+                // 最終的なカリングモード
+                var cullingMode = jugeSettings.cameraCullingMode;
+                if (cullingMode == CullingSettings.CameraCullingMode.AnimatorLinkage)
+                {
+                    if (jugeProcess.cullingAnimator)
+                    {
+                        switch (jugeProcess.cullingAnimator.cullingMode)
+                        {
+                            case AnimatorCullingMode.AlwaysAnimate:
+                                cullingMode = CullingSettings.CameraCullingMode.Off;
+                                break;
+                            case AnimatorCullingMode.CullCompletely:
+                                cullingMode = CullingSettings.CameraCullingMode.Keep;
+                                break;
+                            case AnimatorCullingMode.CullUpdateTransforms:
+                                cullingMode = CullingSettings.CameraCullingMode.Reset;
+                                break;
+                        }
+                    }
+                    else
+                        cullingMode = CullingSettings.CameraCullingMode.Off;
+                }
+
+                // カリング判定
+                if (jugeCloth == null || cullingMode == CullingSettings.CameraCullingMode.Off)
+                {
+                    invisible = false;
+                }
+                else
+                {
+                    // 参照すべきレンダラー確定
+                    Animator jugeAnimator = null;
+                    List<Renderer> jugeRenderers = jugeSettings.cameraCullingRenderers;
+                    if (jugeSettings.cameraCullingMethod == CullingSettings.CameraCullingMethod.AutomaticRenderer)
+                    {
+                        jugeAnimator = jugeCloth.Process.cullingAnimator;
+                        jugeRenderers = jugeCloth.Process.cullingAnimatorRenderers;
+                    }
+
+                    // レンダラー判定
+                    invisible = !cm.CheckVisible(jugeAnimator, jugeRenderers);
+                }
+
+                // 状態変更
+                if (oldInvisible != invisible)
+                {
+                    tdata.flag.SetBits(Flag_CullingInvisible, invisible);
+                    tdata.flag.SetBits(Flag_CullingKeep, false);
+                    //Debug.Log($"Change culling invisible:({oldInvisible}) -> ({invisible})");
+
+                    // cprocessクラスにもコピーする
+                    cprocess.SetState(ClothProcess.State_CullingInvisible, invisible);
+                    cprocess.SetState(ClothProcess.State_CullingKeep, false);
+
+                    if (invisible)
+                    {
+                        // (表示->非表示)時の振る舞い
+                        switch (cullingMode)
+                        {
+                            case CullingSettings.CameraCullingMode.Reset:
+                            case CullingSettings.CameraCullingMode.Off:
+                                tdata.flag.SetBits(Flag_Reset, true);
+                                //Debug.Log($"Culling invisible. Reset On");
+                                break;
+                            case CullingSettings.CameraCullingMode.Keep:
+                                tdata.flag.SetBits(Flag_CullingKeep, true);
+                                cprocess.SetState(ClothProcess.State_CullingKeep, true);
+                                //Debug.Log($"Culling invisible. Keep On");
+                                break;
+                        }
+                    }
+
+                    // 対応するレンダーデータに更新を指示する
+                    cprocess.UpdateRendererUse();
+                }
+            }
+
+            teamUpdateCullingProfiler.End();
         }
 
         //=========================================================================================
@@ -791,7 +906,7 @@ namespace MagicaCloth2
             foreach (var cprocess in clothSet)
             {
                 int teamId = cprocess.TeamId;
-                var tdata = GetTeamData(teamId);
+                ref var tdata = ref GetTeamDataRef(teamId);
                 var cloth = cprocess.cloth;
 
                 // 動作判定 ----------------------------------------------------
@@ -809,33 +924,33 @@ namespace MagicaCloth2
                     int syncTeamId = cloth.SyncCloth.Process.TeamId;
                     if (syncTeamId > 0)
                     {
-                        var syncTeamData = GetTeamData(syncTeamId);
+                        ref var syncTeamData = ref GetTeamDataRef(syncTeamId);
                         if (syncTeamData.flag.IsSet(Flag_Enable) && cloth.SyncCloth.Process.GetSuspendCounter() == 0)
                             suspend = false; // 相手も処理可能状態
                     }
                 }
                 tdata.flag.SetBits(Flag_Suspend, suspend);
-                SetTeamData(teamId, tdata);
 
-                // 最終的に有効状態と同期まちフラグの２つで判定
-                if (tdata.IsProcess == false)
+                // 有効状態と同期まちフラグの２つで実行判定
+                if (tdata.flag.IsSet(Flag_Enable) == false || tdata.flag.IsSet(Flag_Suspend))
                     continue;
+
                 //-------------------------------------------------------------
-
-
-
                 bool selfCollisionUpdate = false;
 
                 // パラメータ変更反映
                 if (cprocess.IsState(ClothProcess.State_ParameterDirty) && cprocess.IsEnable)
                 {
+                    //Develop.DebugLog($"Update Parameters {teamId}");
                     // コライダー更新(内部でteamData更新)
                     MagicaManager.Collider.UpdateColliders(cprocess);
-                    tdata = GetTeamData(teamId); // 再取得の必要あり
+
+                    // カリング用アニメーターとレンダラー更新
+                    cprocess.UpdateCullingAnimatorAndRenderers();
 
                     // パラメータ変更
                     cprocess.SyncParameters();
-                    SetParameters(teamId, cprocess.parameters);
+                    parameterArray[teamId] = cprocess.parameters;
                     tdata.updateMode = cloth.SerializeData.updateMode;
                     tdata.animationPoseRatio = cloth.SerializeData.animationPoseRatio;
 
@@ -846,6 +961,7 @@ namespace MagicaCloth2
                 }
 
                 // チーム同期
+                // 同期チェーンをたどり先端のチームを参照する
                 int oldSyncTeamId = tdata.syncTeamId;
                 var syncCloth = cloth.SyncCloth;
                 if (syncCloth != null)
@@ -865,6 +981,7 @@ namespace MagicaCloth2
                 }
                 tdata.syncTeamId = syncCloth != null ? syncCloth.Process.TeamId : 0;
                 tdata.flag.SetBits(Flag_Synchronization, tdata.syncTeamId != 0);
+                tdata.syncCenterTransformIndex = 0;
                 if (oldSyncTeamId != tdata.syncTeamId)
                 {
                     // 変更あり！
@@ -873,19 +990,17 @@ namespace MagicaCloth2
                     if (oldSyncTeamId > 0)
                     {
                         Develop.DebugLog($"Desynchronization! (1) {teamId}");
-                        var syncTeamData = GetTeamData(oldSyncTeamId);
+                        ref var syncTeamData = ref GetTeamDataRef(oldSyncTeamId);
                         RemoveSyncParent(ref syncTeamData, teamId);
-                        SetTeamData(oldSyncTeamId, syncTeamData);
                     }
 
                     // 同期変更
                     if (syncCloth != null)
                     {
-                        var syncTeamData = GetTeamData(syncCloth.Process.TeamId);
+                        ref var syncTeamData = ref GetTeamDataRef(syncCloth.Process.TeamId);
 
                         // 相手に自身を登録
                         AddSyncParent(ref syncTeamData, teamId);
-                        SetTeamData(syncCloth.Process.TeamId, syncTeamData);
 
                         // 時間リセットフラグクリア
                         tdata.flag.SetBits(Flag_TimeReset, false);
@@ -907,7 +1022,7 @@ namespace MagicaCloth2
                 // 時間の同期
                 if (syncCloth && tdata.syncTeamId > 0)
                 {
-                    var syncTeamData = GetTeamData(syncCloth.Process.TeamId);
+                    ref var syncTeamData = ref GetTeamDataRef(syncCloth.Process.TeamId);
                     if (syncTeamData.IsValid)
                     {
                         // 時間同期
@@ -924,23 +1039,35 @@ namespace MagicaCloth2
                         tdata.frameInterpolation = syncTeamData.frameInterpolation;
                         //Develop.DebugLog($"Team time sync:{teamId}->{syncCloth.Process.TeamId}");
                     }
+
+                    // パラメータ同期
+                    // 同期中は一部のパラメータを連動させる
+                    ref var clothParam = ref GetParametersRef(teamId);
+                    clothParam.inertiaConstraint.worldInertia = syncCloth.SerializeData.inertiaConstraint.worldInertia;
+                    clothParam.inertiaConstraint.movementSpeedLimit = syncCloth.SerializeData.inertiaConstraint.movementSpeedLimit.GetValue(-1);
+                    clothParam.inertiaConstraint.rotationSpeedLimit = syncCloth.SerializeData.inertiaConstraint.rotationSpeedLimit.GetValue(-1);
+                    clothParam.inertiaConstraint.teleportMode = syncCloth.SerializeData.inertiaConstraint.teleportMode;
+                    clothParam.inertiaConstraint.teleportDistance = syncCloth.SerializeData.inertiaConstraint.teleportDistance;
+                    clothParam.inertiaConstraint.teleportRotation = syncCloth.SerializeData.inertiaConstraint.teleportRotation;
+
+                    // 同期先のセンタートランスフォームインデックスを記録
+                    tdata.syncCenterTransformIndex = syncTeamData.centerTransformIndex;
                 }
 
                 // 集計まわり
-                var param = GetParameters(teamId);
+                ref var param = ref GetParametersRef(teamId);
                 if (param.colliderCollisionConstraint.mode == ColliderCollisionConstraint.Mode.Edge)
                     edgeColliderCollisionCount += tdata.EdgeCount;
-
-                SetTeamData(teamId, tdata);
 
                 // セルフコリジョンのフラグやバッファ更新
                 if (selfCollisionUpdate)
                 {
-                    //Develop.DebugLog("セルフコリジョン更新");
+                    //Develop.DebugLog("Update Selfcollision");
                     MagicaManager.Simulation.selfCollisionConstraint.UpdateTeam(teamId);
                 }
             }
 
+#if true
             if (ActiveTeamCount > 0)
             {
                 // フレーム更新時間
@@ -953,9 +1080,9 @@ namespace MagicaCloth2
                 var job = new AlwaysTeamUpdateJob()
                 {
                     teamCount = TeamCount,
-                    frameDeltaTime = deltaTime,
-                    frameFixedDeltaTime = fixedDeltaTime,
-                    frameUnscaledDeltaTime = unscaledDeltaTime,
+                    unityFrameDeltaTime = deltaTime,
+                    unityFrameFixedDeltaTime = fixedDeltaTime,
+                    unityFrameUnscaledDeltaTime = unscaledDeltaTime,
                     globalTimeScale = MagicaManager.Time.GlobalTimeScale,
                     simulationDeltaTime = MagicaManager.Time.SimulationDeltaTime,
                     maxDeltaTime = MagicaManager.Time.MaxDeltaTime,
@@ -966,15 +1093,16 @@ namespace MagicaCloth2
                 };
                 job.Run();
             }
+#endif
         }
 
         [BurstCompile]
         struct AlwaysTeamUpdateJob : IJob
         {
             public int teamCount;
-            public float frameDeltaTime;
-            public float frameFixedDeltaTime;
-            public float frameUnscaledDeltaTime;
+            public float unityFrameDeltaTime;
+            public float unityFrameFixedDeltaTime;
+            public float unityFrameUnscaledDeltaTime;
             public float globalTimeScale;
             public float simulationDeltaTime;
             public float maxDeltaTime;
@@ -1000,11 +1128,9 @@ namespace MagicaCloth2
                     if (tdata.IsProcess == false)
                         continue;
 
-                    var param = parameterArray[teamId];
-
                     //Debug.Log($"Team Enable:{i}");
 
-                    // リセット
+                    // 時間リセット
                     if (tdata.flag.IsSet(Flag_TimeReset))
                     {
                         //Debug.Log($"Team time Reset:{i}");
@@ -1016,22 +1142,18 @@ namespace MagicaCloth2
                         tdata.frameUpdateTime = 0;
                         tdata.frameOldTime = 0;
                     }
-                    if (tdata.flag.IsSet(Flag_Reset) || tdata.flag.IsSet(Flag_TimeReset))
-                    {
-                        // 速度安定化
-                        tdata.velocityWeight = param.stablizationTimeAfterReset > 1e-06f ? 0.0f : 1.0f;
-                        tdata.blendWeight = tdata.velocityWeight;
-                    }
 
                     // 更新時間
-                    float deltaTime = tdata.IsFixedUpdate ? frameFixedDeltaTime : (tdata.IsUnscaled ? frameUnscaledDeltaTime : frameDeltaTime);
+                    float frameDeltaTime = tdata.IsFixedUpdate ? unityFrameFixedDeltaTime : (tdata.IsUnscaled ? unityFrameUnscaledDeltaTime : unityFrameDeltaTime);
+                    tdata.frameDeltaTime = frameDeltaTime;
 
                     // 最大更新時間
-                    deltaTime = math.min(deltaTime, maxDeltaTime);
+                    float deltaTime = math.min(frameDeltaTime, maxDeltaTime);
 
                     // タイムスケール
                     float timeScale = tdata.timeScale * (tdata.IsUnscaled ? 1.0f : globalTimeScale);
                     timeScale = tdata.flag.IsSet(Flag_Suspend) ? 0.0f : timeScale;
+                    //timeScale = tdata.IsCullingInvisible ? 0.0f : timeScale;
 
                     // 加算時間
                     float addTime = deltaTime * timeScale; // 今回の加算時間
@@ -1186,13 +1308,26 @@ namespace MagicaCloth2
                     return;
 
                 var param = parameterArray[teamId];
-
-                // ■センター
                 var cdata = centerDataArray[teamId];
-                var centerWorldPos = transformPositionArray[cdata.centerTransformIndex];
-                var centerWorldRot = transformRotationArray[cdata.centerTransformIndex];
-                var centerWorldScl = transformScaleArray[cdata.centerTransformIndex];
-                var wtol = MathUtility.WorldToLocalMatrix(centerWorldPos, centerWorldRot, centerWorldScl);
+
+                // ■コンポーネントトランスフォーム同期
+                // 同期中は同期先のコンポーネントトランスフォームからワールド慣性を計算する
+                int centerTransformIndex = (tdata.syncTeamId != 0 && tdata.flag.IsSet(Flag_Synchronization)) ? tdata.syncCenterTransformIndex : cdata.centerTransformIndex;
+
+                // ■コンポーネント位置
+                float3 componentWorldPos = transformPositionArray[centerTransformIndex];
+                quaternion componentWorldRot = transformRotationArray[centerTransformIndex];
+                float3 componentWorldScl = transformScaleArray[centerTransformIndex];
+                cdata.componentWorldPosition = componentWorldPos;
+                cdata.componentWorldRotation = componentWorldRot;
+
+                // コンポーネントスケール倍率
+                float componentScaleRatio = math.length(componentWorldScl) / math.length(tdata.initScale);
+
+                // ■クロスセンター位置
+                var centerWorldPos = componentWorldPos;
+                var centerWorldRot = componentWorldRot;
+                var centerWorldScl = componentWorldScl;
 
                 // 固定点リストがある場合は固定点の姿勢から算出する、ない場合はクロストランスフォームを使用する
                 if (tdata.fixedDataChunk.IsValid)
@@ -1200,7 +1335,6 @@ namespace MagicaCloth2
                     float3 cen = 0;
                     float3 nor = 0;
                     float3 tan = 0;
-                    int cnt = 0;
 
                     int v_start = tdata.proxyCommonChunk.startIndex;
 
@@ -1212,7 +1346,6 @@ namespace MagicaCloth2
                         int vindex = l_findex + v_start;
 
                         cen += positions[vindex];
-                        cnt++;
 
                         var rot = rotations[vindex];
                         rot = math.mul(rot, vertexBindPoseRotations[vindex]);
@@ -1221,17 +1354,48 @@ namespace MagicaCloth2
                         tan += MathUtility.ToTangent(rot);
                     }
 #if MC2_DEBUG
-                    Develop.Assert(cnt > 0);
                     Develop.Assert(math.length(nor) > 0.0f);
                     Develop.Assert(math.length(tan) > 0.0f);
 #endif
-                    centerWorldPos = cen / cnt;
+                    centerWorldPos = cen / fcnt;
                     centerWorldRot = MathUtility.ToRotation(math.normalize(nor), math.normalize(tan));
+                }
+                var wtol = MathUtility.WorldToLocalMatrix(centerWorldPos, centerWorldRot, centerWorldScl);
+
+                // フレーム移動量と速度
+                float3 frameDeltaVector = componentWorldPos - cdata.oldComponentWorldPosition;
+                float frameDeltaAngle = MathUtility.Angle(cdata.oldComponentWorldRotation, componentWorldRot);
+                //Debug.Log($"frameDeltaVector:{frameDeltaVector}, frameDeltaAngle:{frameDeltaAngle}");
+
+                // ■テレポート判定（コンポーネント姿勢から判定する）
+                // 同期時は同期先のテレポートモードとパラメータが入っている
+                if (param.inertiaConstraint.teleportMode != InertiaConstraint.TeleportMode.None && tdata.IsReset == false)
+                {
+                    // 移動と回転どちらか一方がしきい値を超えたらテレポートと判定
+                    bool isTeleport = false;
+                    isTeleport = math.length(frameDeltaVector) >= param.inertiaConstraint.teleportDistance * componentScaleRatio ? true : isTeleport;
+                    isTeleport = math.degrees(frameDeltaAngle) >= param.inertiaConstraint.teleportRotation ? true : isTeleport;
+
+                    if (isTeleport)
+                    {
+                        switch (param.inertiaConstraint.teleportMode)
+                        {
+                            case InertiaConstraint.TeleportMode.Reset:
+                                tdata.flag.SetBits(Flag_Reset, true);
+                                break;
+                            case InertiaConstraint.TeleportMode.Keep:
+                                tdata.flag.SetBits(Flag_KeepTeleport, true);
+                                break;
+                        }
+                    }
                 }
 
                 // リセットおよび最新のセンター座標として格納
                 if (tdata.IsReset)
                 {
+                    cdata.oldComponentWorldPosition = componentWorldPos;
+                    cdata.oldComponentWorldRotation = componentWorldRot;
+
                     cdata.frameWorldPosition = centerWorldPos;
                     cdata.frameWorldRotation = centerWorldRot;
                     cdata.frameWorldScale = centerWorldScl;
@@ -1243,7 +1407,6 @@ namespace MagicaCloth2
                     cdata.nowWorldScale = centerWorldScl;
                     cdata.oldWorldPosition = centerWorldPos;
                     cdata.oldWorldRotation = centerWorldRot;
-                    cdata.frameLocalPosition = cdata.initLocalCenterPosition;
 
                     tdata.centerWorldPosition = centerWorldPos;
                 }
@@ -1254,22 +1417,101 @@ namespace MagicaCloth2
                     cdata.frameWorldScale = centerWorldScl;
                 }
 
+                // ■ワールド慣性シフト
+                float3 workOldComponentPosition = cdata.oldComponentWorldPosition;
+                quaternion workOldComponentRotation = cdata.oldComponentWorldRotation;
+                if (tdata.IsReset)
+                {
+                    // リセット（なし）
+                    cdata.frameComponentShiftVector = 0;
+                    cdata.frameComponentShiftRotation = quaternion.identity;
+                }
+                else
+                {
+                    cdata.frameComponentShiftVector = componentWorldPos - cdata.oldComponentWorldPosition;
+                    cdata.frameComponentShiftRotation = MathUtility.FromToRotation(cdata.oldComponentWorldRotation, componentWorldRot);
+                    float moveShiftRatio = 0.0f;
+                    float rotationShiftRatio = 0.0f;
+
+                    // ■全体慣性シフト
+                    float movementShift = 1.0f - param.inertiaConstraint.worldInertia; // 同期時は同期先の値が入っている
+                    float rotationShift = 1.0f - param.inertiaConstraint.worldInertia; // 同期時は同期先の値が入っている
+                    // KeepテレポートもしくはCulling時はシフト量100%で実装
+                    bool keep = tdata.IsKeepReset || tdata.IsCullingInvisible;
+                    movementShift = keep ? 1.0f : movementShift;
+                    rotationShift = keep ? 1.0f : rotationShift;
+                    if (movementShift > Define.System.Epsilon || rotationShift > Define.System.Epsilon)
+                    {
+                        // 全体シフトあり
+                        tdata.flag.SetBits(Flag_InertiaShift, true);
+                        moveShiftRatio = movementShift;
+                        rotationShiftRatio = rotationShift;
+
+                        workOldComponentPosition = math.lerp(workOldComponentPosition, componentWorldPos, movementShift);
+                        workOldComponentRotation = math.slerp(workOldComponentRotation, componentWorldRot, rotationShift);
+                    }
+
+                    // ■最大移動速度制限（全体シフトの結果から計算する）
+                    float movementSpeedLimit = param.inertiaConstraint.movementSpeedLimit * componentScaleRatio; // 同期時は同期先の値が入っている
+                    float rotationSpeedLimit = param.inertiaConstraint.rotationSpeedLimit; // 同期時は同期先の値が入っている
+                    float3 deltaVector = componentWorldPos - workOldComponentPosition;
+                    float deltaAngle = MathUtility.Angle(workOldComponentRotation, componentWorldRot);
+                    float frameSpeed = tdata.frameDeltaTime > 0.0f ? math.length(deltaVector) / tdata.frameDeltaTime : 0.0f;
+                    float frameRotationSpeed = tdata.frameDeltaTime > 0.0f ? math.degrees(deltaAngle) / tdata.frameDeltaTime : 0.0f;
+                    if (frameSpeed > movementSpeedLimit && movementSpeedLimit >= 0.0f)
+                    {
+                        tdata.flag.SetBits(Flag_InertiaShift, true);
+                        float moveLimitRatio = math.saturate(math.max(frameSpeed - movementSpeedLimit, 0.0f) / frameSpeed);
+                        moveShiftRatio = math.lerp(moveShiftRatio, 1.0f, moveLimitRatio);
+                        workOldComponentPosition = math.lerp(workOldComponentPosition, componentWorldPos, moveLimitRatio);
+                    }
+                    if (frameRotationSpeed > rotationSpeedLimit && rotationSpeedLimit >= 0.0f)
+                    {
+                        tdata.flag.SetBits(Flag_InertiaShift, true);
+                        float rotationLimitRatio = math.saturate(math.max(frameRotationSpeed - rotationSpeedLimit, 0.0f) / frameRotationSpeed);
+                        rotationShiftRatio = math.lerp(rotationShiftRatio, 1.0f, rotationLimitRatio);
+                        workOldComponentRotation = math.slerp(workOldComponentRotation, componentWorldRot, rotationLimitRatio);
+                    }
+
+                    // ■慣性シフト最終設定
+                    if (tdata.IsInertiaShift)
+                    {
+                        cdata.frameComponentShiftVector *= moveShiftRatio;
+                        cdata.frameComponentShiftRotation = math.slerp(quaternion.identity, cdata.frameComponentShiftRotation, rotationShiftRatio);
+
+                        cdata.oldFrameWorldPosition = MathUtility.ShiftPosition(cdata.oldFrameWorldPosition, cdata.oldComponentWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+                        cdata.oldFrameWorldRotation = math.mul(cdata.frameComponentShiftRotation, cdata.oldFrameWorldRotation);
+
+                        cdata.nowWorldPosition = MathUtility.ShiftPosition(cdata.nowWorldPosition, cdata.oldComponentWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+                        cdata.nowWorldRotation = math.mul(cdata.frameComponentShiftRotation, cdata.nowWorldRotation);
+                    }
+                }
+                //Debug.Log($"team:[{teamId}] centerTransformIndex:{centerTransformIndex}");
+                //Debug.Log($"team:[{teamId}] worldInertia:{param.inertiaConstraint.worldInertia}");
+                //Debug.Log($"team:[{teamId}] movementSpeedLimit:{param.inertiaConstraint.movementSpeedLimit}");
+                //Debug.Log($"team:[{teamId}] rotationSpeedLimit:{param.inertiaConstraint.rotationSpeedLimit}");
+
+                // ■ワールド移動方向と速度割り出し（慣性シフト後の移動量で計算）
+                float3 movingVector = componentWorldPos - workOldComponentPosition;
+                float movingLength = math.length(movingVector);
+                cdata.frameMovingSpeed = tdata.frameDeltaTime > 0.0f ? movingLength / tdata.frameDeltaTime : 0.0f;
+                cdata.frameMovingDirection = movingLength > 1e-06f ? movingVector / movingLength : 0;
+
+                //Debug.Log($"frameWorldPosition:{cdata.frameWorldPosition}, framwWorldRotation:{cdata.frameWorldRotation.value}");
+                //Debug.Log($"oldFrameWorldPosition:{cdata.oldFrameWorldPosition}, oldFrameWorldRotation:{cdata.oldFrameWorldRotation.value}");
+                //Debug.Log($"nowWorldPosition:{cdata.nowWorldPosition}, nowWorldRotation:{cdata.nowWorldRotation.value}");
+                //Debug.Log($"oldWorldPosition:{cdata.oldWorldPosition}, oldWorldRotation:{cdata.oldWorldRotation.value}");
+
                 // センターローカル座標
                 float3 localCenterPos = MathUtility.InverseTransformPoint(centerWorldPos, wtol);
                 cdata.frameLocalPosition = localCenterPos;
 
-                // 今回のフレーム移動量を算出
-                float3 frameVector = 0;
-                quaternion frameRotation = quaternion.identity;
-                if (tdata.IsRunning)
+                // 速度安定化処理
+                if (tdata.flag.IsSet(Flag_Reset) || tdata.flag.IsSet(Flag_TimeReset))
                 {
-                    // 今回の移動量算出
-                    frameVector = cdata.frameWorldPosition - cdata.oldFrameWorldPosition;
-                    frameRotation = MathUtility.FromToRotation(cdata.oldFrameWorldRotation, cdata.frameWorldRotation);
-
+                    tdata.velocityWeight = param.stablizationTimeAfterReset > 1e-06f ? 0.0f : 1.0f;
+                    tdata.blendWeight = tdata.velocityWeight;
                 }
-                cdata.frameVector = frameVector;
-                cdata.frameRotation = frameRotation;
 
                 // 風の影響を計算
                 Wind(teamId, param, centerWorldPos);
@@ -1389,7 +1631,6 @@ namespace MagicaCloth2
 
                 // debug
                 //newTeamWindData.DebugLog(teamId);
-
                 //Debug.Log($"[{teamId}] wind:{tdata.flag.IsSet(Flag_Wind)}, windCnt:{windInfo.windCount}, zone:{windInfo.windIdList}, dir:{windInfo.windDirectionList.c0},{windInfo.windDirectionList.c1},{windInfo.windDirectionList.c2},{windInfo.windDirectionList.c3}, main:{windInfo.windMainList}");
             }
         }
@@ -1483,58 +1724,28 @@ namespace MagicaCloth2
                 cdata.stepRotation = MathUtility.FromToRotation(cdata.oldWorldRotation, cdata.nowWorldRotation);
                 float stepAngle = MathUtility.Angle(cdata.oldWorldRotation, cdata.nowWorldRotation);
 
-                // 慣性割合
-                float moveInertiaRatio = 0.0f;
-                float rotationInertiaRatio = 0.0f;
-
-                // 最大速度／最大回転による慣性削減
-                float stepSpeed = math.length(cdata.stepVector) / simulationDeltaTime;
-                float stepRotationSpeed = math.degrees(stepAngle) / simulationDeltaTime;
-                //Debug.Log($"Team[{teamId}] stepSpeed:{stepSpeed}, stepRotationSpeed:{stepRotationSpeed}");
-                if (stepSpeed > param.inertiaConstraint.movementSpeedLimit && param.inertiaConstraint.movementSpeedLimit >= 0.0f)
-                {
-                    //Debug.Log($"Team[{teamId}] stepSpeed:{stepSpeed}");
-                    moveInertiaRatio = math.saturate(math.max(stepSpeed - param.inertiaConstraint.movementSpeedLimit, 0.0f) / stepSpeed);
-                }
-                if (stepRotationSpeed > param.inertiaConstraint.rotationSpeedLimit && param.inertiaConstraint.rotationSpeedLimit >= 0.0f)
-                {
-                    //Debug.Log($"Team[{teamId}] stepRotationSpeed:{stepRotationSpeed}");
-                    rotationInertiaRatio = math.saturate(math.max(stepRotationSpeed - param.inertiaConstraint.rotationSpeedLimit, 0.0f) / stepRotationSpeed);
-                }
-
-                // 全体慣性シフト
-                moveInertiaRatio = math.lerp(moveInertiaRatio, 1.0f, 1.0f - param.inertiaConstraint.movementInertia);
-                rotationInertiaRatio = math.lerp(rotationInertiaRatio, 1.0f, 1.0f - param.inertiaConstraint.rotationInertia);
-                cdata.stepMoveInertiaRatio = moveInertiaRatio;
-                cdata.stepRotationInertiaRatio = rotationInertiaRatio;
+                // ローカル慣性
+                float localInertia = 1.0f - param.inertiaConstraint.localInertia;
+                cdata.stepMoveInertiaRatio = localInertia;
+                cdata.stepRotationInertiaRatio = localInertia;
 
                 // 最終慣性
-                cdata.inertiaVector = math.lerp(float3.zero, cdata.stepVector, moveInertiaRatio);
-                cdata.inertiaRotation = math.slerp(quaternion.identity, cdata.stepRotation, rotationInertiaRatio);
+                cdata.inertiaVector = math.lerp(float3.zero, cdata.stepVector, localInertia);
+                cdata.inertiaRotation = math.slerp(quaternion.identity, cdata.stepRotation, localInertia);
                 //Debug.Log($"Team[{teamId}] stepSpeed:{stepSpeed}, moveInertiaRatio:{moveInertiaRatio}, inertiaVector:{cdata.inertiaVector}, rotationInertiaRatio:{rotationInertiaRatio}");
-
-                // 慣性削減後の移動速度と方向
-                var stepMovingVector = cdata.stepVector - cdata.inertiaVector;
-                var stepMovingLength = math.length(stepMovingVector);
-                cdata.stepMovingSpeed = stepMovingLength / simulationDeltaTime;
-                cdata.stepMovingDirection = stepMovingLength > 1e-06f ? stepMovingVector / stepMovingLength : 0;
-                //Debug.Log($"Team[{teamId}] stepMovingSpeed:{cdata.stepMovingSpeed}, stepMovingDirection:{cdata.stepMovingDirection}");
 
                 // ■遠心力用パラメータ算出
                 // 今回ステップでの回転速度と回転軸
                 cdata.angularVelocity = stepAngle / simulationDeltaTime; // 回転速度(rad/s)
-                //cdata.rotationAxis = cdata.angularVelocity > Define.System.Epsilon ? math.normalize(cdata.nowWorldRotation.value.xyz) : 0;
                 if (cdata.angularVelocity > Define.System.Epsilon)
                     MathUtility.ToAngleAxis(cdata.stepRotation, out _, out cdata.rotationAxis);
                 else
                     cdata.rotationAxis = 0;
-                //MathUtility.ToAngleAxis(cdata.stepRotation, out var _angle, out cdata.rotationAxis);
-                //cdata.angularVelocity = _angle / tdata.SimulationDeltaTime; // 回転速度(rad/s)
                 //Debug.Log($"Team[{teamId}] angularVelocity:{math.degrees(cdata.angularVelocity)}, axis:{cdata.rotationAxis}, q:{cdata.stepRotation.value}");
                 //Debug.Log($"Team[{teamId}] angularVelocity:{math.degrees(cdata.angularVelocity)}, now:{cdata.nowWorldRotation.value}, old:{cdata.oldWorldRotation.value}");
 
                 // チームスケール倍率
-                tdata.scaleRatio = math.length(wscl) / math.length(tdata.initScale);
+                tdata.scaleRatio = math.max(math.length(wscl) / math.length(tdata.initScale), 1e-06f);
                 //Debug.Log($"[{teamId}] scaleRatio:{tdata.scaleRatio}");
 
                 // ■重力方向割合 ---------------------------------------------------
@@ -1552,11 +1763,6 @@ namespace MagicaCloth2
                 float gravityRatio = 1.0f;
                 if (param.gravity > 1e-06f && param.gravityFalloff > 1e-06f)
                 {
-                    //var falloffDir = math.mul(cdata.nowWorldRotation, cdata.initLocalGravityDirection);
-                    //gravityDot = math.dot(falloffDir, param.gravityDirection);
-                    //gravityDot = math.saturate(gravityDot * 0.5f + 0.5f);
-                    //Debug.Log($"gdot:{gravityDot}");
-                    //gravityRatio = math.lerp(math.saturate(1.0f - param.gravityFalloff), 1.0f, math.saturate(1.0f - gravityDot));
                     gravityRatio = math.lerp(math.saturate(1.0f - param.gravityFalloff), 1.0f, math.saturate(1.0f - gravityDot));
                 }
                 tdata.gravityRatio = gravityRatio;
@@ -1604,8 +1810,8 @@ namespace MagicaCloth2
                 movingWindInfo.main = 0;
                 if (windParams.movingWind > 0.01f)
                 {
-                    movingWindInfo.main = cdata.stepMovingSpeed * windParams.movingWind;
-                    movingWindInfo.direction = -cdata.stepMovingDirection;
+                    movingWindInfo.main = (cdata.frameMovingSpeed * windParams.movingWind) / tdata.scaleRatio;
+                    movingWindInfo.direction = -cdata.frameMovingDirection;
                     UpdateWindTime(ref movingWindInfo, windParams.frequency, simulationDeltaTime);
                 }
                 teamWindData.movingWind = movingWindInfo;
@@ -1666,14 +1872,22 @@ namespace MagicaCloth2
                 if (tdata.IsProcess == false)
                     return;
 
+                var cdata = centerDataArray[teamId];
+
+                // コンポーネント位置
+                cdata.oldComponentWorldPosition = cdata.componentWorldPosition;
+                cdata.oldComponentWorldRotation = cdata.componentWorldRotation;
+
                 if (tdata.IsRunning)
                 {
-                    // ■センターを更新
-                    var cdata = centerDataArray[teamId];
+                    // センターを更新
                     cdata.oldFrameWorldPosition = cdata.frameWorldPosition;
                     cdata.oldFrameWorldRotation = cdata.frameWorldRotation;
                     cdata.oldFrameWorldScale = cdata.frameWorldScale;
-                    centerDataArray[teamId] = cdata;
+
+                    // 外力クリア
+                    tdata.forceMode = ClothForceMode.None;
+                    tdata.impactForce = 0;
                 }
 
                 // フラグリセット
@@ -1681,9 +1895,11 @@ namespace MagicaCloth2
                 tdata.flag.SetBits(Flag_TimeReset, false);
                 tdata.flag.SetBits(Flag_Running, false);
                 tdata.flag.SetBits(Flag_StepRunning, false);
+                tdata.flag.SetBits(Flag_KeepTeleport, false);
+                tdata.flag.SetBits(Flag_InertiaShift, false);
 
                 // 時間調整（floatの精度問題への対処）
-                const float limitTime = 86400.0f; // 30.0
+                const float limitTime = 3600.0f; // 60min
                 if (tdata.time > limitTime * 2)
                 {
                     tdata.time -= limitTime;
@@ -1695,6 +1911,7 @@ namespace MagicaCloth2
                 }
 
                 teamDataArray[teamId] = tdata;
+                centerDataArray[teamId] = cdata;
             }
         }
 
@@ -1728,11 +1945,26 @@ namespace MagicaCloth2
                     if (tdata.IsValid == false)
                         continue;
 
-                    var cprocess = GetClothProcess(i);
-                    var cloth = cprocess.cloth;
-
                     sb.Clear();
-                    sb.AppendLine($"ID:{i} [{cprocess.Name}] state:0x{cprocess.GetStateFlag().Value:X}, Flag:0x{tdata.flag.Value:X}, Particle:{tdata.ParticleCount}, Collider:{cprocess.ColliderCount} Proxy:{tdata.proxyMeshType}, Mapping:{tdata.MappingCount}");
+
+                    var cprocess = GetClothProcess(i);
+                    if (cprocess == null)
+                    {
+                        sb.AppendLine($"ID:{i} cprocess is null!");
+                        Debug.LogWarning(sb.ToString());
+                        allsb.Append(sb);
+                        continue;
+                    }
+                    var cloth = cprocess.cloth;
+                    if (cloth == null)
+                    {
+                        sb.AppendLine($"ID:{i} cloth is null!");
+                        Debug.LogWarning(sb.ToString());
+                        allsb.Append(sb);
+                        continue;
+                    }
+
+                    sb.AppendLine($"ID:{i} [{cprocess.Name}] state:0x{cprocess.GetStateFlag().Value:X}, Flag:0x{tdata.flag.Value:X}, Particle:{tdata.ParticleCount}, Collider:{cprocess.ColliderCapacity} Proxy:{tdata.proxyMeshType}, Mapping:{tdata.MappingCount}");
                     sb.AppendLine($"  -centerTransformIndex {tdata.centerTransformIndex}");
                     sb.AppendLine($"  -centerWorldPosition {tdata.centerWorldPosition}");
                     sb.AppendLine($"  -initScale {tdata.initScale}");

@@ -467,10 +467,10 @@ namespace MagicaCloth2
                         if (ren)
                         {
                             var setup = new RenderSetupData(ren);
+                            result.Merge(setup.result);
                             if (setup.IsFaild())
                             {
                                 setup.Dispose();
-                                result.Set(setup.result);
                                 throw new MagicaClothProcessingException();
                             }
                             setupList.Add(setup);
@@ -511,7 +511,7 @@ namespace MagicaCloth2
                     var ret = cloth.Process.GeneratePaintMapDataList(paintMapDataList);
                     if (ret.IsError())
                     {
-                        result = ret;
+                        result.Merge(ret);
                         throw new MagicaClothProcessingException();
                     }
                     if (paintMapDataList.Count != setupList.Count)
@@ -547,7 +547,6 @@ namespace MagicaCloth2
                         ct.ThrowIfCancellationRequested();
                         if (sdata.clothType == ClothProcess.ClothType.MeshCloth)
                         {
-                            //foreach (var setup in setupList)
                             for (int i = 0; i < setupList.Count; i++)
                             {
                                 var setup = setupList[i];
@@ -569,7 +568,7 @@ namespace MagicaCloth2
                                     var ret = cloth.Process.GenerateSelectionDataFromPaintMap(clothTransformRecord, renderMesh, paintMapDataList[i], out SelectionData renderSelectionData);
                                     if (ret.IsError())
                                     {
-                                        result = ret;
+                                        result.Merge(ret);
                                         throw new MagicaClothProcessingException();
                                     }
 
@@ -588,7 +587,7 @@ namespace MagicaCloth2
                                 editMesh.Reduction(sdata.reductionSetting, ct);
                                 if (editMesh.IsError)
                                 {
-                                    result = editMesh.result;
+                                    result.Merge(editMesh.result);
                                     throw new MagicaClothProcessingException();
                                 }
 
@@ -601,7 +600,7 @@ namespace MagicaCloth2
                             editMesh.ImportFrom(setupList[0]);
                             if (editMesh.IsError)
                             {
-                                result = editMesh.result;
+                                result.Merge(editMesh.result);
                                 throw new MagicaClothProcessingException();
                             }
                             //Debug.Log($"(IMPORT) {editMesh}");
@@ -619,7 +618,7 @@ namespace MagicaCloth2
                         editMesh.Optimization();
                         if (editMesh.IsError)
                         {
-                            result = editMesh.result;
+                            result.Merge(editMesh.result);
                             throw new MagicaClothProcessingException();
                         }
                         //Debug.Log($"(OPTIMIZE) {editMesh}");
@@ -678,7 +677,7 @@ namespace MagicaCloth2
                         editMesh.ConvertProxyMesh(cloth.SerializeData, null, null, normalAdjustmentTransformRecored);
                         if (editMesh.IsError)
                         {
-                            result = editMesh.result;
+                            result.Merge(editMesh.result);
                             throw new MagicaClothProcessingException();
                         }
                         //Debug.Log($"(PROXY) {editMesh}");

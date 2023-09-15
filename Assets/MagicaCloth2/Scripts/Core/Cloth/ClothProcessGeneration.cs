@@ -19,6 +19,7 @@ namespace MagicaCloth2
                 return false;
             }
             cloth.SerializeData.DataValidate();
+            cloth.serializeData2.DataValidate();
 
             // 初期化実行
             Init();

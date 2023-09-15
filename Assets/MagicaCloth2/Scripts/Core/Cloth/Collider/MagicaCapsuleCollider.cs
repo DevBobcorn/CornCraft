@@ -35,15 +35,21 @@ namespace MagicaCloth2
         /// </summary>
         public bool radiusSeparation = false;
 
+        /// <summary>
+        /// 中央揃え
+        /// Aligned on center.
+        /// </summary>
+        public bool alignedOnCenter = true;
+
 
         public override ColliderManager.ColliderType GetColliderType()
         {
             if (direction == Direction.X)
-                return ColliderManager.ColliderType.CapsuleX;
+                return alignedOnCenter ? ColliderManager.ColliderType.CapsuleX_Center : ColliderManager.ColliderType.CapsuleX_Start;
             else if (direction == Direction.Y)
-                return ColliderManager.ColliderType.CapsuleY;
+                return alignedOnCenter ? ColliderManager.ColliderType.CapsuleY_Center : ColliderManager.ColliderType.CapsuleY_Start;
             else
-                return ColliderManager.ColliderType.CapsuleZ;
+                return alignedOnCenter ? ColliderManager.ColliderType.CapsuleZ_Center : ColliderManager.ColliderType.CapsuleZ_Start;
         }
 
         /// <summary>

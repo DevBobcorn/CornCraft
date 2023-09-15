@@ -31,11 +31,14 @@ namespace MagicaCloth2
         {
             None = 0,
             Sphere = 1,
-            CapsuleX = 2,
-            CapsuleY = 3,
-            CapsuleZ = 4,
-            Plane = 5,
-            Box = 6,
+            CapsuleX_Center = 2,
+            CapsuleY_Center = 3,
+            CapsuleZ_Center = 4,
+            CapsuleX_Start = 5,
+            CapsuleY_Start = 6,
+            CapsuleZ_Start = 7,
+            Plane = 8,
+            Box = 9,
         }
 
         /// <summary>
@@ -45,6 +48,7 @@ namespace MagicaCloth2
         /// </summary>
         public const byte Flag_Valid = 0x10; // データの有無
         public const byte Flag_Enable = 0x20; // 有効状態
+        public const byte Flag_Reset = 0x40; // 位置リセット
         public ExNativeArray<ExBitFlag8> flagArray;
 
         /// <summary>
@@ -206,33 +210,37 @@ namespace MagicaCloth2
             if (isValid == false)
                 return;
 
-            int teamId = cprocess.TeamId;
-            var tdata = MagicaManager.Team.GetTeamData(teamId);
+            // コライダー数
+            int cnt = cprocess.cloth.SerializeData.colliderCollisionConstraint.ColliderLength;
+            if (cnt > 0)
+            {
+                int teamId = cprocess.TeamId;
+                ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
 
-            // 最大コライダー数で初期化
-            int cnt = Define.System.MaxColliderCount;
-            tdata.colliderChunk = teamIdArray.AddRange(cnt, (short)teamId);
-            flagArray.AddRange(cnt);
-            centerArray.AddRange(cnt);
-            sizeArray.AddRange(cnt);
-            framePositions.AddRange(cnt);
-            frameRotations.AddRange(cnt);
-            frameScales.AddRange(cnt);
-            nowPositions.AddRange(cnt);
-            nowRotations.AddRange(cnt);
-            //nowScales.AddRange(cnt);
-            oldFramePositions.AddRange(cnt);
-            oldFrameRotations.AddRange(cnt);
-            //oldFrameScales.AddRange(cnt);
-            oldPositions.AddRange(cnt);
-            oldRotations.AddRange(cnt);
-            workDataArray.AddRange(cnt);
-            tdata.colliderTransformChunk = MagicaManager.Bone.AddTransform(cnt, teamId); // 領域のみ
-            tdata.colliderCount = 0;
-            MagicaManager.Team.SetTeamData(teamId, tdata);
+                // コライダー数で初期化
+                tdata.colliderChunk = teamIdArray.AddRange(cnt, (short)teamId);
+                flagArray.AddRange(cnt);
+                centerArray.AddRange(cnt);
+                sizeArray.AddRange(cnt);
+                framePositions.AddRange(cnt);
+                frameRotations.AddRange(cnt);
+                frameScales.AddRange(cnt);
+                nowPositions.AddRange(cnt);
+                nowRotations.AddRange(cnt);
+                //nowScales.AddRange(cnt);
+                oldFramePositions.AddRange(cnt);
+                oldFrameRotations.AddRange(cnt);
+                //oldFrameScales.AddRange(cnt);
+                oldPositions.AddRange(cnt);
+                oldRotations.AddRange(cnt);
+                workDataArray.AddRange(cnt);
+                tdata.colliderTransformChunk = MagicaManager.Bone.AddTransform(cnt, teamId); // 領域のみ
+                tdata.colliderCount = 0;
+                cprocess.colliderList.AddRange(new ColliderComponent[cnt]); // nullで領域確保
 
-            // 初期コライダー登録
-            InitColliders(cprocess);
+                // 初期コライダー登録
+                InitColliders(cprocess);
+            }
         }
 
         /// <summary>
@@ -247,18 +255,17 @@ namespace MagicaCloth2
             int teamId = cprocess.TeamId;
 
             // コライダー解除
-            for (int i = 0; i < cprocess.colliderArray?.Length; i++)
+            foreach (var col in cprocess.colliderList)
             {
-                var col = cprocess.colliderArray[i];
                 if (col)
                 {
                     col.Exit(teamId);
                     colliderSet.Remove(col);
                 }
-                cprocess.colliderArray[i] = null;
             }
+            cprocess.colliderList.Clear();
 
-            var tdata = MagicaManager.Team.GetTeamData(teamId);
+            ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
 
             var c = tdata.colliderChunk;
             teamIdArray.RemoveAndFill(c); // 0クリア
@@ -284,8 +291,6 @@ namespace MagicaCloth2
             // コライダートランスフォーム解除
             MagicaManager.Bone.RemoveTransform(tdata.colliderTransformChunk);
             tdata.colliderTransformChunk.Clear();
-
-            MagicaManager.Team.SetTeamData(teamId, tdata);
         }
 
         //=========================================================================================
@@ -299,25 +304,18 @@ namespace MagicaCloth2
             if (clist.Count == 0)
                 return;
 
-            var tdata = MagicaManager.Team.GetTeamData(cprocess.TeamId);
+            ref var tdata = ref MagicaManager.Team.GetTeamDataRef(cprocess.TeamId);
             int index = 0;
             for (int i = 0; i < clist.Count; i++)
             {
                 var col = clist[i];
-                if (col)
+                if (col && cprocess.colliderList.Contains(col) == false)
                 {
-                    if (index >= Define.System.MaxColliderCount)
-                    {
-                        Develop.LogWarning($"No more colliders can be added. The maximum number of colliders is {Define.System.MaxColliderCount}.");
-                        break;
-                    }
-
                     AddColliderInternal(cprocess, col, index, tdata.colliderChunk.startIndex + index, tdata.colliderTransformChunk.startIndex + index);
                     tdata.colliderCount++;
                     index++;
                 }
             }
-            MagicaManager.Team.SetTeamData(cprocess.TeamId, tdata);
         }
 
         /// <summary>
@@ -332,14 +330,13 @@ namespace MagicaCloth2
 
             // 現在の登録コライダーと比較し削除と追加を行う
             // 既存削除
-            for (int i = 0; i < Define.System.MaxColliderCount;)
+            for (int i = 0, cnt = cprocess.ColliderCapacity; i < cnt;)
             {
-                var col = cprocess.colliderArray[i];
+                var col = cprocess.colliderList[i];
                 if (col && clist.Contains(col) == false)
                 {
                     // コライダー消滅
                     RemoveCollider(col, cprocess.TeamId);
-                    //Debug.Log($"コライダー消滅:{col.name}");
                 }
                 else
                     i++;
@@ -370,22 +367,67 @@ namespace MagicaCloth2
             if (cprocess.GetColliderIndex(col) >= 0)
                 return; // すでに追加済み
 
-            var tdata = MagicaManager.Team.GetTeamData(cprocess.TeamId);
+            ref var tdata = ref MagicaManager.Team.GetTeamDataRef(cprocess.TeamId);
             Debug.Assert(tdata.IsValid);
+
+            if (tdata.colliderChunk.IsValid == false)
+            {
+                // 新規確保
+                int newCount = Define.System.ExpandedColliderCount;
+                tdata.colliderChunk = teamIdArray.AddRange(newCount, (short)cprocess.TeamId);
+                flagArray.AddRange(newCount);
+                centerArray.AddRange(newCount);
+                sizeArray.AddRange(newCount);
+                framePositions.AddRange(newCount);
+                frameRotations.AddRange(newCount);
+                frameScales.AddRange(newCount);
+                nowPositions.AddRange(newCount);
+                nowRotations.AddRange(newCount);
+                oldFramePositions.AddRange(newCount);
+                oldFrameRotations.AddRange(newCount);
+                oldPositions.AddRange(newCount);
+                oldRotations.AddRange(newCount);
+                workDataArray.AddRange(newCount);
+                tdata.colliderTransformChunk = MagicaManager.Bone.AddTransform(newCount, cprocess.TeamId); // 領域のみ
+                tdata.colliderCount = 0;
+                cprocess.colliderList.AddRange(new ColliderComponent[newCount]); // nullで領域確保
+            }
+            else if (tdata.ColliderCount == tdata.colliderChunk.dataLength)
+            {
+                // コライダー配列のキャパシティ上限なら拡張する
+                // 拡張
+                int newCount = tdata.colliderChunk.dataLength + Define.System.ExpandedColliderCount;
+                var oldColliderChunk = tdata.colliderChunk;
+                tdata.colliderChunk = teamIdArray.Expand(oldColliderChunk, newCount);
+                flagArray.Expand(oldColliderChunk, newCount);
+                centerArray.Expand(oldColliderChunk, newCount);
+                sizeArray.Expand(oldColliderChunk, newCount);
+                framePositions.Expand(oldColliderChunk, newCount);
+                frameRotations.Expand(oldColliderChunk, newCount);
+                frameScales.Expand(oldColliderChunk, newCount);
+                nowPositions.Expand(oldColliderChunk, newCount);
+                nowRotations.Expand(oldColliderChunk, newCount);
+                oldFramePositions.Expand(oldColliderChunk, newCount);
+                oldFrameRotations.Expand(oldColliderChunk, newCount);
+                oldPositions.Expand(oldColliderChunk, newCount);
+                oldRotations.Expand(oldColliderChunk, newCount);
+                workDataArray.Expand(oldColliderChunk, newCount);
+
+                // コライダートランスフォーム拡張
+                var oldColliderTransformChunk = tdata.colliderTransformChunk;
+                tdata.colliderTransformChunk = MagicaManager.Bone.Expand(oldColliderTransformChunk, newCount);
+
+                // コライダー配列拡張
+                cprocess.colliderList.AddRange(new ColliderComponent[Define.System.ExpandedColliderCount]);
+            }
 
             // 最後に追加する
             int index = tdata.colliderCount;
-            if (index >= Define.System.MaxColliderCount)
-            {
-                Develop.LogWarning($"No more colliders can be added. The maximum number of colliders is {Define.System.MaxColliderCount}.");
-                return;
-            }
             int arrayIndex = tdata.colliderChunk.startIndex + index;
             int transformIndex = tdata.colliderTransformChunk.startIndex + index;
             AddColliderInternal(cprocess, col, index, arrayIndex, transformIndex);
 
             tdata.colliderCount++;
-            MagicaManager.Team.SetTeamData(cprocess.TeamId, tdata);
         }
 
         /// <summary>
@@ -399,7 +441,7 @@ namespace MagicaCloth2
         {
             if (isValid == false)
                 return;
-            var tdata = MagicaManager.Team.GetTeamData(teamId);
+            ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
             int ccnt = tdata.colliderCount;
             if (ccnt == 0)
                 return;
@@ -438,15 +480,14 @@ namespace MagicaCloth2
 
                 flagArray[swapArrayIndex] = default;
                 teamIdArray[swapArrayIndex] = 0;
-                //typeArray[swapArrayIndex] = 0;
 
                 // transform
                 MagicaManager.Bone.CopyTransform(swapTransformIndex, transformIndex);
                 MagicaManager.Bone.SetTransform(null, default, swapTransformIndex, 0);
 
                 // cprocess
-                cprocess.colliderArray[index] = cprocess.colliderArray[swapIndex];
-                cprocess.colliderArray[swapIndex] = null;
+                cprocess.colliderList[index] = cprocess.colliderList[swapIndex];
+                cprocess.colliderList[swapIndex] = null;
             }
             else
             {
@@ -458,11 +499,10 @@ namespace MagicaCloth2
                 MagicaManager.Bone.SetTransform(null, default, transformIndex, 0);
 
                 // cprocess
-                cprocess.colliderArray[index] = null;
+                cprocess.colliderList[index] = null;
             }
 
             tdata.colliderCount--;
-            MagicaManager.Team.SetTeamData(teamId, tdata);
 
             colliderSet.Remove(col);
         }
@@ -477,6 +517,7 @@ namespace MagicaCloth2
             flag = DataUtility.SetColliderType(flag, col.GetColliderType());
             flag.SetFlag(Flag_Valid, true);
             flag.SetFlag(Flag_Enable, col.isActiveAndEnabled);
+            flag.SetFlag(Flag_Reset, true);
             flagArray[arrayIndex] = flag;
             centerArray[arrayIndex] = col.center;
             sizeArray[arrayIndex] = col.GetSize();
@@ -494,10 +535,9 @@ namespace MagicaCloth2
             //oldFrameScales[arrayIndex] = scl;
             oldPositions[arrayIndex] = pos;
             oldRotations[arrayIndex] = rot;
-            //workDataArray[arrayIndex] = default;
 
             // チームにコライダーコンポーネントを登録
-            cprocess.colliderArray[index] = col;
+            cprocess.colliderList[index] = col;
 
             // コライダーコンポーネント側にも登録する
             col.Register(teamId);
@@ -507,7 +547,6 @@ namespace MagicaCloth2
             var tflag = new ExBitFlag8(TransformManager.Flag_Read);
             tflag.SetFlag(TransformManager.Flag_Enable, t_enable);
             MagicaManager.Bone.SetTransform(col.transform, tflag, transformIndex, teamId);
-            //MagicaManager.Bone.SetTransform(col.transform, new ExBitFlag8(TransformManager.Flag_Read), transformIndex);
 
             colliderSet.Add(col);
         }
@@ -522,7 +561,7 @@ namespace MagicaCloth2
         {
             if (IsValid() == false)
                 return;
-            var tdata = MagicaManager.Team.GetTeamData(teamId);
+            ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
             if (tdata.IsValid == false)
                 return;
             var cprocess = MagicaManager.Team.GetClothProcess(teamId);
@@ -532,6 +571,7 @@ namespace MagicaCloth2
             int arrayIndex = tdata.colliderChunk.startIndex + index;
             var flag = flagArray[arrayIndex];
             flag.SetFlag(Flag_Enable, sw);
+            flag.SetFlag(Flag_Reset, true); // Enable/Disableどちらでもリセット
             flagArray[arrayIndex] = flag;
 
             // トランスフォーム有効状態
@@ -549,7 +589,7 @@ namespace MagicaCloth2
         {
             if (IsValid() == false)
                 return;
-            var tdata = MagicaManager.Team.GetTeamData(teamId);
+            ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
             if (tdata.IsValid == false)
                 return;
             if (tdata.ColliderCount == 0)
@@ -561,7 +601,12 @@ namespace MagicaCloth2
             {
                 int arrayIndex = tdata.colliderChunk.startIndex + i;
                 int transformIndex = c.startIndex + i;
+
+                // フラグ
                 var flag = flagArray[arrayIndex];
+                flag.SetFlag(Flag_Enable, sw);
+                flag.SetFlag(Flag_Reset, true); // Enable/Disableどちらでもリセット
+                flagArray[arrayIndex] = flag;
 
                 // 有効状態
                 bool t_enable = teamEnable && flag.IsSet(Flag_Enable);
@@ -579,7 +624,7 @@ namespace MagicaCloth2
             if (IsValid() == false)
                 return;
 
-            var tdata = MagicaManager.Team.GetTeamData(teamId);
+            ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
             if (tdata.IsValid == false)
                 return;
             var cprocess = MagicaManager.Team.GetClothProcess(teamId);
@@ -610,6 +655,7 @@ namespace MagicaCloth2
             var job = new PreSimulationUpdateJob()
             {
                 teamDataArray = MagicaManager.Team.teamDataArray.GetNativeArray(),
+                centerDataArray = MagicaManager.Team.centerDataArray.GetNativeArray(),
 
                 teamIdArray = teamIdArray.GetNativeArray(),
                 flagArray = flagArray.GetNativeArray(),
@@ -640,11 +686,13 @@ namespace MagicaCloth2
             // team
             [Unity.Collections.ReadOnly]
             public NativeArray<TeamManager.TeamData> teamDataArray;
+            [Unity.Collections.ReadOnly]
+            public NativeArray<InertiaConstraint.CenterData> centerDataArray;
 
             // collider
             [Unity.Collections.ReadOnly]
             public NativeArray<short> teamIdArray;
-            [Unity.Collections.ReadOnly]
+            //[Unity.Collections.ReadOnly]
             public NativeArray<ExBitFlag8> flagArray;
             [Unity.Collections.ReadOnly]
             public NativeArray<float3> centerArray;
@@ -654,19 +702,13 @@ namespace MagicaCloth2
             public NativeArray<quaternion> frameRotations;
             [Unity.Collections.WriteOnly]
             public NativeArray<float3> frameScales;
-            [Unity.Collections.WriteOnly]
             public NativeArray<float3> oldFramePositions;
-            [Unity.Collections.WriteOnly]
             public NativeArray<quaternion> oldFrameRotations;
             //[Unity.Collections.WriteOnly]
             //public NativeArray<float3> oldFrameScales;
-            [Unity.Collections.WriteOnly]
             public NativeArray<float3> nowPositions;
-            [Unity.Collections.WriteOnly]
             public NativeArray<quaternion> nowRotations;
-            [Unity.Collections.WriteOnly]
             public NativeArray<float3> oldPositions;
-            [Unity.Collections.WriteOnly]
             public NativeArray<quaternion> oldRotations;
 
             // transform (ワールド姿勢)
@@ -706,7 +748,7 @@ namespace MagicaCloth2
                 frameScales[index] = wscl;
 
                 // リセット処理
-                if (tdata.IsReset)
+                if (tdata.IsReset || flag.IsSet(Flag_Reset))
                 {
                     oldFramePositions[index] = wpos;
                     oldFrameRotations[index] = wrot;
@@ -715,6 +757,29 @@ namespace MagicaCloth2
                     nowRotations[index] = wrot;
                     oldPositions[index] = wpos;
                     oldRotations[index] = wrot;
+
+                    flag.SetFlag(Flag_Reset, false);
+                    flagArray[index] = flag;
+                }
+                else if (tdata.IsInertiaShift)
+                {
+                    // 慣性全体シフト
+                    var cdata = centerDataArray[teamId];
+
+                    // cdata.frameComponentShiftVector : 全体シフトベクトル
+                    // cdata.frameComponentShiftRotation : 全体シフト回転
+                    // cdata.oldComponentWorldPosition : フレーム移動前のコンポーネント中心位置
+
+                    float3 prevFrameWorldPosition = cdata.oldComponentWorldPosition;
+
+                    oldFramePositions[index] = MathUtility.ShiftPosition(oldFramePositions[index], prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+                    oldFrameRotations[index] = math.mul(cdata.frameComponentShiftRotation, oldFrameRotations[index]);
+
+                    nowPositions[index] = MathUtility.ShiftPosition(nowPositions[index], prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+                    nowRotations[index] = math.mul(cdata.frameComponentShiftRotation, nowRotations[index]);
+
+                    oldPositions[index] = MathUtility.ShiftPosition(oldPositions[index], prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+                    oldRotations[index] = math.mul(cdata.frameComponentShiftRotation, oldRotations[index]);
                 }
             }
         }
@@ -885,36 +950,17 @@ namespace MagicaCloth2
                 // old姿勢をシフトさせる
                 var oldpos = oldPositions[cindex];
                 var oldrot = oldRotations[cindex];
-#if false
-                {
-                    var cdata = centerDataArray[teamId];
 
-                    // ローカル変換して計算する
-                    float3 lpos = oldpos - cdata.oldWorldPosition;
-                    lpos = math.mul(cdata.inertiaRotation, lpos);
-                    lpos += cdata.inertiaVector;
-                    oldpos = cdata.oldWorldPosition + lpos;
-                    //oldrot = math.mul(oldrot, cdata.inertiaRotation);
-                    oldrot = math.mul(cdata.inertiaRotation, oldrot);
-
-                    oldPositions[cindex] = oldpos;
-                    oldRotations[cindex] = oldrot;
-                }
-#endif
-#if true
-                // おそらくこちらのほうが安定する
+                // ローカル慣性シフト
                 var cdata = centerDataArray[teamId];
                 oldpos = math.lerp(oldpos, pos, cdata.stepMoveInertiaRatio);
                 oldrot = math.slerp(oldrot, rot, cdata.stepRotationInertiaRatio);
                 oldPositions[cindex] = oldpos;
                 oldRotations[cindex] = math.normalize(oldrot);
-#endif
 
                 // ステップ作業データの構築
                 var type = DataUtility.GetColliderType(flag);
                 var work = new WorkData();
-                //var oldpos = oldPositions[cindex];
-                //var oldrot = oldRotations[cindex];
                 var csize = sizeArray[cindex];
                 var cscl = frameScales[cindex];
                 work.inverseOldRot = math.inverse(oldrot);
@@ -936,10 +982,15 @@ namespace MagicaCloth2
                     // nextpos
                     work.nextPos.c0 = pos;
                 }
-                else if (type == ColliderType.CapsuleX || type == ColliderType.CapsuleY || type == ColliderType.CapsuleZ)
+                else if (type >= ColliderType.CapsuleX_Center && type <= ColliderType.CapsuleZ_Start)
                 {
+                    // 中央揃え
+                    bool alignedCenter = type >= ColliderType.CapsuleX_Center && type <= ColliderType.CapsuleZ_Center;
+
                     // 方向性
-                    float3 dir = type == ColliderType.CapsuleX ? math.right() : type == ColliderType.CapsuleY ? math.up() : math.forward();
+                    float3 dir = (type == ColliderType.CapsuleX_Center || type == ColliderType.CapsuleX_Start) ? math.right()
+                        : (type == ColliderType.CapsuleY_Center || type == ColliderType.CapsuleY_Start) ? math.up()
+                        : math.forward();
 
                     // スケール
                     float scl = math.dot(math.abs(cscl), dir); // dirの軸のスケールを使用する
@@ -954,10 +1005,10 @@ namespace MagicaCloth2
 
                     // 長さ
                     float length = csize.z;
-                    float slen = length * 0.5f;
-                    float elen = length * 0.5f;
-                    slen = Mathf.Max(slen - sr, 0.0f);
-                    elen = Mathf.Max(elen - er, 0.0f);
+                    float slen = alignedCenter ? length * 0.5f : 0.0f;
+                    float elen = alignedCenter ? length * 0.5f : (length - sr);
+                    slen = math.max(slen - sr, 0.0f);
+                    elen = math.max(elen - er, 0.0f);
 
                     // 移動前カプセル始点と終点
                     float3 soldpos = oldpos + math.mul(oldrot, dir * slen);
