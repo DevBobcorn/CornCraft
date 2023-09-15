@@ -161,7 +161,7 @@ namespace CraftSharp
                             InWater = inWater,
                             InLava  = blockId == lavaId,
                             LikeAir = emptyBlocks.Contains(blockId),
-                            FullSolid = (!noOcclusion.Contains(blockId)) && alwaysFulls.Contains(blockId)
+                            FullCollider = alwaysFulls.Contains(blockId)
                         };
                     }
                     else
@@ -173,7 +173,7 @@ namespace CraftSharp
                             InWater = waterBlocks.Contains(blockId),
                             InLava  = blockId == lavaId,
                             LikeAir = emptyBlocks.Contains(blockId),
-                            FullSolid = (!noOcclusion.Contains(blockId)) && alwaysFulls.Contains(blockId)
+                            FullCollider = alwaysFulls.Contains(blockId)
                         };
                     }
                 }

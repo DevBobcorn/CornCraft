@@ -30,7 +30,7 @@ namespace CraftSharp
 
         private readonly short[] biomes;
         private readonly byte[] skyLight, blockLight;
-        private readonly bool[] isOpaque;
+        private readonly bool[] aoSolid;
 
         private bool lightingPresent = false;
         public bool LightingPresent => lightingPresent;
@@ -49,7 +49,7 @@ namespace CraftSharp
             skyLight = new byte[4096 * (size + 2)];
             blockLight = new byte[4096 * (size + 2)];
 
-            isOpaque = new bool[4096 * size];
+            aoSolid = new bool[4096 * size];
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace CraftSharp
             return lightingPresent ? blockLight[index] : (byte) 0;
         }
 
-        public void RefreshIsOpaque()
+        public void RefreshAOSolid()
         {
             for (int ci = 0; ci < ColumnSize; ci++)
             {
@@ -148,13 +148,13 @@ namespace CraftSharp
 
                 if (chunk is null) // Empty chunk, no opaque blocks
                 {
-                    Array.Fill(isOpaque, false, firstIndex, 4096);
+                    Array.Fill(aoSolid, false, firstIndex, 4096);
                 }
                 else
                 {
                     for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) for (int z = 0; z < 16; z++)
                     {
-                        isOpaque[firstIndex + (y << 8) + (z << 4) + x] = chunk[x, y, z].State.FullSolid;
+                        aoSolid[firstIndex + (y << 8) + (z << 4) + x] = chunk[x, y, z].State.AmbientOcclusionSolid;
                     }
                 }
             }
@@ -164,10 +164,10 @@ namespace CraftSharp
         {
             int index = (((int) location.Y - MinimumY) << 8) | (location.GetChunkBlockZ() << 4) | location.GetChunkBlockX();
             
-            if (index < 0 || index >= isOpaque.Length)
+            if (index < 0 || index >= aoSolid.Length)
                 return false;
 
-            return isOpaque[index];
+            return aoSolid[index];
         }
     }
 }

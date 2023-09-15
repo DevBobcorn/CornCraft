@@ -24,7 +24,11 @@ namespace CraftSharp
             }
         }
         public bool LikeAir   = false;
-        public bool FullSolid = true;
+        // A block can have full collider box even if it doesn't collide with player,
+        // in this case the collider is used for raycast detection. (e.g. Tall Grass)
+        public bool FullCollider = false;
+        public bool FaceOcclusionSolid => FullCollider && !NoOcclusion;
+        public bool AmbientOcclusionSolid => FullCollider && !NoCollision;
 
         public static BlockState FromString(string state)
         {
