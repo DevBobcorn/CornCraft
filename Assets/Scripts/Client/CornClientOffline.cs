@@ -73,9 +73,9 @@ namespace CraftSharp
             interactionUpdater = GetComponent<InteractionUpdater>();
             interactionUpdater!.Initialize(this, CameraController);
 
-            // Post initialization
             StartClient(new SessionToken(), null, string.Empty, 0, 0, null, "offline");
 
+            // Post initialization
             GameMode = GameMode.Creative;
             EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
 
@@ -202,7 +202,7 @@ namespace CraftSharp
                     targetInfo = "\n";
                 }
                 
-                return baseString + $"\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
+                return baseString + $"\nFog: <{RenderSettings.fogDensity}>\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
             }
             

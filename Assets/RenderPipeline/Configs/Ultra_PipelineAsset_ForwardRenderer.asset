@@ -28,26 +28,26 @@ MonoBehaviour:
   m_Active: 1
   settings:
     isEnabled: 1
-    renderPassEvent: 400
+    renderPassEvent: 500
     NoiseTexture: {fileID: 2800000, guid: e09deeeaec0a3c547a3b72ad3d615255, type: 2}
     Dither: 0
     distanceFog: 1
     useRadialDistance: 1
     heightFog: 0
-    height: 1
-    heightDensity: 2
-    startDistance: 0
-    SunColor: {r: 0, g: 0, b: 0, a: 1}
+    height: 0
+    heightDensity: 0
+    startDistance: 32
+    SunColor: {r: 0.69934195, g: 0.58467793, b: 0.5092466, a: 1}
     MoonColor: {r: 0.33023313, g: 0.36793935, b: 0.38679242, a: 1}
     TopColor: {r: 0, g: 0, b: 0, a: 0}
-    BottomColor: {r: 0.1302065, g: 0.16895631, b: 0.20754719, a: 1}
+    BottomColor: {r: 0.41058934, g: 0.45534423, b: 0.5217236, a: 1}
     BlendHeight: 0.014999998
     FogGradientHeight: 0.5
-    SunIntensity: 0.1707848
-    MoonIntensity: 0.32498372
+    SunIntensity: 0.2033246
+    MoonIntensity: -0.007637215
     SunFalloffIntensity: 9.4
-    SunControl: -0.008325081
-    MoonControl: 1.1828394
+    SunControl: 1.0050161
+    MoonControl: 0
 --- !u!114 &-3662932369841924689
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -255,13 +255,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
-    isEnabled: 0
+    isEnabled: 1
     renderPassEvent: 500
     resolution: 1
     screenBlendMode: 0
     celestialName: UniStorm Sun
     radialBlurIterations: 2
-    sunColor: {r: 0.63763285, g: 0.31256524, b: 0.14843345, a: 1}
+    sunColor: {r: 0.49589634, g: 0.41083628, b: 0.35533753, a: 1}
     sunThreshold: {r: 0.5568628, g: 0.5372549, b: 0.48235294, a: 1}
     sunShaftBlurRadius: 3
     sunShaftIntensity: 1
