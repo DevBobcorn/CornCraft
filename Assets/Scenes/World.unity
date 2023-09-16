@@ -1997,7 +1997,7 @@ MonoBehaviour:
   TimeMusicFoldout: 0
   SunFoldout: 0
   MoonFoldout: 0
-  AtmosphereFoldout: 0
+  AtmosphereFoldout: 1
   FogFoldout: 1
   WeatherFoldout: 0
   LightningFoldout: 0
@@ -2005,7 +2005,7 @@ MonoBehaviour:
   SettingsFoldout: 1
   CloudsFoldout: 0
   PlatformFoldout: 1
-  m_UniStormProfile: {fileID: 0}
+  m_UniStormProfile: {fileID: 11400000, guid: cd9ff5a2dbf568c409befbedafbbc262, type: 2}
   FilePath: Assets/UniStorm Weather System/Resources/Components/Resources/UniStorm
     Data.asset
   UniStormProfileType: 0
@@ -3150,7 +3150,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     m_PreInfinity: 2
     m_PostInfinity: 2
-    m_RotationOrder: 0
+    m_RotationOrder: 4
   SunSize:
     serializedVersion: 2
     m_Curve:
@@ -4416,15 +4416,15 @@ MonoBehaviour:
     m_NumAlphaKeys: 2
   SunSpotColor:
     serializedVersion: 2
-    key0: {r: 3.5629578, g: 0.9327114, b: 0, a: 1}
-    key1: {r: 3.5629578, g: 0.9327114, b: 0, a: 1}
-    key2: {r: 3.5629578, g: 1.6602263, b: 0, a: 0}
-    key3: {r: 3.5629578, g: 1.6602263, b: 0, a: 0}
-    key4: {r: 3.5629578, g: 0.9327114, b: 0, a: 0}
-    key5: {r: 3.5629578, g: 0.9327114, b: 0, a: 0}
+    key0: {r: 4.2183194, g: 1.6742013, b: 0.7720318, a: 1}
+    key1: {r: 4.1285677, g: 1.5810746, b: 0.6777081, a: 1}
+    key2: {r: 4.7568283, g: 3.4723012, b: 2.3514886, a: 0}
+    key3: {r: 4.7568283, g: 3.0648954, b: 1.5886009, a: 0}
+    key4: {r: 4.263195, g: 2.731174, b: 2.187904, a: 0}
+    key5: {r: 4.1285677, g: 1.7248383, b: 0.8724519, a: 0}
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 15521
+    ctime0: 15613
     ctime1: 18396
     ctime2: 22803
     ctime3: 45223
