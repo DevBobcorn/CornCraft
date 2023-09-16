@@ -13,6 +13,69 @@ MonoBehaviour:
   m_Name: FernPostProcess
   m_EditorClassIdentifier: 
   m_Active: 1
+--- !u!114 &-5745652578779279666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1b1f8e52a528414eb09a2a63238d9d6, type: 3}
+  m_Name: UniStormAtmosphericFogFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    isEnabled: 1
+    renderPassEvent: 100
+    NoiseTexture: {fileID: 2800000, guid: e09deeeaec0a3c547a3b72ad3d615255, type: 2}
+    Dither: 0
+    distanceFog: 1
+    useRadialDistance: 1
+    heightFog: 0
+    height: 1
+    heightDensity: 2
+    startDistance: 0
+    SunColor: {r: 0.6853213, g: 0.6031302, b: 0.54233164, a: 1}
+    MoonColor: {r: 0.33023313, g: 0.36793935, b: 0.38679242, a: 1}
+    TopColor: {r: 0, g: 0, b: 0, a: 0}
+    BottomColor: {r: 0.44588825, g: 0.49321982, b: 0.5660378, a: 1}
+    BlendHeight: 0.014999998
+    FogGradientHeight: 0.5
+    SunIntensity: 0.24026117
+    MoonIntensity: -0.010498055
+    SunFalloffIntensity: 9.4
+    SunControl: 1.0049077
+    MoonControl: 0
+--- !u!114 &-3662932369841924689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d309d34ca22cb5d4f91a635395eded23, type: 3}
+  m_Name: UniStormCloudShadowsFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    isEnabled: 0
+    renderPassEvent: 400
+    Fade: 0.33
+    CloudShadowTexture: {fileID: 0}
+    ShadowColor: {r: 1, g: 1, b: 1, a: 1}
+    CloudTextureScale: 0.1
+    BottomThreshold: 0
+    TopThreshold: 1
+    ShadowIntensity: 1
+    ScreenSpaceShadowsMaterial: {fileID: 0}
+    ShadowDirection: {x: 0, y: 0, z: 0}
+    m_CurrentCloudHeight: 0
+    CloudSpeed: 0
+    NormalY: 0
 --- !u!114 &-2351452293755395191
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -75,6 +138,10 @@ MonoBehaviour:
   - {fileID: 5351018995921332434}
   - {fileID: -5747766180797253489}
   - {fileID: -2351452293755395191}
+  - {fileID: -3662932369841924689}
+  - {fileID: -5745652578779279666}
+  - {fileID: 6018286962624777378}
+  - {fileID: 4860644998581089374}
   m_RendererFeatureMap: d22842066da3424a49b7a632a72583dd8f78938d1cd53bb089a36eec98f65ddf
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -109,10 +176,36 @@ MonoBehaviour:
     zFailOperation: 0
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
-  m_DepthPrimingMode: 0
+  m_DepthPrimingMode: 2
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &4860644998581089374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b47d9523e62ddd48b8ae2826026b4f3, type: 3}
+  m_Name: MoonUniStormSunShaftsFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    isEnabled: 0
+    renderPassEvent: 500
+    resolution: 1
+    screenBlendMode: 0
+    celestialName: UniStorm Moon
+    radialBlurIterations: 3
+    sunColor: {r: 0.31764707, g: 0.32156864, b: 0.32156864, a: 1}
+    sunThreshold: {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 1}
+    sunShaftBlurRadius: 3.32
+    sunShaftIntensity: 1
+    maxRadius: 0.3
+    useDepthTexture: 1
 --- !u!114 &5351018995921332434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,3 +241,29 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 3302065f671a8450b82c9ddf07426f3a, type: 3}
   - {fileID: 2800000, guid: 56a77a3e8d64f47b6afe9e3c95cb57d5, type: 3}
   m_Shader: {fileID: 4800000, guid: 0849e84e3d62649e8882e9d6f056a017, type: 3}
+--- !u!114 &6018286962624777378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b47d9523e62ddd48b8ae2826026b4f3, type: 3}
+  m_Name: SunUniStormSunShaftsFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    isEnabled: 1
+    renderPassEvent: 500
+    resolution: 1
+    screenBlendMode: 0
+    celestialName: UniStorm Sun
+    radialBlurIterations: 2
+    sunColor: {r: 0.48719364, g: 0.41604188, b: 0.3668375, a: 1}
+    sunThreshold: {r: 0.5568628, g: 0.5372549, b: 0.48235294, a: 1}
+    sunShaftBlurRadius: 3
+    sunShaftIntensity: 1
+    maxRadius: 0.5
+    useDepthTexture: 1
