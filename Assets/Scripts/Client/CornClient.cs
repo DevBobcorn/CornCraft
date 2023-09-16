@@ -881,6 +881,13 @@ namespace CraftSharp
 
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => ChangeSlot(slot));
+            
+            // There won't be confirmation from the server
+            // Simply set it on the client side
+            CurrentSlot = Convert.ToByte(slot);
+            // Broad cast hotbar selection change
+            EventManager.Instance.BroadcastOnUnityThread(
+                    new HeldItemChangeEvent(CurrentSlot, inventories[0].GetHotbarItem(slot)));
 
             return handler!.SendHeldItemChange(slot);
         }
