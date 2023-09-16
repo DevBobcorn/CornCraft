@@ -60,17 +60,19 @@ namespace CraftSharp.Resource
             float x0z1 = math.lerp(lights[2], lights[6], vertPosInBlock.y);
             float x1z1 = math.lerp(lights[3], lights[7], vertPosInBlock.y);
 
-            return math.lerp(
+            var interpolated = math.lerp(
                     math.lerp(x0z0, x0z1, vertPosInBlock.x),
                     math.lerp(x1z0, x1z1, vertPosInBlock.x),
                     vertPosInBlock.z
             );
+
+            return interpolated * interpolated;
         }
 
         private float GetCornerAO(bool side1, bool corner, bool side2)
         {
             //return 1F - (side1 ? 0.33F : 0F) - (corner ? 0.33F : 0F) - (side2 ? 0.33F : 0F);
-            return 1F - (side1 ? 0.2F : 0F) - (corner ? 0.2F : 0F) - (side2 ? 0.2F : 0F);
+            return 1F - (side1 ? 0.25F : 0F) - (corner ? 0.25F : 0F) - (side2 ? 0.25F : 0F);
         }
 
         // tl tm tr
