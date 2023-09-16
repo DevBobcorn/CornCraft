@@ -256,7 +256,7 @@ Transform:
   - {fileID: 7372638134847987542}
   - {fileID: 7361313672352195396}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2642413223307196818
 MonoBehaviour:
@@ -282,10 +282,10 @@ MonoBehaviour:
   scrollSensitivity: 0.2
   thirdPersonCullingMask:
     serializedVersion: 2
-    m_Bits: 81600
+    m_Bits: 81601
   firstPersonCullingMask:
     serializedVersion: 2
-    m_Bits: 76992
+    m_Bits: 76993
   virtualCameraFollow: {fileID: 8231872019064414601}
   virtualCameraFixed: {fileID: 4409463203126261892}
 --- !u!1 &2988304240145284854
@@ -419,7 +419,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3759418466539031928}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.1, z: 0}
+  m_LocalPosition: {x: 0, y: 1.1, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -465,7 +465,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 81856
+    m_Bits: 81857
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
