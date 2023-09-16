@@ -42,7 +42,6 @@ namespace CraftSharp.Rendering
             entityAnimator.runtimeAnimatorController = animatorOverrideController;
 
             // Add and initialize player widgets
-            visualObj.AddComponent<PlayerAnimatorWidget>();
             var accessoryWidget = visualObj.AddComponent<PlayerAccessoryWidget>();
 
             var weaponMountRef = entityAnimator!.GetBoneTransform(HumanBodyBones.Spine);

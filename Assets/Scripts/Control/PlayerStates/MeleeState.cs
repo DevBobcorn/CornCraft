@@ -7,8 +7,6 @@ namespace CraftSharp.Control
     {
         public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
-            var meleeAttack = player.MeleeAttack;
-
             info.Sprinting = false;
             info.Moving = inputData.HorInputNormalized != Vector2.zero;
 
@@ -16,8 +14,35 @@ namespace CraftSharp.Control
             info.MoveVelocity = Vector3.zero; // Cancel move
 
             var attackStatus = info.AttackStatus;
+            var meleeAttack = attackStatus.CurrentAttack;
+
+            if (meleeAttack == null) // Melee attack data is not assigned, stop it
+            {
+                info.Attacking = false;
+                attackStatus.AttackStage = -1;
+                return;
+            }
 
             attackStatus.AttackCooldown -= interval;
+            attackStatus.StageTime += interval;
+
+            if (attackStatus.CausingDamage)
+            {
+                if (attackStatus.StageTime >= attackStatus.StageDamageEnd)
+                {
+                    attackStatus.CausingDamage = false;
+                    player.MeleeDamageEnd();
+                }
+            }
+            else
+            {
+                if (attackStatus.StageTime >= attackStatus.StageDamageStart
+                        && attackStatus.StageTime < attackStatus.StageDamageEnd)
+                {
+                    attackStatus.CausingDamage = true;
+                    player.MeleeDamageStart();
+                }
+            }
 
             if (attackStatus.AttackCooldown < meleeAttack.IdleTimeout)
             {
@@ -45,9 +70,16 @@ namespace CraftSharp.Control
         private void StartMeleeStage(PlayerMeleeAttack meleeAttack, AttackStatus attackStatus, int stage, PlayerController player)
         {
             attackStatus.AttackStage = stage;
-            attackStatus.AttackCooldown = meleeAttack.StageDurations[stage];
 
-            player.OverrideState(meleeAttack.DummyAnimationClip!, meleeAttack.AnimationClips[stage]);
+            var stageData = meleeAttack.Stages[stage];
+            // Reset attack timers
+            attackStatus.AttackCooldown = stageData.Duration;
+            attackStatus.StageTime = 0F;
+            // Update stage damage time
+            attackStatus.StageDamageStart = stageData.DamageStart;
+            attackStatus.StageDamageEnd = stageData.DamageEnd;
+
+            player.OverrideState(meleeAttack.DummyAnimationClip!, stageData.AnimationClip!);
             player.CrossFadeState("Melee", 0F);
             //player.TurnToAttackTarget();
         }
@@ -79,11 +111,17 @@ namespace CraftSharp.Control
             info.Attacking = true;
 
             var attackStatus = info.AttackStatus;
-            var meleeAttack = player.MeleeAttack;
+            var meleeAttack = attackStatus.CurrentAttack;
+
+            if (meleeAttack == null) // Melee attack data is not assigned, stop it
+            {
+                info.Attacking = false;
+                attackStatus.AttackStage = -1;
+                return;
+            }
 
             StartMeleeStage(meleeAttack, attackStatus, 0, player);
 
-            //Debug.Log("Attack starts!");
             player.ChangeItemState(PlayerController.CurrentItemState.Hold);
             player.UseRootMotion = true;
 
@@ -98,6 +136,12 @@ namespace CraftSharp.Control
             var attackStatus = info.AttackStatus;
 
             attackStatus.AttackCooldown = 0F;
+
+            if (attackStatus.CausingDamage) // Interrupted while dealing damage
+            {
+                attackStatus.CausingDamage = false;
+                player.MeleeDamageEnd();
+            }
 
             //Debug.Log("Attack ends!");
             player.ChangeItemState(PlayerController.CurrentItemState.Mount);

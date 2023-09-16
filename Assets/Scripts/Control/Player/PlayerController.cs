@@ -18,12 +18,11 @@ namespace CraftSharp.Control
 
         public ItemActionType CurrentActionType = ItemActionType.None;
 
-        [SerializeField] protected PlayerMeleeAttack? meleeAttack;
-        public PlayerMeleeAttack MeleeAttack => meleeAttack!;
+        [SerializeField] public PlayerMeleeAttack? MeleeSwordAttack;
+        [SerializeField] public GameObject? SwordTrailPrefab;
 
         [SerializeField] protected PlayerAbility? ability;
         [SerializeField] private CameraController? cameraController;
-        [SerializeField] protected GameObject? meleeWeaponPrefab;
         [SerializeField] public Transform? cameraRef;
         
         private EntityRender? playerRender;
@@ -65,6 +64,8 @@ namespace CraftSharp.Control
             // Clear existing event subscriptions
             OnLogicalUpdate = null;
             OnRandomizeMirroredFlag = null;
+            OnMeleeDamageStart = null;
+            OnMeleeDamageEnd = null;
             OnCurrentItemChanged = null;
             OnItemStateChanged = null;
             OnCrossFadeState = null;
@@ -285,6 +286,12 @@ namespace CraftSharp.Control
         public event NoParamEventHandler? OnRandomizeMirroredFlag;
         public void RandomizeMirroredFlag() => OnRandomizeMirroredFlag?.Invoke();
 
+        public event NoParamEventHandler? OnMeleeDamageStart;
+        public void MeleeDamageStart() => OnMeleeDamageStart?.Invoke();
+
+        public event NoParamEventHandler? OnMeleeDamageEnd;
+        public void MeleeDamageEnd() => OnMeleeDamageEnd?.Invoke();
+
         public void ToggleWalkMode()
         {
             Status!.WalkMode = !Status.WalkMode;
@@ -301,11 +308,14 @@ namespace CraftSharp.Control
 
         public bool TryStartAttack()
         {
-            if (statusUpdater!.Status.AttackStatus.AttackCooldown <= 0F)
+            if (Status!.AttackStatus.AttackCooldown <= 0F)
             {
                 if (CurrentActionType == ItemActionType.MeleeWeaponSword)
                 {
-                    CurrentState.OnExit(statusUpdater!.Status, playerRigidbody!, this);
+                    CurrentState.OnExit(Status, playerRigidbody!, this);
+                    // Specify melee attack data to use
+                    Status.AttackStatus.CurrentAttack = MeleeSwordAttack;
+
                     // Enter melee attack state
                     CurrentState = PlayerStates.MELEE;
                     CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);

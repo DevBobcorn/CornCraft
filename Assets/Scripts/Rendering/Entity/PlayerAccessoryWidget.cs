@@ -17,6 +17,7 @@ namespace CraftSharp.Rendering
         private Transform? itemMountPivot, itemMountSlot;
         private PlayerController? player;
         private PlayerActionItem? currentItem;
+        private Animator? playerAnimator;
 
         public void SetRefTransforms(Transform mainHandRef, Transform spineRef)
         {
@@ -80,6 +81,16 @@ namespace CraftSharp.Rendering
                 currentItem.slotPosition = new(0F, 0F, -0.1F);
                 mainHandSlot!.localPosition = new(-0.2F, 0F, 0.2F);
                 mainHandSlot.localEulerAngles = new(-135F, 0F, 45F);
+
+                if (player!.SwordTrailPrefab != null)
+                {
+                    var trailObj = GameObject.Instantiate(player!.SwordTrailPrefab);
+                    trailObj.transform.parent = itemObj.transform;
+                    trailObj.transform.localPosition = new(0.5F, 0.65F, 0.65F);
+
+                    var currentMeleeWeapon = currentItem as MeleeWeapon;
+                    currentMeleeWeapon!.SlashTrail = trailObj.GetComponent<TrailRenderer>();
+                }
             }
 
             itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
@@ -132,26 +143,25 @@ namespace CraftSharp.Rendering
         }
 
         // Called by animator event
-        public void DamageStart()
-        {
-            //currentItem?.StartSlash();
-        }
+        public void DamageStart() { }
 
         // Called by animator event
-        public void DamageStop()
-        {
-            //currentItem?.EndSlash();
-        }
+        public void DamageStop() { }
 
         // Called by animator event
-        public void StageEnding()
-        {
-            
-        }
+        public void StageEnding() { }
+
+        // Called by animator event
+        public void FootL() { }
+
+        public void FootR() { }
+
+        public void Hit() { }
 
         void Start()
         {
             player = GetComponentInParent<PlayerController>();
+            playerAnimator = GetComponent<Animator>();
 
             player.OnItemStateChanged += (weaponState) => {
                 switch (weaponState)
@@ -176,6 +186,14 @@ namespace CraftSharp.Rendering
                     CreateActionItem(itemStack, actionType);
                 }
             };
+
+            player.OnMeleeDamageStart += () => {
+                currentItem?.StartAction();
+            };
+
+            player.OnMeleeDamageEnd += () => {
+                currentItem?.EndAction();
+            };
         }
 
         void Update()
@@ -184,6 +202,16 @@ namespace CraftSharp.Rendering
                 return;
 
             itemMountPivot.localEulerAngles = new Vector3(-spineRef.localEulerAngles.x, 0F, 0F);
+        }
+
+        void OnAnimatorMove()
+        {
+            if (player is not null && player.UseRootMotion)
+            {
+                var rb = player.PlayerRigidbody;
+
+                rb.position += playerAnimator!.deltaPosition;
+            }
         }
     }
 }

@@ -78,10 +78,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d32161aaff9cb0419e64d4f69a5e1ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  meleeAttack: {fileID: 11400000, guid: 117382c7804f426429eeae8062de2c8e, type: 2}
+  CurrentActionType: 0
+  MeleeSwordAttack: {fileID: 11400000, guid: 117382c7804f426429eeae8062de2c8e, type: 2}
+  SwordTrailPrefab: {fileID: 8749675225872338033, guid: 8c0e367f6013712429a3a0623672b56d, type: 3}
   ability: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
   cameraController: {fileID: 0}
-  meleeWeaponPrefab: {fileID: 3607843667057953232, guid: 92a649b5223bbb74499bff1c0c30402f, type: 3}
   cameraRef: {fileID: 2288748662104460795}
   physicMaterial: {fileID: 13400000, guid: 11508097031b7f04c8ab9dcba71d230e, type: 2}
   UseRootMotion: 0
