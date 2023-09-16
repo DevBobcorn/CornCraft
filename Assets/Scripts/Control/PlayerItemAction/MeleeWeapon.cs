@@ -8,8 +8,7 @@ namespace CraftSharp.Control
 {
     public class MeleeWeapon : PlayerActionItem
     {
-        [SerializeField] private TrailRenderer? slashTrail;
-
+        [SerializeField] public TrailRenderer? SlashTrail;
         private readonly List<Collider> slashHits = new();
         private bool slashActive = false;
 
@@ -18,16 +17,20 @@ namespace CraftSharp.Control
             slashHits.Clear();
             slashActive = true;
 
-            if (slashTrail is not null)
-                slashTrail.emitting = true;
+            if (SlashTrail != null)
+            {
+                SlashTrail.emitting = true;
+            }
         }
 
         public override void EndAction()
         {
             slashActive = false;
 
-            if (slashTrail is not null)
-                slashTrail.emitting = false;
+            if (SlashTrail != null)
+            {
+                SlashTrail.emitting = false;
+            }
             
             List<AttackHitInfo> infos = new();
 
