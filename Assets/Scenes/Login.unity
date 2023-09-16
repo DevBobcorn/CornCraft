@@ -2447,10 +2447,6 @@ PrefabInstance:
       value: UniStorm Environment Manager
       objectReference: {fileID: 0}
     - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
-      propertyPath: TabNumber
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
       propertyPath: PlayerCamera
       value: 
       objectReference: {fileID: 963194227}
@@ -2458,10 +2454,6 @@ PrefabInstance:
       propertyPath: PlayerTransform
       value: 
       objectReference: {fileID: 963194228}
-    - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
-      propertyPath: AtmosphereFoldout
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5024844223867598023, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
       propertyPath: m_RootOrder
       value: 0

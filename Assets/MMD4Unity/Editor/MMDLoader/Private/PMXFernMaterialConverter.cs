@@ -13,8 +13,14 @@ namespace MMD
 
         }
 
-        public Color32 DIFFUSE_HIGH = new Color32(255, 240, 227, 255);
-        public Color32 DIFFUSE_DARK = new Color32(255, 199, 115, 255);
+        //public Color32 DIFFUSE_HIGH = new Color32(255, 240, 227, 255);
+        //public Color32 DIFFUSE_DARK = new Color32(255, 199, 115, 255);
+
+        public Color32 HAIR_DIFFUSE_HIGH = new Color32(255, 255, 255, 255);
+        public Color32 HAIR_DIFFUSE_DARK = new Color32(255, 200, 180, 255);
+
+        public Color32 SKIN_DIFFUSE_HIGH = new Color32(255, 255, 255, 255);
+        public Color32 SKIN_DIFFUSE_DARK = new Color32(255, 200, 180, 255);
 
         enum MaterialTypes
         {
@@ -101,8 +107,8 @@ namespace MMD
                     result.SetFloat("_enum_diffuse", 4); // Standard Diffuse => SDFFaceShading
                     result.SetFloat("_CELLThreshold", 0.3F);
                     result.SetFloat("_CELLSmoothing", 0.1F);
-                    result.SetColor("_HighColor", DIFFUSE_HIGH);
-                    result.SetColor("_DarkColor", DIFFUSE_DARK);
+                    result.SetColor("_HighColor", SKIN_DIFFUSE_HIGH);
+                    result.SetColor("_DarkColor", SKIN_DIFFUSE_DARK);
                     result.SetFloat("_enum_specular", 0); // Standard Specular => None
                     // Setup face SDF parameters
                     result.SetTexture("_SDFFaceTex", faceSDFTex);
@@ -116,8 +122,8 @@ namespace MMD
                     result.SetFloat("_enum_diffuse", 0); // Standard Diffuse => CelShading
                     result.SetFloat("_CELLThreshold", 0.3F);
                     result.SetFloat("_CELLSmoothing", 0.1F);
-                    result.SetColor("_HighColor", DIFFUSE_HIGH);
-                    result.SetColor("_DarkColor", DIFFUSE_DARK);
+                    result.SetColor("_HighColor", SKIN_DIFFUSE_HIGH);
+                    result.SetColor("_DarkColor", SKIN_DIFFUSE_DARK);
                     result.SetFloat("_enum_specular", 0); // Standard Specular => None
                     break;
             }
@@ -137,7 +143,7 @@ namespace MMD
                 result.SetFloat("_Outline", 1F);
                 // Set outline width and color
                 result.SetFloat("_OutlineWidth", material.edge_size * scale_ * 15F / c_default_scale);
-                result.SetColor("_OutlineColor", material.edge_color);
+                result.SetColor("_OutlineColor", material.edge_color / 2F);
             }
             //カスタムレンダーキュー
             /*{

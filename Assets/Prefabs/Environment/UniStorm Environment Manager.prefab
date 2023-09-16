@@ -240,7 +240,7 @@ Transform:
   - {fileID: 4289771794413061662}
   - {fileID: 5196750750398585288}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4808323076095797737
 MonoBehaviour:
@@ -320,7 +320,7 @@ MonoBehaviour:
   TimeMusicFoldout: 0
   SunFoldout: 1
   MoonFoldout: 0
-  AtmosphereFoldout: 0
+  AtmosphereFoldout: 1
   FogFoldout: 0
   WeatherFoldout: 0
   LightningFoldout: 0
@@ -2264,8 +2264,8 @@ MonoBehaviour:
     key0: {r: 0.1938412, g: 0.24391092, b: 0.33962262, a: 1}
     key1: {r: 0.1938412, g: 0.24391092, b: 0.33962262, a: 1}
     key2: {r: 1, g: 0.5568628, b: 0, a: 0}
-    key3: {r: 0, g: 0.72825956, b: 1, a: 0}
-    key4: {r: 0, g: 0.5163206, b: 0.764151, a: 0}
+    key3: {r: 0, g: 0.31703258, b: 0.6415094, a: 0}
+    key4: {r: 0, g: 0.29466307, b: 0.6886792, a: 0}
     key5: {r: 1, g: 0.5568628, b: 0, a: 0}
     key6: {r: 0.1938412, g: 0.24391092, b: 0.33962262, a: 0}
     key7: {r: 0.1938412, g: 0.24391092, b: 0.33962262, a: 0}
@@ -2286,7 +2286,7 @@ MonoBehaviour:
     atime6: 0
     atime7: 0
     m_Mode: 0
-    m_ColorSpace: -1
+    m_ColorSpace: 0
     m_NumColorKeys: 8
     m_NumAlphaKeys: 2
   AmbientSkyLightColor:
@@ -2683,10 +2683,10 @@ MonoBehaviour:
     serializedVersion: 2
     key0: {r: 0.1938412, g: 0.24391092, b: 0.33962262, a: 1}
     key1: {r: 0.1938412, g: 0.24391092, b: 0.33962262, a: 1}
-    key2: {r: 0.6415094, g: 0.6415094, b: 0.6415094, a: 0}
-    key3: {r: 0.011764705, g: 0.6333833, b: 1, a: 0}
-    key4: {r: 0.32452828, g: 0.7226423, b: 1, a: 0}
-    key5: {r: 0.6415094, g: 0.6415094, b: 0.6415094, a: 0}
+    key2: {r: 0.4256319, g: 0.49621752, b: 0.5283019, a: 0}
+    key3: {r: 0, g: 0.47619048, b: 0.754717, a: 0}
+    key4: {r: 0, g: 0.42101812, b: 0.7169812, a: 0}
+    key5: {r: 0.3489498, g: 0.4256804, b: 0.49056602, a: 0}
     key6: {r: 0.1938412, g: 0.24391092, b: 0.33962262, a: 0}
     key7: {r: 0.1938412, g: 0.24391092, b: 0.33962262, a: 0}
     ctime0: 0
@@ -2706,7 +2706,7 @@ MonoBehaviour:
     atime6: 0
     atime7: 0
     m_Mode: 0
-    m_ColorSpace: -1
+    m_ColorSpace: 0
     m_NumColorKeys: 8
     m_NumAlphaKeys: 2
   SunSpotColor:
