@@ -13,10 +13,18 @@ namespace CraftSharp.Control
             info.Gliding = false;
             info.Moving = false;
 
-            if (inputData.Attack) // Attack available
+            if (inputData.AttackReleased) // Attack available
             {
-                player.TryStartAttack();
-                
+                if (inputData.AttackPressTime < PlayerUserInput.LONG_ATTACK_THRESHOLD)
+                {
+                    player.TryStartSingleAttack();
+                    Debug.Log($"Single attack: press time {inputData.AttackPressTime}");
+                }
+            }
+            else if (inputData.AttackPressTime >= PlayerUserInput.LONG_ATTACK_THRESHOLD)
+            {
+                player.TryStartLongAttack();
+                Debug.Log($"Long attack: press time {inputData.AttackPressTime}");
             }
             else if (inputData.JumpFlag) // Jump in place
             {

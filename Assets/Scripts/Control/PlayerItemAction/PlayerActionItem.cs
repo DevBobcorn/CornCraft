@@ -24,6 +24,10 @@ namespace CraftSharp.Control
                 {
                     return ItemActionType.MeleeWeaponSword;
                 }
+                else if (item.ItemType.ItemId.Path.EndsWith("bow"))
+                {
+                    return ItemActionType.RangedWeaponBow;
+                }
                 else
                 {
                     return ItemActionType.None;

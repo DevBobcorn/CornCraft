@@ -12,9 +12,7 @@ namespace CraftSharp.Control
 
         public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (!info.Spectating && info.OnWall && !info.InLiquid)
-                return true;
-            
+            // State only available via direct transition
             return false;
         }
 

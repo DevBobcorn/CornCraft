@@ -5,12 +5,14 @@ namespace CraftSharp.Control
     public class AttackStatus
     {
         // Player attack data
-        public PlayerMeleeAttack? CurrentAttack = null;
-        public float AttackCooldown = 0F;
+        public PlayerMeleeAttack? CurrentMeleeAttack = null;
+        public PlayerRangedAttack? CurrentRangedAttack = null;
+
+        public float AttackCooldown   = 0F;
         public float StageDamageStart = 0F;
-        public float StageDamageEnd = 0F;
+        public float StageDamageEnd   = 0F;
         public float StageTime = 0F;
-        public int AttackStage = 0;
+        public int AttackStage =  0;
 
         public bool CausingDamage = false;
 
