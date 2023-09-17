@@ -84,7 +84,7 @@ namespace CraftSharp
             {
                 DummyOnInventoryOpen(0, new Container(ContainerType.PlayerInventory));
                 DummyOnSetSlot(0, 36, new ItemStack(ItemPalette.INSTANCE.FromId(new("diamond_sword")), 1), 0);
-                DummyOnSetSlot(0, 37, new ItemStack(ItemPalette.INSTANCE.FromId(new("grass_block")), 1), 0);
+                DummyOnSetSlot(0, 37, new ItemStack(ItemPalette.INSTANCE.FromId(new("bow")), 1), 0);
             }
             catch
             {

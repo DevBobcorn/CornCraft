@@ -14,7 +14,7 @@ namespace CraftSharp.Control
             info.MoveVelocity = Vector3.zero; // Cancel move
 
             var attackStatus = info.AttackStatus;
-            var meleeAttack = attackStatus.CurrentAttack;
+            var meleeAttack = attackStatus.CurrentMeleeAttack;
 
             if (meleeAttack == null) // Melee attack data is not assigned, stop it
             {
@@ -57,7 +57,7 @@ namespace CraftSharp.Control
                     info.Attacking = false;
                     attackStatus.AttackStage = -1;
                 }
-                else if (inputData.Attack) // Enter next attack stage
+                else if (inputData.AttackPressed) // Enter next attack stage
                 {
                     info.Attacking = true;
                     var nextStage = (attackStatus.AttackStage + 1) % meleeAttack.StageCount;
@@ -86,12 +86,7 @@ namespace CraftSharp.Control
 
         public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
         {
-            if (!info.Attacking)
-                return false;
-            
-            if (info.Spectating || info.InLiquid)
-                return false;
-            
+            // State only available via direct transition
             return false;
         }
 
@@ -100,7 +95,7 @@ namespace CraftSharp.Control
             if (!info.Attacking)
                 return true;
             
-            if (info.Spectating || info.InLiquid)
+            if (info.Spectating || info.InLiquid || !info.Grounded)
                 return true;
             
             return false;
@@ -111,7 +106,7 @@ namespace CraftSharp.Control
             info.Attacking = true;
 
             var attackStatus = info.AttackStatus;
-            var meleeAttack = attackStatus.CurrentAttack;
+            var meleeAttack = attackStatus.CurrentMeleeAttack;
 
             if (meleeAttack == null) // Melee attack data is not assigned, stop it
             {

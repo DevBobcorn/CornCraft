@@ -19,6 +19,7 @@ namespace CraftSharp.Control
         public ItemActionType CurrentActionType = ItemActionType.None;
 
         [SerializeField] public PlayerMeleeAttack? MeleeSwordAttack;
+        [SerializeField] public PlayerRangedAttack? RangedBowAttack;
         [SerializeField] public GameObject? SwordTrailPrefab;
 
         [SerializeField] protected PlayerAbility? ability;
@@ -306,22 +307,53 @@ namespace CraftSharp.Control
             CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
         }
 
-        public bool TryStartAttack()
+        public bool TryStartSingleAttack()
         {
             if (Status!.AttackStatus.AttackCooldown <= 0F)
             {
                 if (CurrentActionType == ItemActionType.MeleeWeaponSword)
                 {
                     CurrentState.OnExit(Status, playerRigidbody!, this);
-                    // Specify melee attack data to use
-                    Status.AttackStatus.CurrentAttack = MeleeSwordAttack;
-
-                    // Enter melee attack state
+                    // Specify attack data to use
+                    Status.AttackStatus.CurrentMeleeAttack = MeleeSwordAttack;
+                    // Enter attack state
                     CurrentState = PlayerStates.MELEE;
                     CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
+                    return true;
                 }
+                else if (CurrentActionType == ItemActionType.RangedWeaponBow)
+                {
+                    // TODO: Implement
+                    return false;
+                }
+                
+                return false;
+            }
+            
+            return false;
+        }
 
-                return true;
+        public bool TryStartLongAttack()
+        {
+            if (Status!.AttackStatus.AttackCooldown <= 0F)
+            {
+                if (CurrentActionType == ItemActionType.MeleeWeaponSword)
+                {
+                    // TODO: Implement
+                    return false;
+                }
+                else if (CurrentActionType == ItemActionType.RangedWeaponBow)
+                {
+                    CurrentState.OnExit(Status, playerRigidbody!, this);
+                    // Specify attack data to use
+                    Status.AttackStatus.CurrentRangedAttack = RangedBowAttack;
+                    // Enter attack state
+                    CurrentState = PlayerStates.BOW_AIM;
+                    CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
+                    return true;
+                }
+                
+                return false;
             }
             
             return false;

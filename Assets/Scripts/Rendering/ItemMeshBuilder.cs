@@ -12,6 +12,7 @@ namespace CraftSharp.Rendering
     public class ItemMeshBuilder
     {
         private static readonly float3 ITEM_CENTER = new(-0.5F, -0.5F, -0.5F);
+        private static readonly float3 ITEM_ORIGIN = new(-0.5F, 0F, 0F);
 
         public static (Mesh mesh, Material material, Dictionary<DisplayPosition, float3x3> transforms)?
                 BuildItem(ItemStack? itemStack, bool useItemCenter)
@@ -42,7 +43,7 @@ namespace CraftSharp.Rendering
 
             // TODO Get and build the right geometry (base or override)
             var itemGeometry = itemModel.Geometry;
-            itemGeometry.Build(ref visualBuffer, useItemCenter ? ITEM_CENTER : Vector3.zero, colors);
+            itemGeometry.Build(ref visualBuffer, useItemCenter ? ITEM_CENTER : ITEM_ORIGIN, colors);
 
             int vertexCount = visualBuffer.vert.Length;
             int triIdxCount = (vertexCount / 2) * 3;

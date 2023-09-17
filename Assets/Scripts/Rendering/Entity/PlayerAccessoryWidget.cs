@@ -11,8 +11,8 @@ namespace CraftSharp.Rendering
 {
     public class PlayerAccessoryWidget : MonoBehaviour
     {
-        [HideInInspector] public Transform? mainHandRef;
-        [HideInInspector] public Transform? spineRef;
+        [SerializeField] private Transform? mainHandRef;
+        [SerializeField] private Transform? spineRef;
         private Transform? mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
         private Transform? itemMountPivot, itemMountSlot;
         private PlayerController? player;
@@ -55,42 +55,47 @@ namespace CraftSharp.Rendering
             var itemObj = new GameObject("Action Item");
             itemObj.layer = this.gameObject.layer;
 
-            currentItem = actionType switch
-            {
-                ItemActionType.MeleeWeaponSword => itemObj!.AddComponent<MeleeWeapon>(),
-
-                _                               => itemObj!.AddComponent<UselessActionItem>()
-            };
-
             (Mesh mesh, Material material, Dictionary<DisplayPosition, float3x3> transforms)? meshData = null;
 
-            if (actionType == ItemActionType.None)
+            switch (actionType)
             {
-                meshData = ItemMeshBuilder.BuildItem(itemStack, true);
+                case ItemActionType.MeleeWeaponSword:
+                    currentItem = itemObj!.AddComponent<MeleeWeapon>();
+                    meshData = ItemMeshBuilder.BuildItem(itemStack, false);
 
-                currentItem.slotEularAngles = new(0F, 90F, 0F);
-                currentItem.slotPosition = new(0F, 0F, -0.5F);
-                mainHandSlot!.localPosition = Vector3.zero;
-                mainHandSlot.localEulerAngles = Vector3.zero;
-            }
-            else // Hand held melee weapon
-            {
-                meshData = ItemMeshBuilder.BuildItem(itemStack, false);
+                    currentItem.slotEularAngles = new(135F, 90F, -20F);
+                    currentItem.slotPosition = new(0F, 0.2F, -0.25F);
+                    mainHandSlot!.localPosition = new(0F, -0.1F, 0.05F);
+                    mainHandSlot.localEulerAngles = new(-135F, 0F, 45F);
 
-                currentItem.slotEularAngles = new(135F, 90F, 0F);
-                currentItem.slotPosition = new(0F, 0F, -0.1F);
-                mainHandSlot!.localPosition = new(-0.2F, 0F, 0.2F);
-                mainHandSlot.localEulerAngles = new(-135F, 0F, 45F);
+                    if (player!.SwordTrailPrefab != null)
+                    {
+                        var trailObj = GameObject.Instantiate(player!.SwordTrailPrefab);
+                        trailObj.transform.parent = itemObj.transform;
+                        trailObj.transform.localPosition = new(0.5F, 0.65F, 0.65F);
 
-                if (player!.SwordTrailPrefab != null)
-                {
-                    var trailObj = GameObject.Instantiate(player!.SwordTrailPrefab);
-                    trailObj.transform.parent = itemObj.transform;
-                    trailObj.transform.localPosition = new(0.5F, 0.65F, 0.65F);
+                        var sword = currentItem as MeleeWeapon;
+                        sword!.SlashTrail = trailObj.GetComponent<TrailRenderer>();
+                    }
+                    break;
+                case ItemActionType.RangedWeaponBow:
+                    currentItem = itemObj!.AddComponent<UselessActionItem>();
+                    meshData = ItemMeshBuilder.BuildItem(itemStack, false);
 
-                    var currentMeleeWeapon = currentItem as MeleeWeapon;
-                    currentMeleeWeapon!.SlashTrail = trailObj.GetComponent<TrailRenderer>();
-                }
+                    currentItem.slotEularAngles = new(-40F, 90F, 20F);
+                    currentItem.slotPosition = new(0F, -0.4F, -0.4F);
+                    mainHandSlot!.localPosition = Vector3.zero;
+                    mainHandSlot.localEulerAngles = Vector3.zero;
+                    break;
+                default:
+                    currentItem = itemObj!.AddComponent<UselessActionItem>();
+                    meshData = ItemMeshBuilder.BuildItem(itemStack, true);
+
+                    currentItem.slotEularAngles = new(0F, 90F, 0F);
+                    currentItem.slotPosition = new(0F, 0F, -0.5F);
+                    mainHandSlot!.localPosition = Vector3.zero;
+                    mainHandSlot.localEulerAngles = Vector3.zero;
+                    break;
             }
 
             itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);

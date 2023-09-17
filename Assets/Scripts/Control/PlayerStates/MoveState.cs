@@ -39,9 +39,18 @@ namespace CraftSharp.Control
             // Use the target visual yaw as actual movement direction
             var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
 
-            if (inputData.Attack) // Attack available
+            if (inputData.AttackReleased) // Attack available
             {
-                player.TryStartAttack();
+                if (inputData.AttackPressTime < PlayerUserInput.LONG_ATTACK_THRESHOLD)
+                {
+                    player.TryStartSingleAttack();
+                    Debug.Log($"Single attack: press time {inputData.AttackPressTime}");
+                }
+            }
+            else if (inputData.AttackPressTime >= PlayerUserInput.LONG_ATTACK_THRESHOLD)
+            {
+                player.TryStartLongAttack();
+                Debug.Log($"Long attack: press time {inputData.AttackPressTime}");
             }
             else if (inputData.HorInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
             {
