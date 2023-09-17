@@ -43,8 +43,8 @@ MonoBehaviour:
     BottomColor: {r: 0.41058934, g: 0.45534423, b: 0.5217236, a: 1}
     BlendHeight: 0.1
     FogGradientHeight: 0.5
-    SunIntensity: 0.2033246
-    MoonIntensity: -0.007637215
+    SunIntensity: 0
+    MoonIntensity: -0
     SunFalloffIntensity: 9.4
     SunControl: 1.0050161
     MoonControl: 0
@@ -160,6 +160,7 @@ MonoBehaviour:
     blitHDROverlay: {fileID: 4800000, guid: a89bee29cffa951418fc1e2da94d1959, type: 3}
     cameraMotionVector: {fileID: 4800000, guid: c56b7e0d4c7cb484e959caeeedae9bbf, type: 3}
     objectMotionVector: {fileID: 4800000, guid: 7b3ede40266cd49a395def176e1bc486, type: 3}
+    dataDrivenLensFlare: {fileID: 4800000, guid: 6cda457ac28612740adb23da5d39ea92, type: 3}
   m_AssetVersion: 2
   m_OpaqueLayerMask:
     serializedVersion: 2
