@@ -129,7 +129,6 @@ namespace CraftSharp.Control
             info.Attacking = false;
 
             var attackStatus = info.AttackStatus;
-
             attackStatus.AttackCooldown = 0F;
 
             if (attackStatus.CausingDamage) // Interrupted while dealing damage

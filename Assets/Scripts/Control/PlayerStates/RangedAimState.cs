@@ -15,14 +15,15 @@ namespace CraftSharp.Control
 
             if (inputData.AttackPressTime > 0F)
             {
+                var attackStatus = info.AttackStatus;
+                info.MoveVelocity = Vector3.zero;
 
+                attackStatus.StageTime += interval;
             }
             else
             {
                 info.Attacking = false;
             }
-
-            info.MoveVelocity = Vector3.zero;
 
             // Restore stamina
             info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
@@ -59,6 +60,9 @@ namespace CraftSharp.Control
                 return;
             }
 
+            attackStatus.AttackStage = 0;
+            attackStatus.StageTime = 0F;
+
             player.ChangeItemState(PlayerController.CurrentItemState.Hold);
             player.UseRootMotion = true;
 
@@ -71,6 +75,7 @@ namespace CraftSharp.Control
             info.Attacking = false;
 
             var attackStatus = info.AttackStatus;
+            attackStatus.AttackCooldown = 0F;
 
             player.ChangeItemState(PlayerController.CurrentItemState.Mount);
             player.UseRootMotion = false;
