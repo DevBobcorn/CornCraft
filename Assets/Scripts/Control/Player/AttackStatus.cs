@@ -28,7 +28,17 @@ namespace CraftSharp.Control
                 cdString = $"<color=green>{AttackCooldown:0.00}</color>";
             }
 
-            return $"Attack Stage: [{AttackStage}]\tCD: {cdString}";
+            string stageTimeString;
+            if (CausingDamage)
+            {
+                stageTimeString = $"<color=red>{StageTime:0.00}</color>";
+            }
+            else
+            {
+                stageTimeString = $"{StageTime:0.00}";
+            }
+
+            return $"Attack Stage: [{AttackStage}]\tCD: {cdString}\tStg Time: {stageTimeString}";
         }
     }
 }

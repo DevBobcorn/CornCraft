@@ -307,7 +307,7 @@ namespace CraftSharp.Control
             CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
         }
 
-        public bool TryStartSingleAttack()
+        public bool TryStartNormalAttack()
         {
             if (Status!.AttackStatus.AttackCooldown <= 0F)
             {
@@ -333,7 +333,7 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public bool TryStartLongAttack()
+        public bool TryStartChargedAttack()
         {
             if (Status!.AttackStatus.AttackCooldown <= 0F)
             {
