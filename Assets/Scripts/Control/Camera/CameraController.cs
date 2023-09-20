@@ -50,6 +50,8 @@ namespace CraftSharp.Control
 
         public abstract Transform? GetTarget();
 
+        public virtual void SetAimRef(Transform aimRef) { }
+
         public virtual Vector3 GetTargetViewportPos()
         {
             var targetPos = GetTarget()?.position;

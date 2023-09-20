@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using UnityEngine;
 using Cinemachine;
 using CraftSharp.Event;
@@ -28,7 +29,10 @@ namespace CraftSharp.Control
         
         [SerializeField] private CinemachineVirtualCamera? virtualCameraFixed;
 
+        [SerializeField] private CinemachineVirtualCamera? virtualCameraAim;
+
         private CinemachinePOV? followPOV, fixedPOV;
+        private bool isAiming = false;
 
         public override void EnsureInitialized()
         {
@@ -46,6 +50,8 @@ namespace CraftSharp.Control
             }
         }
 
+        private Action<CameraAimEvent>? cameraAimCallback;
+
         void Start()
         {
             EnsureInitialized();
@@ -60,6 +66,16 @@ namespace CraftSharp.Control
 
             // Set perspective to current value to initialize
             SetPerspective(perspective);
+
+            cameraAimCallback = (e) => UseAimCamera(e.Aim, e.AimRef);
+            
+            EventManager.Instance.Register(cameraAimCallback);
+        }
+
+        void OnDestroy()
+        {
+            if (cameraAimCallback is not null)
+                EventManager.Instance.Unregister(cameraAimCallback);
         }
 
         void Update()
@@ -101,6 +117,13 @@ namespace CraftSharp.Control
         }
 
         public override Transform? GetTarget() => virtualCameraFollow?.Follow;
+
+        public override void SetAimRef(Transform aimRef)
+        {
+            EnsureInitialized();
+
+            virtualCameraAim!.Follow = aimRef;
+        }
 
         public override void SetYaw(float yaw)
         {
@@ -149,7 +172,7 @@ namespace CraftSharp.Control
         {
             if (perspective == Perspective.ThirdPerson) // Previously third person
             {
-                // Sync virtual camera rotation
+                // Sync virtual camera params
                 fixedPOV!.m_HorizontalAxis.Value = followPOV!.m_HorizontalAxis.Value;
                 fixedPOV!.m_VerticalAxis.Value   = followPOV!.m_VerticalAxis.Value;
 
@@ -157,54 +180,92 @@ namespace CraftSharp.Control
                 framingTransposer!.m_CameraDistance = 0F;
             }
 
-            // Don't render player on this camera
-            if (renderCamera != null)
+            if (!isAiming)
             {
-                renderCamera.cullingMask = firstPersonCullingMask;
+                // Don't render player on this camera
+                if (renderCamera != null)
+                {
+                    renderCamera.cullingMask = firstPersonCullingMask;
+                }
+                
+                // Update field of view
+                var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
+                virtualCameraFollow!.m_Lens.FieldOfView = fov;
+                virtualCameraFixed!.m_Lens.FieldOfView  = fov;
+                
+                // Make fixed virtual camera the live camera
+                virtualCameraFixed!.MoveToTopOfPrioritySubqueue();
             }
-            
-            // Update field of view
-            var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
-            virtualCameraFollow!.m_Lens.FieldOfView = fov;
-            virtualCameraFixed!.m_Lens.FieldOfView  = fov;
-            
-            // Make fixed virtual camera the live camera
-            virtualCameraFixed!.MoveToTopOfPrioritySubqueue();
 
             perspective = Perspective.FirstPerson;
+            EventManager.Instance.Broadcast(new CrosshairEvent(true));
         }
 
         private void EnterThirdPersonMode()
         {
             if (perspective == Perspective.FirstPerson) // Previously first person
             {
-                // Sync virtual camera rotation
+                // Sync virtual camera params
                 followPOV!.m_HorizontalAxis.Value = fixedPOV!.m_HorizontalAxis.Value;
                 followPOV!.m_VerticalAxis.Value   = fixedPOV!.m_VerticalAxis.Value;
             }
 
-            // Render player on this camera
-            if (renderCamera != null)
+            if (!isAiming)
             {
-                renderCamera.cullingMask = thirdPersonCullingMask;
+                // Render player on this camera
+                if (renderCamera != null)
+                {
+                    renderCamera.cullingMask = thirdPersonCullingMask;
+                }
+                
+                // Update field of view
+                var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
+                virtualCameraFollow!.m_Lens.FieldOfView = fov;
+                virtualCameraFixed!.m_Lens.FieldOfView  = fov;
+
+                // Update target offset
+                framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
+                framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
+
+                // Enable follow camera collider
+                virtualCameraFollow!.GetComponent<CinemachineCollider>().enabled = true;
+
+                // Make normal virtual camera the live camera
+                virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
             }
-            
-            // Update field of view
-            var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
-            virtualCameraFollow!.m_Lens.FieldOfView = fov;
-            virtualCameraFixed!.m_Lens.FieldOfView  = fov;
-
-            // Update target offset
-            framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
-            framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
-
-            // Enable follow camera collider
-            virtualCameraFollow!.GetComponent<CinemachineCollider>().enabled = true;
-
-            // Make normal virtual camera the live camera
-            virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
 
             perspective = Perspective.ThirdPerson;
+            EventManager.Instance.Broadcast(new CrosshairEvent(false));
+        }
+
+        public void UseAimCamera(bool enable, Transform? aimRef)
+        {
+            EnsureInitialized();
+
+            isAiming = enable;
+
+            if (enable)
+            {
+                if (aimRef != null)
+                {
+                    virtualCameraAim!.Follow = aimRef;
+                    virtualCameraAim.MoveToTopOfPrioritySubqueue();
+                }
+
+                EventManager.Instance.Broadcast(new CrosshairEvent(true));
+            }
+            else
+            {
+                switch (perspective)
+                {
+                    case Perspective.FirstPerson:
+                        EnterFirstPersonMode();
+                        break;
+                    case Perspective.ThirdPerson:
+                        EnterThirdPersonMode();
+                        break;
+                }
+            }
         }
     }
 }
