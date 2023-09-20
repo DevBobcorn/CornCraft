@@ -83,7 +83,7 @@ GameObject:
   - component: {fileID: 3083690404439012666}
   - component: {fileID: 7808910476651940505}
   m_Layer: 0
-  m_Name: Overshoulder Virtual
+  m_Name: Aim Virtual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -361,6 +361,7 @@ MonoBehaviour:
     m_Bits: 76993
   virtualCameraFollow: {fileID: 8231872019064414601}
   virtualCameraFixed: {fileID: 4409463203126261892}
+  virtualCameraAim: {fileID: 7808910476651940505}
 --- !u!1 &2988304240145284854
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,7 +494,7 @@ Transform:
   m_GameObject: {fileID: 3759418466539031928}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.1, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

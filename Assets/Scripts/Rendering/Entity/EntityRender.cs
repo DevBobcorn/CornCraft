@@ -125,6 +125,17 @@ namespace CraftSharp.Rendering
 
         }
 
+        public virtual Transform SetupCameraAimRef(Vector3 pos)
+        {
+            var cameraAimRefObj = new GameObject("Camera Aim Ref");
+            var cameraAimRef = cameraAimRefObj.transform;
+
+            cameraAimRef.SetParent(visual, false);
+            cameraAimRef.localPosition = pos;
+
+            return cameraAimRef;
+        }
+
         public virtual void SetVisualMovementVelocity(Vector3 velocity)
         {
             velocity.y = 0; // Ignore y velocity by default
@@ -176,6 +187,5 @@ namespace CraftSharp.Rendering
             UpdateTransform(tickMilSec);
             UpdateAnimation(tickMilSec);
         }
-
     }
 }

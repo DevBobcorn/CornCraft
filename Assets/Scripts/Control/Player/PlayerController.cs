@@ -26,10 +26,11 @@ namespace CraftSharp.Control
         [SerializeField] protected PlayerAbility? ability;
         [SerializeField] private CameraController? cameraController;
         [SerializeField] public Transform? cameraRef;
+        [SerializeField] public Transform? cameraAimRef;
         
         private EntityRender? playerRender;
         [SerializeField] protected PhysicMaterial? physicMaterial;
-        [HideInInspector] public bool UseRootMotion = false;
+        [SerializeField] public bool UseRootMotion = false;
 
         public PlayerAbility Ability => ability!;
         protected Rigidbody? playerRigidbody;
@@ -56,6 +57,11 @@ namespace CraftSharp.Control
                 return playerRender.VisualTransform.forward;
             }
             return Vector3.forward;
+        }
+
+        public Transform? GetCameraAimRef()
+        {
+            return cameraAimRef;
         }
 
         public void UpdatePlayerRender(Entity entity, GameObject renderObj)
@@ -112,7 +118,9 @@ namespace CraftSharp.Control
                     playerRender.SetVisualMovementVelocity(rigidbody!.velocity);
                     // Update render
                     playerRender.UpdateAnimation(0.05F);
-                };   
+                };
+
+                cameraAimRef = playerRender.SetupCameraAimRef(new(1F, 1.5F, -1.5F));
             }
             else
             {
@@ -358,6 +366,18 @@ namespace CraftSharp.Control
             }
             
             return false;
+        }
+
+        public void CameraAim(bool enable)
+        {
+            if (enable)
+            {
+                EventManager.Instance.Broadcast(new CameraAimEvent(true, cameraAimRef));
+            }
+            else
+            {
+                EventManager.Instance.Broadcast(new CameraAimEvent(false, null));
+            }
         }
 
         public void UpdatePlayerStatus()

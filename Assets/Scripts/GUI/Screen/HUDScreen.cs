@@ -65,17 +65,7 @@ namespace CraftSharp.UI
             // Initialize controls...
             staminaBarAnimator = staminaBar!.GetComponent<Animator>();
 
-            perspectiveCallback = (e) => {
-                switch (e.Perspective)
-                {
-                    case Perspective.FirstPerson:
-                        crosshairAnimator!.SetBool(SHOW, true);
-                        break;
-                    case Perspective.ThirdPerson:
-                        crosshairAnimator!.SetBool(SHOW, false);
-                        break;
-                }
-            };
+            crosshairCallback = (e) => crosshairAnimator!.SetBool(SHOW, e.Show);
 
             gameModeCallback = (e) => {
                 var showStatus = e.GameMode switch {
@@ -109,7 +99,7 @@ namespace CraftSharp.UI
                     staminaBarAnimator.SetBool(SHOW, true);
             };
 
-            EventManager.Instance.Register(perspectiveCallback);
+            EventManager.Instance.Register(crosshairCallback);
             EventManager.Instance.Register(gameModeCallback);
             EventManager.Instance.Register(healthCallback);
             EventManager.Instance.Register(staminaCallback);
@@ -146,15 +136,15 @@ namespace CraftSharp.UI
             return true;
         }
 
-        private Action<PerspectiveUpdateEvent>? perspectiveCallback;
+        private Action<CrosshairEvent>?         crosshairCallback;
         private Action<GameModeUpdateEvent>?    gameModeCallback;
         private Action<HealthUpdateEvent>?      healthCallback;
         private Action<StaminaUpdateEvent>?     staminaCallback;
 
         void OnDestroy()
         {
-            if (perspectiveCallback is not null)
-                EventManager.Instance.Unregister(perspectiveCallback);
+            if (crosshairCallback is not null)
+                EventManager.Instance.Unregister(crosshairCallback);
             
             if (gameModeCallback is not null)
                 EventManager.Instance.Unregister(gameModeCallback);

@@ -99,6 +99,8 @@ namespace CraftSharp.Control
 
             rigidbody.velocity = Vector3.zero;
             info.MoveVelocity = Vector3.zero;
+
+            player.CameraAim(true);
         }
 
         public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
@@ -110,6 +112,8 @@ namespace CraftSharp.Control
 
             player.ChangeItemState(PlayerController.CurrentItemState.Mount);
             player.UseRootMotion = false;
+
+            player.CameraAim(false);
         }
 
         public override string ToString() => "RangedAim";
