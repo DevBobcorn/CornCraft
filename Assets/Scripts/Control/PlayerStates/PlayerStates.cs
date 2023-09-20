@@ -6,22 +6,22 @@ namespace CraftSharp.Control
     public interface PlayerStates
     {
         // Grounded states
-        public static readonly IPlayerState IDLE    = new IdleState();
-        public static readonly IPlayerState MOVE    = new MoveState();
+        public static readonly IPlayerState IDLE       = new IdleState();
+        public static readonly IPlayerState MOVE       = new MoveState();
 
         // Attack states
-        public static readonly IPlayerState MELEE   = new MeleeState();
-        public static readonly IPlayerState BOW_AIM = new RangedAimState();
+        public static readonly IPlayerState MELEE      = new MeleeState();
+        public static readonly IPlayerState RANGED_AIM = new RangedAimState();
 
         // On wall states
-        public static readonly IPlayerState CLIMB   = new ClimbState();
+        public static readonly IPlayerState CLIMB      = new ClimbState();
 
         // Airborne states
-        public static readonly IPlayerState FALL    = new FallState();
-        public static readonly IPlayerState GLIDE   = new GlideState();
+        public static readonly IPlayerState FALL       = new FallState();
+        public static readonly IPlayerState GLIDE      = new GlideState();
         // In water states
-        public static readonly IPlayerState SWIM    = new SwimState();
-        public static readonly IPlayerState TREAD   = new TreadState();
+        public static readonly IPlayerState SWIM       = new SwimState();
+        public static readonly IPlayerState TREAD      = new TreadState();
 
         // Special states
         public static readonly IPlayerState SPECTATE = new SpectateState();
@@ -38,7 +38,7 @@ namespace CraftSharp.Control
 
                 // Attack States (no state machine entry)
                 // MELEE,
-                // BOW_AIM
+                // RANGED_AIM
 
                 // On wall States (no state machine entry)
                 // CLIMB,

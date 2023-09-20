@@ -12,7 +12,8 @@ namespace CraftSharp.Control
     {
         public enum CurrentItemState
         {
-            Hold,
+            HoldInMainHand,
+            HoldInOffhand,
             Mount
         }
 
@@ -348,7 +349,7 @@ namespace CraftSharp.Control
                     // Specify attack data to use
                     Status.AttackStatus.CurrentRangedAttack = RangedBowAttack;
                     // Enter attack state
-                    CurrentState = PlayerStates.BOW_AIM;
+                    CurrentState = PlayerStates.RANGED_AIM;
                     CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
                     return true;
                 }

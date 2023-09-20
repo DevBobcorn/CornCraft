@@ -36,10 +36,10 @@ ModelImporter:
       name: Standing Draw Arrow
       takeName: mixamo.com
       internalID: -203655887218126122
-      firstFrame: 0
+      firstFrame: 16.3
       lastFrame: 31
       wrapMode: 0
-      orientationOffsetY: 0
+      orientationOffsetY: 270
       level: 0
       cycleOffset: 0
       loop: 0

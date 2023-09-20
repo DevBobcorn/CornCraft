@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05e2d558e7a812246be76c2843c776ca, type: 3}
   m_Name: Ranged Bow
   m_EditorClassIdentifier: 
-  IdleTimeout: -0.9
-  DrawBow: {fileID: -203655887218126122, guid: 6777970e44a839c4e86aa5ab5e2ff10b, type: 3}
+  IdleTimeout: -0.1
+  SetupTime: 0.5
+  DrawWeapon: {fileID: -203655887218126122, guid: 6777970e44a839c4e86aa5ab5e2ff10b, type: 3}
+  DummyAnimationClip: {fileID: 7400000, guid: 1698def8346f10e46866626916c35924, type: 2}
