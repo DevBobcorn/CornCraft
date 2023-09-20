@@ -44,9 +44,10 @@ namespace CraftSharp.Rendering
             // Add and initialize player widgets
             var accessoryWidget = visualObj.AddComponent<PlayerAccessoryWidget>();
 
-            var weaponMountRef = entityAnimator!.GetBoneTransform(HumanBodyBones.Spine);
+            var itemMountRef = entityAnimator!.GetBoneTransform(HumanBodyBones.Spine);
             var mainHandRef = entityAnimator.GetBoneTransform(HumanBodyBones.RightHand);
-            accessoryWidget.SetRefTransforms(mainHandRef, weaponMountRef);
+            var offHandRef = entityAnimator.GetBoneTransform(HumanBodyBones.LeftHand);
+            accessoryWidget.SetRefTransforms(mainHandRef, offHandRef, itemMountRef);
 
             UpdateSkinMaterial();
         }

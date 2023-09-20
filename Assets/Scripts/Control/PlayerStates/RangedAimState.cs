@@ -11,18 +11,46 @@ namespace CraftSharp.Control
 
             info.Sprinting = false;
             info.Gliding = false;
-            info.Moving = false;
 
-            if (inputData.AttackPressTime > 0F)
-            {
-                var attackStatus = info.AttackStatus;
-                info.MoveVelocity = Vector3.zero;
+            var attackStatus = info.AttackStatus;
+            var rangedAttack = attackStatus.CurrentRangedAttack;
 
-                attackStatus.StageTime += interval;
-            }
-            else
+            if (rangedAttack == null) // Ranged attack data is not assigned, stop it
             {
                 info.Attacking = false;
+                attackStatus.AttackStage = -1;
+                return;
+            }
+
+            // Exit if attack button is released AND we have finished setup state
+            if (attackStatus.StageTime < rangedAttack.SetupTime)
+            {
+                info.Moving = false;
+                info.MoveVelocity = Vector3.zero;
+
+                //info.TargetVisualYaw += rangedAttack.SetupYaw / rangedAttack.SetupTime * Time.deltaTime;
+
+                attackStatus.StageTime += interval;
+                // Reset cooldown
+                attackStatus.AttackCooldown = 0F;
+            }
+            else if (inputData.AttackPressTime > 0F)
+            {
+                attackStatus.StageTime += interval;
+                // Reset cooldown
+                attackStatus.AttackCooldown = 0F;
+            }
+            else // Charging state ends
+            {
+                // Idle timeout
+                attackStatus.AttackCooldown -= interval;
+
+                if (attackStatus.AttackCooldown < rangedAttack.IdleTimeout) // Timed out, exit state
+                {
+                    // Attack timed out, exit
+                    info.Attacking = false;
+                    attackStatus.AttackStage = -1;
+                }
             }
 
             // Restore stamina
@@ -53,7 +81,7 @@ namespace CraftSharp.Control
             var attackStatus = info.AttackStatus;
             var rangedAttack = attackStatus.CurrentRangedAttack;
 
-            if (rangedAttack == null) // Melee attack data is not assigned, stop it
+            if (rangedAttack == null) // Ranged attack data is not assigned, stop it
             {
                 info.Attacking = false;
                 attackStatus.AttackStage = -1;
@@ -63,7 +91,10 @@ namespace CraftSharp.Control
             attackStatus.AttackStage = 0;
             attackStatus.StageTime = 0F;
 
-            player.ChangeItemState(PlayerController.CurrentItemState.Hold);
+            player.OverrideState(rangedAttack.DummyAnimationClip!, rangedAttack.DrawWeapon!);
+            player.CrossFadeState(PlayerAbility.ATTACK, 0.01F);
+
+            player.ChangeItemState(PlayerController.CurrentItemState.HoldInOffhand);
             player.UseRootMotion = true;
 
             rigidbody.velocity = Vector3.zero;
@@ -80,6 +111,7 @@ namespace CraftSharp.Control
             player.ChangeItemState(PlayerController.CurrentItemState.Mount);
             player.UseRootMotion = false;
         }
+
         public override string ToString() => "RangedAim";
     }
 }

@@ -6,29 +6,39 @@ using Unity.Mathematics;
 using CraftSharp.Control;
 using CraftSharp.Resource;
 
-
 namespace CraftSharp.Rendering
 {
     public class PlayerAccessoryWidget : MonoBehaviour
     {
         [SerializeField] private Transform? mainHandRef;
+        [SerializeField] private Transform? offHandRef;
         [SerializeField] private Transform? spineRef;
         private Transform? mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
+        private Transform? offHandSlot; // A slot fixed to offHandRef transform (as a child)
         private Transform? itemMountPivot, itemMountSlot;
         private PlayerController? player;
         private PlayerActionItem? currentItem;
         private Animator? playerAnimator;
 
-        public void SetRefTransforms(Transform mainHandRef, Transform spineRef)
+        public void SetRefTransforms(Transform mainHandRef, Transform offHandRef, Transform spineRef)
         {
             this.mainHandRef = mainHandRef;
-            // Create weapon slot transform
+            // Create main hand slot transform
             var mainHandSlotObj = new GameObject("Main Hand Slot");
             mainHandSlot = mainHandSlotObj.transform;
             mainHandSlot.SetParent(mainHandRef);
             // Initialize position and rotation
             mainHandSlot.localPosition = Vector3.zero;
             mainHandSlot.localEulerAngles = Vector3.zero;
+
+            this.offHandRef = offHandRef;
+            // Create off hand slot transform
+            var offHandSlotObj = new GameObject("Off Hand Slot");
+            offHandSlot = offHandSlotObj.transform;
+            offHandSlot.SetParent(offHandRef);
+            // Initialize position and rotation
+            offHandSlot.localPosition = Vector3.zero;
+            offHandSlot.localEulerAngles = Vector3.zero;
 
             this.spineRef = spineRef;
 
@@ -77,6 +87,8 @@ namespace CraftSharp.Rendering
                         var sword = currentItem as MeleeWeapon;
                         sword!.SlashTrail = trailObj.GetComponent<TrailRenderer>();
                     }
+
+                    itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
                     break;
                 case ItemActionType.RangedWeaponBow:
                     currentItem = itemObj!.AddComponent<UselessActionItem>();
@@ -84,8 +96,10 @@ namespace CraftSharp.Rendering
 
                     currentItem.slotEularAngles = new(-40F, 90F, 20F);
                     currentItem.slotPosition = new(0F, -0.4F, -0.4F);
-                    mainHandSlot!.localPosition = Vector3.zero;
-                    mainHandSlot.localEulerAngles = Vector3.zero;
+                    offHandSlot!.localPosition = new(-0.28F, -0.15F, 0.325F);
+                    offHandSlot.localEulerAngles = new(-30F, 205F, 90F);
+
+                    itemObj.transform.localScale = new(0.6F, 0.6F, 0.6F);
                     break;
                 default:
                     currentItem = itemObj!.AddComponent<UselessActionItem>();
@@ -95,10 +109,10 @@ namespace CraftSharp.Rendering
                     currentItem.slotPosition = new(0F, 0F, -0.5F);
                     mainHandSlot!.localPosition = Vector3.zero;
                     mainHandSlot.localEulerAngles = Vector3.zero;
+
+                    itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
                     break;
             }
-
-            itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
 
             if (meshData is not null)
             {
@@ -127,11 +141,21 @@ namespace CraftSharp.Rendering
             }
         }
 
-        private void HoldItem()
+        private void HoldItemInMainHand()
         {
             if (currentItem != null)
             {
                 currentItem.transform.SetParent(mainHandSlot, false);
+                currentItem.transform.localPosition = Vector3.zero;
+                currentItem.transform.localRotation = Quaternion.identity;
+            }
+        }
+
+        private void HoldItemInOffHand()
+        {
+            if (currentItem != null)
+            {
+                currentItem.transform.SetParent(offHandSlot, false);
                 currentItem.transform.localPosition = Vector3.zero;
                 currentItem.transform.localRotation = Quaternion.identity;
             }
@@ -171,8 +195,11 @@ namespace CraftSharp.Rendering
             player.OnItemStateChanged += (weaponState) => {
                 switch (weaponState)
                 {
-                    case PlayerController.CurrentItemState.Hold:
-                        HoldItem();
+                    case PlayerController.CurrentItemState.HoldInMainHand:
+                        HoldItemInMainHand();
+                        break;
+                    case PlayerController.CurrentItemState.HoldInOffhand:
+                        HoldItemInOffHand();
                         break;
                     case PlayerController.CurrentItemState.Mount:
                         MountItem();
@@ -188,7 +215,15 @@ namespace CraftSharp.Rendering
                 else
                 {
                     var actionType = PlayerActionHelper.GetItemActionType(itemStack);
-                    CreateActionItem(itemStack, actionType);
+
+                    if (actionType == ItemActionType.None)
+                    {
+                        DestroyActionItem();
+                    }
+                    else
+                    {
+                        CreateActionItem(itemStack, actionType);
+                    }
                 }
             };
 

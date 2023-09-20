@@ -80,7 +80,7 @@ namespace CraftSharp.Control
             attackStatus.StageDamageEnd = stageData.DamageEnd;
 
             player.OverrideState(meleeAttack.DummyAnimationClip!, stageData.AnimationClip!);
-            player.CrossFadeState("Melee", 0F);
+            player.CrossFadeState(PlayerAbility.ATTACK, 0F);
             //player.TurnToAttackTarget();
         }
 
@@ -117,7 +117,7 @@ namespace CraftSharp.Control
 
             StartMeleeStage(meleeAttack, attackStatus, 0, player);
 
-            player.ChangeItemState(PlayerController.CurrentItemState.Hold);
+            player.ChangeItemState(PlayerController.CurrentItemState.HoldInMainHand);
             player.UseRootMotion = true;
 
             rigidbody.velocity = Vector3.zero;
