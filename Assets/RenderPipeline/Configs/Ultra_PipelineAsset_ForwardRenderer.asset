@@ -41,7 +41,7 @@ MonoBehaviour:
     MoonColor: {r: 0.33023313, g: 0.36793935, b: 0.38679242, a: 1}
     TopColor: {r: 0, g: 0, b: 0, a: 0}
     BottomColor: {r: 0.41058934, g: 0.45534423, b: 0.5217236, a: 1}
-    BlendHeight: 0.1
+    BlendHeight: 0.5
     FogGradientHeight: 0.5
     SunIntensity: 0
     MoonIntensity: -0

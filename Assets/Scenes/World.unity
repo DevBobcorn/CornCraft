@@ -3402,6 +3402,10 @@ PrefabInstance:
       value: UniStorm Environment Manager
       objectReference: {fileID: 0}
     - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
+      propertyPath: TabNumber
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
       propertyPath: PlayerCamera
       value: 
       objectReference: {fileID: 1162475170}
@@ -3409,10 +3413,6 @@ PrefabInstance:
       propertyPath: PlayerTransform
       value: 
       objectReference: {fileID: 1939684686}
-    - target: {fileID: 5024844223867598023, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5024844223867598023, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -4936,75 +4936,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c42e6541d8d9fb43a6166d532d500d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1001 &9034769435567045610
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1491820745198835017, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_Cameras.Array.data[0]
-      value: 
-      objectReference: {fileID: 1307474302}
-    - target: {fileID: 1688637866847837978, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_CullingMask.m_Bits
-      value: 81857
-      objectReference: {fileID: 0}
-    - target: {fileID: 2501888192042564820, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_Name
-      value: Topdown Camera Controller
-      objectReference: {fileID: 0}
-    - target: {fileID: 5350709377116031585, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_RootOrder
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 5350709377116031585, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5350709377116031585, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5350709377116031585, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5350709377116031585, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5350709377116031585, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5350709377116031585, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5350709377116031585, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5350709377116031585, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5350709377116031585, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5350709377116031585, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -5017,7 +4948,6 @@ SceneRoots:
   - {fileID: 217870550}
   - {fileID: 768585115}
   - {fileID: 1973188133910183364}
-  - {fileID: 9034769435567045610}
   - {fileID: 195804745}
   - {fileID: 1660067573}
   - {fileID: 1307474303}
