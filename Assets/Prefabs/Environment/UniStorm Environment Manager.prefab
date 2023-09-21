@@ -310,7 +310,7 @@ MonoBehaviour:
   UniStormMenuKey: 27
   UniStormCanvas: {fileID: 0}
   m_MenuToggle: 0
-  TabNumber: 4
+  TabNumber: 2
   TimeTabNumbers: 0
   WeatherTabNumbers: 1
   CelestialTabNumbers: 0
@@ -321,8 +321,8 @@ MonoBehaviour:
   SunFoldout: 1
   MoonFoldout: 0
   AtmosphereFoldout: 1
-  FogFoldout: 0
-  WeatherFoldout: 0
+  FogFoldout: 1
+  WeatherFoldout: 1
   LightningFoldout: 0
   CameraFoldout: 1
   SettingsFoldout: 1
@@ -1291,7 +1291,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   CurrentSeason: 2
   CloudType: 1
-  CloudQuality: 2
+  CloudQuality: 1
   TemperatureType: 0
   TemperatureCurve:
     serializedVersion: 2
@@ -1371,7 +1371,7 @@ MonoBehaviour:
   Temperature: 0
   LightningStruckObject: {fileID: 0}
   FogLightFalloff: 9.7
-  CameraFogHeight: 0.85
+  CameraFogHeight: 0.5
   m_SunLight: {fileID: 0}
   SunRevolution: 0
   SunIntensity: 1
@@ -2084,10 +2084,10 @@ MonoBehaviour:
   SunLightShaftsColor:
     serializedVersion: 2
     key0: {r: 0.17646985, g: 0.12102808, b: 0.07843174, a: 1}
-    key1: {r: 0.6509434, g: 0.3180936, b: 0.15045391, a: 1}
-    key2: {r: 0.4528302, g: 0.43659666, b: 0.41224635, a: 0}
-    key3: {r: 0.4528302, g: 0.43659666, b: 0.41224635, a: 0}
-    key4: {r: 0.6509434, g: 0.3180936, b: 0.15045391, a: 0}
+    key1: {r: 0.7075472, g: 0.31497002, b: 0.11681202, a: 1}
+    key2: {r: 1, g: 0.9680075, b: 0.78679246, a: 0}
+    key3: {r: 1, g: 0.944151, b: 0.72075474, a: 0}
+    key4: {r: 0.7075472, g: 0.31497002, b: 0.11681202, a: 0}
     key5: {r: 0.17646985, g: 0.12102808, b: 0.07843174, a: 0}
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
@@ -2173,8 +2173,8 @@ MonoBehaviour:
     serializedVersion: 2
     key0: {r: 0.17646985, g: 0.12102808, b: 0.07843174, a: 1}
     key1: {r: 0.7075472, g: 0.31497002, b: 0.11681202, a: 1}
-    key2: {r: 0.5566038, g: 0.5529281, b: 0.53822535, a: 0}
-    key3: {r: 0.5566038, g: 0.5529281, b: 0.53822535, a: 0}
+    key2: {r: 1, g: 0.9680075, b: 0.78679246, a: 0}
+    key3: {r: 1, g: 0.944151, b: 0.72075474, a: 0}
     key4: {r: 0.7075472, g: 0.31497002, b: 0.11681202, a: 0}
     key5: {r: 0.17646985, g: 0.12102808, b: 0.07843174, a: 0}
     key6: {r: 0, g: 0, b: 0, a: 0}
@@ -2503,17 +2503,17 @@ MonoBehaviour:
     serializedVersion: 2
     key0: {r: 0.1302065, g: 0.16895631, b: 0.20754719, a: 1}
     key1: {r: 0.1302065, g: 0.16895631, b: 0.20754719, a: 1}
-    key2: {r: 0.21293165, g: 0.24325827, b: 0.2735849, a: 0}
-    key3: {r: 0.44588825, g: 0.49321982, b: 0.5660378, a: 0}
-    key4: {r: 0.44588825, g: 0.49321982, b: 0.5660378, a: 0}
+    key2: {r: 0.5188679, g: 0.5188679, b: 0.5188679, a: 0}
+    key3: {r: 0.49466005, g: 0.5893557, b: 0.6603774, a: 0}
+    key4: {r: 0.55813456, g: 0.6428605, b: 0.735849, a: 0}
     key5: {r: 0.21293165, g: 0.24325827, b: 0.2735849, a: 0}
     key6: {r: 0.1302065, g: 0.16895631, b: 0.20754719, a: 0}
     key7: {r: 0.1302065, g: 0.16895631, b: 0.20754719, a: 0}
     ctime0: 0
     ctime1: 16515
     ctime2: 19398
-    ctime3: 22282
-    ctime4: 46373
+    ctime3: 23130
+    ctime4: 46260
     ctime5: 49630
     ctime6: 52888
     ctime7: 65535
@@ -2711,19 +2711,19 @@ MonoBehaviour:
     m_NumAlphaKeys: 2
   SunSpotColor:
     serializedVersion: 2
-    key0: {r: 2.9960783, g: 1.251423, b: 0.5766036, a: 1}
-    key1: {r: 4.237095, g: 1.9517868, b: 1.1168288, a: 1}
-    key2: {r: 2.9960785, g: 2.0472798, b: 1.2266965, a: 0}
-    key3: {r: 2.9960785, g: 2.4277322, b: 2.0181134, a: 0}
-    key4: {r: 2.9960783, g: 1.1208475, b: 0.4352792, a: 0}
-    key5: {r: 2.9960785, g: 1.1142789, b: 0.43527922, a: 0}
+    key0: {r: 0.17646985, g: 0.12102808, b: 0.07843174, a: 1}
+    key1: {r: 0.7075472, g: 0.31497002, b: 0.11681202, a: 1}
+    key2: {r: 1, g: 0.9726066, b: 0.81509435, a: 0}
+    key3: {r: 1, g: 0.95981926, b: 0.7962264, a: 0}
+    key4: {r: 0.7075472, g: 0.31497002, b: 0.11681202, a: 0}
+    key5: {r: 0.17646985, g: 0.12102808, b: 0.07843174, a: 0}
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
     ctime0: 15521
-    ctime1: 19275
-    ctime2: 23130
-    ctime3: 46067
-    ctime4: 49537
+    ctime1: 18396
+    ctime2: 22803
+    ctime3: 45223
+    ctime4: 49630
     ctime5: 53654
     ctime6: 0
     ctime7: 0
@@ -2736,7 +2736,7 @@ MonoBehaviour:
     atime6: 0
     atime7: 0
     m_Mode: 0
-    m_ColorSpace: -1
+    m_ColorSpace: 0
     m_NumColorKeys: 6
     m_NumAlphaKeys: 2
   FogLightColor:
