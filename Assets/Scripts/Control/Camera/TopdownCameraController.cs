@@ -14,7 +14,7 @@ namespace CraftSharp.Control
         private CinemachinePOV? followPOV;
 
         // Virtual camera and camera components
-        [SerializeField] private CinemachineVirtualCamera? virtualCameraFollow;
+        private CinemachineVirtualCamera? virtualCameraFollow;
         private CinemachineFramingTransposer? framingTransposer;
 
         public override void EnsureInitialized()

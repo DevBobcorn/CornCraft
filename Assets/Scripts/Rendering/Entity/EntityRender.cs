@@ -125,15 +125,15 @@ namespace CraftSharp.Rendering
 
         }
 
-        public virtual Transform SetupCameraAimRef(Vector3 pos)
+        public virtual Transform SetupCameraRef(Vector3 pos)
         {
-            var cameraAimRefObj = new GameObject("Camera Aim Ref");
-            var cameraAimRef = cameraAimRefObj.transform;
+            var cameraRefObj = new GameObject("Camera Ref");
+            var cameraRef = cameraRefObj.transform;
 
-            cameraAimRef.SetParent(visual, false);
-            cameraAimRef.localPosition = pos;
+            cameraRef.SetParent(visual, false);
+            cameraRef.localPosition = pos;
 
-            return cameraAimRef;
+            return cameraRef;
         }
 
         public virtual void SetVisualMovementVelocity(Vector3 velocity)

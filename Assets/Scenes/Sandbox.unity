@@ -178,18 +178,30 @@ PrefabInstance:
     - target: {fileID: 4409463203126261892, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Follow
       value: 
-      objectReference: {fileID: 568829120}
+      objectReference: {fileID: 0}
     - target: {fileID: 7808910476651940505, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Follow
       value: 
-      objectReference: {fileID: 568829120}
+      objectReference: {fileID: 0}
     - target: {fileID: 8231872019064414601, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Follow
       value: 
-      objectReference: {fileID: 568829120}
+      objectReference: {fileID: 0}
+    - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -4
+      objectReference: {fileID: 0}
+    - target: {fileID: 9155130719897283015, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_Cameras.Array.size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9155130719897283015, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Cameras.Array.data[0]
@@ -774,11 +786,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!4 &568829120 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2288748662104460795, guid: 51b8087cdfed24041b1fa94df8112e5a, type: 3}
-  m_PrefabInstance: {fileID: 1750034208}
-  m_PrefabAsset: {fileID: 0}
 --- !u!20 &1200116139 stripped
 Camera:
   m_CorrespondingSourceObject: {fileID: 2068180296061937451, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}

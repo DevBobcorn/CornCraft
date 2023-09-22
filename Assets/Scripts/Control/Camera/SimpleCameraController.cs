@@ -31,8 +31,7 @@ namespace CraftSharp.Control
 
         [SerializeField] private CinemachineVirtualCamera? virtualCameraAim;
 
-        private CinemachinePOV? followPOV, fixedPOV;
-        private bool isAiming = false;
+        private CinemachinePOV? followPOV, fixedPOV, aimingPOV;
 
         public override void EnsureInitialized()
         {
@@ -43,14 +42,14 @@ namespace CraftSharp.Control
                 framingTransposer = virtualCameraFollow.GetCinemachineComponent<CinemachineFramingTransposer>();
                 fixedPOV = virtualCameraFixed!.GetCinemachineComponent<CinemachinePOV>();
 
+                aimingPOV = virtualCameraAim!.GetCinemachineComponent<CinemachinePOV>();
+
                 // Override input axis to disable input when paused
                 CinemachineCore.GetInputAxis = (axisName) => PlayerUserInputData.Current.Paused ? 0F : Input.GetAxis(axisName);
 
                 initialized = true;
             }
         }
-
-        private Action<CameraAimEvent>? cameraAimCallback;
 
         void Start()
         {
@@ -66,16 +65,6 @@ namespace CraftSharp.Control
 
             // Set perspective to current value to initialize
             SetPerspective(perspective);
-
-            cameraAimCallback = (e) => UseAimCamera(e.Aim, e.AimRef);
-            
-            EventManager.Instance.Register(cameraAimCallback);
-        }
-
-        void OnDestroy()
-        {
-            if (cameraAimCallback is not null)
-                EventManager.Instance.Unregister(cameraAimCallback);
         }
 
         void Update()
@@ -114,21 +103,74 @@ namespace CraftSharp.Control
             virtualCameraFollow!.LookAt = target;
 
             virtualCameraFixed!.Follow = target;
+
+            virtualCameraAim!.Follow = target;
         }
 
-        public override Transform? GetTarget() => virtualCameraFollow?.Follow;
+        public override Transform? GetTarget()
+        {
+            return virtualCameraFollow?.Follow;
+        }
 
-        public override void SetAimRef(Transform aimRef)
+        public override void EnableAimingCamera(bool enable)
         {
             EnsureInitialized();
+            IsAiming = enable;
 
-            virtualCameraAim!.Follow = aimRef;
+            if (enable)
+            {
+                switch (perspective)
+                {
+                    case Perspective.FirstPerson:
+                        aimingPOV!.m_HorizontalAxis.Value = fixedPOV!.m_HorizontalAxis.Value;
+                        aimingPOV!.m_VerticalAxis.Value = fixedPOV!.m_VerticalAxis.Value;
+                        break;
+                    case Perspective.ThirdPerson:
+                        aimingPOV!.m_HorizontalAxis.Value = followPOV!.m_HorizontalAxis.Value;
+                        aimingPOV!.m_VerticalAxis.Value = followPOV!.m_VerticalAxis.Value;
+                        break;
+                }
+
+                virtualCameraAim!.MoveToTopOfPrioritySubqueue();
+                EventManager.Instance.Broadcast(new CrosshairEvent(true));
+            }
+            else
+            {
+                switch (perspective)
+                {
+                    case Perspective.FirstPerson:
+                        fixedPOV!.m_HorizontalAxis.Value = aimingPOV!.m_HorizontalAxis.Value;
+                        fixedPOV!.m_VerticalAxis.Value = aimingPOV!.m_VerticalAxis.Value;
+                        EnterFirstPersonMode();
+                        break;
+                    case Perspective.ThirdPerson:
+                        followPOV!.m_HorizontalAxis.Value = aimingPOV!.m_HorizontalAxis.Value;
+                        followPOV!.m_VerticalAxis.Value = aimingPOV!.m_VerticalAxis.Value;
+                        EnterThirdPersonMode();
+                        break;
+                }
+            }
+        }
+
+        public override Transform GetTransform()
+        {   
+            return perspective == Perspective.FirstPerson ?
+                    virtualCameraFixed!.transform : virtualCameraFollow!.transform;
         }
 
         public override void SetYaw(float yaw)
         {
             followPOV!.m_HorizontalAxis.Value = yaw;
             fixedPOV!.m_HorizontalAxis.Value = yaw;
+        }
+
+        public override float GetYaw()
+        {
+            if (IsAiming)
+                return aimingPOV!.m_HorizontalAxis.Value;
+            
+            return perspective == Perspective.FirstPerson ?
+                    fixedPOV!.m_HorizontalAxis.Value : followPOV!.m_HorizontalAxis.Value;
         }
 
         public override void SetPerspective(Perspective newPersp)
@@ -180,7 +222,7 @@ namespace CraftSharp.Control
                 framingTransposer!.m_CameraDistance = 0F;
             }
 
-            if (!isAiming)
+            if (!IsAiming)
             {
                 // Don't render player on this camera
                 if (renderCamera != null)
@@ -210,7 +252,7 @@ namespace CraftSharp.Control
                 followPOV!.m_VerticalAxis.Value   = fixedPOV!.m_VerticalAxis.Value;
             }
 
-            if (!isAiming)
+            if (!IsAiming)
             {
                 // Render player on this camera
                 if (renderCamera != null)
@@ -236,36 +278,6 @@ namespace CraftSharp.Control
 
             perspective = Perspective.ThirdPerson;
             EventManager.Instance.Broadcast(new CrosshairEvent(false));
-        }
-
-        public void UseAimCamera(bool enable, Transform? aimRef)
-        {
-            EnsureInitialized();
-
-            isAiming = enable;
-
-            if (enable)
-            {
-                if (aimRef != null)
-                {
-                    virtualCameraAim!.Follow = aimRef;
-                    virtualCameraAim.MoveToTopOfPrioritySubqueue();
-                }
-
-                EventManager.Instance.Broadcast(new CrosshairEvent(true));
-            }
-            else
-            {
-                switch (perspective)
-                {
-                    case Perspective.FirstPerson:
-                        EnterFirstPersonMode();
-                        break;
-                    case Perspective.ThirdPerson:
-                        EnterThirdPersonMode();
-                        break;
-                }
-            }
         }
     }
 }

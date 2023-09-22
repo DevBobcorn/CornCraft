@@ -36,7 +36,6 @@ namespace CraftSharp.Control
         public float BarrierAngle   = 0F;
         public float BarrierDist    = 0F;
 
-        public float UserInputYaw     = 0F;
         public float TargetVisualYaw  = 0F;
         public float CurrentVisualYaw = 0F;
 
@@ -48,7 +47,7 @@ namespace CraftSharp.Control
             var envInfo = $"Ground Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             
-            return $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\n{moveInfo}\n{envInfo}\n{atkInfo}";
+            return $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\n{moveInfo}\n{envInfo}\n{atkInfo}\ncYaw: {CurrentVisualYaw}";
         }
     }
 }
