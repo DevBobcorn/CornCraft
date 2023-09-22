@@ -34,16 +34,12 @@ namespace CraftSharp.Control
                 attackStatus.StageTime += interval;
                 // Reset cooldown
                 attackStatus.AttackCooldown = 0F;
-                // Update player yaw
-                player.AlignVisualYawToCamera();
             }
             else if (inputData.AttackPressTime > 0F)
             {
                 attackStatus.StageTime += interval;
                 // Reset cooldown
                 attackStatus.AttackCooldown = 0F;
-                // Update player yaw
-                player.AlignVisualYawToCamera();
             }
             else // Charging state ends
             {
