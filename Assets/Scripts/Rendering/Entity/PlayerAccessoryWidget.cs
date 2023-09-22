@@ -96,8 +96,10 @@ namespace CraftSharp.Rendering
 
                     currentItem.slotEularAngles = new(-40F, 90F, 20F);
                     currentItem.slotPosition = new(0F, -0.4F, -0.4F);
-                    offHandSlot!.localPosition = new(-0.28F, -0.15F, 0.325F);
-                    offHandSlot.localEulerAngles = new(-30F, 205F, 90F);
+                    //offHandSlot!.localPosition = new(-0.28F, -0.15F, 0.325F);
+                    //offHandSlot.localEulerAngles = new(-30F, 205F, 90F);
+                    offHandSlot!.localPosition = new(-0.21F, 0.12F, 0.38F);
+                    offHandSlot.localEulerAngles = new(5F, -150F, 115F);
 
                     itemObj.transform.localScale = new(0.6F, 0.6F, 0.6F);
                     break;

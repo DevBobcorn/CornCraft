@@ -82,6 +82,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3083690404439012666}
   - component: {fileID: 7808910476651940505}
+  - component: {fileID: 2819967806162033735}
   m_Layer: 0
   m_Name: Aim Virtual
   m_TagString: Untagged
@@ -98,7 +99,7 @@ Transform:
   m_GameObject: {fileID: 1367375308091481784}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: 0, z: -1.5}
+  m_LocalPosition: {x: 0.8, y: -0.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -144,6 +145,21 @@ MonoBehaviour:
         m_Calls: []
   m_LegacyBlendHint: 0
   m_ComponentOwner: {fileID: 2933710564278000443}
+--- !u!114 &2819967806162033735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1367375308091481784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44d70cc20219cd84593f67d248eafe36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Offset: {x: 0, y: 0, z: -1.8}
+  m_ApplyAfter: 1
+  m_PreserveComposition: 0
 --- !u!1 &1953419823033291873
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,8 +509,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3759418466539031928}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -4}
+  m_LocalRotation: {x: 0.06491296, y: -0.19962509, z: 0.013254764, w: 0.97763}
+  m_LocalPosition: {x: 1.3534402, y: 2.062748, z: -3.180583}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -533,7 +549,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60.000004
+  field of view: 65
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -648,7 +664,7 @@ GameObject:
   - component: {fileID: 2933710564278000443}
   - component: {fileID: 1096156914816262735}
   - component: {fileID: 1665461871325454944}
-  - component: {fileID: 6692541483673173170}
+  - component: {fileID: 8792392616486409508}
   m_Layer: 0
   m_Name: cm
   m_TagString: Untagged
@@ -696,7 +712,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BindingMode: 1
-  m_FollowOffset: {x: 1, y: 0, z: -1.5}
+  m_FollowOffset: {x: 0.8, y: -0.1, z: 0}
   m_XDamping: 0
   m_YDamping: 0
   m_ZDamping: 0
@@ -705,7 +721,7 @@ MonoBehaviour:
   m_YawDamping: 0
   m_RollDamping: 0
   m_AngularDamping: 0
---- !u!114 &6692541483673173170
+--- !u!114 &8792392616486409508
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -719,7 +735,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_RecenterTarget: 0
   m_VerticalAxis:
-    Value: 0
+    Value: 25.73914
     m_SpeedMode: 0
     m_MaxSpeed: 300
     m_AccelTime: 0.1
@@ -743,7 +759,7 @@ MonoBehaviour:
     m_LegacyHeadingDefinition: -1
     m_LegacyVelocityFilterStrength: -1
   m_HorizontalAxis:
-    Value: 0
+    Value: 23.533493
     m_SpeedMode: 0
     m_MaxSpeed: 300
     m_AccelTime: 0.1

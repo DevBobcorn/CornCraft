@@ -10,6 +10,5 @@ namespace CraftSharp.Event
             Stamina = stamina;
             IsStaminaFull = isFull;
         }
-
     }
 }

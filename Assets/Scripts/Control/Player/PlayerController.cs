@@ -197,7 +197,6 @@ namespace CraftSharp.Control
                 OnCurrentItemChanged?.Invoke(e.ItemStack);
                 CurrentActionType = PlayerActionHelper.GetItemActionType(e.ItemStack);
             };
-
             EventManager.Instance.Register(heldItemCallback);
         }
 
@@ -376,7 +375,7 @@ namespace CraftSharp.Control
             cameraController!.EnableAimingCamera(false);
         }
 
-        public void AlignVisualYawToCamera()
+        private void AlignVisualYawToCamera()
         {
             Status!.CurrentVisualYaw = cameraController!.GetYaw();
             playerRender!.VisualTransform.eulerAngles = new(0F, Status!.CurrentVisualYaw, 0F);
@@ -491,6 +490,14 @@ namespace CraftSharp.Control
             OnLogicalUpdate?.Invoke(Time.unscaledDeltaTime, Status!, playerRigidbody!);
 
             PostLogicalUpdate();
+        }
+
+        void LateUpdate()
+        {
+            if (cameraController!.IsAiming)
+            {
+                AlignVisualYawToCamera();
+            }
         }
 
         void FixedUpdate()

@@ -25,10 +25,8 @@ namespace CraftSharp.Control
 
         // Virtual camera and camera components
         [SerializeField] private CinemachineVirtualCamera? virtualCameraFollow;
-        private CinemachineFramingTransposer? framingTransposer;
-        
+        private CinemachineFramingTransposer? framingTransposer;        
         [SerializeField] private CinemachineVirtualCamera? virtualCameraFixed;
-
         [SerializeField] private CinemachineVirtualCamera? virtualCameraAim;
 
         private CinemachinePOV? followPOV, fixedPOV, aimingPOV;
@@ -45,7 +43,27 @@ namespace CraftSharp.Control
                 aimingPOV = virtualCameraAim!.GetCinemachineComponent<CinemachinePOV>();
 
                 // Override input axis to disable input when paused
-                CinemachineCore.GetInputAxis = (axisName) => PlayerUserInputData.Current.Paused ? 0F : Input.GetAxis(axisName);
+                CinemachineCore.GetInputAxis = (axisName) =>
+                {
+                    if (PlayerUserInputData.Current.Paused) // Ignore mouse pointer movement when paused by GUI
+                    {
+                        return 0F;
+                    }
+
+                    /*
+                    if (IsAiming && axisName == "Mouse X") // Ranged weapon aiming, use special handling
+                    {
+                        // Tell player controller to update yaw
+                        // This avoids causing jitters when turning around when aiming
+                        float deltaYaw = Input.GetAxis(axisName) * aimingPOV.m_HorizontalAxis
+                                .m_MaxSpeed * Time.unscaledDeltaTime;
+                        EventManager.Instance.Broadcast(new VisualYawUpdateEvent(deltaYaw));
+                        return 0F;
+                    }
+                    */
+
+                    return Input.GetAxis(axisName);
+                };
 
                 initialized = true;
             }
