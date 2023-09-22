@@ -24,9 +24,8 @@ namespace CraftSharp.Control
         [SerializeField] public GameObject? SwordTrailPrefab;
 
         [SerializeField] protected PlayerAbility? ability;
-        [SerializeField] private CameraController? cameraController;
-        [SerializeField] public Transform? cameraRef;
-        [SerializeField] public Transform? cameraAimRef;
+        [SerializeField] protected CameraController? cameraController;
+        [SerializeField] public Transform? CameraRef;
         
         private EntityRender? playerRender;
         [SerializeField] protected PhysicMaterial? physicMaterial;
@@ -57,11 +56,6 @@ namespace CraftSharp.Control
                 return playerRender.VisualTransform.forward;
             }
             return Vector3.forward;
-        }
-
-        public Transform? GetCameraAimRef()
-        {
-            return cameraAimRef;
         }
 
         public void UpdatePlayerRender(Entity entity, GameObject renderObj)
@@ -120,11 +114,14 @@ namespace CraftSharp.Control
                     playerRender.UpdateAnimation(0.05F);
                 };
 
-                cameraAimRef = playerRender.SetupCameraAimRef(new(1F, 1.5F, -1.5F));
+                CameraRef = playerRender.SetupCameraRef(new(0F, 1.5F, 0F));
+                cameraController!.SetTarget(CameraRef);
             }
             else
             {
                 Debug.LogWarning("Player render not found in game object!");
+                // Use own transform
+                cameraController!.SetTarget(transform);
             }
 
             if (prevRender != null)
@@ -368,16 +365,23 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public void CameraAim(bool enable)
+        public void StartAiming()
         {
-            if (enable)
-            {
-                EventManager.Instance.Broadcast(new CameraAimEvent(true, cameraAimRef));
-            }
-            else
-            {
-                EventManager.Instance.Broadcast(new CameraAimEvent(false, null));
-            }
+            AlignVisualYawToCamera();
+            cameraController!.EnableAimingCamera(true);
+        }
+
+        public void StopAiming()
+        {
+            cameraController!.EnableAimingCamera(false);
+        }
+
+        public void AlignVisualYawToCamera()
+        {
+            Status!.CurrentVisualYaw = cameraController!.GetYaw();
+            playerRender!.VisualTransform.eulerAngles = new(0F, Status!.CurrentVisualYaw, 0F);
+
+            //Debug.Log($"Aligning player yaw to camera ({Status!.CurrentVisualYaw}). Aiming: {cameraController!.IsAiming}");
         }
 
         public void UpdatePlayerStatus()
@@ -427,9 +431,9 @@ namespace CraftSharp.Control
             // Prepare current and target player visual yaw before updating it
             if (inputData.HorInputNormalized != Vector2.zero)
             {
-                Status!.UserInputYaw = GetYawFromVector2(inputData.HorInputNormalized);
+                var userInputYaw = GetYawFromVector2(inputData.HorInputNormalized);
                 //Status.TargetVisualYaw = inputData.CameraEularAngles.y + Status.UserInputYaw;
-                Status.TargetVisualYaw = cameraController!.GetYaw() + Status.UserInputYaw;
+                Status!.TargetVisualYaw = cameraController!.GetYaw() + userInputYaw;
             }
             
             // Update player physics and transform using updated current state

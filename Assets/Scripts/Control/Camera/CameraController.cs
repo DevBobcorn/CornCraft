@@ -13,6 +13,7 @@ namespace CraftSharp.Control
 
         // Flag variables
         protected bool initialized = false;
+        public bool IsAiming { get; protected set; } = false;
 
         public abstract void SetPerspective(Perspective newPersp);
 
@@ -50,7 +51,11 @@ namespace CraftSharp.Control
 
         public abstract Transform? GetTarget();
 
-        public virtual void SetAimRef(Transform aimRef) { }
+        public virtual void EnableAimingCamera(bool enable)
+        {
+            EnsureInitialized();
+            IsAiming = enable;
+        }
 
         public virtual Vector3 GetTargetViewportPos()
         {
@@ -82,6 +87,11 @@ namespace CraftSharp.Control
         public virtual Vector3 GetEularAngles()
         {
             return GetTransform().eulerAngles;
+        }
+
+        public virtual string GetDebugInfo()
+        {
+            return $"Aiming: {IsAiming}\ncamYaw: {GetYaw()}";
         }
     }
 }

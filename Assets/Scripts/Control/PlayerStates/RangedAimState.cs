@@ -1,4 +1,5 @@
 #nullable enable
+using CraftSharp.Event;
 using UnityEngine;
 
 namespace CraftSharp.Control
@@ -33,12 +34,16 @@ namespace CraftSharp.Control
                 attackStatus.StageTime += interval;
                 // Reset cooldown
                 attackStatus.AttackCooldown = 0F;
+                // Update player yaw
+                player.AlignVisualYawToCamera();
             }
             else if (inputData.AttackPressTime > 0F)
             {
                 attackStatus.StageTime += interval;
                 // Reset cooldown
                 attackStatus.AttackCooldown = 0F;
+                // Update player yaw
+                player.AlignVisualYawToCamera();
             }
             else // Charging state ends
             {
@@ -100,7 +105,7 @@ namespace CraftSharp.Control
             rigidbody.velocity = Vector3.zero;
             info.MoveVelocity = Vector3.zero;
 
-            player.CameraAim(true);
+            player.StartAiming();
         }
 
         public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
@@ -113,7 +118,7 @@ namespace CraftSharp.Control
             player.ChangeItemState(PlayerController.CurrentItemState.Mount);
             player.UseRootMotion = false;
 
-            player.CameraAim(false);
+            player.StopAiming();
         }
 
         public override string ToString() => "RangedAim";

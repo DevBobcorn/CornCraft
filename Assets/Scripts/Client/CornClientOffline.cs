@@ -66,9 +66,6 @@ namespace CraftSharp
             // Get player user input
             playerUserInput = GetComponent<PlayerUserInput>();
 
-            // Set up camera controller
-            CameraController.SetTarget(playerController!.cameraRef!);
-
             // Set up interaction updater
             interactionUpdater = GetComponent<InteractionUpdater>();
             interactionUpdater!.Initialize(this, CameraController);
@@ -202,7 +199,7 @@ namespace CraftSharp
                     targetInfo = "\n";
                 }
                 
-                return baseString + $"\nFog: <{RenderSettings.fogDensity}>\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
+                return baseString + $"\nFog: <{RenderSettings.fogDensity}>\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{cameraController?.GetDebugInfo()}\n{playerController?.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
             }
             

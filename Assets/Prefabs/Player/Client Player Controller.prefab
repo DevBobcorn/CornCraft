@@ -1,36 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7988133519349716107
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2288748662104460795}
-  m_Layer: 9
-  m_Name: Camera Ref
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2288748662104460795
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7988133519349716107}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.1, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5325304902113657644}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8973392254440252464
 GameObject:
   m_ObjectHideFlags: 0
@@ -62,8 +31,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
-  m_Children:
-  - {fileID: 2288748662104460795}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8936216958574950242
@@ -84,7 +52,7 @@ MonoBehaviour:
   SwordTrailPrefab: {fileID: 8749675225872338033, guid: 8c0e367f6013712429a3a0623672b56d, type: 3}
   ability: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
   cameraController: {fileID: 0}
-  cameraRef: {fileID: 2288748662104460795}
+  cameraRef: {fileID: 0}
   physicMaterial: {fileID: 13400000, guid: 11508097031b7f04c8ab9dcba71d230e, type: 2}
   UseRootMotion: 0
 --- !u!114 &2543192715876108228
