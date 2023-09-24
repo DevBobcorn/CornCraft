@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace CraftSharp.Resource
 {
@@ -41,10 +39,10 @@ namespace CraftSharp.Resource
             return vertexCount;
         }
 
-        public float GetVertexLight(float3 vertPosInBlock, float[] lights)
+        public static float GetVertexLight(float3 vertPosInBlock, float[] lights)
         {
             /*
-            // Original sample: Accepts light values of neighbors and self
+            // Original sampling: Accepts light values of neighbors and self
             float neighbor =
                     math.lerp(lights[2], lights[3], vertPosInBlock.x) + // North / South
                     math.lerp(lights[1], lights[0], vertPosInBlock.y) + // Down / Up
@@ -54,7 +52,7 @@ namespace CraftSharp.Resource
             return Mathf.Max(neighbor, lights[6]);
             */
 
-            // Original sample: Accepts light values of 8 corners
+            // Enhanced sampling: Accepts light values of 8 corners
             float x0z0 = math.lerp(lights[0], lights[4], vertPosInBlock.y);
             float x1z0 = math.lerp(lights[1], lights[5], vertPosInBlock.y);
             float x0z1 = math.lerp(lights[2], lights[6], vertPosInBlock.y);
@@ -150,7 +148,8 @@ namespace CraftSharp.Resource
             return math.lerp(math.lerp(cornersAO[2], cornersAO[0], AOCoord.y), math.lerp(cornersAO[3], cornersAO[1], AOCoord.y), AOCoord.x);
         }
 
-        public void Build(ref VertexBuffer buffer, float3 posOffset, int cullFlags, bool[] opaq, float[] blockLights, float3 blockTint)
+        public void Build(ref VertexBuffer buffer, float3 posOffset, int cullFlags,
+                bool[] ao, float[] blockLights, float3 blockColor)
         {
             // Compute value if absent
             int vertexCount = buffer.vert.Length + (sizeCache.ContainsKey(cullFlags) ? sizeCache[cullFlags] :
@@ -174,7 +173,7 @@ namespace CraftSharp.Resource
                 {
                     verts[i + vertOffset] = vertexArrs[CullDir.NONE][i] + posOffset;
                     float vertLight = GetVertexLight(vertexArrs[CullDir.NONE][i], blockLights);
-                    float3 vertColor = (tintIndexArrs[CullDir.NONE][i] >= 0 ? blockTint : DEFAULT_COLOR);
+                    float3 vertColor = (tintIndexArrs[CullDir.NONE][i] >= 0 ? blockColor : DEFAULT_COLOR);
                     tints[i + vertOffset] = new float4(vertColor, vertLight);
                 }
                 uvArrs[CullDir.NONE].CopyTo(txuvs, vertOffset);
@@ -188,13 +187,13 @@ namespace CraftSharp.Resource
 
                 if ((cullFlags & (1 << dirIdx)) != 0 && vertexArrs[dir].Length > 0)
                 {
-                    var cornersAO = GetDirCornersAO(dir, opaq);
+                    var cornersAO = GetDirCornersAO(dir, ao);
 
                     for (i = 0U;i < vertexArrs[dir].Length;i++)
                     {
                         verts[i + vertOffset] = vertexArrs[dir][i] + posOffset;
                         float vertLight = GetVertexLight(vertexArrs[dir][i], blockLights);
-                        float3 vertColor = (tintIndexArrs[dir][i] >= 0 ? blockTint : DEFAULT_COLOR)
+                        float3 vertColor = (tintIndexArrs[dir][i] >= 0 ? blockColor : DEFAULT_COLOR)
                                 * SampleVertexAO(dir, cornersAO, vertexArrs[dir][i]);
                         tints[i + vertOffset] = new float4(vertColor, vertLight);
                     }
@@ -210,8 +209,8 @@ namespace CraftSharp.Resource
             buffer.tint = tints;
         }
 
-        public void BuildWithCollider(ref VertexBuffer buffer, ref float3[] colliderVerts,
-                float3 posOffset, int cullFlags, bool[] opaq, float[] blockLights, float3 blockTint)
+        public void BuildWithCollider(ref VertexBuffer buffer, ref float3[] colliderVerts, float3 posOffset,
+                int cullFlags, bool[] ao, float[] blockLights, float3 blockColor)
         {
             // Compute value if absent
             int extraVertCount  = sizeCache.ContainsKey(cullFlags) ? sizeCache[cullFlags] :
@@ -240,7 +239,7 @@ namespace CraftSharp.Resource
                 {
                     verts[i + vertOffset] = vertexArrs[CullDir.NONE][i] + posOffset;
                     float vertLight = GetVertexLight(vertexArrs[CullDir.NONE][i], blockLights);
-                    float3 vertColor = (tintIndexArrs[CullDir.NONE][i] >= 0 ? blockTint : DEFAULT_COLOR);
+                    float3 vertColor = (tintIndexArrs[CullDir.NONE][i] >= 0 ? blockColor : DEFAULT_COLOR);
                     tints[i + vertOffset] = new float4(vertColor, vertLight);
                 }
                 uvArrs[CullDir.NONE].CopyTo(txuvs, vertOffset);
@@ -254,13 +253,13 @@ namespace CraftSharp.Resource
 
                 if ((cullFlags & (1 << dirIdx)) != 0 && vertexArrs[dir].Length > 0)
                 {
-                    var cornersAO = GetDirCornersAO(dir, opaq);
+                    var cornersAO = GetDirCornersAO(dir, ao);
 
                     for (i = 0U;i < vertexArrs[dir].Length;i++)
                     {
                         verts[i + vertOffset] = vertexArrs[dir][i] + posOffset;
                         float vertLight = GetVertexLight(vertexArrs[dir][i], blockLights);
-                        float3 vertColor = (tintIndexArrs[dir][i] >= 0 ? blockTint : DEFAULT_COLOR)
+                        float3 vertColor = (tintIndexArrs[dir][i] >= 0 ? blockColor : DEFAULT_COLOR)
                                 * SampleVertexAO(dir, cornersAO, vertexArrs[dir][i]);
                         tints[i + vertOffset] = new float4(vertColor, vertLight);
                     }
