@@ -145,14 +145,16 @@ namespace CraftSharp.Rendering
                             {
                                 var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
                                 int liquidCullFlags = chunkData.GetCullFlags(loc, bloc, neighborCheck);
-                                var liquidHeights = chunkData.GetLiquidHeights(loc);
-
-                                var liquidLayerIndex = state.InWater ? waterLayerIndex : lavaLayerIndex;
-                                var liquidTexture = FluidGeometry.LiquidTextures[state.InWater ? 0 : 1];
 
                                 if (liquidCullFlags != 0)
                                 {
-                                    FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], liquidTexture, x, y, z, liquidHeights, liquidCullFlags, world.GetWaterColor(loc));
+                                    var liquidHeights = chunkData.GetLiquidHeights(loc);
+                                    var liquidLayerIndex = state.InWater ? waterLayerIndex : lavaLayerIndex;
+                                    var liquidTexture = FluidGeometry.LiquidTextures[state.InWater ? 0 : 1];
+                                    var lights = GetCornerLights(world, loc);
+
+                                    FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], new(z, y, x), liquidTexture,
+                                            liquidHeights, liquidCullFlags, lights, world.GetWaterColor(loc));
                                     
                                     layerMask |= (1 << liquidLayerIndex);
                                 }
@@ -392,7 +394,7 @@ namespace CraftSharp.Rendering
                             int liquidCullFlags = world.GetCullFlags(loc, bloc, neighborCheck);
 
                             if (liquidCullFlags != 0)
-                                FluidGeometry.BuildCollider(ref fluidVerts, (int)loc.X, (int)loc.Y, (int)loc.Z, liquidCullFlags);
+                                FluidGeometry.BuildCollider(ref fluidVerts, new((float)loc.Z, (float)loc.Y, (float)loc.X), liquidCullFlags);
                         }
 
                         if (state.LikeAir || state.NoCollision)
