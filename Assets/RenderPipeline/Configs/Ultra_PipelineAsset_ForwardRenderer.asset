@@ -37,16 +37,16 @@ MonoBehaviour:
     height: 0
     heightDensity: 0
     startDistance: 32
-    SunColor: {r: 0.69934195, g: 0.58467793, b: 0.5092466, a: 1}
+    SunColor: {r: 0.7362485, g: 0.5361062, b: 0.42215717, a: 1}
     MoonColor: {r: 0.33023313, g: 0.36793935, b: 0.38679242, a: 1}
     TopColor: {r: 0, g: 0, b: 0, a: 0}
-    BottomColor: {r: 0.41058934, g: 0.45534423, b: 0.5217236, a: 1}
-    BlendHeight: 0.5
+    BottomColor: {r: 0.42619103, g: 0.49012446, b: 0.5591624, a: 1}
+    BlendHeight: 0.2
     FogGradientHeight: 0.5
     SunIntensity: 0
     MoonIntensity: -0
     SunFalloffIntensity: 9.4
-    SunControl: 1.0050161
+    SunControl: 1.0052844
     MoonControl: 0
 --- !u!114 &-3662932369841924689
 MonoBehaviour:
@@ -262,7 +262,7 @@ MonoBehaviour:
     screenBlendMode: 0
     celestialName: UniStorm Sun
     radialBlurIterations: 2
-    sunColor: {r: 0.49589634, g: 0.41083628, b: 0.35533753, a: 1}
+    sunColor: {r: 0.8457053, g: 0.6122024, b: 0.40212157, a: 1}
     sunThreshold: {r: 0.5568628, g: 0.5372549, b: 0.48235294, a: 1}
     sunShaftBlurRadius: 3
     sunShaftIntensity: 1
