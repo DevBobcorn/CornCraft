@@ -23,6 +23,7 @@ namespace CraftSharp.Control
         [SerializeField] private LayerMask thirdPersonCullingMask;
         [SerializeField] private LayerMask firstPersonCullingMask;
 
+        [SerializeField] private CinemachineBrain? cameraBrain;
         // Virtual camera and camera components
         [SerializeField] private CinemachineVirtualCamera? virtualCameraFollow;
         private CinemachineFramingTransposer? framingTransposer;        
@@ -46,6 +47,11 @@ namespace CraftSharp.Control
                 CinemachineCore.GetInputAxis = (axisName) =>
                 {
                     if (PlayerUserInputData.Current.Paused) // Ignore mouse pointer movement when paused by GUI
+                    {
+                        return 0F;
+                    }
+
+                    if (cameraBrain!.IsBlending)
                     {
                         return 0F;
                     }
@@ -141,11 +147,12 @@ namespace CraftSharp.Control
                 {
                     case Perspective.FirstPerson:
                         aimingPOV!.m_HorizontalAxis.Value = fixedPOV!.m_HorizontalAxis.Value;
-                        aimingPOV!.m_VerticalAxis.Value = fixedPOV!.m_VerticalAxis.Value;
+                        aimingPOV!.m_VerticalAxis.Value = followPOV!.m_VerticalAxis.Value;
                         break;
                     case Perspective.ThirdPerson:
                         aimingPOV!.m_HorizontalAxis.Value = followPOV!.m_HorizontalAxis.Value;
                         aimingPOV!.m_VerticalAxis.Value = followPOV!.m_VerticalAxis.Value;
+                        //Debug.Log($"D: {followPOV!.m_VerticalAxis.Value} {aimingPOV!.m_VerticalAxis.Value}");
                         break;
                 }
 
@@ -164,6 +171,7 @@ namespace CraftSharp.Control
                     case Perspective.ThirdPerson:
                         followPOV!.m_HorizontalAxis.Value = aimingPOV!.m_HorizontalAxis.Value;
                         followPOV!.m_VerticalAxis.Value = aimingPOV!.m_VerticalAxis.Value;
+                        //Debug.Log($"T: {followPOV!.m_VerticalAxis.Value} {aimingPOV!.m_VerticalAxis.Value}");
                         EnterThirdPersonMode();
                         break;
                 }
