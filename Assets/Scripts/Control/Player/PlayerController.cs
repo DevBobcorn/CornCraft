@@ -97,8 +97,11 @@ namespace CraftSharp.Control
                 var riggedRender = playerRender as PlayerEntityRiggedRender;
                 if (riggedRender != null) // If player render is rigged render
                 {
-                    // Additionally, update player state machine for rigged renders
+                    // Additionally, update player state machine for rigged rendersInitialize
                     OnLogicalUpdate += (interval, status, rigidbody) => riggedRender.UpdateStateMachine(status);
+                    // Initialize current item held by player
+                    var activeItem = CornApp.CurrentClient!.GetActiveItem();
+                    riggedRender.InitializeActiveItem(activeItem);
                 }
                 else // Player render is vanilla/entity render
                 {
@@ -195,6 +198,8 @@ namespace CraftSharp.Control
             heldItemCallback = (e) =>
             {
                 OnCurrentItemChanged?.Invoke(e.ItemStack);
+                // Exit attack state when active item is changed
+                Status!.Attacking = false;
                 CurrentActionType = PlayerActionHelper.GetItemActionType(e.ItemStack);
             };
             EventManager.Instance.Register(heldItemCallback);

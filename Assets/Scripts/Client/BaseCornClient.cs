@@ -57,6 +57,7 @@ namespace CraftSharp
         // Retrieve gameplay info
         public abstract World GetWorld();
         public abstract Container? GetInventory(int inventoryId);
+        public abstract ItemStack? GetActiveItem();
         public abstract Location GetLocation();
         public abstract Vector3 GetPosition();
         public abstract string GetInfoString(bool withDebugInfo);

@@ -164,6 +164,14 @@ namespace CraftSharp
         }
 
         /// <summary>
+        /// Get item stack held by client player
+        /// </summary>
+        public override ItemStack? GetActiveItem()
+        {
+            return GetInventory(0)?.GetHotbarItem(CurrentSlot);
+        }
+
+        /// <summary>
         /// Get current player location (in Minecraft world)
         /// </summary>
         public override Location GetLocation() => clientEntity.Location;
@@ -404,7 +412,7 @@ namespace CraftSharp
         {
             CurrentSlot = slot;
             // Broad cast hotbar selection change
-            EventManager.Instance.BroadcastOnUnityThread(
+            EventManager.Instance.Broadcast(
                     new HeldItemChangeEvent(CurrentSlot, inventories[0].GetHotbarItem(slot)));
         }
 
