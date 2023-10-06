@@ -13,13 +13,15 @@ namespace CraftSharp.UI
         public abstract bool ShouldPause();
 
         protected bool initialized;
-        protected abstract bool Initialize();
+        protected abstract void Initialize();
 
-        public virtual bool EnsureInitialized()
+        public virtual void EnsureInitialized()
         {
             if (!initialized)
-                return (initialized = Initialize());
-            return true;
+            {
+                Initialize();
+                initialized = true;
+            }
         }
 
         protected virtual void Start()

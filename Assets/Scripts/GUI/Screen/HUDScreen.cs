@@ -6,6 +6,7 @@ using TMPro;
 
 using CraftSharp.Event;
 using CraftSharp.Control;
+using UnityEngine.PlayerLoop;
 
 namespace CraftSharp.UI
 {
@@ -24,6 +25,7 @@ namespace CraftSharp.UI
         [SerializeField] private InteractionPanel? interactionPanel;
         [SerializeField] private Camera? UICamera;
         [SerializeField] private Animator? screenAnimator;
+
         private Animator? staminaBarAnimator;
         private ChatScreen? chatScreen;
         private PauseScreen? pauseScreen;
@@ -34,11 +36,19 @@ namespace CraftSharp.UI
         private int  selectedMode    = 0;
         private int displayedLatency = 0;
 
+        [SerializeField] [Range(0.1F, 1F)] private float transitionTime = 0.1F;
+        private float transitionCooldown = 0F;
+
         public override bool IsActive
         {
             set {
                 isActive = value;
                 screenAnimator!.SetBool(SHOW, isActive);
+
+                if (isActive)
+                {
+                    transitionCooldown = transitionTime;
+                }
             }
 
             get {
@@ -56,7 +66,7 @@ namespace CraftSharp.UI
             return false;
         }
 
-        protected override bool Initialize()
+        protected override void Initialize()
         {
             // Initialize controls...
             staminaBarAnimator = staminaBar!.GetComponent<Animator>();
@@ -126,8 +136,6 @@ namespace CraftSharp.UI
                     crosshairAnimator!.SetBool(SHOW, false);
                 }
             }
-            
-            return true;
         }
 
         private Action<CrosshairEvent>?         crosshairCallback;
@@ -152,8 +160,14 @@ namespace CraftSharp.UI
 
         void Update()
         {
-            if (!initialized || !IsActive)
+            if (!IsActive)
                 return;
+            
+            if (transitionCooldown > 0F)
+            {
+                transitionCooldown -= Time.unscaledDeltaTime;
+                return;
+            }
             
             var game = CornApp.CurrentClient;
             if (game == null) return;
