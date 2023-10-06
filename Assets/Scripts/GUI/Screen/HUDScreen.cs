@@ -12,8 +12,6 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class HUDScreen : BaseScreen
     {
-        private static readonly int SHOW = Animator.StringToHash("Show");
-
         private static readonly string[] modeIdentifiers = { "survival", "creative", "adventure", "spectator" };
         private const float HEALTH_MULTIPLIER = 10F;
 
@@ -25,10 +23,10 @@ namespace CraftSharp.UI
         [SerializeField] private RingValueBar? staminaBar;
         [SerializeField] private InteractionPanel? interactionPanel;
         [SerializeField] private Camera? UICamera;
+        [SerializeField] private Animator? screenAnimator;
         private Animator? staminaBarAnimator;
         private ChatScreen? chatScreen;
         private PauseScreen? pauseScreen;
-        private CanvasGroup? screenGroup;
 
         private bool isActive = false, debugInfo = true;
 
@@ -40,9 +38,7 @@ namespace CraftSharp.UI
         {
             set {
                 isActive = value;
-                screenGroup!.alpha = value ? 1F : 0F;
-                screenGroup.blocksRaycasts = value;
-                screenGroup.interactable   = value;
+                screenAnimator!.SetBool(SHOW, isActive);
             }
 
             get {
@@ -109,8 +105,6 @@ namespace CraftSharp.UI
             pauseScreen = GameObject.FindObjectOfType<PauseScreen>(true);
 
             // Initialize controls
-            screenGroup = GetComponent<CanvasGroup>();
-
             if (interactionPanel != null)
             {
                 interactionPanel.OnItemCountChange += newCount =>

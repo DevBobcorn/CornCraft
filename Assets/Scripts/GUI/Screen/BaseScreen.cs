@@ -5,6 +5,8 @@ namespace CraftSharp.UI
 {
     public abstract class BaseScreen : MonoBehaviour
     {
+        protected static readonly int SHOW = Animator.StringToHash("Show");
+
         public abstract bool IsActive { get; set; }
 
         public abstract bool ReleaseCursor();

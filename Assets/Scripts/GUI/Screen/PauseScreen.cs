@@ -7,19 +7,17 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class PauseScreen : BaseScreen
     {
-        private bool isActive = false;
-
         // UI controls and objects
         [SerializeField] private Button? resumeButton, quitButton;
-        private CanvasGroup? screenGroup;
+        [SerializeField] private Animator? screenAnimator;
+
+        private bool isActive = false;
 
         public override bool IsActive
         {
             set {
                 isActive = value;
-                screenGroup!.alpha = value ? 1F : 0F;
-                screenGroup.blocksRaycasts = value;
-                screenGroup.interactable   = value;
+                screenAnimator!.SetBool(SHOW, isActive);
             }
 
             get {
@@ -50,8 +48,6 @@ namespace CraftSharp.UI
         protected override bool Initialize()
         {
             // Initialize controls and add listeners
-            screenGroup = GetComponent<CanvasGroup>();
-
             resumeButton!.onClick.AddListener(this.Back2Game);
             quitButton!.onClick.AddListener(this.QuitGame);
             
