@@ -146,11 +146,6 @@ namespace CraftSharp.Rendering
         #endregion
 
         #region Chunk updates
-        Action<ReceiveChunkColumnEvent>? columnCallBack1;
-        Action<UnloadChunkColumnEvent>? columnCallBack2;
-        Action<BlockUpdateEvent>? blockCallBack;
-        Action<BlocksUpdateEvent>? blocksCallBack;
-
         private const int ChunkCenterX = Chunk.SizeX / 2 + 1;
         private const int ChunkCenterY = Chunk.SizeY / 2 + 1;
         private const int ChunkCenterZ = Chunk.SizeZ / 2 + 1;
@@ -298,9 +293,9 @@ namespace CraftSharp.Rendering
             liquidCollider = liquidColliderObj.AddComponent<MeshCollider>();
 
             // Register event callbacks
-            EventManager.Instance.Register(columnCallBack1 = (e) => { });
+            EventManager.Instance.Register(columnLoadCallback = (e) => { });
 
-            EventManager.Instance.Register(columnCallBack2 = (e) => {
+            EventManager.Instance.Register(columnUnloadCallback = (e) => {
                 int2 chunkCoord = new(e.ChunkX, e.ChunkZ);
                 if (columns.ContainsKey(chunkCoord))
                 {
@@ -309,14 +304,34 @@ namespace CraftSharp.Rendering
                 }
             });
 
-            EventManager.Instance.Register(blockCallBack = (e) => {
+            EventManager.Instance.Register(blockCallback = (e) => {
                 UpdateBlockAt(e.Location);
             });
 
-            EventManager.Instance.Register(blocksCallBack = (e) => {
+            EventManager.Instance.Register(blocksCallback = (e) => {
                 foreach (var loc in e.Locations)
                     UpdateBlockAt(loc);
             });
+        }
+
+        private Action<ReceiveChunkColumnEvent>? columnLoadCallback;
+        private Action<UnloadChunkColumnEvent>? columnUnloadCallback;
+        private Action<BlockUpdateEvent>? blockCallback;
+        private Action<BlocksUpdateEvent>? blocksCallback;
+
+        void OnDestroy()
+        {
+            if (columnLoadCallback is not null)
+                EventManager.Instance.Unregister(columnLoadCallback);
+            
+            if (columnUnloadCallback is not null)
+                EventManager.Instance.Unregister(columnUnloadCallback);
+            
+            if (blockCallback is not null)
+                EventManager.Instance.Unregister(blockCallback);
+            
+            if (blocksCallback is not null)
+                EventManager.Instance.Unregister(blocksCallback);
         }
 
         private void UpdateBlockAt(Location loc)
