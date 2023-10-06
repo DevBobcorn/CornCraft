@@ -43,6 +43,7 @@ namespace CraftSharp.Rendering
 
             // Add and initialize player widgets
             var accessoryWidget = visualObj.AddComponent<PlayerAccessoryWidget>();
+            accessoryWidget.Initialize();
 
             var itemMountRef = entityAnimator!.GetBoneTransform(HumanBodyBones.Spine);
             var mainHandRef = entityAnimator.GetBoneTransform(HumanBodyBones.RightHand);
@@ -50,6 +51,13 @@ namespace CraftSharp.Rendering
             accessoryWidget.SetRefTransforms(mainHandRef, offHandRef, itemMountRef);
 
             UpdateSkinMaterial();
+        }
+
+        public void InitializeActiveItem(ItemStack? itemStack)
+        {
+            // Initialize player active item
+            var accessoryWidget = visual!.GetComponent<PlayerAccessoryWidget>();
+            accessoryWidget.UpdateActiveItem(itemStack);
         }
 
         public override void UpdateStateMachine(PlayerStatus info)

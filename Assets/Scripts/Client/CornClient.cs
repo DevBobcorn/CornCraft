@@ -447,6 +447,14 @@ namespace CraftSharp
         }
 
         /// <summary>
+        /// Get item stack held by client player
+        /// </summary>
+        public override ItemStack? GetActiveItem()
+        {
+            return GetInventory(0)?.GetHotbarItem(CurrentSlot);
+        }
+
+        /// <summary>
         /// Get current player location (in Minecraft world)
         /// </summary>
         public override Location GetLocation() => clientEntity.Location;
@@ -1210,6 +1218,10 @@ namespace CraftSharp
                         if (container.IsHotbar(slotID, out int hotbarSlot))
                         {
                             EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
+                            if (hotbarSlot == CurrentSlot) // Updating held item
+                            {
+                                EventManager.Instance.Broadcast(new HeldItemChangeEvent(CurrentSlot, item));
+                            }
                         }
                     });
                 }
@@ -1569,7 +1581,7 @@ namespace CraftSharp
         /// Called when held item change
         /// </summary>
         /// <param name="slot"> item slot</param>
-        public void OnHeldItemChange(byte slot)
+        public void OnHeldItemChange(byte slot) //
         {
             CurrentSlot = slot;
             // Broad cast hotbar selection change

@@ -189,11 +189,36 @@ namespace CraftSharp.Rendering
 
         public void Hit() { }
 
-        void Start()
+        public void UpdateActiveItem(ItemStack? itemStack)
+        {
+            if (itemStack is null)
+            {
+                DestroyActionItem();
+            }
+            else
+            {
+                var actionType = PlayerActionHelper.GetItemActionType(itemStack);
+
+                if (actionType == ItemActionType.None)
+                {
+                    DestroyActionItem();
+                }
+                else
+                {
+                    CreateActionItem(itemStack, actionType);
+                }
+            }
+            
+            MountItem();
+        }
+
+        public void Initialize()
         {
             player = GetComponentInParent<PlayerController>();
             playerAnimator = GetComponent<Animator>();
 
+            // These subscriptions will be cleared when the player render is replaced/destroyed,
+            // so it is not necessary to manually unregister them
             player.OnItemStateChanged += (weaponState) => {
                 switch (weaponState)
                 {
@@ -209,25 +234,7 @@ namespace CraftSharp.Rendering
                 }
             };
 
-            player.OnCurrentItemChanged += (itemStack) => {
-                if (itemStack is null)
-                {
-                    DestroyActionItem();
-                }
-                else
-                {
-                    var actionType = PlayerActionHelper.GetItemActionType(itemStack);
-
-                    if (actionType == ItemActionType.None)
-                    {
-                        DestroyActionItem();
-                    }
-                    else
-                    {
-                        CreateActionItem(itemStack, actionType);
-                    }
-                }
-            };
+            player.OnCurrentItemChanged += UpdateActiveItem;
 
             player.OnMeleeDamageStart += () => {
                 currentItem?.StartAction();
