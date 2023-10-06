@@ -203,7 +203,7 @@ namespace CraftSharp.UI
         private Action<ChatMessageEvent>? chatCallback;
         private Action<AutoCompletionEvent>? autoCompleteCallback;
 
-        protected override bool Initialize()
+        protected override void Initialize()
         {
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
@@ -264,8 +264,6 @@ namespace CraftSharp.UI
 
             EventManager.Instance.Register(chatCallback);
             EventManager.Instance.Register(autoCompleteCallback);
-
-            return true;
         }
 
         void OnDestroy()

@@ -52,7 +52,7 @@ namespace CraftSharp.UI
 
         private Action<HealthUpdateEvent>? healthCallback;
 
-        protected override bool Initialize()
+        protected override void Initialize()
         {
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
@@ -68,8 +68,6 @@ namespace CraftSharp.UI
             };
 
             EventManager.Instance.Register(healthCallback);
-            
-            return true;
         }
 
         void OnDestroy()

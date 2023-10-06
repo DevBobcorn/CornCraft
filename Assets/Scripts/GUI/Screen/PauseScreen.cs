@@ -45,13 +45,11 @@ namespace CraftSharp.UI
             CornApp.CurrentClient?.Disconnect();
         }
 
-        protected override bool Initialize()
+        protected override void Initialize()
         {
             // Initialize controls and add listeners
             resumeButton!.onClick.AddListener(this.Back2Game);
             quitButton!.onClick.AddListener(this.QuitGame);
-            
-            return true;
         }
 
         void Update()
@@ -60,9 +58,8 @@ namespace CraftSharp.UI
                 return;
             
             // Escape key cannot be used here, otherwise it will push pause screen back after poping it
-            if (Input.GetKeyDown(KeyCode.Return))
+            if (Input.GetKeyDown(KeyCode.Escape))
                 Back2Game();
-
         }
 
     }

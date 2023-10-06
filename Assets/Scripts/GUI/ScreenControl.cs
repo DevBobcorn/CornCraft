@@ -33,8 +33,10 @@ namespace CraftSharp.UI
 
         public void PushScreen(BaseScreen screen)
         {
-            if (screen is not null && screen.EnsureInitialized())
+            if (screen is not null)
             {
+                screen.EnsureInitialized();
+
                 // Deactive previous top screen if present
                 if (screenStack.Count > 0)
                     screenStack.Peek().IsActive = false;
@@ -94,7 +96,6 @@ namespace CraftSharp.UI
             }
 
             Cursor.lockState = releaseCursor ? CursorLockMode.None : CursorLockMode.Locked;
-
         }
     }
 }
