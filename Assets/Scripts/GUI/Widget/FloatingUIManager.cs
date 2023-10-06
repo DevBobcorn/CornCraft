@@ -21,8 +21,7 @@ namespace CraftSharp.UI
 
                 // Make a new floating UI here...
                 var fUIObj = GameObject.Instantiate(infoTagPrefab);
-                fUIObj!.transform.SetParent(render.InfoAnchor, true);
-                fUIObj!.transform.localPosition = Vector3.zero;
+                fUIObj!.transform.SetParent(render.InfoAnchor, false);
 
                 var fUI = fUIObj.GetComponent<FloatingUI>();
                 fUI.SetInfo(render.Entity);
