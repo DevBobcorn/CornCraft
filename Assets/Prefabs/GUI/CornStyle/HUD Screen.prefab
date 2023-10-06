@@ -221,6 +221,7 @@ GameObject:
   - component: {fileID: 7576224443025202726}
   - component: {fileID: 7576224443025202725}
   - component: {fileID: 7576224443025202724}
+  - component: {fileID: 1504176643780891591}
   m_Layer: 5
   m_Name: HUD Screen
   m_TagString: Untagged
@@ -294,6 +295,28 @@ MonoBehaviour:
   staminaBar: {fileID: 5985444504177522515}
   interactionPanel: {fileID: 6129123592338504208}
   UICamera: {fileID: 0}
+  screenAnimator: {fileID: 1504176643780891591}
+--- !u!95 &1504176643780891591
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7576224443025202727}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 1df435a39d953c941b7a66447d7441de, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7576224443750009121
 GameObject:
   m_ObjectHideFlags: 0
