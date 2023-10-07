@@ -1,5 +1,4 @@
 #nullable enable
-using CraftSharp.Event;
 using UnityEngine;
 
 namespace CraftSharp.Control
@@ -35,14 +34,12 @@ namespace CraftSharp.Control
                 // Reset cooldown
                 attackStatus.AttackCooldown = 0F;
             }
-            /* TODO:X
-            else if (inputData.AttackPressTime > 0F)
+            else if (inputData.Attack.ChargedAttack.IsPressed())
             {
                 attackStatus.StageTime += interval;
                 // Reset cooldown
                 attackStatus.AttackCooldown = 0F;
             }
-            */
             else // Charging state ends
             {
                 // Idle timeout

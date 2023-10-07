@@ -1,5 +1,7 @@
 #nullable enable
+using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace CraftSharp.Control
 {
@@ -57,15 +59,6 @@ namespace CraftSharp.Control
                     info.Attacking = false;
                     attackStatus.AttackStage = -1;
                 }
-                /* TODO:X
-                else if (inputData.AttackPressed) // Enter next attack stage
-                {
-                    info.Attacking = true;
-                    var nextStage = (attackStatus.AttackStage + 1) % meleeAttack.StageCount;
-
-                    StartMeleeStage(meleeAttack, attackStatus, nextStage, player);
-                }
-                */
             }
         }
 
@@ -103,6 +96,9 @@ namespace CraftSharp.Control
             return false;
         }
 
+        private Action<InputAction.CallbackContext>? chargedAttackCallback;
+        private Action<InputAction.CallbackContext>? normalAttackCallback;
+
         public void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             info.Attacking = true;
@@ -124,6 +120,23 @@ namespace CraftSharp.Control
 
             rigidbody.velocity = Vector3.zero;
             info.MoveVelocity = Vector3.zero;
+
+            // Register input action events
+            player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
+            {
+                player.TryStartChargedAttack();
+            };
+
+            player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>
+            {
+                if (attackStatus.AttackCooldown <= 0F && meleeAttack.StageCount > 0) // Attack available
+                {
+                    info.Attacking = true;
+                    var nextStage = (attackStatus.AttackStage + 1) % meleeAttack.StageCount;
+
+                    StartMeleeStage(meleeAttack, attackStatus, nextStage, player);
+                }
+            };
         }
 
         public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
@@ -139,9 +152,12 @@ namespace CraftSharp.Control
                 player.MeleeDamageEnd();
             }
 
-            //Debug.Log("Attack ends!");
             player.ChangeItemState(PlayerController.CurrentItemState.Mount);
             player.UseRootMotion = false;
+
+            // Unregister input action events
+            player.Actions.Attack.ChargedAttack.performed -= chargedAttackCallback;
+            player.Actions.Attack.NormalAttack.performed -= normalAttackCallback;
         }
 
         public override string ToString() => "Melee";

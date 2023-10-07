@@ -152,6 +152,54 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Attack",
+            "id": "ca5a69e5-ea48-4b4c-b4a1-e9aec27e156a",
+            "actions": [
+                {
+                    "name": "Charged Attack",
+                    "type": "Button",
+                    "id": "d21ca125-d9bd-458e-878a-dfae28aeff81",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Normal Attack",
+                    "type": "Button",
+                    "id": "77b7b4f5-a482-448b-88d4-4cb1a80d1fe7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "188cb9cd-2120-4894-ad61-b68d0dd20178",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Hold(duration=0.2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Charged Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f2bcf656-7425-4dd5-849c-a72da24b6d65",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Tap(duration=0.2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Normal Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

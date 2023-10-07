@@ -17,7 +17,7 @@ namespace CraftSharp.Control
 
             info.Sprinting = false;
 
-            if (inputData.Gameplay.Jump.IsPressed()) // Check stop gliding
+            if (inputData.Gameplay.Jump.WasPressedThisFrame()) // Check stop gliding
             {
                 info.Gliding = false;
             }
