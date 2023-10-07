@@ -52,7 +52,17 @@ namespace CraftSharp
             }
         }
 
-        public bool ZoomEnabled { get; set; } = false;
+        public void EnableCameraZoom(bool enable)
+        {
+            if (enable)
+            {
+                cameraController?.EnableZoom();
+            }
+            else
+            {
+                cameraController?.DisableZoom();
+            }
+        }
 
         public GameMode GameMode { get; protected set; } = GameMode.Survival;
         public byte CurrentSlot { get; protected set; } = 0;

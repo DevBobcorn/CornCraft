@@ -120,8 +120,17 @@ namespace CraftSharp.UI
             {
                 interactionPanel!.OnItemCountChange += newCount =>
                 {
-                    // Absorb mouse scroll input if there're more than 1 interaction options
-                    game.ZoomEnabled = newCount > 1;
+                    // Disable camera zoom if there're more than 1 interaction options
+                    if (newCount > 1)
+                    {
+                        scrollInput!.action.Enable();
+                        game.EnableCameraZoom(false);
+                    }
+                    else
+                    {
+                        scrollInput!.action.Disable();
+                        game.EnableCameraZoom(true);
+                    }
                 };
 
                 if (game.CameraController.GetPerspective() == Perspective.FirstPerson)
@@ -225,7 +234,7 @@ namespace CraftSharp.UI
 
             if (interactionPanel!.ShouldAbsordMouseScroll)
             {
-                var scroll = Input.GetAxis("Mouse ScrollWheel");
+                var scroll = scrollInput!.action.ReadValue<float>();
                 if (scroll != 0F && interactionPanel is not null)
                 {
                     if (scroll < 0F)
