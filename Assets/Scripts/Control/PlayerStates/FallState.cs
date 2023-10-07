@@ -11,27 +11,28 @@ namespace CraftSharp.Control
 
         public const float THRESHOLD_ANGLE_FORWARD = 40F;
 
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             var ability = player.Ability;
 
             info.Sprinting = false;
 
-            if (inputData.JumpFlag) // Check start gliding
+            if (inputData.Gameplay.Jump.WasPressedThisFrame()) // Check start gliding
             {
                 if (info.CenterDownDist > 2F && info.StaminaLeft > 0.01F) // Not so near to the ground, and we have stamina left
                 {
                     info.Gliding = true;
                 }
             }
-            else if (inputData.HorInputNormalized != Vector2.zero) // Trying to move
+            else if (inputData.Gameplay.Movement.IsPressed()) // Trying to move
             {
                 // Smooth rotation for player model
                 info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval * 0.05F);
 
                 if (info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to move forward
                 {
-                    if (info.FrontDownDist <= THRESHOLD_CLIMB_1M && info.FrontDownDist > THRESHOLD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
+                    if (info.FrontDownDist <= THRESHOLD_CLIMB_1M && info.FrontDownDist > THRESHOLD_CLIMB_2M
+                            && info.BarrierAngle < 30F) // Climb up platform
                     {
                         var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
                         var horOffset = info.BarrierDist - 1.0F;
@@ -50,11 +51,12 @@ namespace CraftSharp.Control
                                                 player.CrossFadeState(PlayerAbility.CLIMB_2M);
                                             },
                                             update: (interval, inputData, info, rigidbody, player) =>
-                                                info.Moving = inputData.HorInputNormalized != Vector2.zero
+                                                info.Moving = inputData.Gameplay.Movement.IsPressed()
                                         )
                                 } );
                     }
-                    else if (info.FrontDownDist <= THRESHOLD_CLIMB_UP && info.FrontDownDist > THRESHOLD_CLIMB_1M && info.BarrierAngle < 30F) // Climb up platform
+                    else if (info.FrontDownDist <= THRESHOLD_CLIMB_UP && info.FrontDownDist > THRESHOLD_CLIMB_1M &&
+                            info.BarrierAngle < 30F) // Climb up platform
                     {
                         var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
                         var horOffset = info.BarrierDist - 1.0F;
@@ -71,7 +73,7 @@ namespace CraftSharp.Control
                                                 player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                             },
                                             update: (interval, inputData, info, rigidbody, player) =>
-                                                info.Moving = inputData.HorInputNormalized != Vector2.zero
+                                                info.Moving = inputData.Gameplay.Movement.IsPressed()
                                         )
                                 } );
                     }
@@ -90,7 +92,7 @@ namespace CraftSharp.Control
             // Leave stamina value unchanged
         }
 
-        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
         {
             if (!info.Spectating && !info.Grounded && !info.Gliding && !info.OnWall && !info.InLiquid)
                 return true;
@@ -98,7 +100,7 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
             if (info.Spectating || info.Grounded || info.Gliding || info.OnWall || info.InLiquid)
                 return true;

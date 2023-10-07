@@ -42,7 +42,6 @@ namespace CraftSharp
             }
         }
 
-
         // Runs before a scene gets loaded
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void InitializeApp()

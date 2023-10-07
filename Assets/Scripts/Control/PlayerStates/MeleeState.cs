@@ -5,10 +5,10 @@ namespace CraftSharp.Control
 {
     public class MeleeState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             info.Sprinting = false;
-            info.Moving = inputData.HorInputNormalized != Vector2.zero;
+            info.Moving = inputData.Gameplay.Movement.IsPressed();
 
             info.Grounded = true; // Force grounded
             info.MoveVelocity = Vector3.zero; // Cancel move
@@ -52,11 +52,12 @@ namespace CraftSharp.Control
             }
             else if (attackStatus.AttackCooldown <= 0F && meleeAttack.StageCount > 0) // Attack available
             {
-                if (inputData.HorInputNormalized != Vector2.zero) // Start moving, exit attack state
+                if (inputData.Gameplay.Movement.IsPressed()) // Start moving, exit attack state
                 {
                     info.Attacking = false;
                     attackStatus.AttackStage = -1;
                 }
+                /* TODO:X
                 else if (inputData.AttackPressed) // Enter next attack stage
                 {
                     info.Attacking = true;
@@ -64,6 +65,7 @@ namespace CraftSharp.Control
 
                     StartMeleeStage(meleeAttack, attackStatus, nextStage, player);
                 }
+                */
             }
         }
 
@@ -84,13 +86,13 @@ namespace CraftSharp.Control
             //player.TurnToAttackTarget();
         }
 
-        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
         {
             // State only available via direct transition
             return false;
         }
 
-        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
             if (!info.Attacking)
                 return true;

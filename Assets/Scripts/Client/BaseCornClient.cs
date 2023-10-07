@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 using CraftSharp.Control;
-using CraftSharp.Event;
 using CraftSharp.Protocol;
 using CraftSharp.Protocol.ProfileKey;
 using CraftSharp.Protocol.Handlers.Forge;
@@ -15,7 +15,7 @@ using CraftSharp.Inventory;
 
 namespace CraftSharp
 {
-    [RequireComponent(typeof (PlayerUserInput), typeof (InteractionUpdater))]
+    [RequireComponent(typeof (InteractionUpdater))]
     public abstract class BaseCornClient : MonoBehaviour
     {
         #region Inspector Fields
@@ -30,11 +30,30 @@ namespace CraftSharp
         public CameraController CameraController => cameraController!;
         [SerializeField] protected ScreenControl? screenControl;
         public ScreenControl ScreenControl => screenControl!;
-        [SerializeField] public HUDScreen? HUDScreen;
-
+        [SerializeField] protected HUDScreen? HUDScreen;
         #endregion
 
-        public readonly PlayerUserInputData InputData = new();
+        public bool InputPaused { get; private set; } = false;
+        public void EnableInput(bool enable)
+        {
+            if (enable)
+            {
+                playerController?.EnableInput();
+                cameraController?.EnableInput();
+
+                InputPaused = false;
+            }
+            else
+            {
+                playerController?.DisableInput();
+                cameraController?.DisableInput();
+
+                InputPaused = true;
+            }
+        }
+
+        public bool ZoomEnabled { get; set; } = false;
+
         public GameMode GameMode { get; protected set; } = GameMode.Survival;
         public byte CurrentSlot { get; protected set; } = 0;
 

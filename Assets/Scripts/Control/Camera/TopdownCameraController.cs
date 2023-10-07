@@ -1,6 +1,7 @@
 #nullable enable
 using UnityEngine;
 using Cinemachine;
+
 using CraftSharp.Event;
 
 namespace CraftSharp.Control
@@ -9,8 +10,6 @@ namespace CraftSharp.Control
     {
         [SerializeField] private float cameraZOffsetNear =   15F;
         [SerializeField] private float cameraZOffsetFar  =   30F;
-        [SerializeField] [Range(0F, 20F)] private float scaleSmoothFactor = 4.0F;
-        [SerializeField] [Range(0F,  2F)] private float scrollSensitivity = 0.5F;
         private CinemachinePOV? followPOV;
 
         // Virtual camera and camera components
@@ -26,9 +25,6 @@ namespace CraftSharp.Control
                 virtualCameraFollow = followObj.GetComponent<CinemachineVirtualCamera>();
                 framingTransposer = virtualCameraFollow.GetCinemachineComponent<CinemachineFramingTransposer>();
 
-                // Override input axis to disable input when paused
-                CinemachineCore.GetInputAxis = (axisName) => PlayerUserInputData.Current.Paused ? 0F : Input.GetAxis(axisName);
-
                 initialized = true;
             }
         }
@@ -38,6 +34,7 @@ namespace CraftSharp.Control
             EnsureInitialized();
 
             // Initialize camera scale
+            zoomInput!.action.Enable();
             cameraInfo.CurrentScale = cameraInfo.TargetScale;
 
             SetPerspective(Perspective.ThirdPerson);
@@ -45,19 +42,16 @@ namespace CraftSharp.Control
 
         void Update()
         {
-            // Disable input when game is paused, see EnsureInitialized() above
-            if (!PlayerUserInputData.Current.MouseScrollAbsorbed)
+            var zoom = zoomInput!.action.ReadValue<float>();
+            if (zoom != 0F)
             {
-                float scroll = CinemachineCore.GetInputAxis("Mouse ScrollWheel");
-
                 // Update target camera status according to user input
-                if (scroll != 0F)
-                    cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - scroll * scrollSensitivity);
+                cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - zoom * zoomSensitivity);
             }
             
             if (cameraInfo.TargetScale != cameraInfo.CurrentScale)
             {
-                cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, Time.deltaTime * scaleSmoothFactor);
+                cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, Time.deltaTime * zoomSmoothFactor);
                 framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
             }
         }

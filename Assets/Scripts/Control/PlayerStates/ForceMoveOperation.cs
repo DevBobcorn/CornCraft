@@ -100,6 +100,6 @@ namespace CraftSharp.Control
 
         public delegate void OperationExitAction(PlayerStatus info, Rigidbody rigidbody, PlayerController player);
 
-        public delegate void OperationUpdateAction(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player);
+        public delegate void OperationUpdateAction(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player);
     }
 }

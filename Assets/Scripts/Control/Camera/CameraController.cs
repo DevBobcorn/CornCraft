@@ -1,15 +1,47 @@
 #nullable enable
 using UnityEngine;
+using Cinemachine;
+using UnityEngine.InputSystem;
 
 namespace CraftSharp.Control
 {
     public abstract class CameraController : MonoBehaviour
     {
         [SerializeField] protected Camera? renderCamera; // Camera used for actual rendering
+        [SerializeField] protected InputActionReference? zoomInput;
+        [SerializeField] [Range(0F, 20F)] protected float zoomSmoothFactor = 4.0F;
+        [SerializeField] [Range(0F,  2F)] protected float zoomSensitivity = 0.5F;
+
         protected static readonly Vector3 VIEWPORT_CENTER    = new(0.5F,  0.5F, 0F);
         protected CameraInfo cameraInfo = new();
         public Camera? RenderCamera => renderCamera;
         protected Perspective perspective = Perspective.ThirdPerson;
+
+        public virtual void EnableInput()
+        {
+            foreach (var input in GetComponentsInChildren<CinemachineInputProvider>())
+            {
+                input.enabled = true;
+            }
+        }
+
+        public virtual void DisableInput()
+        {
+            foreach (var input in GetComponentsInChildren<CinemachineInputProvider>())
+            {
+                input.enabled = false;
+            }
+        }
+
+        public virtual void EnableZoom()
+        {
+            zoomInput?.action.Enable();
+        }
+
+        public virtual void DisableZoom()
+        {
+            zoomInput?.action.Disable();
+        }
 
         // Flag variables
         protected bool initialized = false;

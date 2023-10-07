@@ -6,7 +6,7 @@ namespace CraftSharp.Control
 {
     public class RangedAimState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             var ability = player.Ability;
 
@@ -35,12 +35,14 @@ namespace CraftSharp.Control
                 // Reset cooldown
                 attackStatus.AttackCooldown = 0F;
             }
+            /* TODO:X
             else if (inputData.AttackPressTime > 0F)
             {
                 attackStatus.StageTime += interval;
                 // Reset cooldown
                 attackStatus.AttackCooldown = 0F;
             }
+            */
             else // Charging state ends
             {
                 // Idle timeout
@@ -58,13 +60,13 @@ namespace CraftSharp.Control
             info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
         }
 
-        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
         {
             // State only available via direct transition
             return false;
         }
 
-        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
             if (!info.Attacking)
                 return true;

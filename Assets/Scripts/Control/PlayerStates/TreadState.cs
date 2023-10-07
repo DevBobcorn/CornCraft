@@ -5,7 +5,7 @@ namespace CraftSharp.Control
 {
     public class TreadState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             var ability = player.Ability;
             
@@ -30,10 +30,12 @@ namespace CraftSharp.Control
                 info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
         }
 
-        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
         {
-            if (inputData.HorInputNormalized != Vector2.zero || inputData.Ascend || inputData.Descend)
-                return false; 
+            if (inputData.Gameplay.Movement.IsPressed() ||
+                    inputData.Gameplay.Ascend.IsPressed() ||
+                    inputData.Gameplay.Descend.IsPressed())
+                return false;
             
             if (!info.Spectating && info.InLiquid)
                 return true;
@@ -41,10 +43,12 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
-            if (inputData.HorInputNormalized != Vector2.zero || inputData.Ascend || inputData.Descend)
-                return true; 
+            if (inputData.Gameplay.Movement.IsPressed() ||
+                    inputData.Gameplay.Ascend.IsPressed() ||
+                    inputData.Gameplay.Descend.IsPressed())
+                return true;
             
             if (info.Spectating || !info.InLiquid)
                 return true;

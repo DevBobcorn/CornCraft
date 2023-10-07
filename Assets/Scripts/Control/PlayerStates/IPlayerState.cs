@@ -5,11 +5,11 @@ namespace CraftSharp.Control
 {
     public interface IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player);
+        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player);
 
-        public abstract bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info);
+        public abstract bool ShouldEnter(PlayerActions inputData, PlayerStatus info);
 
-        public abstract bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info);
+        public abstract bool ShouldExit(PlayerActions inputData, PlayerStatus info);
 
         public virtual void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player) { }
 

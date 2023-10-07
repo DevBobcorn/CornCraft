@@ -1,21 +1,11 @@
 using System.Collections.Generic;
-using CraftSharp.Control;
 using UnityEngine;
 
 namespace CraftSharp.UI
 {
     public class ScreenControl : MonoBehaviour
     {
-        private void PauseGame()
-        {
-            PlayerUserInputData.Current.Paused = true;
-        }
-
-        private void ResumeGame()
-        {
-            PlayerUserInputData.Current.Paused = false;
-        }
-
+        [SerializeField] private BaseCornClient client;
         private readonly Stack<BaseScreen> screenStack = new();
 
         public bool IsTopScreen(BaseScreen screen)
@@ -80,19 +70,23 @@ namespace CraftSharp.UI
         {
             // Get States
             bool releaseCursor = (screenStack.Count > 0) ? screenStack.Peek().ReleaseCursor() : false;
-            bool shouldPauseGame = false;
+            bool shouldPauseInput = false;
             foreach (var w in screenStack)
-                shouldPauseGame = shouldPauseGame || w.ShouldPause();
+                shouldPauseInput = shouldPauseInput || w.ShouldPause();
             
             //Debug.Log($"In window stack: {string.Join(' ', screenStack)}");
 
             // Update States
-            if (PlayerUserInputData.Current.Paused != shouldPauseGame)
+            if (client!.InputPaused != shouldPauseInput)
             {
-                if (shouldPauseGame)
-                    PauseGame();
+                if (shouldPauseInput)
+                {
+                    client.EnableInput(false);
+                }
                 else
-                    ResumeGame();
+                {
+                    client.EnableInput(true);
+                }
             }
 
             Cursor.lockState = releaseCursor ? CursorLockMode.None : CursorLockMode.Locked;

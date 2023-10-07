@@ -13,7 +13,7 @@ namespace CraftSharp.Control
         public const float THRESHOLD_SPRINT_STOP   = 50F;
         public const float THRESHOLD_ANGLE_FORWARD = 70F;
 
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             var ability = player.Ability;
 
@@ -26,7 +26,7 @@ namespace CraftSharp.Control
 
             float moveSpeed;
 
-            if ((inputData.Sprint || info.Sprinting) && info.StaminaLeft > 0F)
+            if ((inputData.Gameplay.Sprint.IsPressed() || info.Sprinting) && info.StaminaLeft > 0F)
                 info.Sprinting = true;
             else
                 info.Sprinting = false;
@@ -39,6 +39,7 @@ namespace CraftSharp.Control
             // Use the target visual yaw as actual movement direction
             var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
 
+            /* TODO:X
             if (inputData.AttackReleased) // Attack initiated
             {
                 if (inputData.AttackPressTime < PlayerUserInput.LONG_ATTACK_THRESHOLD)
@@ -52,7 +53,8 @@ namespace CraftSharp.Control
                 player.TryStartChargedAttack();
                 //Debug.Log($"Charged attack: press time {inputData.AttackPressTime}");
             }
-            else if (inputData.HorInputNormalized != Vector2.zero && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
+            else */
+            if (inputData.Gameplay.Movement.IsPressed() && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
             {
                 if (info.FrontDownDist <= THRESHOLD_CLIMB_1M && info.FrontDownDist > THRESHOLD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
                 {
@@ -73,7 +75,7 @@ namespace CraftSharp.Control
                                             player.CrossFadeState(PlayerAbility.CLIMB_2M);
                                         },
                                         update: (interval, inputData, info, rigidbody, player) =>
-                                            info.Moving = inputData.HorInputNormalized != Vector2.zero
+                                            info.Moving = inputData.Gameplay.Movement.IsPressed()
                                     )
                             } );
                 }
@@ -94,7 +96,7 @@ namespace CraftSharp.Control
                                             player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                         },
                                         update: (interval, inputData, info, rigidbody, player) =>
-                                            info.Moving = inputData.HorInputNormalized != Vector2.zero
+                                            info.Moving = inputData.Gameplay.Movement.IsPressed()
                                     )
                             } );
                 }
@@ -123,13 +125,13 @@ namespace CraftSharp.Control
                 }
             }
 
-            if (inputData.JumpFlag) // Jump up, keep horizontal speed
+            if (inputData.Gameplay.Jump.IsPressed()) // Jump up, keep horizontal speed
             {
                 moveVelocity.y = ability.JumpSpeedCurve.Evaluate(moveSpeed);
                 info.Grounded = false;
                 // Clear jump flag after jumping once to prevent playing
                 // from bouncing on ground when holding jump key
-                inputData.JumpFlag = false;
+                //inputData.JumpFlag = false;
 
                 rigidbody.velocity = moveVelocity;
                 //Debug.Log($"Jump [MOVE] velocity {rigidbody.velocity} ({moveSpeed})");
@@ -148,9 +150,9 @@ namespace CraftSharp.Control
                 info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
         }
 
-        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
         {
-            if (inputData.HorInputNormalized == Vector2.zero)
+            if (!inputData.Gameplay.Movement.IsPressed())
                 return false;
             
             if (!info.Spectating && info.Grounded && !info.OnWall && !info.InLiquid)
@@ -159,9 +161,9 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
-            if (inputData.HorInputNormalized == Vector2.zero)
+            if (!inputData.Gameplay.Movement.IsPressed())
                 return true;
 
             if (info.Spectating || !info.Grounded || info.OnWall || info.InLiquid)

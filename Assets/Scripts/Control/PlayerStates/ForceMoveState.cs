@@ -20,7 +20,7 @@ namespace CraftSharp.Control
             Operations = op;
         }
 
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             if (currentOperation is null)
                 return;
@@ -144,9 +144,9 @@ namespace CraftSharp.Control
         }
 
         // This is not used, use PlayerController.StartForceMoveOperation() to enter this state
-        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info) => false;
+        public bool ShouldEnter(PlayerActions inputData, PlayerStatus info) => false;
 
-        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info) =>
+        public bool ShouldExit(PlayerActions inputData, PlayerStatus info) =>
                 currentOperationIndex >= Operations.Length && currentTime <= 0F;
 
         public void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
