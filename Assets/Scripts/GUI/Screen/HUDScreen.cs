@@ -115,18 +115,15 @@ namespace CraftSharp.UI
             pauseScreen = GameObject.FindObjectOfType<PauseScreen>(true);
 
             // Initialize controls
-            if (interactionPanel != null)
-            {
-                interactionPanel.OnItemCountChange += newCount =>
-                {
-                    // Absorb mouse scroll input if there're more than 1 interaction options
-                    PlayerUserInputData.Current.MouseScrollAbsorbed = newCount > 1;
-                };
-            }
-
             var game = CornApp.CurrentClient;
             if (game != null)
             {
+                interactionPanel!.OnItemCountChange += newCount =>
+                {
+                    // Absorb mouse scroll input if there're more than 1 interaction options
+                    game.ZoomEnabled = newCount > 1;
+                };
+
                 if (game.CameraController.GetPerspective() == Perspective.FirstPerson)
                 {
                     crosshairAnimator!.SetBool(SHOW, true);

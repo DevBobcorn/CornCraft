@@ -1,0 +1,76 @@
+{
+    "name": "CameraActions",
+    "maps": [
+        {
+            "name": "Gameplay",
+            "id": "31c81d10-a7d0-401c-b7d0-ebfa6a404db6",
+            "actions": [
+                {
+                    "name": "Look",
+                    "type": "Value",
+                    "id": "6954de2a-ab1f-41b3-b52a-3305b61fcb16",
+                    "expectedControlType": "Axis",
+                    "processors": "ScaleVector2(x=0.1,y=0.1)",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Zoom",
+                    "type": "Value",
+                    "id": "a9252152-3648-42cf-90cb-62abf5f4cad4",
+                    "expectedControlType": "Axis",
+                    "processors": "Scale(factor=0.01)",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "58408795-8a99-4917-a9fe-9fbf99e4d88b",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "aa0128b5-9a9a-4f20-ba62-c3ecc634ea0f",
+                    "path": "<Pointer>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1bc1cf97-9084-4add-9cbe-9d6586fedbc7",
+                    "path": "<Joystick>/{Hatswitch}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "39b340c1-88d1-49dc-ab88-dad377aeb4ea",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Zoom",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

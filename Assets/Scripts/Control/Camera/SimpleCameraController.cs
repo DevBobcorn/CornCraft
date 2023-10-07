@@ -1,7 +1,7 @@
 #nullable enable
-using System;
 using UnityEngine;
 using Cinemachine;
+
 using CraftSharp.Event;
 
 namespace CraftSharp.Control
@@ -17,13 +17,8 @@ namespace CraftSharp.Control
         [SerializeField] private float cameraYOffsetFar  = -0.4F;
         [SerializeField] private float cameraYOffsetClip =  0.1F;
 
-        [SerializeField] [Range(0F, 20F)] private float scaleSmoothFactor = 4.0F;
-        [SerializeField] [Range(0F,  2F)] private float scrollSensitivity = 0.5F;
-
         [SerializeField] private LayerMask thirdPersonCullingMask;
         [SerializeField] private LayerMask firstPersonCullingMask;
-
-        [SerializeField] private CinemachineBrain? cameraBrain;
         // Virtual camera and camera components
         [SerializeField] private CinemachineVirtualCamera? virtualCameraFollow;
         private CinemachineFramingTransposer? framingTransposer;        
@@ -43,34 +38,6 @@ namespace CraftSharp.Control
 
                 aimingPOV = virtualCameraAim!.GetCinemachineComponent<CinemachinePOV>();
 
-                // Override input axis to disable input when paused
-                CinemachineCore.GetInputAxis = (axisName) =>
-                {
-                    if (PlayerUserInputData.Current.Paused) // Ignore mouse pointer movement when paused by GUI
-                    {
-                        return 0F;
-                    }
-
-                    if (cameraBrain!.IsBlending)
-                    {
-                        return 0F;
-                    }
-
-                    /*
-                    if (IsAiming && axisName == "Mouse X") // Ranged weapon aiming, use special handling
-                    {
-                        // Tell player controller to update yaw
-                        // This avoids causing jitters when turning around when aiming
-                        float deltaYaw = Input.GetAxis(axisName) * aimingPOV.m_HorizontalAxis
-                                .m_MaxSpeed * Time.unscaledDeltaTime;
-                        EventManager.Instance.Broadcast(new VisualYawUpdateEvent(deltaYaw));
-                        return 0F;
-                    }
-                    */
-
-                    return Input.GetAxis(axisName);
-                };
-
                 initialized = true;
             }
         }
@@ -80,6 +47,7 @@ namespace CraftSharp.Control
             EnsureInitialized();
 
             // Initialize camera scale
+            zoomInput!.action.Enable();
             cameraInfo.CurrentScale = cameraInfo.TargetScale;
 
             // Apply default Fov
@@ -93,19 +61,16 @@ namespace CraftSharp.Control
 
         void Update()
         {
-            // Disable input when game is paused, see EnsureInitialized() above
-            if (!PlayerUserInputData.Current.MouseScrollAbsorbed)
+            var zoom = zoomInput!.action.ReadValue<float>();
+            if (zoom != 0F)
             {
-                float scroll = CinemachineCore.GetInputAxis("Mouse ScrollWheel");
-
                 // Update target camera status according to user input
-                if (scroll != 0F)
-                    cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - scroll * scrollSensitivity);
+                cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - zoom * zoomSensitivity);
             }
             
             if (cameraInfo.TargetScale != cameraInfo.CurrentScale)
             {
-                cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, Time.deltaTime * scaleSmoothFactor);
+                cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, Time.deltaTime * zoomSmoothFactor);
 
                 var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
                 virtualCameraFollow!.m_Lens.FieldOfView = fov;

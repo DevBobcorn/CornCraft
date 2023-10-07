@@ -5,7 +5,7 @@ namespace CraftSharp.Control
 {
     public class SpectateState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             var ability = player.Ability;
 
@@ -13,7 +13,7 @@ namespace CraftSharp.Control
 
             Vector3 moveVelocity = Vector3.zero;
 
-            if (inputData.HorInputNormalized != Vector2.zero)
+            if (inputData.Gameplay.Movement.IsPressed())
             {
                 info.Moving = true;
 
@@ -29,18 +29,18 @@ namespace CraftSharp.Control
                 info.Moving = false;
 
             // Check vertical movement...
-            if (inputData.Ascend)
+            if (inputData.Gameplay.Ascend.IsPressed())
                 moveVelocity.y =  ability.WalkSpeed * 3F;
-            else if (inputData.Descend)
+            else if (inputData.Gameplay.Descend.IsPressed())
                 moveVelocity.y = -ability.WalkSpeed * 3F;
 
             // Apply new velocity to rigidbody
             info.MoveVelocity = moveVelocity;
         }
 
-        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info) => info.Spectating;
+        public bool ShouldEnter(PlayerActions inputData, PlayerStatus info) => info.Spectating;
 
-        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)  => !info.Spectating;
+        public bool ShouldExit(PlayerActions inputData, PlayerStatus info)  => !info.Spectating;
 
         public override string ToString() => "Spectate";
 

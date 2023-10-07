@@ -30,6 +30,10 @@ namespace CraftSharp.Control
         private EntityRender? playerRender;
         [SerializeField] protected PhysicMaterial? physicMaterial;
         [SerializeField] public bool UseRootMotion = false;
+        private PlayerActions? playerActions;
+
+        public void EnableInput() => playerActions!.Enable();
+        public void DisableInput() => playerActions!.Disable();
 
         public PlayerAbility Ability => ability!;
         protected Rigidbody? playerRigidbody;
@@ -149,6 +153,9 @@ namespace CraftSharp.Control
             playerRigidbody = GetComponent<Rigidbody>();
             statusUpdater = GetComponent<PlayerStatusUpdater>();
 
+            playerActions = new PlayerActions();
+            playerActions.Enable();
+
             var boxcast = ability!.ColliderType == PlayerAbility.PlayerColliderType.Box;
 
             if (boxcast)
@@ -207,6 +214,8 @@ namespace CraftSharp.Control
 
         void OnDestroy()
         {
+            playerActions?.Disable();
+
             if (gameModeCallback is not null)
                 EventManager.Instance.Unregister(gameModeCallback);
             
@@ -398,21 +407,18 @@ namespace CraftSharp.Control
 
         protected void PreLogicalUpdate(float interval)
         {
-            // Get input data from client
-            var inputData = PlayerUserInputData.Current;
-
             // Update player status (in water, grounded, etc)
             UpdatePlayerStatus();
             
             var status = statusUpdater!.Status;
 
             // Update current player state
-            if (CurrentState.ShouldExit(inputData, status))
+            if (CurrentState.ShouldExit(playerActions!, status))
             {
                 // Try to exit current state and enter another one
                 foreach (var state in PlayerStates.STATES)
                 {
-                    if (state != CurrentState && state.ShouldEnter(inputData, status))
+                    if (state != CurrentState && state.ShouldEnter(playerActions!, status))
                     {
                         CurrentState.OnExit(status, playerRigidbody!, this);
 
@@ -431,17 +437,18 @@ namespace CraftSharp.Control
             }
 
             float prevStamina = status.StaminaLeft;
+            var horInput = playerActions!.Gameplay.Movement.ReadValue<Vector2>();
 
             // Prepare current and target player visual yaw before updating it
-            if (inputData.HorInputNormalized != Vector2.zero)
+            if (horInput != Vector2.zero)
             {
-                var userInputYaw = GetYawFromVector2(inputData.HorInputNormalized);
+                var userInputYaw = GetYawFromVector2(horInput);
                 //Status.TargetVisualYaw = inputData.CameraEularAngles.y + Status.UserInputYaw;
                 Status!.TargetVisualYaw = cameraController!.GetYaw() + userInputYaw;
             }
             
             // Update player physics and transform using updated current state
-            CurrentState.UpdatePlayer(interval, inputData, status, playerRigidbody!, this);
+            CurrentState.UpdatePlayer(interval, playerActions, status, playerRigidbody!, this);
 
             // Broadcast current stamina if changed
             if (prevStamina != status.StaminaLeft)

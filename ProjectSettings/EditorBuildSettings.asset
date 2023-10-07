@@ -15,4 +15,4 @@ EditorBuildSettings:
     path: Assets/Scenes/World Offline.unity
     guid: ec3b3c00dbb3c164ca92f5935b2fc98b
   m_configObjects:
-    com.unity.input.settings: {fileID: 11400000, guid: 34088b9d37c485344a806ff62fa5cc2f, type: 2}
+    com.unity.input.settings: {fileID: 11400000, guid: cd09e9296e268fa4f95e52f01ac9f5af, type: 2}

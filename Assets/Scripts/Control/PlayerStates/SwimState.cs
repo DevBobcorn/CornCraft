@@ -8,7 +8,7 @@ namespace CraftSharp.Control
         public const float THRESHOLD_LAND_PLATFORM  = -1.4F;
         public const float SURFING_LIQUID_DIST_THERSHOLD = -0.2F;
 
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             var ability = player.Ability;
             
@@ -24,7 +24,7 @@ namespace CraftSharp.Control
 
             bool costStamina = true;
 
-            if (inputData.HorInputNormalized != Vector2.zero) // Move horizontally
+            if (inputData.Gameplay.Movement.IsPressed()) // Move horizontally
             {
                 // Smooth rotation for player model
                 info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval);
@@ -53,7 +53,7 @@ namespace CraftSharp.Control
                                                     player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                                 },
                                                 update: (interval, inputData, info, rigidbody, player) =>
-                                                    info.Moving = inputData.HorInputNormalized != Vector2.zero
+                                                    info.Moving = inputData.Gameplay.Movement.IsPressed()
                                             )
                                     } );
                         }
@@ -105,7 +105,7 @@ namespace CraftSharp.Control
                 moveVelocity.y = rigidbody.velocity.y;
 
             // Check vertical movement...
-            if (inputData.Ascend)
+            if (inputData.Gameplay.Ascend.IsPressed())
             {
                 if (distAboveLiquidSurface > 0F) // Free fall in air
                 {
@@ -119,14 +119,14 @@ namespace CraftSharp.Control
                 else
                     moveVelocity.y =  moveSpeed; // Move up
             }
-            else if (inputData.Descend)
+            else if (inputData.Gameplay.Descend.IsPressed())
             {
                 if (!info.Grounded)
                     moveVelocity.y = -moveSpeed;
             }
             else // Not moving horizontally
             {
-                if (inputData.HorInputNormalized != Vector2.zero) // Moving, cancel gravity
+                if (inputData.Gameplay.Movement.IsPressed()) // Moving, cancel gravity
                 {
                     if (movementAffected)
                     {
@@ -150,9 +150,11 @@ namespace CraftSharp.Control
 
         }
 
-        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
         {
-            if (inputData.HorInputNormalized == Vector2.zero && !inputData.Ascend && !inputData.Descend)
+            if (inputData.Gameplay.Movement.ReadValue<Vector2>() == Vector2.zero
+                    && !inputData.Gameplay.Ascend.IsPressed()
+                    && !inputData.Gameplay.Descend.IsPressed())
                 return false;
 
             if (!info.Spectating && info.InLiquid)
@@ -161,9 +163,11 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
-            if (inputData.HorInputNormalized == Vector2.zero && !inputData.Ascend && !inputData.Descend)
+            if (inputData.Gameplay.Movement.ReadValue<Vector2>() == Vector2.zero
+                    && !inputData.Gameplay.Ascend.IsPressed()
+                    && !inputData.Gameplay.Descend.IsPressed())
                 return true;
             
             if (info.Spectating || !info.InLiquid)

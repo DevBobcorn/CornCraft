@@ -1,9 +1,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
-using System.Threading;
-using System.IO;
 using UnityEngine;
 
 using CraftSharp.Control;
@@ -18,7 +15,7 @@ using CraftSharp.Inventory;
 
 namespace CraftSharp
 {
-    [RequireComponent(typeof (PlayerUserInput), typeof (InteractionUpdater))]
+    [RequireComponent(typeof (InteractionUpdater))]
     public class CornClientOffline : BaseCornClient
     {
         #region Login Information
@@ -39,7 +36,6 @@ namespace CraftSharp
         private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
         private readonly object movementLock = new();
-        private PlayerUserInput? playerUserInput;
         private InteractionUpdater? interactionUpdater;
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         private readonly Dictionary<int, Entity> entities = new();
@@ -62,9 +58,6 @@ namespace CraftSharp
 
             // Setup chunk render manager
             ChunkRenderManager!.SetClient(this);
-
-            // Get player user input
-            playerUserInput = GetComponent<PlayerUserInput>();
 
             // Set up interaction updater
             interactionUpdater = GetComponent<InteractionUpdater>();

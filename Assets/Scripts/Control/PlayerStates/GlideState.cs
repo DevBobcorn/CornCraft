@@ -11,20 +11,20 @@ namespace CraftSharp.Control
 
         public const float THRESHOLD_ANGLE_FORWARD = 40F;
 
-        public void UpdatePlayer(float interval, PlayerUserInputData inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             var ability = player.Ability;
 
             info.Sprinting = false;
 
-            if (inputData.JumpFlag) // Check stop gliding
+            if (inputData.Gameplay.Jump.IsPressed()) // Check stop gliding
             {
                 info.Gliding = false;
             }
 
             Vector3 moveVelocity;
             
-            if (inputData.HorInputNormalized != Vector2.zero) // Trying to move
+            if (inputData.Gameplay.Movement.IsPressed()) // Trying to move
             {
                 // Smooth rotation for player model
                 info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.SteerSpeed * interval * 0.08F);
@@ -52,7 +52,7 @@ namespace CraftSharp.Control
                                                 player.CrossFadeState(PlayerAbility.CLIMB_2M);
                                             },
                                             update: (interval, inputData, info, rigidbody, player) =>
-                                                info.Moving = inputData.HorInputNormalized != Vector2.zero
+                                                info.Moving = inputData.Gameplay.Movement.IsPressed()
                                         )
                                 } );
                     }
@@ -73,7 +73,7 @@ namespace CraftSharp.Control
                                                 player.CrossFadeState(PlayerAbility.CLIMB_1M);
                                             },
                                             update: (interval, inputData, info, rigidbody, player) =>
-                                                info.Moving = inputData.HorInputNormalized != Vector2.zero
+                                                info.Moving = inputData.Gameplay.Movement.IsPressed()
                                         )
                                 } );
                     }
@@ -101,7 +101,7 @@ namespace CraftSharp.Control
             }
         }
 
-        public bool ShouldEnter(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
         {
             if (!info.Spectating && !info.Grounded && info.Gliding && !info.OnWall && !info.InLiquid)
                 return true;
@@ -109,7 +109,7 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public bool ShouldExit(PlayerUserInputData inputData, PlayerStatus info)
+        public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
             if (info.Spectating || info.Grounded || !info.Gliding || info.OnWall || info.InLiquid)
                 return true;
