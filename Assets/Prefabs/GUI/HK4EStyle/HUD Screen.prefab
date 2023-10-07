@@ -1923,7 +1923,10 @@ MonoBehaviour:
   healthBar: {fileID: 5352454209895859104}
   staminaBar: {fileID: 8102830407053393212}
   interactionPanel: {fileID: 6066966466741156032}
+  scrollInput: {fileID: 1626063912436494066, guid: 3cf5ae6b9323ca5438eb565ac4b04128, type: 3}
   UICamera: {fileID: 0}
+  screenAnimator: {fileID: 0}
+  transitionTime: 0.1
 --- !u!1 &5352454210492060718
 GameObject:
   m_ObjectHideFlags: 0
