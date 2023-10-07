@@ -1,5 +1,6 @@
 #nullable enable
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace CraftSharp.UI
@@ -58,7 +59,7 @@ namespace CraftSharp.UI
                 return;
             
             // Escape key cannot be used here, otherwise it will push pause screen back after poping it
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Keyboard.current.escapeKey.wasPressedThisFrame)
                 Back2Game();
         }
 

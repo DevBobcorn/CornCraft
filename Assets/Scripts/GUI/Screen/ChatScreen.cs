@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using TMPro;
 
 using CraftSharp.Event;
@@ -281,7 +282,7 @@ namespace CraftSharp.UI
             if (!IsActive)
                 return;
 
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 CornApp.CurrentClient?.ScreenControl.TryPopScreen();
                 return;
@@ -289,12 +290,12 @@ namespace CraftSharp.UI
 
             if (chatInput!.IsActive())
             {
-                if (Input.GetKeyDown(KeyCode.Return))
+                if (Keyboard.current.enterKey.wasPressedThisFrame)
                 {
                     SendChatMessage();
                     chatInput.ActivateInputField();
                 }
-                if (Input.GetKeyDown(KeyCode.UpArrow))
+                if (Keyboard.current.upArrowKey.wasPressedThisFrame)
                 {
                     if (completionsShown)
                     {
@@ -308,7 +309,7 @@ namespace CraftSharp.UI
                     }
                     chatInput.ActivateInputField();
                 }
-                if (Input.GetKeyDown(KeyCode.DownArrow))
+                if (Keyboard.current.downArrowKey.wasPressedThisFrame)
                 {
                     if (completionsShown)
                     {
@@ -322,12 +323,13 @@ namespace CraftSharp.UI
                     }
                     chatInput.ActivateInputField();
                 }
-                if (Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
+                if (Keyboard.current.leftArrowKey.wasPressedThisFrame || 
+                        Keyboard.current.rightArrowKey.wasPressedThisFrame)
                 {
                     // Refresh complete after moving cursor position
                     chatInput.onValueChanged.Invoke(chatInput.text);
                 }
-                if (Input.GetKeyDown(KeyCode.Tab))
+                if (Keyboard.current.tabKey.wasPressedThisFrame)
                 {
                     if (completionsShown)
                     {

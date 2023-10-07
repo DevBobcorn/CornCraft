@@ -1,12 +1,11 @@
 #nullable enable
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using TMPro;
 
 using CraftSharp.Event;
-using CraftSharp.Control;
-using UnityEngine.PlayerLoop;
 
 namespace CraftSharp.UI
 {
@@ -23,6 +22,7 @@ namespace CraftSharp.UI
         [SerializeField] private ValueBar? healthBar;
         [SerializeField] private RingValueBar? staminaBar;
         [SerializeField] private InteractionPanel? interactionPanel;
+        [SerializeField] protected InputActionReference? scrollInput;
         [SerializeField] private Camera? UICamera;
         [SerializeField] private Animator? screenAnimator;
 
@@ -169,9 +169,9 @@ namespace CraftSharp.UI
             var game = CornApp.CurrentClient;
             if (game == null) return;
 
-            if (Input.GetKey(KeyCode.F3))
+            if (Keyboard.current.f3Key.isPressed)
             {
-                if (Input.GetKeyDown(KeyCode.F4))
+                if (Keyboard.current.f4Key.wasPressedThisFrame)
                 {
                     int buttonCount = modeButtons.Length;
                     if (modePanelShown) // Select next gamemode
@@ -196,7 +196,7 @@ namespace CraftSharp.UI
                 }
             }
 
-            if (Input.GetKeyUp(KeyCode.F3))
+            if (Keyboard.current.f3Key.wasReleasedThisFrame)
             {
                 if (modePanelShown) // Hide gamemode switch
                 {
@@ -220,7 +220,7 @@ namespace CraftSharp.UI
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.F)) // Execute interactions
+            if (Keyboard.current.fKey.wasPressedThisFrame) // Execute interactions
                 interactionPanel!.RunInteractionOption();
 
             if (interactionPanel!.ShouldAbsordMouseScroll)
@@ -235,40 +235,40 @@ namespace CraftSharp.UI
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.F5))
+            if (Keyboard.current.f5Key.wasPressedThisFrame)
             {
                 game.CameraController.SwitchPerspective();
             }
 
             // Hotbar slot switching
-            if (Input.GetKeyDown(KeyCode.Alpha1))
+            if (Keyboard.current.digit1Key.wasPressedThisFrame)
                 game.ChangeSlot(0);
-            if (Input.GetKeyDown(KeyCode.Alpha2))
+            if (Keyboard.current.digit2Key.wasPressedThisFrame)
                 game.ChangeSlot(1);
-            if (Input.GetKeyDown(KeyCode.Alpha3))
+            if (Keyboard.current.digit3Key.wasPressedThisFrame)
                 game.ChangeSlot(2);
-            if (Input.GetKeyDown(KeyCode.Alpha4))
+            if (Keyboard.current.digit4Key.wasPressedThisFrame)
                 game.ChangeSlot(3);
-            if (Input.GetKeyDown(KeyCode.Alpha5))
+            if (Keyboard.current.digit5Key.wasPressedThisFrame)
                 game.ChangeSlot(4);
-            if (Input.GetKeyDown(KeyCode.Alpha6))
+            if (Keyboard.current.digit6Key.wasPressedThisFrame)
                 game.ChangeSlot(5);
-            if (Input.GetKeyDown(KeyCode.Alpha7))
+            if (Keyboard.current.digit7Key.wasPressedThisFrame)
                 game.ChangeSlot(6);
-            if (Input.GetKeyDown(KeyCode.Alpha8))
+            if (Keyboard.current.digit8Key.wasPressedThisFrame)
                 game.ChangeSlot(7);
-            if (Input.GetKeyDown(KeyCode.Alpha9))
+            if (Keyboard.current.digit9Key.wasPressedThisFrame)
                 game.ChangeSlot(8);
 
-            if (Input.GetKeyDown(KeyCode.Slash))
+            if (Keyboard.current.slashKey.wasPressedThisFrame)
             {   // Open chat screen and input a slash
                 game.ScreenControl.PushScreen(chatScreen);
                 chatScreen?.SetChatMessage("/", 1);
             }
-            else if (Input.GetKeyDown(KeyCode.T)) // Just open chat screen
+            else if (Keyboard.current.tKey.wasPressedThisFrame) // Just open chat screen
                 game.ScreenControl.PushScreen(chatScreen);
 
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Keyboard.current.escapeKey.wasPressedThisFrame)
                 game.ScreenControl.PushScreen(pauseScreen);
             
             debugText!.text = game.GetInfoString(debugInfo);

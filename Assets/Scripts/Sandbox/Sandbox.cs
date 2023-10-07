@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using TMPro;
 
 using CraftSharp.Control;
@@ -85,7 +86,7 @@ namespace CraftSharp.Sandbox
                 fpsText.text = $"FPS: {(int)(1F / Time.deltaTime), 4}";
             }
 
-            if (Input.GetKeyDown(KeyCode.F5))
+            if (Keyboard.current.f5Key.wasPressedThisFrame)
             {
                 cameraController?.SwitchPerspective();
             }
