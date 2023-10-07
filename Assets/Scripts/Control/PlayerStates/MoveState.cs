@@ -1,5 +1,7 @@
 #nullable enable
+using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace CraftSharp.Control
 {
@@ -39,21 +41,6 @@ namespace CraftSharp.Control
             // Use the target visual yaw as actual movement direction
             var moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
 
-            /* TODO:X
-            if (inputData.AttackReleased) // Attack initiated
-            {
-                if (inputData.AttackPressTime < PlayerUserInput.LONG_ATTACK_THRESHOLD)
-                {
-                    player.TryStartNormalAttack();
-                    //Debug.Log($"Normal attack: press time {inputData.AttackPressTime}");
-                }
-            }
-            else if (inputData.AttackPressTime >= PlayerUserInput.LONG_ATTACK_THRESHOLD)
-            {
-                player.TryStartChargedAttack();
-                //Debug.Log($"Charged attack: press time {inputData.AttackPressTime}");
-            }
-            else */
             if (inputData.Gameplay.Movement.IsPressed() && info.YawOffset <= THRESHOLD_ANGLE_FORWARD) // Trying to moving forward
             {
                 if (info.FrontDownDist <= THRESHOLD_CLIMB_1M && info.FrontDownDist > THRESHOLD_CLIMB_2M && info.BarrierAngle < 30F) // Climb up platform
@@ -172,9 +159,32 @@ namespace CraftSharp.Control
             return false;
         }
 
+        private Action<InputAction.CallbackContext>? chargedAttackCallback;
+        private Action<InputAction.CallbackContext>? normalAttackCallback;
+
+        public void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        {
+            info.Sprinting = false;
+
+            // Register input action events
+            player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
+            {
+                player.TryStartChargedAttack();
+            };
+
+            player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>
+            {
+                player.TryStartNormalAttack();
+            };
+        }
+
         public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             info.Sprinting = false;
+
+            // Unregister input action events
+            player.Actions.Attack.ChargedAttack.performed -= chargedAttackCallback;
+            player.Actions.Attack.NormalAttack.performed -= normalAttackCallback;
         }
 
         public override string ToString() => "Move";

@@ -1,5 +1,7 @@
 #nullable enable
+using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace CraftSharp.Control
 {
@@ -13,22 +15,6 @@ namespace CraftSharp.Control
             info.Gliding = false;
             info.Moving = false;
 
-            /*
-            if (inputData.AttackReleased) // Attack initiated
-            {
-                if (inputData.AttackPressTime < PlayerUserInput.LONG_ATTACK_THRESHOLD)
-                {
-                    player.TryStartNormalAttack();
-                    //Debug.Log($"Normal attack: press time {inputData.AttackPressTime}");
-                }
-            }
-            else if (inputData.AttackPressTime >= PlayerUserInput.LONG_ATTACK_THRESHOLD)
-            {
-                player.TryStartChargedAttack();
-                //Debug.Log($"Charged attack: press time {inputData.AttackPressTime}");
-            }
-            else 
-            */
             if (inputData.Gameplay.Jump.WasPressedThisFrame()) // Jump in place
             {
                 // Preserve horizontal speed and change vertical speed
@@ -69,6 +55,34 @@ namespace CraftSharp.Control
                 return true;
             
             return false;
+        }
+
+        private Action<InputAction.CallbackContext>? chargedAttackCallback;
+        private Action<InputAction.CallbackContext>? normalAttackCallback;
+
+        public void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        {
+            info.Sprinting = false;
+
+            // Register input action events
+            player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
+            {
+                player.TryStartChargedAttack();
+            };
+
+            player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>
+            {
+                player.TryStartNormalAttack();
+            };
+        }
+
+        public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        {
+            info.Sprinting = false;
+
+            // Unregister input action events
+            player.Actions.Attack.ChargedAttack.performed -= chargedAttackCallback;
+            player.Actions.Attack.NormalAttack.performed -= normalAttackCallback;
         }
 
         public override string ToString() => "Idle";

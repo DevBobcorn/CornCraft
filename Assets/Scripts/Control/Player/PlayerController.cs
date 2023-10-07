@@ -31,6 +31,7 @@ namespace CraftSharp.Control
         [SerializeField] protected PhysicMaterial? physicMaterial;
         [SerializeField] public bool UseRootMotion = false;
         private PlayerActions? playerActions;
+        public PlayerActions Actions => playerActions!;
 
         public void EnableInput() => playerActions!.Enable();
         public void DisableInput() => playerActions!.Disable();
