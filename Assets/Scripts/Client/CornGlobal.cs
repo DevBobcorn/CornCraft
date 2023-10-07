@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using UnityEngine;
 using CraftSharp.Proxy;
 using CraftSharp.Protocol.Session;
 
@@ -6,8 +6,8 @@ namespace CraftSharp
 {
     public static class CornGlobal
     {
-        public const string Version = "1.0.0";
-        public const string BrandInfo = "CornCraft/" + Version;
+        public static string Version = Application.version;
+        public static string BrandInfo => $"CornCraft/{Application.version}";
 
         public static bool DisplaySystemMessages  { get; set; } =  true;
         public static bool DisplayXPBarMessages   { get; set; } =  true;
