@@ -5,6 +5,7 @@ using System.Collections;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 using TMPro;
@@ -511,18 +512,18 @@ namespace CraftSharp.UI
         {
             if (namesShown)
             {
-                if (Input.GetKeyDown(KeyCode.UpArrow))
+                if (Keyboard.current.upArrowKey.wasPressedThisFrame)
                 {
                     usernameIndex = (usernameIndex + 1) % shownNames.Length;
                     RefreshUsernames();
                 }
-                else if (Input.GetKeyDown(KeyCode.DownArrow))
+                else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
                 {
                     usernameIndex = (usernameIndex + shownNames.Length - 1) % shownNames.Length;
                     RefreshUsernames();
                 }
 
-                if (Input.GetKeyDown(KeyCode.Tab)) // Tab-complete
+                if (Keyboard.current.tabKey.wasPressedThisFrame) // Tab-complete
                 {
                     if (usernameIndex >= 0 && usernameIndex < shownNames.Length)
                     {

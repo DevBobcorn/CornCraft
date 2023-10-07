@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 using CraftSharp.Event;
@@ -243,7 +244,7 @@ namespace CraftSharp
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.F11)) // Toggle full screen
+            if (Keyboard.current.f11Key.wasPressedThisFrame) // Toggle full screen
             {
                 if (Screen.fullScreen)
                 {
