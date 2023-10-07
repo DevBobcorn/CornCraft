@@ -137,7 +137,7 @@ PlayerSettings:
   vulkanEnableLateAcquireNextImage: 0
   vulkanEnableCommandBufferRecycling: 1
   loadStoreDebugModeEnabled: 0
-  bundleVersion: 0.1
+  bundleVersion: 0.1.0
   preloadedAssets:
   - {fileID: 11400000, guid: cd09e9296e268fa4f95e52f01ac9f5af, type: 2}
   metroInputSource: 0
@@ -766,7 +766,7 @@ PlayerSettings:
   hmiLogStartupTiming: 0
   hmiCpuConfiguration: 
   apiCompatibilityLevel: 6
-  activeInputHandler: 2
+  activeInputHandler: 1
   windowsGamepadBackendHint: 0
   cloudProjectId: 83f7a400-8b5c-456b-89d6-9673888eb1e3
   framebufferDepthMemorylessMode: 0
