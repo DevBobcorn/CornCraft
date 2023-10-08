@@ -1,11 +1,13 @@
+#nullable enable
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace CraftSharp.UI
 {
     public class ScreenControl : MonoBehaviour
     {
-        [SerializeField] private BaseCornClient client;
+        [SerializeField] private BaseCornClient? client;
         private readonly Stack<BaseScreen> screenStack = new();
 
         public bool IsTopScreen(BaseScreen screen)
@@ -13,10 +15,13 @@ namespace CraftSharp.UI
             return GetTopScreen() == screen;
         }
 
-        public BaseScreen GetTopScreen()
+        public BaseScreen? GetTopScreen()
         {
             if (screenStack.Count <= 0)
-                Debug.LogError("Trying to peek an already empty screen stack!");
+            {
+                //Debug.LogError("Trying to peek an already empty screen stack!");
+                return null;
+            }
 
             return screenStack.Peek();
         }
@@ -90,6 +95,15 @@ namespace CraftSharp.UI
             }
 
             Cursor.lockState = releaseCursor ? CursorLockMode.None : CursorLockMode.Locked;
+        }
+
+        void Update()
+        {
+            var topScreen = GetTopScreen();
+            if (topScreen is not null)
+            {
+                topScreen.UpdateScreen();
+            }
         }
     }
 }

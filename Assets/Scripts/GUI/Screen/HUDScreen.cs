@@ -170,11 +170,8 @@ namespace CraftSharp.UI
                 EventManager.Instance.Unregister(staminaCallback);
         }
 
-        void Update()
+        public override void UpdateScreen()
         {
-            if (!IsActive)
-                return;
-            
             if (transitionCooldown > 0F)
             {
                 transitionCooldown -= Time.unscaledDeltaTime;
@@ -277,14 +274,18 @@ namespace CraftSharp.UI
 
             if (Keyboard.current.slashKey.wasPressedThisFrame)
             {   // Open chat screen and input a slash
-                game.ScreenControl.PushScreen(chatScreen);
-                chatScreen?.SetChatMessage("/", 1);
+                game.ScreenControl.PushScreen(chatScreen!);
+                chatScreen!.SetChatMessage("/", 1);
             }
             else if (Keyboard.current.tKey.wasPressedThisFrame) // Just open chat screen
-                game.ScreenControl.PushScreen(chatScreen);
+            {
+                game.ScreenControl.PushScreen(chatScreen!);
+            }
 
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
-                game.ScreenControl.PushScreen(pauseScreen);
+            {
+                game.ScreenControl.PushScreen(pauseScreen!);
+            }
             
             debugText!.text = game.GetInfoString(debugInfo);
 

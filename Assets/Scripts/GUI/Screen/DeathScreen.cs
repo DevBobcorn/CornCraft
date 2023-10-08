@@ -76,10 +76,9 @@ namespace CraftSharp.UI
                 EventManager.Instance.Unregister(healthCallback);
         }
 
-        void Update()
+        public override void UpdateScreen()
         {
-            if (!IsActive)
-                return;
+            
         }
     }
 }

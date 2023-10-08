@@ -211,6 +211,10 @@ namespace CraftSharp.Control
                 CurrentActionType = PlayerActionHelper.GetItemActionType(e.ItemStack);
             };
             EventManager.Instance.Register(heldItemCallback);
+
+            // Initialize player state (idle on start)
+            Status.Grounded = true;
+            CurrentState.OnEnter(Status, playerRigidbody, this);
         }
 
         void OnDestroy()
