@@ -29,5 +29,6 @@ namespace CraftSharp.UI
             EnsureInitialized();
         }
 
+        public abstract void UpdateScreen();
     }
 }

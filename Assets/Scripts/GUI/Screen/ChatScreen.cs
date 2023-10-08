@@ -277,11 +277,8 @@ namespace CraftSharp.UI
 
         }
 
-        void Update()
+        public override void UpdateScreen()
         {
-            if (!IsActive)
-                return;
-
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 CornApp.CurrentClient?.ScreenControl.TryPopScreen();
@@ -352,12 +349,8 @@ namespace CraftSharp.UI
                             HideCompletions();
                         }
                     }
-
                 }
-
             }
-
         }
-
     }
 }

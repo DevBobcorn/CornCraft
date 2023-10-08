@@ -53,11 +53,8 @@ namespace CraftSharp.UI
             quitButton!.onClick.AddListener(this.QuitGame);
         }
 
-        void Update()
+        public override void UpdateScreen()
         {
-            if (!IsActive)
-                return;
-            
             // Escape key cannot be used here, otherwise it will push pause screen back after poping it
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
                 Back2Game();

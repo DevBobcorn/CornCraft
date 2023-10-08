@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -63,9 +64,14 @@ namespace CraftSharp
             interactionUpdater = GetComponent<InteractionUpdater>();
             interactionUpdater!.Initialize(this, CameraController);
 
-            StartClient(new SessionToken(), null, string.Empty, 0, 0, null, "offline");
-
             // Post initialization
+            StartCoroutine(PostInitialization());
+        }
+
+        private IEnumerator PostInitialization()
+        {
+            yield return new WaitForEndOfFrame();
+
             GameMode = GameMode.Creative;
             EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
 
