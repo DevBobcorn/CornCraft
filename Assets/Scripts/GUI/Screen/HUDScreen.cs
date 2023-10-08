@@ -96,13 +96,19 @@ namespace CraftSharp.UI
             staminaCallback = (e) => {
                 staminaBar.CurValue = e.Stamina;
 
-                if (e.IsStaminaFull)
+                if (staminaBar.MaxValue != e.MaxStamina)
                 {
-                    staminaBar.MaxValue = e.Stamina;
+                    staminaBar.MaxValue = e.MaxStamina;
+                }
+
+                if (e.Stamina >= e.MaxStamina) // Stamina is full
+                {
                     staminaBarAnimator.SetBool(SHOW, false);
                 }
                 else
+                {
                     staminaBarAnimator.SetBool(SHOW, true);
+                }
             };
 
             EventManager.Instance.Register(crosshairCallback);
