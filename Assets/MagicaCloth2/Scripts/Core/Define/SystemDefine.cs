@@ -13,6 +13,11 @@ namespace MagicaCloth2
         public static class System
         {
             /// <summary>
+            /// プロジェクトセッティングに登録するDefineシンボル
+            /// </summary>
+            public const string DefineSymbol = "MAGICACLOTH2";
+
+            /// <summary>
             /// 計算を省略する最小の浮動小数点数
             /// </summary>
             public const float Epsilon = 1e-8f;

@@ -32,13 +32,14 @@ namespace MagicaCloth2
         internal bool GenerateBoneClothSelection()
         {
             // セレクションデータの構築
-            var ct = cloth.transform;
+            //var ct = cloth.transform;
             var setupData = boneClothSetupData;
             int tcnt = setupData.skinBoneCount; // パーティクルトランスフォーム総数
             var selectionData = new SelectionData(tcnt);
             for (int i = 0; i < tcnt; i++)
             {
-                var lpos = ct.InverseTransformPoint(setupData.transformPositions[i]);
+                //var lpos = ct.InverseTransformPoint(setupData.transformPositions[i]);
+                float3 lpos = math.transform(setupData.initRenderWorldtoLocal, setupData.transformPositions[i]);
                 selectionData.positions[i] = lpos;
                 selectionData.attributes[i] = VertexAttribute.Move; // 移動で初期化
             }

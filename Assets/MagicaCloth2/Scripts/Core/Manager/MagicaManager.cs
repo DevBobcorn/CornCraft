@@ -6,10 +6,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.LowLevel;
 using System.Linq;
+using UnityEngine.Scripting;
 #if UNITY_EDITOR
 using UnityEditor.Compilation;
 using UnityEditor;
 #endif
+
+// コードストリッピングを無効化する 
+[assembly: AlwaysLinkAssembly]
 
 namespace MagicaCloth2
 {
@@ -127,6 +131,21 @@ namespace MagicaCloth2
         [InitializeOnLoadMethod]
         static void PlayModeStateChange()
         {
+            // プロジェクトセッティングにMagicaCloth2用デファインシンボルを登録する
+            try
+            {
+                var newDefines = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup).Split(';');
+                if (newDefines.Contains(Define.System.DefineSymbol) == false)
+                {
+                    PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, newDefines.Concat(new string[] { Define.System.DefineSymbol }).ToArray());
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            // エディタ状態変更時イベント処理
             EditorApplication.playModeStateChanged += (mode) =>
             {
                 Develop.DebugLog($"PlayModeStateChanged:{mode} F:{UnityEngine.Time.frameCount}");
