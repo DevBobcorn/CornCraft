@@ -51,7 +51,7 @@ namespace CraftSharp
 
         void Start()
         {
-            MaterialManager!.LoadPlayerSkins();
+            //MaterialManager!.LoadPlayerSkins();
 
             // Push HUD Screen on start
             ScreenControl.PushScreen(HUDScreen!);
@@ -200,7 +200,7 @@ namespace CraftSharp
                     targetInfo = "\n";
                 }
                 
-                return baseString + $"\nFog: <{RenderSettings.fogDensity}>\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{cameraController?.GetDebugInfo()}\n{playerController?.GetDebugInfo()}" +
+                return baseString + $"\nFog: <{RenderSettings.fogDensity}>\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
             }
             

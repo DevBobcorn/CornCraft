@@ -31,15 +31,17 @@ namespace CraftSharp.Resource
                         Json.JSONData packData = metaData.Properties["pack"];
                         if (packData.Properties.ContainsKey("pack_format"))
                         {
-                            string packFormat = packData.Properties["pack_format"].StringValue;
-                            Debug.Log($"Pack [{packName}] is valid, with pack format version {packFormat}");
                             isValid = true;
-                        }
 
-                        if (packData.Properties.ContainsKey("description"))
-                        {
-                            string desc = packData.Properties["description"].StringValue;
-                            Debug.Log($"Description: {desc}");
+                            string packFormat = packData.Properties["pack_format"].StringValue;
+                            var description = string.Empty;
+
+                            if (packData.Properties.ContainsKey("description"))
+                            {
+                                description = packData.Properties["description"].StringValue;
+                            }
+
+                            Debug.Log($"Pack [{packName}] is valid, with pack format version {packFormat}. Description: {description}");
                         }
                     }
                 }

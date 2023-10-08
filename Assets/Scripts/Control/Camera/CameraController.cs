@@ -123,7 +123,7 @@ namespace CraftSharp.Control
 
         public virtual string GetDebugInfo()
         {
-            return $"Aiming: {IsAiming}\ncamYaw: {GetYaw()}";
+            return $"Aiming: {IsAiming}\nCamYaw: {GetYaw()}";
         }
     }
 }

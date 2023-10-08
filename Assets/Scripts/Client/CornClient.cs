@@ -84,7 +84,7 @@ namespace CraftSharp
 
         void Start()
         {
-            MaterialManager!.LoadPlayerSkins();
+            //MaterialManager!.LoadPlayerSkins();
 
             // Push HUD Screen on start
             ScreenControl.PushScreen(HUDScreen!);
@@ -1045,7 +1045,7 @@ namespace CraftSharp
                         locationReceived = true;
                     });
 
-                    Debug.Log($"Loc initialized at {location} with yaw {yaw}");
+                    //Debug.Log($"Loc initialized at {location} with yaw {yaw}");
                 }
                 else // Position correction from server
                 {                    

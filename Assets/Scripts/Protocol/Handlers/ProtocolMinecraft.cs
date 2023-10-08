@@ -327,11 +327,6 @@ namespace CraftSharp.Protocol.Handlers
                                 for (int i = 0; i < worldCount; i++)
                                     dataTypes.ReadNextString(packetData);                 // Dimension Names (World Names) - 1.16 and above
                                 var registryCodec = dataTypes.ReadNextNbt(packetData);    // Registry Codec (Dimension Codec) - 1.16 and above
-                                
-                                foreach (var entry in registryCodec)
-                                {
-                                    Debug.Log("Entry: " + entry.Key);
-                                }
 
                                 // Read and store defined dimensions 1.16.2 and above
                                 World.StoreDimensionList(registryCodec);

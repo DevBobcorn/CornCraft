@@ -96,8 +96,8 @@ namespace CraftSharp.Interaction
                                     }
                                 }
                             }
-                            else
-                                Debug.LogWarning($"Unknown interactable block {blockId}");
+                            //else
+                            //    Debug.LogWarning($"Unknown interactable block {blockId}");
                         }
 
                     }

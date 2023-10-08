@@ -47,7 +47,7 @@ namespace CraftSharp.Control
             var envInfo = $"Ground Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             
-            return $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\n{moveInfo}\n{envInfo}\n{atkInfo}\ncYaw: {CurrentVisualYaw}";
+            return $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\n{moveInfo}\n{envInfo}\n{atkInfo}";
         }
     }
 }
