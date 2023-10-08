@@ -191,7 +191,7 @@ namespace CraftSharp.Control
             // Set stamina to max value
             Status!.StaminaLeft = ability!.MaxStamina;
             // And broadcast current stamina
-            EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, true));
+            EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, ability!.MaxStamina));
             // Initialize health value
             EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
 
@@ -454,8 +454,7 @@ namespace CraftSharp.Control
             // Broadcast current stamina if changed
             if (prevStamina != status.StaminaLeft)
             {
-                EventManager.Instance.Broadcast(new StaminaUpdateEvent(
-                        status.StaminaLeft, status.StaminaLeft >= ability!.MaxStamina));
+                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, ability!.MaxStamina));
             }
 
             // Apply updated visual yaw to visual transform

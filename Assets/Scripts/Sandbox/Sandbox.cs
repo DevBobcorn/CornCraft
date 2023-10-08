@@ -21,7 +21,7 @@ namespace CraftSharp.Sandbox
         [SerializeField] private Camera? UICamera;
         [SerializeField] private GameObject? playerRenderPrefab;
         [SerializeField] private TMP_Text? debugText, fpsText;
-        [SerializeField] private RingValueBar? playerStaminaBar;
+        [SerializeField] private RingValueBar? staminaBar;
         private Animator? staminaBarAnimator;
 
         void Start()
@@ -47,14 +47,18 @@ namespace CraftSharp.Sandbox
 
             StartCoroutine(DelayedInit());
 
-            staminaBarAnimator = playerStaminaBar!.GetComponent<Animator>();
+            staminaBarAnimator = staminaBar!.GetComponent<Animator>();
 
             staminaCallback = (e) => {
-                playerStaminaBar.CurValue = e.Stamina;
+                staminaBar.CurValue = e.Stamina;
 
-                if (e.IsStaminaFull)
+                if (staminaBar.MaxValue != e.MaxStamina)
                 {
-                    playerStaminaBar.MaxValue = e.Stamina;
+                    staminaBar.MaxValue = e.MaxStamina;
+                }
+
+                if (e.Stamina >= e.MaxStamina) // Stamina is full
+                {
                     staminaBarAnimator.SetBool(SHOW, false);
                 }
                 else
@@ -95,8 +99,8 @@ namespace CraftSharp.Sandbox
             var targetPosition = UICamera!.ViewportToWorldPoint(
                     cameraController!.GetTargetViewportPos());
 
-            playerStaminaBar!.transform.position = Vector3.Lerp(
-                    playerStaminaBar.transform.position, targetPosition, Time.deltaTime * 10F);
+            staminaBar!.transform.position = Vector3.Lerp(
+                    staminaBar.transform.position, targetPosition, Time.deltaTime * 10F);
         }
 
         private IEnumerator DelayedInit()

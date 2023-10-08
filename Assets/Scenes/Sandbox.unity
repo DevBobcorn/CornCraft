@@ -175,6 +175,34 @@ PrefabInstance:
       propertyPath: m_Name
       value: Simple Camera Controller
       objectReference: {fileID: 0}
+    - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.5256128
+      objectReference: {fileID: 0}
+    - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.05159
+      objectReference: {fileID: 0}
+    - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.0881348
+      objectReference: {fileID: 0}
+    - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.28152874
+      objectReference: {fileID: 0}
+    - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.13044336
+      objectReference: {fileID: 0}
+    - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.86255515
+      objectReference: {fileID: 0}
+    - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.39965582
+      objectReference: {fileID: 0}
     - target: {fileID: 9155130719897283015, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Cameras.Array.data[0]
       value: 
@@ -230,7 +258,7 @@ MonoBehaviour:
   playerRenderPrefab: {fileID: 4629627389257955861, guid: f203159209ba7b748b562080342c675e, type: 3}
   debugText: {fileID: 1679823445}
   fpsText: {fileID: 1353139096}
-  playerStaminaBar: {fileID: 279101131}
+  staminaBar: {fileID: 279101131}
 --- !u!4 &36819548
 Transform:
   m_ObjectHideFlags: 0

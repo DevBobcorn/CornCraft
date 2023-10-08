@@ -859,8 +859,6 @@ MonoBehaviour:
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
-  playerActions: {fileID: 0}
-  cameraActions: {fileID: 0}
 --- !u!1 &434662498
 GameObject:
   m_ObjectHideFlags: 0
