@@ -140,7 +140,7 @@ namespace CraftSharp.Resource
             }
 
             Debug.Log($"Resource packs loaded in {sw.ElapsedMilliseconds} ms.");
-            Debug.Log($"Built {StateModelTable.Count} block state geometry lists.");
+            //Debug.Log($"Built {StateModelTable.Count} block state geometry lists.");
 
             updateStatus("status.info.resource_loaded");
 
@@ -650,7 +650,7 @@ namespace CraftSharp.Resource
             // Read biome colormaps from resource pack
             if (texDict.ContainsKey(FOLIAGE_COLORMAP))
             {
-                Debug.Log($"Loading foliage colormap from {texDict[FOLIAGE_COLORMAP]}");
+                //Debug.Log($"Loading foliage colormap from {texDict[FOLIAGE_COLORMAP]}");
                 var mapTex = new Texture2D(2, 2);
                 mapTex.LoadImage(File.ReadAllBytes(texDict[FOLIAGE_COLORMAP]));
                 
@@ -663,7 +663,7 @@ namespace CraftSharp.Resource
             
             if (texDict.ContainsKey(GRASS_COLORMAP))
             {
-                Debug.Log($"Loading grass colormap from {texDict[GRASS_COLORMAP]}");
+                //Debug.Log($"Loading grass colormap from {texDict[GRASS_COLORMAP]}");
                 var mapTex = new Texture2D(2, 2);
                 mapTex.LoadImage(File.ReadAllBytes(texDict[GRASS_COLORMAP]));
                 

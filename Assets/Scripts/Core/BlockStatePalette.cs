@@ -107,7 +107,7 @@ namespace CraftSharp
 
             // Then read block states...
             Json.JSONData palette = Json.ParseJson(File.ReadAllText(statesPath, Encoding.UTF8));
-            Debug.Log("Reading block states from " + statesPath);
+            //Debug.Log("Reading block states from " + statesPath);
 
             foreach (KeyValuePair<string, Json.JSONData> item in palette.Properties)
             {
@@ -186,7 +186,7 @@ namespace CraftSharp
                 }
             }
 
-            Debug.Log($"{statesTable.Count} block states loaded.");
+            //Debug.Log($"{statesTable.Count} block states loaded.");
 
             // Load block color rules...
             Json.JSONData colorRules = Json.ParseJson(File.ReadAllText(colorsPath, Encoding.UTF8));
@@ -292,7 +292,7 @@ namespace CraftSharp
                 flag.Failed = true;
             }
 
-            Debug.Log($"Render type of {RenderTypeTable.Count} blocks loaded.");
+            //Debug.Log($"Render type of {RenderTypeTable.Count} blocks loaded.");
 
             flag.Finished = true;
 
