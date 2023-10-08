@@ -219,7 +219,7 @@ namespace MagicaCloth2
 
                 // コライダー数で初期化
                 tdata.colliderChunk = teamIdArray.AddRange(cnt, (short)teamId);
-                flagArray.AddRange(cnt);
+                flagArray.AddRange(cnt, default);
                 centerArray.AddRange(cnt);
                 sizeArray.AddRange(cnt);
                 framePositions.AddRange(cnt);
@@ -375,7 +375,7 @@ namespace MagicaCloth2
                 // 新規確保
                 int newCount = Define.System.ExpandedColliderCount;
                 tdata.colliderChunk = teamIdArray.AddRange(newCount, (short)cprocess.TeamId);
-                flagArray.AddRange(newCount);
+                flagArray.AddRange(newCount, default);
                 centerArray.AddRange(newCount);
                 sizeArray.AddRange(newCount);
                 framePositions.AddRange(newCount);
@@ -399,7 +399,7 @@ namespace MagicaCloth2
                 int newCount = tdata.colliderChunk.dataLength + Define.System.ExpandedColliderCount;
                 var oldColliderChunk = tdata.colliderChunk;
                 tdata.colliderChunk = teamIdArray.Expand(oldColliderChunk, newCount);
-                flagArray.Expand(oldColliderChunk, newCount);
+                flagArray.ExpandAndFill(oldColliderChunk, newCount); // 旧領域のフラグはクリアする必要あり
                 centerArray.Expand(oldColliderChunk, newCount);
                 sizeArray.Expand(oldColliderChunk, newCount);
                 framePositions.Expand(oldColliderChunk, newCount);
