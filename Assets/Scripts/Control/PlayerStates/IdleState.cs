@@ -31,6 +31,11 @@ namespace CraftSharp.Control
             
             info.MoveVelocity = Vector3.zero;
 
+            if (inputData.Gameplay.WalkToggle.WasPressedThisFrame())
+            {
+                player.ToggleWalkMode();
+            }
+
             // Restore stamina
             info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
         }

@@ -73,6 +73,15 @@ namespace CraftSharp.Control
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""WalkToggle"",
+                    ""type"": ""Button"",
+                    ""id"": ""dcc660b9-db49-4350-a3aa-27dbb29a5426"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -174,6 +183,17 @@ namespace CraftSharp.Control
                     ""action"": ""Sprint"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""82a91f93-d0dc-4e6d-8f0d-551d9023a23e"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""WalkToggle"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -235,6 +255,7 @@ namespace CraftSharp.Control
             m_Gameplay_Descend = m_Gameplay.FindAction("Descend", throwIfNotFound: true);
             m_Gameplay_Ascend = m_Gameplay.FindAction("Ascend", throwIfNotFound: true);
             m_Gameplay_Sprint = m_Gameplay.FindAction("Sprint", throwIfNotFound: true);
+            m_Gameplay_WalkToggle = m_Gameplay.FindAction("WalkToggle", throwIfNotFound: true);
             // Attack
             m_Attack = asset.FindActionMap("Attack", throwIfNotFound: true);
             m_Attack_ChargedAttack = m_Attack.FindAction("Charged Attack", throwIfNotFound: true);
@@ -305,6 +326,7 @@ namespace CraftSharp.Control
         private readonly InputAction m_Gameplay_Descend;
         private readonly InputAction m_Gameplay_Ascend;
         private readonly InputAction m_Gameplay_Sprint;
+        private readonly InputAction m_Gameplay_WalkToggle;
         public struct GameplayActions
         {
             private @PlayerActions m_Wrapper;
@@ -314,6 +336,7 @@ namespace CraftSharp.Control
             public InputAction @Descend => m_Wrapper.m_Gameplay_Descend;
             public InputAction @Ascend => m_Wrapper.m_Gameplay_Ascend;
             public InputAction @Sprint => m_Wrapper.m_Gameplay_Sprint;
+            public InputAction @WalkToggle => m_Wrapper.m_Gameplay_WalkToggle;
             public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -338,6 +361,9 @@ namespace CraftSharp.Control
                 @Sprint.started += instance.OnSprint;
                 @Sprint.performed += instance.OnSprint;
                 @Sprint.canceled += instance.OnSprint;
+                @WalkToggle.started += instance.OnWalkToggle;
+                @WalkToggle.performed += instance.OnWalkToggle;
+                @WalkToggle.canceled += instance.OnWalkToggle;
             }
 
             private void UnregisterCallbacks(IGameplayActions instance)
@@ -357,6 +383,9 @@ namespace CraftSharp.Control
                 @Sprint.started -= instance.OnSprint;
                 @Sprint.performed -= instance.OnSprint;
                 @Sprint.canceled -= instance.OnSprint;
+                @WalkToggle.started -= instance.OnWalkToggle;
+                @WalkToggle.performed -= instance.OnWalkToggle;
+                @WalkToggle.canceled -= instance.OnWalkToggle;
             }
 
             public void RemoveCallbacks(IGameplayActions instance)
@@ -435,6 +464,7 @@ namespace CraftSharp.Control
             void OnDescend(InputAction.CallbackContext context);
             void OnAscend(InputAction.CallbackContext context);
             void OnSprint(InputAction.CallbackContext context);
+            void OnWalkToggle(InputAction.CallbackContext context);
         }
         public interface IAttackActions
         {
