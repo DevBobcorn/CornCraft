@@ -131,6 +131,11 @@ namespace CraftSharp.Control
             // Apply new velocity to rigidbody
             info.MoveVelocity = moveVelocity;
 
+            if (inputData.Gameplay.WalkToggle.WasPressedThisFrame())
+            {
+                player.ToggleWalkMode();
+            }
+
             if (info.Sprinting) // Cost stamina
                 info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, 0F, interval * ability.SprintStaminaCost);
             else // Restore stamina 
