@@ -33,6 +33,5 @@ namespace CraftSharp.Rendering
                 Debug.LogWarning("Item entity prefab components not assigned!");
             }
         }
-
     }
 }

@@ -1,7 +1,7 @@
 namespace CraftSharp
 {
     /// <summary>
-    /// Represents a Minecraft Biome
+    /// Represents a Minecraft Entity Type
     /// </summary>
     public record EntityType
     {

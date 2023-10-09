@@ -38,11 +38,6 @@ namespace CraftSharp
         /// CustomName of the entity.
         /// </summary>
         public string? CustomName;
-        
-        /// <summary>
-        /// Latency of the entity if it is a player.
-        /// </summary>
-        public int Latency;
 
         /// <summary>
         /// Entity type
@@ -69,9 +64,9 @@ namespace CraftSharp
         /// </summary>
         public float HeadYaw = 0;
 
-        public float SetYawFromByte(byte yaw) => Yaw = (yaw / 256F * 360F) + 90F;
-        public float SetPitchFromByte(byte pitch) => Pitch = pitch / 256F * 360F;
-        public float SetHeadYawFromByte(byte headYaw) => HeadYaw = (headYaw / 256F * 360F) + 90F;
+        public static float GetYawFromByte(byte yaw) => (yaw / 256F * 360F) + 90F;
+        public static float GetPitchFromByte(byte pitch) => pitch / 256F * 360F;
+        public static float GetHeadYawFromByte(byte headYaw) => (headYaw / 256F * 360F) + 90F;
 
         /// <summary>
         /// Used in Item Frame, Falling Block and Fishing Float.
@@ -142,9 +137,9 @@ namespace CraftSharp
             this.MaxHealth = 1F;
             this.Equipment = new Dictionary<int, ItemStack>();
             this.Item = null;
-            SetYawFromByte(yaw);
-            SetPitchFromByte(pitch);
-            SetHeadYawFromByte(headYaw);
+            this.Yaw = GetYawFromByte(yaw);
+            this.Pitch = GetPitchFromByte(pitch);
+            this.HeadYaw = GetHeadYawFromByte(headYaw);
             this.ObjectData = objectData;
         }
 

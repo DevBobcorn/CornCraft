@@ -1,12 +1,14 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace CraftSharp.Rendering
 {
     public class EntityRenderManager : MonoBehaviour
     {
+        #region GameObject Prefabs for each entity type
         [SerializeField] private GameObject? defaultPrefab;
 
         [SerializeField] private GameObject? serverPlayerPrefab;
@@ -26,24 +28,64 @@ namespace CraftSharp.Rendering
         [SerializeField] private GameObject? itemPrefab;
         [SerializeField] private GameObject? arrowPrefab;
         [SerializeField] private GameObject? experienceOrbPrefab;
+        #endregion
 
         private readonly Dictionary<ResourceLocation, GameObject?> entityPrefabs = new();
         private GameObject? GetPrefabForType(ResourceLocation type) => entityPrefabs.GetValueOrDefault(type, defaultPrefab);
-
+        
+        /// <summary>
+        /// All entity renders in the current world
+        /// </summary>
         private readonly Dictionary<int, EntityRender> entityRenders = new();
         
-        // Entity Id => Square distance to player
+        // Squared distance range of a entity to be considered as "near" the player
+        private const float NEARBY_THERESHOLD_INNER =  81F; //  9 *  9
+        private const float NEARBY_THERESHOLD_OUTER = 100F; // 10 * 10
+
+        /// <summary>
+        /// A dictionary storing entities near the player
+        /// Entity Id => Square distance to player
+        /// </summary>
         private readonly Dictionary<int, float> nearbyEntities = new();
 
-        private const float NEARBY_THERESHOLD_INNER = 100F; // 10 * 10
-        private const float NEARBY_THERESHOLD_OUTER = 121F; // 11 * 11
+        public string GetDebugInfo() => $"Entity Count: {entityRenders.Count}";
 
-        public string GetDebugInfo() => $"Ent: {entityRenders.Count}";
+        /// <summary>
+        /// Check if the given id is occupied by an entity
+        /// </summary>
+        /// <param name="entityId">Numeral id of the entity</param>
+        /// <returns></returns>
+        public bool HasEntityRender(int entityId)
+        {
+            return entityRenders.ContainsKey(entityId);
+        }
 
+        /// <summary>
+        /// Get entity render with a given numeral id
+        /// </summary>
+        /// <param name="entityId">Numeral id of the entity</param>
+        /// <returns>Entity render with the id. Null if not present</returns>
+        public EntityRender? GetEntityRender(int entityId)
+        {
+            if (entityRenders.ContainsKey(entityId))
+                return entityRenders[entityId];
+            
+            return null;
+        }
+
+        /// <summary>
+        /// Create a new entity render from given entity data
+        /// </summary>
+        /// <param name="entity">Entity data</param>
         public void AddEntityRender(Entity entity)
         {
+            // If the numeral if is occupied by an entity already,
+            // destroy this entity first
             if (entityRenders.ContainsKey(entity.ID))
-                return;
+            {
+                entityRenders[entity.ID]?.Unload();
+                entityRenders.Remove(entity.ID);
+            }
 
             GameObject? entityPrefab;
 
@@ -59,7 +101,6 @@ namespace CraftSharp.Rendering
                 var entityObj    = GameObject.Instantiate(entityPrefab);
                 var entityRender = entityObj!.GetComponent<EntityRender>();
 
-                entityRender.Entity = entity;
                 entityRenders.Add(entity.ID, entityRender);
 
                 entityObj.name = $"{entity.ID} {entity.Type}";
@@ -70,6 +111,9 @@ namespace CraftSharp.Rendering
             }
         }
 
+        /// <summary>
+        /// Unload(Clear) entities with given ids
+        /// </summary>
         public void RemoveEntityRenders(int[] entityIds)
         {
             foreach (var id in entityIds)
@@ -83,33 +127,80 @@ namespace CraftSharp.Rendering
                 if (nearbyEntities.ContainsKey(id))
                     nearbyEntities.Remove(id);
             }
-
         }
 
+        /// <summary>
+        /// Move an entity render by given delta value
+        /// </summary>
+        /// <param name="entityId">Numeral id of the entity to move</param>
+        /// <param name="location">Location delta</param>
         public void MoveEntityRender(int entityId, Location location)
         {
             if (entityRenders.ContainsKey(entityId))
-                entityRenders[entityId].MoveTo(CoordConvert.MC2Unity(location));
+            {
+                entityRenders[entityId].Position += CoordConvert.MC2Unity(location);
+            }
         }
 
-        public void RotateEntityRender(int entityId, float yaw, float pitch)
+        /// <summary>
+        /// Teleport an entity render to given location
+        /// </summary>
+        /// <param name="entityId">Numeral id of the entity to move</param>
+        /// <param name="location">New location</param>
+        public void TeleportEntityRender(int entityId, Location location)
         {
             if (entityRenders.ContainsKey(entityId))
-                entityRenders[entityId].RotateTo(yaw, pitch);
+            {
+                entityRenders[entityId].Position = CoordConvert.MC2Unity(location);
+            }
         }
 
-        public void RotateEntityRenderHead(int entityId, float headYaw)
+        /// <summary>
+        /// Update the yaw and pitch of a given entity
+        /// </summary>
+        /// <param name="entityId">Numeral id of the entity to rotate</param>
+        /// <param name="yaw">Byte angle, conversion required</param>
+        /// <param name="pitch">Byte angle, conversion required</param>
+        public void RotateEntityRender(int entityId, byte yaw, byte pitch)
         {
             if (entityRenders.ContainsKey(entityId))
-                entityRenders[entityId].RotateHeadTo(headYaw);
+            {
+                entityRenders[entityId].Yaw = Entity.GetYawFromByte(yaw);
+                entityRenders[entityId].Pitch = Entity.GetPitchFromByte(pitch);
+            }
         }
 
-        public void UnloadEntityRenders()
+        /// <summary>
+        /// Update the head yaw of a given entity
+        /// </summary>
+        /// <param name="entityId">Numeral id of the entity</param>
+        /// <param name="headYaw">Byte angle, conversion required</param>
+        public void RotateEntityRenderHead(int entityId, byte headYaw)
         {
-            entityRenders.Clear();
-            nearbyEntities.Clear();
+            if (entityRenders.ContainsKey(entityId))
+            {
+                entityRenders[entityId].HeadYaw = Entity.GetHeadYawFromByte(headYaw);
+            }
         }
 
+        /// <summary>
+        /// Update the health value of a given entity
+        /// </summary>
+        /// <param name="entityId">Numeral id of the entity</param>
+        /// <param name="health">New health value</param>
+        public void UpdateEntityHealth(int entityId, float health)
+        {
+            if (entityRenders.ContainsKey(entityId))
+            {
+                entityRenders[entityId].Health = health;
+                entityRenders[entityId].MaxHealth = math.max(
+                        entityRenders[entityId].MaxHealth, health);
+            }
+        }
+
+        /// <summary>
+        /// Unload all entities in the world
+        /// </summary>
         public void ReloadEntityRenders()
         {
             var ids = entityRenders.Keys.ToArray();
@@ -119,10 +210,16 @@ namespace CraftSharp.Rendering
 
             entityRenders.Clear();
             nearbyEntities.Clear();
-
         }
 
-        public Dictionary<int, float> GetNearbyEntities() => nearbyEntities;
+        /// <summary>
+        /// Get a list of entities near the player
+        /// </summary>
+        /// <returns>A dictionary mapping nearby entity ids to the distance between the entity and client player</returns>
+        public Dictionary<int, float> GetNearbyEntities()
+        {
+            return nearbyEntities;
+        }
 
         public Vector3? GetAttackTarget(Vector3 playerPos)
         {
@@ -138,7 +235,7 @@ namespace CraftSharp.Rendering
                 {
                     var render = GetEntityRender(pair.Key);
 
-                    if (render!.Entity.Type.ContainsItem) // Not a valid target
+                    if (render!.Type!.ContainsItem) // Not a valid target
                         continue;
 
                     var pos = render.transform.position;
@@ -149,14 +246,6 @@ namespace CraftSharp.Rendering
             }
 
             return targetPos;
-        }
-
-        public EntityRender? GetEntityRender(int entityId)
-        {
-            if (entityRenders.ContainsKey(entityId))
-                return entityRenders[entityId];
-            
-            return null;
         }
 
         void Start()
@@ -191,10 +280,10 @@ namespace CraftSharp.Rendering
             foreach (var prefabItem in entityPrefabs)
             {
                 if (prefabItem.Value is null)
+                {
                     Debug.LogWarning($"Prefab for entity type {prefabItem.Key} is not assigned!");
-                
+                }            
             }
-
         }
 
         void Update()
@@ -211,7 +300,7 @@ namespace CraftSharp.Rendering
 
                 // Update entities around the player
                 float dist = (render.transform.position - client.GetPosition()).sqrMagnitude;
-                int entityId = render.Entity.ID;
+                int entityId = render.NumeralId;
 
                 bool inDict = nearbyEntities.ContainsKey(entityId);
 
@@ -232,9 +321,7 @@ namespace CraftSharp.Rendering
                     if (inDict)
                         nearbyEntities[entityId] = dist;
                 }
-
             }
         }
-
     }
 }

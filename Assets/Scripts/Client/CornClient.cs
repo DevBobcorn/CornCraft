@@ -63,15 +63,12 @@ namespace CraftSharp
         #region Players and Entities
         private bool locationReceived = false;
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
-        private float? yawToSend = null, pitchToSend = null;
-        private bool grounded = false;
         private int clientSequenceId;
         private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
         private readonly object movementLock = new();
         private InteractionUpdater? interactionUpdater;
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
-        private readonly Dictionary<int, Entity> entities = new();
         #endregion
 
         void Awake() // In case where the client wasn't properly assigned before
@@ -132,7 +129,7 @@ namespace CraftSharp
                     // Update client entity name
                     clientEntity.Name = session.PlayerName;
                     clientEntity.UUID = uuid;
-                    clientEntity.SetHeadYawFromByte(127);
+                    clientEntity.HeadYaw = Entity.GetHeadYawFromByte(127);
                     clientEntity.MaxHealth = 20F;
 
                     if (playerRenderPrefab != null)
@@ -149,8 +146,6 @@ namespace CraftSharp
                         renderObj!.name = $"Player Entity ({playerRenderPrefab.name})";
 
                         playerController!.UpdatePlayerRender(clientEntity, renderObj);
-                        // Subscribe movement events
-                        playerController!.OnMovementUpdate += UpdatePlayerStatus;
                     }
                     else
                     {
@@ -213,11 +208,15 @@ namespace CraftSharp
             {
                 lock (movementLock)
                 {
-                    handler?.SendLocationUpdate(clientEntity.Location, grounded, yawToSend, pitchToSend);
+                    handler?.SendLocationUpdate(
+                            CoordConvert.Unity2MC(playerController!.Position2Send),
+                            playerController.IsGrounded2Send,
+                            playerController.Yaw2Send,
+                            playerController.Pitch2Send);
 
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)
                     // Once yaw and pitch have been sent, switch back to location-only updates (without yaw and pitch)
-                    yawToSend = pitchToSend = null;
+                    //yawToSend = pitchToSend = null;
                 }
             }
 
@@ -302,9 +301,7 @@ namespace CraftSharp
             Loom.QueueOnMainThread(() => {
                 // Return to login scene
                 CornApp.Instance.BackToLogin();
-                
             });
-            
         }
 
         /// <summary>
@@ -453,12 +450,18 @@ namespace CraftSharp
         /// <summary>
         /// Get current player location (in Minecraft world)
         /// </summary>
-        public override Location GetLocation() => clientEntity.Location;
+        public override Location GetLocation()
+        {
+            return CoordConvert.Unity2MC(playerController!.Position2Send);
+        }
 
         /// <summary>
         /// Get current player position (in Unity scene)
         /// </summary>
-        public override Vector3 GetPosition() => CoordConvert.MC2Unity(clientEntity.Location);
+        public override Vector3 GetPosition()
+        {
+            return playerController!.Position2Send;
+        }
 
         /// <summary>
         /// Get current status about the client
@@ -509,21 +512,6 @@ namespace CraftSharp
         public static char[] GetDisallowedChatCharacters()
         {
             return new char[] { (char)167, (char)127 }; // Minecraft color code and ASCII code DEL
-        }
-
-        /// <summary>
-        /// Get all Entities
-        /// </summary>
-        /// <returns>All Entities</returns>
-        public override Dictionary<int, Entity> GetEntities() => entities;
-
-        /// <summary>
-        /// Get target entity for initiating an attack
-        /// </summary>
-        /// <returns>The current position of target</returns>
-        public override Vector3? GetAttackTarget()
-        {
-            return EntityRenderManager!.GetAttackTarget(GetPosition());
         }
 
         /// <summary>
@@ -593,27 +581,6 @@ namespace CraftSharp
         #endregion
 
         #region Action methods: Perform an action on the Server
-
-        public override void UpdatePlayerStatus(Vector3 newPosition, float newYaw, float newPitch, bool newGrounded)
-        {
-            lock (movementLock)
-            {
-                // Update player location
-                clientEntity.Location = CoordConvert.Unity2MC(newPosition);
-
-                // Update player yaw and pitch
-                
-                if (clientEntity.Yaw != newYaw || clientEntity.Pitch != newPitch)
-                {
-                    yawToSend = newYaw;
-                    clientEntity.Yaw = newYaw;
-                    pitchToSend = newPitch;
-                    clientEntity.Pitch = newPitch;
-                }
-                
-                grounded = newGrounded;
-            }
-        }
 
         public void SetCanSendMessage(bool canSendMessage)
         {
@@ -824,7 +791,7 @@ namespace CraftSharp
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => InteractEntity(entityID, type, hand));
 
-            if (entities.ContainsKey(entityID))
+            if (EntityRenderManager!.HasEntityRender(entityID))
             {
                 if (type == 0)
                     return handler!.SendInteractEntity(entityID, type, (int)hand);
@@ -985,14 +952,12 @@ namespace CraftSharp
             ClearTasks();
 
             GetWorld().Clear();
-            entities.Clear();
             ClearInventories();
 
             Loom.QueueOnMainThread(() => {
                 ChunkRenderManager?.ReloadWorld();
                 EntityRenderManager?.ReloadEntityRenders();
             });
-
         }
 
         /// <summary>
@@ -1027,12 +992,12 @@ namespace CraftSharp
 
             lock (movementLock)
             {
-                yawToSend = clientEntity.Yaw = yaw;
-                pitchToSend = clientEntity.Pitch = pitch;
+                //yawToSend = clientEntity.Yaw = yaw;
+                //pitchToSend = clientEntity.Pitch = pitch;
                 
                 if (!locationReceived) // On entering world or respawning
                 {
-                    clientEntity.Location = location;
+                    locationReceived = true;
 
                     Loom.QueueOnMainThread(() => {
                         // Force refresh environment collider
@@ -1042,10 +1007,8 @@ namespace CraftSharp
                         // Update camera yaw
                         CameraController.SetYaw(yaw);
 
-                        locationReceived = true;
+                        Debug.Log($"Loc initialized at {location} with yaw {yaw}");
                     });
-
-                    //Debug.Log($"Loc initialized at {location} with yaw {yaw}");
                 }
                 else // Position correction from server
                 {                    
@@ -1056,12 +1019,10 @@ namespace CraftSharp
                             return;
                         }
 
-                        clientEntity.Location = location;
-
                         // Force refresh environment collider
                         ChunkRenderManager?.RebuildTerrainCollider(location.ToFloor());
                         // Then update player location
-                        playerController!.SetLocation(location, yaw: yaw);
+                        playerController!.SetLocation(location, reset: true, yaw: yaw);
 
                         Debug.Log($"Loc updated to {location} with yaw {yaw} error value: {offset.magnitude}");
                     });
@@ -1256,7 +1217,6 @@ namespace CraftSharp
             {
                 onlinePlayers[player.Uuid] = player;
             }
-
         }
 
         /// <summary>
@@ -1275,7 +1235,6 @@ namespace CraftSharp
                     onlinePlayers.Remove(uuid);
                 }
             }
-
         }
 
         /// <summary>
@@ -1283,16 +1242,9 @@ namespace CraftSharp
         /// </summary>
         public void OnSpawnEntity(Entity entity)
         {
-            // The entity should not already exist, but if it does, let's consider the previous one is being destroyed
-            if (entities.ContainsKey(entity.ID))
-                OnDestroyEntities(new[] { entity.ID });
-
-            entities.Add(entity.ID, entity);
-
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager?.AddEntityRender(entity);
+                EntityRenderManager!.AddEntityRender(entity);
             });
-
         }
 
         /// <summary>
@@ -1308,7 +1260,7 @@ namespace CraftSharp
             string? playerName = null;
             if (onlinePlayers.ContainsKey(uuid))
                 playerName = onlinePlayers[uuid].Name;
-            Entity playerEntity = new Entity(entityID, EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID), location, uuid, playerName);
+            Entity playerEntity = new(entityID, EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID), location, uuid, playerName);
             OnSpawnEntity(playerEntity);
         }
 
@@ -1320,14 +1272,7 @@ namespace CraftSharp
         /// <param name="item"> Item)</param>
         public void OnEntityEquipment(int entityid, int slot, ItemStack item)
         {
-            if (entities.ContainsKey(entityid))
-            {
-                Entity entity = entities[entityid];
-                if (entity.Equipment.ContainsKey(slot))
-                    entity.Equipment.Remove(slot);
-                if (item != null)
-                    entity.Equipment[slot] = item;
-            }
+            // TODO
         }
 
         /// <summary>
@@ -1368,13 +1313,6 @@ namespace CraftSharp
         /// </summary>
         public void OnDestroyEntities(int[] Entities)
         {
-            foreach (int a in Entities)
-            {
-                if (entities.ContainsKey(a))
-                    entities.Remove(a);
-                
-            }
-
             Loom.QueueOnMainThread(() => {
                 EntityRenderManager?.RemoveEntityRenders(Entities);
             });
@@ -1383,74 +1321,57 @@ namespace CraftSharp
         /// <summary>
         /// Called when an entity's position changed within 8 block of its previous position.
         /// </summary>
-        /// <param name="EntityID"></param>
-        /// <param name="Dx"></param>
-        /// <param name="Dy"></param>
-        /// <param name="Dz"></param>
-        /// <param name="onGround"></param>
-        public void OnEntityPosition(int EntityID, Double Dx, Double Dy, Double Dz, bool onGround)
+        /// <param name="EntityID">Entity ID</param>
+        /// <param name="Dx">Delta X</param>
+        /// <param name="Dy">Delta Y</param>
+        /// <param name="Dz">Delta Z</param>
+        /// <param name="onGround">Whether the entity is grounded</param>
+        public void OnEntityPosition(int EntityID, double Dx, double Dy, double Dz, bool onGround)
         {
-            if (entities.ContainsKey(EntityID))
-            {
-                Location location = entities[EntityID].Location;
-                location.X += Dx;
-                location.Y += Dy;
-                location.Z += Dz;
-                entities[EntityID].Location = location;
-
-                Loom.QueueOnMainThread(() => {
-                    EntityRenderManager?.MoveEntityRender(EntityID, location);
-                });
-            }
-
+            Loom.QueueOnMainThread(() => {
+                EntityRenderManager?.MoveEntityRender(EntityID, new(Dx, Dy, Dz));
+            });
         }
 
+        /// <summary>
+        /// Called when an entity's yaw/pitch changed.
+        /// </summary>
+        /// <param name="EntityID">Entity ID</param>
+        /// <param name="yaw">New yaw</param>
+        /// <param name="pitch">New pitch</param>
+        /// <param name="onGround">Whether the entity is grounded</param>
         public void OnEntityRotation(int EntityID, byte yaw, byte pitch, bool onGround)
         {
-            if (entities.ContainsKey(EntityID))
-            {
-                var renderYaw = entities[EntityID].SetYawFromByte(yaw);
-                var renderPitch = entities[EntityID].SetPitchFromByte(pitch);
-
-                Loom.QueueOnMainThread(() => {
-                    EntityRenderManager?.RotateEntityRender(EntityID, renderYaw, renderPitch);
-                });
-            }
-
+            Loom.QueueOnMainThread(() => {
+                EntityRenderManager?.RotateEntityRender(EntityID, yaw, pitch);
+            });
         }
 
+        /// <summary>
+        /// Called when an entity's head yaw changed.
+        /// </summary>
+        /// <param name="EntityID">Entity ID</param>
+        /// <param name="headYaw">New head yaw</param>
         public void OnEntityHeadLook(int EntityID, byte headYaw)
         {
-            if (entities.ContainsKey(EntityID))
-            {
-                var renderHeadYaw = entities[EntityID].SetHeadYawFromByte(headYaw);
-
-                Loom.QueueOnMainThread(() => {
-                    EntityRenderManager?.RotateEntityRenderHead(EntityID, renderHeadYaw);
-                });
-            }
-
+            Loom.QueueOnMainThread(() => {
+                EntityRenderManager?.RotateEntityRenderHead(EntityID, headYaw);
+            });
         }
 
         /// <summary>
         /// Called when an entity moved over 8 block.
         /// </summary>
         /// <param name="EntityID"></param>
-        /// <param name="X"></param>
-        /// <param name="Y"></param>
-        /// <param name="Z"></param>
+        /// <param name="X">New X</param>
+        /// <param name="Y">New Y</param>
+        /// <param name="Z">New Z</param>
         /// <param name="onGround"></param>
-        public void OnEntityTeleport(int EntityID, Double X, Double Y, Double Z, bool onGround)
+        public void OnEntityTeleport(int EntityID, double X, double Y, double Z, bool onGround)
         {
-            if (entities.ContainsKey(EntityID))
-            {
-                Location location = new Location(X, Y, Z);
-                entities[EntityID].Location = location;
-
-                Loom.QueueOnMainThread(() => {
-                    EntityRenderManager?.MoveEntityRender(EntityID, location);
-                });
-            }
+            Loom.QueueOnMainThread(() => {
+                EntityRenderManager?.TeleportEntityRender(EntityID, new(X, Y, Z));
+            });
         }
 
         /// <summary>
@@ -1458,7 +1379,7 @@ namespace CraftSharp
         /// </summary>
         /// <param name="EntityID"></param>
         /// <param name="prop"></param>
-        public void OnEntityProperties(int EntityID, Dictionary<string, Double> prop) { }
+        public void OnEntityProperties(int EntityID, Dictionary<string, double> prop) { }
 
         /// <summary>
         /// Called when the status of an entity have been changed
@@ -1486,7 +1407,7 @@ namespace CraftSharp
             {
                 DateTime currentTime = DateTime.Now;
                 long tickDiff = worldAge - lastAge;
-                Double tps = tickDiff / (currentTime - lastTime).TotalSeconds;
+                double tps = tickDiff / (currentTime - lastTime).TotalSeconds;
                 lastAge = worldAge;
                 lastTime = currentTime;
                 if (tps <= 20 && tps > 0)
@@ -1525,9 +1446,8 @@ namespace CraftSharp
             clientEntity.Health = health;
             foodSaturation = food;
 
-            Loom.QueueOnMainThread(() => {
-                EventManager.Instance.Broadcast<HealthUpdateEvent>(new(health, updateMaxHealth));
-            });
+            EventManager.Instance.BroadcastOnUnityThread
+                    <HealthUpdateEvent>(new(health, updateMaxHealth));
         }
 
         /// <summary>
@@ -1561,15 +1481,6 @@ namespace CraftSharp
             {
                 var player = onlinePlayers[uuid];
                 player.Ping = latency;
-                string playerName = player.Name;
-                foreach (KeyValuePair<int, Entity> ent in entities)
-                {
-                    if (ent.Value.UUID == uuid && ent.Value.Name == playerName)
-                    {
-                        ent.Value.Latency = latency;
-                        break;
-                    }
-                }
             }
         }
 
@@ -1641,14 +1552,9 @@ namespace CraftSharp
         /// <param name="health">The health of the entity</param>
         public void OnEntityHealth(int entityID, float health)
         {
-            if (entities.ContainsKey(entityID))
-            {
-                Entity entity = entities[entityID];
-
-                entity.Health = health;
-                entity.MaxHealth = Math.Max(entity.MaxHealth, health);
-            }
-            
+            Loom.QueueOnMainThread(() => {
+                EntityRenderManager?.UpdateEntityHealth(entityID, health);
+            });
         }
 
         /// <summary>
@@ -1658,30 +1564,33 @@ namespace CraftSharp
         /// <param name="metadata">The metadata of the entity</param>
         public void OnEntityMetadata(int entityID, Dictionary<int, object?> metadata)
         {
-            if (entities.ContainsKey(entityID))
-            {
-                Entity entity = entities[entityID];
-                entity.Metadata = metadata;
-                if (entity.Type.ContainsItem && metadata.TryGetValue(7, out object? itemObj) && itemObj != null && itemObj.GetType() == typeof(ItemStack))
+            Loom.QueueOnMainThread(() => {
+                var entity = EntityRenderManager?.GetEntityRender(entityID);
+
+                if (entity != null)
                 {
-                    var item = (ItemStack?) itemObj;
-                    entity.Item = item;
+                    entity.Metadata = metadata;
+                    if (entity.Type!.ContainsItem && metadata.TryGetValue(7, out object? itemObj) && itemObj != null && itemObj.GetType() == typeof(ItemStack))
+                    {
+                        var item = (ItemStack?) itemObj;
+                        entity.Item = item;
+                    }
+                    if (metadata.TryGetValue(6, out object? poseObj) && poseObj != null && poseObj.GetType() == typeof(int))
+                    {
+                        entity.Pose = (EntityPose)poseObj;
+                    }
+                    if (metadata.TryGetValue(2, out object? nameObj) && nameObj != null && nameObj.GetType() == typeof(string))
+                    {
+                        string name = nameObj.ToString()!;
+                        entity.CustomNameJson = name;
+                        entity.CustomName = ChatParser.ParseText(name);
+                    }
+                    if (metadata.TryGetValue(3, out object? nameVisableObj) && nameVisableObj != null && nameVisableObj.GetType() == typeof(bool))
+                    {
+                        entity.IsCustomNameVisible = bool.Parse(nameVisableObj.ToString()!);
+                    }
                 }
-                if (metadata.TryGetValue(6, out object? poseObj) && poseObj != null && poseObj.GetType() == typeof(Int32))
-                {
-                    entity.Pose = (EntityPose)poseObj;
-                }
-                if (metadata.TryGetValue(2, out object? nameObj) && nameObj != null && nameObj.GetType() == typeof(string))
-                {
-                    string name = nameObj.ToString()!;
-                    entity.CustomNameJson = name;
-                    entity.CustomName = ChatParser.ParseText(name);
-                }
-                if (metadata.TryGetValue(3, out object? nameVisableObj) && nameVisableObj != null && nameVisableObj.GetType() == typeof(bool))
-                {
-                    entity.IsCustomNameVisible = bool.Parse(nameVisableObj.ToString()!);
-                }
-            }
+            });
         }
 
         /// <summary>
@@ -1700,10 +1609,7 @@ namespace CraftSharp
         /// <param name="stage">Destroy stage, maximum 255</param>
         public void OnBlockBreakAnimation(int entityId, Location location, byte stage)
         {
-            if (entities.ContainsKey(entityId))
-            {
-                Entity entity = entities[entityId];
-            }
+            // TODO
         }
 
         /// <summary>
@@ -1713,10 +1619,7 @@ namespace CraftSharp
         /// <param name="animation">0 = LMB, 1 = RMB (RMB Corrent not work)</param>
         public void OnEntityAnimation(int entityID, byte animation)
         {
-            if (entities.ContainsKey(entityID))
-            {
-                Entity entity = entities[entityID];
-            }
+            // TODO
         }
 
         /// <summary>
@@ -1725,16 +1628,9 @@ namespace CraftSharp
         /// <param name="begin">true if the rain is starting</param>
         public void OnRainChange(bool begin)
         {
-            if (begin)
-            {
-                Debug.Log("Rain starts");
-            }
-            else
-            {
-                Debug.Log("Rain stops");
-            }
-
-            EnvironmentManager!.SetRain(begin);
+            Loom.QueueOnMainThread(() => {
+                EnvironmentManager!.SetRain(begin);
+            });
         }
 
         /// <summary>

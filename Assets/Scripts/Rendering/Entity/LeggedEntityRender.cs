@@ -10,8 +10,6 @@ namespace CraftSharp.Rendering
         
         protected float currentLegAngle = 0F, currentMovFract = 0F;
 
-        protected bool legsPresent = false;
-
         protected void UpdateLegAngle()
         {
             var movFract = Mathf.Clamp01(visualMovementVelocity.x * visualMovementVelocity.x + visualMovementVelocity.z * visualMovementVelocity.z);
@@ -32,10 +30,6 @@ namespace CraftSharp.Rendering
                 currentLegAngle = -legAngle * (1F - movTime) * 4F;
             else // 0.25 ~ 0.75
                 currentLegAngle = -legAngle * (movTime - 0.5F) * 4F;
-            
-            //nameText!.text = ((int)currentLegAngle).ToString();
-
         }
-
     }
 }
