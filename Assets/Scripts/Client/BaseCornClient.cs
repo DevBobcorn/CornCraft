@@ -90,8 +90,6 @@ namespace CraftSharp
         public abstract Location GetLocation();
         public abstract Vector3 GetPosition();
         public abstract string GetInfoString(bool withDebugInfo);
-        public abstract Dictionary<int, Entity> GetEntities();
-        public abstract Vector3? GetAttackTarget();
         public abstract Dictionary<string, int> GetPlayersLatency();
         public abstract int GetOwnLatency();
         public abstract PlayerInfo? GetPlayerInfo(Guid uuid);
@@ -102,7 +100,6 @@ namespace CraftSharp
 
         #region Action methods: Perform an action on the Server
 
-        public abstract void UpdatePlayerStatus(Vector3 newPosition, float newYaw, float newPitch, bool newGrounded);
         public abstract void TrySendChat(string text);
         public abstract bool SendRespawnPacket();
         public abstract bool SendEntityAction(EntityActionType entityAction);

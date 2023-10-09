@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 
 using CraftSharp.Protocol;
+using CraftSharp.Rendering;
 
 namespace CraftSharp.UI
 {
@@ -14,20 +15,20 @@ namespace CraftSharp.UI
         [SerializeField] private TMP_Text? descriptionText;
         private Action? destroyCallback;
 
-        public override void SetInfo(Entity entity)
+        public override void SetInfo(EntityRender entityRender)
         {
-            this.entity = entity;
+            this.entityRender = entityRender;
 
             if (nameText != null)
             {
-                nameText.text = (entity.Name ?? entity.CustomName) ??
-                        ChatParser.TranslateString(entity.Type.EntityId.GetTranslationKey("entity"));
+                nameText.text = (entityRender.Name ?? entityRender.CustomName) ??
+                        ChatParser.TranslateString(entityRender.Type!.EntityId.GetTranslationKey("entity"));
 
             }
 
             if (descriptionText != null)
             {
-                descriptionText.text = $"<{entity.Type.EntityId}>";
+                descriptionText.text = $"<{entityRender.Type!.EntityId}>";
             }
         }
 

@@ -21,7 +21,6 @@ namespace CraftSharp.Rendering
                 Debug.LogWarning("Visual transform for entity render not assigned!");
                 visual = transform;
             }
-            
         }
     }
 }

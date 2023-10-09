@@ -45,6 +45,14 @@ namespace CraftSharp.Control
         protected PlayerStatusUpdater? statusUpdater;
         public PlayerStatus? Status => statusUpdater?.Status;
 
+        // Values for sending over to the server.
+        // Should only be set from the unity thread
+        // and read from the network thread
+        public Vector3 Position2Send { get; private set; }
+        public float Yaw2Send { get; private set; }
+        public float Pitch2Send { get; private set; }
+        public bool IsGrounded2Send { get; private set; }
+
         public Quaternion GetRotation()
         {
             if (playerRender != null) // If player render is present
@@ -470,33 +478,25 @@ namespace CraftSharp.Control
 
         protected void PostLogicalUpdate()
         {
-            // Tell server our current position
-            Vector3 newPosition;
-
+            // Update values to send to server
             if (CurrentState is ForceMoveState state)
             // Use move origin as the player location to tell to server, to
             // prevent sending invalid positions during a force move operation
-                newPosition = state.GetFakePlayerOffset();
+                Position2Send = state.GetFakePlayerOffset();
             else
-                newPosition = transform.position;
+                Position2Send = transform.position;
 
             if (playerRender != null)
             {
                 // Update client player data
-                var newYaw = playerRender.VisualTransform.eulerAngles.y - 90F;
-                var newPitch = 0F;
-                
-                // TODO: Use event to broadcast changes
-                OnMovementUpdate?.Invoke(newPosition, newYaw, newPitch, Status!.Grounded);
+                Yaw2Send = playerRender.VisualTransform.eulerAngles.y - 90F;
+                Pitch2Send = 0F;
             }
         }
 
         // Used only by player renders, will be cleared and reassigned upon player render update
         private delegate void PlayerUpdateEventHandler(float interval, PlayerStatus status, Rigidbody rigidbody);
         private event PlayerUpdateEventHandler? OnLogicalUpdate;
-
-        public delegate void PlayerMovementEventHandler(Vector3 position, float yaw, float pitch, bool grounded);
-        public event PlayerMovementEventHandler? OnMovementUpdate;
 
         void Update()
         {
@@ -536,12 +536,14 @@ namespace CraftSharp.Control
             }
         }
 
-        public void SetLocation(Location loc, bool resetVelocity = false, float yaw = 0F)
+        public void SetLocation(Location loc, bool reset = false, float yaw = 0F)
         {
             if (playerRigidbody is null) return;
 
-            if (resetVelocity) // Reset rigidbody velocity
+            if (reset) // Reset rigidbody
+            {
                 playerRigidbody.velocity = Vector3.zero;
+            }
             
             playerRigidbody.position = CoordConvert.MC2Unity(loc);
 

@@ -84,7 +84,7 @@ namespace CraftSharp.Rendering
                 return;
             }
 
-            var nameLower = entity!.Name?.ToLower();
+            var nameLower = Name?.ToLower();
             var skinMats = CornApp.CurrentClient!.MaterialManager!.SkinMaterials;
 
             // Find skin and change materials

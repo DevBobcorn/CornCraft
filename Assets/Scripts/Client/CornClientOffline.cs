@@ -29,11 +29,7 @@ namespace CraftSharp
         #endregion
 
         #region Players and Entities
-        private bool locationReceived = false;
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
-        private float? yawToSend = null, pitchToSend = null;
-        private bool grounded = false;
-        private int clientSequenceId;
         private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
         private readonly object movementLock = new();
@@ -98,7 +94,7 @@ namespace CraftSharp
             // Update client entity name
             clientEntity.Name = session.PlayerName;
             clientEntity.UUID = uuid;
-            clientEntity.SetHeadYawFromByte(127);
+            clientEntity.HeadYaw = Entity.GetHeadYawFromByte(127);
             clientEntity.MaxHealth = 20F;
 
             if (playerRenderPrefab != null)
@@ -115,8 +111,6 @@ namespace CraftSharp
                 renderObj!.name = $"Player Entity ({playerRenderPrefab.name})";
 
                 playerController!.UpdatePlayerRender(clientEntity, renderObj);
-                // Subscribe movement events
-                playerController!.OnMovementUpdate += UpdatePlayerStatus;
             }
             else
             {
@@ -214,21 +208,6 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Get all Entities
-        /// </summary>
-        /// <returns>All Entities</returns>
-        public override Dictionary<int, Entity> GetEntities() => entities;
-
-        /// <summary>
-        /// Get target entity for initiating an attack
-        /// </summary>
-        /// <returns>The current position of target</returns>
-        public override Vector3? GetAttackTarget()
-        {
-            return EntityRenderManager!.GetAttackTarget(GetPosition());
-        }
-
-        /// <summary>
         /// Get all players latency
         /// </summary>
         public override Dictionary<string, int> GetPlayersLatency()
@@ -296,27 +275,6 @@ namespace CraftSharp
 
         #region Action methods: Perform an action on the Server
 
-        public override void UpdatePlayerStatus(Vector3 newPosition, float newYaw, float newPitch, bool newGrounded)
-        {
-            lock (movementLock)
-            {
-                // Update player location
-                clientEntity.Location = CoordConvert.Unity2MC(newPosition);
-
-                // Update player yaw and pitch
-                
-                if (clientEntity.Yaw != newYaw || clientEntity.Pitch != newPitch)
-                {
-                    yawToSend = newYaw;
-                    clientEntity.Yaw = newYaw;
-                    pitchToSend = newPitch;
-                    clientEntity.Pitch = newPitch;
-                }
-                
-                grounded = newGrounded;
-            }
-        }
-
         /// <summary>
         /// Allows the user to send chat messages, commands, and leave the server.
         /// </summary>
@@ -333,9 +291,6 @@ namespace CraftSharp
         /// <returns>True if packet successfully sent</returns>
         public override bool SendRespawnPacket()
         {
-            // Reset location received flag
-            locationReceived = false;
-
             return true;
         }
 

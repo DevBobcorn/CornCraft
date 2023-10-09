@@ -2,7 +2,7 @@
 using UnityEngine;
 using TMPro;
 
-using CraftSharp;
+using CraftSharp.Rendering;
 
 namespace CraftSharp.UI
 {
@@ -13,32 +13,31 @@ namespace CraftSharp.UI
         [SerializeField] private string textFormat = "Lv.{0:0}";
         private float lastHealth, lastMaxHealth;
 
-        public override void SetInfo(Entity entity)
+        public override void SetInfo(EntityRender entityRender)
         {
-            this.entity = entity;
+            this.entityRender = entityRender;
 
             if (levelText != null)
             {
-                levelText.text = string.Format(textFormat, entity.MaxHealth * 2);
+                levelText.text = string.Format(textFormat, entityRender.MaxHealth * 2);
 
             }
 
             if (healthBar != null)
             {
-                healthBar.MaxValue = lastMaxHealth = entity.MaxHealth;
-                healthBar.CurValue = lastHealth = entity.Health;
+                healthBar.MaxValue = lastMaxHealth = entityRender.MaxHealth;
+                healthBar.CurValue = lastHealth = entityRender.Health;
             }
-            
         }
 
         public void Update()
         {
-            if (healthBar != null && entity != null)
+            if (healthBar != null && entityRender != null)
             {
-                if (entity.MaxHealth != lastMaxHealth || entity.Health != lastHealth)
+                if (entityRender.MaxHealth != lastMaxHealth || entityRender.Health != lastHealth)
                 {
-                    healthBar.MaxValue = lastMaxHealth = entity.MaxHealth;
-                    healthBar.CurValue = lastHealth = entity.Health;
+                    healthBar.MaxValue = lastMaxHealth = entityRender.MaxHealth;
+                    healthBar.CurValue = lastHealth = entityRender.Health;
                 }
             }
         }

@@ -14,7 +14,7 @@ namespace CraftSharp.UI
 
         public void AddForEntity(int entityId, EntityRender? render)
         {
-            if (render?.Entity is not null && !entityFloatingUIs.ContainsKey(entityId))
+            if (render != null && !entityFloatingUIs.ContainsKey(entityId))
             {
                 var infoTagPrefab = render.FloatingInfoPrefab;
                 if (infoTagPrefab == null) return;
@@ -24,7 +24,7 @@ namespace CraftSharp.UI
                 fUIObj!.transform.SetParent(render.InfoAnchor, false);
 
                 var fUI = fUIObj.GetComponent<FloatingUI>();
-                fUI.SetInfo(render.Entity);
+                fUI.SetInfo(render);
 
                 entityFloatingUIs.Add(entityId, fUI);
             }

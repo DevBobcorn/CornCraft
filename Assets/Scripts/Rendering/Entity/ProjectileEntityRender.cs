@@ -8,24 +8,19 @@ namespace CraftSharp.Rendering
         public override void UpdateTransform(float tickMilSec)
         {
             // Update position
-            if (lastPosition is not null && targetPosition is not null)
-            {
-                if ((targetPosition.Value - transform.position).sqrMagnitude > MOVE_THRESHOLD) // Treat as teleport
-                    transform.position = targetPosition.Value;
-                else // Smoothly move to current position
-                    transform.position = Vector3.SmoothDamp(transform.position, targetPosition.Value, ref visualMovementVelocity, tickMilSec);
-
-            }
+            if ((Position - transform.position).sqrMagnitude > MOVE_THRESHOLD) // Treat as teleport
+                transform.position = Position;
+            else // Smoothly move to current position
+                transform.position = Vector3.SmoothDamp(transform.position, Position, ref visualMovementVelocity, tickMilSec);
 
             // Update rotation
-            if (lastYaw != targetYaw || lastPitch != targetPitch)
+            if (lastYaw != Yaw || lastPitch != Pitch)
             {
-                lastPitch = targetPitch;
-                lastYaw = targetYaw;
+                lastPitch = Pitch;
+                lastYaw = Yaw;
 
                 transform.localEulerAngles = new(-lastPitch, 180F - lastYaw);
             }
-
         }
     }
 }
