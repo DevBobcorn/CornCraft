@@ -37,22 +37,6 @@ namespace CraftSharp.Rendering
             return Mathf.Max(world.GetBlockLight(loc), 4) / 10F;
         }
 
-        private float[] GetFaceLights(World world, Location loc)
-        {
-            return new float[]
-            {
-                // Sample neighbors
-                GetLight(world, loc.Up()),
-                GetLight(world, loc.Down()),
-                GetLight(world, loc.North()),
-                GetLight(world, loc.South()),
-                GetLight(world, loc.East()),
-                GetLight(world, loc.West()),
-                // Sample self
-                GetLight(world, loc)
-            };
-        }
-
         private float[] GetCornerLights(World world, Location loc)
         {
             var result = new float[8];

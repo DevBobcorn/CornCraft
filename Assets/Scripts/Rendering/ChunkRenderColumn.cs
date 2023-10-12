@@ -86,6 +86,5 @@ namespace CraftSharp.Rendering
         }
 
         public override string ToString() => $"[ChunkRenderColumn {ChunkX}, {ChunkZ}]";
-
     }
 }

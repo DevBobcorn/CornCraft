@@ -79,11 +79,6 @@ namespace CraftSharp
             return this[location.GetChunkBlockX(), location.GetChunkBlockY(), location.GetChunkBlockZ()];
         }
 
-        public Block GetBlockFromWorld(Location location)
-        {
-            return world.GetBlock(location);
-        }
-
         private static byte getLiquidHeight(BlockState state)
         {
             if (state.InWater || state.InLava)
@@ -230,6 +225,5 @@ namespace CraftSharp
             
             return GetBlock(location.South().West());
         }
-
     }
 }

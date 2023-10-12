@@ -727,7 +727,6 @@ namespace CraftSharp.Protocol.Handlers
             {
                 // Save light data for later use (when the chunk data is ready)
                 world.LightDataCache.AddOrUpdate(new(chunkX, chunkZ), (_) => cache, (_, _) => cache);
-
             }
             else
             {
@@ -743,7 +742,6 @@ namespace CraftSharp.Protocol.Handlers
                 
                 chunkColumn.SetLights(skyLight, blockLight);
             }
-            
         }
     }
 }
