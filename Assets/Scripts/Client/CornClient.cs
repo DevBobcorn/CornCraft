@@ -209,7 +209,7 @@ namespace CraftSharp
                 lock (movementLock)
                 {
                     handler?.SendLocationUpdate(
-                            CoordConvert.Unity2MC(playerController!.Position2Send),
+                            playerController!.Location2Send,
                             playerController.IsGrounded2Send,
                             playerController.Yaw2Send,
                             playerController.Pitch2Send);
@@ -452,7 +452,7 @@ namespace CraftSharp
         /// </summary>
         public override Location GetLocation()
         {
-            return CoordConvert.Unity2MC(playerController!.Position2Send);
+            return playerController!.Location2Send;
         }
 
         /// <summary>
@@ -460,7 +460,7 @@ namespace CraftSharp
         /// </summary>
         public override Vector3 GetPosition()
         {
-            return playerController!.Position2Send;
+            return CoordConvert.MC2Unity(playerController!.Location2Send);
         }
 
         /// <summary>
@@ -1014,7 +1014,7 @@ namespace CraftSharp
                 {                    
                     Loom.QueueOnMainThread(() => {
                         var offset = playerController!.transform.position - CoordConvert.MC2Unity(location);
-                        if (offset.magnitude < 8F)
+                        if (offset.magnitude < 3F)
                         {
                             return;
                         }

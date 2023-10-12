@@ -48,7 +48,7 @@ namespace CraftSharp.Control
         // Values for sending over to the server.
         // Should only be set from the unity thread
         // and read from the network thread
-        public Vector3 Position2Send { get; private set; }
+        public Location Location2Send { get; private set; }
         public float Yaw2Send { get; private set; }
         public float Pitch2Send { get; private set; }
         public bool IsGrounded2Send { get; private set; }
@@ -480,11 +480,20 @@ namespace CraftSharp.Control
         {
             // Update values to send to server
             if (CurrentState is ForceMoveState state)
-            // Use move origin as the player location to tell to server, to
-            // prevent sending invalid positions during a force move operation
-                Position2Send = state.GetFakePlayerOffset();
+            {
+                // Use move origin as the player location to tell to server, to
+                // prevent sending invalid positions during a force move operation
+                Location2Send = CoordConvert.Unity2MC(
+                        state.GetFakePlayerOffset());
+            }
             else
-                Position2Send = transform.position;
+            {
+                Location2Send = new(
+                        Math.Round(transform.position.z, 2),
+                        Math.Round(transform.position.y, 2),
+                        Math.Round(transform.position.x, 2)
+                );
+            }
 
             if (playerRender != null)
             {
