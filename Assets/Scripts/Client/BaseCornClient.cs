@@ -84,7 +84,7 @@ namespace CraftSharp
         public abstract double GetServerTPS();
         public abstract float GetTickMilSec();
         // Retrieve gameplay info
-        public abstract World GetWorld();
+        public abstract ChunkRenderManager GetChunkRenderManager();
         public abstract Container? GetInventory(int inventoryId);
         public abstract ItemStack? GetActiveItem();
         public abstract Location GetLocation();

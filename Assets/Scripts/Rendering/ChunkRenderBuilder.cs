@@ -31,19 +31,19 @@ namespace CraftSharp.Rendering
             this.modelTable = modelTable;
         }
 
-        private float GetLight(World world, BlockLoc location)
+        private float GetLight(ChunkRenderManager manager, BlockLoc location)
         {
             //return Mathf.Max(world.GetBlockLight(loc), world.GetSkyLight(loc)) / 15F;
-            return Mathf.Max(world.GetBlockLight(location), 4) / 10F;
+            return Mathf.Max(manager.GetBlockLight(location), 4) / 10F;
         }
 
-        private float[] GetCornerLights(World world, BlockLoc blockLoc)
+        private float[] GetCornerLights(ChunkRenderManager manager, BlockLoc blockLoc)
         {
             var result = new float[8];
 
             for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
             {
-                var sample = GetLight(world, blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
+                var sample = GetLight(manager, blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
 
                 if (y != 2 && z != 2 && x != 2) // [0] x0z0 y0
                 {
@@ -82,19 +82,19 @@ namespace CraftSharp.Rendering
             return result.Select(x => x / 8F).ToArray();
         }
 
-        private bool[] GetAllNeighborOpaque(World world, BlockLoc blockLoc)
+        private bool[] GetAllNeighborOpaque(ChunkRenderManager manager, BlockLoc blockLoc)
         {
             var result = new bool[27];
 
             for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
             {
-                result[y * 9 + z * 3 + x] = world.GetIsOpaque(blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
+                result[y * 9 + z * 3 + x] = manager.IsOpaqueAt(blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
             }
 
             return result;
         }
 
-        public ChunkBuildResult Build(World world, Chunk chunkData, ChunkRender chunkRender)
+        public ChunkBuildResult Build(ChunkRenderManager manager, World world, Chunk chunkData, ChunkRender chunkRender)
         {
             try
             {
@@ -128,14 +128,14 @@ namespace CraftSharp.Rendering
                             if (state.InLiquid) // Build liquid here
                             {
                                 var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                                int liquidCullFlags = chunkData.GetCullFlags(blockLoc, bloc, neighborCheck);
+                                int liquidCullFlags = world.GetCullFlags(blockLoc, bloc, neighborCheck);
 
                                 if (liquidCullFlags != 0)
                                 {
-                                    var liquidHeights = chunkData.GetLiquidHeights(blockLoc);
+                                    var liquidHeights = world.GetLiquidHeights(blockLoc);
                                     var liquidLayerIndex = state.InWater ? waterLayerIndex : lavaLayerIndex;
                                     var liquidTexture = FluidGeometry.LiquidTextures[state.InWater ? 0 : 1];
-                                    var lights = GetCornerLights(world, blockLoc);
+                                    var lights = GetCornerLights(manager, blockLoc);
 
                                     FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], new(z, y, x), liquidTexture,
                                             liquidHeights, liquidCullFlags, lights, world.GetWaterColor(blockLoc));
@@ -147,7 +147,7 @@ namespace CraftSharp.Rendering
                             // If air-like (air, water block, etc), ignore it...
                             if (state.LikeAir) continue;
                             
-                            int cullFlags = chunkData.GetCullFlags(blockLoc, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
+                            int cullFlags = world.GetCullFlags(blockLoc, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
                             
                             if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
@@ -156,8 +156,8 @@ namespace CraftSharp.Rendering
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;
                                 var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, blockLoc, state);
-                                var lights = GetCornerLights(world, blockLoc);
-                                var opaq = GetAllNeighborOpaque(world, blockLoc);
+                                var lights = GetCornerLights(manager, blockLoc);
+                                var opaq = GetAllNeighborOpaque(manager, blockLoc);
 
                                 if (state.NoCollision)
                                     models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, opaq, lights, color);
@@ -481,6 +481,5 @@ namespace CraftSharp.Rendering
                 colVertAttrs.Dispose();
             });
         }
-
     }
 }

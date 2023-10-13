@@ -197,7 +197,8 @@ namespace CraftSharp
                 {
                     var ruleName = dynamicRule.Key;
 
-                    Func<AbstractWorld, BlockLoc, BlockState, float3> ruleFunc = ruleName switch {
+                    Func<AbstractWorld, BlockLoc, BlockState, float3> ruleFunc = ruleName switch
+                    {
                         "foliage"  => (world, loc, state) => world.GetFoliageColor(loc),
                         "grass"    => (world, loc, state) => world.GetGrassColor(loc),
                         "redstone" => (world, loc, state) => {

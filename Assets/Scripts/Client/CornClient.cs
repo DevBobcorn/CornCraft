@@ -309,8 +309,10 @@ namespace CraftSharp
         /// </summary>
         public void OnConnectionLost(DisconnectReason reason, string message)
         {
-            // Clear world data
-            GetWorld().Clear();
+            Loom.QueueOnMainThread(() => {
+                // Clear world data
+                ChunkRenderManager!.ClearWorld();
+            });
 
             switch (reason)
             {
@@ -422,11 +424,11 @@ namespace CraftSharp
         public override float GetTickMilSec() => (float)(1D / averageTPS);
 
         /// <summary>
-        /// Get current world
+        /// Get current chunk render manager
         /// </summary>
-        public override World GetWorld()
+        public override ChunkRenderManager GetChunkRenderManager()
         {
-            return ChunkRenderManager!.World;
+            return ChunkRenderManager!;
         }
 
         /// <summary>
@@ -475,14 +477,14 @@ namespace CraftSharp
             {
                 var targetLoc = interactionUpdater?.TargetBlockLoc;
                 var playerLoc = GetLocation();
-                var blockLoc = GetLocation().GetBlockLoc();
-                var world = GetWorld();
+                var blockLoc = playerLoc.GetBlockLoc();
+                var biome = ChunkRenderManager!.GetBiome(blockLoc);
 
                 string targetInfo;
 
                 if (targetLoc is not null)
                 {
-                    var targetBlock = world.GetBlock(targetLoc.Value);
+                    var targetBlock = ChunkRenderManager.GetBlock(targetLoc.Value);
                     targetInfo = $"Target: {targetLoc}\n{targetBlock}";
                 }
                 else
@@ -490,7 +492,7 @@ namespace CraftSharp
                     targetInfo = "\n";
                 }
                 
-                return baseString + $"\nFog: <{RenderSettings.fogDensity}>\nLoc: {playerLoc}\nBiome:\t{world.GetBiome(blockLoc)}\n{targetInfo}\n{cameraController?.GetDebugInfo()}\n{playerController?.GetDebugInfo()}" +
+                return baseString + $"\nLoc: {playerLoc}\nBiome:\t{biome}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
             }
             
@@ -954,11 +956,11 @@ namespace CraftSharp
         {
             ClearTasks();
 
-            GetWorld().Clear();
+            ChunkRenderManager!.ClearWorld();
             ClearInventories();
 
             Loom.QueueOnMainThread(() => {
-                ChunkRenderManager?.ReloadWorld();
+                ChunkRenderManager?.ReloadWorldRender();
                 EntityRenderManager?.ReloadEntityRenders();
             });
         }

@@ -13,11 +13,7 @@ namespace CraftSharp
     /// </summary>
     public class World : AbstractWorld
     {
-        /// <summary>
-        /// The chunks contained into the Minecraft world
-        /// </summary>
-        private readonly ConcurrentDictionary<int2, ChunkColumn> chunks = new();
-        public readonly ConcurrentDictionary<int2, Queue<byte>> LightDataCache = new();
+        #region Static data storage and access
         
         /// <summary>
         /// The dimension info of the world
@@ -30,45 +26,7 @@ namespace CraftSharp
         /// <summary>
         /// The biomes of the world
         /// </summary>
-        private static readonly Dictionary<int, Biome> biomeList = new();
-
-        /// <summary>
-        /// Chunk data parsing progress
-        /// </summary>
-        public int chunkCnt = 0;
-        public int chunkLoadNotCompleted = 0;
-
-        /// <summary>
-        /// Read, set or unload the specified chunk column
-        /// </summary>
-        /// <param name="chunkX">ChunkColumn X</param>
-        /// <param name="chunkZ">ChunkColumn Z</param>
-        /// <returns>chunk at the given location</returns>
-        public ChunkColumn? this[int chunkX, int chunkZ]
-        {
-            get
-            {
-                chunks.TryGetValue(new(chunkX, chunkZ), out ChunkColumn? chunkColumn);
-                return chunkColumn;
-            }
-            set
-            {
-                int2 chunkCoord = new(chunkX, chunkZ);
-                if (value is null)
-                    chunks.TryRemove(chunkCoord, out _);
-                else
-                    chunks.AddOrUpdate(chunkCoord, value, (_, _) => value);
-            }
-        }
-
-        // Chunk column data is sent one whole column per time,
-        // a whole air chunk is represent by null
-        public bool isChunkColumnReady(int chunkX, int chunkZ)
-        {
-            if (chunks.TryGetValue(new(chunkX, chunkZ), out ChunkColumn? chunkColumn))
-                return (chunkColumn is not null && chunkColumn.FullyLoaded && chunkColumn.LightingPresent);
-            return false;
-        }
+        public static readonly Dictionary<int, Biome> BiomeList = new();
 
         /// <summary>
         /// Storage of all dimensional data - 1.19.1 and above
@@ -148,8 +106,8 @@ namespace CraftSharp
             var biomeNumId = (int)biomeData["id"];
             var biomeId = ResourceLocation.FromString(biomeName);
 
-            if (biomeList.ContainsKey(biomeNumId))
-                biomeList.Remove(biomeNumId);
+            if (BiomeList.ContainsKey(biomeNumId))
+                BiomeList.Remove(biomeNumId);
             
             //Debug.Log($"Biome registered:\n{Json.Dictionary2Json(biomeData)}");
 
@@ -226,7 +184,54 @@ namespace CraftSharp
                 Precipitation = precipitation
             };
 
-            biomeList.Add(biomeNumId, biome);
+            BiomeList.Add(biomeNumId, biome);
+        }
+
+        #endregion
+
+        #region World instance data storage and access
+
+        /// <summary>
+        /// The chunks contained into the Minecraft world
+        /// </summary>
+        private readonly ConcurrentDictionary<int2, ChunkColumn> columns = new();
+
+        /// <summary>
+        /// Read, set or unload the specified chunk column
+        /// </summary>
+        /// <param name="chunkX">ChunkColumn X</param>
+        /// <param name="chunkZ">ChunkColumn Z</param>
+        /// <returns>Chunk at the given location</returns>
+        public ChunkColumn? this[int chunkX, int chunkZ]
+        {
+            get
+            {
+                columns.TryGetValue(new(chunkX, chunkZ), out ChunkColumn? chunkColumn);
+                return chunkColumn;
+            }
+            set
+            {
+                int2 chunkCoord = new(chunkX, chunkZ);
+                if (value is null)
+                    columns.TryRemove(chunkCoord, out _);
+                else
+                    columns.AddOrUpdate(chunkCoord, value, (_, _) => value);
+            }
+        }
+
+        /// <summary>
+        /// Check whether the data of a chunk column is ready
+        /// </summary>
+        /// <param name="chunkX">ChunkColumn X</param>
+        /// <param name="chunkZ">ChunkColumn Z</param>
+        /// <returns>True if chunk column data is ready</returns>
+        public bool IsChunkColumnReady(int chunkX, int chunkZ)
+        {
+            // Chunk column data is sent one whole column per time,
+            // a whole air chunk is represent by null
+            if (columns.TryGetValue(new(chunkX, chunkZ), out ChunkColumn? chunkColumn))
+                return chunkColumn is not null && chunkColumn.FullyLoaded && chunkColumn.LightingPresent;
+            return false;
         }
 
         /// <summary>
@@ -239,7 +244,7 @@ namespace CraftSharp
         /// <param name="chunk">Chunk data</param>
         public void StoreChunk(int chunkX, int chunkY, int chunkZ, int chunkColumnSize, Chunk? chunk)
         {
-            ChunkColumn chunkColumn = chunks.GetOrAdd(new(chunkX, chunkZ), (_) => new(chunkColumnSize));
+            ChunkColumn chunkColumn = columns.GetOrAdd(new(chunkX, chunkZ), (_) => new(chunkColumnSize));
             chunkColumn[chunkY] = chunk;
         }
 
@@ -251,7 +256,7 @@ namespace CraftSharp
         /// <param name="chunkColumnSize">ChunkColumn size</param>
         public void CreateEmptyChunkColumn(int chunkX, int chunkZ, int chunkColumnSize)
         {
-            chunks.GetOrAdd(new(chunkX, chunkZ), (_) => new(chunkColumnSize));
+            columns.GetOrAdd(new(chunkX, chunkZ), (_) => new(chunkColumnSize));
         }
 
         /// <summary>
@@ -264,12 +269,7 @@ namespace CraftSharp
             return this[location.GetChunkX(), location.GetChunkZ()];
         }
 
-        public ChunkColumn? GetChunkColumn(int chunkX, int chunkZ)
-        {
-            return this[chunkX, chunkZ];
-        }
-
-        private static readonly Block AIR_INSTANCE = new Block(0);
+        private static readonly Block AIR_INSTANCE = new(0);
 
         /// <summary>
         /// Get block at the specified location
@@ -288,51 +288,133 @@ namespace CraftSharp
             return AIR_INSTANCE; // Air
         }
 
+        private Block GetUpBlock(Chunk selfChunk, BlockLoc blockLoc) // MC Y Pos
+        {
+            if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1)
+                return GetBlock(blockLoc.Up());
+            
+            // Target is in the same chunk
+            return selfChunk.GetBlock(blockLoc.Up());
+        }
+
+        private Block GetDownBlock(Chunk selfChunk, BlockLoc blockLoc) // MC Y Neg
+        {
+            if (blockLoc.GetChunkBlockY() == 0)
+                return GetBlock(blockLoc.Down());
+            
+            // Target is in the same chunk
+            return selfChunk.GetBlock(blockLoc.Down());
+        }
+
+        private Block GetEastBlock(Chunk selfChunk, BlockLoc blockLoc) // MC X Pos
+        {
+            if (blockLoc.GetChunkBlockX() == Chunk.SIZE - 1)
+                return GetBlock(blockLoc.East());
+            
+            // Target is in the same chunk
+            return selfChunk.GetBlock(blockLoc.East());
+        }
+
+        private Block GetWestBlock(Chunk selfChunk, BlockLoc blockLoc) // MC X Neg
+        {
+            if (blockLoc.GetChunkBlockX() == 0)
+                return GetBlock(blockLoc.West());
+            
+            // Target is in the same chunk
+            return selfChunk.GetBlock(blockLoc.West());
+        }
+
+        private Block GetSouthBlock(Chunk selfChunk, BlockLoc blockLoc) // MC Z Pos
+        {
+            if (blockLoc.GetChunkBlockZ() == Chunk.SIZE - 1)
+                return GetBlock(blockLoc.South());
+            
+            // Target is in the same chunk
+            return selfChunk.GetBlock(blockLoc.South());
+        }
+
+        private Block GetNorthBlock(Chunk selfChunk, BlockLoc blockLoc) // MC Z Neg
+        {
+            if (blockLoc.GetChunkBlockZ() == 0)
+                return GetBlock(blockLoc.North());
+            
+            // Target is in the same chunk
+            return selfChunk.GetBlock(blockLoc.North());
+        }
+
+        public int GetCullFlags(BlockLoc blockLoc, Block self, BlockNeighborCheck check)
+        {
+            var selfChunk = GetChunkColumn(blockLoc)?.GetChunk(blockLoc);
+            if (selfChunk == null)
+            {
+                return 0;
+            }
+
+            int cullFlags = 0;
+
+            if (check(self, GetUpBlock(selfChunk, blockLoc)))
+                cullFlags |= (1 << 0);
+
+            if (check(self, GetDownBlock(selfChunk, blockLoc)))
+                cullFlags |= (1 << 1);
+            
+            if (check(self, GetSouthBlock(selfChunk, blockLoc)))
+                cullFlags |= (1 << 2);
+
+            if (check(self, GetNorthBlock(selfChunk, blockLoc)))
+                cullFlags |= (1 << 3);
+            
+            if (check(self, GetEastBlock(selfChunk, blockLoc)))
+                cullFlags |= (1 << 4);
+
+            if (check(self, GetWestBlock(selfChunk, blockLoc)))
+                cullFlags |= (1 << 5);
+            
+            return cullFlags;
+        }
+
+        /// <summary>
+        /// Clear all terrain data from the world
+        /// </summary>
+        public void Clear()
+        {
+            columns.Clear();
+        }
+
+        public byte[] GetLiquidHeights(BlockLoc blockLoc)
+        {
+            // Height References
+            //  NE---E---SE
+            //  |         |
+            //  N    @    S
+            //  |         |
+            //  NW---W---SW
+
+            return new byte[] {
+                16, 16, 16,
+                16, 16, 16,
+                16, 16, 16
+            };
+        }
+
+        private const int COLOR_SAMPLE_RADIUS = 2;
+
         public Biome GetBiome(BlockLoc blockLoc)
         {
             var column = GetChunkColumn(blockLoc);
             if (column != null)
-                return biomeList.GetValueOrDefault(column.GetBiomeId(blockLoc), DUMMY_BIOME);
+                return BiomeList.GetValueOrDefault(column.GetBiomeId(blockLoc), DUMMY_BIOME);
             
             return DUMMY_BIOME; // Not available
         }
-
-        public bool GetIsOpaque(BlockLoc blockLoc)
-        {
-            var column = GetChunkColumn(blockLoc);
-            if (column != null)
-                return column.GetIsOpaque(blockLoc);
-            
-            return false; // Not available
-        }
-
-        public byte GetSkyLight(BlockLoc blockLoc)
-        {
-            var column = GetChunkColumn(blockLoc);
-            if (column != null)
-                return column.GetSkyLight(blockLoc);
-            
-            return (byte) 0; // Not available
-        }
-
-        public byte GetBlockLight(BlockLoc blockLoc)
-        {
-            var column = GetChunkColumn(blockLoc);
-            if (column != null)
-                return column.GetBlockLight(blockLoc);
-            
-            return (byte) 0; // Not available
-        }
-
-        private const int radius = 2;
 
         public override float3 GetFoliageColor(BlockLoc blockLoc)
         {
             int cnt = 0;
             float3 colorSum = float3.zero;
-            for (int x = -radius;x <= radius;x++)
-                for (int y = -radius;y <= radius;y++)
-                    for (int z = -radius;z < radius;z++)
+            for (int x = -COLOR_SAMPLE_RADIUS;x <= COLOR_SAMPLE_RADIUS;x++)
+                for (int y = -COLOR_SAMPLE_RADIUS;y <= COLOR_SAMPLE_RADIUS;y++)
+                    for (int z = -COLOR_SAMPLE_RADIUS;z < COLOR_SAMPLE_RADIUS;z++)
                     {
                         var b = GetBiome(blockLoc + new BlockLoc(x, y, z));
                         if (b != DUMMY_BIOME)
@@ -349,9 +431,9 @@ namespace CraftSharp
         {
             int cnt = 0;
             float3 colorSum = float3.zero;
-            for (int x = -radius;x <= radius;x++)
-                for (int y = -radius;y <= radius;y++)
-                    for (int z = -radius;z < radius;z++)
+            for (int x = -COLOR_SAMPLE_RADIUS;x <= COLOR_SAMPLE_RADIUS;x++)
+                for (int y = -COLOR_SAMPLE_RADIUS;y <= COLOR_SAMPLE_RADIUS;y++)
+                    for (int z = -COLOR_SAMPLE_RADIUS;z < COLOR_SAMPLE_RADIUS;z++)
                     {
                         var b = GetBiome(blockLoc + new BlockLoc(x, y, z));
                         if (b != DUMMY_BIOME)
@@ -368,9 +450,9 @@ namespace CraftSharp
         {
             int cnt = 0;
             float3 colorSum = float3.zero;
-            for (int x = -radius;x <= radius;x++)
-                for (int y = -radius;y <= radius;y++)
-                    for (int z = -radius;z < radius;z++)
+            for (int x = -COLOR_SAMPLE_RADIUS;x <= COLOR_SAMPLE_RADIUS;x++)
+                for (int y = -COLOR_SAMPLE_RADIUS;y <= COLOR_SAMPLE_RADIUS;y++)
+                    for (int z = -COLOR_SAMPLE_RADIUS;z < COLOR_SAMPLE_RADIUS;z++)
                     {
                         var b = GetBiome(blockLoc + new BlockLoc(x, y, z));
                         if (b != DUMMY_BIOME)
@@ -383,87 +465,6 @@ namespace CraftSharp
             return colorSum / cnt;
         }
 
-        public bool IsWaterAt(BlockLoc blockLoc)
-        {
-            var column = GetChunkColumn(blockLoc);
-            if (column != null)
-            {
-                var chunk = column.GetChunk(blockLoc);
-                if (chunk != null)
-                    return chunk.GetBlock(blockLoc).State.InWater;
-            }
-            return false;
-        }
-
-        public bool IsLavaAt(BlockLoc blockLoc)
-        {
-            var column = GetChunkColumn(blockLoc);
-            if (column != null)
-            {
-                var chunk = column.GetChunk(blockLoc);
-                if (chunk != null)
-                    return chunk.GetBlock(blockLoc).State.InLava;
-            }
-            return false;
-        }
-
-        public bool IsLiquidAt(BlockLoc blockLoc)
-        {
-            var column = GetChunkColumn(blockLoc);
-            if (column != null)
-            {
-                var chunk = column.GetChunk(blockLoc);
-                if (chunk != null)
-                    return chunk.GetBlock(blockLoc).State.InWater || chunk.GetBlock(blockLoc).State.InLava;
-            }
-            return false;
-        }
-
-        public int GetCullFlags(BlockLoc blockLoc, Block self, BlockNeighborCheck check)
-        {
-            int cullFlags = 0;
-            if (check(self, GetBlock(blockLoc.Up())))
-                cullFlags |= (1 << 0);
-            if (check(self, GetBlock(blockLoc.Down())))
-                cullFlags |= (1 << 1);
-            if (check(self, GetBlock(blockLoc.South())))
-                cullFlags |= (1 << 2);
-            if (check(self, GetBlock(blockLoc.North())))
-                cullFlags |= (1 << 3);
-            if (check(self, GetBlock(blockLoc.East())))
-                cullFlags |= (1 << 4);
-            if (check(self, GetBlock(blockLoc.West())))
-                cullFlags |= (1 << 5);
-            return cullFlags;
-        }
-
-        /// <summary>
-        /// Set block at the specified location
-        /// </summary>
-        /// <param name="blockLoc">Location to set block to</param>
-        /// <param name="block">Block to set</param>
-        public void SetBlock(BlockLoc blockLoc, Block block)
-        {
-            var column = this[blockLoc.GetChunkX(), blockLoc.GetChunkZ()];
-            if (column is not null)
-            {
-                var chunk = column.GetChunk(blockLoc);
-                if (chunk is null)
-                    column[blockLoc.GetChunkY()] = chunk = new Chunk(this);
-                chunk[blockLoc.GetChunkBlockX(), blockLoc.GetChunkBlockY(), blockLoc.GetChunkBlockZ()] = block;
-            }
-            else
-                UnityEngine.Debug.LogWarning($"Failed to set {block.State} at {blockLoc}: chunk column not loaded");
-
-        }
-
-        /// <summary>
-        /// Clear all terrain data from the world
-        /// </summary>
-        public void Clear()
-        {
-            chunks.Clear();
-            chunkCnt = chunkLoadNotCompleted = 0;
-        }
+        #endregion
     }
 }

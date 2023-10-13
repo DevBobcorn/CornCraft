@@ -59,6 +59,11 @@ namespace CraftSharp.Rendering
             }
         }
 
+        /// <summary>
+        /// Unload a chunk render, accessible on unity thread only
+        /// </summary>
+        /// <param name="chunksBeingBuilt"></param>
+        /// <param name="chunks2Build"></param>
         public void Unload(ref List<ChunkRender> chunksBeingBuilt, ref PriorityQueue<ChunkRender> chunks2Build)
         {
             // Unload this chunk column...

@@ -36,7 +36,7 @@ namespace CraftSharp.Protocol.Handlers
         /// </summary>
         /// <param name="chunk">Blocks will store in this chunk</param>
         /// <param name="cache">Cache for reading data</param>
-        private Chunk? ReadBlockStatesField(World world, Queue<byte> cache)
+        private Chunk? ReadBlockStatesField(Queue<byte> cache)
         {
             // read Block states (Type: Paletted Container)
             byte bitsPerEntry = dataTypes.ReadNextByte(cache);
@@ -53,7 +53,7 @@ namespace CraftSharp.Protocol.Handlers
                 if (blockId == 0)
                     return null;
                 
-                Chunk chunk = new(world);
+                Chunk chunk = new();
                 for (int blockY = 0; blockY < Chunk.SIZE; blockY++)
                     for (int blockZ = 0; blockZ < Chunk.SIZE; blockZ++)
                         for (int blockX = 0; blockX < Chunk.SIZE; blockX++)
@@ -87,7 +87,7 @@ namespace CraftSharp.Protocol.Handlers
                 Span<byte> entryDataByte = stackalloc byte[8];
                 Span<long> entryDataLong = MemoryMarshal.Cast<byte, long>(entryDataByte); // Faster than MemoryMarshal.Read<long>
 
-                Chunk chunk = new(world);
+                Chunk chunk = new();
                 int startOffset = 64; // Read the first data immediately
                 for (int blockY = 0; blockY < Chunk.SIZE; blockY++)
                     for (int blockZ = 0; blockZ < Chunk.SIZE; blockZ++)
@@ -233,10 +233,10 @@ namespace CraftSharp.Protocol.Handlers
         /// <returns>true if successfully loaded</returns>
         public bool ProcessChunkColumnData17(int chunkX, int chunkZ, ulong[]? verticalStripBitmask, Queue<byte> cache)
         {
+            var chunksManager = handler.GetChunkRenderManager();
+
             // Biome data of this whole chunk column
             short[]? biomes = null;
-            
-            var world = handler.GetWorld();
 
             int chunkColumnSize = (World.GetDimension().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
             int chunkMask = 0;
@@ -279,25 +279,23 @@ namespace CraftSharp.Protocol.Handlers
                     int blockCount = dataTypes.ReadNextShort(cache);
                     
                     // Read Block states (Type: Paletted Container)
-                    var chunk = ReadBlockStatesField(world, cache);
+                    var chunk = ReadBlockStatesField(cache);
                     
                     if (chunk is not null) // Chunk not empty(air)
                         chunkMask |= 1 << chunkY;
 
                     // We have our chunk, save the chunk into the world
-                    world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
+                    chunksManager.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
                 }
 
                 // Read Biomes (Type: Paletted Container) - 1.18(1.18.1) and above
                 if (protocolVersion >= ProtocolMinecraft.MC_1_18_1_Version)
                     ReadBiomesField(chunkY, biomes!, cache);
-                
             }
 
             if (chunkMask == 0) // The whole chunk column is empty (chunks around main island in the end, for example)
             {
-                //UnityEngine.Debug.Log($"Received empty column: [{chunkX}, {chunkZ}]");
-                world.CreateEmptyChunkColumn(chunkX, chunkZ, chunkColumnSize);
+                chunksManager.CreateEmptyChunkColumn(chunkX, chunkZ, chunkColumnSize);
             }
 
             int consumedSize = totalSize - cache.Count;
@@ -348,7 +346,7 @@ namespace CraftSharp.Protocol.Handlers
             // All data in packet should be parsed now, with nothing left
 
             // Set the column's chunk mask and load state
-            var c = world[chunkX, chunkZ];
+            var c = chunksManager.GetChunkColumn(chunkX, chunkZ);
             if (c is not null)
             {
                 if (biomes!.Length == c.ColumnSize * 64)
@@ -361,9 +359,6 @@ namespace CraftSharp.Protocol.Handlers
 
                 c!.FullyLoaded = true;
             }
-
-            // Broadcast event to update world render
-            EventManager.Instance.BroadcastOnUnityThread<ReceiveChunkColumnEvent>(new(chunkX, chunkZ));
             return true;
         }
 
@@ -381,6 +376,8 @@ namespace CraftSharp.Protocol.Handlers
         /// <returns>true if successfully loaded</returns>
         public bool ProcessChunkColumnData16(int chunkX, int chunkZ, ushort chunkMask, ushort chunkMask2, bool hasSkyLight, bool chunksContinuous, int currentDimension, Queue<byte> cache)
         {
+            var chunksManager = handler.GetChunkRenderManager();
+
             int biomesLength = 0;
                                 
             if (protocolVersion >= ProtocolMinecraft.MC_1_16_2_Version && chunksContinuous)
@@ -400,15 +397,12 @@ namespace CraftSharp.Protocol.Handlers
             }
 
             int dataSize = dataTypes.ReadNextVarInt(cache);
-            
-            World world = handler.GetWorld();
 
             const int chunkColumnSize = 16;
 
             if (chunkMask == 0) // The whole chunk column is empty (chunks around main island in the end, for example)
             {
-                //UnityEngine.Debug.Log($"Received empty column: [{chunkX}, {chunkZ}]");
-                world.CreateEmptyChunkColumn(chunkX, chunkZ, chunkColumnSize);
+                chunksManager.CreateEmptyChunkColumn(chunkX, chunkZ, chunkColumnSize);
             }
             else
             {
@@ -445,7 +439,7 @@ namespace CraftSharp.Protocol.Handlers
                         // Block IDs are packed in the array of 64-bits integers
                         ulong[] dataArray = dataTypes.ReadNextULongArray(cache);
 
-                        Chunk chunk = new Chunk(world);
+                        Chunk chunk = new Chunk();
 
                         if (dataArray.Length > 0)
                         {
@@ -528,7 +522,7 @@ namespace CraftSharp.Protocol.Handlers
                         }
 
                         // We have our chunk, save the chunk into the world
-                        world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
+                        chunksManager.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
                     }
                 }
             }
@@ -549,7 +543,7 @@ namespace CraftSharp.Protocol.Handlers
             // All data in packet should be parsed now, with nothing left
 
             // Set the column's chunk mask and load state
-            var c = world[chunkX, chunkZ];
+            var c = chunksManager.GetChunkColumn(chunkX, chunkZ);
             if (c is not null) // Receive and store biome and light data, these should be present even for empty chunk columns
             {
                 if (biomes.Length == c.ColumnSize * 64)
@@ -560,7 +554,7 @@ namespace CraftSharp.Protocol.Handlers
                 // Check if light data for this chunk column is present
                 int2 chunkKey = new(chunkX, chunkZ);
 
-                if (world.LightDataCache.TryRemove(chunkKey, out Queue<byte>? lightData))
+                if (chunksManager.LightDataCache.TryRemove(chunkKey, out Queue<byte>? lightData))
                 {
                     // Parse lighting data
                     var skyLight   = new byte[4096 * (chunkColumnSize + 2)];
@@ -576,9 +570,6 @@ namespace CraftSharp.Protocol.Handlers
 
                 c!.FullyLoaded = true;
             }
-
-            // Broadcast event to update world render
-            EventManager.Instance.BroadcastOnUnityThread<ReceiveChunkColumnEvent>(new(chunkX, chunkZ));
             return true;
         }
 
@@ -720,13 +711,13 @@ namespace CraftSharp.Protocol.Handlers
         /// </summary>
         public void ProcessChunkLightData(int chunkX, int chunkZ, Queue<byte> cache)
         {
-            World world = handler.GetWorld();
-            var chunkColumn = world.GetChunkColumn(chunkX, chunkZ);
+            var chunksManager = handler.GetChunkRenderManager();
+            var chunkColumn = chunksManager.GetChunkColumn(chunkX, chunkZ);
 
             if (chunkColumn is null)
             {
                 // Save light data for later use (when the chunk data is ready)
-                world.LightDataCache.AddOrUpdate(new(chunkX, chunkZ), (_) => cache, (_, _) => cache);
+                chunksManager.LightDataCache.AddOrUpdate(new(chunkX, chunkZ), (_) => cache, (_, _) => cache);
             }
             else
             {

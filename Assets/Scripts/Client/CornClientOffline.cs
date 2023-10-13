@@ -139,11 +139,11 @@ namespace CraftSharp
         public override float GetTickMilSec() => 0.05F;
 
         /// <summary>
-        /// Get current world
+        /// Get current chunk render manager
         /// </summary>
-        public override World GetWorld()
+        public override ChunkRenderManager GetChunkRenderManager()
         {
-            return ChunkRenderManager!.World;
+            return ChunkRenderManager!;
         }
 
         /// <summary>
@@ -167,12 +167,18 @@ namespace CraftSharp
         /// <summary>
         /// Get current player location (in Minecraft world)
         /// </summary>
-        public override Location GetLocation() => clientEntity.Location;
+        public override Location GetLocation()
+        {
+            return playerController!.Location2Send;
+        }
 
         /// <summary>
         /// Get current player position (in Unity scene)
         /// </summary>
-        public override Vector3 GetPosition() => CoordConvert.MC2Unity(clientEntity.Location);
+        public override Vector3 GetPosition()
+        {
+            return CoordConvert.MC2Unity(playerController!.Location2Send);
+        }
 
         /// <summary>
         /// Get current status about the client
@@ -187,13 +193,13 @@ namespace CraftSharp
                 var targetLoc = interactionUpdater?.TargetBlockLoc;
                 var playerLoc = GetLocation();
                 var blockLoc = playerLoc.GetBlockLoc();
-                var world = GetWorld();
+                var biome = ChunkRenderManager!.GetBiome(blockLoc);
 
                 string targetInfo;
 
                 if (targetLoc is not null)
                 {
-                    var targetBlock = world.GetBlock(targetLoc.Value);
+                    var targetBlock = ChunkRenderManager.GetBlock(targetLoc.Value);
                     targetInfo = $"Target: {targetLoc}\n{targetBlock}";
                 }
                 else
@@ -201,7 +207,7 @@ namespace CraftSharp
                     targetInfo = "\n";
                 }
                 
-                return baseString + $"\nFog: <{RenderSettings.fogDensity}>\nLoc: {playerLoc}\nBiome:\t{world.GetBiome(blockLoc)}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
+                return baseString + $"\nLoc: {playerLoc}\nBiome:\t{biome}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
             }
             

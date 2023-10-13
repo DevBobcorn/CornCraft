@@ -162,9 +162,7 @@ namespace CraftSharp.Protocol.Handlers
 
             if (cancelToken.IsCancellationRequested)
             {   // Normally disconnected
-                Loom.QueueOnMainThread(
-                    () => handler.OnConnectionLost(DisconnectReason.ConnectionLost, "")
-                );
+                handler.OnConnectionLost(DisconnectReason.ConnectionLost, "");
                 return;
             }
         }
@@ -894,8 +892,10 @@ namespace CraftSharp.Protocol.Handlers
                         break;
                     case PacketTypesIn.ChunkData:
                         {
-                            Interlocked.Increment(ref handler.GetWorld().chunkCnt);
-                            Interlocked.Increment(ref handler.GetWorld().chunkLoadNotCompleted);
+                            var chunkRenderManager = handler.GetChunkRenderManager();
+
+                            Interlocked.Increment(ref chunkRenderManager.chunkCnt);
+                            Interlocked.Increment(ref chunkRenderManager.chunkLoadNotCompleted);
                             
                             int chunkX = dataTypes.ReadNextInt(packetData);
                             int chunkZ = dataTypes.ReadNextInt(packetData);
@@ -910,7 +910,7 @@ namespace CraftSharp.Protocol.Handlers
                                 dataTypes.ReadNextNbt(packetData); // Heightmaps
 
                                 if (pTerrain.ProcessChunkColumnData17(chunkX, chunkZ, verticalStripBitmask, packetData))
-                                    Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
+                                    Interlocked.Decrement(ref chunkRenderManager.chunkLoadNotCompleted);
                             }
                             else
                             {
@@ -923,7 +923,7 @@ namespace CraftSharp.Protocol.Handlers
                                 dataTypes.ReadNextNbt(packetData);  // Heightmaps - 1.14 and above
 
                                 if (pTerrain.ProcessChunkColumnData16(chunkX, chunkZ, chunkMask, 0, false, chunksContinuous, currentDimension, packetData))
-                                    Interlocked.Decrement(ref handler.GetWorld().chunkLoadNotCompleted);
+                                    Interlocked.Decrement(ref chunkRenderManager.chunkLoadNotCompleted);
                             }
                             break;
                         }
@@ -1060,7 +1060,6 @@ namespace CraftSharp.Protocol.Handlers
                         }
                     case PacketTypesIn.MultiBlockChange:
                         {
-                            var blockLocList = new List<BlockLoc>();
                             // MC 1.16.2+
                             long chunkSection = dataTypes.ReadNextLong(packetData);
                             int sectionX = (int)(chunkSection >> 42);
@@ -1071,6 +1070,7 @@ namespace CraftSharp.Protocol.Handlers
                                 dataTypes.ReadNextBool(packetData); // Useless boolean (Related to light update)
 
                             int blocksSize = dataTypes.ReadNextVarInt(packetData);
+
                             for (int i = 0; i < blocksSize; i++)
                             {
                                 ulong block = (ulong)dataTypes.ReadNextVarLong(packetData);
@@ -1084,17 +1084,15 @@ namespace CraftSharp.Protocol.Handlers
                                 int blockY = (sectionY * 16) + localY;
                                 int blockZ = (sectionZ * 16) + localZ;
                                 var blockLoc = new BlockLoc(blockX, blockY, blockZ);
-                                handler.GetWorld().SetBlock(blockLoc, bloc);
-                                blockLocList.Add(blockLoc);
+                                handler.GetChunkRenderManager().SetBlock(blockLoc, bloc);
                             }
-                            EventManager.Instance.BroadcastOnUnityThread<BlocksUpdateEvent>(new(blockLocList));
                             break;
                         }
                     case PacketTypesIn.BlockChange:
                         {
                             var blockLoc = dataTypes.ReadNextBlockLoc(packetData);
-                            handler.GetWorld().SetBlock(blockLoc, new Block((ushort)dataTypes.ReadNextVarInt(packetData)));
-                            EventManager.Instance.BroadcastOnUnityThread<BlockUpdateEvent>(new(blockLoc));
+                            handler.GetChunkRenderManager().SetBlock(blockLoc,
+                                    new Block((ushort) dataTypes.ReadNextVarInt(packetData)));
                             break;
                         }
                     case PacketTypesIn.UnloadChunk:
@@ -1102,13 +1100,10 @@ namespace CraftSharp.Protocol.Handlers
                             int chunkX = dataTypes.ReadNextInt(packetData);
                             int chunkZ = dataTypes.ReadNextInt(packetData);
 
-                            if (handler.GetWorld()[chunkX, chunkZ] != null)
-                                Interlocked.Decrement(ref handler.GetWorld().chunkCnt);
+                            if (handler.GetChunkRenderManager().GetChunkColumn(chunkX, chunkZ) != null)
+                                Interlocked.Decrement(ref handler.GetChunkRenderManager().chunkCnt);
                             // Warning: It is legal to include unloaded chunks in the UnloadChunk packet. Since chunks that have not been loaded are not recorded, this may result in loading chunks that should be unloaded and inaccurate statistics.
-                            
-                            handler.GetWorld()[chunkX, chunkZ] = null;
-
-                            EventManager.Instance.BroadcastOnUnityThread<UnloadChunkColumnEvent>(new(chunkX, chunkZ));
+                            handler.GetChunkRenderManager().UnloadChunk(chunkX, chunkZ);
                             break;
                         }
                     case PacketTypesIn.ChangeGameState:
