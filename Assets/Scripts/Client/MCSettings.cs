@@ -5,7 +5,7 @@ namespace CraftSharp
         public bool Enabled = true;
         public string Locale = "en_US";
         public byte Difficulty = 0;
-        public byte RenderDistance = 10;
+        public byte RenderDistance = 8;
         public byte ChatMode = 0;
         public bool ChatColors = true;
         public byte MainHand = 0;
