@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using CraftSharp.Protocol.Message;
 using CraftSharp.Inventory;
+using CraftSharp.Rendering;
 
 namespace CraftSharp.Protocol
 {
@@ -28,7 +29,7 @@ namespace CraftSharp.Protocol
         Dictionary<string, string> GetOnlinePlayersWithUUID();
         PlayerInfo? GetPlayerInfo(Guid uuid);
         Location GetLocation();
-        World GetWorld();
+        ChunkRenderManager GetChunkRenderManager();
 
         public void SetCanSendMessage(bool canSendMessage);
 

@@ -113,7 +113,8 @@ namespace CraftSharp.Control
                     // Additionally, update player state machine for rigged rendersInitialize
                     OnLogicalUpdate += (interval, status, rigidbody) => riggedRender.UpdateStateMachine(status);
                     // Initialize current item held by player
-                    var activeItem = CornApp.CurrentClient!.GetActiveItem();
+                    // TODO: Remove direct reference to client
+                    var activeItem = CornApp.CurrentClient?.GetActiveItem();
                     riggedRender.InitializeActiveItem(activeItem);
                 }
                 else // Player render is vanilla/entity render

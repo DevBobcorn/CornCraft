@@ -5,6 +5,7 @@ using UnityEngine;
 
 using CraftSharp.Event;
 using CraftSharp.Interaction;
+using CraftSharp.Rendering;
 
 namespace CraftSharp.Control
 {
@@ -54,7 +55,7 @@ namespace CraftSharp.Control
 
         public const int INTERACTION_RADIUS_SQR_PLUS = INTERACTION_RADIUS * INTERACTION_RADIUS + INTERACTION_RADIUS;
 
-        private void UpdateInteractions(World world)
+        private void UpdateInteractions(ChunkRenderManager chunksManager)
         {
             var playerLoc = client!.GetLocation();
             var playerBlockLoc = playerLoc.GetBlockLoc();
@@ -74,7 +75,7 @@ namespace CraftSharp.Control
                     continue;
                 }
                 
-                var block = world.GetBlock(blockLoc);
+                var block = chunksManager.GetBlock(blockLoc);
 
                 if (!table.ContainsKey(block.StateId))
                 {
@@ -93,7 +94,7 @@ namespace CraftSharp.Control
                         var loc = playerBlockLoc + new BlockLoc(x, y, z);
                         // Hash locations in a 16*16*16 area
                         int locHash = loc.GetChunkBlockX() + (loc.GetChunkBlockY() << 4) + (loc.GetChunkBlockZ() << 8);
-                        var block = world.GetBlock(loc);
+                        var block = chunksManager.GetBlock(loc);
 
                         if (table.TryGetValue(block.StateId, out BlockInteractionDefinition? newDef))
                         {
@@ -159,7 +160,7 @@ namespace CraftSharp.Control
             UpdateBlockSelection(cameraController!.GetViewportCenterRay());
 
             // Update player interactions
-            UpdateInteractions(client!.GetWorld());
+            UpdateInteractions(client!.ChunkRenderManager!);
         }
     }
 }
