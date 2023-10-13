@@ -20,7 +20,7 @@ namespace CraftSharp.Rendering
             newChunk.ChunkZ = this.ChunkZ;
             // Set its parent to this chunk column...
             chunkObj.transform.parent = this.transform;
-            chunkObj.transform.localPosition = CoordConvert.MC2Unity(this.ChunkX * Chunk.SizeX, chunkY * Chunk.SizeY + World.GetDimension().minY, this.ChunkZ * Chunk.SizeZ);
+            chunkObj.transform.localPosition = CoordConvert.MC2Unity(this.ChunkX * Chunk.SIZE, chunkY * Chunk.SIZE + World.GetDimension().minY, this.ChunkZ * Chunk.SIZE);
             
             return newChunk;
         }
@@ -38,7 +38,7 @@ namespace CraftSharp.Rendering
             else
             {
                 // This chunk doesn't currently exist...
-                if (chunkY >= 0 && chunkY * Chunk.SizeY < World.GetDimension().height)
+                if (chunkY >= 0 && chunkY * Chunk.SIZE < World.GetDimension().height)
                 {
                     if (createIfEmpty)
                     {

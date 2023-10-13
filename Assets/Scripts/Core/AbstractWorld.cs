@@ -16,11 +16,10 @@ namespace CraftSharp
         public static readonly Biome DUMMY_BIOME = new(ResourceLocation.INVALID,
                 0, DEFAULT_FOLIAGE, DEFAULT_GRASS, DEFAULT_WATER, 0, 0);
 
-        public virtual float3 GetFoliageColor(Location loc) => DUMMY_BIOME.FoliageColor;
+        public virtual float3 GetFoliageColor(BlockLoc loc) => DUMMY_BIOME.FoliageColor;
 
-        public virtual float3 GetGrassColor(Location loc) => DUMMY_BIOME.GrassColor;
+        public virtual float3 GetGrassColor(BlockLoc loc) => DUMMY_BIOME.GrassColor;
 
-        public virtual float3 GetWaterColor(Location loc) => DUMMY_BIOME.WaterColor;
-
+        public virtual float3 GetWaterColor(BlockLoc loc) => DUMMY_BIOME.WaterColor;
     }
 }

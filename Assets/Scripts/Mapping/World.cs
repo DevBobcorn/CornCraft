@@ -23,14 +23,14 @@ namespace CraftSharp
         /// The dimension info of the world
         /// </summary>
         private static Dimension curDimension = new();
-        private static Dictionary<string, Dimension> dimensionList = new();
+        private static readonly Dictionary<string, Dimension> dimensionList = new();
 
         public static bool BiomesInitialized { get; private set; } = false;
 
         /// <summary>
         /// The biomes of the world
         /// </summary>
-        private static Dictionary<int, Biome> biomeList = new();
+        private static readonly Dictionary<int, Biome> biomeList = new();
 
         /// <summary>
         /// Chunk data parsing progress
@@ -239,7 +239,7 @@ namespace CraftSharp
         /// <param name="chunk">Chunk data</param>
         public void StoreChunk(int chunkX, int chunkY, int chunkZ, int chunkColumnSize, Chunk? chunk)
         {
-            ChunkColumn chunkColumn = chunks.GetOrAdd(new(chunkX, chunkZ), (_) => new(this, chunkColumnSize));
+            ChunkColumn chunkColumn = chunks.GetOrAdd(new(chunkX, chunkZ), (_) => new(chunkColumnSize));
             chunkColumn[chunkY] = chunk;
         }
 
@@ -251,7 +251,7 @@ namespace CraftSharp
         /// <param name="chunkColumnSize">ChunkColumn size</param>
         public void CreateEmptyChunkColumn(int chunkX, int chunkZ, int chunkColumnSize)
         {
-            chunks.GetOrAdd(new(chunkX, chunkZ), (_) => new(this, chunkColumnSize));
+            chunks.GetOrAdd(new(chunkX, chunkZ), (_) => new(chunkColumnSize));
         }
 
         /// <summary>
@@ -259,7 +259,7 @@ namespace CraftSharp
         /// </summary>
         /// <param name="location">Location to retrieve chunk column</param>
         /// <returns>The chunk column</returns>
-        public ChunkColumn? GetChunkColumn(Location location)
+        public ChunkColumn? GetChunkColumn(BlockLoc location)
         {
             return this[location.GetChunkX(), location.GetChunkZ()];
         }
@@ -274,59 +274,59 @@ namespace CraftSharp
         /// <summary>
         /// Get block at the specified location
         /// </summary>
-        /// <param name="location">Location to retrieve block from</param>
+        /// <param name="blockLoc">Location to retrieve block from</param>
         /// <returns>Block at specified location or Air if the location is not loaded</returns>
-        public Block GetBlock(Location location)
+        public Block GetBlock(BlockLoc blockLoc)
         {
-            var column = GetChunkColumn(location);
+            var column = GetChunkColumn(blockLoc);
             if (column != null)
             {
-                var chunk = column.GetChunk(location);
+                var chunk = column.GetChunk(blockLoc);
                 if (chunk != null)
-                    return chunk.GetBlock(location);
+                    return chunk.GetBlock(blockLoc);
             }
             return AIR_INSTANCE; // Air
         }
 
-        public Biome GetBiome(Location location)
+        public Biome GetBiome(BlockLoc blockLoc)
         {
-            var column = GetChunkColumn(location);
+            var column = GetChunkColumn(blockLoc);
             if (column != null)
-                return biomeList.GetValueOrDefault(column.GetBiomeId(location), DUMMY_BIOME);
+                return biomeList.GetValueOrDefault(column.GetBiomeId(blockLoc), DUMMY_BIOME);
             
             return DUMMY_BIOME; // Not available
         }
 
-        public bool GetIsOpaque(Location location)
+        public bool GetIsOpaque(BlockLoc blockLoc)
         {
-            var column = GetChunkColumn(location);
+            var column = GetChunkColumn(blockLoc);
             if (column != null)
-                return column.GetIsOpaque(location);
+                return column.GetIsOpaque(blockLoc);
             
             return false; // Not available
         }
 
-        public byte GetSkyLight(Location location)
+        public byte GetSkyLight(BlockLoc blockLoc)
         {
-            var column = GetChunkColumn(location);
+            var column = GetChunkColumn(blockLoc);
             if (column != null)
-                return column.GetSkyLight(location);
+                return column.GetSkyLight(blockLoc);
             
             return (byte) 0; // Not available
         }
 
-        public byte GetBlockLight(Location location)
+        public byte GetBlockLight(BlockLoc blockLoc)
         {
-            var column = GetChunkColumn(location);
+            var column = GetChunkColumn(blockLoc);
             if (column != null)
-                return column.GetBlockLight(location);
+                return column.GetBlockLight(blockLoc);
             
             return (byte) 0; // Not available
         }
 
         private const int radius = 2;
 
-        public override float3 GetFoliageColor(Location loc)
+        public override float3 GetFoliageColor(BlockLoc blockLoc)
         {
             int cnt = 0;
             float3 colorSum = float3.zero;
@@ -334,7 +334,7 @@ namespace CraftSharp
                 for (int y = -radius;y <= radius;y++)
                     for (int z = -radius;z < radius;z++)
                     {
-                        var b = GetBiome(loc + new Location(x, y, z));
+                        var b = GetBiome(blockLoc + new BlockLoc(x, y, z));
                         if (b != DUMMY_BIOME)
                         {
                             cnt++;
@@ -345,7 +345,7 @@ namespace CraftSharp
             return colorSum / cnt;
         }
 
-        public override float3 GetGrassColor(Location loc)
+        public override float3 GetGrassColor(BlockLoc blockLoc)
         {
             int cnt = 0;
             float3 colorSum = float3.zero;
@@ -353,7 +353,7 @@ namespace CraftSharp
                 for (int y = -radius;y <= radius;y++)
                     for (int z = -radius;z < radius;z++)
                     {
-                        var b = GetBiome(loc + new Location(x, y, z));
+                        var b = GetBiome(blockLoc + new BlockLoc(x, y, z));
                         if (b != DUMMY_BIOME)
                         {
                             cnt++;
@@ -364,7 +364,7 @@ namespace CraftSharp
             return colorSum / cnt;
         }
 
-        public override float3 GetWaterColor(Location loc)
+        public override float3 GetWaterColor(BlockLoc blockLoc)
         {
             int cnt = 0;
             float3 colorSum = float3.zero;
@@ -372,7 +372,7 @@ namespace CraftSharp
                 for (int y = -radius;y <= radius;y++)
                     for (int z = -radius;z < radius;z++)
                     {
-                        var b = GetBiome(loc + new Location(x, y, z));
+                        var b = GetBiome(blockLoc + new BlockLoc(x, y, z));
                         if (b != DUMMY_BIOME)
                         {
                             cnt++;
@@ -383,122 +383,77 @@ namespace CraftSharp
             return colorSum / cnt;
         }
 
-        public bool IsWaterAt(Location location)
+        public bool IsWaterAt(BlockLoc blockLoc)
         {
-            var column = GetChunkColumn(location);
+            var column = GetChunkColumn(blockLoc);
             if (column != null)
             {
-                var chunk = column.GetChunk(location);
+                var chunk = column.GetChunk(blockLoc);
                 if (chunk != null)
-                    return chunk.GetBlock(location).State.InWater;
+                    return chunk.GetBlock(blockLoc).State.InWater;
             }
             return false;
         }
 
-        public bool IsLavaAt(Location location)
+        public bool IsLavaAt(BlockLoc blockLoc)
         {
-            var column = GetChunkColumn(location);
+            var column = GetChunkColumn(blockLoc);
             if (column != null)
             {
-                var chunk = column.GetChunk(location);
+                var chunk = column.GetChunk(blockLoc);
                 if (chunk != null)
-                    return chunk.GetBlock(location).State.InLava;
+                    return chunk.GetBlock(blockLoc).State.InLava;
             }
             return false;
         }
 
-        public bool IsLiquidAt(Location location)
+        public bool IsLiquidAt(BlockLoc blockLoc)
         {
-            var column = GetChunkColumn(location);
+            var column = GetChunkColumn(blockLoc);
             if (column != null)
             {
-                var chunk = column.GetChunk(location);
+                var chunk = column.GetChunk(blockLoc);
                 if (chunk != null)
-                    return chunk.GetBlock(location).State.InWater || chunk.GetBlock(location).State.InLava;
+                    return chunk.GetBlock(blockLoc).State.InWater || chunk.GetBlock(blockLoc).State.InLava;
             }
             return false;
         }
 
-        public int GetCullFlags(Location location, Block self, BlockNeighborCheck check)
+        public int GetCullFlags(BlockLoc blockLoc, Block self, BlockNeighborCheck check)
         {
             int cullFlags = 0;
-            if (check(self, GetBlock(location.Up())))
+            if (check(self, GetBlock(blockLoc.Up())))
                 cullFlags |= (1 << 0);
-            if (check(self, GetBlock(location.Down())))
+            if (check(self, GetBlock(blockLoc.Down())))
                 cullFlags |= (1 << 1);
-            if (check(self, GetBlock(location.South())))
+            if (check(self, GetBlock(blockLoc.South())))
                 cullFlags |= (1 << 2);
-            if (check(self, GetBlock(location.North())))
+            if (check(self, GetBlock(blockLoc.North())))
                 cullFlags |= (1 << 3);
-            if (check(self, GetBlock(location.East())))
+            if (check(self, GetBlock(blockLoc.East())))
                 cullFlags |= (1 << 4);
-            if (check(self, GetBlock(location.West())))
+            if (check(self, GetBlock(blockLoc.West())))
                 cullFlags |= (1 << 5);
             return cullFlags;
         }
 
         /// <summary>
-        /// Look for a block around the specified location
-        /// </summary>
-        /// <param name="from">Start location</param>
-        /// <param name="block">Block type</param>
-        /// <param name="radius">Search radius - larger is slower: O^3 complexity</param>
-        /// <returns>Block matching the specified block type</returns>
-        public List<Location> FindBlock(Location from, ResourceLocation targetBlock, int radius)
-        {
-            return FindBlock(from, targetBlock, radius, radius, radius);
-        }
-
-        /// <summary>
-        /// Look for a block around the specified location
-        /// </summary>
-        /// <param name="from">Start location</param>
-        /// <param name="targetBlock">Block type</param>
-        /// <param name="radiusx">Search radius on the X axis</param>
-        /// <param name="radiusy">Search radius on the Y axis</param>
-        /// <param name="radiusz">Search radius on the Z axis</param>
-        /// <returns>Block matching the specified block type</returns>
-        public List<Location> FindBlock(Location from, ResourceLocation targetBlock, int radiusx, int radiusy, int radiusz)
-        {
-            Location minPoint = new Location(from.X - radiusx, from.Y - radiusy, from.Z - radiusz);
-            Location maxPoint = new Location(from.X + radiusx, from.Y + radiusy, from.Z + radiusz);
-            List<Location> list = new List<Location> { };
-            for (double x = minPoint.X; x <= maxPoint.X; x++)
-            {
-                for (double y = minPoint.Y; y <= maxPoint.Y; y++)
-                {
-                    for (double z = minPoint.Z; z <= maxPoint.Z; z++)
-                    {
-                        Location doneloc = new Location(x, y, z);
-                        Block doneblock = GetBlock(doneloc);
-                        ResourceLocation blockId = doneblock.BlockId;
-                        if (blockId == targetBlock)
-                        {
-                            list.Add(doneloc);
-                        }
-                    }
-                }
-            }
-            return list;
-        }
-
-        /// <summary>
         /// Set block at the specified location
         /// </summary>
-        /// <param name="location">Location to set block to</param>
+        /// <param name="blockLoc">Location to set block to</param>
         /// <param name="block">Block to set</param>
-        public void SetBlock(Location location, Block block)
+        public void SetBlock(BlockLoc blockLoc, Block block)
         {
-            var column = this[location.GetChunkX(), location.GetChunkZ()];
+            var column = this[blockLoc.GetChunkX(), blockLoc.GetChunkZ()];
             if (column is not null)
             {
-                var chunk = column.GetChunk(location);
+                var chunk = column.GetChunk(blockLoc);
                 if (chunk is null)
-                    column[location.GetChunkY()] = chunk = new Chunk(this);
-                chunk[location.GetChunkBlockX(), location.GetChunkBlockY(), location.GetChunkBlockZ()] = block;
+                    column[blockLoc.GetChunkY()] = chunk = new Chunk(this);
+                chunk[blockLoc.GetChunkBlockX(), blockLoc.GetChunkBlockY(), blockLoc.GetChunkBlockZ()] = block;
             }
             else
-                UnityEngine.Debug.LogWarning($"Failed to set {block.State} at {location}: chunk column not loaded");
+                UnityEngine.Debug.LogWarning($"Failed to set {block.State} at {blockLoc}: chunk column not loaded");
 
         }
 

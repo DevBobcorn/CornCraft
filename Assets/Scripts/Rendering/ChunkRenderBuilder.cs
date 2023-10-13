@@ -19,31 +19,31 @@ namespace CraftSharp.Rendering
         public const int MOVEMENT_RADIUS = 3;
         public const int MOVEMENT_RADIUS_SQR = MOVEMENT_RADIUS * MOVEMENT_RADIUS;
 
-        private static Location GetLocationInChunkRender(ChunkRender chunk, int x, int y, int z, int offsetY)
+        private static BlockLoc GetBlockLocInChunkRender(ChunkRender chunk, int x, int y, int z, int offsetY)
         {   // Offset y coordinate by the current dimension's minY...
-            return new(chunk.ChunkX * Chunk.SizeX + x, chunk.ChunkY * Chunk.SizeY + y + offsetY, chunk.ChunkZ * Chunk.SizeZ + z);
+            return new(chunk.ChunkX * Chunk.SIZE + x, chunk.ChunkY * Chunk.SIZE + y + offsetY, chunk.ChunkZ * Chunk.SIZE + z);
         }
 
-        private Dictionary<int, BlockStateModel> modelTable;
+        private readonly Dictionary<int, BlockStateModel> modelTable;
 
         public ChunkRenderBuilder(Dictionary<int, BlockStateModel> modelTable)
         {
             this.modelTable = modelTable;
         }
 
-        private float GetLight(World world, Location loc)
+        private float GetLight(World world, BlockLoc location)
         {
             //return Mathf.Max(world.GetBlockLight(loc), world.GetSkyLight(loc)) / 15F;
-            return Mathf.Max(world.GetBlockLight(loc), 4) / 10F;
+            return Mathf.Max(world.GetBlockLight(location), 4) / 10F;
         }
 
-        private float[] GetCornerLights(World world, Location loc)
+        private float[] GetCornerLights(World world, BlockLoc blockLoc)
         {
             var result = new float[8];
 
             for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
             {
-                var sample = GetLight(world, loc + new Location(x - 1, y - 1, z - 1));
+                var sample = GetLight(world, blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
 
                 if (y != 2 && z != 2 && x != 2) // [0] x0z0 y0
                 {
@@ -82,13 +82,13 @@ namespace CraftSharp.Rendering
             return result.Select(x => x / 8F).ToArray();
         }
 
-        private bool[] GetAllNeighborOpaque(World world, Location loc)
+        private bool[] GetAllNeighborOpaque(World world, BlockLoc blockLoc)
         {
             var result = new bool[27];
 
             for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
             {
-                result[y * 9 + z * 3 + x] = world.GetIsOpaque(loc + new Location(x - 1, y - 1, z - 1));
+                result[y * 9 + z * 3 + x] = world.GetIsOpaque(blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
             }
 
             return result;
@@ -110,16 +110,16 @@ namespace CraftSharp.Rendering
                 float3[] colliderVerts = { };
 
                 // Build chunk mesh block by block
-                for (int x = 0;x < Chunk.SizeX;x++)
+                for (int x = 0;x < Chunk.SIZE;x++)
                 {
-                    for (int y = 0;y < Chunk.SizeY;y++)
+                    for (int y = 0;y < Chunk.SIZE;y++)
                     {
-                        for (int z = 0;z < Chunk.SizeZ;z++)
+                        for (int z = 0;z < Chunk.SIZE;z++)
                         {
                             if (ts.IsCancellationRequested)
                                 return ChunkBuildResult.Cancelled;
 
-                            var loc = GetLocationInChunkRender(chunkRender, x, y, z, offsetY);
+                            var blockLoc = GetBlockLocInChunkRender(chunkRender, x, y, z, offsetY);
 
                             var bloc = chunkData[x, y, z];
                             var state = bloc.State;
@@ -128,17 +128,17 @@ namespace CraftSharp.Rendering
                             if (state.InLiquid) // Build liquid here
                             {
                                 var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                                int liquidCullFlags = chunkData.GetCullFlags(loc, bloc, neighborCheck);
+                                int liquidCullFlags = chunkData.GetCullFlags(blockLoc, bloc, neighborCheck);
 
                                 if (liquidCullFlags != 0)
                                 {
-                                    var liquidHeights = chunkData.GetLiquidHeights(loc);
+                                    var liquidHeights = chunkData.GetLiquidHeights(blockLoc);
                                     var liquidLayerIndex = state.InWater ? waterLayerIndex : lavaLayerIndex;
                                     var liquidTexture = FluidGeometry.LiquidTextures[state.InWater ? 0 : 1];
-                                    var lights = GetCornerLights(world, loc);
+                                    var lights = GetCornerLights(world, blockLoc);
 
                                     FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], new(z, y, x), liquidTexture,
-                                            liquidHeights, liquidCullFlags, lights, world.GetWaterColor(loc));
+                                            liquidHeights, liquidCullFlags, lights, world.GetWaterColor(blockLoc));
                                     
                                     layerMask |= (1 << liquidLayerIndex);
                                 }
@@ -147,7 +147,7 @@ namespace CraftSharp.Rendering
                             // If air-like (air, water block, etc), ignore it...
                             if (state.LikeAir) continue;
                             
-                            int cullFlags = chunkData.GetCullFlags(loc, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
+                            int cullFlags = chunkData.GetCullFlags(blockLoc, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
                             
                             if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
@@ -155,9 +155,9 @@ namespace CraftSharp.Rendering
 
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;
-                                var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, loc, state);
-                                var lights = GetCornerLights(world, loc);
-                                var opaq = GetAllNeighborOpaque(world, loc);
+                                var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, blockLoc, state);
+                                var lights = GetCornerLights(world, blockLoc);
+                                var opaq = GetAllNeighborOpaque(world, blockLoc);
 
                                 if (state.NoCollision)
                                     models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, opaq, lights, color);
@@ -354,10 +354,9 @@ namespace CraftSharp.Rendering
         // (or say PhysX) bug, so we dynamically build the mesh collider around the
         // player as a solution to this. See the problem discussion at
         // https://forum.unity.com/threads/ball-rolling-on-mesh-hits-edges.772760/
-        public void BuildTerrainCollider(World world, Location playerLoc, MeshCollider movementCollider, MeshCollider liquidCollider)
+        public void BuildTerrainCollider(World world, BlockLoc playerBlockLoc, MeshCollider movementCollider, MeshCollider liquidCollider)
         {
             int offsetY = World.GetDimension().minY;
-            playerLoc = playerLoc.ToFloor();
             
             float3[] movementVerts = { }, fluidVerts = { };
 
@@ -368,17 +367,17 @@ namespace CraftSharp.Rendering
                         if (x * x + y * y + z * z > MOVEMENT_RADIUS_SQR)
                             continue;
 
-                        var loc  = playerLoc + new Location(x, y, z);
-                        var bloc = world.GetBlock(loc);
+                        var blockLoc = playerBlockLoc + new BlockLoc(x, y, z);
+                        var bloc = world.GetBlock(blockLoc);
                         var state = bloc.State;
 
                         if (state.InWater || state.InLava) // Build liquid collider
                         {
                             var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                            int liquidCullFlags = world.GetCullFlags(loc, bloc, neighborCheck);
+                            int liquidCullFlags = world.GetCullFlags(blockLoc, bloc, neighborCheck);
 
                             if (liquidCullFlags != 0)
-                                FluidGeometry.BuildCollider(ref fluidVerts, new((float)loc.Z, (float)loc.Y, (float)loc.X), liquidCullFlags);
+                                FluidGeometry.BuildCollider(ref fluidVerts, new((float)blockLoc.Z, (float)blockLoc.Y, (float)blockLoc.X), liquidCullFlags);
                         }
 
                         if (state.LikeAir || state.NoCollision)
@@ -386,12 +385,12 @@ namespace CraftSharp.Rendering
                         
                         // Build collider here
                         var stateId = bloc.StateId;
-                        int cullFlags = world.GetCullFlags(loc, bloc, BlockNeighborChecks.NON_FULL_SOLID);
+                        int cullFlags = world.GetCullFlags(blockLoc, bloc, BlockNeighborChecks.NON_FULL_SOLID);
                         
                         if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                         {
                             // They all have the same collider so we just pick the 1st one
-                            modelTable[stateId].Geometries[0].BuildCollider(ref movementVerts, new((float)loc.Z, (float)loc.Y, (float)loc.X), cullFlags);
+                            modelTable[stateId].Geometries[0].BuildCollider(ref movementVerts, new((float)blockLoc.Z, (float)blockLoc.Y, (float)blockLoc.X), cullFlags);
                         }
                     }
                 

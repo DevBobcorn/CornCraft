@@ -13,7 +13,7 @@ namespace CraftSharp.Control
         [SerializeField] public LayerMask BlockSelectionLayer;
 
         public readonly Dictionary<int, BlockInteractionInfo> interactionInfos = new();
-        public Location? TargetLocation = null;
+        public BlockLoc? TargetBlockLoc = null;
         private BaseCornClient? client;
         private CameraController? cameraController;
 
@@ -37,14 +37,15 @@ namespace CraftSharp.Control
             {
                 Vector3 offseted = PointOnCubeSurface(castResultPos.Value) ?
                         castResultPos.Value - castSurfaceDir.Value * 0.5F : castResultPos.Value;
-                
-                Vector3 selection = new(Mathf.Floor(offseted.x), Mathf.Floor(offseted.y), Mathf.Floor(offseted.z));
 
-                TargetLocation = CoordConvert.Unity2MC(selection);
+                TargetBlockLoc = new BlockLoc(
+                        Mathf.FloorToInt(offseted.z),
+                        Mathf.FloorToInt(offseted.y),
+                        Mathf.FloorToInt(offseted.x));
             }
             else
             {
-                TargetLocation = null;
+                TargetBlockLoc = null;
             }
         }
 
@@ -55,7 +56,8 @@ namespace CraftSharp.Control
 
         private void UpdateInteractions(World world)
         {
-            var playerLoc = client!.GetLocation().ToFloor();
+            var playerLoc = client!.GetLocation();
+            var playerBlockLoc = playerLoc.GetBlockLoc();
             var table = BlockInteractionManager.INSTANCE.InteractionTable;
 
             // Remove expired interactions
@@ -63,8 +65,8 @@ namespace CraftSharp.Control
 
             foreach (var id in ids)
             {
-                var loc = interactionInfos[id].Location;
-                var sqrDist = playerLoc.SqrDistanceTo(loc);
+                var blockLoc = interactionInfos[id].Location;
+                var sqrDist = playerLoc.SqrDistanceTo(blockLoc.ToLocation());
 
                 if (sqrDist > INTERACTION_RADIUS_SQR_PLUS)
                 {
@@ -72,7 +74,7 @@ namespace CraftSharp.Control
                     continue;
                 }
                 
-                var block = world.GetBlock(loc);
+                var block = world.GetBlock(blockLoc);
 
                 if (!table.ContainsKey(block.StateId))
                 {
@@ -88,7 +90,7 @@ namespace CraftSharp.Control
                         if (x * x + y * y + z * z > INTERACTION_RADIUS_SQR)
                             continue;
                         
-                        var loc = playerLoc + new Location(x, y, z);
+                        var loc = playerBlockLoc + new BlockLoc(x, y, z);
                         // Hash locations in a 16*16*16 area
                         int locHash = loc.GetChunkBlockX() + (loc.GetChunkBlockY() << 4) + (loc.GetChunkBlockZ() << 8);
                         var block = world.GetBlock(loc);
@@ -116,26 +118,21 @@ namespace CraftSharp.Control
                     }
         }
 
-        private void AddInteraction(int id, Location loc, BlockInteractionDefinition def)
+        private void AddInteraction(int id, BlockLoc location, BlockInteractionDefinition def)
         {
-            BlockInteractionInfo info = new(id, loc, def);
+            BlockInteractionInfo info = new(id, location, def);
             interactionInfos.Add(id, info);
 
             EventManager.Instance.Broadcast<InteractionAddEvent>(new(id, info));
-
-            //Debug.Log($"Add {id} {def.Hint} at {loc}");
         }
 
         private void RemoveInteraction(int id)
         {
             if (interactionInfos.ContainsKey(id))
             {
-                var info = interactionInfos[id];
                 interactionInfos.Remove(id);
                 
                 EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(id));
-
-                //Debug.Log($"Remove {id} {info.GetHint()} at {info.Location}");
             }
         }
 

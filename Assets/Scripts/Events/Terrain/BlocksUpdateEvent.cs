@@ -3,11 +3,11 @@ namespace CraftSharp.Event
 {
     public record BlocksUpdateEvent : BaseEvent
     {
-        public List<Location> Locations { get; }
+        public List<BlockLoc> Locations { get; }
 
-        public BlocksUpdateEvent(List<Location> locs)
+        public BlocksUpdateEvent(List<BlockLoc> locations)
         {
-            this.Locations = locs;
+            this.Locations = locations;
         }
     }
 }

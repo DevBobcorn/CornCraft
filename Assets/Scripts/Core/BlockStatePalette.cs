@@ -43,9 +43,9 @@ namespace CraftSharp
 
         public readonly Dictionary<ResourceLocation, RenderType> RenderTypeTable = new();
 
-        private readonly Dictionary<int, Func<AbstractWorld, Location, BlockState, float3>> blockColorRules = new();
+        private readonly Dictionary<int, Func<AbstractWorld, BlockLoc, BlockState, float3>> blockColorRules = new();
 
-        public float3 GetBlockColor(int stateId, AbstractWorld world, Location loc, BlockState state)
+        public float3 GetBlockColor(int stateId, AbstractWorld world, BlockLoc loc, BlockState state)
         {
             if (blockColorRules.ContainsKey(stateId))
                 return blockColorRules[stateId].Invoke(world, loc, state);
@@ -197,7 +197,7 @@ namespace CraftSharp
                 {
                     var ruleName = dynamicRule.Key;
 
-                    Func<AbstractWorld, Location, BlockState, float3> ruleFunc = ruleName switch {
+                    Func<AbstractWorld, BlockLoc, BlockState, float3> ruleFunc = ruleName switch {
                         "foliage"  => (world, loc, state) => world.GetFoliageColor(loc),
                         "grass"    => (world, loc, state) => world.GetGrassColor(loc),
                         "redstone" => (world, loc, state) => {
@@ -236,7 +236,7 @@ namespace CraftSharp
                     if (stateListTable.ContainsKey(blockId))
                     {
                         var fixedColor = VectorUtil.Json2Float3(fixedRule.Value) / 255F;
-                        Func<AbstractWorld, Location, BlockState, float3> ruleFunc = (world, loc, state) => fixedColor;
+                        Func<AbstractWorld, BlockLoc, BlockState, float3> ruleFunc = (world, loc, state) => fixedColor;
 
                         foreach (var stateId in stateListTable[blockId])
                         {

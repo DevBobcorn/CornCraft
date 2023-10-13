@@ -1060,65 +1060,41 @@ namespace CraftSharp.Protocol.Handlers
                         }
                     case PacketTypesIn.MultiBlockChange:
                         {
-                            var locs = new List<Location>();
-                            if (protocolVersion >= MC_1_16_2_Version)
+                            var blockLocList = new List<BlockLoc>();
+                            // MC 1.16.2+
+                            long chunkSection = dataTypes.ReadNextLong(packetData);
+                            int sectionX = (int)(chunkSection >> 42);
+                            int sectionY = (int)((chunkSection << 44) >> 44);
+                            int sectionZ = (int)((chunkSection << 22) >> 42);
+                            
+                            if(protocolVersion < MC_1_20_Version)
+                                dataTypes.ReadNextBool(packetData); // Useless boolean (Related to light update)
+
+                            int blocksSize = dataTypes.ReadNextVarInt(packetData);
+                            for (int i = 0; i < blocksSize; i++)
                             {
-                                long chunkSection = dataTypes.ReadNextLong(packetData);
-                                int sectionX = (int)(chunkSection >> 42);
-                                int sectionY = (int)((chunkSection << 44) >> 44);
-                                int sectionZ = (int)((chunkSection << 22) >> 42);
-                                
-                                if(protocolVersion < MC_1_20_Version)
-                                    dataTypes.ReadNextBool(packetData); // Useless boolean (Related to light update)
+                                ulong block = (ulong)dataTypes.ReadNextVarLong(packetData);
+                                int blockId = (int)(block >> 12);
+                                int localX = (int)((block >> 8) & 0x0F);
+                                int localZ = (int)((block >> 4) & 0x0F);
+                                int localY = (int)(block & 0x0F);
 
-                                int blocksSize = dataTypes.ReadNextVarInt(packetData);
-                                for (int i = 0; i < blocksSize; i++)
-                                {
-                                    ulong block = (ulong)dataTypes.ReadNextVarLong(packetData);
-                                    int blockId = (int)(block >> 12);
-                                    int localX = (int)((block >> 8) & 0x0F);
-                                    int localZ = (int)((block >> 4) & 0x0F);
-                                    int localY = (int)(block & 0x0F);
-
-                                    Block bloc = new Block((ushort)blockId);
-                                    int blockX = (sectionX * 16) + localX;
-                                    int blockY = (sectionY * 16) + localY;
-                                    int blockZ = (sectionZ * 16) + localZ;
-                                    var loc1 = new Location(blockX, blockY, blockZ);
-                                    handler.GetWorld().SetBlock(loc1, bloc);
-                                    locs.Add(loc1);
-                                }
+                                Block bloc = new Block((ushort)blockId);
+                                int blockX = (sectionX * 16) + localX;
+                                int blockY = (sectionY * 16) + localY;
+                                int blockZ = (sectionZ * 16) + localZ;
+                                var blockLoc = new BlockLoc(blockX, blockY, blockZ);
+                                handler.GetWorld().SetBlock(blockLoc, bloc);
+                                blockLocList.Add(blockLoc);
                             }
-                            else
-                            {
-                                int chunkX = dataTypes.ReadNextInt(packetData);
-                                int chunkZ = dataTypes.ReadNextInt(packetData);
-                                int recordCount = dataTypes.ReadNextVarInt(packetData);
-
-                                for (int i = 0; i < recordCount; i++)
-                                {
-                                    byte locationXZ = dataTypes.ReadNextByte(packetData);
-                                    int blockY = (ushort)dataTypes.ReadNextByte(packetData);
-                                    ushort blockIdMeta = (ushort)dataTypes.ReadNextVarInt(packetData);
-
-                                    int blockX = locationXZ >> 4;
-                                    int blockZ = locationXZ & 0x0F;
-                                    Block bloc = new Block(blockIdMeta);
-                                    var loc1 = new Location(chunkX * Chunk.SizeX + blockX, blockY, chunkZ * Chunk.SizeZ + blockZ);
-                                    handler.GetWorld().SetBlock(loc1, bloc);
-                                    locs.Add(loc1);
-                                }
-                            }
-                            //Debug.Log("Blocks change: " + locs[0] + ", etc");
-                            EventManager.Instance.BroadcastOnUnityThread<BlocksUpdateEvent>(new(locs));
+                            EventManager.Instance.BroadcastOnUnityThread<BlocksUpdateEvent>(new(blockLocList));
                             break;
                         }
                     case PacketTypesIn.BlockChange:
                         {
-                            var location = dataTypes.ReadNextLocation(packetData);
-                            handler.GetWorld().SetBlock(location, new Block((ushort)dataTypes.ReadNextVarInt(packetData)));
-                            //Debug.Log($"Block change: {location}");
-                            EventManager.Instance.BroadcastOnUnityThread<BlockUpdateEvent>(new(location));
+                            var blockLoc = dataTypes.ReadNextBlockLoc(packetData);
+                            handler.GetWorld().SetBlock(blockLoc, new Block((ushort)dataTypes.ReadNextVarInt(packetData)));
+                            EventManager.Instance.BroadcastOnUnityThread<BlockUpdateEvent>(new(blockLoc));
                             break;
                         }
                     case PacketTypesIn.UnloadChunk:
@@ -2817,13 +2793,13 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool SendPlayerDigging(int status, Location location, Direction face, int sequenceId)
+        public bool SendPlayerDigging(int status, BlockLoc blockLoc, Direction face, int sequenceId)
         {
             try
             {
                 List<byte> packet = new List<byte>();
                 packet.AddRange(DataTypes.GetVarInt(status));
-                packet.AddRange(dataTypes.GetLocation(location));
+                packet.AddRange(dataTypes.GetBlockLoc(blockLoc));
                 packet.AddRange(DataTypes.GetVarInt(dataTypes.GetBlockFace(face)));
                 if (protocolVersion >= MC_1_19_Version)
                     packet.AddRange(DataTypes.GetVarInt(sequenceId));
@@ -2835,13 +2811,13 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool SendPlayerBlockPlacement(int hand, Location location, Direction face, int sequenceId)
+        public bool SendPlayerBlockPlacement(int hand, BlockLoc location, Direction face, int sequenceId)
         {
             try
             {
                 List<byte> packet = new List<byte>();
                 packet.AddRange(DataTypes.GetVarInt(hand));
-                packet.AddRange(dataTypes.GetLocation(location));
+                packet.AddRange(dataTypes.GetBlockLoc(location));
                 packet.AddRange(DataTypes.GetVarInt(dataTypes.GetBlockFace(face)));
                 packet.AddRange(dataTypes.GetFloat(0.5f)); // cursorX
                 packet.AddRange(dataTypes.GetFloat(0.5f)); // cursorY

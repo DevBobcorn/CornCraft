@@ -14,8 +14,6 @@ namespace CraftSharp
 
         public bool FullyLoaded = false;
 
-        private World world;
-
         /// <summary>
         /// Blocks contained into the chunk
         /// </summary>
@@ -38,9 +36,8 @@ namespace CraftSharp
         /// <summary>
         /// Create a new ChunkColumn
         /// </summary>
-        public ChunkColumn(World parent, int size = 16)
+        public ChunkColumn(int size = 16)
         {
-            world = parent;
             ColumnSize = size;
             MinimumY = World.GetDimension().minY;
 
@@ -72,13 +69,13 @@ namespace CraftSharp
         /// <summary>
         /// Get chunk at the specified location
         /// </summary>
-        /// <param name="location">Location, a modulo will be applied</param>
+        /// <param name="blockLoc">Location, a modulo will be applied</param>
         /// <returns>The chunk, or null if not loaded</returns>
-        public Chunk? GetChunk(Location location)
+        public Chunk? GetChunk(BlockLoc blockLoc)
         {
             try
             {
-                return this[location.GetChunkY()];
+                return this[blockLoc.GetChunkY()];
             }
             catch (IndexOutOfRangeException)
             {
@@ -94,9 +91,9 @@ namespace CraftSharp
                 Debug.LogWarning($"Biomes data length inconsistent: {biomes.Length} {this.biomes.Length}");
         }
 
-        public short GetBiomeId(Location location)
+        public short GetBiomeId(BlockLoc blockLoc)
         {
-            int index = ((((int) location.Y - MinimumY) >> 2) << 4) | ((location.GetChunkBlockZ() >> 2) << 2) | (location.GetChunkBlockX() >> 2);
+            int index = (((blockLoc.Y - MinimumY) >> 2) << 4) | ((blockLoc.GetChunkBlockZ() >> 2) << 2) | (blockLoc.GetChunkBlockX() >> 2);
 
             if (index < 0 || index >= biomes.Length)
                 return (short) -1;
@@ -117,10 +114,10 @@ namespace CraftSharp
                 Debug.LogWarning($"Lighting data length inconsistent: Sky Light: {skyLight.Length} {this.skyLight.Length} Block Light: {blockLight.Length} {this.blockLight.Length}");
         }
 
-        public byte GetSkyLight(Location location)
+        public byte GetSkyLight(BlockLoc blockLoc)
         {
             // Move up by one chunk
-            int index = (((int) location.Y - MinimumY + Chunk.SizeY) << 8) | (location.GetChunkBlockZ() << 4) | location.GetChunkBlockX();
+            int index = ((blockLoc.Y - MinimumY + Chunk.SIZE) << 8) | (blockLoc.GetChunkBlockZ() << 4) | blockLoc.GetChunkBlockX();
             
             if (index < 0 || index >= skyLight.Length)
                 return (byte) 0;
@@ -128,10 +125,10 @@ namespace CraftSharp
             return lightingPresent ? skyLight[index] : (byte) 0;
         }
 
-        public byte GetBlockLight(Location location)
+        public byte GetBlockLight(BlockLoc blockLoc)
         {
             // Move up by one chunk
-            int index = (((int) location.Y - MinimumY + Chunk.SizeY) << 8) | (location.GetChunkBlockZ() << 4) | location.GetChunkBlockX();
+            int index = ((blockLoc.Y - MinimumY + Chunk.SIZE) << 8) | (blockLoc.GetChunkBlockZ() << 4) | blockLoc.GetChunkBlockX();
             
             if (index < 0 || index >= blockLight.Length)
                 return (byte) 0;
@@ -160,9 +157,9 @@ namespace CraftSharp
             }
         }
 
-        public bool GetIsOpaque(Location location)
+        public bool GetIsOpaque(BlockLoc blockLoc)
         {
-            int index = (((int) location.Y - MinimumY) << 8) | (location.GetChunkBlockZ() << 4) | location.GetChunkBlockX();
+            int index = ((blockLoc.Y - MinimumY) << 8) | (blockLoc.GetChunkBlockZ() << 4) | blockLoc.GetChunkBlockX();
             
             if (index < 0 || index >= aoSolid.Length)
                 return false;

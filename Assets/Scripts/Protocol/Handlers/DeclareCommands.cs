@@ -39,7 +39,7 @@ namespace CraftSharp.Protocol.Handlers
                             4 => new ParserLong(dataTypes, packetData),
                             5 => new ParserString(dataTypes, packetData),
                             6 => new ParserEntity(dataTypes, packetData),
-                            8 => new ParserBlockPos(dataTypes, packetData),
+                            8 => new ParserBlockLoc(dataTypes, packetData),
                             9 => new ParserColumnPos(dataTypes, packetData),
                             10 => new ParserVec3(dataTypes, packetData),
                             11 => new ParserVec2(dataTypes, packetData),
@@ -59,7 +59,7 @@ namespace CraftSharp.Protocol.Handlers
                             4 => new ParserLong(dataTypes, packetData),
                             5 => new ParserString(dataTypes, packetData),
                             6 => new ParserEntity(dataTypes, packetData),
-                            8 => new ParserBlockPos(dataTypes, packetData),
+                            8 => new ParserBlockLoc(dataTypes, packetData),
                             9 => new ParserColumnPos(dataTypes, packetData),
                             10 => new ParserVec3(dataTypes, packetData),
                             11 => new ParserVec2(dataTypes, packetData),
@@ -81,7 +81,7 @@ namespace CraftSharp.Protocol.Handlers
                             4 => new ParserLong(dataTypes, packetData),
                             5 => new ParserString(dataTypes, packetData),
                             6 => new ParserEntity(dataTypes, packetData),
-                            8 => new ParserBlockPos(dataTypes, packetData),
+                            8 => new ParserBlockLoc(dataTypes, packetData),
                             9 => new ParserColumnPos(dataTypes, packetData),
                             10 => new ParserVec3(dataTypes, packetData),
                             11 => new ParserVec2(dataTypes, packetData),
@@ -395,10 +395,10 @@ namespace CraftSharp.Protocol.Handlers
             }
         }
 
-        internal class ParserBlockPos : Parser
+        internal class ParserBlockLoc : Parser
         {
 
-            public ParserBlockPos(DataTypes dataTypes, Queue<byte> packetData) { }
+            public ParserBlockLoc(DataTypes dataTypes, Queue<byte> packetData) { }
 
             public override bool Check(string text)
             {

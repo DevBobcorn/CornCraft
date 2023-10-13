@@ -1,57 +1,55 @@
 #nullable enable
-using System;
 
 namespace CraftSharp
 {
-    public static class LocationExtension
+    public static class BlockLocExtension
     {
         /// <summary>
         /// Get the X index of the corresponding chunk in the world
         /// </summary>
-        public static int GetChunkX(this Location loc)
+        public static int GetChunkX(this BlockLoc loc)
         {
-            return (int)Math.Floor(loc.X / Chunk.SizeX);
+            return loc.X >> 4;
         }
 
         /// <summary>
         /// Get the Y index of the corresponding chunk in the world
         /// </summary>
-        public static int GetChunkY(this Location loc)
+        public static int GetChunkY(this BlockLoc loc)
         {
-            return (int)Math.Floor((loc.Y - World.GetDimension().minY) / Chunk.SizeY);
+            return (loc.Y - World.GetDimension().minY) >> 4;
         }
 
         /// <summary>
         /// Get the Z index of the corresponding chunk in the world
         /// </summary>
-        public static int GetChunkZ(this Location loc)
+        public static int GetChunkZ(this BlockLoc loc)
         {
-            return (int)Math.Floor(loc.Z / Chunk.SizeZ);
+            return loc.Z >> 4;
         }
 
         /// <summary>
         /// Get the X index of the corresponding block in the corresponding chunk of the world
         /// </summary>
-        public static int GetChunkBlockX(this Location loc)
+        public static int GetChunkBlockX(this BlockLoc loc)
         {
-            return ((int)Math.Floor(loc.X) % Chunk.SizeX + Chunk.SizeX) % Chunk.SizeX;
+            return ((loc.X % Chunk.SIZE) + Chunk.SIZE) % Chunk.SIZE;
         }
 
         /// <summary>
         /// Get the Y index of the corresponding block in the corresponding chunk of the world
         /// </summary>
-        public static int GetChunkBlockY(this Location loc)
+        public static int GetChunkBlockY(this BlockLoc loc)
         {
-            return ((int)Math.Floor(loc.Y) % Chunk.SizeY + Chunk.SizeY) % Chunk.SizeY;
+            return ((loc.Y % Chunk.SIZE) + Chunk.SIZE) % Chunk.SIZE;
         }
 
         /// <summary>
         /// Get the Z index of the corresponding block in the corresponding chunk of the world
         /// </summary>
-        public static int GetChunkBlockZ(this Location loc)
+        public static int GetChunkBlockZ(this BlockLoc loc)
         {
-            return ((int)Math.Floor(loc.Z) % Chunk.SizeZ + Chunk.SizeZ) % Chunk.SizeZ;
+            return ((loc.Z % Chunk.SIZE) + Chunk.SIZE) % Chunk.SIZE;
         }
-
     }
 }

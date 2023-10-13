@@ -3,13 +3,13 @@ namespace CraftSharp.Interaction
 {
     public class BlockInteractionInfo : InteractionInfo
     {
-        public Location Location { get; }// Location for calculating distance
+        public BlockLoc Location { get; }// Location for calculating distance
         public BlockInteractionDefinition Definition { get; }
 
-        public BlockInteractionInfo(int id, Location loc, BlockInteractionDefinition def)
+        public BlockInteractionInfo(int id, BlockLoc location, BlockInteractionDefinition def)
         {
             Id = id;
-            Location = loc;
+            Location = location;
             Definition = def;
         }
 
@@ -29,8 +29,6 @@ namespace CraftSharp.Interaction
                     client.DigBlock(Location, true, false);
                     break;
             }
-            
         }
-
     }
 }
