@@ -1019,7 +1019,7 @@ namespace CraftSharp
                 {                    
                     Loom.QueueOnMainThread(() => {
                         var offset = playerController!.transform.position - CoordConvert.MC2Unity(location);
-                        if (offset.magnitude < 3F)
+                        if (offset.magnitude < 8F)
                         {
                             return;
                         }
