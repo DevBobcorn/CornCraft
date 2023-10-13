@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace CraftSharp
 {
@@ -14,14 +15,12 @@ namespace CraftSharp
             world = parent;
         }
 
-        public const int SizeX = 16;
-        public const int SizeY = 16;
-        public const int SizeZ = 16;
+        public const int SIZE = 16;
 
         /// <summary>
         /// Blocks contained into the chunk
         /// </summary>
-        private readonly Block[] blocks = new Block[SizeY * SizeZ * SizeX];
+        private readonly Block[] blocks = new Block[SIZE * SIZE * SIZE];
 
         /// <summary>
         /// Read, or set the specified block
@@ -34,24 +33,24 @@ namespace CraftSharp
         {
             get
             {
-                if (blockX < 0 || blockX >= SizeX)
-                    throw new ArgumentOutOfRangeException(nameof(blockX), "Must be between 0 and " + (SizeX - 1) + " (inclusive)");
-                if (blockY < 0 || blockY >= SizeY)
-                    throw new ArgumentOutOfRangeException(nameof(blockY), "Must be between 0 and " + (SizeY - 1) + " (inclusive)");
-                if (blockZ < 0 || blockZ >= SizeZ)
-                    throw new ArgumentOutOfRangeException(nameof(blockZ), "Must be between 0 and " + (SizeZ - 1) + " (inclusive)");
+                if (blockX < 0 || blockX >= SIZE)
+                    throw new ArgumentOutOfRangeException(nameof(blockX), $"Must be between 0 and {SIZE - 1} (inclusive), got {blockX}");
+                if (blockY < 0 || blockY >= SIZE)
+                    throw new ArgumentOutOfRangeException(nameof(blockY), $"Must be between 0 and {SIZE - 1} (inclusive), got {blockY}");
+                if (blockZ < 0 || blockZ >= SIZE)
+                    throw new ArgumentOutOfRangeException(nameof(blockZ), $"Must be between 0 and {SIZE - 1} (inclusive), got {blockZ}");
 
                 return blocks[(blockY << 8) | (blockZ << 4) | blockX];
             }
 
             set
             {
-                if (blockX < 0 || blockX >= SizeX)
-                    throw new ArgumentOutOfRangeException(nameof(blockX), "Must be between 0 and " + (SizeX - 1) + " (inclusive)");
-                if (blockY < 0 || blockY >= SizeY)
-                    throw new ArgumentOutOfRangeException(nameof(blockY), "Must be between 0 and " + (SizeY - 1) + " (inclusive)");
-                if (blockZ < 0 || blockZ >= SizeZ)
-                    throw new ArgumentOutOfRangeException(nameof(blockZ), "Must be between 0 and " + (SizeZ - 1) + " (inclusive)");
+                if (blockX < 0 || blockX >= SIZE)
+                    throw new ArgumentOutOfRangeException(nameof(blockX), $"Must be between 0 and {SIZE - 1} (inclusive), got {blockX}");
+                if (blockY < 0 || blockY >= SIZE)
+                    throw new ArgumentOutOfRangeException(nameof(blockY), $"Must be between 0 and {SIZE - 1} (inclusive), got {blockY}");
+                if (blockZ < 0 || blockZ >= SIZE)
+                    throw new ArgumentOutOfRangeException(nameof(blockZ), $"Must be between 0 and {SIZE - 1} (inclusive), got {blockZ}");
 
                 blocks[(blockY << 8) | (blockZ << 4) | blockX] = value;
             }
@@ -72,40 +71,14 @@ namespace CraftSharp
         /// <summary>
         /// Get block at the specified location
         /// </summary>
-        /// <param name="location">Location, a modulo will be applied</param>
+        /// <param name="blockLoc">Location, a modulo will be applied</param>
         /// <returns>The block</returns>
-        public Block GetBlock(Location location)
+        public Block GetBlock(BlockLoc blockLoc)
         {
-            return this[location.GetChunkBlockX(), location.GetChunkBlockY(), location.GetChunkBlockZ()];
+            return this[blockLoc.GetChunkBlockX(), blockLoc.GetChunkBlockY(), blockLoc.GetChunkBlockZ()];
         }
 
-        private static byte getLiquidHeight(BlockState state)
-        {
-            if (state.InWater || state.InLava)
-            {
-                if (state.Properties.ContainsKey("level"))
-                {
-                    return state.Properties["level"] switch {
-                        "0"  => 14,
-                        "1"  => 12,
-                        "2"  => 10,
-                        "3"  =>  8,
-                        "4"  =>  7,
-                        "5"  =>  5,
-                        "6"  =>  3,
-                        "7"  =>  1,
-
-                        _    => 16
-                    };
-                }
-
-                return 16;
-            }
-
-            return 0;
-        }
-
-        public byte[] GetLiquidHeights(Location location)
+        public byte[] GetLiquidHeights(BlockLoc blockLoc)
         {
             // Height References
             //  NE---E---SE
@@ -115,115 +88,83 @@ namespace CraftSharp
             //  NW---W---SW
 
             return new byte[] {
-                getLiquidHeight(getNEBlock(location).State),    getLiquidHeight(getEastBlock(location).State), getLiquidHeight(getSEBlock(location).State),
-                getLiquidHeight(getNorthBlock(location).State), getLiquidHeight(GetBlock(location).State),     getLiquidHeight(getSouthBlock(location).State),
-                getLiquidHeight(getNWBlock(location).State),    getLiquidHeight(getWestBlock(location).State), getLiquidHeight(getSWBlock(location).State)
+                16, 16, 16,
+                16, 16, 16,
+                16, 16, 16
             };
         }
 
-        public int GetCullFlags(Location location, Block self, BlockNeighborCheck check)
+        public int GetCullFlags(BlockLoc blockLoc, Block self, BlockNeighborCheck check)
         {
             int cullFlags = 0;
 
-            if (check(self, getUpBlock(location)))
+            if (check(self, getUpBlock(blockLoc)))
                 cullFlags |= (1 << 0);
 
-            if (check(self, getDownBlock(location)))
+            if (check(self, getDownBlock(blockLoc)))
                 cullFlags |= (1 << 1);
             
-            if (check(self, getSouthBlock(location)))
+            if (check(self, getSouthBlock(blockLoc)))
                 cullFlags |= (1 << 2);
 
-            if (check(self, getNorthBlock(location)))
+            if (check(self, getNorthBlock(blockLoc)))
                 cullFlags |= (1 << 3);
             
-            if (check(self, getEastBlock(location)))
+            if (check(self, getEastBlock(blockLoc)))
                 cullFlags |= (1 << 4);
 
-            if (check(self, getWestBlock(location)))
+            if (check(self, getWestBlock(blockLoc)))
                 cullFlags |= (1 << 5);
             
             return cullFlags;
         }
 
-        private Block getUpBlock(Location location) // MC Y Pos
+        private Block getUpBlock(BlockLoc blockLoc) // MC Y Pos
         {
-            if (location.GetChunkBlockY() == Chunk.SizeY - 1)
-                return world.GetBlock(location.Up());
+            if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1)
+                return world.GetBlock(blockLoc.Up());
             
-            return GetBlock(location.Up());
+            return GetBlock(blockLoc.Up());
         }
 
-        private Block getDownBlock(Location location) // MC Y Neg
+        private Block getDownBlock(BlockLoc blockLoc) // MC Y Neg
         {
-            if (location.GetChunkBlockY() == 0)
-                return world.GetBlock(location.Down());
+            if (blockLoc.GetChunkBlockY() == 0)
+                return world.GetBlock(blockLoc.Down());
             
-            return GetBlock(location.Down());
+            return GetBlock(blockLoc.Down());
         }
 
-        private Block getEastBlock(Location location) // MC X Pos
+        private Block getEastBlock(BlockLoc blockLoc) // MC X Pos
         {
-            if (location.GetChunkBlockX() == Chunk.SizeX - 1)
-                return world.GetBlock(location.East());
+            if (blockLoc.GetChunkBlockX() == Chunk.SIZE - 1)
+                return world.GetBlock(blockLoc.East());
             
-            return GetBlock(location.East());
+            return GetBlock(blockLoc.East());
         }
 
-        private Block getWestBlock(Location location) // MC X Neg
+        private Block getWestBlock(BlockLoc blockLoc) // MC X Neg
         {
-            if (location.GetChunkBlockX() == 0)
-                return world.GetBlock(location.West());
+            if (blockLoc.GetChunkBlockX() == 0)
+                return world.GetBlock(blockLoc.West());
             
-            return GetBlock(location.West());
+            return GetBlock(blockLoc.West());
         }
 
-        private Block getSouthBlock(Location location) // MC Z Pos
+        private Block getSouthBlock(BlockLoc blockLoc) // MC Z Pos
         {
-            if (location.GetChunkBlockZ() == Chunk.SizeZ - 1)
-                return world.GetBlock(location.South());
+            if (blockLoc.GetChunkBlockZ() == Chunk.SIZE - 1)
+                return world.GetBlock(blockLoc.South());
             
-            return GetBlock(location.South());
+            return GetBlock(blockLoc.South());
         }
 
-        private Block getNorthBlock(Location location) // MC Z Neg
+        private Block getNorthBlock(BlockLoc blockLoc) // MC Z Neg
         {
-            if (location.GetChunkBlockZ() == 0)
-                return world.GetBlock(location.North());
+            if (blockLoc.GetChunkBlockZ() == 0)
+                return world.GetBlock(blockLoc.North());
             
-            return GetBlock(location.North());
-        }
-
-        private Block getNEBlock(Location location)
-        {
-            if (location.GetChunkBlockZ() == 0 || location.GetChunkBlockX() == Chunk.SizeX - 1)
-                return world.GetBlock(location.North().East());
-            
-            return GetBlock(location.North().East());
-        }
-
-        private Block getNWBlock(Location location)
-        {
-            if (location.GetChunkBlockZ() == 0 || location.GetChunkBlockX() == 0)
-                return world.GetBlock(location.North().West());
-            
-            return GetBlock(location.North().West());
-        }
-
-        private Block getSEBlock(Location location)
-        {
-            if (location.GetChunkBlockZ() == Chunk.SizeZ - 1 || location.GetChunkBlockX() == Chunk.SizeX - 1)
-                return world.GetBlock(location.South().East());
-            
-            return GetBlock(location.South().East());
-        }
-
-        private Block getSWBlock(Location location)
-        {
-            if (location.GetChunkBlockZ() == Chunk.SizeZ - 1 || location.GetChunkBlockX() == 0)
-                return world.GetBlock(location.South().West());
-            
-            return GetBlock(location.South().West());
+            return GetBlock(blockLoc.North());
         }
     }
 }

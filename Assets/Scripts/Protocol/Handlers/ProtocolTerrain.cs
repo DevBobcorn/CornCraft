@@ -54,9 +54,9 @@ namespace CraftSharp.Protocol.Handlers
                     return null;
                 
                 Chunk chunk = new(world);
-                for (int blockY = 0; blockY < Chunk.SizeY; blockY++)
-                    for (int blockZ = 0; blockZ < Chunk.SizeZ; blockZ++)
-                        for (int blockX = 0; blockX < Chunk.SizeX; blockX++)
+                for (int blockY = 0; blockY < Chunk.SIZE; blockY++)
+                    for (int blockZ = 0; blockZ < Chunk.SIZE; blockZ++)
+                        for (int blockX = 0; blockX < Chunk.SIZE; blockX++)
                             chunk.SetWithoutCheck(blockX, blockY, blockZ, new(blockId));
 
                 return chunk;
@@ -89,9 +89,9 @@ namespace CraftSharp.Protocol.Handlers
 
                 Chunk chunk = new(world);
                 int startOffset = 64; // Read the first data immediately
-                for (int blockY = 0; blockY < Chunk.SizeY; blockY++)
-                    for (int blockZ = 0; blockZ < Chunk.SizeZ; blockZ++)
-                        for (int blockX = 0; blockX < Chunk.SizeX; blockX++)
+                for (int blockY = 0; blockY < Chunk.SIZE; blockY++)
+                    for (int blockZ = 0; blockZ < Chunk.SIZE; blockZ++)
+                        for (int blockX = 0; blockX < Chunk.SIZE; blockX++)
                         {
                             // Calculate location of next block ID inside the array of Longs
                             if ((startOffset += bitsPerEntry) > (64 - bitsPerEntry))
@@ -112,7 +112,7 @@ namespace CraftSharp.Protocol.Handlers
                             {
                                 if (paletteLength <= blockId)
                                 {
-                                    int blockNumber = (blockY * Chunk.SizeZ + blockZ) * Chunk.SizeX + blockX;
+                                    int blockNumber = (blockY * Chunk.SIZE + blockZ) * Chunk.SIZE + blockX;
                                     throw new IndexOutOfRangeException(String.Format("Block ID {0} is outside Palette range 0-{1}! (bitsPerBlock: {2}, blockNumber: {3})",
                                         blockId,
                                         paletteLength - 1,
@@ -238,7 +238,7 @@ namespace CraftSharp.Protocol.Handlers
             
             var world = handler.GetWorld();
 
-            int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
+            int chunkColumnSize = (World.GetDimension().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
             int chunkMask = 0;
 
             int dataSize;
@@ -452,11 +452,11 @@ namespace CraftSharp.Protocol.Handlers
                             int longIndex = 0;
                             int startOffset = 0 - bitsPerBlock;
 
-                            for (int blockY = 0; blockY < Chunk.SizeY; blockY++)
+                            for (int blockY = 0; blockY < Chunk.SIZE; blockY++)
                             {
-                                for (int blockZ = 0; blockZ < Chunk.SizeZ; blockZ++)
+                                for (int blockZ = 0; blockZ < Chunk.SIZE; blockZ++)
                                 {
-                                    for (int blockX = 0; blockX < Chunk.SizeX; blockX++)
+                                    for (int blockX = 0; blockX < Chunk.SIZE; blockX++)
                                     {
                                         // NOTICE: In the future a single ushort may not store the entire block id;
                                         // the Block class may need to change if block state IDs go beyond 65535
@@ -508,7 +508,7 @@ namespace CraftSharp.Protocol.Handlers
                                         {
                                             if (paletteLength <= blockId)
                                             {
-                                                int blockNumber = (blockY * Chunk.SizeZ + blockZ) * Chunk.SizeX + blockX;
+                                                int blockNumber = (blockY * Chunk.SIZE + blockZ) * Chunk.SIZE + blockX;
                                                 throw new IndexOutOfRangeException(String.Format("Block ID {0} is outside Palette range 0-{1}! (bitsPerBlock: {2}, blockNumber: {3})",
                                                     blockId,
                                                     paletteLength - 1,
@@ -730,7 +730,7 @@ namespace CraftSharp.Protocol.Handlers
             }
             else
             {
-                int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
+                int chunkColumnSize = (World.GetDimension().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
 
                 var skyLight   = new byte[4096 * (chunkColumnSize + 2)];
                 var blockLight = new byte[4096 * (chunkColumnSize + 2)];

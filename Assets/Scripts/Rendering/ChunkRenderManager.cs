@@ -18,9 +18,6 @@ namespace CraftSharp.Rendering
         public const string SOLID_LAYER_NAME = "Solid";
         public const string LIQUID_SURFACE_LAYER_NAME = "LiquidSurface";
 
-        public const float MIN_UPDATE_DISTANCE = 0.5F;
-        public static readonly Location BLOCK_CHECK_OFFSET = new(0D, 0.125D, 0D);
-
         public readonly World World = new();
 
         private Dictionary<int2, ChunkRenderColumn> columns = new();
@@ -146,28 +143,29 @@ namespace CraftSharp.Rendering
         #endregion
 
         #region Chunk updates
-        private const int ChunkCenterX = Chunk.SizeX / 2 + 1;
-        private const int ChunkCenterY = Chunk.SizeY / 2 + 1;
-        private const int ChunkCenterZ = Chunk.SizeZ / 2 + 1;
+        private const int ChunkCenterX = Chunk.SIZE / 2 + 1;
+        private const int ChunkCenterY = Chunk.SIZE / 2 + 1;
+        private const int ChunkCenterZ = Chunk.SIZE / 2 + 1;
         private const int OPERATION_CYCLE_LENGTH = 64;
 
-        private void UpdateBuildPriority(Location currentLocation, ChunkRender chunk, int offsetY)
+        private void UpdateBuildPriority(Location currentBlockLoc, ChunkRender chunk, int offsetY)
         {   // Get this chunk's build priority based on its current distance to the player,
             // a smaller value means a higher priority...
             chunk.Priority = (int)(
-                    new Location(chunk.ChunkX * Chunk.SizeX + ChunkCenterX, chunk.ChunkY * Chunk.SizeY + ChunkCenterY + offsetY,
-                            chunk.ChunkZ * Chunk.SizeZ + ChunkCenterZ).DistanceTo(currentLocation) / 16);
+                    new Location(chunk.ChunkX * Chunk.SIZE + ChunkCenterX, chunk.ChunkY * Chunk.SIZE + ChunkCenterY + offsetY,
+                            chunk.ChunkZ * Chunk.SIZE + ChunkCenterZ).DistanceTo(currentBlockLoc) / 16);
         }
 
         public void UpdateChunkRendersListAdd()
         {
-            var location = client!.GetLocation();
+            var playerLoc = client!.GetLocation();
+            var blockLoc = playerLoc.GetBlockLoc();
             ChunkRenderColumn columnRender;
 
             int viewDist = CornGlobal.MCSettings.RenderDistance;
             int viewDistSqr = viewDist * viewDist;
 
-            int chunkColumnSize = (World.GetDimension().height + Chunk.SizeY - 1) / Chunk.SizeY; // Round up
+            int chunkColumnSize = (World.GetDimension().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
             int offsetY = World.GetDimension().minY;
 
             // Add nearby chunks
@@ -176,7 +174,7 @@ namespace CraftSharp.Rendering
                 {
                     if (cx * cx + cz * cz >= viewDistSqr) continue;
 
-                    int chunkX = location.GetChunkX() + cx, chunkZ = location.GetChunkZ() + cz;
+                    int chunkX = blockLoc.GetChunkX() + cx, chunkZ = blockLoc.GetChunkZ() + cz;
                     
                     if (World.isChunkColumnReady(chunkX, chunkZ))
                     {
@@ -191,7 +189,7 @@ namespace CraftSharp.Rendering
                                 if (!World[chunkX, chunkZ]!.ChunkIsEmpty(chunkY))
                                 {   // This chunk is not empty and needs to be added and queued
                                     var chunk = columnRender.GetChunkRender(chunkY, true);
-                                    UpdateBuildPriority(location, chunk, offsetY);
+                                    UpdateBuildPriority(playerLoc, chunk, offsetY);
                                     QueueChunkRenderBuild(chunk);
                                 }
                             }
@@ -203,7 +201,7 @@ namespace CraftSharp.Rendering
                                 //if (chunk.State == ChunkBuildState.Delayed || chunk.State == ChunkBuildState.Cancelled)
                                 if (chunk.State == ChunkBuildState.Delayed)
                                 {   // Queue delayed or cancelled chunk builds...
-                                    UpdateBuildPriority(location, chunk, offsetY);
+                                    UpdateBuildPriority(playerLoc, chunk, offsetY);
                                     QueueChunkRenderBuild(chunk);
                                 }
                             }
@@ -216,21 +214,19 @@ namespace CraftSharp.Rendering
         public void UpdateChunkRendersListRemove()
         {
             // Add nearby chunks
-            var location   = client!.GetLocation();
+            var blockLoc   = client!.GetLocation().GetBlockLoc();
             int unloadDist = Mathf.RoundToInt(CornGlobal.MCSettings.RenderDistance * 2F);
 
             var chunkCoords = columns.Keys.ToArray();
 
             foreach (var chunkCoord in chunkCoords)
             {
-                if (Mathf.Abs(location.GetChunkX() - chunkCoord.x) > unloadDist || Mathf.Abs(location.GetChunkZ() - chunkCoord.y) > unloadDist)
+                if (Mathf.Abs(blockLoc.GetChunkX() - chunkCoord.x) > unloadDist || Mathf.Abs(blockLoc.GetChunkZ() - chunkCoord.y) > unloadDist)
                 {
                     columns[chunkCoord].Unload(ref chunksBeingBuilt, ref chunkRendersToBeBuilt);
                     columns.Remove(chunkCoord);
                 }
-
             }
-
         }
 
         public void QueueChunkRenderBuild(ChunkRender chunkRender)
@@ -274,7 +270,7 @@ namespace CraftSharp.Rendering
 
         public const int BUILD_COUNT_LIMIT = 4;
         private int operationCode    = 0;
-        private Location? lastPlayerLoc = null;
+        private BlockLoc? lastPlayerBlockLoc = null;
         private bool terrainColliderDirty = true;
 
         void Start()
@@ -334,10 +330,10 @@ namespace CraftSharp.Rendering
                 EventManager.Instance.Unregister(blocksCallback);
         }
 
-        private void UpdateBlockAt(Location loc)
+        private void UpdateBlockAt(BlockLoc blockLoc)
         {
-            int chunkX = loc.GetChunkX(), chunkY = loc.GetChunkY(), chunkZ = loc.GetChunkZ();
-            var column = GetChunkRenderColumn(loc.GetChunkX(), loc.GetChunkZ(), false);
+            int chunkX = blockLoc.GetChunkX(), chunkY = blockLoc.GetChunkY(), chunkZ = blockLoc.GetChunkZ();
+            var column = GetChunkRenderColumn(blockLoc.GetChunkX(), blockLoc.GetChunkZ(), false);
             if (column is not null) // Queue this chunk to rebuild list...
             {   // Create the chunk render object if not present (previously empty)
                 var chunk = column.GetChunkRender(chunkY, true);
@@ -345,34 +341,34 @@ namespace CraftSharp.Rendering
                 // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                 QueueChunkRenderBuild(chunk);
 
-                if (loc.GetChunkBlockY() == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
+                if (blockLoc.GetChunkBlockY() == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
                 {   // Queue the chunk below, if it isn't empty
                     QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY - 1, false));
                 }
-                else if (loc.GetChunkBlockY() == Chunk.SizeY - 1 && ((chunkY + 1) * Chunk.SizeY) < World.GetDimension().height) // In the top layer of this chunk
+                else if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1 && ((chunkY + 1) * Chunk.SIZE) < World.GetDimension().height) // In the top layer of this chunk
                 {   // Queue the chunk above, if it isn't empty
                     QueueChunkBuildIfNotEmpty(column.GetChunkRender(chunkY + 1, false));
                 }
             }
 
-            if (loc.GetChunkBlockX() == 0) // Check MC X direction neighbors
+            if (blockLoc.GetChunkBlockX() == 0) // Check MC X direction neighbors
                 QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX - 1, chunkY, chunkZ));
-            else if (loc.GetChunkBlockX() == Chunk.SizeX - 1)
+            else if (blockLoc.GetChunkBlockX() == Chunk.SIZE - 1)
                 QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX + 1, chunkY, chunkZ));
 
-            if (loc.GetChunkBlockZ() == 0) // Check MC Z direction neighbors
+            if (blockLoc.GetChunkBlockZ() == 0) // Check MC Z direction neighbors
                 QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ - 1));
-            else if (loc.GetChunkBlockZ() == Chunk.SizeZ - 1)
+            else if (blockLoc.GetChunkBlockZ() == Chunk.SIZE - 1)
                 QueueChunkBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ + 1));
             
-            if (loc.DistanceSquared(client!.GetLocation()) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)
+            if (blockLoc.DistanceSquared(client!.GetLocation().GetBlockLoc()) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)
                 terrainColliderDirty = true; // Terrain collider needs to be updated
         }
 
-        public void RebuildTerrainCollider(Location playerLoc)
+        public void RebuildTerrainCollider(BlockLoc playerBlockLoc)
         {
             terrainColliderDirty = false;
-            Task.Factory.StartNew(() => builder!.BuildTerrainCollider(World, playerLoc, movementCollider!, liquidCollider!));
+            Task.Factory.StartNew(() => builder!.BuildTerrainCollider(World, playerBlockLoc, movementCollider!, liquidCollider!));
         }
 
         void FixedUpdate()
@@ -411,42 +407,37 @@ namespace CraftSharp.Rendering
             operationCode = (operationCode + 1) % OPERATION_CYCLE_LENGTH;
 
             // Update terrain collider if necessary
-            var playerLoc = client?.GetLocation();
-            if (playerLoc is not null)
+            var playerBlockLoc = client?.GetLocation().GetBlockLoc();
+            if (playerBlockLoc is not null)
             {
-                if (lastPlayerLoc is not null)
+                if (lastPlayerBlockLoc is not null)
                 {
-                    if (terrainColliderDirty || lastPlayerLoc.Value.DistanceTo(playerLoc.Value) >= MIN_UPDATE_DISTANCE)
+                    if (terrainColliderDirty || lastPlayerBlockLoc.Value != playerBlockLoc.Value)
                     {
-                        RebuildTerrainCollider(playerLoc.Value);
+                        RebuildTerrainCollider(playerBlockLoc.Value);
                         // Update player liquid state
-                        var inLiquid = World.GetBlock(playerLoc.Value + BLOCK_CHECK_OFFSET).State.InLiquid;
-                        var prevInLiquid = World.GetBlock(lastPlayerLoc.Value + BLOCK_CHECK_OFFSET).State.InLiquid;
+                        var inLiquid = World.GetBlock(playerBlockLoc.Value).State.InLiquid;
+                        var prevInLiquid = World.GetBlock(lastPlayerBlockLoc.Value).State.InLiquid;
                         if (prevInLiquid != inLiquid) // Player liquid state changed, broadcast this change
                         {
                             EventManager.Instance.Broadcast(new PlayerLiquidEvent(inLiquid));
-
-                            if (inLiquid)
-                                Debug.Log($"Enter water at {playerLoc}");
-                            else
-                                Debug.Log($"Exit water at {playerLoc}");
                         }
                         // Update last location only if it is used
-                        lastPlayerLoc = playerLoc;
+                        lastPlayerBlockLoc = playerBlockLoc;
                     }
                 }
                 else
                 {
-                    RebuildTerrainCollider(playerLoc.Value);
+                    RebuildTerrainCollider(playerBlockLoc.Value);
                     // Update player liquid state
-                    var inLiquid = World.GetBlock(playerLoc.Value + BLOCK_CHECK_OFFSET).State.InLiquid;
+                    var inLiquid = World.GetBlock(playerBlockLoc.Value).State.InLiquid;
                     if (inLiquid) // Player liquid state changed, broadcast this change
                     {
                         EventManager.Instance.Broadcast(new PlayerLiquidEvent(true));
-                        Debug.Log($"Enter water at {playerLoc}");
+                        Debug.Log($"Enter water at {playerBlockLoc}");
                     }
                     // Update last location
-                    lastPlayerLoc = playerLoc;
+                    lastPlayerBlockLoc = playerBlockLoc;
                 }
             }
         }

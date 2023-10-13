@@ -184,8 +184,9 @@ namespace CraftSharp
 
             if (withDebugInfo)
             {
-                var targetLoc = interactionUpdater?.TargetLocation;
-                var loc = GetLocation();
+                var targetLoc = interactionUpdater?.TargetBlockLoc;
+                var playerLoc = GetLocation();
+                var blockLoc = playerLoc.GetBlockLoc();
                 var world = GetWorld();
 
                 string targetInfo;
@@ -200,7 +201,7 @@ namespace CraftSharp
                     targetInfo = "\n";
                 }
                 
-                return baseString + $"\nFog: <{RenderSettings.fogDensity}>\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
+                return baseString + $"\nFog: <{RenderSettings.fogDensity}>\nLoc: {playerLoc}\nBiome:\t{world.GetBiome(blockLoc)}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
             }
             
@@ -320,10 +321,10 @@ namespace CraftSharp
         /// <summary>
         /// Place the block at hand in the Minecraft world
         /// </summary>
-        /// <param name="location">Location to place block to</param>
+        /// <param name="blockLoc">Location to place block to</param>
         /// <param name="blockFace">Block face (e.g. Direction.Down when clicking on the block below to place this block)</param>
         /// <returns>TRUE if successfully placed</returns>
-        public override bool PlaceBlock(Location location, Direction blockFace, Hand hand = Hand.MainHand)
+        public override bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, Hand hand = Hand.MainHand)
         {
             return false;
         }
@@ -331,10 +332,10 @@ namespace CraftSharp
         /// <summary>
         /// Attempt to dig a block at the specified location
         /// </summary>
-        /// <param name="location">Location of block to dig</param>
+        /// <param name="blockLoc">Location of block to dig</param>
         /// <param name="swingArms">Also perform the "arm swing" animation</param>
         /// <param name="lookAtBlock">Also look at the block before digging</param>
-        public override bool DigBlock(Location location, bool swingArms = true, bool lookAtBlock = true)
+        public override bool DigBlock(BlockLoc blockLoc, bool swingArms = true, bool lookAtBlock = true)
         {
             return false;
         }

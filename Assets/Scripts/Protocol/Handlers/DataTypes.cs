@@ -181,6 +181,29 @@ namespace CraftSharp.Protocol.Handlers
         }
 
         /// <summary>
+        /// Read a BlockLoc encoded as an ulong field and remove it from the cache
+        /// </summary>
+        /// <returns>The Location value</returns>
+        public BlockLoc ReadNextBlockLoc(Queue<byte> cache)
+        {
+            ulong locEncoded = ReadNextULong(cache);
+            int x, y, z;
+            
+            // MC 1.14+
+            x = (int)(locEncoded >> 38);
+            y = (int)(locEncoded & 0xFFF);
+            z = (int)(locEncoded << 26 >> 38);
+
+            if (x >= 0x02000000) // 33,554,432
+                x -= 0x04000000; // 67,108,864
+            if (y >= 0x00000800) //      2,048
+                y -= 0x00001000; //      4,096
+            if (z >= 0x02000000) // 33,554,432
+                z -= 0x04000000; // 67,108,864
+            return new BlockLoc(x, y, z);
+        }
+
+        /// <summary>
         /// Read several little endian unsigned short integers at once from a cache of bytes and remove them from the cache
         /// </summary>
         /// <returns>The unsigned short integer value</returns>
@@ -700,7 +723,7 @@ namespace CraftSharp.Protocol.Handlers
                         value = ReadNextVarInt(cache);
                         break;
                     case EntityMetaDataType.GlobalPosition: // GlobalPos
-                        // Dimension and blockPos, currently not in use
+                        // Dimension and blockLoc, currently not in use
                         value = new Tuple<string, Location>(ReadNextString(cache), ReadNextLocation(cache));
                         break;
                     case EntityMetaDataType.OptionalGlobalPosition:
@@ -708,7 +731,7 @@ namespace CraftSharp.Protocol.Handlers
                         //        but minecraft-data is bool + string
                         if (ReadNextBool(cache))
                         {
-                            // Dimension and blockPos, currently not in use
+                            // Dimension and blockLoc, currently not in use
                             value = new Tuple<string, Location>(ReadNextString(cache), ReadNextLocation(cache));
                         }
                         break;
@@ -1255,6 +1278,26 @@ namespace CraftSharp.Protocol.Handlers
             byte[] locationBytes = BitConverter.GetBytes(((((ulong)location.X) & 0x3FFFFFF) << 38) |
                     ((((ulong)location.Z) & 0x3FFFFFF) << 12) |
                     (((ulong)location.Y) & 0xFFF));
+
+            Array.Reverse(locationBytes); //Endianness
+            return locationBytes;
+        }
+
+        /// <summary>
+        /// Get a byte array representing the given BlockLoc encoded as an unsigned long
+        /// </summary>
+        /// <remarks>
+        /// A modulo will be applied if the location is outside the following ranges:
+        /// X: -33,554,432 to +33,554,431
+        /// Y: -2,048 to +2,047
+        /// Z: -33,554,432 to +33,554,431
+        /// </remarks>
+        /// <returns>Location representation as ulong</returns>
+        public byte[] GetBlockLoc(BlockLoc blockLoc)
+        {
+            byte[] locationBytes = BitConverter.GetBytes(((((ulong)blockLoc.X) & 0x3FFFFFF) << 38) |
+                    ((((ulong)blockLoc.Z) & 0x3FFFFFF) << 12) |
+                    (((ulong)blockLoc.Y) & 0xFFF));
 
             Array.Reverse(locationBytes); //Endianness
             return locationBytes;

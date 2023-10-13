@@ -105,8 +105,8 @@ namespace CraftSharp
         public abstract bool SendEntityAction(EntityActionType entityAction);
         public abstract void SendAutoCompleteRequest(string text);
         public abstract bool UseItemOnHand();
-        public abstract bool PlaceBlock(Location location, Direction blockFace, Hand hand = Hand.MainHand);
-        public abstract bool DigBlock(Location location, bool swingArms = true, bool lookAtBlock = true);
+        public abstract bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, Hand hand = Hand.MainHand);
+        public abstract bool DigBlock(BlockLoc blockLoc, bool swingArms = true, bool lookAtBlock = true);
         public abstract bool ChangeSlot(short slot);
 
         #endregion

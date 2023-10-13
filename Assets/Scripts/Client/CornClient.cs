@@ -473,8 +473,9 @@ namespace CraftSharp
 
             if (withDebugInfo)
             {
-                var targetLoc = interactionUpdater?.TargetLocation;
-                var loc = GetLocation();
+                var targetLoc = interactionUpdater?.TargetBlockLoc;
+                var playerLoc = GetLocation();
+                var blockLoc = GetLocation().GetBlockLoc();
                 var world = GetWorld();
 
                 string targetInfo;
@@ -489,7 +490,7 @@ namespace CraftSharp
                     targetInfo = "\n";
                 }
                 
-                return baseString + $"\nFog: <{RenderSettings.fogDensity}>\nLoc: {loc}\nBiome:\t{world.GetBiome(loc)}\n{targetInfo}\n{cameraController?.GetDebugInfo()}\n{playerController?.GetDebugInfo()}" +
+                return baseString + $"\nFog: <{RenderSettings.fogDensity}>\nLoc: {playerLoc}\nBiome:\t{world.GetBiome(blockLoc)}\n{targetInfo}\n{cameraController?.GetDebugInfo()}\n{playerController?.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
             }
             
@@ -804,37 +805,39 @@ namespace CraftSharp
         /// <summary>
         /// Place the block at hand in the Minecraft world
         /// </summary>
-        /// <param name="location">Location to place block to</param>
+        /// <param name="blockLoc">Location to place block to</param>
         /// <param name="blockFace">Block face (e.g. Direction.Down when clicking on the block below to place this block)</param>
         /// <returns>TRUE if successfully placed</returns>
-        public override bool PlaceBlock(Location location, Direction blockFace, Hand hand = Hand.MainHand)
+        public override bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, Hand hand = Hand.MainHand)
         {
-            return InvokeOnNetMainThread(() => handler!.SendPlayerBlockPlacement((int)hand, location, blockFace, clientSequenceId));
+            return InvokeOnNetMainThread(() => handler!.SendPlayerBlockPlacement((int)hand, blockLoc, blockFace, clientSequenceId));
         }
 
         /// <summary>
         /// Attempt to dig a block at the specified location
         /// </summary>
-        /// <param name="location">Location of block to dig</param>
+        /// <param name="blockLoc">Location of block to dig</param>
         /// <param name="swingArms">Also perform the "arm swing" animation</param>
         /// <param name="lookAtBlock">Also look at the block before digging</param>
-        public override bool DigBlock(Location location, bool swingArms = true, bool lookAtBlock = true)
+        public override bool DigBlock(BlockLoc blockLoc, bool swingArms = true, bool lookAtBlock = true)
         {
             if (InvokeRequired)
-                return InvokeOnNetMainThread(() => DigBlock(location, swingArms, lookAtBlock));
+                return InvokeOnNetMainThread(() => DigBlock(blockLoc, swingArms, lookAtBlock));
 
             // TODO select best face from current player location
             Direction blockFace = Direction.Down;
 
             // Look at block before attempting to break it
             if (lookAtBlock)
-                UpdateLocation(GetLocation(), location);
+            {
+                UpdateLocation(GetLocation(), new Location(blockLoc.X, blockLoc.Y, blockLoc.Z));
+            }
 
             // Send dig start and dig end, will need to wait for server response to know dig result
             // See https://wiki.vg/How_to_Write_a_Client#Digging for more details
-            return handler!.SendPlayerDigging(0, location, blockFace, clientSequenceId)
+            return handler!.SendPlayerDigging(0, blockLoc, blockFace, clientSequenceId)
                 && (!swingArms || DoAnimation((int)Hand.MainHand))
-                && handler.SendPlayerDigging(2, location, blockFace, clientSequenceId);
+                && handler.SendPlayerDigging(2, blockLoc, blockFace, clientSequenceId);
         }
 
         /// <summary>
@@ -1001,7 +1004,7 @@ namespace CraftSharp
 
                     Loom.QueueOnMainThread(() => {
                         // Force refresh environment collider
-                        ChunkRenderManager?.RebuildTerrainCollider(location.ToFloor());
+                        ChunkRenderManager?.RebuildTerrainCollider(location.GetBlockLoc());
                         // Then update player location
                         playerController!.SetLocation(location, yaw: yaw);
                         // Update camera yaw
@@ -1020,7 +1023,7 @@ namespace CraftSharp
                         }
 
                         // Force refresh environment collider
-                        ChunkRenderManager?.RebuildTerrainCollider(location.ToFloor());
+                        ChunkRenderManager?.RebuildTerrainCollider(location.GetBlockLoc());
                         // Then update player location
                         playerController!.SetLocation(location, reset: true, yaw: yaw);
 

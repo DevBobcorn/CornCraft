@@ -1,43 +1,42 @@
-﻿using System;
-using Unity.Mathematics;
+using System;
 
 namespace CraftSharp
 {
     /// <summary>
-    /// Represents a location into a Minecraft world
+    /// Represents a block location into a Minecraft world
     /// </summary>
-    public struct Location
+    public struct BlockLoc
     {
         /// <summary>
         /// The X Coordinate
         /// </summary>
-        public double X;
+        public int X;
         
         /// <summary>
         /// The Y Coordinate (vertical)
         /// </summary>
-        public double Y;
+        public int Y;
 
         /// <summary>
         /// The Z coordinate
         /// </summary>
-        public double Z;
+        public int Z;
 
         /// <summary>
         /// Get location with zeroed coordinates
         /// </summary>
-        public static Location Zero
+        public static BlockLoc Zero
         {
             get
             {
-                return new Location(0, 0, 0);
+                return new BlockLoc(0, 0, 0);
             }
         }
 
         /// <summary>
         /// Create a new location
         /// </summary>
-        public Location(double x, double y, double z)
+        public BlockLoc(int x, int y, int z)
         {
             X = x;
             Y = y;
@@ -45,43 +44,25 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Round coordinates
-        /// </summary>
-        /// <returns>New location</returns>
-        public Location ToFloor()
-        {
-            return new Location(Math.Floor(this.X), Math.Floor(this.Y), Math.Floor(this.Z));
-        }
-
-        /// <summary>
-        /// Get the center coordinates
-        /// </summary>
-        /// <returns>New location</returns>
-        public Location ToCenter()
-        {
-            return new Location(Math.Floor(this.X) + 0.5, this.Y, Math.Floor(this.Z) + 0.5);
-        }
-
-        /// <summary>
         /// Get a squared distance to the specified location
         /// </summary>
-        /// <param name="location">Other location for computing distance</param>
+        /// <param name="blockLoc">Other location for computing distance</param>
         /// <returns>Distance to the specified location, without using a square root</returns>
-        public double DistanceSquared(Location location)
+        public double DistanceSquared(BlockLoc blockLoc)
         {
-            return ((X - location.X) * (X - location.X))
-                 + ((Y - location.Y) * (Y - location.Y))
-                 + ((Z - location.Z) * (Z - location.Z));
+            return ((X - blockLoc.X) * (X - blockLoc.X))
+                 + ((Y - blockLoc.Y) * (Y - blockLoc.Y))
+                 + ((Z - blockLoc.Z) * (Z - blockLoc.Z));
         }
 
         /// <summary>
         /// Get exact distance to the specified location
         /// </summary>
-        /// <param name="location">Other location for computing distance</param>
+        /// <param name="blockLoc">Other location for computing distance</param>
         /// <returns>Distance to the specified location, with square root so lower performances</returns>
-        public double Distance(Location location)
+        public double Distance(BlockLoc blockLoc)
         {
-            return Math.Sqrt(DistanceSquared(location));
+            return Math.Sqrt(DistanceSquared(blockLoc));
         }
 
         /// <summary>
@@ -93,11 +74,11 @@ namespace CraftSharp
         {
             if (obj == null)
                 return false;
-            if (obj is Location)
+            if (obj is BlockLoc)
             {
-                return ((int)this.X) == ((int)((Location)obj).X)
-                    && ((int)this.Y) == ((int)((Location)obj).Y)
-                    && ((int)this.Z) == ((int)((Location)obj).Z);
+                return ((int)this.X) == ((int)((BlockLoc)obj).X)
+                    && ((int)this.Y) == ((int)((BlockLoc)obj).Y)
+                    && ((int)this.Z) == ((int)((BlockLoc)obj).Z);
             }
             return false;
         }
@@ -108,7 +89,7 @@ namespace CraftSharp
         /// <param name="loc1">First location to compare</param>
         /// <param name="loc2">Second location to compare</param>
         /// <returns>TRUE if the locations are equals</returns>
-        public static bool operator ==(Location loc1, Location loc2)
+        public static bool operator ==(BlockLoc loc1, BlockLoc loc2)
         {
             if (loc1 == null && loc2 == null)
                 return true;
@@ -123,7 +104,7 @@ namespace CraftSharp
         /// <param name="loc1">First location to compare</param>
         /// <param name="loc2">Second location to compare</param>
         /// <returns>TRUE if the locations are equals</returns>
-        public static bool operator !=(Location loc1, Location loc2)
+        public static bool operator !=(BlockLoc loc1, BlockLoc loc2)
         {
             if (loc1 == null && loc2 == null)
                 return false;
@@ -141,9 +122,9 @@ namespace CraftSharp
         /// <param name="loc1">First location to sum</param>
         /// <param name="loc2">Second location to sum</param>
         /// <returns>Sum of the two locations</returns>
-        public static Location operator +(Location loc1, Location loc2)
+        public static BlockLoc operator +(BlockLoc loc1, BlockLoc loc2)
         {
-            return new Location
+            return new BlockLoc
             (
                 loc1.X + loc2.X,
                 loc1.Y + loc2.Y,
@@ -160,45 +141,13 @@ namespace CraftSharp
         /// <param name="loc1">First location</param>
         /// <param name="loc2">Location to substract to the first one</param>
         /// <returns>Sum of the two locations</returns>
-        public static Location operator -(Location loc1, Location loc2)
+        public static BlockLoc operator -(BlockLoc loc1, BlockLoc loc2)
         {
-            return new Location
+            return new BlockLoc
             (
                 loc1.X - loc2.X,
                 loc1.Y - loc2.Y,
                 loc1.Z - loc2.Z
-            );
-        }
-
-        /// <summary>
-        /// Multiply a location by a scalar value
-        /// </summary>
-        /// <param name="loc">Location to multiply</param>
-        /// <param name="val">Scalar value</param>
-        /// <returns>Product of the location and the scalar value</returns>
-        public static Location operator *(Location loc, double val)
-        {
-            return new Location
-            (
-                loc.X * val,
-                loc.Y * val,
-                loc.Z * val
-            );
-        }
-
-        /// <summary>
-        /// Divide a location by a scalar value
-        /// </summary>
-        /// <param name="loc">Location to divide</param>
-        /// <param name="val">Scalar value</param>
-        /// <returns>Result of the division</returns>
-        public static Location operator /(Location loc, double val)
-        {
-            return new Location
-            (
-                loc.X / val,
-                loc.Y / val,
-                loc.Z / val
             );
         }
 
@@ -214,9 +163,9 @@ namespace CraftSharp
         /// <returns>A simplified version of the location</returns>
         public override int GetHashCode()
         {
-            return (((int)X) & ~((~0) << 13)) << 19
-                 | (((int)Y) & ~((~0) << 13)) << 13
-                 | (((int)Z) & ~((~0) << 06)) << 00;
+            return (X & ~((~0) << 13)) << 19
+                 | (Y & ~((~0) << 13)) << 13
+                 | (Z & ~((~0) << 06)) << 00;
         }
 
         /// <summary>
@@ -225,12 +174,12 @@ namespace CraftSharp
         /// <returns>String representation of the location</returns>
         public override string ToString()
         {
-            return string.Format("X:{0:0.00} Y:{1:0.00} Z:{2:0.00}", X, Y, Z);
+            return string.Format("X:\t{0} Y:\t{1} Z:\t{2}", X, Y, Z);
         }
 
-        public BlockLoc GetBlockLoc()
+        public Location ToLocation()
         {
-            return new BlockLoc((int) Math.Floor(X), (int) Math.Floor(Y), (int) Math.Floor(Z));
+            return new Location(this.X, this.Y, this.Z);
         }
 
         public double DistanceTo(Location loc)
@@ -238,19 +187,38 @@ namespace CraftSharp
             return Math.Sqrt(Math.Pow(this.X - loc.X, 2) + Math.Pow(this.Y - loc.Y, 2) + Math.Pow(this.Z - loc.Z, 2));
         }
 
-        public double DistanceTo(int3 loc)
+        public BlockLoc Up()
         {
-            return Math.Sqrt(Math.Pow(this.X - loc.x, 2) + Math.Pow(this.Y - loc.y, 2) + Math.Pow(this.Z - loc.z, 2));
+            return this + new BlockLoc( 0, 1, 0);
         }
 
-        public double SqrDistanceTo(Location loc)
+        public BlockLoc Down()
         {
-            return Math.Pow(this.X - loc.X, 2) + Math.Pow(this.Y - loc.Y, 2) + Math.Pow(this.Z - loc.Z, 2);
+            return this + new BlockLoc( 0,-1, 0);
         }
 
-        public double SqrDistanceTo(int3 loc)
+        // MC Z Neg
+        public BlockLoc North()
         {
-            return Math.Pow(this.X - loc.x, 2) + Math.Pow(this.Y - loc.y, 2) + Math.Pow(this.Z - loc.z, 2);
+            return this + new BlockLoc( 0, 0,-1);
+        }
+
+        // MC Z Pos
+        public BlockLoc South()
+        {
+            return this + new BlockLoc( 0, 0, 1);
+        }
+
+        // MC X Pos
+        public BlockLoc East()
+        {
+            return this + new BlockLoc( 1, 0, 0);
+        }
+
+        // MC X Neg
+        public BlockLoc West()
+        {
+            return this + new BlockLoc(-1, 0, 0);
         }
     }
 }
