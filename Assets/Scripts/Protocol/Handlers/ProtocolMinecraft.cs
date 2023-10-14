@@ -47,6 +47,7 @@ namespace CraftSharp.Protocol.Handlers
         internal const int MC_1_19_3_Version = 761;
         internal const int MC_1_19_4_Version = 762;
         internal const int MC_1_20_Version   = 763;
+        internal const int MC_1_20_2_Version = 764;
 
         private int compression_treshold = 0;
         private int autoCompleteTransactionId = 0;
@@ -808,48 +809,49 @@ namespace CraftSharp.Protocol.Handlers
                         {
                             string? dimensionTypeNameRespawn = null;
                             Dictionary<string, object>? dimensionTypeRespawn = null;
-                            if (protocolVersion >= MC_1_16_Version)
+                            // MC 1.16+
+                            if (protocolVersion >= MC_1_19_Version)
+                                dimensionTypeNameRespawn = dataTypes.ReadNextString(packetData); // Dimension Type: Identifier
+                            else if (protocolVersion >= MC_1_16_2_Version)
+                                dimensionTypeRespawn = dataTypes.ReadNextNbt(packetData);        // Dimension Type: NBT Tag Compound
+                            else
+                                dataTypes.ReadNextString(packetData);
+                            
+                            this.currentDimension = 0;
+
+                            string dimensionName = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
+                            
+                            if (protocolVersion >= MC_1_16_2_Version && protocolVersion <= MC_1_18_2_Version)
                             {
-                                if (protocolVersion >= MC_1_19_Version)
-                                    dimensionTypeNameRespawn = dataTypes.ReadNextString(packetData); // Dimension Type: Identifier
-                                else if (protocolVersion >= MC_1_16_2_Version)
-                                    dimensionTypeRespawn = dataTypes.ReadNextNbt(packetData);        // Dimension Type: NBT Tag Compound
-                                else
-                                    dataTypes.ReadNextString(packetData);
-                                this.currentDimension = 0;
+                                World.SetDimension(dimensionName);
                             }
-                            else 
-                            {   // 1.15 and below
-                                this.currentDimension = dataTypes.ReadNextInt(packetData);
+                            else if (protocolVersion >= MC_1_19_Version)
+                            {
+                                World.SetDimension(dimensionTypeNameRespawn!);
                             }
 
-                            if (protocolVersion >= MC_1_16_Version)
-                            {
-                                string dimensionName = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
-                                
-                                if (protocolVersion >= MC_1_16_2_Version && protocolVersion <= MC_1_18_2_Version)
-                                {
-                                    World.SetDimension(dimensionName);
-                                }
-                                else if (protocolVersion >= MC_1_19_Version)
-                                {
-                                    World.SetDimension(dimensionTypeNameRespawn!);
-                                }
-                            }
-
-                            if (protocolVersion >= MC_1_15_Version)
-                                dataTypes.ReadNextLong(packetData);           // Hashed world seed - 1.15 and above
+                            dataTypes.ReadNextLong(packetData);               // Hashed world seed - 1.15 and above
                             dataTypes.ReadNextByte(packetData);               // Gamemode
-                            if (protocolVersion >= MC_1_16_Version)
-                                dataTypes.ReadNextByte(packetData);           // Previous Game mode - 1.16 and above
-                            if (protocolVersion < MC_1_16_Version)
-                                dataTypes.SkipNextString(packetData);         // Level Type - 1.15 and below
-                            if (protocolVersion >= MC_1_16_Version)
+                            dataTypes.ReadNextByte(packetData);               // Previous Game mode - 1.16 and above
+
+                            dataTypes.ReadNextBool(packetData);               // Is Debug - 1.16 and above
+                            dataTypes.ReadNextBool(packetData);               // Is Flat - 1.16 and above
+
+                            bool keepAttributes = false, keepMetadata = false;
+
+                            if (protocolVersion < MC_1_20_Version)
                             {
-                                dataTypes.ReadNextBool(packetData);           // Is Debug - 1.16 and above
-                                dataTypes.ReadNextBool(packetData);           // Is Flat - 1.16 and above
-                                dataTypes.ReadNextBool(packetData);           // Copy metadata - 1.16 and above
+                                keepMetadata = dataTypes.ReadNextBool(packetData);   // Copy metadata - 1.16 to 1.19.4
+                                keepAttributes = keepMetadata;
                             }
+                            else if (protocolVersion < MC_1_20_2_Version)
+                            {
+                                // Data kept flags
+                                byte dataKept = dataTypes.ReadNextByte(packetData);  // Data Kept - 1.20 and 1.20.1
+                                keepAttributes = (dataKept & 0x01) != 0;
+                                keepMetadata = (dataKept & 0x02) != 0;
+                            }
+                            
                             if (protocolVersion >= MC_1_19_Version)
                             {
                                 bool hasDeathLocation = dataTypes.ReadNextBool(packetData); // Has death location
@@ -859,10 +861,19 @@ namespace CraftSharp.Protocol.Handlers
                                     dataTypes.ReadNextLocation(packetData); // Death location
                                 }
                             }
+
                             if (protocolVersion >= MC_1_20_Version)
                                 dataTypes.ReadNextVarInt(packetData); // Portal Cooldown - 1.20 and above
                             
-                            handler.OnRespawn();
+                            if (protocolVersion >= MC_1_20_2_Version)
+                            {
+                                // Data kept flags
+                                byte dataKept = dataTypes.ReadNextByte(packetData);  // Data Kept - 1.20 and 1.20.1
+                                keepAttributes = (dataKept & 0x01) != 0;
+                                keepMetadata = (dataKept & 0x02) != 0;
+                            }
+
+                            handler.OnRespawn(keepAttributes, keepMetadata);
                             break;
                         }
                     case PacketTypesIn.PlayerPositionAndLook:
@@ -880,7 +891,9 @@ namespace CraftSharp.Protocol.Handlers
                             location.X = (locMask & 1 << 0) != 0 ? location.X + x : x;
                             location.Y = (locMask & 1 << 1) != 0 ? location.Y + y : y;
                             location.Z = (locMask & 1 << 2) != 0 ? location.Z + z : z;
-                            handler.UpdateLocation(location, yaw, pitch);
+                            bool yawIsOffset = (locMask & 1 << 3) != 0;
+                            bool pitchIsOffset = (locMask & 1 << 4) != 0;
+                            handler.UpdateLocation(location, yawIsOffset, yaw, pitchIsOffset, pitch);
 
                             int teleportId = dataTypes.ReadNextVarInt(packetData);
                             // Teleport confirm packet

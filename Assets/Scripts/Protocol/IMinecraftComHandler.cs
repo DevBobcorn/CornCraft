@@ -120,7 +120,7 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Called when the player respawns, which happens on login, respawn and world change.
         /// </summary>
-        void OnRespawn();
+        void OnRespawn(bool keepAttr, bool keepMeta);
 
         /// <summary>
         /// Called when a new player joins the game
@@ -138,9 +138,11 @@ namespace CraftSharp.Protocol
         /// Called when the server sets the new location for the player
         /// </summary>
         /// <param name="location">New location of the player</param>
-        /// <param name="yaw">New yaw</param>
-        /// <param name="pitch">New pitch</param>
-        void UpdateLocation(Location location, float yaw, float pitch);
+        /// <param name="yawIsOffset">Whether yaw is an offset value or a new value</param>
+        /// <param name="yaw">Yaw value, measured in degrees</param>
+        /// <param name="pitchIsOffset">Whether pitch is an offset value or a new value</param>
+        /// <param name="pitch">Pitch value, measured in degrees</param>
+        void UpdateLocation(Location location, bool yawIsOffset, float yaw, bool pitchIsOffset, float pitch);
 
         /// <summary>
         /// Called when the connection has been lost

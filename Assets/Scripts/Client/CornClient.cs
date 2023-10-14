@@ -952,12 +952,16 @@ namespace CraftSharp
         /// <summary>
         /// Called when the player respawns, which happens on login, respawn and world change.
         /// </summary>
-        public void OnRespawn()
+        public void OnRespawn(bool keepAttr, bool keepMeta)
         {
             ClearTasks();
 
             ChunkRenderManager!.ClearWorld();
-            ClearInventories();
+
+            if (!keepAttr)
+            {
+                ClearInventories();
+            }
 
             Loom.QueueOnMainThread(() => {
                 ChunkRenderManager?.ReloadWorldRender();
@@ -982,7 +986,7 @@ namespace CraftSharp
             float pitch = Convert.ToSingle(-Math.Asin(dy / r) / Math.PI * 180);
             if (yaw < 0) yaw += 360;
 
-            UpdateLocation(location, yaw, pitch);
+            UpdateLocation(location, false, yaw, false, pitch);
         }
 
         /// <summary>
@@ -991,14 +995,25 @@ namespace CraftSharp
         /// <param name="location">The new location</param>
         /// <param name="yaw">Yaw to look at</param>
         /// <param name="pitch">Pitch to look at</param>
-        public void UpdateLocation(Location location, float yaw, float pitch)
+        public void UpdateLocation(Location location, bool yawIsOffset, float yaw, bool pitchIsOffset, float pitch)
         {
-            yaw += 90F;
-
             lock (movementLock)
             {
-                //yawToSend = clientEntity.Yaw = yaw;
-                //pitchToSend = clientEntity.Pitch = pitch;
+                if (yawIsOffset)
+                {
+                    // Offset based off current value
+                    yaw += playerController!.Yaw2Send;
+                }
+                else
+                {
+                    yaw += 90F; // Coordinate system conversion
+                }
+
+                if (pitchIsOffset)
+                {
+                    // Offset based off current value
+                    pitch += playerController!.Pitch2Send;
+                }
                 
                 if (!locationReceived) // On entering world or respawning
                 {
@@ -1012,7 +1027,7 @@ namespace CraftSharp
                         // Update camera yaw
                         CameraController.SetYaw(yaw);
 
-                        Debug.Log($"Loc initialized at {location} with yaw {yaw}");
+                        Debug.Log($"Spawned at {location} yaw: {yaw} (offset: {yawIsOffset})");
                     });
                 }
                 else // Position correction from server
@@ -1029,7 +1044,7 @@ namespace CraftSharp
                         // Then update player location
                         playerController!.SetLocation(location, reset: true, yaw: yaw);
 
-                        Debug.Log($"Loc updated to {location} with yaw {yaw} error value: {offset.magnitude}");
+                        Debug.Log($"Updated to {location} yaw: {yaw} (offset: {yawIsOffset}) loc offset: {offset.magnitude}");
                     });
                 }    
             }

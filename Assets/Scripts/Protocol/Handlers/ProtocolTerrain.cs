@@ -4,9 +4,6 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
-using CraftSharp.Event;
-using CraftSharp;
-
 namespace CraftSharp.Protocol.Handlers
 {
     /// <summary>
