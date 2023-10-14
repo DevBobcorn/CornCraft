@@ -123,8 +123,10 @@ namespace CraftSharp.Rendering
         [SerializeField] protected GameObject? ragdollPrefab;
         [SerializeField] public GameObject? FloatingInfoPrefab;
 
-        // A number made from the entity's numeral id, used in animations to prevent
-        // several mobs of a same type moving synchronisedly, which looks unnatural
+        /// <summary>
+        /// A number made from the entity's numeral id, used in animations to prevent
+        /// several mobs of a same type moving synchronisedly, which looks unnatural
+        /// </summary>
         protected float pseudoRandomOffset = 0F;
 
         public void Unload()
@@ -166,6 +168,9 @@ namespace CraftSharp.Rendering
             Pose = source.Pose;
             Metadata = source.Metadata;
             Equipment = source.Equipment;
+
+            UnityEngine.Random.InitState(NumeralId);
+            pseudoRandomOffset = UnityEngine.Random.Range(0F, 1F);
 
             visual.eulerAngles = new(0F, lastYaw, 0F);
         }

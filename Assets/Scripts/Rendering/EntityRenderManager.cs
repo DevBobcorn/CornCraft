@@ -48,7 +48,10 @@ namespace CraftSharp.Rendering
         /// </summary>
         private readonly Dictionary<int, float> nearbyEntities = new();
 
-        public string GetDebugInfo() => $"Entity Count: {entityRenders.Count}";
+        public string GetDebugInfo()
+        {
+            return $"Entity Count: {entityRenders.Count}";
+        }
 
         /// <summary>
         /// Check if the given id is occupied by an entity
@@ -79,7 +82,7 @@ namespace CraftSharp.Rendering
         /// <param name="entity">Entity data</param>
         public void AddEntityRender(Entity entity)
         {
-            // If the numeral if is occupied by an entity already,
+            // If the numeral id is occupied by an entity already,
             // destroy this entity first
             if (entityRenders.ContainsKey(entity.ID))
             {
@@ -301,24 +304,23 @@ namespace CraftSharp.Rendering
                 // Update entities around the player
                 float dist = (render.transform.position - client.GetPosition()).sqrMagnitude;
                 int entityId = render.NumeralId;
-
-                bool inDict = nearbyEntities.ContainsKey(entityId);
+                bool inNearbyDict = nearbyEntities.ContainsKey(entityId);
 
                 if (dist < NEARBY_THERESHOLD_INNER) // Add entity to dictionary
                 {
-                    if (inDict)
+                    if (inNearbyDict)
                         nearbyEntities[entityId] = dist;
                     else
                         nearbyEntities.Add(entityId, dist);
                 }
                 else if (dist > NEARBY_THERESHOLD_OUTER) // Remove entity from dictionary
                 {
-                    if (inDict)
+                    if (inNearbyDict)
                         nearbyEntities.Remove(entityId);
                 }
                 else // Update entity's distance to the player if it is in the dictionary, otherwise do nothing
                 {
-                    if (inDict)
+                    if (inNearbyDict)
                         nearbyEntities[entityId] = dist;
                 }
             }

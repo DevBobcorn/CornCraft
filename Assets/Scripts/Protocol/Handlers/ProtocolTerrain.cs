@@ -310,13 +310,18 @@ namespace CraftSharp.Protocol.Handlers
                 for (int i = 0; i < blockEntityCount; i++) {
                     var packedXZ = dataTypes.ReadNextByte(cache);
                     var y = dataTypes.ReadNextShort(cache);
-                    var type = dataTypes.ReadNextVarInt(cache);
+                    var ttt = dataTypes.ReadNextVarInt(cache);
                     var tag = dataTypes.ReadNextNbt(cache);
                     int x = (chunkX << 4) + (packedXZ >> 4);
                     int z = (chunkZ << 4) + (packedXZ & 15);
                     // Output block entity data
                     var blockLoc = new BlockLoc(x, y, z);
-                    UnityEngine.Debug.Log($"[{blockLoc}] {Json.Object2Json(tag)}");
+                    var typeId = ResourceLocation.FromString((string) tag["id"]);
+                    var type = BlockEntityPalette.INSTANCE.FromId(typeId);
+                    //UnityEngine.Debug.Log($"[{blockLoc}] {Json.Object2Json(tag)}");
+                    Loom.QueueOnMainThread(() => {
+                        chunksManager.AddBlockEntityRender(blockLoc, type, tag);
+                    });
                 }
             }
             
@@ -518,7 +523,12 @@ namespace CraftSharp.Protocol.Handlers
                     var tag = dataTypes.ReadNextNbt(cache);
                     // Output block entity data
                     var blockLoc = new BlockLoc((int) tag["x"], (int) tag["y"], (int) tag["z"]);
-                    UnityEngine.Debug.Log($"[{blockLoc}] {Json.Object2Json(tag)}");
+                    var typeId = ResourceLocation.FromString((string) tag["id"]);
+                    var type = BlockEntityPalette.INSTANCE.FromId(typeId);
+                    //UnityEngine.Debug.Log($"[{blockLoc}] {Json.Object2Json(tag)}");
+                    Loom.QueueOnMainThread(() => {
+                        chunksManager.AddBlockEntityRender(blockLoc, type, tag);
+                    });
                 }
             }
 

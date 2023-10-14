@@ -1111,10 +1111,15 @@ namespace CraftSharp.Protocol.Handlers
                     case PacketTypesIn.BlockEntityData:
                         {
                             var blockLoc = dataTypes.ReadNextBlockLoc(packetData);
-                            var type = dataTypes.ReadNextVarInt(packetData);
+                            var ttt = dataTypes.ReadNextVarInt(packetData);
                             var tag = dataTypes.ReadNextNbt(packetData);
                             // Output block entity data
-                            UnityEngine.Debug.Log($"[{blockLoc}] {Json.Object2Json(tag)}");
+                            var typeId = ResourceLocation.FromString((string) tag["id"]);
+                            var type = BlockEntityPalette.INSTANCE.FromId(typeId);
+                            //UnityEngine.Debug.Log($"[{blockLoc}] {Json.Object2Json(tag)}");
+                            Loom.QueueOnMainThread(() => {
+                                handler.GetChunkRenderManager().AddBlockEntityRender(blockLoc, type, tag);
+                            });
                             break;
                         }
                     case PacketTypesIn.UnloadChunk:
