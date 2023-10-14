@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using CraftSharp.Event;
-using CraftSharp.Interaction;
+using CraftSharp.Control;
 
 namespace CraftSharp.UI
 {

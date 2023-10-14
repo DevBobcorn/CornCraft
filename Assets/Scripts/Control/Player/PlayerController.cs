@@ -26,6 +26,8 @@ namespace CraftSharp.Control
         [SerializeField] protected PlayerAbility? ability;
         [SerializeField] protected CameraController? cameraController;
         [SerializeField] public Transform? CameraRef;
+        [SerializeField] protected Rigidbody? playerRigidbody;
+        [SerializeField] protected PlayerStatusUpdater? statusUpdater;
         
         private EntityRender? playerRender;
         [SerializeField] protected PhysicMaterial? physicMaterial;
@@ -37,12 +39,10 @@ namespace CraftSharp.Control
         public void DisableInput() => playerActions!.Disable();
 
         public PlayerAbility Ability => ability!;
-        protected Rigidbody? playerRigidbody;
         public Rigidbody PlayerRigidbody => playerRigidbody!;
         protected Collider? playerCollider;
         public Collider PlayerCollider => playerCollider!;
         protected IPlayerState CurrentState = PlayerStates.IDLE;
-        protected PlayerStatusUpdater? statusUpdater;
         public PlayerStatus? Status => statusUpdater?.Status;
 
         // Values for sending over to the server.
@@ -160,9 +160,6 @@ namespace CraftSharp.Control
 
         void Start()
         {
-            playerRigidbody = GetComponent<Rigidbody>();
-            statusUpdater = GetComponent<PlayerStatusUpdater>();
-
             playerActions = new PlayerActions();
             playerActions.Enable();
 
@@ -223,7 +220,7 @@ namespace CraftSharp.Control
 
             // Initialize player state (idle on start)
             Status.Grounded = true;
-            CurrentState.OnEnter(Status, playerRigidbody, this);
+            CurrentState.OnEnter(Status, playerRigidbody!, this);
         }
 
         void OnDestroy()
@@ -499,7 +496,7 @@ namespace CraftSharp.Control
             if (playerRender != null)
             {
                 // Update client player data
-                Yaw2Send = playerRender.VisualTransform.eulerAngles.y - 90F;
+                Yaw2Send = playerRender.VisualTransform.eulerAngles.y - 90F; // Coordinate system conversion
                 Pitch2Send = 0F;
             }
         }
@@ -548,14 +545,12 @@ namespace CraftSharp.Control
 
         public void SetLocation(Location loc, bool reset = false, float yaw = 0F)
         {
-            if (playerRigidbody is null) return;
-
             if (reset) // Reset rigidbody
             {
-                playerRigidbody.velocity = Vector3.zero;
+                playerRigidbody!.velocity = Vector3.zero;
             }
             
-            playerRigidbody.position = CoordConvert.MC2Unity(loc);
+            playerRigidbody!.position = CoordConvert.MC2Unity(loc);
 
             if (playerRender != null)
             {
