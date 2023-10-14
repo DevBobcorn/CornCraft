@@ -18,10 +18,34 @@ namespace CraftSharp.Rendering
         public const string SOLID_LAYER_NAME = "Solid";
         public const string LIQUID_SURFACE_LAYER_NAME = "LiquidSurface";
 
+        [SerializeField] private Transform? blockEntityParent;
+
+        #region GameObject Prefabs for each block entity type
+        [SerializeField] private GameObject? defaultPrefab;
+        #endregion
+
+        private readonly Dictionary<ResourceLocation, GameObject?> blockEntityPrefabs = new();
+        private GameObject? GetPrefabForType(ResourceLocation type) => blockEntityPrefabs.GetValueOrDefault(type, defaultPrefab);
+
         /// <summary>
         /// World data, accessible on both Unity thread and mesh builder threads
         /// </summary>
         private readonly World world = new();
+
+        /// <summary>
+        /// All block entity renders in the current world
+        /// </summary>
+        private readonly Dictionary<BlockLoc, BlockEntityRender> blockEntityRenders = new();
+
+        // Squared distance range of a entity to be considered as "near" the player
+        private const float NEARBY_THERESHOLD_INNER =  81F; //  9 *  9
+        private const float NEARBY_THERESHOLD_OUTER = 100F; // 10 * 10
+
+        /// <summary>
+        /// A dictionary storing entities near the player
+        /// Block entity location => Square distance to player
+        /// </summary>
+        private readonly Dictionary<BlockLoc, float> nearbyBlockEntities = new();
 
         /// <summary>
         /// Dictionary for temporarily storing received lighting data
@@ -54,7 +78,10 @@ namespace CraftSharp.Rendering
 
         public void SetClient(BaseCornClient client) => this.client = client;
 
-        public string GetDebugInfo() => $"QueC: {chunkRendersToBeBuilt.Count}\t BldC: {chunkRendersBeingBuilt.Count}";
+        public string GetDebugInfo()
+        {
+            return $"Queued Chunks: {chunkRendersToBeBuilt.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\nBlock Entity Count: {blockEntityRenders.Count}";
+        }
 
         #region Chunk management
         private ChunkRenderColumn CreateChunkRenderColumn(int chunkX, int chunkZ)
@@ -197,6 +224,56 @@ namespace CraftSharp.Rendering
             return false; // Not available
         }
 
+        /// <summary>
+        /// Check if the given location is occupied by a block entity
+        /// </summary>
+        /// <param name="blockLoc">Location of the block entity</param>
+        /// <returns></returns>
+        public bool HasBlockEntityRender(BlockLoc blockLoc)
+        {
+            return blockEntityRenders.ContainsKey(blockLoc);
+        }
+
+        /// <summary>
+        /// Get block entity render at a given location
+        /// </summary>
+        /// <param name="blockLoc">Location of the block entity</param>
+        /// <returns>Block entity render at the location. Null if not present</returns>
+        public BlockEntityRender? GetBlockEntityRender(BlockLoc blockLoc)
+        {
+            if (blockEntityRenders.ContainsKey(blockLoc))
+                return blockEntityRenders[blockLoc];
+            
+            return null;
+        }
+
+        public void AddBlockEntityRender(BlockLoc blockLoc, BlockEntityType blockEntityType, Dictionary<string, object> tags)
+        {
+            // If the location is occupied by a block entity already,
+            // destroy this block entity first
+            if (blockEntityRenders.ContainsKey(blockLoc))
+            {
+                blockEntityRenders[blockLoc]?.Unload();
+                blockEntityRenders.Remove(blockLoc);
+            }
+
+            GameObject? blockEntityPrefab = GetPrefabForType(blockEntityType.BlockEntityId);
+
+            if (blockEntityPrefab is not null)
+            {
+                var blockEntityObj = GameObject.Instantiate(blockEntityPrefab);
+                var blockEntityRender = blockEntityObj!.GetComponent<BlockEntityRender>();
+
+                blockEntityRenders.Add(blockLoc, blockEntityRender);
+
+                blockEntityObj.name = $"[{blockLoc}] {blockEntityType}";
+                blockEntityObj.transform.parent = blockEntityParent;
+                blockEntityObj.transform.position = CoordConvert.MC2Unity(blockLoc.ToCenterLocation());
+
+                // Initialize the entity
+                blockEntityRender.Initialize(blockLoc, blockEntityType, tags);
+            }
+        }
         #endregion
 
         #region Chunk updating
@@ -403,6 +480,13 @@ namespace CraftSharp.Rendering
                 renderColumns.Remove(chunkCoord);
             }
 
+            // Unload all block renders in world
+            foreach (var pair in blockEntityRenders)
+            {
+                pair.Value.Unload();
+            }
+            blockEntityRenders.Clear();
+
             renderColumns.Clear();
         }
 
@@ -533,6 +617,44 @@ namespace CraftSharp.Rendering
             }
         }
 
+        void Update()
+        {
+            var client = CornApp.CurrentClient;
+
+            if (client is null) // Game is not ready, cancel update
+                return;
+
+            foreach (var pair in blockEntityRenders)
+            {
+                var blockLoc = pair.Key;
+                var render = pair.Value;
+
+                // Call managed update
+                render.ManagedUpdate(client!.GetTickMilSec());
+
+                // Update entities around the player
+                float dist = (float) blockLoc.ToCenterLocation().DistanceSquared(client.GetLocation());
+                bool inNearbyDict = nearbyBlockEntities.ContainsKey(blockLoc);
+
+                if (dist < NEARBY_THERESHOLD_INNER) // Add entity to dictionary
+                {
+                    if (inNearbyDict)
+                        nearbyBlockEntities[blockLoc] = dist;
+                    else
+                        nearbyBlockEntities.Add(blockLoc, dist);
+                }
+                else if (dist > NEARBY_THERESHOLD_OUTER) // Remove entity from dictionary
+                {
+                    if (inNearbyDict)
+                        nearbyBlockEntities.Remove(blockLoc);
+                }
+                else // Update entity's distance to the player if it is in the dictionary, otherwise do nothing
+                {
+                    if (inNearbyDict)
+                        nearbyBlockEntities[blockLoc] = dist;
+                }
+            }
+        }
         #endregion
     }
 }
