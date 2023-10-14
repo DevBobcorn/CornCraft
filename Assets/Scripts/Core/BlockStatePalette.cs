@@ -12,6 +12,8 @@ namespace CraftSharp
 {
     public class BlockStatePalette
     {
+        private static readonly char SP = Path.DirectorySeparatorChar;
+
         public static readonly BlockStatePalette INSTANCE = new();
 
         public BlockState FromId(int stateId)
@@ -64,7 +66,7 @@ namespace CraftSharp
 
             HashSet<int> knownStates = new HashSet<int>();
 
-            string statesPath = PathHelper.GetExtraDataFile($"blocks-{dataVersion}.json");
+            string statesPath = PathHelper.GetExtraDataFile($"blocks{SP}blocks-{dataVersion}.json");
             string listsPath  = PathHelper.GetExtraDataFile("block_lists.json");
             string colorsPath = PathHelper.GetExtraDataFile("block_colors.json");
             string renderTypePath = PathHelper.GetExtraDataFile("block_render_type.json");

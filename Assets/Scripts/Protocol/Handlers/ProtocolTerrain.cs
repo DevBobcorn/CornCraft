@@ -303,34 +303,20 @@ namespace CraftSharp.Protocol.Handlers
             if (error > 0) // Error correction
                 dataTypes.ReadData(error, cache);
 
-            // Skip tile entity data
+            // Read block entity data
             int blockEntityCount = dataTypes.ReadNextVarInt(cache);
-
-            if (blockEntityCount != 0)
+            if (blockEntityCount > 0)
             {
-                //UnityEngine.Debug.Log($"Block entities: {blockEntityCount} | Bytes left: {cache.Count}");
-
                 for (int i = 0; i < blockEntityCount; i++) {
                     var packedXZ = dataTypes.ReadNextByte(cache);
                     var y = dataTypes.ReadNextShort(cache);
                     var type = dataTypes.ReadNextVarInt(cache);
-
                     var tag = dataTypes.ReadNextNbt(cache);
-
-                    /* Output tile entity data
-                    
                     int x = (chunkX << 4) + (packedXZ >> 4);
                     int z = (chunkZ << 4) + (packedXZ & 15);
-
-                    var sb = new StringBuilder($"{x} {y} {z} => Some Tile Entity, tag count: {tag.Keys.Count}\n");
-
-                    if (tag.Keys.Count > 0)
-                    {
-                        foreach (var pair in tag)
-                        sb.Append($"{pair.Key}: {pair.Value}\n");
-                    }
-
-                    UnityEngine.Debug.Log(sb.ToString());*/
+                    // Output block entity data
+                    var blockLoc = new BlockLoc(x, y, z);
+                    UnityEngine.Debug.Log($"[{blockLoc}] {Json.Object2Json(tag)}");
                 }
             }
             
@@ -524,17 +510,16 @@ namespace CraftSharp.Protocol.Handlers
                 }
             }
 
-            // Read tile entity data
+            // Read block entity data
             int blockEntityCount = dataTypes.ReadNextVarInt(cache);
-
-            //if (blockEntityCount > 0)
-            //    UnityEngine.Debug.Log($"{blockEntityCount} block entities in chunk column [{chunkX}, {chunkZ}]");
-
-            for (int i = 0; i < blockEntityCount; i++) {
-                var tag = dataTypes.ReadNextNbt(cache);
-                //UnityEngine.Debug.Log($"{tag["x"]} {tag["y"]} {tag["z"]} => {tag["id"]}");
-
-                // TODO Make use of these data
+            if (blockEntityCount > 0)
+            {
+                for (int i = 0; i < blockEntityCount; i++) {
+                    var tag = dataTypes.ReadNextNbt(cache);
+                    // Output block entity data
+                    var blockLoc = new BlockLoc((int) tag["x"], (int) tag["y"], (int) tag["z"]);
+                    UnityEngine.Debug.Log($"[{blockLoc}] {Json.Object2Json(tag)}");
+                }
             }
 
             // All data in packet should be parsed now, with nothing left

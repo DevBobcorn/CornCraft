@@ -8,6 +8,7 @@ namespace CraftSharp
 {
     public class EntityPalette
     {
+        private static readonly char SP = Path.DirectorySeparatorChar;
         public static readonly EntityPalette INSTANCE = new();
 
         private readonly Dictionary<int, EntityType> entityTypeTable = new();
@@ -56,7 +57,7 @@ namespace CraftSharp
             entityTypeTable.Clear();
             dictId.Clear();
 
-            var entityTypeListPath = PathHelper.GetExtraDataFile($"entity_types-{entityVersion}.json");
+            var entityTypeListPath = PathHelper.GetExtraDataFile($"entities{SP}entity_types-{entityVersion}.json");
             string listsPath  = PathHelper.GetExtraDataFile("entity_lists.json");
 
             if (!File.Exists(entityTypeListPath) || !File.Exists(listsPath))
@@ -67,7 +68,7 @@ namespace CraftSharp
                 return;
             }
 
-            // First read special item lists...
+            // First read special entity lists...
             var lists = new Dictionary<string, HashSet<ResourceLocation>>();
             lists.Add("contains_item", new());
 

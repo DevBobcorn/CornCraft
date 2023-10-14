@@ -225,6 +225,11 @@ namespace CraftSharp
             return "[" + string.Join(",", list.Select(x => Object2Json(x)) ) + "]";
         }
 
+        private static string Array2Json(object[] array)
+        {
+            return "[" + string.Join(",", array.Select(x => Object2Json(x)) ) + "]";
+        }
+
         /// <summary>
         /// Serialize an object into JSON string
         /// </summary>
@@ -237,8 +242,10 @@ namespace CraftSharp
                 Dictionary<string, object> dict => Dictionary2Json(dict),
                 // Object list
                 List<object> list               => List2Json(list),
+                // Object array
+                object[] array                  => Array2Json(array),
                 // User-defined json serialization
-                IJSONSerializable objValue       => objValue.ToJson(),
+                IJSONSerializable objValue      => objValue.ToJson(),
                 // String value, wrap with quoatation marks
                 string strValue                 => $"\"{strValue}\"",
                 // Boolean value, should be lowercase 'true' or 'false'

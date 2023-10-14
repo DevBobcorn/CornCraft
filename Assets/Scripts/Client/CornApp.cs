@@ -160,6 +160,11 @@ namespace CraftSharp
             Task.Run(() => EntityPalette.INSTANCE.PrepareData(entityVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
+            // Load block entity definitions (after all blockstates are loaded)
+            loadFlag.Finished = false;
+            Task.Run(() => BlockEntityPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            while (!loadFlag.Finished) yield return null;
+
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
                 Notify("Failed to load all resources!", Notification.Type.Error);
