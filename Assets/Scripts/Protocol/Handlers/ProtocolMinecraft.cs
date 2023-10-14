@@ -1108,6 +1108,15 @@ namespace CraftSharp.Protocol.Handlers
                                     new Block((ushort) dataTypes.ReadNextVarInt(packetData)));
                             break;
                         }
+                    case PacketTypesIn.BlockEntityData:
+                        {
+                            var blockLoc = dataTypes.ReadNextBlockLoc(packetData);
+                            var type = dataTypes.ReadNextVarInt(packetData);
+                            var tag = dataTypes.ReadNextNbt(packetData);
+                            // Output block entity data
+                            UnityEngine.Debug.Log($"[{blockLoc}] {Json.Object2Json(tag)}");
+                            break;
+                        }
                     case PacketTypesIn.UnloadChunk:
                         {
                             int chunkX = dataTypes.ReadNextInt(packetData);

@@ -11,6 +11,7 @@ namespace CraftSharp
 {
     public class ItemPalette
     {
+        private static readonly char SP = Path.DirectorySeparatorChar;
         public static readonly ItemPalette INSTANCE = new();
 
         private readonly Dictionary<int, Item> itemsTable = new();
@@ -68,7 +69,7 @@ namespace CraftSharp
             itemsTable.Clear();
             dictId.Clear();
 
-            string itemsPath = PathHelper.GetExtraDataFile($"items-{dataVersion}.json");
+            string itemsPath = PathHelper.GetExtraDataFile($"items{SP}items-{dataVersion}.json");
             string listsPath  = PathHelper.GetExtraDataFile("item_lists.json");
             string colorsPath = PathHelper.GetExtraDataFile("item_colors.json");
 

@@ -1046,7 +1046,7 @@ namespace CraftSharp
 
                         Debug.Log($"Updated to {location} yaw: {yaw} (offset: {yawIsOffset}) loc offset: {offset.magnitude}");
                     });
-                }    
+                }
             }
         }
 
