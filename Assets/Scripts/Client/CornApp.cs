@@ -10,7 +10,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 using CraftSharp.Event;
-using CraftSharp.Interaction;
+using CraftSharp.Control;
 using CraftSharp.Protocol.ProfileKey;
 using CraftSharp.Protocol.Handlers.Forge;
 using CraftSharp.Protocol.Session;

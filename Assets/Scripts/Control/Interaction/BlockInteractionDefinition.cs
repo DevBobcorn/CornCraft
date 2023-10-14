@@ -1,6 +1,4 @@
-#nullable enable
-
-namespace CraftSharp.Interaction
+namespace CraftSharp.Control
 {
     public enum BlockInteractionType
     {

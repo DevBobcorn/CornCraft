@@ -238,19 +238,9 @@ namespace CraftSharp
             return Math.Sqrt(Math.Pow(this.X - loc.X, 2) + Math.Pow(this.Y - loc.Y, 2) + Math.Pow(this.Z - loc.Z, 2));
         }
 
-        public double DistanceTo(int3 loc)
-        {
-            return Math.Sqrt(Math.Pow(this.X - loc.x, 2) + Math.Pow(this.Y - loc.y, 2) + Math.Pow(this.Z - loc.z, 2));
-        }
-
         public double SqrDistanceTo(Location loc)
         {
             return Math.Pow(this.X - loc.X, 2) + Math.Pow(this.Y - loc.Y, 2) + Math.Pow(this.Z - loc.Z, 2);
-        }
-
-        public double SqrDistanceTo(int3 loc)
-        {
-            return Math.Pow(this.X - loc.x, 2) + Math.Pow(this.Y - loc.y, 2) + Math.Pow(this.Z - loc.z, 2);
         }
     }
 }

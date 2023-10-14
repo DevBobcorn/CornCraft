@@ -42,7 +42,6 @@ namespace CraftSharp.UI
             };
 
             EventManager.Instance.Register(showCallback);
-
         }
 
         void OnDestroy()
@@ -51,6 +50,5 @@ namespace CraftSharp.UI
                 EventManager.Instance.Unregister(showCallback);
 
         }
-
     }
 }

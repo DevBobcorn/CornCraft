@@ -53,6 +53,8 @@ MonoBehaviour:
   ability: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
   cameraController: {fileID: 0}
   CameraRef: {fileID: 0}
+  playerRigidbody: {fileID: 4743315889508510048}
+  statusUpdater: {fileID: 2543192715876108228}
   physicMaterial: {fileID: 13400000, guid: 11508097031b7f04c8ab9dcba71d230e, type: 2}
   UseRootMotion: 0
 --- !u!114 &2543192715876108228

@@ -6,7 +6,7 @@ using UnityEngine;
 
 using CraftSharp.Protocol;
 
-namespace CraftSharp.Interaction
+namespace CraftSharp.Control
 {
     public class BlockInteractionManager
     {
@@ -49,7 +49,6 @@ namespace CraftSharp.Interaction
                             //Debug.Log($"Added pickable interaction for blockstate [{stateId}] {statesTable[stateId]}");
                         }
                     }
-
                 }
             }
 

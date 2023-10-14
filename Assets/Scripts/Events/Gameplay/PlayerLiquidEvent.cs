@@ -1,6 +1,3 @@
-#nullable enable
-using CraftSharp.Interaction;
-
 namespace CraftSharp.Event
 {
     public record PlayerLiquidEvent : BaseEvent

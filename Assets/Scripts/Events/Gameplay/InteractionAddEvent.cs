@@ -1,5 +1,5 @@
 #nullable enable
-using CraftSharp.Interaction;
+using CraftSharp.Control;
 
 namespace CraftSharp.Event
 {

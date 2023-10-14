@@ -174,7 +174,7 @@ namespace CraftSharp
         /// <returns>String representation of the location</returns>
         public override string ToString()
         {
-            return string.Format("X:\t{0} Y:\t{1} Z:\t{2}", X, Y, Z);
+            return string.Format("X: {0} Y: {1} Z: {2}", X, Y, Z);
         }
 
         public Location ToLocation()
@@ -182,9 +182,19 @@ namespace CraftSharp
             return new Location(this.X, this.Y, this.Z);
         }
 
-        public double DistanceTo(Location loc)
+        public Location ToCenterLocation()
+        {
+            return new Location(this.X + 0.5F, this.Y + 0.5F, this.Z + 0.5F);
+        }
+
+        public double DistanceTo(BlockLoc loc)
         {
             return Math.Sqrt(Math.Pow(this.X - loc.X, 2) + Math.Pow(this.Y - loc.Y, 2) + Math.Pow(this.Z - loc.Z, 2));
+        }
+
+        public double SqrDistanceTo(BlockLoc loc)
+        {
+            return Math.Pow(this.X - loc.X, 2) + Math.Pow(this.Y - loc.Y, 2) + Math.Pow(this.Z - loc.Z, 2);
         }
 
         public BlockLoc Up()

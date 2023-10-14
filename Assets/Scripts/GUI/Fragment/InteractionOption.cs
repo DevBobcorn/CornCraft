@@ -3,7 +3,7 @@ using UnityEngine;
 using TMPro;
 
 using CraftSharp.Event;
-using CraftSharp.Interaction;
+using CraftSharp.Control;
 
 namespace CraftSharp.UI
 {
