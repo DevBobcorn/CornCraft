@@ -2334,6 +2334,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Simple Camera Controller
       objectReference: {fileID: 0}
+    - target: {fileID: 4409463203126261892, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_Follow
+      value: 
+      objectReference: {fileID: 1939684686}
+    - target: {fileID: 7808910476651940505, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_Follow
+      value: 
+      objectReference: {fileID: 1939684686}
+    - target: {fileID: 8231872019064414601, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_Follow
+      value: 
+      objectReference: {fileID: 1939684686}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.5256128
