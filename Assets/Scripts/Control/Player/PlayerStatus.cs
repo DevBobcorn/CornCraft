@@ -25,6 +25,7 @@ namespace CraftSharp.Control
         public bool WalkMode   = false;
 
         public bool EntityDisabled = false;
+        public bool PhysicsDisabled = true;
 
         public bool PlayingRootMotion = false;
 

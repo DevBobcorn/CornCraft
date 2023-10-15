@@ -45,12 +45,29 @@ namespace CraftSharp.Control
         protected IPlayerState CurrentState = PlayerStates.IDLE;
         public PlayerStatus? Status => statusUpdater?.Status;
 
-        // Values for sending over to the server.
-        // Should only be set from the unity thread
-        // and read from the network thread
+        // Values for sending over to the server. Should only be set
+        // from the unity thread and read from the network thread
+
+        /// <summary>
+        /// Player location for sending to the server
+        /// </summary>
         public Location Location2Send { get; private set; }
-        public float Yaw2Send { get; private set; }
+
+        /// <summary>
+        /// Player yaw for sending to the server
+        /// This yaw value is stored in Minecraft coordinate system.
+        /// Conversion is required when assigning to unity transfom
+        /// </summary>
+        public float MCYaw2Send { get; private set; }
+
+        /// <summary>
+        /// Player pitch for sending to the server
+        /// </summary>
         public float Pitch2Send { get; private set; }
+
+        /// <summary>
+        /// Grounded flag for sending to the server
+        /// </summary>
         public bool IsGrounded2Send { get; private set; }
 
         public Quaternion GetRotation()
@@ -201,9 +218,6 @@ namespace CraftSharp.Control
             // Initialize health value
             EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
 
-            // Disable entity on start
-            DisableEntity();
-
             // Register gamemode events for updating gamemode
             gameModeCallback = (e) => SetGameMode(e.GameMode);
             EventManager.Instance.Register(gameModeCallback);
@@ -251,6 +265,18 @@ namespace CraftSharp.Control
             }
         }
 
+        public void DisablePhysics()
+        {
+            Status!.PhysicsDisabled = true;
+            playerRigidbody!.isKinematic = true;
+        }
+
+        public void EnablePhysics()
+        {
+            Status!.PhysicsDisabled = false;
+            playerRigidbody!.isKinematic = false;
+        }
+
         protected void DisableEntity()
         {
             // Update components state...
@@ -267,7 +293,7 @@ namespace CraftSharp.Control
             Status.EntityDisabled = true;
 
             // Hide entity render
-            HideRender();
+            playerRender?.gameObject.SetActive(false);
         }
 
         protected void EnableEntity()
@@ -279,16 +305,6 @@ namespace CraftSharp.Control
             Status!.EntityDisabled = false;
 
             // Show entity render
-            ShowRender();
-        }
-
-        protected virtual void HideRender()
-        {
-            playerRender?.gameObject.SetActive(false);
-        }
-
-        protected virtual void ShowRender()
-        {
             playerRender?.gameObject.SetActive(true);
         }
         
@@ -496,7 +512,7 @@ namespace CraftSharp.Control
             if (playerRender != null)
             {
                 // Update client player data
-                Yaw2Send = playerRender.VisualTransform.eulerAngles.y - 90F; // Coordinate system conversion
+                MCYaw2Send = playerRender.VisualTransform.eulerAngles.y - 90F; // Coordinate system conversion
                 Pitch2Send = 0F;
             }
         }
@@ -543,7 +559,7 @@ namespace CraftSharp.Control
             }
         }
 
-        public void SetLocation(Location loc, bool reset = false, float yaw = 0F)
+        public void SetLocation(Location loc, bool reset = false, float mcYaw = 0F)
         {
             if (reset) // Reset rigidbody
             {
@@ -551,10 +567,13 @@ namespace CraftSharp.Control
             }
             
             playerRigidbody!.position = CoordConvert.MC2Unity(loc);
+            // Update local data
+            Location2Send = loc;
+            MCYaw2Send = mcYaw;
 
             if (playerRender != null)
             {
-                playerRender.VisualTransform.eulerAngles = new(0F, yaw, 0F);
+                playerRender.VisualTransform.eulerAngles = new(0F, mcYaw + 90F, 0F); // Coordinate system conversion
             }
         }
 
