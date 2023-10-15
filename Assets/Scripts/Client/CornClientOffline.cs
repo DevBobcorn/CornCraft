@@ -94,7 +94,6 @@ namespace CraftSharp
             // Update client entity name
             clientEntity.Name = session.PlayerName;
             clientEntity.UUID = uuid;
-            clientEntity.HeadYaw = Entity.GetHeadYawFromByte(127);
             clientEntity.MaxHealth = 20F;
 
             if (playerRenderPrefab != null)
