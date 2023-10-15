@@ -1130,7 +1130,7 @@ namespace CraftSharp.Protocol.Handlers
                             if (handler.GetChunkRenderManager().GetChunkColumn(chunkX, chunkZ) != null)
                                 Interlocked.Decrement(ref handler.GetChunkRenderManager().chunkCnt);
                             // Warning: It is legal to include unloaded chunks in the UnloadChunk packet. Since chunks that have not been loaded are not recorded, this may result in loading chunks that should be unloaded and inaccurate statistics.
-                            handler.GetChunkRenderManager().UnloadChunk(chunkX, chunkZ);
+                            handler.GetChunkRenderManager().UnloadChunkColumn(chunkX, chunkZ);
                             break;
                         }
                     case PacketTypesIn.ChangeGameState:

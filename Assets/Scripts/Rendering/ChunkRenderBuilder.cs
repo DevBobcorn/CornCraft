@@ -354,7 +354,7 @@ namespace CraftSharp.Rendering
         // (or say PhysX) bug, so we dynamically build the mesh collider around the
         // player as a solution to this. See the problem discussion at
         // https://forum.unity.com/threads/ball-rolling-on-mesh-hits-edges.772760/
-        public void BuildTerrainCollider(World world, BlockLoc playerBlockLoc, MeshCollider movementCollider, MeshCollider liquidCollider)
+        public void BuildTerrainCollider(World world, BlockLoc playerBlockLoc, MeshCollider movementCollider, MeshCollider liquidCollider, Action? callback)
         {
             int offsetY = World.GetDimension().minY;
             
@@ -479,6 +479,10 @@ namespace CraftSharp.Rendering
                     liquidCollider!.sharedMesh?.Clear();
                 
                 colVertAttrs.Dispose();
+
+                // Invoke callback, for example enable player
+                // physics when collider rebuild is complete
+                callback?.Invoke();
             });
         }
     }

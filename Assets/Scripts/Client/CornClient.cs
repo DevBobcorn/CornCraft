@@ -92,6 +92,9 @@ namespace CraftSharp
             // Set up interaction updater
             interactionUpdater = GetComponent<InteractionUpdater>();
             interactionUpdater!.Initialize(this, CameraController);
+
+            // Freeze player controller until terrain is ready
+            playerController!.DisablePhysics();
         }
 
         public override bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp,
@@ -211,7 +214,7 @@ namespace CraftSharp
                     handler?.SendLocationUpdate(
                             playerController!.Location2Send,
                             playerController.IsGrounded2Send,
-                            playerController.Yaw2Send,
+                            playerController.MCYaw2Send,
                             playerController.Pitch2Send);
 
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)
@@ -238,7 +241,6 @@ namespace CraftSharp
         /// </summary>
         private void TimeoutDetector(object? o)
         {
-            Debug.Log("Timeout Detector start");
             UpdateKeepAlive();
             do
             {
@@ -269,7 +271,6 @@ namespace CraftSharp
                 }
             }
             while (!((CancellationToken)o!).IsCancellationRequested);
-            Debug.Log("Timeout Detector stop");
         }
 
         /// <summary>
@@ -649,9 +650,6 @@ namespace CraftSharp
         /// <returns>True if packet successfully sent</returns>
         public override bool SendRespawnPacket()
         {
-            // Reset location received flag
-            locationReceived = false;
-
             if (InvokeRequired)
                 return InvokeOnNetMainThread<bool>(SendRespawnPacket);
 
@@ -954,6 +952,9 @@ namespace CraftSharp
         /// </summary>
         public void OnRespawn(bool keepAttr, bool keepMeta)
         {
+            // Reset location received flag
+            locationReceived = false;
+
             ClearTasks();
 
             ChunkRenderManager!.ClearWorld();
@@ -964,6 +965,8 @@ namespace CraftSharp
             }
 
             Loom.QueueOnMainThread(() => {
+                playerController!.DisablePhysics();
+
                 ChunkRenderManager?.ReloadWorldRender();
                 EntityRenderManager?.ReloadEntityRenders();
             });
@@ -1002,11 +1005,7 @@ namespace CraftSharp
                 if (yawIsOffset)
                 {
                     // Offset based off current value
-                    yaw += playerController!.Yaw2Send;
-                }
-                else
-                {
-                    yaw += 90F; // Coordinate system conversion
+                    yaw += playerController!.MCYaw2Send;
                 }
 
                 if (pitchIsOffset)
@@ -1020,14 +1019,14 @@ namespace CraftSharp
                     locationReceived = true;
 
                     Loom.QueueOnMainThread(() => {
+                        // Update player location
+                        playerController!.SetLocation(location, mcYaw: yaw);
                         // Force refresh environment collider
-                        ChunkRenderManager?.RebuildTerrainCollider(location.GetBlockLoc());
-                        // Then update player location
-                        playerController!.SetLocation(location, yaw: yaw);
+                        ChunkRenderManager?.InitializeTerrainCollider(location.GetBlockLoc(),
+                                () => playerController!.EnablePhysics());
                         // Update camera yaw
                         CameraController.SetYaw(yaw);
-
-                        Debug.Log($"Spawned at {location} yaw: {yaw} (offset: {yawIsOffset})");
+                        Debug.Log($"Spawned at {location}");
                     });
                 }
                 else // Position correction from server
@@ -1042,9 +1041,8 @@ namespace CraftSharp
                         // Force refresh environment collider
                         ChunkRenderManager?.RebuildTerrainCollider(location.GetBlockLoc());
                         // Then update player location
-                        playerController!.SetLocation(location, reset: true, yaw: yaw);
-
-                        Debug.Log($"Updated to {location} yaw: {yaw} (offset: {yawIsOffset}) loc offset: {offset.magnitude}");
+                        playerController!.SetLocation(location, reset: true, mcYaw: yaw);
+                        Debug.Log($"Updated to {location} offset: {offset.magnitude}");
                     });
                 }
             }
@@ -1212,7 +1210,7 @@ namespace CraftSharp
         public void OnReceivePlayerEntityID(int entityID)
         {
             clientEntity.ID = entityID;
-            Debug.Log($"Client entity id received: {entityID}");
+            //Debug.Log($"Client entity id received: {entityID}");
         }
 
         /// <summary>

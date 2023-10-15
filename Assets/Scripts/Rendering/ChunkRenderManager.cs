@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -253,7 +254,7 @@ namespace CraftSharp.Rendering
             // destroy this block entity first
             if (blockEntityRenders.ContainsKey(blockLoc))
             {
-                blockEntityRenders[blockLoc]?.Unload();
+                // TODO: blockEntityRenders[blockLoc]?.Unload();
                 blockEntityRenders.Remove(blockLoc);
             }
 
@@ -436,11 +437,11 @@ namespace CraftSharp.Rendering
         private bool terrainColliderDirty = true;
 
         /// <summary>
-        /// Unload a chunk, invoked from network thread
+        /// Unload a chunk column, invoked from network thread
         /// </summary>
         /// <param name="chunkX"></param>
         /// <param name="chunkZ"></param>
-        public void UnloadChunk(int chunkX, int chunkZ)
+        public void UnloadChunkColumn(int chunkX, int chunkZ)
         {
             world[chunkX, chunkZ] = null;
 
@@ -450,6 +451,15 @@ namespace CraftSharp.Rendering
                 {
                     renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt);
                     renderColumns.Remove(chunkCoord);
+                }
+
+                foreach (var pair in blockEntityRenders)
+                {
+                    if (pair.Key.GetChunkX() == chunkX && pair.Key.GetChunkZ() == chunkZ)
+                    {
+                        // Block entity is within the chunk column to be unloaded
+                        pair.Value.Unload();
+                    }
                 }
             });
         }
@@ -479,13 +489,6 @@ namespace CraftSharp.Rendering
                 renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt);
                 renderColumns.Remove(chunkCoord);
             }
-
-            // Unload all block renders in world
-            foreach (var pair in blockEntityRenders)
-            {
-                pair.Value.Unload();
-            }
-            blockEntityRenders.Clear();
 
             renderColumns.Clear();
         }
@@ -525,10 +528,42 @@ namespace CraftSharp.Rendering
                 terrainColliderDirty = true; // Terrain collider needs to be updated
         }
 
+        public void InitializeTerrainCollider(BlockLoc playerBlockLoc, Action? callback = null)
+        {
+            terrainColliderDirty = false;
+
+            Task.Factory.StartNew(async () =>
+            {
+                // Wait for old data to be cleared up
+                await Task.Delay(100);
+
+                int chunkX = playerBlockLoc.GetChunkX();
+                int chunkZ = playerBlockLoc.GetChunkZ();
+
+                int delayCount = 50; // Max delay time to stop waiting forever
+                
+                while (!world.IsChunkColumnReady(chunkX, chunkZ) && delayCount > 0)
+                {
+                    // Wait until the chunk column data is ready
+                    await Task.Delay(100);
+                    delayCount--;
+                }
+
+                builder!.BuildTerrainCollider(world, playerBlockLoc, movementCollider!, liquidCollider!, callback);
+
+                // Set last player location
+                lastPlayerBlockLoc = playerBlockLoc;
+            });
+        }
+
         public void RebuildTerrainCollider(BlockLoc playerBlockLoc)
         {
             terrainColliderDirty = false;
-            Task.Factory.StartNew(() => builder!.BuildTerrainCollider(world, playerBlockLoc, movementCollider!, liquidCollider!));
+
+            Task.Factory.StartNew(() =>
+            {
+                builder!.BuildTerrainCollider(world, playerBlockLoc, movementCollider!, liquidCollider!, null);
+            });
         }
 
         void Start()
@@ -580,41 +615,6 @@ namespace CraftSharp.Rendering
                 UpdateChunkRendersListRemove();
             
             operationCode = (operationCode + 1) % OPERATION_CYCLE_LENGTH;
-
-            // Update terrain collider if necessary
-            var playerBlockLoc = client?.GetLocation().GetBlockLoc();
-            if (playerBlockLoc is not null)
-            {
-                if (lastPlayerBlockLoc is not null)
-                {
-                    if (terrainColliderDirty || lastPlayerBlockLoc.Value != playerBlockLoc.Value)
-                    {
-                        RebuildTerrainCollider(playerBlockLoc.Value);
-                        // Update player liquid state
-                        var inLiquid = GetBlock(playerBlockLoc.Value).State.InLiquid;
-                        var prevInLiquid = GetBlock(lastPlayerBlockLoc.Value).State.InLiquid;
-                        if (prevInLiquid != inLiquid) // Player liquid state changed, broadcast this change
-                        {
-                            EventManager.Instance.Broadcast(new PlayerLiquidEvent(inLiquid));
-                        }
-                        // Update last location only if it is used
-                        lastPlayerBlockLoc = playerBlockLoc;
-                    }
-                }
-                else
-                {
-                    RebuildTerrainCollider(playerBlockLoc.Value);
-                    // Update player liquid state
-                    var inLiquid = GetBlock(playerBlockLoc.Value).State.InLiquid;
-                    if (inLiquid) // Player liquid state changed, broadcast this change
-                    {
-                        EventManager.Instance.Broadcast(new PlayerLiquidEvent(true));
-                        Debug.Log($"Enter water at {playerBlockLoc}");
-                    }
-                    // Update last location
-                    lastPlayerBlockLoc = playerBlockLoc;
-                }
-            }
         }
 
         void Update()
@@ -623,6 +623,8 @@ namespace CraftSharp.Rendering
 
             if (client is null) // Game is not ready, cancel update
                 return;
+            
+            var playerBlockLoc = client.GetLocation().GetBlockLoc();
 
             foreach (var pair in blockEntityRenders)
             {
@@ -630,10 +632,10 @@ namespace CraftSharp.Rendering
                 var render = pair.Value;
 
                 // Call managed update
-                render.ManagedUpdate(client!.GetTickMilSec());
+                render.ManagedUpdate(client.GetTickMilSec());
 
                 // Update entities around the player
-                float dist = (float) blockLoc.ToCenterLocation().DistanceSquared(client.GetLocation());
+                float dist = (float) blockLoc.DistanceSquared(playerBlockLoc);
                 bool inNearbyDict = nearbyBlockEntities.ContainsKey(blockLoc);
 
                 if (dist < NEARBY_THERESHOLD_INNER) // Add entity to dictionary
@@ -652,6 +654,23 @@ namespace CraftSharp.Rendering
                 {
                     if (inNearbyDict)
                         nearbyBlockEntities[blockLoc] = dist;
+                }
+            }
+
+            if (lastPlayerBlockLoc is not null) // Updating location, update terrain collider if necessary
+            {
+                if (terrainColliderDirty || lastPlayerBlockLoc.Value != playerBlockLoc)
+                {
+                    RebuildTerrainCollider(playerBlockLoc);
+                    // Update player liquid state
+                    var inLiquid = GetBlock(playerBlockLoc).State.InLiquid;
+                    var prevInLiquid = GetBlock(lastPlayerBlockLoc.Value).State.InLiquid;
+                    if (prevInLiquid != inLiquid) // Player liquid state changed, broadcast this change
+                    {
+                        EventManager.Instance.Broadcast(new PlayerLiquidEvent(inLiquid));
+                    }
+                    // Update last location only if it is used
+                    lastPlayerBlockLoc = playerBlockLoc; 
                 }
             }
         }
