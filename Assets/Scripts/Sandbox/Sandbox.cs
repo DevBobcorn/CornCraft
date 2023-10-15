@@ -30,7 +30,6 @@ namespace CraftSharp.Sandbox
 
             // Create dummy entity
             var dummyEntity = new Entity(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
-            dummyEntity.HeadYaw = Entity.GetHeadYawFromByte(127);
             dummyEntity.MaxHealth = 20F;
 
             GameObject renderObj;
