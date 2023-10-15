@@ -549,6 +549,10 @@ namespace CraftSharp.Rendering
                     delayCount--;
                 }
 
+                // Update player liquid state
+                var inLiquid = GetBlock(playerBlockLoc).State.InLiquid;
+                EventManager.Instance.Broadcast(new PlayerLiquidEvent(inLiquid));
+
                 builder!.BuildTerrainCollider(world, playerBlockLoc, movementCollider!, liquidCollider!, callback);
 
                 // Set last player location
