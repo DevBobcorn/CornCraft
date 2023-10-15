@@ -157,7 +157,7 @@ namespace CraftSharp
             }
         }
 
-        public bool GetIsOpaque(BlockLoc blockLoc)
+        public bool GetAmbientOcclusion(BlockLoc blockLoc)
         {
             int index = ((blockLoc.Y - MinimumY) << 8) | (blockLoc.GetChunkBlockZ() << 4) | blockLoc.GetChunkBlockX();
             

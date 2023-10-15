@@ -82,13 +82,13 @@ namespace CraftSharp.Rendering
             return result.Select(x => x / 8F).ToArray();
         }
 
-        private bool[] GetAllNeighborOpaque(ChunkRenderManager manager, BlockLoc blockLoc)
+        private bool[] GetAllNeighborAO(ChunkRenderManager manager, BlockLoc blockLoc)
         {
             var result = new bool[27];
 
             for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
             {
-                result[y * 9 + z * 3 + x] = manager.IsOpaqueAt(blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
+                result[y * 9 + z * 3 + x] = manager.GetAmbientOcclusion(blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
             }
 
             return result;
@@ -157,7 +157,7 @@ namespace CraftSharp.Rendering
                                 var chosen = (x + y + z) % models.Length;
                                 var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, blockLoc, state);
                                 var lights = GetCornerLights(manager, blockLoc);
-                                var opaq = GetAllNeighborOpaque(manager, blockLoc);
+                                var opaq = GetAllNeighborAO(manager, blockLoc);
 
                                 if (state.NoCollision)
                                     models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, opaq, lights, color);

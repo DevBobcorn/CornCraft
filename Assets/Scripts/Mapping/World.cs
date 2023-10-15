@@ -262,11 +262,11 @@ namespace CraftSharp
         /// <summary>
         /// Get chunk column at the specified location
         /// </summary>
-        /// <param name="location">Location to retrieve chunk column</param>
+        /// <param name="blockLoc">Location to retrieve chunk column</param>
         /// <returns>The chunk column</returns>
-        public ChunkColumn? GetChunkColumn(BlockLoc location)
+        public ChunkColumn? GetChunkColumn(BlockLoc blockLoc)
         {
-            return this[location.GetChunkX(), location.GetChunkZ()];
+            return this[blockLoc.GetChunkX(), blockLoc.GetChunkZ()];
         }
 
         private static readonly Block AIR_INSTANCE = new(0);

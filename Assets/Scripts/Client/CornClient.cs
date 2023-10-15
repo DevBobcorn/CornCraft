@@ -311,7 +311,7 @@ namespace CraftSharp
         {
             Loom.QueueOnMainThread(() => {
                 // Clear world data
-                ChunkRenderManager!.ClearWorld();
+                ChunkRenderManager!.ClearChunksData();
             });
 
             switch (reason)
@@ -956,7 +956,7 @@ namespace CraftSharp
 
             ClearTasks();
 
-            ChunkRenderManager!.ClearWorld();
+            ChunkRenderManager!.ClearChunksData();
 
             if (!keepAttr)
             {
@@ -966,7 +966,7 @@ namespace CraftSharp
             Loom.QueueOnMainThread(() => {
                 playerController!.DisablePhysics();
 
-                ChunkRenderManager?.ReloadWorldRender();
+                ChunkRenderManager?.ReloadChunksRender();
                 EntityRenderManager?.ReloadEntityRenders();
             });
         }
