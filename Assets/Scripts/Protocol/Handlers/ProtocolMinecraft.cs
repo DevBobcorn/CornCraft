@@ -1116,7 +1116,7 @@ namespace CraftSharp.Protocol.Handlers
                             // Output block entity data
                             var typeId = ResourceLocation.FromString((string) tag["id"]);
                             var type = BlockEntityPalette.INSTANCE.FromId(typeId);
-                            //UnityEngine.Debug.Log($"[{blockLoc}] {Json.Object2Json(tag)}");
+                            UnityEngine.Debug.Log($"Single [{blockLoc}] {Json.Object2Json(tag)}");
                             Loom.QueueOnMainThread(() => {
                                 handler.GetChunkRenderManager().AddBlockEntityRender(blockLoc, type, tag);
                             });

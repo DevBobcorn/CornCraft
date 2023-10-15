@@ -88,6 +88,11 @@ namespace CraftSharp.Rendering
             {
                 entityRenders[entity.ID]?.Unload();
                 entityRenders.Remove(entity.ID);
+
+                if (nearbyEntities.ContainsKey(entity.ID))
+                {
+                    nearbyEntities.Remove(entity.ID);
+                }
             }
 
             GameObject? entityPrefab;
@@ -128,7 +133,9 @@ namespace CraftSharp.Rendering
                 }
 
                 if (nearbyEntities.ContainsKey(id))
+                {
                     nearbyEntities.Remove(id);
+                }
             }
         }
 
@@ -202,15 +209,15 @@ namespace CraftSharp.Rendering
         }
 
         /// <summary>
-        /// Unload all entities in the world
+        /// Unload all entity renders in the world
         /// </summary>
         public void ReloadEntityRenders()
         {
             var ids = entityRenders.Keys.ToArray();
-
             foreach (var id in ids)
+            {
                 entityRenders[id].Unload();
-
+            }
             entityRenders.Clear();
             nearbyEntities.Clear();
         }
