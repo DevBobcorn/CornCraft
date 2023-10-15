@@ -87,9 +87,6 @@ namespace CraftSharp.Resource
 
         public void LoadPacks(DataLoadFlag flag, Action<string> updateStatus)
         {
-            System.Diagnostics.Stopwatch sw = new();
-            sw.Start();
-
             // Gather all textures and model files
             updateStatus("status.info.gather_resource");
             foreach (var pack in packs) pack.GatherResources(this);
@@ -138,9 +135,6 @@ namespace CraftSharp.Resource
                     Debug.LogWarning($"Model for {stateItem.Value}(state Id {stateItem.Key}) not loaded!");
                 }
             }
-
-            Debug.Log($"Resource packs loaded in {sw.ElapsedMilliseconds} ms.");
-            //Debug.Log($"Built {StateModelTable.Count} block state geometry lists.");
 
             updateStatus("status.info.resource_loaded");
 

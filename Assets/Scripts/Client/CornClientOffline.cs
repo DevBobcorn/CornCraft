@@ -208,7 +208,7 @@ namespace CraftSharp
                 }
                 
                 return baseString + $"\nLoc: {playerLoc}\nBiome:\t{biome}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
-                        $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nSvr TPS: {GetServerTPS():00.00}";
+                        $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
             }
             
             return baseString;

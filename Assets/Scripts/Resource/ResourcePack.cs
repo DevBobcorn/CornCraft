@@ -41,7 +41,7 @@ namespace CraftSharp.Resource
                                 description = packData.Properties["description"].StringValue;
                             }
 
-                            Debug.Log($"Pack [{packName}] is valid, with pack format version {packFormat}. Description: {description}");
+                            Debug.Log($"[{packName}] format: {packFormat}, description: {description}");
                         }
                     }
                 }
