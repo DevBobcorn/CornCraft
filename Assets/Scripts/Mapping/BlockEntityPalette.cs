@@ -14,6 +14,8 @@ namespace CraftSharp
         private readonly Dictionary<int, BlockEntityType> blockEntityTypeTable = new();
         private readonly Dictionary<ResourceLocation, int> dictId = new();
 
+        private readonly Dictionary<ResourceLocation, BlockEntityType> blockEntityMapping = new();
+
         public static readonly BlockEntityType UNKNOWN_BLOCK_ENTITY_TYPE = new(UNKNOWN_BLOCK_ENTITY_NUM_ID, new("unknown_block_entity"));
         public const int UNKNOWN_BLOCK_ENTITY_NUM_ID = -1;
 
@@ -39,7 +41,7 @@ namespace CraftSharp
             if (dictId.ContainsKey(identifier))
                 return dictId[identifier];
             
-            Debug.LogWarning($"Unknown Entity Type {identifier}");
+            Debug.LogWarning($"Unknown BlockEntity Type {identifier}");
             return UNKNOWN_BLOCK_ENTITY_NUM_ID;
         }
 
@@ -51,16 +53,25 @@ namespace CraftSharp
             return FromNumId(ToNumId(identifier));
         }
 
+        public bool GetBlockEntityForBlock(ResourceLocation blockId, out BlockEntityType blockEntityType)
+        {
+            var found = blockEntityMapping.TryGetValue(blockId, out BlockEntityType result);
+            blockEntityType = result;
+            return found;
+        }
+
         public void PrepareData(string dataVersion, DataLoadFlag flag)
         {
             // Clear loaded stuff...
             blockEntityTypeTable.Clear();
             dictId.Clear();
+            blockEntityMapping.Clear();
 
             var blockEntityTypeListPath = PathHelper.GetExtraDataFile($"blocks{SP}block_entity_types-{dataVersion}.json");
             //string listsPath  = PathHelper.GetExtraDataFile("block_entity_lists.json");
+            string mappingPath  = PathHelper.GetExtraDataFile("block_entity_mapping.json");
 
-            if (!File.Exists(blockEntityTypeListPath)) // || !File.Exists(listsPath))
+            if (!File.Exists(blockEntityTypeListPath) || !File.Exists(mappingPath)) // || !File.Exists(listsPath))
             {
                 Debug.LogWarning("BlockEntity data not complete!");
                 flag.Finished = true;
@@ -108,6 +119,33 @@ namespace CraftSharp
             {
                 Debug.LogError($"Error loading block entity types: {e.Message}");
                 flag.Failed = true;
+            }
+
+            // Read block entity mapping...
+            var mappingData = Json.ParseJson(File.ReadAllText(mappingPath, Encoding.UTF8));
+            foreach (var pair in mappingData.Properties)
+            {
+                var blockEntityTypeId = ResourceLocation.FromString(pair.Key);
+                if (dictId.ContainsKey(blockEntityTypeId))
+                {
+                    foreach (var block in pair.Value.DataArray)
+                    {
+                        var blockId = ResourceLocation.FromString(block.StringValue);
+
+                        if (BlockStatePalette.INSTANCE.DefaultStateTable.ContainsKey(blockId))
+                        {
+                            blockEntityMapping.Add(blockId, FromNumId(dictId[blockEntityTypeId]));
+                        }
+                        else
+                        {
+                            //Debug.LogWarning($"Block {blockId} which has {blockEntityTypeId} is not present!");
+                        }
+                    }
+                }
+                else
+                {
+                    //Debug.LogWarning($"Block entity type {blockEntityTypeId} is not loaded");
+                }
             }
 
             flag.Finished = true;
