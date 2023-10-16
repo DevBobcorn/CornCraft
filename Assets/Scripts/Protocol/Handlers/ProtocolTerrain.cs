@@ -318,7 +318,7 @@ namespace CraftSharp.Protocol.Handlers
                     var blockLoc = new BlockLoc(x, y, z);
                     var typeId = ResourceLocation.FromString((string) tag["id"]);
                     var type = BlockEntityPalette.INSTANCE.FromId(typeId);
-                    UnityEngine.Debug.Log($"Chunk17 [{blockLoc}] {Json.Object2Json(tag)}");
+                    //UnityEngine.Debug.Log($"Chunk17 [{blockLoc}] {Json.Object2Json(tag)}");
                     Loom.QueueOnMainThread(() => {
                         chunksManager.AddBlockEntityRender(blockLoc, type, tag);
                     });
@@ -525,7 +525,7 @@ namespace CraftSharp.Protocol.Handlers
                     var blockLoc = new BlockLoc((int) tag["x"], (int) tag["y"], (int) tag["z"]);
                     var typeId = ResourceLocation.FromString((string) tag["id"]);
                     var type = BlockEntityPalette.INSTANCE.FromId(typeId);
-                    UnityEngine.Debug.Log($"Chunk16 [{blockLoc}] {Json.Object2Json(tag)}");
+                    //UnityEngine.Debug.Log($"Chunk16 [{blockLoc}] {Json.Object2Json(tag)}");
                     Loom.QueueOnMainThread(() => {
                         chunksManager.AddBlockEntityRender(blockLoc, type, tag);
                     });

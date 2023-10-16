@@ -171,6 +171,11 @@ namespace CraftSharp.Rendering
             Loom.QueueOnMainThread(() => {
                 // Check if the location has a block entity and remove it
                 RemoveBlockEntityRender(blockLoc);
+                // Auto-create block entity if present
+                if (BlockEntityPalette.INSTANCE.GetBlockEntityForBlock(block.BlockId, out BlockEntityType blockEntityType))
+                {
+                    AddBlockEntityRender(blockLoc, blockEntityType, null);
+                }
                 // Mark the chunk dirty and queue for mesh rebuild
                 MarkDirtyAt(blockLoc);
             });
@@ -275,11 +280,31 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Add a new block entity render to the world
         /// </summary>
-        public void AddBlockEntityRender(BlockLoc blockLoc, BlockEntityType blockEntityType, Dictionary<string, object> tags)
+        /// <param name="tags">Pass in null if auto-creating this block entity</param>
+        public void AddBlockEntityRender(BlockLoc blockLoc, BlockEntityType blockEntityType, Dictionary<string, object>? tags = null)
         {
-            // If the location is occupied by a block entity already,
-            // destroy this block entity first
-            RemoveBlockEntityRender(blockLoc);
+            // If the location is occupied by a block entity already
+            if (blockEntityRenders.ContainsKey(blockLoc))
+            {
+                var prevBlockEntity = blockEntityRenders[blockLoc];
+                if (prevBlockEntity.Type == blockEntityType) // Auto-created, keep it but replace data tags
+                {
+                    if (tag is null) // Auto-creating a block entity while it is already created
+                    {
+                        // Do nothing
+                    }
+                    else // Update block entity data tags
+                    {
+                        prevBlockEntity.BlockEntityTags = tags;
+                        // TODO: Update render with updated data tags
+                    }
+                    return;
+                }
+                else // Previously another type of block entity, remove it
+                {
+                    RemoveBlockEntityRender(blockLoc);
+                }
+            }
 
             GameObject? blockEntityPrefab = GetPrefabForType(blockEntityType.BlockEntityId);
 
@@ -295,7 +320,7 @@ namespace CraftSharp.Rendering
                 blockEntityObj.transform.position = CoordConvert.MC2Unity(blockLoc.ToCenterLocation());
 
                 // Initialize the entity
-                blockEntityRender.Initialize(blockLoc, blockEntityType, tags);
+                blockEntityRender.Initialize(blockLoc, blockEntityType, tags ?? new());
             }
         }
 
