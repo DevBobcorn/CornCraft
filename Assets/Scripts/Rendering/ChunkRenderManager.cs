@@ -162,6 +162,9 @@ namespace CraftSharp.Rendering
             var column = GetChunkColumn(blockLoc);
             if (column is not null)
             {
+                // Update ambient occulsion cache
+                column.SetAmbientOcclusion(blockLoc, block.State);
+                // Update chunk data
                 var chunk = column.GetChunk(blockLoc);
                 if (chunk is null)
                     column[blockLoc.GetChunkY()] = chunk = new Chunk();
