@@ -50,6 +50,8 @@
         "minecraft:acacia_door",
         "minecraft:dark_oak_door",
         "minecraft:mangrove_door",
+        "minecraft:cherry_door",
+        "minecraft:bamboo_door",
         "minecraft:crimson_door",
         "minecraft:warped_door"
       ]
@@ -66,8 +68,46 @@
         "minecraft:acacia_door",
         "minecraft:dark_oak_door",
         "minecraft:mangrove_door",
+        "minecraft:cherry_door",
+        "minecraft:bamboo_door",
         "minecraft:crimson_door",
         "minecraft:warped_door"
+      ]
+    },
+    "pull_lever_on": {
+      "action": "interact",
+      "hint": "gameplay.interaction.pull_lever",
+      "predicate": "powered=false",
+      "triggers": [
+        "minecraft:lever"
+      ]
+    },
+    "pull_lever_off": {
+      "action": "interact",
+      "hint": "gameplay.interaction.pull_lever",
+      "predicate": "powered=true",
+      "triggers": [
+        "minecraft:lever"
+      ]
+    },
+    "push_button": {
+      "action": "interact",
+      "hint": "gameplay.interaction.push_button",
+      "predicate": "powered=false",
+      "triggers": [
+        "minecraft:stone_button",
+        "minecraft:oak_button",
+        "minecraft:spruce_button",
+        "minecraft:birch_button",
+        "minecraft:jungle_button",
+        "minecraft:acacia_button",
+        "minecraft:dark_oak_button",
+        "minecraft:mangrove_button",
+        "minecraft:cherry_button",
+        "minecraft:bamboo_button",
+        "minecraft:crimson_button",
+        "minecraft:warped_button",
+        "minecraft:polished_blackstone_button"
       ]
     }
   }

@@ -44,7 +44,8 @@ namespace CraftSharp.Control
 
                     if (stateListTable.ContainsKey(blockId)) {
                         foreach (var stateId in stateListTable[blockId]) {
-                            interactionTable.Add(stateId, new(BlockInteractionType.Break, ChatParser.TranslateString(blockId.GetTranslationKey("block"))));
+                            interactionTable.Add(stateId, new(BlockInteractionType.Break, $"pickable/{blockId}",
+                                    ChatParser.TranslateString(blockId.GetTranslationKey("block"))));
 
                             //Debug.Log($"Added pickable interaction for blockstate [{stateId}] {statesTable[stateId]}");
                         }
@@ -88,10 +89,9 @@ namespace CraftSharp.Control
                                 {
                                     if (predicate.Check(statesTable[stateId]))
                                     {
-                                        interactionTable.Add(stateId, new(interactionType, hint));
+                                        interactionTable.Add(stateId, new(interactionType, $"special/{entryName}", hint));
 
                                         //Debug.Log($"Added {entryName} interaction for blockstate [{stateId}] {statesTable[stateId]}");
-
                                     }
                                 }
                             }

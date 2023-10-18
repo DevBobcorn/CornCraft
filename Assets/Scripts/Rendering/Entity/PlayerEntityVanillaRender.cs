@@ -44,10 +44,6 @@ namespace CraftSharp.Rendering
 
                 Debug.Log($"Skin applied to {nameLower}");
             }
-            else
-            {
-                Debug.LogWarning($"Failed to apply skin for {nameLower}");
-            }
         }
     }
 }
