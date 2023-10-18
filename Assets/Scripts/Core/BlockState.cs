@@ -30,6 +30,9 @@ namespace CraftSharp
         public bool FaceOcclusionSolid => FullCollider && !NoOcclusion;
         public bool AmbientOcclusionSolid => FullCollider && !NoCollision;
 
+        public byte LightBlockLevel = 0;
+        public byte LightEmissionLevel = 0;
+
         public static BlockState FromString(string state)
         {
             var props = new Dictionary<string, string>();
@@ -56,7 +59,6 @@ namespace CraftSharp
                 // Simple, only a block id
                 return new BlockState(ResourceLocation.FromString(state), props);
             }
-
         }
 
         public BlockState(ResourceLocation blockId)
@@ -86,7 +88,6 @@ namespace CraftSharp
             }
             else return BlockId.ToString();
         }
-
     }
 }
 

@@ -485,7 +485,8 @@ namespace CraftSharp
                 if (targetLoc is not null)
                 {
                     var targetBlock = ChunkRenderManager.GetBlock(targetLoc.Value);
-                    targetInfo = $"Target: {targetLoc}\n{targetBlock}";
+                    var targetState = targetBlock.State;
+                    targetInfo = $"Target: {targetLoc}\n{targetBlock}\nLight Block: {targetState.LightBlockLevel} Emission: {targetState.LightEmissionLevel}";
                 }
                 else
                 {
