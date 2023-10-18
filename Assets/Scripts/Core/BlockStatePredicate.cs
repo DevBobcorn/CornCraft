@@ -8,14 +8,14 @@ namespace CraftSharp
     {
         public static readonly BlockStatePredicate EMPTY = new BlockStatePredicate(new Dictionary<string, string>());
 
-        private Dictionary<string, string> conditions = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> conditions = new Dictionary<string, string>();
 
         public BlockStatePredicate(Dictionary<string, string> conditions)
         {
             this.conditions = conditions;
         }
 
-        public static BlockStatePredicate fromString(string source)
+        public static BlockStatePredicate FromString(string source)
         {
             if (source == string.Empty)
                 return EMPTY;
@@ -37,7 +37,7 @@ namespace CraftSharp
             return new BlockStatePredicate(conditions);
         }
 
-        public static BlockStatePredicate fromJson(Json.JSONData data)
+        public static BlockStatePredicate FromJson(Json.JSONData data)
         {
             if (data.Properties.Count == 0)
                 return EMPTY;
@@ -50,7 +50,7 @@ namespace CraftSharp
             return new BlockStatePredicate(conditions);
         }
 
-        public bool check(BlockState state)
+        public bool Check(BlockState state)
         {
             foreach (var condition in conditions)
             {
@@ -68,9 +68,6 @@ namespace CraftSharp
             }
 
             return true;
-
         }
-
     }
-
 }

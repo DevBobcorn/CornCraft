@@ -74,7 +74,7 @@ namespace CraftSharp.Control
                         };
 
                         var hint = Translations.TryGet(entryCont["hint"].StringValue);
-                        var predicate = BlockStatePredicate.fromString(entryCont["predicate"].StringValue);
+                        var predicate = BlockStatePredicate.FromString(entryCont["predicate"].StringValue);
 
                         var triggers = entryCont["triggers"].DataArray;
 
@@ -86,7 +86,7 @@ namespace CraftSharp.Control
                             {
                                 foreach (var stateId in stateListTable[blockId])
                                 {
-                                    if (predicate.check(statesTable[stateId]))
+                                    if (predicate.Check(statesTable[stateId]))
                                     {
                                         interactionTable.Add(stateId, new(interactionType, hint));
 
