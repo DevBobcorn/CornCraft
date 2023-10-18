@@ -92,18 +92,18 @@ namespace CraftSharp.Control
                             if (blockInteractionInfos.ContainsKey(blockLoc))
                             {
                                 var prevDef = blockInteractionInfos[blockLoc].Definition;
-                                if (prevDef.Hint != newDef.Hint) // Update this interaction
+                                if (prevDef.Identifier != newDef.Identifier) // Update this interaction
                                 {
                                     RemoveBlockInteraction(blockLoc);
                                     AddBlockInteraction(blockLoc, newDef);
-                                    //Debug.Log($"Upd: [{blockLoc}] {prevDef.Hint} => {newDef.Hint}");
+                                    //Debug.Log($"Upd: [{blockLoc}] {prevDef.Identifier} => {newDef.Identifier}");
                                 }
                                 // Otherwise leave it unchanged
                             }
                             else // Add this interaction
                             {
                                 AddBlockInteraction(blockLoc, newDef);
-                                //Debug.Log($"Add: [{blockLoc}] {newDef.Hint}");
+                                //Debug.Log($"Add: [{blockLoc}] {newDef.Identifier}");
                             }
                         }
                         else
