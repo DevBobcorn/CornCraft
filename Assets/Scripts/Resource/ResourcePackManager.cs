@@ -88,20 +88,20 @@ namespace CraftSharp.Resource
         public void LoadPacks(DataLoadFlag flag, Action<string> updateStatus)
         {
             // Gather all textures and model files
-            updateStatus("status.info.gather_resource");
+            updateStatus("resource.info.gather_resource");
             foreach (var pack in packs) pack.GatherResources(this);
 
             var atlasGenFlag = new DataLoadFlag();
 
             // Load texture atlas (on main thread)...
-            updateStatus("status.info.create_texture");
+            updateStatus("resource.info.create_texture");
             Loom.QueueOnMainThread(() => {
                 Loom.Current.StartCoroutine(GenerateAtlas(atlasGenFlag));
             });
             
             while (!atlasGenFlag.Finished) { /* Wait */ }
 
-            updateStatus("status.info.load_block_model");
+            updateStatus("resource.info.load_block_model");
 
             // Load block models...
             foreach (var blockModelId in BlockModelFileTable.Keys)
@@ -119,10 +119,10 @@ namespace CraftSharp.Resource
                 ItemModelLoader.LoadItemModel(itemModelId);
             }
 
-            updateStatus("status.info.build_blockstate_geometry");
+            updateStatus("resource.info.build_blockstate_geometry");
             BuildStateGeometries();
 
-            updateStatus("status.info.build_item_geometry");
+            updateStatus("resource.info.build_item_geometry");
             BuildItemGeometries();
 
             // Perform integrity check...
@@ -136,7 +136,7 @@ namespace CraftSharp.Resource
                 }
             }
 
-            updateStatus("status.info.resource_loaded");
+            updateStatus("resource.info.resource_loaded");
 
             flag.Finished = true;
         }
@@ -156,10 +156,10 @@ namespace CraftSharp.Resource
                     StateModelLoader.LoadBlockStateModel(blockId, BlockStateFileTable[blockId], renderType);
                 }
                 else
+                {
                     Debug.LogWarning($"Block state model definition not assigned for {blockId}!");
-                
+                }
             }
-
         }
 
         public void BuildItemGeometries()
@@ -246,13 +246,15 @@ namespace CraftSharp.Resource
                         ItemModelTable.Add(numId, itemModel);
                     }
                     else
+                    {
                         Debug.LogWarning($"Item model for {itemId} not found at {itemModelId}!");
+                    }
                 }
                 else
+                {
                     Debug.LogWarning($"Item model not assigned for {itemModelId}");
-
+                }
             }
-
         }
 
         private readonly Dictionary<ResourceLocation, TextureInfo> texAtlasTable = new();
@@ -396,7 +398,6 @@ namespace CraftSharp.Resource
                     }
 
                     return (rearranged, new(frameCount, framePerRow, frameInterval, interpolate));
-
                 }
             }
 
@@ -486,7 +487,6 @@ namespace CraftSharp.Resource
                                 //else
                                 //    Debug.LogWarning($"Texture {texId} not found in dictionary! (Referenced in {modelFile})");
                             }
-                                
                         }
                     }
                 }
@@ -671,6 +671,5 @@ namespace CraftSharp.Resource
 
             atlasGenFlag.Finished = true;
         }
-
     }
 }

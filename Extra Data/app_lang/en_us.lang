@@ -1,4 +1,4 @@
-﻿[mcc]
+[mcc]
 # Messages from MCC itself
 mcc.offline=You chose to run in offline mode.
 mcc.session_invalid=Cached session is invalid or expired.
@@ -112,6 +112,7 @@ extra.inventory_open=Inventory # {0} opened: {1}
 extra.inventory_close=Inventory # {0} closed.
 
 [gameplay]
+gameplay.control.update_gamemode=Gamemode updated to {0}
 gameplay.control.switch_to_rush=Switched to rush mode
 gameplay.control.switch_to_walk=Switched to walk mode
 gameplay.interaction.go_to_bed=Go to bed
@@ -120,16 +121,32 @@ gameplay.interaction.close_door=Close door
 gameplay.interaction.pull_lever=Pull lever
 gameplay.interaction.push_button=Push button
 
-[startup]
-startup.server_name_invalid=Failed to parse server name or address!
-startup.link_copied=Link copied to clipboard
-startup.auth_code_empty=Authentication code is empty!
-startup.offline_username_invalid=The offline username is not valid!
-startup.logging_in=Already logging in!
-startup.data_not_availale=Data for this version is not available!
-startup.base_resource_download_failure=Failed to download base resource pack!
-startup.base_resource_invalid=Base resource pack is invalid!
-startup.resource_load_failure=Failed to load all resources!
+[login]
+login.server_name_invalid=Failed to parse server name or address!
+login.link_copied=Link copied to clipboard
+login.auth_code_empty=Authentication code is empty!
+login.offline_username_invalid=The offline username is not valid!
+login.logging_in=Already logging in!
+login.data_not_availale=Data for this version is not available!
+login.enter_world_scene=Entering world scene...
+login.login_failed=Login failed! >_<
+
+[resource]
+resource.error.base_resource_invalid=Base resource pack is invalid!
+resource.error.resource_load_failure=Failed to load all resources! >_<
+resource.error.base_resource_download_failure=Failed to download base resource pack!
+resource.info.download_manifest=Downloading version manifest...
+resource.info.get_version_info=Getting version info...
+resource.info.download_jar=Downloading client jar...
+resource.info.extract_asset=Extracting asset files...
+resource.info.get_asset_index=Getting asset index...
+resource.info.download_lang_text=Downloading localization texts...
+resource.info.gather_resource=Gathering resources...
+resource.info.create_texture=Creating textures...
+resource.info.load_block_model=Loading block models...
+resource.info.build_blockstate_geometry=Building block state geometries...
+resource.info.build_item_geometry=Building item geometries...
+resource.info.load_completed=Resource loaded
 
 [rendering]
 rendering.debug.reload_chunk_render=Reloading chunk renders...

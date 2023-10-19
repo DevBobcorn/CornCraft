@@ -85,8 +85,8 @@ namespace CraftSharp
             catch (Exception e)
             {
                 Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
-                Notify(Translations.Get("startup.data_not_availale"), Notification.Type.Error);
-                updateStatus(">_<");
+                Notify(Translations.Get("login.data_not_availale"), Notification.Type.Error);
+                updateStatus(Translations.Get("login.result.login_failed"));
                 startUpFlag.Failed = true;
                 yield break;
             }
@@ -96,7 +96,7 @@ namespace CraftSharp
             var langFile = PathHelper.GetPackDirectoryNamed(
                     $"vanilla-{resourceVersion}{s}assets{s}minecraft{s}lang{s}{CornGlobal.Language}.json");
             
-            if (!File.Exists(langFile))
+            if (!File.Exists(langFile)) // If translation file is not available, try downloading it
             {
                 yield return StartCoroutine(ResourceDownloader.DownloadLanguageJson(
                         resourceVersion, CornGlobal.Language, updateStatus,
@@ -110,7 +110,7 @@ namespace CraftSharp
 
             if (startUpFlag.Failed)
             {
-                updateStatus(">_<");
+                updateStatus(Translations.Get("login.login_failed"));
                 yield break;
             }
             
@@ -146,8 +146,8 @@ namespace CraftSharp
                 
                 if (!downloadSucceeded)
                 {
-                    Notify(Translations.Get("startup.base_resource_download_failure"), Notification.Type.Error);
-                    updateStatus(">_<");
+                    Notify(Translations.Get("resource.error.base_resource_download_failure"), Notification.Type.Error);
+                    updateStatus(Translations.Get("login.login_failed"));
                     startUpFlag.Failed = true;
                     yield break;
                 }
@@ -158,8 +158,8 @@ namespace CraftSharp
             // Check base pack availability
             if (!basePack.IsValid)
             {
-                Notify(Translations.Get("startup.base_resource_invalid"), Notification.Type.Error);
-                updateStatus(">_<");
+                Notify(Translations.Get("resource.error.base_resource_invalid"), Notification.Type.Error);
+                updateStatus(Translations.Get("login.login_failed"));
                 startUpFlag.Failed = true;
                 yield break;
             }
@@ -185,8 +185,8 @@ namespace CraftSharp
 
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
-                Notify(Translations.Get("startup.resource_load_failure"), Notification.Type.Error);
-                updateStatus(">_<");
+                Notify(Translations.Get("resource.error.resource_load_failure"), Notification.Type.Error);
+                updateStatus(Translations.Get("login.login_failed"));
                 startUpFlag.Failed = true;
                 yield break;
             }
@@ -236,7 +236,7 @@ namespace CraftSharp
             client = null;
 
             // Enter world scene, and find the client instance in that scene
-            updateStatus("status.info.enter_world_scene");
+            updateStatus("login.enter_world_scene");
             yield return EnterWorldScene(online ? "World" : "World Offline");
 
             // Start client

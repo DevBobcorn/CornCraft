@@ -7,4 +7,20 @@ namespace CraftSharp
         Adventure = 2,
         Spectator = 3
     }
+
+    static class GameModeExtension
+    {
+        public static string GetIdentifier(this GameMode gameMode)
+        {
+            return gameMode switch
+            {
+                GameMode.Survival  => "survival",
+                GameMode.Creative  => "creative",
+                GameMode.Adventure => "adventure",
+                GameMode.Spectator => "spectator",
+
+                _                  => "unknown"
+            };
+        }
+    }
 }

@@ -72,7 +72,7 @@ namespace CraftSharp.UI
         {
             if (preparingGame)
             {
-                CornApp.Notify(Translations.Get("startup.logging_in"), Notification.Type.Warning);
+                CornApp.Notify(Translations.Get("login.logging_in"), Notification.Type.Warning);
                 return;
             }
 
@@ -98,9 +98,9 @@ namespace CraftSharp.UI
             {
                 if (!StringHelper.IsValidName(account))
                 {
-                    CornApp.Notify(Translations.Get("startup.offline_username_invalid"), Notification.Type.Warning);
+                    CornApp.Notify(Translations.Get("login.offline_username_invalid"), Notification.Type.Warning);
                     preparingGame = false;
-                    loadStateInfoText!.text = ">_<";
+                    loadStateInfoText!.text = Translations.Get("login.login_failed");
                     yield break;
                 }
 
@@ -183,9 +183,9 @@ namespace CraftSharp.UI
 
                 if (!ParseServerIP(serverText, out host, ref port))
                 {
-                    CornApp.Notify(Translations.Get("startup.server_name_invalid"), Notification.Type.Warning);
+                    CornApp.Notify(Translations.Get("login.server_name_invalid"), Notification.Type.Warning);
                     preparingGame = false;
-                    loadStateInfoText!.text = ">_<";
+                    loadStateInfoText!.text = Translations.Get("login.login_failed");
                     yield break;
                 }
 
@@ -243,7 +243,7 @@ namespace CraftSharp.UI
                 {
                     CornApp.Notify(Translations.Get("error.ping"), Notification.Type.Error);
                     preparingGame = false;
-                    loadStateInfoText!.text = ">_<";
+                    loadStateInfoText!.text = Translations.Get("login.login_failed");
                     yield break;
                 }
                 else
@@ -262,7 +262,7 @@ namespace CraftSharp.UI
                         // this scene is unloaded and LoginControl object is destroyed
                         CornApp.Instance.StartLoginCoroutine(true, session, playerKeyPair, host, port, protocolVersion, null,
                                 (succeeded) => preparingGame = false,
-                                (status) => loadStateInfoText!.text = status, accountLower);
+                                (status) => loadStateInfoText!.text = Translations.Get(status), accountLower);
 
                         yield break;
                     }
@@ -288,7 +288,7 @@ namespace CraftSharp.UI
                     _                                                => "error.login.unknown"
                 };
                 failureMessage += Translations.Get(failureReason);
-                loadStateInfoText!.text = ">_<";
+                loadStateInfoText!.text = Translations.Get("login.login_failed");
                 CornApp.Notify(failureMessage, Notification.Type.Error);
 
                 if (result == ProtocolHandler.LoginResult.SSLError)
@@ -304,7 +304,7 @@ namespace CraftSharp.UI
         {
             if (preparingGame)
             {
-                CornApp.Notify(Translations.Get("startup.logging_in"), Notification.Type.Warning);
+                CornApp.Notify(Translations.Get("login.logging_in"), Notification.Type.Warning);
                 return;
             }
 
@@ -322,7 +322,7 @@ namespace CraftSharp.UI
             // this scene is unloaded and LoginControl object is destroyed
             CornApp.Instance.StartLoginCoroutine(false, session, null, "<local>", 0, protocolVersion, null,
                     (succeeded) => preparingGame = false,
-                    (status) => loadStateInfoText!.text = status, accountLower);
+                    (status) => loadStateInfoText!.text = Translations.Get(status), accountLower);
         }
 
         public void ShowLoginPanel()
@@ -389,7 +389,7 @@ namespace CraftSharp.UI
         public void CopyAuthLink()
         {
             GUIUtility.systemCopyBuffer = authLinkText!.text;
-            CornApp.Notify(Translations.Get("startup.link_copied"), Notification.Type.Success);
+            CornApp.Notify(Translations.Get("login.link_copied"), Notification.Type.Success);
         }
 
         public void PasteAuthCode()
@@ -434,7 +434,7 @@ namespace CraftSharp.UI
 
             if (String.IsNullOrEmpty(code))
             {
-                CornApp.Notify(Translations.Get("startup.auth_code_empty"), Notification.Type.Warning);
+                CornApp.Notify(Translations.Get("login.auth_code_empty"), Notification.Type.Warning);
                 return;
             }
 
