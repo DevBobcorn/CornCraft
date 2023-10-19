@@ -112,6 +112,7 @@ extra.inventory_open=物品栏# {0}已开启：{1}
 extra.inventory_close=物品栏# {0}已关闭。
 
 [gameplay]
+gameplay.control.update_gamemode=游戏模式已更新为{0}
 gameplay.control.switch_to_rush=已切换至跑步模式
 gameplay.control.switch_to_walk=已切换至行走模式
 gameplay.interaction.go_to_bed=睡觉
@@ -120,16 +121,32 @@ gameplay.interaction.close_door=关门
 gameplay.interaction.pull_lever=拉动拉杆
 gameplay.interaction.push_button=按下按钮
 
-[startup]
-startup.server_name_invalid=服务器名称或地址无效！
-startup.link_copied=链接已复制到剪切板
-startup.auth_code_empty=验证码为空！
-startup.offline_username_invalid=离线用户名无效！
-startup.logging_in=已经在登录了喵
-startup.data_not_availale=当前版本没有对应数据
-startup.base_resource_download_failure=本体资源包下载失败！
-startup.base_resource_invalid=本体资源包无效
-startup.resource_load_failure=未能成功加载所有资源
+[login]
+login.server_name_invalid=服务器名称或地址无效！
+login.link_copied=链接已复制到剪切板
+login.auth_code_empty=验证码为空！
+login.offline_username_invalid=离线用户名无效！
+login.logging_in=已经在登录了喵
+login.data_not_availale=当前版本没有对应数据
+login.enter_world_scene=正在进入世界场景...
+login.login_failed=登入失败！>_<
+
+[resource]
+resource.error.base_resource_invalid=本体资源包无效
+resource.error.resource_load_failure=未能成功加载所有资源 >_<
+resource.error.base_resource_download_failure=本体资源包下载失败！
+resource.info.download_manifest=正在下载版本清单...
+resource.info.get_version_info=正在获取版本信息...
+resource.info.download_jar=正在下载客户端jar文件...
+resource.info.extract_asset=正在提取资源...
+resource.info.get_asset_index=正在获取资源索引...
+resource.info.download_lang_text=正在下载本地化文本...
+resource.info.gather_resource=收集资源文件...
+resource.info.create_texture=创建纹理...
+resource.info.load_block_model=加载方块模型...
+resource.info.build_blockstate_geometry=生成方块状态模型...
+resource.info.build_item_geometry=生成物品模型...
+resource.info.resource_loaded=资源加载完毕
 
 [rendering]
 rendering.debug.reload_chunk_render=正在重建区块渲染...

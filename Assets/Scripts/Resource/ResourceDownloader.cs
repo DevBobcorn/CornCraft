@@ -33,7 +33,7 @@ namespace CraftSharp.Resource
 
             // Download version manifest
             downloadTask = webClient.DownloadStringTaskAsync(VERSION_MANIFEST_URL);
-            updateStatus("status.info.download_manifest");
+            updateStatus("resource.info.download_manifest");
             while (!downloadTask.IsCompleted) yield return null;
 
             if (downloadTask.IsCompletedSuccessfully) // Proceed to resource downloading
@@ -46,7 +46,7 @@ namespace CraftSharp.Resource
                 {
                     var versionInfoUri = versionTargets.First().Properties["url"].StringValue;
                     downloadTask = webClient.DownloadStringTaskAsync(versionInfoUri);
-                    updateStatus("status.info.get_version_info");
+                    updateStatus("resource.info.get_version_info");
                     while (!downloadTask.IsCompleted) yield return null;
 
                     if (downloadTask.IsCompletedSuccessfully)
@@ -57,7 +57,7 @@ namespace CraftSharp.Resource
                         var jarUri = clientJarInfo.Properties["url"].StringValue;
                         // Download jar file
                         var jardownloadTask = webClient.DownloadDataTaskAsync(jarUri);
-                        updateStatus("status.info.download_jar");
+                        updateStatus("resource.info.download_jar");
                         while (!jardownloadTask.IsCompleted) yield return null;
                         if (jardownloadTask.IsCompletedSuccessfully) // Jar downloaded, unzip it
                         {
@@ -67,7 +67,7 @@ namespace CraftSharp.Resource
                                 var zipStream = new MemoryStream(jardownloadTask.Result);
                                 using (var zipFile = new ZipArchive(zipStream, ZipArchiveMode.Read))
                                 {
-                                    updateStatus("status.info.extract_asset");
+                                    updateStatus("resource.info.extract_asset");
                                     // Extract asset files
                                     //foreach (var entry in zipFile.Entries.Where(x => x.FullName.StartsWith("assets")))
                                     foreach (var entry in zipFile.Entries.Where(x => x.FullName.StartsWith("assets")))
@@ -135,7 +135,7 @@ namespace CraftSharp.Resource
 
             // Download version manifest
             downloadTask = webClient.DownloadStringTaskAsync("https://launchermeta.mojang.com/mc/game/version_manifest.json");
-            updateStatus("status.info.download_manifest");
+            updateStatus("resource.info.download_manifest");
             while (!downloadTask.IsCompleted) yield return null;
 
             if (downloadTask.IsCompletedSuccessfully) // Proceed to resource downloading
@@ -148,7 +148,7 @@ namespace CraftSharp.Resource
                 {
                     var versionInfoUri = versionTargets.First().Properties["url"].StringValue;
                     downloadTask = webClient.DownloadStringTaskAsync(versionInfoUri);
-                    updateStatus("status.info.get_version_info");
+                    updateStatus("resource.info.get_version_info");
                     while (!downloadTask.IsCompleted) yield return null;
 
                     if (downloadTask.IsCompletedSuccessfully)
@@ -157,7 +157,7 @@ namespace CraftSharp.Resource
                         var assetIndexUri = infoJson.Properties["assetIndex"].Properties["url"].StringValue;
                         
                         downloadTask = webClient.DownloadStringTaskAsync(assetIndexUri);
-                        updateStatus("status.info.get_asset_index");
+                        updateStatus("resource.info.get_asset_index");
                         while (!downloadTask.IsCompleted) yield return null;
 
                         if (downloadTask.IsCompletedSuccessfully)
@@ -170,7 +170,7 @@ namespace CraftSharp.Resource
                                 var langJsonUrl = $"{RESOURCE_DOWNLOAD_URL}/{hash[..2]}/{hash}";
                                 
                                 downloadTask = webClient.DownloadStringTaskAsync(langJsonUrl);
-                                updateStatus("status.info.download_lang_text");
+                                updateStatus("resource.info.download_lang_text");
                                 while (!downloadTask.IsCompleted) yield return null;
 
                                 if (downloadTask.IsCompletedSuccessfully)

@@ -1321,7 +1321,8 @@ namespace CraftSharp
                         GameMode = (GameMode) gamemode;
                         EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
 
-                        CornApp.Notify($"Gamemode updated to {GameMode}", Notification.Type.Success);
+                        CornApp.Notify(Translations.Get("gameplay.control.update_gamemode",
+                                ChatParser.TranslateString($"gameMode.{GameMode.GetIdentifier()}")), Notification.Type.Success);
                     });
                 }
             }

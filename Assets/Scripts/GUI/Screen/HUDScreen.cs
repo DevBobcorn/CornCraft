@@ -6,13 +6,13 @@ using UnityEngine.UI;
 using TMPro;
 
 using CraftSharp.Event;
+using CraftSharp.Protocol;
 
 namespace CraftSharp.UI
 {
     [RequireComponent(typeof (CanvasGroup))]
     public class HUDScreen : BaseScreen
     {
-        private static readonly string[] modeIdentifiers = { "survival", "creative", "adventure", "spectator" };
         private const float HEALTH_MULTIPLIER = 10F;
 
         // UI controls and objects
@@ -189,7 +189,7 @@ namespace CraftSharp.UI
                     if (modePanelShown) // Select next gamemode
                     {
                         selectedMode = (selectedMode + 1) % buttonCount;
-                        modeText!.text = ((GameMode)selectedMode).ToString();
+                        modeText!.text = ChatParser.TranslateString($"gameMode.{((GameMode) selectedMode).GetIdentifier()}");
                         modeButtons[selectedMode].Select();
                     }
                     else // Show gamemode switch
@@ -197,7 +197,7 @@ namespace CraftSharp.UI
                         selectedMode = (int) game.GameMode;
                         if (selectedMode >= 0 && selectedMode < modeButtons.Length)
                         {
-                            modeText!.text = ((GameMode)selectedMode).ToString();
+                            modeText!.text = ChatParser.TranslateString($"gameMode.{((GameMode) selectedMode).GetIdentifier()}");
                             modePanelAnimator!.SetBool(SHOW, true);
                             modePanelShown = true;
                             modeButtons[selectedMode].Select();
@@ -217,7 +217,7 @@ namespace CraftSharp.UI
 
                     if (selectedMode != (int) game.GameMode) // Commit switch request
                     {
-                        game.TrySendChat($"/gamemode {modeIdentifiers[selectedMode]}");
+                        game.TrySendChat($"/gamemode {((GameMode) selectedMode).GetIdentifier()}");
                     }
                     
                     // Restore crosshair if necessary
