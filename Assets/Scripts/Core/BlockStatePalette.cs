@@ -409,7 +409,7 @@ namespace CraftSharp
                         var stateIds = GetStateIdsFromString(blockStateElem.StringValue);
                         foreach (var stateId in stateIds)
                         {
-                            statesTable[stateId].LightBlockLevel = lightBlockLevel;
+                            statesTable[stateId].LightBlockageLevel = lightBlockLevel;
                         }
                     }
                 }

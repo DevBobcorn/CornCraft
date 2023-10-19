@@ -39,24 +39,30 @@ namespace CraftSharp.Resource
             return vertexCount;
         }
 
-        public static float GetVertexLight(float3 vertPosInBlock, float[] lights)
+        public static float GetVertexLightFromFaceLights(CullDir dir, float[] faceLights)
         {
-            /*
-            // Original sampling: Accepts light values of neighbors and self
-            float neighbor =
-                    math.lerp(lights[2], lights[3], vertPosInBlock.x) + // North / South
-                    math.lerp(lights[1], lights[0], vertPosInBlock.y) + // Down / Up
-                    math.lerp(lights[4], lights[5], vertPosInBlock.z)   // East / West
-                    / 3F;
-            
-            return Mathf.Max(neighbor, lights[6]);
-            */
+            // Simplified sampling: Accepts light values of neighbors and self, sample by face direction
+            float neighbor = dir switch
+            {
+                CullDir.DOWN  => faceLights[1],
+                CullDir.UP    => faceLights[0],
+                CullDir.NORTH => faceLights[2],
+                CullDir.SOUTH => faceLights[3],
+                CullDir.EAST  => faceLights[4],
+                CullDir.WEST  => faceLights[5],
+                _             => faceLights[6]
+            };
 
-            // Enhanced sampling: Accepts light values of 8 corners
-            float x0z0 = math.lerp(lights[0], lights[4], vertPosInBlock.y);
-            float x1z0 = math.lerp(lights[1], lights[5], vertPosInBlock.y);
-            float x0z1 = math.lerp(lights[2], lights[6], vertPosInBlock.y);
-            float x1z1 = math.lerp(lights[3], lights[7], vertPosInBlock.y);
+            return math.max(neighbor, faceLights[6]);
+        }
+
+        public static float GetVertexLightFromCornerLights(float3 vertPosInBlock, float[] cornerLights)
+        {
+            // Enhanced sampling: Accepts averaged light values of 8 corners
+            float x0z0 = math.lerp(cornerLights[0], cornerLights[4], vertPosInBlock.y);
+            float x1z0 = math.lerp(cornerLights[1], cornerLights[5], vertPosInBlock.y);
+            float x0z1 = math.lerp(cornerLights[2], cornerLights[6], vertPosInBlock.y);
+            float x1z1 = math.lerp(cornerLights[3], cornerLights[7], vertPosInBlock.y);
 
             var interpolated = math.lerp(
                     math.lerp(x0z0, x0z1, vertPosInBlock.x),
@@ -69,8 +75,8 @@ namespace CraftSharp.Resource
 
         private float GetCornerAO(bool side1, bool corner, bool side2)
         {
-            return 1F - (side1 ? 0.33F : 0F) - (corner ? 0.33F : 0F) - (side2 ? 0.33F : 0F);
-            //return 1F - (side1 ? 0.25F : 0F) - (corner ? 0.25F : 0F) - (side2 ? 0.25F : 0F);
+            //return 1F - (side1 ? 0.33F : 0F) - (corner ? 0.33F : 0F) - (side2 ? 0.33F : 0F);
+            return 1F - (side1 ? 0.22F : 0F) - (corner ? 0.22F : 0F) - (side2 ? 0.22F : 0F);
         }
 
         // tl tm tr
@@ -172,7 +178,8 @@ namespace CraftSharp.Resource
                 for (i = 0U;i < vertexArrs[CullDir.NONE].Length;i++)
                 {
                     verts[i + vertOffset] = vertexArrs[CullDir.NONE][i] + posOffset;
-                    float vertLight = GetVertexLight(vertexArrs[CullDir.NONE][i], blockLights);
+                    float vertLight = GetVertexLightFromCornerLights(vertexArrs[CullDir.NONE][i], blockLights);
+                    //float vertLight = GetVertexLightFromFaceLights(CullDir.NONE, blockLights);
                     float3 vertColor = (tintIndexArrs[CullDir.NONE][i] >= 0 ? blockColor : DEFAULT_COLOR);
                     tints[i + vertOffset] = new float4(vertColor, vertLight);
                 }
@@ -192,7 +199,8 @@ namespace CraftSharp.Resource
                     for (i = 0U;i < vertexArrs[dir].Length;i++)
                     {
                         verts[i + vertOffset] = vertexArrs[dir][i] + posOffset;
-                        float vertLight = GetVertexLight(vertexArrs[dir][i], blockLights);
+                        float vertLight = GetVertexLightFromCornerLights(vertexArrs[dir][i], blockLights);
+                        //float vertLight = GetVertexLightFromFaceLights(dir, blockLights);
                         float3 vertColor = (tintIndexArrs[dir][i] >= 0 ? blockColor : DEFAULT_COLOR)
                                 * SampleVertexAO(dir, cornersAO, vertexArrs[dir][i]);
                         tints[i + vertOffset] = new float4(vertColor, vertLight);
@@ -238,7 +246,8 @@ namespace CraftSharp.Resource
                 for (i = 0U;i < vertexArrs[CullDir.NONE].Length;i++)
                 {
                     verts[i + vertOffset] = vertexArrs[CullDir.NONE][i] + posOffset;
-                    float vertLight = GetVertexLight(vertexArrs[CullDir.NONE][i], blockLights);
+                    float vertLight = GetVertexLightFromCornerLights(vertexArrs[CullDir.NONE][i], blockLights);
+                    //float vertLight = GetVertexLightFromFaceLights(CullDir.NONE, blockLights);
                     float3 vertColor = (tintIndexArrs[CullDir.NONE][i] >= 0 ? blockColor : DEFAULT_COLOR);
                     tints[i + vertOffset] = new float4(vertColor, vertLight);
                 }
@@ -258,7 +267,8 @@ namespace CraftSharp.Resource
                     for (i = 0U;i < vertexArrs[dir].Length;i++)
                     {
                         verts[i + vertOffset] = vertexArrs[dir][i] + posOffset;
-                        float vertLight = GetVertexLight(vertexArrs[dir][i], blockLights);
+                        float vertLight = GetVertexLightFromCornerLights(vertexArrs[dir][i], blockLights);
+                        //float vertLight = GetVertexLightFromFaceLights(dir, blockLights);
                         float3 vertColor = (tintIndexArrs[dir][i] >= 0 ? blockColor : DEFAULT_COLOR)
                                 * SampleVertexAO(dir, cornersAO, vertexArrs[dir][i]);
                         tints[i + vertOffset] = new float4(vertColor, vertLight);

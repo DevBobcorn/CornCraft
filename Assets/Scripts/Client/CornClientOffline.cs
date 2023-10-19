@@ -192,22 +192,23 @@ namespace CraftSharp
                 var targetLoc = interactionUpdater?.TargetBlockLoc;
                 var playerLoc = GetLocation();
                 var blockLoc = playerLoc.GetBlockLoc();
-                var biome = ChunkRenderManager!.GetBiome(blockLoc);
 
-                string targetInfo;
+                string targetInfo, locInfo;
 
                 if (targetLoc is not null)
                 {
-                    var targetBlock = ChunkRenderManager.GetBlock(targetLoc.Value);
+                    var targetBlock = ChunkRenderManager!.GetBlock(targetLoc.Value);
                     var targetState = targetBlock.State;
-                    targetInfo = $"Target: {targetLoc}\n{targetBlock}\nLight Block: {targetState.LightBlockLevel} Emission: {targetState.LightEmissionLevel}";
+                    targetInfo = $"Target: {targetLoc}\n{targetBlock}\nBlockage: {targetState.LightBlockageLevel} Emission: {targetState.LightEmissionLevel}";
                 }
                 else
                 {
                     targetInfo = "\n";
                 }
+
+                locInfo = $"Biome:\t{ChunkRenderManager!.GetBiome(blockLoc)}\nBlock Light:\t{ChunkRenderManager!.GetBlockLight(blockLoc)}";
                 
-                return baseString + $"\nLoc: {playerLoc}\nBiome:\t{biome}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
+                return baseString + $"\nLoc: {playerLoc}\n{locInfo}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
             }
             

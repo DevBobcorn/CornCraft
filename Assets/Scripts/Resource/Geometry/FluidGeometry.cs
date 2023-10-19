@@ -132,7 +132,7 @@ namespace CraftSharp.Resource
             for (int i = buffer.vert.Length; i < verts.Length; i++) // For each new vertex in the mesh
             {
                 // Calculate vertex lighting
-                tints[i] = new float4(fluidColor, BlockGeometry.GetVertexLight(verts[i], blockLights));
+                tints[i] = new float4(fluidColor, BlockGeometry.GetVertexLightFromCornerLights(verts[i], blockLights));
                 // Offset vertices
                 verts[i] = verts[i] + posOffset;
             }

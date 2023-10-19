@@ -288,6 +288,30 @@ namespace CraftSharp
             return AIR_INSTANCE; // Air
         }
 
+        /// <summary>
+        /// Get block light at the specified location
+        /// </summary>
+        public byte GetBlockLight(BlockLoc blockLoc)
+        {
+            var column = GetChunkColumn(blockLoc);
+            if (column != null)
+                return column.GetBlockLight(blockLoc);
+            
+            return (byte) 0; // Not available
+        }
+
+        /// <summary>
+        /// Check if the block at specified location causes ambient occlusion
+        /// </summary>
+        public bool GetAmbientOcclusion(BlockLoc blockLoc)
+        {
+            var column = GetChunkColumn(blockLoc);
+            if (column != null)
+                return column.GetAmbientOcclusion(blockLoc);
+            
+            return false; // Not available
+        }
+
         private Block GetUpBlock(Chunk selfChunk, BlockLoc blockLoc) // MC Y Pos
         {
             if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1)
@@ -399,6 +423,9 @@ namespace CraftSharp
 
         private const int COLOR_SAMPLE_RADIUS = 2;
 
+        /// <summary>
+        /// Get biome at the specified location
+        /// </summary>
         public Biome GetBiome(BlockLoc blockLoc)
         {
             var column = GetChunkColumn(blockLoc);
