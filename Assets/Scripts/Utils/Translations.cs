@@ -32,6 +32,10 @@ namespace CraftSharp
                 }
                 else return translations[msgName];
             }
+            else
+            {
+                Debug.Log($"Translation key not found: {msgName}");
+            }
             return msgName.ToUpper();
         }
 

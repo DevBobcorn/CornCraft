@@ -112,9 +112,27 @@ extra.inventory_open=物品栏# {0}已开启：{1}
 extra.inventory_close=物品栏# {0}已关闭。
 
 [gameplay]
+gameplay.control.switch_to_rush=已切换至跑步模式
+gameplay.control.switch_to_walk=已切换至行走模式
 gameplay.interaction.go_to_bed=睡觉
 gameplay.interaction.open_door=开门
 gameplay.interaction.close_door=关门
+gameplay.interaction.pull_lever=拉动拉杆
+gameplay.interaction.push_button=按下按钮
+
+[startup]
+startup.server_name_invalid=服务器名称或地址无效！
+startup.link_copied=链接已复制到剪切板
+startup.auth_code_empty=验证码为空！
+startup.offline_username_invalid=离线用户名无效！
+startup.logging_in=已经在登录了喵
+startup.data_not_availale=当前版本没有对应数据
+startup.base_resource_download_failure=本体资源包下载失败！
+startup.base_resource_invalid=本体资源包无效
+startup.resource_load_failure=未能成功加载所有资源
+
+[rendering]
+rendering.debug.reload_chunk_render=正在重建区块渲染...
 
 [forge]
 # Messages from Forge handler
