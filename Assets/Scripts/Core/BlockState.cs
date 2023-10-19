@@ -30,7 +30,7 @@ namespace CraftSharp
         public bool FaceOcclusionSolid => FullCollider && !NoOcclusion;
         public bool AmbientOcclusionSolid => FullCollider && !NoCollision;
 
-        public byte LightBlockLevel = 0;
+        public byte LightBlockageLevel = 0;
         public byte LightEmissionLevel = 0;
 
         public static BlockState FromString(string state)

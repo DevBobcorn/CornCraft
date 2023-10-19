@@ -31,19 +31,34 @@ namespace CraftSharp.Rendering
             this.modelTable = modelTable;
         }
 
-        private float GetLight(ChunkRenderManager manager, BlockLoc location)
+        private float GetBlockLight(World world, BlockLoc location)
         {
-            //return Mathf.Max(world.GetBlockLight(loc), world.GetSkyLight(loc)) / 15F;
-            return Mathf.Max(manager.GetBlockLight(location), 4) / 10F;
+            return Mathf.Max(world.GetBlockLight(location), 4) / 10F;
         }
 
-        private float[] GetCornerLights(ChunkRenderManager manager, BlockLoc blockLoc)
+        private float[] GetFaceLights(World world, BlockLoc blockLoc)
+        {
+            return new float[]
+            {
+                // Sample neighbors
+                GetBlockLight(world, blockLoc.Up()),
+                GetBlockLight(world, blockLoc.Down()),
+                GetBlockLight(world, blockLoc.North()),
+                GetBlockLight(world, blockLoc.South()),
+                GetBlockLight(world, blockLoc.East()),
+                GetBlockLight(world, blockLoc.West()),
+                // Sample self
+                GetBlockLight(world, blockLoc)
+            };
+        }
+
+        private float[] GetCornerLights(World world, BlockLoc blockLoc)
         {
             var result = new float[8];
 
             for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
             {
-                var sample = GetLight(manager, blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
+                var sample = GetBlockLight(world, blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
 
                 if (y != 2 && z != 2 && x != 2) // [0] x0z0 y0
                 {
@@ -82,19 +97,19 @@ namespace CraftSharp.Rendering
             return result.Select(x => x / 8F).ToArray();
         }
 
-        private bool[] GetAllNeighborAO(ChunkRenderManager manager, BlockLoc blockLoc)
+        private bool[] GetAllNeighborAO(World world, BlockLoc blockLoc)
         {
             var result = new bool[27];
 
             for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
             {
-                result[y * 9 + z * 3 + x] = manager.GetAmbientOcclusion(blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
+                result[y * 9 + z * 3 + x] = world.GetAmbientOcclusion(blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
             }
 
             return result;
         }
 
-        public ChunkBuildResult Build(ChunkRenderManager manager, World world, Chunk chunkData, ChunkRender chunkRender)
+        public ChunkBuildResult Build(World world, Chunk chunkData, ChunkRender chunkRender)
         {
             try
             {
@@ -135,7 +150,7 @@ namespace CraftSharp.Rendering
                                     var liquidHeights = world.GetLiquidHeights(blockLoc);
                                     var liquidLayerIndex = state.InWater ? waterLayerIndex : lavaLayerIndex;
                                     var liquidTexture = FluidGeometry.LiquidTextures[state.InWater ? 0 : 1];
-                                    var lights = GetCornerLights(manager, blockLoc);
+                                    var lights = GetCornerLights(world, blockLoc);
 
                                     FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], new(z, y, x), liquidTexture,
                                             liquidHeights, liquidCullFlags, lights, world.GetWaterColor(blockLoc));
@@ -156,8 +171,8 @@ namespace CraftSharp.Rendering
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;
                                 var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, blockLoc, state);
-                                var lights = GetCornerLights(manager, blockLoc);
-                                var opaq = GetAllNeighborAO(manager, blockLoc);
+                                var lights = GetCornerLights(world, blockLoc);
+                                var opaq = GetAllNeighborAO(world, blockLoc);
 
                                 if (state.NoCollision)
                                     models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, opaq, lights, color);

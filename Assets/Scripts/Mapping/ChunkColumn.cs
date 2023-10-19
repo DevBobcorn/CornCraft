@@ -29,6 +29,8 @@ namespace CraftSharp
         private readonly short[] biomes;
         private readonly byte[] skyLight, blockLight;
         private readonly bool[] aoCache;
+        private readonly byte[] lightBlockageCache;
+        private readonly byte[] lightEmissionCache;
 
         private bool lightingPresent = false;
         public bool LightingPresent => lightingPresent;
@@ -47,6 +49,8 @@ namespace CraftSharp
             blockLight = new byte[4096 * (size + 2)];
 
             aoCache = new bool[4096 * size];
+            lightBlockageCache = new byte[4096 * size];
+            lightEmissionCache = new byte[4096 * size];
         }
 
         /// <summary>
@@ -140,31 +144,74 @@ namespace CraftSharp
         {
             for (int ci = 0; ci < ColumnSize; ci++)
             {
-                int firstIndex = ci * 4096;
+                int firstIndexInChunk = ci << 12; // i.e. ci * 4096
                 var chunk = chunks[ci];
 
                 if (chunk is null) // Empty chunk, no opaque blocks
                 {
-                    Array.Fill(aoCache, false, firstIndex, 4096);
+                    Array.Fill(aoCache, false, firstIndexInChunk, 4096);
                 }
                 else
                 {
                     for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) for (int z = 0; z < 16; z++)
                     {
-                        aoCache[firstIndex + (y << 8) + (z << 4) + x] = chunk[x, y, z].State.AmbientOcclusionSolid;
+                        aoCache[firstIndexInChunk | (y << 8) | (z << 4) | x] = chunk[x, y, z].State.AmbientOcclusionSolid;
                     }
                 }
             }
         }
 
-        public void SetAmbientOcclusion(BlockLoc blockLoc, BlockState state)
+        public void InitializeBlockLightCache()
+        {
+            for (int ci = 0; ci < ColumnSize; ci++)
+            {
+                int firstIndexInChunk = ci << 12; // i.e. ci * 4096
+                var chunk = chunks[ci];
+
+                if (chunk is null) // Empty chunk, no light blockage, no light emission
+                {
+                    Array.Fill(lightBlockageCache, (byte) 0, firstIndexInChunk, 4096);
+                    Array.Fill(lightEmissionCache, (byte) 0, firstIndexInChunk, 4096);
+                }
+                else
+                {
+                    for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) for (int z = 0; z < 16; z++)
+                    {
+                        var index = firstIndexInChunk | (y << 8) | (z << 4) | x;
+                        lightBlockageCache[index] = chunk[x, y, z].State.LightBlockageLevel;
+                        lightEmissionCache[index] = chunk[x, y, z].State.LightEmissionLevel;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Update cached block data (AO, light data) when a block change takes place
+        /// Returns true if this updates block light, which will require recalculating
+        /// </summary>
+        /// <param name="blockLoc"></param>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public bool UpdateCachedBlockData(BlockLoc blockLoc, BlockState state)
         {
             int index = ((blockLoc.Y - MinimumY) << 8) | (blockLoc.GetChunkBlockZ() << 4) | blockLoc.GetChunkBlockX();
             
+            // Lengths of aoCache, lightBlockageCache and
+            // lightEmissionCache should be the same
             if (index < 0 || index >= aoCache.Length)
-                return;
+                return false;
 
             aoCache[index] = state.AmbientOcclusionSolid;
+
+            if (lightBlockageCache[index] != state.LightBlockageLevel || lightEmissionCache[index] != state.LightEmissionLevel)
+            {
+                lightBlockageCache[index] = state.LightBlockageLevel;
+                lightEmissionCache[index] = state.LightEmissionLevel;
+
+                return true;
+            }
+            
+            return false;
         }
 
         public bool GetAmbientOcclusion(BlockLoc blockLoc)
@@ -175,6 +222,26 @@ namespace CraftSharp
                 return false;
 
             return aoCache[index];
+        }
+
+        public byte GetLightBlockage(BlockLoc blockLoc)
+        {
+            int index = ((blockLoc.Y - MinimumY) << 8) | (blockLoc.GetChunkBlockZ() << 4) | blockLoc.GetChunkBlockX();
+            
+            if (index < 0 || index >= lightBlockageCache.Length)
+                return 0;
+
+            return lightBlockageCache[index];
+        }
+
+        public byte GetLightEmission(BlockLoc blockLoc)
+        {
+            int index = ((blockLoc.Y - MinimumY) << 8) | (blockLoc.GetChunkBlockZ() << 4) | blockLoc.GetChunkBlockX();
+            
+            if (index < 0 || index >= lightEmissionCache.Length)
+                return 0;
+
+            return lightEmissionCache[index];
         }
     }
 }

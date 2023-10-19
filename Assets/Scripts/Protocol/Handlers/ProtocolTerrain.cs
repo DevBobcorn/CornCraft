@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
@@ -344,6 +345,7 @@ namespace CraftSharp.Protocol.Handlers
                 
                 c.SetLights(skyLight, blockLight);
                 c.InitializeAmbientOcclusion();
+                c.InitializeBlockLightCache();
 
                 c!.FullyLoaded = true;
             }
@@ -556,6 +558,7 @@ namespace CraftSharp.Protocol.Handlers
 
                     c.SetLights(skyLight, blockLight);
                     c.InitializeAmbientOcclusion();
+                    c.InitializeBlockLightCache();
 
                     //UnityEngine.Debug.Log($"Lighting up chunk column [{chunkX}, {chunkZ}]");
                 }
@@ -566,9 +569,11 @@ namespace CraftSharp.Protocol.Handlers
         }
 
         /// <summary>
-        /// Read chunk column light data from the server - 1.17 and above
+        /// Read chunk column light data from the server - 1.17 and above.
+        /// The returned indices is from one section below bottom to one section above top
         /// </summary>
-        public void ReadChunkColumnLightData17(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
+        /// <returns>Indicies of chunk sections whose light data is included</returns>
+        public int[] ReadChunkColumnLightData17(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
         {
             var trustEdges = dataTypes.ReadNextBool(cache);
 
@@ -611,7 +616,7 @@ namespace CraftSharp.Protocol.Handlers
             if (protocolVersion >= ProtocolMinecraft.MC_1_20_Version)
             {
                 // TODO: Fix and implement
-                return;
+                return new int[0];
             }
             
             // Block Light Arrays
@@ -634,12 +639,16 @@ namespace CraftSharp.Protocol.Handlers
 
                 ReadLightArray(blockLightArray, chunkBlockY, ref blockLight);
             }
+
+            return skyLightIndices.Union(blockLightIndices).Distinct().ToArray();
         }
 
         /// <summary>
-        /// Read chunk column light data from the server - 1.16
+        /// Read chunk column light data from the server - 1.16.
+        /// The returned indices is from one section below bottom to one section above top
         /// </summary>
-        public void ReadChunkColumnLightData16(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
+        /// <returns>Indicies of chunk sections whose light data is included</returns>
+        public int[] ReadChunkColumnLightData16(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
         {
             var trustEdges = dataTypes.ReadNextBool(cache);
             
@@ -655,11 +664,15 @@ namespace CraftSharp.Protocol.Handlers
             // Empty Block Light Mask
             var emptyBlockLightMask = dataTypes.ReadNextVarInt(cache);
 
+            var updatedSections = new HashSet<int>();
+
             // Sky light arrays
             for (int i = 0;i < 18;i++) //  // From one chunk below bottom to one chunk above top, 18 chunks in a column
             {
                 if ((skyLightMask & (1 << i)) == 0)
                     continue; // Skip
+                
+                updatedSections.Add(i);
 
                 var skyLightArray = dataTypes.ReadNextByteArray(cache);
                 var chunkBlockY = i * 16;
@@ -672,12 +685,16 @@ namespace CraftSharp.Protocol.Handlers
             {
                 if ((blockLightMask & (1 << i)) == 0)
                     continue; // Skip
+                
+                updatedSections.Add(i);
 
                 var blockLightArray = dataTypes.ReadNextByteArray(cache);
                 var chunkBlockY = i * 16;
 
                 ReadLightArray(blockLightArray, chunkBlockY, ref blockLight);
             }
+
+            return updatedSections.ToArray();
         }
 
         private void ReadLightArray(byte[] srcArray, int chunkBlockY, ref byte[] light)
@@ -717,13 +734,23 @@ namespace CraftSharp.Protocol.Handlers
 
                 var skyLight   = new byte[4096 * (chunkColumnSize + 2)];
                 var blockLight = new byte[4096 * (chunkColumnSize + 2)];
+
+                int[] updatedSections;
                 
                 if (protocolVersion >= ProtocolMinecraft.MC_1_17_Version)
-                    ReadChunkColumnLightData17(ref skyLight, ref blockLight, cache);
+                    updatedSections = ReadChunkColumnLightData17(ref skyLight, ref blockLight, cache);
                 else
-                    ReadChunkColumnLightData16(ref skyLight, ref blockLight, cache);
+                    updatedSections = ReadChunkColumnLightData16(ref skyLight, ref blockLight, cache);
                 
                 chunkColumn.SetLights(skyLight, blockLight);
+
+                Loom.QueueOnMainThread(() => {
+                    for (int i = 0; i < updatedSections.Length; i++)
+                    {
+                        int chunkY = updatedSections[i] - 1;
+                        chunksManager.MarkDirtyBecauseOfLightUpdate(chunkX, chunkY, chunkZ);
+                    }
+                });
             }
         }
     }

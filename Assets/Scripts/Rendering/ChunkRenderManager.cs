@@ -10,6 +10,7 @@ using Unity.Mathematics;
 
 using CraftSharp.Event;
 using CraftSharp.Resource;
+using UnityEngine.InputSystem;
 
 namespace CraftSharp.Rendering
 {
@@ -162,13 +163,13 @@ namespace CraftSharp.Rendering
             var column = GetChunkColumn(blockLoc);
             if (column is not null)
             {
-                // Update ambient occulsion cache
-                column.SetAmbientOcclusion(blockLoc, block.State);
                 // Update chunk data
                 var chunk = column.GetChunk(blockLoc);
                 if (chunk is null)
                     column[blockLoc.GetChunkY()] = chunk = new Chunk();
                 chunk[blockLoc.GetChunkBlockX(), blockLoc.GetChunkBlockY(), blockLoc.GetChunkBlockZ()] = block;
+                // Update ambient occulsion and light data cache
+                bool lightRecalc = column.UpdateCachedBlockData(blockLoc, block.State);
             }
 
             Loom.QueueOnMainThread(() => {
@@ -223,26 +224,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         public byte GetBlockLight(BlockLoc blockLoc)
         {
-            var column = GetChunkColumn(blockLoc);
-            if (column != null)
-                return column.GetBlockLight(blockLoc);
-            
-            return (byte) 0; // Not available
-        }
-
-        /// <summary>
-        /// Check if the specified location is liquid
-        /// </summary>
-        public bool IsLiquidAt(BlockLoc blockLoc)
-        {
-            var column = GetChunkColumn(blockLoc);
-            if (column != null)
-            {
-                var chunk = column.GetChunk(blockLoc);
-                if (chunk != null)
-                    return chunk.GetBlock(blockLoc).State.InWater || chunk.GetBlock(blockLoc).State.InLava;
-            }
-            return false;
+            return world.GetBlockLight(blockLoc);
         }
 
         /// <summary>
@@ -250,11 +232,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         public bool GetAmbientOcclusion(BlockLoc blockLoc)
         {
-            var column = GetChunkColumn(blockLoc);
-            if (column != null)
-                return column.GetAmbientOcclusion(blockLoc);
-            
-            return false; // Not available
+            return world.GetAmbientOcclusion(blockLoc);
         }
 
         /// <summary>
@@ -485,7 +463,7 @@ namespace CraftSharp.Rendering
             chunkRender.TokenSource = new();
             
             Task.Factory.StartNew(() => {
-                var buildResult = builder!.Build(this, world, chunkData, chunkRender);
+                var buildResult = builder!.Build(world, chunkData, chunkRender);
 
                 Loom.QueueOnMainThread(() => {
                     if (chunkRender is not null)
@@ -545,7 +523,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Unload all chunks and block entity renders in the world
         /// </summary>
-        public void ReloadChunksRender()
+        public void ReloadChunksRender(bool clearBlockEntities = true)
         {
             // Clear the queue first...
             chunkRendersToBeBuilt.Clear();
@@ -568,13 +546,16 @@ namespace CraftSharp.Rendering
             renderColumns.Clear();
 
             // Clear all block entity renders
-            var locs = blockEntityRenders.Keys.ToArray();
-            foreach (var loc in locs)
+            if (clearBlockEntities)
             {
-                blockEntityRenders[loc].Unload();
+                var locs = blockEntityRenders.Keys.ToArray();
+                foreach (var loc in locs)
+                {
+                    blockEntityRenders[loc].Unload();
+                }
+                blockEntityRenders.Clear();
+                nearbyBlockEntities.Clear();
             }
-            blockEntityRenders.Clear();
-            nearbyBlockEntities.Clear();
         }
 
         public void MarkDirtyAt(BlockLoc blockLoc)
@@ -610,6 +591,18 @@ namespace CraftSharp.Rendering
             
             if (blockLoc.DistanceSquared(client!.GetLocation().GetBlockLoc()) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)
                 terrainColliderDirty = true; // Terrain collider needs to be updated
+        }
+
+        public void MarkDirtyBecauseOfLightUpdate(int chunkX, int chunkY, int chunkZ)
+        {
+            var column = GetChunkRenderColumn(chunkX, chunkZ, false);
+            if (column is not null) // Queue this chunk to rebuild list...
+            {   // Create the chunk render object if not present (previously empty)
+                var chunk = column.GetChunkRender(chunkY, true);
+
+                // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
+                QueueChunkRenderBuild(chunk);
+            }
         }
 
         public void InitializeTerrainCollider(BlockLoc playerBlockLoc, Action? callback = null)
@@ -760,6 +753,13 @@ namespace CraftSharp.Rendering
                     // Update last location only if it is used
                     lastPlayerBlockLoc = playerBlockLoc; 
                 }
+            }
+
+            if (Keyboard.current.qKey.wasPressedThisFrame) // Debug function, reload chunk renders
+            {
+                CornApp.Notify(Translations.Get("rendering.debug.reload_chunk_render"));
+                // Don't destroy block entity renders
+                ReloadChunksRender(false);
             }
         }
         #endregion
