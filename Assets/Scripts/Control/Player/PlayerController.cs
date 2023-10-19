@@ -344,7 +344,7 @@ namespace CraftSharp.Control
         public void ToggleWalkMode()
         {
             Status!.WalkMode = !Status.WalkMode;
-            CornApp.Notify(Status.WalkMode ? "Switched to walk mode" : "Switched to rush mode");
+            CornApp.Notify(Translations.Get($"gameplay.control.switch_to_{(Status.WalkMode ? "walk" : "rush")}"));
         }
 
         public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)

@@ -85,7 +85,7 @@ namespace CraftSharp
             catch (Exception e)
             {
                 Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
-                Notify("Data for gameplay is not available!", Notification.Type.Error);
+                Notify(Translations.Get("startup.data_not_availale"), Notification.Type.Error);
                 updateStatus(">_<");
                 startUpFlag.Failed = true;
                 yield break;
@@ -95,6 +95,24 @@ namespace CraftSharp
             var s = Path.DirectorySeparatorChar;
             var langFile = PathHelper.GetPackDirectoryNamed(
                     $"vanilla-{resourceVersion}{s}assets{s}minecraft{s}lang{s}{CornGlobal.Language}.json");
+            
+            if (!File.Exists(langFile))
+            {
+                yield return StartCoroutine(ResourceDownloader.DownloadLanguageJson(
+                        resourceVersion, CornGlobal.Language, updateStatus,
+                        () => { },
+                        (langJsonDownloaded) => {
+                            if (!langJsonDownloaded)
+                                startUpFlag.Failed = true;
+                        }
+                ));
+            }
+
+            if (startUpFlag.Failed)
+            {
+                updateStatus(">_<");
+                yield break;
+            }
             
             Protocol.ChatParser.LoadTranslationRules(langFile);
 
@@ -128,7 +146,7 @@ namespace CraftSharp
                 
                 if (!downloadSucceeded)
                 {
-                    Notify("Failed to download base resource pack!", Notification.Type.Error);
+                    Notify(Translations.Get("startup.base_resource_download_failure"), Notification.Type.Error);
                     updateStatus(">_<");
                     startUpFlag.Failed = true;
                     yield break;
@@ -140,7 +158,7 @@ namespace CraftSharp
             // Check base pack availability
             if (!basePack.IsValid)
             {
-                Notify("Base resource pack is invalid!", Notification.Type.Error);
+                Notify(Translations.Get("startup.base_resource_invalid"), Notification.Type.Error);
                 updateStatus(">_<");
                 startUpFlag.Failed = true;
                 yield break;
@@ -167,7 +185,7 @@ namespace CraftSharp
 
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
-                Notify("Failed to load all resources!", Notification.Type.Error);
+                Notify(Translations.Get("startup.resource_load_failure"), Notification.Type.Error);
                 updateStatus(">_<");
                 startUpFlag.Failed = true;
                 yield break;

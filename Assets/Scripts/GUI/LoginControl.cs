@@ -72,7 +72,7 @@ namespace CraftSharp.UI
         {
             if (preparingGame)
             {
-                CornApp.Notify("Already loggin' in!", Notification.Type.Warning);
+                CornApp.Notify(Translations.Get("startup.logging_in"), Notification.Type.Warning);
                 return;
             }
 
@@ -98,7 +98,7 @@ namespace CraftSharp.UI
             {
                 if (!StringHelper.IsValidName(account))
                 {
-                    CornApp.Notify("The offline username is not valid!", Notification.Type.Warning);
+                    CornApp.Notify(Translations.Get("startup.offline_username_invalid"), Notification.Type.Warning);
                     preparingGame = false;
                     loadStateInfoText!.text = ">_<";
                     yield break;
@@ -183,7 +183,7 @@ namespace CraftSharp.UI
 
                 if (!ParseServerIP(serverText, out host, ref port))
                 {
-                    CornApp.Notify("Failed to parse server name or address!", Notification.Type.Warning);
+                    CornApp.Notify(Translations.Get("startup.server_name_invalid"), Notification.Type.Warning);
                     preparingGame = false;
                     loadStateInfoText!.text = ">_<";
                     yield break;
@@ -304,7 +304,7 @@ namespace CraftSharp.UI
         {
             if (preparingGame)
             {
-                CornApp.Notify("Already loggin' in!", Notification.Type.Warning);
+                CornApp.Notify(Translations.Get("startup.logging_in"), Notification.Type.Warning);
                 return;
             }
 
@@ -389,7 +389,7 @@ namespace CraftSharp.UI
         public void CopyAuthLink()
         {
             GUIUtility.systemCopyBuffer = authLinkText!.text;
-            CornApp.Notify("Link copied to clipboard.", Notification.Type.Success);
+            CornApp.Notify(Translations.Get("startup.link_copied"), Notification.Type.Success);
         }
 
         public void PasteAuthCode()
@@ -434,7 +434,7 @@ namespace CraftSharp.UI
 
             if (String.IsNullOrEmpty(code))
             {
-                CornApp.Notify("Authentication code is empty!", Notification.Type.Warning);
+                CornApp.Notify(Translations.Get("startup.auth_code_empty"), Notification.Type.Warning);
                 return;
             }
 

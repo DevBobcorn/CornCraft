@@ -112,9 +112,27 @@ extra.inventory_open=Inventory # {0} opened: {1}
 extra.inventory_close=Inventory # {0} closed.
 
 [gameplay]
+gameplay.control.switch_to_rush=Switched to rush mode
+gameplay.control.switch_to_walk=Switched to walk mode
 gameplay.interaction.go_to_bed=Go to bed
 gameplay.interaction.open_door=Open door
 gameplay.interaction.close_door=Close door
+gameplay.interaction.pull_lever=Pull lever
+gameplay.interaction.push_button=Push button
+
+[startup]
+startup.server_name_invalid=Failed to parse server name or address!
+startup.link_copied=Link copied to clipboard
+startup.auth_code_empty=Authentication code is empty!
+startup.offline_username_invalid=The offline username is not valid!
+startup.logging_in=Already logging in!
+startup.data_not_availale=Data for this version is not available!
+startup.base_resource_download_failure=Failed to download base resource pack!
+startup.base_resource_invalid=Base resource pack is invalid!
+startup.resource_load_failure=Failed to load all resources!
+
+[rendering]
+rendering.debug.reload_chunk_render=Reloading chunk renders...
 
 [forge]
 # Messages from Forge handler
