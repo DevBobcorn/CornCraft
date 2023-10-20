@@ -190,7 +190,7 @@ namespace CraftSharp.Control
                 var box = gameObject.AddComponent<BoxCollider>();
                 var sideLength = ability.ColliderRadius * 2F;
                 box.size = new(sideLength, ability.ColliderHeight, sideLength);
-                box.center = new(0F, ability.ColliderHeight / 2F, 0F);
+                box.center = new(0F, (ability.ColliderHeight / 2F) - 0.001F, 0F);
 
                 statusUpdater!.GroundBoxcastHalfSize = new(ability.ColliderRadius, 0.01F, ability.ColliderRadius);
 
@@ -202,7 +202,7 @@ namespace CraftSharp.Control
                 var capsule = gameObject.AddComponent<CapsuleCollider>();
                 capsule.height = ability.ColliderHeight;
                 capsule.radius = ability.ColliderRadius;
-                capsule.center = new(0F, ability.ColliderHeight / 2F, 0F);
+                capsule.center = new(0F, (ability.ColliderHeight / 2F) - 0.001F, 0F);
 
                 statusUpdater!.GroundSpherecastRadius = ability.ColliderRadius;
                 statusUpdater.GroundSpherecastCenter = new(0F, ability.ColliderRadius + 0.05F, 0F);
@@ -285,8 +285,12 @@ namespace CraftSharp.Control
             playerCollider!.enabled = false;
             playerRigidbody!.useGravity = false;
 
+            if (!playerRigidbody.isKinematic) // If physics is enabled, reset velocity to zero
+            {
+                playerRigidbody!.velocity = Vector3.zero;
+            }
+
             // Reset player status
-            playerRigidbody!.velocity = Vector3.zero;
             Status!.Grounded = false;
             Status.InLiquid  = false;
             Status.OnWall    = false;
@@ -333,7 +337,11 @@ namespace CraftSharp.Control
 
         public delegate void NoParamEventHandler();
         public event NoParamEventHandler? OnRandomizeMirroredFlag;
-        public void RandomizeMirroredFlag() => OnRandomizeMirroredFlag?.Invoke();
+        public void RandomizeMirroredFlag()
+        {
+            OnRandomizeMirroredFlag?.Invoke();
+            Debug.Log("RAND MRR");
+        }
 
         public event NoParamEventHandler? OnMeleeDamageStart;
         public void MeleeDamageStart() => OnMeleeDamageStart?.Invoke();
@@ -545,14 +553,14 @@ namespace CraftSharp.Control
         {
             var info = Status!;
 
-            if (info.MoveVelocity != Vector3.zero)
+            if (info.MoveVelocity != Vector3.zero) // Add a force to change velocity of the rigidbody
             {
                 // The player is actively moving
                 playerRigidbody!.AddForce((info.MoveVelocity - playerRigidbody!.velocity) * Time.fixedUnscaledDeltaTime * 10F, ForceMode.VelocityChange);
             }
             else
             {
-                if (info.Spectating)
+                if (info.Spectating && !playerRigidbody!.isKinematic) // If physics is enabled, reset velocity to zero
                 {
                     playerRigidbody!.velocity = Vector3.zero;
                 }

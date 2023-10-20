@@ -143,12 +143,6 @@ namespace CraftSharp.Control
             }
         }
 
-        public override Transform GetTransform()
-        {   
-            return perspective == Perspective.FirstPerson ?
-                    virtualCameraFixed!.transform : virtualCameraFollow!.transform;
-        }
-
         public override void SetYaw(float yaw)
         {
             followPOV!.m_HorizontalAxis.Value = yaw;
@@ -190,15 +184,12 @@ namespace CraftSharp.Control
 
         public override Vector3 GetTargetViewportPos()
         {
-            if (IsFixed())
-                return VIEWPORT_CENTER;
-            
-            var targetPos = GetTarget()?.position;
-            if (renderCamera != null && targetPos is not null)
+            if (IsFixed()) // Use screen center if camera is fixed
             {
-                return renderCamera!.WorldToViewportPoint(targetPos.Value);
+                return VIEWPORT_CENTER;
             }
-            return VIEWPORT_CENTER;
+            
+            return base.GetTargetViewportPos();
         }
 
         private void EnterFirstPersonMode()

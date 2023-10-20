@@ -17,7 +17,7 @@ namespace CraftSharp.Control
         private const float LIQUID_RAYCAST_DIST    = 5.0F;
         private static readonly Vector3 ANGLE_CHECK_RAYCAST_START_POINT = new(0F, 0.02F, 0F);
 
-        [SerializeField] public LayerMask GroundLayer;
+        [SerializeField] public LayerMask SolidLayer;
         [SerializeField] public LayerMask LiquidSurfaceLayer;
         [SerializeField] public LayerMask LiquidVolumeLayer;
 
@@ -26,12 +26,12 @@ namespace CraftSharp.Control
         // Grounded check - using boxcast
         [HideInInspector] public Vector3 GroundBoxcastCenter   = new(0F,    0.05F,    0F);
         [HideInInspector] public Vector3 GroundBoxcastHalfSize = new(0.35F, 0.01F, 0.35F);
-        [HideInInspector] public float   GroundBoxcastDist     = 0.1F;
+        [HideInInspector] public float   GroundBoxcastDist     = 0.2F;
 
         // Grounded check - using spherecast
         [HideInInspector] public Vector3 GroundSpherecastCenter = new(0F,   0.4F,   0F);
         [HideInInspector] public float   GroundSpherecastRadius = 0.35F;
-        [HideInInspector] public float   GroundSpherecastDist   = 0.1F;
+        [HideInInspector] public float   GroundSpherecastDist   = 0.5F;
 
         public PlayerStatus Status = new();
 
@@ -41,11 +41,11 @@ namespace CraftSharp.Control
             bool groundCheck;
             if (UseBoxCastForGroundedCheck) // Cast a box down to check if player is grounded
             {
-                groundCheck = Physics.BoxCast(transform.position + GroundBoxcastCenter, GroundBoxcastHalfSize, -transform.up, Quaternion.identity, GroundBoxcastDist, GroundLayer);
+                groundCheck = Physics.BoxCast(transform.position + GroundBoxcastCenter, GroundBoxcastHalfSize, -transform.up, Quaternion.identity, GroundBoxcastDist, SolidLayer);
             }
             else
             {
-                groundCheck = Physics.SphereCast(transform.position + GroundSpherecastCenter, GroundSpherecastRadius, -transform.up, out _, GroundSpherecastDist, GroundLayer);
+                groundCheck = Physics.SphereCast(transform.position + GroundSpherecastCenter, GroundSpherecastRadius, -transform.up, out _, GroundSpherecastDist, SolidLayer);
             }
 
             var rayCenter = transform.position + GROUND_BOXCAST_START_POINT;
@@ -53,7 +53,7 @@ namespace CraftSharp.Control
             var rayFront  = rayCenter + frontDirNormalized * GROUND_RAYCAST_OFFSET;
 
             // Cast a ray downwards
-            if (Physics.Raycast(rayCenter, -transform.up, out RaycastHit centerDownHit, GROUND_RAYCAST_DIST, GroundLayer))
+            if (Physics.Raycast(rayCenter, -transform.up, out RaycastHit centerDownHit, GROUND_RAYCAST_DIST, SolidLayer))
                 Status.CenterDownDist = centerDownHit.distance - GROUND_RAYCAST_START;
             else
                 Status.CenterDownDist = GROUND_RAYCAST_DIST - GROUND_RAYCAST_START;
@@ -61,7 +61,7 @@ namespace CraftSharp.Control
             Debug.DrawRay(rayCenter, transform.up * -GROUND_RAYCAST_DIST, Color.cyan);
 
             // Cast another ray downwards in front of the player
-            if (Physics.Raycast(rayFront, -transform.up, out RaycastHit frontDownHit, GROUND_RAYCAST_DIST, GroundLayer))
+            if (Physics.Raycast(rayFront, -transform.up, out RaycastHit frontDownHit, GROUND_RAYCAST_DIST, SolidLayer))
                 Status.FrontDownDist = frontDownHit.distance - GROUND_RAYCAST_START;
             else
                 Status.FrontDownDist = GROUND_RAYCAST_DIST - GROUND_RAYCAST_START;
@@ -83,13 +83,13 @@ namespace CraftSharp.Control
             }
             else // Not grounded in last update
             {
-                if (velocity.y < 0.5F) // Not jumping up
-                {
-                    Status.Grounded = groundCheck;
-                }
-                else // Jumping up
+                if (velocity.y > 0F) // Jumping up
                 {
                     Status.Grounded = false;
+                }
+                else // Not jumping up
+                {
+                    Status.Grounded = groundCheck;
                 }
             }
             
@@ -109,7 +109,7 @@ namespace CraftSharp.Control
             var angleCheckRayOrigin = transform.position + ANGLE_CHECK_RAYCAST_START_POINT;
 
             // Cast a ray forward from feet to figure out whether the slope angle before the player
-            if (Physics.Raycast(angleCheckRayOrigin, frontDirNormalized, out RaycastHit angleCheckHit, 1F, GroundLayer))
+            if (Physics.Raycast(angleCheckRayOrigin, frontDirNormalized, out RaycastHit angleCheckHit, 1F, SolidLayer))
             {
                 Debug.DrawRay(angleCheckHit.point, angleCheckHit.normal, Color.magenta);
 
@@ -123,7 +123,7 @@ namespace CraftSharp.Control
             var barrierCheckRayOrigin = transform.position + new Vector3(0F, Status.FrontDownDist < -0.2F ? -Status.FrontDownDist - 0.1F : 0.1F, 0F);
 
             // Cast another ray forward from the height of barrier to figure out whether the slope angle before the player
-            if (Physics.Raycast(barrierCheckRayOrigin, frontDirNormalized, out angleCheckHit, 1F, GroundLayer))
+            if (Physics.Raycast(barrierCheckRayOrigin, frontDirNormalized, out angleCheckHit, 1F, SolidLayer))
             {
                 Status.BarrierAngle = Vector3.Angle(frontDirNormalized, -angleCheckHit.normal);
                 Status.BarrierDist = angleCheckHit.distance;

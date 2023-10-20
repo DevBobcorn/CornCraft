@@ -112,7 +112,7 @@ namespace CraftSharp.Control
                 }
             }
 
-            if (inputData.Gameplay.Jump.IsPressed()) // Jump up, keep horizontal speed
+            if (inputData.Gameplay.Jump.WasPerformedThisFrame()) // Jump up, keep horizontal speed
             {
                 moveVelocity.y = ability.JumpSpeedCurve.Evaluate(moveSpeed);
                 info.Grounded = false;
@@ -186,6 +186,9 @@ namespace CraftSharp.Control
         public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
             info.Sprinting = false;
+
+            // Randomize for brake animation
+            player.RandomizeMirroredFlag();
 
             // Unregister input action events
             player.Actions.Attack.ChargedAttack.performed -= chargedAttackCallback;

@@ -92,16 +92,18 @@ namespace CraftSharp.Control
         public virtual Vector3 GetTargetViewportPos()
         {
             var targetPos = GetTarget()?.position;
-            if (renderCamera != null && targetPos is not null)
+            if (targetPos is not null)
             {
-                return renderCamera.WorldToViewportPoint(targetPos.Value);
+                var pos = renderCamera!.WorldToViewportPoint(targetPos.Value);
+                pos.z = 0F;
+                return pos;
             }
             return VIEWPORT_CENTER;
         }
 
         public virtual Transform GetTransform()
         {
-            return renderCamera?.transform ?? transform;
+            return renderCamera!.transform;
         }
 
         public virtual float GetYaw()
