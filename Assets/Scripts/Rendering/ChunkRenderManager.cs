@@ -34,6 +34,8 @@ namespace CraftSharp.Rendering
         /// </summary>
         private readonly World world = new();
 
+        private readonly LightCalculator lightCalc = new();
+
         /// <summary>
         /// All block entity renders in the current world
         /// </summary>
@@ -153,6 +155,60 @@ namespace CraftSharp.Rendering
             world.CreateEmptyChunkColumn(chunkX, chunkZ, chunkColumnSize);
         }
 
+        private void RecalculateBlockLightAt(BlockLoc center)
+        {
+            // Set up light calculator
+            lightCalc.SetUpRecalculateArea(world, center);
+            // Recalculate block light
+            var result = lightCalc.RecalculateLightValues();
+
+            // Apply the result to chunk light data
+            int boxMinX = lightCalc.BoxMinX;
+            int boxMinY = lightCalc.BoxMinY;
+            int boxMinZ = lightCalc.BoxMinZ;
+
+            for (int x = LightCalculator.MAX_SPREAD_DIST; x < LightCalculator.LIGHT_CALC_BOX_SIZE - LightCalculator.MAX_SPREAD_DIST; x++)
+                for (int y = LightCalculator.MAX_SPREAD_DIST; y < LightCalculator.LIGHT_CALC_BOX_SIZE - LightCalculator.MAX_SPREAD_DIST; y++)
+                    for (int z = LightCalculator.MAX_SPREAD_DIST; z < LightCalculator.LIGHT_CALC_BOX_SIZE - LightCalculator.MAX_SPREAD_DIST; z++)
+                    {
+                        if (LightCalculator.ManhattanDistToCenter(x, y, z) >= LightCalculator.MAX_SPREAD_DIST)
+                        {
+                            // These light might be recalculated, but they are not
+                            // within the affect range of this block change
+                            continue;
+                        }
+
+                        world.SetBlockLight(new(boxMinX + x, boxMinY + y, boxMinZ + z), result[x, y, z]);
+                    }
+            
+            // Mark chunk renders as dirty
+            int worldMinY = World.GetDimension().minY;
+            int worldMaxY = World.GetDimension().maxY;
+
+            var minAffectedBlockLoc = new BlockLoc(
+                lightCalc.BoxMinX + LightCalculator.MAX_SPREAD_DIST,
+                math.max(worldMinY, lightCalc.BoxMinY + LightCalculator.MAX_SPREAD_DIST),
+                lightCalc.BoxMinZ + LightCalculator.MAX_SPREAD_DIST
+            );
+
+            var maxAffectedBlockLoc = new BlockLoc(
+                lightCalc.BoxMaxX - LightCalculator.MAX_SPREAD_DIST,
+                math.min(worldMaxY, lightCalc.BoxMaxY - LightCalculator.MAX_SPREAD_DIST),
+                lightCalc.BoxMaxZ - LightCalculator.MAX_SPREAD_DIST
+            );
+
+            Loom.QueueOnMainThread(() =>
+            {
+                for (int chunkX = minAffectedBlockLoc.GetChunkX(); chunkX <= maxAffectedBlockLoc.GetChunkX(); chunkX++)
+                    for (int chunkZ = minAffectedBlockLoc.GetChunkZ(); chunkZ <= maxAffectedBlockLoc.GetChunkZ(); chunkZ++)
+                        for (int chunkY = minAffectedBlockLoc.GetChunkY(worldMinY);
+                                chunkY <= maxAffectedBlockLoc.GetChunkY(worldMinY); chunkY++)
+                        {
+                            MarkDirtyBecauseOfLightUpdate(chunkX, chunkY, chunkZ);
+                        }
+            });
+        }
+
         /// <summary>
         /// Set block at the specified location, invoked from network thread
         /// </summary>
@@ -166,10 +222,14 @@ namespace CraftSharp.Rendering
                 // Update chunk data
                 var chunk = column.GetChunk(blockLoc);
                 if (chunk is null)
-                    column[blockLoc.GetChunkY()] = chunk = new Chunk();
+                    column[blockLoc.GetChunkY(column.MinimumY)] = chunk = new Chunk();
                 chunk[blockLoc.GetChunkBlockX(), blockLoc.GetChunkBlockY(), blockLoc.GetChunkBlockZ()] = block;
                 // Update ambient occulsion and light data cache
-                bool lightRecalc = column.UpdateCachedBlockData(blockLoc, block.State);
+                bool shouldRecalcLight = column.UpdateCachedBlockData(blockLoc, block.State);
+                if (shouldRecalcLight)
+                {
+                    RecalculateBlockLightAt(blockLoc);
+                }
             }
 
             Loom.QueueOnMainThread(() => {
@@ -560,10 +620,13 @@ namespace CraftSharp.Rendering
 
         public void MarkDirtyAt(BlockLoc blockLoc)
         {
-            int chunkX = blockLoc.GetChunkX(), chunkY = blockLoc.GetChunkY(), chunkZ = blockLoc.GetChunkZ();
+            int chunkX = blockLoc.GetChunkX(), chunkZ = blockLoc.GetChunkZ();
             var column = GetChunkRenderColumn(chunkX, chunkZ, false);
+            int chunkY = blockLoc.GetChunkY(World.GetDimension().minY);
+
             if (column is not null) // Queue this chunk to rebuild list...
-            {   // Create the chunk render object if not present (previously empty)
+            {
+                // Create the chunk render object if not present (previously empty)
                 var chunk = column.GetChunkRender(chunkY, true);
 
                 // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly

@@ -79,7 +79,7 @@ namespace CraftSharp
         {
             try
             {
-                return this[blockLoc.GetChunkY()];
+                return this[blockLoc.GetChunkY(MinimumY)];
             }
             catch (IndexOutOfRangeException)
             {
@@ -138,6 +138,17 @@ namespace CraftSharp
                 return (byte) 0;
 
             return lightingPresent ? blockLight[index] : (byte) 0;
+        }
+
+        public void SetBlockLight(BlockLoc blockLoc, byte newValue)
+        {
+            // Move up by one chunk
+            int index = ((blockLoc.Y - MinimumY + Chunk.SIZE) << 8) | (blockLoc.GetChunkBlockZ() << 4) | blockLoc.GetChunkBlockX();
+            
+            if (index < 0 || index >= blockLight.Length)
+                return;
+
+            blockLight[index] = newValue;
         }
 
         public void InitializeAmbientOcclusion()
