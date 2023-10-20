@@ -807,8 +807,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  WalkSpeed: 1.2
-  RunSpeed: 5
+  WalkSpeed: 2.15
+  RunSpeed: 6
   SprintSpeed: 10
   GlideSpeed: 2.8
   JumpSpeedCurve:
@@ -816,7 +816,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 3.2
+      value: 4
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -825,7 +825,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 5
-      value: 4.2
+      value: 4
       inSlope: 0
       outSlope: 0
       tangentMode: 0

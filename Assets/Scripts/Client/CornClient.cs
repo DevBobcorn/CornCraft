@@ -1027,7 +1027,7 @@ namespace CraftSharp
                                 () => playerController!.EnablePhysics());
                         // Update camera yaw
                         CameraController.SetYaw(yaw);
-                        Debug.Log($"Spawned at {location}");
+                        //Debug.Log($"Spawned at {location}");
                     });
                 }
                 else // Position correction from server
@@ -1043,7 +1043,7 @@ namespace CraftSharp
                         ChunkRenderManager?.RebuildTerrainCollider(location.GetBlockLoc());
                         // Then update player location
                         playerController!.SetLocation(location, reset: true, mcYaw: yaw);
-                        Debug.Log($"Updated to {location} offset: {offset.magnitude}");
+                        //Debug.Log($"Updated to {location} offset: {offset.magnitude}");
                     });
                 }
             }
