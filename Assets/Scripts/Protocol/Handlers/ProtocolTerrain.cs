@@ -744,6 +744,7 @@ namespace CraftSharp.Protocol.Handlers
                 
                 chunkColumn.SetLights(skyLight, blockLight);
 
+                /* TODO: Figure out when these will be triggered and when they will not
                 Loom.QueueOnMainThread(() => {
                     for (int i = 0; i < updatedSections.Length; i++)
                     {
@@ -751,6 +752,7 @@ namespace CraftSharp.Protocol.Handlers
                         chunksManager.MarkDirtyBecauseOfLightUpdate(chunkX, chunkY, chunkZ);
                     }
                 });
+                */
             }
         }
     }

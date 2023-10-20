@@ -33,7 +33,7 @@ namespace CraftSharp.Rendering
 
         private float GetBlockLight(World world, BlockLoc location)
         {
-            return Mathf.Max(world.GetBlockLight(location), 4) / 10F;
+            return world.GetBlockLight(location) / 15F;
         }
 
         private float[] GetFaceLights(World world, BlockLoc blockLoc)
@@ -172,12 +172,12 @@ namespace CraftSharp.Rendering
                                 var chosen = (x + y + z) % models.Length;
                                 var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, blockLoc, state);
                                 var lights = GetCornerLights(world, blockLoc);
-                                var opaq = GetAllNeighborAO(world, blockLoc);
+                                var ao = GetAllNeighborAO(world, blockLoc);
 
                                 if (state.NoCollision)
-                                    models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, opaq, lights, color);
+                                    models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, ao, lights, color);
                                 else
-                                    models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags, opaq, lights, color);
+                                    models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags, ao, lights, color);
                                 
                                 layerMask |= (1 << layerIndex);
                             }

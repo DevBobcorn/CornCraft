@@ -76,7 +76,7 @@ namespace CraftSharp.Resource
         private float GetCornerAO(bool side1, bool corner, bool side2)
         {
             //return 1F - (side1 ? 0.33F : 0F) - (corner ? 0.33F : 0F) - (side2 ? 0.33F : 0F);
-            return 1F - (side1 ? 0.22F : 0F) - (corner ? 0.22F : 0F) - (side2 ? 0.22F : 0F);
+            return 1F - (side1 ? 0.2F : 0F) - (corner ? 0.2F : 0F) - (side2 ? 0.2F : 0F);
         }
 
         // tl tm tr
@@ -135,7 +135,7 @@ namespace CraftSharp.Resource
             }
         }
 
-        public float SampleVertexAO(CullDir dir, float[] cornersAO, float3 vertPosInBlock)
+        public float SampleVertexAO(CullDir dir, float[] cornersAO, float3 vertPosInBlock, float vertLight)
         {
             // AO Coord: 0 1
             //           2 3
@@ -151,7 +151,11 @@ namespace CraftSharp.Resource
                 _              => float2.zero
             };
 
-            return math.lerp(math.lerp(cornersAO[2], cornersAO[0], AOCoord.y), math.lerp(cornersAO[3], cornersAO[1], AOCoord.y), AOCoord.x);
+            var ao = math.lerp(math.lerp(cornersAO[2], cornersAO[0], AOCoord.y),
+                     math.lerp(cornersAO[3], cornersAO[1], AOCoord.y), AOCoord.x);
+            
+            // Reduce ambient occlusion of lit vertices
+            return math.lerp(ao, 1F, vertLight);
         }
 
         public void Build(ref VertexBuffer buffer, float3 posOffset, int cullFlags,
@@ -202,7 +206,7 @@ namespace CraftSharp.Resource
                         float vertLight = GetVertexLightFromCornerLights(vertexArrs[dir][i], blockLights);
                         //float vertLight = GetVertexLightFromFaceLights(dir, blockLights);
                         float3 vertColor = (tintIndexArrs[dir][i] >= 0 ? blockColor : DEFAULT_COLOR)
-                                * SampleVertexAO(dir, cornersAO, vertexArrs[dir][i]);
+                                * SampleVertexAO(dir, cornersAO, vertexArrs[dir][i], vertLight);
                         tints[i + vertOffset] = new float4(vertColor, vertLight);
                     }
                     uvArrs[dir].CopyTo(txuvs, vertOffset);
@@ -270,7 +274,7 @@ namespace CraftSharp.Resource
                         float vertLight = GetVertexLightFromCornerLights(vertexArrs[dir][i], blockLights);
                         //float vertLight = GetVertexLightFromFaceLights(dir, blockLights);
                         float3 vertColor = (tintIndexArrs[dir][i] >= 0 ? blockColor : DEFAULT_COLOR)
-                                * SampleVertexAO(dir, cornersAO, vertexArrs[dir][i]);
+                                * SampleVertexAO(dir, cornersAO, vertexArrs[dir][i], vertLight);
                         tints[i + vertOffset] = new float4(vertColor, vertLight);
                     }
                     uvArrs[dir].CopyTo(txuvs, vertOffset);

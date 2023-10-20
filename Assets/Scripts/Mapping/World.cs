@@ -5,6 +5,7 @@ using UnityEngine;
 using Unity.Mathematics;
 
 using CraftSharp.Resource;
+using System;
 
 namespace CraftSharp
 {
@@ -298,6 +299,29 @@ namespace CraftSharp
                 return column.GetBlockLight(blockLoc);
             
             return (byte) 0; // Not available
+        }
+
+        /// <summary>
+        /// Set block light at the specified location
+        /// </summary>
+        public void SetBlockLight(BlockLoc blockLoc, byte newValue)
+        {
+            GetChunkColumn(blockLoc)?.SetBlockLight(blockLoc, newValue);
+        }
+
+        public T[,,] GetValuesFromSection<T>(int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ, Func<BlockState, T> valueGetter)
+        {
+            T[,,] result = new T[sizeX, sizeY, sizeZ];
+
+            for (int x = 0; x < sizeX; x++)
+                for (int y = 0; y < sizeY; y++)
+                    for (int z = 0; z < sizeZ; z++)
+                    {
+                        var blockLoc = new BlockLoc(x + minX, y + minY, z + minZ);
+                        result[x, y, z] = valueGetter.Invoke(GetBlock(blockLoc).State);
+                    }
+            
+            return result;
         }
 
         /// <summary>

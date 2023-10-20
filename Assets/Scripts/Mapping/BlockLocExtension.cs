@@ -15,9 +15,9 @@ namespace CraftSharp
         /// <summary>
         /// Get the Y index of the corresponding chunk in the world
         /// </summary>
-        public static int GetChunkY(this BlockLoc loc)
+        public static int GetChunkY(this BlockLoc loc, int minY)
         {
-            return (loc.Y - World.GetDimension().minY) >> 4;
+            return (loc.Y - minY) >> 4;
         }
 
         /// <summary>
