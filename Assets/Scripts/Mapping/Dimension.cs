@@ -85,7 +85,7 @@ namespace CraftSharp
         /// <summary>
         /// The maximum Y level.
         /// </summary>
-        public readonly int maxY = 256;
+        public readonly int maxY = 255;
 
         /// <summary>
         /// The maximum height.
@@ -180,7 +180,7 @@ namespace CraftSharp
             if (nbt.ContainsKey("height"))
                 this.height = (int)nbt["height"];
             if (nbt.ContainsKey("min_y") && nbt.ContainsKey("height"))
-                this.maxY = this.minY + this.height;
+                this.maxY = this.minY + this.height - 1;
             if (nbt.ContainsKey("logical_height"))
                 this.logicalHeight = (int)nbt["logical_height"];
             if (nbt.ContainsKey("coordinate_scale"))
