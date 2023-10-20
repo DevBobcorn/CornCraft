@@ -33,7 +33,7 @@ namespace CraftSharp.Rendering
 
         private float GetBlockLight(World world, BlockLoc location)
         {
-            return world.GetBlockLight(location) / 15F;
+            return math.min(1.4F, math.sqrt(world.GetBlockLight(location) / 4F));
         }
 
         private float[] GetFaceLights(World world, BlockLoc blockLoc)
