@@ -337,11 +337,7 @@ namespace CraftSharp.Control
 
         public delegate void NoParamEventHandler();
         public event NoParamEventHandler? OnRandomizeMirroredFlag;
-        public void RandomizeMirroredFlag()
-        {
-            OnRandomizeMirroredFlag?.Invoke();
-            Debug.Log("RAND MRR");
-        }
+        public void RandomizeMirroredFlag() => OnRandomizeMirroredFlag?.Invoke();
 
         public event NoParamEventHandler? OnMeleeDamageStart;
         public void MeleeDamageStart() => OnMeleeDamageStart?.Invoke();
