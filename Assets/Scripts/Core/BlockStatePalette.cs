@@ -79,6 +79,51 @@ namespace CraftSharp
             }
         }
 
+        public static int GetStateIdFromString(string state, int valueIfNotFound)
+        {
+            var parts = state.Trim().Split('[');
+
+            if (parts.Length == 1) // No predicate specified
+            {
+                var blockId = ResourceLocation.FromString(parts[0]);
+
+                if (INSTANCE.StateListTable.ContainsKey(blockId))
+                {
+                    return GetDefaultStateId(blockId);
+                }
+                else
+                {
+                    return valueIfNotFound;
+                }
+            }
+            else if (parts.Length == 2 && parts[1].EndsWith(']')) // With predicates
+            {
+                var blockId = ResourceLocation.FromString(parts[0]);
+                var filter = parts[1][..^1]; // Remove trailing ']'
+
+                if (INSTANCE.StateListTable.ContainsKey(blockId)) // StateListTable should have the same keys as DefaultStateTable
+                {
+                    var predicate = BlockStatePredicate.FromString(filter);
+
+                    foreach (var stateId in INSTANCE.StateListTable[blockId])
+                    {
+                        if (predicate.Check(INSTANCE.StatesTable[stateId]))
+                            return stateId;
+                    }
+
+                    return GetDefaultStateId(blockId);
+                }
+                else
+                {
+                    return valueIfNotFound;
+                }
+            }
+            else
+            {
+                return valueIfNotFound;
+            }
+        }
+
         public static HashSet<int> GetStateIdsFromString(string state)
         {
             var parts = state.Trim().Split('[');
@@ -152,7 +197,57 @@ namespace CraftSharp
             if (blockColorRules.ContainsKey(stateId))
                 return blockColorRules[stateId].Invoke(world, loc, state);
             return BlockGeometry.DEFAULT_COLOR;
-        } 
+        }
+
+        public Dictionary<string, HashSet<string>> GetBlockProperties(ResourceLocation blockId)
+        {
+            Dictionary<string, HashSet<string>> result = new();
+
+            foreach (var stateId in stateListTable[blockId]) // For each possible state of this block
+            {
+                foreach (var pair in statesTable[stateId].Properties) // For each property in this state
+                {
+                    if (!result.ContainsKey(pair.Key))
+                    {
+                        result.Add(pair.Key, new HashSet<string>());
+                    }
+
+                    result[pair.Key].Add(pair.Value);
+                }
+            }
+
+            return result;
+        }
+
+        public (int, BlockState) GetBlockStateWithProperty(int sourceId, BlockState source, string key, string value)
+        {
+            var blockId = source.BlockId;
+            // Copy properties from source blockstate, with the
+            // property of specified key set to given value
+            var props = new Dictionary<string, string>(source.Properties)
+            {
+                [key] = value
+            };
+
+            var predicate = new BlockStatePredicate(props);
+
+            foreach (var stateId in stateListTable[blockId]) // For each blockstate of this block
+            {
+                if (predicate.Check(statesTable[stateId]))
+                {
+                    return (stateId, statesTable[stateId]);
+                }
+            }
+
+            return (sourceId, source);
+        }
+
+        public static ResourceLocation[] GetBlockIdCandidates(ResourceLocation incompleteBlockId)
+        {
+            return INSTANCE.StateListTable.Keys.Where(
+                    x => x.Namespace == incompleteBlockId.Namespace &&
+                            x.Path.StartsWith(incompleteBlockId.Path)).Take(3).ToArray();
+        }
 
         public void PrepareData(string dataVersion, DataLoadFlag flag)
         {
