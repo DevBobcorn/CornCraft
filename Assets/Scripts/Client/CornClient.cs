@@ -95,6 +95,7 @@ namespace CraftSharp
 
             // Freeze player controller until terrain is ready
             playerController!.DisablePhysics();
+            ScreenControl.PushScreen(LoadingScreen!);
         }
 
         public override bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp,
@@ -966,6 +967,7 @@ namespace CraftSharp
             }
 
             Loom.QueueOnMainThread(() => {
+                ScreenControl.PushScreen(LoadingScreen!);
                 playerController!.DisablePhysics();
 
                 ChunkRenderManager?.ReloadChunksRender();
@@ -1023,8 +1025,12 @@ namespace CraftSharp
                         // Update player location
                         playerController!.SetLocation(location, mcYaw: yaw);
                         // Force refresh environment collider
-                        ChunkRenderManager?.InitializeTerrainCollider(location.GetBlockLoc(),
-                                () => playerController!.EnablePhysics());
+                        ChunkRenderManager?.InitializeTerrainCollider(location.GetBlockLoc(), () =>
+                                {
+                                    // Pop loading screen
+                                    ScreenControl.TryPopScreen();
+                                    playerController!.EnablePhysics();
+                                });
                         // Update camera yaw
                         CameraController.SetYaw(yaw);
                         //Debug.Log($"Spawned at {location}");
