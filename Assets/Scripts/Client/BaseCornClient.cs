@@ -31,6 +31,7 @@ namespace CraftSharp
         [SerializeField] protected ScreenControl? screenControl;
         public ScreenControl ScreenControl => screenControl!;
         [SerializeField] protected HUDScreen? HUDScreen;
+        [SerializeField] protected LoadingScreen? LoadingScreen;
         #endregion
 
         public bool InputPaused { get; private set; } = false;
