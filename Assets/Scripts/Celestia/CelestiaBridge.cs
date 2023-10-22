@@ -1,9 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-public class LoginBridge : MonoBehaviour
+public class CelestiaBridge : MonoBehaviour
 {
     [SerializeField] private GameObject bridgeFragment;
 
@@ -13,15 +11,25 @@ public class LoginBridge : MonoBehaviour
     [SerializeField] private GameObject poweredRail;
 
     [SerializeField] private Transform viewerTransform;
+    [SerializeField] private float viewerMoveSpeed = 5F;
 
-    private readonly Queue<BridgeFragment> existingFragments = new();
+    private readonly Queue<CelestiaBridgeFragment> existingFragments = new();
     private int fragmentIndex = 0;
     [SerializeField] private int viewFragmentCount = 2;
     [SerializeField] private int maxFragmentCount = 5;
     [SerializeField] private int fragmentLength = 15;
 
+    private bool stopSignalReceived = false;
+
+    void StopGeneration()
+    {
+        stopSignalReceived = true;
+    }
+
     void Update()
     {
+        viewerTransform.position += new Vector3(0F, 0F, viewerMoveSpeed * Time.deltaTime);
+
         int targetFragmentIndex = Mathf.RoundToInt(viewerTransform.position.z / fragmentLength) + viewFragmentCount;
 
         while (fragmentIndex < targetFragmentIndex)
@@ -36,7 +44,7 @@ public class LoginBridge : MonoBehaviour
         fragmentObj.transform.SetParent(transform, false);
         fragmentObj.name = $"Fragment #{fragmentIndex}";
 
-        var fragment = fragmentObj.GetComponent<BridgeFragment>();
+        var fragment = fragmentObj.GetComponent<CelestiaBridgeFragment>();
         fragment.BuildFragment(fragmentIndex, bridgeBlock, bridgeEdge, regularRail, poweredRail);
 
         fragmentIndex++;

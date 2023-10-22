@@ -7,9 +7,6 @@ using UnityEngine;
 using CraftSharp.Control;
 using CraftSharp.Event;
 using CraftSharp.Protocol;
-using CraftSharp.Protocol.ProfileKey;
-using CraftSharp.Protocol.Handlers.Forge;
-using CraftSharp.Protocol.Session;
 using CraftSharp.Rendering;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
@@ -84,10 +81,9 @@ namespace CraftSharp
             }
         }
 
-        public override bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp,
-                ushort port, int protocol, ForgeInfo? forgeInfo, string accountLower)
+        public override bool StartClient(StartLoginInfo info)
         {
-            // Start up client
+            var session = info.Session;
 
             // Update entity type for dummy client entity
             clientEntity.Type = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);

@@ -53,7 +53,7 @@ namespace CraftSharp
             var i = Instance;
         }
 
-        private IEnumerator PrepareDataAndResource(int protocolVersion, DataLoadFlag startUpFlag, Action<string> updateStatus)
+        public IEnumerator PrepareDataAndResource(int protocolVersion, DataLoadFlag startUpFlag, Action<string> updateStatus)
         {
             var versionDictPath = PathHelper.GetExtraDataFile("versions.json");
 
@@ -214,35 +214,24 @@ namespace CraftSharp
             while (!fullyLoaded) yield return null;
         }
 
-        public void StartLoginCoroutine(bool online, SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
-                int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
+        public void StartLoginCoroutine(StartLoginInfo info, Action<bool> callback, Action<string> updateStatus)
         {
-            StartCoroutine(StartLogin(online, session, playerKeyPair, serverIp, port, protocol, forgeInfo, callback, updateStatus, accountLower));
+            StartCoroutine(StartLogin(info, callback, updateStatus));
         }
 
-        private IEnumerator StartLogin(bool online, SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp, ushort port,
-                int protocol, ForgeInfo? forgeInfo, Action<bool> callback, Action<string> updateStatus, string accountLower)
+        private IEnumerator StartLogin(StartLoginInfo info, Action<bool> callback, Action<string> updateStatus)
         {
-            // Prepare resources
-            var dataLoadFlag = new DataLoadFlag();
-            yield return PrepareDataAndResource(protocol, dataLoadFlag, updateStatus);
-            if (dataLoadFlag.Failed)
-            {
-                callback(false);
-                yield break;
-            }
-
             // Clear client value
             client = null;
 
             // Enter world scene, and find the client instance in that scene
             updateStatus("login.enter_world_scene");
-            yield return EnterWorldScene(online ? "World" : "World Offline");
+            yield return EnterWorldScene(info.Online ? "World" : "World Offline");
 
             // Start client
             if (client != null)
             {
-                var succeeded = client!.StartClient(session, playerKeyPair, serverIp, port, protocol, forgeInfo, accountLower);
+                var succeeded = client!.StartClient(info);
                 callback(succeeded);
             }
             else // Failed to find client instance in scene
@@ -280,7 +269,6 @@ namespace CraftSharp
                     Screen.SetResolution(maxRes.width, maxRes.height, true);
                     Screen.fullScreen = true;
                 }
-                
             }
         }
     }
