@@ -29,6 +29,8 @@ namespace CraftSharp.UI
         [SerializeField] private CanvasGroup?    loginPanel, usernamePanel, authPanel;
         [SerializeField] private TMP_Dropdown?   loginDropDown;
 
+        [SerializeField] private Button?         enterGamePanel;
+
         [SerializeField] private CelestiaBridge? celestiaBridge;
 
         private bool preparingGame = false, authenticating = false, authCancelled = false;
@@ -87,6 +89,8 @@ namespace CraftSharp.UI
 
             var session = new SessionToken { PlayerName = "OfflinePlayer" };
             var accountLower = "dummy_user";
+            // Dummy authentication completed, hide the panel...
+            HideLoginPanel();
             // Store current login info
             loginInfo = new StartLoginInfo(false, session, null, "<local>", 0,
                     protocolVersion, null, accountLower);
@@ -343,7 +347,13 @@ namespace CraftSharp.UI
             else
             {
                 resourceLoaded = true;
-                Debug.Log("Resource load completed");
+                yield return StartCoroutine(celestiaBridge!.StopAndMakePortal(() =>
+                {
+                    // Set enter game panel to active
+                    enterGamePanel!.gameObject.SetActive(true);
+                    // TODO: Show hint for player
+
+                }));
             }
         }
 
@@ -399,7 +409,7 @@ namespace CraftSharp.UI
         {
             usernameIndex = 0;
             usernamePanel!.alpha = 0F;
-            namesShown        = false;
+            namesShown = false;
         }
 
         public void UpdateUsernamePlaceholder(int selection)
@@ -464,6 +474,22 @@ namespace CraftSharp.UI
             HideAuthPanel();
         }
 
+        public IEnumerator EnterGame()
+        {
+            if (resourceLoaded && loginInfo is not null)
+            {
+                celestiaBridge!.EnterPortal();
+
+                yield return new WaitForSecondsRealtime(0.5F);
+
+                // We cannot directly use StartCoroutine to call StartLogin here, which will stop running when
+                // this scene is unloaded and LoginControl object is destroyed
+                CornApp.Instance.StartLoginCoroutine(loginInfo,
+                        (succeeded) => preparingGame = false,
+                        (status) => loadStateInfoText!.text = Translations.Get(status));
+            }
+        }
+
         public void QuitGame()
         {
             Application.Quit();
@@ -474,7 +500,8 @@ namespace CraftSharp.UI
             // Initialize controls
             usernameOptions!.text = string.Empty;
             usernamePanel!.alpha  = 0F; // Hide at start
-
+            enterGamePanel!.gameObject.SetActive(false);
+            enterGamePanel.onClick.AddListener(() => StartCoroutine(EnterGame()));
             loginDropDown!.onValueChanged.AddListener(this.UpdateUsernamePlaceholder);
 
             //Load cached sessions from disk if necessary
@@ -551,18 +578,6 @@ namespace CraftSharp.UI
                         usernameInput!.text = shownNames[usernameIndex];
                         usernameInput!.MoveTextEnd(false);
                     }
-                }
-            }
-
-            if (Keyboard.current.qKey.wasPressedThisFrame) // Join game
-            {
-                if (resourceLoaded && loginInfo is not null)
-                {
-                    // We cannot directly use StartCoroutine to call StartLogin here, which will stop running when
-                    // this scene is unloaded and LoginControl object is destroyed
-                    CornApp.Instance.StartLoginCoroutine(loginInfo,
-                            (succeeded) => preparingGame = false,
-                            (status) => loadStateInfoText!.text = Translations.Get(status));
                 }
             }
         }

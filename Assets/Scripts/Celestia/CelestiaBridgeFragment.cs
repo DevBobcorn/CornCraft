@@ -14,6 +14,7 @@ public class CelestiaBridgeFragment : MonoBehaviour
     [SerializeField] private float defaultRiseSpeed = 1F;
     [SerializeField] private float targetHeight = 0F;
     [SerializeField] private float edgeOffset = 0.25F;
+    [SerializeField] private float portalOffset = 0.5F;
 
     private readonly List<(GameObject, float, float)> bridgeBlocks = new();
     private readonly List<(GameObject, float, Material)> railBlocks = new();
@@ -104,6 +105,66 @@ public class CelestiaBridgeFragment : MonoBehaviour
                     var railOffset = GetRailBlockOffset(j + bridgeBodyLength);
                     var (railBlock, railMat) = CreateRailBlock(regularRail, new(i, targetHeight + 0.55F, nextConPos + j));
                     railBlocks.Add((railBlock, Time.timeSinceLevelLoad + railOffset, railMat));
+                }
+            }
+        }
+    }
+
+    public void BuildFinalFragment(int fragIndex, GameObject surfaceBlock,
+            GameObject edgeBlock, GameObject portalFrameBlock, GameObject portalBlock)
+    {
+        int forwardPos = fragIndex * (bridgeBodyLength + bridgeConnectionLength);
+        float verticalPos = -2F; // (fragIndex % 2) * 0.1F;
+
+        // Connection with previous fragment
+        for (int i = -bridgeWidth + 1;i < bridgeWidth;i++)
+        {
+            bool isEdge = Mathf.Abs(i) == bridgeWidth - 1;
+
+            int prevConPos = forwardPos - bridgeConnectionLength;
+            float sample = SamplePerlinNoise(fragIndex - 1, i);
+
+            for (int j = Mathf.RoundToInt(sample * bridgeConnectionLength);j < bridgeConnectionLength;j++)
+            {
+                var newBlock = CreateBridgeBlock(isEdge ? edgeBlock : surfaceBlock,
+                        new Vector3(i, isEdge ? verticalPos + edgeOffset : verticalPos, prevConPos + j));
+                var riseSpeed = defaultRiseSpeed + Random.Range(-0.1F, 0.1F);
+                bridgeBlocks.Add((newBlock, riseSpeed, isEdge ? targetHeight + edgeOffset : targetHeight));
+            }
+        }
+
+        for (int i = -bridgeWidth + 1;i < bridgeWidth;i++)
+        {
+            for (int j = 0;j < bridgeBodyLength;j++)
+            {
+                float randomOffset = GetBlockOffset(j);
+                var newBlock = CreateBridgeBlock(surfaceBlock,
+                        new Vector3(i, verticalPos + edgeOffset - randomOffset, forwardPos + j));
+                var riseSpeed = defaultRiseSpeed + Random.Range(-0.1F, 0.1F);
+                bridgeBlocks.Add((newBlock, riseSpeed, targetHeight + edgeOffset));
+            }
+        }
+
+        int portalHeight = 7;
+
+        // Create portal
+        for (int i = -bridgeWidth + 1;i < bridgeWidth;i++)
+        {
+            bool isEdge = Mathf.Abs(i) == bridgeWidth - 1;
+            int j = bridgeBodyLength;
+
+            for (int k = 0; k < portalHeight; k++)
+            {
+                float randomOffset = GetBlockOffset(j);
+
+                bool isFrame = isEdge || k == 0 || k == portalHeight - 1;
+
+                if (isFrame)
+                {
+                    var newBlock = CreateBridgeBlock(portalFrameBlock,
+                            new Vector3(i, verticalPos - randomOffset, forwardPos + j + randomOffset));
+                    var riseSpeed = Random.Range(4F, 12F);
+                    bridgeBlocks.Add((newBlock, riseSpeed, targetHeight + portalOffset + k + 0.5F));
                 }
             }
         }
