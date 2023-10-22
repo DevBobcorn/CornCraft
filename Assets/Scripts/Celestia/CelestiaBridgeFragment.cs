@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BridgeFragment : MonoBehaviour
+public class CelestiaBridgeFragment : MonoBehaviour
 {
     [SerializeField] private int bridgeWidth = 6;
     [SerializeField] private int bridgeConnectionLength = 10;

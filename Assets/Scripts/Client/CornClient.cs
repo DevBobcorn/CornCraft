@@ -10,9 +10,7 @@ using CraftSharp.Control;
 using CraftSharp.Event;
 using CraftSharp.Protocol;
 using CraftSharp.Protocol.ProfileKey;
-using CraftSharp.Protocol.Handlers.Forge;
 using CraftSharp.Protocol.Message;
-using CraftSharp.Protocol.Session;
 using CraftSharp.Proxy;
 using CraftSharp.Rendering;
 using CraftSharp.UI;
@@ -98,17 +96,18 @@ namespace CraftSharp
             ScreenControl.PushScreen(LoadingScreen!);
         }
 
-        public override bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp,
-                ushort port, int protocol, ForgeInfo? forgeInfo, string accountLower)
+        public override bool StartClient(StartLoginInfo info)
         {
+            var session = info.Session;
+
             this.sessionId = session.ID;
             if (!Guid.TryParse(session.PlayerID, out this.uuid))
                 this.uuid = Guid.Empty;
             this.username = session.PlayerName;
-            this.host = serverIp;
-            this.port = port;
-            this.protocolVersion = protocol;
-            this.playerKeyPair = playerKeyPair;
+            this.host = info.ServerIp;
+            this.port = info.ServerPort;
+            this.protocolVersion = info.ProtocolVersion;
+            this.playerKeyPair = info.Player;
 
             // Start up client
             try
@@ -119,14 +118,14 @@ namespace CraftSharp
                 tcpClient.ReceiveTimeout = 30000; // 30 seconds
 
                 // Create handler
-                handler = ProtocolHandler.GetProtocolHandler(tcpClient, protocol, forgeInfo, this);
+                handler = ProtocolHandler.GetProtocolHandler(tcpClient, info.ProtocolVersion, info.ForgeInfo, this);
 
                 // Start update loop
                 timeoutdetector = Tuple.Create(new Thread(new ParameterizedThreadStart(TimeoutDetector)), new CancellationTokenSource());
                 timeoutdetector.Item1.Name = "Connection Timeout Detector";
                 timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
 
-                if (handler.Login(this.playerKeyPair, session, accountLower)) // Login
+                if (handler.Login(this.playerKeyPair, session, info.AccountLower)) // Login
                 {
                     // Update entity type for dummy client entity
                     clientEntity.Type = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);

@@ -2799,7 +2799,6 @@ GameObject:
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   - component: {fileID: 963194230}
-  - component: {fileID: 963194231}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2926,19 +2925,6 @@ MonoBehaviour:
     mipBias: 0
     varianceClampScale: 0.9
     contrastAdaptiveSharpening: 0
---- !u!114 &963194231
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963194225}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 523daa6f1b11551409ba2378dd5415c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 7.5
 --- !u!1 &1076491537
 GameObject:
   m_ObjectHideFlags: 0
@@ -7248,6 +7234,7 @@ MonoBehaviour:
   regularRail: {fileID: 5369743078286888248, guid: 064762344eaae9746803e3ea83c69103, type: 3}
   poweredRail: {fileID: 5369743078286888248, guid: 5f65e4cc5a28f6545bf55aa545c01c0a, type: 3}
   viewerTransform: {fileID: 963194228}
+  viewerMoveSpeed: 7.5
   viewFragmentCount: 4
   maxFragmentCount: 4
   fragmentLength: 7

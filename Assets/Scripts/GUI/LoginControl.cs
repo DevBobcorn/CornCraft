@@ -29,7 +29,11 @@ namespace CraftSharp.UI
         [SerializeField] private CanvasGroup?    loginPanel, usernamePanel, authPanel;
         [SerializeField] private TMP_Dropdown?   loginDropDown;
 
+        [SerializeField] private CelestiaBridge? celestiaBridge;
+
         private bool preparingGame = false, authenticating = false, authCancelled = false;
+        private bool resourceLoaded = false;
+        private StartLoginInfo? loginInfo = null;
 
         // Login auto-complete
         int  usernameIndex =  0;
@@ -67,7 +71,28 @@ namespace CraftSharp.UI
 
             return false;
         }
-        
+
+        private void TryConnectDummyServer()
+        {
+            if (preparingGame)
+            {
+                CornApp.Notify(Translations.Get("login.logging_in"), Notification.Type.Warning);
+                return;
+            }
+            preparingGame = true;
+
+            var serverVersionName = "<dummy>";
+            var protocolVersion = 754; // 1.16.5
+            CornApp.Notify(Translations.Get("mcc.server_protocol", serverVersionName, protocolVersion));
+
+            var session = new SessionToken { PlayerName = "OfflinePlayer" };
+            var accountLower = "dummy_user";
+            // Store current login info
+            loginInfo = new StartLoginInfo(false, session, null, "<local>", 0,
+                    protocolVersion, null, accountLower);
+            StartCoroutine(StoreLoginInfoAndLoadResource(loginInfo));
+        }
+
         public void TryConnectServer()
         {
             if (preparingGame)
@@ -75,7 +100,6 @@ namespace CraftSharp.UI
                 CornApp.Notify(Translations.Get("login.logging_in"), Notification.Type.Warning);
                 return;
             }
-
             preparingGame = true;
 
             StartCoroutine(ConnectServer());
@@ -83,6 +107,8 @@ namespace CraftSharp.UI
 
         private IEnumerator ConnectServer()
         {
+            loginInfo = null;
+
             string serverText = serverInput!.text;
             string account = usernameInput!.text;
             string accountLower = account.ToLower();
@@ -169,9 +195,7 @@ namespace CraftSharp.UI
                         {
                             result = ProtocolHandler.LoginResult.OtherError;
                         }
-                        
                     }
-
                 }
             }
 
@@ -251,26 +275,29 @@ namespace CraftSharp.UI
                     CornApp.Notify(Translations.Get("mcc.server_protocol", receivedVersionName, protocolVersion));
                 }
 
-                if (protocolVersion != 0) // Proceed to server login
+                if (protocolVersion != 0) // Load corresponding data
                 {
-                    if (Protocol.ProtocolHandler.IsProtocolSupported(protocolVersion))
+                    if (ProtocolHandler.IsProtocolSupported(protocolVersion))
                     {
                         // Authentication completed, hide the panel...
                         HideLoginPanel();
-
-                        // We cannot directly use StartCoroutine to call StartLogin here, which will stop running when
-                        // this scene is unloaded and LoginControl object is destroyed
-                        CornApp.Instance.StartLoginCoroutine(true, session, playerKeyPair, host, port, protocolVersion, null,
-                                (succeeded) => preparingGame = false,
-                                (status) => loadStateInfoText!.text = Translations.Get(status), accountLower);
-
-                        yield break;
+                        // Store current login info
+                        loginInfo = new StartLoginInfo(true, session, playerKeyPair, host, port,
+                                protocolVersion, null, accountLower);
+                        // No need to yield return this coroutine because it's the last step here
+                        StartCoroutine(StoreLoginInfoAndLoadResource(loginInfo));
                     }
                     else
+                    {
                         CornApp.Notify(Translations.Get("error.unsupported"), Notification.Type.Error);
+                        preparingGame = false;
+                    }
                 }
                 else // Unable to determine server version
+                {
                     CornApp.Notify(Translations.Get("error.determine"), Notification.Type.Error);
+                    preparingGame = false;
+                }
             }
             else
             {
@@ -295,34 +322,29 @@ namespace CraftSharp.UI
                     CornApp.Notify(Translations.Get("error.login.ssl_help"), Notification.Type.Error);
                 
                 Debug.LogError(failureMessage);
-            }
 
-            preparingGame = false;
+                preparingGame = false;
+            }
         }
 
-        private void TryConnectDummyServer()
+        private IEnumerator StoreLoginInfoAndLoadResource(StartLoginInfo info)
         {
-            if (preparingGame)
+            loginInfo = info;
+
+            var resLoadFlag = new DataLoadFlag();
+            yield return StartCoroutine(CornApp.Instance.PrepareDataAndResource(info.ProtocolVersion, resLoadFlag,
+                    (status) => loadStateInfoText!.text = Translations.Get(status)));
+            
+            if (resLoadFlag.Failed)
             {
-                CornApp.Notify(Translations.Get("login.logging_in"), Notification.Type.Warning);
-                return;
+                resourceLoaded = false;
+                Debug.LogWarning("Resource load failed");
             }
-
-            preparingGame = true;
-
-            var serverVersionName = "<dummy>";
-            var protocolVersion = 754; // 1.16.5
-
-            CornApp.Notify(Translations.Get("mcc.server_protocol", serverVersionName, protocolVersion));
-
-            var session = new SessionToken { PlayerName = "OfflinePlayer" };
-            var accountLower = "dummy_user";
-
-            // We cannot directly use StartCoroutine to call StartLogin here, which will stop running when
-            // this scene is unloaded and LoginControl object is destroyed
-            CornApp.Instance.StartLoginCoroutine(false, session, null, "<local>", 0, protocolVersion, null,
-                    (succeeded) => preparingGame = false,
-                    (status) => loadStateInfoText!.text = Translations.Get(status), accountLower);
+            else
+            {
+                resourceLoaded = true;
+                Debug.Log("Resource load completed");
+            }
         }
 
         public void ShowLoginPanel()
@@ -371,7 +393,6 @@ namespace CraftSharp.UI
                     (login) => login != message && login.Contains(message)).ToArray();
 
             RefreshUsernames();
-
         }
 
         public void HideUsernamePanel(string message)
@@ -432,7 +453,7 @@ namespace CraftSharp.UI
         {
             var code = authCodeInput!.text.Trim();
 
-            if (String.IsNullOrEmpty(code))
+            if (string.IsNullOrEmpty(code))
             {
                 CornApp.Notify(Translations.Get("login.auth_code_empty"), Notification.Type.Warning);
                 return;
@@ -530,6 +551,18 @@ namespace CraftSharp.UI
                         usernameInput!.text = shownNames[usernameIndex];
                         usernameInput!.MoveTextEnd(false);
                     }
+                }
+            }
+
+            if (Keyboard.current.qKey.wasPressedThisFrame) // Join game
+            {
+                if (resourceLoaded && loginInfo is not null)
+                {
+                    // We cannot directly use StartCoroutine to call StartLogin here, which will stop running when
+                    // this scene is unloaded and LoginControl object is destroyed
+                    CornApp.Instance.StartLoginCoroutine(loginInfo,
+                            (succeeded) => preparingGame = false,
+                            (status) => loadStateInfoText!.text = Translations.Get(status));
                 }
             }
         }

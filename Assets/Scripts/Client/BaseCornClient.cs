@@ -2,13 +2,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 using CraftSharp.Control;
 using CraftSharp.Protocol;
-using CraftSharp.Protocol.ProfileKey;
-using CraftSharp.Protocol.Handlers.Forge;
-using CraftSharp.Protocol.Session;
 using CraftSharp.Rendering;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
@@ -68,8 +64,7 @@ namespace CraftSharp
         public GameMode GameMode { get; protected set; } = GameMode.Survival;
         public byte CurrentSlot { get; protected set; } = 0;
 
-        public abstract bool StartClient(SessionToken session, PlayerKeyPair? playerKeyPair, string serverIp,
-                ushort port, int protocol, ForgeInfo? forgeInfo, string accountLower);
+        public abstract bool StartClient(StartLoginInfo info);
         
         public abstract void Disconnect();
 
