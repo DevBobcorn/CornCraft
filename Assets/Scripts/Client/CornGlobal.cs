@@ -42,7 +42,5 @@ namespace CraftSharp
 
         // Minecraft Settings
         public static MCSettings MCSettings { get; } = new();
-
     }
-
 }

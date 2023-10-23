@@ -130,6 +130,7 @@ login.logging_in=已经在登录了喵
 login.data_not_availale=当前版本没有对应数据
 login.enter_world_scene=正在进入世界场景...
 login.login_failed=登入失败！>_<
+login.click_to_enter=点击进入游戏
 
 [resource]
 resource.error.base_resource_invalid=本体资源包无效

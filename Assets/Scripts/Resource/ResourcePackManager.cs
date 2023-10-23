@@ -260,7 +260,7 @@ namespace CraftSharp.Resource
         private readonly Dictionary<ResourceLocation, TextureInfo> texAtlasTable = new();
 
         /// <summary>
-        /// Get texture uvs (x, y, depth in atlas array) and texture animation info (frame count, frame interval, frame offset)
+        /// Get texture uvs (x, y, depth in atlas array) and texture animation info (// frame count, frame interval, frame UV size, frame per row)
         /// </summary>
         public (float3[] uvs, float4 anim) GetUVs(ResourceLocation identifier, Vector4 part, int areaRot)
         {

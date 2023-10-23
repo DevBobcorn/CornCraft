@@ -15,7 +15,7 @@ namespace CraftSharp.Resource
         public float3[] txuv = { };
 
         /// <summary>
-        /// Texture uv animation array (frame count, frame interval, frame offset)
+        /// Texture uv animation array (// frame count, frame interval, frame UV size, frame per row)
         /// </summary>
         public float4[] uvan = { };
 
