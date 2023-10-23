@@ -130,6 +130,7 @@ login.logging_in=Already logging in!
 login.data_not_availale=Data for this version is not available!
 login.enter_world_scene=Entering world scene...
 login.login_failed=Login failed! >_<
+login.click_to_enter=Click to Enter
 
 [resource]
 resource.error.base_resource_invalid=Base resource pack is invalid!

@@ -352,7 +352,7 @@ namespace CraftSharp.UI
                     // Set enter game panel to active
                     enterGamePanel!.gameObject.SetActive(true);
                     // TODO: Show hint for player
-
+                    loadStateInfoText!.text = Translations.Get("login.click_to_enter");
                 }));
             }
         }
@@ -480,7 +480,7 @@ namespace CraftSharp.UI
             {
                 celestiaBridge!.EnterPortal();
 
-                yield return new WaitForSecondsRealtime(0.5F);
+                yield return new WaitForSecondsRealtime(0.6F);
 
                 // We cannot directly use StartCoroutine to call StartLogin here, which will stop running when
                 // this scene is unloaded and LoginControl object is destroyed

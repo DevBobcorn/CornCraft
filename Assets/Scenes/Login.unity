@@ -2876,13 +2876,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.06975647, y: 0, z: 0, w: 0.9975641}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -8, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7351,16 +7351,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4817b816128e9fa4989bcaa7032cee84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeFragment: {fileID: 3566167390013837463, guid: 3857db084e5aacb428ad561dcb2cdd67, type: 3}
-  bridgeBlock: {fileID: 6280996216578334597, guid: ab68220f0cd4e0c429a1e29c2cfd73b6, type: 3}
-  bridgeEdge: {fileID: 6280996216578334597, guid: 25df61a37a7361f4599002ff2af43432, type: 3}
-  portalFrame: {fileID: 7992725482465875916, guid: f0358a370072ce7418bd063716a4b5ff, type: 3}
-  portalBlock: {fileID: 6280996216578334597, guid: ab68220f0cd4e0c429a1e29c2cfd73b6, type: 3}
-  regularRail: {fileID: 5369743078286888248, guid: 064762344eaae9746803e3ea83c69103, type: 3}
-  poweredRail: {fileID: 5369743078286888248, guid: 5f65e4cc5a28f6545bf55aa545c01c0a, type: 3}
+  bridgeFragmentPrefab: {fileID: 3566167390013837463, guid: 3857db084e5aacb428ad561dcb2cdd67, type: 3}
+  portalFragmentPrefab: {fileID: 3566167390013837463, guid: 891cf3704dbcd914e813e0469c76130f, type: 3}
   viewerTransform: {fileID: 963194228}
   viewerMoveSpeed: 7.5
   viewerStopDistance: 5
+  enterPortalSpeed: 55
   viewFragmentCount: 4
   maxFragmentCount: 4
   fragmentLength: 7

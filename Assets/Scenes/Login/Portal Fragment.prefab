@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3566167390013837463
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4675239136662155128}
+  - component: {fileID: 7086515304278822274}
+  - component: {fileID: 3864760325587259743}
+  m_Layer: 0
+  m_Name: Portal Fragment
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4675239136662155128
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3566167390013837463}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7086515304278822274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3566167390013837463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a350b7da89e0144db66fb9b214147ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bridgeWidth: 3
+  bridgeConnectionLength: 6
+  bridgeBodyLength: 1
+  perlinInitOffset: 0.16
+  perlinSampleInterval: 0.7
+  perlinSampleUnit: 0.1
+  defaultRiseSpeed: 1.8
+  targetHeight: 0
+  edgeOffset: 0.25
+  bridgeBlock: {fileID: 6280996216578334597, guid: ab68220f0cd4e0c429a1e29c2cfd73b6, type: 3}
+  bridgeEdge: {fileID: 6280996216578334597, guid: 25df61a37a7361f4599002ff2af43432, type: 3}
+  regularRail: {fileID: 5369743078286888248, guid: 064762344eaae9746803e3ea83c69103, type: 3}
+  poweredRail: {fileID: 5369743078286888248, guid: 5f65e4cc5a28f6545bf55aa545c01c0a, type: 3}
+--- !u!114 &3864760325587259743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3566167390013837463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28a79ff76c0f1a347bca601ca04e849f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bridgeWidth: 3
+  bridgeConnectionLength: 6
+  bridgeBodyLength: 1
+  perlinInitOffset: 0.16
+  perlinSampleInterval: 0.7
+  perlinSampleUnit: 0.1
+  defaultRiseSpeed: 1.8
+  targetHeight: 0
+  edgeOffset: 0.25
+  bridgeBlock: {fileID: 6280996216578334597, guid: ab68220f0cd4e0c429a1e29c2cfd73b6, type: 3}
+  bridgeEdge: {fileID: 6280996216578334597, guid: 25df61a37a7361f4599002ff2af43432, type: 3}
+  regularRail: {fileID: 5369743078286888248, guid: 064762344eaae9746803e3ea83c69103, type: 3}
+  poweredRail: {fileID: 5369743078286888248, guid: 5f65e4cc5a28f6545bf55aa545c01c0a, type: 3}
+  portalOffset: 1.5
+  portalWidth: 3
+  portalHeight: 6
+  portalFrame: {fileID: 7992725482465875916, guid: f0358a370072ce7418bd063716a4b5ff, type: 3}
+  portalBlockMaterial: {fileID: 2100000, guid: a05d1b9b1798fd74b8f20257346d4d34, type: 2}
+  portalBlockEmissionColor: {r: 0.42352945, g: 0.7568628, b: 0.9098039, a: 1}
+  FrameGenerationComplete: 0
