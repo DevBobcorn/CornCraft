@@ -7356,7 +7356,7 @@ MonoBehaviour:
   viewerTransform: {fileID: 963194228}
   viewerMoveSpeed: 7.5
   viewerStopDistance: 5
-  enterPortalSpeed: 55
+  enterPortalSpeed: 35
   viewFragmentCount: 4
   maxFragmentCount: 4
   fragmentLength: 7

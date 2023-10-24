@@ -15,7 +15,8 @@ namespace CraftSharp
         [SerializeField] private int portalHeight = 5;
         [SerializeField] private GameObject portalFrame;
         [SerializeField] private Material portalBlockMaterial;
-        [SerializeField] private Color portalBlockEmissionColor;
+        
+        [SerializeField] [ColorUsage(false, true)] private Color portalBlockEmissionColor;
 
         public bool FrameGenerationComplete = false;
 
@@ -126,7 +127,7 @@ namespace CraftSharp
 
             // Add mesh renderer to the block
             var portalMeshRenderer = portalBlockObject.AddComponent<MeshRenderer>();
-            portalMeshRenderer.sharedMaterial = new Material(portalBlockMaterial);
+            portalMeshRenderer.material = new Material(portalBlockMaterial);
 
             portalBlockPrototype = portalBlockObject;
         }
@@ -163,7 +164,7 @@ namespace CraftSharp
                 // Prototype and other portal blocks share the same
                 // material instance
                 portalBlockPrototype.GetComponent<MeshRenderer>().sharedMaterial
-                        .SetColor("_EmissionColor", portalBlockEmissionColor * 100F);
+                        .SetColor("_EmissionColor", portalBlockEmissionColor * emissionTime);
             }
         }
     }

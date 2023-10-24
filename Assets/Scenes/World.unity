@@ -1237,13 +1237,29 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
+      propertyPath: FogFoldout
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
       propertyPath: PlayerCamera
       value: 
       objectReference: {fileID: 1162475170}
     - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
+      propertyPath: CloudsFoldout
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
+      propertyPath: WeatherFoldout
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
       propertyPath: PlayerTransform
       value: 
       objectReference: {fileID: 1939684686}
+    - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
+      propertyPath: LightningFoldout
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4436244931441415794, guid: a50dee228949cbc48a5eddb3eee12cf8, type: 3}
       propertyPath: AmbientSkyLightColor.key0.b
       value: 0.754717

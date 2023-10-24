@@ -63,8 +63,13 @@ namespace CraftSharp
         {
             if (enterSignalReceived)
             {
+                var posLim = stopFragmentIndex * fragmentLength;
                 viewerMoveSpeed += Time.deltaTime * enterPortalSpeed;
-                viewerTransform.position += new Vector3(0F, 0F, viewerMoveSpeed * Time.deltaTime);
+
+                var newPos = viewerTransform.position + new Vector3(0F, 0F, viewerMoveSpeed * Time.deltaTime);
+                newPos.z = Mathf.Min(newPos.z, posLim);
+
+                viewerTransform.position = newPos;
             }
             else if (stopSignalReceived)
             {
