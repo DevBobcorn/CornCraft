@@ -480,7 +480,7 @@ namespace CraftSharp.UI
             {
                 celestiaBridge!.EnterPortal();
 
-                yield return new WaitForSecondsRealtime(0.6F);
+                yield return new WaitForSecondsRealtime(2F);
 
                 // We cannot directly use StartCoroutine to call StartLogin here, which will stop running when
                 // this scene is unloaded and LoginControl object is destroyed
