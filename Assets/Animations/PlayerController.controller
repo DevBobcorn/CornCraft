@@ -808,10 +808,10 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 2
-    m_ConditionEvent: Grounded
+    m_ConditionEvent: InLiquid
     m_EventTreshold: 0
   - m_ConditionMode: 2
-    m_ConditionEvent: InLiquid
+    m_ConditionEvent: Grounded
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -2074294797873482424}
@@ -2705,10 +2705,10 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 2
-    m_ConditionEvent: Grounded
+    m_ConditionEvent: InLiquid
     m_EventTreshold: 0
   - m_ConditionMode: 2
-    m_ConditionEvent: InLiquid
+    m_ConditionEvent: Grounded
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -2074294797873482424}
