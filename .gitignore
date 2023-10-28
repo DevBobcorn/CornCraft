@@ -11,7 +11,8 @@
 # CornModel resources
 /[Rr]esource [Pp]acks/*/
 !/[Rr]esource [Pp]acks/vanilla_fix/
-/[Aa]ssets/MMDModels/*
+/[Aa]ssets/AnimeModels/*
+/[Aa]ssets/AnimeModels.meta
 /*.ini
 
 # Third party packages & utils

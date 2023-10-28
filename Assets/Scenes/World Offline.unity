@@ -857,7 +857,7 @@ MonoBehaviour:
   EnvironmentManager: {fileID: 1449873968}
   MaterialManager: {fileID: 331478947}
   playerController: {fileID: 195804746}
-  playerRenderPrefab: {fileID: 4629627389257955861, guid: f203159209ba7b748b562080342c675e, type: 3}
+  playerRenderPrefab: {fileID: 1589991316666168082, guid: bc46e5ac0bc327049911b07789e1ff30, type: 3}
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
