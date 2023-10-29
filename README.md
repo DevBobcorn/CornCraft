@@ -10,6 +10,9 @@ __*Important!*__ It is __NOT__ recommended to join a public/commercial server wi
 
 The code CornCraft uses to parse vanilla resource packs is open source as a separate project called [CornModel](https://github.com/DevBobcorn/CornModel). Check it out if you want to make a Minecraft structure viewer, map editor or something like that with Unity.
 
+## > Cloning Repo
+This project makes use of Git LFS to store some of the resource files, so make sure you have it installed before cloning the repository. Either regular <code>git clone ...</code> or <code>git lfs clone ...</code> should work fine.
+
 ## > Server Setup
 Recommended server versions for CornCraft are <code>1.16.5</code>, <code>1.17.1</code>, <code>1.18.2</code> and <code>1.19.2</code>, both vanilla servers and plugin servers like Spigot are supported.
 
