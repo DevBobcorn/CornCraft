@@ -11,6 +11,9 @@ namespace CraftSharp.Rendering
         [SerializeField] private Light? sunLight;
         [SerializeField] AnimationCurve? lightIntensity;
 
+        private Material? skyboxMaterial;
+        [SerializeField] AnimationCurve? skyboxExposure;
+
         private int ticks;
         private int lastRecTicks;
         private bool simulate = false;
@@ -85,6 +88,14 @@ namespace CraftSharp.Rendering
 
             sunTransform!.localEulerAngles = new Vector3(270F - normalizedTOD * 360F, 0F, 0F);
             sunLight!.intensity = lightIntensity!.Evaluate(normalizedTOD);
+
+            if (skyboxMaterial == null)
+            {
+                skyboxMaterial = new Material(RenderSettings.skybox);
+                RenderSettings.skybox = skyboxMaterial;
+            }
+
+            skyboxMaterial!.SetFloat("_Exposure", skyboxExposure!.Evaluate(normalizedTOD));
         }
 
         public static (int hours, int minutes, int seconds) Tick2HMS(int ticks)
