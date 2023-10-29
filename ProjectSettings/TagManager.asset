@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Fire
   layers:
   - Default
   - TransparentFX
@@ -22,7 +23,7 @@ TagManager:
   - LiquidSurface
   - LiquidVolume
   - PostProc
-  - 
+  - 3DSkybox
   - 
   - 
   - 

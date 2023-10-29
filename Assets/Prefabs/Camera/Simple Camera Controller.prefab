@@ -407,10 +407,10 @@ MonoBehaviour:
   cameraYOffsetClip: 0.1
   thirdPersonCullingMask:
     serializedVersion: 2
-    m_Bits: 16065
+    m_Bits: 147137
   firstPersonCullingMask:
     serializedVersion: 2
-    m_Bits: 11457
+    m_Bits: 142529
   virtualCameraFollow: {fileID: 8231872019064414601}
   virtualCameraFixed: {fileID: 4409463203126261892}
   virtualCameraAim: {fileID: 7808910476651940505}
@@ -563,8 +563,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3759418466539031928}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.8, y: -0.1, z: -1.8}
+  m_LocalRotation: {x: -0.3228197, y: 0.63633984, z: 0.6162236, w: 0.33335796}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -609,7 +609,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 16321
+    m_Bits: 147393
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -645,8 +645,7 @@ MonoBehaviour:
   m_RequiresDepthTextureOption: 1
   m_RequiresOpaqueTextureOption: 1
   m_CameraType: 0
-  m_Cameras:
-  - {fileID: 0}
+  m_Cameras: []
   m_RendererIndex: -1
   m_VolumeLayerMask:
     serializedVersion: 2

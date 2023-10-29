@@ -25,7 +25,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1b1f8e52a528414eb09a2a63238d9d6, type: 3}
   m_Name: UniStormAtmosphericFogFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     isEnabled: 1
     renderPassEvent: 500
@@ -34,19 +34,19 @@ MonoBehaviour:
     distanceFog: 1
     useRadialDistance: 1
     heightFog: 0
-    height: 0
+    height: 10
     heightDensity: 0
     startDistance: 32
-    SunColor: {r: 0.7362485, g: 0.5361062, b: 0.42215717, a: 1}
+    SunColor: {r: 0.69934195, g: 0.58467793, b: 0.5092466, a: 1}
     MoonColor: {r: 0.33023313, g: 0.36793935, b: 0.38679242, a: 1}
     TopColor: {r: 0, g: 0, b: 0, a: 0}
-    BottomColor: {r: 0.42619103, g: 0.49012446, b: 0.5591624, a: 1}
-    BlendHeight: 0.2
+    BottomColor: {r: 0.74650955, g: 0.74650955, b: 0.74650955, a: 1}
+    BlendHeight: 222
     FogGradientHeight: 0.5
     SunIntensity: 0
     MoonIntensity: -0
     SunFalloffIntensity: 9.4
-    SunControl: 1.0052844
+    SunControl: 1.0050161
     MoonControl: 0
 --- !u!114 &-3662932369841924689
 MonoBehaviour:
@@ -60,7 +60,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d309d34ca22cb5d4f91a635395eded23, type: 3}
   m_Name: UniStormCloudShadowsFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     isEnabled: 0
     renderPassEvent: 400
@@ -142,7 +142,8 @@ MonoBehaviour:
   - {fileID: -5745652578779279666}
   - {fileID: 6018286962624777378}
   - {fileID: 4860644998581089374}
-  m_RendererFeatureMap: d22842066da3424a49b7a632a72583dd8f78938d1cd53bb089a36eec98f65ddf
+  - {fileID: 2523911226042182567}
+  m_RendererFeatureMap: d22842066da3424a49b7a632a72583dd8f78938d1cd53bb089a36eec98f65ddf8e5cedf480b84570a76bdd48e3bb0623
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -181,6 +182,24 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &2523911226042182567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73a60ff029db77a498e020817f4aa301, type: 3}
+  m_Name: SkyboxFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  injectionPoint: 0
+  mask:
+    serializedVersion: 2
+    m_Bits: 0
+  ratioScale: 64
 --- !u!114 &4860644998581089374
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193,7 +212,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b47d9523e62ddd48b8ae2826026b4f3, type: 3}
   m_Name: MoonUniStormSunShaftsFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     isEnabled: 0
     renderPassEvent: 500
@@ -254,17 +273,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b47d9523e62ddd48b8ae2826026b4f3, type: 3}
   m_Name: SunUniStormSunShaftsFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     isEnabled: 1
     renderPassEvent: 500
     resolution: 1
     screenBlendMode: 0
     celestialName: UniStorm Sun
-    radialBlurIterations: 2
-    sunColor: {r: 0.8457053, g: 0.6122024, b: 0.40212157, a: 1}
+    radialBlurIterations: 3
+    sunColor: {r: 0.93642616, g: 0.82604927, b: 0.6411512, a: 1}
     sunThreshold: {r: 0.5568628, g: 0.5372549, b: 0.48235294, a: 1}
-    sunShaftBlurRadius: 3
+    sunShaftBlurRadius: 0.4
     sunShaftIntensity: 1
     maxRadius: 0.5
     useDepthTexture: 1
