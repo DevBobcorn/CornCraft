@@ -305,6 +305,67 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  skyboxMaterial: {fileID: 2100000, guid: e14f29569c2db49fdb0a5fd5b3e95b86, type: 2}
+  skyboxExposure:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.5
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.25
+      value: 0.5
+      inSlope: Infinity
+      outSlope: 2
+      tangentMode: 7
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.35
+      value: 4
+      inSlope: 0.012275581
+      outSlope: 0.012275581
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.19287598
+      outWeight: 0.044929985
+    - serializedVersion: 3
+      time: 0.65
+      value: 4
+      inSlope: 0.016610693
+      outSlope: 0.016610693
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.06679078
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.75
+      value: 0.5
+      inSlope: -17.499996
+      outSlope: -17.499996
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.5
+      inSlope: Infinity
+      outSlope: 0
+      tangentMode: 7
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &8248344031915582242
 MonoBehaviour:
   m_ObjectHideFlags: 0

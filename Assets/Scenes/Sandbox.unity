@@ -259,7 +259,7 @@ MonoBehaviour:
   playerController: {fileID: 1750034212}
   cameraController: {fileID: 11106863}
   UICamera: {fileID: 1399966910}
-  playerRenderPrefab: {fileID: 1332614594968626728, guid: 2fbc3437d775d8c4fa60f0d825c62dc4, type: 3}
+  playerRenderPrefab: {fileID: 4629627389257955861, guid: f203159209ba7b748b562080342c675e, type: 3}
   debugText: {fileID: 1679823445}
   fpsText: {fileID: 1353139096}
   staminaBar: {fileID: 279101131}
@@ -3622,7 +3622,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 78cbccf73f77e6e4c871a40abf00f3ed, type: 2}
+  - {fileID: 2100000, guid: d1655f21c179238488271f4168c752c1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
