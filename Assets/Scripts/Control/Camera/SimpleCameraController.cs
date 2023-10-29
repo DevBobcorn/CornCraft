@@ -54,6 +54,7 @@ namespace CraftSharp.Control
             var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
             virtualCameraFollow!.m_Lens.FieldOfView = fov;
             virtualCameraFixed!.m_Lens.FieldOfView  = fov;
+            spriteRenderCamera!.fieldOfView = fov;
 
             // Set perspective to current value to initialize
             SetPerspective(perspective);
@@ -75,6 +76,7 @@ namespace CraftSharp.Control
                 var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
                 virtualCameraFollow!.m_Lens.FieldOfView = fov;
                 virtualCameraFixed!.m_Lens.FieldOfView  = fov;
+                spriteRenderCamera!.fieldOfView = fov;
 
                 if (perspective == Perspective.ThirdPerson) // Update target local position
                 {

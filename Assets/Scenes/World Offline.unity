@@ -5324,10 +5324,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9155130719897283015, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Cameras.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 9155130719897283015, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Cameras.Array.data[0]
+      value: 
+      objectReference: {fileID: 1973188133910183365}
+    - target: {fileID: 9155130719897283015, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_Cameras.Array.data[1]
       value: 
       objectReference: {fileID: 1307474302}
     m_RemovedComponents: []
@@ -5335,6 +5339,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+--- !u!20 &1973188133910183365 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 8338982171505058957, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+  m_PrefabInstance: {fileID: 1973188133910183364}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &5003336745837788658 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2642413223307196818, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
@@ -5394,6 +5403,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3129376051727432842, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
+      propertyPath: m_Layer
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 3767240062597777947, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
+      propertyPath: m_Layer
+      value: 18
+      objectReference: {fileID: 0}
     - target: {fileID: 5027442766357424345, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
       propertyPath: m_Name
       value: Minecraft Axis
@@ -5401,6 +5418,10 @@ PrefabInstance:
     - target: {fileID: 5027442766357424345, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5436528971823218233, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
+      propertyPath: m_Layer
+      value: 18
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

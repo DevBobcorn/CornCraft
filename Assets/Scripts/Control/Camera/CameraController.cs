@@ -7,7 +7,17 @@ namespace CraftSharp.Control
 {
     public abstract class CameraController : MonoBehaviour
     {
-        [SerializeField] protected Camera? renderCamera; // Camera used for actual rendering
+        /// <summary>
+        /// Camera used for actual rendering
+        /// </summary>
+        [SerializeField] protected Camera? renderCamera;
+
+        /// <summary>
+        /// Camera used for rendering sprites, without post processing.
+        /// The clear depth flag of this camera should be set to false
+        /// </summary>
+        [SerializeField] protected Camera? spriteRenderCamera;
+
         [SerializeField] protected InputActionReference? zoomInput;
         [SerializeField] [Range(0F, 20F)] protected float zoomSmoothFactor = 4.0F;
         [SerializeField] [Range(0F,  2F)] protected float zoomSensitivity = 0.5F;
