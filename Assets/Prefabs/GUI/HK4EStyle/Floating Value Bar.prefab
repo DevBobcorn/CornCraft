@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8212691612673053287}
   - component: {fileID: 6259464667680561640}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: Bar Delta Mask
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24,6 +24,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 653598151171488298}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.75, y: 0.32, z: 1}
@@ -31,7 +32,6 @@ Transform:
   m_Children:
   - {fileID: 2861978020617268979}
   m_Father: {fileID: 1695370463921219153}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!331 &6259464667680561640
 SpriteMask:
@@ -94,7 +94,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1801958663910060756}
   - component: {fileID: 9131402660689459246}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: Display Bar Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -108,13 +108,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2242198776004958749}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.3, y: 0, z: 0}
   m_LocalScale: {x: 0.4, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2861978020617268979}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &9131402660689459246
 SpriteRenderer:
@@ -177,7 +177,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2861978020617268979}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: Fill Anchor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -191,6 +191,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7741627817127896604}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 2.5, y: 0.5, z: 1}
@@ -199,7 +200,6 @@ Transform:
   - {fileID: 1801958663910060756}
   - {fileID: 6027592466930968922}
   m_Father: {fileID: 8212691612673053287}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8251889616360467417
 GameObject:
@@ -212,7 +212,7 @@ GameObject:
   - component: {fileID: 1695370463921219153}
   - component: {fileID: 7437413893603162986}
   - component: {fileID: 4136069150884023646}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: Floating Value Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -226,6 +226,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8251889616360467417}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -234,7 +235,6 @@ Transform:
   - {fileID: 8212691612673053287}
   - {fileID: 4404340322419832644}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7437413893603162986
 SpriteRenderer:
@@ -309,8 +309,6 @@ MonoBehaviour:
   dangerColor: {r: 1, g: 0, b: 0, a: 1}
   warningThreshold: 0.3
   dangerThreshold: 0.1
-  barAxis: 0
-  smoothSpeed: 10
   displayFillRenderer: {fileID: 9131402660689459246}
   deltaFillRenderer: {fileID: 9138806618825133927}
 --- !u!1 &8679627734270550727
@@ -324,7 +322,7 @@ GameObject:
   - component: {fileID: 4404340322419832644}
   - component: {fileID: 8842087755726104444}
   - component: {fileID: 3412471277927703412}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: Bar Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -344,7 +342,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1695370463921219153}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -495,7 +492,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6027592466930968922}
   - component: {fileID: 9138806618825133927}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: Delta Bar Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -509,13 +506,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8685362706974984310}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.2, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2861978020617268979}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &9138806618825133927
 SpriteRenderer:

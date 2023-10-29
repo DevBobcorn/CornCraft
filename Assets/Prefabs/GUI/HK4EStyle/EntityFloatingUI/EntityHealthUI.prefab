@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7991305971945140537}
   - component: {fileID: 7382846207584803511}
   - component: {fileID: 6540253403968938249}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: Level Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -181,7 +181,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7461499628501205960}
   - component: {fileID: 9026479344747715613}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: EntityHealthUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}

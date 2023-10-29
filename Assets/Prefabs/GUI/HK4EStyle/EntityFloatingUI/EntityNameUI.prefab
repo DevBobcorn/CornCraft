@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3477107485963041504}
   - component: {fileID: 3724565778024473251}
   - component: {fileID: 2493816643352550870}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: Description Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31,7 +31,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7461499628501205960}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -109,8 +108,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294949720
-  m_fontColor: {r: 0.3433962, g: 0.7335697, b: 1, a: 1}
+    rgba: 4294940416
+  m_fontColor: {r: 0, g: 0.59281445, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -183,7 +182,7 @@ GameObject:
   - component: {fileID: 7461499628501205960}
   - component: {fileID: 5976652590761273480}
   - component: {fileID: 5920838107057724769}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: EntityNameUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -197,6 +196,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5300854894600073256}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -205,7 +205,6 @@ Transform:
   - {fileID: 5637415768736436391}
   - {fileID: 3477107485963041504}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5976652590761273480
 MonoBehaviour:
@@ -253,7 +252,7 @@ GameObject:
   - component: {fileID: 5637415768736436391}
   - component: {fileID: 7220158899283333396}
   - component: {fileID: 1141950587681984479}
-  m_Layer: 10
+  m_Layer: 18
   m_Name: Name Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -273,7 +272,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7461499628501205960}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
