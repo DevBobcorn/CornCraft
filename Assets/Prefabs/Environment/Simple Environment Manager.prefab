@@ -305,7 +305,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  skyboxMaterial: {fileID: 2100000, guid: e14f29569c2db49fdb0a5fd5b3e95b86, type: 2}
   skyboxExposure:
     serializedVersion: 2
     m_Curve:
@@ -1050,7 +1049,7 @@ ParticleSystem:
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 0.8
     donutRadius: 0.2
-    m_Position: {x: -200, y: 180, z: 200}
+    m_Position: {x: 0, y: 200, z: 0}
     m_Rotation: {x: 90, y: 0, z: 0}
     m_Scale: {x: 1, y: 1, z: 1}
     placementMode: 0
