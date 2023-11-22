@@ -908,7 +908,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 15
+      scalar: 12
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -1462,7 +1462,7 @@ ParticleSystem:
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 0.8
     donutRadius: 0.2
-    m_Position: {x: 0, y: -40, z: 600}
+    m_Position: {x: 0, y: -50, z: 600}
     m_Rotation: {x: 90, y: 0, z: 0}
     m_Scale: {x: 1, y: 1, z: 1}
     placementMode: 0
@@ -7668,7 +7668,7 @@ Transform:
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
   m_LocalRotation: {x: -0.08715578, y: 0, z: 0, w: 0.9961947}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: 0, y: 4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8765,7 +8765,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 12
+      scalar: 10
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -9319,7 +9319,7 @@ ParticleSystem:
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 0.8
     donutRadius: 0.2
-    m_Position: {x: 0, y: -55, z: 160}
+    m_Position: {x: 0, y: -80, z: 160}
     m_Rotation: {x: 90, y: 0, z: 0}
     m_Scale: {x: 1, y: 1, z: 1}
     placementMode: 0
@@ -17018,8 +17018,8 @@ MonoBehaviour:
   viewerMoveSpeed: 7.5
   viewerStopDistance: 5
   enterPortalSpeed: 35
-  viewFragmentCount: 4
-  maxFragmentCount: 4
+  viewFragmentCount: 6
+  maxFragmentCount: 6
   fragmentLength: 7
 --- !u!4 &7462250540743095448
 Transform:
