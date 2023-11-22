@@ -27,6 +27,8 @@ namespace CraftSharp
 
         private readonly List<(GameObject, float, Vector3)> portalFrameBlocks = new();
 
+        protected readonly List<(GameObject, float)> portalBlocks = new();
+
         public override void BuildFragment(int fragIndex)
         {
             int forwardPos = fragIndex * (bridgeBodyLength + bridgeConnectionLength);
@@ -51,7 +53,7 @@ namespace CraftSharp
 
             for (int i = -bridgeWidth + 1;i < bridgeWidth;i++)
             {
-                for (int j = 0;j < bridgeBodyLength;j++)
+                for (int j = 0;j < 12;j++)
                 {
                     float randomOffset = GetBlockOffset(j);
                     var newBlock = CreateBlock(bridgeEdge,
@@ -61,7 +63,7 @@ namespace CraftSharp
                 }
             }
 
-            portalPosZ = forwardPos + bridgeBodyLength;
+            portalPosZ = forwardPos + 12;
 
             // Create portal
             for (int i = -portalWidth + 1;i < portalWidth;i++)
@@ -90,18 +92,28 @@ namespace CraftSharp
         {
             var wait = new WaitForSecondsRealtime(0.1F);
 
-            // Fill portal
-            for (int i = -portalWidth + 2;i < portalWidth - 1;i++)
+            for (int dist = 0; dist < portalWidth - 1 + (portalHeight / 2); dist++)
             {
-                for (int k = 1; k < portalHeight - 1; k++)
+                // Fill portal
+                for (int i = -portalWidth + 2;i < portalWidth - 1;i++)
                 {
-                    var newBlock = CreateBlock(portalBlockPrototype,
-                            new Vector3(i, targetHeight + portalOffset + k, posZ));
-                    
-                    // Rescale portal blocks
-                    newBlock.transform.localScale = new Vector3(1F, 1F, 0.125F);
-                }
+                    for (int k = 1; k < portalHeight - 1; k++)
+                    {
+                        if (Mathf.Abs(i) + Mathf.Abs(k - (portalHeight / 2)) != dist)
+                        {
+                            continue;
+                        }
 
+                        var newBlock = CreateBlock(portalBlockPrototype,
+                                new Vector3(i, targetHeight + portalOffset + k, posZ));
+                        
+                        // Rescale portal blocks
+                        newBlock.transform.localScale = new Vector3(0F, 0F, 0.125F);
+
+                        portalBlocks.Add((newBlock, 0.2F));
+                    }
+                }
+                
                 yield return wait;
             }
         }
@@ -165,6 +177,14 @@ namespace CraftSharp
                 // material instance
                 portalBlockPrototype.GetComponent<MeshRenderer>().sharedMaterial
                         .SetColor("_EmissionColor", portalBlockEmissionColor * emissionTime);
+            }
+
+            foreach (var (portalBlock, speed) in portalBlocks)
+            {
+                var curSize = portalBlock.transform.localScale;
+                var newSize = Mathf.MoveTowards(curSize.x, 1F, speed);
+
+                portalBlock.transform.localScale = new(newSize, newSize, curSize.z);
             }
         }
     }

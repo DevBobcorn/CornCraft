@@ -45,13 +45,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a350b7da89e0144db66fb9b214147ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeWidth: 3
+  bridgeWidth: 5
   bridgeConnectionLength: 6
   bridgeBodyLength: 1
   perlinInitOffset: 0.16
   perlinSampleInterval: 0.7
   perlinSampleUnit: 0.1
-  defaultRiseSpeed: 1.8
+  defaultRiseSpeed: 1.3
   targetHeight: 0
   edgeOffset: 0.25
   bridgeBlock: {fileID: 6280996216578334597, guid: ab68220f0cd4e0c429a1e29c2cfd73b6, type: 3}
@@ -70,7 +70,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28a79ff76c0f1a347bca601ca04e849f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeWidth: 3
+  bridgeWidth: 5
   bridgeConnectionLength: 6
   bridgeBodyLength: 1
   perlinInitOffset: 0.16
@@ -84,8 +84,8 @@ MonoBehaviour:
   regularRail: {fileID: 5369743078286888248, guid: 064762344eaae9746803e3ea83c69103, type: 3}
   poweredRail: {fileID: 5369743078286888248, guid: 5f65e4cc5a28f6545bf55aa545c01c0a, type: 3}
   portalOffset: 1.5
-  portalWidth: 3
-  portalHeight: 6
+  portalWidth: 4
+  portalHeight: 10
   portalFrame: {fileID: 7992725482465875916, guid: f0358a370072ce7418bd063716a4b5ff, type: 3}
   portalBlockMaterial: {fileID: 2100000, guid: a05d1b9b1798fd74b8f20257346d4d34, type: 2}
   portalBlockEmissionColor: {r: 0.8470589, g: 1.5137256, b: 1.8196079, a: 1}

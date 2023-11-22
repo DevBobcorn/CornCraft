@@ -158,7 +158,7 @@ namespace CraftSharp
 
             foreach (var (railBlock, creationTime, railMat) in railBlocks)
             {
-                var lifeTime = Mathf.Clamp01(curTime - creationTime - 1F);
+                var lifeTime = Mathf.Clamp01(curTime - creationTime - 2F);
                 railMat.SetFloat("_FadeTime", lifeTime);
             }
         }
