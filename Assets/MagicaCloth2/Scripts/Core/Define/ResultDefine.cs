@@ -10,7 +10,11 @@ namespace MagicaCloth2
         {
             None = 0,
 
+            /// <summary>
+            /// It is not an error, but the data is empty.
+            /// </summary>
             Empty = 1,
+
             Success = 2,
             Cancel = 3,
             Process = 4,
@@ -34,6 +38,10 @@ namespace MagicaCloth2
             // Error(20000 - )
             ///////////////////////////////////////////////////////////////////
             Error = 20000,
+
+            // Validating serialized data
+            SerializeData_InvalidData = 20050,
+            SerializeData_Over15Renderers,
 
             // init
             Init_InvalidData = 20100,

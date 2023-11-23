@@ -34,6 +34,7 @@ namespace MagicaCloth2
         public bool animatedPosition = false;
         public DebugAxis animatedAxis = DebugAxis.None;
         public bool animatedShape = false;
+        public bool inertiaCenter = true;
         //public bool basicPosition = false;
         //public DebugAxis basicAxis = DebugAxis.None;
         //public bool basicShape = false;
@@ -104,7 +105,8 @@ namespace MagicaCloth2
 
         public float GetLineSize()
         {
-            return 0.03f; // 固定
+            //return 0.03f; // 固定
+            return 0.05f; // 固定
         }
 
         public float GetInertiaCenterRadius()

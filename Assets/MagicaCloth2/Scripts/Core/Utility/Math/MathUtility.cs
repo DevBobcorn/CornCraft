@@ -1531,9 +1531,12 @@ namespace MagicaCloth2
         /// <param name="friction"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float CalcInverseMass(float friction, float depth, bool fix)
+        public static float CalcInverseMass(float friction, float depth, bool fix, float fixMass)
         {
-            return fix ? (1.0f / 100.0f) : CalcInverseMass(friction, depth);
+            //return fix ? (1.0f / 100.0f) : CalcInverseMass(friction, depth);
+            //return fix ? (1.0f / 30.0f) : CalcInverseMass(friction, depth);
+
+            return fix ? (1.0f / fixMass) : CalcInverseMass(friction, depth);
         }
 
         /// <summary>

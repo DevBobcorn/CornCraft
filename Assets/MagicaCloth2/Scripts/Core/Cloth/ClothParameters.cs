@@ -81,13 +81,16 @@ namespace MagicaCloth2
         // モーション(MaxDistance/Backstop)
         public MotionConstraint.MotionConstraintParams motionConstraint;
 
-        // コライダーコリジョン
+        // コライダーコリジョン(Collider Collision)
         public ColliderCollisionConstraint.ColliderCollisionConstraintParams colliderCollisionConstraint;
 
-        // セルフコリジョン
+        // セルフコリジョン(Self Collision)
         public SelfCollisionConstraint.SelfCollisionConstraintParams selfCollisionConstraint;
 
-        // 風
+        // 風(Wind)
         public WindParams wind;
+
+        // スプリング(Spring)
+        public SpringConstraint.SpringConstraintParams springConstraint;
     }
 }

@@ -30,7 +30,7 @@ namespace MagicaCloth2
         }
 
         [System.Serializable]
-        public class SerializeData : IDataValidate
+        public class SerializeData : IDataValidate, ITransform
         {
             /// <summary>
             /// Collision judgment mode.
@@ -48,7 +48,7 @@ namespace MagicaCloth2
             /// [OK] Runtime changes.
             /// [OK] Export/Import with Presets
             /// </summary>
-            [Range(0.0f, 0.3f)]
+            [Range(0.0f, 0.5f)]
             public float friction;
 
             /// <summary>
@@ -59,6 +59,23 @@ namespace MagicaCloth2
             /// </summary>
             public List<ColliderComponent> colliderList = new List<ColliderComponent>();
 
+            /// <summary>
+            /// List of Transforms that perform collision detection with BoneSpring.
+            /// BoneSpringで衝突判定を行うTransformのリスト
+            /// [OK] Runtime changes.
+            /// [NG] Export/Import with Presets
+            /// </summary>
+            public List<Transform> collisionBones = new List<Transform>();
+
+            /// <summary>
+            /// The maximum distance from the origin that a vertex will be pushed by the collider. Currently used only with BoneSpring.
+            /// コライダーにより頂点が押し出される原点からの最大距離。現在はBoneSpringのみで利用。
+            /// [OK] Runtime changes.
+            /// [OK] Export/Import with Presets
+            /// </summary>
+            public CurveSerializeData limitDistance = new CurveSerializeData(0.05f);
+
+
             public SerializeData()
             {
                 mode = Mode.Point;
@@ -67,7 +84,8 @@ namespace MagicaCloth2
 
             public void DataValidate()
             {
-                friction = Mathf.Clamp(friction, 0.0f, 0.3f);
+                friction = Mathf.Clamp(friction, 0.0f, 0.5f);
+                limitDistance.DataValidate(0.0f, 1.0f);
             }
 
             public SerializeData Clone()
@@ -77,7 +95,41 @@ namespace MagicaCloth2
                     mode = mode,
                     friction = friction,
                     colliderList = new List<ColliderComponent>(colliderList),
+                    collisionBones = new List<Transform>(collisionBones),
                 };
+            }
+
+            public override int GetHashCode()
+            {
+                int hash = 0;
+                foreach (var t in collisionBones)
+                {
+                    if (t)
+                        hash += t.GetInstanceID();
+                }
+
+                return hash;
+            }
+
+            public void GetUsedTransform(HashSet<Transform> transformSet)
+            {
+                foreach (var t in collisionBones)
+                {
+                    if (t)
+                        transformSet.Add(t);
+                }
+            }
+
+            public void ReplaceTransform(Dictionary<int, Transform> replaceDict)
+            {
+                for (int i = 0; i < collisionBones.Count; i++)
+                {
+                    var t = collisionBones[i];
+                    if (t && replaceDict.ContainsKey(t.GetInstanceID()))
+                    {
+                        collisionBones[i] = replaceDict[t.GetInstanceID()];
+                    }
+                }
             }
 
             public int ColliderLength => colliderList.Count;
@@ -87,6 +139,7 @@ namespace MagicaCloth2
         {
             /// <summary>
             /// 衝突判定モード
+            /// BoneSpringではPointに固定される
             /// </summary>
             public Mode mode;
 
@@ -102,12 +155,32 @@ namespace MagicaCloth2
             /// </summary>
             public float staticFriction;
 
-            public void Convert(SerializeData sdata)
+            /// <summary>
+            /// コライダーにより頂点が押し出される原点からの最大距離。現在はBoneSpringのみで利用。
+            /// </summary>
+            public float4x4 limitDistance;
+
+            public void Convert(SerializeData sdata, ClothProcess.ClothType clothType)
             {
-                mode = sdata.mode;
-                // 動摩擦/静止摩擦は設定摩擦に係数を掛けたものを使用する
-                dynamicFriction = sdata.friction * Define.System.ColliderCollisionDynamicFrictionRatio;
-                staticFriction = sdata.friction * Define.System.ColliderCollisionStaticFrictionRatio;
+                switch (clothType)
+                {
+                    case ClothProcess.ClothType.BoneCloth:
+                    case ClothProcess.ClothType.MeshCloth:
+                        mode = sdata.mode;
+                        // 動摩擦/静止摩擦は設定摩擦に係数を掛けたものを使用する
+                        dynamicFriction = sdata.friction * Define.System.ColliderCollisionDynamicFrictionRatio;
+                        staticFriction = sdata.friction * Define.System.ColliderCollisionStaticFrictionRatio;
+                        break;
+                    case ClothProcess.ClothType.BoneSpring:
+                        // BoneSpringは球のみ
+                        mode = Mode.Point;
+                        // BoneSpringのみ押し出し距離制限を設ける
+                        limitDistance = sdata.limitDistance.ConvertFloatArray();
+                        // 摩擦は定数
+                        dynamicFriction = Define.System.BoneSpringCollisionFriction;
+                        staticFriction = Define.System.BoneSpringCollisionFriction;
+                        break;
+                }
             }
         }
 
@@ -192,6 +265,7 @@ namespace MagicaCloth2
                 frictionArray = sm.frictionArray.GetNativeArray(),
                 collisionNormalArray = sm.collisionNormalArray.GetNativeArray(),
                 velocityPosArray = sm.velocityPosArray.GetNativeArray(),
+                basePosArray = sm.basePosArray.GetNativeArray(),
 
                 colliderFlagArray = cm.flagArray.GetNativeArray(),
                 colliderWorkDataArray = cm.workDataArray.GetNativeArray(),
@@ -282,6 +356,8 @@ namespace MagicaCloth2
             public NativeArray<float3> collisionNormalArray;
             [NativeDisableParallelForRestriction]
             public NativeArray<float3> velocityPosArray;
+            [Unity.Collections.ReadOnly]
+            public NativeArray<float3> basePosArray;
 
             // collider
             [Unity.Collections.ReadOnly]
@@ -312,9 +388,15 @@ namespace MagicaCloth2
                 int l_index = pindex - tdata.particleChunk.startIndex;
                 int vindex = tdata.proxyCommonChunk.startIndex + l_index;
                 var attr = attributes[vindex];
-                if (attr.IsMove() == false)
+                if (attr.IsInvalid() || attr.IsDisableCollision())
+                    return;
+                if (attr.IsMove() == false && tdata.IsSpring == false) // スプリング利用時は固定頂点も通す
                     return;
                 float depth = vertexDepths[vindex];
+
+                // BoneSpringでは自動的にソフトコライダーとなる
+                bool isSpring = tdata.IsSpring;
+                var basePos = isSpring ? basePosArray[pindex] : float3.zero; // ソフトコライダーのみbasePosが必要
 
                 // パーティクル半径
                 float radius = math.max(param.radiusCurveData.EvaluateCurve(depth), 0.0001f); // safe;
@@ -343,6 +425,9 @@ namespace MagicaCloth2
                 var aabb = new AABB(nextPos - radius, nextPos + radius);
                 aabb.Expand(cfr);
 
+                // BoneSpringでの最大押し出し距離
+                float maxLength = isSpring ? math.max(param.colliderCollisionConstraint.limitDistance.EvaluateCurve(depth), 0.0001f) * tdata.scaleRatio : -1; // チームスケール倍率
+
                 // チーム内のコライダーをループ
                 int cindex = tdata.colliderChunk.startIndex;
                 int ccnt = tdata.colliderCount;
@@ -361,7 +446,9 @@ namespace MagicaCloth2
                     switch (ctype)
                     {
                         case ColliderManager.ColliderType.Sphere:
-                            dist = PointSphereColliderDetection(ref _nextPos, radius, aabb, cwork, out n);
+                            // ソフトコライダーはSphereのみ
+                            //dist = PointSphereColliderDetection(ref _nextPos, basePos, radius, aabb, cwork, maxLength, out n);
+                            dist = PointSphereColliderDetection(ref _nextPos, basePos, radius, aabb, cwork, isSpring, maxLength, out n);
                             break;
                         case ColliderManager.ColliderType.CapsuleX_Center:
                         case ColliderManager.ColliderType.CapsuleY_Center:
@@ -437,12 +524,12 @@ namespace MagicaCloth2
                 // 書き戻し
                 nextPosArray[pindex] = nextPos;
 
-                // 速度影響
-                //if (addCnt > 0)
-                //{
-                //    float attn = param.colliderCollisionConstraint.colliderVelocityAttenuation;
-                //    velocityPosArray[pindex] = velocityPosArray[pindex] + addPos * attn;
-                //}
+                // 速度影響(BoneSpringのみ)
+                if (isSpring && addCnt > 0)
+                {
+                    // BoneSpringでは速度影響を０にする
+                    velocityPosArray[pindex] = velocityPosArray[pindex] + addPos;
+                }
             }
 
             /// <summary>
@@ -454,7 +541,7 @@ namespace MagicaCloth2
             /// <param name="cindex"></param>
             /// <param name="friction"></param>
             /// <returns></returns>
-            float PointSphereColliderDetection(ref float3 nextpos, float radius, in AABB aabb, in ColliderManager.WorkData cwork, out float3 normal)
+            float PointSphereColliderDetection(ref float3 nextpos, in float3 basePos, float radius, in AABB aabb, in ColliderManager.WorkData cwork, bool isSpring, float maxLength, out float3 normal)
             {
                 // ★たとえ接触していなくともコライダーまでの距離と法線を返さなければならない！
                 normal = 0;
@@ -464,6 +551,8 @@ namespace MagicaCloth2
                 //=========================================================
                 if (aabb.Overlaps(cwork.aabb) == false)
                     return float.MaxValue;
+
+                var oldpos = nextpos;
 
                 //=========================================================
                 // 衝突解決
@@ -485,7 +574,29 @@ namespace MagicaCloth2
                 // c = 平面位置
                 // n = 平面方向
                 // 平面衝突判定と押し出し
-                return MathUtility.IntersectPointPlaneDist(c, n, nextpos, out nextpos);
+                //return MathUtility.IntersectPointPlaneDist(c, n, nextpos, out nextpos);
+                float dist = MathUtility.IntersectPointPlaneDist(c, n, nextpos, out nextpos);
+
+#if true
+                // BoneSpring
+                if (maxLength > 0.0f)
+                {
+                    // (1)距離制限
+                    nextpos = MathUtility.ClampDistance(basePos, nextpos, maxLength);
+
+                    // (2)反発力減衰
+                    float l = math.distance(basePos, nextpos);
+                    float t = math.saturate(l / radius); // 半径基準
+                    //float t = math.saturate(l / maxLength);
+                    t = math.lerp(0.0f, 0.85f, t); // 最低でも少し反発を残す
+                    nextpos = math.lerp(nextpos, oldpos, t);
+
+                    // 衝突平面までの距離は摩擦影響を抑えるためスケールする
+                    dist *= 3.0f;
+                }
+#endif
+
+                return dist;
             }
 
             /// <summary>

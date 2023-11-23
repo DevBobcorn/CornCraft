@@ -101,6 +101,7 @@ namespace MagicaCloth2
         {
             MeshCloth = 0,
             BoneCloth = 1,
+            BoneSpring = 10,
         }
         internal ClothType clothType { get; private set; }
 
@@ -179,6 +180,11 @@ namespace MagicaCloth2
         /// 破棄フラグ
         /// </summary>
         volatile bool isDestory = false;
+
+        /// <summary>
+        /// 内部データまで完全に破棄されたかどうか
+        /// </summary>
+        volatile bool isDestoryInternal = false;
 
         /// <summary>
         /// 構築中フラグ
@@ -264,6 +270,10 @@ namespace MagicaCloth2
         {
             lock (lockObject)
             {
+                // すでに破棄完了ならば不要
+                if (isDestoryInternal)
+                    return;
+
                 // ビルド中は破棄を保留する
                 if (isBuild)
                     return;
@@ -306,7 +316,14 @@ namespace MagicaCloth2
 
                 cullingAnimator = null;
                 cullingAnimatorRenderers.Clear();
+
+                // 完全破棄フラグ
+                isDestoryInternal = true;
             }
+            Develop.DebugLog($"Cloth dispose internal.");
+
+            // 破棄監視リストから削除する
+            MagicaManager.Team.RemoveMonitoringProcess(this);
         }
 
         internal void IncrementSuspendCounter()

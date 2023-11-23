@@ -115,13 +115,13 @@ namespace MagicaCloth2
             // stiffness
             public float stiffness;
 
-            public void Convert(SerializeData sdata)
+            public void Convert(SerializeData sdata, ClothProcess.ClothType clothType)
             {
-                useMaxDistance = sdata.useMaxDistance;
+                useMaxDistance = clothType == ClothProcess.ClothType.BoneSpring ? false : sdata.useMaxDistance;
                 maxDistanceCurveData = sdata.maxDistance.ConvertFloatArray();
                 //maxDistanceOffset = sdata.maxDistanceOffset;
 
-                useBackstop = sdata.useBackstop;
+                useBackstop = clothType == ClothProcess.ClothType.BoneSpring ? false : sdata.useBackstop;
                 backstopRadius = sdata.backstopRadius;
                 backstopDistanceCurveData = sdata.backstopDistance.ConvertFloatArray();
 

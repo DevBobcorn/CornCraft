@@ -27,8 +27,9 @@ namespace MagicaCloth2
         // タイプ
         public enum SetupType
         {
-            Mesh = 0,
-            Bone = 1,
+            MeshCloth = 0,
+            BoneCloth = 1,
+            BoneSpring = 2,
         }
         public SetupType setupType;
 
@@ -50,7 +51,6 @@ namespace MagicaCloth2
         public NativeArray<BoneWeight1> boneWeightArray;
 
         // Bone ---------------------------------------------------------------
-        //public NativeArray<short> rootTransformIndices;
         public List<int> rootTransformIdList;
         public enum BoneConnectionMode
         {
@@ -71,6 +71,7 @@ namespace MagicaCloth2
             SequentialNonLoopMesh = 3,
         }
         public BoneConnectionMode boneConnectionMode = BoneConnectionMode.Line;
+        public List<int> collisionBoneIndexList; // BoneSpringのコリジョン有効Transformインデックスリスト
 
         // Common -------------------------------------------------------------
         // Transform情報
@@ -109,7 +110,7 @@ namespace MagicaCloth2
             {
                 result.Clear();
                 // Meshタイプに設定
-                setupType = SetupType.Mesh;
+                setupType = SetupType.MeshCloth;
 
                 if (ren == null)
                 {
@@ -308,8 +309,10 @@ namespace MagicaCloth2
         /// <param name="renderTransform"></param>
         /// <param name="rootTransforms"></param>
         public RenderSetupData(
+            SetupType setType,
             Transform renderTransform,
             List<Transform> rootTransforms,
+            List<Transform> collisionBones,
             BoneConnectionMode connectionMode = BoneConnectionMode.Line,
             string name = "(no name)"
             )
@@ -320,7 +323,7 @@ namespace MagicaCloth2
             try
             {
                 // Boneタイプに設定
-                setupType = SetupType.Bone;
+                setupType = setType;
 
                 // 接続モード
                 boneConnectionMode = connectionMode;
@@ -342,10 +345,10 @@ namespace MagicaCloth2
 
                 // 必要なトランスフォーム情報
                 var indexDict = new Dictionary<Transform, int>(256);
-                transformList = new List<Transform>(1024);
+                transformList = new List<Transform>(256);
 
                 // root以下をすべて登録する
-                var stack = new Stack<Transform>(1024);
+                var stack = new Stack<Transform>(256);
                 foreach (var t in rootTransforms)
                     stack.Push(t);
                 while (stack.Count > 0)
@@ -372,6 +375,21 @@ namespace MagicaCloth2
                 foreach (var t in rootTransforms)
                 {
                     rootTransformIdList.Add(t.GetInstanceID());
+                }
+
+                // collision transform (use BoneSpring)
+                if (collisionBones != null)
+                {
+                    collisionBoneIndexList = new List<int>(collisionBones.Count);
+                    foreach (var t in collisionBones)
+                    {
+                        if (t)
+                        {
+                            int index = transformList.IndexOf(t);
+                            collisionBoneIndexList.Add(index);
+                            //Debug.Log($"collision bones:{t.name}, index:{index}");
+                        }
+                    }
                 }
 
                 // スキニングボーン数
@@ -528,7 +546,7 @@ namespace MagicaCloth2
                 transformInverseRotations.Dispose();
 
             // MeshDataArrayはメインスレッドのみDispose()可能
-            if (setupType == SetupType.Mesh)
+            if (setupType == SetupType.MeshCloth)
             {
                 if (meshDataArray.Length > 0)
                     meshDataArray.Dispose();

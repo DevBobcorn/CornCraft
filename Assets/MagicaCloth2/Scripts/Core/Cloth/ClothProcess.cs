@@ -33,6 +33,13 @@ namespace MagicaCloth2
                 return;
             }
 
+            // すでに破棄されている場合はエラーとする。再初期化はできない
+            if (isDestory)
+            {
+                Develop.LogError($"Already destroyed components cannot be reinitialized.");
+                return;
+            }
+
             SetState(State_Valid, false);
             result.SetProcess();
             var sdata = cloth.SerializeData;
@@ -40,7 +47,8 @@ namespace MagicaCloth2
             // クロスを生成するための最低限の情報が揃っているかチェックする
             if (sdata.IsValid() == false)
             {
-                result.SetResult(Define.Result.Empty);
+                //result.SetResult(Define.Result.Empty);
+                result.SetResult(sdata.VerificationResult);
                 return;
             }
 
@@ -86,7 +94,14 @@ namespace MagicaCloth2
             {
                 // BoneCloth
                 // 必要なボーンを登録する
-                AddBoneCloth(sdata.rootBones, sdata.connectionMode);
+                AddBoneCloth(clothType, sdata.rootBones, null, sdata.connectionMode);
+            }
+            else if (clothType == ClothType.BoneSpring)
+            {
+                // BoneSpring
+                // 必要なボーンを登録する
+                // BoneSpringではLine接続のみ
+                AddBoneCloth(clothType, sdata.rootBones, sdata.colliderCollisionConstraint.collisionBones, RenderSetupData.BoneConnectionMode.Line);
             }
 
             // カスタムスキニングのボーン情報
@@ -99,6 +114,11 @@ namespace MagicaCloth2
             result.SetSuccess();
             SetState(State_Valid, true);
             SetState(State_InitComplete, true);
+
+            // この時点でクロスコンポーネントが非アクティブの場合は破棄監視リストに登録する
+            if (cloth.isActiveAndEnabled == false)
+                MagicaManager.Team.AddMonitoringProcess(this);
+
             Develop.DebugLog($"Init finish :{cloth.name}");
         }
 
@@ -139,10 +159,17 @@ namespace MagicaCloth2
         /// </summary>
         /// <param name="rootTransforms"></param>
         /// <param name="connectionMode"></param>
-        void AddBoneCloth(List<Transform> rootTransforms, RenderSetupData.BoneConnectionMode connectionMode)
+        void AddBoneCloth(ClothType ctype, List<Transform> rootTransforms, List<Transform> collisionBones, RenderSetupData.BoneConnectionMode connectionMode)
         {
             // BoneCloth用のセットアップデータ作成
-            boneClothSetupData = new RenderSetupData(clothTransformRecord.transform, rootTransforms, connectionMode, cloth.name);
+            boneClothSetupData = new RenderSetupData(
+                ctype == ClothType.BoneSpring ? RenderSetupData.SetupType.BoneSpring : RenderSetupData.SetupType.BoneCloth,
+                clothTransformRecord.transform,
+                rootTransforms,
+                collisionBones,
+                connectionMode,
+                cloth.name
+                );
         }
 
 #if false
@@ -443,7 +470,7 @@ namespace MagicaCloth2
                             }
                             Develop.DebugLog($"(MERGE) {proxyMesh}");
                         }
-                        else if (clothType == ClothType.BoneCloth)
+                        else if (clothType == ClothType.BoneCloth || clothType == ClothType.BoneSpring)
                         {
                             // ■BoneCloth
                             // import

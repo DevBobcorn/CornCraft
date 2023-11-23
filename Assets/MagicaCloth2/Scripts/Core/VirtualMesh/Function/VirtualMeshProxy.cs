@@ -35,7 +35,7 @@ namespace MagicaCloth2
                 }
 
                 // カスタムスキニングボーン追加
-                if (sdata.customSkinningSetting.enable)
+                if (sdata.customSkinningSetting.enable && sdata.IsBoneSpring() == false)
                 {
                     SetCustomSkinningBones(clothTransformRecord, customSkinningBoneRecords);
                 }
@@ -246,7 +246,7 @@ namespace MagicaCloth2
                 //JobUtility.CalcAABBRun(localPositions.GetNativeArray(), VertexCount, boundingBox);
 
                 // カスタムスキニング設定
-                if (sdata.customSkinningSetting.enable)
+                if (sdata.customSkinningSetting.enable && sdata.IsBoneSpring() == false)
                 {
                     CreateCustomSkinning(sdata.customSkinningSetting, customSkinningBoneRecords);
                 }

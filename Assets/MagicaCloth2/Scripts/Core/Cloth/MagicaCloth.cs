@@ -53,7 +53,7 @@ namespace MagicaCloth2
         /// <summary>
         /// Synchronization target.
         /// </summary>
-        public MagicaCloth SyncCloth => SerializeData.selfCollisionConstraint.GetSyncPartner();
+        public MagicaCloth SyncCloth => SerializeData.IsBoneSpring() ? null : SerializeData.selfCollisionConstraint.GetSyncPartner();
 
         /// <summary>
         /// Check if the cloth component is in a valid state.
@@ -74,6 +74,9 @@ namespace MagicaCloth2
         private void Awake()
         {
             Process.Init();
+
+            // If Awake() is called, OnDestroy() will also be called, so remove it from monitoring.
+            MagicaManager.Team.RemoveMonitoringProcess(Process);
         }
 
         private void OnEnable()

@@ -1150,7 +1150,7 @@ namespace MagicaCloth2
                 stepBasicRotationArray[pindex] = baseRot;
 
                 // 移動パーティクル
-                if (attr.IsMove())
+                if (attr.IsMove() || tdata.IsSpring)
                 {
                     var cdata = centerDataArray[teamId];
 
@@ -1244,12 +1244,97 @@ namespace MagicaCloth2
                     velocityPos = basePos;
                 }
 
+                // スプリング（固定パーティクルのみ）
+                if (tdata.IsSpring && attr.IsFixed())
+                {
+                    // ノイズ用に時間を不規則にずらす
+                    Spring(param.springConstraint, param.normalAxis, ref nextPos, basePos, baseRot, (tdata.time + index * 49.6198f) * 2.4512f + math.csum(nextPos), tdata.scaleRatio);
+                }
+
                 // 速度計算用の移動前の位置
                 velocityPosArray[pindex] = velocityPos;
 
                 // 予測位置格納
                 nextPosArray[pindex] = nextPos;
             }
+
+            void Spring(in SpringConstraint.SpringConstraintParams springParams, ClothNormalAxis normalAxis, ref float3 nextPos, in float3 basePos, in quaternion baseRot, float noiseTime, float scaleRatio)
+            {
+                // clamp distance
+                var v = nextPos - basePos;
+                float3 dir = math.up();
+                switch (normalAxis)
+                {
+                    case ClothNormalAxis.Right:
+                        dir = math.right();
+                        break;
+                    case ClothNormalAxis.Up:
+                        dir = math.up();
+                        break;
+                    case ClothNormalAxis.Forward:
+                        dir = math.forward();
+                        break;
+                    case ClothNormalAxis.InverseRight:
+                        dir = -math.right();
+                        break;
+                    case ClothNormalAxis.InverseUp:
+                        dir = -math.up();
+                        break;
+                    case ClothNormalAxis.InverseForward:
+                        dir = -math.forward();
+                        break;
+                }
+                dir = math.mul(baseRot, dir);
+                float limitDistance = springParams.limitDistance * scaleRatio; // スケール倍率
+
+                if (limitDistance > 1e-08f)
+                {
+                    // 球クランプ
+                    var len = math.length(v);
+                    if (len > limitDistance)
+                    {
+                        v *= (limitDistance / len);
+                    }
+
+                    // 楕円クランプ
+                    if (springParams.normalLimitRatio < 1.0f)
+                    {
+                        // もっとスマートにならないか..
+                        float ylen = math.dot(dir, v);
+                        float3 vx = v - dir * ylen;
+                        float xlen = math.length(vx);
+                        float t = xlen / limitDistance;
+                        float y = math.cos(math.asin(t));
+                        y *= limitDistance * springParams.normalLimitRatio;
+
+                        if (math.abs(ylen) > y)
+                        {
+                            v -= dir * (math.abs(ylen) - y) * math.sign(ylen);
+                        }
+                    }
+                }
+                else
+                {
+                    v = float3.zero;
+                }
+
+                // スプリング力
+                float power = springParams.springPower;
+
+                // ノイズ
+                if (springParams.springNoise > 0.0f)
+                {
+                    float noise = math.sin(noiseTime); // -1.0~+1.0
+                    //Debug.Log(noise);
+                    noise *= springParams.springNoise * 0.6f; // スケーリング
+                    power = math.max(power + power * noise, 0.0f);
+                }
+
+                // スプリング適用
+                v -= v * power;
+                nextPos = basePos + v;
+            }
+
 
             float3 Wind(int teamId, in TeamManager.TeamData tdata, in WindParams windParams, in InertiaConstraint.CenterData cdata, int vindex, int pindex, float depth)
             {
@@ -1549,7 +1634,7 @@ namespace MagicaCloth2
                 var nextPos = nextPosArray[pindex];
                 var oldPos = oldPosArray[pindex];
 
-                if (attr.IsMove())
+                if (attr.IsMove() || tdata.IsSpring)
                 {
                     // 移動パーティクル
                     var velocityOldPos = velocityPosArray[pindex];
@@ -1776,7 +1861,7 @@ namespace MagicaCloth2
                 var pos = positions[vindex];
                 var rot = rotations[vindex];
 
-                if (attr.IsMove())
+                if (attr.IsMove() || tdata.IsSpring)
                 {
                     // 移動パーティクル
                     var dpos = oldPosArray[pindex];

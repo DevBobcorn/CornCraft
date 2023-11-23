@@ -51,8 +51,6 @@ namespace MagicaCloth2
 
         public struct TetherConstraintParams
         {
-            //public float stiffness;
-
             /// <summary>
             /// 最大縮小割合(0.0 ~ 1.0)
             /// 0.0=縮小しない
@@ -65,23 +63,20 @@ namespace MagicaCloth2
             /// </summary>
             public float stretchLimit;
 
-            /// <summary>
-            /// stiffnessのフェード範囲(0.0 ~ 1.0)
-            /// </summary>
-            //public float stiffnessWidth;
-
-            /// <summary>
-            /// 速度減衰
-            /// </summary>
-            //public float velocityAttenuation;
-
-            public void Convert(SerializeData sdata)
+            public void Convert(SerializeData sdata, ClothProcess.ClothType clothType)
             {
-                //stiffness = Define.System.TetherStiffness;
-                compressionLimit = sdata.distanceCompression;
+                switch (clothType)
+                {
+                    case ClothProcess.ClothType.BoneCloth:
+                    case ClothProcess.ClothType.MeshCloth:
+                        compressionLimit = sdata.distanceCompression;
+                        break;
+                    case ClothProcess.ClothType.BoneSpring:
+                        // BoneSpringは定数
+                        compressionLimit = Define.System.BoneSpringTetherCompressionLimit;
+                        break;
+                }
                 stretchLimit = Define.System.TetherStretchLimit;
-                //stiffnessWidth = Define.System.TetherStiffnessWidth;
-                //velocityAttenuation = Define.System.TehterVelocityAttenuation;
             }
         }
 
