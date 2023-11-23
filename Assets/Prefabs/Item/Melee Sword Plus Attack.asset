@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88d582769fd5a7f48830e466a271858b, type: 3}
-  m_Name: Melee Sword Plus
+  m_Name: Melee Sword Plus Attack
   m_EditorClassIdentifier: 
   Stages:
   - AnimationClip: {fileID: 7400000, guid: 1d399b9dc0740ba4b9f589b3d85f96d5, type: 2}

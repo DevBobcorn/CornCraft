@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05e2d558e7a812246be76c2843c776ca, type: 3}
-  m_Name: Ranged Bow
+  m_Name: Ranged Bow Attack
   m_EditorClassIdentifier: 
   IdleTimeout: -0.1
   SetupTime: 0.5
