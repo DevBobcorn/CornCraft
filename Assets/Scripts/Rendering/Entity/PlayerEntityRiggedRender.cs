@@ -53,11 +53,11 @@ namespace CraftSharp.Rendering
             UpdateSkinMaterial();
         }
 
-        public void InitializeActiveItem(ItemStack? itemStack)
+        public void InitializeActiveItem(ItemStack? itemStack, ItemActionType actionType)
         {
             // Initialize player active item
             var accessoryWidget = visual!.GetComponent<PlayerAccessoryWidget>();
-            accessoryWidget.UpdateActiveItem(itemStack);
+            accessoryWidget.UpdateActiveItem(itemStack, actionType);
         }
 
         public override void UpdateStateMachine(PlayerStatus info)

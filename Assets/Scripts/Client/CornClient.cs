@@ -857,9 +857,10 @@ namespace CraftSharp
             // There won't be confirmation from the server
             // Simply set it on the client side
             CurrentSlot = Convert.ToByte(slot);
+            var curItem = inventories[0].GetHotbarItem(slot);
             // Broad cast hotbar selection change
             EventManager.Instance.BroadcastOnUnityThread(
-                    new HeldItemChangeEvent(CurrentSlot, inventories[0].GetHotbarItem(slot)));
+                    new HeldItemChangeEvent(CurrentSlot, curItem, PlayerActionHelper.GetItemActionType(curItem)));
 
             return handler!.SendHeldItemChange(slot);
         }
@@ -1201,7 +1202,8 @@ namespace CraftSharp
                             EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
                             if (hotbarSlot == CurrentSlot) // Updating held item
                             {
-                                EventManager.Instance.Broadcast(new HeldItemChangeEvent(CurrentSlot, item));
+                                EventManager.Instance.Broadcast(new HeldItemChangeEvent(
+                                        CurrentSlot, item, PlayerActionHelper.GetItemActionType(item)));
                             }
                         }
                     });
@@ -1516,9 +1518,11 @@ namespace CraftSharp
         public void OnHeldItemChange(byte slot) //
         {
             CurrentSlot = slot;
+            var newItem = inventories[0].GetHotbarItem(slot);
             // Broad cast hotbar selection change
             EventManager.Instance.BroadcastOnUnityThread(
-                    new HeldItemChangeEvent(CurrentSlot, inventories[0].GetHotbarItem(slot)));
+                    new HeldItemChangeEvent(CurrentSlot, newItem,
+                    PlayerActionHelper.GetItemActionType(newItem)));
         }
 
         /// Called when an update of the map is sent by the server, take a look at https://wiki.vg/Protocol#Map_Data for more info on the fields

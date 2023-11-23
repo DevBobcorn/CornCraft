@@ -13,6 +13,7 @@ namespace CraftSharp.Rendering
         [SerializeField] private Transform? mainHandRef;
         [SerializeField] private Transform? offHandRef;
         [SerializeField] private Transform? spineRef;
+
         private Transform? mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
         private Transform? offHandSlot; // A slot fixed to offHandRef transform (as a child)
         private Transform? itemMountPivot, itemMountSlot;
@@ -52,18 +53,17 @@ namespace CraftSharp.Rendering
             itemMountSlot.SetParent(itemMountPivot);
         }
 
-        private void CreateActionItem(ItemStack itemStack, ItemActionType actionType)
+        private void CreateActionItem(ItemStack? itemStack, ItemActionType actionType)
         {
             if (currentItem != null)
             {
                 Destroy(currentItem.gameObject);
             }
 
-            //var itemObj = GameObject.Instantiate(itemPrefab);
-            //currentItem = itemObj!.GetComponent<PlayerActionItem>();
-
-            var itemObj = new GameObject("Action Item");
-            itemObj.layer = this.gameObject.layer;
+            var itemObj = new GameObject("Action Item")
+            {
+                layer = gameObject.layer
+            };
 
             (Mesh mesh, Material material, Dictionary<DisplayPosition, float3x3> transforms)? meshData = null;
 
@@ -72,9 +72,12 @@ namespace CraftSharp.Rendering
                 case ItemActionType.MeleeWeaponSword:
                     currentItem = itemObj!.AddComponent<MeleeWeapon>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack, false);
+                    // Use dummy material and mesh if failed to build for item
+                    meshData ??= (player!.DummySwordItemMesh!, player!.DummyItemMaterial!, new());
 
                     currentItem.slotEularAngles = new(135F, 90F, -20F);
                     currentItem.slotPosition = new(0F, 0.2F, -0.25F);
+
                     mainHandSlot!.localPosition = new(0F, -0.1F, 0.05F);
                     mainHandSlot.localEulerAngles = new(-135F, 0F, 45F);
 
@@ -93,11 +96,12 @@ namespace CraftSharp.Rendering
                 case ItemActionType.RangedWeaponBow:
                     currentItem = itemObj!.AddComponent<UselessActionItem>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack, false);
+                    // Use dummy material and mesh if failed to build for item
+                    meshData ??= (player!.DummyBowItemMesh!, player!.DummyItemMaterial!, new());
 
                     currentItem.slotEularAngles = new(-40F, 90F, 20F);
                     currentItem.slotPosition = new(0F, -0.4F, -0.4F);
-                    //offHandSlot!.localPosition = new(-0.28F, -0.15F, 0.325F);
-                    //offHandSlot.localEulerAngles = new(-30F, 205F, 90F);
+                    
                     offHandSlot!.localPosition = new(-0.21F, 0.12F, 0.38F);
                     offHandSlot.localEulerAngles = new(5F, -150F, 115F);
 
@@ -106,17 +110,17 @@ namespace CraftSharp.Rendering
                 default:
                     currentItem = itemObj!.AddComponent<UselessActionItem>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack, true);
+                    // Use dummy material and mesh if failed to build for item
+                    meshData ??= (player!.DummySwordItemMesh!, player!.DummyItemMaterial!, new());
 
                     currentItem.slotEularAngles = new(0F, 90F, 0F);
                     currentItem.slotPosition = new(0F, 0F, -0.5F);
-                    mainHandSlot!.localPosition = Vector3.zero;
-                    mainHandSlot.localEulerAngles = Vector3.zero;
 
                     itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
                     break;
             }
 
-            if (meshData is not null)
+            if (meshData is not null) // In case of invalid items, meshData can be null
             {
                 var mesh = itemObj.AddComponent<MeshFilter>();
                 mesh.mesh = meshData.Value.mesh;
@@ -189,24 +193,15 @@ namespace CraftSharp.Rendering
 
         public void Hit() { }
 
-        public void UpdateActiveItem(ItemStack? itemStack)
+        public void UpdateActiveItem(ItemStack? itemStack, ItemActionType actionType)
         {
-            if (itemStack is null)
+            if (actionType == ItemActionType.None)
             {
                 DestroyActionItem();
             }
             else
             {
-                var actionType = PlayerActionHelper.GetItemActionType(itemStack);
-
-                if (actionType == ItemActionType.None)
-                {
-                    DestroyActionItem();
-                }
-                else
-                {
-                    CreateActionItem(itemStack, actionType);
-                }
+                CreateActionItem(itemStack, actionType);
             }
             
             MountItem();

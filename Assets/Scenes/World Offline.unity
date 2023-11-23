@@ -857,7 +857,7 @@ MonoBehaviour:
   EnvironmentManager: {fileID: 346995815}
   MaterialManager: {fileID: 331478947}
   playerController: {fileID: 195804746}
-  playerRenderPrefab: {fileID: 1589991316666168082, guid: bc46e5ac0bc327049911b07789e1ff30, type: 3}
+  playerRenderPrefab: {fileID: 4629627389257955861, guid: f203159209ba7b748b562080342c675e, type: 3}
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
@@ -5282,10 +5282,42 @@ PrefabInstance:
       propertyPath: m_LocalPosition.x
       value: 0.8
       objectReference: {fileID: 0}
+    - target: {fileID: 3083690404439012666, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3083690404439012666, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4409463203126261892, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Follow
       value: 
       objectReference: {fileID: 1011435875}
+    - target: {fileID: 7361313672352195396, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7361313672352195396, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7361313672352195396, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7372638134847987542, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.5256128
+      objectReference: {fileID: 0}
+    - target: {fileID: 7372638134847987542, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.05159
+      objectReference: {fileID: 0}
+    - target: {fileID: 7372638134847987542, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.0881348
+      objectReference: {fileID: 0}
     - target: {fileID: 7808910476651940505, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Follow
       value: 

@@ -17,10 +17,13 @@ namespace CraftSharp.Control
             Mount
         }
 
-        public ItemActionType CurrentActionType = ItemActionType.None;
+        public ItemActionType CurrentActionType { get; private set; } = ItemActionType.None;
 
         [SerializeField] public PlayerMeleeAttack? MeleeSwordAttack;
         [SerializeField] public PlayerRangedAttack? RangedBowAttack;
+        [SerializeField] public Material? DummyItemMaterial;
+        [SerializeField] public Mesh? DummySwordItemMesh;
+        [SerializeField] public Mesh? DummyBowItemMesh;
         [SerializeField] public GameObject? SwordTrailPrefab;
 
         [SerializeField] protected PlayerAbility? ability;
@@ -134,7 +137,8 @@ namespace CraftSharp.Control
                     // Initialize current item held by player
                     // TODO: Remove direct reference to client
                     var activeItem = CornApp.CurrentClient?.GetActiveItem();
-                    riggedRender.InitializeActiveItem(activeItem);
+                    riggedRender.InitializeActiveItem(activeItem,
+                            PlayerActionHelper.GetItemActionType(activeItem));
                 }
                 else // Player render is vanilla/entity render
                 {
@@ -227,10 +231,10 @@ namespace CraftSharp.Control
             // Register hotbar item event for updating item visuals
             heldItemCallback = (e) =>
             {
-                OnCurrentItemChanged?.Invoke(e.ItemStack);
+                OnCurrentItemChanged?.Invoke(e.ItemStack, e.ActionType);
                 // Exit attack state when active item is changed
                 Status!.Attacking = false;
-                CurrentActionType = PlayerActionHelper.GetItemActionType(e.ItemStack);
+                CurrentActionType = e.ActionType;
             };
             EventManager.Instance.Register(heldItemCallback);
 
@@ -318,7 +322,7 @@ namespace CraftSharp.Control
         public event ItemStateEventHandler? OnItemStateChanged;
         public void ChangeItemState(CurrentItemState itemState) => OnItemStateChanged?.Invoke(itemState);
 
-        public delegate void ItemStackEventHandler(ItemStack? item);
+        public delegate void ItemStackEventHandler(ItemStack? item, ItemActionType actionType);
         public event ItemStackEventHandler? OnCurrentItemChanged;
 
         public delegate void CrossFadeStateEventHandler(string stateName, float time, int layer, float timeOffset);

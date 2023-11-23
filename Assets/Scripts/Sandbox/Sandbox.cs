@@ -29,8 +29,10 @@ namespace CraftSharp.Sandbox
             Cursor.lockState = CursorLockMode.Locked;
 
             // Create dummy entity
-            var dummyEntity = new Entity(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
-            dummyEntity.MaxHealth = 20F;
+            var dummyEntity = new Entity(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero)
+            {
+                MaxHealth = 20F
+            };
 
             GameObject renderObj;
             if (playerRenderPrefab!.GetComponent<Animator>() != null) // Model prefab, wrap it up
@@ -92,6 +94,19 @@ namespace CraftSharp.Sandbox
             if (Keyboard.current.f5Key.wasPressedThisFrame)
             {
                 cameraController?.SwitchPerspective();
+            }
+
+            if (Keyboard.current.numpad0Key.wasPressedThisFrame)
+            {
+                EventManager.Instance.Broadcast(new HeldItemChangeEvent(0, null, ItemActionType.None));
+            }
+            if (Keyboard.current.numpad1Key.wasPressedThisFrame)
+            {
+                EventManager.Instance.Broadcast(new HeldItemChangeEvent(0, null, ItemActionType.MeleeWeaponSword));
+            }
+            if (Keyboard.current.numpad2Key.wasPressedThisFrame)
+            {
+                EventManager.Instance.Broadcast(new HeldItemChangeEvent(0, null, ItemActionType.RangedWeaponBow));
             }
 
             // Update stamina bar position
