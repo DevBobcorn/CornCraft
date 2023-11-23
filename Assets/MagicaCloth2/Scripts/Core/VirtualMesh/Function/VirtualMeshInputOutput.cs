@@ -63,7 +63,7 @@ namespace MagicaCloth2
                 initScale = rsetup.initRenderScale;
 
                 // ========== ここからMesh/Boneで分岐 ==========
-                if (rsetup.setupType == RenderSetupData.SetupType.Mesh)
+                if (rsetup.setupType == RenderSetupData.SetupType.MeshCloth)
                 {
                     // メッシュタイプ
                     meshType = MeshType.NormalMesh;
@@ -76,7 +76,7 @@ namespace MagicaCloth2
                         ImportMeshSkinning();
                     }
                 }
-                else if (rsetup.setupType == RenderSetupData.SetupType.Bone)
+                else if (rsetup.setupType == RenderSetupData.SetupType.BoneCloth || rsetup.setupType == RenderSetupData.SetupType.BoneSpring)
                 {
                     // ボーンタイプ
                     meshType = MeshType.NormalBoneMesh;
@@ -94,15 +94,21 @@ namespace MagicaCloth2
                 JobUtility.CalcAABBRun(localPositions.GetNativeArray(), VertexCount, boundingBox);
 
                 // UV
-                if (rsetup.setupType == RenderSetupData.SetupType.Bone && TriangleCount > 0)
+                switch (rsetup.setupType)
                 {
-                    // ボーンタイプでトライアングルを含む場合
-                    JobUtility.CalcUVWithSphereMappingRun(
-                        localPositions.GetNativeArray(),
-                        VertexCount,
-                        boundingBox,
-                        uv.GetNativeArray()
-                        );
+                    case RenderSetupData.SetupType.BoneCloth:
+                    case RenderSetupData.SetupType.BoneSpring:
+                        if (TriangleCount > 0)
+                        {
+                            // ボーンタイプでトライアングルを含む場合
+                            JobUtility.CalcUVWithSphereMappingRun(
+                                localPositions.GetNativeArray(),
+                                VertexCount,
+                                boundingBox,
+                                uv.GetNativeArray()
+                                );
+                        }
+                        break;
                 }
 
                 // 頂点平均接続距離算出
@@ -473,6 +479,26 @@ namespace MagicaCloth2
                         lineList.Add(line);
                     }
                 }
+
+                // BoneSpringでの設定
+                if (rsetup.setupType == RenderSetupData.SetupType.BoneSpring)
+                {
+                    // スプリングではコリジョン無効で初期化
+                    attributes.Fill(0, vcnt, VertexAttribute.DisableCollision);
+
+                    // コリジョンとして指定されたボーンのみ衝突判定を有効化する
+                    if (rsetup.collisionBoneIndexList != null)
+                    {
+                        foreach (int index in rsetup.collisionBoneIndexList)
+                        {
+                            if (index >= 0)
+                            {
+                                attributes[index] = VertexAttribute.Invalid;
+                            }
+                        }
+                    }
+                }
+
                 if (lineList.Count > 0)
                     lines = new ExSimpleNativeArray<int2>(lineList.ToArray());
             }

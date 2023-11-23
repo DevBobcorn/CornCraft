@@ -14,8 +14,13 @@ namespace MagicaCloth2
     /// </summary>
     public class ClothManager : IManager, IValid
     {
+        // すべて
         internal HashSet<ClothProcess> clothSet = new HashSet<ClothProcess>();
+
+        // BoneCloth,BoneSpring
         internal HashSet<ClothProcess> boneClothSet = new HashSet<ClothProcess>();
+
+        // MeshCloth
         internal HashSet<ClothProcess> meshClothSet = new HashSet<ClothProcess>();
 
         //=========================================================================================
@@ -97,10 +102,19 @@ namespace MagicaCloth2
                 return 0;
 
             clothSet.Add(cprocess);
-            if (cprocess.clothType == ClothProcess.ClothType.BoneCloth)
-                boneClothSet.Add(cprocess);
-            else
-                meshClothSet.Add(cprocess);
+            switch (cprocess.clothType)
+            {
+                case ClothProcess.ClothType.BoneCloth:
+                case ClothProcess.ClothType.BoneSpring:
+                    boneClothSet.Add(cprocess);
+                    break;
+                case ClothProcess.ClothType.MeshCloth:
+                    meshClothSet.Add(cprocess);
+                    break;
+                default:
+                    Develop.LogError($"Invalid cloth type! :{cprocess.clothType}");
+                    break;
+            }
 
             return teamId;
         }

@@ -83,16 +83,19 @@ namespace MagicaCloth2
                 return false;
 
             // setting by type.
-            if (serializeData.clothType == ClothProcess.ClothType.BoneCloth)
+            switch (serializeData.clothType)
             {
-                // BoneCloth用のセレクションデータの作成
-                // ただしセレクションデータが存在し、かつユーザー定義されている場合は作成しない
-                var nowSelection = serializeData2.selectionData;
-                if (nowSelection == null || nowSelection.IsValid() == false || nowSelection.IsUserEdit() == false)
-                {
-                    if (Process.GenerateBoneClothSelection() == false)
-                        return false;
-                }
+                case ClothProcess.ClothType.BoneCloth:
+                case ClothProcess.ClothType.BoneSpring:
+                    // BoneCloth用のセレクションデータの作成
+                    // ただしセレクションデータが存在し、かつユーザー定義されている場合は作成しない
+                    var nowSelection = serializeData2.selectionData;
+                    if (nowSelection == null || nowSelection.IsValid() == false || nowSelection.IsUserEdit() == false)
+                    {
+                        if (Process.GenerateBoneClothSelection() == false)
+                            return false;
+                    }
+                    break;
             }
 
             // build and run.

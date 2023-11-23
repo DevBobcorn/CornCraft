@@ -18,6 +18,8 @@ namespace MagicaCloth2
 
         public static void DrawPresetButton(MagicaCloth cloth, ClothSerializeData sdata)
         {
+            bool save = false;
+            bool load = false;
             using (var horizontalScope = new GUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("Parameters", EditorStyles.boldLabel);
@@ -33,15 +35,21 @@ namespace MagicaCloth2
 
                 if (GUILayout.Button("Save", GUILayout.Width(40), GUILayout.Height(16)))
                 {
-                    SavePreset(sdata);
+                    //SavePreset(sdata);
                     //GUIUtility.ExitGUI();
+                    save = true;
                 }
                 if (GUILayout.Button("Load", GUILayout.Width(40), GUILayout.Height(16)))
                 {
-                    LoadPreset(cloth, sdata);
+                    //LoadPreset(cloth, sdata);
                     //GUIUtility.ExitGUI();
+                    load = true;
                 }
             }
+            if (save)
+                SavePreset(sdata);
+            if (load)
+                LoadPreset(cloth, sdata);
         }
 
         static string GetComponentTypeName(ClothSerializeData sdata)

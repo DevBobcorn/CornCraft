@@ -17,7 +17,7 @@ namespace MagicaCloth2
         public float depthWeight;
         public float movingWind;
 
-        public void Convert(WindSettings sdata)
+        public void Convert(WindSettings sdata, ClothProcess.ClothType clothType)
         {
             influence = sdata.influence;
             frequency = sdata.frequency;

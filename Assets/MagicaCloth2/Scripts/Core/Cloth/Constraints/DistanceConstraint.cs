@@ -59,9 +59,19 @@ namespace MagicaCloth2
             /// </summary>
             public float velocityAttenuation;
 
-            public void Convert(SerializeData sdata)
+            public void Convert(SerializeData sdata, ClothProcess.ClothType clothType)
             {
-                restorationStiffness = sdata.stiffness.ConvertFloatArray();
+                switch (clothType)
+                {
+                    case ClothProcess.ClothType.BoneCloth:
+                    case ClothProcess.ClothType.MeshCloth:
+                        restorationStiffness = sdata.stiffness.ConvertFloatArray();
+                        break;
+                    case ClothProcess.ClothType.BoneSpring:
+                        // BoneSpringは定数
+                        restorationStiffness = Define.System.BoneSpringDistanceStiffness;
+                        break;
+                }
                 velocityAttenuation = Define.System.DistanceVelocityAttenuation;
             }
         }
@@ -477,6 +487,9 @@ namespace MagicaCloth2
                 var sc = tdata.distanceStartChunk;
                 var dc = tdata.distanceDataChunk;
 
+                if (sc.dataLength == 0)
+                    return;
+
                 int c_start = sc.startIndex;
                 int d_start = dc.startIndex;
                 int v_start = tdata.proxyCommonChunk.startIndex;
@@ -488,11 +501,22 @@ namespace MagicaCloth2
                 float depth = depthArray[vindex];
                 float friction = frictionArray[pindex];
 
-                if (attr.IsDontMove())
+                if (attr.IsInvalid())
                     return;
 
+                // Spring利用中は固定も通す
+                bool isSpring = tdata.IsSpring;
+                if (attr.IsDontMove() && isSpring == false)
+                    return;
+
+                // 固定点の重量
+                float fixMass = isSpring ? 10.0f : 50.0f;
+
                 // 重量
-                float invMass = MathUtility.CalcInverseMass(friction, depth, attr.IsDontMove());
+                // BoneSpringでは固定点の重量加算を行わない
+                //float invMass = MathUtility.CalcInverseMass(friction, depth, attr.IsDontMove() && isSpring == false);
+                float invMass = MathUtility.CalcInverseMass(friction, depth, attr.IsDontMove(), fixMass);
+                //float invMass = isSpring && attr.IsDontMove() ? 1.0f / 2.0f : MathUtility.CalcInverseMass(friction, depth, attr.IsDontMove());
 
                 // 基本剛性
                 float stiffness = parameter.distanceConstraint.restorationStiffness.EvaluateCurveClamp01(depth);
@@ -532,7 +556,10 @@ namespace MagicaCloth2
                         var t_attr = attributes[tvindex];
 
                         // 重量
-                        float t_invMass = MathUtility.CalcInverseMass(t_friction, t_depth, t_attr.IsDontMove());
+                        // BoneSpringでは固定点の重量加算を行わない
+                        //float t_invMass = MathUtility.CalcInverseMass(t_friction, t_depth, t_attr.IsDontMove() && isSpring == false);
+                        float t_invMass = MathUtility.CalcInverseMass(t_friction, t_depth, t_attr.IsDontMove(), fixMass);
+                        //float t_invMass = isSpring && t_attr.IsDontMove() ? 1.0f / 2.0f : MathUtility.CalcInverseMass(t_friction, t_depth, t_attr.IsDontMove());
 
                         // 復元する長さ
                         // !Distance制約は初期化時に保存した距離を見るようにしないと駄目

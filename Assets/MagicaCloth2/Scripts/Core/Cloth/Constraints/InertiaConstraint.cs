@@ -75,6 +75,22 @@ namespace MagicaCloth2
             public float localInertia;
 
             /// <summary>
+            /// Local movement speed limit (m/s).
+            /// ローカル移動速度制限(m/s)
+            /// [OK] Runtime changes.
+            /// [OK] Export/Import with Presets
+            /// </summary>
+            public CheckSliderSerializeData localMovementSpeedLimit;
+
+            /// <summary>
+            /// Local rotation speed limit (deg/s).
+            /// ローカル回転速度制限(deg/s)
+            /// [OK] Runtime changes.
+            /// [OK] Export/Import with Presets
+            /// </summary>
+            public CheckSliderSerializeData localRotationSpeedLimit;
+
+            /// <summary>
             /// depth inertia (0.0 ~ 1.0).
             /// Increasing the effect weakens the inertia near the root (makes it difficult to move).
             /// 深度慣性(0.0 ~ 1.0)
@@ -132,6 +148,8 @@ namespace MagicaCloth2
                 movementSpeedLimit = new CheckSliderSerializeData(true, 5.0f);
                 rotationSpeedLimit = new CheckSliderSerializeData(true, 720.0f);
                 localInertia = 1.0f;
+                localMovementSpeedLimit = new CheckSliderSerializeData(false, 5.0f);
+                localRotationSpeedLimit = new CheckSliderSerializeData(false, 720.0f);
                 depthInertia = 0.0f;
                 centrifualAcceleration = 0.0f;
                 particleSpeedLimit = new CheckSliderSerializeData(true, 4.0f);
@@ -148,6 +166,8 @@ namespace MagicaCloth2
                     movementSpeedLimit = movementSpeedLimit.Clone(),
                     rotationSpeedLimit = rotationSpeedLimit.Clone(),
                     localInertia = localInertia,
+                    localMovementSpeedLimit = localMovementSpeedLimit.Clone(),
+                    localRotationSpeedLimit = localRotationSpeedLimit.Clone(),
                     depthInertia = depthInertia,
                     centrifualAcceleration = centrifualAcceleration,
                     particleSpeedLimit = particleSpeedLimit.Clone(),
@@ -163,6 +183,8 @@ namespace MagicaCloth2
                 movementSpeedLimit.DataValidate(0.0f, Define.System.MaxMovementSpeedLimit);
                 rotationSpeedLimit.DataValidate(0.0f, Define.System.MaxRotationSpeedLimit);
                 localInertia = Mathf.Clamp01(localInertia);
+                localMovementSpeedLimit.DataValidate(0.0f, Define.System.MaxMovementSpeedLimit);
+                localRotationSpeedLimit.DataValidate(0.0f, Define.System.MaxRotationSpeedLimit);
                 centrifualAcceleration = Mathf.Clamp01(centrifualAcceleration);
                 depthInertia = Mathf.Clamp01(depthInertia);
                 particleSpeedLimit.DataValidate(0.0f, Define.System.MaxParticleSpeedLimit);
@@ -192,6 +214,16 @@ namespace MagicaCloth2
             /// ローカル慣性影響(0.0 ~ 1.0)
             /// </summary>
             public float localInertia;
+
+            /// <summary>
+            /// ローカル移動速度制限(m/s)
+            /// </summary>
+            public float localMovementSpeedLimit;
+
+            /// <summary>
+            /// ローカル回転速度制限(deg/s)
+            /// </summary>
+            public float localRotationSpeedLimit;
 
             /// <summary>
             /// 深度慣性(0.0 ~ 1.0)
@@ -230,6 +262,8 @@ namespace MagicaCloth2
                 movementSpeedLimit = sdata.movementSpeedLimit.GetValue(-1);
                 rotationSpeedLimit = sdata.rotationSpeedLimit.GetValue(-1);
                 localInertia = sdata.localInertia;
+                localMovementSpeedLimit = sdata.localMovementSpeedLimit.GetValue(-1);
+                localRotationSpeedLimit = sdata.localRotationSpeedLimit.GetValue(-1);
                 depthInertia = sdata.depthInertia;
                 centrifualAcceleration = sdata.centrifualAcceleration;
                 particleSpeedLimit = sdata.particleSpeedLimit.GetValue(-1);

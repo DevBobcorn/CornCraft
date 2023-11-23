@@ -116,6 +116,7 @@ namespace MagicaCloth2
                         var p = pointList[i];
 
                         var attr = editMesh.attributes[p.vindex];
+
                         var col = InvalidPointColor;
                         if (attr.IsFixed()) col = FixedPointColor;
                         else if (attr.IsMove()) col = MovePointColor;
@@ -123,10 +124,18 @@ namespace MagicaCloth2
 
                         // radius
                         float depth = editMesh.vertexDepths[p.vindex];
-                        float radius = serializeData.radius.Evaluate(depth);
-                        radius *= worldToLocalScale;
                         var pos = editMesh.localPositions[p.vindex];
-                        GizmoUtility.DrawSphere(pos, drawSettings.CheckRadiusDrawing() ? radius : drawPointSize, true);
+                        if (attr.IsDisableCollision())
+                        {
+                            // コリジョン無効は固定サイズワイヤーフレーム表示
+                            GizmoUtility.DrawSimpleWireSphere(pos, 0.01f, crot, true);
+                        }
+                        else
+                        {
+                            float radius = serializeData.radius.Evaluate(depth);
+                            radius *= worldToLocalScale;
+                            GizmoUtility.DrawSphere(pos, drawSettings.CheckRadiusDrawing() ? radius : drawPointSize, true);
+                        }
                     }
                 }
             }
@@ -379,7 +388,7 @@ namespace MagicaCloth2
 #endif
 
             // inertia center
-            if (paint == false && editMesh.CenterFixedPointCount > 0)
+            if (paint == false && editMesh.CenterFixedPointCount > 0 && drawSettings.inertiaCenter)
             {
                 float3 pos = 0;
                 int ccnt = editMesh.CenterFixedPointCount;
@@ -501,6 +510,11 @@ namespace MagicaCloth2
                         int cvindex = tdata.proxyCommonChunk.startIndex + p.vindex;
 
                         var attr = vm.attributes[cvindex];
+
+                        // 無効属性は表示しない
+                        if (attr.IsInvalid())
+                            continue;
+
                         var col = InvalidPointColor;
                         if (attr.IsFixed()) col = FixedPointColor;
                         else if (attr.IsMove()) col = MovePointColor;
@@ -508,10 +522,18 @@ namespace MagicaCloth2
 
                         // radius
                         float depth = vm.vertexDepths[cvindex];
-                        float radius = cprocess.parameters.radiusCurveData.EvaluateCurve(depth);
-                        radius *= tdata.scaleRatio;
                         var pos = positionArray[pindex];
-                        GizmoUtility.DrawSphere(pos, drawSettings.CheckRadiusDrawing() ? radius : drawPointSize, true);
+                        if (attr.IsDisableCollision())
+                        {
+                            // コリジョン無効は固定サイズワイヤーフレーム表示
+                            GizmoUtility.DrawSimpleWireSphere(pos, 0.01f, crot, true);
+                        }
+                        else
+                        {
+                            float radius = cprocess.parameters.radiusCurveData.EvaluateCurve(depth);
+                            radius *= tdata.scaleRatio;
+                            GizmoUtility.DrawSphere(pos, drawSettings.CheckRadiusDrawing() ? radius : drawPointSize, true);
+                        }
                     }
                 }
             }
@@ -535,8 +557,8 @@ namespace MagicaCloth2
                     int cvindex = tdata.proxyCommonChunk.startIndex + i;
 
                     // attribute
-                    //if (vm.attributes[cvindex].IsInvalid())
-                    //    continue;
+                    if (vm.attributes[cvindex].IsInvalid())
+                        continue;
 
                     var pos = positionArray[pindex];
                     var rot = vm.rotations[cvindex]; // 計算済みの前フレームの最終姿勢
@@ -698,9 +720,11 @@ namespace MagicaCloth2
                     int tindex = tdata.proxyTriangleChunk.startIndex + i;
                     int3 tri = vm.triangles[tindex];
 
-                    //int3 vtri = tri + tdata.proxyCommonChunk.startIndex;
-                    //if (vm.attributes[vtri.x].IsInvalid() || vm.attributes[vtri.y].IsInvalid() || vm.attributes[vtri.z].IsInvalid())
-                    //    continue;
+#if true
+                    int3 vtri = tri + tdata.proxyCommonChunk.startIndex;
+                    if (vm.attributes[vtri.x].IsInvalid() || vm.attributes[vtri.y].IsInvalid() || vm.attributes[vtri.z].IsInvalid())
+                        continue;
+#endif
 
                     segmentBuffer0.Add(tri.x);
                     segmentBuffer0.Add(tri.y);
@@ -718,9 +742,11 @@ namespace MagicaCloth2
                 {
                     int2 line = proxyMesh.lines[i];
 
-                    //int2 vline = line + tdata.proxyCommonChunk.startIndex;
-                    //if (vm.attributes[vline.x].IsInvalid() || vm.attributes[vline.y].IsInvalid())
-                    //    continue;
+#if true
+                    int2 vline = line + tdata.proxyCommonChunk.startIndex;
+                    if (vm.attributes[vline.x].IsInvalid() || vm.attributes[vline.y].IsInvalid())
+                        continue;
+#endif
 
                     segmentBuffer0.Add(line.x);
                     segmentBuffer0.Add(line.y);
@@ -1067,6 +1093,7 @@ namespace MagicaCloth2
 
 
             // inertia center
+            if (drawSettings.inertiaCenter)
             {
                 var pos = cdata.nowWorldPosition;
                 var rot = cdata.nowWorldRotation;

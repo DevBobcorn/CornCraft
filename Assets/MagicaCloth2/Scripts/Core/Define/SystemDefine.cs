@@ -23,6 +23,11 @@ namespace MagicaCloth2
             public const float Epsilon = 1e-8f;
 
             /// <summary>
+            /// MeshClothで設定可能な最大レンダラー数
+            /// </summary>
+            public const int MaxRendererCount = 15;
+
+            /// <summary>
             /// 最小のグリッドサイズ定義(GridSize=0は動作しないため)
             /// </summary>
             public const float MinimumGridSize = 0.00001f;
@@ -375,6 +380,24 @@ namespace MagicaCloth2
             /// 風速係数の基準となる風速(m/s)
             /// </summary>
             public const float WindBaseSpeed = 7.5f;
+
+            /// <summary>
+            /// [Spring]
+            /// BoneSpring利用時のDistanceConstraintのStiffness値
+            /// </summary>
+            public const float BoneSpringDistanceStiffness = 0.5f;
+
+            /// <summary>
+            /// [Spring]
+            /// BoneSpring利用時のTetherConstraintのCompressionLimit値
+            /// </summary>
+            public const float BoneSpringTetherCompressionLimit = 0.8f;
+
+            /// <summary>
+            /// [Spring]
+            /// BoneSpring利用時のfriction値
+            /// </summary>
+            public const float BoneSpringCollisionFriction = 0.5f;
         }
     }
 }

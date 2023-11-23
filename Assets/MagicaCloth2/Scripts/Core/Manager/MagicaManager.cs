@@ -10,6 +10,9 @@ using UnityEngine.Scripting;
 #if UNITY_EDITOR
 using UnityEditor.Compilation;
 using UnityEditor;
+#if UNITY_2023_1_OR_NEWER
+using UnityEditor.Build;
+#endif
 #endif
 
 // コードストリッピングを無効化する 
@@ -134,11 +137,20 @@ namespace MagicaCloth2
             // プロジェクトセッティングにMagicaCloth2用デファインシンボルを登録する
             try
             {
+#if UNITY_2023_1_OR_NEWER
+                var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+                PlayerSettings.GetScriptingDefineSymbols(namedBuildTarget, out string[] newDefines);
+                if (newDefines.Contains(Define.System.DefineSymbol) == false)
+                {
+                    PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, newDefines.Concat(new string[] { Define.System.DefineSymbol }).ToArray());
+                }
+#else
                 var newDefines = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup).Split(';');
                 if (newDefines.Contains(Define.System.DefineSymbol) == false)
                 {
                     PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, newDefines.Concat(new string[] { Define.System.DefineSymbol }).ToArray());
                 }
+#endif
             }
             catch (Exception e)
             {

@@ -705,8 +705,12 @@ namespace MagicaCloth2
 
                 if (flag.IsSet(Flag_WorldRotWrite))
                 {
-                    // ワールド回転のみ書き込む
+                    // ワールド回転
                     transform.rotation = worldRotations[index];
+
+                    // BoneSpringのみワールド座標を書き込む
+                    if (tdata.IsSpring)
+                        transform.position = worldPositions[index];
                 }
                 else if (flag.IsSet(Flag_LocalPosRotWrite))
                 {

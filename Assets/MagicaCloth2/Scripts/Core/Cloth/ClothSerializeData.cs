@@ -246,5 +246,10 @@ namespace MagicaCloth2
         /// Wind
         /// </summary>
         public WindSettings wind = new WindSettings();
+
+        /// <summary>
+        /// Spring
+        /// </summary>
+        public SpringConstraint.SerializeData springConstraint = new SpringConstraint.SerializeData();
     }
 }

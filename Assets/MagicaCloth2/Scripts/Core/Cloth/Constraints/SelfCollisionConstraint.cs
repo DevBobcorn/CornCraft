@@ -106,11 +106,11 @@ namespace MagicaCloth2
             public SelfCollisionMode syncMode;
             public float clothMass;
 
-            public void Convert(SerializeData sdata)
+            public void Convert(SerializeData sdata, ClothProcess.ClothType clothType)
             {
-                selfMode = sdata.selfMode;
+                selfMode = clothType == ClothProcess.ClothType.BoneSpring ? SelfCollisionMode.None : sdata.selfMode;
                 surfaceThicknessCurveData = sdata.surfaceThickness.ConvertFloatArray();
-                syncMode = sdata.syncMode;
+                syncMode = clothType == ClothProcess.ClothType.BoneSpring ? SelfCollisionMode.None : sdata.syncMode;
                 clothMass = sdata.clothMass;
             }
         }

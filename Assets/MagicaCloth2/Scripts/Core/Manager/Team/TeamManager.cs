@@ -32,6 +32,7 @@ namespace MagicaCloth2
         public const int Flag_InertiaShift = 10; // 慣性全体シフト
         public const int Flag_CullingInvisible = 11; // カリングによる非表示状態
         public const int Flag_CullingKeep = 12; // カリング時に姿勢を保つ
+        public const int Flag_Spring = 13; // Spring利用
 
         // 以下セルフコリジョン
         // !これ以降の順番を変えないこと
@@ -405,6 +406,8 @@ namespace MagicaCloth2
 
             public bool IsCullingKeep => flag.IsSet(Flag_CullingKeep);
 
+            public bool IsSpring => flag.IsSet(Flag_Spring);
+
             public int ParticleCount => particleChunk.dataLength;
 
             /// <summary>
@@ -557,6 +560,9 @@ namespace MagicaCloth2
         //=========================================================================================
         public void Dispose()
         {
+            // 破棄監視リストの強制処理
+            MonitoringProcess(true);
+
             isValid = false;
 
             teamDataArray?.Dispose();
@@ -579,6 +585,9 @@ namespace MagicaCloth2
 
             //globalTimeScale = 1.0f;
             //fixedUpdateCount = 0;
+
+            // 破棄監視更新処理
+            MagicaManager.afterUpdateDelegate -= MonitoringProcessUpdate;
         }
 
         public void EnterdEditMode()
@@ -609,6 +618,9 @@ namespace MagicaCloth2
             //globalTimeScale = 1.0f;
             //fixedUpdateCount = 0;
 
+            // 破棄監視更新処理
+            MagicaManager.afterUpdateDelegate += MonitoringProcessUpdate;
+
             isValid = true;
         }
 
@@ -636,8 +648,6 @@ namespace MagicaCloth2
             team.flag.SetBits(Flag_Valid, true);
             team.flag.SetBits(Flag_Reset, true);
             team.flag.SetBits(Flag_TimeReset, true);
-            //team.flag.SetBits(Flag_CustomSkinning, cprocess.cloth.SerializeData.customSkinningSetting.enable);
-            //team.flag.SetBits(Flag_NormalAdjustment, cprocess.cloth.SerializeData.normalAlignmentSetting.alignmentMode != NormalAlignmentSettings.AlignmentMode.None);
             team.updateMode = cprocess.cloth.SerializeData.updateMode;
             //team.frequency = clothParams.solverFrequency;
             team.timeScale = 1.0f;
@@ -953,6 +963,7 @@ namespace MagicaCloth2
                     parameterArray[teamId] = cprocess.parameters;
                     tdata.updateMode = cloth.SerializeData.updateMode;
                     tdata.animationPoseRatio = cloth.SerializeData.animationPoseRatio;
+                    tdata.flag.SetBits(Flag_Spring, cprocess.clothType == ClothProcess.ClothType.BoneSpring && cprocess.parameters.springConstraint.springPower > 0.0f); // Spring利用フラグ
 
                     // セルフコリジョン更新
                     selfCollisionUpdate = true;
@@ -1724,14 +1735,37 @@ namespace MagicaCloth2
                 cdata.stepRotation = MathUtility.FromToRotation(cdata.oldWorldRotation, cdata.nowWorldRotation);
                 float stepAngle = MathUtility.Angle(cdata.oldWorldRotation, cdata.nowWorldRotation);
 
+                // ステップごとの移動速度と回転速度
+                //float stepMoveSpeed = math.length(cdata.stepVector) / simulationDeltaTime; // 移動速度(m/s)
+                //float stepAngularVelocity = stepAngle / simulationDeltaTime; // 回転速度(rad/s)
+                //cdata.angularVelocity = stepAngularVelocity;
+
                 // ローカル慣性
-                float localInertia = 1.0f - param.inertiaConstraint.localInertia;
-                cdata.stepMoveInertiaRatio = localInertia;
-                cdata.stepRotationInertiaRatio = localInertia;
+                //float localInertia = 1.0f - param.inertiaConstraint.localInertia;
+                float localMovementInertia = 1.0f - param.inertiaConstraint.localInertia;
+                float localRotationInertia = 1.0f - param.inertiaConstraint.localInertia;
+#if true
+                float3 localVector = cdata.stepVector * (1.0f - localMovementInertia);
+                float localMovementSpeed = math.length(localVector) / simulationDeltaTime; // ローカル移動速度(m/s)
+                if (localMovementSpeed > param.inertiaConstraint.localMovementSpeedLimit && param.inertiaConstraint.localMovementSpeedLimit >= 0.0f)
+                {
+                    float t = param.inertiaConstraint.localMovementSpeedLimit / localMovementSpeed;
+                    localMovementInertia = math.lerp(1.0f, localMovementInertia, t);
+                }
+                float localAngle = stepAngle * (1.0f - localRotationInertia);
+                float localAngleSpeed = math.degrees(localAngle / simulationDeltaTime); // ローカル回転速度(deg/s)
+                if (localAngleSpeed > param.inertiaConstraint.localRotationSpeedLimit && param.inertiaConstraint.localRotationSpeedLimit >= 0.0f)
+                {
+                    float t = param.inertiaConstraint.localRotationSpeedLimit / localAngleSpeed;
+                    localRotationInertia = math.lerp(1.0f, localRotationInertia, t);
+                }
+#endif
+                cdata.stepMoveInertiaRatio = localMovementInertia;
+                cdata.stepRotationInertiaRatio = localRotationInertia;
 
                 // 最終慣性
-                cdata.inertiaVector = math.lerp(float3.zero, cdata.stepVector, localInertia);
-                cdata.inertiaRotation = math.slerp(quaternion.identity, cdata.stepRotation, localInertia);
+                cdata.inertiaVector = math.lerp(float3.zero, cdata.stepVector, localMovementInertia);
+                cdata.inertiaRotation = math.slerp(quaternion.identity, cdata.stepRotation, localRotationInertia);
                 //Debug.Log($"Team[{teamId}] stepSpeed:{stepSpeed}, moveInertiaRatio:{moveInertiaRatio}, inertiaVector:{cdata.inertiaVector}, rotationInertiaRatio:{rotationInertiaRatio}");
 
                 // ■遠心力用パラメータ算出
@@ -1916,6 +1950,58 @@ namespace MagicaCloth2
         }
 
         //=========================================================================================
+        /// <summary>
+        /// ここに登録されるのはClothコンポーネントがDisable時に初期化されたプロセス
+        /// これらのプロセスはマネージャ側で消滅が監視される
+        /// </summary>
+        HashSet<ClothProcess> monitoringProcessSet = new HashSet<ClothProcess>();
+        List<ClothProcess> disposeProcessList = new List<ClothProcess>();
+
+        internal void AddMonitoringProcess(ClothProcess cprocess)
+        {
+            Develop.Assert(cprocess != null);
+            monitoringProcessSet.Add(cprocess);
+        }
+
+        internal void RemoveMonitoringProcess(ClothProcess cprocess)
+        {
+            Develop.Assert(cprocess != null);
+            if (monitoringProcessSet.Contains(cprocess))
+                monitoringProcessSet.Remove(cprocess);
+        }
+
+        /// <summary>
+        /// コンポーネントDisable時に初期化されたClothProcessを監視し消滅していたらマネージャ側からメモリを開放する
+        /// </summary>
+        /// <param name="force"></param>
+        void MonitoringProcess(bool force)
+        {
+            disposeProcessList.Clear();
+            foreach (var cprocess in monitoringProcessSet)
+            {
+                if (cprocess.cloth == null || force)
+                {
+                    // 消滅を検出
+                    Develop.DebugLog($"Detection MagicaCloth destroy!");
+                    disposeProcessList.Add(cprocess);
+                }
+            }
+
+            // 消滅したClothを破棄する
+            if (disposeProcessList.Count > 0)
+            {
+                disposeProcessList.ForEach(cprocess => cprocess.Dispose());
+                disposeProcessList.Clear();
+            }
+            if (force)
+            {
+                monitoringProcessSet.Clear();
+            }
+        }
+
+        void MonitoringProcessUpdate() => MonitoringProcess(false);
+
+        //=========================================================================================
         public void InformationLog(StringBuilder allsb)
         {
             StringBuilder sb = new StringBuilder();
@@ -1930,7 +2016,7 @@ namespace MagicaCloth2
             }
             else
             {
-                sb.AppendLine($"Team Manager. Team:{TeamCount}, Mapping:{MappingCount}");
+                sb.AppendLine($"Team Manager. Team:{TeamCount}, Mapping:{MappingCount}, Monitoring:{monitoringProcessSet.Count}");
                 sb.AppendLine($"  -teamDataArray:{teamDataArray.ToSummary()}");
                 sb.AppendLine($"  -teamWindArray:{teamWindArray.ToSummary()}");
                 sb.AppendLine($"  -mappingDataArray:{mappingDataArray.ToSummary()}");

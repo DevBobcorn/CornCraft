@@ -558,7 +558,6 @@ namespace MagicaCloth2
 
                             // 復元力
                             float restorationStiffness = angleParam.restorationStiffness.EvaluateCurveClamp01(cdepth);
-                            //restorationStiffness = math.saturate(restorationStiffness * math.pow(simulationPower.x, 1.5f));
                             restorationStiffness = math.saturate(restorationStiffness * simulationPower.w);
 
                             //int _pindex = indexBuffer[i] + p_start;

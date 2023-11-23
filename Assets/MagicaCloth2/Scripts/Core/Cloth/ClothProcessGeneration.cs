@@ -15,7 +15,10 @@ namespace MagicaCloth2
             // シリアライズデータ(1)の検証
             if (cloth.SerializeData.IsValid() == false)
             {
-                result.SetError(Define.Result.CreateCloth_InvalidSerializeData);
+                if (cloth.SerializeData.VerificationResult == Define.Result.Empty)
+                    result.SetError(Define.Result.CreateCloth_InvalidSerializeData);
+                else
+                    result.SetError(cloth.SerializeData.VerificationResult);
                 return false;
             }
             cloth.SerializeData.DataValidate();
@@ -32,13 +35,11 @@ namespace MagicaCloth2
         internal bool GenerateBoneClothSelection()
         {
             // セレクションデータの構築
-            //var ct = cloth.transform;
             var setupData = boneClothSetupData;
             int tcnt = setupData.skinBoneCount; // パーティクルトランスフォーム総数
             var selectionData = new SelectionData(tcnt);
             for (int i = 0; i < tcnt; i++)
             {
-                //var lpos = ct.InverseTransformPoint(setupData.transformPositions[i]);
                 float3 lpos = math.transform(setupData.initRenderWorldtoLocal, setupData.transformPositions[i]);
                 selectionData.positions[i] = lpos;
                 selectionData.attributes[i] = VertexAttribute.Move; // 移動で初期化

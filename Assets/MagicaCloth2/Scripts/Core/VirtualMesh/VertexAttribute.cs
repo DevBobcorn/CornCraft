@@ -19,11 +19,13 @@ namespace MagicaCloth2
         public const byte Flag_Move = 0x02; // 移動
         //public const byte Flag_Ignore = 0x04; // 無視（シミュレーションの対象としない）:一旦オミット!
         public const byte Flag_InvalidMotion = 0x08; // モーション制約無効
+        public const byte Flag_DisableCollision = 0x10; // コリジョン無効
         public const byte Flag_Triangle = 0x80; // この頂点はトライアングルに属している
 
         public static readonly VertexAttribute Invalid = new VertexAttribute();
         public static readonly VertexAttribute Fixed = new VertexAttribute(Flag_Fixed);
         public static readonly VertexAttribute Move = new VertexAttribute(Flag_Move);
+        public static readonly VertexAttribute DisableCollision = new VertexAttribute(Flag_DisableCollision);
 
         //=========================================================================================
         /// <summary>
@@ -120,6 +122,9 @@ namespace MagicaCloth2
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsMotion() => IsSet(Flag_InvalidMotion) == false;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsDisableCollision() => IsSet(Flag_DisableCollision);
 
         //=========================================================================================
         /// <summary>
