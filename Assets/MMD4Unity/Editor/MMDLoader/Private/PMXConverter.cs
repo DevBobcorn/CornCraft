@@ -120,10 +120,13 @@ namespace MMD
 
                 if (faceMaterialIndices.Count > 0)
                 {
+                    /*
                     var helper = renderers[meshIndex].AddComponent<FernNPRCore.Scripts.ShadingUtils.MeshSDFFaceAxisFix>();
                     helper.targetMaterialIndices = faceMaterialIndices.ToArray();
                     helper.forwardEnum = FernNPRCore.Scripts.ShadingUtils.MeshSDFFaceAxisFix.FaceMeshAxisEnum.Z;
                     helper.rightEnum   = FernNPRCore.Scripts.ShadingUtils.MeshSDFFaceAxisFix.FaceMeshAxisEnum.X;
+
+                    */
 
                     // Clear up for next iteration
                     faceMaterialIndices.Clear();

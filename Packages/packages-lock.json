@@ -7,6 +7,16 @@
       "dependencies": {},
       "hash": "b870d64b5704a764fd03aaccb11f2dbe652b1756"
     },
+    "com.fernrender.core": {
+      "version": "https://github.com/FernRP/FernRP.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.render-pipelines.core": "14.0.6",
+        "com.unity.shadergraph": "14.0.6"
+      },
+      "hash": "4689e38aa66074c58094a132f3f6ddfd9408a172"
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
