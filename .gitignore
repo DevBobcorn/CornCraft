@@ -11,11 +11,11 @@
 # CornModel resources
 /[Rr]esource [Pp]acks/*/
 !/[Rr]esource [Pp]acks/vanilla_fix/
-/[Aa]ssets/AnimeModels/*
-/[Aa]ssets/AnimeModels.meta
 /*.ini
 
-# Third party packages & utils
+# Third party resources & utils
+/[Aa]ssets/AnimeModels/*
+/[Aa]ssets/AnimeModels.meta
 /[Aa]ssets/VeryAnimation
 /[Aa]ssets/VeryAnimation.meta
 /[Aa]ssets/Hovl Studio
