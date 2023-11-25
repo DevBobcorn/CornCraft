@@ -7,6 +7,25 @@
       "dependencies": {},
       "hash": "0a9cf7a1809a289ca7bedecee594cdf256e26935"
     },
+    "com.devbobcorn.craftsharp": {
+      "version": "https://github.com/DevBobcorn/CraftSharp.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.mathematics": "1.2.6"
+      },
+      "hash": "c95f5e34dd148647d4e1739ddd29a6e226f533c9"
+    },
+    "com.devbobcorn.craftsharp-resource": {
+      "version": "https://github.com/DevBobcorn/CraftSharp-Resource.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.mathematics": "1.2.6",
+        "com.devbobcorn.craftsharp": "1.0.0"
+      },
+      "hash": "9b88118fe7bb4e7bcb9ea072431f4794f8418709"
+    },
     "com.fernrender.core": {
       "version": "https://github.com/FernRP/FernRP.git",
       "depth": 0,
