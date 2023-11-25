@@ -86,7 +86,7 @@ namespace CraftSharp
             {
                 Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
                 Notify(Translations.Get("login.data_not_availale"), Notification.Type.Error);
-                updateStatus(Translations.Get("login.result.login_failed"));
+                updateStatus("login.result.login_failed");
                 startUpFlag.Failed = true;
                 yield break;
             }
@@ -110,7 +110,7 @@ namespace CraftSharp
 
             if (startUpFlag.Failed)
             {
-                updateStatus(Translations.Get("login.login_failed"));
+                updateStatus("login.login_failed");
                 yield break;
             }
             
@@ -135,8 +135,9 @@ namespace CraftSharp
 
             // Load resource packs...
             packManager.ClearPacks();
-            // Download base pack if not present
-            if (!Directory.Exists(PathHelper.GetPackDirectoryNamed($"vanilla-{resourceVersion}"))) // Prepare resources first
+            // Download base pack if not present (Check pack.mcmeta because the
+            // folder is present even if only language files are downloaded)
+            if (!File.Exists(PathHelper.GetPackFile($"vanilla-{resourceVersion}", "pack.mcmeta"))) // Prepare resources first
             {
                 Debug.Log($"Resources for {resourceVersion} not present. Downloading...");
                 bool downloadSucceeded = false;
@@ -147,7 +148,7 @@ namespace CraftSharp
                 if (!downloadSucceeded)
                 {
                     Notify(Translations.Get("resource.error.base_resource_download_failure"), Notification.Type.Error);
-                    updateStatus(Translations.Get("login.login_failed"));
+                    updateStatus("login.login_failed");
                     startUpFlag.Failed = true;
                     yield break;
                 }
@@ -159,7 +160,7 @@ namespace CraftSharp
             if (!basePack.IsValid)
             {
                 Notify(Translations.Get("resource.error.base_resource_invalid"), Notification.Type.Error);
-                updateStatus(Translations.Get("login.login_failed"));
+                updateStatus("login.login_failed");
                 startUpFlag.Failed = true;
                 yield break;
             }
@@ -186,7 +187,7 @@ namespace CraftSharp
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
                 Notify(Translations.Get("resource.error.resource_load_failure"), Notification.Type.Error);
-                updateStatus(Translations.Get("login.login_failed"));
+                updateStatus("login.login_failed");
                 startUpFlag.Failed = true;
                 yield break;
             }
