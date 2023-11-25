@@ -5,7 +5,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "b870d64b5704a764fd03aaccb11f2dbe652b1756"
+      "hash": "0a9cf7a1809a289ca7bedecee594cdf256e26935"
     },
     "com.fernrender.core": {
       "version": "https://github.com/FernRP/FernRP.git",
