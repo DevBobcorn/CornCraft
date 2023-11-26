@@ -14,7 +14,7 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.6"
       },
-      "hash": "c95f5e34dd148647d4e1739ddd29a6e226f533c9"
+      "hash": "d63445d95a8812dbde2ade8492ac5d9a0d9d1a6b"
     },
     "com.devbobcorn.craftsharp-resource": {
       "version": "https://github.com/DevBobcorn/CraftSharp-Resource.git",
@@ -24,17 +24,17 @@
         "com.unity.mathematics": "1.2.6",
         "com.devbobcorn.craftsharp": "1.0.0"
       },
-      "hash": "9b88118fe7bb4e7bcb9ea072431f4794f8418709"
+      "hash": "b8ce4f185933ed5c5d29c6b9baa6ac4018af46b4"
     },
     "com.fernrender.core": {
-      "version": "https://github.com/FernRP/FernRP.git",
+      "version": "https://github.com/DevBobcorn/FernRP.git",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.render-pipelines.core": "14.0.6",
         "com.unity.shadergraph": "14.0.6"
       },
-      "hash": "4689e38aa66074c58094a132f3f6ddfd9408a172"
+      "hash": "3c5dbaf6abba40c12f4c8d6dcae1988f3e1933ae"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
