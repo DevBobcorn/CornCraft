@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 using CraftSharp.Resource;
@@ -14,21 +15,30 @@ namespace CraftSharp.Rendering
         [SerializeField] public Material? AtlasCutoutMipped;
         [SerializeField] public Material? AtlasTranslucent;
         [SerializeField] public Material? AtlasWater;
+        [SerializeField] public Material? AtlasInventory;
 
         [SerializeField] public Material? PlayerSkin;
 
-        private Dictionary<RenderType, Material> atlasMaterials = new();
+        private readonly Dictionary<RenderType, Material> atlasMaterials = new();
+        private Dictionary<RenderType, Material> foglessAtlasMaterials = new();
         private Material? defaultAtlasMaterial;
         private Dictionary<string, Texture2D> skinTextures = new(); // First assign a place holder...
         private Dictionary<string, Material> skinMaterials = new();
         public Dictionary<string, Material> SkinMaterials => skinMaterials;
 
-        private bool initialized = false;
+        private bool atlasInitialized = false;
 
-        public Material GetAtlasMaterial(RenderType renderType)
+        public Material GetAtlasMaterial(RenderType renderType, bool disableFog = false)
         {
-            EnsureInitialized();
-            return atlasMaterials.GetValueOrDefault(renderType, defaultAtlasMaterial!);
+            EnsureAtlasInitialized();
+            if (disableFog)
+            {
+                return foglessAtlasMaterials.GetValueOrDefault(renderType, defaultAtlasMaterial!);
+            }
+            else
+            {
+                return atlasMaterials.GetValueOrDefault(renderType, defaultAtlasMaterial!);
+            }
         }
 
         public void LoadPlayerSkins()
@@ -74,9 +84,9 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public void EnsureInitialized()
+        public void EnsureAtlasInitialized()
         {
-            if (!initialized) Initialize();
+            if (!atlasInitialized) Initialize();
         }
 
         private void Initialize()
@@ -86,34 +96,41 @@ namespace CraftSharp.Rendering
 
             // Solid
             var solid = new Material(AtlasSolid!);
-            solid.SetTexture("_BaseMap", packManager.GetAtlasArray(RenderType.SOLID));
+            solid.SetTexture("_BaseMap", packManager.GetAtlasArray(false));
             atlasMaterials.Add(RenderType.SOLID, solid);
 
             defaultAtlasMaterial = solid;
 
             // Cutout & Cutout Mipped
             var cutout = new Material(AtlasCutout!);
-            cutout.SetTexture("_BaseMap", packManager.GetAtlasArray(RenderType.CUTOUT));
+            cutout.SetTexture("_BaseMap", packManager.GetAtlasArray(false));
             atlasMaterials.Add(RenderType.CUTOUT, cutout);
 
             var cutoutMipped = new Material(AtlasCutoutMipped!);
-            cutoutMipped.SetTexture("_BaseMap", packManager.GetAtlasArray(RenderType.CUTOUT_MIPPED));
+            cutoutMipped.SetTexture("_BaseMap", packManager.GetAtlasArray(true));
             atlasMaterials.Add(RenderType.CUTOUT_MIPPED, cutoutMipped);
 
             // Translucent
             var translucent = new Material(AtlasTranslucent!);
-            translucent.SetTexture("_BaseMap", packManager.GetAtlasArray(RenderType.TRANSLUCENT));
+            translucent.SetTexture("_BaseMap", packManager.GetAtlasArray(false));
             atlasMaterials.Add(RenderType.TRANSLUCENT, translucent);
 
             // Water
             var water = new Material(AtlasWater!);
-            water.SetTexture("_BaseMap", packManager.GetAtlasArray(RenderType.TRANSLUCENT));
+            water.SetTexture("_BaseMap", packManager.GetAtlasArray(false));
             atlasMaterials.Add(RenderType.WATER, water);
 
-            initialized = true;
+            // Make fogless variants
+            foglessAtlasMaterials = atlasMaterials.ToDictionary(x => x.Key, x =>
+            {
+                // Make a copy of the material
+                var m = new Material(x.Value);
+                // Set disable fog keyword
+                m.EnableKeyword("_DISABLE_FOG");
+                return m;
+            });
 
+            atlasInitialized = true;
         }
-
     }
-
 }
