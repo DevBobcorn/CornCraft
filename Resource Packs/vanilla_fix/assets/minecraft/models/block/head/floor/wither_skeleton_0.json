@@ -1,6 +1,0 @@
-{
-	"parent": "block/head/floor/head_0",
-	"textures": {
-		"head": "entity/skeleton/wither_skeleton"
-	}
-}

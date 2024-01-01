@@ -1,6 +1,0 @@
-{
-	"parent": "block/head/floor/head_1",
-	"textures": {
-		"head": "entity/creeper/creeper"
-	}
-}

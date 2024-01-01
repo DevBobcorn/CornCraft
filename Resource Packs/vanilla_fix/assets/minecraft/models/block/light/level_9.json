@@ -1,7 +1,0 @@
-{
-    "parent": "block/cube_all",
-    "textures": {
-        "particle": "item/light_09",
-        "all": "item/light_09"
-    }
-}

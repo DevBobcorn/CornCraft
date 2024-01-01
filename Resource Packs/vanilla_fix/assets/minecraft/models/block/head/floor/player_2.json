@@ -1,6 +1,0 @@
-{
-	"parent": "block/head/floor/head2_2",
-	"textures": {
-		"head": "entity/steve"
-	}
-}

@@ -1,7 +1,0 @@
-{
-	"parent": "block/sign/sign_0",
-	"textures": {
-		"all": "entity/signs/birch",
-		"particle": "block/birch_planks"
-	}
-}
