@@ -1,7 +1,0 @@
-{
-	"parent": "block/wall_sign/wall_sign",
-	"textures": {
-		"all": "entity/signs/crimson",
-		"particle": "block/crimson_planks"
-	}
-}

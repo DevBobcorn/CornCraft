@@ -1,7 +1,0 @@
-{
-	"parent": "block/wall_sign/wall_sign",
-	"textures": {
-		"all": "entity/signs/spruce",
-		"particle": "block/spruce_planks"
-	}
-}

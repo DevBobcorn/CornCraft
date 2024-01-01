@@ -1,7 +1,0 @@
-{
-	"parent": "block/sign/sign_3",
-	"textures": {
-		"all": "entity/signs/warped",
-		"particle": "block/warped_planks"
-	}
-}
