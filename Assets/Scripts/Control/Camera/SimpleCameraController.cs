@@ -50,6 +50,9 @@ namespace CraftSharp.Control
             var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
             virtualCameraFollow!.m_Lens.FieldOfView = fov;
             spriteRenderCamera!.fieldOfView = fov;
+
+            // Aiming is not enabled by default
+            EnableAimingCamera(false);
         }
 
         void Update()

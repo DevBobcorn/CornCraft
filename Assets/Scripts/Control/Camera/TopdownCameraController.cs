@@ -2,19 +2,18 @@
 using UnityEngine;
 using Cinemachine;
 
-using CraftSharp.Event;
-
 namespace CraftSharp.Control
 {
     public class TopdownCameraController : CameraController
     {
         [SerializeField] private float cameraZOffsetNear =   15F;
         [SerializeField] private float cameraZOffsetFar  =   30F;
-        private CinemachinePOV? followPOV;
+        
 
         // Virtual camera and camera components
         private CinemachineVirtualCamera? virtualCameraFollow;
         private CinemachineFramingTransposer? framingTransposer;
+        private CinemachinePOV? followPOV;
 
         public override void EnsureInitialized()
         {
@@ -23,6 +22,7 @@ namespace CraftSharp.Control
                 // Get virtual and render cameras
                 var followObj = transform.Find("Follow Virtual");
                 virtualCameraFollow = followObj.GetComponent<CinemachineVirtualCamera>();
+                followPOV = virtualCameraFollow!.GetCinemachineComponent<CinemachinePOV>();
                 framingTransposer = virtualCameraFollow.GetCinemachineComponent<CinemachineFramingTransposer>();
 
                 initialized = true;
@@ -36,6 +36,9 @@ namespace CraftSharp.Control
             // Initialize camera scale
             zoomInput!.action.Enable();
             cameraInfo.CurrentScale = cameraInfo.TargetScale;
+
+            // Aiming is not enabled by default
+            EnableAimingCamera(false);
         }
 
         void Update()

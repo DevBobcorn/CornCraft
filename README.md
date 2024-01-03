@@ -35,7 +35,6 @@ Key                                                       | Action
 <kbd>Left Ctrl</kbd>                                      | Toggle Walk/Rush Mode
 <kbd>F3</kbd>                                             | Toggle Debug Info
 <kbd>F3</kbd> + <kbd>F4</kbd>                             | Show Game Mode Switch
-<kbd>F5</kbd>                                             | Toggle First/Third Person Perspective
 <kbd>F11</kbd>                                            | Toggle Fullscreen
 <kbd>T</kbd> / <kbd>/</kbd>                               | Show Chat Screen
 <kbd>Esc</kbd>                                            | Pause Game
