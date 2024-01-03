@@ -25,7 +25,6 @@ namespace CraftSharp.Control
         protected static readonly Vector3 VIEWPORT_CENTER    = new(0.5F,  0.5F, 0F);
         protected CameraInfo cameraInfo = new();
         public Camera? RenderCamera => renderCamera;
-        protected Perspective perspective = Perspective.ThirdPerson;
 
         public virtual void EnableInput()
         {
@@ -45,38 +44,17 @@ namespace CraftSharp.Control
 
         public virtual void EnableZoom()
         {
-            zoomInput?.action.Enable();
+            zoomInput!.action.Enable();
         }
 
         public virtual void DisableZoom()
         {
-            zoomInput?.action.Disable();
+            zoomInput!.action.Disable();
         }
 
         // Flag variables
         protected bool initialized = false;
         public bool IsAiming { get; protected set; } = false;
-
-        public abstract void SetPerspective(Perspective newPersp);
-
-        public void SwitchPerspective()
-        {
-            // Switch to next perspective
-            var newPersp = perspective switch
-            {
-                Perspective.FirstPerson    => Perspective.ThirdPerson,
-                Perspective.ThirdPerson    => Perspective.FirstPerson,
-
-                _                          => Perspective.ThirdPerson
-            };
-
-            SetPerspective(newPersp);
-        }
-
-        public Perspective GetPerspective()
-        {
-            return perspective;
-        }
 
         public virtual Ray? GetViewportCenterRay()
         {
@@ -102,7 +80,7 @@ namespace CraftSharp.Control
         public virtual Vector3 GetTargetViewportPos()
         {
             var targetPos = GetTarget()?.position;
-            if (targetPos is not null)
+            if (targetPos != null)
             {
                 var pos = renderCamera!.WorldToViewportPoint(targetPos.Value);
                 pos.z = 0F;

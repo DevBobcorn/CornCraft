@@ -139,14 +139,7 @@ namespace CraftSharp.UI
                     }
                 };
 
-                if (game.CameraController.GetPerspective() == Perspective.FirstPerson)
-                {
-                    crosshairAnimator!.SetBool(SHOW, true);
-                }
-                else
-                {
-                    crosshairAnimator!.SetBool(SHOW, false);
-                }
+                crosshairAnimator!.SetBool(SHOW, false);
             }
         }
 
@@ -219,12 +212,6 @@ namespace CraftSharp.UI
                     {
                         game.TrySendChat($"/gamemode {((GameMode) selectedMode).GetIdentifier()}");
                     }
-                    
-                    // Restore crosshair if necessary
-                    if (game.CameraController.GetPerspective() == Perspective.FirstPerson)
-                    {
-                        crosshairAnimator!.SetBool(SHOW, true);
-                    }
                 }
                 else // Toggle debug info
                 {
@@ -245,11 +232,6 @@ namespace CraftSharp.UI
                     else
                         interactionPanel.SelectPrevOption();
                 }
-            }
-
-            if (Keyboard.current.f5Key.wasPressedThisFrame)
-            {
-                game.CameraController.SwitchPerspective();
             }
 
             // Hotbar slot switching

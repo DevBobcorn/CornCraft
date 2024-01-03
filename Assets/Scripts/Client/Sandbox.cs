@@ -91,11 +91,6 @@ namespace CraftSharp.Sandbox
                 fpsText.text = $"FPS: {(int)(1F / Time.deltaTime), 4}";
             }
 
-            if (Keyboard.current.f5Key.wasPressedThisFrame)
-            {
-                cameraController?.SwitchPerspective();
-            }
-
             if (Keyboard.current.numpad0Key.wasPressedThisFrame)
             {
                 EventManager.Instance.Broadcast(new HeldItemChangeEvent(0, null, ItemActionType.None));

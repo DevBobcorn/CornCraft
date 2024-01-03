@@ -24,7 +24,7 @@ namespace FernNPRCore.Scripts.ShadingUtils
         public int[] targetMaterialIndices = { };
 
         private static readonly int faceObjectToWorld = Shader.PropertyToID("_FaceObjectToWorld");
-        private SkinnedMeshRenderer renderer;
+        private new SkinnedMeshRenderer renderer;
         private MaterialPropertyBlock faceMaterialblock;
 
         private Vector3 forward;

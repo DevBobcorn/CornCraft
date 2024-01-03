@@ -36,8 +36,6 @@ namespace CraftSharp.Control
             // Initialize camera scale
             zoomInput!.action.Enable();
             cameraInfo.CurrentScale = cameraInfo.TargetScale;
-
-            SetPerspective(Perspective.ThirdPerson);
         }
 
         void Update()
@@ -67,17 +65,6 @@ namespace CraftSharp.Control
         public override void SetYaw(float yaw)
         {
             followPOV!.m_HorizontalAxis.Value = yaw;
-        }
-
-        public override void SetPerspective(Perspective newPersp)
-        {
-            EnsureInitialized();
-
-            // Only third person perspective is accepted, lock to it and discard the perspective change
-            perspective = Perspective.ThirdPerson;
-
-            // Broadcast perspective change
-            EventManager.Instance.Broadcast<PerspectiveUpdateEvent>(new(Perspective.ThirdPerson));
         }
     }
 }
