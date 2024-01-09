@@ -8,17 +8,17 @@ namespace CraftSharp.Rendering
     {
         [SerializeField] private Renderer[] playerSkinRenderers = { };
 
-        private static readonly int GROUNDED = Animator.StringToHash("Grounded");
-        private static readonly int IN_LIQUID = Animator.StringToHash("InLiquid");
-        private static readonly int ON_WALL = Animator.StringToHash("OnWall");
-        private static readonly int GLIDING = Animator.StringToHash("Gliding");
-        private static readonly int MOVING = Animator.StringToHash("Moving");
-        private static readonly int SPRINTING = Animator.StringToHash("Sprinting");
-        private static readonly int WALK_MODE = Animator.StringToHash("WalkMode");
-        private static readonly int CENTER_DOWN_DIST = Animator.StringToHash("CenterDownDist");
+        private static readonly int GROUNDED_HASH = Animator.StringToHash("Grounded");
+        private static readonly int IN_LIQUID_HASH = Animator.StringToHash("InLiquid");
+        private static readonly int ON_WALL_HASH = Animator.StringToHash("OnWall");
+        private static readonly int GLIDING_HASH = Animator.StringToHash("Gliding");
+        private static readonly int MOVING_HASH = Animator.StringToHash("Moving");
+        private static readonly int SPRINTING_HASH = Animator.StringToHash("Sprinting");
+        private static readonly int WALK_MODE_HASH = Animator.StringToHash("WalkMode");
+        private static readonly int CENTER_DOWN_DIST_HASH = Animator.StringToHash("CenterDownDist");
 
-        private static readonly int ROOT_MOTION = Animator.StringToHash("RootMotion");
-        private static readonly int ATTACKING = Animator.StringToHash("Attacking");
+        private static readonly int ROOT_MOTION_HASH = Animator.StringToHash("RootMotion");
+        private static readonly int ATTACKING_HASH = Animator.StringToHash("Attacking");
 
         public override void Initialize(EntityType entityType, Entity entity)
         {
@@ -63,17 +63,17 @@ namespace CraftSharp.Rendering
         public override void UpdateStateMachine(PlayerStatus info)
         {
             // Update animator parameters
-            entityAnimator!.SetBool(GROUNDED, info.Grounded);
-            entityAnimator.SetBool(IN_LIQUID, info.InLiquid);
-            entityAnimator.SetBool(ON_WALL, info.OnWall);
-            entityAnimator.SetBool(GLIDING, info.Gliding);
-            entityAnimator.SetBool(MOVING, info.Moving);
-            entityAnimator.SetBool(SPRINTING, info.Sprinting);
-            entityAnimator.SetBool(WALK_MODE, info.WalkMode);
-            entityAnimator.SetFloat(CENTER_DOWN_DIST, info.CenterDownDist);
+            entityAnimator!.SetBool(GROUNDED_HASH, info.Grounded);
+            entityAnimator.SetBool(IN_LIQUID_HASH, info.InLiquid);
+            entityAnimator.SetBool(ON_WALL_HASH, info.OnWall);
+            entityAnimator.SetBool(GLIDING_HASH, info.Gliding);
+            entityAnimator.SetBool(MOVING_HASH, info.Moving);
+            entityAnimator.SetBool(SPRINTING_HASH, info.Sprinting);
+            entityAnimator.SetBool(WALK_MODE_HASH, info.WalkMode);
+            entityAnimator.SetFloat(CENTER_DOWN_DIST_HASH, info.CenterDownDist);
 
-            entityAnimator.SetBool(ROOT_MOTION, info.PlayingRootMotion);
-            entityAnimator.SetBool(ATTACKING, info.Attacking);
+            entityAnimator.SetBool(ROOT_MOTION_HASH, info.PlayingRootMotion);
+            entityAnimator.SetBool(ATTACKING_HASH, info.Attacking);
         }
 
         private void UpdateSkinMaterial()

@@ -10,7 +10,7 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (Animator))]
     public class Notification : MonoBehaviour
     {
-        private static readonly int EXPIRED  = Animator.StringToHash("Expired");
+        private static readonly int EXPIRED_HASH  = Animator.StringToHash("Expired");
 
         public enum Type {
             Notify,
@@ -57,7 +57,7 @@ namespace CraftSharp.UI
             if (timeLeft <= 0F) // Time to go....
             {
                 // Play fade away animation...
-                anim?.SetBool(EXPIRED, true);
+                anim?.SetBool(EXPIRED_HASH, true);
             }
         }
 

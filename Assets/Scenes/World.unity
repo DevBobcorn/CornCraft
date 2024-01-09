@@ -424,6 +424,7 @@ MonoBehaviour:
   AtlasCutoutMipped: {fileID: 2100000, guid: 356fe3b2c3144ef4f82484e1a7bebe4e, type: 2}
   AtlasTranslucent: {fileID: 2100000, guid: 8ee6dff0c60e65743895b69cc4c5bc0a, type: 2}
   AtlasWater: {fileID: 2100000, guid: 8ee6dff0c60e65743895b69cc4c5bc0a, type: 2}
+  AtlasInventory: {fileID: 0}
   PlayerSkin: {fileID: 2100000, guid: a7bc66ac351da2644be4e993cc7450e7, type: 2}
 --- !u!114 &331478948
 MonoBehaviour:
@@ -1698,63 +1699,51 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3083690404439012666, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.8
+      value: -9578.913
       objectReference: {fileID: 0}
     - target: {fileID: 3083690404439012666, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.1
+      value: 19194.574
       objectReference: {fileID: 0}
     - target: {fileID: 3083690404439012666, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 13089.316
       objectReference: {fileID: 0}
-    - target: {fileID: 4409463203126261892, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
-      propertyPath: m_Follow
-      value: 
-      objectReference: {fileID: 1939684686}
     - target: {fileID: 7361313672352195396, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 3.5719452
       objectReference: {fileID: 0}
     - target: {fileID: 7361313672352195396, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 13.857941
       objectReference: {fileID: 0}
     - target: {fileID: 7361313672352195396, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -14.759343
       objectReference: {fileID: 0}
     - target: {fileID: 7372638134847987542, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.5256128
+      value: -9581.323
       objectReference: {fileID: 0}
     - target: {fileID: 7372638134847987542, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.05159
+      value: 19200.783
       objectReference: {fileID: 0}
     - target: {fileID: 7372638134847987542, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.0881348
+      value: 13093.973
       objectReference: {fileID: 0}
-    - target: {fileID: 7808910476651940505, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
-      propertyPath: m_Follow
-      value: 
-      objectReference: {fileID: 1939684686}
-    - target: {fileID: 8231872019064414601, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
-      propertyPath: m_Follow
-      value: 
-      objectReference: {fileID: 1939684686}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.5256128
+      value: -9581.323
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.05159
+      value: 19200.783
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.0881348
+      value: 13093.973
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1777,10 +1766,6 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 9155130719897283015, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
-      propertyPath: m_Cameras.Array.data[0]
-      value: 
-      objectReference: {fileID: 1973188133910183365}
-    - target: {fileID: 9155130719897283015, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Cameras.Array.data[1]
       value: 
       objectReference: {fileID: 1307474302}
@@ -1789,11 +1774,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
---- !u!20 &1973188133910183365 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 8338982171505058957, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
-  m_PrefabInstance: {fileID: 1973188133910183364}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2038652673010739302
 PrefabInstance:
   m_ObjectHideFlags: 0

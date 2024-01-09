@@ -36,6 +36,22 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(heldItemChangeCallback);
         }
 
+        public void ShowItems()
+        {
+            for (int i = 0; i < itemSlots.Length; i++)
+            {
+                itemSlots[i].ShowItemStack();
+            }
+        }
+
+        public void HideItems()
+        {
+            for (int i = 0; i < itemSlots.Length; i++)
+            {
+                itemSlots[i].HideItemStack();
+            }
+        }
+
         void OnDestroy()
         {
             if (hotbarUpdateCallback is not null)
