@@ -7,10 +7,10 @@ namespace CraftSharp.Rendering
 {
     public abstract class AnimatorEntityRender : EntityRender
     {
-        protected static readonly int MIRRORED = Animator.StringToHash("Mirrored");
+        protected static readonly int MIRRORED_HASH = Animator.StringToHash("Mirrored");
 
-        protected static readonly int VERTICAL_SPEED = Animator.StringToHash("VerticalSpeed");
-        protected static readonly int HORIZONTAL_SPEED = Animator.StringToHash("HorizontalSpeed");
+        protected static readonly int VERTICAL_SPEED_HASH = Animator.StringToHash("VerticalSpeed");
+        protected static readonly int HORIZONTAL_SPEED_HASH = Animator.StringToHash("HorizontalSpeed");
 
         protected Animator? entityAnimator;
         protected AnimatorOverrideController? animatorOverrideController;
@@ -38,15 +38,15 @@ namespace CraftSharp.Rendering
         {
             base.SetVisualMovementVelocity(velocity);
 
-            entityAnimator!.SetFloat(VERTICAL_SPEED, velocity.y);
-            entityAnimator.SetFloat(HORIZONTAL_SPEED, Mathf.Sqrt(velocity.x * velocity.x + velocity.z * velocity.z));
+            entityAnimator!.SetFloat(VERTICAL_SPEED_HASH, velocity.y);
+            entityAnimator.SetFloat(HORIZONTAL_SPEED_HASH, Mathf.Sqrt(velocity.x * velocity.x + velocity.z * velocity.z));
         }
 
         public virtual void UpdateStateMachine(PlayerStatus info) { }
 
         public virtual void SetMirroredFlag(bool flag)
         {
-            entityAnimator!.SetBool(MIRRORED, flag);
+            entityAnimator!.SetBool(MIRRORED_HASH, flag);
         }
 
         public virtual void CrossFadeState(string stateName, float time, int layer, float timeOffset)

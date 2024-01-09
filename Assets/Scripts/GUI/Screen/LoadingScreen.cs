@@ -19,7 +19,7 @@ namespace CraftSharp.UI
         {
             set {
                 isActive = value;
-                screenAnimator!.SetBool(SHOW, isActive);
+                screenAnimator!.SetBool(SHOW_HASH, isActive);
             }
 
             get {

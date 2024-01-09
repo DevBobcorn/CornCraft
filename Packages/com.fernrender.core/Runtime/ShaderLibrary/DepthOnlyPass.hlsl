@@ -46,7 +46,7 @@ half DepthOnlyFragment(Varyings input) : SV_TARGET
     Alpha(SampleAlbedoAlpha(input.uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap)).a, _BaseColor, _Cutoff);
 
 #ifdef LOD_FADE_CROSSFADE
-    LODFadeCrossFade(input.positionCS);
+    //LODFadeCrossFade(input.positionCS);
 #endif
 
     return input.positionCS.z;
@@ -59,7 +59,7 @@ half DepthOnlyFragment_Shadow(Varyings input) : SV_TARGET
     Alpha(SampleAlbedoAlpha(input.uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap)).a, _BaseColor, _Cutoff);
 
     #ifdef LOD_FADE_CROSSFADE
-        LODFadeCrossFade(input.positionCS);
+        //LODFadeCrossFade(input.positionCS);
     #endif
 
     return input.positionCS.z;

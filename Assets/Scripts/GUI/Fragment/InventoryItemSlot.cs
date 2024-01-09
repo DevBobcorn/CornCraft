@@ -10,10 +10,14 @@ namespace CraftSharp.UI
 {
     public class InventoryItemSlot : MonoBehaviour
     {
+        private static readonly int SHOW_HASH = Animator.StringToHash("Show");
+        private static readonly int UPDATE_HASH = Animator.StringToHash("Update");
+
         [SerializeField] private GameObject? modelObject;
         [SerializeField] private TMP_Text? itemText;
         [SerializeField] private MeshFilter? itemMeshFilter;
         [SerializeField] private MeshRenderer? itemMeshRenderer;
+        [SerializeField] private Animator itemAnimator;
 
         // Use null for empty items
         private ItemStack? itemStack = null;
@@ -23,6 +27,18 @@ namespace CraftSharp.UI
             itemStack = newItemStack;
             // Update item mesh
             UpdateItemMesh();
+            // Visually emphasize the change
+            itemAnimator.SetTrigger(UPDATE_HASH);
+        }
+
+        public void ShowItemStack()
+        {
+            itemAnimator.SetBool(SHOW_HASH, true);
+        }
+
+        public void HideItemStack()
+        {
+            itemAnimator.SetBool(SHOW_HASH, false);
         }
 
         private void UpdateItemMesh()

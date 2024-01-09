@@ -22,6 +22,7 @@ namespace CraftSharp.UI
         [SerializeField] private ValueBar? healthBar;
         [SerializeField] private RingValueBar? staminaBar;
         [SerializeField] private InteractionPanel? interactionPanel;
+        [SerializeField] private InventoryHotbar? inventoryHotbar;
         [SerializeField] protected InputActionReference? scrollInput;
         [SerializeField] private Camera? UICamera;
         [SerializeField] private Animator? screenAnimator;
@@ -43,11 +44,17 @@ namespace CraftSharp.UI
         {
             set {
                 isActive = value;
-                screenAnimator!.SetBool(SHOW, isActive);
+                
+                screenAnimator!.SetBool(SHOW_HASH, isActive);
 
                 if (isActive)
                 {
                     transitionCooldown = transitionTime;
+                    inventoryHotbar!.ShowItems();
+                }
+                else
+                {
+                    inventoryHotbar!.HideItems();
                 }
             }
 
@@ -71,7 +78,7 @@ namespace CraftSharp.UI
             // Initialize controls...
             staminaBarAnimator = staminaBar!.GetComponent<Animator>();
 
-            crosshairCallback = (e) => crosshairAnimator!.SetBool(SHOW, e.Show);
+            crosshairCallback = (e) => crosshairAnimator!.SetBool(SHOW_HASH, e.Show);
 
             gameModeCallback = (e) => {
                 var showStatus = e.GameMode switch {
@@ -83,7 +90,7 @@ namespace CraftSharp.UI
                     _                   => false
                 };
 
-                statusPanelAnimator!.SetBool(SHOW, showStatus);
+                statusPanelAnimator!.SetBool(SHOW_HASH, showStatus);
             };
 
             healthCallback = (e) => {
@@ -103,11 +110,11 @@ namespace CraftSharp.UI
 
                 if (e.Stamina >= e.MaxStamina) // Stamina is full
                 {
-                    staminaBarAnimator.SetBool(SHOW, false);
+                    staminaBarAnimator.SetBool(SHOW_HASH, false);
                 }
                 else
                 {
-                    staminaBarAnimator.SetBool(SHOW, true);
+                    staminaBarAnimator.SetBool(SHOW_HASH, true);
                 }
             };
 
@@ -139,7 +146,7 @@ namespace CraftSharp.UI
                     }
                 };
 
-                crosshairAnimator!.SetBool(SHOW, false);
+                crosshairAnimator!.SetBool(SHOW_HASH, false);
             }
         }
 
@@ -191,11 +198,11 @@ namespace CraftSharp.UI
                         if (selectedMode >= 0 && selectedMode < modeButtons.Length)
                         {
                             modeText!.text = ChatParser.TranslateString($"gameMode.{((GameMode) selectedMode).GetIdentifier()}");
-                            modePanelAnimator!.SetBool(SHOW, true);
+                            modePanelAnimator!.SetBool(SHOW_HASH, true);
                             modePanelShown = true;
                             modeButtons[selectedMode].Select();
                             // Hide crosshair (if shown)
-                            crosshairAnimator!.SetBool(SHOW, false);
+                            crosshairAnimator!.SetBool(SHOW_HASH, false);
                         }
                     }
                 }
@@ -205,7 +212,7 @@ namespace CraftSharp.UI
             {
                 if (modePanelShown) // Hide gamemode switch
                 {
-                    modePanelAnimator!.SetBool(SHOW, false);
+                    modePanelAnimator!.SetBool(SHOW_HASH, false);
                     modePanelShown = false;
 
                     if (selectedMode != (int) game.GameMode) // Commit switch request

@@ -12,7 +12,7 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (ScrollRect))]
     public class InteractionPanel : MonoBehaviour
     {
-        private static readonly int SHOW = Animator.StringToHash("Show");
+        private static readonly int SHOW_HASH = Animator.StringToHash("Show");
 
         [SerializeField] private GameObject? interactionOptionPrefab;
         [SerializeField] private RectTransform? container;
@@ -38,7 +38,7 @@ namespace CraftSharp.UI
             scrollHint = transform.Find("Scroll Hint").GetComponent<Animator>();
 
             scrollRect = GetComponent<ScrollRect>();
-            scrollHint.SetBool(SHOW, false);
+            scrollHint.SetBool(SHOW_HASH, false);
 
             // Events
             addCallback = (e) => {
@@ -85,7 +85,7 @@ namespace CraftSharp.UI
                 else if (selectedIndex < 0 || selectedIndex >= interactionOptions.Count)
                     SetSelected(0); // There's at least 1 option available after adding
                 
-                scrollHint!.SetBool(SHOW, interactionOptions.Count > 1); // Show or hide scroll hint
+                scrollHint!.SetBool(SHOW_HASH, interactionOptions.Count > 1); // Show or hide scroll hint
             }
             else
             {
@@ -131,7 +131,7 @@ namespace CraftSharp.UI
                 }
             }
 
-            scrollHint!.SetBool(SHOW, interactionOptions.Count > 1); // Show or hide scroll hint
+            scrollHint!.SetBool(SHOW_HASH, interactionOptions.Count > 1); // Show or hide scroll hint
             OnItemCountChange?.Invoke(interactionOptions.Count);
         }
 
