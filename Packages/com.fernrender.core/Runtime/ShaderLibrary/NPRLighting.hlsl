@@ -624,7 +624,9 @@ half3 FernRimLighting(LightingData lightingData, InputData inputData, Varyings i
 
 half3 FernIndirectLighting(BRDFData brdfData, InputData inputData, Varyings input, half occlusion)
 {
-    half3 indirectDiffuse = inputData.bakedGI * occlusion;
+    // MODIFICATION START
+    half3 indirectDiffuse = max(1.4, inputData.bakedGI) * occlusion;
+    // MODIFICATION END
     half3 reflectVector = reflect(-inputData.viewDirectionWS, inputData.normalWS);
     half NoV = saturate(dot(inputData.normalWS, inputData.viewDirectionWS));
     half fresnelTerm = Pow4(1.0 - NoV);
