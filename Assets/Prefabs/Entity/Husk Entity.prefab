@@ -36,6 +36,10 @@ PrefabInstance:
       propertyPath: ragdollPrefab
       value: 
       objectReference: {fileID: 8996889979576193348, guid: 7e80d5df74d20cf4d9b09b48d3a7f03f, type: 3}
+    - target: {fileID: 6033660137571719628, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
+      propertyPath: FloatingInfoPrefab
+      value: 
+      objectReference: {fileID: 5300854894600073256, guid: 608e9410959fcf54b91dae8f1208b8eb, type: 3}
     - target: {fileID: 6640179865016471911, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
       propertyPath: m_Name
       value: Husk Entity

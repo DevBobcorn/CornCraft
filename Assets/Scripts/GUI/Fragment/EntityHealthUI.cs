@@ -9,7 +9,7 @@ namespace CraftSharp.UI
     public class EntityHealthUI : FloatingUI
     {
         [SerializeField] private TMP_Text? levelText;
-        [SerializeField] private FloatingValueBar? healthBar;
+        [SerializeField] private BaseValueBar? healthBar;
         [SerializeField] private string textFormat = "Lv.{0:0}";
 
         private void UpdateHealth()
@@ -21,7 +21,7 @@ namespace CraftSharp.UI
             }
         }
 
-        public void Destroy()
+        public void OnDestroy()
         {
             // Unregister events for previous entity
             if (entityRender != null)
