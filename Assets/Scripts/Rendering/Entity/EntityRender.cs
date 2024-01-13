@@ -39,35 +39,37 @@ namespace CraftSharp.Rendering
         /// </summary>
         public string? CustomName;
 
+        private EntityType? type;
+
         /// <summary>
         /// Entity type
         /// </summary>
-        public EntityType? Type;
+        public EntityType Type => type!;
 
         /// <summary>
         /// Entity position
         /// </summary>
-        public Vector3 Position;
-        protected Vector3 lastPosition;
+        public TrackedValue<Vector3> Position = new(Vector3.zero);
+        protected Vector3 lastPosition = Vector3.zero;
 
         /// <summary>
         /// Entity yaw
         /// </summary>
-        public float Yaw = 0;
+        public TrackedValue<float> Yaw = new(0F);
         protected float lastYaw = 0F;
 
         /// <summary>
         /// Entity head pitch
         /// </summary>
-        public float Pitch = 0;
+        public TrackedValue<float> Pitch = new(0F);
         protected float lastPitch = 0F;
 
         /// <summary>
         /// Entity head yaw
         /// </summary>
-        public float HeadYaw = 0;
+        public TrackedValue<float> HeadYaw = new(0F);
         protected float lastHeadYaw = 0F;
-
+        
         /// <summary>
         /// Used in Item Frame, Falling Block and Fishing Float.
         /// See https://wiki.vg/Object_Data for details.
@@ -78,17 +80,17 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Health of the entity
         /// </summary>
-        public float Health;
+        public TrackedValue<float> Health = new(0F);
 
         /// <summary>
         /// Max health of the entity
         /// </summary>
-        public float MaxHealth;
+        public TrackedValue<float> MaxHealth = new(0F);
         
         /// <summary>
         /// Item of the entity if ItemFrame or Item
         /// </summary>
-        public ItemStack? Item;
+        public TrackedValue<ItemStack?> Item = new(null);
         
         /// <summary>
         /// Entity pose in the Minecraft world
@@ -131,7 +133,7 @@ namespace CraftSharp.Rendering
 
         public void Unload()
         {
-            if (!turnedIntoRagdoll && Health <= 0F)
+            if (!turnedIntoRagdoll && Health.Value <= 0F)
             {
                 TurnIntoRagdoll();
             }
@@ -153,18 +155,18 @@ namespace CraftSharp.Rendering
             CustomNameJson = source.CustomNameJson;
             IsCustomNameVisible = source.IsCustomNameVisible;
             CustomName = source.CustomName;
-            Type = entityType;
+            type = entityType;
 
-            Position = CoordConvert.MC2Unity(source.Location);
-            lastPosition = Position;
-            lastYaw = Yaw = source.Yaw;
-            lastHeadYaw = HeadYaw = source.HeadYaw;
-            lastPitch = Pitch = source.Pitch;
+            Position.Value = CoordConvert.MC2Unity(source.Location);
+            lastPosition = Position.Value;
+            lastYaw = Yaw.Value = source.Yaw;
+            lastHeadYaw = HeadYaw.Value = source.HeadYaw;
+            lastPitch = Pitch.Value = source.Pitch;
 
             ObjectData = source.ObjectData;
-            Health = source.Health;
-            MaxHealth = source.MaxHealth;
-            Item = source.Item;
+            Health.Value = source.Health;
+            MaxHealth.Value = source.MaxHealth;
+            Item.Value = source.Item;
             Pose = source.Pose;
             Metadata = source.Metadata;
             Equipment = source.Equipment;
@@ -178,35 +180,35 @@ namespace CraftSharp.Rendering
         public virtual void UpdateTransform(float tickMilSec)
         {
             // Update position
-            if ((Position - transform.position).sqrMagnitude > MOVE_THRESHOLD) // Treat as teleport
-                transform.position = Position;
+            if ((Position.Value - transform.position).sqrMagnitude > MOVE_THRESHOLD) // Treat as teleport
+                transform.position = Position.Value;
             else // Smoothly move to current position
-                transform.position = Vector3.SmoothDamp(transform.position, Position,
+                transform.position = Vector3.SmoothDamp(transform.position, Position.Value,
                         ref visualMovementVelocity, tickMilSec);
 
             // Update rotation
-            var headYawDelta = Mathf.Abs(Mathf.DeltaAngle(lastHeadYaw, HeadYaw));
-            var bodyYawDelta = Mathf.Abs(Mathf.DeltaAngle(lastYaw, Yaw));
+            var headYawDelta = Mathf.Abs(Mathf.DeltaAngle(lastHeadYaw, HeadYaw.Value));
+            var bodyYawDelta = Mathf.Abs(Mathf.DeltaAngle(lastYaw, Yaw.Value));
 
             if (bodyYawDelta > 0.0025F)
             {
-                lastYaw = Mathf.MoveTowardsAngle(lastYaw, Yaw, Time.deltaTime * 300F);
+                lastYaw = Mathf.MoveTowardsAngle(lastYaw, Yaw.Value, Time.deltaTime * 300F);
                 visual!.eulerAngles = new(0F, lastYaw, 0F);
             }
 
             if (headYawDelta > 0.0025F)
-                lastHeadYaw = Mathf.MoveTowardsAngle(lastHeadYaw, HeadYaw, Time.deltaTime * 150F);
+                lastHeadYaw = Mathf.MoveTowardsAngle(lastHeadYaw, HeadYaw.Value, Time.deltaTime * 150F);
             else
             {
                 if (visualMovementVelocity.magnitude < 0.1F)
                     Yaw = HeadYaw;
             }
             
-            if (Mathf.Abs(Mathf.DeltaAngle(Yaw, HeadYaw)) > 75F)
+            if (Mathf.Abs(Mathf.DeltaAngle(Yaw.Value, HeadYaw.Value)) > 75F)
                 Yaw = HeadYaw;
             
-            if (lastPitch != Pitch)
-                lastPitch = Mathf.MoveTowardsAngle(lastPitch, Pitch, Time.deltaTime * 300F);
+            if (lastPitch != Pitch.Value)
+                lastPitch = Mathf.MoveTowardsAngle(lastPitch, Pitch.Value, Time.deltaTime * 300F);
 
         }
 
@@ -260,7 +262,7 @@ namespace CraftSharp.Rendering
 
         public virtual void ManagedUpdate(float tickMilSec)
         {
-            if (!turnedIntoRagdoll && Health <= 0F)
+            if (!turnedIntoRagdoll && Health.Value <= 0F)
             {
                 TurnIntoRagdoll();
             }

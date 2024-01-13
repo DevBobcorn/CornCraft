@@ -17,7 +17,7 @@ namespace CraftSharp.UI
         [SerializeField] private TMP_Text? itemText;
         [SerializeField] private MeshFilter? itemMeshFilter;
         [SerializeField] private MeshRenderer? itemMeshRenderer;
-        [SerializeField] private Animator itemAnimator;
+        [SerializeField] private Animator? itemAnimator;
 
         // Use null for empty items
         private ItemStack? itemStack = null;
@@ -28,17 +28,17 @@ namespace CraftSharp.UI
             // Update item mesh
             UpdateItemMesh();
             // Visually emphasize the change
-            itemAnimator.SetTrigger(UPDATE_HASH);
+            itemAnimator!.SetTrigger(UPDATE_HASH);
         }
 
         public void ShowItemStack()
         {
-            itemAnimator.SetBool(SHOW_HASH, true);
+            itemAnimator!.SetBool(SHOW_HASH, true);
         }
 
         public void HideItemStack()
         {
-            itemAnimator.SetBool(SHOW_HASH, false);
+            itemAnimator!.SetBool(SHOW_HASH, false);
         }
 
         private void UpdateItemMesh()
