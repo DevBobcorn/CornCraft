@@ -1602,7 +1602,7 @@ namespace CraftSharp
                     if (entity.Type!.ContainsItem && metadata.TryGetValue(7, out object? itemObj) && itemObj != null && itemObj.GetType() == typeof(ItemStack))
                     {
                         var item = (ItemStack?) itemObj;
-                        entity.Item = item;
+                        entity.Item.Value = item;
                     }
                     if (metadata.TryGetValue(6, out object? poseObj) && poseObj != null && poseObj.GetType() == typeof(int))
                     {

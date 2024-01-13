@@ -111,7 +111,7 @@ namespace CraftSharp.Control
             if (playerRender != null)
             {
                 // Initialize head yaw to look forward
-                playerRender.HeadYaw = Entity.GetHeadYawFromByte(127); // i.e. -90F
+                playerRender.HeadYaw.Value = Entity.GetHeadYawFromByte(127); // i.e. -90F
                 playerRender.transform.SetParent(transform, false);
 
                 // Destroy these colliders, so that they won't affect our movement

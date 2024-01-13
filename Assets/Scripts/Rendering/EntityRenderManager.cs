@@ -148,7 +148,7 @@ namespace CraftSharp.Rendering
         {
             if (entityRenders.ContainsKey(entityId))
             {
-                entityRenders[entityId].Position += CoordConvert.MC2Unity(location);
+                entityRenders[entityId].Position.Value += CoordConvert.MC2Unity(location);
             }
         }
 
@@ -161,7 +161,7 @@ namespace CraftSharp.Rendering
         {
             if (entityRenders.ContainsKey(entityId))
             {
-                entityRenders[entityId].Position = CoordConvert.MC2Unity(location);
+                entityRenders[entityId].Position.Value = CoordConvert.MC2Unity(location);
             }
         }
 
@@ -175,8 +175,8 @@ namespace CraftSharp.Rendering
         {
             if (entityRenders.ContainsKey(entityId))
             {
-                entityRenders[entityId].Yaw = Entity.GetYawFromByte(yaw);
-                entityRenders[entityId].Pitch = Entity.GetPitchFromByte(pitch);
+                entityRenders[entityId].Yaw.Value = Entity.GetYawFromByte(yaw);
+                entityRenders[entityId].Pitch.Value = Entity.GetPitchFromByte(pitch);
             }
         }
 
@@ -189,7 +189,7 @@ namespace CraftSharp.Rendering
         {
             if (entityRenders.ContainsKey(entityId))
             {
-                entityRenders[entityId].HeadYaw = Entity.GetHeadYawFromByte(headYaw);
+                entityRenders[entityId].HeadYaw.Value = Entity.GetHeadYawFromByte(headYaw);
             }
         }
 
@@ -202,9 +202,9 @@ namespace CraftSharp.Rendering
         {
             if (entityRenders.ContainsKey(entityId))
             {
-                entityRenders[entityId].Health = health;
-                entityRenders[entityId].MaxHealth = math.max(
-                        entityRenders[entityId].MaxHealth, health);
+                entityRenders[entityId].Health.Value = health;
+                entityRenders[entityId].MaxHealth.Value = math.max(
+                        entityRenders[entityId].MaxHealth.Value, health);
             }
         }
 

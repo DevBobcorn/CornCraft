@@ -11,9 +11,6 @@ using UnityEngine.SceneManagement;
 
 using CraftSharp.Event;
 using CraftSharp.Control;
-using CraftSharp.Protocol.ProfileKey;
-using CraftSharp.Protocol.Handlers.Forge;
-using CraftSharp.Protocol.Session;
 using CraftSharp.Resource;
 using CraftSharp.UI;
 
@@ -50,7 +47,7 @@ namespace CraftSharp
             Loom.Initialize();
 
             // Ensure CornApp instance is created
-            var i = Instance;
+            _ = Instance;
         }
 
         public IEnumerator PrepareDataAndResource(int protocolVersion, DataLoadFlag startUpFlag, Action<string> updateStatus)
