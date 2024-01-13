@@ -23,13 +23,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3990931385665030105}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1839913200369853627}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4806443658253136590
 GameObject:
@@ -55,6 +55,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4806443658253136590}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -63,7 +64,6 @@ Transform:
   - {fileID: 336690420239295031}
   - {fileID: 5944258813398908273}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6499665788135871479
 MonoBehaviour:
@@ -77,10 +77,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edd39ef75f9619644b7fea72044f0f18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  NumeralId: 0
+  Name: 
+  CustomNameJson: 
+  IsCustomNameVisible: 0
+  CustomName: 
+  ObjectData: -1
+  Pose: 0
   infoAnchor: {fileID: 5944258813398908273}
   visual: {fileID: 336690420239295031}
   ragdollPrefab: {fileID: 4806443658253136590, guid: 546f8b98fdfb8584f85c683cd2f635d3, type: 3}
-  FloatingInfoPrefab: {fileID: 5300854894600073256, guid: c0d5430989fe0e44bb3d36023e36d951, type: 3}
+  FloatingInfoPrefab: {fileID: 5300854894600073256, guid: dc0198fc5ba3e39439e4422c6b7cffad, type: 3}
   head: {fileID: 545362463778066498}
   cycleTime: 1.2
   legAngle: 40

@@ -49,25 +49,25 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Entity position
         /// </summary>
-        public TrackedValue<Vector3> Position = new(Vector3.zero);
+        public readonly TrackedValue<Vector3> Position = new(Vector3.zero);
         protected Vector3 lastPosition = Vector3.zero;
 
         /// <summary>
         /// Entity yaw
         /// </summary>
-        public TrackedValue<float> Yaw = new(0F);
+        public readonly TrackedValue<float> Yaw = new(0F);
         protected float lastYaw = 0F;
 
         /// <summary>
         /// Entity head pitch
         /// </summary>
-        public TrackedValue<float> Pitch = new(0F);
+        public readonly TrackedValue<float> Pitch = new(0F);
         protected float lastPitch = 0F;
 
         /// <summary>
         /// Entity head yaw
         /// </summary>
-        public TrackedValue<float> HeadYaw = new(0F);
+        public readonly TrackedValue<float> HeadYaw = new(0F);
         protected float lastHeadYaw = 0F;
         
         /// <summary>
@@ -80,17 +80,17 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Health of the entity
         /// </summary>
-        public TrackedValue<float> Health = new(0F);
+        public readonly TrackedValue<float> Health = new(0F);
 
         /// <summary>
         /// Max health of the entity
         /// </summary>
-        public TrackedValue<float> MaxHealth = new(0F);
+        public readonly TrackedValue<float> MaxHealth = new(0F);
         
         /// <summary>
         /// Item of the entity if ItemFrame or Item
         /// </summary>
-        public TrackedValue<ItemStack?> Item = new(null);
+        public readonly TrackedValue<ItemStack?> Item = new(null);
         
         /// <summary>
         /// Entity pose in the Minecraft world
@@ -201,11 +201,11 @@ namespace CraftSharp.Rendering
             else
             {
                 if (visualMovementVelocity.magnitude < 0.1F)
-                    Yaw = HeadYaw;
+                    Yaw.Value = HeadYaw.Value;
             }
             
             if (Mathf.Abs(Mathf.DeltaAngle(Yaw.Value, HeadYaw.Value)) > 75F)
-                Yaw = HeadYaw;
+                Yaw.Value = HeadYaw.Value;
             
             if (lastPitch != Pitch.Value)
                 lastPitch = Mathf.MoveTowardsAngle(lastPitch, Pitch.Value, Time.deltaTime * 300F);
