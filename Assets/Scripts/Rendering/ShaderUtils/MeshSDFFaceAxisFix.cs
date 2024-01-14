@@ -24,7 +24,7 @@ namespace FernNPRCore.Scripts.ShadingUtils
         public int[] targetMaterialIndices = { };
 
         private static readonly int faceObjectToWorld = Shader.PropertyToID("_FaceObjectToWorld");
-        private new SkinnedMeshRenderer renderer;
+        private SkinnedMeshRenderer _renderer;
         private MaterialPropertyBlock faceMaterialblock;
 
         private Vector3 forward;
@@ -32,7 +32,7 @@ namespace FernNPRCore.Scripts.ShadingUtils
 
         private void OnEnable()
         {
-            renderer = GetComponent<SkinnedMeshRenderer>();
+            _renderer = GetComponent<SkinnedMeshRenderer>();
 
             if (faceMaterialblock == null)
             {
@@ -69,7 +69,7 @@ namespace FernNPRCore.Scripts.ShadingUtils
 
         private void SetupFaceObjectAxis()
         {
-            if (renderer == null) return;
+            if (_renderer == null) return;
 
             SetupFaceAxis();
 
@@ -79,7 +79,7 @@ namespace FernNPRCore.Scripts.ShadingUtils
 
         private void Update()
         {
-            if (renderer == null) return;
+            if (_renderer == null) return;
 
 //#if UNITY_EDITOR
             SetupFaceObjectAxis();
@@ -87,13 +87,13 @@ namespace FernNPRCore.Scripts.ShadingUtils
 
             for (int i = 0; i < targetMaterialIndices.Length;i++)
             {
-                renderer.GetPropertyBlock(faceMaterialblock, targetMaterialIndices[i]);
+                _renderer.GetPropertyBlock(faceMaterialblock, targetMaterialIndices[i]);
                 Matrix4x4 faceObjectToWorldMatrix = Matrix4x4.zero;
                 faceObjectToWorldMatrix.SetColumn(0, right);
                 faceObjectToWorldMatrix.SetColumn(1, Vector4.zero);
                 faceObjectToWorldMatrix.SetColumn(2, forward);
                 faceMaterialblock.SetMatrix(faceObjectToWorld, faceObjectToWorldMatrix);
-                renderer.SetPropertyBlock(faceMaterialblock, targetMaterialIndices[i]);
+                _renderer.SetPropertyBlock(faceMaterialblock, targetMaterialIndices[i]);
             }
 
         }
