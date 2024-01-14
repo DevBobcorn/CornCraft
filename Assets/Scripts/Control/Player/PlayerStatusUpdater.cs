@@ -87,6 +87,10 @@ namespace CraftSharp.Control
                 {
                     Status.Grounded = false;
                 }
+                else if (velocity.y == 0F) // Stuck, prolly
+                {
+                    Status.Grounded = true;
+                }
                 else // Not jumping up
                 {
                     Status.Grounded = groundCheck;
