@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 1367375308091481784}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.8747582, y: 19.361118, z: -20.055021}
+  m_LocalPosition: {x: 1.6, y: -0.2, z: -1.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -473,7 +473,7 @@ Transform:
   m_GameObject: {fileID: 2988304240145284854}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.149146, y: 22.312706, z: -21.566887}
+  m_LocalPosition: {x: -0.72561264, y: 2.9515898, z: 0.28813452}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -594,7 +594,7 @@ Transform:
   m_GameObject: {fileID: 3759418466539031928}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.6747584, y: 19.261118, z: -23.65502}
+  m_LocalPosition: {x: 0.8, y: -0.1, z: -1.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -678,11 +678,10 @@ MonoBehaviour:
   m_CameraType: 0
   m_Cameras:
   - {fileID: 8338982171505058957}
-  - {fileID: 0}
   m_RendererIndex: -1
   m_VolumeLayerMask:
     serializedVersion: 2
-    m_Bits: 65536
+    m_Bits: 4294967295
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 1
