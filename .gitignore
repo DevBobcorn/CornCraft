@@ -9,9 +9,6 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
-# Large resource files
-/[Aa]ssets/Prefabs/Clouds/*.tif
-
 # CornModel resources
 /[Rr]esource [Pp]acks/*/
 !/[Rr]esource [Pp]acks/vanilla_fix/
