@@ -6,8 +6,8 @@ namespace CraftSharp.Control
     public class SwimState : IPlayerState
     {
         public const float THRESHOLD_LAND_PLATFORM  = -1.4F;
-        public const float AFLOAT_LIQUID_DIST_THERSHOLD = -0.70F;
-        public const float SOAKED_LIQUID_DIST_THERSHOLD = -0.75F;
+        public const float AFLOAT_LIQUID_DIST_THERSHOLD = -0.55F;
+        public const float SOAKED_LIQUID_DIST_THERSHOLD = -0.65F;
         public const float SURFING_GRAVITY_SCALE = 0.5F;
 
         public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
@@ -61,7 +61,19 @@ namespace CraftSharp.Control
                     }
                     else if (info.LiquidDist > THRESHOLD_LAND_PLATFORM) // Approaching Water suface, and the platform is under water 
                     {
-                        // Do nothing
+                        var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
+
+                        // Start force move operation
+                        var org  = rigidbody.transform.position;
+                        var dest = org + (-info.FrontDownDist) * Vector3.up + moveHorDir * 0.55F;
+
+                        player.StartForceMoveOperation("Swim over barrier underwater",
+                                new ForceMoveOperation[] {
+                                        new(org,  dest, 0.8F,
+                                            update: (interval, inputData, info, rigidbody, player) =>
+                                                info.Moving = true
+                                        )
+                                } );
                     }
                     else // Below water surface now, swim up a bit
                     {
