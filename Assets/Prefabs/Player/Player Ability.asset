@@ -809,6 +809,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   WalkSpeed: 2.15
   RunSpeed: 6
+  SwimSpeed: 4
   SprintSpeed: 10
   GlideSpeed: 2.8
   JumpSpeedCurve:
@@ -852,5 +853,4 @@ MonoBehaviour:
   StaminaRestore: 4
   MaxFallSpeed: -10
   MaxGlideFallSpeed: -0.5
-  MaxInLiquidFallSpeed: -1.1
-  WaterMoveMultiplier: 0.6
+  LiquidMoveMultiplier: 0.8

@@ -45,8 +45,8 @@ namespace CraftSharp.Control
         public Rigidbody PlayerRigidbody => playerRigidbody!;
         protected Collider? playerCollider;
         public Collider PlayerCollider => playerCollider!;
-        protected IPlayerState CurrentState = PlayerStates.IDLE;
-        protected IPlayerState? PendingState = null;
+        protected IPlayerState currentState = PlayerStates.IDLE;
+        protected IPlayerState? pendingState = null;
         public PlayerStatus? Status => statusUpdater?.Status;
 
         // Values for sending over to the server. Should only be set
@@ -241,7 +241,7 @@ namespace CraftSharp.Control
 
             // Initialize player state (idle on start)
             Status.Grounded = true;
-            CurrentState.OnEnter(Status, playerRigidbody!, this);
+            currentState.OnEnter(Status, playerRigidbody!, this);
         }
 
         void OnDestroy()
@@ -359,19 +359,19 @@ namespace CraftSharp.Control
         public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)
         {
             // Set it as pending state, this will be set as active state upon next logical update
-            PendingState = new ForceMoveState(name, ops);
+            pendingState = new ForceMoveState(name, ops);
         }
 
         private void ChangeToState(IPlayerState state)
         {
             //Debug.Log($"Exit state [{CurrentState}]");
-            CurrentState.OnExit(statusUpdater!.Status, playerRigidbody!, this);
+            currentState.OnExit(statusUpdater!.Status, playerRigidbody!, this);
 
             // Exit previous state and enter this state
-            CurrentState = state;
+            currentState = state;
             
             //Debug.Log($"Enter state [{CurrentState}]");
-            CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
+            currentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
         }
 
         public bool TryStartNormalAttack()
@@ -380,12 +380,12 @@ namespace CraftSharp.Control
             {
                 if (CurrentActionType == ItemActionType.MeleeWeaponSword)
                 {
-                    CurrentState.OnExit(Status, playerRigidbody!, this);
+                    currentState.OnExit(Status, playerRigidbody!, this);
                     // Specify attack data to use
                     Status.AttackStatus.CurrentMeleeAttack = MeleeSwordAttack;
                     // Enter attack state
-                    CurrentState = PlayerStates.MELEE;
-                    CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
+                    currentState = PlayerStates.MELEE;
+                    currentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
                     return true;
                 }
                 else if (CurrentActionType == ItemActionType.RangedWeaponBow)
@@ -411,12 +411,12 @@ namespace CraftSharp.Control
                 }
                 else if (CurrentActionType == ItemActionType.RangedWeaponBow)
                 {
-                    CurrentState.OnExit(Status, playerRigidbody!, this);
+                    currentState.OnExit(Status, playerRigidbody!, this);
                     // Specify attack data to use
                     Status.AttackStatus.CurrentRangedAttack = RangedBowAttack;
                     // Enter attack state
-                    CurrentState = PlayerStates.RANGED_AIM;
-                    CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
+                    currentState = PlayerStates.RANGED_AIM;
+                    currentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
                     return true;
                 }
                 
@@ -461,17 +461,17 @@ namespace CraftSharp.Control
             var status = statusUpdater!.Status;
 
             // Update current player state
-            if (PendingState != null) // Change to pending state if present
+            if (pendingState != null) // Change to pending state if present
             {
-                ChangeToState(PendingState);
-                PendingState = null;
+                ChangeToState(pendingState);
+                pendingState = null;
             }
-            else if (CurrentState.ShouldExit(playerActions!, status))
+            else if (currentState.ShouldExit(playerActions!, status))
             {
                 // Try to exit current state and enter another one
                 foreach (var state in PlayerStates.STATES)
                 {
-                    if (state != CurrentState && state.ShouldEnter(playerActions!, status))
+                    if (state != currentState && state.ShouldEnter(playerActions!, status))
                     {
                         ChangeToState(state);
                         break;
@@ -496,7 +496,7 @@ namespace CraftSharp.Control
             }
             
             // Update player physics and transform using updated current state
-            CurrentState.UpdatePlayer(interval, playerActions, status, playerRigidbody!, this);
+            currentState.UpdatePlayer(interval, playerActions, status, playerRigidbody!, this);
 
             // Broadcast current stamina if changed
             if (prevStamina != status.StaminaLeft)
@@ -514,7 +514,7 @@ namespace CraftSharp.Control
         protected void PostLogicalUpdate()
         {
             // Update values to send to server
-            if (CurrentState is ForceMoveState state)
+            if (currentState is ForceMoveState state)
             {
                 // Use move origin as the player location to tell to server, to
                 // prevent sending invalid positions during a force move operation
@@ -632,7 +632,7 @@ namespace CraftSharp.Control
             else
                 statusInfo = statusUpdater!.Status.ToString();
             
-            return $"ActionType:\t{CurrentActionType}\nState:\t{CurrentState}\n{statusInfo}";
+            return $"ActionType:\t{CurrentActionType}\nState:\t{currentState}\n{statusInfo}";
         }
     }
 }

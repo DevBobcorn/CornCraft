@@ -70,7 +70,7 @@ namespace CraftSharp.Control
 
             if (Status.InLiquid) // In liquid
             {
-                if (Status.CenterDownDist < 1F)
+                if (Status!.Grounded && velocity.y < 0F && Status.CenterDownDist < 1F)
                 {
                     // Treading on ground
                     Status.Grounded = true;
