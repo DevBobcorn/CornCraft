@@ -68,32 +68,42 @@ namespace CraftSharp.Control
             
             Debug.DrawRay(rayFront,  transform.up * -GROUND_RAYCAST_DIST, Color.green);
 
-            if (Status.InLiquid && Status.CenterDownDist < 1F)
+            if (Status.InLiquid) // In liquid
             {
-                if (Status.LiquidDist > -0.4F)
-                    Status.Grounded = true;
-            }
-            else if (Status.Grounded) // Grounded in last update
-            {
-                // Extra check to make sure the player is just walking on some bumped surface and happen to leave the ground
-                if (!groundCheck && Status.CenterDownDist > 1.75F)
+                if (Status.CenterDownDist < 1F)
                 {
-                    Status.Grounded = false;
-                }
-            }
-            else // Not grounded in last update
-            {
-                if (velocity.y > 0F) // Jumping up
-                {
-                    Status.Grounded = false;
-                }
-                else if (velocity.y == 0F) // Stuck, prolly
-                {
+                    // Treading on ground
                     Status.Grounded = true;
                 }
-                else // Not jumping up
+                else
                 {
                     Status.Grounded = groundCheck;
+                }
+            }
+            else // In air or on ground
+            {
+                if (Status.Grounded) // Grounded in last update
+                {
+                    // Extra check to make sure the player is just walking on some bumped surface and happen to leave the ground
+                    if (!groundCheck && Status.CenterDownDist > 1.75F)
+                    {
+                        Status.Grounded = false;
+                    }
+                }
+                else // Not grounded in last update
+                {
+                    if (velocity.y > 0F) // Jumping up
+                    {
+                        Status.Grounded = false;
+                    }
+                    else if (velocity.y == 0F) // Stuck, prolly
+                    {
+                        Status.Grounded = true;
+                    }
+                    else // Not jumping up
+                    {
+                        Status.Grounded = groundCheck;
+                    }
                 }
             }
             
@@ -105,14 +115,18 @@ namespace CraftSharp.Control
                     Status.LiquidDist = centerDownHit.distance - LIQUID_RAYCAST_START;
                 }
                 else // Dived completely into water
+                {
                     Status.LiquidDist = -LIQUID_RAYCAST_DIST;
+                }
             }
             else // Not in water
+            {
                 Status.LiquidDist = 0F;
+            }
 
             var angleCheckRayOrigin = transform.position + ANGLE_CHECK_RAYCAST_START_POINT;
 
-            // Cast a ray forward from feet to figure out whether the slope angle before the player
+            // Cast a ray forward from feet to figure out the slope angle before the player
             if (Physics.Raycast(angleCheckRayOrigin, frontDirNormalized, out RaycastHit angleCheckHit, 1F, SolidLayer))
             {
                 Debug.DrawRay(angleCheckHit.point, angleCheckHit.normal, Color.magenta);
@@ -120,13 +134,15 @@ namespace CraftSharp.Control
                 Status.GroundSlope = Vector3.Angle(transform.up, angleCheckHit.normal);
             }
             else
+            {
                 Status.GroundSlope = 0F;
+            }
             
             Debug.DrawRay(angleCheckRayOrigin, frontDirNormalized, Color.red);
 
             var barrierCheckRayOrigin = transform.position + new Vector3(0F, Status.FrontDownDist < -0.2F ? -Status.FrontDownDist - 0.1F : 0.1F, 0F);
 
-            // Cast another ray forward from the height of barrier to figure out whether the slope angle before the player
+            // Cast another ray forward from the height of barrier to figure out the slope angle before the player
             if (Physics.Raycast(barrierCheckRayOrigin, frontDirNormalized, out angleCheckHit, 1F, SolidLayer))
             {
                 Status.BarrierAngle = Vector3.Angle(frontDirNormalized, -angleCheckHit.normal);

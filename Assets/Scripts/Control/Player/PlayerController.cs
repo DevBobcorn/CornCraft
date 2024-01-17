@@ -46,6 +46,7 @@ namespace CraftSharp.Control
         protected Collider? playerCollider;
         public Collider PlayerCollider => playerCollider!;
         protected IPlayerState CurrentState = PlayerStates.IDLE;
+        protected IPlayerState? PendingState = null;
         public PlayerStatus? Status => statusUpdater?.Status;
 
         // Values for sending over to the server. Should only be set
@@ -287,15 +288,15 @@ namespace CraftSharp.Control
         {
             // Update components state...
             playerCollider!.enabled = false;
-            playerRigidbody!.useGravity = false;
+            Status!.GravityScale = 0F;
 
-            if (!playerRigidbody.isKinematic) // If physics is enabled, reset velocity to zero
+            if (!playerRigidbody!.isKinematic) // If physics is enabled, reset velocity to zero
             {
-                playerRigidbody!.velocity = Vector3.zero;
+                playerRigidbody.velocity = Vector3.zero;
             }
 
             // Reset player status
-            Status!.Grounded = false;
+            Status.Grounded = false;
             Status.InLiquid  = false;
             Status.OnWall    = false;
             Status.Sprinting = false;
@@ -310,9 +311,9 @@ namespace CraftSharp.Control
         {
             // Update components state...
             playerCollider!.enabled = true;
-            playerRigidbody!.useGravity = true;
+            Status!.GravityScale = 1F;
 
-            Status!.EntityDisabled = false;
+            Status.EntityDisabled = false;
 
             // Show entity render
             playerRender?.gameObject.SetActive(true);
@@ -357,9 +358,19 @@ namespace CraftSharp.Control
 
         public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)
         {
+            // Set it as pending state, this will be set as active state upon next logical update
+            PendingState = new ForceMoveState(name, ops);
+        }
+
+        private void ChangeToState(IPlayerState state)
+        {
+            //Debug.Log($"Exit state [{CurrentState}]");
             CurrentState.OnExit(statusUpdater!.Status, playerRigidbody!, this);
-            // Enter a new force move state
-            CurrentState = new ForceMoveState(name, ops);
+
+            // Exit previous state and enter this state
+            CurrentState = state;
+            
+            //Debug.Log($"Enter state [{CurrentState}]");
             CurrentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
         }
 
@@ -450,19 +461,19 @@ namespace CraftSharp.Control
             var status = statusUpdater!.Status;
 
             // Update current player state
-            if (CurrentState.ShouldExit(playerActions!, status))
+            if (PendingState != null) // Change to pending state if present
+            {
+                ChangeToState(PendingState);
+                PendingState = null;
+            }
+            else if (CurrentState.ShouldExit(playerActions!, status))
             {
                 // Try to exit current state and enter another one
                 foreach (var state in PlayerStates.STATES)
                 {
                     if (state != CurrentState && state.ShouldEnter(playerActions!, status))
                     {
-                        CurrentState.OnExit(status, playerRigidbody!, this);
-
-                        // Exit previous state and enter this state
-                        CurrentState = state;
-                        
-                        CurrentState.OnEnter(status, playerRigidbody!, this);
+                        ChangeToState(state);
                         break;
                     }
                 }
@@ -531,6 +542,9 @@ namespace CraftSharp.Control
         private delegate void PlayerUpdateEventHandler(float interval, PlayerStatus status, Rigidbody rigidbody);
         private event PlayerUpdateEventHandler? OnLogicalUpdate;
 
+        /// <summary>
+        /// Logical update
+        /// </summary>
         void Update()
         {
             PreLogicalUpdate(Time.unscaledDeltaTime);
@@ -541,6 +555,9 @@ namespace CraftSharp.Control
             PostLogicalUpdate();
         }
 
+        /// <summary>
+        /// Late logical update
+        /// </summary>
         void LateUpdate()
         {
             if (cameraController!.IsAiming)
@@ -549,14 +566,23 @@ namespace CraftSharp.Control
             }
         }
 
+        /// <summary>
+        /// Physics update
+        /// </summary>
         void FixedUpdate()
         {
             var info = Status!;
 
+            if (info.GravityScale != 0F) // Apply current gravity
+            {
+                Vector3 gravity = Physics.gravity * info.GravityScale;
+                playerRigidbody!.AddForce(gravity, ForceMode.Acceleration);
+            }
+
             if (info.MoveVelocity != Vector3.zero) // Add a force to change velocity of the rigidbody
             {
                 // The player is actively moving
-                playerRigidbody!.AddForce((info.MoveVelocity - playerRigidbody!.velocity) * Time.fixedUnscaledDeltaTime * 10F, ForceMode.VelocityChange);
+                playerRigidbody!.AddForce(10F * Time.fixedUnscaledDeltaTime * (info.MoveVelocity - playerRigidbody!.velocity), ForceMode.VelocityChange);
             }
             else
             {
