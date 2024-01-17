@@ -25,7 +25,7 @@ namespace MagicaCloth2
             /// <summary>
             /// MeshClothで設定可能な最大レンダラー数
             /// </summary>
-            public const int MaxRendererCount = 15;
+            public const int MaxRendererCount = 31;
 
             /// <summary>
             /// 最小のグリッドサイズ定義(GridSize=0は動作しないため)

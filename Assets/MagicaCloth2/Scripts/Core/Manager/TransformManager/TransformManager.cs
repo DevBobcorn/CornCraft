@@ -703,6 +703,10 @@ namespace MagicaCloth2
                 if (tdata.IsCullingInvisible)
                     return;
 
+                // 書き込み停止中ならスキップ
+                if (tdata.flag.IsSet(TeamManager.Flag_SkipWriting))
+                    return;
+
                 if (flag.IsSet(Flag_WorldRotWrite))
                 {
                     // ワールド回転

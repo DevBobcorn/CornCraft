@@ -236,5 +236,20 @@ namespace MagicaCloth2
                 tdata.impactForce = forceDirection.normalized * forceVelocity;
             }
         }
+
+        /// <summary>
+        /// TransformおよびMeshへの書き込みを禁止または許可します
+        /// この機能を使うことでストップモーションを実装することが可能です
+        /// Prevent or allow writing to Transform and Mesh.
+        /// By using this function, it is possible to implement stop motion.
+        /// </summary>
+        /// <param name="sw">true=write disabled, false=write enabled</param>
+        public void SetSkipWriting(bool sw)
+        {
+            if (IsValid())
+            {
+                Process.SetSkipWriting(sw);
+            }
+        }
     }
 }

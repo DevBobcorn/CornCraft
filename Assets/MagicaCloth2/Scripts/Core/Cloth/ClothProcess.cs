@@ -351,6 +351,20 @@ namespace MagicaCloth2
                 // ペイントマップ指定の場合は空で初期化
                 SelectionData selectionData = usePaintMap ? new SelectionData() : sdata2.selectionData.Clone();
 
+                // BoneCloth/BoneSpringでシリアライズ２にTransformと属性辞書がある場合はIDと属性の辞書に変換（スレッドではアクセスできないため）
+                Dictionary<int, VertexAttribute> boneAttributeDict = null;
+                if (sdata2.boneAttributeDict.Count > 0)
+                {
+                    boneAttributeDict = new Dictionary<int, VertexAttribute>(sdata2.boneAttributeDict.Count);
+                    foreach (var kv in sdata2.boneAttributeDict)
+                    {
+                        if (kv.Key)
+                        {
+                            boneAttributeDict.Add(kv.Key.GetInstanceID(), kv.Value);
+                        }
+                    }
+                }
+
                 // ■スレッド
                 await Task.Run(() =>
                 {
@@ -498,6 +512,19 @@ namespace MagicaCloth2
                                         selectionData.attributes[rootIndex] = VertexAttribute.Fixed;
                                     }
                                     isValidSelection = selectionData.IsValid();
+                                }
+                            }
+
+                            // Transformと属性辞書がある場合はそれに従って属性を書き換える
+                            if (boneAttributeDict != null)
+                            {
+                                foreach (var kv in boneAttributeDict)
+                                {
+                                    int index = boneClothSetupData.GetTransformIndexFromId(kv.Key);
+                                    if (index >= 0)
+                                    {
+                                        selectionData.attributes[index] = kv.Value;
+                                    }
                                 }
                             }
                         }

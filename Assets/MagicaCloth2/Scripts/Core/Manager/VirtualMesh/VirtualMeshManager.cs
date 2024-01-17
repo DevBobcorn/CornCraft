@@ -554,11 +554,14 @@ namespace MagicaCloth2
             tdata.proxyBoneChunk.Clear();
 
             // 同時に連動するマッピングメッシュも解放する
-            var mappingIndices = tdata.mappingDataIndexSet.ToArray();
-            int mcnt = tdata.mappingDataIndexSet.Length;
+            //var mappingIndices = tdata.mappingDataIndexSet.ToArray();
+            //int mcnt = tdata.mappingDataIndexSet.Length;
+            var mappingList = MagicaManager.Team.teamMappingIndexArray[teamId];
+            int mcnt = mappingList.Length;
             for (int i = 0; i < mcnt; i++)
             {
-                int mappingIndex = mappingIndices[i];
+                //int mappingIndex = mappingIndices[i];
+                int mappingIndex = mappingList[i];
                 ExitMappingMesh(teamId, mappingIndex);
             }
         }
@@ -576,6 +579,7 @@ namespace MagicaCloth2
                 return DataChunk.Empty;
 
             ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
+            ref var mappingList = ref MagicaManager.Team.GetTeamMappingRef(teamId);
 
             var mdata = new TeamManager.MappingData();
 
@@ -609,7 +613,8 @@ namespace MagicaCloth2
 
             // 再登録
             MagicaManager.Team.mappingDataArray[mappingIndex] = mdata;
-            tdata.mappingDataIndexSet.Set((short)mappingIndex);
+            //tdata.mappingDataIndexSet.Set((short)mappingIndex);
+            mappingList.Set((short)mappingIndex);
 
             // vmeshにも記録する
             mappingMesh.mappingId = mappingIndex;
@@ -627,6 +632,7 @@ namespace MagicaCloth2
 
             ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
             ref var mdata = ref MagicaManager.Team.mappingDataArray.GetRef(mappingIndex);
+            ref var mappingList = ref MagicaManager.Team.GetTeamMappingRef(teamId);
 
             // Transform解放
             MagicaManager.Bone.RemoveTransform(new DataChunk(mdata.centerTransformIndex, 1));
@@ -643,7 +649,8 @@ namespace MagicaCloth2
             mappingNormals.Remove(mdata.mappingCommonChunk);
 
             // チームから削除する
-            tdata.mappingDataIndexSet.RemoveItemAtSwapBack((short)mappingIndex);
+            //tdata.mappingDataIndexSet.RemoveItemAtSwapBack((short)mappingIndex);
+            mappingList.RemoveItemAtSwapBack((short)mappingIndex);
 
             MagicaManager.Team.mappingDataArray.RemoveAndFill(new DataChunk(mappingIndex, 1));
 

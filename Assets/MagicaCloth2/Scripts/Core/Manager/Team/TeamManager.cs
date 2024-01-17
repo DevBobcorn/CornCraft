@@ -15,7 +15,7 @@ namespace MagicaCloth2
     public class TeamManager : IManager, IValid
     {
         /// <summary>
-        /// チームフラグ(32bit)
+        /// チームフラグ(64bit)
         /// </summary>
         public const int Flag_Valid = 0; // データの有効性
         public const int Flag_Enable = 1; // 動作状態
@@ -33,31 +33,32 @@ namespace MagicaCloth2
         public const int Flag_CullingInvisible = 11; // カリングによる非表示状態
         public const int Flag_CullingKeep = 12; // カリング時に姿勢を保つ
         public const int Flag_Spring = 13; // Spring利用
+        public const int Flag_SkipWriting = 14; // 書き込み停止（ストップモーション用）
 
         // 以下セルフコリジョン
         // !これ以降の順番を変えないこと
-        public const int Flag_Self_PointPrimitive = 14; // PointPrimitive+Sortを保持し更新する
-        public const int Flag_Self_EdgePrimitive = 15; // EdgePrimitive+Sortを保持し更新する
-        public const int Flag_Self_TrianglePrimitive = 16; // TrianglePrimitive+Sortを保持し更新する
+        public const int Flag_Self_PointPrimitive = 32; // PointPrimitive+Sortを保持し更新する
+        public const int Flag_Self_EdgePrimitive = 33; // EdgePrimitive+Sortを保持し更新する
+        public const int Flag_Self_TrianglePrimitive = 34; // TrianglePrimitive+Sortを保持し更新する
 
-        public const int Flag_Self_EdgeEdge = 17;
-        public const int Flag_Sync_EdgeEdge = 18;
-        public const int Flag_PSync_EdgeEdge = 19;
+        public const int Flag_Self_EdgeEdge = 35;
+        public const int Flag_Sync_EdgeEdge = 36;
+        public const int Flag_PSync_EdgeEdge = 37;
 
-        public const int Flag_Self_PointTriangle = 20;
-        public const int Flag_Sync_PointTriangle = 21;
-        public const int Flag_PSync_PointTriangle = 22;
+        public const int Flag_Self_PointTriangle = 38;
+        public const int Flag_Sync_PointTriangle = 39;
+        public const int Flag_PSync_PointTriangle = 40;
 
-        public const int Flag_Self_TrianglePoint = 23;
-        public const int Flag_Sync_TrianglePoint = 24;
-        public const int Flag_PSync_TrianglePoint = 25;
+        public const int Flag_Self_TrianglePoint = 41;
+        public const int Flag_Sync_TrianglePoint = 42;
+        public const int Flag_PSync_TrianglePoint = 43;
 
-        public const int Flag_Self_EdgeTriangleIntersect = 26;
-        public const int Flag_Sync_EdgeTriangleIntersect = 27;
-        public const int Flag_PSync_EdgeTriangleIntersect = 28;
-        public const int Flag_Self_TriangleEdgeIntersect = 29;
-        public const int Flag_Sync_TriangleEdgeIntersect = 30;
-        public const int Flag_PSync_TriangleEdgeIntersect = 31;
+        public const int Flag_Self_EdgeTriangleIntersect = 44;
+        public const int Flag_Sync_EdgeTriangleIntersect = 45;
+        public const int Flag_PSync_EdgeTriangleIntersect = 46;
+        public const int Flag_Self_TriangleEdgeIntersect = 47;
+        public const int Flag_Sync_TriangleEdgeIntersect = 48;
+        public const int Flag_PSync_TriangleEdgeIntersect = 49;
 
         /// <summary>
         /// チーム基本データ
@@ -67,7 +68,7 @@ namespace MagicaCloth2
             /// <summary>
             /// フラグ
             /// </summary>
-            public BitField32 flag;
+            public BitField64 flag;
 
             /// <summary>
             /// 更新モード
@@ -298,7 +299,7 @@ namespace MagicaCloth2
             /// <summary>
             /// 接続しているマッピングメッシュへデータへのインデックスセット(最大15まで)
             /// </summary>
-            public FixedList32Bytes<short> mappingDataIndexSet;
+            //public FixedList32Bytes<short> mappingDataIndexSet;
 
             //-----------------------------------------------------------------
             /// <summary>
@@ -421,7 +422,7 @@ namespace MagicaCloth2
 
             public int EdgeCount => proxyEdgeChunk.dataLength;
 
-            public int MappingCount => mappingDataIndexSet.Length;
+            //public int MappingCount => mappingDataIndexSet.Length;
 
             /// <summary>
             /// 初期スケール（ｘ軸のみで判定、均等スケールしか認めていない）
@@ -491,6 +492,11 @@ namespace MagicaCloth2
             public int VertexCount => mappingCommonChunk.dataLength;
         }
         public ExNativeArray<MappingData> mappingDataArray;
+
+        /// <summary>
+        /// チームごとのマッピングメッシュIDリスト（チームごとに最大31まで)
+        /// </summary>
+        public ExNativeArray<FixedList64Bytes<short>> teamMappingIndexArray;
 
         /// <summary>
         /// チーム全体の最大更新回数
@@ -568,12 +574,14 @@ namespace MagicaCloth2
             teamDataArray?.Dispose();
             teamWindArray?.Dispose();
             mappingDataArray?.Dispose();
+            teamMappingIndexArray?.Dispose();
             parameterArray?.Dispose();
             centerDataArray?.Dispose();
 
             teamDataArray = null;
             teamWindArray = null;
             mappingDataArray = null;
+            teamMappingIndexArray = null;
             parameterArray = null;
             centerDataArray = null;
 
@@ -603,6 +611,7 @@ namespace MagicaCloth2
             teamDataArray = new ExNativeArray<TeamData>(capacity);
             teamWindArray = new ExNativeArray<TeamWindData>(capacity);
             mappingDataArray = new ExNativeArray<MappingData>(capacity);
+            teamMappingIndexArray = new ExNativeArray<FixedList64Bytes<short>>(capacity);
             parameterArray = new ExNativeArray<ClothParameters>(capacity);
             centerDataArray = new ExNativeArray<InertiaConstraint.CenterData>(capacity);
 
@@ -610,6 +619,7 @@ namespace MagicaCloth2
             var gteam = new TeamData();
             teamDataArray.Add(gteam);
             teamWindArray.Add(new TeamWindData());
+            teamMappingIndexArray.Add(new FixedList64Bytes<short>());
             parameterArray.Add(new ClothParameters());
             centerDataArray.Add(new InertiaConstraint.CenterData());
 
@@ -671,6 +681,9 @@ namespace MagicaCloth2
             wind.movingWind.time = -Define.System.WindMaxTime;
             teamWindArray.Add(wind);
 
+            // マッピングメッシュ
+            teamMappingIndexArray.Add(new FixedList64Bytes<short>());
+
             // パラメータ
             parameterArray.Add(clothParams);
 
@@ -708,6 +721,7 @@ namespace MagicaCloth2
             var c = new DataChunk(teamId);
             teamDataArray.RemoveAndFill(c);
             teamWindArray.RemoveAndFill(c);
+            teamMappingIndexArray.RemoveAndFill(c, new FixedList64Bytes<short>());
             parameterArray.Remove(c);
             centerDataArray.Remove(c);
 
@@ -747,6 +761,14 @@ namespace MagicaCloth2
             return enableTeamSet.Contains(teamId);
         }
 
+        internal void SetSkipWriting(int teamId, bool sw)
+        {
+            if (isValid == false || teamId == 0)
+                return;
+            ref var team = ref teamDataArray.GetRef(teamId);
+            team.flag.SetBits(Flag_SkipWriting, sw);
+        }
+
         public bool ContainsTeamData(int teamId)
         {
             return teamId >= 0 && clothProcessDict.ContainsKey(teamId);
@@ -755,6 +777,11 @@ namespace MagicaCloth2
         public ref TeamData GetTeamDataRef(int teamId)
         {
             return ref teamDataArray.GetRef(teamId);
+        }
+
+        public ref FixedList64Bytes<short> GetTeamMappingRef(int teamId)
+        {
+            return ref teamMappingIndexArray.GetRef(teamId);
         }
 
         public ref ClothParameters GetParametersRef(int teamId)
@@ -949,26 +976,45 @@ namespace MagicaCloth2
                 bool selfCollisionUpdate = false;
 
                 // パラメータ変更反映
-                if (cprocess.IsState(ClothProcess.State_ParameterDirty) && cprocess.IsEnable)
+                if (cprocess.IsEnable)
                 {
-                    //Develop.DebugLog($"Update Parameters {teamId}");
-                    // コライダー更新(内部でteamData更新)
-                    MagicaManager.Collider.UpdateColliders(cprocess);
+                    if (cprocess.IsState(ClothProcess.State_ParameterDirty))
+                    {
+                        //Develop.DebugLog($"Update Parameters {teamId}");
+                        // コライダー更新(内部でteamData更新)
+                        MagicaManager.Collider.UpdateColliders(cprocess);
 
-                    // カリング用アニメーターとレンダラー更新
-                    cprocess.UpdateCullingAnimatorAndRenderers();
+                        // カリング用アニメーターとレンダラー更新
+                        cprocess.UpdateCullingAnimatorAndRenderers();
 
-                    // パラメータ変更
-                    cprocess.SyncParameters();
-                    parameterArray[teamId] = cprocess.parameters;
-                    tdata.updateMode = cloth.SerializeData.updateMode;
-                    tdata.animationPoseRatio = cloth.SerializeData.animationPoseRatio;
-                    tdata.flag.SetBits(Flag_Spring, cprocess.clothType == ClothProcess.ClothType.BoneSpring && cprocess.parameters.springConstraint.springPower > 0.0f); // Spring利用フラグ
+                        // パラメータ変更
+                        cprocess.SyncParameters();
+                        parameterArray[teamId] = cprocess.parameters;
+                        tdata.updateMode = cloth.SerializeData.updateMode;
+                        tdata.animationPoseRatio = cloth.SerializeData.animationPoseRatio;
+                        tdata.flag.SetBits(Flag_Spring, cprocess.clothType == ClothProcess.ClothType.BoneSpring && cprocess.parameters.springConstraint.springPower > 0.0f); // Spring利用フラグ
 
-                    // セルフコリジョン更新
-                    selfCollisionUpdate = true;
+                        // セルフコリジョン更新
+                        selfCollisionUpdate = true;
 
-                    cprocess.SetState(ClothProcess.State_ParameterDirty, false);
+                        cprocess.SetState(ClothProcess.State_ParameterDirty, false);
+                    }
+                    if (cprocess.IsState(ClothProcess.State_SkipWritingDirty))
+                    {
+                        bool skipWriting = cprocess.IsState(ClothProcess.State_SkipWriting);
+
+                        // チームへ反映
+                        tdata.flag.SetBits(Flag_SkipWriting, skipWriting);
+
+                        // RenderDataへ反映
+                        foreach (var rinfo in cprocess.renderMeshInfoList)
+                        {
+                            var renderData = MagicaManager.Render.GetRendererData(rinfo.renderHandle);
+                            renderData.UpdateSkipWriting();
+                        }
+
+                        cprocess.SetState(ClothProcess.State_SkipWritingDirty, false);
+                    }
                 }
 
                 // チーム同期
@@ -1610,8 +1656,6 @@ namespace MagicaCloth2
                                 windMain *= attenuation;
                                 break;
                         }
-                        if (windMain < 0.01f)
-                            continue;
 
                         // 計算する風として登録する
                         var windInfo = new TeamWindInfo()
@@ -2033,6 +2077,8 @@ namespace MagicaCloth2
 
                     sb.Clear();
 
+                    var mappingList = teamMappingIndexArray[i];
+
                     var cprocess = GetClothProcess(i);
                     if (cprocess == null)
                     {
@@ -2050,7 +2096,8 @@ namespace MagicaCloth2
                         continue;
                     }
 
-                    sb.AppendLine($"ID:{i} [{cprocess.Name}] state:0x{cprocess.GetStateFlag().Value:X}, Flag:0x{tdata.flag.Value:X}, Particle:{tdata.ParticleCount}, Collider:{cprocess.ColliderCapacity} Proxy:{tdata.proxyMeshType}, Mapping:{tdata.MappingCount}");
+                    //sb.AppendLine($"ID:{i} [{cprocess.Name}] state:0x{cprocess.GetStateFlag().Value:X}, Flag:0x{tdata.flag.Value:X}, Particle:{tdata.ParticleCount}, Collider:{cprocess.ColliderCapacity} Proxy:{tdata.proxyMeshType}, Mapping:{tdata.MappingCount}");
+                    sb.AppendLine($"ID:{i} [{cprocess.Name}] state:0x{cprocess.GetStateFlag().Value:X}, Flag:0x{tdata.flag.Value:X}, Particle:{tdata.ParticleCount}, Collider:{cprocess.ColliderCapacity} Proxy:{tdata.proxyMeshType}, Mapping:{mappingList.Length}");
                     sb.AppendLine($"  -centerTransformIndex {tdata.centerTransformIndex}");
                     sb.AppendLine($"  -centerWorldPosition {tdata.centerWorldPosition}");
                     sb.AppendLine($"  -initScale {tdata.initScale}");
@@ -2077,12 +2124,17 @@ namespace MagicaCloth2
                     sb.AppendLine($"  -colliderCount {tdata.colliderCount}");
 
                     // mapping情報
-                    sb.AppendLine($"  *Mapping Count {tdata.MappingCount}");
-                    if (tdata.MappingCount > 0)
+                    //var teamMapping = teamMappingIndexArray[i];
+                    //sb.AppendLine($"  *Mapping Count {tdata.MappingCount}");
+                    sb.AppendLine($"  *Mapping Count {mappingList.Length}");
+                    //if (tdata.MappingCount > 0)
+                    if (mappingList.Length > 0)
                     {
-                        for (int j = 0; j < tdata.MappingCount; j++)
+                        //for (int j = 0; j < tdata.MappingCount; j++)
+                        for (int j = 0; j < mappingList.Length; j++)
                         {
-                            int mid = tdata.mappingDataIndexSet[j];
+                            //int mid = tdata.mappingDataIndexSet[j];
+                            int mid = mappingList[j];
                             var mdata = mappingDataArray[mid];
                             sb.AppendLine($"  *Mapping Mid:{mid}, Vertex:{mdata.VertexCount}");
                             sb.AppendLine($"    -teamId:{mdata.teamId}");

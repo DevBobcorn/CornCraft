@@ -120,7 +120,7 @@ namespace MagicaCloth2
                     return "It is necessary to turn on [Read/Write] in the model import settings.";
                 case Define.Result.RenderSetup_Over65535vertices:
                     return "Original mesh must have no more than 65,535 vertices";
-                case Define.Result.SerializeData_Over15Renderers:
+                case Define.Result.SerializeData_Over31Renderers:
                     return $"There are {Define.System.MaxRendererCount} renderers that can be set.";
                 default:
                     return null;

@@ -41,7 +41,7 @@ namespace MagicaCloth2
 
             // Validating serialized data
             SerializeData_InvalidData = 20050,
-            SerializeData_Over15Renderers,
+            SerializeData_Over31Renderers,
 
             // init
             Init_InvalidData = 20100,

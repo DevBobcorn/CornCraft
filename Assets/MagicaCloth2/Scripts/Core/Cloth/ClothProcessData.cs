@@ -28,6 +28,8 @@ namespace MagicaCloth2
         public const int State_DisableAutoBuild = 6;
         public const int State_CullingInvisible = 7; // チームデータの同フラグのコピー
         public const int State_CullingKeep = 8; // チームデータの同フラグのコピー
+        public const int State_SkipWriting = 9; // 書き込み停止（ストップモーション用）
+        public const int State_SkipWritingDirty = 10; // 書き込み停止フラグ更新サイン
 
         /// <summary>
         /// 現在の状態
@@ -218,10 +220,9 @@ namespace MagicaCloth2
         }
 
         public bool IsValid() => IsState(State_Valid);
-
         public bool IsCullingInvisible() => IsState(State_CullingInvisible);
-
         public bool IsCullingKeep() => IsState(State_CullingKeep);
+        public bool IsSkipWriting() => IsState(State_SkipWriting);
 
         public bool IsEnable
         {
@@ -378,6 +379,14 @@ namespace MagicaCloth2
             renderHandleList.ForEach(handle => MagicaManager.Render.GetRendererData(handle).ReplaceTransform(replaceDict));
             customSkinningBoneRecords.ForEach(rd => rd.ReplaceTransform(replaceDict));
             normalAdjustmentTransformRecord?.ReplaceTransform(replaceDict);
+        }
+
+        internal void SetSkipWriting(bool sw)
+        {
+            // ここではフラグのみ更新する
+            // 実際の更新はチームのAlwaysTeamUpdate()で行われる
+            SetState(State_SkipWriting, sw);
+            SetState(State_SkipWritingDirty, true);
         }
     }
 }
