@@ -40,6 +40,9 @@ namespace CraftSharp
             if (CornApp.CurrentClient == null)
             {
                 CornApp.SetCurrentClient(this);
+
+                // Start up by self since it's not started from login screen
+                StartClient(new(false, new(), null, "dummy", 0, 754, null, "dummy_player"));
             }
         }
 
