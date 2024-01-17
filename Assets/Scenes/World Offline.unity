@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 1907403077}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.42327523, g: 0.57146406, b: 0.39080995, a: 1}
+  m_IndirectSpecularColor: {r: 0.58787966, g: 1.1287535, b: 2.0109694, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -858,7 +858,7 @@ MonoBehaviour:
   EnvironmentManager: {fileID: 346995815}
   MaterialManager: {fileID: 331478947}
   playerController: {fileID: 195804746}
-  playerRenderPrefab: {fileID: 4629627389257955861, guid: f203159209ba7b748b562080342c675e, type: 3}
+  playerRenderPrefab: {fileID: 1589991316666168082, guid: bc46e5ac0bc327049911b07789e1ff30, type: 3}
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
