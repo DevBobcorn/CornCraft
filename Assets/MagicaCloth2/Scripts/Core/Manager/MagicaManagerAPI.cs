@@ -51,7 +51,10 @@ namespace MagicaCloth2
                 return Time.GlobalTimeScale;
             }
             else
+            {
+                Develop.LogError("MagicaManager is not starting!");
                 return 1.0f;
+            }
         }
 
         /// <summary>
@@ -80,7 +83,10 @@ namespace MagicaCloth2
             if (IsPlaying())
                 return Time.simulationFrequency;
             else
+            {
+                Develop.LogError("MagicaManager is not starting!");
                 return 0;
+            }
         }
 
         /// <summary>
@@ -115,7 +121,37 @@ namespace MagicaCloth2
             if (IsPlaying())
                 return Time.maxSimulationCountPerFrame;
             else
+            {
+                Develop.LogError("MagicaManager is not starting!");
                 return 0;
+            }
+        }
+
+        /// <summary>
+        /// シミュレーションの更新場所を変更します
+        /// Change the simulation update location.
+        /// </summary>
+        /// <param name="updateLocation"></param>
+        public static void SetUpdateLocation(TimeManager.UpdateLocation updateLocation)
+        {
+            if (IsPlaying())
+                Time.updateLocation = updateLocation;
+        }
+
+        /// <summary>
+        /// 現在のシミュレーションの更新場所を取得します
+        /// Get the current simulation update location.
+        /// </summary>
+        /// <returns></returns>
+        public static TimeManager.UpdateLocation GetUpdateLocation()
+        {
+            if (IsPlaying())
+                return Time.updateLocation;
+            else
+            {
+                Develop.LogError("MagicaManager is not starting!");
+                return TimeManager.UpdateLocation.AfterLateUpdate;
+            }
         }
     }
 }

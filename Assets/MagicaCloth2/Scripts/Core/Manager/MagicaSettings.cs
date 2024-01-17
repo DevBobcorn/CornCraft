@@ -64,6 +64,17 @@ namespace MagicaCloth2
         [Range(Define.System.MaxSimulationCountPerFrame_Low, Define.System.MaxSimulationCountPerFrame_Hi)]
         public int maxSimulationCountPerFrame = Define.System.DefaultMaxSimulationCountPerFrame;
 
+        /// <summary>
+        /// シミュレーションの更新場所
+        /// BeforeLateUpdate : LateUpdate()の前に実行します。これはUnity 2D Animationで利用する場合に必要です。
+        /// AfterLateUpdate  : LateUpdate()の後に実行します。初期設定。
+        /// 
+        /// Simulation update location.
+        /// BeforeLateUpdate : Executes before LateUpdate(). This is required when using Unity 2D Animation.
+        /// AfterLateUpdate  : Executes after LateUpdate(). Initial setting.
+        /// </summary>
+        public TimeManager.UpdateLocation updateLocation = TimeManager.UpdateLocation.AfterLateUpdate;
+
         //=========================================================================================
         public void Awake()
         {
@@ -74,6 +85,12 @@ namespace MagicaCloth2
         public void Update()
         {
             if (refreshMode == RefreshMode.EveryFrame)
+                Refresh();
+        }
+
+        private void OnValidate()
+        {
+            if (Application.isPlaying)
                 Refresh();
         }
 
@@ -91,6 +108,11 @@ namespace MagicaCloth2
 
                 MagicaManager.SetSimulationFrequency(simulationFrequency);
                 MagicaManager.SetMaxSimulationCountPerFrame(maxSimulationCountPerFrame);
+                MagicaManager.SetUpdateLocation(updateLocation);
+            }
+            else
+            {
+                Develop.LogError("MagicaManager is not starting!");
             }
         }
     }

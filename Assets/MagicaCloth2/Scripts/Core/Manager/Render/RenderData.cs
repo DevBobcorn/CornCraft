@@ -29,6 +29,11 @@ namespace MagicaCloth2
         /// </summary>
         HashSet<ClothProcess> useProcessSet = new HashSet<ClothProcess>();
 
+        /// <summary>
+        /// Meshへの書き込み停止フラグ
+        /// </summary>
+        bool isSkipWriting;
+
         //=========================================================================================
         // セットアップデータ
         internal RenderSetupData setupData;
@@ -291,9 +296,27 @@ namespace MagicaCloth2
         }
 
         //=========================================================================================
+        /// <summary>
+        /// Meshへの書き込みフラグを更新する
+        /// </summary>
+        internal void UpdateSkipWriting()
+        {
+            isSkipWriting = false;
+            foreach (var cprocess in useProcessSet)
+            {
+                if (cprocess.IsSkipWriting())
+                    isSkipWriting = true;
+            }
+        }
+
+        //=========================================================================================
         internal void WriteMesh()
         {
             if (UseCustomMesh == false || useProcessSet.Count == 0)
+                return;
+
+            // 書き込み停止中ならスキップ
+            if (isSkipWriting)
                 return;
 
             // メッシュに反映

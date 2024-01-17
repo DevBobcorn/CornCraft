@@ -20,6 +20,16 @@ namespace MagicaCloth2
         /// </summary>
         internal int maxSimulationCountPerFrame = Define.System.DefaultMaxSimulationCountPerFrame;
 
+        /// <summary>
+        /// マネージャの更新場所
+        /// </summary>
+        public enum UpdateLocation
+        {
+            AfterLateUpdate = 0,
+            BeforeLateUpdate = 1,
+        }
+        internal UpdateLocation updateLocation = UpdateLocation.AfterLateUpdate;
+
         //=========================================================================================
         bool isValid = false;
 

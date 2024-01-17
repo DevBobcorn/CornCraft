@@ -61,6 +61,11 @@ namespace MagicaCloth2
         public static UpdateMethod afterUpdateDelegate;
 
         /// <summary>
+        /// LateUpdate()の前
+        /// </summary>
+        public static UpdateMethod beforeLateUpdateDelegate;
+
+        /// <summary>
         /// LateUpdate()の後
         /// </summary>
         public static UpdateMethod afterLateUpdateDelegate;
@@ -348,6 +353,15 @@ namespace MagicaCloth2
             };
             AddPlayerLoop(afterUpdate, ref playerLoop, "Update", "ScriptRunDelayedTasks");
 
+            // before late update 
+            // LateUpdate()の前
+            PlayerLoopSystem beforeLateUpdate = new PlayerLoopSystem()
+            {
+                type = typeof(MagicaManager),
+                updateDelegate = () => beforeLateUpdateDelegate?.Invoke()
+            };
+            AddPlayerLoop(beforeLateUpdate, ref playerLoop, "PreLateUpdate", "ScriptRunBehaviourLateUpdate", before: true);
+
             // after late update 
             // LateUpdate()の後
             PlayerLoopSystem afterLateUpdate = new PlayerLoopSystem()
@@ -389,7 +403,7 @@ namespace MagicaCloth2
         /// <param name="playerLoop"></param>
         /// <param name="categoryName"></param>
         /// <param name="systemName"></param>
-        static void AddPlayerLoop(PlayerLoopSystem method, ref PlayerLoopSystem playerLoop, string categoryName, string systemName, bool last = false)
+        static void AddPlayerLoop(PlayerLoopSystem method, ref PlayerLoopSystem playerLoop, string categoryName, string systemName, bool last = false, bool before = false)
         {
             int sysIndex = Array.FindIndex(playerLoop.subSystemList, (s) => s.type.Name == categoryName);
             PlayerLoopSystem category = playerLoop.subSystemList[sysIndex];
@@ -403,7 +417,10 @@ namespace MagicaCloth2
             else
             {
                 int index = systemList.FindIndex(h => h.type.Name.Contains(systemName));
-                systemList.Insert(index + 1, method);
+                if (before)
+                    systemList.Insert(index, method);
+                else
+                    systemList.Insert(index + 1, method);
             }
 
             category.subSystemList = systemList.ToArray();
