@@ -6,7 +6,9 @@ namespace CraftSharp.Control
     public class SwimState : IPlayerState
     {
         public const float THRESHOLD_LAND_PLATFORM  = -1.4F;
-        public const float SURFING_LIQUID_DIST_THERSHOLD = -0.2F;
+        public const float AFLOAT_LIQUID_DIST_THERSHOLD = -0.70F;
+        public const float SOAKED_LIQUID_DIST_THERSHOLD = -0.75F;
+        public const float SURFING_GRAVITY_SCALE = 0.5F;
 
         public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
         {
@@ -16,9 +18,7 @@ namespace CraftSharp.Control
             info.Gliding = false;
             info.Moving = true;
 
-            var moveSpeed = (info.WalkMode ? ability.WalkSpeed : ability.RunSpeed) * ability.WaterMoveMultiplier;
-
-            var distAboveLiquidSurface = info.LiquidDist - SURFING_LIQUID_DIST_THERSHOLD;
+            var moveSpeed = ability.SwimSpeed;
 
             Vector3 moveVelocity;
 
@@ -61,19 +61,7 @@ namespace CraftSharp.Control
                     }
                     else if (info.LiquidDist > THRESHOLD_LAND_PLATFORM) // Approaching Water suface, and the platform is under water 
                     {
-                        var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
-
-                        // Start force move operation
-                        var org  = rigidbody.transform.position;
-                        var dest = org + (-info.FrontDownDist) * Vector3.up + moveHorDir * 0.55F;
-
-                        player.StartForceMoveOperation("Swim over barrier underwater",
-                                new ForceMoveOperation[] {
-                                        new(org,  dest, 0.8F,
-                                            update: (interval, inputData, info, rigidbody, player) =>
-                                                info.Moving = true
-                                        )
-                                } );
+                        // Do nothing
                     }
                     else // Below water surface now, swim up a bit
                     {
@@ -96,48 +84,40 @@ namespace CraftSharp.Control
             else
                 moveVelocity = Vector3.zero;
             
-            // Whether movement should be slowed down by liquid, and whether the player can move around by swimming
-            bool movementAffected = info.LiquidDist <= -0.4F;
+            // Whether gravity should be reduced by liquid, and whether the player can move around by swimming
+            bool soaked = info.LiquidDist <= SOAKED_LIQUID_DIST_THERSHOLD;
+            float distToAfloat = AFLOAT_LIQUID_DIST_THERSHOLD - info.LiquidDist;
 
-            if (movementAffected) // In liquid
-                moveVelocity.y = Mathf.Max(rigidbody.velocity.y, ability.MaxInLiquidFallSpeed);
-            else // Still in air, free fall
-                moveVelocity.y = rigidbody.velocity.y;
+            if (soaked) // Use no gravity
+            {
+                info.GravityScale = 0F;
+            }
+            else // Still in air, use reduced gravity
+            {
+                info.GravityScale = SURFING_GRAVITY_SCALE;
+            }
+
+            moveVelocity.y = rigidbody.velocity.y * ability.LiquidMoveMultiplier;
 
             // Check vertical movement...
             if (inputData.Gameplay.Ascend.IsPressed())
             {
-                if (distAboveLiquidSurface > 0F) // Free fall in air
+                if (distToAfloat > 0F && distToAfloat < 1F) // Move up no further than top of the surface
                 {
-                    costStamina = false;
-                }
-                else if (distAboveLiquidSurface > -0.5F) // Cancel gravity, but don't move up further
-                {
-                    moveVelocity.y = -distAboveLiquidSurface;
+                    moveVelocity.y = distToAfloat;
                     costStamina = false;
                 }
                 else
+                {
                     moveVelocity.y =  moveSpeed; // Move up
+                }
             }
             else if (inputData.Gameplay.Descend.IsPressed())
             {
                 if (!info.Grounded)
-                    moveVelocity.y = -moveSpeed;
-            }
-            else // Not moving horizontally
-            {
-                if (inputData.Gameplay.Movement.IsPressed()) // Moving, cancel gravity
                 {
-                    if (movementAffected)
-                    {
-                        if (distAboveLiquidSurface > -0.5F)
-                            moveVelocity.y = -distAboveLiquidSurface;
-                        else
-                            moveVelocity.y =  0.5F;
-                    }
-                    // Otherwise free fall
+                    moveVelocity.y = -moveSpeed;
                 }
-                
             }
 
             // Apply new velocity to rigidbody
@@ -174,6 +154,17 @@ namespace CraftSharp.Control
                 return true;
             
             return false;
+        }
+
+        public void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        {
+            info.GravityScale = SURFING_GRAVITY_SCALE;
+        }
+
+        public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        {
+            // Restore gravity scale
+            info.GravityScale = 1F;
         }
 
         public override string ToString() => "Swim";

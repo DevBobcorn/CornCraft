@@ -13,18 +13,20 @@ namespace CraftSharp.Control
             info.Gliding = false;
             info.Moving = false;
 
-            // Whether movement should be slowed down by liquid, and whether the player can move around by swimming
-            bool movementAffected = info.LiquidDist <= -0.4F;
+            // Whether gravity should be reduced by liquid, and whether the player can move around by swimming
+            bool soaked = info.LiquidDist <= SwimState.SOAKED_LIQUID_DIST_THERSHOLD;
 
-            Vector3 moveVelocity = rigidbody.velocity;
-
-            if (movementAffected) // In liquid
-                moveVelocity.y = Mathf.Max(rigidbody.velocity.y, ability.MaxInLiquidFallSpeed);
-            else // Still in air, free fall
-                moveVelocity.y = rigidbody.velocity.y;
+            if (soaked) // Use no gravity
+            {
+                info.GravityScale = 0F;
+            }
+            else // Still in air, use reduced gravity
+            {
+                info.GravityScale = SwimState.SURFING_GRAVITY_SCALE;
+            }
 
             // Apply new velocity to rigidbody
-            info.MoveVelocity = moveVelocity;
+            info.MoveVelocity = rigidbody.velocity * ability.LiquidMoveMultiplier;
             
             if (info.Grounded) // Restore stamina
                 info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
@@ -54,6 +56,17 @@ namespace CraftSharp.Control
                 return true;
             
             return false;
+        }
+
+        public void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        {
+            info.GravityScale = SwimState.SURFING_GRAVITY_SCALE;
+        }
+
+        public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        {
+            // Restore gravity scale
+            info.GravityScale = 1F;
         }
 
         public override string ToString() => "Tread";

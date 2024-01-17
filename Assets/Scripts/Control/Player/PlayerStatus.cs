@@ -17,6 +17,7 @@ namespace CraftSharp.Control
         public bool Sprinting = false;
 
         public Vector3 MoveVelocity = Vector3.zero;
+        public float GravityScale = 0F;
 
         public bool Attacking = false;
         public AttackStatus AttackStatus = new();
@@ -45,7 +46,7 @@ namespace CraftSharp.Control
         public override string ToString()
         {
             var moveInfo = $"Moving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nSprinting:\t{Sprinting}";
-            var envInfo = $"Ground Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}";
+            var envInfo = $"Ground Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}\nGravity Scale:\t{GravityScale:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             
             return $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\n{moveInfo}\n{envInfo}\n{atkInfo}";
