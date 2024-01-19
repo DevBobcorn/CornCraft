@@ -55,69 +55,6 @@ MonoBehaviour:
   m_Name: FernPostProcess
   m_EditorClassIdentifier: 
   m_Active: 1
---- !u!114 &-5745652578779279666
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b1b1f8e52a528414eb09a2a63238d9d6, type: 3}
-  m_Name: UniStormAtmosphericFogFeature
-  m_EditorClassIdentifier: 
-  m_Active: 0
-  settings:
-    isEnabled: 1
-    renderPassEvent: 500
-    NoiseTexture: {fileID: 2800000, guid: e09deeeaec0a3c547a3b72ad3d615255, type: 2}
-    Dither: 0
-    distanceFog: 1
-    useRadialDistance: 1
-    heightFog: 0
-    height: 10
-    heightDensity: 0
-    startDistance: 32
-    SunColor: {r: 0.69934195, g: 0.58467793, b: 0.5092466, a: 1}
-    MoonColor: {r: 0.33023313, g: 0.36793935, b: 0.38679242, a: 1}
-    TopColor: {r: 0, g: 0, b: 0, a: 0}
-    BottomColor: {r: 0.74650955, g: 0.74650955, b: 0.74650955, a: 1}
-    BlendHeight: 222
-    FogGradientHeight: 0.5
-    SunIntensity: 0
-    MoonIntensity: -0
-    SunFalloffIntensity: 9.4
-    SunControl: 1.0050161
-    MoonControl: 0
---- !u!114 &-3662932369841924689
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d309d34ca22cb5d4f91a635395eded23, type: 3}
-  m_Name: UniStormCloudShadowsFeature
-  m_EditorClassIdentifier: 
-  m_Active: 0
-  settings:
-    isEnabled: 0
-    renderPassEvent: 400
-    Fade: 0.33
-    CloudShadowTexture: {fileID: 0}
-    ShadowColor: {r: 1, g: 1, b: 1, a: 1}
-    CloudTextureScale: 0.1
-    BottomThreshold: 0
-    TopThreshold: 1
-    ShadowIntensity: 1
-    ScreenSpaceShadowsMaterial: {fileID: 0}
-    ShadowDirection: {x: 0, y: 0, z: 0}
-    m_CurrentCloudHeight: 0
-    CloudSpeed: 0
-    NormalY: 0
 --- !u!114 &-2351452293755395191
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -244,32 +181,6 @@ MonoBehaviour:
       normalBlend: 2
   m_CopyDepthPS: {fileID: 4800000, guid: d6dae50ee9e1bfa4db75f19f99355220, type: 3}
   m_DBufferClear: {fileID: 4800000, guid: f056d8bd2a1c7e44e9729144b4c70395, type: 3}
---- !u!114 &4860644998581089374
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b47d9523e62ddd48b8ae2826026b4f3, type: 3}
-  m_Name: MoonUniStormSunShaftsFeature
-  m_EditorClassIdentifier: 
-  m_Active: 0
-  settings:
-    isEnabled: 0
-    renderPassEvent: 500
-    resolution: 1
-    screenBlendMode: 0
-    celestialName: UniStorm Moon
-    radialBlurIterations: 3
-    sunColor: {r: 0.31764707, g: 0.32156864, b: 0.32156864, a: 1}
-    sunThreshold: {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 1}
-    sunShaftBlurRadius: 3.32
-    sunShaftIntensity: 1
-    maxRadius: 0.3
-    useDepthTexture: 1
 --- !u!114 &5351018995921332434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -305,29 +216,3 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 3302065f671a8450b82c9ddf07426f3a, type: 3}
   - {fileID: 2800000, guid: 56a77a3e8d64f47b6afe9e3c95cb57d5, type: 3}
   m_Shader: {fileID: 4800000, guid: 0849e84e3d62649e8882e9d6f056a017, type: 3}
---- !u!114 &6018286962624777378
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b47d9523e62ddd48b8ae2826026b4f3, type: 3}
-  m_Name: SunUniStormSunShaftsFeature
-  m_EditorClassIdentifier: 
-  m_Active: 0
-  settings:
-    isEnabled: 1
-    renderPassEvent: 500
-    resolution: 1
-    screenBlendMode: 0
-    celestialName: UniStorm Sun
-    radialBlurIterations: 3
-    sunColor: {r: 0.93642616, g: 0.82604927, b: 0.6411512, a: 1}
-    sunThreshold: {r: 0.5568628, g: 0.5372549, b: 0.48235294, a: 1}
-    sunShaftBlurRadius: 0.4
-    sunShaftIntensity: 1
-    maxRadius: 0.5
-    useDepthTexture: 1
