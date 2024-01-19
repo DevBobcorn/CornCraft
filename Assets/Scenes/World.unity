@@ -423,7 +423,7 @@ MonoBehaviour:
   AtlasCutout: {fileID: 2100000, guid: 9799fbe4314dcb04a95084e6b0a1626f, type: 2}
   AtlasCutoutMipped: {fileID: 2100000, guid: 356fe3b2c3144ef4f82484e1a7bebe4e, type: 2}
   AtlasTranslucent: {fileID: 2100000, guid: 8ee6dff0c60e65743895b69cc4c5bc0a, type: 2}
-  AtlasWater: {fileID: 2100000, guid: 8ee6dff0c60e65743895b69cc4c5bc0a, type: 2}
+  AtlasWater: {fileID: 2100000, guid: f88a63d89167dc8418f0889f8358a56d, type: 2}
   AtlasInventory: {fileID: 0}
   PlayerSkin: {fileID: 2100000, guid: a7bc66ac351da2644be4e993cc7450e7, type: 2}
 --- !u!114 &331478948
@@ -1699,15 +1699,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3083690404439012666, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -9830.065
+      value: -9913.238
       objectReference: {fileID: 0}
     - target: {fileID: 3083690404439012666, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 19707.064
+      value: 19871.918
       objectReference: {fileID: 0}
     - target: {fileID: 3083690404439012666, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 13428.297
+      value: 13539.033
       objectReference: {fileID: 0}
     - target: {fileID: 7361313672352195396, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1723,43 +1723,43 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7372638134847987542, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -9833.193
+      value: -9915.649
       objectReference: {fileID: 0}
     - target: {fileID: 7372638134847987542, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 19710.318
+      value: 19878.127
       objectReference: {fileID: 0}
     - target: {fileID: 7372638134847987542, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 13432.189
+      value: 13543.69
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -9830.065
+      value: -9915.649
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 19707.064
+      value: 19878.127
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 13426.497
+      value: 13543.69
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.28152874
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0.13044336
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0.86255515
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: -0.39965582
       objectReference: {fileID: 0}
     - target: {fileID: 9155130719897283015, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Cameras.Array.size
