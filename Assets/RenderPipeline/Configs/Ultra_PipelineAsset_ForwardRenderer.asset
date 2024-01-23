@@ -116,10 +116,10 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 2459697373835453351}
   - {fileID: 5351018995921332434}
-  - {fileID: -5747766180797253489}
   - {fileID: -2351452293755395191}
+  - {fileID: -5747766180797253489}
   - {fileID: -8976238060765929404}
-  m_RendererFeatureMap: a7636cbeba992222d22842066da3424a8f78938d1cd53bb089a36eec98f65ddf44a0b4b80aff6d83
+  m_RendererFeatureMap: a7636cbeba992222d22842066da3424a89a36eec98f65ddf8f78938d1cd53bb044a0b4b80aff6d83
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -170,7 +170,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1614fc811f8f184697d9bee70ab9fe5, type: 3}
   m_Name: DecalRendererFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   m_Settings:
     technique: 2
     maxDrawDistance: 1000
