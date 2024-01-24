@@ -268,6 +268,13 @@ namespace CraftSharp
                     Screen.fullScreen = true;
                 }
             }
+
+            if (Keyboard.current.f5Key.wasPressedThisFrame)
+            {
+                DynamicGI.UpdateEnvironment();
+
+                Notify("Updating skybox lighting...");
+            }
         }
     }
 }

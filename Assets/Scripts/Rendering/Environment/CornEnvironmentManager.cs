@@ -1,4 +1,5 @@
 #nullable enable
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace CraftSharp.Rendering
@@ -15,6 +16,9 @@ namespace CraftSharp.Rendering
         [SerializeField] AnimationCurve? skyboxExposure;
 
         [SerializeField] private long startTime;
+        [SerializeField] private bool updateEnvLighting = false;
+
+        private float lastUpdateEnvLightingTODAngle = 0;
 
         private int ticks;
         private int lastRecTicks;
@@ -52,6 +56,15 @@ namespace CraftSharp.Rendering
         void Start()
         {
             SetTime(startTime);
+
+            if (updateEnvLighting)
+            {
+                float normalizedTOD = (ticks + 6000) % 24000 / 24000F;
+
+                DynamicGI.UpdateEnvironment();
+
+                lastUpdateEnvLightingTODAngle = normalizedTOD * 360F;
+            }
         }
 
         void Update()
@@ -111,7 +124,14 @@ namespace CraftSharp.Rendering
 
             skyboxMaterial!.SetFloat("_Exposure", skyboxExposure!.Evaluate(normalizedTOD));
 
-            //DynamicGI.UpdateEnvironment();
+            if (updateEnvLighting && Mathf.Abs(Mathf.DeltaAngle(normalizedTOD * 360F, lastUpdateEnvLightingTODAngle)) > 20F) // Time for an update!
+            {
+                lastUpdateEnvLightingTODAngle = normalizedTOD * 360F;
+
+                //Debug.Log("Updating env lighting!");
+
+                DynamicGI.UpdateEnvironment();
+            }
         }
 
         public static (int hours, int minutes, int seconds) Tick2HMS(int ticks)
