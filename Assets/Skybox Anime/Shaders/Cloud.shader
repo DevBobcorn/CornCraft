@@ -2,7 +2,6 @@ Shader "AnimeSkybox/Cloud"
 {
     Properties
     {
-
         [HDR]_CloudColorD("近太阳云颜色B",color) = (1,1,1,1)
         [HDR]_CloudColorB("近太阳云颜色B",color) = (1,1,1,1)
 
@@ -17,19 +16,22 @@ Shader "AnimeSkybox/Cloud"
         _SunDirection("_SunDirection", Vector) = (-0.26102,0.12177,-0.95762, 0)
         _MoonDirection("_MoonDirection", Vector) = (-0.33274, -0.11934, 0.93544, 0)
         _SunMoon("唯一日月光切换", Range(0, 1)) = 0
- 
     }
+
     SubShader
     {
-        Tags { "Queue"="Transparent" 
-               "RenderType" = "Transparent"
-               "IgnoreProjector" = "True"
-               "RenderPipeline" = "UniversalPipeline" 
-             }
+        Tags {
+            "Queue" = "Transparent" 
+            "RenderType" = "Transparent"
+            "IgnoreProjector" = "True"
+            "RenderPipeline" = "UniversalPipeline" 
+        }
+
         LOD 100
         Blend SrcAlpha OneMinusSrcAlpha
         ZWrite On
-        ZTest NotEqual
+        ZTest LEqual
+        
         Pass
         {
             Name "Unlit"
@@ -44,8 +46,6 @@ Shader "AnimeSkybox/Cloud"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
- 
-   
 
             struct Attributes
             {
@@ -57,12 +57,10 @@ Shader "AnimeSkybox/Cloud"
             struct Varyings
             {
                 float4 positionCS       : SV_POSITION;
-              
                 float2 uv            : TEXCOORD0;
                 float fogCoord          : TEXCOORD1;
                 float2 noiseuv  : TEXCOORD2;
-               float3 positionWS       : TEXCOORD3;
-         
+                float3 positionWS       : TEXCOORD3;
             };
  
             CBUFFER_START(UnityPerMaterial)
@@ -89,11 +87,10 @@ Shader "AnimeSkybox/Cloud"
             CBUFFER_END
 
             half remap(half x, half t1, half t2, half s1, half s2)
-           {
-               return (x - t1) / (t2 - t1) * (s2 - s1) + s1;
-          }
+            {
+                return (x - t1) / (t2 - t1) * (s2 - s1) + s1;
+            }
 
-            
             Varyings vert(Attributes v)
             {
                 Varyings o = (Varyings)0;
@@ -114,16 +111,17 @@ Shader "AnimeSkybox/Cloud"
             half4 frag(Varyings i) : SV_Target
             {
             
-               float3 LightDirection = lerp(_SunDirection.xyz,_MoonDirection.xyz,_SunMoon);
+                float3 LightDirection = lerp(_SunDirection.xyz,_MoonDirection.xyz,_SunMoon);
 
-               float3 SunDirection = clamp((dot(normalize(i.positionWS),LightDirection.xyz)),0,1);
-                      SunDirection =  pow(SunDirection,2);
-              // float  SunDir = smoothstep(0,1,SunDirection);
+                float3 SunDirection = clamp((dot(normalize(i.positionWS),LightDirection.xyz)),0,1);
+                SunDirection =  pow(SunDirection,2);
+                
+                // float SunDir = smoothstep(0,1,SunDirection);
 
                float3  CloudColorAB = lerp(_CloudColorA,_CloudColorB,SunDirection.x) ;
                float3  CloudColorCD = lerp(_CloudColorC,_CloudColorD,SunDirection.x) ;
 
-         // SunDirection =  remap(SunDirection+1,1,2,1,1.15)+_SunColor;
+                // SunDirection =  remap(SunDirection+1,1,2,1,1.15)+_SunColor;
 
                float4 Noise = tex2D(_NoiseMap,i.noiseuv);
                  
@@ -144,8 +142,6 @@ Shader "AnimeSkybox/Cloud"
               
                 return float4(  CloudColor,baseMapSMstep*baseMap.a);
                // return float4(SunDirection,1);
-              
-        
             }
             ENDHLSL
         }

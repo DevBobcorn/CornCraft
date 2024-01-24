@@ -37,7 +37,7 @@ RenderSettings:
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 1907403077}
-  m_Sun: {fileID: 0}
+  m_Sun: {fileID: 346995816}
   m_IndirectSpecularColor: {r: 0.58787966, g: 1.1284804, b: 2.0102315, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
@@ -497,7 +497,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7676391819571368479, guid: bfb4ce13ee81d0a4981f1e5ce3d5a1cd, type: 3}
       propertyPath: m_Name
-      value: Simple Environment Manager
+      value: BoattAttack Environment Manager
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -515,6 +515,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a64db20876eec024489de478bb533db3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!108 &346995816 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1978168991097772859, guid: bfb4ce13ee81d0a4981f1e5ce3d5a1cd, type: 3}
+  m_PrefabInstance: {fileID: 346995814}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &519552150
 GameObject:
   m_ObjectHideFlags: 0

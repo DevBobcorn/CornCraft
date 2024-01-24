@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 
-[ExecuteInEditMode]
-public class FogOverride : MonoBehaviour
+namespace BoatAttackSkybox
 {
-    [ColorUsage(false, true)]
-    public Color mFogColor = Color.white;
-
-    private void LateUpdate()
+    [ExecuteInEditMode]
+    public class FogOverride : MonoBehaviour
     {
-        RenderSettings.fogColor = mFogColor;
+        [ColorUsage(false, true)]
+        public Color mFogColor = Color.white;
+
+        private void LateUpdate()
+        {
+            RenderSettings.fogColor = mFogColor;
+        }
     }
 }

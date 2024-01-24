@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace AnimeSkybox
 {
@@ -17,11 +18,10 @@ namespace AnimeSkybox
 
         void Update()
         {
-            if (Input.GetMouseButton(0))
+            if (Mouse.current.leftButton.isPressed)
             {
-                //Debug.Log("Mouse button down");
-                rotationY += Input.GetAxis("Mouse X") * sensitivity;
-                rotationX -= Input.GetAxis("Mouse Y") * sensitivity;
+                rotationY += Mouse.current.delta.x.value * sensitivity;
+                rotationX -= Mouse.current.delta.y.value * sensitivity;
 
                 rotationX = Mathf.Clamp(rotationX, -90, 90);
 

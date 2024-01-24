@@ -1,18 +1,14 @@
 #nullable enable
 using UnityEngine;
+using UnityEngine.Playables;
 
 namespace CraftSharp.Rendering
 {
-    public class CornEnvironmentManager : BaseEnvironmentManager
+    public class TimelineEnvironmentManager : BaseEnvironmentManager
     {
         private const float TICK_SECONDS = 0.05F;
 
-        [SerializeField] private Transform? sunTransform;
-        [SerializeField] private Light? sunLight;
-        [SerializeField] AnimationCurve? lightIntensity;
-
-        private Material? skyboxMaterial;
-        [SerializeField] AnimationCurve? skyboxExposure;
+        private PlayableDirector? playableDirector;
 
         [SerializeField] private long startTime;
 
@@ -42,6 +38,15 @@ namespace CraftSharp.Rendering
 
                 // Make sure to update time if pause is toggled
                 UpdateTime(lastRecTicks);
+
+                if (simulate)
+                {
+                    playableDirector!.Resume();
+                }
+                else
+                {
+                    playableDirector!.Pause();
+                }
             }
             else if (Mathf.Abs(ticks - lastRecTicks) > 25F)
             {
@@ -51,6 +56,18 @@ namespace CraftSharp.Rendering
 
         void Start()
         {
+            playableDirector = GetComponent<PlayableDirector>();
+            SetPlayableSpeed(4D / 1200D);
+
+            if (simulate)
+            {
+                playableDirector!.Resume();
+            }
+            else
+            {
+                playableDirector!.Pause();
+            }
+
             SetTime(startTime);
         }
 
@@ -73,6 +90,24 @@ namespace CraftSharp.Rendering
             }
         }
 
+        private void SetPlayableSpeed(double speed)
+        {
+            if (playableDirector != null)
+            {
+                var playableGraph = playableDirector.playableGraph;
+                
+                if (!playableGraph.IsValid())
+                {
+                    playableDirector.RebuildGraph();
+                }
+
+                if (playableGraph.IsValid())
+                {
+                    playableDirector.playableGraph.GetRootPlayable(0).SetSpeed(speed);
+                }
+            }
+        }
+
         private void UpdateTime(int serverTicks)
         {
             ticks = serverTicks;
@@ -84,32 +119,9 @@ namespace CraftSharp.Rendering
 
         private void UpdateTimeRelated()
         {
-            float normalizedTOD = (ticks + 6000) % 24000 / 24000F;
+            double normalizedTOD = ticks / 24000D;
 
-            // Update directional light
-            // 00:00 - 0.00 - 270
-            // 06:00 - 0.25 - 180
-            // 12:00 - 0.50 -  90
-            // 18:00 - 0.75 -   0
-            // 24:00 - 1.00 - -90
-
-            if (sunTransform != null)
-            {
-                sunTransform.localEulerAngles = new Vector3(270F - normalizedTOD * 360F, 0F, 0F);
-            }
-
-            if (sunLight != null)
-            {
-                sunLight.intensity = lightIntensity!.Evaluate(normalizedTOD);
-            }
-
-            if (skyboxMaterial == null)
-            {
-                skyboxMaterial = new Material(RenderSettings.skybox);
-                RenderSettings.skybox = skyboxMaterial;
-            }
-
-            skyboxMaterial!.SetFloat("_Exposure", skyboxExposure!.Evaluate(normalizedTOD));
+            playableDirector!.time = playableDirector.duration * normalizedTOD;
 
             //DynamicGI.UpdateEnvironment();
         }
