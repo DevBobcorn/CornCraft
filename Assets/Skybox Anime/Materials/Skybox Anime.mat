@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Skybox
+  m_Name: Skybox Anime
   m_Shader: {fileID: 4800000, guid: 679b1c0c92a1387478906c8e129d7716, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -53,39 +53,39 @@ Material:
         m_Offset: {x: 0.55, y: 0.6}
     m_Ints: []
     m_Floats:
-    - _IrradianceMapG_maxAngleRange: 0.722
-    - _IrradianceMapR_maxAngleRange: 0.326
+    - _IrradianceMapG_maxAngleRange: 0.7131843
+    - _IrradianceMapR_maxAngleRange: 0.32796556
     - _MoonMaskRadius: 5.49
     - _MoonRadius: 2.15
     - _Moon_color_intensity: 1.39
     - _NoiseSpeed: 0.079
-    - _SunAdditionIntensity: 0.772
+    - _SunAdditionIntensity: 0.7583543
     - _SunInnerBoundary: 0
-    - _SunOuterBoundary: 0.26
+    - _SunOuterBoundary: 0.3117851
     - _SunRadius: 8.3
-    - _SunScattering: 0.15
+    - _SunScattering: 0.15402144
     - _disk_power_999: 450
     - _galaxy_INT: 0.2
     - _galaxy_intensity: 0
     - _mainColorMoonGatherFactor: 0.74
-    - _mainColorSunGatherFactor: 1.35
-    - _starColorIntensity: 10
+    - _mainColorSunGatherFactor: 1.3583735
+    - _starColorIntensity: 9.825675
     - _starIntensityLinearDamping: 0.557
-    - _sun_color_intensity: 1.38
-    - _sun_disk_power_999: 160
+    - _sun_color_intensity: 1.3671479
+    - _sun_disk_power_999: 160.2874
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _MoonDirection: {r: -0, g: -0.12723763, b: 0.9918723, a: 0}
+    - _MoonDirection: {r: -0.90458995, g: 0.34202012, b: -0.25443894, a: 0}
     - _MoonScatteringColor: {r: 0.13389996, g: 0.36446565, b: 0.5566038, a: 1}
     - _Moon_color: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 1}
     - _StarColorLut_ST: {r: 0.5, g: 1, b: 0, a: 0}
-    - _SunAdditionColor: {r: 0.9921569, g: 0.8588236, b: 0.48235297, a: 1}
-    - _SunDirection: {r: -0, g: 0.12896867, b: -0.9916487, a: 0}
-    - _downPartSkyColor: {r: 0.7019608, g: 0.882353, b: 0.9607844, a: 1}
+    - _SunAdditionColor: {r: 0.97225356, g: 0.8683925, b: 0.5286665, a: 1}
+    - _SunDirection: {r: -0, g: 0.013962104, b: -0.99990255, a: 0}
+    - _downPartSkyColor: {r: 0.6870333, g: 0.87584615, b: 0.9592534, a: 1}
     - _downPartSunColor: {r: 0.9294118, g: 0.93725497, b: 0.86274517, a: 1}
-    - _sun_color: {r: 0.9960785, g: 0.77647066, b: 0.54901963, a: 1}
+    - _sun_color: {r: 0.9964612, g: 0.79407746, b: 0.584616, a: 1}
     - _sun_color_Scat: {r: 0.2830189, g: 0.2830189, b: 0.2830189, a: 1}
     - _sun_dir: {r: -0.02403209, g: -0.9968847, b: -0.07512238, a: 0}
-    - _upPartSkyColor: {r: 0.27058825, g: 0.56078434, b: 0.7254902, a: 1}
-    - _upPartSunColor: {r: 1, g: 0.8196079, b: 0.41176474, a: 1}
+    - _upPartSkyColor: {r: 0.28360197, g: 0.57035327, b: 0.74730736, a: 1}
+    - _upPartSunColor: {r: 1, g: 0.8360664, b: 0.46152312, a: 1}
   m_BuildTextureStacks: []

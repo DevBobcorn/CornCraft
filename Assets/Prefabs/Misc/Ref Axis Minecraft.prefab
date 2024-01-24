@@ -354,7 +354,7 @@ GameObject:
   - component: {fileID: 6653623722198815094}
   - component: {fileID: 2824855517066200999}
   m_Layer: 0
-  m_Name: Minecraft Axis
+  m_Name: Ref Axis Minecraft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -1,40 +1,43 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-[ExecuteAlways]
-public class CloudRenderHelper : MonoBehaviour
+namespace BoatAttackSkybox
 {
-    private Transform t;
-    
-    public int scalefactor = 64;
-    public static float SkyboxScale { get; set; }
-
-    private void OnEnable()
+    [ExecuteAlways]
+    public class CloudRenderHelper : MonoBehaviour
     {
-        t = transform;
-        RenderPipelineManager.beginCameraRendering += OnCamera;
-        RenderPipelineManager.endCameraRendering += OnCameraFinish;
-    }
+        private Transform t;
+        
+        public int scalefactor = 64;
+        public static float SkyboxScale { get; set; }
 
-    private void OnDisable()
-    {
-        RenderPipelineManager.beginCameraRendering -= OnCamera;
-        RenderPipelineManager.endCameraRendering -= OnCameraFinish;
-    }
+        private void OnEnable()
+        {
+            t = transform;
+            RenderPipelineManager.beginCameraRendering += OnCamera;
+            RenderPipelineManager.endCameraRendering += OnCameraFinish;
+        }
 
-    private void OnCamera(ScriptableRenderContext context, Camera camera)
-    {
-        var scaleRatio = 1.0f / scalefactor;
-        SkyboxScale = scaleRatio;
-        Shader.SetGlobalFloat("_BA_SkyboxRatio", scaleRatio);
-        t.position = camera.transform.position * (1 - scaleRatio);
-        t.localScale = Vector3.one * scaleRatio;
-        Shader.SetGlobalMatrix("_BA_SkyboxMatrix", Matrix4x4.TRS(-t.position, Quaternion.identity, t.localScale * scalefactor));
-    }
+        private void OnDisable()
+        {
+            RenderPipelineManager.beginCameraRendering -= OnCamera;
+            RenderPipelineManager.endCameraRendering -= OnCameraFinish;
+        }
 
-    private void OnCameraFinish(ScriptableRenderContext context, Camera camera)
-    {
-        t.position = Vector3.zero;
-        t.localScale = Vector3.one;
+        private void OnCamera(ScriptableRenderContext context, Camera camera)
+        {
+            var scaleRatio = 1.0f / scalefactor;
+            SkyboxScale = scaleRatio;
+            Shader.SetGlobalFloat("_BA_SkyboxRatio", scaleRatio);
+            t.position = camera.transform.position * (1 - scaleRatio);
+            t.localScale = Vector3.one * scaleRatio;
+            Shader.SetGlobalMatrix("_BA_SkyboxMatrix", Matrix4x4.TRS(-t.position, Quaternion.identity, t.localScale * scalefactor));
+        }
+
+        private void OnCameraFinish(ScriptableRenderContext context, Camera camera)
+        {
+            t.position = Vector3.zero;
+            t.localScale = Vector3.one;
+        }
     }
 }

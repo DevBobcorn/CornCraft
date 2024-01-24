@@ -47,7 +47,7 @@ namespace AnimeSkybox
             }
 
             // 如果确实要在运行时更改材质属性，可能需要强制Unity重新绘制Skybox
-            //  DynamicGI.UpdateEnvironment();
+            // DynamicGI.UpdateEnvironment();
         }
     }
 }

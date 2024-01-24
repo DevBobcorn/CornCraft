@@ -11,20 +11,20 @@ namespace AnimeSkybox
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
             Material material = playerData as Material;
-            if(material == null) return;
+            if (material == null) return;
             
             RenderSettings.skybox = material; // 设置天空盒的材质
 
-            float t = (float)(playable.GetTime() / playable.GetDuration()); // 缩放到0-1的范围
+            float t = (float) (playable.GetTime() / playable.GetDuration()); // 缩放到0-1的范围
             
-            foreach(var property in properties) // 遍历所有属性
+            foreach (var property in properties) // 遍历所有属性
             {
-                if(property.type == MaterialProperty.PropertyType.Float) // 如果是float类型
+                if (property.type == MaterialProperty.PropertyType.Float) // 如果是float类型
                 {
                     float value = property.curve.Evaluate(t);
                     material.SetFloat(property.propertyName, value);
                 }
-                else if(property.type == MaterialProperty.PropertyType.Color) // 如果是color类型
+                else if (property.type == MaterialProperty.PropertyType.Color) // 如果是color类型
                 {
                     Color color = property.gradient.Evaluate(t);
                     material.SetColor(property.propertyName, color);

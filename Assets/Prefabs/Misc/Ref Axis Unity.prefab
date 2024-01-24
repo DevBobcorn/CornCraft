@@ -520,7 +520,7 @@ GameObject:
   - component: {fileID: 3747809905265957741}
   - component: {fileID: 7323089040985957752}
   m_Layer: 0
-  m_Name: Unity Axis
+  m_Name: Ref Axis Unity
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
