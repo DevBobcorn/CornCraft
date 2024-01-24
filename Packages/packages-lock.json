@@ -17,14 +17,13 @@
       "hash": "3a936c69d075a6d161605748c3f0b752e0b4d19e"
     },
     "com.devbobcorn.craftsharp-resource": {
-      "version": "https://github.com/DevBobcorn/CraftSharp-Resource.git",
+      "version": "file:com.devbobcorn.craftsharp-resource",
       "depth": 0,
-      "source": "git",
+      "source": "embedded",
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
         "com.devbobcorn.craftsharp": "1.0.0"
-      },
-      "hash": "24e6e4b6ba2609aa3cd4a16b210d854ebda118e0"
+      }
     },
     "com.fernrender.core": {
       "version": "file:com.fernrender.core",
