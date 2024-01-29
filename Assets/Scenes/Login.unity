@@ -17066,7 +17066,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4680534492281049065, guid: bfb4ce13ee81d0a4981f1e5ce3d5a1cd, type: 3}
       propertyPath: startTime
-      value: 5000
+      value: -5000
       objectReference: {fileID: 0}
     - target: {fileID: 5285508904983264441, guid: bfb4ce13ee81d0a4981f1e5ce3d5a1cd, type: 3}
       propertyPath: m_LocalPosition.z
