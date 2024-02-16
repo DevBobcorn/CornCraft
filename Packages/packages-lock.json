@@ -264,46 +264,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "com.vrmc.gltf": {
-      "version": "https://github.com/vrm-c/UniVRM.git?path=/Assets/UniGLTF#v0.115.0",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.vrmc.vrmshaders": "0.115.0",
-        "com.unity.modules.animation": "1.0.0"
-      },
-      "hash": "7e052b19b3c0b4cd02e63159fc37db820729554e"
-    },
-    "com.vrmc.univrm": {
-      "version": "https://github.com/vrm-c/UniVRM.git?path=/Assets/VRM#v0.115.0",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.vrmc.vrmshaders": "0.115.0",
-        "com.vrmc.gltf": "0.115.0",
-        "com.unity.ugui": "1.0.0"
-      },
-      "hash": "7e052b19b3c0b4cd02e63159fc37db820729554e"
-    },
-    "com.vrmc.vrm": {
-      "version": "https://github.com/vrm-c/UniVRM.git?path=/Assets/VRM10#v0.115.0",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.vrmc.vrmshaders": "0.115.0",
-        "com.vrmc.gltf": "0.115.0"
-      },
-      "hash": "7e052b19b3c0b4cd02e63159fc37db820729554e"
-    },
-    "com.vrmc.vrmshaders": {
-      "version": "https://github.com/vrm-c/UniVRM.git?path=/Assets/VRMShaders#v0.115.0",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.unity.modules.imageconversion": "1.0.0"
-      },
-      "hash": "7e052b19b3c0b4cd02e63159fc37db820729554e"
-    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,
