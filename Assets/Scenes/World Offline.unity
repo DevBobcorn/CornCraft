@@ -438,7 +438,7 @@ MonoBehaviour:
   EnvironmentManager: {fileID: 346995815}
   MaterialManager: {fileID: 331478947}
   playerController: {fileID: 195804746}
-  playerRenderPrefab: {fileID: 5188445008950304087, guid: d8e357869c598364cad4373b066744c9, type: 3}
+  playerRenderPrefab: {fileID: 1633519693162105835, guid: f203159209ba7b748b562080342c675e, type: 3}
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
@@ -1691,6 +1691,10 @@ PrefabInstance:
     - target: {fileID: 4117646344682881235, guid: c736719586407004a83d441146483357, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6666799940204106742, guid: c736719586407004a83d441146483357, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 2.5002441
       objectReference: {fileID: 0}
     - target: {fileID: 7578064148835205907, guid: c736719586407004a83d441146483357, type: 3}
       propertyPath: m_AnchorMax.x

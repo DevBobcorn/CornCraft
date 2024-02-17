@@ -7,7 +7,7 @@ namespace MMD
     {
         private Config config;
 
-        [MenuItem("MMD for Unity/Config")]
+        [MenuItem("MMD for Unity/MFU Config")]
         public static void Init()
         {
             GetWindow<ConfigWindow>("MFU Config");

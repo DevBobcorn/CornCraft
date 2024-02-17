@@ -128,7 +128,7 @@ namespace MMD
     public class PMXImportConfig : ConfigBase
     {
         public PMXConverter.AnimationType animation_type = PMXConverter.AnimationType.HumanMecanim;
-        public PMXConverter.MaterialType material_type = PMXConverter.MaterialType.FernMaterial;
+        public Color HightColor = Color.gray, DarkColor = Color.black;
         public PMXConverter.PhysicsType physics_type = PMXConverter.PhysicsType.UnityPhysics;
         public bool use_ik = false;
         public bool use_leg_d_bones = true;
@@ -137,13 +137,12 @@ namespace MMD
         
         public override string GetTitle()
         {
-            return "Default PMD Import Config";
+            return "Default PMX Import Config";
         }
 
         public override void OnGUIFunction()
         {
             animation_type = (PMXConverter.AnimationType)EditorGUILayout.EnumPopup("Animation Type", animation_type);
-            material_type = (PMXConverter.MaterialType)EditorGUILayout.EnumPopup("Material Type", material_type);
             physics_type = (PMXConverter.PhysicsType)EditorGUILayout.EnumPopup("Physics Type", physics_type);
             use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
             if (!use_ik)
