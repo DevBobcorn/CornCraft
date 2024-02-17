@@ -41,8 +41,7 @@ public class PMXLoaderWindow : EditorWindow {
     void LoadModel() {
         string file_path = AssetDatabase.GetAssetPath(pmxFile);
         MMD.ModelAgent model_agent = new MMD.ModelAgent(file_path);
-        model_agent.CreatePrefab(pmx_config.material_type
-                                , pmx_config.physics_type
+        model_agent.CreatePrefab(pmx_config.physics_type
                                 , pmx_config.animation_type
                                 , pmx_config.use_ik
                                 , pmx_config.use_leg_d_bones

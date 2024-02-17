@@ -13,39 +13,26 @@ namespace MMD
 
         }
 
-        //public Color32 DIFFUSE_HIGH = new Color32(255, 240, 227, 255);
-        //public Color32 DIFFUSE_DARK = new Color32(255, 199, 115, 255);
-
         public Color32 HAIR_DIFFUSE_HIGH = new Color32(255, 255, 255, 255);
         public Color32 HAIR_DIFFUSE_DARK = new Color32(255, 200, 180, 255);
 
         public Color32 SKIN_DIFFUSE_HIGH = new Color32(255, 255, 255, 255);
         public Color32 SKIN_DIFFUSE_DARK = new Color32(255, 200, 180, 255);
 
-        enum MaterialTypes
-        {
-            Body,
-            Face,
-            Hair,
-            Cloth,
-            Metal
-        }
-
-
         /// <summary>
         /// MMDシェーダーパスの取得
         /// </summary>
         /// <returns>MMDシェーダーパス</returns>
-        string GetShaderPath(MaterialTypes type)
+        string GetShaderPath(PMXMaterialType type)
         {
             string result = "FernRender/URP/FERNNPR";
 
             switch (type)
             {
-                case MaterialTypes.Face:
+                case PMXMaterialType.Face:
                     result += "Face";
                     break;
-                case MaterialTypes.Hair:
+                case PMXMaterialType.Hair:
                     result += "Hair";
                     break;
                 default:
@@ -74,16 +61,8 @@ namespace MMD
                 main_texture = (Texture2D)AssetDatabase.LoadAssetAtPath(path, typeof(Texture2D));
             }
 
-            // Pick material type from name
-            var materialType = MaterialTypes.Body;
-            if (material.name.Contains("脸") || material.name.Contains("顔") || material.name.Contains("颜"))
-            {
-                materialType = MaterialTypes.Face;
-            }
-            else if (material.name.Contains("发") || material.name.Contains("髪"))
-            {
-                materialType = MaterialTypes.Hair;
-            }
+            // Guess material type from name
+            var materialType = PMXMaterialTypeUtil.GuessMaterialType(material);
             
             //マテリアルに設定
             string shader_path = GetShaderPath(materialType);
@@ -103,7 +82,7 @@ namespace MMD
 
             switch (materialType)
             {
-                case MaterialTypes.Face:
+                case PMXMaterialType.Face:
                     result.SetFloat("_enum_diffuse", 4); // Standard Diffuse => SDFFaceShading
                     result.SetFloat("_CELLThreshold", 0.3F);
                     result.SetFloat("_CELLSmoothing", 0.1F);
@@ -129,11 +108,6 @@ namespace MMD
             }
 
             result.SetFloat("_Smoothness", 0F);
-            //result.SetColor("_AmbColor", material.ambient_color);
-            //result.SetFloat("_Opacity", material.diffuse_color.a);
-            //result.SetColor("_SpecularColor", material.specular_color);
-            //result.SetFloat("_Shininess", material.specularity);
-            //result.SetFloat("_UseAlphaClipping", is_transparent ? 1F : 0F);
             // エッジ
             const float c_default_scale = 0.085f; //0.085fの時にMMDと一致する様にしているので、それ以外なら補正
 
@@ -145,18 +119,7 @@ namespace MMD
                 result.SetFloat("_OutlineWidth", material.edge_size * scale_ * 15F / c_default_scale);
                 result.SetColor("_OutlineColor", material.edge_color / 2F);
             }
-            //カスタムレンダーキュー
-            /*{
-                MMDEngine engine = root_game_object_.GetComponent<MMDEngine>();
-                if (engine.enable_render_queue && is_transparent) {
-                    //カスタムレンダーキューが有効 かつ マテリアルが透過なら
-                    //マテリアル順に並べる
-                    result.renderQueue = engine.render_queue_value + (int)material_index;
-                } else {
-                    //非透明なら
-                    result.renderQueue = -1;
-                }
-            }*/
+
             // スフィアテクスチャ
             if (material.sphere_texture_index < format_.texture_list.texture_file.Length) {
                 string sphere_texture_file_name = format_.texture_list.texture_file[material.sphere_texture_index];
@@ -178,7 +141,6 @@ namespace MMD
                 default:
                     //empty.
                     break;
-                    
                 }
             }
             // テクスチャが空でなければ登録

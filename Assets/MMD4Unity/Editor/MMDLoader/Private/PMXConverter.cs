@@ -17,15 +17,6 @@ namespace MMD
             HumanMecanim,        //人型アバターでのMecanim
             LegacyAnimation,    //旧式アニメーション
         }
-
-        /// <summary>
-        /// マテリアルタイプ
-        /// </summary>
-        public enum MaterialType {
-            MMDMaterial,
-            NiloMaterial,
-            FernMaterial
-        }
         
         /// <summary>
         /// Physicsタイプ
@@ -45,11 +36,11 @@ namespace MMD
         /// <param name='use_ik'>IKを使用するか</param>
         /// <param name='use_leg_d_bones'>Whether or not to directly use d-bones to manipulate leg animations.</param>
         /// <param name='scale'>スケール</param>
-        public static GameObject CreateGameObject(PMXFormat format, MaterialType material_type, PhysicsType physics_type,
+        public static GameObject CreateGameObject(PMXFormat format, PhysicsType physics_type,
                 AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale) {
             GameObject result;
             using (PMXConverter converter = new PMXConverter()) {
-                result = converter.CreateGameObject_(format, material_type, physics_type, animation_type,
+                result = converter.CreateGameObject_(format, physics_type, animation_type,
                         use_ik, use_leg_d_bones, scale);
             }
             return result;
@@ -82,7 +73,7 @@ namespace MMD
         /// <param name='use_ik'>IKを使用するか</param>
         /// <param name='use_leg_d_bones'>Whether or not to directly use d-bones to manipulate leg animations.</param>
         /// <param name='scale'>スケール</param>
-        private GameObject CreateGameObject_(PMXFormat format, MaterialType material_type, PhysicsType physics_type, AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale) {
+        private GameObject CreateGameObject_(PMXFormat format, PhysicsType physics_type, AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale) {
             format_ = format;
             use_ik_ = use_ik;
             use_leg_d_bones_ = use_leg_d_bones;
@@ -91,15 +82,10 @@ namespace MMD
             MMDEngine engine = root_game_object_.AddComponent<MMDEngine>(); //MMDEngine追加
             //スケール・エッジ幅
             engine.scale = scale_;
-            engine.outline_width = 1.0f;
-            engine.material_outline_widths = format.material_list.material.Select(x=>x.edge_size).ToArray();
-            engine.enable_render_queue = false; //初期値無効
-            const int c_render_queue_transparent = 3000;
-            engine.render_queue_value = c_render_queue_transparent;
             
             MeshCreationInfo[] creation_info = CreateMeshCreationInfo();                // メッシュを作成する為の情報を作成
             Mesh[] mesh = CreateMesh(creation_info);                                    // メッシュの生成・設定
-            Material[][] materials = CreateMaterials(material_type, creation_info);                    // マテリアルの生成・設定
+            Material[][] materials = CreateMaterials(creation_info);                    // マテリアルの生成・設定
 
             GameObject[] bones = CreateBones();                                            // ボーンの生成・設定
             SkinnedMeshRenderer[] renderers = BuildingBindpose(mesh, materials, bones);    // バインドポーズの作成
@@ -181,7 +167,7 @@ namespace MMD
         /// </summary>
         internal class MeshCreationInfo {
             public class Pack {
-                public uint        material_index;    //マテリアル
+                public uint      material_index;    //マテリアル
                 public uint[]    plane_indices;    //面
                 public uint[]    vertices;        //頂点
             }
@@ -513,7 +499,7 @@ namespace MMD
         /// </summary>
         /// <returns>マテリアル</returns>
         /// <param name='creation_info'>メッシュ作成情報</param>
-        Material[][] CreateMaterials(MaterialType material_type, MeshCreationInfo[] creation_info)
+        Material[][] CreateMaterials(MeshCreationInfo[] creation_info)
         {
             // 適当なフォルダに投げる
             string path = format_.meta_header.folder + "/Materials/";
@@ -522,7 +508,7 @@ namespace MMD
             }
             
             //全マテリアルを作成
-            Material[] materials = EntryAttributesForMaterials(material_type);
+            Material[] materials = EntryAttributesForMaterials();
             CreateAssetForMaterials(materials);
 
             //メッシュ単位へ振り分け
@@ -538,21 +524,14 @@ namespace MMD
         /// マテリアルに基本情報(シェーダー・カラー・テクスチャ)を登録する
         /// </summary>
         /// <returns>マテリアル</returns>
-        Material[] EntryAttributesForMaterials(MaterialType material_type)
+        Material[] EntryAttributesForMaterials()
         {
             //材質モーフが透過を要望するか
             bool[] is_transparent_by_material = IsTransparentByMaterial(); //材質
             bool[] is_transparent_by_material_morph = IsTransparentByMaterialMorph(); //材質モーフ
             bool[] is_transparent_by_texture_alpha = IsTransparentByTextureAlpha(); //テクスチャのアルファ値(UV考慮済み)
 
-            PMXBaseMaterialConverter materialConv = material_type switch
-            {
-                MaterialType.MMDMaterial  => new PMXMMDMaterialConverter(root_game_object_, format_, scale_),
-                MaterialType.NiloMaterial => new PMXNiloMaterialConverter(root_game_object_, format_, scale_),
-                MaterialType.FernMaterial => new PMXFernMaterialConverter(root_game_object_, format_, scale_),
-
-                _                         => new PMXNiloMaterialConverter(root_game_object_, format_, scale_)
-            };
+            PMXBaseMaterialConverter materialConv = new PMXFernMaterialConverter(root_game_object_, format_, scale_);
             
             return Enumerable.Range(0, format_.material_list.material.Length)
                     .Select(x=>new {
