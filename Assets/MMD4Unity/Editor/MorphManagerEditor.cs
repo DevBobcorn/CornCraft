@@ -118,6 +118,6 @@ public sealed class MorphManagerEditor : Editor
         return is_update;
     }
     
-    private static    bool[]            panel_displays_;    //パネルの表示
-    private            Transform[][]    children_;            //パネル別子モーフオブジェクト
+    private static    bool[]           panel_displays_;    //パネルの表示
+    private           Transform[][]    children_;          //パネル別子モーフオブジェクト
 }
