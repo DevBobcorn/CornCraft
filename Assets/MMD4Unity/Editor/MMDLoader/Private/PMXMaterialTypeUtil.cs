@@ -1,44 +1,40 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace MMD
 {
     public static class PMXMaterialTypeUtil
     {
-        public static PMXMaterialType GuessMaterialType(PMX.PMXFormat.Material material)
+        public static PMXMaterialCategory GuessMaterialType(string materialName)
         {
-            var materialType = PMXMaterialType.Unknown;
+            var materialType = PMXMaterialCategory.Unknown;
 
-            if (material.name.Contains("衣") || material.name.Contains("裙") || material.name.Contains("裤") ||
-                    material.name.Contains("带") || material.name.Contains("花") || material.name.Contains("饰") ||
-                    material.name.Contains("飾"))
+            if (materialName.Contains("衣") || materialName.Contains("裙") || materialName.Contains("裤") ||
+                    materialName.Contains("带") || materialName.Contains("花") || materialName.Contains("饰") ||
+                    materialName.Contains("飾"))
             {
-                materialType = PMXMaterialType.Cloth;
+                materialType = PMXMaterialCategory.Clothes;
             }
-            else if (material.name.Contains("脸") || material.name.Contains("顔") || material.name.Contains("颜"))
+            else if (materialName.Contains("脸") || materialName.Contains("顔") || materialName.Contains("颜"))
             {
-                materialType = PMXMaterialType.Face;
+                materialType = PMXMaterialCategory.Face;
             }
-            else if (material.name.Contains("白目") || material.name.Contains("睫") ||
-                    material.name.Contains("眉") || material.name.Contains("二重") ||
-                    material.name.Contains("口") || material.name.Contains("唇") ||
-                    material.name.Contains("牙") || material.name.Contains("齿") || material.name.Contains("歯"))
+            else if (materialName.Contains("白目") || materialName.Contains("睫") ||
+                    materialName.Contains("眉") || materialName.Contains("二重") ||
+                    materialName.Contains("口") || materialName.Contains("唇") ||
+                    materialName.Contains("牙") || materialName.Contains("齿") || materialName.Contains("歯"))
             {
-                materialType = PMXMaterialType.Face;
+                materialType = PMXMaterialCategory.Face;
             }
-            else if (material.name.Contains("目") || material.name.Contains("眼") || material.name.Contains("瞳"))
+            else if (materialName.Contains("目") || materialName.Contains("眼") || materialName.Contains("瞳"))
             {
                 // Use face material type for now
-                materialType = PMXMaterialType.Face;
+                materialType = PMXMaterialCategory.Face;
             }
-            else if (material.name.Contains("发") || material.name.Contains("髪"))
+            else if (materialName.Contains("发") || materialName.Contains("髪"))
             {
-                materialType = PMXMaterialType.Hair;
+                materialType = PMXMaterialCategory.Hair;
             }
-            else if (material.name.Contains("体") || material.name.Contains("肌"))
+            else if (materialName.Contains("体") || materialName.Contains("肌"))
             {
-                materialType = PMXMaterialType.Body;
+                materialType = PMXMaterialCategory.Body;
             }
 
             return materialType;
