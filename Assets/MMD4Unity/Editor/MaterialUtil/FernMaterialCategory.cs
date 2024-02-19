@@ -1,6 +1,6 @@
 namespace MMD
 {
-    public enum PMXMaterialCategory
+    public enum FernMaterialCategory
     {
         Body,     // Body
         Face,     // Face

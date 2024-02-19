@@ -10,15 +10,15 @@ namespace MMD
     {
         private Color DiffuseHigh = Color.grey, DiffuseDark = Color.black;
 
-        private readonly Dictionary<PMXMaterialCategory, List<Material>> TargetMaterials = new();
+        private readonly Dictionary<FernMaterialCategory, List<Material>> TargetMaterials = new();
 
         private GameObject target = null;
         private int currentCategoryMask = 1; // Only category 0 is selected by default
 
-        [MenuItem("MMD for Unity/MFU Material Util")]
+        [MenuItem("MMD for Unity/Fern Material Util")]
         static void Init()
         {
-            var window = GetWindow<MaterialUtilWindow>(false, "MFU Material Util");
+            var window = GetWindow<MaterialUtilWindow>(false, "Fern Material Util");
             window.Show();
         }
 
@@ -55,7 +55,7 @@ namespace MMD
                         .Where( x => x.shader.name.StartsWith(FERN_NPR_SHADER_PREFIX) ).ToArray();
 
                 // Initialize material dictionary
-                foreach (PMXMaterialCategory type in Enum.GetValues(typeof (PMXMaterialCategory)))
+                foreach (FernMaterialCategory type in Enum.GetValues(typeof (FernMaterialCategory)))
                 {
                     if (TargetMaterials.ContainsKey(type))
                     {
@@ -72,7 +72,7 @@ namespace MMD
                     // Populate material dictionary
                     foreach (var material in materials)
                     {
-                        var type = PMXMaterialTypeUtil.GuessMaterialType(material.name);
+                        var type = FernMaterialTypeUtil.GuessMaterialType(material.name);
 
                         TargetMaterials[type].Add(material);
                     }
@@ -139,7 +139,7 @@ namespace MMD
         private static readonly Color SELECTED_NAME_COLOR = Color.white * 1.5F;
         private static readonly Color SELECTED_SLOT_COLOR = Color.white * 1.8F; // Man, it really works!
 
-        private void DrawMaterialList(PMXMaterialCategory type, List<Material> materials, bool selected, bool drawHeader)
+        private void DrawMaterialList(FernMaterialCategory type, List<Material> materials, bool selected, bool drawHeader)
         {
             var oldColor = GUI.color;
 
@@ -188,7 +188,7 @@ namespace MMD
                     GUI.enabled = true;
 
                     // Draw material category dropdown
-                    var newType = (PMXMaterialCategory) EditorGUILayout.EnumPopup(type, GUILayout.Width(60));
+                    var newType = (FernMaterialCategory) EditorGUILayout.EnumPopup(type, GUILayout.Width(60));
                     if (newType != type)
                     {
                         // Move this material to another category
@@ -282,7 +282,7 @@ namespace MMD
 
                     int catIndex = 0;
 
-                    foreach (PMXMaterialCategory cat in Enum.GetValues(typeof (PMXMaterialCategory)))
+                    foreach (FernMaterialCategory cat in Enum.GetValues(typeof (FernMaterialCategory)))
                     {
                         if (catIndex % 2 == 0) GUILayout.BeginHorizontal();
                         GUILayout.Space(10);

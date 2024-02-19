@@ -111,7 +111,7 @@ namespace MMD
 
         public override void OnGUIFunction()
         {
-            use_pmx_preload = EditorGUILayout.Toggle("Use PMD Preload", use_pmx_preload);
+            use_pmx_preload = EditorGUILayout.Toggle("Use PMX Preload", use_pmx_preload);
             use_vmd_preload = EditorGUILayout.Toggle("Use VMD Preload", use_vmd_preload);
         }
 
