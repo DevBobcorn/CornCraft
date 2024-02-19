@@ -32,7 +32,7 @@ namespace MMD
                 mat.DisableKeyword("_ALPHABLEND_ON");
                 mat.DisableKeyword("_ALPHATEST_ON");
             }
-            else if(surfaceType == 1) // Transparent
+            else if (surfaceType == 1) // Transparent
             {
                 mat.renderQueue = (int) RenderQueue.Transparent;
                 mat.SetOverrideTag("RenderType", "Transparent");

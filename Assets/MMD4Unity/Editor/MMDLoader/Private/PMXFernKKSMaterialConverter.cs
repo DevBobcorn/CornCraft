@@ -1,12 +1,14 @@
 using UnityEditor;
 using UnityEngine;
 using MMD.PMX;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MMD
 {
-    public class PMXFernMaterialConverter : PMXBaseMaterialConverter
+    public class PMXFernKKSMaterialConverter : PMXBaseMaterialConverter
     {
-        public PMXFernMaterialConverter(GameObject root_game_object, PMXFormat format, float scale)
+        public PMXFernKKSMaterialConverter(GameObject root_game_object, PMXFormat format, float scale)
                 : base(root_game_object, format, scale)
         {
             // Something else to do here...
@@ -43,6 +45,19 @@ namespace MMD
             return result;
         }
 
+        private static readonly string[] HIDDEN_MATERIALS = {
+            "gageye",
+            "namida",
+            "bonelyfans",
+            //"tang"
+
+        };
+        
+        private static bool ShouldHide(string materialBaseName)
+        {
+            return HIDDEN_MATERIALS.Any(x => materialBaseName.Contains(x));
+        }
+
         /// <summary>
         /// マテリアルをUnity用に変換する
         /// </summary>
@@ -53,12 +68,15 @@ namespace MMD
         {
             PMXFormat.Material material = format_.material_list.material[material_index];
 
-            //先にテクスチャ情報を検索
-            Texture2D main_texture = null;
-            if (material.usually_texture_index < format_.texture_list.texture_file.Length) {
-                string texture_file_name = format_.texture_list.texture_file[material.usually_texture_index];
-                string path = format_.meta_header.folder + "/" + texture_file_name;
-                main_texture = (Texture2D) AssetDatabase.LoadAssetAtPath(path, typeof(Texture2D));
+            string materialBaseName = PMXKKSConverter.GetMaterialBaseName(material.name);
+
+            var main_texture_path = $"{format_.meta_header.folder}/{material.name}_MT_CT.png";
+            // KKS Only: Base textures are named "basename_MT_CT.png"
+            Texture2D main_texture = (Texture2D)AssetDatabase.LoadAssetAtPath(main_texture_path, typeof(Texture2D));
+
+            if (main_texture == null)
+            {
+                Debug.LogWarning($"Main texture {main_texture_path} not found!");
             }
 
             // Guess material type from name
@@ -75,6 +93,16 @@ namespace MMD
                 SetSurfaceType(result, 2);
             } else {
                 SetSurfaceType(result, 0);
+            }
+
+            // Hide invisible materials
+            if (ShouldHide(materialBaseName))
+            {
+                //result.SetFloat("_ZOffset", -1);
+                SetSurfaceType(result, 1); // Translucent
+                var invisibleColor = result.GetColor("_BaseColor");
+                invisibleColor.a = 0F;
+                result.SetColor("_BaseColor", invisibleColor);
             }
 
             switch (materialType)
@@ -108,40 +136,17 @@ namespace MMD
 
             result.SetFloat("_Smoothness", 0F);
             // エッジ
-            const float c_default_scale = 0.07f; //0.085fの時にMMDと一致する様にしているので、それ以外なら補正
-
             if (material.edge_size > 0F)
             {
                 // Enable outline on this material
                 result.SetFloat("_Outline", 1F);
                 // Set outline width and color
-                result.SetFloat("_OutlineWidth", material.edge_size / c_default_scale);
+                result.SetFloat("_OutlineWidth", material.edge_size / 0.2F);
                 result.SetColor("_OutlineColor", material.edge_color);
             }
 
-            // スフィアテクスチャ
-            if (material.sphere_texture_index < format_.texture_list.texture_file.Length) {
-                string sphere_texture_file_name = format_.texture_list.texture_file[material.sphere_texture_index];
-                string path = format_.meta_header.folder + "/" + sphere_texture_file_name;
-                Texture2D sphere_texture = (Texture2D)UnityEditor.AssetDatabase.LoadAssetAtPath(path, typeof(Texture2D));
-                
-                switch (material.sphere_mode) {
-                case PMXFormat.Material.SphereMode.AddSphere: // 加算
-                    result.SetTexture("_SphereAddTex", sphere_texture);
-                    result.SetTextureScale("_SphereAddTex", new Vector2(1, -1));
-                    break;
-                case PMXFormat.Material.SphereMode.MulSphere: // 乗算
-                    result.SetTexture("_SphereMulTex", sphere_texture);
-                    result.SetTextureScale("_SphereMulTex", new Vector2(1, -1));
-                    break;
-                case PMXFormat.Material.SphereMode.SubTexture: // サブテクスチャ
-                    //サブテクスチャ用シェーダーが無いので設定しない
-                    break;
-                default:
-                    //empty.
-                    break;
-                }
-            }
+            // スフィアテクスチャ [Code removed]
+
             // テクスチャが空でなければ登録
             if (null != main_texture) {
                 //result.mainTexture = main_texture;
