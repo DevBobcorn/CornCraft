@@ -153,7 +153,7 @@ namespace MMD
             {
                 use_leg_d_bones = false;
             }
-            scale = EditorGUILayout.Slider("Scale", scale, 0.001f, 1.0f);
+            scale = EditorGUILayout.Slider("Scale", scale, 0.001f, 5.0f);
             player_anim_controller = (AnimatorController)EditorGUILayout.ObjectField("Animator Controller", player_anim_controller, typeof (AnimatorController), false);
 
             EditorGUILayout.BeginHorizontal();

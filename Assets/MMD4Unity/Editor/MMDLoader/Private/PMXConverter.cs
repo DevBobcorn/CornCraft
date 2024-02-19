@@ -3,7 +3,6 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 using MMD.PMX;
-using Unity.VisualScripting;
 
 namespace MMD
 {
@@ -28,40 +27,16 @@ namespace MMD
         }
 
         /// <summary>
-        /// GameObjectを作成する
-        /// </summary>
-        /// <param name='format'>内部形式データ</param>
-        /// <param name='physics_type'>Which type of physics to use</param>
-        /// <param name='animation_type'>アニメーションタイプ</param>
-        /// <param name='use_ik'>IKを使用するか</param>
-        /// <param name='use_leg_d_bones'>Whether or not to directly use d-bones to manipulate leg animations.</param>
-        /// <param name='scale'>スケール</param>
-        public static GameObject CreateGameObject(PMXFormat format, PhysicsType physics_type,
-                AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale) {
-            GameObject result;
-            using (PMXConverter converter = new PMXConverter()) {
-                result = converter.CreateGameObject_(format, physics_type, animation_type,
-                        use_ik, use_leg_d_bones, scale);
-            }
-            return result;
-        }
-
-        /// <summary>
         /// デフォルトコンストラクタ
         /// </summary>
-        /// <remarks>
-        /// ユーザーに依るインスタンス作成を禁止する
-        /// </remarks>
-        private PMXConverter() {}
+        public PMXConverter() { }
 
         /// <summary>
         /// Disposeインターフェース
         /// </summary>
         public void Dispose()
         {
-            if (null != alpha_readable_texture_) {
-                alpha_readable_texture_.Dispose();
-            }
+            alpha_readable_texture_?.Dispose();
         }
         
         /// <summary>
@@ -73,7 +48,8 @@ namespace MMD
         /// <param name='use_ik'>IKを使用するか</param>
         /// <param name='use_leg_d_bones'>Whether or not to directly use d-bones to manipulate leg animations.</param>
         /// <param name='scale'>スケール</param>
-        private GameObject CreateGameObject_(PMXFormat format, PhysicsType physics_type, AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale) {
+        public virtual GameObject CreateGameObject(PMXFormat format, PhysicsType physics_type, AnimationType animation_type, bool use_ik, bool use_leg_d_bones, float scale)
+        {
             format_ = format;
             use_ik_ = use_ik;
             use_leg_d_bones_ = use_leg_d_bones;
@@ -89,7 +65,7 @@ namespace MMD
 
             GameObject[] bones = CreateBones();                                            // ボーンの生成・設定
             SkinnedMeshRenderer[] renderers = BuildingBindpose(mesh, materials, bones);    // バインドポーズの作成
-            CreateMorph(mesh, materials, bones, renderers, creation_info);                // モーフの生成・設定
+            CreateMorph(mesh, materials, bones, renderers, creation_info);                 // モーフの生成・設定
             
             // Fern NPR Face SDF helper script assigning
             List<int> faceMaterialIndices = new();
@@ -106,7 +82,7 @@ namespace MMD
 
                 if (faceMaterialIndices.Count > 0)
                 {
-                    var helper = renderers[meshIndex].AddComponent<FernNPRCore.Scripts.ShadingUtils.MeshSDFFaceAxisFix>();
+                    var helper = renderers[meshIndex].gameObject.AddComponent<FernNPRCore.Scripts.ShadingUtils.MeshSDFFaceAxisFix>();
                     helper.targetMaterialIndices = faceMaterialIndices.ToArray();
 
                     // Clear up for next iteration
@@ -139,7 +115,7 @@ namespace MMD
             // Mecanim設定
             if (AnimationType.LegacyAnimation != animation_type) {
                 //アニメーター追加
-                AvatarSettingScript avatar_setting = new AvatarSettingScript(root_game_object_, bones);
+                var avatar_setting = new AvatarSettingScript(root_game_object_, bones);
                 switch (animation_type) {
                 case AnimationType.GenericMecanim: //汎用アバターでのMecanim
                     avatar_setting.SettingGenericAvatar();
@@ -165,7 +141,7 @@ namespace MMD
         /// <summary>
         /// メッシュを作成する時に参照するデータの纏め
         /// </summary>
-        internal class MeshCreationInfo {
+        protected internal class MeshCreationInfo {
             public class Pack {
                 public uint      material_index;    //マテリアル
                 public uint[]    plane_indices;    //面
@@ -180,7 +156,7 @@ namespace MMD
         /// メッシュを作成する為の情報を作成
         /// </summary>
         /// <returns>メッシュ作成情報</returns>
-        MeshCreationInfo[] CreateMeshCreationInfo()
+        protected MeshCreationInfo[] CreateMeshCreationInfo()
         {
             // 1メッシュで収まる場合でも-Multi()を使っても問題は起き無いが、
             // -Multi()では頂点数計測をマテリアル単位で行う関係上、頂点数が多く見積もられる(概算値)。
@@ -377,7 +353,7 @@ namespace MMD
         /// </summary>
         /// <returns>メッシュ</returns>
         /// <param name='creation_info'>メッシュ作成情報</param>
-        Mesh[] CreateMesh(MeshCreationInfo[] creation_info)
+        protected Mesh[] CreateMesh(MeshCreationInfo[] creation_info)
         {
             Mesh[] result = new Mesh[creation_info.Length];
             for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
@@ -482,7 +458,7 @@ namespace MMD
         /// </summary>
         /// <param name='mesh'>対象メッシュ</param>
         /// <param name='index'>メッシュインデックス</param>
-        void CreateAssetForMesh(Mesh mesh, int index)
+        protected void CreateAssetForMesh(Mesh mesh, int index)
         {
             string path = format_.meta_header.folder + "/Meshes/";
             if (!System.IO.Directory.Exists(path)) { 
@@ -499,7 +475,7 @@ namespace MMD
         /// </summary>
         /// <returns>マテリアル</returns>
         /// <param name='creation_info'>メッシュ作成情報</param>
-        Material[][] CreateMaterials(MeshCreationInfo[] creation_info)
+        private Material[][] CreateMaterials(MeshCreationInfo[] creation_info)
         {
             // 適当なフォルダに投げる
             string path = format_.meta_header.folder + "/Materials/";
@@ -524,7 +500,7 @@ namespace MMD
         /// マテリアルに基本情報(シェーダー・カラー・テクスチャ)を登録する
         /// </summary>
         /// <returns>マテリアル</returns>
-        Material[] EntryAttributesForMaterials()
+        private Material[] EntryAttributesForMaterials()
         {
             //材質モーフが透過を要望するか
             bool[] is_transparent_by_material = IsTransparentByMaterial(); //材質
@@ -784,7 +760,7 @@ namespace MMD
         /// マテリアルをProjectに登録する
         /// </summary>
         /// <param name='materials'>対象マテリアル</param>
-        void CreateAssetForMaterials(Material[] materials) {
+        protected void CreateAssetForMaterials(Material[] materials) {
             string path = format_.meta_header.folder + "/Materials/";
 
             for (int i = 0, i_max = materials.Length; i < i_max; ++i) {
@@ -798,7 +774,7 @@ namespace MMD
         /// ボーン作成
         /// </summary>
         /// <returns>ボーンのゲームオブジェクト</returns>
-        GameObject[] CreateBones()
+        protected GameObject[] CreateBones()
         {
             GameObject[] bones = EntryAttributeForBones();
             AttachParentsForBone(bones);
@@ -850,7 +826,7 @@ namespace MMD
         /// <param name='bones'>対象ボーン</param>
         /// <param name='renderers'>対象レンダラー</param>
         /// <param name='creation_info'>メッシュ作成情報</param>
-        void CreateMorph(Mesh[] mesh, Material[][] materials, GameObject[] bones, SkinnedMeshRenderer[] renderers, MeshCreationInfo[] creation_info)
+        protected void CreateMorph(Mesh[] mesh, Material[][] materials, GameObject[] bones, SkinnedMeshRenderer[] renderers, MeshCreationInfo[] creation_info)
         {
             //表情ルートを生成してルートの子供に付ける
             GameObject expression_root = new GameObject("Expression");
@@ -1305,7 +1281,7 @@ namespace MMD
         /// <param name='mesh'>対象メッシュ</param>
         /// <param name='materials'>設定するマテリアル</param>
         /// <param name='bones'>設定するボーン</param>
-        SkinnedMeshRenderer[] BuildingBindpose(Mesh[] mesh, Material[][] materials, GameObject[] bones)
+        protected SkinnedMeshRenderer[] BuildingBindpose(Mesh[] mesh, Material[][] materials, GameObject[] bones)
         {
             // メッシュルートを生成してルートの子供に付ける
             Transform mesh_root_transform = (new GameObject("Mesh")).transform;
@@ -1340,7 +1316,7 @@ namespace MMD
         /// </summary>
         /// <returns>ボーンコントローラースクリプト</returns>
         /// <param name='bones'>ボーンのゲームオブジェクト</param>
-        BoneController[] EntryBoneController(GameObject[] bones)
+        protected BoneController[] EntryBoneController(GameObject[] bones)
         {
             //BoneControllerが他のBoneControllerを参照するので先に全ボーンに付与
             foreach (var bone in bones) {
@@ -1418,7 +1394,7 @@ namespace MMD
         /// </summary>
         /// <returns>ファイルパスに使用可能な文字列</returns>
         /// <param name='src'>ファイルパスに使用したい文字列</param>
-        private static string GetFilePathString(string src) {
+        protected static string GetFilePathString(string src) {
             return src.Replace('\\', '＼')
                         .Replace('/',  '／')
                         .Replace(':',  '：')
@@ -1432,13 +1408,13 @@ namespace MMD
                         .Replace("\r",  string.Empty);
         }
 
-        const uint    c_max_vertex_count_in_mesh = 65535; //meshに含まれる最大頂点数(Unity3D的には65536迄入ると思われるが、ushort.MaxValueは特別な値として使うのでその分を除外)
+        protected const uint    c_max_vertex_count_in_mesh = 65535; //meshに含まれる最大頂点数(Unity3D的には65536迄入ると思われるが、ushort.MaxValueは特別な値として使うのでその分を除外)
 
-        GameObject    root_game_object_;
-        PMXFormat               format_;
-        bool                    use_ik_;
-        bool           use_leg_d_bones_;
-        float                    scale_;
-        AlphaReadableTexture    alpha_readable_texture_ = null;
+        protected GameObject    root_game_object_;
+        protected PMXFormat               format_;
+        protected bool                    use_ik_;
+        protected bool           use_leg_d_bones_;
+        protected float                    scale_;
+        protected AlphaReadableTexture    alpha_readable_texture_ = null;
     }
 }

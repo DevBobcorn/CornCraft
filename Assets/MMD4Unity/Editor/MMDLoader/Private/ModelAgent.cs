@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using UnityEditor.Animations;
+using System.Runtime.InteropServices;
 
 namespace MMD {
     
@@ -46,11 +47,24 @@ namespace MMD {
             header_ = pmx_format.header;
 
             //ゲームオブジェクトの作成
-            GameObject visualObj = PMXConverter.CreateGameObject(pmx_format, physics_type, animation_type, use_ik, use_leg_d_bones, scale);
+            GameObject visualObj;
+
+            {
+                using var converter = header_.model_name switch
+                {
+                    "koikatu" => new PMXKKSConverter(true),
+                    _         => new PMXConverter()
+                };
+
+                visualObj = converter.CreateGameObject(pmx_format, physics_type, animation_type, use_ik, use_leg_d_bones, scale);
+            }
 
             // Assign animator controller
             var player_animator = visualObj.GetComponent<Animator>();
-            player_animator.runtimeAnimatorController = player_anim_controller;
+            if (player_animator != null)
+            {
+                player_animator.runtimeAnimatorController = player_anim_controller;
+            }
 
             // プレファブパスの設定
             string prefabPath = pmx_format.meta_header.folder + "/" + pmx_format.meta_header.name + ".prefab";
