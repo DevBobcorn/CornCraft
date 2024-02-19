@@ -20,6 +20,7 @@
 # Third party resources & utils
 /[Aa]ssets/AnimeModels/Genshin*
 /[Aa]ssets/AnimeModels/StarRail*
+/[Aa]ssets/AnimeModels/Test*
 /[Aa]ssets/VeryAnimation
 /[Aa]ssets/VeryAnimation.meta
 /[Aa]ssets/Hovl Studio

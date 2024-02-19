@@ -23,16 +23,16 @@ namespace MMD
         /// MMDシェーダーパスの取得
         /// </summary>
         /// <returns>MMDシェーダーパス</returns>
-        string GetShaderPath(PMXMaterialCategory type)
+        string GetShaderPath(FernMaterialCategory type)
         {
             string result = "FernRender/URP/FERNNPR";
 
             switch (type)
             {
-                case PMXMaterialCategory.Face:
+                case FernMaterialCategory.Face:
                     result += "Face";
                     break;
-                case PMXMaterialCategory.Hair:
+                case FernMaterialCategory.Hair:
                     result += "Hair";
                     break;
                 default:
@@ -62,7 +62,7 @@ namespace MMD
             }
 
             // Guess material type from name
-            var materialType = PMXMaterialTypeUtil.GuessMaterialType(material.name);
+            var materialType = FernMaterialTypeUtil.GuessMaterialType(material.name);
             
             //マテリアルに設定
             string shader_path = GetShaderPath(materialType);
@@ -82,7 +82,7 @@ namespace MMD
 
             switch (materialType)
             {
-                case PMXMaterialCategory.Face:
+                case FernMaterialCategory.Face:
                     result.SetFloat("_enum_diffuse", 4); // Standard Diffuse => SDFFaceShading
                     result.SetFloat("_CELLThreshold", 0.3F);
                     result.SetFloat("_CELLSmoothing", 0.1F);
