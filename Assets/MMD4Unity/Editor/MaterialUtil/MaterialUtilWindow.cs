@@ -242,11 +242,14 @@ namespace MMD
             }
         }
 
+        private Vector2 scrollPos = Vector2.zero;
+
         void OnGUI()
         {
             GUILayout.BeginHorizontal();
             GUILayout.Space(5);
             GUILayout.BeginVertical();
+            scrollPos = GUILayout.BeginScrollView(scrollPos);
             
                 EditorGUILayout.LabelField("Target Selection", EditorStyles.boldLabel);
 
@@ -324,6 +327,7 @@ namespace MMD
                     GUILayout.EndHorizontal();
                 }
 
+            GUILayout.EndScrollView();
             GUILayout.EndVertical();
             GUILayout.Space(5);
             GUILayout.EndHorizontal();

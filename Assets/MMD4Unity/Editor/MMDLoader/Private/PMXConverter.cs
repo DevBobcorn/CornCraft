@@ -59,9 +59,9 @@ namespace MMD
             //スケール・エッジ幅
             engine.scale = scale_;
             
-            MeshCreationInfo[] creation_info = CreateMeshCreationInfo();                // メッシュを作成する為の情報を作成
-            Mesh[] mesh = CreateMesh(creation_info);                                    // メッシュの生成・設定
-            Material[][] materials = CreateMaterials(creation_info);                    // マテリアルの生成・設定
+            MeshCreationInfo[] creation_info = CreateMeshCreationInfo(format_);         // メッシュを作成する為の情報を作成
+            Mesh[] mesh = CreateMesh(format_, creation_info);                           // メッシュの生成・設定
+            Material[][] materials = CreateMaterials(format_, creation_info);           // マテリアルの生成・設定
 
             GameObject[] bones = CreateBones();                                            // ボーンの生成・設定
             SkinnedMeshRenderer[] renderers = BuildingBindpose(mesh, materials, bones);    // バインドポーズの作成
@@ -156,7 +156,7 @@ namespace MMD
         /// メッシュを作成する為の情報を作成
         /// </summary>
         /// <returns>メッシュ作成情報</returns>
-        protected MeshCreationInfo[] CreateMeshCreationInfo()
+        protected static MeshCreationInfo[] CreateMeshCreationInfo(PMXFormat format)
         {
             // 1メッシュで収まる場合でも-Multi()を使っても問題は起き無いが、
             // -Multi()では頂点数計測をマテリアル単位で行う関係上、頂点数が多く見積もられる(概算値)。
@@ -169,12 +169,12 @@ namespace MMD
             // 単純に-Single()の方が解析が少ない分早い。
 
             MeshCreationInfo[] result;
-            if (format_.vertex_list.vertex.Length < c_max_vertex_count_in_mesh) {
+            if (format.vertex_list.vertex.Length < c_max_vertex_count_in_mesh) {
                 //1メッシュで収まるなら
-                result = CreateMeshCreationInfoSingle();
+                result = CreateMeshCreationInfoSingle(format);
             } else {
                 //1メッシュで収まらず、複数メッシュに分割するなら
-                result = CreateMeshCreationInfoMulti();
+                result = CreateMeshCreationInfoMulti(format);
             }
             return result;
         }
@@ -183,13 +183,13 @@ namespace MMD
         /// メッシュを作成する為の情報を作成(単体メッシュ版)
         /// </summary>
         /// <returns>メッシュ作成情報</returns>
-        MeshCreationInfo[] CreateMeshCreationInfoSingle()
+        static MeshCreationInfo[] CreateMeshCreationInfoSingle(PMXFormat format)
         {
             MeshCreationInfo[] result = new[]{new MeshCreationInfo()};
             //全マテリアルを設定
-            result[0].value = CreateMeshCreationInfoPacks();
+            result[0].value = CreateMeshCreationInfoPacks(format);
             //全頂点を設定
-            result[0].all_vertices = Enumerable.Range(0, format_.vertex_list.vertex.Length).Select(x=>(uint)x).ToArray();
+            result[0].all_vertices = Enumerable.Range(0, format.vertex_list.vertex.Length).Select(x=>(uint)x).ToArray();
             //頂点リアサインインデックス用辞書作成
             result[0].reassign_dictionary = new Dictionary<uint, uint>(result[0].all_vertices.Length);
             for (uint i = 0, i_max = (uint)result[0].all_vertices.Length; i < i_max; ++i) {
@@ -202,16 +202,16 @@ namespace MMD
         /// 全マテリアルをメッシュ作成情報のマテリアルパックとして返す
         /// </summary>
         /// <returns>メッシュ作成情報のマテリアルパック</returns>
-        MeshCreationInfo.Pack[] CreateMeshCreationInfoPacks()
+        static MeshCreationInfo.Pack[] CreateMeshCreationInfoPacks(PMXFormat format)
         {
             uint plane_start = 0;
             //マテリアル単位のMeshCreationInfo.Packを作成する
-            return Enumerable.Range(0, format_.material_list.material.Length)
+            return Enumerable.Range(0, format.material_list.material.Length)
                             .Select(x=>{
                                         MeshCreationInfo.Pack pack = new MeshCreationInfo.Pack();
                                         pack.material_index = (uint)x;
-                                        uint plane_count = format_.material_list.material[x].face_vert_count;
-                                        pack.plane_indices = format_.face_vertex_list.face_vert_index.Skip((int)plane_start)
+                                        uint plane_count = format.material_list.material[x].face_vert_count;
+                                        pack.plane_indices = format.face_vertex_list.face_vert_index.Skip((int)plane_start)
                                                                                                             .Take((int)plane_count)
                                                                                                             .ToArray();
                                         pack.vertices = pack.plane_indices.Distinct() //重複削除
@@ -226,10 +226,10 @@ namespace MMD
         /// メッシュを作成する為の情報を作成(複数メッシュ版)
         /// </summary>
         /// <returns>メッシュ作成情報</returns>
-        MeshCreationInfo[] CreateMeshCreationInfoMulti()
+        static MeshCreationInfo[] CreateMeshCreationInfoMulti(PMXFormat format)
         {
             //マテリアル単位のMeshCreationInfo.Packを作成する
-            MeshCreationInfo.Pack[] packs = CreateMeshCreationInfoPacks();
+            MeshCreationInfo.Pack[] packs = CreateMeshCreationInfoPacks(format);
             //マテリアル細分化
             packs = SplitSubMesh(packs);
             //頂点数の多い順に並べる(メッシュ分割アルゴリズム上、後半に行く程頂点数が少ない方が敷き詰め効率が良い)
@@ -274,7 +274,7 @@ namespace MMD
         /// </summary>
         /// <returns>メッシュ作成情報のマテリアルパック</returns>
         /// <param name='creation_infos'>メッシュ作成情報のマテリアルパック</param>
-        MeshCreationInfo.Pack[] SplitSubMesh(MeshCreationInfo.Pack[] packs)
+        static MeshCreationInfo.Pack[] SplitSubMesh(MeshCreationInfo.Pack[] packs)
         {
             MeshCreationInfo.Pack[] result = packs;
             if (packs.Any(x=>c_max_vertex_count_in_mesh<=x.vertices.Length)) {
@@ -304,7 +304,7 @@ namespace MMD
         /// </summary>
         /// <returns>メッシュ作成情報のマテリアルパック</returns>
         /// <param name='creation_infos'>メッシュ作成情報のマテリアルパック</param>
-        List<MeshCreationInfo.Pack> SplitSubMesh(MeshCreationInfo.Pack pack)
+        static List<MeshCreationInfo.Pack> SplitSubMesh(MeshCreationInfo.Pack pack)
         {
             List<MeshCreationInfo.Pack> result = new List<MeshCreationInfo.Pack>();
             //1メッシュに収まらないなら
@@ -347,20 +347,21 @@ namespace MMD
             }
             return result;
         }
-        
+
         /// <summary>
         /// メッシュ作成
         /// </summary>
         /// <returns>メッシュ</returns>
+        /// <param name='mesh_owner'>The format containing the mesh to process. <br>This can be different from 'format_'.</param>
         /// <param name='creation_info'>メッシュ作成情報</param>
-        protected Mesh[] CreateMesh(MeshCreationInfo[] creation_info)
+        protected Mesh[] CreateMesh(PMXFormat mesh_owner, MeshCreationInfo[] creation_info, string save_name = "")
         {
             Mesh[] result = new Mesh[creation_info.Length];
             for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
-                Mesh mesh = new Mesh();
-                EntryAttributesForMesh(mesh, creation_info[i]);
+                var mesh = new Mesh();
+                EntryAttributesForMesh(mesh_owner, scale_, mesh, creation_info[i]);
                 SetSubMesh(mesh, creation_info[i]);
-                CreateAssetForMesh(mesh, i);
+                CreateAssetForMesh(mesh, i, save_name);
                 result[i] = mesh;
             }
             return result;
@@ -371,30 +372,30 @@ namespace MMD
         /// </summary>
         /// <param name='mesh'>対象メッシュ</param>
         /// <param name='creation_info'>メッシュ作成情報</param>
-        void EntryAttributesForMesh(Mesh mesh, MeshCreationInfo creation_info)
+        static void EntryAttributesForMesh(PMXFormat format, float scale, Mesh mesh, MeshCreationInfo creation_info)
         {
-            mesh.vertices = creation_info.all_vertices.Select(x=>format_.vertex_list.vertex[x].pos * scale_).ToArray();
-            mesh.normals = creation_info.all_vertices.Select(x=>format_.vertex_list.vertex[x].normal_vec).ToArray();
-            mesh.uv = creation_info.all_vertices.Select(x=>format_.vertex_list.vertex[x].uv).ToArray();
-            if (0 < format_.header.additionalUV) {
+            mesh.vertices = creation_info.all_vertices.Select(x=>format.vertex_list.vertex[x].pos * scale).ToArray();
+            mesh.normals = creation_info.all_vertices.Select(x=>format.vertex_list.vertex[x].normal_vec).ToArray();
+            mesh.uv = creation_info.all_vertices.Select(x=>format.vertex_list.vertex[x].uv).ToArray();
+            if (0 < format.header.additionalUV) {
                 //追加UVが1つ以上有れば
                 //1つ目のみ登録
-                mesh.uv2 = creation_info.all_vertices.Select(x=>new Vector2(format_.vertex_list.vertex[x].add_uv[0].x, format_.vertex_list.vertex[x].add_uv[0].y)).ToArray();
+                mesh.uv2 = creation_info.all_vertices.Select(x=>new Vector2(format.vertex_list.vertex[x].add_uv[0].x, format.vertex_list.vertex[x].add_uv[0].y)).ToArray();
             }
-            if (1 < format_.header.additionalUV)
+            if (1 < format.header.additionalUV)
             {
                 //追加UVが1つ以上有れば
                 //2つ目のみ登録
-                mesh.uv3 = creation_info.all_vertices.Select(x => new Vector2(format_.vertex_list.vertex[x].add_uv[1].x, format_.vertex_list.vertex[x].add_uv[1].y)).ToArray();
+                mesh.uv3 = creation_info.all_vertices.Select(x => new Vector2(format.vertex_list.vertex[x].add_uv[1].x, format.vertex_list.vertex[x].add_uv[1].y)).ToArray();
             }
-            if (2 < format_.header.additionalUV)
+            if (2 < format.header.additionalUV)
             {
                 //追加UVが1つ以上有れば
                 //3つ目のみ登録
-                mesh.uv4 = creation_info.all_vertices.Select(x => new Vector2(format_.vertex_list.vertex[x].add_uv[2].x, format_.vertex_list.vertex[x].add_uv[2].y)).ToArray();
+                mesh.uv4 = creation_info.all_vertices.Select(x => new Vector2(format.vertex_list.vertex[x].add_uv[2].x, format.vertex_list.vertex[x].add_uv[2].y)).ToArray();
             }
-            mesh.boneWeights = creation_info.all_vertices.Select(x=>ConvertBoneWeight(format_.vertex_list.vertex[x].bone_weight)).ToArray();
-            mesh.colors = creation_info.all_vertices.Select(x=>new Color(0.0f, 0.0f, 0.0f, format_.vertex_list.vertex[x].edge_magnification * 0.25f)).ToArray(); //不透明度にエッジ倍率を0.25倍した情報を仕込む(0～8迄は表せる)
+            mesh.boneWeights = creation_info.all_vertices.Select(x=>ConvertBoneWeight(format.vertex_list.vertex[x].bone_weight)).ToArray();
+            mesh.colors = creation_info.all_vertices.Select(x=>new Color(0.0f, 0.0f, 0.0f, format.vertex_list.vertex[x].edge_magnification * 0.25f)).ToArray(); //不透明度にエッジ倍率を0.25倍した情報を仕込む(0～8迄は表せる)
         }
         
         /// <summary>
@@ -402,7 +403,7 @@ namespace MMD
         /// </summary>
         /// <returns>Unity用ボーンウェイト</returns>
         /// <param name='bone_weight'>PMX用ボーンウェイト</param>
-        BoneWeight ConvertBoneWeight(PMXFormat.BoneWeight bone_weight)
+        static BoneWeight ConvertBoneWeight(PMXFormat.BoneWeight bone_weight)
         {
             //HACK: 取り敢えずボーンウェイトタイプを考えずにBDEFx系として登録する
             BoneWeight result = new BoneWeight();
@@ -413,7 +414,7 @@ namespace MMD
                 //BDEF4なら
                 result.boneIndex0 = (int)bone_weight.bone1_ref;
                 result.weight0 = bone_weight.bone1_weight;
-                result.boneIndex1 = (int)bone_weight.bone2_ref;;
+                result.boneIndex1 = (int)bone_weight.bone2_ref;
                 result.weight1 = bone_weight.bone2_weight;
                 result.boneIndex2 = (int)bone_weight.bone3_ref;
                 result.weight2 = bone_weight.bone3_weight;
@@ -439,7 +440,7 @@ namespace MMD
         /// </summary>
         /// <param name='mesh'>対象メッシュ</param>
         /// <param name='creation_info'>メッシュ作成情報</param>
-        void SetSubMesh(Mesh mesh, MeshCreationInfo creation_info)
+        static void SetSubMesh(Mesh mesh, MeshCreationInfo creation_info)
         {
             // マテリアル対サブメッシュ
             // サブメッシュとはマテリアルに適用したい面頂点データのこと
@@ -458,7 +459,7 @@ namespace MMD
         /// </summary>
         /// <param name='mesh'>対象メッシュ</param>
         /// <param name='index'>メッシュインデックス</param>
-        protected void CreateAssetForMesh(Mesh mesh, int index)
+        protected void CreateAssetForMesh(Mesh mesh, int index, string save_name = "")
         {
             string path = format_.meta_header.folder + "/Meshes/";
             if (!System.IO.Directory.Exists(path)) { 
@@ -466,7 +467,8 @@ namespace MMD
             }
             
             string name = GetFilePathString(format_.meta_header.name);
-            string file_name = path + index.ToString() + "_" + name + ".asset";
+            //string file_name = path + index.ToString() + "_" + name + ".asset";
+            string file_name = string.IsNullOrEmpty(save_name) ? $"{path}{index}_{name}.asset" : $"{path}{index}_{save_name}.asset";
             AssetDatabase.CreateAsset(mesh, file_name);
         }
         
@@ -474,8 +476,9 @@ namespace MMD
         /// マテリアル作成
         /// </summary>
         /// <returns>マテリアル</returns>
+        /// <param name='mats_owner'>The format containing the materials to process. <br>This can be different from 'format_'.</param>
         /// <param name='creation_info'>メッシュ作成情報</param>
-        private Material[][] CreateMaterials(MeshCreationInfo[] creation_info)
+        private Material[][] CreateMaterials(PMXFormat mats_owner, MeshCreationInfo[] creation_info)
         {
             // 適当なフォルダに投げる
             string path = format_.meta_header.folder + "/Materials/";
@@ -484,8 +487,8 @@ namespace MMD
             }
             
             //全マテリアルを作成
-            Material[] materials = EntryAttributesForMaterials();
-            CreateAssetForMaterials(materials);
+            Material[] materials = EntryAttributesForMaterials(mats_owner);
+            CreateAssetForMaterials(mats_owner, materials);
 
             //メッシュ単位へ振り分け
             Material[][] result = new Material[creation_info.Length][];
@@ -500,16 +503,16 @@ namespace MMD
         /// マテリアルに基本情報(シェーダー・カラー・テクスチャ)を登録する
         /// </summary>
         /// <returns>マテリアル</returns>
-        private Material[] EntryAttributesForMaterials()
+        private Material[] EntryAttributesForMaterials(PMXFormat mats_owner)
         {
             //材質モーフが透過を要望するか
             bool[] is_transparent_by_material = IsTransparentByMaterial(); //材質
             bool[] is_transparent_by_material_morph = IsTransparentByMaterialMorph(); //材質モーフ
             bool[] is_transparent_by_texture_alpha = IsTransparentByTextureAlpha(); //テクスチャのアルファ値(UV考慮済み)
 
-            PMXBaseMaterialConverter materialConv = new PMXFernMaterialConverter(root_game_object_, format_, scale_);
+            PMXBaseMaterialConverter materialConv = new PMXFernMaterialConverter(root_game_object_, mats_owner, scale_);
             
-            return Enumerable.Range(0, format_.material_list.material.Length)
+            return Enumerable.Range(0, mats_owner.material_list.material.Length)
                     .Select(x=>new {
                             material_index = (uint)x,
                             is_transparent = is_transparent_by_material[x] || is_transparent_by_material_morph[x]
@@ -607,7 +610,7 @@ namespace MMD
         /// </remarks>
         Vector2[][] GetUvList()
         {
-            uint[][] vertex_list = CreateMeshCreationInfoPacks().Select(x=>x.plane_indices).ToArray();
+            uint[][] vertex_list = CreateMeshCreationInfoPacks(format_).Select(x=>x.plane_indices).ToArray();
             
             Dictionary<uint, Vector4>[] uv_morphs = format_.morph_list.morph_data
                                                             .Where(x=>PMXFormat.MorphData.MorphType.Uv==x.morph_type) //UVモーフなら
@@ -760,11 +763,11 @@ namespace MMD
         /// マテリアルをProjectに登録する
         /// </summary>
         /// <param name='materials'>対象マテリアル</param>
-        protected void CreateAssetForMaterials(Material[] materials) {
+        protected void CreateAssetForMaterials(PMXFormat mats_owner, Material[] materials) {
             string path = format_.meta_header.folder + "/Materials/";
 
             for (int i = 0, i_max = materials.Length; i < i_max; ++i) {
-                string name = GetFilePathString(format_.material_list.material[i].name);
+                string name = GetFilePathString(mats_owner.material_list.material[i].name);
                 string file_name = path + i.ToString() + "_" + name + ".asset";
                 AssetDatabase.CreateAsset(materials[i], file_name);
             }
@@ -1284,7 +1287,7 @@ namespace MMD
         protected SkinnedMeshRenderer[] BuildingBindpose(Mesh[] mesh, Material[][] materials, GameObject[] bones)
         {
             // メッシュルートを生成してルートの子供に付ける
-            Transform mesh_root_transform = (new GameObject("Mesh")).transform;
+            Transform mesh_root_transform = new GameObject("Mesh").transform;
             mesh_root_transform.parent = root_game_object_.transform;
 
             //モデルルート取得
@@ -1296,7 +1299,7 @@ namespace MMD
             //レンダー設定
             SkinnedMeshRenderer[] result = new SkinnedMeshRenderer[mesh.Length];
             for (int i = 0, i_max = mesh.Length; i < i_max; ++i) {
-                Transform mesh_transform = (new GameObject("Mesh" + i.ToString())).transform;
+                Transform mesh_transform = new GameObject("Mesh" + i.ToString()).transform;
                 mesh_transform.parent = mesh_root_transform;
                 SkinnedMeshRenderer smr = mesh_transform.gameObject.AddComponent<SkinnedMeshRenderer>();
                 mesh[i].bindposes = bindposes;

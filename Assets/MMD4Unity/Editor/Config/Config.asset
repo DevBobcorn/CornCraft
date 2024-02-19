@@ -22,7 +22,7 @@ MonoBehaviour:
     physics_type: 2
     use_ik: 0
     use_leg_d_bones: 0
-    scale: 1.2
+    scale: 1.3
     player_anim_controller: {fileID: 9100000, guid: aaa3809713074ae41b53726a38b8cfd5, type: 2}
   vmd_config:
     createAnimationFile: 0
