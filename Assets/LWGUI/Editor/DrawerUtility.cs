@@ -907,7 +907,7 @@ public static float PowPreserveSign(float f, float p)
 		/// <returns>is has changed?</returns>
 		public static bool DrawSearchField(ref string searchingText, ref SearchMode searchMode, LWGUI lwgui)
 		{
-			var toolbarSeachTextFieldPopup = new GUIStyle("ToolbarSeachTextFieldPopup");
+			var toolbarSeachTextFieldPopup = new GUIStyle("ToolbarSearchTextFieldPopup");
 
 			bool isHasChanged = false;
 			EditorGUI.BeginChangeCheck();
