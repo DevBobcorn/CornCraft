@@ -12,9 +12,8 @@ namespace MMD
         /// アニメーションタイプ
         /// </summary>
         public enum AnimationType {
-            GenericMecanim,        //汎用アバターでのMecanim
+            GenericMecanim,      //汎用アバターでのMecanim
             HumanMecanim,        //人型アバターでのMecanim
-            LegacyAnimation,    //旧式アニメーション
         }
         
         /// <summary>
@@ -113,27 +112,23 @@ namespace MMD
             }
     
             // Mecanim設定
-            if (AnimationType.LegacyAnimation != animation_type) {
-                //アニメーター追加
-                var avatar_setting = new AvatarSettingScript(root_game_object_, bones);
-                switch (animation_type) {
-                case AnimationType.GenericMecanim: //汎用アバターでのMecanim
-                    avatar_setting.SettingGenericAvatar();
-                    break;
-                case AnimationType.HumanMecanim: //人型アバターでのMecanim
-                    avatar_setting.SettingHumanAvatar(use_leg_d_bones);
-                    break;
-                default:
-                    throw new System.ArgumentException();
-                }
-                
-                string path = format_.meta_header.folder + "/";
-                string name = GetFilePathString(format_.meta_header.name);
-                string file_name = path + name + ".avatar.asset";
-                avatar_setting.CreateAsset(file_name);
-            } else {
-                root_game_object_.AddComponent<Animation>();    // アニメーション追加
+            //アニメーター追加
+            var avatar_setting = new AvatarSettingScript(root_game_object_, bones);
+            switch (animation_type) {
+            case AnimationType.GenericMecanim: //汎用アバターでのMecanim
+                avatar_setting.SettingGenericAvatar();
+                break;
+            case AnimationType.HumanMecanim: //人型アバターでのMecanim
+                avatar_setting.SettingHumanAvatar(use_leg_d_bones);
+                break;
+            default:
+                throw new System.ArgumentException();
             }
+            
+            string path = format_.meta_header.folder + "/";
+            string name = GetFilePathString(format_.meta_header.name);
+            string file_name = path + name + ".avatar.asset";
+            avatar_setting.CreateAsset(file_name);
 
             return root_game_object_;
         }
@@ -791,7 +786,7 @@ namespace MMD
         GameObject[] EntryAttributeForBones()
         {
             return format_.bone_list.bone.Select(x=>{
-                GameObject game_object = new GameObject(x.bone_name);
+                var game_object = new GameObject(x.bone_name);
                 game_object.transform.position = x.bone_position * scale_;
                 return game_object;
             }).ToArray();
@@ -804,12 +799,12 @@ namespace MMD
         void AttachParentsForBone(GameObject[] bones)
         {
             //モデルルートを生成してルートの子供に付ける
-            Transform model_root_transform = (new GameObject("Model")).transform;
+            Transform model_root_transform = new GameObject("Model").transform;
             model_root_transform.parent = root_game_object_.transform;
 
             for (int i = 0, i_max = format_.bone_list.bone.Length; i < i_max; ++i) {
                 uint parent_bone_index = format_.bone_list.bone[i].parent_bone_index;
-                if (parent_bone_index < (uint)bones.Length) {
+                if (parent_bone_index < (uint) bones.Length) {
                     //親のボーンが有るなら
                     //それの子に為る
                     bones[i].transform.parent = bones[parent_bone_index].transform;

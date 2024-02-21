@@ -76,7 +76,7 @@ namespace MMD
 
             if (main_texture == null)
             {
-                Debug.LogWarning($"Main texture {main_texture_path} not found!");
+                //Debug.LogWarning($"Main texture {main_texture_path} not found!");
             }
 
             // Guess material type from name
