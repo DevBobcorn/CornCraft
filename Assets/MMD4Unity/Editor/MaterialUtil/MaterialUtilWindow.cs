@@ -8,12 +8,18 @@ namespace MMD
 {
     public class MaterialUtilWindow : EditorWindow
     {
-        private Color DiffuseHigh = Color.grey, DiffuseDark = Color.black;
+        private Color DiffuseHigh = new Color32(170, 170, 170, 255);
+        private Color DiffuseDark = new Color32(166, 153, 150, 255);
 
         private readonly Dictionary<FernMaterialCategory, List<Material>> TargetMaterials = new();
 
         private GameObject target = null;
+        private string targetPrefabPath = string.Empty;
         private int currentCategoryMask = 1; // Only category 0 is selected by default
+
+        // KKS Panel Variables
+        private bool usingKKSPanel = false;
+        private int selectedBakedType = 0;
 
         [MenuItem("MMD for Unity/Fern Material Util")]
         static void Init()
@@ -76,6 +82,12 @@ namespace MMD
 
                         TargetMaterials[type].Add(material);
                     }
+                }
+
+                targetPrefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(newTarget) ?? "";
+                if (targetPrefabPath != "")
+                {
+                    targetPrefabPath = targetPrefabPath[..targetPrefabPath.LastIndexOf('/')];
                 }
             }
         }
@@ -323,6 +335,16 @@ namespace MMD
                         {
                             ApplyDiffuseColors(GetSelectedMaterials(), DiffuseHigh, DiffuseDark);
                         }
+
+                        usingKKSPanel = EditorGUILayout.Toggle("Expand KKS Panel", usingKKSPanel);
+
+                        if (usingKKSPanel)
+                        {
+                            FernMaterialForKKS.DrawGUI(targetPrefabPath, ref selectedBakedType, TargetMaterials);
+                        }
+
+                        GUILayout.Space(20);
+
                     GUILayout.EndVertical();
                     GUILayout.EndHorizontal();
                 }
