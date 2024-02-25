@@ -20,30 +20,6 @@ namespace MMD
         public Color32 SKIN_DIFFUSE_DARK = new Color32(255, 200, 180, 255);
 
         /// <summary>
-        /// MMDシェーダーパスの取得
-        /// </summary>
-        /// <returns>MMDシェーダーパス</returns>
-        string GetShaderPath(FernMaterialCategory type)
-        {
-            string result = "FernRender/URP/FERNNPR";
-
-            switch (type)
-            {
-                case FernMaterialCategory.Face:
-                    result += "Face";
-                    break;
-                case FernMaterialCategory.Hair:
-                    result += "Hair";
-                    break;
-                default:
-                    result += "Standard";
-                    break;
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// マテリアルをUnity用に変換する
         /// </summary>
         /// <returns>Unity用マテリアル</returns>
@@ -62,19 +38,19 @@ namespace MMD
             }
 
             // Guess material type from name
-            var materialType = FernMaterialTypeUtil.GuessMaterialType(material.name);
+            var materialType = FernMaterialUtilFunctions.GuessMaterialCategory(material.name);
             
             //マテリアルに設定
-            string shader_path = GetShaderPath(materialType);
+            string shader_path = FernMaterialUtilFunctions.GetShaderPath(materialType);
             Material result = new(Shader.Find(shader_path));
             // シェーダに依って値が有ったり無かったりするが、設定してもエラーに為らない様なので全部設定
             // TODO: result.SetColor("_BaseColor", material.diffuse_color);
             result.SetColor("_BaseColor", Color.white);
 
             if (is_transparent) {
-                SetSurfaceType(result, 2);
+                FernMaterialUtilFunctions.SetRenderType(result, FernMaterialRenderType.Cutout);
             } else {
-                SetSurfaceType(result, 0);
+                FernMaterialUtilFunctions.SetRenderType(result, FernMaterialRenderType.Opaque);
             }
 
             switch (materialType)
