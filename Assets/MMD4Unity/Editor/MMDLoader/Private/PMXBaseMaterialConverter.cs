@@ -17,54 +17,6 @@ namespace MMD
             scale_ = scale;
         }
 
-        // See LWGUI.Helper.SetSurfaceType()
-		public static void SetSurfaceType(Material mat, int surfaceType)
-		{
-            mat.SetFloat("_Surface", surfaceType);
-
-            if (surfaceType == 0) // Opaque
-            {
-                mat.renderQueue = (int) RenderQueue.Geometry;
-                mat.SetOverrideTag("RenderType", "Opaque");
-                mat.SetInt("_SrcBlend", (int) BlendMode.One);
-                mat.SetInt("_DstBlend", (int) BlendMode.Zero);
-                mat.SetFloat("_ZWrite", 1);
-                mat.DisableKeyword("_ALPHABLEND_ON");
-                mat.DisableKeyword("_ALPHATEST_ON");
-            }
-            else if (surfaceType == 1) // Transparent
-            {
-                mat.renderQueue = (int) RenderQueue.Transparent;
-                mat.SetOverrideTag("RenderType", "Transparent");
-                mat.SetInt("_SrcBlend", (int) BlendMode.SrcAlpha);
-                mat.SetInt("_DstBlend", (int) BlendMode.OneMinusSrcAlpha);
-                mat.SetFloat("_ZWrite", 0);
-                mat.EnableKeyword("_ALPHABLEND_ON");
-                mat.DisableKeyword("_ALPHATEST_ON");
-            }
-            else if (surfaceType == 2) // Clip
-            {
-                mat.renderQueue = (int) RenderQueue.AlphaTest;
-                mat.SetOverrideTag("RenderType", "TransparentCutout");
-                mat.SetInt("_SrcBlend", (int) BlendMode.One);
-                mat.SetInt("_DstBlend", (int) BlendMode.Zero);
-                mat.SetFloat("_ZWrite", 1);
-                mat.EnableKeyword("_ALPHATEST_ON");
-                mat.DisableKeyword("_ALPHABLEND_ON");
-            }
-
-            if (mat.HasProperty("_QueueOffset"))
-            {
-                mat.renderQueue += (int)mat.GetFloat("_QueueOffset");
-            }
-            
-            if (mat.HasProperty("_DepthPrePass"))
-            {
-                mat.SetShaderPassEnabled("SRPDefaultUnlit", mat.GetFloat("_DepthPrePass")>0);
-                mat.SetShaderPassEnabled("ShadowCaster", mat.GetFloat("_CasterShadow")>0);
-            }
-		}
-
         /// <summary>
         /// 透過マテリアル確認
         /// </summary>

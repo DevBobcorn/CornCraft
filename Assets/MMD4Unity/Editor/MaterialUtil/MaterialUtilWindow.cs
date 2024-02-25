@@ -11,6 +11,9 @@ namespace MMD
         private Color DiffuseHigh = new Color32(170, 170, 170, 255);
         private Color DiffuseDark = new Color32(166, 153, 150, 255);
 
+        private Color OutlineColor = Color.black;
+        private float OutlineWidth =        1.5F;
+
         private readonly Dictionary<FernMaterialCategory, List<Material>> TargetMaterials = new();
 
         private GameObject target = null;
@@ -78,7 +81,7 @@ namespace MMD
                     // Populate material dictionary
                     foreach (var material in materials)
                     {
-                        var type = FernMaterialTypeUtil.GuessMaterialType(material.name);
+                        var type = FernMaterialUtilFunctions.GuessMaterialCategory(material.name);
 
                         TargetMaterials[type].Add(material);
                     }
@@ -151,7 +154,7 @@ namespace MMD
         private static readonly Color SELECTED_NAME_COLOR = Color.white * 1.5F;
         private static readonly Color SELECTED_SLOT_COLOR = Color.white * 1.8F; // Man, it really works!
 
-        private void DrawMaterialList(FernMaterialCategory type, List<Material> materials, bool selected, bool drawHeader)
+        private void DrawMaterialList(FernMaterialCategory category, List<Material> materials, bool selected, bool drawHeader)
         {
             var oldColor = GUI.color;
 
@@ -159,7 +162,7 @@ namespace MMD
             {
                 GUILayout.BeginHorizontal();
                     if (selected) GUI.color = SELECTED_NAME_COLOR;
-                    EditorGUILayout.LabelField($"> {type}", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField($"> {category}", EditorStyles.boldLabel);
                     if (selected) GUI.color = oldColor;
                 GUILayout.EndHorizontal();
             }
@@ -167,11 +170,12 @@ namespace MMD
             {
                 GUILayout.BeginHorizontal();
                     if (selected) GUI.color = SELECTED_NAME_COLOR;
-                    EditorGUILayout.LabelField($"> {type}", EditorStyles.boldLabel, GUILayout.Width(135));
+                    EditorGUILayout.LabelField($"> {category}", EditorStyles.boldLabel, GUILayout.Width(135));
                     GUI.color = CATEGORY_NAME_COLOR;
                     EditorGUILayout.LabelField($"[Category]", EditorStyles.boldLabel, GUILayout.Width(80));
-                    EditorGUILayout.LabelField($"[Diffuse]",  EditorStyles.boldLabel, GUILayout.Width(80));
-                    EditorGUILayout.LabelField($"[Specular]", EditorStyles.boldLabel, GUILayout.Width(105));
+                    EditorGUILayout.LabelField($"[Diffuse & Specular]",  EditorStyles.boldLabel, GUILayout.Width(135));
+                    EditorGUILayout.LabelField($"[Type]", EditorStyles.boldLabel, GUILayout.Width(45));
+                    EditorGUILayout.LabelField($"[Outline]", EditorStyles.boldLabel, GUILayout.Width(55));
                     GUI.color = oldColor;
                 GUILayout.EndHorizontal();
             }
@@ -200,12 +204,12 @@ namespace MMD
                     GUI.enabled = true;
 
                     // Draw material category dropdown
-                    var newType = (FernMaterialCategory) EditorGUILayout.EnumPopup(type, GUILayout.Width(60));
-                    if (newType != type)
+                    var newCategory = (FernMaterialCategory) EditorGUILayout.EnumPopup(category, GUILayout.Width(60));
+                    if (newCategory != category)
                     {
                         // Move this material to another category
-                        TargetMaterials[type].Remove(material);
-                        TargetMaterials[newType].Add(material);
+                        TargetMaterials[category].Remove(material);
+                        TargetMaterials[newCategory].Add(material);
                         breakNext = true;
                     }
 
@@ -215,7 +219,7 @@ namespace MMD
 
                     GUILayout.Space(5); // ============================================================================
 
-                    // Draw diffuse info
+                    // Draw lighting colors
                     var diffuseName = GetKeywordType(FERN_DIFFUSE_KEYWORDS, material);
                     EditorGUILayout.LabelField(new GUIContent(diffuseName[..4], diffuseName), GUILayout.Width(30));
                     GUI.enabled = false;
@@ -223,19 +227,35 @@ namespace MMD
                     DrawColorFieldWithoutLabel(material.GetColor("_DarkColor"), false, false, GUILayout.Width(20));
                     GUI.enabled = true;
 
-                    GUILayout.Space(5); // ============================================================================
-
-                    // Draw specular info
                     var specularName = GetKeywordType(FERN_SPECULAR_KEYWORDS, material);
                     
                     if (specularName != "None")
                     {
-                        EditorGUILayout.LabelField(new GUIContent(specularName[..4], specularName), GUILayout.Width(30));
+                        EditorGUILayout.LabelField(new GUIContent(specularName[..4], specularName),   GUILayout.Width(30));
                         DrawColorFieldWithoutLabel(material.GetColor("_SpecularColor"), false, false, GUILayout.Width(20));
                     }
                     else
                     {
                         EditorGUILayout.LabelField(new GUIContent(specularName[..4], specularName), GUILayout.Width(50));
+                    }
+
+                    GUILayout.Space(5); // ============================================================================
+
+                    // Draw render type
+                    var renderType = FernMaterialUtilFunctions.GetRenderType(material).ToString();
+                    EditorGUILayout.LabelField(renderType, GUILayout.Width(45));
+
+                    GUILayout.Space(5); // ============================================================================
+
+                    // Draw outline info
+                    if (material.GetFloat("_Outline") > 0F) // If outline is enabled
+                    {
+                        DrawColorFieldWithoutLabel(material.GetColor("_OutlineColor"), false, false, GUILayout.Width(20));
+                        EditorGUILayout.LabelField(material.GetFloat("_OutlineWidth").ToString(),    GUILayout.Width(35));
+                    }
+                    else
+                    {
+                        EditorGUILayout.LabelField("None", GUILayout.Width(55));
                     }
 
                     GUILayout.EndHorizontal();
@@ -245,12 +265,33 @@ namespace MMD
             }
         }
 
-        private void ApplyDiffuseColors(List<Material> materials, Color highColor, Color darkColor)
+        private static void ApplyDiffuseColors(List<Material> materials, Color highColor, Color darkColor)
         {
             foreach (var material in materials)
             {
                 material.SetColor("_HighColor", highColor);
                 material.SetColor("_DarkColor", darkColor);
+            }
+        }
+
+        private static void ApplyOutline(List<Material> materials, Color outlineColor, float outlineWidth)
+        {
+            foreach (var material in materials)
+            {
+                material.SetFloat("_Outline", 1F); // First make sure outline is enabled
+                material.EnableKeyword("_OUTLINE");
+                
+                material.SetColor("_OutlineColor", outlineColor);
+                material.SetFloat("_OutlineWidth", outlineWidth);
+            }
+        }
+
+        private static void DisableOutline(List<Material> materials)
+        {
+            foreach (var material in materials)
+            {
+                material.SetFloat("_Outline", 0F);
+                material.DisableKeyword("_OUTLINE");
             }
         }
 
@@ -335,18 +376,44 @@ namespace MMD
                         {
                             ApplyDiffuseColors(GetSelectedMaterials(), DiffuseHigh, DiffuseDark);
                         }
+                    
+                    GUILayout.EndVertical();
+                    GUILayout.EndHorizontal();
 
-                        usingKKSPanel = EditorGUILayout.Toggle("Expand KKS Panel", usingKKSPanel);
+                    EditorGUILayout.LabelField("Outline", EditorStyles.boldLabel);
 
-                        if (usingKKSPanel)
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Space(10);
+                    GUILayout.BeginVertical();
+
+                        GUILayout.BeginHorizontal();
+                            OutlineColor = DrawColorField("Outline Color", OutlineColor, true, false);
+                            OutlineWidth = EditorGUILayout.FloatField("Outline Width",  OutlineWidth);
+                        GUILayout.EndHorizontal();
+
+                        if (GUILayout.Button("Apply outline to selected categories"))
                         {
-                            FernMaterialForKKS.DrawGUI(targetPrefabPath, ref selectedBakedType, TargetMaterials);
+                            ApplyOutline(GetSelectedMaterials(), OutlineColor, OutlineWidth);
                         }
-
-                        GUILayout.Space(20);
 
                     GUILayout.EndVertical();
                     GUILayout.EndHorizontal();
+
+                    usingKKSPanel = EditorGUILayout.Toggle("Expand KKS Panel", usingKKSPanel);
+
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Space(10);
+                    GUILayout.BeginVertical();
+
+                    if (usingKKSPanel)
+                    {
+                        FernMaterialForKKS.DrawGUI(targetPrefabPath, ref selectedBakedType, TargetMaterials);
+                    }
+
+                    GUILayout.EndVertical();
+                    GUILayout.EndHorizontal();
+
+                    GUILayout.Space(20);
                 }
 
             GUILayout.EndScrollView();
