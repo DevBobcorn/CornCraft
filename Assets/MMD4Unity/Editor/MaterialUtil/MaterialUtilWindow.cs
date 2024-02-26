@@ -119,7 +119,7 @@ namespace MMD
 
         private const string FERN_NPR_SHADER_PREFIX = "FernRender/URP/FERNNPR";
 
-        private readonly Dictionary<string, string> FERN_DIFFUSE_KEYWORDS = new()
+        private static readonly Dictionary<string, string> FERN_DIFFUSE_KEYWORDS = new()
                 {
                     ["_CELLSHADING"]     = "Cel ",
                     ["_RAMPSHADING"]     = "Ramp",
@@ -128,7 +128,7 @@ namespace MMD
                     ["_SDFFACE"]         = "SDF Face"
                 };
         
-        private readonly Dictionary<string, string> FERN_SPECULAR_KEYWORDS = new()
+        private static readonly Dictionary<string, string> FERN_SPECULAR_KEYWORDS = new()
                 {
                     ["_GGX"]          = "PBR-GGX",
                     ["_STYLIZED"]     = "Ramp",
@@ -137,17 +137,17 @@ namespace MMD
                     ["_ANGLERING"]    = "AngleRing"
                 };
 
-        private string GetKeywordType(Dictionary<string, string> dictionary, Material material)
+        private static (string, string) GetKeywordType(Dictionary<string, string> dictionary, Material material)
         {
             foreach (var keyword in material.shaderKeywords)
             {
                 if (dictionary.ContainsKey(keyword))
                 {
-                    return dictionary[keyword];
+                    return (keyword, dictionary[keyword]);
                 }
             }
 
-            return "None";
+            return ("_", "None");
         }
 
         private static readonly Color CATEGORY_NAME_COLOR = Color.cyan;
@@ -213,21 +213,21 @@ namespace MMD
                         breakNext = true;
                     }
 
-                    // Draw shader name (without the leading "FernRender/URP/FERNNPR" prefix)
+                    // Draw shader name (without the leading "FernRender/URP/" prefix)
                     var shaderName = material.shader.name[15..];
                     EditorGUILayout.LabelField(new GUIContent(shaderName[7..9], shaderName), EditorStyles.boldLabel, GUILayout.Width(15));
 
                     GUILayout.Space(5); // ============================================================================
 
                     // Draw lighting colors
-                    var diffuseName = GetKeywordType(FERN_DIFFUSE_KEYWORDS, material);
+                    var (_, diffuseName) = GetKeywordType(FERN_DIFFUSE_KEYWORDS, material);
                     EditorGUILayout.LabelField(new GUIContent(diffuseName[..4], diffuseName), GUILayout.Width(30));
                     GUI.enabled = false;
                     DrawColorFieldWithoutLabel(material.GetColor("_HighColor"), false,  true, GUILayout.Width(20));
                     DrawColorFieldWithoutLabel(material.GetColor("_DarkColor"), false, false, GUILayout.Width(20));
                     GUI.enabled = true;
 
-                    var specularName = GetKeywordType(FERN_SPECULAR_KEYWORDS, material);
+                    var (_, specularName) = GetKeywordType(FERN_SPECULAR_KEYWORDS, material);
                     
                     if (specularName != "None")
                     {
@@ -271,6 +271,49 @@ namespace MMD
             {
                 material.SetColor("_HighColor", highColor);
                 material.SetColor("_DarkColor", darkColor);
+            }
+        }
+
+        private static Dictionary<string, Dictionary<string, int>> DIFFUSE_SHADER_KW_ENUM = new()
+        {
+            ["FERNNPRStandard"] = new()
+            {
+                ["_CELLSHADING"] = 0,
+                ["_LAMBERTIAN"]  = 3,
+            },
+            ["FERNNPREye"]      = new()
+            {
+                ["_CELLSHADING"] = 1,
+                ["_LAMBERTIAN"]  = 3,
+            },
+            ["FERNNPRFace"]     = new()
+            {
+                ["_CELLSHADING"] = 0,
+                ["_LAMBERTIAN"]  = 3,
+            },
+            ["FERNNPRHair"]     = new()
+            {
+                ["_CELLSHADING"] = 0,
+                ["_LAMBERTIAN"]  = 2,
+            },
+        };
+
+        private static void ApplyDiffuseType(List<Material> materials, string newDiffuseKw)
+        {
+            foreach (var material in materials)
+            {
+                var (oldDiffuseKw, _) = GetKeywordType(FERN_DIFFUSE_KEYWORDS, material);
+
+                if (oldDiffuseKw != "_" && oldDiffuseKw != newDiffuseKw)
+                {
+                    material.DisableKeyword(oldDiffuseKw);
+                    material.EnableKeyword(newDiffuseKw);
+
+                    // Get shader name (without the leading "FernRender/URP/" prefix)
+                    var shaderName = material.shader.name[15..];
+
+                    material.SetFloat("_enum_diffuse", DIFFUSE_SHADER_KW_ENUM[shaderName][newDiffuseKw]);
+                }
             }
         }
 
@@ -368,14 +411,26 @@ namespace MMD
                     GUILayout.BeginVertical();
 
                         GUILayout.BeginHorizontal();
-                            DiffuseHigh = DrawColorField("Lit Color",  DiffuseHigh, true, true );
-                            DiffuseDark = DrawColorField("Dark Color", DiffuseDark, true, false);
+                            DiffuseHigh = DrawColorField("Diffuse Lit Color",  DiffuseHigh, true, true );
+                            DiffuseDark = DrawColorField("Diffuse Dark Color", DiffuseDark, true, false);
                         GUILayout.EndHorizontal();
 
                         if (GUILayout.Button("Apply diffuse colors to selected categories"))
                         {
                             ApplyDiffuseColors(GetSelectedMaterials(), DiffuseHigh, DiffuseDark);
                         }
+
+                        GUILayout.BeginHorizontal();
+                        if (GUILayout.Button("Apply CellShading to selected"))
+                        {
+                            ApplyDiffuseType(GetSelectedMaterials(), "_CELLSHADING");
+                        }
+
+                        if (GUILayout.Button("Apply Lambert to selected"))
+                        {
+                            ApplyDiffuseType(GetSelectedMaterials(), "_LAMBERTIAN");
+                        }
+                        GUILayout.EndHorizontal();
                     
                     GUILayout.EndVertical();
                     GUILayout.EndHorizontal();
