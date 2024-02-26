@@ -11,21 +11,26 @@ public class SkillEditorWindow : SimpleTimeArea
 
     private Rect rectTopBar;
     private Rect rectLeft;
+    private Rect rectSplitter;
     public Rect rectLeftTopToolBar;
 
+    private double _runningTime = 0f;
     private float _lastUpdateTime = 0f;
-    #region Used
-    private double runningTime = 10.0f;
+    private float _currentLeftWidth = 250f;
+    private const float MIN_LEFT_WIDTH = 200f;
+    private const float MAX_LEFT_WIDTH = 350f;
+    private bool resizingLeft = false;
+
+    #region Property Access
+    
     protected override double RunningTime
     {
-        get { return runningTime; }
+        get { return _runningTime; }
         set
         {
-            runningTime = value;
+            _runningTime = value;
         }
     }
-
-    private readonly float leftWidth = 250f;
 
     public bool IsPlaying
     {
@@ -60,7 +65,7 @@ public class SkillEditorWindow : SimpleTimeArea
 
     protected override float sequencerHeaderWidth
     {
-        get { return leftWidth; }
+        get { return _currentLeftWidth; }
     }
 
     #endregion
@@ -98,14 +103,15 @@ public class SkillEditorWindow : SimpleTimeArea
 
     private void OnGUI()
     {
-        Rect rectMainBodyArea = new Rect(0, toolbarHeight, base.position.width, this.position.height - toolbarHeight);
-        rectTopBar = new Rect(0, 0, this.position.width, toolbarHeight);
-        rectLeft = new Rect(rectMainBodyArea.x, rectMainBodyArea.y + timeRulerHeight, leftWidth, rectMainBodyArea.height);
-        rectLeftTopToolBar = new Rect(rectMainBodyArea.x, rectMainBodyArea.y, leftWidth, timeRulerHeight);
+        Rect rectMainBodyArea = new(0, toolbarHeight, base.position.width, this.position.height - toolbarHeight);
 
-        rectTotalArea = new Rect(rectMainBodyArea.x + leftWidth, rectMainBodyArea.y, base.position.width - leftWidth, rectMainBodyArea.height);
-        rectTimeRuler = new Rect(rectMainBodyArea.x + leftWidth, rectMainBodyArea.y, base.position.width - leftWidth, timeRulerHeight);
-        rectContent = new Rect(rectMainBodyArea.x + leftWidth, rectMainBodyArea.y + timeRulerHeight, base.position.width - leftWidth, rectMainBodyArea.height - timeRulerHeight);
+        rectTopBar.Set(0, 0, this.position.width, toolbarHeight);
+        rectLeft.Set(rectMainBodyArea.x, rectMainBodyArea.y + timeRulerHeight, _currentLeftWidth, rectMainBodyArea.height);
+        rectLeftTopToolBar.Set(rectMainBodyArea.x, rectMainBodyArea.y, _currentLeftWidth, timeRulerHeight);
+
+        rectTotalArea.Set(rectMainBodyArea.x + _currentLeftWidth, rectMainBodyArea.y, base.position.width - _currentLeftWidth, rectMainBodyArea.height);
+        rectTimeRuler.Set(rectMainBodyArea.x + _currentLeftWidth, rectMainBodyArea.y, base.position.width - _currentLeftWidth, timeRulerHeight);
+        rectContent.Set(rectMainBodyArea.x + _currentLeftWidth, rectMainBodyArea.y + timeRulerHeight, base.position.width - _currentLeftWidth, rectMainBodyArea.height - timeRulerHeight);
 
         InitTimeArea(false, false, true, true);
         DrawTimeAreaBackGround();
@@ -119,9 +125,28 @@ public class SkillEditorWindow : SimpleTimeArea
         // Draw left tool bar
         DrawLeftTopToolBar();
 
+        // Draw view splitter
+        rectSplitter.Set(_currentLeftWidth - 1f, rectMainBodyArea.y, 2f, rectMainBodyArea.height);
+        GUI.DrawTexture(rectSplitter, EditorGUIUtility.whiteTexture);
+        EditorGUIUtility.AddCursorRect(rectSplitter, MouseCursor.ResizeHorizontal);
+
+        if (Event.current.type == EventType.MouseDown && rectSplitter.Contains(Event.current.mousePosition))
+        {
+            resizingLeft = true;
+        }
+        if (resizingLeft)
+        {
+            _currentLeftWidth = Mathf.Clamp(Event.current.mousePosition.x, MIN_LEFT_WIDTH, MAX_LEFT_WIDTH);
+            rectSplitter.Set(_currentLeftWidth - 1f, rectMainBodyArea.y, rectSplitter.width, rectMainBodyArea.height);
+        }
+        if (Event.current.type == EventType.MouseUp)
+        {
+            resizingLeft = false;
+        }
+
+        // Draw timeline items
         GUILayout.BeginArea(rectContent);
         
-
         GUILayout.EndArea();
     }
 
