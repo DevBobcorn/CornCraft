@@ -334,7 +334,7 @@ namespace MMD
 
                     GUILayout.Space(10);
 
-                    EditorGUILayout.LabelField($"Edit categories", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("Edit categories", EditorStyles.boldLabel);
 
                     int catIndex = 0;
 
