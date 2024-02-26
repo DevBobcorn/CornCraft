@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 1907403077}
   m_Sun: {fileID: 346995816}
-  m_IndirectSpecularColor: {r: 0.58787966, g: 1.1284804, b: 2.0102315, a: 1}
+  m_IndirectSpecularColor: {r: 0.58787966, g: 1.1287535, b: 2.0109694, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -438,7 +438,7 @@ MonoBehaviour:
   EnvironmentManager: {fileID: 346995815}
   MaterialManager: {fileID: 331478947}
   playerController: {fileID: 195804746}
-  playerRenderPrefab: {fileID: 5188445008950304087, guid: d8e357869c598364cad4373b066744c9, type: 3}
+  playerRenderPrefab: {fileID: 8036012344149937322, guid: a6627dfafe1ec424fa5191ece97b88f3, type: 3}
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
@@ -520,134 +520,6 @@ Light:
   m_CorrespondingSourceObject: {fileID: 1978168991097772859, guid: bfb4ce13ee81d0a4981f1e5ce3d5a1cd, type: 3}
   m_PrefabInstance: {fileID: 346995814}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &432555827
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 432555831}
-  - component: {fileID: 432555830}
-  - component: {fileID: 432555828}
-  m_Layer: 0
-  m_Name: Temp Camera
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &432555828
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 432555827}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_RenderShadows: 1
-  m_RequiresDepthTextureOption: 2
-  m_RequiresOpaqueTextureOption: 2
-  m_CameraType: 0
-  m_Cameras: []
-  m_RendererIndex: -1
-  m_VolumeLayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_VolumeTrigger: {fileID: 0}
-  m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 1
-  m_Antialiasing: 2
-  m_AntialiasingQuality: 2
-  m_StopNaN: 0
-  m_Dithering: 0
-  m_ClearDepth: 1
-  m_AllowXRRendering: 1
-  m_AllowHDROutput: 1
-  m_UseScreenCoordOverride: 0
-  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
-  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
-  m_RequiresDepthTexture: 0
-  m_RequiresColorTexture: 0
-  m_Version: 2
-  m_TaaSettings:
-    quality: 3
-    frameInfluence: 0.1
-    jitterScale: 1
-    mipBias: 0
-    varianceClampScale: 0.9
-    contrastAdaptiveSharpening: 0
---- !u!20 &432555830
-Camera:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 432555827}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
-  m_projectionMatrixMode: 1
-  m_GateFitMode: 2
-  m_FOVAxisMode: 0
-  m_Iso: 200
-  m_ShutterSpeed: 0.005
-  m_Aperture: 16
-  m_FocusDistance: 10
-  m_FocalLength: 50
-  m_BladeCount: 5
-  m_Curvature: {x: 2, y: 11}
-  m_BarrelClipping: 0.25
-  m_Anamorphism: 0
-  m_SensorSize: {x: 36, y: 24}
-  m_LensShift: {x: 0, y: 0}
-  m_NormalizedViewPortRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60
-  orthographic: 0
-  orthographic size: 5
-  m_Depth: 0
-  m_CullingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RenderingPath: -1
-  m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 1
-  m_TargetEye: 3
-  m_HDR: 1
-  m_AllowMSAA: 1
-  m_AllowDynamicResolution: 0
-  m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
-  m_StereoConvergence: 10
-  m_StereoSeparation: 0.022
---- !u!4 &432555831
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 432555827}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.067132406, y: 1.0932915, z: -1.99}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519552150
 GameObject:
   m_ObjectHideFlags: 0
@@ -1330,10 +1202,6 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 2232586837897650378, guid: 4abdac2869b287f459e7c6f7e6200476, type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 78cbccf73f77e6e4c871a40abf00f3ed, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1563,18 +1431,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 607892725}
     m_Modifications:
-    - target: {fileID: 1401472592891436881, guid: efe38836644dfaf48bab36b37aecdb7f, type: 3}
-      propertyPath: m_Alpha
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1401472592891436881, guid: efe38836644dfaf48bab36b37aecdb7f, type: 3}
-      propertyPath: m_Interactable
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1401472592891436881, guid: efe38836644dfaf48bab36b37aecdb7f, type: 3}
-      propertyPath: m_BlocksRaycasts
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2753033581101122184, guid: efe38836644dfaf48bab36b37aecdb7f, type: 3}
       propertyPath: m_Name
       value: Loading Screen
@@ -1835,10 +1691,6 @@ PrefabInstance:
     - target: {fileID: 4117646344682881235, guid: c736719586407004a83d441146483357, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6666799940204106742, guid: c736719586407004a83d441146483357, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 2.5002441
       objectReference: {fileID: 0}
     - target: {fileID: 7578064148835205907, guid: c736719586407004a83d441146483357, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2607,4 +2459,3 @@ SceneRoots:
   - {fileID: 1307474303}
   - {fileID: 131827504}
   - {fileID: 5453782239839008095}
-  - {fileID: 432555831}
