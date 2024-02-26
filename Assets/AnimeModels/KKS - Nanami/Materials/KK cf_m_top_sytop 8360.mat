@@ -26,8 +26,8 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ALPHATEST_ON
+  - _CELLSHADING
   - _GGX
-  - _LAMBERTIAN
   - _NORMALMAP
   - _OUTLINE
   - _RENDERENVSETTING
@@ -194,7 +194,7 @@ Material:
     - _WorkflowMode: 1
     - _ZOffset: 0
     - _ZWrite: 1
-    - _enum_diffuse: 3
+    - _enum_diffuse: 0
     - _enum_env: 1
     - _enum_outline_color: 0
     - _enum_outline_smoothed: 0
