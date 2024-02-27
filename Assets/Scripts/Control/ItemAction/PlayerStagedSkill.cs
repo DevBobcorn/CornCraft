@@ -5,7 +5,7 @@ using UnityEngine;
 namespace CraftSharp.Control
 {
     [Serializable]
-    public class PlayerMeleeAttackStage
+    public class PlayerAttackStage
     {
         [SerializeField] public AnimationClip? AnimationClip;
         [SerializeField] public float Duration;
@@ -13,12 +13,11 @@ namespace CraftSharp.Control
         [SerializeField] public float DamageEnd;
     }
 
-    [CreateAssetMenu(menuName = "CornCraft/PlayerMeleeAttack")]
-    public class PlayerMeleeAttack : ScriptableObject
+    [CreateAssetMenu(menuName = "Gameplay/Staged Skill")]
+    public class PlayerStagedSkill : PlayerBaseSkill
     {
-        [SerializeField] public PlayerMeleeAttackStage[] Stages = { };
+        [SerializeField] public PlayerAttackStage[] Stages = { };
 
-        [SerializeField] [Range(-5F, -0.1F)] public float IdleTimeout = -0.9F;
         [SerializeField] public AnimationClip? DummyAnimationClip;
 
         public int StageCount => Stages.Length;

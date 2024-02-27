@@ -16,7 +16,7 @@ namespace CraftSharp.Control
             info.MoveVelocity = Vector3.zero; // Cancel move
 
             var attackStatus = info.AttackStatus;
-            var meleeAttack = attackStatus.CurrentMeleeAttack;
+            var meleeAttack = attackStatus.CurrentStagedAttack;
 
             if (meleeAttack == null) // Melee attack data is not assigned, stop it
             {
@@ -62,7 +62,7 @@ namespace CraftSharp.Control
             }
         }
 
-        private void StartMeleeStage(PlayerMeleeAttack meleeAttack, AttackStatus attackStatus, int stage, PlayerController player)
+        private void StartMeleeStage(PlayerStagedSkill meleeAttack, AttackStatus attackStatus, int stage, PlayerController player)
         {
             attackStatus.AttackStage = stage;
 
@@ -104,7 +104,7 @@ namespace CraftSharp.Control
             info.Attacking = true;
 
             var attackStatus = info.AttackStatus;
-            var meleeAttack = attackStatus.CurrentMeleeAttack;
+            var meleeAttack = attackStatus.CurrentStagedAttack;
 
             if (meleeAttack == null) // Melee attack data is not assigned, stop it
             {

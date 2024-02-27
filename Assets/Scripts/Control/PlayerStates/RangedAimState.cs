@@ -13,7 +13,7 @@ namespace CraftSharp.Control
             info.Gliding = false;
 
             var attackStatus = info.AttackStatus;
-            var rangedAttack = attackStatus.CurrentRangedAttack;
+            var rangedAttack = attackStatus.CurrentChargedAttack;
 
             if (rangedAttack == null) // Ranged attack data is not assigned, stop it
             {
@@ -79,7 +79,7 @@ namespace CraftSharp.Control
             info.Attacking = true;
 
             var attackStatus = info.AttackStatus;
-            var rangedAttack = attackStatus.CurrentRangedAttack;
+            var rangedAttack = attackStatus.CurrentChargedAttack;
 
             if (rangedAttack == null) // Ranged attack data is not assigned, stop it
             {

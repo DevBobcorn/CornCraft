@@ -4,20 +4,19 @@ using UnityEditor;
 
 namespace DMTimeArea
 {
-    public abstract class SimpleTimeArea : EditorWindow
+    public abstract class TimeAreaWindow : EditorWindow
     {
-        protected TimeArea _simpleTimeArea;
-        public TimeArea GetTimeArea
+        protected TimeArea m_TimeArea;
+        public TimeArea TimeArea
         {
-            get { return _simpleTimeArea; }
+            get { return m_TimeArea; }
         }
 
         private static readonly float kTimeAreaMinWidth = 50f;
 
         protected const float ARROW_WIDTH = 6f;
         protected const int TIMELINETIMELABEL_HEIGHT = 18;
-        private const int TIMERULER_HEIGHT = 28;// 18;
-        protected const int HORIZONTALBAR_HEIGHT = 15;
+        private const int TIMERULER_HEIGHT = 28;
 
         protected virtual int timeRulerHeight
         {
@@ -115,23 +114,23 @@ namespace DMTimeArea
             }
         }
 
-        public Vector2 timeAreaScale
+        public Vector2 TimeAreaScale
         {
             get
             {
-                return this._simpleTimeArea.scale;
+                return this.m_TimeArea.scale;
             }
         }
 
-        public Vector2 timeAreaTranslation
+        public Vector2 TimeAreaTranslation
         {
             get
             {
-                return this._simpleTimeArea.translation;
+                return this.m_TimeArea.translation;
             }
         }
 
-        public Vector2 timeAreaTimeShownRange
+        public Vector2 TimeAreaTimeShownRange
         {
             get
             {
@@ -146,15 +145,15 @@ namespace DMTimeArea
             GUI.Box(_rectTimeAreaContent, GUIContent.none, new GUIStyle("CurveEditorBackground"));
             // EditorGUI.DrawRect(_rectTimeAreaContent, new Color(0.16f, 0.16f, 0.16f, 1f));
             // EditorGUI.DrawRect(_rectTimeAreaContent, DMTimeLineStyles)
-            _simpleTimeArea.mRect = this._timeAreaBounds;
-            _simpleTimeArea.BeginViewGUI();
-            _simpleTimeArea.SetTickMarkerRanges();
-            _simpleTimeArea.DrawMajorTicks(this._rectTimeAreaTotal, (float)_frameRate);
+            m_TimeArea.mRect = this._timeAreaBounds;
+            m_TimeArea.BeginViewGUI();
+            m_TimeArea.SetTickMarkerRanges();
+            m_TimeArea.DrawMajorTicks(this._rectTimeAreaTotal, (float)_frameRate);
             // DrawVerticalTickLine();
-            _simpleTimeArea.EndViewGUI();
+            m_TimeArea.EndViewGUI();
 
             // Mouse Event for zoom area
-            _simpleTimeArea.OnAreaEvent();
+            m_TimeArea.OnAreaEvent();
         }
 
         protected virtual void DrawVerticalTickLine()
@@ -164,7 +163,7 @@ namespace DMTimeArea
         protected void DrawTimeCodeGUI()
         {
             string text;
-            if (_simpleTimeArea != null)
+            if (m_TimeArea != null)
             {
                 double time01 = this.RunningTime;
                 text = this.TimeAsString(time01, "F2");
@@ -213,15 +212,15 @@ namespace DMTimeArea
         public float TimeToTimeAreaPixel(double time)
         {
             float num = (float)time;
-            num *= this.timeAreaScale.x;
-            return num + (this.timeAreaTranslation.x + this.sequencerHeaderWidth);
+            num *= this.TimeAreaScale.x;
+            return num + (this.TimeAreaTranslation.x + this.sequencerHeaderWidth);
         }
 
         public float TimeToScreenSpacePixel(double time)
         {
             float num = (float)time;
-            num *= this.timeAreaScale.x;
-            return num + this.timeAreaTranslation.x;
+            num *= this.TimeAreaScale.x;
+            return num + this.TimeAreaTranslation.x;
         }
 
         public string TimeAsString(double timeValue, string format = "F2")
@@ -240,27 +239,27 @@ namespace DMTimeArea
 
         public float TimeToPixel(double time)
         {
-            return _simpleTimeArea.TimeToPixel((float)time, _timeAreaBounds);
+            return m_TimeArea.TimeToPixel((float)time, _timeAreaBounds);
         }
 
         public float TimeToPixel(double time, float rectWidth, float rectX, float x, float y, float width)
         {
-            return _simpleTimeArea.TimeToPixel((float)time, rectWidth, rectX, x, y, width);
+            return m_TimeArea.TimeToPixel((float)time, rectWidth, rectX, x, y, width);
         }
 
         public float YToPixel(float y)
         {
-            return _simpleTimeArea.YToPixel(y, _timeAreaBounds);
+            return m_TimeArea.YToPixel(y, _timeAreaBounds);
         }
 
         public float PixelToY(float pixel)
         {
-            return _simpleTimeArea.PixelToY(pixel);
+            return m_TimeArea.PixelToY(pixel);
         }
 
         public float PixelToTime(float pixel)
         {
-            return _simpleTimeArea.PixelToTime(pixel, _timeAreaBounds);
+            return m_TimeArea.PixelToTime(pixel, _timeAreaBounds);
         }
 
         public float TimeAreaPixelToTime(float pixel)
@@ -295,11 +294,11 @@ namespace DMTimeArea
 
         public float TrackSpacePixelToTimeAreaTime(float p)
         {
-            p -= this.timeAreaTranslation.x;
+            p -= this.TimeAreaTranslation.x;
             float result;
-            if (this.timeAreaScale.x > 0f)
+            if (this.TimeAreaScale.x > 0f)
             {
-                result = p / this.timeAreaScale.x;
+                result = p / this.TimeAreaScale.x;
             }
             else
             {
@@ -315,10 +314,10 @@ namespace DMTimeArea
             bool showhSlider = false,
             bool showVSlider = false)
         {
-            if (_simpleTimeArea == null)
+            if (m_TimeArea == null)
             {
                 // create new timeArea
-                this._simpleTimeArea = new TimeArea(false, true)
+                this.m_TimeArea = new TimeArea(false, true)
                 {
                     hRangeLocked = hLocked,
                     vRangeLocked = vLocked,
@@ -331,10 +330,10 @@ namespace DMTimeArea
                     vRangeMax = float.PositiveInfinity,
                     mRect = _timeAreaBounds,
                 };
-                this._simpleTimeArea.hTicks.SetTickModulosForFrameRate(this._frameRate);
+                this.m_TimeArea.hTicks.SetTickModulosForFrameRate(this._frameRate);
                 // show time range begin seconds to end seconds(xxs - xxs)
-                this._simpleTimeArea.SetShownHRange(-1, 5f);
-                this._simpleTimeArea.SetShownVRange(0, 100f);
+                this.m_TimeArea.SetShownHRange(-1, 5f);
+                this.m_TimeArea.SetShownVRange(0, 100f);
             }
         }
 
@@ -343,23 +342,23 @@ namespace DMTimeArea
             //
             // Time ruler
             //
-            _simpleTimeArea.TimeRuler(_rectTimeAreaRuler, _frameRate, true, false, 1f, _timeInFrames ? TimeArea.TimeFormat.Frame : TimeArea.TimeFormat.TimeFrame);
+            m_TimeArea.TimeRuler(_rectTimeAreaRuler, _frameRate, true, false, 1f, _timeInFrames ? TimeArea.TimeFormat.Frame : TimeArea.TimeFormat.TimeFrame);
 
             //
             // Draw Current Running Time Cursor and red guide line
             //
             GUILayout.BeginArea(_rectTimeAreaTotal, string.Empty/*, EditorStyles.toolbarButton*/);
             Color cl01 = GUI.color;
-            GUI.color = Color.red;
+            GUI.color = Color.white;
             float timeToPos = TimeToPixel(this.RunningTime);
             GUI.DrawTexture(new Rect(-ARROW_WIDTH + timeToPos - _rectTimeAreaRuler.x, 2, ARROW_WIDTH * 2f, ARROW_WIDTH * 2f * 1.82f), ResManager.TimeHeadTexture);
             GUI.color = cl01;
             Rect lineRect = new Rect(timeToPos - _rectTimeAreaRuler.x, TIMELINETIMELABEL_HEIGHT, 1, _rectTimeAreaContent.height + 6);
-            EditorGUI.DrawRect(lineRect, Color.red);
+            EditorGUI.DrawRect(lineRect, Color.white);
             GUILayout.EndArea();
         }
 
-        protected void OnTimeRulerCursorAndCutOffCursorInput()
+        protected void HandleTimeRulerCursorInput()
         {
             //
             // Drag running time guide line
@@ -430,11 +429,11 @@ namespace DMTimeArea
             // Draw time ruler
             GUIStyle TimelineTick = "AnimationTimelineTick";
             string beginTime = TimeAsString(fTime);
-            GUIContent lb = new GUIContent(beginTime);
+            var lb = new GUIContent(beginTime);
             Vector2 size = TimelineTick.CalcSize(lb);
             Color pre = GUI.color;
             GUI.color = Color.white;
-            Rect rectTip = new Rect(timeToPos - offSet, yPos, size.x, size.y);
+            var rectTip = new Rect(timeToPos - offSet, yPos, size.x, size.y);
             rectTip.x -= 4;
             rectTip.width += 8;
             GUI.Box(rectTip, GUIContent.none, "Button");
