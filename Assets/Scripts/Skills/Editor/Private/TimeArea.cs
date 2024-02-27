@@ -511,15 +511,5 @@ namespace DMTimeArea
             object ret = mth.Invoke(null, new object[] { miniDifference });
             return (int)ret;
         }
-
-
-        //ADD BY LITAO
-        //获取当前画布的最小最大时间
-        public float[] GetMinMaxAreaTime(float frameRate)
-        {
-            int levelWithMinSeparation = this.hTicks.GetLevelWithMinSeparation(40f);
-            float[] ticksAtLevel2 = this.hTicks.GetTicksAtLevel(levelWithMinSeparation, false);
-            return new float[2] { ticksAtLevel2[0], ticksAtLevel2[ticksAtLevel2.Length - 1] };
-        }
     }
 }

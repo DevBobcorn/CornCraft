@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace MMD
@@ -28,6 +27,7 @@ namespace MMD
 
             if (target == null || (targetAnimator = target.GetComponent<Animator>()) == null)
             {
+                target = null;
                 targetAnimator = null;
             }
             else

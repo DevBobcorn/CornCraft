@@ -19,8 +19,8 @@ namespace CraftSharp.Control
 
         public ItemActionType CurrentActionType { get; private set; } = ItemActionType.None;
 
-        [SerializeField] public PlayerMeleeAttack? MeleeSwordAttack;
-        [SerializeField] public PlayerRangedAttack? RangedBowAttack;
+        [SerializeField] public PlayerStagedSkill? MeleeSwordAttack;
+        [SerializeField] public PlayerChargedSkill? RangedBowAttack;
         [SerializeField] public Material? DummyItemMaterial;
         [SerializeField] public Mesh? DummySwordItemMesh;
         [SerializeField] public Mesh? DummyBowItemMesh;
@@ -382,7 +382,7 @@ namespace CraftSharp.Control
                 {
                     currentState.OnExit(Status, playerRigidbody!, this);
                     // Specify attack data to use
-                    Status.AttackStatus.CurrentMeleeAttack = MeleeSwordAttack;
+                    Status.AttackStatus.CurrentStagedAttack = MeleeSwordAttack;
                     // Enter attack state
                     currentState = PlayerStates.MELEE;
                     currentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
@@ -413,7 +413,7 @@ namespace CraftSharp.Control
                 {
                     currentState.OnExit(Status, playerRigidbody!, this);
                     // Specify attack data to use
-                    Status.AttackStatus.CurrentRangedAttack = RangedBowAttack;
+                    Status.AttackStatus.CurrentChargedAttack = RangedBowAttack;
                     // Enter attack state
                     currentState = PlayerStates.RANGED_AIM;
                     currentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
