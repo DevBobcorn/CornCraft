@@ -33,6 +33,8 @@ namespace CraftSharp.Control
                 moveVelocity.y =  ability.WalkSpeed * 3F;
             else if (inputData.Gameplay.Descend.IsPressed())
                 moveVelocity.y = -ability.WalkSpeed * 3F;
+            else
+                moveVelocity.y = 0F;
 
             // Apply new velocity to rigidbody
             info.MoveVelocity = moveVelocity;
