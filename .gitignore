@@ -18,8 +18,8 @@
 /[Pp]ackages/com.devbobcorn.craftsharp-resource
 
 # Third party resources & utils
-/[Aa]ssets/AnimeModels/Genshin*
-/[Aa]ssets/AnimeModels/StarRail*
+/[Aa]ssets/AnimeModels/GI - *
+/[Aa]ssets/AnimeModels/SR - *
 /[Aa]ssets/AnimeModels/Test*
 /[Aa]ssets/VeryAnimation
 /[Aa]ssets/VeryAnimation.meta
