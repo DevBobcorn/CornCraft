@@ -1,6 +1,4 @@
-using System;
 using System.Linq;
-using DMTimeArea;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,10 +13,15 @@ namespace CraftSharp.Control
         private float damageStart;   // Seconds
         private float damageEnd;     // Seconds
 
+        private AnimationClip animationClip;
+
         private Rect rectHeader = new();
         private Rect rectContent = new();
+        private Rect rectAnimation = new();
 
-        public float TrackHeight { get; private set; } = 40F;
+        public float TrackHeight { get; private set; } = 42F;
+
+        public float AnimationHeight { get; private set; } = 12F;
 
         public SkillStageTrack(float start, int index, PlayerAttackStage stage)
         {
@@ -26,6 +29,8 @@ namespace CraftSharp.Control
             stageDuration = stage.Duration;
 
             stageIndex = index;
+
+            animationClip = stage.AnimationClip;
         }
 
         public void DrawHeader(float startY, float width)
@@ -33,12 +38,29 @@ namespace CraftSharp.Control
             rectHeader.Set(5, startY, width, TrackHeight);
             GUI.DrawTexture(rectHeader, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, false, 0, TRACK_HEADER, 0, 3);
 
-            GUILayout.BeginArea(rectHeader);
+            var defColor = GUI.backgroundColor;
 
-            GUILayout.Space(10);
+            GUILayout.BeginArea(rectHeader);
+            //GUILayout.Space(10);
             GUILayout.BeginHorizontal();
                 GUILayout.Space(5);
                 GUILayout.Label($"Stage {stageIndex}", EditorStyles.boldLabel);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+                GUILayout.Space(5);
+                GUI.backgroundColor = TRACK_BODY[stageIndex % TRACK_BODY.Length] * 2; // Intensify the color
+                animationClip =  EditorGUILayout.ObjectField(animationClip, typeof (AnimationClip), false,
+                        GUILayout.Width(width - 50)) as AnimationClip;
+                GUI.backgroundColor = defColor; // Restore background color
+
+                if (animationClip != null)
+                {
+                    GUILayout.Label($"{animationClip.length:0.00}", GUILayout.Width(30));
+                }
+                else
+                {
+                    GUILayout.Label("UwU", GUILayout.Width(30));
+                }
             GUILayout.EndHorizontal();
             GUILayout.EndArea();
         }
@@ -77,7 +99,21 @@ namespace CraftSharp.Control
                 //var maxPixel = fullWidth * ( (maxTimeShown - minTime) / totalSpan );
                 var widthPixel = fullWidth * ( (maxTimeShown - minTimeShown) / totalSpan );
 
-                rectContent.Set(minPixel, startY, widthPixel, TrackHeight);
+                if (animationClip != null)
+                {
+                    var animMaxTime = Mathf.Clamp(stageStart + animationClip.length, minTime, maxTime);
+                    var animWidthPixel = fullWidth * ( (animMaxTime - minTimeShown) / totalSpan );
+
+                    rectAnimation.Set(minPixel, startY, animWidthPixel, AnimationHeight);
+
+                    GUI.DrawTexture(rectAnimation, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, Color.white, 1, 0);
+                    GUI.DrawTexture(rectAnimation, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, Color.white * 0.8F, 0, 0);
+                }
+
+                var bodyStartY = startY + AnimationHeight;
+                var bodyHeight = TrackHeight - AnimationHeight;
+
+                rectContent.Set(minPixel, bodyStartY, widthPixel, bodyHeight);
 
                 if (rectContent.Contains(UnityEngine.Event.current.mousePosition))
                 {
@@ -88,9 +124,9 @@ namespace CraftSharp.Control
                     GUILayout.BeginHorizontal();
                         GUI.color = Color.black;
                         GUI.Label(rectContent, $"Start\n{stageStart}", EditorStyles.boldLabel);
-                        GUI.Label(new(minPixel + widthPixel / 2, startY, widthPixel, TrackHeight), $"{stageDuration}");
+                        GUI.Label(new(minPixel + widthPixel / 2, bodyStartY, widthPixel, bodyHeight), $"{stageDuration}");
                         GUI.color = Color.white;
-                        GUI.Label(new(minPixel + widthPixel, startY, widthPixel, TrackHeight), $"End\n{stageStart + stageDuration}", EditorStyles.boldLabel);
+                        GUI.Label(new(minPixel + widthPixel, bodyStartY, widthPixel, bodyHeight), $"End\n{stageStart + stageDuration}", EditorStyles.boldLabel);
                     GUILayout.EndHorizontal();
                 }
                 else
@@ -103,6 +139,8 @@ namespace CraftSharp.Control
             }
 
             GUILayout.BeginArea(rectContent);
+            // Draw detailed information...
+
             GUILayout.EndArea();
         }
     }

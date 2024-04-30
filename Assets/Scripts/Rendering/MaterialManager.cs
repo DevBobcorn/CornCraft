@@ -14,8 +14,7 @@ namespace CraftSharp.Rendering
         [SerializeField] public Material? AtlasCutout;
         [SerializeField] public Material? AtlasCutoutMipped;
         [SerializeField] public Material? AtlasTranslucent;
-        [SerializeField] public Material? AtlasWater;
-        [SerializeField] public Material? AtlasInventory;
+        [SerializeField] public Material? StylizedWater;
 
         [SerializeField] public Material? PlayerSkin;
 
@@ -116,8 +115,8 @@ namespace CraftSharp.Rendering
             atlasMaterials.Add(RenderType.TRANSLUCENT, translucent);
 
             // Water
-            var water = new Material(AtlasWater!);
-            water.SetTexture("_BaseMap", packManager.GetAtlasArray(false));
+            var water = new Material(StylizedWater!);
+            //water.SetTexture("_BaseMap", packManager.GetAtlasArray(false));
             atlasMaterials.Add(RenderType.WATER, water);
 
             // Make fogless variants
