@@ -85,9 +85,10 @@ namespace MagicaCloth2
         /// <summary>
         /// 制約データ
         /// </summary>
-        internal class ConstraintData : IValid
+        [System.Serializable]
+        public class ConstraintData : IValid
         {
-            internal ResultCode result;
+            public ResultCode result;
 
             public uint[] indexArray;
             public ushort[] dataArray;
@@ -151,7 +152,7 @@ namespace MagicaCloth2
         /// 制約データの作成
         /// </summary>
         /// <param name="cbase"></param>
-        internal static ConstraintData CreateData(VirtualMesh proxyMesh, in ClothParameters parameters)
+        public static ConstraintData CreateData(VirtualMesh proxyMesh, in ClothParameters parameters)
         {
             var constraintData = new ConstraintData();
 
@@ -216,7 +217,7 @@ namespace MagicaCloth2
                     for (int l = 0; l < ecnt; l++)
                     {
                         int2 edge = proxyMesh.edges[l];
-                        var tset = proxyMesh.edgeToTriangles.ToFixedList128Bytes(edge);
+                        var tset = proxyMesh.edgeToTriangles.MC2ToFixedList128Bytes(edge);
                         int tcnt = tset.Length;
                         if (tcnt < 2)
                             continue;
@@ -519,7 +520,7 @@ namespace MagicaCloth2
                 //float invMass = isSpring && attr.IsDontMove() ? 1.0f / 2.0f : MathUtility.CalcInverseMass(friction, depth, attr.IsDontMove());
 
                 // 基本剛性
-                float stiffness = parameter.distanceConstraint.restorationStiffness.EvaluateCurveClamp01(depth);
+                float stiffness = parameter.distanceConstraint.restorationStiffness.MC2EvaluateCurveClamp01(depth);
                 //stiffness *= simulationPower;
                 //stiffness *= (simulationPower * simulationPower);
                 stiffness *= simulationPower.y;

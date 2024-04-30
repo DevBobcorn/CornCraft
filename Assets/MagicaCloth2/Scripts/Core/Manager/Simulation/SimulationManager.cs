@@ -323,7 +323,7 @@ namespace MagicaCloth2
                 return;
 
             int teamId = cprocess.TeamId;
-            var proxyMesh = cprocess.ProxyMesh;
+            var proxyMesh = cprocess.ProxyMeshContainer.shareVirtualMesh;
             ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
 
             int pcnt = proxyMesh.VertexCount;
@@ -448,13 +448,13 @@ namespace MagicaCloth2
             processingSelfTrianglePoint.UpdateBuffer(selfCollisionConstraint.TrianglePrimitiveCount);
 
             // 汎用作業バッファ
-            tempFloat3Buffer.Resize(pcnt);
-            stepBasicPositionBuffer.Resize(pcnt);
-            stepBasicRotationBuffer.Resize(pcnt);
+            tempFloat3Buffer.MC2Resize(pcnt);
+            stepBasicPositionBuffer.MC2Resize(pcnt);
+            stepBasicRotationBuffer.MC2Resize(pcnt);
 
             // 加算バッファ
-            countArray.Resize(pcnt);
-            sumArray.Resize(pcnt * 3);
+            countArray.MC2Resize(pcnt);
+            sumArray.MC2Resize(pcnt * 3);
 
             // 制約
             angleConstraint.WorkBufferUpdate();
@@ -540,7 +540,6 @@ namespace MagicaCloth2
             [Unity.Collections.WriteOnly]
             public NativeArray<float3> velocityPosArray;
             public NativeArray<float3> dispPosArray;
-            [Unity.Collections.WriteOnly]
             public NativeArray<float3> velocityArray;
             public NativeArray<float3> realVelocityArray;
             [Unity.Collections.WriteOnly]
@@ -607,6 +606,7 @@ namespace MagicaCloth2
 
                     dispPosArray[pindex] = MathUtility.ShiftPosition(dispPosArray[pindex], prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
 
+                    velocityArray[pindex] = math.mul(cdata.frameComponentShiftRotation, velocityArray[pindex]);
                     realVelocityArray[pindex] = math.mul(cdata.frameComponentShiftRotation, realVelocityArray[pindex]);
                 }
             }
@@ -938,7 +938,7 @@ namespace MagicaCloth2
                 // パーティクルリスト
                 int pcnt = tdata.particleChunk.dataLength;
                 int pstart = tdata.particleChunk.startIndex;
-                int start = stepParticleIndexCounter.InterlockedStartIndex(pcnt);
+                int start = stepParticleIndexCounter.MC2InterlockedStartIndex(pcnt);
                 for (int i = 0; i < pcnt; i++)
                 {
                     stepParticleIndexArray[start + i] = pstart + i;
@@ -947,7 +947,7 @@ namespace MagicaCloth2
                 // ベースライン
                 int bcnt = tdata.BaseLineCount;
                 int bstart = tdata.baseLineChunk.startIndex;
-                start = stepBaseLineIndexCounter.InterlockedStartIndex(bcnt);
+                start = stepBaseLineIndexCounter.MC2InterlockedStartIndex(bcnt);
                 for (int i = 0; i < bcnt; i++)
                 {
                     // 上位16bit:チームID, 下位16bit:ベースラインインデックス
@@ -960,7 +960,7 @@ namespace MagicaCloth2
                 {
                     int bendCnt = tdata.bendingPairChunk.dataLength;
                     int bendIndex = tdata.bendingPairChunk.startIndex;
-                    start = stepTriangleBendIndexCounter.InterlockedStartIndex(bendCnt);
+                    start = stepTriangleBendIndexCounter.MC2InterlockedStartIndex(bendCnt);
                     for (int i = 0; i < bendCnt; i++, bendIndex++)
                     {
                         uint pack = DataUtility.Pack12_20(teamId, bendIndex);
@@ -974,7 +974,7 @@ namespace MagicaCloth2
                 {
                     int ecnt = tdata.proxyEdgeChunk.dataLength;
                     int estart = tdata.proxyEdgeChunk.startIndex;
-                    start = stepEdgeCollisionIndexCounter.InterlockedStartIndex(ecnt);
+                    start = stepEdgeCollisionIndexCounter.MC2InterlockedStartIndex(ecnt);
                     for (int i = 0; i < ecnt; i++)
                     {
                         stepEdgeCollisionIndexArray[start + i] = estart + i;
@@ -984,7 +984,7 @@ namespace MagicaCloth2
                 // モーション制約パーティクル
                 if (parameter.motionConstraint.useMaxDistance || parameter.motionConstraint.useBackstop)
                 {
-                    start = motionParticleIndexCounter.InterlockedStartIndex(pcnt);
+                    start = motionParticleIndexCounter.MC2InterlockedStartIndex(pcnt);
                     for (int i = 0; i < pcnt; i++)
                     {
                         motionParticleIndexArray[start + i] = pstart + i;
@@ -998,7 +998,7 @@ namespace MagicaCloth2
                 if (useSelfEdgeEdge)
                 {
                     int ecnt = tdata.EdgeCount;
-                    start = selfEdgeEdgeCounter.InterlockedStartIndex(ecnt);
+                    start = selfEdgeEdgeCounter.MC2InterlockedStartIndex(ecnt);
                     for (int i = 0; i < ecnt; i++)
                     {
                         // 上位16bit:チームID, 下位16bit:Edgeインデックス
@@ -1008,7 +1008,7 @@ namespace MagicaCloth2
                 }
                 if (useSelfPointTriangle)
                 {
-                    start = selfPointTriangleCounter.InterlockedStartIndex(pcnt);
+                    start = selfPointTriangleCounter.MC2InterlockedStartIndex(pcnt);
                     for (int i = 0; i < pcnt; i++)
                     {
                         // 上位16bit:チームID, 下位16bit:Pointインデックス
@@ -1019,7 +1019,7 @@ namespace MagicaCloth2
                 if (useSelfTrianglePoint)
                 {
                     int tcnt = tdata.TriangleCount;
-                    start = selfTrianglePointCounter.InterlockedStartIndex(tcnt);
+                    start = selfTrianglePointCounter.MC2InterlockedStartIndex(tcnt);
                     for (int i = 0; i < tcnt; i++)
                     {
                         // 上位16bit:チームID, 下位16bit:Triangleインデックス
@@ -1029,7 +1029,7 @@ namespace MagicaCloth2
                 }
                 if (useSelfEdgeEdge || useSelfPointTriangle || useSelfTrianglePoint)
                 {
-                    start = selfParticleCounter.InterlockedStartIndex(pcnt);
+                    start = selfParticleCounter.MC2InterlockedStartIndex(pcnt);
                     for (int i = 0; i < pcnt; i++)
                     {
                         selfParticleIndexArray[start + i] = pstart + i;
@@ -1168,6 +1168,7 @@ namespace MagicaCloth2
 
                     // 慣性の深さ影響
                     float inertiaDepth = param.inertiaConstraint.depthInertia * (1.0f - depth * depth); // 二次曲線
+                    //Debug.Log($"[{pindex}] inertiaDepth:{inertiaDepth}");
                     inertiaVector = math.lerp(inertiaVector, cdata.stepVector, inertiaDepth);
                     inertiaRotation = math.slerp(inertiaRotation, cdata.stepRotation, inertiaDepth);
 
@@ -1193,7 +1194,7 @@ namespace MagicaCloth2
 
                     // 抵抗
                     // 重力に影響させたくないので先に計算する（※通常はforce適用後に行うのが一般的）
-                    float damping = param.dampingCurveData.EvaluateCurveClamp01(depth);
+                    float damping = param.dampingCurveData.MC2EvaluateCurveClamp01(depth);
                     velocity *= math.saturate(1.0f - damping * simulationPower.z);
 
                     // 外力
@@ -1392,6 +1393,8 @@ namespace MagicaCloth2
                 float windMain = windInfo.main;
                 if (windMain < 0.01f)
                     return 0;
+
+                //Debug.Log($"windMain:{windMain}");
 
                 // 風速係数
                 float mainRatio = windMain / Define.System.WindBaseSpeed; // 0.0 ~ 
@@ -1855,8 +1858,6 @@ namespace MagicaCloth2
                 int vindex = tdata.proxyCommonChunk.startIndex + l_index;
 
                 var attr = attributes[vindex];
-                //if (attr.IsInvalid())
-                //    return;
 
                 var pos = positions[vindex];
                 var rot = rotations[vindex];
@@ -1866,13 +1867,12 @@ namespace MagicaCloth2
                     // 移動パーティクル
                     var dpos = oldPosArray[pindex];
 
-#if true
+#if !MC2_DISABLE_FUTURE
                     // 未来予測
                     // 最終計算位置と実速度から次のステップ位置を予測し、その間のフレーム時間位置を表示位置とする
                     float3 velocity = realVelocityArray[pindex] * simulationDeltaTime;
                     float3 fpos = dpos + velocity;
                     float interval = (tdata.nowUpdateTime + simulationDeltaTime) - tdata.oldTime;
-                    //float t = (tdata.time - tdata.oldTime) / interval;
                     float t = interval > 0.0f ? (tdata.time - tdata.oldTime) / interval : 0.0f;
                     fpos = math.lerp(dispPosArray[pindex], fpos, t);
                     dpos = fpos;

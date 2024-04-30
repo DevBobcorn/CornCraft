@@ -158,22 +158,22 @@ namespace MagicaCloth2
 
         //=========================================================================================
         /// <summary>
-        /// TransformDataを追加する
+        /// VirtualMeshのTransformDataを追加する
         /// </summary>
         /// <param name="tdata"></param>
         /// <returns></returns>
-        internal DataChunk AddTransform(TransformData tdata, int teamId)
+        internal DataChunk AddTransform(VirtualMeshContainer cmesh, int teamId)
         {
             if (isValid == false)
                 return default;
 
-            Debug.Assert(tdata != null);
-            int cnt = tdata.Count;
+            Debug.Assert(cmesh != null);
+            int cnt = cmesh.GetTransformCount();
 
             // データコピー追加
-            var c = flagArray.AddRange(tdata.flagArray);
-            initLocalPositionArray.AddRange(tdata.initLocalPositionArray);
-            initLocalRotationArray.AddRange(tdata.initLocalRotationArray);
+            var c = flagArray.AddRange(cmesh.shareVirtualMesh.transformData.flagArray);
+            initLocalPositionArray.AddRange(cmesh.shareVirtualMesh.transformData.initLocalPositionArray);
+            initLocalRotationArray.AddRange(cmesh.shareVirtualMesh.transformData.initLocalRotationArray);
 
             // 領域のみ追加
             positionArray.AddRange(cnt);
@@ -199,7 +199,7 @@ namespace MagicaCloth2
 
             for (int i = 0; i < cnt; i++)
             {
-                var t = tdata.transformList[i];
+                Transform t = cmesh.GetTransformFromIndex(i);
                 int index = c.startIndex + i;
                 if (index < nowcnt)
                     transformAccessArray[index] = t;

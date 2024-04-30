@@ -1064,6 +1064,12 @@ namespace MagicaCloth2
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 TransformPoint(in float3 pos, in float3 wpos, in quaternion wrot, in float3 wscl)
+        {
+            return math.transform(Matrix4x4.TRS(wpos, wrot, wscl), pos);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float3 TransformPoint(in float3 pos, in float4x4 localToWorldMatrix)
         {
             return math.transform(localToWorldMatrix, pos);
@@ -1137,6 +1143,12 @@ namespace MagicaCloth2
         public static float3 InverseTransformPoint(in float3 pos, in float4x4 worldToLocalMatrix)
         {
             return math.transform(worldToLocalMatrix, pos);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 InverseTransformPoint(in float3 pos, in float3 wpos, in quaternion wrot, in float3 wscl)
+        {
+            return math.transform(math.inverse(Matrix4x4.TRS(wpos, wrot, wscl)), pos);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -63,7 +63,7 @@ namespace MagicaCloth2
         /// </summary>
         /// <param name="ren"></param>
         /// <returns></returns>
-        public int AddRenderer(Renderer ren)
+        public int AddRenderer(Renderer ren, RenderSetupData referenceSetupData, RenderSetupData.UniqueSerializationData referenceUniqueSetupData)
         {
             if (isValid == false)
                 return 0;
@@ -78,7 +78,7 @@ namespace MagicaCloth2
                 {
                     // 新規
                     var rdata = new RenderData();
-                    rdata.Initialize(ren);
+                    rdata.Initialize(ren, referenceSetupData, referenceUniqueSetupData);
                     renderDataDict.Add(handle, rdata);
                 }
 

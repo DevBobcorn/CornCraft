@@ -1764,16 +1764,6 @@ namespace MagicaCloth2
             return transformData.GetTransformFromIndex(centerTransformIndex);
         }
 
-        public float4x4 GetCenterLocalToWorldMatrix()
-        {
-            return transformData.GetLocalToWorldMatrix(centerTransformIndex);
-        }
-
-        public float4x4 GetCenterWorldToLocalMatrix()
-        {
-            return transformData.GetWorldToLocalMatrix(centerTransformIndex);
-        }
-
         /// <summary>
         /// カスタムスキニング用ボーンを登録する
         /// </summary>
@@ -1828,6 +1818,7 @@ namespace MagicaCloth2
         }
 
         //=========================================================================================
+#if false
         /// <summary>
         /// UnityMeshに出力する（メインスレッドのみ）
         /// ※ほぼデバッグ用
@@ -1893,93 +1884,6 @@ namespace MagicaCloth2
 
             return mesh;
         }
-
-        /// <summary>
-        /// メッシュの基準トランスフォームを返す
-        /// 通常はレンダラーのtransform
-        /// </summary>
-        /// <returns></returns>
-        public Transform ExportCenterTransform()
-        {
-            return transformData.GetTransformFromIndex(centerTransformIndex);
-        }
-
-        public Transform ExportSkinRootBone()
-        {
-            return transformData.GetTransformFromIndex(skinRootIndex);
-        }
-
-        /// <summary>
-        /// メッシュのスキニング用ボーンリストを返す
-        /// </summary>
-        /// <returns></returns>
-        public List<Transform> ExportSkinningBones()
-        {
-            var sbones = new List<Transform>(SkinBoneCount);
-            for (int i = 0; i < SkinBoneCount; i++)
-            {
-                sbones.Add(transformData.GetTransformFromIndex(skinBoneTransformIndices[i]));
-            }
-            return sbones;
-        }
-
-        /// <summary>
-        /// メッシュのバウンディングボックスを返す
-        /// スキニングの場合はスキニングルートボーンからのバウンディングボックスとなる
-        /// それ以外はセンターボーンからのバウンディングボックスとなる
-        /// </summary>
-        /// <returns></returns>
-        /*public Bounds ExportBounds()
-        {
-            float3 offset = 0;
-            if (skinRootIndex >= 0 && centerTransformIndex != skinRootIndex)
-            {
-                // スキニングのルートボーンが別の場合
-                // ちょっと面倒
-                float3 wmin = transformData.TransformPoint(centerTransformIndex, boundingBox.Value.Min);
-                float3 wmax = transformData.TransformPoint(centerTransformIndex, boundingBox.Value.Max);
-                float3 lmin = transformData.InverseTransformPoint(skinRootIndex, wmin);
-                float3 lmax = transformData.InverseTransformPoint(skinRootIndex, wmax);
-                float3 cen = (lmax + lmin) * 0.5f;
-                float3 size = math.abs(lmax - lmin);
-                return new Bounds(cen, size);
-            }
-            else
-            {
-                return new Bounds(boundingBox.Value.Center, boundingBox.Value.Extents);
-            }
-        }*/
-
-        /// <summary>
-        /// 現在のメッシュをレンダラーに反映させる（主にデバッグ用）
-        /// </summary>
-        /// <param name="ren"></param>
-        public Mesh ToRenderer(Renderer ren)
-        {
-            Mesh mesh = null;
-            if (IsSuccess == false)
-                return mesh;
-
-            if (ren is MeshRenderer)
-            {
-                mesh = ExportToMesh();
-                var filter = ren.GetComponent<MeshFilter>();
-                filter.mesh = mesh;
-            }
-            else if (ren is SkinnedMeshRenderer)
-            {
-                var sren = ren as SkinnedMeshRenderer;
-                mesh = ExportToMesh(true);
-                var rootBone = ExportSkinRootBone();
-                var skinBones = ExportSkinningBones().ToArray();
-
-                sren.rootBone = rootBone;
-                sren.bones = skinBones;
-                sren.sharedMesh = mesh;
-            }
-
-            return mesh;
-        }
-
+#endif
     }
 }

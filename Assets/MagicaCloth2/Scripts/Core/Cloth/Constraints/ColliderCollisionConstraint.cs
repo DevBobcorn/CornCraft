@@ -195,8 +195,8 @@ namespace MagicaCloth2
 
         public void Dispose()
         {
-            tempFrictionArray.DisposeSafe();
-            tempNormalArray.DisposeSafe();
+            tempFrictionArray.MC2DisposeSafe();
+            tempNormalArray.MC2DisposeSafe();
         }
 
         /// <summary>
@@ -209,8 +209,8 @@ namespace MagicaCloth2
                 return;
 
             int pcnt = MagicaManager.Simulation.ParticleCount;
-            tempFrictionArray.Resize(pcnt);
-            tempNormalArray.Resize(pcnt * 3);
+            tempFrictionArray.MC2Resize(pcnt);
+            tempNormalArray.MC2Resize(pcnt * 3);
             //if (tempFrictionArray.IsCreated == false || tempFrictionArray.Length < pcnt)
             //{
             //    if (tempFrictionArray.IsCreated)
@@ -399,7 +399,7 @@ namespace MagicaCloth2
                 var basePos = isSpring ? basePosArray[pindex] : float3.zero; // ソフトコライダーのみbasePosが必要
 
                 // パーティクル半径
-                float radius = math.max(param.radiusCurveData.EvaluateCurve(depth), 0.0001f); // safe;
+                float radius = math.max(param.radiusCurveData.MC2EvaluateCurve(depth), 0.0001f); // safe;
 
                 // チームスケール倍率
                 radius *= tdata.scaleRatio;
@@ -426,7 +426,7 @@ namespace MagicaCloth2
                 aabb.Expand(cfr);
 
                 // BoneSpringでの最大押し出し距離
-                float maxLength = isSpring ? math.max(param.colliderCollisionConstraint.limitDistance.EvaluateCurve(depth), 0.0001f) * tdata.scaleRatio : -1; // チームスケール倍率
+                float maxLength = isSpring ? math.max(param.colliderCollisionConstraint.limitDistance.MC2EvaluateCurve(depth), 0.0001f) * tdata.scaleRatio : -1; // チームスケール倍率
 
                 // チーム内のコライダーをループ
                 int cindex = tdata.colliderChunk.startIndex;
@@ -473,6 +473,8 @@ namespace MagicaCloth2
                         addPos += (_nextPos - nextPos);
                         addN += n;
                         addCnt++;
+
+                        //Debug.Log($"Collision!");
                     }
 
                     // コライダーに一定距離近づいている場合（動摩擦／静止摩擦が影響する）
@@ -766,7 +768,7 @@ namespace MagicaCloth2
                 int2 pE = edge + pstart;
                 float3x2 nextPosE = new float3x2(nextPosArray[pE.x], nextPosArray[pE.y]);
                 float2 depthE = new float2(vertexDepths[vE.x], vertexDepths[vE.y]);
-                float2 radiusE = new float2(param.radiusCurveData.EvaluateCurve(depthE.x), param.radiusCurveData.EvaluateCurve(depthE.y));
+                float2 radiusE = new float2(param.radiusCurveData.MC2EvaluateCurve(depthE.x), param.radiusCurveData.MC2EvaluateCurve(depthE.y));
 
                 // チームスケール倍率
                 radiusE *= tdata.scaleRatio;

@@ -33,7 +33,6 @@ namespace MagicaCloth2
         {
             if (IsPlaying())
             {
-                //Team.globalTimeScale = Mathf.Clamp01(timeScale);
                 Time.GlobalTimeScale = Mathf.Clamp01(timeScale);
             }
         }
@@ -47,7 +46,6 @@ namespace MagicaCloth2
         {
             if (IsPlaying())
             {
-                //return Team.globalTimeScale;
                 return Time.GlobalTimeScale;
             }
             else
@@ -152,6 +150,48 @@ namespace MagicaCloth2
                 Develop.LogError("MagicaManager is not starting!");
                 return TimeManager.UpdateLocation.AfterLateUpdate;
             }
+        }
+
+        /// <summary>
+        /// 未使用のデータをすべて解放します
+        /// Free all unused data.
+        /// - Unused PreBuild data
+        /// </summary>
+        public static void UnloadUnusedData()
+        {
+            if (IsPlaying())
+            {
+                PreBuild.UnloadUnusedData();
+            }
+        }
+
+        /// <summary>
+        /// MonoBehaviourでのMagicaClothの初期化場所
+        /// MagicaCloth initialization location in MonoBehaviour.
+        /// </summary>
+        public enum InitializationLocation
+        {
+            /// <summary>
+            /// Initialize with MonoBehaviour.Start().
+            /// (Default)
+            /// </summary>
+            Start = 0,
+
+            /// <summary>
+            /// Initialize with MonoBehaviour.Awake().
+            /// </summary>
+            Awake = 1,
+        }
+        internal static InitializationLocation initializationLocation = InitializationLocation.Start;
+
+        /// <summary>
+        /// MonoBehaviourでのMagicaClothの初期化場所を設定する
+        /// Setting MagicaCloth initialization location in MonoBehaviour.
+        /// </summary>
+        /// <param name="initLocation"></param>
+        public static void SetInitializationLocation(InitializationLocation initLocation)
+        {
+            initializationLocation = initLocation;
         }
     }
 }

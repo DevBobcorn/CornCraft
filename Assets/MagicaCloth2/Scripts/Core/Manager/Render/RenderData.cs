@@ -37,6 +37,7 @@ namespace MagicaCloth2
         //=========================================================================================
         // セットアップデータ
         internal RenderSetupData setupData;
+        internal RenderSetupData.UniqueSerializationData preBuildUniqueSerializeData;
 
         internal string Name => setupData?.name ?? "(empty)";
 
@@ -44,6 +45,12 @@ namespace MagicaCloth2
         internal bool HasBoneWeight => setupData?.hasBoneWeight ?? false;
 
         //=========================================================================================
+        // オリジナル情報
+        Mesh originalMesh;
+        SkinnedMeshRenderer skinnedMeshRendere;
+        MeshFilter meshFilter;
+        List<Transform> transformList;
+
         // カスタムメッシュ情報
         Mesh customMesh;
         NativeArray<Vector3> localPositions;
@@ -52,17 +59,16 @@ namespace MagicaCloth2
         BoneWeight centerBoneWeight;
 
         /// <summary>
-        /// カスタムメッシュの使用フラグ
+        /// カスタムメッシュの状態フラグ
         /// </summary>
-        public bool UseCustomMesh { get; private set; }
+        private const int Flag_UseCustomMesh = 0; // カスタムメッシュの利用
+        private const int Flag_ChangePositionNormal = 1; // 座標および法線の書き込み
+        private const int Flag_ChangeBoneWeight = 2; // ボーンウエイトの書き込み
+        private const int Flag_ModifyBoneWeight = 3; // ボーンウエイトの変更
 
-        /// <summary>
-        /// カスタムメッシュの変更フラグ
-        /// </summary>
-        public bool ChangeCustomMesh { get; private set; }
+        private BitField32 flag;
 
-        public bool ChangePositionNormal { get; private set; }
-        public bool ChangeBoneWeight { get; private set; }
+        public bool UseCustomMesh => flag.IsSet(Flag_UseCustomMesh);
 
         //=========================================================================================
         public void Dispose()
@@ -71,6 +77,7 @@ namespace MagicaCloth2
             SwapOriginalMesh();
 
             setupData?.Dispose();
+            preBuildUniqueSerializeData = null;
 
             if (localPositions.IsCreated)
                 localPositions.Dispose();
@@ -98,12 +105,32 @@ namespace MagicaCloth2
         /// この処理はスレッド化できないので少し負荷がかかるが即時実行する
         /// </summary>
         /// <param name="ren"></param>
-        internal void Initialize(Renderer ren)
+        internal void Initialize(Renderer ren, RenderSetupData referenceSetupData, RenderSetupData.UniqueSerializationData referencePreBuildUniqueSetupData)
         {
             Debug.Assert(ren);
 
             // セットアップデータ作成
-            setupData = new RenderSetupData(ren);
+            // PreBuildでは外部から受け渡される
+            if (referenceSetupData != null && referencePreBuildUniqueSetupData != null)
+            {
+                setupData = referenceSetupData;
+                preBuildUniqueSerializeData = referencePreBuildUniqueSetupData;
+
+                originalMesh = preBuildUniqueSerializeData.originalMesh;
+                skinnedMeshRendere = preBuildUniqueSerializeData.skinRenderer;
+                meshFilter = preBuildUniqueSerializeData.meshFilter;
+                transformList = preBuildUniqueSerializeData.transformList;
+            }
+            else
+            {
+                setupData = new RenderSetupData(ren);
+                preBuildUniqueSerializeData = null;
+
+                originalMesh = setupData.originalMesh;
+                skinnedMeshRendere = setupData.skinRenderer;
+                meshFilter = setupData.meshFilter;
+                transformList = setupData.transformList;
+            }
 
             // センタートランスフォーム用ボーンウエイト
             centerBoneWeight = new BoneWeight();
@@ -133,16 +160,17 @@ namespace MagicaCloth2
 
             if (setupData.IsFaild())
                 return;
-            if (setupData.originalMesh == null)
+            if (originalMesh == null)
+                return;
+            if (UseCustomMesh)
                 return;
 
             // カスタムメッシュの作成
             if (customMesh == null)
             {
-                Debug.Assert(setupData.originalMesh);
-
+                //Debug.Assert(setupData.originalMesh);
                 // クローン作成
-                customMesh = GameObject.Instantiate(setupData.originalMesh);
+                customMesh = GameObject.Instantiate(originalMesh);
                 customMesh.MarkDynamic();
 
                 // 作業配列
@@ -155,13 +183,17 @@ namespace MagicaCloth2
                 // bind pose
                 if (HasBoneWeight)
                 {
-                    int transformCount = setupData.TransformCount;
+                    int transformCount = preBuildUniqueSerializeData != null ? preBuildUniqueSerializeData.transformList.Count : setupData.TransformCount;
                     var bindPoseList = new List<Matrix4x4>(transformCount);
                     bindPoseList.AddRange(setupData.bindPoseList);
                     // rootBone/skinning bones
                     while (bindPoseList.Count < transformCount)
                         bindPoseList.Add(Matrix4x4.identity);
                     customMesh.bindposes = bindPoseList.ToArray();
+
+                    // スキニング用ボーンを書き換える
+                    // このリストにはオリジナルのスキニングボーン＋レンダラーのトランスフォームが含まれている
+                    skinnedMeshRendere.bones = transformList.ToArray();
                 }
             }
 
@@ -170,23 +202,23 @@ namespace MagicaCloth2
 
             // カスタムメッシュに表示切り替え
             SetMesh(customMesh);
-
-            // スキニング用ボーンを書き換える
-            if (HasBoneWeight)
-            {
-                // このリストにはオリジナルのスキニングボーン＋レンダラーのトランスフォームが含まれている
-                setupData.skinRenderer.bones = setupData.transformList.ToArray();
-            }
-
-            UseCustomMesh = true;
+            flag.SetBits(Flag_UseCustomMesh, true);
         }
 
         void ResetCustomMeshWorkData()
         {
             // オリジナルデータをコピーする
-            var meshData = setupData.meshDataArray[0];
-            meshData.GetVertices(localPositions);
-            meshData.GetNormals(localNormals);
+            if (setupData.HasMeshDataArray)
+            {
+                var meshData = setupData.meshDataArray[0];
+                meshData.GetVertices(localPositions);
+                meshData.GetNormals(localNormals);
+            }
+            else
+            {
+                NativeArray<Vector3>.Copy(setupData.localPositions, localPositions);
+                NativeArray<Vector3>.Copy(setupData.localNormals, localNormals);
+            }
             if (HasBoneWeight)
             {
                 setupData.GetBoneWeightsRun(boneWeights);
@@ -200,15 +232,14 @@ namespace MagicaCloth2
         {
             if (UseCustomMesh && setupData != null)
             {
-                SetMesh(setupData.originalMesh);
+                SetMesh(originalMesh);
 
-                if (setupData.skinRenderer != null)
+                if (skinnedMeshRendere != null)
                 {
-                    setupData.skinRenderer.bones = setupData.transformList.ToArray();
+                    skinnedMeshRendere.bones = transformList.ToArray();
                 }
             }
-
-            UseCustomMesh = false;
+            flag.SetBits(Flag_UseCustomMesh, false);
         }
 
         /// <summary>
@@ -222,13 +253,13 @@ namespace MagicaCloth2
 
             if (setupData != null)
             {
-                if (setupData.meshFilter != null)
+                if (meshFilter != null)
                 {
-                    setupData.meshFilter.mesh = mesh;
+                    meshFilter.mesh = mesh;
                 }
-                else if (setupData.skinRenderer != null)
+                else if (skinnedMeshRendere != null)
                 {
-                    setupData.skinRenderer.sharedMesh = mesh;
+                    skinnedMeshRendere.sharedMesh = mesh;
                 }
             }
         }
@@ -251,7 +282,7 @@ namespace MagicaCloth2
         /// </summary>
         public void EndUse(ClothProcess cprocess)
         {
-            Debug.Assert(useProcessSet.Count > 0);
+            //Debug.Assert(useProcessSet.Count > 0);
             UpdateUse(cprocess, -1);
         }
 
@@ -263,8 +294,11 @@ namespace MagicaCloth2
             }
             else if (add < 0)
             {
-                Debug.Assert(useProcessSet.Count > 0);
-                useProcessSet.Remove(cprocess);
+                //Debug.Assert(useProcessSet.Count > 0);
+                if (useProcessSet.Contains(cprocess))
+                    useProcessSet.Remove(cprocess);
+                else
+                    return;
             }
 
             // Invisible状態
@@ -276,23 +310,32 @@ namespace MagicaCloth2
                 // 利用停止
                 // オリジナルメッシュに切り替え
                 SwapOriginalMesh();
-                ChangeCustomMesh = true;
             }
-            else if (useProcessSet.Count == 1)
+            else if (add == 0 && useProcessSet.Count > 0)
+            {
+                // カリング復帰
+                // カスタムメッシュに切り替え、および作業バッファ作成
+                // すでにカスタムメッシュが存在する場合は作業バッファのみ再初期化する
+                SwapCustomMesh();
+                flag.SetBits(Flag_ModifyBoneWeight, true);
+            }
+            else if (add > 0 && useProcessSet.Count == 1)
             {
                 // 利用開始
                 // カスタムメッシュに切り替え、および作業バッファ作成
-                // すでにカスタムメッシュが存在する場合は作業バッファのみ最初期化する
+                // すでにカスタムメッシュが存在する場合は作業バッファのみ再初期化する
                 SwapCustomMesh();
-                ChangeCustomMesh = true;
+                flag.SetBits(Flag_ModifyBoneWeight, true);
             }
             else if (add != 0)
             {
                 // 複数から利用されている状態で１つが停止した。
                 // バッファを最初期化する
                 ResetCustomMeshWorkData();
-                ChangeCustomMesh = true;
+                flag.SetBits(Flag_ModifyBoneWeight, true);
             }
+
+            //Debug.Log($"add:{add}, invisible:{invisible}, useCount:{useProcessSet.Count}, ModifyBoneWeight = {flag.IsSet(Flag_ModifyBoneWeight)}");
         }
 
         //=========================================================================================
@@ -319,21 +362,24 @@ namespace MagicaCloth2
             if (isSkipWriting)
                 return;
 
+            //Debug.Log($"WriteMesh [{Name}] ChangePositionNormal:{flag.IsSet(Flag_ChangePositionNormal)}, ChangeBoneWeight:{flag.IsSet(Flag_ChangeBoneWeight)}");
+
             // メッシュに反映
-            if (ChangePositionNormal)
+            if (flag.IsSet(Flag_ChangePositionNormal))
             {
                 customMesh.SetVertices(localPositions);
                 customMesh.SetNormals(localNormals);
             }
-            if (ChangeBoneWeight && HasBoneWeight)
+            if (flag.IsSet(Flag_ChangeBoneWeight) && HasBoneWeight)
             {
                 customMesh.boneWeights = boneWeights.ToArray();
+                //Debug.Log($"★[{Name}] boneWeights.ToArray(), size:{boneWeights.Length}, F:{Time.frameCount}");
+                flag.SetBits(Flag_ModifyBoneWeight, false);
             }
 
             // 完了
-            ChangeCustomMesh = false;
-            ChangePositionNormal = false;
-            ChangeBoneWeight = false;
+            flag.SetBits(Flag_ChangePositionNormal, false);
+            flag.SetBits(Flag_ChangeBoneWeight, false);
         }
 
         //=========================================================================================
@@ -365,7 +411,7 @@ namespace MagicaCloth2
             };
             jobHandle = job.Schedule(mappingChunk.dataLength, 32, jobHandle);
 
-            ChangePositionNormal = true;
+            flag.SetBits(Flag_ChangePositionNormal, true);
 
             return jobHandle;
         }
@@ -424,11 +470,13 @@ namespace MagicaCloth2
         /// <returns></returns>
         internal JobHandle UpdateBoneWeight(DataChunk mappingChunk, JobHandle jobHandle = default)
         {
+            //Debug.Log($"UpdateBoneWeight [{Name}] UseCustomMesh:{UseCustomMesh}, ModifyBoneWeight:{flag.IsSet(Flag_ModifyBoneWeight)}");
+
             if (UseCustomMesh == false)
                 return jobHandle;
 
             // ボーンウエイトの差分書き換え
-            if (HasBoneWeight)
+            if (HasBoneWeight && flag.IsSet(Flag_ModifyBoneWeight))
             {
                 var vm = MagicaManager.VMesh;
 
@@ -443,7 +491,9 @@ namespace MagicaCloth2
                 };
                 jobHandle = job.Schedule(mappingChunk.dataLength, 32, jobHandle);
 
-                ChangeBoneWeight = true;
+                flag.SetBits(Flag_ChangeBoneWeight, true);
+
+                //Debug.Log($"UpdateBoneWeightJob2");
             }
 
             return jobHandle;

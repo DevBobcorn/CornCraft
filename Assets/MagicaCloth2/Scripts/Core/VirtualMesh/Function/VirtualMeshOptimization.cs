@@ -94,13 +94,13 @@ namespace MagicaCloth2
                         if (edgeToTriangleList.ContainsKey(edge))
                         {
                             var tlist = edgeToTriangleList[edge];
-                            tlist.Set(i);
+                            tlist.MC2Set(i);
                             edgeToTriangleList[edge] = tlist;
                         }
                         else
                         {
                             var tlist = new FixedList128Bytes<int>();
-                            tlist.Set(i);
+                            tlist.MC2Set(i);
                             edgeToTriangleList.Add(edge, tlist);
                         }
                     }

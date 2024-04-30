@@ -90,6 +90,7 @@ namespace MagicaCloth2
         public ExNativeArray<float3> oldPositions;
         public ExNativeArray<quaternion> oldRotations;
 
+
         /// <summary>
         /// 有効なコライダーデータ数
         /// </summary>
@@ -719,6 +720,7 @@ namespace MagicaCloth2
             [Unity.Collections.ReadOnly]
             public NativeArray<float3> transformScaleArray;
 
+            // コライダーごと
             public void Execute(int index)
             {
                 var flag = flagArray[index];
@@ -836,7 +838,7 @@ namespace MagicaCloth2
                 // このチームが参照するコライダーを登録する
                 if (tdata.ColliderCount > 0)
                 {
-                    int start = jobColliderCounter.InterlockedStartIndex(tdata.ColliderCount);
+                    int start = jobColliderCounter.MC2InterlockedStartIndex(tdata.ColliderCount);
                     for (int j = 0; j < tdata.ColliderCount; j++)
                     {
                         int index = tdata.colliderChunk.startIndex + j;
@@ -1093,7 +1095,6 @@ namespace MagicaCloth2
                 oldRotations[cindex] = nowRotations[cindex];
             }
         }
-
 
         /// <summary>
         /// シミュレーション更新後処理

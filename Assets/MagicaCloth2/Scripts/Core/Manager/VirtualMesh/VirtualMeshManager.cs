@@ -393,18 +393,19 @@ namespace MagicaCloth2
         /// <summary>
         /// プロキシメッシュをマネージャに登録する
         /// </summary>
-        public void RegisterProxyMesh(int teamId, VirtualMesh proxyMesh)
+        public void RegisterProxyMesh(int teamId, VirtualMeshContainer proxyMeshContainer)
         {
             if (isValid == false)
                 return;
 
             ref var tdata = ref MagicaManager.Team.GetTeamDataRef(teamId);
+            var proxyMesh = proxyMeshContainer.shareVirtualMesh;
 
             // mesh type
             tdata.proxyMeshType = proxyMesh.meshType;
 
             // Transform
-            tdata.proxyTransformChunk = MagicaManager.Bone.AddTransform(proxyMesh.transformData, teamId);
+            tdata.proxyTransformChunk = MagicaManager.Bone.AddTransform(proxyMeshContainer, teamId);
 
             // center transform
             tdata.centerTransformIndex = proxyMesh.centerTransformIndex + tdata.proxyTransformChunk.startIndex;
@@ -573,7 +574,7 @@ namespace MagicaCloth2
         /// <param name="cbase"></param>
         /// <param name="mappingMesh"></param>
         /// <returns></returns>
-        public DataChunk RegisterMappingMesh(int teamId, VirtualMesh mappingMesh)
+        public DataChunk RegisterMappingMesh(int teamId, VirtualMeshContainer mappingMeshContainer)
         {
             if (isValid == false)
                 return DataChunk.Empty;
@@ -582,11 +583,12 @@ namespace MagicaCloth2
             ref var mappingList = ref MagicaManager.Team.GetTeamMappingRef(teamId);
 
             var mdata = new TeamManager.MappingData();
-
             mdata.teamId = teamId;
 
+            var mappingMesh = mappingMeshContainer.shareVirtualMesh;
+
             // transform
-            var ct = mappingMesh.GetCenterTransform();
+            var ct = mappingMeshContainer.GetCenterTransform();
             var c = MagicaManager.Bone.AddTransform(ct, new ExBitFlag8(TransformManager.Flag_Read | TransformManager.Flag_Enable), teamId);
             mdata.centerTransformIndex = c.startIndex;
 
@@ -614,7 +616,7 @@ namespace MagicaCloth2
             // 再登録
             MagicaManager.Team.mappingDataArray[mappingIndex] = mdata;
             //tdata.mappingDataIndexSet.Set((short)mappingIndex);
-            mappingList.Set((short)mappingIndex);
+            mappingList.MC2Set((short)mappingIndex);
 
             // vmeshにも記録する
             mappingMesh.mappingId = mappingIndex;
@@ -650,7 +652,7 @@ namespace MagicaCloth2
 
             // チームから削除する
             //tdata.mappingDataIndexSet.RemoveItemAtSwapBack((short)mappingIndex);
-            mappingList.RemoveItemAtSwapBack((short)mappingIndex);
+            mappingList.MC2RemoveItemAtSwapBack((short)mappingIndex);
 
             MagicaManager.Team.mappingDataArray.RemoveAndFill(new DataChunk(mappingIndex, 1));
 
@@ -800,7 +802,7 @@ namespace MagicaCloth2
                     return;
 
                 // BoneClothもMeshClothもすべてスキニングとして登録
-                int start = processingCounter1.InterlockedStartIndex(c.dataLength);
+                int start = processingCounter1.MC2InterlockedStartIndex(c.dataLength);
                 for (int j = 0; j < c.dataLength; j++)
                 {
                     int vindex = c.startIndex + j;
@@ -1190,7 +1192,7 @@ namespace MagicaCloth2
                 // トライアングル[0]
                 if (tdata.TriangleCount > 0 && tdata.proxyCommonChunk.IsValid)
                 {
-                    int start = processingCounter0.InterlockedStartIndex(tdata.proxyCommonChunk.dataLength);
+                    int start = processingCounter0.MC2InterlockedStartIndex(tdata.proxyCommonChunk.dataLength);
                     for (int j = 0; j < tdata.proxyCommonChunk.dataLength; j++)
                     {
                         int vindex = tdata.proxyCommonChunk.startIndex + j;
@@ -1201,7 +1203,7 @@ namespace MagicaCloth2
                 // トランスフォーム書き込み[1]
                 if (tdata.proxyMeshType == VirtualMesh.MeshType.ProxyBoneMesh)
                 {
-                    int start = processingCounter1.InterlockedStartIndex(tdata.proxyCommonChunk.dataLength);
+                    int start = processingCounter1.MC2InterlockedStartIndex(tdata.proxyCommonChunk.dataLength);
                     for (int j = 0; j < tdata.proxyCommonChunk.dataLength; j++)
                     {
                         int vindex = tdata.proxyCommonChunk.startIndex + j;
@@ -1212,7 +1214,7 @@ namespace MagicaCloth2
                 // ベースライン[2]
                 if (tdata.baseLineChunk.IsValid)
                 {
-                    int start = processingCounter2.InterlockedStartIndex(tdata.baseLineChunk.dataLength);
+                    int start = processingCounter2.MC2InterlockedStartIndex(tdata.baseLineChunk.dataLength);
                     for (int j = 0; j < tdata.baseLineChunk.dataLength; j++)
                     {
                         int bindex = tdata.baseLineChunk.startIndex + j;
@@ -1223,7 +1225,7 @@ namespace MagicaCloth2
                 // トライアングル2
                 if (tdata.TriangleCount > 0)
                 {
-                    int start = processingCounter3.InterlockedStartIndex(tdata.proxyTriangleChunk.dataLength);
+                    int start = processingCounter3.MC2InterlockedStartIndex(tdata.proxyTriangleChunk.dataLength);
                     for (int j = 0; j < tdata.proxyTriangleChunk.dataLength; j++)
                     {
                         int tindex = tdata.proxyTriangleChunk.startIndex + j;

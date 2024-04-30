@@ -147,7 +147,7 @@ namespace MagicaCloth2
                 sb.AppendLine($"MaxSimulationCountPerFrame:{maxSimulationCountPerFrame}");
                 sb.AppendLine($"GlobalTimeScale:{GlobalTimeScale}");
                 sb.AppendLine($"SimulationDeltaTime:{SimulationDeltaTime}");
-                sb.AppendLine($"MaxDeltaTime:{MaxDeltaTime}");
+                //sb.AppendLine($"MaxDeltaTime:{MaxDeltaTime}");
                 sb.AppendLine($"SimulationPower:{SimulationPower}");
             }
             sb.AppendLine();

@@ -54,9 +54,9 @@ namespace MagicaCloth2
         /// </summary>
         /// <param name="editMesh"></param>
         /// <param name="drawSettings"></param>
-        public static void DrawClothEditor(VirtualMesh editMesh, ClothDebugSettings drawSettings, ClothSerializeData serializeData, bool selected, bool direction, bool paint)
+        public static void DrawClothEditor(VirtualMeshContainer editMeshContainer, ClothDebugSettings drawSettings, ClothSerializeData serializeData, bool selected, bool direction, bool paint)
         {
-            if (editMesh == null || editMesh.IsSuccess == false)
+            if (editMeshContainer == null || editMeshContainer.shareVirtualMesh == null || editMeshContainer.shareVirtualMesh.IsSuccess == false)
                 return;
 
             if (drawSettings.enable == false || serializeData == null)
@@ -69,7 +69,8 @@ namespace MagicaCloth2
             var crot = scam.transform.rotation;
 
             // 座標空間に合わせる
-            var t = editMesh.GetCenterTransform();
+            var editMesh = editMeshContainer.shareVirtualMesh;
+            var t = editMeshContainer.GetCenterTransform();
             if (t == null)
                 return;
 
@@ -445,7 +446,7 @@ namespace MagicaCloth2
                 return;
 
             // プロキシメッシュ
-            var proxyMesh = cprocess.ProxyMesh;
+            var proxyMesh = cprocess.ProxyMeshContainer?.shareVirtualMesh;
             if (proxyMesh == null || proxyMesh.IsSuccess == false)
                 return;
 
@@ -530,7 +531,7 @@ namespace MagicaCloth2
                         }
                         else
                         {
-                            float radius = cprocess.parameters.radiusCurveData.EvaluateCurve(depth);
+                            float radius = cprocess.parameters.radiusCurveData.MC2EvaluateCurve(depth);
                             radius *= tdata.scaleRatio;
                             GizmoUtility.DrawSphere(pos, drawSettings.CheckRadiusDrawing() ? radius : drawPointSize, true);
                         }

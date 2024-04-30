@@ -18,7 +18,7 @@ namespace MagicaCloth2
         /// <param name="dataCount"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        unsafe public static int InterlockedStartIndex(ref this NativeReference<int> counter, int dataCount)
+        unsafe public static int MC2InterlockedStartIndex(ref this NativeReference<int> counter, int dataCount)
         {
             int* cntPt = (int*)counter.GetUnsafePtr();
             int start = Interlocked.Add(ref *cntPt, dataCount) - dataCount;

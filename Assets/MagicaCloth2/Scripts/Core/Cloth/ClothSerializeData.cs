@@ -92,7 +92,7 @@ namespace MagicaCloth2
         /// [OK] Runtime changes.
         /// [NG] Export/Import with Presets
         /// </summary>
-        public ClothUpdateMode updateMode = ClothUpdateMode.Normal;
+        public ClothUpdateMode updateMode = ClothUpdateMode.AnimatorLinkage;
 
         /// <summary>
         /// Blend ratio between initial pose and animation pose.
