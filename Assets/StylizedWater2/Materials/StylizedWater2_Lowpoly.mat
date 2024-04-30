@@ -1,0 +1,277 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: StylizedWater2_Lowpoly
+  m_Shader: {fileID: -6465566751694194690, guid: d7b0192b9bf19c949900035fa781fdc4,
+    type: 3}
+  m_ValidKeywords:
+  - _ADVANCED_SHADING
+  - _FLAT_SHADING
+  - _RECEIVE_SHADOWS_OFF
+  - _SHARP_INERSECTION
+  - _TRANSLUCENCY
+  - _WAVES
+  m_InvalidKeywords:
+  - _CROSSPAN_INTERSECTION
+  - _DEPTHEXP_ON
+  - _DEPTH_TEX
+  - _ZCLIP_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 2800000, guid: ec6f0adef15b52448a82f3f183525d84, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMapLarge:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMapSlope:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CausticsTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DepthTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FoamTex:
+        m_Texture: {fileID: 2800000, guid: 6a4aa5aa1ed7b9e4e9204a95f56f4d29, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FoamTexDynamic:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _IntersectionNoise:
+        m_Texture: {fileID: 2800000, guid: b8850342fb8b1e846ac3807e35ec1685, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanarReflection:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanarReflectionLeft:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AlphaClip: 0
+    - _AnimationSpeed: 1
+    - _Blend: 0
+    - _BumpScale: 1
+    - _CausticsBrightness: 2
+    - _CausticsDistortion: 1
+    - _CausticsOn: 0
+    - _CausticsSpeed: 0.1
+    - _CausticsTiling: 0.5
+    - _ColorAbsorption: 0
+    - _CrossPan_IntersectionOn: 1
+    - _Cull: 2
+    - _Cutoff: 0.5
+    - _Depth: 2.45
+    - _DepthExp: 1
+    - _DepthHorizontal: 2.44
+    - _DepthMode: 0
+    - _DepthTexture: 1
+    - _DepthVertical: 4.2
+    - _DisableDepthTexture: 0
+    - _DistanceNormalsOn: 0
+    - _DistanceNormalsTiling: 0.25
+    - _DstBlend: 0
+    - _EdgeFade: 1.01
+    - _EnvironmentReflections: 1
+    - _EnvironmentReflectionsOn: 1
+    - _FlatShadingOn: 1
+    - _FoamBaseAmount: 1
+    - _FoamClipping: 0
+    - _FoamDistortion: 0.1
+    - _FoamOn: 0
+    - _FoamOpacity: 1
+    - _FoamSize: 0.695
+    - _FoamSpeed: 0.1
+    - _FoamSpeedDynamic: 0.1
+    - _FoamSubSpeed: -0.25
+    - _FoamSubSpeedDynamic: -0.1
+    - _FoamSubTiling: 0.5
+    - _FoamSubTilingDynamic: 2
+    - _FoamTiling: 0.39999992
+    - _FoamTilingDynamic: 0.1
+    - _FoamWaveAmount: 0
+    - _FoamWaveMask: 1
+    - _FoamWaveMaskExp: 1
+    - _GlossMapScale: 0
+    - _Glossiness: 0
+    - _GlossyReflections: 0
+    - _HorizonDistance: 8
+    - _IntersectionClipping: 0.5
+    - _IntersectionFalloff: 1
+    - _IntersectionLength: 1.98
+    - _IntersectionRippleDist: 1
+    - _IntersectionRippleStrength: 0
+    - _IntersectionSource: 0
+    - _IntersectionSpeed: 0.1
+    - _IntersectionStyle: 1
+    - _IntersectionTiling: 0.09999993
+    - _LightingOn: 1
+    - _Metallic: 0
+    - _NormalMapOn: 0
+    - _NormalSpeed: 0.2
+    - _NormalStrength: 0
+    - _NormalSubSpeed: -0.5
+    - _NormalSubTiling: 0.5
+    - _NormalTiling: 1
+    - _OcclusionStrength: 1
+    - _PlanarReflectionsEnabled: 0
+    - _PlanarReflectionsParams: 0
+    - _PointSpotLightReflectionDistortion: 0.5
+    - _PointSpotLightReflectionExp: 64
+    - _PointSpotLightReflectionSize: 0
+    - _PointSpotLightReflectionStrength: 10
+    - _QueueOffset: 0
+    - _ReceiveShadows: 0
+    - _ReflectionBlur: 0.205
+    - _ReflectionDistortion: 0
+    - _ReflectionFresnel: 8
+    - _ReflectionLighting: 0
+    - _ReflectionStrength: 1
+    - _RefractionChromaticAberration: 1
+    - _RefractionOn: 0
+    - _RefractionStrength: 0.118
+    - _RiverModeOn: 0
+    - _SHARP_INERSECTIONOn: 1
+    - _ShadingMode: 1
+    - _ShadowStrength: 1
+    - _ShoreLineLength: 2
+    - _ShoreLineWaveDistance: 64
+    - _ShoreLineWaveStr: 0.008
+    - _SlopeAngleFalloff: 25
+    - _SlopeAngleThreshold: 15
+    - _SlopeFoam: 1
+    - _SlopeSpeed: 4
+    - _SlopeStretching: 0.5
+    - _SlopeThreshold: 0.25
+    - _Smoothness: 0.5
+    - _SmoothnessTextureChannel: 0
+    - _SparkleIntensity: 0
+    - _SparkleSize: 0.1
+    - _SpecularHighlights: 1
+    - _SpecularReflectionsOn: 1
+    - _Speed: 1
+    - _SrcBlend: 1
+    - _SunReflectionDistortion: 2
+    - _SunReflectionPerturbance: 1
+    - _SunReflectionSize: 0.95
+    - _SunReflectionStrength: 1
+    - _Surface: 0
+    - _TessMax: 15
+    - _TessMin: 0
+    - _TessValue: 16
+    - _Texture_IntersectionOn: 0
+    - _Translucency: 1
+    - _TranslucencyCurvatureMask: 1
+    - _TranslucencyExp: 1
+    - _TranslucencyOn: 1
+    - _TranslucencyReflectionMask: 0
+    - _TranslucencyStrength: 1
+    - _TranslucencyStrengthDirect: 0.05
+    - _UnderwaterRefractionOffset: 0.2
+    - _UnderwaterSurfaceSmoothness: 0.8
+    - _VertexColorDepth: 0
+    - _VertexColorFoam: 0
+    - _VertexColorWaveFlattening: 0
+    - _WaveCount: 1
+    - _WaveDistance: 0.574
+    - _WaveHeight: 0.15
+    - _WaveNormalStr: 1
+    - _WaveSpeed: 3
+    - _WaveSteepness: 0.1
+    - _WaveTint: 0
+    - _WavesOn: 1
+    - _WorkflowMode: 1
+    - _WorldSpaceUV: 1
+    - _ZClip: 1
+    - _ZWrite: 0
+    m_Colors:
+    - _BaseColor: {r: 0, g: 0.17100494, b: 0.4811321, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _DepthMapBounds: {r: 0, g: 0, b: 0, a: 0}
+    - _Direction: {r: 1, g: 1, b: 0, a: 0}
+    - _DistanceNormalsFadeDist: {r: 300, g: 0.25, b: 0, a: 0}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FoamTiling: {r: 0.1, g: 0.1, b: 0, a: 0}
+    - _HorizonColor: {r: 0.41037738, g: 0.71931076, b: 1, a: 0}
+    - _IntersectionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _NormalTiling: {r: 0.1, g: 0.1, b: 0, a: 0}
+    - _ShallowColor: {r: 0, g: 2, b: 1.9607843, a: 1}
+    - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _WaveDirection: {r: 1, g: 1, b: 1, a: 1}
+    - _WaveFadeDistance: {r: 150, g: 300, b: 0, a: 0}
+  m_BuildTextureStacks: []
+--- !u!114 &1092640962685890020
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 2
