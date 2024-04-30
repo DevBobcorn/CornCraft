@@ -9,6 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Stylized Water
   m_Shader: {fileID: -6465566751694194690, guid: d7b0192b9bf19c949900035fa781fdc4, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ADVANCED_SHADING
   - _CAUSTICS
@@ -16,13 +18,13 @@ Material:
   - _FOAM
   - _NORMALMAP
   - _REFRACTION
-  - _SHARP_INERSECTION
   - _TRANSLUCENCY
   - _WAVES
   m_InvalidKeywords:
   - ADVANCED_LIGHTING
   - _DEPTHEXP_ON
   - _DEPTH_TEX
+  - _RECEIVEDYNAMICEFFECTS_ON
   - _SIMPLE_LIGHTING
   - _VERTEXCOLORWAVEFLATTENING_ON
   - _WORLDSPACEUV_ON
@@ -33,6 +35,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -194,7 +197,7 @@ Material:
     - _IntersectionSize: 0.944
     - _IntersectionSource: 0
     - _IntersectionSpeed: 0.06999999
-    - _IntersectionStyle: 1
+    - _IntersectionStyle: 0
     - _IntersectionTiling: 0.13999975
     - _IntersectionWaveDist: 33.28
     - _LightingMode: 2
@@ -217,6 +220,7 @@ Material:
     - _PointSpotLightReflectionSize: 0
     - _PointSpotLightReflectionStrength: 10
     - _QueueOffset: 0
+    - _ReceiveDynamicEffects: 1
     - _ReceiveShadows: 1
     - _ReflectionBlur: 0
     - _ReflectionDistortion: 0.146
@@ -233,7 +237,7 @@ Material:
     - _RiverModeOn: 0
     - _SHARP_INERSECTIONOn: 1
     - _ShadingMode: 1
-    - _ShadowStrength: 1
+    - _ShadowStrength: 0.5
     - _ShoreLineLength: 0
     - _ShoreLineWaveDistance: 23
     - _ShoreLineWaveStr: 1
