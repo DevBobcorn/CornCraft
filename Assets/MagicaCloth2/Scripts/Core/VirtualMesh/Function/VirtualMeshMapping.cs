@@ -282,10 +282,10 @@ namespace MagicaCloth2
                     // ウエイトバッファ
                     var weights = new ExCostSortedList4(-1);
 
-                    stack.Push(pindex);
+                    stack.MC2Push(pindex);
                     while (stack.IsEmpty == false)
                     {
-                        pindex = stack.Pop();
+                        pindex = stack.MC2Pop();
 
                         if (useSet.Contains(pindex))
                             continue;
@@ -305,7 +305,7 @@ namespace MagicaCloth2
 
                         // 次の接続
                         DataUtility.Unpack12_20(proxyVertexToVertexIndexArray[pindex], out var dcnt, out var dstart);
-                        for (int i = 0; i < dcnt && stack.IsCapacity() == false; i++)
+                        for (int i = 0; i < dcnt && stack.MC2IsCapacity() == false; i++)
                         {
                             ushort tindex = proxyVertexToVertexDataArray[dstart + i];
 
@@ -317,7 +317,7 @@ namespace MagicaCloth2
                             if (dist > weightLength)
                                 continue;
 
-                            stack.Push(tindex);
+                            stack.MC2Push(tindex);
                         }
                     }
 

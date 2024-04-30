@@ -82,7 +82,8 @@ namespace MagicaCloth2
         }
 
         //=========================================================================================
-        internal class ConstraintData : IValid
+        [System.Serializable]
+        public class ConstraintData : IValid
         {
             public ResultCode result;
             public ulong[] trianglePairArray;
@@ -140,6 +141,11 @@ namespace MagicaCloth2
 
         public int DataCount => trianglePairArray?.Count ?? 0;
 
+        /// <summary>
+        /// ボリューム計算の浮動小数点誤差を回避するための倍数
+        /// </summary>
+        const float VolumeScale = 1000.0f;
+
         //=========================================================================================
         public TriangleBendingConstraint()
         {
@@ -186,7 +192,7 @@ namespace MagicaCloth2
         /// <param name="proxyMesh"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        internal static ConstraintData CreateData(VirtualMesh proxyMesh, in ClothParameters parameters)
+        public static ConstraintData CreateData(VirtualMesh proxyMesh, in ClothParameters parameters)
         {
             var constraintData = new ConstraintData();
 
@@ -223,7 +229,7 @@ namespace MagicaCloth2
                     if (proxyMesh.edgeToTriangles.ContainsKey(edge) == false)
                         continue;
 
-                    var triangles = proxyMesh.edgeToTriangles.ToFixedList128Bytes(edge);
+                    var triangles = proxyMesh.edgeToTriangles.MC2ToFixedList128Bytes(edge);
                     int tcnt = triangles.Length;
 
                     // トライアングルの組み合わせ
@@ -320,7 +326,7 @@ namespace MagicaCloth2
 
                                     volumeCount++;
 
-                                    //Develop.DebugLog($"Volume Pair. edge:{edge}, tri:({tri0},{tri1}) restAngle:{degAngle}");
+                                    //Develop.DebugLog($"Volume Pair. edge:{edge}, tri:({tri0},{tri1}) restAngle:{degAngle}, restData:{restData}, signFlag:{signFlag}");
                                 }
                             }
                             //if (math.all(tri0 - 243) == false || math.all(tri1 - 243) == false)
@@ -357,12 +363,14 @@ namespace MagicaCloth2
         static void InitVolume(VirtualMesh proxyMesh, int v0, int v1, int v2, int v3, out float volumeRest, out sbyte signFlag)
         {
             // 0/1が対角点,2/3が共通辺
-            float3 pos0 = proxyMesh.localPositions[v0];
-            float3 pos1 = proxyMesh.localPositions[v1];
-            float3 pos2 = proxyMesh.localPositions[v2];
-            float3 pos3 = proxyMesh.localPositions[v3];
+            // ここは実行時とボリューム値を合わせるためワールド座標で計算する必要がある。
+            float3 pos0 = MathUtility.TransformPoint(proxyMesh.localPositions[v0], proxyMesh.initLocalToWorld);
+            float3 pos1 = MathUtility.TransformPoint(proxyMesh.localPositions[v1], proxyMesh.initLocalToWorld);
+            float3 pos2 = MathUtility.TransformPoint(proxyMesh.localPositions[v2], proxyMesh.initLocalToWorld);
+            float3 pos3 = MathUtility.TransformPoint(proxyMesh.localPositions[v3], proxyMesh.initLocalToWorld);
 
             volumeRest = (1.0f / 6.0f) * math.dot(math.cross(pos1 - pos0, pos2 - pos0), pos3 - pos0);
+            volumeRest *= VolumeScale; // 浮動小数点演算誤差回避
             signFlag = 100; // Volume
         }
 
@@ -601,7 +609,8 @@ namespace MagicaCloth2
                 if (signOrVolume == 100)
                 {
                     // Volume
-                    result = Volume(nextPosBuffer, invMassBuffer, restAngle, stiffness, ref addPosBuffer);
+                    float volumeRest = restAngle * tdata.scaleRatio; // スケール倍率
+                    result = Volume(nextPosBuffer, invMassBuffer, volumeRest, stiffness, ref addPosBuffer);
                 }
                 else
                 {
@@ -649,6 +658,7 @@ namespace MagicaCloth2
                 float invMass3 = invMassBuffer[3];
 
                 float volume = (1.0f / 6.0f) * math.dot(math.cross(nextPos1 - nextPos0, nextPos2 - nextPos0), nextPos3 - nextPos0);
+                volume *= VolumeScale; // 浮動小数点演算誤差回避
 
                 float3 grad0 = math.cross(nextPos1 - nextPos2, nextPos3 - nextPos2);
                 float3 grad1 = math.cross(nextPos2 - nextPos0, nextPos3 - nextPos0);
@@ -660,6 +670,7 @@ namespace MagicaCloth2
                     invMass1 * math.lengthsq(grad1) +
                     invMass2 * math.lengthsq(grad2) +
                     invMass3 * math.lengthsq(grad3);
+                lambda *= VolumeScale; // 浮動小数点演算誤差回避
 
                 if (math.abs(lambda) < 1e-06f)
                     return false;

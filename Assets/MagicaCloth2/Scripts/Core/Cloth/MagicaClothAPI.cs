@@ -67,41 +67,74 @@ namespace MagicaCloth2
         /// <returns>true=start build. false=build failed.</returns>
         public bool BuildAndRun()
         {
-            if (Application.isPlaying == false)
-                return false;
+            bool ret = false;
+            bool buildComplate = true;
 
-            DisableAutoBuild();
-
-            if (Process.IsState(ClothProcess.State_Build))
+            try
             {
-                Develop.LogError($"Already built.:{this.name}");
-                return false;
-            }
+                if (Application.isPlaying == false)
+                    throw new MagicaClothProcessingException();
 
-            // initialize generated data.
-            if (Process.GenerateInitialization() == false)
-                return false;
+                DisableAutoBuild();
 
-            // setting by type.
-            switch (serializeData.clothType)
-            {
-                case ClothProcess.ClothType.BoneCloth:
-                case ClothProcess.ClothType.BoneSpring:
-                    // BoneCloth用のセレクションデータの作成
-                    // ただしセレクションデータが存在し、かつユーザー定義されている場合は作成しない
-                    var nowSelection = serializeData2.selectionData;
-                    if (nowSelection == null || nowSelection.IsValid() == false || nowSelection.IsUserEdit() == false)
+                if (Process.IsState(ClothProcess.State_Build))
+                {
+                    Develop.LogError($"Already built.:{this.name}");
+                    throw new MagicaClothProcessingException();
+                }
+
+                // initialize generated data.
+                if (Process.GenerateInitialization() == false)
+                    throw new MagicaClothProcessingException();
+
+                // check Pre-Build
+                bool usePreBuildData = serializeData2.preBuildData.UsePreBuild();
+
+                if (usePreBuildData == false)
+                {
+                    // Runtime Build.
+                    // setting by type.
+                    switch (serializeData.clothType)
                     {
-                        if (Process.GenerateBoneClothSelection() == false)
-                            return false;
+                        case ClothProcess.ClothType.BoneCloth:
+                        case ClothProcess.ClothType.BoneSpring:
+                            // BoneCloth用のセレクションデータの作成
+                            // ただしセレクションデータが存在し、かつユーザー定義されている場合は作成しない
+                            var nowSelection = serializeData2.selectionData;
+                            if (nowSelection == null || nowSelection.IsValid() == false || nowSelection.IsUserEdit() == false)
+                            {
+                                if (Process.GenerateBoneClothSelection() == false)
+                                    throw new MagicaClothProcessingException();
+                            }
+                            break;
                     }
-                    break;
+
+                    // build and run.
+                    ret = Process.StartRuntimeBuild();
+                    if (ret)
+                        buildComplate = false; // OnBuildCompleteはランタイム構築後に呼ばれる
+                }
+                else
+                {
+                    // pre-build
+                    ret = Process.PreBuildDataConstruction();
+                }
+            }
+            catch (MagicaClothProcessingException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+            }
+            finally
+            {
+                // ビルド完了イベント
+                if (buildComplate)
+                    OnBuildComplete?.Invoke(ret);
             }
 
-            // build and run.
-            Process.StartBuild();
-
-            return true;
+            return ret;
         }
 
         /// <summary>

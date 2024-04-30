@@ -837,11 +837,11 @@ namespace MagicaCloth2
                     var vset_z = (ptr + tri.z);
 
                     if (vset_x->Length < 7)
-                        vset_x->Set(tindex);
+                        vset_x->MC2Set(tindex);
                     if (vset_y->Length < 7)
-                        vset_y->Set(tindex);
+                        vset_y->MC2Set(tindex);
                     if (vset_z->Length < 7)
-                        vset_z->Set(tindex);
+                        vset_z->MC2Set(tindex);
                 }
             }
         }
@@ -1131,7 +1131,7 @@ namespace MagicaCloth2
                     for (int j = 0; j < 3; j++)
                     {
                         int2 edge = edges[j];
-                        edgeToTriangles.UniqueAdd(edge, (ushort)i);
+                        edgeToTriangles.MC2UniqueAdd(edge, (ushort)i);
                     }
                 }
             }
@@ -1192,12 +1192,12 @@ namespace MagicaCloth2
                     ushort y = (ushort)tri.y;
                     ushort z = (ushort)tri.z;
 
-                    vertexToVertexMap.UniqueAdd(tri.x, y);
-                    vertexToVertexMap.UniqueAdd(tri.x, z);
-                    vertexToVertexMap.UniqueAdd(tri.y, x);
-                    vertexToVertexMap.UniqueAdd(tri.y, z);
-                    vertexToVertexMap.UniqueAdd(tri.z, x);
-                    vertexToVertexMap.UniqueAdd(tri.z, y);
+                    vertexToVertexMap.MC2UniqueAdd(tri.x, y);
+                    vertexToVertexMap.MC2UniqueAdd(tri.x, z);
+                    vertexToVertexMap.MC2UniqueAdd(tri.y, x);
+                    vertexToVertexMap.MC2UniqueAdd(tri.y, z);
+                    vertexToVertexMap.MC2UniqueAdd(tri.z, x);
+                    vertexToVertexMap.MC2UniqueAdd(tri.z, y);
 
                     edgeSet.Add(DataUtility.PackInt2(tri.xy));
                     edgeSet.Add(DataUtility.PackInt2(tri.yz));
@@ -1226,8 +1226,8 @@ namespace MagicaCloth2
                 {
                     int2 line = lines[i];
 
-                    vertexToVertexMap.UniqueAdd(line.x, (ushort)line.y);
-                    vertexToVertexMap.UniqueAdd(line.y, (ushort)line.x);
+                    vertexToVertexMap.MC2UniqueAdd(line.x, (ushort)line.y);
+                    vertexToVertexMap.MC2UniqueAdd(line.y, (ushort)line.x);
 
                     edgeSet.Add(DataUtility.PackInt2(line));
                 }
@@ -1950,7 +1950,7 @@ namespace MagicaCloth2
                         int pindex = vertexParentIndices[vindex];
                         if (pindex >= 0)
                         {
-                            vertexChildMap.UniqueAdd(pindex, (ushort)vindex);
+                            vertexChildMap.MC2UniqueAdd(pindex, (ushort)vindex);
                         }
                     }
 

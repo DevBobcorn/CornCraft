@@ -60,5 +60,10 @@ namespace MagicaCloth2
         {
             Develop.DebugLog(this);
         }
+
+        public void Log()
+        {
+            Develop.Log(this);
+        }
     }
 }

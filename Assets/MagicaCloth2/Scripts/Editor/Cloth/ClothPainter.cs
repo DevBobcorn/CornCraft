@@ -47,7 +47,7 @@ namespace MagicaCloth2
         /// <summary>
         /// 編集対象のエディットメッシュ
         /// </summary>
-        static VirtualMesh editMesh = null;
+        static VirtualMeshContainer editMeshContainer = null;
 
         /// <summary>
         /// 編集対象のセレクションデータ
@@ -98,22 +98,22 @@ namespace MagicaCloth2
         /// ペイント開始
         /// </summary>
         /// <param name="clothComponent"></param>
-        public static void EnterPaint(PaintMode mode, MagicaClothEditor editor, MagicaCloth clothComponent, VirtualMesh vmesh, SelectionData sdata)
+        public static void EnterPaint(PaintMode mode, MagicaClothEditor editor, MagicaCloth clothComponent, VirtualMeshContainer cmesh, SelectionData sdata)
         {
             Develop.DebugLog($"EnterPaint");
 
             paintMode = mode;
             cloth = clothComponent;
             clothEditor = editor;
-            editMesh = vmesh;
+            editMeshContainer = cmesh;
             selectionData = sdata;
             initSelectionData = sdata.Clone();
             rayhit = default;
             forceUpdate = true;
 
             // ポイントバッファ
-            dispPointList = new NativeList<Point>(vmesh.VertexCount, Allocator.Persistent);
-            pointWorldPositions = new NativeArray<float3>(vmesh.VertexCount, Allocator.Persistent);
+            dispPointList = new NativeList<Point>(cmesh.shareVirtualMesh.VertexCount, Allocator.Persistent);
+            pointWorldPositions = new NativeArray<float3>(cmesh.shareVirtualMesh.VertexCount, Allocator.Persistent);
 
             // UndoRedoコールバック
             Undo.undoRedoPerformed += UndoRedoCallback;
@@ -128,7 +128,7 @@ namespace MagicaCloth2
 
             cloth = null;
             clothEditor = null;
-            editMesh = null;
+            editMeshContainer = null;
             selectionData = null;
             initSelectionData = null;
             rayhit = default;
@@ -152,11 +152,11 @@ namespace MagicaCloth2
             if (EditorApplication.isPlaying)
                 return;
 
-            if (cloth == null || editMesh == null || selectionData == null || editMesh.IsSuccess == false)
+            if (cloth == null || editMeshContainer == null || selectionData == null || editMeshContainer.shareVirtualMesh.IsSuccess == false)
                 return;
 
             // セレクションデータを取り直す
-            selectionData = clothEditor.GetSelectionData(cloth, editMesh);
+            selectionData = clothEditor.GetSelectionData(cloth, editMeshContainer.shareVirtualMesh);
 
             forceUpdate = true;
         }
@@ -191,9 +191,9 @@ namespace MagicaCloth2
             if (SceneView.lastActiveSceneView != sceneView)
                 return;
 
-            if (cloth == null || editMesh == null || selectionData == null)
+            if (cloth == null || editMeshContainer == null || editMeshContainer.shareVirtualMesh == null || selectionData == null)
                 return;
-            if (editMesh.IsSuccess == false || selectionData.IsValid() == false)
+            if (editMeshContainer.shareVirtualMesh.IsSuccess == false || selectionData.IsValid() == false)
                 return;
 
             var windata = ScriptableSingleton<ClothPainterWindowData>.instance;
@@ -326,7 +326,7 @@ namespace MagicaCloth2
 
                 // ペイント中のギズモ表示
                 if (windata.showShape)
-                    ClothEditorUtility.DrawClothEditor(editMesh, ClothEditorUtility.PaintSettings, cloth.SerializeData, true, windata.backFaceCulling, true);
+                    ClothEditorUtility.DrawClothEditor(editMeshContainer, ClothEditorUtility.PaintSettings, cloth.SerializeData, true, windata.backFaceCulling, true);
             }
 
             // GUI
@@ -384,7 +384,8 @@ namespace MagicaCloth2
             CreateDispPointList(through, ct, cam, showAll, brushSize, brushPos).Complete();
 
             // サーフェース交差判定
-            rayhit = editMesh.IntersectRayMesh(ray.origin, ray.direction, showAll, pointSize);
+            //rayhit = editMesh.IntersectRayMesh(ray.origin, ray.direction, showAll, pointSize);
+            rayhit = editMeshContainer.shareVirtualMesh.IntersectRayMesh(ray.origin, ray.direction, showAll, pointSize);
         }
 
         static JobHandle CreateDispPointList(
@@ -394,6 +395,7 @@ namespace MagicaCloth2
         {
             dispPointList.Clear();
 
+            var editMesh = editMeshContainer.shareVirtualMesh;
             int vcnt = editMesh.VertexCount;
             if (vcnt == 0)
                 return jobHandle;
@@ -698,7 +700,8 @@ namespace MagicaCloth2
         static void Fill(ClothPainterWindowData windata)
         {
             // 塗りつぶし用のポイントデータを作成する
-            int vcnt = editMesh.VertexCount;
+            //int vcnt = editMesh.VertexCount;
+            int vcnt = editMeshContainer.shareVirtualMesh.VertexCount;
             using var fillDispPointList = new NativeList<Point>(vcnt, Allocator.TempJob);
             BitField32 flag = new();
             flag.SetBits(PointFlag_Selecting, true);

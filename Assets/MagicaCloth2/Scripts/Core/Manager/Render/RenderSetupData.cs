@@ -19,10 +19,11 @@ namespace MagicaCloth2
     /// またこの情報はキャラクターが動き出す前に取得しておく必要がある
     /// そのためAwake()などで実行する
     /// </summary>
-    public class RenderSetupData : IDisposable, ITransform
+    public partial class RenderSetupData : IDisposable, ITransform
     {
         public ResultCode result;
         public string name = string.Empty;
+        public bool isManaged; // pre-build DeserializeManager管理
 
         // タイプ
         public enum SetupType
@@ -45,10 +46,15 @@ namespace MagicaCloth2
         public Mesh.MeshDataArray meshDataArray;　// Jobで利用するためのMeshData
         public int skinRootBoneIndex;
         public int skinBoneCount;
+
         // MeshDataでは取得できないメッシュ情報
         public List<Matrix4x4> bindPoseList;
         public NativeArray<byte> bonesPerVertexArray;
         public NativeArray<BoneWeight1> boneWeightArray;
+
+        // PreBuild時のみ保持する情報.逆にmeshDataArrayは持たない
+        public NativeArray<Vector3> localPositions;
+        public NativeArray<Vector3> localNormals;
 
         // Bone ---------------------------------------------------------------
         public List<int> rootTransformIdList;
@@ -95,10 +101,14 @@ namespace MagicaCloth2
         public bool IsSuccess() => result.IsSuccess();
         public bool IsFaild() => result.IsFaild();
         public int TransformCount => transformList?.Count ?? 0;
+        public bool HasMeshDataArray => meshDataArray.Length > 0;
+        public bool HasLocalPositions => localPositions.IsCreated;
 
         //static readonly ProfilerMarker initProfiler = new ProfilerMarker("Render Setup");
 
         //=========================================================================================
+        public RenderSetupData() { }
+
         /// <summary>
         /// レンダラーから基本情報を作成する（メインスレッドのみ）
         /// タイプはMeshになる
@@ -527,23 +537,21 @@ namespace MagicaCloth2
 
         public void Dispose()
         {
-            if (bonesPerVertexArray.IsCreated)
-                bonesPerVertexArray.Dispose();
-            if (boneWeightArray.IsCreated)
-                boneWeightArray.Dispose();
+            // Pre-Build DeserializeManager管理中は破棄させない
+            if (isManaged)
+                return;
 
-            if (transformPositions.IsCreated)
-                transformPositions.Dispose();
-            if (transformRotations.IsCreated)
-                transformRotations.Dispose();
-            if (transformLocalPositins.IsCreated)
-                transformLocalPositins.Dispose();
-            if (transformLocalRotations.IsCreated)
-                transformLocalRotations.Dispose();
-            if (transformScales.IsCreated)
-                transformScales.Dispose();
-            if (transformInverseRotations.IsCreated)
-                transformInverseRotations.Dispose();
+            bonesPerVertexArray.MC2DisposeSafe();
+            boneWeightArray.MC2DisposeSafe();
+            localPositions.MC2DisposeSafe();
+            localNormals.MC2DisposeSafe();
+
+            transformPositions.MC2DisposeSafe();
+            transformRotations.MC2DisposeSafe();
+            transformLocalPositins.MC2DisposeSafe();
+            transformLocalRotations.MC2DisposeSafe();
+            transformScales.MC2DisposeSafe();
+            transformInverseRotations.MC2DisposeSafe();
 
             // MeshDataArrayはメインスレッドのみDispose()可能
             if (setupType == SetupType.MeshCloth)
@@ -555,8 +563,11 @@ namespace MagicaCloth2
 
         public void GetUsedTransform(HashSet<Transform> transformSet)
         {
-            foreach (var t in transformList)
-                transformSet.Add(t);
+            if (transformList != null)
+            {
+                foreach (var t in transformList)
+                    transformSet.Add(t);
+            }
         }
 
         public void ReplaceTransform(Dictionary<int, Transform> replaceDict)

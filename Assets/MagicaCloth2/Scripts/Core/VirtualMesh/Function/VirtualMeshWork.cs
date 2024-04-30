@@ -14,7 +14,7 @@ namespace MagicaCloth2
     {
         //=========================================================================================
         /// <summary>
-        /// 頂点間の平均/最大距離を調べてる（スレッド可）
+        /// 頂点間の平均/最大距離を調べる（スレッド可）
         /// 結果はaverageVertexDistance/maxVertexDistanceに格納される
         /// </summary>
         internal void CalcAverageAndMaxVertexDistanceRun()

@@ -341,7 +341,7 @@ namespace MagicaCloth2
             edgeEdgeContactList.Dispose();
             pointTriangleContactList.Dispose();
 
-            intersectFlagArray.DisposeSafe();
+            intersectFlagArray.MC2DisposeSafe();
 
             IntersectCount = 0;
         }
@@ -776,7 +776,7 @@ namespace MagicaCloth2
             if (IntersectCount > 0)
             {
                 int pcnt = MagicaManager.Simulation.ParticleCount;
-                intersectFlagArray.Resize(pcnt, options: NativeArrayOptions.ClearMemory);
+                intersectFlagArray.MC2Resize(pcnt, options: NativeArrayOptions.ClearMemory);
             }
 
 #if MC2_DEBUG && false
@@ -1267,7 +1267,7 @@ namespace MagicaCloth2
                 primitive.flagAndTeamId = flag;
                 depth /= ac;
                 //float thickness = parameterArray[teamId].selfCollisionConstraint.surfaceThicknessCurveData.EvaluateCurve(depth);
-                float thickness = param.surfaceThicknessCurveData.EvaluateCurve(depth);
+                float thickness = param.surfaceThicknessCurveData.MC2EvaluateCurve(depth);
                 thickness *= tdata.scaleRatio; // team scale
                 primitive.thickness = thickness;
                 primitiveArray[pri_index] = primitive;

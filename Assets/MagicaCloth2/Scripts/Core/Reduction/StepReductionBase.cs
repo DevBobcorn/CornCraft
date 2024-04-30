@@ -450,12 +450,12 @@ namespace MagicaCloth2
                     foreach (ushort nindex in vertexToVertexMap.GetValuesForKey((ushort)vindex1))
                     {
                         if (nindex != vindex1 && nindex != vindex2)
-                            newLink.Set(nindex);
+                            newLink.MC2Set(nindex);
                     }
                     foreach (ushort nindex in vertexToVertexMap.GetValuesForKey((ushort)vindex2))
                     {
                         if (nindex != vindex1 && nindex != vindex2)
-                            newLink.Set(nindex);
+                            newLink.MC2Set(nindex);
                     }
                     vertexToVertexMap.Remove((ushort)vindex2);
                     for (int i = 0; i < newLink.Length; i++)
@@ -558,7 +558,7 @@ namespace MagicaCloth2
                     if (tvindex == vindex)
                         continue;
 
-                    newLinkSet.Set((ushort)tvindex);
+                    newLinkSet.MC2Set((ushort)tvindex);
                 }
                 // 生存のみの新しいセットに入れ替え
                 vertexToVertexMap.Remove((ushort)vindex);
@@ -640,12 +640,12 @@ namespace MagicaCloth2
             foreach (ushort index in vertexToVertexMap.GetValuesForKey((ushort)vindex))
             {
                 if (index != vindex && index != tvindex)
-                    joinVlink.Set(index);
+                    joinVlink.MC2Set(index);
             }
             foreach (ushort index in vertexToVertexMap.GetValuesForKey((ushort)tvindex))
             {
                 if (index != vindex && index != tvindex)
-                    joinVlink.Set(index);
+                    joinVlink.MC2Set(index);
             }
 
             // 点になるのはNG
@@ -662,20 +662,20 @@ namespace MagicaCloth2
                 // 結合後のトライアングルの外周をひと筆書きし、すべての外周頂点が使われているならOK!
                 // 外周頂点が一筆書きできない場合は２つ以上のグループに分かれいる（X型になる）
                 var stack = new FixedList512Bytes<ushort>();
-                stack.Push(joinVlink[0]);
+                stack.MC2Push(joinVlink[0]);
                 while (stack.Length > 0)
                 {
-                    ushort index = stack.Pop();
+                    ushort index = stack.MC2Pop();
                     if (joinVlink.Contains(index) == false)
                         continue;
-                    joinVlink.RemoveItemAtSwapBack(index);
+                    joinVlink.MC2RemoveItemAtSwapBack(index);
 
                     foreach (ushort nindex in vertexToVertexMap.GetValuesForKey((ushort)index))
                     {
                         if (joinVlink.Contains(nindex))
                         {
                             // next
-                            stack.Push(nindex);
+                            stack.MC2Push(nindex);
                         }
                     }
                 }
@@ -716,13 +716,13 @@ namespace MagicaCloth2
             {
                 int index = vlist[i];
                 if (index != vindex && index != tvindex)
-                    joinVlink.SetLimit((ushort)index);
+                    joinVlink.MC2SetLimit((ushort)index);
             }
             for (int i = 0; i < tvlist.Length; i++)
             {
                 int index = tvlist[i];
                 if (index != vindex && index != tvindex)
-                    joinVlink.SetLimit((ushort)index);
+                    joinVlink.MC2SetLimit((ushort)index);
             }
 
             // 点になるのはNG
@@ -739,13 +739,13 @@ namespace MagicaCloth2
                 // 結合後のトライアングルの外周をひと筆書きし、すべての外周頂点が使われているならOK!
                 // 外周頂点が一筆書きできない場合は２つ以上のグループに分かれいる（X型になる）
                 var stack = new FixedList512Bytes<ushort>();
-                stack.Push(joinVlink[0]);
+                stack.MC2Push(joinVlink[0]);
                 while (stack.Length > 0)
                 {
-                    ushort index = stack.Pop();
+                    ushort index = stack.MC2Pop();
                     if (joinVlink.Contains(index) == false)
                         continue;
-                    joinVlink.RemoveItemAtSwapBack(index);
+                    joinVlink.MC2RemoveItemAtSwapBack(index);
 
                     var link = vertexToVertexArray[index];
                     for (int i = 0; i < link.Length; i++)
@@ -754,7 +754,7 @@ namespace MagicaCloth2
                         if (joinVlink.Contains(nindex))
                         {
                             // next
-                            stack.Push(nindex);
+                            stack.MC2Push(nindex);
                         }
                     }
                 }

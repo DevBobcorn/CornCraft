@@ -186,6 +186,16 @@ namespace MagicaCloth2
                 renderManager.InformationLog(allsb);
             }
 
+            var preBuildManager = MagicaManager.PreBuild;
+            if (preBuildManager == null)
+            {
+                Debug.LogWarning("PreBuild Manager is null!");
+            }
+            else
+            {
+                preBuildManager.InformationLog(allsb);
+            }
+
             // clipboard
             //GUIUtility.systemCopyBuffer = allsb.ToString();
 

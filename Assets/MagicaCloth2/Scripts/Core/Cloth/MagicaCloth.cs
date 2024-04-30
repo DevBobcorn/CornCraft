@@ -66,6 +66,14 @@ namespace MagicaCloth2
         }
 
         //=========================================================================================
+        private void Reset()
+        {
+#if UNITY_EDITOR
+            // Automatically generate pre-build ID
+            serializeData2.preBuildData.buildId = PreBuildSerializeData.GenerateBuildID();
+#endif
+        }
+
         private void OnValidate()
         {
             Process.DataUpdate();
@@ -73,10 +81,11 @@ namespace MagicaCloth2
 
         private void Awake()
         {
-            Process.Init();
-
-            // If Awake() is called, OnDestroy() will also be called, so remove it from monitoring.
-            MagicaManager.Team.RemoveMonitoringProcess(Process);
+            if (MagicaManager.initializationLocation == MagicaManager.InitializationLocation.Awake)
+            {
+                Process.Init();
+                MagicaManager.Team.RemoveMonitoringProcess(Process);
+            }
         }
 
         private void OnEnable()
@@ -91,6 +100,12 @@ namespace MagicaCloth2
 
         void Start()
         {
+            if (MagicaManager.initializationLocation == MagicaManager.InitializationLocation.Start)
+            {
+                Process.Init();
+                MagicaManager.Team.RemoveMonitoringProcess(Process);
+            }
+
             Process.AutoBuild();
         }
 

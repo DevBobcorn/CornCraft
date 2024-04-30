@@ -28,6 +28,7 @@ namespace MagicaCloth2
             EditorGUILayout.PropertyField(serializedObject.FindProperty("refreshMode"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("simulationFrequency"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("maxSimulationCountPerFrame"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("initializationLocation"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("updateLocation"));
         }
     }

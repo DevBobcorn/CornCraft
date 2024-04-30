@@ -48,7 +48,7 @@ namespace MagicaCloth2
                 float sameDistance = maxSideLength * math.saturate(Define.System.ReductionSameDistance);
                 float simpleDistance = maxSideLength * math.saturate(settings.simpleDistance);
                 float shapeDistance = maxSideLength * math.saturate(settings.shapeDistance);
-                //Develop.DebugLog($"ReductionDista. maxSideLength:{maxSideLength}, same:{sameDistance}, simple:{simpleDistance}, shape:{shapeDistance}");
+                Develop.DebugLog($"ReductionDista. maxSideLength:{maxSideLength}, same:{sameDistance}, simple:{simpleDistance}, shape:{shapeDistance}");
 
                 // 同一距離リダクション
                 ct.ThrowIfCancellationRequested();
@@ -659,7 +659,7 @@ namespace MagicaCloth2
                 {
                     int newIndex2 = vertexRemapIndices[oldVertexIndex];
                     //Debug.Assert(newIndex != newIndex2);
-                    newVertexToVertexMap.UniqueAdd((ushort)newIndex, (ushort)newIndex2);
+                    newVertexToVertexMap.MC2UniqueAdd((ushort)newIndex, (ushort)newIndex2);
                 }
 
                 //Debug.Log($"[{newIndex}] cnt:{newVertexToVertexMap.CountValuesForKey((ushort)newIndex)}");
@@ -764,7 +764,7 @@ namespace MagicaCloth2
                         if (vindex == edge.x || vindex == edge.y)
                             continue;
 
-                        if (newVertexToVertexMap.Contains((ushort)edge.y, vindex))
+                        if (newVertexToVertexMap.MC2Contains((ushort)edge.y, vindex))
                         {
                             // トライアングル生成
                             int3 tri = DataUtility.PackInt3(edge.x, edge.y, vindex);

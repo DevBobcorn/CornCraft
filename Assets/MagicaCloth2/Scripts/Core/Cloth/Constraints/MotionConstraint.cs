@@ -242,7 +242,7 @@ namespace MagicaCloth2
                     var opos = nextPos;
 
                     // パーティクル半径
-                    float radius = math.max(param.radiusCurveData.EvaluateCurve(depth), 0.0001f); // safe
+                    float radius = math.max(param.radiusCurveData.MC2EvaluateCurve(depth), 0.0001f); // safe
                     //radius *= tdata.scaleRatio;
 
                     // 摩擦影響距離
@@ -284,7 +284,7 @@ namespace MagicaCloth2
                     //=========================================================
                     if (motionParam.useMaxDistance)
                     {
-                        float maxDistance = motionParam.maxDistanceCurveData.EvaluateCurve(depth);
+                        float maxDistance = motionParam.maxDistanceCurveData.MC2EvaluateCurve(depth);
                         //var cen = basePos + dir * (motionParam.maxDistanceOffset * maxDistance);
                         var cen = basePos;
                         var v = MathUtility.ClampVector(nextPos - cen, maxDistance);
@@ -297,7 +297,7 @@ namespace MagicaCloth2
                     if (motionParam.useBackstop)
                     {
                         float backstopRadius = motionParam.backstopRadius;
-                        float backstopDistance = motionParam.backstopDistanceCurveData.EvaluateCurve(depth);
+                        float backstopDistance = motionParam.backstopDistanceCurveData.MC2EvaluateCurve(depth);
                         if (backstopRadius > 0.0f)
                         {
                             // バックストップは法線逆方向

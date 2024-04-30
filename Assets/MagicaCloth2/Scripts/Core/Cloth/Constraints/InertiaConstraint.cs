@@ -40,6 +40,28 @@ namespace MagicaCloth2
         public class SerializeData : IDataValidate
         {
             /// <summary>
+            /// Anchor that cancels inertia.
+            /// Anchor translation and rotation are excluded from simulation.
+            /// This is useful if your character rides a vehicle.
+            /// 慣性を打ち消すアンカー
+            /// アンカーの移動と回転はシミュレーションから除外されます
+            /// これはキャラクターが乗り物に乗る場合に便利です
+            /// [OK] Runtime changes.
+            /// [NG] Export/Import with Presets
+            /// </summary>
+            public Transform anchor;
+
+            /// <summary>
+            /// Anchor Influence (0.0 ~ 1.0)
+            /// アンカーの影響(0.0 ~ 1.0)
+            /// [OK] Runtime changes.
+            /// [NG] Export/Import with Presets
+            /// </summary>
+            [Range(0.0f, 1.0f)]
+            public float anchorInertia;
+
+
+            /// <summary>
             /// World Influence (0.0 ~ 1.0).
             /// ワールド移動影響(0.0 ~ 1.0)
             /// [OK] Runtime changes.
@@ -48,6 +70,15 @@ namespace MagicaCloth2
             [FormerlySerializedAs("movementInertia")]
             [Range(0.0f, 1.0f)]
             public float worldInertia;
+
+            /// <summary>
+            /// World Influence Smoothing (0.0 ~ 1.0).
+            /// ワールド移動影響平滑化(0.0 ~ 1.0)
+            /// [OK] Runtime changes.
+            /// [OK] Export/Import with Presets
+            /// </summary>
+            [Range(0.0f, 1.0f)]
+            public float movementInertiaSmoothing;
 
             /// <summary>
             /// World movement speed limit (m/s).
@@ -144,7 +175,11 @@ namespace MagicaCloth2
 
             public SerializeData()
             {
+                anchor = null;
+                anchorInertia = 0.0f;
                 worldInertia = 1.0f;
+                //movementInertiaSmoothing = 0.65f; // ->0.0524
+                movementInertiaSmoothing = 0.5f; // ->0.13375
                 movementSpeedLimit = new CheckSliderSerializeData(true, 5.0f);
                 rotationSpeedLimit = new CheckSliderSerializeData(true, 720.0f);
                 localInertia = 1.0f;
@@ -162,7 +197,10 @@ namespace MagicaCloth2
             {
                 return new SerializeData()
                 {
+                    anchor = anchor,
+                    anchorInertia = anchorInertia,
                     worldInertia = worldInertia,
+                    movementInertiaSmoothing = movementInertiaSmoothing,
                     movementSpeedLimit = movementSpeedLimit.Clone(),
                     rotationSpeedLimit = rotationSpeedLimit.Clone(),
                     localInertia = localInertia,
@@ -179,7 +217,9 @@ namespace MagicaCloth2
 
             public void DataValidate()
             {
+                anchorInertia = Mathf.Clamp01(anchorInertia);
                 worldInertia = Mathf.Clamp01(worldInertia);
+                movementInertiaSmoothing = Mathf.Clamp01(movementInertiaSmoothing);
                 movementSpeedLimit.DataValidate(0.0f, Define.System.MaxMovementSpeedLimit);
                 rotationSpeedLimit.DataValidate(0.0f, Define.System.MaxRotationSpeedLimit);
                 localInertia = Mathf.Clamp01(localInertia);
@@ -196,17 +236,29 @@ namespace MagicaCloth2
         public struct InertiaConstraintParams
         {
             /// <summary>
+            /// アンカー影響率(0.0 ~ 1.0)
+            /// </summary>
+            public float anchorInertia;
+
+            /// <summary>
             /// ワールド慣性影響(0.0 ~ 1.0)
             /// </summary>
             public float worldInertia;
 
             /// <summary>
+            /// ワールド慣性スムージング率(0.0 ~ 1.0)
+            /// </summary>
+            public float movementInertiaSmoothing;
+
+            /// <summary>
             /// ワールド移動速度制限(m/s)
+            /// 無制限時は(-1)
             /// </summary>
             public float movementSpeedLimit;
 
             /// <summary>
             /// ワールド回転速度制限(deg/s)
+            /// 無制限時は(-1)
             /// </summary>
             public float rotationSpeedLimit;
 
@@ -258,7 +310,9 @@ namespace MagicaCloth2
 
             public void Convert(SerializeData sdata)
             {
+                anchorInertia = sdata.anchorInertia;
                 worldInertia = sdata.worldInertia;
+                movementInertiaSmoothing = sdata.movementInertiaSmoothing;
                 movementSpeedLimit = sdata.movementSpeedLimit.GetValue(-1);
                 rotationSpeedLimit = sdata.rotationSpeedLimit.GetValue(-1);
                 localInertia = sdata.localInertia;
@@ -277,8 +331,26 @@ namespace MagicaCloth2
         /// <summary>
         /// センタートランスフォームのデータ
         /// </summary>
+        [System.Serializable]
         public struct CenterData
         {
+            /// <summary>
+            /// 現在のアンカー姿勢
+            /// </summary>
+            public float3 anchorPosition;
+            public quaternion anchorRotation;
+
+            /// <summary>
+            /// 前フレームのアンカー姿勢
+            /// </summary>
+            public float3 oldAnchorPosition;
+            public quaternion oldAnchorRotation;
+
+            /// <summary>
+            /// アンカー空間でのコンポーネントのローカル座標
+            /// </summary>
+            public float3 anchorComponentLocalPosition;
+
             /// <summary>
             /// 参照すべきセンタートランスフォームインデックス
             /// 同期時は同期先チームのもにになる
@@ -395,8 +467,16 @@ namespace MagicaCloth2
             /// </summary>
             public float3 initLocalGravityDirection;
 
+            /// <summary>
+            /// スムージングされた現在のワールド慣性速度ベクトル
+            /// </summary>
+            public float3 smoothingVelocity; // (m/s)
+
             internal void Initialize()
             {
+                anchorRotation = quaternion.identity;
+                oldAnchorRotation = quaternion.identity;
+
                 componentWorldRotation = quaternion.identity;
                 oldComponentWorldRotation = quaternion.identity;
                 frameComponentShiftRotation = quaternion.identity;
@@ -412,6 +492,7 @@ namespace MagicaCloth2
         /// <summary>
         /// 制約データ
         /// </summary>
+        [System.Serializable]
         public class ConstraintData
         {
             public ResultCode result;
@@ -450,7 +531,7 @@ namespace MagicaCloth2
         /// 制約データの作成
         /// </summary>
         /// <param name="cbase"></param>
-        internal static ConstraintData CreateData(VirtualMesh proxyMesh, in ClothParameters parameters)
+        public static ConstraintData CreateData(VirtualMesh proxyMesh, in ClothParameters parameters)
         {
             var constraintData = new ConstraintData();
 
@@ -522,9 +603,9 @@ namespace MagicaCloth2
 
             // 固定点リスト
             var c = new DataChunk();
-            if (cprocess.ProxyMesh.CenterFixedPointCount > 0)
+            if (cprocess.ProxyMeshContainer.shareVirtualMesh.CenterFixedPointCount > 0)
             {
-                c = fixedArray.AddRange(cprocess.ProxyMesh.centerFixedList);
+                c = fixedArray.AddRange(cprocess.ProxyMeshContainer.shareVirtualMesh.centerFixedList);
             }
             tdata.fixedDataChunk = c;
         }

@@ -1,6 +1,7 @@
 ﻿// Magica Cloth 2.
 // Copyright (c) 2023 MagicaSoft.
 // https://magicasoft.jp
+using System;
 using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 using UnityEngine;
@@ -428,7 +429,7 @@ namespace MagicaCloth2
             {
                 float time = i / 15.0f;
                 float val = curve.Evaluate(time);
-                m.SetValue(i, val);
+                m.MC2SetValue(i, val);
             }
 
             return m;
@@ -447,7 +448,7 @@ namespace MagicaCloth2
             int index = (int)(math.saturate(time) * 15);
             time -= index * interval;
             float t = time / interval;
-            return math.lerp(curve.GetValue(index), curve.GetValue(index + 1), t);
+            return math.lerp(curve.MC2GetValue(index), curve.MC2GetValue(index + 1), t);
         }
 
         //=========================================================================================
@@ -473,6 +474,31 @@ namespace MagicaCloth2
         {
             flag.Value = (byte)(flag.Value & 0xf0 | (byte)ctype);
             return flag;
+        }
+
+        //=========================================================================================
+        /// <summary>
+        /// 配列をDeepコピーする
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="src"></param>
+        /// <param name="dst"></param>
+        public static void ArrayCopy<T>(T[] src, ref T[] dst)
+        {
+            if (src == null)
+            {
+                dst = null;
+                return;
+            }
+            if (src.Length == 0)
+            {
+                dst = new T[0];
+            }
+            else
+            {
+                dst = new T[src.Length];
+                Array.Copy(src, dst, src.Length);
+            }
         }
     }
 }

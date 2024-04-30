@@ -65,6 +65,12 @@ namespace MagicaCloth2
         public int maxSimulationCountPerFrame = Define.System.DefaultMaxSimulationCountPerFrame;
 
         /// <summary>
+        /// MonoBehaviourでのMagicaClothの初期化場所。
+        /// MagicaCloth initialization location in MonoBehaviour.
+        /// </summary>
+        public MagicaManager.InitializationLocation initializationLocation = MagicaManager.InitializationLocation.Start;
+
+        /// <summary>
         /// シミュレーションの更新場所
         /// BeforeLateUpdate : LateUpdate()の前に実行します。これはUnity 2D Animationで利用する場合に必要です。
         /// AfterLateUpdate  : LateUpdate()の後に実行します。初期設定。
@@ -78,8 +84,7 @@ namespace MagicaCloth2
         //=========================================================================================
         public void Awake()
         {
-            if (refreshMode == RefreshMode.OnAwake)
-                Refresh();
+            Refresh();
         }
 
         public void Update()
@@ -108,6 +113,7 @@ namespace MagicaCloth2
 
                 MagicaManager.SetSimulationFrequency(simulationFrequency);
                 MagicaManager.SetMaxSimulationCountPerFrame(maxSimulationCountPerFrame);
+                MagicaManager.SetInitializationLocation(initializationLocation);
                 MagicaManager.SetUpdateLocation(updateLocation);
             }
             else

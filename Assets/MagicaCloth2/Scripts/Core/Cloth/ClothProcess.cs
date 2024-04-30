@@ -9,6 +9,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace MagicaCloth2
@@ -19,107 +20,176 @@ namespace MagicaCloth2
     public partial class ClothProcess
     {
         //=========================================================================================
+        static readonly ProfilerMarker initProfiler = new ProfilerMarker("ClothProcess.Init");
+
         /// <summary>
-        /// 初期化（★必ずアニメーションの実行前に行う）
+        /// 初期化（必ずアニメーションの実行前に行う）
         /// </summary>
         internal void Init()
         {
             Debug.Assert(cloth);
-            Develop.DebugLog($"Init start :{cloth.name}");
+            Develop.DebugLog($"Init start [{cloth.name}]");
+            initProfiler.Begin();
+            result.SetSuccess();
 
-            // すでに初期化済みならスキップ
-            if (IsState(State_InitComplete))
+            try
             {
-                return;
-            }
-
-            // すでに破棄されている場合はエラーとする。再初期化はできない
-            if (isDestory)
-            {
-                Develop.LogError($"Already destroyed components cannot be reinitialized.");
-                return;
-            }
-
-            SetState(State_Valid, false);
-            result.SetProcess();
-            var sdata = cloth.SerializeData;
-
-            // クロスを生成するための最低限の情報が揃っているかチェックする
-            if (sdata.IsValid() == false)
-            {
-                //result.SetResult(Define.Result.Empty);
-                result.SetResult(sdata.VerificationResult);
-                return;
-            }
-
-            // 基本情報
-            clothType = sdata.clothType;
-            reductionSettings = sdata.reductionSetting;
-            parameters = sdata.GetClothParameters();
-
-            // 初期トランスフォーム状態
-            clothTransformRecord = new TransformRecord(cloth.ClothTransform);
-
-            // 法線調整用トランスフォーム
-            normalAdjustmentTransformRecord = new TransformRecord(
-                sdata.normalAlignmentSetting.adjustmentTransform ?
-                sdata.normalAlignmentSetting.adjustmentTransform :
-                cloth.ClothTransform);
-
-            // レンダラーとセットアップ情報の初期化
-            if (clothType == ClothType.MeshCloth)
-            {
-                // MeshCloth
-                // 必要なレンダラーを登録する
-                foreach (var ren in sdata.sourceRenderers)
+                // すでに破棄されている場合はエラーとする。再初期化はできない
+                if (isDestory)
                 {
-                    if (ren)
+                    Develop.LogError($"Already destroyed components cannot be reinitialized.");
+                    throw new OperationCanceledException();
+                }
+
+                // すでに初期化済みならスキップ
+                if (IsState(State_InitComplete))
+                {
+                    throw new OperationCanceledException();
+                }
+
+                var sdata = cloth.SerializeData;
+                var sdata2 = cloth.GetSerializeData2();
+
+                SetState(State_Valid, false);
+
+                // アニメーション用プロパティ初期化
+                cloth.InitAnimationProperty();
+
+                // クロスを生成するための最低限の情報が揃っているかチェックする
+                if (sdata.IsValid() == false)
+                {
+                    result.SetResult(sdata.VerificationResult);
+                    throw new OperationCanceledException();
+                }
+
+                SetState(State_InitComplete, true);
+
+                // PreBuildデータの利用と検証
+                bool usePreBuildData = sdata2.preBuildData.UsePreBuild();
+                SharePreBuildData sharePreBuildData = null;
+                if (usePreBuildData)
+                {
+                    SetState(State_UsePreBuild, true);
+                    var r = sdata2.preBuildData.DataValidate();
+                    if (r.IsFaild())
                     {
-                        int handle = AddRenderer(ren);
-                        if (handle == 0)
+                        result.Merge(r);
+                        throw new OperationCanceledException();
+                    }
+
+                    sharePreBuildData = sdata2.preBuildData.GetSharePreBuildData();
+                }
+
+                // 基本情報
+                clothType = sdata.clothType;
+                reductionSettings = sdata.reductionSetting;
+                parameters = sdata.GetClothParameters();
+
+                // 初期トランスフォーム状態
+                clothTransformRecord = new TransformRecord(cloth.ClothTransform);
+                if (usePreBuildData)
+                {
+                    // Pre-Buildでは編集時スケールを復元する
+                    clothTransformRecord.scale = sharePreBuildData.buildScale;
+                }
+
+                // 法線調整用トランスフォーム
+                normalAdjustmentTransformRecord = new TransformRecord(
+                    sdata.normalAlignmentSetting.adjustmentTransform ?
+                    sdata.normalAlignmentSetting.adjustmentTransform :
+                    cloth.ClothTransform);
+
+                // PreBuildデータの登録
+                PreBuildManager.ShareDeserializationData sharePreBuildDeserializeData = usePreBuildData ? MagicaManager.PreBuild.RegisterPreBuildData(sharePreBuildData, true) : null;
+                UniquePreBuildData uniquePreBuildData = usePreBuildData ? sdata2.preBuildData.uniquePreBuildData : null;
+
+                // レンダラーとセットアップ情報の初期化
+                // なおセットアップ情報はVirtualMeshを生成するためのものなのでベイク構築時は不要
+                if (clothType == ClothType.MeshCloth)
+                {
+                    // MeshCloth
+                    // 必要なレンダラーを登録する
+                    for (int i = 0; i < sdata.sourceRenderers.Count; i++)
+                    {
+                        var ren = sdata.sourceRenderers[i];
+                        if (ren)
                         {
-                            result.SetError(Define.Result.ClothInit_FailedAddRenderer);
-                            return;
-                        }
-                        var rdata = MagicaManager.Render.GetRendererData(handle);
-                        result.Merge(rdata.Result);
-                        if (rdata.Result.IsFaild())
-                        {
-                            return;
+                            // PreBuildではセットアップ情報を復元する
+                            RenderSetupData setup = null;
+                            RenderSetupData.UniqueSerializationData uniquePreBuildSetupData = null;
+                            if (usePreBuildData)
+                            {
+                                setup = sharePreBuildDeserializeData.renderSetupDataList[i];
+                                uniquePreBuildSetupData = uniquePreBuildData.renderSetupDataList[i];
+
+                                if (setup.result.IsFaild())
+                                {
+                                    setup.Dispose();
+                                    result.SetError(Define.Result.PreBuild_SetupDeserializationError);
+                                    throw new OperationCanceledException();
+                                }
+                            }
+
+                            int handle = AddRenderer(ren, setup, uniquePreBuildSetupData);
+                            if (handle == 0)
+                            {
+                                result.SetError(Define.Result.ClothInit_FailedAddRenderer);
+                                throw new OperationCanceledException();
+                            }
+                            var rdata = MagicaManager.Render.GetRendererData(handle);
+                            result.Merge(rdata.Result);
+                            if (rdata.Result.IsFaild())
+                            {
+                                throw new OperationCanceledException();
+                            }
                         }
                     }
                 }
+                else if (clothType == ClothType.BoneCloth && usePreBuildData == false)
+                {
+                    // BoneCloth
+                    CreateBoneRenderSetupData(clothType, sdata.rootBones, null, sdata.connectionMode);
+                }
+                else if (clothType == ClothType.BoneSpring && usePreBuildData == false)
+                {
+                    // BoneSpring
+                    // BoneSpringではLine接続のみ
+                    CreateBoneRenderSetupData(clothType, sdata.rootBones, sdata.colliderCollisionConstraint.collisionBones, RenderSetupData.BoneConnectionMode.Line);
+                }
+
+                // カスタムスキニングのボーン情報
+                int bcnt = sdata.customSkinningSetting.skinningBones.Count;
+                for (int i = 0; i < bcnt; i++)
+                {
+                    customSkinningBoneRecords.Add(new TransformRecord(sdata.customSkinningSetting.skinningBones[i]));
+                }
+
+                result.SetSuccess();
+                SetState(State_Valid, true);
+                SetState(State_InitSuccess, true);
+
+                // この時点でクロスコンポーネントが非アクティブの場合は破棄監視リストに登録する
+                if (cloth.isActiveAndEnabled == false)
+                    MagicaManager.Team.AddMonitoringProcess(this);
             }
-            else if (clothType == ClothType.BoneCloth)
+            catch (OperationCanceledException)
             {
-                // BoneCloth
-                // 必要なボーンを登録する
-                AddBoneCloth(clothType, sdata.rootBones, null, sdata.connectionMode);
             }
-            else if (clothType == ClothType.BoneSpring)
+            catch (MagicaClothProcessingException)
             {
-                // BoneSpring
-                // 必要なボーンを登録する
-                // BoneSpringではLine接続のみ
-                AddBoneCloth(clothType, sdata.rootBones, sdata.colliderCollisionConstraint.collisionBones, RenderSetupData.BoneConnectionMode.Line);
             }
-
-            // カスタムスキニングのボーン情報
-            int bcnt = sdata.customSkinningSetting.skinningBones.Count;
-            for (int i = 0; i < bcnt; i++)
+            catch (Exception exception)
             {
-                customSkinningBoneRecords.Add(new TransformRecord(sdata.customSkinningSetting.skinningBones[i]));
+                Debug.LogException(exception);
+                result.SetError(Define.Result.ClothProcess_Exception);
             }
 
-            result.SetSuccess();
-            SetState(State_Valid, true);
-            SetState(State_InitComplete, true);
+            initProfiler.End();
 
-            // この時点でクロスコンポーネントが非アクティブの場合は破棄監視リストに登録する
-            if (cloth.isActiveAndEnabled == false)
-                MagicaManager.Team.AddMonitoringProcess(this);
-
-            Develop.DebugLog($"Init finish :{cloth.name}");
+            if (result.IsSuccess())
+                Develop.DebugLog($"Cloth Initialize Success! [{cloth.name}]");
+            else
+                Develop.DebugLogError($"Cloth Initialize failure! [{cloth.name}] : {result.GetResultString()}");
         }
 
         /// <summary>
@@ -128,7 +198,7 @@ namespace MagicaCloth2
         /// </summary>
         /// <param name="ren"></param>
         /// <returns>レンダー情報ハンドル</returns>
-        int AddRenderer(Renderer ren)
+        int AddRenderer(Renderer ren, RenderSetupData referenceSetupData, RenderSetupData.UniqueSerializationData referenceUniqueSetupData)
         {
             if (ren == null)
                 return 0;
@@ -139,7 +209,7 @@ namespace MagicaCloth2
             if (renderHandleList.Contains(handle) == false)
             {
                 // レンダラーの利用開始
-                handle = MagicaManager.Render.AddRenderer(ren);
+                handle = MagicaManager.Render.AddRenderer(ren, referenceSetupData, referenceUniqueSetupData);
                 if (handle != 0)
                 {
                     lock (lockObject)
@@ -159,7 +229,7 @@ namespace MagicaCloth2
         /// </summary>
         /// <param name="rootTransforms"></param>
         /// <param name="connectionMode"></param>
-        void AddBoneCloth(ClothType ctype, List<Transform> rootTransforms, List<Transform> collisionBones, RenderSetupData.BoneConnectionMode connectionMode)
+        void CreateBoneRenderSetupData(ClothType ctype, List<Transform> rootTransforms, List<Transform> collisionBones, RenderSetupData.BoneConnectionMode connectionMode)
         {
             // BoneCloth用のセットアップデータ作成
             boneClothSetupData = new RenderSetupData(
@@ -171,19 +241,6 @@ namespace MagicaCloth2
                 cloth.name
                 );
         }
-
-#if false
-        /// <summary>
-        /// セレクションデータハッシュとレンダラーハッシュを１つに結合したものを返す
-        /// </summary>
-        /// <param name="selectionHash"></param>
-        /// <param name="renderHash"></param>
-        /// <returns></returns>
-        int GetSelectionAndRenderMixHash(int selectionHash, int renderHash)
-        {
-            return selectionHash + renderHash;
-        }
-#endif
 
         /// <summary>
         /// 有効化
@@ -254,26 +311,24 @@ namespace MagicaCloth2
         /// <summary>
         /// 構築を開始し完了後に自動実行する
         /// </summary>
-        internal bool StartBuild()
+        internal bool StartRuntimeBuild()
         {
             // ビルド開始
             // -コンポーネントが有効であること
             // -初期化済みであること
             // -ビルドがまだ実行されていないこと
-            if (IsValid() && IsState(State_InitComplete) && IsState(State_Build) == false)
+            // -ベイクデータを利用しないこと
+            if (IsValid() && IsState(State_InitSuccess) && IsState(State_Build) == false && IsState(State_UsePreBuild) == false)
             {
                 result.SetProcess();
                 SetState(State_Build, true);
-                var _ = BuildAsync(cts.Token);
+                var _ = RuntimeBuildAsync(cts.Token);
                 return true;
             }
             else
             {
-                Develop.LogError($"Cloth build failure!: {cloth.name}");
-
-                // ビルド完了イベント
-                cloth?.OnBuildComplete?.Invoke(false);
-
+                result.SetError(Define.Result.CreateCloth_CanNotStart);
+                Develop.LogError($"Cloth runtime build failure! [{cloth.name}] : {result.GetResultString()}");
                 return false;
             }
         }
@@ -284,25 +339,42 @@ namespace MagicaCloth2
         /// <returns></returns>
         internal bool AutoBuild()
         {
-            if (IsState(State_DisableAutoBuild) == false)
-                return StartBuild();
+            bool ret;
+            bool buildComplate = true;
+
+            if (IsState(State_DisableAutoBuild))
+            {
+                ret = false;
+            }
             else
-                return false;
+            {
+                if (IsState(State_UsePreBuild))
+                    ret = PreBuildDataConstruction();
+                else
+                {
+                    ret = StartRuntimeBuild();
+                    if (ret)
+                        buildComplate = false; // OnBuildCompleteはランタイム構築後に呼ばれる
+                }
+            }
+
+            // ビルド完了イベント
+            if (buildComplate)
+                cloth?.OnBuildComplete?.Invoke(ret);
+
+            return ret;
         }
 
         /// <summary>
-        /// 構築タスク
+        /// 実行時構築タスク
         /// </summary>
         /// <param name="ct"></param>
         /// <returns></returns>
-        async Task BuildAsync(CancellationToken ct)
+        async Task RuntimeBuildAsync(CancellationToken ct)
         {
             isBuild = true;
             Develop.DebugLog($"Build start : {Name}");
             result.SetProcess();
-#if MC2_DEBUG
-            var span = new TimeSpan("Build Cloth");
-#endif
 
             // 作成されたレンダラー情報
             var renderMeshInfos = new List<RenderMeshInfo>();
@@ -389,13 +461,8 @@ namespace MagicaCloth2
                             }
                         }
 
-                        // セレクションデータ
-                        // ペイントマップ指定の場合は空で初期化
-                        //SelectionData selectionData = usePaintMap ? new SelectionData() : sdata2.selectionData;
-
                         // セレクションデータの有無
                         bool isValidSelection = selectionData?.IsValid() ?? false;
-                        //Develop.Log($"セレクションデータの有無:{isValidSelection}");
 
                         // MeshCloth/BoneClothで処理が一部異なる
                         if (clothType == ClothType.MeshCloth)
@@ -478,7 +545,7 @@ namespace MagicaCloth2
                                 var info = new RenderMeshInfo();
                                 //info.mixHash = mixHash;
                                 info.renderHandle = renderHandle;
-                                info.renderMesh = renderMesh;
+                                info.renderMeshContainer = new VirtualMeshContainer(renderMesh);
                                 renderMesh = null;
                                 renderMeshInfos.Add(info);
                             }
@@ -610,16 +677,6 @@ namespace MagicaCloth2
                         }
 
                         //--------------------------------------------------------------------
-#if false
-                    // pitch/yaw個別制限はv1.0では実装しないので一旦停止
-                    // 角度制限計算用回転を作成
-                    ct.ThrowIfCancellationRequested();
-                    proxyMesh.CreateAngleCalcLocalRotation(normalCalculation, normalCalculationCenter);
-                    if (proxyMesh.IsError)
-                        throw new InvalidOperationException();
-#endif
-
-                        //--------------------------------------------------------------------
                         // finish
                         ct.ThrowIfCancellationRequested();
                         if (proxyMesh.IsError)
@@ -637,7 +694,8 @@ namespace MagicaCloth2
                             foreach (var info in renderMeshInfos)
                             {
                                 ct.ThrowIfCancellationRequested();
-                                var vmesh = info.renderMesh;
+                                var cmesh = info.renderMeshContainer;
+                                var vmesh = cmesh.shareVirtualMesh;
                                 vmesh.Mapping(proxyMesh);
                                 if (vmesh.IsError)
                                 {
@@ -709,10 +767,6 @@ namespace MagicaCloth2
                 // パラメータ変更フラグ
                 SetState(State_ParameterDirty, true);
 
-                // 自チームと同期チームのデータ（コピー）
-                //var teamData = MagicaManager.Team.GetTeamData(TeamId);
-                //var syncTeamData = syncCloth != null ? MagicaManager.Team.GetTeamData(syncCloth.Process.TeamId) : default;
-
                 // ■スレッド
                 ct.ThrowIfCancellationRequested();
                 await Task.Run(() =>
@@ -747,12 +801,6 @@ namespace MagicaCloth2
                             throw new MagicaClothProcessingException();
                         }
 
-                        // セルフコリジョン２(SelfCollision2)
-                        //ct.ThrowIfCancellationRequested();
-                        //self2ConstraintData = SelfCollisionConstraint2.CreateData(TeamId, teamData, ProxyMesh, parameters, syncCloth?.Process?.TeamId ?? 0, syncTeamData, syncCloth?.Process?.ProxyMesh);
-                        //if (self2ConstraintData != null && self2ConstraintData.result.IsError())
-                        //    result = self2ConstraintData.result;
-
                         if (result.IsError())
                             throw new MagicaClothProcessingException();
                     }
@@ -782,7 +830,7 @@ namespace MagicaCloth2
                 lock (lockObject)
                 {
                     // ProxyMesh登録
-                    ProxyMesh = proxyMesh;
+                    ProxyMeshContainer = new VirtualMeshContainer(proxyMesh);
                     proxyMesh = null;
 
                     // チーム登録
@@ -794,7 +842,7 @@ namespace MagicaCloth2
                     }
 
                     // プロキシメッシュ登録
-                    MagicaManager.VMesh.RegisterProxyMesh(TeamId, ProxyMesh);
+                    MagicaManager.VMesh.RegisterProxyMesh(TeamId, ProxyMeshContainer);
                     MagicaManager.Simulation.RegisterProxyMesh(this);
 
                     // コライダー登録
@@ -812,17 +860,16 @@ namespace MagicaCloth2
                     {
                         foreach (var info in renderMeshInfos)
                         {
-                            if (info.renderMesh.IsError == false && info.renderMesh.IsMapping)
+                            var renderMesh = info.renderMeshContainer.shareVirtualMesh;
+
+                            if (renderMesh.IsError == false && renderMesh.IsMapping)
                             {
                                 // マッピングメッシュのデータ検証
                                 // ここまでの時間経過でRendererが消滅しているなどの状況があり得るため
-                                if (info.renderMesh.IsValid())
+                                if (renderMesh.IsValid())
                                 {
                                     // MappingMesh登録
-                                    info.mappingChunk = MagicaManager.VMesh.RegisterMappingMesh(TeamId, info.renderMesh);
-
-                                    // 完了
-                                    info.renderMesh.result.SetSuccess();
+                                    info.mappingChunk = MagicaManager.VMesh.RegisterMappingMesh(TeamId, info.renderMeshContainer);
 
                                     // コンポーネントがすでに有効状態ならば利用開始
                                     if (IsState(State_Enable))
@@ -846,7 +893,7 @@ namespace MagicaCloth2
                 // チームの有効状態の設定
                 MagicaManager.Team.SetEnable(TeamId, IsState(State_Enable));
 
-                // 初期化完了
+                // ビルド完了
                 result.SetSuccess();
                 SetState(State_Running, true);
 
@@ -874,7 +921,7 @@ namespace MagicaCloth2
                 // この時点でデータが存在する場合は失敗しているので破棄する
                 foreach (var info in renderMeshInfos)
                 {
-                    info?.renderMesh?.Dispose();
+                    info?.renderMeshContainer?.Dispose();
                 }
                 proxyMesh?.Dispose();
 
@@ -891,9 +938,6 @@ namespace MagicaCloth2
 
                 // ビルド完了
                 isBuild = false;
-#if MC2_DEBUG
-                span.DebugLog();
-#endif
 
                 // この時点でコンポーネントが削除されている場合は破棄する
                 if (isDestory)
@@ -903,6 +947,9 @@ namespace MagicaCloth2
                 }
                 else if (cloth != null)
                 {
+                    if (result.IsFaild())
+                        Develop.LogError($"Cloth runtime build failure! [{cloth.name}] : {result.GetResultString()}");
+
                     // ビルド完了イベント
                     cloth.OnBuildComplete?.Invoke(result.IsSuccess());
                 }
@@ -1112,12 +1159,193 @@ namespace MagicaCloth2
             return result;
         }
 
-
         //=========================================================================================
-        // 単体マッピング
-        // メモ
-        // ・レンダラーの情報はすべてスレッドローカルで作成して処理する
-        // ・成功した場合は最後に書き戻す
+        static readonly ProfilerMarker preBuildProfiler = new ProfilerMarker("ClothProcess.PreBuild");
+        static readonly ProfilerMarker preBuildDeserializationProfiler = new ProfilerMarker("ClothProcess.PreBuild.Deserialization");
+        static readonly ProfilerMarker preBuildRegistrationProfiler = new ProfilerMarker("ClothProcess.PreBuild.Registration");
+
+        /// <summary>
+        /// PreBuildデータによる即時構築
+        /// </summary>
+        /// <returns></returns>
+        internal bool PreBuildDataConstruction()
+        {
+            if (IsState(State_UsePreBuild) == false)
+                return false;
+            if (IsState(State_InitSuccess) == false)
+                return false;
+
+            // 構築開始
+            Develop.DebugLog($"Pre-Build start [{cloth.name}]");
+            preBuildProfiler.Begin();
+
+            result.SetProcess();
+            var sdata = cloth.SerializeData;
+            var sdata2 = cloth.GetSerializeData2();
+
+            VirtualMeshContainer proxyMeshContainer = null;
+            List<VirtualMeshContainer> renderMeshContainerList = new List<VirtualMeshContainer>();
+
+            try
+            {
+                // 固有部分データ
+                var uniquePreBuildData = sdata2.preBuildData.uniquePreBuildData;
+
+                // 共有部分データ
+                var preBuildDeserializeData = MagicaManager.PreBuild.GetPreBuildData(sdata2.preBuildData.GetSharePreBuildData());
+
+                try
+                {
+                    preBuildDeserializationProfiler.Begin();
+
+                    // ProxyMesh復元
+                    proxyMeshContainer = new VirtualMeshContainer(preBuildDeserializeData.proxyMesh);
+                    if (proxyMeshContainer.shareVirtualMesh.IsError)
+                    {
+                        result.Merge(proxyMeshContainer.shareVirtualMesh.result);
+                        throw new MagicaClothProcessingException();
+                    }
+                    proxyMeshContainer.uniqueData = uniquePreBuildData.proxyMesh;
+
+                    // RenderMesh復元
+                    for (int i = 0; i < preBuildDeserializeData.renderMeshList.Count; i++)
+                    {
+                        var renderMeshContainer = new VirtualMeshContainer(preBuildDeserializeData.renderMeshList[i]);
+                        renderMeshContainerList.Add(renderMeshContainer);
+                        if (renderMeshContainer.shareVirtualMesh.IsError)
+                        {
+                            result.Merge(renderMeshContainer.shareVirtualMesh.result);
+                            throw new MagicaClothProcessingException();
+                        }
+                        renderMeshContainer.uniqueData = uniquePreBuildData.renderMeshList[i];
+                    }
+
+                    // 制約データ復元
+                    inertiaConstraintData = preBuildDeserializeData.inertiaConstraintData;
+                    distanceConstraintData = preBuildDeserializeData.distanceConstraintData;
+                    bendingConstraintData = preBuildDeserializeData.bendingConstraintData;
+                }
+                catch
+                {
+                    throw;
+                }
+                finally
+                {
+                    preBuildDeserializationProfiler.End();
+                }
+
+                // パラメータ変更フラグ
+                SetState(State_ParameterDirty, true);
+
+                // 登録
+                try
+                {
+                    preBuildRegistrationProfiler.Begin();
+
+                    // ProxyMesh登録
+                    ProxyMeshContainer = proxyMeshContainer;
+                    proxyMeshContainer = null;
+
+                    // チーム登録
+                    TeamId = MagicaManager.Cloth.AddCloth(this, parameters);
+                    if (TeamId <= 0)
+                    {
+                        result.SetError(Define.Result.ClothProcess_OverflowTeamCount4096);
+                        throw new MagicaClothProcessingException();
+                    }
+
+                    // プロキシメッシュ登録
+                    MagicaManager.VMesh.RegisterProxyMesh(TeamId, ProxyMeshContainer);
+                    MagicaManager.Simulation.RegisterProxyMesh(this);
+
+                    // コライダー登録
+                    MagicaManager.Collider.Register(this);
+
+                    // 制約データ登録
+                    MagicaManager.Simulation.RegisterConstraint(this);
+
+                    // マッピングメッシュ登録
+                    for (int i = 0; i < renderMeshContainerList.Count; i++)
+                    {
+                        var renderMeshContainer = renderMeshContainerList[i];
+                        var renderMesh = renderMeshContainer.shareVirtualMesh;
+                        if (renderMesh.IsError == false && renderMesh.IsMapping && renderMesh.IsValid())
+                        {
+                            renderMeshContainerList[i] = null;
+
+                            // レンダーハンドル
+                            int renderHandle = renderHandleList[i];
+
+                            // MappingMesh登録
+                            var mappingChunk = MagicaManager.VMesh.RegisterMappingMesh(TeamId, renderMeshContainer);
+
+                            // コンポーネントがすでに有効状態ならば利用開始
+                            if (IsState(State_Enable))
+                            {
+                                MagicaManager.Render.StartUse(this, renderHandle);
+                            }
+
+                            // 完了
+                            renderMesh.result.SetSuccess();
+
+                            // レンダラー情報を登録
+                            var info = new RenderMeshInfo()
+                            {
+                                renderHandle = renderHandle,
+                                renderMeshContainer = renderMeshContainer,
+                                mappingChunk = mappingChunk,
+                            };
+                            renderMeshInfoList.Add(info);
+                        }
+                    }
+
+                    // チームの有効状態の設定
+                    MagicaManager.Team.SetEnable(TeamId, IsState(State_Enable));
+                }
+                catch
+                {
+                    throw;
+                }
+                finally
+                {
+                    preBuildRegistrationProfiler.End();
+                }
+
+                // ビルド完了
+                result.SetSuccess();
+                SetState(State_Running, true);
+            }
+            catch (MagicaClothProcessingException)
+            {
+                if (result.IsError() == false)
+                    result.SetError(Define.Result.PreBuild_UnknownError);
+                result.DebugLog();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                result.SetError(Define.Result.PreBuild_Exception);
+            }
+            finally
+            {
+                // この時点でデータが存在する場合は失敗しているので破棄する
+                renderMeshContainerList.ForEach(x => x?.Dispose());
+                renderMeshContainerList.Clear();
+                proxyMeshContainer?.Dispose();
+
+                // ビルド完了
+                //Develop.DebugLog($"PreBuild Construction Complate.[{cloth.name}] result:{result.GetResultString()}");
+                if (result.IsFaild())
+                    Develop.LogError($"Cloth Pre-Build construction failure! [{cloth.name}] : {result.GetResultString()}");
+                else
+                    Develop.DebugLog($"Cloth Pre-Build Success! [{cloth.name}]");
+            }
+
+            preBuildProfiler.End();
+
+            return result.IsSuccess();
+        }
+
 
         //=========================================================================================
         /// <summary>
@@ -1140,18 +1368,19 @@ namespace MagicaCloth2
 
             // 連動アニメーター更新
             if (cullingSettings.cameraCullingMode == CullingSettings.CameraCullingMode.AnimatorLinkage
-                || cullingSettings.cameraCullingMethod == CullingSettings.CameraCullingMethod.AutomaticRenderer)
+                || cullingSettings.cameraCullingMethod == CullingSettings.CameraCullingMethod.AutomaticRenderer
+                || cloth.SerializeData.updateMode == ClothUpdateMode.AnimatorLinkage)
             {
-                cullingAnimator = cloth.GetComponentInParent<Animator>();
+                interlockingAnimator = cloth.GetComponentInParent<Animator>();
             }
 
             // 連動レンダラー更新
-            if (cullingSettings.cameraCullingMethod == CullingSettings.CameraCullingMethod.AutomaticRenderer && cullingAnimator)
+            if (cullingSettings.cameraCullingMethod == CullingSettings.CameraCullingMethod.AutomaticRenderer && interlockingAnimator)
             {
                 // ★GetComponentsInChildrenのコストはキャラクタ100体で1msほど。
                 // ★もしコストが問題となるようならばキャッシュする
-                cullingAnimatorRenderers.Clear();
-                cullingAnimator.GetComponentsInChildren<Renderer>(cullingAnimatorRenderers);
+                interlockingAnimatorRenderers.Clear();
+                interlockingAnimator.GetComponentsInChildren<Renderer>(interlockingAnimatorRenderers);
             }
         }
 

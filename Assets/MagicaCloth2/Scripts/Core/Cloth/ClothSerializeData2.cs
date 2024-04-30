@@ -11,7 +11,7 @@ namespace MagicaCloth2
     /// Parts that cannot be exported externally.
     /// </summary>
     [System.Serializable]
-    public class ClothSerializeData2 : IDataValidate, IValid
+    public class ClothSerializeData2 : IDataValidate, IValid, ITransform
     {
         /// <summary>
         /// 頂点ペイントデータ
@@ -27,6 +27,11 @@ namespace MagicaCloth2
         /// When creating BoneCloth/BoneSpring at runtime, you can store Transform and vertex attribute pairs in this dictionary and use it instead of vertex paint data.
         /// </summary>
         public Dictionary<Transform, VertexAttribute> boneAttributeDict = new Dictionary<Transform, VertexAttribute>();
+
+        /// <summary>
+        /// PreBuild Data.
+        /// </summary>
+        public PreBuildSerializeData preBuildData = new PreBuildSerializeData();
 
         //=========================================================================================
         public ClothSerializeData2()
@@ -56,6 +61,16 @@ namespace MagicaCloth2
         {
             int hash = 0;
             return hash;
+        }
+
+        public void GetUsedTransform(HashSet<Transform> transformSet)
+        {
+            preBuildData.GetUsedTransform(transformSet);
+        }
+
+        public void ReplaceTransform(Dictionary<int, Transform> replaceDict)
+        {
+            preBuildData.ReplaceTransform(replaceDict);
         }
     }
 }

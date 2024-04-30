@@ -22,6 +22,8 @@ namespace MagicaCloth2
 
         public ResultCode result = new ResultCode();
 
+        public bool isManaged; // PreBuild DeserializeManager管理
+
         /// <summary>
         /// メッシュタイプ
         /// </summary>
@@ -360,26 +362,34 @@ namespace MagicaCloth2
         public int mappingId;
 
         //=========================================================================================
-        public VirtualMesh()
+        public VirtualMesh() { }
+
+        public VirtualMesh(bool initialize)
         {
-            transformData = new TransformData();
+            if (initialize)
+            {
+                transformData = new TransformData(100);
 
-            // 最小限のデータ
-            averageVertexDistance = new NativeReference<float>(0.0f, Allocator.Persistent);
-            maxVertexDistance = new NativeReference<float>(0.0f, Allocator.Persistent);
+                // 最小限のデータ
+                averageVertexDistance = new NativeReference<float>(0.0f, Allocator.Persistent);
+                maxVertexDistance = new NativeReference<float>(0.0f, Allocator.Persistent);
 
-
-            // 作業中にしておく
-            result.SetProcess();
+                // 作業中にしておく
+                result.SetProcess();
+            }
         }
 
-        public VirtualMesh(string name) : this()
+        public VirtualMesh(string name) : this(true)
         {
             this.name = name;
         }
 
         public void Dispose()
         {
+            // PreBuild DeserializeManager管理中は破棄させない
+            if (isManaged)
+                return;
+
             result.Clear();
             referenceIndices.Dispose();
             attributes.Dispose();
@@ -471,7 +481,8 @@ namespace MagicaCloth2
                 return false;
 
             // レンダラーが存在する場合はその存在を確認する
-            if (centerTransformIndex >= 0 && transformData.GetTransformFromIndex(centerTransformIndex) == null)
+            // ただしPreBuildではtransformListは空なのでスキップする
+            if (centerTransformIndex >= 0 && transformData.IsEmpty == false && transformData.GetTransformFromIndex(centerTransformIndex) == null)
                 return false;
 
             return true;
@@ -483,23 +494,38 @@ namespace MagicaCloth2
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine($"===== {name} =====");
-            sb.Append($"Result:{result}");
-            sb.Append($", Type:{meshType}");
-            sb.Append($", Vertex:{VertexCount}");
-            sb.Append($", Line:{LineCount}");
-            sb.Append($", Triangle:{TriangleCount}");
-            sb.Append($", Edge:{EdgeCount}");
-            sb.Append($", SkinBone:{SkinBoneCount}");
-            sb.Append($", Transform:{transformData?.Count}");
-            sb.Append($", BaseLine:{BaseLineCount}");
+            sb.AppendLine($"Result:{result.GetResultString()}");
+            sb.AppendLine($"Type:{meshType}");
+            sb.AppendLine($"Vertex:{VertexCount}");
+            sb.AppendLine($"Line:{LineCount}");
+            sb.AppendLine($"Triangle:{TriangleCount}");
+            sb.AppendLine($"Edge:{EdgeCount}");
+            sb.AppendLine($"SkinBone:{SkinBoneCount}");
+            sb.AppendLine($"Transform:{TransformCount}");
+            if (averageVertexDistance.IsCreated)
+                sb.AppendLine($"avgDist:{averageVertexDistance.Value}");
+            if (maxVertexDistance.IsCreated)
+                sb.AppendLine($"maxDist:{maxVertexDistance.Value}");
+            if (boundingBox.IsCreated)
+                sb.AppendLine($"AABB:{boundingBox.Value}");
             sb.AppendLine();
 
-            if (averageVertexDistance.IsCreated)
-                sb.Append($"avgDist:{averageVertexDistance.Value}");
-            if (maxVertexDistance.IsCreated)
-                sb.Append($", maxDist:{maxVertexDistance.Value}");
-            if (boundingBox.IsCreated)
-                sb.Append($", AABB:{boundingBox.Value}");
+            sb.AppendLine($"<<< Proxy >>>");
+            sb.AppendLine($"BaseLine:{BaseLineCount}");
+            sb.AppendLine($"EdgeCount:{EdgeCount}");
+            int edgeToTrianglesCnt = edgeToTriangles.IsCreated ? edgeToTriangles.Count() : 0;
+            sb.AppendLine($"edgeToTriangles:{edgeToTrianglesCnt}");
+            sb.AppendLine($"CustomSkinningBoneCount:{CustomSkinningBoneCount}");
+            sb.AppendLine($"CenterFixedPointCount:{CenterFixedPointCount}");
+            sb.AppendLine($"NormalAdjustmentRotationCount:{NormalAdjustmentRotationCount}");
+            sb.AppendLine();
+
+            sb.AppendLine($"<<< Mapping >>>");
+            sb.AppendLine($"centerWorldPosition:{centerWorldPosition}");
+            sb.AppendLine();
+
+            //sb.AppendLine($"<<< TransformData >>>");
+            sb.AppendLine(transformData?.ToString() ?? "(none)");
             sb.AppendLine();
 
             return sb.ToString();

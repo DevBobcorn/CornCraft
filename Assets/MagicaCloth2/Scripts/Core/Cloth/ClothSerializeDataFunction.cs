@@ -107,10 +107,12 @@ namespace MagicaCloth2
         /// <returns></returns>
         public override int GetHashCode()
         {
+            const int NullHash = -3910836;
+
             int hash = 0;
             hash += (int)clothType;
             foreach (var ren in sourceRenderers)
-                hash += ren?.GetInstanceID() ?? 0;
+                hash += ren?.GetInstanceID() ?? NullHash;
             foreach (var t in rootBones)
             {
                 var stack = new Stack<Transform>(30);
@@ -119,7 +121,10 @@ namespace MagicaCloth2
                 {
                     var t2 = stack.Pop();
                     if (t2 == null)
+                    {
+                        hash += NullHash;
                         continue;
+                    }
                     hash += t2.GetInstanceID();
                     hash += t2.localPosition.GetHashCode();
                     hash += t2.localRotation.GetHashCode();
@@ -207,6 +212,8 @@ namespace MagicaCloth2
             CullingSettings.CameraCullingMode cullingMode;
             CullingSettings.CameraCullingMethod cullingMethod;
             List<Renderer> cullingRenderers;
+            Transform anchor;
+            float anchorInertia;
 
             internal TempBuffer(ClothSerializeData sdata)
             {
@@ -237,6 +244,8 @@ namespace MagicaCloth2
                 cullingMode = sdata.cullingSettings.cameraCullingMode;
                 cullingMethod = sdata.cullingSettings.cameraCullingMethod;
                 cullingRenderers = new List<Renderer>(sdata.cullingSettings.cameraCullingRenderers);
+                anchor = sdata.inertiaConstraint.anchor;
+                anchorInertia = sdata.inertiaConstraint.anchorInertia;
             }
 
             internal void Pop(ClothSerializeData sdata)
@@ -263,6 +272,8 @@ namespace MagicaCloth2
                 sdata.cullingSettings.cameraCullingMode = cullingMode;
                 sdata.cullingSettings.cameraCullingMethod = cullingMethod;
                 sdata.cullingSettings.cameraCullingRenderers = cullingRenderers;
+                sdata.inertiaConstraint.anchor = anchor;
+                sdata.inertiaConstraint.anchorInertia = anchorInertia;
             }
         }
 

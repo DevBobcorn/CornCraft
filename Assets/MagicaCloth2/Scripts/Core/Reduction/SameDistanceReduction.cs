@@ -26,7 +26,8 @@ namespace MagicaCloth2
 
         //=========================================================================================
         GridMap<int> gridMap;
-        NativeParallelHashSet<int2> joinPairSet;
+        //NativeParallelHashSet<int2> joinPairSet;
+        NativeParallelMultiHashMap<ushort, ushort> joinPairMap;
         NativeReference<int> resultRef;
 
         //=========================================================================================
@@ -48,8 +49,10 @@ namespace MagicaCloth2
 
         public virtual void Dispose()
         {
-            if (joinPairSet.IsCreated)
-                joinPairSet.Dispose();
+            //if (joinPairSet.IsCreated)
+            //    joinPairSet.Dispose();
+            if (joinPairMap.IsCreated)
+                joinPairMap.Dispose();
             if (resultRef.IsCreated)
                 resultRef.Dispose();
             gridMap?.Dispose();
@@ -77,7 +80,8 @@ namespace MagicaCloth2
 
                 // 頂点ごとの接続マップ
                 // インデックスが若い方が記録する
-                joinPairSet = new NativeParallelHashSet<int2>(vmesh.VertexCount / 4, Allocator.Persistent);
+                //joinPairSet = new NativeParallelHashSet<int2>(vmesh.VertexCount / 4, Allocator.Persistent);
+                joinPairMap = new NativeParallelMultiHashMap<ushort, ushort>(vmesh.VertexCount, Allocator.Persistent);
                 resultRef = new NativeReference<int>(Allocator.Persistent);
 
                 // ポイントをグリッドに登録
@@ -100,14 +104,18 @@ namespace MagicaCloth2
                     localPositions = vmesh.localPositions.GetNativeArray(),
                     joinIndices = workData.vertexJoinIndices,
                     gridMap = gridMap.GetMultiHashMap(),
-                    joinPairSet = joinPairSet,
+                    //joinPairSet = joinPairSet,
+                    joinPairMap = joinPairMap,
                 };
                 searchJoinJob.Run();
 
                 // 結合する
+#if false
                 var joinJob = new JoinJob()
                 {
-                    joinPairSet = joinPairSet,
+                    vertexCount = vmesh.VertexCount,
+                    //joinPairSet = joinPairSet,
+                    joinPairMap = joinPairMap,
                     joinIndices = workData.vertexJoinIndices,
                     vertexToVertexMap = workData.vertexToVertexMap,
                     boneWeights = vmesh.boneWeights.GetNativeArray(),
@@ -115,6 +123,25 @@ namespace MagicaCloth2
                     result = resultRef,
                 };
                 joinJob.Run();
+#endif
+#if true
+                // 高速化および詳細メッシュがある場合に１つの頂点に大量に結合しオーバーフローが発生する問題を回避したもの
+                // 以前はA->B->C結合時にA->C間が接続距離以上でもA->Cが結合されてしまったが、この改良版ではそれがおこならない
+                // そのため以前とは結果がことなることに注意！
+                using var tempList = new NativeList<ushort>(2048, Allocator.Persistent);
+                var joinJob2 = new JoinJob2()
+                {
+                    vertexCount = vmesh.VertexCount,
+                    joinPairMap = joinPairMap,
+                    joinIndices = workData.vertexJoinIndices,
+                    vertexToVertexMap = workData.vertexToVertexMap,
+                    boneWeights = vmesh.boneWeights.GetNativeArray(),
+                    attributes = vmesh.attributes.GetNativeArray(),
+                    result = resultRef,
+                    tempList = tempList,
+                };
+                joinJob2.Run();
+#endif
 
                 // 頂点の接続状態を最新に更新する。すべて最新の生存ポイントを指すように変更する
                 UpdateJoinAndLink();
@@ -191,7 +218,8 @@ namespace MagicaCloth2
             [Unity.Collections.ReadOnly]
             public NativeParallelMultiHashMap<int3, int> gridMap;
 
-            public NativeParallelHashSet<int2> joinPairSet;
+            //public NativeParallelHashSet<int2> joinPairSet;
+            public NativeParallelMultiHashMap<ushort, ushort> joinPairMap;
 
             public void Execute()
             {
@@ -222,14 +250,91 @@ namespace MagicaCloth2
                                 continue;
 
                             // 結合登録
-                            int2 ehash = DataUtility.PackInt2(vindex, tvindex);
-                            joinPairSet.Add(ehash);
+                            //int2 ehash = DataUtility.PackInt2(vindex, tvindex);
+                            //joinPairSet.Add(ehash);
+                            joinPairMap.Add((ushort)vindex, (ushort)tvindex);
                         }
                     }
                 }
             }
         }
 
+        [BurstCompile]
+        struct JoinJob2 : IJob
+        {
+            public int vertexCount;
+
+            [Unity.Collections.ReadOnly]
+            public NativeParallelMultiHashMap<ushort, ushort> joinPairMap;
+
+            public NativeArray<int> joinIndices;
+            public NativeParallelMultiHashMap<ushort, ushort> vertexToVertexMap;
+            public NativeArray<VirtualMeshBoneWeight> boneWeights;
+            public NativeArray<VertexAttribute> attributes;
+            public NativeReference<int> result;
+
+            public NativeList<ushort> tempList;
+
+            public void Execute()
+            {
+                int cnt = 0;
+
+                for (ushort vindexLive = 0; vindexLive < vertexCount; vindexLive++)
+                {
+                    // すでに結合済みならスキップ
+                    if (joinIndices[vindexLive] >= 0)
+                        continue;
+
+                    // 対象ループ
+                    foreach (ushort vindexDead in joinPairMap.GetValuesForKey(vindexLive))
+                    {
+                        // 対象がすでに結合ずみならスキップ
+                        if (joinIndices[vindexDead] >= 0)
+                            continue;
+
+                        // 結合(vertexDead -> vertexLive)
+                        joinIndices[vindexDead] = vindexLive;
+                        cnt++;
+
+                        vertexToVertexMap.MC2RemoveValue(vindexLive, vindexDead);
+
+                        tempList.Clear();
+                        foreach (ushort i in vertexToVertexMap.GetValuesForKey(vindexDead))
+                        {
+                            tempList.Add(i);
+                        }
+                        foreach (ushort i in tempList)
+                        {
+                            if (joinIndices[i] >= 0)
+                                continue;
+                            if (i == vindexLive || i == vindexDead)
+                                continue;
+
+                            vertexToVertexMap.MC2RemoveValue(i, vindexDead);
+
+                            vertexToVertexMap.MC2UniqueAdd(vindexLive, i);
+                            vertexToVertexMap.MC2UniqueAdd(i, vindexLive);
+
+                            // p2にBoneWeightを結合
+                            var bw = boneWeights[vindexLive];
+                            bw.AddWeight(boneWeights[vindexDead]);
+                            boneWeights[vindexLive] = bw;
+
+                            // 属性
+                            var attr1 = attributes[vindexDead];
+                            var attr2 = attributes[vindexLive];
+                            attributes[vindexLive] = VertexAttribute.JoinAttribute(attr1, attr2);
+                            attributes[vindexDead] = VertexAttribute.Invalid; // 削除頂点は無効にする
+                        }
+                    }
+                }
+
+                // 削除頂点数記録
+                result.Value = cnt;
+            }
+        }
+
+#if false // old
         [BurstCompile]
         struct JoinJob : IJob
         {
@@ -245,32 +350,31 @@ namespace MagicaCloth2
             public void Execute()
             {
                 var workSet = new FixedList512Bytes<ushort>();
-
                 int cnt = 0;
+
                 foreach (var ehash in joinPairSet)
                 {
-                    int vindex2 = ehash[0]; // 生存側
-                    int vindex1 = ehash[1]; // 削除側
+                    int vindexLive = ehash[0]; // 生存側
+                    int vindexDead = ehash[1]; // 削除側
 
-                    // 両方とも生存インデックスに変換する
-                    while (joinIndices[vindex1] >= 0)
+                    while (joinIndices[vindexDead] >= 0)
                     {
-                        vindex1 = joinIndices[vindex1];
+                        vindexDead = joinIndices[vindexDead];
                     }
-                    while (joinIndices[vindex2] >= 0)
+                    while (joinIndices[vindexLive] >= 0)
                     {
-                        vindex2 = joinIndices[vindex2];
+                        vindexLive = joinIndices[vindexLive];
                     }
-                    if (vindex1 == vindex2)
+                    if (vindexDead == vindexLive)
                         continue;
 
                     // 結合(vertex1 -> vertex2)
-                    joinIndices[vindex1] = vindex2;
+                    joinIndices[vindexDead] = vindexLive;
                     cnt++;
 
                     // 接続数を結合する（重複は弾かれる）
                     workSet.Clear();
-                    foreach (ushort i in vertexToVertexMap.GetValuesForKey((ushort)vindex1))
+                    foreach (ushort i in vertexToVertexMap.GetValuesForKey((ushort)vindexDead))
                     {
                         int index = i;
                         // 生存インデックス
@@ -278,10 +382,10 @@ namespace MagicaCloth2
                         {
                             index = joinIndices[index];
                         }
-                        if (index != vindex1 && index != vindex2)
-                            workSet.Set((ushort)index);
+                        if (index != vindexDead && index != vindexLive)
+                            workSet.MC2Set((ushort)index);
                     }
-                    foreach (ushort i in vertexToVertexMap.GetValuesForKey((ushort)vindex2))
+                    foreach (ushort i in vertexToVertexMap.GetValuesForKey((ushort)vindexLive))
                     {
                         int index = i;
                         // 生存インデックス
@@ -289,32 +393,33 @@ namespace MagicaCloth2
                         {
                             index = joinIndices[index];
                         }
-                        if (index != vindex1 && index != vindex2)
-                            workSet.Set((ushort)index);
+                        if (index != vindexDead && index != vindexLive)
+                            workSet.MC2Set((ushort)index);
                     }
-                    vertexToVertexMap.Remove((ushort)vindex2);
+                    vertexToVertexMap.Remove((ushort)vindexLive);
                     for (int i = 0; i < workSet.Length; i++)
                     {
-                        vertexToVertexMap.Add((ushort)vindex2, workSet[i]);
+                        vertexToVertexMap.Add((ushort)vindexLive, workSet[i]);
                     }
                     //Debug.Assert(workSet.Length > 0);
 
                     // p2にBoneWeightを結合
-                    var bw = boneWeights[vindex2];
-                    bw.AddWeight(boneWeights[vindex1]);
-                    boneWeights[vindex2] = bw;
+                    var bw = boneWeights[vindexLive];
+                    bw.AddWeight(boneWeights[vindexDead]);
+                    boneWeights[vindexLive] = bw;
 
                     // 属性
-                    var attr1 = attributes[vindex1];
-                    var attr2 = attributes[vindex2];
-                    attributes[vindex2] = VertexAttribute.JoinAttribute(attr1, attr2);
-                    attributes[vindex1] = VertexAttribute.Invalid; // 削除頂点は無効にする
+                    var attr1 = attributes[vindexDead];
+                    var attr2 = attributes[vindexLive];
+                    attributes[vindexLive] = VertexAttribute.JoinAttribute(attr1, attr2);
+                    attributes[vindexDead] = VertexAttribute.Invalid; // 削除頂点は無効にする
                 }
 
                 // 削除頂点数記録
                 result.Value = cnt;
             }
         }
+#endif
 
         //=========================================================================================
         /// <summary>
@@ -395,7 +500,7 @@ namespace MagicaCloth2
                     if (tvindex == vindex)
                         continue;
 
-                    newLinkSet.Set((ushort)tvindex);
+                    newLinkSet.MC2Set((ushort)tvindex);
                 }
                 // 生存のみの新しいセットに入れ替え
                 vertexToVertexMap.Remove((ushort)vindex);

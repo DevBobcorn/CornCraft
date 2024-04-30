@@ -3,6 +3,7 @@
 // https://magicasoft.jp
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -16,7 +17,7 @@ namespace MagicaCloth2
     /// TransformAccessArrayを中心とした一連のTransform管理クラス
     /// スレッドで利用できるように様々な工夫を行っている
     /// </summary>
-    public class TransformData : IDisposable
+    public partial class TransformData : IDisposable
     {
         internal List<Transform> transformList;
 
@@ -101,10 +102,7 @@ namespace MagicaCloth2
         Queue<int> emptyStack;
 
         //=========================================================================================
-        public TransformData()
-        {
-            Init(100);
-        }
+        public TransformData() { }
 
         public TransformData(int capacity)
         {
@@ -133,7 +131,7 @@ namespace MagicaCloth2
 
         public void Dispose()
         {
-            transformList.Clear();
+            transformList?.Clear();
             idArray?.Dispose();
             parentIdArray?.Dispose();
             flagArray?.Dispose();
@@ -145,15 +143,11 @@ namespace MagicaCloth2
             localPositionArray?.Dispose();
             localRotationArray?.Dispose();
             inverseRotationArray?.Dispose();
-            emptyStack.Clear();
+            emptyStack?.Clear();
 
             // transformAccessArrayはメインスレッドのみ
             if (transformAccessArray.isCreated)
             {
-                //if (MagicaManager.Discard != null)
-                //    MagicaManager.Discard.AddMain(transformAccessArray);
-                //else
-                //    transformAccessArray.Dispose();
                 transformAccessArray.Dispose();
             }
         }
@@ -161,6 +155,7 @@ namespace MagicaCloth2
         public int Count => transformList.Count;
         public int RootCount => rootIdList?.Count ?? 0;
         public bool IsDirty => isDirty;
+        public bool IsEmpty => transformList == null;
 
         //=========================================================================================
         /// <summary>
@@ -950,6 +945,20 @@ namespace MagicaCloth2
         public float4x4 GetWorldToLocalMatrix(int index)
         {
             return math.inverse(GetLocalToWorldMatrix(index));
+        }
+
+        //=========================================================================================
+        public override string ToString()
+        {
+            int transformListCount = transformList?.Count ?? 0;
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("==== TransformData ====");
+            sb.AppendLine($"isDirty:{isDirty}");
+            sb.AppendLine($"transformList:{transformListCount}");
+            sb.AppendLine($"flagArray:{flagArray.Length}");
+
+            return sb.ToString();
         }
     }
 }

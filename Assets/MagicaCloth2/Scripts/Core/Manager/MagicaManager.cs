@@ -40,6 +40,7 @@ namespace MagicaCloth2
         public static SimulationManager Simulation => managers?[6] as SimulationManager;
         public static ColliderManager Collider => managers?[7] as ColliderManager;
         public static WindManager Wind => managers?[8] as WindManager;
+        public static PreBuildManager PreBuild => managers?[9] as PreBuildManager;
 
         //=========================================================================================
         // player loop delegate
@@ -91,8 +92,6 @@ namespace MagicaCloth2
         //=========================================================================================
         static volatile bool isPlaying = false;
 
-        //static bool isValid = false;
-
         //=========================================================================================
         /// <summary>
         /// Reload Domain 対策
@@ -122,6 +121,7 @@ namespace MagicaCloth2
             managers.Add(new SimulationManager()); // [6]
             managers.Add(new ColliderManager()); // [7]
             managers.Add(new WindManager()); // [8]
+            managers.Add(new PreBuildManager()); // [9]
             foreach (var manager in managers)
                 manager.Initialize();
 

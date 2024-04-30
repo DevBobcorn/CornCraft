@@ -34,6 +34,8 @@ namespace MagicaCloth2
         public const int Flag_CullingKeep = 12; // カリング時に姿勢を保つ
         public const int Flag_Spring = 13; // Spring利用
         public const int Flag_SkipWriting = 14; // 書き込み停止（ストップモーション用）
+        public const int Flag_Anchor = 15; // Inertia anchorを利用中
+        public const int Flag_AnchorReset = 16; // Inertia anchorの座標リセット
 
         // 以下セルフコリジョン
         // !これ以降の順番を変えないこと
@@ -80,6 +82,9 @@ namespace MagicaCloth2
             /// </summary>
             //public int frequency;
 
+            /// <summary>
+            /// 現在フレームの更新時間
+            /// </summary>
             public float frameDeltaTime;
 
             /// <summary>
@@ -118,9 +123,20 @@ namespace MagicaCloth2
             public float timeScale;
 
             /// <summary>
+            /// チームの最終計算用タイムスケール(0.0~1.0)
+            /// グローバルタイムスケールなどを考慮した値
+            /// </summary>
+            public float nowTimeScale;
+
+            /// <summary>
             /// 今回のチーム更新回数（０ならばこのフレームは更新なし）
             /// </summary>
             public int updateCount;
+
+            /// <summary>
+            /// 今回のチーム更新スキップ回数（１以上ならばシミュレーションスキップが発生）
+            /// </summary>
+            public int skipCount;
 
             /// <summary>
             /// ステップごとのフレームに対するnowUpdateTime割合
@@ -144,7 +160,12 @@ namespace MagicaCloth2
             /// <summary>
             /// 現在の中心ワールド座標（この値はCenterData.nowWorldPositionのコピー）
             /// </summary>
-            public float3 centerWorldPosition;
+            //public float3 centerWorldPosition;
+
+            /// <summary>
+            /// アンカーとして設定されているTransformのインスタンスID(0=なし)
+            /// </summary>
+            public int anchorTransformId;
 
             /// <summary>
             /// チームスケール
@@ -663,7 +684,7 @@ namespace MagicaCloth2
             team.timeScale = 1.0f;
             team.initScale = cprocess.clothTransformRecord.scale; // 初期スケール
             team.scaleRatio = 1.0f;
-            team.centerWorldPosition = cprocess.clothTransformRecord.position;
+            //team.centerWorldPosition = cprocess.clothTransformRecord.position;
             team.animationPoseRatio = cprocess.cloth.SerializeData.animationPoseRatio;
             var c = teamDataArray.Add(team);
             int teamId = c.startIndex;
@@ -690,7 +711,7 @@ namespace MagicaCloth2
             // 慣性制約
             // 初期化時のセンターローカル位置を初期化
             var cdata = new InertiaConstraint.CenterData();
-            cdata.frameLocalPosition = cprocess.ProxyMesh.localCenterPosition.Value;
+            cdata.frameLocalPosition = cprocess.ProxyMeshContainer.shareVirtualMesh.localCenterPosition.Value;
             centerDataArray.Add(cdata);
 
             clothProcessDict.Add(teamId, cprocess);
@@ -852,9 +873,9 @@ namespace MagicaCloth2
                 var cullingMode = jugeSettings.cameraCullingMode;
                 if (cullingMode == CullingSettings.CameraCullingMode.AnimatorLinkage)
                 {
-                    if (jugeProcess.cullingAnimator)
+                    if (jugeProcess.interlockingAnimator)
                     {
-                        switch (jugeProcess.cullingAnimator.cullingMode)
+                        switch (jugeProcess.interlockingAnimator.cullingMode)
                         {
                             case AnimatorCullingMode.AlwaysAnimate:
                                 cullingMode = CullingSettings.CameraCullingMode.Off;
@@ -883,8 +904,8 @@ namespace MagicaCloth2
                     List<Renderer> jugeRenderers = jugeSettings.cameraCullingRenderers;
                     if (jugeSettings.cameraCullingMethod == CullingSettings.CameraCullingMethod.AutomaticRenderer)
                     {
-                        jugeAnimator = jugeCloth.Process.cullingAnimator;
-                        jugeRenderers = jugeCloth.Process.cullingAnimatorRenderers;
+                        jugeAnimator = jugeCloth.Process.interlockingAnimator;
+                        jugeRenderers = jugeCloth.Process.interlockingAnimatorRenderers;
                     }
 
                     // レンダラー判定
@@ -930,6 +951,11 @@ namespace MagicaCloth2
 
         //=========================================================================================
         /// <summary>
+        /// チーム更新後処理用作業リスト
+        /// </summary>
+        List<ClothProcess> workPostProcessList = new List<ClothProcess>(256);
+
+        /// <summary>
         /// 毎フレーム常に実行するチーム更新
         /// - 時間の更新と実行回数の算出
         /// </summary>
@@ -939,6 +965,7 @@ namespace MagicaCloth2
             edgeColliderCollisionCount = 0;
 
             // ジョブでは実行できないチーム更新
+            workPostProcessList.Clear();
             var clothSet = MagicaManager.Cloth.clothSet;
             foreach (var cprocess in clothSet)
             {
@@ -1036,6 +1063,7 @@ namespace MagicaCloth2
                             c = c.SyncCloth;
                     }
                 }
+                cprocess.SyncCloth = syncCloth;
                 tdata.syncTeamId = syncCloth != null ? syncCloth.Process.TeamId : 0;
                 tdata.flag.SetBits(Flag_Synchronization, tdata.syncTeamId != 0);
                 tdata.syncCenterTransformIndex = 0;
@@ -1094,13 +1122,16 @@ namespace MagicaCloth2
                         tdata.timeScale = syncTeamData.timeScale;
                         tdata.updateCount = syncTeamData.updateCount;
                         tdata.frameInterpolation = syncTeamData.frameInterpolation;
+                        tdata.skipCount = syncTeamData.skipCount;
                         //Develop.DebugLog($"Team time sync:{teamId}->{syncCloth.Process.TeamId}");
                     }
 
                     // パラメータ同期
                     // 同期中は一部のパラメータを連動させる
                     ref var clothParam = ref GetParametersRef(teamId);
+                    clothParam.inertiaConstraint.anchorInertia = syncCloth.SerializeData.inertiaConstraint.anchorInertia;
                     clothParam.inertiaConstraint.worldInertia = syncCloth.SerializeData.inertiaConstraint.worldInertia;
+                    clothParam.inertiaConstraint.movementInertiaSmoothing = syncCloth.SerializeData.inertiaConstraint.movementInertiaSmoothing;
                     clothParam.inertiaConstraint.movementSpeedLimit = syncCloth.SerializeData.inertiaConstraint.movementSpeedLimit.GetValue(-1);
                     clothParam.inertiaConstraint.rotationSpeedLimit = syncCloth.SerializeData.inertiaConstraint.rotationSpeedLimit.GetValue(-1);
                     clothParam.inertiaConstraint.teleportMode = syncCloth.SerializeData.inertiaConstraint.teleportMode;
@@ -1110,6 +1141,16 @@ namespace MagicaCloth2
                     // 同期先のセンタートランスフォームインデックスを記録
                     tdata.syncCenterTransformIndex = syncTeamData.centerTransformIndex;
                 }
+
+                // アンカー
+                var anchorTransform = syncCloth && tdata.syncTeamId > 0 ? syncCloth.SerializeData.inertiaConstraint.anchor : cloth.SerializeData.inertiaConstraint.anchor;
+                int anchorTransformId = anchorTransform != null ? anchorTransform.GetInstanceID() : 0;
+                tdata.flag.SetBits(Flag_Anchor, anchorTransformId != 0);
+                tdata.flag.SetBits(Flag_AnchorReset, anchorTransformId != tdata.anchorTransformId);
+                tdata.anchorTransformId = anchorTransformId;
+                ref var cdata = ref GetCenterDataRef(teamId);
+                cdata.anchorPosition = anchorTransformId != 0 ? anchorTransform.position : float3.zero;
+                cdata.anchorRotation = anchorTransformId != 0 ? anchorTransform.rotation : quaternion.identity;
 
                 // 集計まわり
                 ref var param = ref GetParametersRef(teamId);
@@ -1122,7 +1163,25 @@ namespace MagicaCloth2
                     //Develop.DebugLog("Update Selfcollision");
                     MagicaManager.Simulation.selfCollisionConstraint.UpdateTeam(teamId);
                 }
+
+                // 一部の処理は後処理にする
+                if (cloth.SerializeData.updateMode == ClothUpdateMode.AnimatorLinkage || syncCloth)
+                {
+                    workPostProcessList.Add(cprocess);
+                }
             }
+
+            // チーム更新（後処理）
+            // 同期が確定してから実行しなければならないもの
+            foreach (var cprocess in workPostProcessList)
+            {
+                int teamId = cprocess.TeamId;
+                ref var tdata = ref GetTeamDataRef(teamId);
+
+                // 更新モード
+                tdata.updateMode = cprocess.SyncCloth ? cprocess.SyncCloth.Process.GetClothUpdateMode() : cprocess.GetClothUpdateMode();
+            }
+            workPostProcessList.Clear();
 
 #if true
             if (ActiveTeamCount > 0)
@@ -1131,7 +1190,9 @@ namespace MagicaCloth2
                 float deltaTime = Time.deltaTime;
                 float fixedDeltaTime = MagicaManager.Time.FixedUpdateCount * Time.fixedDeltaTime;
                 float unscaledDeltaTime = Time.unscaledDeltaTime;
-                //Debug.Log($"DeltaTime:{deltaTime}, FixedDeltaTime:{fixedDeltaTime}, fixedUpdateCount:{fixedUpdateCount}");
+
+                //Debug.Log($"DeltaTime:{deltaTime}, FixedDeltaTime:{fixedDeltaTime}, simulationDeltaTime:{MagicaManager.Time.SimulationDeltaTime}, maxDeltaTime:{MagicaManager.Time.MaxDeltaTime}");
+                //Debug.Log($"DeltaTime:{deltaTime}, FixedDeltaTime:{fixedDeltaTime}, simulationDeltaTime:{MagicaManager.Time.SimulationDeltaTime}");
 
                 // このJobは即時実行させる
                 var job = new AlwaysTeamUpdateJob()
@@ -1142,7 +1203,8 @@ namespace MagicaCloth2
                     unityFrameUnscaledDeltaTime = unscaledDeltaTime,
                     globalTimeScale = MagicaManager.Time.GlobalTimeScale,
                     simulationDeltaTime = MagicaManager.Time.SimulationDeltaTime,
-                    maxDeltaTime = MagicaManager.Time.MaxDeltaTime,
+                    //maxDeltaTime = MagicaManager.Time.MaxDeltaTime,
+                    maxSimmulationCountPerFrame = MagicaManager.Time.maxSimulationCountPerFrame,
 
                     maxUpdateCount = maxUpdateCount,
                     teamDataArray = teamDataArray.GetNativeArray(),
@@ -1162,7 +1224,8 @@ namespace MagicaCloth2
             public float unityFrameUnscaledDeltaTime;
             public float globalTimeScale;
             public float simulationDeltaTime;
-            public float maxDeltaTime;
+            //public float maxDeltaTime;
+            public int maxSimmulationCountPerFrame;
 
             public NativeReference<int> maxUpdateCount;
             public NativeArray<TeamData> teamDataArray;
@@ -1185,13 +1248,9 @@ namespace MagicaCloth2
                     if (tdata.IsProcess == false)
                         continue;
 
-                    //Debug.Log($"Team Enable:{i}");
-
                     // 時間リセット
                     if (tdata.flag.IsSet(Flag_TimeReset))
                     {
-                        //Debug.Log($"Team time Reset:{i}");
-
                         tdata.time = 0;
                         tdata.oldTime = 0;
                         tdata.nowUpdateTime = 0;
@@ -1201,27 +1260,37 @@ namespace MagicaCloth2
                     }
 
                     // 更新時間
+                    //Debug.Log($"Team [{teamId}] updateMode:{(int)tdata.updateMode}");
                     float frameDeltaTime = tdata.IsFixedUpdate ? unityFrameFixedDeltaTime : (tdata.IsUnscaled ? unityFrameUnscaledDeltaTime : unityFrameDeltaTime);
                     tdata.frameDeltaTime = frameDeltaTime;
-
-                    // 最大更新時間
-                    float deltaTime = math.min(frameDeltaTime, maxDeltaTime);
+                    float deltaTime = frameDeltaTime;
 
                     // タイムスケール
                     float timeScale = tdata.timeScale * (tdata.IsUnscaled ? 1.0f : globalTimeScale);
                     timeScale = tdata.flag.IsSet(Flag_Suspend) ? 0.0f : timeScale;
-                    //timeScale = tdata.IsCullingInvisible ? 0.0f : timeScale;
+                    tdata.nowTimeScale = timeScale; // 最終計算用タイムスケール
 
                     // 加算時間
                     float addTime = deltaTime * timeScale; // 今回の加算時間
 
                     // 時間を加算
                     float time = tdata.time + addTime;
-
                     //Debug.Log($"[{i}] time:{time}, addTime:{addTime}, timeScale:{timeScale}, suspend:{tdata.flag.IsSet(Flag_Suspend)}");
-
                     float interval = time - tdata.nowUpdateTime;
-                    tdata.updateCount = (int)(interval / simulationDeltaTime); // 今回の更新回数
+
+                    // 今回の予定更新回数
+                    int updateCount = (int)(interval / simulationDeltaTime);
+
+                    // 今回の更新回数（最大更新回数まで）
+                    tdata.updateCount = math.min(updateCount, maxSimmulationCountPerFrame);
+
+                    // 今回のスキップ回数（最大更新回数超過分）
+                    tdata.skipCount = updateCount - tdata.updateCount;
+                    if (tdata.skipCount > 0)
+                    {
+                        // スキップ発生時はスキップ時間を無かったものとする
+                        time = time - simulationDeltaTime * tdata.skipCount;
+                    }
 
                     if (tdata.updateCount > 0 && addTime == 0.0f)
                     {
@@ -1231,6 +1300,7 @@ namespace MagicaCloth2
                         // こうなると時間補間関連で0除算が発生して数値が壊れる
                         // 誤差を修正する
                         tdata.updateCount = 0;
+                        tdata.skipCount = 0;
                         tdata.nowUpdateTime = time - simulationDeltaTime + 0.0001f;
                     }
 
@@ -1257,7 +1327,7 @@ namespace MagicaCloth2
                     // 全体の最大実行回数
                     maxCount = math.max(maxCount, tdata.updateCount);
 
-                    //Debug.Log($"[{teamId}] updateCount:{tdata.updateCount}, addtime:{addTime}, t.time:{tdata.time}, t.oldtime:{tdata.oldTime}");
+                    //Debug.Log($"[{teamId}] updateCount:{tdata.updateCount}, skipCount:{tdata.skipCount}, addtime:{addTime}, t.time:{tdata.time}, t.oldtime:{tdata.oldTime}, timeScale:{tdata.timeScale}");
                 }
 
                 maxUpdateCount.Value = maxCount;
@@ -1279,7 +1349,7 @@ namespace MagicaCloth2
 
         void RemoveSyncParent(ref TeamData tdata, int parentTeamId)
         {
-            tdata.syncParentTeamId.RemoveItemAtSwapBack(parentTeamId);
+            tdata.syncParentTeamId.MC2RemoveItemAtSwapBack(parentTeamId);
         }
 
         //=========================================================================================
@@ -1297,6 +1367,8 @@ namespace MagicaCloth2
 
             var job = new CalcCenterAndInertiaAndWindJob()
             {
+                simulationDeltaTime = MagicaManager.Time.SimulationDeltaTime,
+
                 teamDataArray = teamDataArray.GetNativeArray(),
                 centerDataArray = MagicaManager.Team.centerDataArray.GetNativeArray(),
                 teamWindArray = teamWindArray.GetNativeArray(),
@@ -1323,6 +1395,8 @@ namespace MagicaCloth2
         [BurstCompile]
         struct CalcCenterAndInertiaAndWindJob : IJobParallelFor
         {
+            public float simulationDeltaTime;
+
             // team
             public NativeArray<TeamData> teamDataArray;
             public NativeArray<InertiaConstraint.CenterData> centerDataArray;
@@ -1377,6 +1451,8 @@ namespace MagicaCloth2
                 float3 componentWorldScl = transformScaleArray[centerTransformIndex];
                 cdata.componentWorldPosition = componentWorldPos;
                 cdata.componentWorldRotation = componentWorldRot;
+                float3 oldComponentWorldPosition = cdata.oldComponentWorldPosition;
+                quaternion oldComponentWorldRotation = cdata.oldComponentWorldRotation;
 
                 // コンポーネントスケール倍率
                 float componentScaleRatio = math.length(componentWorldScl) / math.length(tdata.initScale);
@@ -1419,9 +1495,37 @@ namespace MagicaCloth2
                 }
                 var wtol = MathUtility.WorldToLocalMatrix(centerWorldPos, centerWorldRot, centerWorldScl);
 
+                // ■アンカー
+                float3 anchorDeltaVector = 0;
+                quaternion anchorDeltaRotation = quaternion.identity;
+                if (tdata.flag.IsSet(Flag_AnchorReset) || tdata.IsReset)
+                {
+                    cdata.oldAnchorPosition = cdata.anchorPosition;
+                    cdata.oldAnchorRotation = cdata.anchorRotation;
+                    cdata.anchorComponentLocalPosition = MathUtility.InverseTransformPoint(componentWorldPos, cdata.anchorPosition, cdata.anchorRotation, 1);
+                }
+                if (tdata.flag.IsSet(Flag_Anchor))
+                {
+                    // アンカーの移動回転影響
+                    float3 anchorCenterPosition = MathUtility.TransformPoint(cdata.anchorComponentLocalPosition, cdata.anchorPosition, cdata.anchorRotation, 1);
+                    anchorDeltaVector = anchorCenterPosition - oldComponentWorldPosition;
+                    anchorDeltaRotation = MathUtility.FromToRotation(cdata.oldAnchorRotation, cdata.anchorRotation);
+
+                    // アンカーの影響割合
+                    float anchorRatio = 1.0f - param.inertiaConstraint.anchorInertia;
+                    anchorDeltaVector = math.lerp(float3.zero, anchorDeltaVector, anchorRatio);
+                    anchorDeltaRotation = math.slerp(quaternion.identity, anchorDeltaRotation, anchorRatio);
+
+                    // 打ち消す
+                    oldComponentWorldPosition += anchorDeltaVector;
+                    oldComponentWorldRotation = math.mul(anchorDeltaRotation, oldComponentWorldRotation);
+
+                    tdata.flag.SetBits(Flag_InertiaShift, true);
+                }
+
                 // フレーム移動量と速度
-                float3 frameDeltaVector = componentWorldPos - cdata.oldComponentWorldPosition;
-                float frameDeltaAngle = MathUtility.Angle(cdata.oldComponentWorldRotation, componentWorldRot);
+                float3 frameDeltaVector = componentWorldPos - oldComponentWorldPosition;
+                float frameDeltaAngle = MathUtility.Angle(oldComponentWorldRotation, componentWorldRot);
                 //Debug.Log($"frameDeltaVector:{frameDeltaVector}, frameDeltaAngle:{frameDeltaAngle}");
 
                 // ■テレポート判定（コンポーネント姿勢から判定する）
@@ -1447,11 +1551,45 @@ namespace MagicaCloth2
                     }
                 }
 
+                // ■スムージング
+                // ワールド慣性の急激な変化および小刻みな変化によりクロスが乱れる問題を解消するために慣性をスムージングする
+                // ・慣性の急激な変化（急発進・急停止）によるクロスの乱れの緩和
+                // ・慣性の小刻みな変化によるクロスの振動の緩和
+                float3 smoothDeltaVector = 0;
+#if true
+                if (param.inertiaConstraint.movementInertiaSmoothing >= 1e-06f)
+                {
+                    // 慣性速度をスムージングする
+                    // 測定はシミュレーションが実行される場合のみ行う（そうしないと振動が発生する）
+                    if (tdata.IsRunning)
+                    {
+                        float3 frameDeltaVelocity = tdata.frameDeltaTime > 0.0f ? frameDeltaVector / tdata.frameDeltaTime : 0; // 速度ベクトル(m/s)
+                        float movementSpeedLimit = param.inertiaConstraint.movementSpeedLimit * componentScaleRatio; // 同期時は同期先の値が入っている
+                        if (movementSpeedLimit >= 0.0f)
+                        {
+                            // 最大速度制限
+                            frameDeltaVelocity = MathUtility.ClampVector(frameDeltaVelocity, movementSpeedLimit);
+                        }
+                        float averageRatio = math.saturate(math.pow(1.0f - param.inertiaConstraint.movementInertiaSmoothing, 3.0f) * 0.99f + 0.01f);
+                        cdata.smoothingVelocity = math.lerp(cdata.smoothingVelocity, frameDeltaVelocity, averageRatio); // 比重により平滑化
+                    }
+
+                    // スムージングした慣性速度に基づいて１つ前のコンポーネント位置を補正する
+                    // 処理的にはアンカーと同じ考え
+                    float3 smoothPos = componentWorldPos - cdata.smoothingVelocity * tdata.frameDeltaTime;
+                    smoothDeltaVector = smoothPos - oldComponentWorldPosition;
+                    oldComponentWorldPosition = smoothPos;
+                    tdata.flag.SetBits(Flag_InertiaShift, true);
+                }
+#endif
+
                 // リセットおよび最新のセンター座標として格納
                 if (tdata.IsReset)
                 {
                     cdata.oldComponentWorldPosition = componentWorldPos;
                     cdata.oldComponentWorldRotation = componentWorldRot;
+                    oldComponentWorldPosition = componentWorldPos;
+                    oldComponentWorldRotation = componentWorldRot;
 
                     cdata.frameWorldPosition = centerWorldPos;
                     cdata.frameWorldRotation = centerWorldRot;
@@ -1464,8 +1602,7 @@ namespace MagicaCloth2
                     cdata.nowWorldScale = centerWorldScl;
                     cdata.oldWorldPosition = centerWorldPos;
                     cdata.oldWorldRotation = centerWorldRot;
-
-                    tdata.centerWorldPosition = centerWorldPos;
+                    //tdata.centerWorldPosition = centerWorldPos;
                 }
                 else
                 {
@@ -1475,28 +1612,35 @@ namespace MagicaCloth2
                 }
 
                 // ■ワールド慣性シフト
-                float3 workOldComponentPosition = cdata.oldComponentWorldPosition;
-                quaternion workOldComponentRotation = cdata.oldComponentWorldRotation;
+                float3 workOldComponentPosition = oldComponentWorldPosition;
+                quaternion workOldComponentRotation = oldComponentWorldRotation;
                 if (tdata.IsReset)
                 {
                     // リセット（なし）
                     cdata.frameComponentShiftVector = 0;
                     cdata.frameComponentShiftRotation = quaternion.identity;
+
+                    // スムージングリセット
+                    cdata.smoothingVelocity = 0;
+                    smoothDeltaVector = 0;
                 }
                 else
                 {
-                    cdata.frameComponentShiftVector = componentWorldPos - cdata.oldComponentWorldPosition;
-                    cdata.frameComponentShiftRotation = MathUtility.FromToRotation(cdata.oldComponentWorldRotation, componentWorldRot);
+                    cdata.frameComponentShiftVector = componentWorldPos - oldComponentWorldPosition;
+                    cdata.frameComponentShiftRotation = MathUtility.FromToRotation(oldComponentWorldRotation, componentWorldRot);
+                    //Debug.Log($"frameComponentShiftVector:{cdata.frameComponentShiftVector}");
                     float moveShiftRatio = 0.0f;
                     float rotationShiftRatio = 0.0f;
 
                     // ■全体慣性シフト
                     float movementShift = 1.0f - param.inertiaConstraint.worldInertia; // 同期時は同期先の値が入っている
                     float rotationShift = 1.0f - param.inertiaConstraint.worldInertia; // 同期時は同期先の値が入っている
+
                     // KeepテレポートもしくはCulling時はシフト量100%で実装
                     bool keep = tdata.IsKeepReset || tdata.IsCullingInvisible;
                     movementShift = keep ? 1.0f : movementShift;
                     rotationShift = keep ? 1.0f : rotationShift;
+
                     if (movementShift > Define.System.Epsilon || rotationShift > Define.System.Epsilon)
                     {
                         // 全体シフトあり
@@ -1530,11 +1674,52 @@ namespace MagicaCloth2
                         workOldComponentRotation = math.slerp(workOldComponentRotation, componentWorldRot, rotationLimitRatio);
                     }
 
+                    // その他の影響
+                    float otherShiftRatio = 0.0f;
+
+                    // 更新スキップによるシフト
+                    // 更新スキップ時はスキップ時間分ワールド慣性シフトを行う
+                    if (tdata.skipCount > 0)
+                    {
+                        otherShiftRatio = math.lerp(otherShiftRatio, 1.0f, math.saturate((tdata.skipCount * simulationDeltaTime) / (tdata.frameDeltaTime * tdata.nowTimeScale)));
+                    }
+
+                    // 安定化時間中は慣性を抑える
+                    if (tdata.velocityWeight < 1.0f)
+                    {
+                        otherShiftRatio = math.lerp(otherShiftRatio, 1.0f, 1.0f - tdata.velocityWeight);
+                    }
+
+                    // タイムスケール
+                    // タイムスケールの影響分ワールド慣性シフトを行う
+                    if (tdata.nowTimeScale < 1.0f)
+                    {
+                        otherShiftRatio = math.lerp(otherShiftRatio, 1.0f, 1.0f - tdata.nowTimeScale);
+                    }
+
+                    if (otherShiftRatio > 0.0f)
+                    {
+                        tdata.flag.SetBits(Flag_InertiaShift, true);
+                        moveShiftRatio = math.lerp(moveShiftRatio, 1.0f, otherShiftRatio);
+                        workOldComponentPosition = math.lerp(workOldComponentPosition, componentWorldPos, otherShiftRatio);
+                        rotationShiftRatio = math.lerp(rotationShiftRatio, 1.0f, otherShiftRatio);
+                        workOldComponentRotation = math.slerp(workOldComponentRotation, componentWorldRot, otherShiftRatio);
+                    }
+
                     // ■慣性シフト最終設定
                     if (tdata.IsInertiaShift)
                     {
+                        //Debug.Log($"moveShiftRatio:{moveShiftRatio}, rotationShiftRatio:{rotationShiftRatio}");
+
                         cdata.frameComponentShiftVector *= moveShiftRatio;
                         cdata.frameComponentShiftRotation = math.slerp(quaternion.identity, cdata.frameComponentShiftRotation, rotationShiftRatio);
+
+                        // アンカーによる打ち消し
+                        cdata.frameComponentShiftVector += anchorDeltaVector;
+                        cdata.frameComponentShiftRotation = math.mul(anchorDeltaRotation, cdata.frameComponentShiftRotation);
+
+                        // スムージング影響打ち消し
+                        cdata.frameComponentShiftVector += smoothDeltaVector;
 
                         cdata.oldFrameWorldPosition = MathUtility.ShiftPosition(cdata.oldFrameWorldPosition, cdata.oldComponentWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
                         cdata.oldFrameWorldRotation = math.mul(cdata.frameComponentShiftRotation, cdata.oldFrameWorldRotation);
@@ -1552,6 +1737,7 @@ namespace MagicaCloth2
                 float3 movingVector = componentWorldPos - workOldComponentPosition;
                 float movingLength = math.length(movingVector);
                 cdata.frameMovingSpeed = tdata.frameDeltaTime > 0.0f ? movingLength / tdata.frameDeltaTime : 0.0f;
+                cdata.frameMovingSpeed *= tdata.nowTimeScale > 1e-06f ? 1.0f / tdata.nowTimeScale : 0.0f; // タイムスケール考慮
                 cdata.frameMovingDirection = movingLength > 1e-06f ? movingVector / movingLength : 0;
 
                 //Debug.Log($"frameWorldPosition:{cdata.frameWorldPosition}, framwWorldRotation:{cdata.frameWorldRotation.value}");
@@ -1652,7 +1838,7 @@ namespace MagicaCloth2
                                 if (llen <= 1e-06f)
                                     continue;
                                 float depth = math.saturate(llen / wdata.size.x);
-                                float attenuation = wdata.attenuation.EvaluateCurveClamp01(depth);
+                                float attenuation = wdata.attenuation.MC2EvaluateCurveClamp01(depth);
                                 windMain *= attenuation;
                                 break;
                         }
@@ -1769,23 +1955,13 @@ namespace MagicaCloth2
                 cdata.nowWorldRotation = math.normalize(cdata.nowWorldRotation); // 必要
                 float3 wscl = math.lerp(cdata.oldFrameWorldScale, cdata.frameWorldScale, tdata.frameInterpolation);
                 cdata.nowWorldScale = wscl;
-                //cdata.nowLocalToWorldMatrix = MathUtility.LocalToWorldMatrix(cdata.nowWorldPosition, cdata.nowWorldRotation, cdata.nowWorldScale);
-
-                // 現在座標はteamDataにもコピーする
-                tdata.centerWorldPosition = cdata.nowWorldPosition;
 
                 // ステップごとの移動量
                 cdata.stepVector = cdata.nowWorldPosition - cdata.oldWorldPosition;
                 cdata.stepRotation = MathUtility.FromToRotation(cdata.oldWorldRotation, cdata.nowWorldRotation);
                 float stepAngle = MathUtility.Angle(cdata.oldWorldRotation, cdata.nowWorldRotation);
 
-                // ステップごとの移動速度と回転速度
-                //float stepMoveSpeed = math.length(cdata.stepVector) / simulationDeltaTime; // 移動速度(m/s)
-                //float stepAngularVelocity = stepAngle / simulationDeltaTime; // 回転速度(rad/s)
-                //cdata.angularVelocity = stepAngularVelocity;
-
                 // ローカル慣性
-                //float localInertia = 1.0f - param.inertiaConstraint.localInertia;
                 float localMovementInertia = 1.0f - param.inertiaConstraint.localInertia;
                 float localRotationInertia = 1.0f - param.inertiaConstraint.localInertia;
 #if true
@@ -1810,7 +1986,7 @@ namespace MagicaCloth2
                 // 最終慣性
                 cdata.inertiaVector = math.lerp(float3.zero, cdata.stepVector, localMovementInertia);
                 cdata.inertiaRotation = math.slerp(quaternion.identity, cdata.stepRotation, localRotationInertia);
-                //Debug.Log($"Team[{teamId}] stepSpeed:{stepSpeed}, moveInertiaRatio:{moveInertiaRatio}, inertiaVector:{cdata.inertiaVector}, rotationInertiaRatio:{rotationInertiaRatio}");
+                //Debug.Log($"Team[{teamId}] localMovementInertia:{localMovementInertia}, localRotationInertia:{localRotationInertia}, inertiaVector:{cdata.inertiaVector}, inertiaRotation:{cdata.inertiaRotation}");
 
                 // ■遠心力用パラメータ算出
                 // 今回ステップでの回転速度と回転軸
@@ -1966,7 +2142,15 @@ namespace MagicaCloth2
                     // 外力クリア
                     tdata.forceMode = ClothForceMode.None;
                     tdata.impactForce = 0;
+
+                    // スキップ
+                    tdata.skipCount = 0;
                 }
+
+                // アンカー
+                cdata.oldAnchorPosition = cdata.anchorPosition;
+                cdata.oldAnchorRotation = cdata.anchorRotation;
+                cdata.anchorComponentLocalPosition = MathUtility.InverseTransformPoint(cdata.componentWorldPosition, cdata.anchorPosition, cdata.anchorRotation, 1);
 
                 // フラグリセット
                 tdata.flag.SetBits(Flag_Reset, false);
@@ -2099,7 +2283,6 @@ namespace MagicaCloth2
                     //sb.AppendLine($"ID:{i} [{cprocess.Name}] state:0x{cprocess.GetStateFlag().Value:X}, Flag:0x{tdata.flag.Value:X}, Particle:{tdata.ParticleCount}, Collider:{cprocess.ColliderCapacity} Proxy:{tdata.proxyMeshType}, Mapping:{tdata.MappingCount}");
                     sb.AppendLine($"ID:{i} [{cprocess.Name}] state:0x{cprocess.GetStateFlag().Value:X}, Flag:0x{tdata.flag.Value:X}, Particle:{tdata.ParticleCount}, Collider:{cprocess.ColliderCapacity} Proxy:{tdata.proxyMeshType}, Mapping:{mappingList.Length}");
                     sb.AppendLine($"  -centerTransformIndex {tdata.centerTransformIndex}");
-                    sb.AppendLine($"  -centerWorldPosition {tdata.centerWorldPosition}");
                     sb.AppendLine($"  -initScale {tdata.initScale}");
                     sb.AppendLine($"  -scaleRatio {tdata.scaleRatio}");
                     sb.AppendLine($"  -animationPoseRatio {tdata.animationPoseRatio}");
@@ -2124,16 +2307,11 @@ namespace MagicaCloth2
                     sb.AppendLine($"  -colliderCount {tdata.colliderCount}");
 
                     // mapping情報
-                    //var teamMapping = teamMappingIndexArray[i];
-                    //sb.AppendLine($"  *Mapping Count {tdata.MappingCount}");
                     sb.AppendLine($"  *Mapping Count {mappingList.Length}");
-                    //if (tdata.MappingCount > 0)
                     if (mappingList.Length > 0)
                     {
-                        //for (int j = 0; j < tdata.MappingCount; j++)
                         for (int j = 0; j < mappingList.Length; j++)
                         {
-                            //int mid = tdata.mappingDataIndexSet[j];
                             int mid = mappingList[j];
                             var mdata = mappingDataArray[mid];
                             sb.AppendLine($"  *Mapping Mid:{mid}, Vertex:{mdata.VertexCount}");

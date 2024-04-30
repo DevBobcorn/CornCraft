@@ -104,10 +104,14 @@ namespace MagicaCloth2
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             EditorGUILayout.Space();
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
             ClothParameterInspector();
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             GizmoInspector();
+            EditorGUILayout.Space();
+            ClothPreBuildInspector();
             serializedObject.ApplyModifiedProperties();
 
             //DrawDefaultInspector();
@@ -164,29 +168,52 @@ namespace MagicaCloth2
         {
             var cloth = target as MagicaCloth;
 
-            ResultCode result;
             if (EditorApplication.isPlaying)
             {
-                result = cloth.Process.Result;
+                StaticStringBuilder.Clear();
+                StaticStringBuilder.AppendLine("[State]");
+                StaticStringBuilder.Append(cloth.Process.IsState(ClothProcess.State_UsePreBuild) ? "Pre-Build Construction" : "Runtime Construction");
+                DispClothStatus(StaticStringBuilder.ToString(), cloth.Process.Result, true);
             }
             else
             {
-                result = ClothEditorManager.GetResultCode(cloth);
+                var preBuildData = cloth.GetSerializeData2().preBuildData;
+                if (preBuildData.enabled)
+                {
+                    // pre-build
+                    DispClothStatus("[Pre-Build Construction]", preBuildData.DataValidate(), false);
+                }
+                else
+                {
+                    // runtime
+                    DispClothStatus("[Runtime Construction]", ClothEditorManager.GetResultCode(cloth), true);
+                }
             }
+        }
+
+        void DispClothStatus(string title, ResultCode result, bool dispWarning)
+        {
+            StaticStringBuilder.Clear();
+            StaticStringBuilder.AppendLine(title);
 
             // normal / error
             MessageType mtype = MessageType.Info;
             if (result.IsError())
                 mtype = MessageType.Error;
-
             var infoMessage = result.GetResultInformation();
             if (infoMessage != null)
-                EditorGUILayout.HelpBox($"{result.GetResultString()}\n{infoMessage}", mtype);
+            {
+                StaticStringBuilder.AppendLine(result.GetResultString());
+                StaticStringBuilder.AppendLine(infoMessage);
+            }
             else
-                EditorGUILayout.HelpBox(result.GetResultString(), mtype);
+            {
+                StaticStringBuilder.AppendLine(result.GetResultString());
+            }
+            EditorGUILayout.HelpBox(StaticStringBuilder.ToString(), mtype);
 
             // warning
-            if (result.IsWarning())
+            if (dispWarning && result.IsWarning())
             {
                 mtype = MessageType.Warning;
                 infoMessage = result.GetWarningInformation();
@@ -201,17 +228,19 @@ namespace MagicaCloth2
         {
             var cloth = target as MagicaCloth;
 
-            VirtualMesh vmesh = null;
+            VirtualMeshContainer cmesh;
             if (EditorApplication.isPlaying)
             {
-                vmesh = cloth.Process?.ProxyMesh;
+                cmesh = cloth.Process?.ProxyMeshContainer;
             }
             else
             {
-                vmesh = ClothEditorManager.GetEditMesh(cloth);
+                cmesh = ClothEditorManager.GetEditMeshContainer(cloth);
             }
-            if (vmesh == null)
+            if (cmesh == null || cmesh.shareVirtualMesh == null)
                 return;
+
+            var vmesh = cmesh.shareVirtualMesh;
 
             StaticStringBuilder.Clear();
             if (EditorApplication.isPlaying)
@@ -224,7 +253,7 @@ namespace MagicaCloth2
             StaticStringBuilder.AppendLine($"Edge: {vmesh.EdgeCount}");
             StaticStringBuilder.AppendLine($"Triangle: {vmesh.TriangleCount}");
             StaticStringBuilder.AppendLine($"SkinBoneCount: {vmesh.SkinBoneCount}");
-            StaticStringBuilder.Append($"TransformCount: {vmesh.TransformCount}");
+            StaticStringBuilder.Append($"TransformCount: {cmesh.GetTransformCount()}");
 
             EditorGUILayout.HelpBox(StaticStringBuilder.ToString(), MessageType.Info);
         }
@@ -282,7 +311,20 @@ namespace MagicaCloth2
                     }
 
                     EditorGUILayout.Space();
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.updateMode"));
+                    if (sync == false)
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.updateMode"));
+                    else
+                    {
+                        // 同期中は操作不可
+                        using (new EditorGUI.DisabledScope(true))
+                        {
+                            using (new EditorGUILayout.HorizontalScope())
+                            {
+                                EditorGUILayout.LabelField("Update Mode");
+                                EditorGUILayout.LabelField("(Synchronizing)");
+                            }
+                        }
+                    }
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.animationPoseRatio"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.normalAxis"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.normalAlignmentSetting.alignmentMode"), new GUIContent("Normal Alignment"));
@@ -351,6 +393,48 @@ namespace MagicaCloth2
                     }
                 }
             });
+        }
+
+        void ClothPreBuildInspector()
+        {
+            var cloth = target as MagicaCloth;
+
+            bool generation = false;
+
+            using (new EditorGUI.DisabledScope(EditorApplication.isPlaying))
+            {
+                Foldout("Pre-Build", serializedObject.FindProperty("serializeData2.preBuildData.enabled"), null, () =>
+                {
+                    // information
+                    var preBuildData = cloth.GetSerializeData2().preBuildData;
+                    if (preBuildData.UsePreBuild())
+                    {
+                        DispClothStatus("[Pre-Build Construction]", preBuildData.DataValidate(), false);
+                    }
+
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData2.preBuildData.buildId"), new GUIContent("Build ID"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData2.preBuildData.preBuildScriptableObject"), new GUIContent("Write Object"));
+                    using (var horizontalScope = new GUILayout.HorizontalScope())
+                    {
+                        EditorGUILayout.Space();
+                        GUI.backgroundColor = Color.red;
+                        if (GUILayout.Button("Create PreBuild Data"))
+                        {
+                            generation = true;
+                        }
+                        GUI.backgroundColor = Color.white;
+                        EditorGUILayout.Space();
+                    }
+                });
+            }
+
+            if (generation)
+            {
+                // PreBuildデータ構築実行
+                Develop.Log($"Start PreBuild data creation.");
+                var preBuildResult = PreBuildDataCreation.CreatePreBuildData(cloth);
+                Develop.Log($"PreBuild data creation completed. [{cloth.GetSerializeData2().preBuildData.buildId}] : {preBuildResult.GetResultString()}");
+            }
         }
 
         void ClothParameterInspector()
@@ -426,7 +510,12 @@ namespace MagicaCloth2
             {
                 if (sync == false)
                 {
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.anchor"));
+                    if (cloth.SerializeData.inertiaConstraint.anchor != null)
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.anchorInertia"));
+                    EditorGUILayout.Space();
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.worldInertia"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.movementInertiaSmoothing"), new GUIContent("World Inertia Smoothing"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.movementSpeedLimit"), new GUIContent("World Movement Speed Limit"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.rotationSpeedLimit"), new GUIContent("World Rotation Speed Limit"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("serializeData.inertiaConstraint.teleportMode"));
@@ -440,7 +529,23 @@ namespace MagicaCloth2
                     {
                         using (new EditorGUILayout.HorizontalScope())
                         {
+                            EditorGUILayout.LabelField("Anchor");
+                            EditorGUILayout.LabelField("(Synchronizing)");
+                        }
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField("Anchor Inertia");
+                            EditorGUILayout.LabelField("(Synchronizing)");
+                        }
+                        EditorGUILayout.Space();
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
                             EditorGUILayout.LabelField("World Inertia");
+                            EditorGUILayout.LabelField("(Synchronizing)");
+                        }
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField("World Inertia Smoothing");
                             EditorGUILayout.LabelField("(Synchronizing)");
                         }
                         using (new EditorGUILayout.HorizontalScope())
@@ -770,17 +875,17 @@ namespace MagicaCloth2
                     if (edit == false)
                     {
                         // 最新の編集メッシュからセレクションデータを生成する
-                        var editMesh = ClothEditorManager.GetEditMesh(cloth);
-                        if (editMesh != null)
+                        var editMeshContainer = ClothEditorManager.GetEditMeshContainer(cloth);
+                        if (editMeshContainer != null && editMeshContainer.shareVirtualMesh != null)
                         {
                             // すでにセレクションデータが存在し、かつユーザー編集データならばコンバートする
-                            var selectionData = GetSelectionData(cloth, editMesh);
+                            var selectionData = GetSelectionData(cloth, editMeshContainer.shareVirtualMesh);
 
                             // セレクションデータにメッシュの最大接続距離を記録する
-                            selectionData.maxConnectionDistance = editMesh.maxVertexDistance.Value;
+                            selectionData.maxConnectionDistance = editMeshContainer.shareVirtualMesh.maxVertexDistance.Value;
 
                             // ペイント開始
-                            ClothPainter.EnterPaint(paintMode, this, cloth, editMesh, selectionData);
+                            ClothPainter.EnterPaint(paintMode, this, cloth, editMeshContainer, selectionData);
                             SceneView.RepaintAll();
                         }
                     }

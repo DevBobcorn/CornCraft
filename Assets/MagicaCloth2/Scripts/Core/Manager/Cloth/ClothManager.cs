@@ -233,10 +233,10 @@ namespace MagicaCloth2
             // チームのセンター姿勢の決定と慣性用の移動量計算
             masterJob = tm.CalcCenterAndInertiaAndWind(masterJob);
 
-            // パーティクルリセットの適用
+            // パーティクルの全体慣性およびリセットの適用
             masterJob = sm.PreSimulationUpdate(masterJob);
 
-            // ■コライダーのローカル姿勢を求める
+            // ■コライダーのローカル姿勢を求める、および全体慣性とリセットの適用
             masterJob = MagicaManager.Collider.PreSimulationUpdate(masterJob);
 
             //-----------------------------------------------------------------
@@ -286,7 +286,7 @@ namespace MagicaCloth2
                         masterJob = renderData.UpdatePositionNormal(info.mappingChunk, masterJob);
 
                         // BoneWeight書き込み
-                        if (renderData.ChangeCustomMesh)
+                        if (renderData.UseCustomMesh)
                         {
                             masterJob = renderData.UpdateBoneWeight(info.mappingChunk, masterJob);
                         }

@@ -2,25 +2,31 @@
 // Copyright (c) 2023 MagicaSoft.
 // https://magicasoft.jp
 using System.Diagnostics;
+using UnityEngine;
 
 namespace MagicaCloth2
 {
     /// <summary>
     /// 様々な処理の結果
     /// </summary>
+    [System.Serializable]
     public struct ResultCode
     {
+        [SerializeField]
         volatile Define.Result result;
 
         /// <summary>
         /// 警告：警告は１つのみ保持
         /// </summary>
+        [SerializeField]
         volatile Define.Result warning;
 
         public Define.Result Result => result;
 
         public static ResultCode None => new ResultCode(Define.Result.None);
         public static ResultCode Empty => new ResultCode(Define.Result.Empty);
+        public static ResultCode Success => new ResultCode(Define.Result.Success);
+        public static ResultCode Error => new ResultCode(Define.Result.Error);
 
         public ResultCode(Define.Result initResult)
         {

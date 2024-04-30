@@ -34,7 +34,7 @@ namespace MagicaCloth2
             public GizmoType gizmoType;
             public ClothBehaviour component;
             public int componentHash;
-            public VirtualMesh editMesh;
+            public VirtualMeshContainer editMeshContainer;
             public int nextBuildHash;
             public int importCount;
         }
@@ -210,7 +210,7 @@ namespace MagicaCloth2
                     info.building = false;
                     info.result = ResultCode.Empty;
                     info.component = component;
-                    info.editMesh = null;
+                    info.editMeshContainer = null;
                     info.gizmoType = gizmoType;
                     info.componentHash = 0;
                     info.nextBuildHash = 0;
@@ -228,6 +228,7 @@ namespace MagicaCloth2
             if (cloth && EditorApplication.isPlaying == false)
             {
                 int hash = component.GetMagicaHashCode();
+                //Debug.Log($"Hash:{hash}");
 
                 lock (editClothDict)
                 {
@@ -265,19 +266,19 @@ namespace MagicaCloth2
             }
         }
 
-        public static VirtualMesh GetEditMesh(ClothBehaviour comp)
+        public static VirtualMeshContainer GetEditMeshContainer(ClothBehaviour comp)
         {
             if (isValid == false)
                 return null;
             if (comp == null)
                 return null;
             int id = comp.GetInstanceID();
-            VirtualMesh vmesh = null;
+            VirtualMeshContainer cmesh = null;
             lock (editClothDict)
             {
-                vmesh = editClothDict.ContainsKey(id) ? editClothDict[id].editMesh : null;
+                cmesh = editClothDict.ContainsKey(id) ? editClothDict[id].editMeshContainer : null;
             }
-            return vmesh;
+            return cmesh;
         }
 
         /// <summary>
@@ -311,7 +312,7 @@ namespace MagicaCloth2
             {
                 foreach (var info in editClothDict.Values)
                 {
-                    info?.editMesh?.Dispose();
+                    info?.editMeshContainer?.Dispose();
                 }
                 editClothDict.Clear();
             }
@@ -335,7 +336,7 @@ namespace MagicaCloth2
                 foreach (var id in destroyList)
                 {
                     //Debug.Log($"削除");
-                    editClothDict[id].editMesh?.Dispose();
+                    editClothDict[id].editMeshContainer?.Dispose();
                     editClothDict.Remove(id);
                 }
                 destroyList.Clear();
@@ -440,7 +441,7 @@ namespace MagicaCloth2
             var sdata = cloth.SerializeData;
             var sdata2 = cloth.GetSerializeData2();
             var setupList = new List<RenderSetupData>();
-            VirtualMesh editMesh = null;
+            VirtualMeshContainer editMeshContainer = null;
             ResultCode result = new ResultCode();
 
             try
@@ -455,7 +456,6 @@ namespace MagicaCloth2
                 // メッシュを構築するための最低限のデータが揃っているか確認
                 if (sdata.IsValid() == false)
                 {
-                    //result.SetResult(Define.Result.Empty);
                     result.SetResult(sdata.VerificationResult);
                     throw new MagicaClothProcessingException();
                 }
@@ -533,7 +533,8 @@ namespace MagicaCloth2
                 // エディットメッシュ作成
                 // メッシュはセンター空間で作成される
                 ct.ThrowIfCancellationRequested();
-                editMesh = new VirtualMesh("EditMesh");
+                var editMesh = new VirtualMesh("EditMesh");
+                editMeshContainer = new VirtualMeshContainer(editMesh);
                 if (sdata.clothType == ClothProcess.ClothType.MeshCloth)
                 {
                     // MeshClothではクロストランスフォームを追加しておく
@@ -543,7 +544,6 @@ namespace MagicaCloth2
 
                 // セレクションデータ
                 // ペイントマップ指定の場合は空で初期化
-                //SelectionData selectionData = usePaintMap ? new SelectionData() : sdata2.selectionData;
                 SelectionData selectionData = usePaintMap ? new SelectionData() : sdata2.selectionData.Clone();
 
                 // ■スレッド
@@ -723,8 +723,6 @@ namespace MagicaCloth2
                 ct.ThrowIfCancellationRequested();
                 if (cloth == null || isValid == false)
                 {
-                    //result.SetError(Define.Result.CreateCloth_InvalidCloth);
-                    //throw new MagicaClothProcessingException();
                     // キャンセル扱いにする
                     throw new OperationCanceledException();
                 }
@@ -760,16 +758,16 @@ namespace MagicaCloth2
                             var info = editClothDict[id];
                             info.building = false;
                             info.result = result;
-                            info.editMesh?.Dispose();
+                            info.editMeshContainer?.Dispose();
                             if (result.IsSuccess())
                             {
-                                info.editMesh = editMesh;
-                                editMesh = null;
+                                info.editMeshContainer = editMeshContainer;
+                                editMeshContainer = null;
                                 Develop.DebugLog($"Registration Complete : {cloth.name}");
                             }
                             else
                             {
-                                info.editMesh = null;
+                                info.editMeshContainer = null;
                             }
                         }
                     }
@@ -780,7 +778,7 @@ namespace MagicaCloth2
                 {
                     setup?.Dispose();
                 }
-                editMesh?.Dispose();
+                editMeshContainer?.Dispose();
 
                 //span.DebugLog();
 
@@ -955,7 +953,7 @@ namespace MagicaCloth2
                                 if (isPlaying)
                                     ClothEditorUtility.DrawClothRuntime(cloth.Process, cloth.GizmoSerializeData.clothDebugSettings, active);
                                 else
-                                    ClothEditorUtility.DrawClothEditor(info.editMesh, cloth.GizmoSerializeData.clothDebugSettings, cloth.SerializeData, active, false, false);
+                                    ClothEditorUtility.DrawClothEditor(info.editMeshContainer, cloth.GizmoSerializeData.clothDebugSettings, cloth.SerializeData, active, false, false);
                             }
 
 #if MC2_DEBUG
@@ -963,9 +961,9 @@ namespace MagicaCloth2
                             if (cloth.GizmoSerializeData.proxyDebugSettings.enable)
                             {
                                 if (isPlaying)
-                                    VirtualMeshEditorUtility.DrawRuntimeGizmos(cloth.Process, false, cloth.Process.ProxyMesh, cloth.GizmoSerializeData.proxyDebugSettings, active, true);
+                                    VirtualMeshEditorUtility.DrawRuntimeGizmos(cloth.Process, false, cloth.Process.ProxyMeshContainer, cloth.GizmoSerializeData.proxyDebugSettings, active, true);
                                 else
-                                    VirtualMeshEditorUtility.DrawGizmos(info.editMesh, cloth.GizmoSerializeData.proxyDebugSettings, active, true);
+                                    VirtualMeshEditorUtility.DrawGizmos(info.editMeshContainer, cloth.GizmoSerializeData.proxyDebugSettings, active, true);
                             }
 
                             // Mapping Mesh
@@ -974,8 +972,8 @@ namespace MagicaCloth2
                                 if (isPlaying)
                                 {
                                     var renderMeshInfo = cloth.Process.GetRenderMeshInfo(cloth.GizmoSerializeData.debugMappingIndex);
-                                    if (renderMeshInfo != null && renderMeshInfo.renderMesh != null)
-                                        VirtualMeshEditorUtility.DrawRuntimeGizmos(cloth.Process, true, renderMeshInfo.renderMesh, cloth.GizmoSerializeData.mappingDebugSettings, active, true);
+                                    if (renderMeshInfo != null && renderMeshInfo.renderMeshContainer != null)
+                                        VirtualMeshEditorUtility.DrawRuntimeGizmos(cloth.Process, true, renderMeshInfo.renderMeshContainer, cloth.GizmoSerializeData.mappingDebugSettings, active, true);
                                 }
                             }
 #endif // MC2_DEBUG

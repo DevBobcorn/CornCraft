@@ -29,14 +29,15 @@ namespace MagicaCloth2
         /// </summary>
         /// <param name="vmesh"></param>
         /// <param name="debugSettings"></param>
-        public static void DrawGizmos(VirtualMesh vmesh, VirtualMeshDebugSettings debugSettings, bool selected, bool useHandles)
+        public static void DrawGizmos(VirtualMeshContainer cmesh, VirtualMeshDebugSettings debugSettings, bool selected, bool useHandles)
         {
             if (debugSettings.enable == false)
                 return;
-            if (vmesh == null || vmesh.IsSuccess == false || vmesh.VertexCount == 0)
+            if (cmesh == null || cmesh.shareVirtualMesh == null || cmesh.shareVirtualMesh.IsSuccess == false || cmesh.shareVirtualMesh.VertexCount == 0)
                 return;
 
-            var t = vmesh.GetCenterTransform();
+            var vmesh = cmesh.shareVirtualMesh;
+            var t = cmesh.GetCenterTransform();
             if (t == null)
                 return;
 
@@ -45,7 +46,7 @@ namespace MagicaCloth2
                 useHandles,
                 true,
                 selected,
-                vmesh,
+                cmesh,
                 debugSettings,
                 t,
                 0,
@@ -66,7 +67,7 @@ namespace MagicaCloth2
         /// <param name="cprocess"></param>
         /// <param name="vmesh"></param>
         /// <param name="debugSettings"></param>
-        public static void DrawRuntimeGizmos(ClothProcess cprocess, bool isMapping, VirtualMesh vmesh, VirtualMeshDebugSettings debugSettings, bool selected, bool useHandles)
+        public static void DrawRuntimeGizmos(ClothProcess cprocess, bool isMapping, VirtualMeshContainer cmesh, VirtualMeshDebugSettings debugSettings, bool selected, bool useHandles)
         {
             if (cprocess == null || cprocess.IsValid() == false)
                 return;
@@ -77,10 +78,10 @@ namespace MagicaCloth2
             if (MagicaManager.Team.ContainsTeamData(cprocess.TeamId) == false)
                 return;
 
-            if (vmesh == null || vmesh.IsSuccess == false)
+            if (cmesh == null || cmesh.shareVirtualMesh == null || cmesh.shareVirtualMesh.IsSuccess == false)
                 return;
 
-            var t = vmesh.GetCenterTransform();
+            var t = cmesh.GetCenterTransform();
             if (t == null)
                 return;
 
@@ -91,6 +92,7 @@ namespace MagicaCloth2
             var vm = MagicaManager.VMesh;
 
             // メッシュタイプにより参照するデータを切り替える
+            var vmesh = cmesh.shareVirtualMesh;
             var attributes = vmesh.IsMapping ? vm.mappingAttributes : vm.attributes;
             var positions = vmesh.IsMapping ? vm.mappingPositions : vm.positions;
             var rotations = vmesh.IsMapping ? null : vm.rotations;
@@ -105,7 +107,7 @@ namespace MagicaCloth2
                 useHandles,
                 isMapping ? true : false,
                 selected,
-                vmesh,
+                cmesh,
                 debugSettings,
                 t,
                 vstart,
@@ -123,7 +125,7 @@ namespace MagicaCloth2
             bool useHandles,
             bool isLocal,
             bool selected,
-            VirtualMesh vmesh,
+            VirtualMeshContainer cmesh,
             VirtualMeshDebugSettings debugSettings,
             Transform center,
             int vstart,
@@ -154,7 +156,8 @@ namespace MagicaCloth2
             if (scam == null)
                 return;
             quaternion camRot = scam.transform.rotation;
-            quaternion invCamRot = math.inverse(camRot);
+            //quaternion invCamRot = math.inverse(camRot);
+            var vmesh = cmesh.shareVirtualMesh;
             int vcnt = vmesh.VertexCount;
 
             // 表示スケール調整
@@ -503,10 +506,12 @@ namespace MagicaCloth2
             // bone name
             if (debugSettings.boneName)
             {
-                int cnt = vmesh.transformData.Count;
+                //int cnt = vmesh.transformData.Count;
+                int cnt = cmesh.GetTransformCount();
                 for (int i = 0; i < cnt; i++)
                 {
-                    var t = vmesh.transformData.GetTransformFromIndex(i);
+                    //var t = vmesh.transformData.GetTransformFromIndex(i);
+                    var t = cmesh.GetTransformFromIndex(i);
                     if (t)
                     {
                         var pos = t.position;

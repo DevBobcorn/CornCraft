@@ -76,6 +76,7 @@ namespace MagicaCloth2
             CreateCloth_InvalidPaintMap,
             CreateCloth_PaintMapNotReadable,
             CreateCloth_PaintMapCountMismatch,
+            CreateCloth_CanNotStart,
 
             // Reduction
             Reduction_Exception = 20500,
@@ -131,6 +132,27 @@ namespace MagicaCloth2
             MagicaMesh_Invalid,
             MagicaMesh_InvalidRenderer,
             MagicaMesh_InvalidMeshFilter,
+
+            // PreBuildData
+            PreBuildData_UnknownError = 22600,
+            PreBuildData_MagicaClothException,
+            PreBuildData_VirtualMeshDeserializationException,
+            PreBuildData_VerificationResult,
+            PreBuildData_VersionMismatch,
+            PreBuildData_InvalidClothData,
+            PreBuildData_Empty,
+            PreBuildData_InvalidScale,
+
+            // PreBuild
+            PreBuild_UnknownError = 22700,
+            PreBuild_Exception,
+            PreBuild_InvalidPreBuildData,
+            PreBuild_InvalidRenderSetupData,
+            PreBuild_SetupDeserializationError,
+
+            // PreBuild Deserialization
+            Deserialization_UnknownError = 22800,
+            Deserialization_Exception,
         }
     }
 }

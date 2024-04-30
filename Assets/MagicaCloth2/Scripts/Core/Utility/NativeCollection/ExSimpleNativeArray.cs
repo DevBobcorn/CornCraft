@@ -67,6 +67,11 @@ namespace MagicaCloth2
             count = length;
         }
 
+        public ExSimpleNativeArray(SerializationData sdata)
+        {
+            Deserialize(sdata);
+        }
+
         public void Dispose()
         {
             if (nativeArray.IsCreated)
@@ -512,8 +517,8 @@ namespace MagicaCloth2
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine($"ExNativeArray Length:{Length} Count:{Count} IsValid:{IsValid}");
-            sb.AppendLine("---- Datas[100] ----");
+            sb.AppendLine($"ExSimpleNativeArray Length:{Length} Count:{Count} IsValid:{IsValid}");
+            sb.AppendLine("---- Datas[~100] ----");
             if (IsValid)
             {
                 for (int i = 0; i < Length && i < 100; i++)
@@ -523,6 +528,60 @@ namespace MagicaCloth2
             }
 
             return sb.ToString();
+        }
+
+        //=========================================================================================
+        /// <summary>
+        /// シリアライズデータ
+        /// </summary>
+        [System.Serializable]
+        public class SerializationData
+        {
+            public int count;
+            public int length;
+            public byte[] arrayBytes;
+        }
+
+        /// <summary>
+        /// シリアライズする
+        /// </summary>
+        /// <returns></returns>
+        public SerializationData Serialize()
+        {
+            var data = new SerializationData();
+            data.count = count;
+            data.length = length;
+            if (nativeArray.IsCreated && nativeArray.Length > 0)
+            {
+                data.arrayBytes = nativeArray.MC2ToRawBytes();
+            }
+
+            return data;
+        }
+
+        /// <summary>
+        /// デシリアライズする
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public bool Deserialize(SerializationData data)
+        {
+            try
+            {
+                Dispose();
+                count = data.count;
+                length = data.length;
+                if (data.length > 0 && data.arrayBytes != null)
+                {
+                    nativeArray = NativeArrayExtensions.MC2FromRawBytes<T>(data.arrayBytes, Allocator.Persistent);
+                }
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+                return false;
+            }
         }
     }
 }

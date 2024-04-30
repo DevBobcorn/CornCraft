@@ -18,6 +18,11 @@ namespace MagicaCloth2
             public const string DefineSymbol = "MAGICACLOTH2";
 
             /// <summary>
+            /// 現在有効なPreBuildの最新バージョン
+            /// </summary>
+            public const int LatestPreBuildVersion = 2;
+
+            /// <summary>
             /// 計算を省略する最小の浮動小数点数
             /// </summary>
             public const float Epsilon = 1e-8f;

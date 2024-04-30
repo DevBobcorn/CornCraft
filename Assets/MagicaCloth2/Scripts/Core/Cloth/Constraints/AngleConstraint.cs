@@ -203,21 +203,21 @@ namespace MagicaCloth2
 
         public void Dispose()
         {
-            lengthBuffer.DisposeSafe();
-            localPosBuffer.DisposeSafe();
-            localRotBuffer.DisposeSafe();
-            rotationBuffer.DisposeSafe();
-            restorationVectorBuffer.DisposeSafe();
+            lengthBuffer.MC2DisposeSafe();
+            localPosBuffer.MC2DisposeSafe();
+            localRotBuffer.MC2DisposeSafe();
+            rotationBuffer.MC2DisposeSafe();
+            restorationVectorBuffer.MC2DisposeSafe();
         }
 
         internal void WorkBufferUpdate()
         {
             int pcnt = MagicaManager.Simulation.ParticleCount;
-            lengthBuffer.Resize(pcnt, options: NativeArrayOptions.UninitializedMemory);
-            localPosBuffer.Resize(pcnt, options: NativeArrayOptions.UninitializedMemory);
-            localRotBuffer.Resize(pcnt, options: NativeArrayOptions.UninitializedMemory);
-            rotationBuffer.Resize(pcnt, options: NativeArrayOptions.UninitializedMemory);
-            restorationVectorBuffer.Resize(pcnt, options: NativeArrayOptions.UninitializedMemory);
+            lengthBuffer.MC2Resize(pcnt, options: NativeArrayOptions.UninitializedMemory);
+            localPosBuffer.MC2Resize(pcnt, options: NativeArrayOptions.UninitializedMemory);
+            localRotBuffer.MC2Resize(pcnt, options: NativeArrayOptions.UninitializedMemory);
+            rotationBuffer.MC2Resize(pcnt, options: NativeArrayOptions.UninitializedMemory);
+            restorationVectorBuffer.MC2Resize(pcnt, options: NativeArrayOptions.UninitializedMemory);
         }
 
         public override string ToString()
@@ -490,7 +490,7 @@ namespace MagicaCloth2
                             v = math.normalize(v) * vlen;
 
                             // ベクトル角度クランプ
-                            float maxAngleDeg = angleParam.limitCurveData.EvaluateCurve(cdepth);
+                            float maxAngleDeg = angleParam.limitCurveData.MC2EvaluateCurve(cdepth);
                             float maxAngleRad = math.radians(maxAngleDeg);
                             float angle = MathUtility.Angle(v, tv);
                             float3 rv = v;
@@ -557,7 +557,7 @@ namespace MagicaCloth2
                             float3 tv = restorationVectorBufferArray[pindex];
 
                             // 復元力
-                            float restorationStiffness = angleParam.restorationStiffness.EvaluateCurveClamp01(cdepth);
+                            float restorationStiffness = angleParam.restorationStiffness.MC2EvaluateCurveClamp01(cdepth);
                             restorationStiffness = math.saturate(restorationStiffness * simulationPower.w);
 
                             //int _pindex = indexBuffer[i] + p_start;
