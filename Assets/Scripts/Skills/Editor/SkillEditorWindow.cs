@@ -23,7 +23,7 @@ namespace CraftSharp.Control
         private float _lastUpdateTime = 0f;
         private float _currentLeftWidth = 250f;
         private const float MIN_LEFT_WIDTH = 200f;
-        private const float MAX_LEFT_WIDTH = 350f;
+        private const float MAX_LEFT_WIDTH = 400f;
         private bool resizingLeft = false;
 
         #region Property Access
@@ -85,7 +85,7 @@ namespace CraftSharp.Control
         static void Init()
         {
             var window = GetWindow<SkillEditorWindow>(false, "Unicorn Skill Editor");
-            window.minSize = new Vector3(400f, 200f);
+            window.minSize = new Vector3(500f, 200f);
             window.Show();
         }
 
@@ -285,7 +285,7 @@ namespace CraftSharp.Control
             {
                 track.DrawHeader(nextStartY, _currentLeftWidth);
 
-                nextStartY += track.TrackHeight + 8;
+                nextStartY += track.TrackHeight + 6;
             }
 
             GUILayout.EndArea();
@@ -302,7 +302,7 @@ namespace CraftSharp.Control
             {
                 track.DrawContent(nextStartY, contentWidth, TimeAreaTimeShownRange);
 
-                nextStartY += track.TrackHeight + 8;
+                nextStartY += track.TrackHeight + 6;
             }
 
             GUILayout.EndArea();

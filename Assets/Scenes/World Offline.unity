@@ -462,8 +462,7 @@ MonoBehaviour:
   AtlasCutout: {fileID: 2100000, guid: 9799fbe4314dcb04a95084e6b0a1626f, type: 2}
   AtlasCutoutMipped: {fileID: 2100000, guid: 356fe3b2c3144ef4f82484e1a7bebe4e, type: 2}
   AtlasTranslucent: {fileID: 2100000, guid: 8ee6dff0c60e65743895b69cc4c5bc0a, type: 2}
-  AtlasWater: {fileID: 2100000, guid: 8ee6dff0c60e65743895b69cc4c5bc0a, type: 2}
-  AtlasInventory: {fileID: 0}
+  StylizedWater: {fileID: 2100000, guid: 832933f1201cf6146a0399fc088e9d6d, type: 2}
   PlayerSkin: {fileID: 2100000, guid: a7bc66ac351da2644be4e993cc7450e7, type: 2}
 --- !u!114 &331478948
 MonoBehaviour:
@@ -1263,6 +1262,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8368171166587409609, guid: 4abdac2869b287f459e7c6f7e6200476, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 832933f1201cf6146a0399fc088e9d6d, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

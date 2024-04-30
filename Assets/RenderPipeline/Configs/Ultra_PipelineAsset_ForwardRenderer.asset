@@ -98,6 +98,26 @@ MonoBehaviour:
       restoreCamera: 1
       offset: {x: 0, y: 0, z: 0, w: 0}
       cameraFieldOfView: 60
+--- !u!114 &-408358162207867921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2086e3e143e14a2abcd3b0dbc77a10ac, type: 3}
+  m_Name: 'Stylized Water 2: Stylized Water 2'
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  screenSpaceReflectionSettings:
+    enable: 1
+  directionalCaustics: 0
+  displacementPrePassSettings:
+    enable: 0
+    range: 500
+    cellSize: 0.25
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119,6 +139,7 @@ MonoBehaviour:
   - {fileID: -2351452293755395191}
   - {fileID: -5747766180797253489}
   - {fileID: -8976238060765929404}
+  - {fileID: -408358162207867921}
   m_RendererFeatureMap: a7636cbeba992222d22842066da3424a89a36eec98f65ddf8f78938d1cd53bb044a0b4b80aff6d83
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
