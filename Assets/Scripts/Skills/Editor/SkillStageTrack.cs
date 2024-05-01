@@ -1,3 +1,4 @@
+#nullable enable
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -9,11 +10,13 @@ namespace CraftSharp.Control
         private readonly int stageIndex;
 
         private float stageStart;    // Seconds
+        public float StageStart => stageStart;
         private float stageDuration; // Seconds
+        public float StageDuration => stageDuration;
         private float damageStart;   // Seconds
         private float damageEnd;     // Seconds
 
-        private AnimationClip animationClip;
+        private AnimationClip? animationClip;
 
         private Rect rectHeader = new();
         private Rect rectContent = new();
@@ -22,6 +25,8 @@ namespace CraftSharp.Control
         public float TrackHeight { get; private set; } = 42F;
 
         public float AnimationHeight { get; private set; } = 12F;
+
+        public float AnimationDuration => animationClip?.averageDuration ?? 1F;
 
         public SkillStageTrack(float start, int index, PlayerAttackStage stage)
         {
@@ -49,7 +54,7 @@ namespace CraftSharp.Control
             GUILayout.BeginHorizontal();
                 GUILayout.Space(5);
                 GUI.backgroundColor = TRACK_BODY[stageIndex % TRACK_BODY.Length] * 2; // Intensify the color
-                animationClip =  EditorGUILayout.ObjectField(animationClip, typeof (AnimationClip), false,
+                animationClip = EditorGUILayout.ObjectField(animationClip, typeof (AnimationClip), false,
                         GUILayout.Width(width - 50)) as AnimationClip;
                 GUI.backgroundColor = defColor; // Restore background color
 
@@ -74,7 +79,7 @@ namespace CraftSharp.Control
             return color;
         }).ToArray();
 
-        public void DrawContent(float startY, float fullWidth, Vector2 timeRange)
+        public void DrawContent(float startY, float fullWidth, Vector2 timeRange, bool active)
         {
             rectContent.Set(0, startY, fullWidth, 8);
             GUI.DrawTexture(rectContent, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, TRACK_EDGE, 0, 0);
@@ -118,7 +123,7 @@ namespace CraftSharp.Control
                 if (rectContent.Contains(UnityEngine.Event.current.mousePosition))
                 {
                     // The mouse is on this rect
-                    GUI.DrawTexture(rectContent, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, Color.white * 0.7F, 0, 0);
+                    GUI.DrawTexture(rectContent, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, (active ? Color.cyan : Color.white) * 0.7F, 0, 0);
                     
                     // Draw exact start and end time
                     GUILayout.BeginHorizontal();
@@ -131,7 +136,7 @@ namespace CraftSharp.Control
                 }
                 else
                 {
-                    GUI.DrawTexture(rectContent, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, Color.white * 0.5F, 0, 0);
+                    GUI.DrawTexture(rectContent, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, (active ? Color.cyan : Color.white) * 0.5F, 0, 0);
                 }
 
                 // Reset GUI color
@@ -142,6 +147,14 @@ namespace CraftSharp.Control
             // Draw detailed information...
 
             GUILayout.EndArea();
+        }
+
+        public void ReplaceAnimation(AnimatorOverrideController controller)
+        {
+            if (animationClip != null)
+            {
+                controller["DummySkill"] = animationClip;
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿#nullable enable
+using UnityEngine;
 using UnityEditor;
+using Unity.Mathematics;
 using DMTimeArea;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,7 @@ namespace CraftSharp.Control
         public Rect rectLeftTopToolBar;
 
         private double _runningTime = 0f;
+        private float _playbackSpeed = 1f;
         private float _lastUpdateTime = 0f;
         private float _currentLeftWidth = 250f;
         private const float MIN_LEFT_WIDTH = 200f;
@@ -75,11 +78,16 @@ namespace CraftSharp.Control
 
         #endregion
 
-        private Animator previewAnimator = null;
-        private GameObject charaPreview = null;
-        private PlayerStagedSkill currentSkill = null;
+        private Animator? previewAnimator = null;
+        private AnimatorOverrideController? animatorOverrideController;
+        private AnimationModeDriver? m_Driver;
+        private GameObject? charaPreview = null;
+        private Vector3 charaPreviewPos = Vector3.zero;
+        private Quaternion charaPreviewRot = Quaternion.identity;
+        private PlayerStagedSkill? currentSkill = null;
 
         private readonly List<SkillStageTrack> tracks = new();
+        private SkillStageTrack? activeTrack = null;
 
         [MenuItem("Tools/Unicorn Skill Editor", false, 2024)]
         static void Init()
@@ -109,7 +117,7 @@ namespace CraftSharp.Control
         /// <summary>
         /// Called when the selected object for preview is changed
         /// </summary>
-        void HandleSkillChange(PlayerStagedSkill newSkill)
+        void HandleSkillChange(PlayerStagedSkill? newSkill)
         {
             currentSkill = newSkill;
 
@@ -120,8 +128,25 @@ namespace CraftSharp.Control
             else
             {
                 InitializeTracks(newSkill);
+            }
+        }
 
-                Debug.Log($"Tracks: {tracks.Count}");
+        void AssignAnimatorOverride()
+        {
+            if (previewAnimator != null)
+            {
+                if (previewAnimator.runtimeAnimatorController is AnimatorOverrideController)
+                {
+                    animatorOverrideController = previewAnimator.runtimeAnimatorController as AnimatorOverrideController;
+                }
+                else
+                {
+                    animatorOverrideController = new AnimatorOverrideController(previewAnimator.runtimeAnimatorController)
+                    {
+                        name = previewAnimator.runtimeAnimatorController.name + " (Overriden)"
+                    };
+                    previewAnimator.runtimeAnimatorController = animatorOverrideController;
+                }
             }
         }
 
@@ -129,11 +154,13 @@ namespace CraftSharp.Control
         /// Called when the selected preview character object is changed
         /// </summary>
         /// <param name="newPreview">The new selected object</param>
-        void HandlePreviewObjectChange(GameObject newPreview)
+        void HandlePreviewObjectChange(GameObject? newPreview)
         {
+            AnimationMode.StopAnimationMode(GetAnimationModeDriver()); // Revert all changes done in preview
+
             charaPreview = newPreview;
 
-            if (charaPreview == null || (previewAnimator = charaPreview.GetComponent<Animator>()) == null)
+            if (charaPreview == null || (previewAnimator = charaPreview.GetComponentInChildren<Animator>()) == null)
             {
                 charaPreview = null;
                 previewAnimator = null;
@@ -149,6 +176,19 @@ namespace CraftSharp.Control
                 else
                 {
                     InitializeTracks(currentSkill);
+
+                    // Store initial position and rotation
+                    charaPreviewPos = charaPreview.transform.position;
+                    charaPreviewRot = charaPreview.transform.rotation;
+
+                    AnimationMode.StartAnimationMode(GetAnimationModeDriver());
+
+                    // Assign overridden animator controller
+                    AssignAnimatorOverride();
+
+                    // Enable root motion
+                    //previewAnimator.stabilizeFeet = true;
+                    previewAnimator.applyRootMotion = true;
                 }
             }
         }
@@ -163,6 +203,54 @@ namespace CraftSharp.Control
 
                 Repaint();
             }
+        }
+
+        protected override void HandleTimeUpdate(double runningTime)
+        {
+            if (activeTrack != null && (runningTime < activeTrack.StageStart ||
+                    runningTime > activeTrack.StageStart + activeTrack.StageDuration) )
+            {
+                // Active stage expired
+                activeTrack = null;
+            }
+
+            if (activeTrack == null && animatorOverrideController != null)
+            {
+                // Update active stage
+                foreach (var track in tracks)
+                {
+                    if (runningTime >= track.StageStart && runningTime <= track.StageStart + track.StageDuration)
+                    {
+                        activeTrack = track;
+                        track.ReplaceAnimation(animatorOverrideController);
+                        break;
+                    }
+                }
+            }
+
+            if (activeTrack != null && AnimationMode.InAnimationMode())
+            {
+                float animTime = (float) runningTime - activeTrack.StageStart;
+                animTime = math.clamp(animTime, 0F, activeTrack.StageDuration);
+                
+                AnimationMode.BeginSampling();
+                AnimationMode.SampleAnimationClip(charaPreview, animatorOverrideController!["DummySkill"], animTime);
+                AnimationMode.EndSampling();
+
+                charaPreview!.transform.SetPositionAndRotation(charaPreviewPos, charaPreviewRot);
+            }
+        }
+
+        private AnimationModeDriver GetAnimationModeDriver()
+        {
+            if (m_Driver == null)
+            {
+                m_Driver = ScriptableObject.CreateInstance<AnimationModeDriver>();
+                m_Driver.hideFlags = HideFlags.HideAndDontSave;
+                m_Driver.name = "SkillAnimationWindowDriver";
+            }
+
+            return m_Driver;
         }
 
         void OnFocus()
@@ -189,15 +277,28 @@ namespace CraftSharp.Control
             EditorApplication.update = (EditorApplication.CallbackFunction) Delegate.Remove(EditorApplication.update, new EditorApplication.CallbackFunction(OnEditorUpdate));
         }
 
+        public void OnDestroy()
+        {
+            if (m_Driver != null)
+                ScriptableObject.DestroyImmediate(m_Driver);
+        }
+
         private void OnEditorUpdate()
         {
             if (!Application.isPlaying && this.IsPlaying)
             {
-                double fTime = (float)EditorApplication.timeSinceStartup - _lastUpdateTime;
-                this.RunningTime += Math.Abs(fTime) * 1.0f;
-            }
+                double fTime = (float) EditorApplication.timeSinceStartup - _lastUpdateTime;
+                // Clamp fTime to avoid sudden changes
+                fTime = math.clamp(fTime, 0, 0.1);
 
-            _lastUpdateTime = (float)EditorApplication.timeSinceStartup;
+                _lastUpdateTime = (float) EditorApplication.timeSinceStartup;
+
+                // Setting running time will trigger animation update, which
+                // can take a long time, so we do this after updating timestamp
+                this.RunningTime += Math.Abs(fTime) * _playbackSpeed;
+                HandleTimeUpdate(this.RunningTime);
+            }
+            
             Repaint();
         }
 
@@ -300,7 +401,16 @@ namespace CraftSharp.Control
 
             foreach (var track in tracks)
             {
-                track.DrawContent(nextStartY, contentWidth, TimeAreaTimeShownRange);
+                track.DrawContent(nextStartY, contentWidth, TimeAreaTimeShownRange, track == activeTrack);
+
+                if (track == activeTrack)
+                {
+                    GUI.color = Color.black;
+                    // Draw cursor time inside this track
+                    float pos = TimeToPixel(this.RunningTime) - rectMainBodyArea.x - _currentLeftWidth;
+                    GUI.Label(new(pos, nextStartY - 5, 50, 20), $"{RunningTime - track.StageStart:0.00}", EditorStyles.boldLabel);
+                    GUI.color = Color.white;
+                }
 
                 nextStartY += track.TrackHeight + 6;
             }
@@ -329,6 +439,21 @@ namespace CraftSharp.Control
             {
                 HandleSkillChange(newCurrentSkill);
             }
+
+            GUILayout.Space(10);
+
+            if (GUILayout.Button("Reload", GUILayout.Width(70)) && currentSkill != null)
+            {
+                HandleSkillChange(currentSkill);
+            }
+
+            GUILayout.Space(60);
+
+            GUILayout.Label("AnimMode: " + (AnimationMode.InAnimationMode() ? "ON" : "OFF"), GUILayout.Width(100));
+
+            GUILayout.Label("Speed", GUILayout.Width(50));
+            
+            _playbackSpeed = EditorGUILayout.Slider(_playbackSpeed, -1, 1, GUILayout.Width(135));
 
             GUILayout.EndHorizontal();
 
@@ -382,8 +507,7 @@ namespace CraftSharp.Control
             if (GUILayout.Button(ResManager.StopIcon, EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))
                 && !Application.isPlaying)
             {
-                PausePreview();
-                this.RunningTime = 0.0f;
+                ResetPreview();
             }
 
             GUILayout.FlexibleSpace();
@@ -432,6 +556,18 @@ namespace CraftSharp.Control
         private void PausePreview()
         {
             IsPlaying = false;
+        }
+
+        void ResetPreview()
+        {
+            IsPlaying = false;
+            RunningTime = 0.0f;
+
+            // Reset preview object transform
+            if (charaPreview != null)
+            {
+                charaPreview.transform.SetPositionAndRotation(charaPreviewPos, charaPreviewRot);
+            }
         }
     }
 }

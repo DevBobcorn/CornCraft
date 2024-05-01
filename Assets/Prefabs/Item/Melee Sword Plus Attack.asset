@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88d582769fd5a7f48830e466a271858b, type: 3}
   m_Name: Melee Sword Plus Attack
   m_EditorClassIdentifier: 
+  IdleTimeout: -0.9
   Stages:
   - AnimationClip: {fileID: 7400000, guid: 1d399b9dc0740ba4b9f589b3d85f96d5, type: 2}
-    Duration: 0.733
+    Duration: 0.45
     DamageStart: 0.24
     DamageEnd: 0.4
   - AnimationClip: {fileID: 7400000, guid: 567cd903192f0d343970405d252dc8c3, type: 2}
-    Duration: 0.733
+    Duration: 0.55
     DamageStart: 0.24
     DamageEnd: 0.43
   - AnimationClip: {fileID: 7400000, guid: 04eb97a893e61e548b63161f0226bcad, type: 2}
@@ -26,12 +27,11 @@ MonoBehaviour:
     DamageStart: 0.25
     DamageEnd: 0.36
   - AnimationClip: {fileID: 7400000, guid: f37d1da60d957c4469826862c4003909, type: 2}
-    Duration: 0.667
+    Duration: 1
     DamageStart: 0.1
     DamageEnd: 0.16
   - AnimationClip: {fileID: 7400000, guid: fb94335a9f207974794dbe50de1826d5, type: 2}
-    Duration: 0.667
+    Duration: 1
     DamageStart: 0.1
     DamageEnd: 0.16
-  IdleTimeout: -0.9
   DummyAnimationClip: {fileID: 7400000, guid: 1698def8346f10e46866626916c35924, type: 2}
