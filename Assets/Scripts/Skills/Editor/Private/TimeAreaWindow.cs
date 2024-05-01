@@ -382,6 +382,7 @@ namespace DMTimeArea
                                 if (fTime <= 0)
                                     fTime = 0.0;
                                 this.RunningTime = fTime;
+                                HandleTimeUpdate(fTime);
                             }
                         }
                         break;
@@ -395,6 +396,7 @@ namespace DMTimeArea
                                     if (fTime <= 0)
                                         fTime = 0.0;
                                     this.RunningTime = fTime;
+                                    HandleTimeUpdate(fTime);
                                 }
                             }
                         }
@@ -403,6 +405,8 @@ namespace DMTimeArea
                 }
             }
         }
+
+        protected abstract void HandleTimeUpdate(double runningTime);
 
         private static int kRedCursorControlID = "RedCursorControlRect".GetHashCode();
 
