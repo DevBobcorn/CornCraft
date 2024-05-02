@@ -124,7 +124,7 @@ namespace CraftSharp.Rendering
 
             skyboxMaterial!.SetFloat("_Exposure", skyboxExposure!.Evaluate(normalizedTOD));
 
-            if (updateEnvLighting && Mathf.Abs(Mathf.DeltaAngle(normalizedTOD * 360F, lastUpdateEnvLightingTODAngle)) > 20F) // Time for an update!
+            if (updateEnvLighting && Mathf.Abs(Mathf.DeltaAngle(normalizedTOD * 360F, lastUpdateEnvLightingTODAngle)) > 12F) // Time for an update!
             {
                 lastUpdateEnvLightingTODAngle = normalizedTOD * 360F;
 
