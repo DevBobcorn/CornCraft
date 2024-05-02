@@ -21,7 +21,8 @@ namespace CraftSharp
         [SerializeField] public MaterialManager? MaterialManager;
         
         [SerializeField] protected PlayerController? playerController;
-        [SerializeField] protected GameObject? playerRenderPrefab;
+        [SerializeField] protected GameObject[] playerRenderPrefabs = { };
+        [SerializeField] protected int selectedRenderPrefab;
         [SerializeField] protected CameraController? cameraController;
         public CameraController CameraController => cameraController!;
         [SerializeField] protected ScreenControl? screenControl;

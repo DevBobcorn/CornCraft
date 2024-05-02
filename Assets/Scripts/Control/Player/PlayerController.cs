@@ -92,7 +92,23 @@ namespace CraftSharp.Control
             return Vector3.forward;
         }
 
-        public void UpdatePlayerRender(Entity entity, GameObject renderObj)
+        public void UpdatePlayerRenderFromPrefab(Entity entity, GameObject renderPrefab)
+        {
+            GameObject renderObj;
+            if (renderPrefab.GetComponent<Animator>() != null) // Model prefab, wrap it up
+            {
+                renderObj = AnimatorEntityRender.CreateFromModel(renderPrefab);
+            }
+            else // Player render prefab, just instantiate
+            {
+                renderObj = GameObject.Instantiate(renderPrefab);
+            }
+            renderObj!.name = $"Player Entity ({renderPrefab.name})";
+
+            UpdatePlayerRender(entity, renderObj);
+        }
+
+        private void UpdatePlayerRender(Entity entity, GameObject renderObj)
         {
             var prevRender = playerRender;
 
