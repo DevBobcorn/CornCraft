@@ -23,7 +23,7 @@ namespace CraftSharp.Control
         public Rect rectLeftTopToolBar;
 
         private double _runningTime = 0f;
-        private float _playbackSpeed = 1f;
+        private float m_PlaybackSpeed = 1f;
         private float _lastUpdateTime = 0f;
         private float _currentLeftWidth = 250f;
         private const float MIN_LEFT_WIDTH = 200f;
@@ -82,9 +82,27 @@ namespace CraftSharp.Control
         private Animator? previewAnimator = null;
         private AnimatorOverrideController? animatorOverrideController;
         private AnimationModeDriver? m_Driver;
+        private bool m_FixedTransform = false;
         private GameObject? charaPreview = null;
-        private Vector3 charaPreviewPos = Vector3.zero;
-        private Quaternion charaPreviewRot = Quaternion.identity;
+        //private Vector3 charaPreviewPos = Vector3.zero;
+        //private Quaternion charaPreviewRot = Quaternion.identity;
+        private Transform? charaPreviewOrigin = null;
+        private Transform CharaPreviewOrigin
+        {
+            get {
+                if (charaPreviewOrigin == null)
+                {
+                    var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    obj.hideFlags = HideFlags.HideAndDontSave;
+
+                    charaPreviewOrigin = obj.transform;
+                    charaPreviewOrigin.localScale = Vector3.one * 0.1F;
+                }
+
+                return charaPreviewOrigin;
+            }
+        }
+
         private PlayerStagedSkill? currentSkill = null;
 
         private readonly List<SkillStageTrack> tracks = new();
@@ -159,6 +177,12 @@ namespace CraftSharp.Control
         {
             AnimationMode.StopAnimationMode(GetAnimationModeDriver()); // Revert all changes done in preview
 
+            if (charaPreview != null && charaPreviewOrigin != null) // Revert preview object root transform
+            {
+                charaPreview.transform.SetPositionAndRotation(charaPreviewOrigin.position, charaPreviewOrigin.rotation);
+                GameObject.DestroyImmediate(charaPreviewOrigin.gameObject);
+            }
+
             charaPreview = newPreview;
 
             if (charaPreview == null || (previewAnimator = charaPreview.GetComponentInChildren<Animator>()) == null)
@@ -179,16 +203,14 @@ namespace CraftSharp.Control
                     InitializeTracks(currentSkill);
 
                     // Store initial position and rotation
-                    charaPreviewPos = charaPreview.transform.position;
-                    charaPreviewRot = charaPreview.transform.rotation;
-
+                    CharaPreviewOrigin.transform.SetPositionAndRotation(charaPreview.transform.position, charaPreview.transform.rotation);
                     AnimationMode.StartAnimationMode(GetAnimationModeDriver());
 
                     // Assign overridden animator controller
                     AssignAnimatorOverride();
 
                     // Enable root motion
-                    //previewAnimator.stabilizeFeet = true;
+                    previewAnimator.stabilizeFeet = true;
                     previewAnimator.applyRootMotion = true;
                 }
             }
@@ -233,12 +255,24 @@ namespace CraftSharp.Control
             {
                 float animTime = (float) runningTime - activeTrack.StageStart;
                 animTime = math.clamp(animTime, 0F, activeTrack.StageDuration);
+
+                var clip = animatorOverrideController![SKILL_CLIP_NAME];
                 
                 AnimationMode.BeginSampling();
-                AnimationMode.SampleAnimationClip(charaPreview, animatorOverrideController![SKILL_CLIP_NAME], animTime);
+                AnimationMode.SampleAnimationClip(charaPreview, clip, animTime);
                 AnimationMode.EndSampling();
 
-                charaPreview!.transform.SetPositionAndRotation(charaPreviewPos, charaPreviewRot);
+                if (m_FixedTransform)
+                {
+                    charaPreview!.transform.SetPositionAndRotation(CharaPreviewOrigin.position, CharaPreviewOrigin.rotation);
+                }
+                else
+                {
+                    charaPreview!.transform.SetPositionAndRotation(
+                        CharaPreviewOrigin.position + charaPreview!.transform.position,
+                        charaPreview!.transform.rotation
+                    );
+                }
             }
         }
 
@@ -282,6 +316,9 @@ namespace CraftSharp.Control
         {
             if (m_Driver != null)
                 ScriptableObject.DestroyImmediate(m_Driver);
+            
+            if (charaPreviewOrigin != null)
+                GameObject.DestroyImmediate(charaPreviewOrigin.gameObject);
         }
 
         private void OnEditorUpdate()
@@ -296,7 +333,7 @@ namespace CraftSharp.Control
 
                 // Setting running time will trigger animation update, which
                 // can take a long time, so we do this after updating timestamp
-                this.RunningTime += Math.Abs(fTime) * _playbackSpeed;
+                this.RunningTime += Math.Abs(fTime) * m_PlaybackSpeed;
                 HandleTimeUpdate(this.RunningTime);
             }
             
@@ -452,9 +489,10 @@ namespace CraftSharp.Control
 
             GUILayout.Label("AnimMode: " + (AnimationMode.InAnimationMode() ? "ON" : "OFF"), GUILayout.Width(100));
 
-            GUILayout.Label("Speed", GUILayout.Width(50));
-            
-            _playbackSpeed = EditorGUILayout.Slider(_playbackSpeed, -1, 1, GUILayout.Width(135));
+            GUILayout.Label("Speed:", GUILayout.Width(50));
+            m_PlaybackSpeed = EditorGUILayout.Slider(m_PlaybackSpeed, -1, 1, GUILayout.Width(135));
+            GUILayout.Space(20);
+            m_FixedTransform = EditorGUILayout.Toggle("Fixed:", m_FixedTransform, GUILayout.Width(60));
 
             GUILayout.EndHorizontal();
 
@@ -563,12 +601,6 @@ namespace CraftSharp.Control
         {
             IsPlaying = false;
             RunningTime = 0.0f;
-
-            // Reset preview object transform
-            if (charaPreview != null)
-            {
-                charaPreview.transform.SetPositionAndRotation(charaPreviewPos, charaPreviewRot);
-            }
         }
     }
 }
