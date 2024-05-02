@@ -1870,7 +1870,10 @@ MonoBehaviour:
   EnvironmentManager: {fileID: 346995815}
   MaterialManager: {fileID: 331478947}
   playerController: {fileID: 195804746}
-  playerRenderPrefab: {fileID: 3760512872237308020, guid: 75e2993040f85d9469c7377f3b5812d1, type: 3}
+  playerRenderPrefabs:
+  - {fileID: 3760512872237308020, guid: 75e2993040f85d9469c7377f3b5812d1, type: 3}
+  - {fileID: 1847743972792587742, guid: 0ff630b9800a23845be87657af0b61c4, type: 3}
+  selectedRenderPrefab: 0
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
@@ -2645,14 +2648,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Sample Environment
       objectReference: {fileID: 0}
-    - target: {fileID: 2169475716691911886, guid: 4abdac2869b287f459e7c6f7e6200476, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8368171166587409609, guid: 4abdac2869b287f459e7c6f7e6200476, type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 832933f1201cf6146a0399fc088e9d6d, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

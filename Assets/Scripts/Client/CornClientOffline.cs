@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 using CraftSharp.Control;
 using CraftSharp.Event;
@@ -95,20 +96,9 @@ namespace CraftSharp
             clientEntity.UUID = uuid;
             clientEntity.MaxHealth = 20F;
 
-            if (playerRenderPrefab != null)
+            if (playerRenderPrefabs[selectedRenderPrefab] != null)
             {
-                GameObject renderObj;
-                if (playerRenderPrefab.GetComponent<Animator>() != null) // Model prefab, wrap it up
-                {
-                    renderObj = AnimatorEntityRender.CreateFromModel(playerRenderPrefab);
-                }
-                else // Player render prefab, just instantiate
-                {
-                    renderObj = GameObject.Instantiate(playerRenderPrefab);
-                }
-                renderObj!.name = $"Player Entity ({playerRenderPrefab.name})";
-
-                playerController!.UpdatePlayerRender(clientEntity, renderObj);
+                playerController!.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
             }
             else
             {
@@ -116,6 +106,20 @@ namespace CraftSharp
             }
 
             return true; // Client successfully started
+        }
+
+        void Update()
+        {
+            if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
+            {
+                selectedRenderPrefab = (selectedRenderPrefab + 1) % playerRenderPrefabs.Length;
+                playerController?.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+            }
+            else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
+            {
+                selectedRenderPrefab = (selectedRenderPrefab + playerRenderPrefabs.Length - 1) % playerRenderPrefabs.Length;
+                playerController?.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+            }
         }
 
         public override void Disconnect()

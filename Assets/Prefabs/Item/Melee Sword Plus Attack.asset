@@ -27,7 +27,7 @@ MonoBehaviour:
     DamageStart: 0.25
     DamageEnd: 0.36
   - AnimationClip: {fileID: 7400000, guid: f37d1da60d957c4469826862c4003909, type: 2}
-    Duration: 1
+    Duration: 0.57
     DamageStart: 0.1
     DamageEnd: 0.16
   - AnimationClip: {fileID: 7400000, guid: fb94335a9f207974794dbe50de1826d5, type: 2}
