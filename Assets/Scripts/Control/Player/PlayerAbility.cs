@@ -18,8 +18,8 @@ namespace CraftSharp.Control
         // Force move animation state names
         public static readonly string CLIMB_1M = "Climb1m";
         public static readonly string CLIMB_2M = "Climb2m";
-        // Attack animation state name
-        public static readonly string ATTACK   = "Attack";
+        // Skill animation state name
+        public static readonly string SKILL      = "Skill";
 
         [SerializeField] public AnimationCurve Climb1mX = new(), Climb1mY = new(), Climb1mZ = new();
         public AnimationCurve[] Climb1mCurves => new[] { Climb1mX, Climb1mY, Climb1mZ };

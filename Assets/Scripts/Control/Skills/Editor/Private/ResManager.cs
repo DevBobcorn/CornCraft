@@ -1,12 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 
 namespace DMTimeArea
 {
     public class ResManager
     {
+        public static readonly string ASSET_PATH = "Assets/Scripts/Control/Skills/EditorResources";
+
         public static GUIContent playContent = EditorGUIUtility.IconContent("Animation.Play", "|Play the Current active Shot.");
         public static GUIContent recordContent = EditorGUIUtility.IconContent("Animation.Record", "|Enable/disable keyframe recording mode.");
         public static GUIContent prevKeyContent = EditorGUIUtility.IconContent("Animation.PrevKey", "|Go to previous keyframe.");
@@ -21,7 +21,7 @@ namespace DMTimeArea
             {
                 if (_stopIcon == null)
                 {
-                    _stopIcon = (EditorGUIUtility.Load("Assets/Scripts/Skills/EditorResources/StopIcon.png") as Texture);
+                    _stopIcon = EditorGUIUtility.Load($"{ASSET_PATH}/StopIcon.png") as Texture;
                 }
                 return _stopIcon;
             }
@@ -34,7 +34,7 @@ namespace DMTimeArea
             {
                 if (_settingIcon == null)
                 {
-                    _settingIcon = (EditorGUIUtility.Load("Assets/Scripts/Skills/EditorResources/SettingsIcon.png") as Texture);
+                    _settingIcon = EditorGUIUtility.Load($"{ASSET_PATH}/SettingsIcon.png") as Texture;
                 }
                 return _settingIcon;
             }
@@ -47,7 +47,7 @@ namespace DMTimeArea
             get
             {
                 if (_cutOffGuideLine == null)
-                    _cutOffGuideLine = (EditorGUIUtility.Load("Assets/Scripts/Skills/EditorResources/CutOffTimeCursor.png") as Texture);
+                    _cutOffGuideLine = EditorGUIUtility.Load($"{ASSET_PATH}/CutOffTimeCursor.png") as Texture;
                 return _cutOffGuideLine;
             }
         }
@@ -57,7 +57,7 @@ namespace DMTimeArea
             get
             {
                 if (_timeHead == null)
-                    _timeHead = (EditorGUIUtility.Load("Assets/Scripts/Skills/EditorResources/Timecursor.png") as Texture);
+                    _timeHead = EditorGUIUtility.Load($"{ASSET_PATH}/Timecursor.png") as Texture;
                 return _timeHead;
             }
         }

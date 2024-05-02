@@ -92,7 +92,7 @@ namespace CraftSharp.Control
             attackStatus.StageTime = 0F;
 
             player.OverrideState(rangedAttack.DummyAnimationClip!, rangedAttack.DrawWeapon!);
-            player.CrossFadeState(PlayerAbility.ATTACK, 0.01F);
+            player.CrossFadeState(PlayerAbility.SKILL, 0.01F);
 
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInOffhand);
             player.UseRootMotion = true;

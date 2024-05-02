@@ -75,7 +75,7 @@ namespace CraftSharp.Control
             attackStatus.StageDamageEnd = stageData.DamageEnd;
 
             player.OverrideState(meleeAttack.DummyAnimationClip!, stageData.AnimationClip!);
-            player.CrossFadeState(PlayerAbility.ATTACK, 0F);
+            player.CrossFadeState(PlayerAbility.SKILL, 0F);
             //player.TurnToAttackTarget();
         }
 

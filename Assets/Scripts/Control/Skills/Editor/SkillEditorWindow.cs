@@ -10,6 +10,7 @@ namespace CraftSharp.Control
 {
     public class SkillEditorWindow : TimeAreaWindow
     {
+        private static readonly string SKILL_CLIP_NAME = "DummySkill";
         private Rect rectTopBar;
 
         private Rect rectMainBodyArea;
@@ -234,7 +235,7 @@ namespace CraftSharp.Control
                 animTime = math.clamp(animTime, 0F, activeTrack.StageDuration);
                 
                 AnimationMode.BeginSampling();
-                AnimationMode.SampleAnimationClip(charaPreview, animatorOverrideController!["DummySkill"], animTime);
+                AnimationMode.SampleAnimationClip(charaPreview, animatorOverrideController![SKILL_CLIP_NAME], animTime);
                 AnimationMode.EndSampling();
 
                 charaPreview!.transform.SetPositionAndRotation(charaPreviewPos, charaPreviewRot);
