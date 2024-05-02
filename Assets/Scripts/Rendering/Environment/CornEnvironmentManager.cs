@@ -1,5 +1,6 @@
 #nullable enable
-using Unity.Mathematics;
+using System;
+using System.Collections;
 using UnityEngine;
 
 namespace CraftSharp.Rendering
@@ -60,10 +61,16 @@ namespace CraftSharp.Rendering
             if (updateEnvLighting)
             {
                 float normalizedTOD = (ticks + 6000) % 24000 / 24000F;
-
-                DynamicGI.UpdateEnvironment();
-
                 lastUpdateEnvLightingTODAngle = normalizedTOD * 360F;
+
+                static IEnumerator delayed(Action action)
+                {
+                    yield return 0;
+                    // Wait for next frame
+                    action.Invoke();
+                };
+
+                StartCoroutine(delayed(() => DynamicGI.UpdateEnvironment()));
             }
         }
 
