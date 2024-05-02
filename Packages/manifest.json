@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "com.coffee.softmask-for-ugui": "https://github.com/mob-sakai/SoftMaskForUGUI.git",
     "com.devbobcorn.craftsharp": "https://github.com/DevBobcorn/CraftSharp.git",
     "com.devbobcorn.craftsharp-resource": "https://github.com/DevBobcorn/CraftSharp-Resource.git",
+    "com.jasonma.lwgui": "https://github.com/JasonMa0012/LWGUI.git",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.burst": "1.8.14",
     "com.unity.cinemachine": "2.10.0",
