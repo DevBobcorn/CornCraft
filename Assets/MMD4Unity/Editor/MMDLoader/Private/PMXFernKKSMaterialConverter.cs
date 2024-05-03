@@ -55,7 +55,7 @@ namespace MMD
             }
 
             // Guess material type from name
-            var materialType = FernMaterialUtilFunctions.GuessMaterialCategory(material.name);
+            var materialType = FernMaterialUtilFunctions.GuessMMDMaterialCategory(material.name);
             
             //マテリアルに設定
             string shader_path = FernMaterialUtilFunctions.GetShaderPath(materialType);

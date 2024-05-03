@@ -28,7 +28,6 @@ Material:
   - _CELLSHADING
   - _GGX
   - _NORMALMAP
-  - _OUTLINE
   - _RENDERENVSETTING
   m_InvalidKeywords:
   - _ALPHABLEND_ON
@@ -160,7 +159,7 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
-    - _Outline: 1
+    - _Outline: 0
     - _OutlineWidth: 1.5
     - _Parallax: 0.02
     - _QueueOffset: 0

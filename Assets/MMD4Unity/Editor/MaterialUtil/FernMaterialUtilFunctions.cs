@@ -6,13 +6,14 @@ namespace MMD
 {
     public static class FernMaterialUtilFunctions
     {
-        public static FernMaterialCategory GuessMaterialCategory(string materialName)
+        public static FernMaterialCategory GuessMMDMaterialCategory(string materialName)
         {
             var materialType = FernMaterialCategory.Unknown;
 
             if (materialName.Contains("衣") || materialName.Contains("裙") || materialName.Contains("裤") ||
                     materialName.Contains("带") || materialName.Contains("花") || materialName.Contains("饰") ||
-                    materialName.Contains("飾"))
+                    materialName.Contains("飾") || materialName.Contains("袖") || materialName.Contains("靴") ||
+                    materialName.Contains("鞋") || materialName.Contains("袜") || materialName.Contains("套"))
             {
                 materialType = FernMaterialCategory.Clothes;
             }
@@ -20,81 +21,29 @@ namespace MMD
             {
                 materialType = FernMaterialCategory.Face;
             }
-            else if (materialName.Contains("白目") || materialName.Contains("睫") ||
-                    materialName.Contains("眉") || materialName.Contains("二重") ||
-                    materialName.Contains("口") || materialName.Contains("唇") ||
+            else if (materialName.Contains("白目") || materialName.Contains("眼白") ||
+                    materialName.Contains("睫") || materialName.Contains("眉") || materialName.Contains("二重") ||
+                    materialName.Contains("口") || materialName.Contains("唇") || materialName.Contains("舌") ||
                     materialName.Contains("牙") || materialName.Contains("齿") || materialName.Contains("歯"))
             {
-                materialType = FernMaterialCategory.Face;
+                //materialType = FernMaterialCategory.Face;
+                materialType = FernMaterialCategory.Body;
             }
             else if (materialName.Contains("目") || materialName.Contains("眼") || materialName.Contains("瞳"))
             {
                 // Use face material type for now
-                materialType = FernMaterialCategory.Face;
+                materialType = FernMaterialCategory.Eye;
             }
             else if (materialName.Contains("发") || materialName.Contains("髪"))
             {
                 materialType = FernMaterialCategory.Hair;
             }
-            else if (materialName.Contains("体") || materialName.Contains("肌"))
+            else if (materialName.Contains("体") || materialName.Contains("肌") || materialName.Contains("肤"))
             {
                 materialType = FernMaterialCategory.Body;
             }
 
             return materialType;
-        }
-
-        private static readonly HashSet<string> OPAQUE_MATERIALS = new()
-        {
-            "KK Tongue",
-            "KK Teeth (tooth)",
-            "KK Face",
-            "KK Body",
-        };
-
-        private static readonly HashSet<string> CUTOUT_MATERIALS = new()
-        {
-            "KK Nose",
-            "KK Gag00",
-            "KK Gag01",
-            "KK Gag02",
-            "KK Eyewhites (sirome)",
-            "KK EyeR (hitomi)",
-            "KK EyeL (hitomi)",
-        };
-
-        private static readonly HashSet<string> TRANSLUCENT_MATERIALS = new()
-        {
-            "KK Tears",
-            "KK Eyeline up",
-            "KK Eyeline Kage",
-            "KK Eyeline down",
-            "KK Eyebrows (mayuge)",
-        };
-
-        public static FernMaterialRenderType GuessRenderType(string materialName)
-        {
-            if (OPAQUE_MATERIALS.Contains(materialName))
-            {
-                return FernMaterialRenderType.Opaque;
-            }
-
-            if (CUTOUT_MATERIALS.Contains(materialName))
-            {
-                return FernMaterialRenderType.Cutout;
-            }
-
-            if (TRANSLUCENT_MATERIALS.Contains(materialName))
-            {
-                return FernMaterialRenderType.Translucent;
-            }
-
-            if (materialName.Contains("hair_s_") || materialName.Contains("hair_f_") || materialName.Contains("hair_b_"))
-            {
-                return FernMaterialRenderType.Opaque;
-            }
-
-            return FernMaterialRenderType.Unknown;
         }
 
         /// <summary>
@@ -109,6 +58,7 @@ namespace MMD
             {
                 FernMaterialCategory.Face => "Face",
                 FernMaterialCategory.Hair => "Hair",
+                FernMaterialCategory.Eye  => "Eye",
                 _                         => "Standard",
             };
             return result;

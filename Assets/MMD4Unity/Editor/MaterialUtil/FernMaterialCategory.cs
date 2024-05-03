@@ -4,6 +4,7 @@ namespace MMD
     {
         Body,     // Body
         Face,     // Face
+        Eye,      // Eye
         Hair,     // Hair
         Clothes,  // Clothes
         Unknown   // Uncategorized

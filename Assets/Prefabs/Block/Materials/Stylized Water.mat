@@ -19,6 +19,7 @@ Material:
   - _NORMALMAP
   - _REFRACTION
   - _TRANSLUCENCY
+  - _UNLIT
   - _WAVES
   m_InvalidKeywords:
   - ADVANCED_LIGHTING
@@ -201,7 +202,7 @@ Material:
     - _IntersectionTiling: 0.13999975
     - _IntersectionWaveDist: 33.28
     - _LightingMode: 2
-    - _LightingOn: 1
+    - _LightingOn: 0
     - _Metallic: 0
     - _Metallicness: 0.1
     - _NORMALMAPOn: 1
