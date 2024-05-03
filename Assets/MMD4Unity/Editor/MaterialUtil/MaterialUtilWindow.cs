@@ -81,7 +81,7 @@ namespace MMD
                     // Populate material dictionary
                     foreach (var material in materials)
                     {
-                        var type = FernMaterialUtilFunctions.GuessMaterialCategory(material.name);
+                        var type = FernMaterialUtilFunctions.GuessMMDMaterialCategory(material.name);
 
                         TargetMaterials[type].Add(material);
                     }
@@ -248,7 +248,7 @@ namespace MMD
                     GUILayout.Space(5); // ============================================================================
 
                     // Draw outline info
-                    if (material.GetFloat("_Outline") > 0F) // If outline is enabled
+                    if (material.HasFloat("_Outline") && material.GetFloat("_Outline") > 0F) // If outline is enabled
                     {
                         DrawColorFieldWithoutLabel(material.GetColor("_OutlineColor"), false, false, GUILayout.Width(20));
                         EditorGUILayout.LabelField(material.GetFloat("_OutlineWidth").ToString(),    GUILayout.Width(35));

@@ -12,6 +12,59 @@ namespace MMD
     /// </summary>
     public static class FernMaterialForKKS
     {
+        private static readonly HashSet<string> KKS_OPAQUE_MATERIALS = new()
+        {
+            "KK Tongue",
+            "KK Teeth (tooth)",
+            "KK Face",
+            "KK Body",
+        };
+
+        private static readonly HashSet<string> KKS_CUTOUT_MATERIALS = new()
+        {
+            "KK Nose",
+            "KK Gag00",
+            "KK Gag01",
+            "KK Gag02",
+            "KK Eyewhites (sirome)",
+            "KK EyeR (hitomi)",
+            "KK EyeL (hitomi)",
+        };
+
+        private static readonly HashSet<string> KKS_TRANSLUCENT_MATERIALS = new()
+        {
+            "KK Tears",
+            "KK Eyeline up",
+            "KK Eyeline Kage",
+            "KK Eyeline down",
+            "KK Eyebrows (mayuge)",
+        };
+
+        public static FernMaterialRenderType GuessKKSRenderType(string materialName)
+        {
+            if (KKS_OPAQUE_MATERIALS.Contains(materialName))
+            {
+                return FernMaterialRenderType.Opaque;
+            }
+
+            if (KKS_CUTOUT_MATERIALS.Contains(materialName))
+            {
+                return FernMaterialRenderType.Cutout;
+            }
+
+            if (KKS_TRANSLUCENT_MATERIALS.Contains(materialName))
+            {
+                return FernMaterialRenderType.Translucent;
+            }
+
+            if (materialName.Contains("hair_s_") || materialName.Contains("hair_f_") || materialName.Contains("hair_b_"))
+            {
+                return FernMaterialRenderType.Opaque;
+            }
+
+            return FernMaterialRenderType.Unknown;
+        }
+
         public static readonly string[] BAKED_TEXTURE_SUFFIXES = { "light", "dark" };
 
         public static void DrawGUI(string prefabPath, ref int selectedSuffix, Dictionary<FernMaterialCategory, List<Material>> targetMaterials)
@@ -146,7 +199,7 @@ namespace MMD
         {
             foreach (var material in materials)
             {
-                var renderType = FernMaterialUtilFunctions.GuessRenderType(material.name);
+                var renderType = GuessKKSRenderType(material.name);
 
                 // Use cutout by default for clothes and accessories
                 // TODO: Guess the render types for these entries

@@ -8,24 +8,22 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: KK EyeL (hitomi)
-  m_Shader: {fileID: 4800000, guid: 335dcad6d9fdba943a91b0a9295ee10e, type: 3}
+  m_Shader: {fileID: 4800000, guid: 693893d803363444f877131cc810c00d, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ALPHATEST_ON
-  - _CELLSHADING
   - _GGX
   - _NORMALMAP
-  - _OUTLINE
   - _RENDERENVSETTING
   m_InvalidKeywords:
   - _IS_FILTER_LIGHTCOLOR_ON
+  - _OUTLINE
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2450
-  stringTagMap:
-    RenderType: TransparentCutout
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   disabledShaderPasses:
   - SRPDEFAULTUNLIT
   m_LockedProperties: 
@@ -69,6 +67,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MatCapTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -144,6 +146,7 @@ Material:
     - _Is_Filter_LightColor: 1
     - _Is_SDInPaint: 0
     - _LightIntensityClamp: 1
+    - _MatCapAlbedoWeight: 0
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -177,6 +180,7 @@ Material:
     - _UseDepthShadow: 0
     - _UseEmissionTex: 0
     - _UseHalfLambert: 0
+    - _UseMatCap: 0
     - _UseRadianceOcclusion: 0
     - _WorkflowMode: 1
     - _ZOffset: 0
@@ -195,7 +199,9 @@ Material:
     - _groupClearCoat: 1
     - _groupEmission: 0
     - _groupEnvironment: 1
+    - _groupMatCap: 1
     - _groupOutline: 1
+    - _groupParallax: 0
     - _groupRim: 1
     - _groupShadingMask: 0
     - _groupShadowSetting: 1
@@ -207,7 +213,9 @@ Material:
     - _DarkColor: {r: 0.6509804, g: 0.6, b: 0.5882353, a: 1}
     - _EmissionChannel: {r: 0, g: 0, b: 1, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _EyeParallaxChannel: {r: 1, g: 0, b: 0, a: 0}
     - _HighColor: {r: 0.6666667, g: 0.6666667, b: 0.6666667, a: 1}
+    - _MatCapColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _PBRMetallicChannel: {r: 1, g: 0, b: 0, a: 0}
     - _PBROcclusionChannel: {r: 0, g: 1, b: 0, a: 0}
