@@ -217,10 +217,10 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _DarkColor: {r: 0.6509804, g: 0.6, b: 0.5882353, a: 1}
+    - _DarkColor: {r: 0.8113208, g: 0.8113208, b: 0.8113208, a: 1}
     - _EmissionChannel: {r: 0, g: 0, b: 1, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _HighColor: {r: 0.6666667, g: 0.6666667, b: 0.6666667, a: 1}
+    - _HighColor: {r: 0.8679245, g: 0.8679245, b: 0.8679245, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _PBRMetallicChannel: {r: 1, g: 0, b: 0, a: 0}
     - _PBROcclusionChannel: {r: 0, g: 1, b: 0, a: 0}

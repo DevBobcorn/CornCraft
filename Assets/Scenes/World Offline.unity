@@ -440,7 +440,6 @@ MonoBehaviour:
   playerRenderPrefabs:
   - {fileID: 3760512872237308020, guid: 75e2993040f85d9469c7377f3b5812d1, type: 3}
   - {fileID: 1847743972792587742, guid: 0ff630b9800a23845be87657af0b61c4, type: 3}
-  - {fileID: 3416577474152965808, guid: 72f17731465b7ff4ca1a548e3658d3b7, type: 3}
   selectedRenderPrefab: 0
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}
@@ -454,6 +453,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1978168991097772859, guid: bfb4ce13ee81d0a4981f1e5ce3d5a1cd, type: 3}
+      propertyPath: m_Intensity
+      value: 2.2
+      objectReference: {fileID: 0}
     - target: {fileID: 4680534492281049065, guid: bfb4ce13ee81d0a4981f1e5ce3d5a1cd, type: 3}
       propertyPath: startTime
       value: -8000
@@ -2432,7 +2435,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5027442766357424345, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5436528971823218233, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
       propertyPath: m_Layer
@@ -2441,16 +2444,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3129376051727432842, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 3767240062597777947, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 5436528971823218233, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

@@ -33,24 +33,24 @@ Shader "FernRender/URP/FERNNPREye"
         _group1 ("DiffuseSettings", float) = 1
         [Space()]
         [KWEnum(Diffuse, Unlit, _, CelShading, _CELLSHADING, RampShading, _RAMPSHADING, PBRShading, _LAMBERTIAN)] _enum_diffuse ("Shading Mode", float) = 2
-        [SubToggle(Diffuse._CELLSHADING._RAMPSHADING._LAMBERTIAN)] _UseHalfLambert ("Use HalfLambert (More Flatter)", float) = 0
-        [SubToggle(Diffuse._CELLSHADING._RAMPSHADING._LAMBERTIAN)] _UseRadianceOcclusion ("Radiance Occlusion", float) = 0
-        [Sub(Diffuse_LAMBERTIAN._CELLSHADING)] [HDR] _HighColor ("Hight Color", Color) = (1,1,1,1)
-        [Sub(Diffuse_LAMBERTIAN._CELLSHADING)] _DarkColor ("Dark Color", Color) = (0,0,0,1)
-        [Sub(Diffuse_CELLSHADING)] _CELLThreshold ("Cell Threshold", Range(0.01,1)) = 0.5
-        [Sub(Diffuse_CELLSHADING)] _CELLSmoothing ("Cell Smoothing", Range(0.001,1)) = 0.001
-        [Sub(Diffuse_RAMPSHADING)] _DiffuseRampMap ("Ramp Map", 2D) = "white" {}
-        [Sub(Diffuse_RAMPSHADING)] _RampMapUOffset ("Ramp Map U Offset", Range(-1,1)) = 0
-        [Sub(Diffuse_RAMPSHADING)] _RampMapVOffset ("Ramp Map V Offset", Range(0,1)) = 0.5
+        [SubToggle(Diffuse)] [ShowIf(_enum_diffuse, NEqual, 0)] _UseHalfLambert ("Use HalfLambert (More Flatter)", float) = 0
+        [SubToggle(Diffuse)] [ShowIf(_enum_diffuse, NEqual, 0)] _UseRadianceOcclusion ("Radiance Occlusion", float) = 0
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 1)][ShowIf(Or,_enum_diffuse, Equal, 2)] [HDR] _HighColor ("Hight Color", Color) = (1,1,1,1)
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 1)][ShowIf(Or,_enum_diffuse, Equal, 2)] _DarkColor ("Dark Color", Color) = (0,0,0,1)
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 1)] _CELLThreshold ("Cell Threshold", Range(0.01,1)) = 0.5
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 1)] _CELLSmoothing ("Cell Smoothing", Range(0.001,1)) = 0.001
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 1)] _DiffuseRampMap ("Ramp Map", 2D) = "white" {}
+        [Sub(Diffuse_RAMPSHADING)] [ShowIf(_enum_diffuse, Equal, 2)] _RampMapUOffset ("Ramp Map U Offset", Range(-1,1)) = 0
+        [Sub(Diffuse_RAMPSHADING)] [ShowIf(_enum_diffuse, Equal, 2)] _RampMapVOffset ("Ramp Map V Offset", Range(0,1)) = 0.5
         
         [Main(Specular, _, off, off)]
         _groupSpecular ("SpecularSettings", float) = 1
         [Space()]
-        [KWEnum(Specular, None, _, PBR_GGX, _GGX, Blinn_Phong, _BLINNPHONG)] _enum_specular ("Shading Mode", float) = 0
-        [SubToggle(Specular._GGX._BLINNPHONG, _SPECULARMASK)] _SpecularMask("Use Specular Mask", Float) = 0.0
-        [Channel(Specular._SPECULARMASK)] _SpecularIntensityChannel("Specular Intensity Channel", Vector) = (1,0,0,0)
-        [Sub(Specular._GGX._BLINNPHONG)][HDR] _SpecularColor ("Specular Color", Color) = (1,1,1,1)
-        [Sub(Specular._BLINNPHONG)] _Shininess ("BlinnPhong Shininess", Range(0,1)) = 1
+        [KWEnum(Specular, None, _, PBR_GGX, _GGX, Stylized, _STYLIZED, Blinn_Phong, _BLINNPHONG)] _enum_specular ("Shading Mode", float) = 1
+        [SubToggle(Specular, _SPECULARMASK)] [ShowIf(_enum_specular, NEqual, 0)] _SpecularMask("Use Specular Mask", Float) = 0.0
+        [Channel(Specular_SPECULARMASK)] _SpecularIntensityChannel("Specular Intensity Channel", Vector) = (1,0,0,0)
+        [Sub(Specular)] [ShowIf(_enum_specular, NEqual, 0)] _SpecularColor ("Specular Color", Color) = (1,1,1,1)
+        [Sub(Specular)] [ShowIf(_enum_specular, Equal, 3)] _Shininess ("BlinnPhong Shininess", Range(0,1)) = 1
         
         [Main(Environment, _, off, off)]
         _groupEnvironment ("EnvironmentSettings", float) = 1
@@ -61,15 +61,15 @@ Shader "FernRender/URP/FERNNPREye"
         _groupMatCap ("MatCapSettings", float) = 1
         [Space()]
         [SubToggle(MatCap, _MATCAP)] _UseMatCap("Use MapCap", Float) = 0.0
-        [Tex(MatCap._MATCAP, _MatCapColor)] _MatCapTex("MatCap Tex", 2D) = "black" {}
+        [Tex(MatCap_MATCAP, _MatCapColor)] _MatCapTex("MatCap Tex", 2D) = "black" {}
         [HideInInspector][HDR]_MatCapColor ("Matcap Color", color) = (1,1,1,1)
-        [Sub(MatCap._MATCAP)] _MatCapAlbedoWeight ("MatCap Albedo Weight", Range(0, 1)) = 0
+        [Sub(MatCap_MATCAP)] _MatCapAlbedoWeight ("MatCap Albedo Weight", Range(0, 1)) = 0
         
         [Main(EmssionSetting, _, off, off)]
         _groupEmission ("Emission Setting", float) = 0
         [Space()]
         [SubToggle(EmssionSetting, _USEEMISSIONTEX)] _UseEmissionTex("Use Emission Tex", Float) = 0.0
-        [Tex(EmssionSetting._USEEMISSIONTEX)] _EmissionTex ("Emission Tex", 2D) = "white" { }
+        [Tex(EmssionSetting_USEEMISSIONTEX)] _EmissionTex ("Emission Tex", 2D) = "white" { }
         [Channel(EmssionSetting)] _EmissionChannel("Emission Channel", Vector) = (0,0,1,0)
         [Sub(EmssionSetting)] [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         [Sub(EmssionSetting)] _EmissionColorAlbedoWeight("Emission Color Albedo Weight", Range(0, 1)) = 0
@@ -79,10 +79,10 @@ Shader "FernRender/URP/FERNNPREye"
         [Space()]
         [SubToggleOff(ShadowSetting, _RECEIVE_SHADOWS_OFF)] _RECEIVE_SHADOWS_OFF("RECEIVE_SHADOWS", Float) = 1
         [SubToggle(ShadowSetting, _DEPTHSHADOW)] _UseDepthShadow("Use Depth Shadow", Float) = 0.0
-        [SubToggle(ShadowSetting._DEPTHSHADOW)] _DepthOffsetShadowReverseX("Depth Offset Reverse X", Float) = 0
-        [Sub(ShadowSetting._DEPTHSHADOW)] _DepthShadowOffset("Depth Shadow Offset", Range(-2,2)) = 0.15
-        [Sub(ShadowSetting._DEPTHSHADOW)] _DepthShadowThresoldOffset("Depth Shadow Thresold Offset", Range(-1,1)) = 0.0
-        [Sub(ShadowSetting._DEPTHSHADOW)] _DepthShadowSoftness("Depth Shadow Softness", Range(0,1)) = 0.0
+        [SubToggle(ShadowSetting_DEPTHSHADOW)] _DepthOffsetShadowReverseX("Depth Offset Reverse X", Float) = 0
+        [Sub(ShadowSetting_DEPTHSHADOW)] _DepthShadowOffset("Depth Shadow Offset", Range(-2,2)) = 0.15
+        [Sub(ShadowSetting_DEPTHSHADOW)] _DepthShadowThresoldOffset("Depth Shadow Thresold Offset", Range(-1,1)) = 0.0
+        [Sub(ShadowSetting_DEPTHSHADOW)] _DepthShadowSoftness("Depth Shadow Softness", Range(0,1)) = 0.0
         
         [Main(AdditionalLightSetting, _, off, off)]
         _groupAdditionLight ("AdditionalLightSetting", float) = 1
@@ -91,11 +91,11 @@ Shader "FernRender/URP/FERNNPREye"
         [Sub(AdditionalLightSetting)] _LightIntensityClamp("Additional Light Intensity Clamp", Range(0, 8)) = 1
         
         // AI Core has no release
-        [Main(AISetting, _, off, off)]
-        _groupAI ("AISetting", float) = 1
-        [Space()]
-        [SubToggle(AISetting)] _Is_SDInPaint("Is InPaint", Float) = 0
-        [SubToggle(AISetting)] _ClearShading("Clear Shading", Float) = 0
+//        [Main(AISetting, _, off, off)]
+//        _groupAI ("AISetting", float) = 1
+//        [Space()]
+//        [SubToggle(AISetting)] _Is_SDInPaint("Is InPaint", Float) = 0
+//        [SubToggle(AISetting)] _ClearShading("Clear Shading", Float) = 0
 
         //Effect is in Developing
 //        [Title(_, Effect)]

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
   m_Name: 3D Skybox Transparent
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     passTag: 3D Skybox Transparent
     Event: 400
@@ -134,13 +134,12 @@ MonoBehaviour:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: 2459697373835453351}
   - {fileID: 5351018995921332434}
   - {fileID: -2351452293755395191}
   - {fileID: -5747766180797253489}
   - {fileID: -8976238060765929404}
   - {fileID: -408358162207867921}
-  m_RendererFeatureMap: a7636cbeba992222d22842066da3424a89a36eec98f65ddf8f78938d1cd53bb044a0b4b80aff6d83
+  m_RendererFeatureMap: d22842066da3424a89a36eec98f65ddf8f78938d1cd53bb044a0b4b80aff6d83
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -175,33 +174,10 @@ MonoBehaviour:
     zFailOperation: 0
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
-  m_DepthPrimingMode: 2
-  m_CopyDepthMode: 0
+  m_DepthPrimingMode: 0
+  m_CopyDepthMode: 2
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
---- !u!114 &2459697373835453351
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1614fc811f8f184697d9bee70ab9fe5, type: 3}
-  m_Name: DecalRendererFeature
-  m_EditorClassIdentifier: 
-  m_Active: 0
-  m_Settings:
-    technique: 2
-    maxDrawDistance: 1000
-    decalLayers: 1
-    dBufferSettings:
-      surfaceData: 2
-    screenSpaceSettings:
-      normalBlend: 2
-  m_CopyDepthPS: {fileID: 4800000, guid: d6dae50ee9e1bfa4db75f19f99355220, type: 3}
-  m_DBufferClear: {fileID: 4800000, guid: f056d8bd2a1c7e44e9729144b4c70395, type: 3}
 --- !u!114 &5351018995921332434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,8 +197,8 @@ MonoBehaviour:
     AfterOpaque: 0
     Source: 1
     NormalSamples: 1
-    Intensity: 0.2
-    DirectLightingStrength: 0.1
+    Intensity: 0.5
+    DirectLightingStrength: 0.5
     Radius: 1
     Samples: 0
     BlurQuality: 0

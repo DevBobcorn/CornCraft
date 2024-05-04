@@ -26,12 +26,13 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _CELLSHADING
-  - _KAJIYAHAIR
   - _NORMALMAP
   - _OUTLINE
   - _RENDERENVSETTING
+  - _STYLIZED
   m_InvalidKeywords:
   - _IS_FILTER_LIGHTCOLOR_ON
+  - _USERADIANCEOCCLUSION_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -140,8 +141,8 @@ Material:
     - _BlendModePreserveSpecular: 1
     - _BumpMapKeyword: 1
     - _BumpScale: 1
-    - _CELLSmoothing: 0.001
-    - _CELLThreshold: 0.5
+    - _CELLSmoothing: 0.1
+    - _CELLThreshold: 0.4
     - _CasterShadow: 1
     - _CellBandSoftness: 0.001
     - _CellBands: 1
@@ -205,7 +206,7 @@ Material:
     - _UseDepthShadow: 0
     - _UseEmissionTex: 0
     - _UseHalfLambert: 0
-    - _UseRadianceOcclusion: 0
+    - _UseRadianceOcclusion: 1
     - _WorkflowMode: 1
     - _ZOffset: 0
     - _ZWrite: 1
@@ -215,7 +216,7 @@ Material:
     - _enum_outline_smoothed: 0
     - _enum_outline_width: 0
     - _enum_rim: 0
-    - _enum_specular: 1
+    - _enum_specular: 2
     - _group: 0
     - _group1: 1
     - _groupAI: 1
@@ -236,10 +237,10 @@ Material:
     - _AnisoSpecularColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 0.72594535, g: 0.7018359, b: 0.61378783, a: 1}
-    - _DarkColor: {r: 0.6509804, g: 0.6, b: 0.5882353, a: 1}
+    - _DarkColor: {r: 0.39057493, g: 0.547742, b: 0.6320754, a: 1}
     - _EmissionChannel: {r: 0, g: 0, b: 1, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _HighColor: {r: 0.6666667, g: 0.6666667, b: 0.6666667, a: 1}
+    - _HighColor: {r: 0.5208259, g: 0.6679619, b: 0.8301887, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _PBRMetallicChannel: {r: 1, g: 0, b: 0, a: 0}
     - _PBROcclusionChannel: {r: 0, g: 1, b: 0, a: 0}
