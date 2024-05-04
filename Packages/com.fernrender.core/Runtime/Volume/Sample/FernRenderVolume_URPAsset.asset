@@ -18,7 +18,6 @@ MonoBehaviour:
   m_RendererData: {fileID: 0}
   m_RendererDataList:
   - {fileID: 11400000, guid: ce9a0c59d9831374bac903aa82e14cf6, type: 2}
-  - {fileID: 11400000, guid: a2dde31fdd0c64e75bf44085fa3cf6f3, type: 2}
   m_DefaultRendererIndex: 0
   m_RequireDepthTexture: 1
   m_RequireOpaqueTexture: 1
@@ -73,6 +72,7 @@ MonoBehaviour:
   m_ColorGradingMode: 0
   m_ColorGradingLutSize: 32
   m_UseFastSRGBLinearConversion: 0
+  m_SupportDataDrivenLensFlare: 1
   m_ShadowType: 1
   m_LocalShadowsSupported: 0
   m_LocalShadowsAtlasResolution: 256
@@ -104,6 +104,10 @@ MonoBehaviour:
   m_PrefilterDBufferMRT1: 0
   m_PrefilterDBufferMRT2: 0
   m_PrefilterDBufferMRT3: 0
+  m_PrefilterSoftShadowsQualityLow: 0
+  m_PrefilterSoftShadowsQualityMedium: 0
+  m_PrefilterSoftShadowsQualityHigh: 0
+  m_PrefilterSoftShadows: 0
   m_PrefilterScreenCoord: 0
   m_PrefilterNativeRenderPass: 0
   m_ShaderVariantLogLevel: 0

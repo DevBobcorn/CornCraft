@@ -31,29 +31,29 @@ Shader "FernRender/URP/FERNNPRStandard"
         [SubToggle(Diffuse)] _UseRadianceOcclusion ("Radiance Occlusion", float) = 0
         [Sub(Diffuse)] [HDR] _HighColor ("Hight Color", Color) = (1,1,1,1)
         [Sub(Diffuse)] _DarkColor ("Dark Color", Color) = (0,0,0,1)
-        [Sub(Diffuse._CELLBANDSHADING)] _CellBands ("Cell Bands(Int)", Range(1, 10)) = 1
-        [Sub(Diffuse_CELLSHADING._CELLBANDSHADING)] _CELLThreshold ("Cell Threshold", Range(0.01,1)) = 0.5
-        [Sub(Diffuse_CELLSHADING)] _CELLSmoothing ("Cell Smoothing", Range(0.001,1)) = 0.001
-        [Sub(Diffuse._CELLBANDSHADING)] _CellBandSoftness ("Cell Softness", Range(0.001, 1)) = 0.001
-        [Sub(Diffuse_RAMPSHADING)] _DiffuseRampMap ("Ramp Map", 2D) = "white" {}
-        [Sub(Diffuse_RAMPSHADING)] _RampMapUOffset ("Ramp Map U Offset", Range(-1,1)) = 0
-        [Sub(Diffuse_RAMPSHADING)] _RampMapVOffset ("Ramp Map V Offset", Range(0,1)) = 0.5
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 2)] _CellBands ("Cell Bands(Int)", Range(1, 10)) = 1
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 0)] [ShowIf(Or,_enum_diffuse, Equal, 2)] _CELLThreshold ("Cell Threshold", Range(0.01,1)) = 0.5
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 0)] [ShowIf(Or,_enum_diffuse, Equal, 2)] _CELLSmoothing ("Cell Smoothing", Range(0.001,1)) = 0.001
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 2)] _CellBandSoftness ("Cell Softness", Range(0.001, 1)) = 0.001
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 1)] _DiffuseRampMap ("Ramp Map", 2D) = "white" {}
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 1)] _RampMapUOffset ("Ramp Map U Offset", Range(-1,1)) = 0
+        [Sub(Diffuse)] [ShowIf(_enum_diffuse, Equal, 1)] _RampMapVOffset ("Ramp Map V Offset", Range(0,1)) = 0.5
         
         [Main(Specular, _, off, off)]
         _groupSpecular ("SpecularSettings", float) = 1
         [Space()]
         [KWEnum(Specular, None, _, PBR_GGX, _GGX, Stylized, _STYLIZED, Blinn_Phong, _BLINNPHONG)] _enum_specular ("Shading Mode", float) = 1
-        [SubToggle(Specular._GGX._STYLIZED._BLINNPHONG._KAJIYAHAIR, _SPECULARMASK)] _SpecularMask("Use Specular Mask", Float) = 0.0
-        [Channel(Specular._SPECULARMASK)] _SpecularIntensityChannel("Specular Intensity Channel", Vector) = (1,0,0,0)
-        [Sub(Specular._GGX._STYLIZED._BLINNPHONG._KAJIYAHAIR)] _SpecularColor ("Specular Color", Color) = (1,1,1,1)
-        [Sub(Specular._GGX._STYLIZED._BLINNPHONG._KAJIYAHAIR)] _SpecularIntensity ("Specular Intensity", Range(0,8)) = 1 // version: 1.0.1
-        [Sub(Specular._STYLIZED)] _StylizedSpecularSize ("Stylized Specular Size", Range(0,1)) = 0.1
-        [Sub(Specular._STYLIZED)] _StylizedSpecularSoftness ("Stylized Specular Softness", Range(0.001,1)) = 0.05
-        [Sub(Specular._STYLIZED)] _StylizedSpecularAlbedoWeight ("Specular Color Albedo Weight", Range(0,1)) = 0
-        [Sub(Specular._BLINNPHONG)] _Shininess ("BlinnPhong Shininess", Range(0,1)) = 1
-        [SubToggle(Specular._GGX, _SPECULARAA)] _SpecularAA("Use Specular AA", Float) = 0.0
-        [Sub(Specular._SPECULARAA)] _SpaceScreenThresold ("SpecularAA Threshold", Range(0,1)) = 0.5 // version: 1.0.0 is Specular AA Variant
-        [Sub(Specular._SPECULARAA)] _SpecularAAStrength ("SpecularAA Strength", Range(0,1)) = 1 // version: 1.0.0 is Specular AA Thresold
+        [SubToggle(Specular, _SPECULARMASK)] [ShowIf(_enum_specular, NEqual, 0)] _SpecularMask("Use Specular Mask", Float) = 0.0
+        [Channel(Specular_SPECULARMASK)] _SpecularIntensityChannel("Specular Intensity Channel", Vector) = (1,0,0,0)
+        [Sub(Specular)] [ShowIf(_enum_specular, NEqual, 0)] _SpecularColor ("Specular Color", Color) = (1,1,1,1)
+        [Sub(Specular)] [ShowIf(_enum_specular, NEqual, 0)]  _SpecularIntensity ("Specular Intensity", Range(0,8)) = 1
+        [Sub(Specular)] [ShowIf(_enum_specular, Equal, 2)] _StylizedSpecularSize ("Stylized Specular Size", Range(0,1)) = 0.1
+        [Sub(Specular)] [ShowIf(_enum_specular, Equal, 2)] _StylizedSpecularSoftness ("Stylized Specular Softness", Range(0.001,1)) = 0.05
+        [Sub(Specular)] [ShowIf(_enum_specular, Equal, 2)] _StylizedSpecularAlbedoWeight ("Specular Color Albedo Weight", Range(0,1)) = 0
+        [Sub(Specular)] [ShowIf(_enum_specular, Equal, 3)] _Shininess ("BlinnPhong Shininess", Range(0,1)) = 1
+        [SubToggle(Specular, _SPECULARAA)] [ShowIf(_enum_specular, Equal, 1)] _SpecularAA("Use Specular AA", Float) = 0.0
+        [Sub(Specular_SPECULARAA)] _SpaceScreenThresold ("SpecularAA Threshold", Range(0,1)) = 0.5
+        [Sub(Specular_SPECULARAA)] _SpecularAAStrength ("SpecularAA Strength", Range(0,1)) = 1
         
         [Main(Environment, _, off, off)]
         _groupEnvironment ("EnvironmentSettings", float) = 1
@@ -64,7 +64,7 @@ Shader "FernRender/URP/FERNNPRStandard"
         _groupEmission ("Emission Setting", float) = 0
         [Space()]
         [SubToggle(EmssionSetting, _USEEMISSIONTEX)] _UseEmissionTex("Use Emission Tex", Float) = 0.0
-        [Tex(EmssionSetting._USEEMISSIONTEX)] _EmissionTex ("Emission Tex", 2D) = "white" { }
+        [Tex(EmssionSetting_USEEMISSIONTEX)] _EmissionTex ("Emission Tex", 2D) = "white" { }
         [Channel(EmssionSetting)] _EmissionChannel("Emission Channel", Vector) = (0,0,1,0)
         [Sub(EmssionSetting)] [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         [Sub(EmssionSetting)] _EmissionColorAlbedoWeight("Emission Color Albedo Weight", Range(0, 1)) = 0
@@ -73,31 +73,31 @@ Shader "FernRender/URP/FERNNPRStandard"
         _groupRim ("RimSettings", float) = 1
         [Space()]
         [KWEnum(Rim, None, _, FresnelRim, _FRESNELRIM, ScreenSpaceRim, _SCREENSPACERIM)] _enum_rim ("Rim Mode", float) = 0
-        [Sub(Rim._FRESNELRIM._SCREENSPACERIM)] _RimDirectionLightContribution("Directional Light Contribution", Range(0,1)) = 1.0
-        [Sub(Rim._FRESNELRIM._SCREENSPACERIM)][HDR] _RimColor("Rim Color",Color) = (1,1,1,1)
-        [Sub(Rim._FRESNELRIM)] _RimThreshold("Rim Threshold",Range(0,1)) = 0.2
-        [Sub(Rim._FRESNELRIM)] _RimSoftness("Rim Softness",Range(0.001,1)) = 0.01
-        [SubToggle(Rim._SCREENSPACERIM)] _DepthOffsetRimReverseX("Depth Offset Reverse X", Float) = 0
-        [Sub(Rim._SCREENSPACERIM)] _DepthRimOffset("Depth Rim Width",Range(-32,32)) = 0.01
-        [Sub(Rim._SCREENSPACERIM)] _DepthRimThresoldOffset("Depth Rim Thresold Offset",Range(0,32)) = 0.01
+        [Sub(Rim)] [ShowIf(_enum_rim, NEqual, 0)] _RimDirectionLightContribution("Directional Light Contribution", Range(0,1)) = 1.0
+        [Sub(Rim)] [ShowIf(_enum_rim, NEqual, 0)] [HDR] _RimColor("Rim Color",Color) = (1,1,1,1)
+        [Sub(Rim)] [ShowIf(_enum_rim, Equal, 1)] _RimThreshold("Rim Threshold",Range(0,1)) = 0.2
+        [Sub(Rim)] [ShowIf(_enum_rim, Equal, 1)] _RimSoftness("Rim Softness",Range(0.001,1)) = 0.01
+        [SubToggle(Rim)] [ShowIf(_enum_rim, Equal, 2)] _DepthOffsetRimReverseX("Depth Offset Reverse X", Float) = 0
+        [Sub(Rim)] [ShowIf(_enum_rim, Equal, 2)] _DepthRimOffset("Depth Rim Width",Range(-32,32)) = 0.01
+        [Sub(Rim)] [ShowIf(_enum_rim, Equal, 2)] _DepthRimThresoldOffset("Depth Rim Thresold Offset",Range(0,32)) = 0.01
         
         [Main(ClearCoat, _, off, off)]
         _groupClearCoat ("ClearCoatSettings", float) = 1
         [Space()]
         [SubToggle(ClearCoat, _CLEARCOAT)] _ClearCoat("Use Clear Coat", Float) = 0.0
-        [KWEnum(ClearCoat._CLEARCOAT, RenderSetting, _, MaterialCustom, _CUSTOMCLEARCOATTEX)] _ClearCoatTexSource ("Clear Coat Texture Source", float) = 0
-        [Sub(ClearCoat._CLEARCOAT)] _ClearCoatMask("Clear Coat Mask", Range(0,1)) = 1.0
-        [Sub(ClearCoat._CLEARCOAT)] _ClearCoatSmoothness("Clear Coat Smoothness", Range(0,1)) = 1.0
+        [KWEnum(ClearCoat_CLEARCOAT, RenderSetting, _, MaterialCustom, _CUSTOMCLEARCOATTEX)] _ClearCoatTexSource ("Clear Coat Texture Source", float) = 0
+        [Sub(ClearCoat_CLEARCOAT)] _ClearCoatMask("Clear Coat Mask", Range(0,1)) = 1.0
+        [Sub(ClearCoat_CLEARCOAT)] _ClearCoatSmoothness("Clear Coat Smoothness", Range(0,1)) = 1.0
         
         [Main(ShadowSetting, _, off, off)]
         _groupShadowSetting ("Shadow Setting", float) = 1
         [Space()]
         [SubToggleOff(ShadowSetting, _RECEIVE_SHADOWS_OFF)] _RECEIVE_SHADOWS_OFF("RECEIVE_SHADOWS", Float) = 1
         [SubToggle(ShadowSetting, _DEPTHSHADOW)] _UseDepthShadow("Use Depth Shadow", Float) = 0.0
-        [SubToggle(ShadowSetting._DEPTHSHADOW)] _DepthOffsetShadowReverseX("Depth Offset Reverse X", Float) = 0
-        [Sub(ShadowSetting._DEPTHSHADOW)] _DepthShadowOffset("Depth Shadow Offset", Range(-2,2)) = 0.15
-        [Sub(ShadowSetting._DEPTHSHADOW)] _DepthShadowThresoldOffset("Depth Shadow Thresold Offset", Range(-1,1)) = 0.0
-        [Sub(ShadowSetting._DEPTHSHADOW)] _DepthShadowSoftness("Depth Shadow Softness", Range(0,1)) = 0.0
+        [SubToggle(ShadowSetting_DEPTHSHADOW)] _DepthOffsetShadowReverseX("Depth Offset Reverse X", Float) = 0
+        [Sub(ShadowSetting_DEPTHSHADOW)] _DepthShadowOffset("Depth Shadow Offset", Range(-2,2)) = 0.15
+        [Sub(ShadowSetting_DEPTHSHADOW)] _DepthShadowThresoldOffset("Depth Shadow Thresold Offset", Range(-1,1)) = 0.0
+        [Sub(ShadowSetting_DEPTHSHADOW)] _DepthShadowSoftness("Depth Shadow Softness", Range(0,1)) = 0.0
         
         [Main(AdditionalLightSetting, _, off, off)]
         _groupAdditionLight ("AdditionalLightSetting", float) = 1
@@ -109,18 +109,18 @@ Shader "FernRender/URP/FERNNPRStandard"
         _groupOutline ("OutlineSettings", float) = 1
         [Space()]
         [SubToggle(Outline, _OUTLINE)] _Outline("Use Outline", Float) = 0.0
-        [Sub(Outline._OUTLINE)] _OutlineColor ("Outline Color", Color) = (0,0,0,0)
-        [Sub(Outline._OUTLINE)] _OutlineWidth ("Outline Width", Range(0, 10)) = 1
+        [Sub(Outline_OUTLINE)] _OutlineColor ("Outline Color", Color) = (0,0,0,0)
+        [Sub(Outline_OUTLINE)] _OutlineWidth ("Outline Width", Range(0, 10)) = 1
         [KWEnum(Outline, None, _, UV8.RG, _SMOOTHEDNORMAL)] _enum_outline_smoothed("Smoothed Normal", float) = 0
         [KWEnum(Outline, None, _, VertexColor.A, _OUTLINEWIDTHWITHVERTEXTCOLORA, UV8.A, _OUTLINEWIDTHWITHUV8A)] _enum_outline_width("Override Outline Width", float) = 0
         [KWEnum(Outline, None, _, BaseMap, _OUTLINECOLORBLENDBASEMAP, VertexColor, _OUTLINECOLORBLENDVERTEXCOLOR)] _enum_outline_color("Blend Outline Color", float) = 0
 
         // AI Core has no release
-        [Main(AISetting, _, off, off)]
-        _groupAI ("AISetting", float) = 1
-        [Space()]
-        [SubToggle(AISetting)] _Is_SDInPaint("Is InPaint", Float) = 0
-        [SubToggle(AISetting)] _ClearShading("Clear Shading", Float) = 0
+//        [Main(AISetting, _, off, off)]
+//        _groupAI ("AISetting", float) = 1
+//        [Space()]
+//        [SubToggle(AISetting)] _Is_SDInPaint("Is InPaint", Float) = 0
+//        [SubToggle(AISetting)] _ClearShading("Clear Shading", Float) = 0
 
         // RenderSetting
         [Title(_, RenderSetting)]

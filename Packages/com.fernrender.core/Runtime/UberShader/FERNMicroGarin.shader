@@ -46,7 +46,7 @@ Shader "FernRender/URP/FERNMicroGarin"
         _groupEmission ("Emission Setting", float) = 0
         [Space()]
         [SubToggle(EmssionSetting, _USEEMISSIONTEX)] _UseEmissionTex("Use Emission Tex", Float) = 0.0
-        [Tex(EmssionSetting._USEEMISSIONTEX)] _EmissionTex ("Emission Tex", 2D) = "white" { }
+        [Tex(EmssionSetting_USEEMISSIONTEX)] _EmissionTex ("Emission Tex", 2D) = "white" { }
         [Channel(EmssionSetting)] _EmissionChannel("Emission Channel", Vector) = (0,0,1,0)
         [Sub(EmssionSetting)] [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         [Sub(EmssionSetting)] _EmissionColorAlbedoWeight("Emission Color Albedo Weight", Range(0, 1)) = 0
@@ -55,13 +55,13 @@ Shader "FernRender/URP/FERNMicroGarin"
         _groupRim ("RimSettings", float) = 1
         [Space()]
         [KWEnum(Rim, None, _, FresnelRim, _FRESNELRIM, ScreenSpaceRim, _SCREENSPACERIM)] _enum_rim ("Rim Mode", float) = 0
-        [Sub(Rim._FRESNELRIM._SCREENSPACERIM)] _RimDirectionLightContribution("Directional Light Contribution", Range(0,1)) = 1.0
-        [Sub(Rim._FRESNELRIM._SCREENSPACERIM)][HDR] _RimColor("Rim Color",Color) = (1,1,1,1)
-        [Sub(Rim._FRESNELRIM)] _RimThreshold("Rim Threshold",Range(0,1)) = 0.2
-        [Sub(Rim._FRESNELRIM)] _RimSoftness("Rim Softness",Range(0.001,1)) = 0.01
-        [SubToggle(Rim._SCREENSPACERIM)] _DepthOffsetRimReverseX("Depth Offset Reverse X", Float) = 0
-        [Sub(Rim._SCREENSPACERIM)] _DepthRimOffset("Depth Rim Width",Range(-32,32)) = 0.01
-        [Sub(Rim._SCREENSPACERIM)] _DepthRimThresoldOffset("Depth Rim Thresold Offset",Range(0,32)) = 0.01
+        [Sub(Rim)] [ShowIf(_enum_rim, NEqual, 0)] _RimDirectionLightContribution("Directional Light Contribution", Range(0,1)) = 1.0
+        [Sub(Rim)] [ShowIf(_enum_rim, NEqual, 0)] [HDR] _RimColor("Rim Color",Color) = (1,1,1,1)
+        [Sub(Rim)] [ShowIf(_enum_rim, Equal, 1)] _RimThreshold("Rim Threshold",Range(0,1)) = 0.2
+        [Sub(Rim)] [ShowIf(_enum_rim, Equal, 1)] _RimSoftness("Rim Softness",Range(0.001,1)) = 0.01
+        [SubToggle(Rim)] [ShowIf(_enum_rim, Equal, 2)] _DepthOffsetRimReverseX("Depth Offset Reverse X", Float) = 0
+        [Sub(Rim)] [ShowIf(_enum_rim, Equal, 2)] _DepthRimOffset("Depth Rim Width",Range(-32,32)) = 0.01
+        [Sub(Rim)] [ShowIf(_enum_rim, Equal, 2)] _DepthRimThresoldOffset("Depth Rim Thresold Offset",Range(0,32)) = 0.01
         
         [Main(ShadowSetting, _, off, off)]
         _groupShadowSetting ("Shadow Setting", float) = 1
@@ -78,8 +78,8 @@ Shader "FernRender/URP/FERNMicroGarin"
         _groupOutline ("OutlineSettings", float) = 1
         [Space()]
         [SubToggle(Outline, _OUTLINE)] _Outline("Use Outline", Float) = 0.0
-        [Sub(Outline._OUTLINE)] _OutlineColor ("Outline Color", Color) = (0,0,0,0)
-        [Sub(Outline._OUTLINE)] _OutlineWidth ("Outline Width", Range(0, 10)) = 1
+        [Sub(Outline_OUTLINE)] _OutlineColor ("Outline Color", Color) = (0,0,0,0)
+        [Sub(Outline_OUTLINE)] _OutlineWidth ("Outline Width", Range(0, 10)) = 1
         [KWEnum(Outline, None, _, UV8.RG, _SMOOTHEDNORMAL)] _enum_outline_smoothed("Smoothed Normal", float) = 0
         [KWEnum(Outline, None, _, VertexColor.A, _OUTLINEWIDTHWITHVERTEXTCOLORA, UV8.A, _OUTLINEWIDTHWITHUV8A)] _enum_outline_width("Override Outline Width", float) = 0
         [KWEnum(Outline, None, _, BaseMap, _OUTLINECOLORBLENDBASEMAP, VertexColor, _OUTLINECOLORBLENDVERTEXCOLOR)] _enum_outline_color("Blend Outline Color", float) = 0
