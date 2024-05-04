@@ -2,7 +2,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 #endif
 
-namespace FernNPRCore.Scripts.ShadingUtils
+namespace MMD.ShadingUtils
 {
     [ExecuteAlways]
     [ExecuteInEditMode]

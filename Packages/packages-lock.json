@@ -29,11 +29,11 @@
       }
     },
     "com.jasonma.lwgui": {
-      "version": "https://github.com/JasonMa0012/LWGUI.git",
+      "version": "https://github.com/DeJhon-Huang/LWGUI.git",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "5e37b80c1930327f919449964ae18e52ac1a11c6"
+      "hash": "d9efd7e7ab826faa137ff3325d57fab85129a548"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",

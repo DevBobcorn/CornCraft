@@ -35,9 +35,8 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
-  stringTagMap:
-    RenderType: Opaque
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   disabledShaderPasses:
   - SRPDEFAULTUNLIT
   m_LockedProperties: 
@@ -94,6 +93,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SDFFaceTex:
+        m_Texture: {fileID: 2800000, guid: 22d9c0078cd012143b83f8181a37b7ae, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ShadingMap01:
@@ -155,6 +158,7 @@ Material:
     - _GlossyReflections: 1
     - _Is_Filter_LightColor: 1
     - _Is_SDInPaint: 0
+    - _LightDirectionObliqueWeight: 0
     - _LightIntensityClamp: 1
     - _Metallic: 0
     - _Mode: 0
@@ -163,13 +167,19 @@ Material:
     - _OutlineWidth: 1.5
     - _Parallax: 0.02
     - _QueueOffset: 0
-    - _RECEIVE_SHADOWS_OFF: 1
+    - _RECEIVE_SHADOWS_OFF: 0
     - _RampMapUOffset: 0
     - _RampMapVOffset: 0.5
     - _ReceiveShadows: 1
     - _RimDirectionLightContribution: 1
     - _RimSoftness: 0.01
     - _RimThreshold: 0.2
+    - _SDFDirectionReversal: 0
+    - _SDFFaceArea: 127
+    - _SDFShadingSoftness: 0.1
+    - _ScreenSpaceRimSoftness: 0.01
+    - _ScreenSpaceRimThreshold: 0.01
+    - _ScreenSpaceRimWidth: 0.01
     - _Shininess: 1
     - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
@@ -207,6 +217,7 @@ Material:
     - _groupClearCoat: 1
     - _groupEmission: 0
     - _groupEnvironment: 1
+    - _groupLightDirectionOffset: 0
     - _groupOutline: 1
     - _groupRim: 1
     - _groupShadingMask: 0

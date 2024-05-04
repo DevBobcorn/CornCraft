@@ -81,7 +81,7 @@ namespace MMD
 
                 if (faceMaterialIndices.Count > 0)
                 {
-                    var helper = renderers[meshIndex].gameObject.AddComponent<FernNPRCore.Scripts.ShadingUtils.MeshSDFFaceAxisFix>();
+                    var helper = renderers[meshIndex].gameObject.AddComponent<ShadingUtils.MeshSDFFaceAxisFix>();
                     helper.targetMaterialIndices = faceMaterialIndices.ToArray();
 
                     // Clear up for next iteration
