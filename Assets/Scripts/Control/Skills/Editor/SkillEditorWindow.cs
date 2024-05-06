@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using DMTimeArea;
 using System;
 using System.Collections.Generic;
+using CraftSharp.Rendering;
 
 namespace CraftSharp.Control
 {
@@ -80,12 +81,11 @@ namespace CraftSharp.Control
         #endregion
 
         private Animator? previewAnimator = null;
+        private PlayerAccessoryWidget? accessoryWidget = null;
         private AnimatorOverrideController? animatorOverrideController;
         private AnimationModeDriver? m_Driver;
         private bool m_FixedTransform = false;
         private GameObject? charaPreview = null;
-        //private Vector3 charaPreviewPos = Vector3.zero;
-        //private Quaternion charaPreviewRot = Quaternion.identity;
         private Transform? charaPreviewOrigin = null;
         private Transform CharaPreviewOrigin
         {
@@ -189,6 +189,7 @@ namespace CraftSharp.Control
             {
                 charaPreview = null;
                 previewAnimator = null;
+                accessoryWidget = null;
 
                 ClearTracks();
             }
@@ -212,6 +213,21 @@ namespace CraftSharp.Control
                     // Enable root motion
                     previewAnimator.stabilizeFeet = true;
                     previewAnimator.applyRootMotion = true;
+
+                    // Add and initialize player widgets (See PlayerEntityRigged.cs)
+                    if (!(accessoryWidget = charaPreview.GetComponent<PlayerAccessoryWidget>()))
+                        accessoryWidget = charaPreview.AddComponent<PlayerAccessoryWidget>();
+                    accessoryWidget.Initialize();
+
+                    var itemMountRef = previewAnimator!.GetBoneTransform(HumanBodyBones.Spine);
+                    var mainHandRef = previewAnimator.GetBoneTransform(HumanBodyBones.RightHand);
+                    var offHandRef = previewAnimator.GetBoneTransform(HumanBodyBones.LeftHand);
+                    accessoryWidget.SetRefTransforms(mainHandRef, offHandRef, itemMountRef);
+
+                    // Initialize skill item (sword, bow, etc.)
+                    accessoryWidget.UpdateActiveItem(null, currentSkill.SkillItemActionType, currentSkill.SkillItemConf);
+                    // Hold it in main hand
+                    accessoryWidget.UpdateActionItemState(PlayerController.CurrentItemState.HoldInMainHand);
                 }
             }
         }

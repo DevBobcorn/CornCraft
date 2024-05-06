@@ -18,8 +18,8 @@ namespace CraftSharp.Control
 
         private AnimationClip? animationClip;
 
-        private Rect rectHeader = new();
-        private Rect rectContent = new();
+        private Rect rectHeader    = new();
+        private Rect rectContent   = new();
         private Rect rectAnimation = new();
 
         public float TrackHeight { get; private set; } = 42F;
@@ -36,6 +36,9 @@ namespace CraftSharp.Control
             stageIndex = index;
 
             animationClip = stage.AnimationClip;
+
+            damageStart = stage.DamageStart;
+            damageEnd   = stage.DamageEnd;
         }
 
         public void DrawHeader(float startY, float width)
@@ -95,15 +98,15 @@ namespace CraftSharp.Control
             float maxTime = timeRange.y;
             float totalSpan = maxTime - minTime;
 
-            float minTimeShown = Mathf.Clamp(stageStart, minTime, maxTime);
+            float minTimeShown = Mathf.Clamp(stageStart,                 minTime, maxTime);
             float maxTimeShown = Mathf.Clamp(stageStart + stageDuration, minTime, maxTime);
 
             if (minTimeShown < maxTimeShown) // Draw duration
             {
-                var minPixel = fullWidth * ( (minTimeShown - minTime) / totalSpan );
-                //var maxPixel = fullWidth * ( (maxTimeShown - minTime) / totalSpan );
+                var minPixel   = fullWidth * ( (minTimeShown -      minTime) / totalSpan );
                 var widthPixel = fullWidth * ( (maxTimeShown - minTimeShown) / totalSpan );
 
+                // Draw animation clip
                 if (animationClip != null)
                 {
                     var animMaxTime = Mathf.Clamp(stageStart + animationClip.length, minTime, maxTime);
@@ -111,7 +114,7 @@ namespace CraftSharp.Control
 
                     rectAnimation.Set(minPixel, startY, animWidthPixel, AnimationHeight);
 
-                    GUI.DrawTexture(rectAnimation, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, Color.white, 1, 0);
+                    GUI.DrawTexture(rectAnimation, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, Color.white,        1, 0);
                     GUI.DrawTexture(rectAnimation, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, Color.white * 0.8F, 0, 0);
                 }
 
@@ -120,6 +123,18 @@ namespace CraftSharp.Control
 
                 rectContent.Set(minPixel, bodyStartY, widthPixel, bodyHeight);
 
+                // Draw damage span
+                float D_minTimeShown = Mathf.Clamp( stageStart + damageStart, minTime, maxTime );
+                float D_maxTimeShown = Mathf.Clamp( stageStart + damageEnd,   minTime, maxTime );
+                var D_minPixel   = fullWidth * ( (D_minTimeShown        - minTime) / totalSpan );
+                var D_widthPixel = fullWidth * ( (D_maxTimeShown - D_minTimeShown) / totalSpan );
+
+                rectAnimation.Set(D_minPixel, startY, D_widthPixel, AnimationHeight);
+
+                GUI.DrawTexture(rectAnimation, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, Color.green,        1, 0);
+                GUI.DrawTexture(rectAnimation, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill, true, 0, Color.green + Color.white * 0.5f, 0, 0);
+
+                // Draw mouse hover info
                 if (rectContent.Contains(UnityEngine.Event.current.mousePosition))
                 {
                     // The mouse is on this rect

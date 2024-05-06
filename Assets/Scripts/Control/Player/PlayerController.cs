@@ -21,12 +21,9 @@ namespace CraftSharp.Control
 
         [SerializeField] public PlayerStagedSkill? MeleeSwordAttack;
         [SerializeField] public PlayerChargedSkill? RangedBowAttack;
-        [SerializeField] public Material? DummyItemMaterial;
-        [SerializeField] public Mesh? DummySwordItemMesh;
-        [SerializeField] public Mesh? DummyBowItemMesh;
-        [SerializeField] public GameObject? SwordTrailPrefab;
 
         [SerializeField] protected PlayerAbility? ability;
+        [SerializeField] public PlayerSkillItemConfig? SkillItemConf;
         [SerializeField] protected CameraController? cameraController;
         [SerializeField] public Transform? CameraRef;
         [SerializeField] protected Rigidbody? playerRigidbody;
