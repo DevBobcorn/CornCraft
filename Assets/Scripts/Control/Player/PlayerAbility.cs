@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CraftSharp.Control
 {
-    [CreateAssetMenu(fileName = "PlayerAbility", menuName = "CornCraft/PlayerAbility")]
+    [CreateAssetMenu(fileName = "Player Ability", menuName = "CornCraft/Player Ability")]
     public class PlayerAbility : ScriptableObject
     {
         public enum PlayerColliderType

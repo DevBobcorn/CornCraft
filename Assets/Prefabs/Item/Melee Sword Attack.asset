@@ -31,3 +31,5 @@ MonoBehaviour:
     DamageStart: 0.1
     DamageEnd: 0.16
   DummyAnimationClip: {fileID: 7400000, guid: 1698def8346f10e46866626916c35924, type: 2}
+  SkillItemActionType: 1
+  SkillItemConf: {fileID: 11400000, guid: d50d776819a982b49b745438ebbebd20, type: 2}

@@ -53,14 +53,24 @@ namespace CraftSharp.Rendering
             itemMountSlot.SetParent(itemMountPivot);
         }
 
-        private void CreateActionItem(ItemStack? itemStack, ItemActionType actionType)
+        private void CreateActionItem(ItemStack? itemStack, ItemActionType actionType, PlayerSkillItemConfig psi)
         {
             if (currentItem != null)
             {
-                Destroy(currentItem.gameObject);
+                // See https://forum.unity.com/threads/editor-and-destroyimmediate.1261745/
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    DestroyImmediate(currentItem.gameObject);
+                }
+                else
+#endif
+                {
+                    Destroy(currentItem.gameObject);
+                }
             }
 
-            var itemObj = new GameObject("Action Item")
+            var itemObj = new GameObject($"Action Item ({itemStack?.DisplayName})")
             {
                 layer = gameObject.layer
             };
@@ -73,7 +83,7 @@ namespace CraftSharp.Rendering
                     currentItem = itemObj!.AddComponent<MeleeWeapon>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack, false);
                     // Use dummy material and mesh if failed to build for item
-                    meshData ??= (player!.DummySwordItemMesh!, player!.DummyItemMaterial!, new());
+                    meshData ??= (psi.DummySwordItemMesh!, psi.DummyItemMaterial!, new());
 
                     currentItem.slotEularAngles = new(135F, 90F, -20F);
                     currentItem.slotPosition = new(0F, 0.2F, -0.25F);
@@ -81,15 +91,12 @@ namespace CraftSharp.Rendering
                     mainHandSlot!.localPosition = new(0F, -0.1F, 0.05F);
                     mainHandSlot.localEulerAngles = new(-135F, 0F, 45F);
 
-                    if (player!.SwordTrailPrefab != null)
-                    {
-                        var trailObj = GameObject.Instantiate(player!.SwordTrailPrefab);
-                        trailObj.transform.parent = itemObj.transform;
-                        trailObj.transform.localPosition = new(0.5F, 0.65F, 0.65F);
+                    var trailObj = GameObject.Instantiate(psi.SwordTrailPrefab);
+                    trailObj.transform.parent = itemObj.transform;
+                    trailObj.transform.localPosition = new(0.5F, 0.65F, 0.65F);
 
-                        var sword = currentItem as MeleeWeapon;
-                        sword!.SlashTrail = trailObj.GetComponent<TrailRenderer>();
-                    }
+                    var sword = currentItem as MeleeWeapon;
+                    sword!.SlashTrail = trailObj.GetComponent<TrailRenderer>();
 
                     itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
                     break;
@@ -97,7 +104,7 @@ namespace CraftSharp.Rendering
                     currentItem = itemObj!.AddComponent<UselessActionItem>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack, false);
                     // Use dummy material and mesh if failed to build for item
-                    meshData ??= (player!.DummyBowItemMesh!, player!.DummyItemMaterial!, new());
+                    meshData ??= (psi.DummyBowItemMesh!, psi.DummyItemMaterial!, new());
 
                     currentItem.slotEularAngles = new(-40F, 90F, 20F);
                     currentItem.slotPosition = new(0F, -0.4F, -0.4F);
@@ -111,7 +118,7 @@ namespace CraftSharp.Rendering
                     currentItem = itemObj!.AddComponent<UselessActionItem>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack, true);
                     // Use dummy material and mesh if failed to build for item
-                    meshData ??= (player!.DummySwordItemMesh!, player!.DummyItemMaterial!, new());
+                    meshData ??= (psi.DummySwordItemMesh!, psi.DummyItemMaterial!, new());
 
                     currentItem.slotEularAngles = new(0F, 90F, 0F);
                     currentItem.slotPosition = new(0F, 0F, -0.5F);
@@ -136,7 +143,7 @@ namespace CraftSharp.Rendering
             itemMountSlot!.localEulerAngles = currentItem.slotEularAngles;
 
             // Mount weapon on start
-            MountItem();
+            MoveItemToWidgetSlot(itemMountSlot!);
         }
 
         private void DestroyActionItem()
@@ -147,33 +154,12 @@ namespace CraftSharp.Rendering
             }
         }
 
-        private void HoldItemInMainHand()
+        private void MoveItemToWidgetSlot(Transform slot)
         {
             if (currentItem != null)
             {
-                currentItem.transform.SetParent(mainHandSlot, false);
-                currentItem.transform.localPosition = Vector3.zero;
-                currentItem.transform.localRotation = Quaternion.identity;
-            }
-        }
-
-        private void HoldItemInOffHand()
-        {
-            if (currentItem != null)
-            {
-                currentItem.transform.SetParent(offHandSlot, false);
-                currentItem.transform.localPosition = Vector3.zero;
-                currentItem.transform.localRotation = Quaternion.identity;
-            }
-        }
-
-        private void MountItem()
-        {
-            if (currentItem != null)
-            {
-                currentItem.transform.SetParent(itemMountSlot, false);
-                currentItem.transform.localPosition = Vector3.zero;
-                currentItem.transform.localRotation = Quaternion.identity;
+                currentItem.transform.SetParent(slot, false);
+                currentItem.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             }
         }
 
@@ -193,7 +179,7 @@ namespace CraftSharp.Rendering
 
         public void Hit() { }
 
-        public void UpdateActiveItem(ItemStack? itemStack, ItemActionType actionType)
+        public void UpdateActiveItem(ItemStack? itemStack, ItemActionType actionType, PlayerSkillItemConfig? psi = null)
         {
             if (actionType == ItemActionType.None)
             {
@@ -201,10 +187,34 @@ namespace CraftSharp.Rendering
             }
             else
             {
-                CreateActionItem(itemStack, actionType);
+                if ((psi != null) || ((psi = player?.SkillItemConf) != null))
+                {
+                    CreateActionItem(itemStack, actionType, psi);
+                }
+                else
+                {
+                    Debug.LogWarning("Player skill item config is neither passed in nor present in player controller!");
+                }
             }
             
-            MountItem();
+            // Mount weapon on start
+            MoveItemToWidgetSlot(itemMountSlot!);
+        }
+
+        public void UpdateActionItemState(PlayerController.CurrentItemState state)
+        {
+            switch (state)
+            {
+                case PlayerController.CurrentItemState.HoldInMainHand:
+                    MoveItemToWidgetSlot(mainHandSlot!);
+                    break;
+                case PlayerController.CurrentItemState.HoldInOffhand:
+                    MoveItemToWidgetSlot(offHandSlot!);
+                    break;
+                case PlayerController.CurrentItemState.Mount:
+                    MoveItemToWidgetSlot(itemMountSlot!);
+                    break;
+            }
         }
 
         public void Initialize()
@@ -212,32 +222,23 @@ namespace CraftSharp.Rendering
             player = GetComponentInParent<PlayerController>();
             playerAnimator = GetComponent<Animator>();
 
-            // These subscriptions will be cleared when the player render is replaced/destroyed,
-            // so it is not necessary to manually unregister them
-            player.OnItemStateChanged += (weaponState) => {
-                switch (weaponState)
-                {
-                    case PlayerController.CurrentItemState.HoldInMainHand:
-                        HoldItemInMainHand();
-                        break;
-                    case PlayerController.CurrentItemState.HoldInOffhand:
-                        HoldItemInOffHand();
-                        break;
-                    case PlayerController.CurrentItemState.Mount:
-                        MountItem();
-                        break;
-                }
-            };
+            // If this is used by an actual player object, instead of a preview object etc.
+            if (player)
+            {
+                // These subscriptions will be cleared when the player render is replaced/destroyed,
+                // so it is not necessary to manually unregister them
+                player.OnItemStateChanged += UpdateActionItemState;
 
-            player.OnCurrentItemChanged += UpdateActiveItem;
+                player.OnCurrentItemChanged += (i, iat) => UpdateActiveItem(i, iat, player.SkillItemConf);
 
-            player.OnMeleeDamageStart += () => {
-                currentItem?.StartAction();
-            };
+                player.OnMeleeDamageStart += () => {
+                    currentItem?.StartAction();
+                };
 
-            player.OnMeleeDamageEnd += () => {
-                currentItem?.EndAction();
-            };
+                player.OnMeleeDamageEnd += () => {
+                    currentItem?.EndAction();
+                };
+            }
         }
 
         void Update()

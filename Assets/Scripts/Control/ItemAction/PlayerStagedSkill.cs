@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using CraftSharp.Rendering;
 using UnityEngine;
 
 namespace CraftSharp.Control
@@ -19,6 +20,8 @@ namespace CraftSharp.Control
         [SerializeField] public PlayerAttackStage[] Stages = { };
 
         [SerializeField] public AnimationClip? DummyAnimationClip;
+        [SerializeField] public ItemActionType SkillItemActionType = ItemActionType.MeleeWeaponSword;
+        [SerializeField] public PlayerSkillItemConfig? SkillItemConf;
 
         public int StageCount => Stages.Length;
     }
