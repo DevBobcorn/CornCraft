@@ -181,6 +181,13 @@ namespace CraftSharp.Control
             {
                 charaPreview.transform.SetPositionAndRotation(charaPreviewOrigin.position, charaPreviewOrigin.rotation);
                 GameObject.DestroyImmediate(charaPreviewOrigin.gameObject);
+
+                if (accessoryWidget != null)
+                {
+                    accessoryWidget.UpdateActiveItem(null, ItemActionType.None, null);
+                    // Also clean up temporary slots for holding items
+                    accessoryWidget.CleanUpSlots();
+                }
             }
 
             charaPreview = newPreview;
