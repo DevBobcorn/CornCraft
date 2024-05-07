@@ -55,20 +55,7 @@ namespace CraftSharp.Rendering
 
         private void CreateActionItem(ItemStack? itemStack, ItemActionType actionType, PlayerSkillItemConfig psi)
         {
-            if (currentItem != null)
-            {
-                // See https://forum.unity.com/threads/editor-and-destroyimmediate.1261745/
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                {
-                    DestroyImmediate(currentItem.gameObject);
-                }
-                else
-#endif
-                {
-                    Destroy(currentItem.gameObject);
-                }
-            }
+            DestroyActionItem();
 
             var itemObj = new GameObject($"Action Item ({itemStack?.DisplayName})")
             {
@@ -146,12 +133,31 @@ namespace CraftSharp.Rendering
             MoveItemToWidgetSlot(itemMountSlot!);
         }
 
+        /// <summary>
+        /// Properly destroy a gameobject, in either editor mode, play mode, or an actual build.
+        /// See https://forum.unity.com/threads/editor-and-destroyimmediate.1261745/
+        /// </summary>
+        /// <param name="gameObject"></param>
+        private void SafeDestroy(GameObject? gameObject)
+        {
+            if (gameObject != null)
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    DestroyImmediate(gameObject);
+                }
+                else
+#endif
+                {
+                    Destroy(gameObject);
+                }
+            }
+        }
+
         private void DestroyActionItem()
         {
-            if (currentItem != null)
-            {
-                Destroy(currentItem.gameObject);
-            }
+            if (currentItem != null) SafeDestroy(currentItem.gameObject);
         }
 
         private void MoveItemToWidgetSlot(Transform slot)
@@ -195,10 +201,10 @@ namespace CraftSharp.Rendering
                 {
                     Debug.LogWarning("Player skill item config is neither passed in nor present in player controller!");
                 }
+
+                // Mount weapon on start
+                MoveItemToWidgetSlot(itemMountSlot!);
             }
-            
-            // Mount weapon on start
-            MoveItemToWidgetSlot(itemMountSlot!);
         }
 
         public void UpdateActionItemState(PlayerController.CurrentItemState state)
@@ -215,6 +221,18 @@ namespace CraftSharp.Rendering
                     MoveItemToWidgetSlot(itemMountSlot!);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Used by skill editor to clean up temporary slots attached to chara preview.
+        /// SetRefTransforms() needs to be called again before using these slots.
+        /// </summary>
+        public void CleanUpSlots()
+        {
+            if (mainHandSlot != null)   SafeDestroy(mainHandSlot.gameObject);
+            if (offHandSlot != null)    SafeDestroy(offHandSlot.gameObject);
+            if (itemMountPivot != null) SafeDestroy(itemMountPivot.gameObject);
+            if (itemMountSlot != null)  SafeDestroy(itemMountSlot.gameObject);
         }
 
         public void Initialize()
