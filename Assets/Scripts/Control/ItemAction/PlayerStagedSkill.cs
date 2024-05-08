@@ -12,6 +12,8 @@ namespace CraftSharp.Control
         [SerializeField] public float Duration;
         [SerializeField] public float DamageStart;
         [SerializeField] public float DamageEnd;
+
+        [SerializeField] public GameObject? VisualFXPrefab;
     }
 
     [CreateAssetMenu(menuName = "Gameplay/Staged Skill")]

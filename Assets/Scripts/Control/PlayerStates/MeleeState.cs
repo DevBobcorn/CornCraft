@@ -77,6 +77,17 @@ namespace CraftSharp.Control
             player.OverrideState(meleeAttack.DummyAnimationClip!, stageData.AnimationClip!);
             player.CrossFadeState(PlayerAbility.SKILL, 0F);
             //player.TurnToAttackTarget();
+
+            if (stageData.VisualFXPrefab != null)
+            {
+                var fxObj = GameObject.Instantiate(stageData.VisualFXPrefab);
+                // Disable loop for all particle components
+                foreach (var c in fxObj.GetComponentsInChildren<ParticleSystem>())
+                {
+                    // Main module? c.loop = false;
+                }
+                player.AttachVisualFX(fxObj!);
+            }
         }
 
         public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
