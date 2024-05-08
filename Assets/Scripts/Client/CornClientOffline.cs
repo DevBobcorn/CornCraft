@@ -143,7 +143,7 @@ namespace CraftSharp
         /// <summary>
         /// Get current chunk render manager
         /// </summary>
-        public override ChunkRenderManager GetChunkRenderManager()
+        public override IChunkRenderManager GetChunkRenderManager()
         {
             return ChunkRenderManager!;
         }

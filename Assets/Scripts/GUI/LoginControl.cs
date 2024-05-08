@@ -126,7 +126,7 @@ namespace CraftSharp.UI
             // Login Microsoft/Offline player account
             if (!microsoftLogin)
             {
-                if (!StringHelper.IsValidName(account))
+                if (!PlayerInfo.IsValidName(account))
                 {
                     CornApp.Notify(Translations.Get("login.offline_username_invalid"), Notification.Type.Warning);
                     preparingGame = false;

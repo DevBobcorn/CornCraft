@@ -430,7 +430,7 @@ namespace CraftSharp
         /// <summary>
         /// Get current chunk render manager
         /// </summary>
-        public override ChunkRenderManager GetChunkRenderManager()
+        public override IChunkRenderManager GetChunkRenderManager()
         {
             return ChunkRenderManager!;
         }
@@ -1095,6 +1095,22 @@ namespace CraftSharp
         }
 
         /// <summary>
+        /// Called tab complete suggestion is received
+        /// </summary>
+        public void OnTabComplete(int completionStart, int completionLength, List<string> completeResults)
+        {
+            if (completeResults.Count > 0)
+            {
+                EventManager.Instance.BroadcastOnUnityThread<AutoCompletionEvent>(
+                        new(completionStart, completionLength, completeResults.ToArray()));
+            }
+            else
+            {
+                EventManager.Instance.BroadcastOnUnityThread(AutoCompletionEvent.EMPTY);
+            }
+        }
+
+        /// <summary>
         /// When an inventory is opened
         /// </summary>
         /// <param name="inventory">The inventory</param>
@@ -1231,7 +1247,7 @@ namespace CraftSharp
         public void OnPlayerJoin(PlayerInfo player)
         {
             //Ignore placeholders eg 0000tab# from TabListPlus
-            if (!StringHelper.IsValidName(player.Name))
+            if (!PlayerInfo.IsValidName(player.Name))
                 return;
 
             if (player.Name == username)
