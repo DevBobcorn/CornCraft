@@ -1,0 +1,16 @@
+{
+  "name": "com.devbobcorn.craftsharp-protocol",
+  "description": "A Minecraft JE protocol code library. Based on Minecraft Console Client(MCC).",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "author": {
+    "name": "DevBobcorn",
+    "email": "DevBobcorn@outlook.com",
+    "url": "https://github.com/DevBobcorn"
+  },
+  "displayName": "CraftSharp Protocol",
+  "dependencies": {
+    "com.unity.mathematics": "1.2.6",
+    "com.devbobcorn.craftsharp": "1.0.0"
+  }
+}

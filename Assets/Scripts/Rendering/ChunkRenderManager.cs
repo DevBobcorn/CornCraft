@@ -14,7 +14,7 @@ using UnityEngine.InputSystem;
 
 namespace CraftSharp.Rendering
 {
-    public class ChunkRenderManager : MonoBehaviour
+    public class ChunkRenderManager : MonoBehaviour, IChunkRenderManager
     {
         public const string MOVEMENT_LAYER_NAME = "Movement";
         public const string SOLID_LAYER_NAME = "Solid";
@@ -55,13 +55,13 @@ namespace CraftSharp.Rendering
         /// Dictionary for temporarily storing received lighting data
         /// Accessible on network thread
         /// </summary>
-        public readonly ConcurrentDictionary<int2, Queue<byte>> LightDataCache = new();
+        private readonly ConcurrentDictionary<int2, Queue<byte>> lightingCache = new();
 
         /// <summary>
-        /// Chunk data parsing progress
+        /// Get lighting cache for this chunk render manager
         /// </summary>
-        public int chunkCnt = 0;
-        public int chunkLoadNotCompleted = 0;
+        /// <returns></returns>
+        public ConcurrentDictionary<int2, Queue<byte>> GetLightingCache() => lightingCache;
 
         /// <summary>
         /// Unity thread access only
@@ -577,7 +577,6 @@ namespace CraftSharp.Rendering
         public void ClearChunksData()
         {
             world.Clear();
-            chunkCnt = chunkLoadNotCompleted = 0;
         }
 
         /// <summary>

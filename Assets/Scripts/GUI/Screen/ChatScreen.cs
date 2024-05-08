@@ -225,7 +225,7 @@ namespace CraftSharp.UI
 
             // Register callbacks
             chatCallback = (e) => {
-                chatContent.text += StringHelper.MC2TMP(e.Message) + '\n';
+                chatContent.text += TMPConverter.MC2TMP(e.Message) + '\n';
             };
 
             autoCompleteCallback = (e) => {
