@@ -18,22 +18,27 @@ MonoBehaviour:
     Duration: 0.45
     DamageStart: 0.24
     DamageEnd: 0.35
+    VisualFXPrefab: {fileID: 1130446560849736, guid: c4d564b5d4682ad46b8621f0fa6f40d9, type: 3}
   - AnimationClip: {fileID: 7400000, guid: 567cd903192f0d343970405d252dc8c3, type: 2}
     Duration: 0.55
     DamageStart: 0.08
     DamageEnd: 0.22
+    VisualFXPrefab: {fileID: 0}
   - AnimationClip: {fileID: 7400000, guid: 04eb97a893e61e548b63161f0226bcad, type: 2}
     Duration: 0.767
     DamageStart: 0.25
     DamageEnd: 0.45
+    VisualFXPrefab: {fileID: 0}
   - AnimationClip: {fileID: 7400000, guid: f37d1da60d957c4469826862c4003909, type: 2}
     Duration: 0.57
     DamageStart: 0.33
     DamageEnd: 0.52
+    VisualFXPrefab: {fileID: 0}
   - AnimationClip: {fileID: 7400000, guid: fb94335a9f207974794dbe50de1826d5, type: 2}
     Duration: 1
     DamageStart: 0.16
     DamageEnd: 0.6
+    VisualFXPrefab: {fileID: 0}
   DummyAnimationClip: {fileID: 7400000, guid: 1698def8346f10e46866626916c35924, type: 2}
   SkillItemActionType: 1
   SkillItemConf: {fileID: 11400000, guid: d50d776819a982b49b745438ebbebd20, type: 2}

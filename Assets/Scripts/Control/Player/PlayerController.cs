@@ -387,6 +387,18 @@ namespace CraftSharp.Control
             currentState.OnEnter(statusUpdater!.Status, playerRigidbody!, this);
         }
 
+        public void AttachVisualFX(GameObject fxObj)
+        {
+            if (playerRender != null)
+            {
+                fxObj.transform.SetParent(playerRender.VisualTransform);
+            }
+            else
+            {
+                Debug.LogWarning("Trying to attach vfx object to empty player render!");
+            }
+        }
+
         public bool TryStartNormalAttack()
         {
             if (Status!.AttackStatus.AttackCooldown <= 0F)
