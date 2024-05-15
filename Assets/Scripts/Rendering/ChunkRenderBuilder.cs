@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -8,7 +9,6 @@ using Unity.Collections;
 using Unity.Mathematics;
 
 using CraftSharp.Resource;
-using System.Linq;
 
 namespace CraftSharp.Rendering
 {
@@ -20,7 +20,8 @@ namespace CraftSharp.Rendering
         public const int MOVEMENT_RADIUS_SQR = MOVEMENT_RADIUS * MOVEMENT_RADIUS;
 
         private static BlockLoc GetBlockLocInChunkRender(ChunkRender chunk, int x, int y, int z, int offsetY)
-        {   // Offset y coordinate by the current dimension's minY...
+        {
+            // Offset y coordinate by the current dimension's minY...
             return new(chunk.ChunkX * Chunk.SIZE + x, chunk.ChunkY * Chunk.SIZE + y + offsetY, chunk.ChunkZ * Chunk.SIZE + z);
         }
 
