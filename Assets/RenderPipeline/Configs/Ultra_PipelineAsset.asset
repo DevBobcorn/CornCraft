@@ -50,7 +50,7 @@ MonoBehaviour:
   m_ShadowCascadeCount: 4
   m_Cascade2Split: 0.33333334
   m_Cascade3Split: {x: 0.1, y: 0.3}
-  m_Cascade4Split: {x: 0.009881424, y: 0.019762853, z: 0.0395257}
+  m_Cascade4Split: {x: 0.009881424, y: 0.04940712, z: 0.09486167}
   m_CascadeBorder: 0.10288066
   m_ShadowDepthBias: 0
   m_ShadowNormalBias: 0

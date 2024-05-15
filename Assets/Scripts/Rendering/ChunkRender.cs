@@ -2,8 +2,6 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-using CraftSharp.Resource;
-
 namespace CraftSharp.Rendering
 {
     [RequireComponent(typeof (MeshFilter), typeof (MeshRenderer))]
