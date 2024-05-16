@@ -23,6 +23,7 @@ Material:
   - ADVANCED_LIGHTING
   - _DEPTHEXP_ON
   - _DEPTH_TEX
+  - _RECEIVEDYNAMICEFFECTS_ON
   - _SIMPLE_LIGHTING
   - _WORLDSPACEUV_ON
   - _ZCLIP_ON
@@ -140,10 +141,10 @@ Material:
     - _BumpScale: 1
     - _CROSSPAN_INTERSECTIONOn: 1
     - _CausticsBrightness: 2
-    - _CausticsChromance: 1
+    - _CausticsChromance: 0.442
     - _CausticsDistortion: 0.128
     - _CausticsOn: 1
-    - _CausticsSpeed: 0.1
+    - _CausticsSpeed: 0.05
     - _CausticsTiling: 0.15
     - _ColorAbsorption: 0.11
     - _CrossPan_IntersectionOn: 0
@@ -217,6 +218,7 @@ Material:
     - _PointSpotLightReflectionSize: 0
     - _PointSpotLightReflectionStrength: 10
     - _QueueOffset: 0
+    - _ReceiveDynamicEffects: 1
     - _ReceiveShadows: 1
     - _ReflectionBlur: 0
     - _ReflectionDistortion: 0.206
@@ -269,7 +271,7 @@ Material:
     - _TranslucencyExp: 2
     - _TranslucencyOn: 1
     - _TranslucencyReflectionMask: 1
-    - _TranslucencyStrength: 3
+    - _TranslucencyStrength: 1
     - _TranslucencyStrengthDirect: 0.05
     - _UnderwaterRefractionOffset: 0.2
     - _UnderwaterSurfaceSmoothness: 0.8

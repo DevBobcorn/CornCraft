@@ -163,7 +163,7 @@ namespace MagicaCloth2
 
             //cparams.solverFrequency = Define.System.SolverFrequency;
             cparams.gravity = clothType == ClothProcess.ClothType.BoneSpring ? 0.0f : gravity; // BoneSpring has no gravity.
-            cparams.gravityDirection = gravityDirection;
+            cparams.worldGravityDirection = gravityDirection;
             cparams.gravityFalloff = gravityFalloff;
             cparams.stablizationTimeAfterReset = stablizationTimeAfterReset;
             cparams.blendWeight = blendWeight;

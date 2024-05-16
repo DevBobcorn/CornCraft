@@ -17,6 +17,11 @@ namespace MagicaCloth2
     /// </summary>
     public class TriangleBendingConstraint : IDisposable
     {
+        /// <summary>
+        /// ボリュームとして処理する判定フラグ
+        /// </summary>
+        const sbyte VOLUME_SIGN = 100;
+
         public enum Method
         {
             None = 0,
@@ -29,7 +34,7 @@ namespace MagicaCloth2
 
             /// <summary>
             /// 方向性ありの２面角曲げ制約
-            /// 初期姿勢を保た持つように復元する
+            /// 初期姿勢を保つように復元する
             /// </summary>
             DirectionDihedralAngle = 2,
         }
@@ -73,9 +78,9 @@ namespace MagicaCloth2
 
             public void Convert(SerializeData sdata)
             {
-                //method = sdata.method;
                 // モードはDirectionDihedralAngleに固定する
                 method = sdata.stiffness > Define.System.Epsilon ? Method.DirectionDihedralAngle : Method.None;
+                //method = sdata.stiffness > Define.System.Epsilon ? Method.DihedralAngle : Method.None;
 
                 stiffness = sdata.stiffness;
             }
@@ -117,7 +122,7 @@ namespace MagicaCloth2
         public ExNativeArray<float> restAngleOrVolumeArray;
 
         /// <summary>
-        /// トライアングルペアごとの復元方向もしくはボリューム判定（100=このペアはボリュームである）
+        /// トライアングルペアごとの復元方向もしくはボリューム判定（VOLUME_SIGN(100)=このペアはボリュームである）
         /// </summary>
         public ExNativeArray<sbyte> signOrVolumeArray;
 
@@ -282,6 +287,7 @@ namespace MagicaCloth2
                                 trianglePairList.Add(pair);
                                 restAngleOrVolumeList.Add(restData);
                                 signOrVolumeList.Add(signFlag);
+                                //Debug.Log($"rest angle:{math.degrees(restData)}, signFlag:{signFlag}");
 
                                 uint writeData = DataUtility.Pack32(
                                     multiBuilder.CountValuesForKey(vtx.x),
@@ -371,7 +377,7 @@ namespace MagicaCloth2
 
             volumeRest = (1.0f / 6.0f) * math.dot(math.cross(pos1 - pos0, pos2 - pos0), pos3 - pos0);
             volumeRest *= VolumeScale; // 浮動小数点演算誤差回避
-            signFlag = 100; // Volume
+            signFlag = VOLUME_SIGN; // Volume
         }
 
         static void InitDihedralAngle(VirtualMesh proxyMesh, int v0, int v1, int v2, int v3, out float restAngle, out sbyte signFlag)
@@ -557,8 +563,6 @@ namespace MagicaCloth2
             public void Execute(int index)
             {
                 // インデックスのチームは有効であることが保証されている
-                //int pairIndex = stepTriangleBendIndexArray[index];
-                //int teamId = trianglePairTeamIdArray[pairIndex];
                 uint pack = (uint)stepTriangleBendIndexArray[index];
                 int pairIndex = DataUtility.Unpack12_20Low(pack);
                 int teamId = DataUtility.Unpack12_20Hi(pack);
@@ -606,25 +610,33 @@ namespace MagicaCloth2
 
                 // メソッドごとの解決
                 bool result = false;
-                if (signOrVolume == 100)
+                if (signOrVolume == VOLUME_SIGN)
                 {
                     // Volume
                     float volumeRest = restAngle * tdata.scaleRatio; // スケール倍率
+
+                    // マイナススケール
+                    volumeRest *= tdata.negativeScaleSign;
+
                     result = Volume(nextPosBuffer, invMassBuffer, volumeRest, stiffness, ref addPosBuffer);
                 }
                 else
                 {
                     // Triangle Bending
-                    float sign = signOrVolume < 0 ? -1 : 1;
                     if (parameter.method == Method.DihedralAngle)
                     {
-                        // 二面角
+                        // 方向性なし二面角
                         result = DihedralAngle(0, nextPosBuffer, invMassBuffer, restAngle, stiffness, ref addPosBuffer);
                     }
                     else if (parameter.method == Method.DirectionDihedralAngle)
                     {
-                        // 方向性二面角
+                        // 方向性あり二面角
+                        float sign = signOrVolume < 0 ? -1 : 1;
                         restAngle *= sign;
+
+                        // マイナススケール
+                        restAngle *= tdata.negativeScaleSign;
+
                         result = DihedralAngle(sign, nextPosBuffer, invMassBuffer, restAngle, stiffness, ref addPosBuffer);
                     }
                 }
@@ -675,16 +687,26 @@ namespace MagicaCloth2
                 if (math.abs(lambda) < 1e-06f)
                     return false;
 
-                lambda = stiffness * (volume - volumeRest) / lambda;
+                lambda = stiffness * (volumeRest - volume) / lambda;
 
-                addPosBuffer[0] = -lambda * invMass0 * grad0;
-                addPosBuffer[1] = -lambda * invMass1 * grad1;
-                addPosBuffer[2] = -lambda * invMass2 * grad2;
-                addPosBuffer[3] = -lambda * invMass3 * grad3;
+                addPosBuffer[0] = lambda * invMass0 * grad0;
+                addPosBuffer[1] = lambda * invMass1 * grad1;
+                addPosBuffer[2] = lambda * invMass2 * grad2;
+                addPosBuffer[3] = lambda * invMass3 * grad3;
 
                 return true;
             }
 
+            /// <summary>
+            /// トライアングルベンド計算
+            /// </summary>
+            /// <param name="sign">方向性ありなら0以外</param>
+            /// <param name="nextPosBuffer"></param>
+            /// <param name="invMassBuffer"></param>
+            /// <param name="restAngle"></param>
+            /// <param name="stiffness"></param>
+            /// <param name="addPosBuffer"></param>
+            /// <returns></returns>
             bool DihedralAngle(float sign, in float3x4 nextPosBuffer, in float4 invMassBuffer, float restAngle, float stiffness, ref float3x4 addPosBuffer)
             {
                 float3 nextPos0 = nextPosBuffer[0];
@@ -706,6 +728,7 @@ namespace MagicaCloth2
 
                 float3 n1 = math.cross(nextPos2 - nextPos0, nextPos3 - nextPos0);
                 float3 n2 = math.cross(nextPos3 - nextPos1, nextPos2 - nextPos1);
+
                 float n1_lengsq = math.lengthsq(n1);
                 float n2_lengsq = math.lengthsq(n2);
 
@@ -728,14 +751,6 @@ namespace MagicaCloth2
                 dot = MathUtility.Clamp1(dot);
                 float phi = math.acos(dot);
 
-                // 方向性
-                float dir = math.dot(math.cross(n1, n2), e);
-                if (sign != 0)
-                {
-                    phi *= math.sign(dir);
-                    dir = 1; // lambdaを反転させるため
-                }
-
                 float lambda =
                     invMass0 * math.lengthsq(d0) +
                     invMass1 * math.lengthsq(d1) +
@@ -745,10 +760,20 @@ namespace MagicaCloth2
                 if (lambda == 0.0f)
                     return false;
 
-                lambda = (phi - restAngle) / lambda * stiffness;
+                // 方向性
+                float dirSign = math.sign(math.dot(math.cross(n1, n2), e));
+                if (sign != 0)
+                {
+                    // 方向性あり(DirectionDihedralAngle)
+                    phi *= dirSign;
+                }
+                else
+                {
+                    // 方向性なし(DihedralAngle)
+                    lambda *= dirSign;
+                }
 
-                if (dir > 0.0f)
-                    lambda = -lambda;
+                lambda = (restAngle - phi) / lambda * stiffness;
 
                 float3 corr0 = -invMass0 * lambda * d0;
                 float3 corr1 = -invMass1 * lambda * d1;

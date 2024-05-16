@@ -21,7 +21,7 @@ namespace StylizedWater2
         public const string ASSET_ID = "170386";
         public const string ASSET_ABRV = "SW2";
 
-        public const string INSTALLED_VERSION = "1.6.3";
+        public const string INSTALLED_VERSION = "1.6.4";
         
         public const int SHADER_GENERATOR_VERSION_MAJOR = 1;
         public const int SHADER_GENERATOR_MINOR = 2; 
@@ -34,8 +34,8 @@ namespace StylizedWater2
         public const string DOC_URL = "http://staggart.xyz/unity/stylized-water-2/sws-2-docs/";
         public const string FORUM_URL = "https://forum.unity.com/threads/999132/";
         public const string EMAIL_URL = "mailto:contact@staggart.xyz?subject=Stylized Water 2";
-
-        public static bool IS_UPDATED = true;
+        public const string DISCORD_INVITE_URL = "https://discord.gg/GNjEaJc8gw";
+        
         public static bool supportedVersion = true;
         public static bool compatibleVersion = true;
         public static bool alphaVersion = false;
@@ -318,6 +318,29 @@ namespace StylizedWater2
 
         public static class VersionChecking
         {
+            [InitializeOnLoadMethod]
+            static void Initialize()
+            {
+                if (CHECK_PERFORMED == false)
+                {
+                    CheckForUpdate(false);
+                    CHECK_PERFORMED = true;
+                }
+            }
+            
+            private static bool CHECK_PERFORMED
+            {
+                get => SessionState.GetBool("SW2_VERSION_CHECK_PERFORMED", false);
+                set => SessionState.SetBool("SW2_VERSION_CHECK_PERFORMED", value);
+            }
+            
+            public static string LATEST_VERSION
+            {
+                get => SessionState.GetString("SW2_LATEST_VERSION", INSTALLED_VERSION);
+                set => SessionState.SetString("SW2_LATEST_VERSION", value);
+            }
+            public static bool UPDATE_AVAILABLE => new Version(LATEST_VERSION) > new Version(INSTALLED_VERSION);
+            
             public static string GetUnityVersion()
             {
                 string version = UnityEditorInternal.InternalEditorUtility.GetFullUnityVersion();
@@ -339,8 +362,7 @@ namespace StylizedWater2
                 alphaVersion = GetUnityVersion().Contains("f") == false;
             }
 
-            public static string fetchedVersionString;
-            public static System.Version fetchedVersion;
+            public static string apiResult;
             private static bool showPopup;
 
             public enum VersionStatus
@@ -379,35 +401,42 @@ namespace StylizedWater2
 
                 queryStatus = QueryStatus.Fetching;
 
-                using (WebClient webClient = new WebClient())
+                var url = $"https://api.assetstore.unity3d.com/package/latest-version/{ASSET_ID}";
+
+                using (System.Net.WebClient webClient = new System.Net.WebClient())
                 {
-                    webClient.DownloadStringCompleted += new System.Net.DownloadStringCompletedEventHandler(OnRetrievedServerVersion);
-                    webClient.DownloadStringAsync(new System.Uri(VERSION_FETCH_URL), fetchedVersionString);
+                    webClient.DownloadStringCompleted += OnRetrievedAPIContent;
+                    webClient.DownloadStringAsync(new System.Uri(url), apiResult);
                 }
             }
+            
+            private class AssetStoreItem
+            {
+                public string name;
+                public string version;
+            }
 
-            private static void OnRetrievedServerVersion(object sender, DownloadStringCompletedEventArgs e)
+            private static void OnRetrievedAPIContent(object sender, DownloadStringCompletedEventArgs e)
             {
                 if (e.Error == null && !e.Cancelled)
                 {
-                    fetchedVersionString = e.Result;
-                    fetchedVersion = new System.Version(fetchedVersionString);
-                    System.Version installedVersion = new System.Version(INSTALLED_VERSION);
+                    string result = e.Result;
 
-                    //Success
-                    IS_UPDATED = (installedVersion >= fetchedVersion) ? true : false;
+                    AssetStoreItem asset = (AssetStoreItem)JsonUtility.FromJson(result, typeof(AssetStoreItem));
 
+                    LATEST_VERSION = asset.version;
+                    
 #if SWS_DEV
-                    Debug.Log("<b>PackageVersionCheck</b> Up-to-date = " + IS_UPDATED + " (Installed:" + INSTALLED_VERSION + ") (Remote:" + fetchedVersionString + ")");
+                    Debug.Log("<b>PackageVersionCheck</b> Update available = " + UPDATE_AVAILABLE + " (Installed:" + INSTALLED_VERSION + ") (Remote:" + LATEST_VERSION + ")");
 #endif
 
                     queryStatus = QueryStatus.Completed;
 
                     if (VersionChecking.showPopup)
                     {
-                        if (!IS_UPDATED)
+                        if (UPDATE_AVAILABLE)
                         {
-                            if (EditorUtility.DisplayDialog(ASSET_NAME + ", version " + INSTALLED_VERSION, "An updated version is available: " + fetchedVersionString, "Open Package Manager", "Close"))
+                            if (EditorUtility.DisplayDialog(ASSET_NAME + ", version " + INSTALLED_VERSION, "An updated version is available: " + LATEST_VERSION, "Open Package Manager", "Close"))
                             {
                                 OpenInPackageManager();
                             }
@@ -422,9 +451,6 @@ namespace StylizedWater2
                 {
                     Debug.LogWarning("[" + ASSET_NAME + "] Contacting update server failed: " + e.Error.Message);
                     queryStatus = QueryStatus.Failed;
-
-                    //When failed, assume installation is up-to-date
-                    IS_UPDATED = true;
                 }
             }
         }

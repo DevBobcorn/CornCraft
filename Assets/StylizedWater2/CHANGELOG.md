@@ -1,3 +1,15 @@
+1.6.4
+
+Changed:
+- Implemented proper error handling for Unity 6.
+- "Murky" water material
+
+Fixed:
+- Planar Reflections, minute changes in render scale not having an effect on resolution.
+- Buoyancy API not respecting custom time value if it was exactly 0.
+- Indirect lighting and reflections being black in demo scenes in Unity 2023.2+.
+- Translucency for point lights being visible on backfaces (underwater scenario).
+
 1.6.3
 
 Added:

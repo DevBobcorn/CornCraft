@@ -9,6 +9,10 @@ using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.Rendering;
+#if URP
+using UnityEngine.Rendering.Universal;
+#endif
 
 namespace StylizedWater2
 {
@@ -366,6 +370,34 @@ namespace StylizedWater2
             EditorGUI.LabelField(labelRect, new GUIContent(text), Styles.H2);
             
             EditorGUILayout.Space(backgroundRect.height * 0.5f);
+        }
+
+        public static void DrawRenderGraphError()
+        {
+            #if UNITY_6000_0_OR_NEWER && URP
+            if (GraphicsSettings.GetRenderPipelineSettings<RenderGraphSettings>().enableRenderCompatibilityMode == false)
+            {
+                EditorGUILayout.HelpBox("Using Render Graph in Unity 6+ is not supported." +
+                                        "\n\nBackwards compatibility mode must be enabled.", MessageType.Error);
+                
+                GUILayout.Space(-32);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button(new GUIContent("Enable", EditorGUIUtility.IconContent("d_tab_next").image), GUILayout.Width(60)))
+                    {
+                        GraphicsSettings.GetRenderPipelineSettings<RenderGraphSettings>().enableRenderCompatibilityMode = true;
+
+                        EditorUtility.DisplayDialog($"{AssetInfo.ASSET_NAME} v{AssetInfo.INSTALLED_VERSION}", 
+                            "Please note that this option will be removed in a future Unity version, this version will no longer be functional then." +
+                            "\n\n" +
+                            "A license upgrade for Unity 6+ support may be available, please check the documentation for information.", "OK");
+                    }
+                    GUILayout.Space(8);
+                }
+                GUILayout.Space(11);
+            }
+            #endif
         }
     
         public static void DrawFooter()
@@ -844,11 +876,12 @@ namespace StylizedWater2
                             wordWrap = true,
                             padding = new RectOffset()
                             {
-                                left = 14,
-                                right = 14,
-                                top = 8,
-                                bottom = 8
-                            }
+                                left = 7,
+                                right = 0,
+                                top = 5,
+                                bottom = 5
+                            },
+                            imagePosition = ImagePosition.ImageLeft
                         };
                     }
 
@@ -863,7 +896,7 @@ namespace StylizedWater2
                 {
                     if (_AssetStoreBtnContent == null)
                     {
-                        _AssetStoreBtnContent = new GUIContent("  View on Asset Store ", EditorGUIUtility.IconContent("Asset Store").image, "Open web page.\n\nURL may contain an affiliate ID to fund the purchase of new assets and investigate/develop integrations for them.");
+                        _AssetStoreBtnContent = new GUIContent("  View on Asset Store ", EditorGUIUtility.IconContent("Asset Store").image, "Open web page.\n\nURL may contain an affiliate ID, this commission helps to fund the purchase of new assets in order to investigate/develop integrations for them.");
                     }
 
                     return _AssetStoreBtnContent;

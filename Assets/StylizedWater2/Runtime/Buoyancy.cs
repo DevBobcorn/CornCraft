@@ -41,7 +41,7 @@ namespace StylizedWater2
         {
             get
             {
-                if (WaterObject.CustomTime >= 0) return WaterObject.CustomTime;
+                if (WaterObject.CustomTime > 0) return WaterObject.CustomTime;
                 
 #if UNITY_EDITOR
                 return Application.isPlaying ? Time.time : Shader.GetGlobalVector(TimeParametersID).x;

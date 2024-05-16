@@ -534,6 +534,14 @@ namespace StylizedWater2
                     MessageType.Error);
             }
             
+            #if UNITY_6000_0_OR_NEWER
+            if (tesselationEnabled && UniversalRenderPipeline.asset.gpuResidentDrawerMode != GPUResidentDrawerMode.Disabled)
+            {
+                UI.DrawNotification(true, "[Unity 6+] Using the GPU Resident Drawer with Tessellation enabled is not supported!" +
+                                          "\n\nEither disable Tessellation (under the Rendering tab), or disable GPU Resident Drawer in your pipeline settings.", MessageType.Error);
+            }
+            #endif
+            
             UI.DrawNotification(depthAfterTransparents && _ZWrite.floatValue > 0, "\nZWrite option (Rendering tab) is enabled & Depth Texture Mode is set to \'After Transparents\" on the default renderer\n\nWater can not render properly with this combination\n", MessageType.Error);
             
             #if !UNITY_2023_1_OR_NEWER //OpenGLES 2.0 no longer supported at all
@@ -684,6 +692,8 @@ namespace StylizedWater2
 
                 UI.Material.DrawVector2(_Direction, "Direction");
                 UI.Material.DrawFloatField(_Speed, label:"Speed");
+                
+                UI.DrawNotification(WaterObject.CustomTime > 0, $"Shader animations are driven by a custom time value set through script ({WaterObject.CustomTime}).", MessageType.Info);
 
                 #if UNITY_2020_2_OR_NEWER
                 if (EditorWindow.focusedWindow && EditorWindow.focusedWindow.GetType() == typeof(SceneView))

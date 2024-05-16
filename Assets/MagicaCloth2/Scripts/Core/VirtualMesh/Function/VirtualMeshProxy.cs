@@ -356,96 +356,7 @@ namespace MagicaCloth2
                 };
                 job1.Run(vcnt);
             }
-#if false // ★どうもうまくいかないので一旦停止！
-            // 頂点ウエイトから
-            else if (mode == NormalAlignmentSettings.AlignmentMode.BoneWeight)
-            {
-                var job2 = new ProxyNormalWeightAdjustmentJob()
-                {
-                    WtoL = initWorldToLocal,
-                    localPositions = localPositions.GetNativeArray(),
-                    boneWeights = boneWeights.GetNativeArray(),
-
-                    transformPositionArray = transformData.positionArray.GetNativeArray(),
-
-                    localNormals = localNormals.GetNativeArray(),
-                    localTangents = localTangents.GetNativeArray(),
-                    normalAdjustmentRotations = normalAdjustmentRotations,
-                };
-                job2.Run(vcnt);
-            }
-#endif
         }
-
-#if false
-        [BurstCompile]
-        struct ProxyNormalWeightAdjustmentJob : IJobParallelFor
-        {
-            public float4x4 WtoL;
-            [Unity.Collections.ReadOnly]
-            public NativeArray<float3> localPositions;
-            [Unity.Collections.ReadOnly]
-            public NativeArray<VirtualMeshBoneWeight> boneWeights;
-
-            // transform
-            [Unity.Collections.ReadOnly]
-            public NativeArray<float3> transformPositionArray;
-
-            // out
-            //[Unity.Collections.WriteOnly]
-            public NativeArray<float3> localNormals;
-            //[Unity.Collections.WriteOnly]
-            public NativeArray<float3> localTangents;
-            [Unity.Collections.WriteOnly]
-            public NativeArray<quaternion> normalAdjustmentRotations;
-
-            public void Execute(int vindex)
-            {
-                var lpos = localPositions[vindex];
-                var bw = boneWeights[vindex];
-
-                // 現在の回転
-                var lrot = MathUtility.ToRotation(localNormals[vindex], localTangents[vindex]);
-
-                // 影響するボーンへの方向をまとめる
-                float3 bv = 0;
-                int bcnt = bw.Count;
-                if (bcnt == 0)
-                    return;
-                for (int i = 0; i < bcnt; i++)
-                {
-                    var bonePos = math.transform(WtoL, transformPositionArray[bw.boneIndices[i]]);
-                    //var v = transformPositionArray[bw.boneIndices[i]] - lpos;
-                    var v = lpos - bonePos;
-                    v = math.normalizesafe(v, float3.zero);
-                    v *= bw.weights[i];
-                    bv += v;
-                }
-                if (math.lengthsq(bv) < Define.System.Epsilon)
-                    return;
-
-                // 法線確定
-                float3 n = math.normalize(bv);
-
-                // 法線をもとに接線を計算する
-                var lnor = localNormals[vindex];
-                var ltan = localTangents[vindex];
-                var dotNormal = math.dot(n, lnor);
-                var dotTangent = math.dot(n, ltan);
-                float3 tv = dotNormal < dotTangent ? lnor : ltan;
-                float3 tan = math.cross(tv, n);
-
-                //localNormals[vindex] = tan;
-                //localTangents[vindex] = n;
-                localNormals[vindex] = n;
-                localTangents[vindex] = tan;
-                var nrot = MathUtility.ToRotation(n, tan);
-
-                // 補正用回転を算出し格納する
-                normalAdjustmentRotations[vindex] = math.mul(math.inverse(lrot), nrot);
-            }
-        }
-#endif
 
         [BurstCompile]
         struct ProxyNormalRadiationAdjustmentJob : IJobParallelFor
@@ -1103,7 +1014,10 @@ namespace MagicaCloth2
                 // 頂点のローカル回転
                 var vrot = MathUtility.ToRotation(localNormals[vindex], localTangents[vindex]);
 
-                vertexToTransformRotations[vindex] = math.mul(math.inverse(vrot), trot);
+                // 頂点ローカル回転をトランスフォームローカル回転に復元する回転を求める
+                var toRot = math.mul(math.inverse(vrot), trot);
+
+                vertexToTransformRotations[vindex] = toRot;
             }
         }
 
@@ -1157,13 +1071,13 @@ namespace MagicaCloth2
 
             public void Execute(int vindex)
             {
-                float3 pos = localPositions[vindex];
-                var nor = localNormals[vindex];
-                var tan = localTangents[vindex];
+                float3 lpos = localPositions[vindex];
+                var lnor = localNormals[vindex];
+                var ltan = localTangents[vindex];
 
                 // マッピング用の頂点バインドポーズを求める
-                quaternion rot = MathUtility.ToRotation(nor, tan);
-                vertexBindPosePositions[vindex] = -pos;
+                quaternion rot = MathUtility.ToRotation(lnor, ltan);
+                vertexBindPosePositions[vindex] = -lpos;
                 vertexBindPoseRotations[vindex] = math.inverse(rot);
             }
         }
@@ -1282,39 +1196,6 @@ namespace MagicaCloth2
             if (CustomSkinningBoneCount == 0)
                 return;
 
-#if false
-            // ボーン情報の構築
-            using var boneInfoList = new NativeList<SkinningBoneInfo>(CustomSkinningBoneCount, Allocator.Persistent);
-            for (int i = 0; i < CustomSkinningBoneCount; i++)
-            {
-                int tindex = customSkinningBoneIndices[i];
-                if (tindex == -1)
-                    continue;
-
-                // 登録
-                var info = new SkinningBoneInfo();
-                info.transformIndex = tindex;
-                info.startPos = bones[i].localPosition;
-                boneInfoList.Add(info);
-                Debug.Log($"[{boneInfoList.Length - 1}] {i}, tindex:{tindex}");
-            }
-            if (boneInfoList.Length == 0)
-                return;
-
-            // 頂点ごとにカスタムスキニングウエイトを算出
-            var job = new Proxy_CalcCustomSkinningWeightsJob2()
-            {
-                distanceReduction = setting.distanceReduction,
-                distancePow = setting.distancePow,
-
-                //attributes = attributes.GetNativeArray(),
-                localPositions = localPositions.GetNativeArray(),
-                boneInfoList = boneInfoList,
-                boneWeights = boneWeights.GetNativeArray(),
-            };
-            job.Run(VertexCount);
-#endif
-#if true
             // ボーン情報の構築
             using var boneInfoList = new NativeList<SkinningBoneInfo>(CustomSkinningBoneCount * 2, Allocator.Persistent);
             for (int i = 0; i < CustomSkinningBoneCount; i++)
@@ -1331,7 +1212,6 @@ namespace MagicaCloth2
 
                 // ボーンライン情報の作成
                 var info = new SkinningBoneInfo();
-                //info.transformIndex = customSkinningBoneIndices[pindex];
                 info.startTransformIndex = customSkinningBoneIndices[pindex];
                 info.startPos = bones[pindex].localPosition;
                 info.endTransformIndex = tindex;
@@ -1352,9 +1232,6 @@ namespace MagicaCloth2
             var job = new Proxy_CalcCustomSkinningWeightsJob()
             {
                 isBoneCloth = isBoneCloth,
-                //angularAttenuation = setting.angularAttenuation,
-                //distanceReduction = setting.distanceReduction,
-                //distancePow = setting.distancePow,
                 angularAttenuation = Define.System.CustomSkinningAngularAttenuation,
                 distanceReduction = Define.System.CustomSkinningDistanceReduction,
                 distancePow = Define.System.CustomSkinningDistancePow,
@@ -1365,109 +1242,7 @@ namespace MagicaCloth2
                 boneWeights = boneWeights.GetNativeArray(),
             };
             job.Run(VertexCount);
-#endif
         }
-
-#if false
-        [BurstCompile]
-        struct Proxy_CalcCustomSkinningWeightsJob2 : IJobParallelFor
-        {
-            public float distanceReduction;
-            public float distancePow;
-
-            //[Unity.Collections.ReadOnly]
-            //public NativeArray<VertexAttribute> attributes;
-            [Unity.Collections.ReadOnly]
-            public NativeArray<float3> localPositions;
-            [Unity.Collections.ReadOnly]
-            public NativeList<SkinningBoneInfo> boneInfoList;
-            [Unity.Collections.WriteOnly]
-            public NativeArray<VirtualMeshBoneWeight> boneWeights;
-
-            public void Execute(int vindex)
-            {
-                // 固定は無効(※この時点ではまだ属性がない！）
-                //var attr = attributes[vindex];
-                //if (attr.IsMove() == false)
-                //    return;
-
-                var lpos = localPositions[vindex];
-
-                var costList = new ExCostSortedList4(-1);
-                int bcnt = boneInfoList.Length;
-                for (int i = 0; i < bcnt; i++)
-                {
-                    var binfo = boneInfoList[i];
-
-                    // 距離
-                    float dist = math.distance(lpos, binfo.startPos);
-
-                    // 登録。すでに登録済みならばdistがより小さい場合のみ再登録
-                    int boneIndex = binfo.transformIndex;
-                    int nowIndex = costList.indexOf(boneIndex);
-                    if (nowIndex >= 0)
-                    {
-                        if (dist < costList.costs[nowIndex])
-                        {
-                            costList.RemoveItem(boneIndex);
-                            costList.Add(dist, boneIndex);
-                        }
-                    }
-                    else
-                        costList.Add(dist, boneIndex);
-                }
-
-                // ウエイト算出
-                // (0)最小距離のn%を減算する
-                int cnt = costList.Count;
-                //const float lengthWeight = 0.8f;
-                float mindist = costList.MinCost * distanceReduction;
-                costList.costs -= mindist;
-
-                // (1)distanceをn乗する
-                //const float pow = 2.0f;
-                costList.costs = math.pow(costList.costs, distancePow);
-
-                // (2)最小値の逆数にする
-                float min = math.max(costList.MinCost, 1e-06f);
-                float sum = 0;
-                for (int i = 0; i < cnt; i++)
-                {
-                    costList.costs[i] = min / costList.costs[i];
-                    sum += costList.costs[i];
-                }
-
-                // (3)割合を出す
-                costList.costs /= sum;
-
-                // (4)極小のウエイトは削除する
-                sum = 0;
-                for (int i = 0; i < 4; i++)
-                {
-                    if (costList.costs[i] < 0.01f || i >= cnt)
-                    {
-                        // 打ち切り
-                        costList.costs[i] = 0.0f;
-                        costList.data[i] = 0;
-                    }
-                    else
-                    {
-                        sum += costList.costs[i];
-                    }
-                }
-                Debug.Assert(sum > 0);
-
-                // (5)再度1.0に平均化
-                costList.costs /= sum;
-
-                //Debug.Log($"[{vindex}] :{costList}");
-
-                // ウエイト作成
-                var bw = new VirtualMeshBoneWeight(costList.data, costList.costs);
-                boneWeights[vindex] = bw;
-            }
-        }
-#endif
 
 #if true
         [BurstCompile]
@@ -2261,16 +2036,21 @@ namespace MagicaCloth2
                     float3 tan = localTangents[vindex];
                     quaternion rot = MathUtility.ToRotation(nor, tan);
 
-
                     float3 lpos = math.mul(iprot, pos - ppos);
                     quaternion lrot = math.mul(iprot, rot);
                     vertexLocalPositions[vindex] = lpos;
                     vertexLocalRotations[vindex] = lrot;
+
+                    //Debug.Log($"vertexLocalPositions [{vindex}] : {lpos}");
+                    //Debug.Log($"vertexLocalRotations [{vindex}] : {lrot}");
                 }
                 else
                 {
                     vertexLocalPositions[vindex] = 0;
                     vertexLocalRotations[vindex] = quaternion.identity;
+
+                    //Debug.Log($"vertexLocalPositions [{vindex}] : 0");
+                    //Debug.Log($"vertexLocalRotations [{vindex}] : (0, 0, 0, 1)");
                 }
             }
         }

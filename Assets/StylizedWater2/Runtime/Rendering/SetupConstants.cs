@@ -35,7 +35,11 @@ namespace StylizedWater2
         #if UNITY_2020_2_OR_NEWER
         private ScriptableRenderPassInput requirements;
         #endif
-        
+
+        #if UNITY_6000_0_OR_NEWER //Silence warning spam
+        public override void RecordRenderGraph(UnityEngine.Rendering.RenderGraphModule.RenderGraph renderGraph, ContextContainer frameData) { }
+        #endif
+
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
             #if UNITY_2020_2_OR_NEWER

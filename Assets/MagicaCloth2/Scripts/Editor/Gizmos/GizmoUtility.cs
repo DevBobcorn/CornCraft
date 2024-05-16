@@ -169,7 +169,11 @@ namespace MagicaCloth2
 
             var cpos = collider.transform.TransformPoint(collider.center);
             var crot = collider.transform.rotation;
-            var cscl = Vector3.one * collider.GetScale(); // スケールはx軸のみ（つまり均等スケールのみ）
+            //var cscl = Vector3.one * collider.GetScale(); // スケールはx軸のみ（つまり均等スケールのみ）
+
+            // マイナススケール
+            var cscl = collider.transform.lossyScale;
+            //var cscl = Vector3.one * Mathf.Abs(collider.GetScale()); // スケールはx軸のみ（つまり均等スケールのみ）
 
             // カメラ回転をコライダーのローカル回転に変換
             camRot = Quaternion.Inverse(crot) * camRot;
@@ -180,6 +184,7 @@ namespace MagicaCloth2
             if (useHandles)
             {
                 Handles.matrix = Matrix4x4.TRS(cpos, crot, cscl);
+
                 Handles.color = selected ? ColorCollider : ColorCollider * 0.5f;
                 switch (collider.GetColliderType())
                 {
@@ -206,6 +211,7 @@ namespace MagicaCloth2
                         break;
                     case ColliderManager.ColliderType.Plane:
                         DrawWireCube(Vector3.zero, Quaternion.identity, new Vector3(1.0f, 0.0f, 1.0f) * 1.0f, true);
+                        DrawLine(Vector3.zero, Vector3.up * 0.25f, true);
                         break;
                 }
             }
@@ -299,23 +305,6 @@ namespace MagicaCloth2
             if (resetMatrix)
                 Gizmos.matrix = Matrix4x4.identity;
         }
-
-        //public static void DrawWireSphere(
-        //    Vector3 pos, Quaternion rot, Vector3 scl, float radius,
-        //    Quaternion camRot, bool useHandles
-        //    )
-        //{
-        //    if(useHandles)
-        //    {
-        //        Handles.matrix = Matrix4x4.TRS(pos, rot, scl);
-
-        //    }
-        //    else
-        //    {
-
-        //    }
-        //}
-
 
 #if false
         /// <summary>

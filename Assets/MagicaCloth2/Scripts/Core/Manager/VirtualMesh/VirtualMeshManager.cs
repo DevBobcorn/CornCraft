@@ -691,7 +691,7 @@ namespace MagicaCloth2
             };
             jobHandle = clearJob.Schedule(jobHandle);
 
-            // [BoneCloht(1)][MeshCloth(2)]それぞれの処理頂点インデックスリストを作成する
+            // [BoneCloht][MeshCloth]処理頂点インデックスリストを作成する
             var job1 = new CreateProxyMeshUpdateVertexList()
             {
                 teamDataArray = tm.teamDataArray.GetNativeArray(),
@@ -701,26 +701,8 @@ namespace MagicaCloth2
             };
             jobHandle = job1.Schedule(tm.TeamCount, 1, jobHandle);
 
-#if false
-            // [BoneCloth] Transform姿勢を頂点姿勢として取り込む
-            var calcBoneClothJob = new CalcTransformDirectJob()
-            {
-                jobVertexIndexList = sm.processingIntList0.Buffer,
-
-                teamDataArray = tm.teamDataArray.GetNativeArray(),
-
-                transformPositions = bm.positionArray.GetNativeArray(),
-                transformRotations = bm.rotationArray.GetNativeArray(),
-
-                teamIds = teamIds.GetNativeArray(),
-                positions = positions.GetNativeArray(),
-                rotations = rotations.GetNativeArray(),
-            };
-            jobHandle = calcBoneClothJob.Schedule(sm.processingIntList0.GetJobSchedulePtr(), 8, jobHandle);
-#endif
-
-            // [MeshCloth] ProxyMeshをスキニングして頂点姿勢を求める
-            var calcMeshClothJob = new CalcTransformOnlySkinningJob()
+            // [BoneCloht][MeshCloth] ProxyMeshをスキニングして頂点姿勢を求める
+            var calcSkinningJob = new CalcProxyMeshSkinningJob()
             {
                 jobVertexIndexList = sm.processingStepTriangleBending.Buffer,
 
@@ -737,11 +719,9 @@ namespace MagicaCloth2
                 positions = positions.GetNativeArray(),
                 rotations = rotations.GetNativeArray(),
 
-                transformPositionArray = bm.positionArray.GetNativeArray(),
-                transformRotationArray = bm.rotationArray.GetNativeArray(),
-                transformScaleArray = bm.scaleArray.GetNativeArray(),
+                transformLocalToWorldMatrixArray = bm.localToWorldMatrixArray.GetNativeArray(),
             };
-            jobHandle = calcMeshClothJob.Schedule(sm.processingStepTriangleBending.GetJobSchedulePtr(), 32, jobHandle);
+            jobHandle = calcSkinningJob.Schedule(sm.processingStepTriangleBending.GetJobSchedulePtr(), 32, jobHandle);
 
             return jobHandle;
         }
@@ -768,21 +748,12 @@ namespace MagicaCloth2
         {
             public NativeArray<TeamManager.TeamData> teamDataArray;
 
-            // bone (direct transform)
-            //[NativeDisableParallelForRestriction]
-            //[Unity.Collections.WriteOnly]
-            //public NativeReference<int> processingCounter0;
-            //[NativeDisableParallelForRestriction]
-            //[Unity.Collections.WriteOnly]
-            //public NativeArray<int> processingList0; // bone
-
-            // mesh (skinning)
             [NativeDisableParallelForRestriction]
             [Unity.Collections.WriteOnly]
             public NativeReference<int> processingCounter1;
             [NativeDisableParallelForRestriction]
             [Unity.Collections.WriteOnly]
-            public NativeArray<int> processingList1; // mesh
+            public NativeArray<int> processingList1;
 
             public void Execute(int teamId)
             {
@@ -808,86 +779,17 @@ namespace MagicaCloth2
                     int vindex = c.startIndex + j;
                     processingList1[start + j] = vindex;
                 }
-
-#if false
-                if (tdata.proxyMeshType == VirtualMesh.MeshType.ProxyMesh || tdata.flag.IsSet(TeamManager.Flag_CustomSkinning))
-                {
-                    int start = processingCounter1.InterlockedStartIndex(c.dataLength);
-                    for (int j = 0; j < c.dataLength; j++)
-                    {
-                        int vindex = c.startIndex + j;
-                        processingList1[start + j] = vindex;
-                    }
-                }
-                if (tdata.proxyMeshType == VirtualMesh.MeshType.ProxyBoneMesh)
-                {
-                    int start = processingCounter0.InterlockedStartIndex(c.dataLength);
-                    for (int j = 0; j < c.dataLength; j++)
-                    {
-                        int vindex = c.startIndex + j;
-                        processingList0[start + j] = vindex;
-                    }
-                }
-#endif
-
                 //Debug.Log($"Vmesh Bone:{jobVertexIndexList1.Length}, Mesh:{jobVertexIndexList2.Length}");
             }
         }
 
-#if false
         /// <summary>
-        /// Transformから対応する頂点に姿勢をコピーする
-        /// </summary>
-        [BurstCompile]
-        struct CalcTransformDirectJob : IJobParallelForDefer
-        {
-            [Unity.Collections.ReadOnly]
-            public NativeArray<int> jobVertexIndexList;
-
-            // team
-            [Unity.Collections.ReadOnly]
-            public NativeArray<TeamManager.TeamData> teamDataArray;
-
-            // transform
-            [Unity.Collections.ReadOnly]
-            public NativeArray<float3> transformPositions;
-            [Unity.Collections.ReadOnly]
-            public NativeArray<quaternion> transformRotations;
-
-            // vmesh
-            [Unity.Collections.ReadOnly]
-            public NativeArray<short> teamIds;
-            [NativeDisableParallelForRestriction]
-            [Unity.Collections.WriteOnly]
-            public NativeArray<float3> positions;
-            [NativeDisableParallelForRestriction]
-            [Unity.Collections.WriteOnly]
-            public NativeArray<quaternion> rotations;
-
-            public void Execute(int index)
-            {
-                int vindex = jobVertexIndexList[index];
-                int teamId = teamIds[vindex];
-                var tdata = teamDataArray[teamId];
-                int l_index = vindex - tdata.proxyCommonChunk.startIndex;
-
-                // 現在のトランスフォームワールド姿勢
-                int tindex = tdata.proxyTransformChunk.startIndex + l_index;
-                var wpos = transformPositions[tindex];
-                quaternion wrot = transformRotations[tindex];
-
-                positions[vindex] = wpos;
-                rotations[vindex] = wrot;
-            }
-        }
-#endif
-
-        /// <summary>
-        /// 頂点スキニングを行い座標・法線・接線を求める
+        /// プロキシメッシュの頂点スキニングを行い座標・法線・接線を求める
+        /// [BoneCloth][MeshCloth]兼用
         /// 姿勢はワールド座標で格納される
         /// </summary>
         [BurstCompile]
-        struct CalcTransformOnlySkinningJob : IJobParallelForDefer
+        struct CalcProxyMeshSkinningJob : IJobParallelForDefer
         {
             [Unity.Collections.ReadOnly]
             public NativeArray<int> jobVertexIndexList;
@@ -922,11 +824,7 @@ namespace MagicaCloth2
 
             // transform
             [Unity.Collections.ReadOnly]
-            public NativeArray<float3> transformPositionArray;
-            [Unity.Collections.ReadOnly]
-            public NativeArray<quaternion> transformRotationArray;
-            [Unity.Collections.ReadOnly]
-            public NativeArray<float3> transformScaleArray;
+            public NativeArray<float4x4> transformLocalToWorldMatrixArray;
 
             public void Execute(int index)
             {
@@ -941,33 +839,34 @@ namespace MagicaCloth2
 
                 var bw = boneWeights[mvindex];
                 int wcnt = bw.Count;
-                float3 wpos = 0;
-                float3 wnor = 0;
-                float3 wtan = 0;
+                float4x3 wpose = 0;
+                float4x3 _pose = 0;
                 for (int i = 0; i < wcnt; i++)
                 {
                     float w = bw.weights[i];
 
+                    _pose.c0 = new float4(localPositions[mvindex], 1);
+                    _pose.c1 = new float4(localNormals[mvindex], 0);
+                    _pose.c2 = new float4(localTangents[mvindex], 0);
+                    //Debug.Log($"[{mvindex}] lpos:{lpos}, lnor:{lnor}, ltan:{ltan}");
+
+                    // ボーンローカル空間に変換
                     int l_boneIndex = bw.boneIndices[i];
                     float4x4 bp = skinBoneBindPoses[sb_start + l_boneIndex];
-                    float4 lpos = new float4(localPositions[mvindex], 1);
-                    float4 lnor = new float4(localNormals[mvindex], 0);
-                    float4 ltan = new float4(localTangents[mvindex], 0);
+                    _pose = math.mul(bp, _pose);
 
-                    float3 pos = math.mul(bp, lpos).xyz;
-                    float3 nor = math.mul(bp, lnor).xyz;
-                    float3 tan = math.mul(bp, ltan).xyz;
-
+                    // 現在のワールド空間に変換
                     int tindex = skinBoneTransformIndices[sb_start + l_boneIndex] + t_start;
-                    var tpos = transformPositionArray[tindex];
-                    var trot = transformRotationArray[tindex];
-                    var tscl = transformScaleArray[tindex];
-                    MathUtility.TransformPositionNormalTangent(tpos, trot, tscl, ref pos, ref nor, ref tan);
+                    var lw = transformLocalToWorldMatrixArray[tindex];
+                    _pose = math.mul(lw, _pose);
 
-                    wpos += pos * w;
-                    wnor += nor * w;
-                    wtan += tan * w;
+                    // ウエイト
+                    wpose += _pose * w;
                 }
+
+                float3 wpos = wpose.c0.xyz;
+                float3 wnor = wpose.c1.xyz;
+                float3 wtan = wpose.c2.xyz;
 
                 // バインドポーズにスケールが入るので単位化する必要がある
 #if MC2_DEBUG
@@ -980,6 +879,8 @@ namespace MagicaCloth2
 
                 positions[vindex] = wpos;
                 rotations[vindex] = wrot;
+
+                //Debug.Log($"[{vindex}] wnor:{MathUtility.ToNormal(wrot)}, wtan:{MathUtility.ToTangent(wrot)}, wbnor:{MathUtility.ToBinormal(wrot)}");
             }
         }
 
@@ -1035,8 +936,8 @@ namespace MagicaCloth2
             if (BaseLineCount > 0)
             {
                 // ラインの法線・接線を求める
-                // （ローカル座標空間）
-                var calcBaseLineNormalTangentJob = new CalcBaseLineNormalTangentJob()
+                // （ワールド座標空間）
+                var calcLineNormalTangentJob = new CalcLineNormalTangentJob()
                 {
                     jobBaseLineList = sm.processingStepEdgeCollision.Buffer,
 
@@ -1055,17 +956,17 @@ namespace MagicaCloth2
                     baseLineFlags = baseLineFlags.GetNativeArray(),
                     baseLineTeamIds = baseLineTeamIds.GetNativeArray(),
                     baseLineStartIndices = baseLineStartDataIndices.GetNativeArray(),
-                    baseLineCounts = baseLineDataCounts.GetNativeArray(),
-                    baseLineIndices = baseLineData.GetNativeArray(),
+                    baseLineDataCounts = baseLineDataCounts.GetNativeArray(),
+                    baseLineData = baseLineData.GetNativeArray(),
                 };
-                jobHandle = calcBaseLineNormalTangentJob.Schedule(sm.processingStepEdgeCollision.GetJobSchedulePtr(), 8, jobHandle);
+                jobHandle = calcLineNormalTangentJob.Schedule(sm.processingStepEdgeCollision.GetJobSchedulePtr(), 8, jobHandle);
             }
 
             // トライアングルがある場合はトライアングル接続情報から最終的な姿勢を求める
             if (TriangleCount > 0)
             {
                 // トライアングルの法線・接線を求める
-                // （ローカル座標空間）
+                // （ワールド座標空間）
                 var triangleNormalTangentJob = new CalcTriangleNormalTangentJob()
                 {
                     jobTriangleList = sm.processingStepMotionParticle.Buffer,
@@ -1083,7 +984,7 @@ namespace MagicaCloth2
                 jobHandle = triangleNormalTangentJob.Schedule(sm.processingStepMotionParticle.GetJobSchedulePtr(), 16, jobHandle);
 
                 // トライアングルの法線接線から頂点法線接線を平均化して求める
-                // （ローカル座標空間）
+                // （ワールド座標空間）
                 var vertexNormalTangentFromTriangleJob = new CalcVertexNormalTangentFromTriangleJob()
                 {
                     jobVertexIndexList = sm.processingStepParticle.Buffer,
@@ -1111,6 +1012,7 @@ namespace MagicaCloth2
                 transformRotationArray = bm.rotationArray.GetNativeArray(),
 
                 teamIds = teamIds.GetNativeArray(),
+                //attributes = attributes.GetNativeArray(),
                 positions = positions.GetNativeArray(),
                 rotations = rotations.GetNativeArray(),
                 vertexToTransformRotations = vertexToTransformRotations.GetNativeArray(),
@@ -1238,10 +1140,10 @@ namespace MagicaCloth2
         }
 
         /// <summary>
-        /// ベースラインの法線接線を求める
+        /// ラインのワールド法線接線を求める
         /// </summary>
         [BurstCompile]
-        struct CalcBaseLineNormalTangentJob : IJobParallelForDefer
+        struct CalcLineNormalTangentJob : IJobParallelForDefer
         {
             [Unity.Collections.ReadOnly]
             public NativeArray<int> jobBaseLineList;
@@ -1277,9 +1179,9 @@ namespace MagicaCloth2
             [Unity.Collections.ReadOnly]
             public NativeArray<ushort> baseLineStartIndices;
             [Unity.Collections.ReadOnly]
-            public NativeArray<ushort> baseLineCounts;
+            public NativeArray<ushort> baseLineDataCounts;
             [Unity.Collections.ReadOnly]
-            public NativeArray<ushort> baseLineIndices;
+            public NativeArray<ushort> baseLineData;
 
             // ベースラインごと
             public void Execute(int index)
@@ -1312,20 +1214,22 @@ namespace MagicaCloth2
 
                 // ベースラインをルートから走査する
                 int dataIndex = baseLineStartIndices[bindex] + s_dataIndex;
-                int dataCnt = baseLineCounts[bindex];
+                int dataCnt = baseLineDataCounts[bindex];
                 for (int i = 0; i < dataCnt; i++, dataIndex++)
                 {
                     // 自身を親とする
-                    int vindex = baseLineIndices[dataIndex] + s_vindex;
+                    int vindex = baseLineData[dataIndex] + s_vindex;
                     var pos = positions[vindex];
                     var rot = rotations[vindex];
                     var attr = attributes[vindex];
+
+                    //Debug.Log($"p:[{vindex}] rot:[{rot}] wn:{MathUtility.ToNormal(rot)}, wt:{MathUtility.ToTangent(rot)}");
 
                     // 子の情報
                     var pack = childIndexArray[vindex];
                     int cstart = DataUtility.Unpack12_20Low(pack);
                     int ccnt = DataUtility.Unpack12_20Hi(pack);
-
+#if true
                     int movecnt = 0;
                     if (ccnt > 0)
                     {
@@ -1345,7 +1249,11 @@ namespace MagicaCloth2
                             var cpos = positions[cvindex];
 
                             // 子の本来のベクトル
-                            float3 tv = math.mul(rot, vertexLocalPositions[cvindex]);
+                            // マイナススケール
+                            float3 tv = math.mul(rot, vertexLocalPositions[cvindex] * tdata.negativeScaleDirection);
+                            //float3 tv = math.mul(rot, vertexLocalPositions[cvindex]); // オリジナル
+                            //Debug.Log($"p:[{vindex}] c:[{cvindex}] tv:{tv}");
+
                             ctv += tv;
 
                             if (cattr.IsMove())
@@ -1354,11 +1262,17 @@ namespace MagicaCloth2
                                 float3 v = cpos - pos;
                                 cv += v;
 
+                                //Debug.Log($"p:[{vindex}] c:[{cvindex}] v:{v}");
+
                                 // 回転
                                 var q = MathUtility.FromToRotation(tv, v);
 
                                 // 子の姿勢を決定
-                                var crot = math.mul(rot, vertexLocalRotations[cvindex]);
+                                // マイナススケール
+                                var crot = math.mul(rot, vertexLocalRotations[cvindex].value * tdata.negativeScaleQuaternionValue);
+                                //var crot = math.mul(rot, vertexLocalRotations[cvindex]); // オリジナル
+                                //Debug.Log($"c:[{cvindex}] crot:[{crot}] cwn:{MathUtility.ToNormal(crot)}, cwt:{MathUtility.ToTangent(crot)}");
+
                                 crot = math.mul(q, crot);
                                 rotations[cvindex] = crot;
 
@@ -1383,35 +1297,7 @@ namespace MagicaCloth2
                         rot = math.mul(cq, rot);
                         rotations[vindex] = rot;
                     }
-                    else
-                    {
-#if false
-                        // 末端
-                        if (param.boneParameters.leafRotation)
-                        {
-                            // 親からの角度分さらに曲げる（この方が見た目が良くなる）
-                            int pvindex = parentIndices[vindex] + s_vindex;
-                            if (pvindex >= 0)
-                            {
-                                var ppos = positions[pvindex];
-                                var prot = rotations[pvindex];
-
-                                // 本来のベクトル
-                                float3 tv = math.mul(prot, vertexLocalPositions[vindex]);
-
-                                // 現在のベクトル
-                                float3 v = pos - ppos;
-
-                                // 回転
-                                var q = MathUtility.FromToRotation(tv, v, averageRate);
-
-                                // 親からの角度分さらに回転させる
-                                rot = math.mul(q, rot);
-                                rotations[vindex] = rot;
-                            }
-                        }
 #endif
-                    }
                 }
             }
         }
@@ -1473,7 +1359,14 @@ namespace MagicaCloth2
                 float3 cross = math.cross(pos2 - pos1, pos3 - pos1);
                 float len = math.length(cross);
                 if (len > Define.System.Epsilon)
-                    outTriangleNormals[tindex] = cross / len;
+                {
+                    float3 nor = cross / len;
+
+                    // マイナススケール
+                    nor *= tdata.negativeScaleTriangleSign.x;
+
+                    outTriangleNormals[tindex] = nor;
+                }
 #if MC2_DEBUG
                 else
                     Debug.LogWarning("CalcTriangleNormalTangentJob.normal = 0!");
@@ -1485,19 +1378,16 @@ namespace MagicaCloth2
                 var uv3 = uv[start + tri.z];
                 var tan = MathUtility.TriangleTangent(pos1, pos2, pos3, uv1, uv2, uv3);
                 if (math.lengthsq(tan) > 0.0f)
+                {
+                    // マイナススケール
+                    tan *= tdata.negativeScaleTriangleSign.y;
+
                     outTriangleTangents[tindex] = tan;
+                }
 #if MC2_DEBUG
                 else
                     Debug.LogWarning("CalcTriangleNormalTangentJob.tangent = 0!");
 #endif
-                //                len = math.length(tan);
-                //                if (len > 1e-06f)
-                //                    outTriangleTangents[tindex] = tan / len;
-                //#if MC2_DEBUG
-                //                else
-                //                    Debug.LogWarning("CalcTriangleNormalTangentJob.tangent = 0!");
-                //#endif
-
             }
         }
 
@@ -1555,22 +1445,8 @@ namespace MagicaCloth2
                         tindex += tdata.proxyTriangleChunk.startIndex;
                         nor += triangleNormals[tindex] * ((flipFlag & 0x1) == 0 ? 1 : -1);
                         tan += triangleTangents[tindex] * ((flipFlag & 0x2) == 0 ? 1 : -1);
-
-                        /*
-                        // トライアングルインデックスが負の値ならば法線をフリップさせる
-                        // トライアングルインデックスは＋１の値が格納されているので注意！
-                        int tindex = tlist[i];
-                        float flip = math.sign(tindex);
-                        tindex = math.abs(tindex) - 1;
-                        tindex += tdata.proxyTriangleChunk.startIndex;
-
-                        nor += triangleNormals[tindex] * flip;
-                        tan += triangleTangents[tindex]; // 接線はフリップさせては駄目！
-                        */
                     }
-
                     //Debug.Log($"Vertex:{vindex} nor:{nor}, tan:{tan}");
-
 
                     // 法線０を考慮する。法線を０にするとポリゴンが欠けるため
                     float ln = math.length(nor);
@@ -1579,16 +1455,18 @@ namespace MagicaCloth2
                     {
                         nor = nor / ln;
                         tan = tan / lt;
+
                         float dot = math.dot(nor, tan);
                         if (dot != 1.0f && dot != -1.0f)
                         {
                             // トライアングル回転は従法線から算出するように変更(v2.1.7)
-                            //var rot = quaternion.LookRotation(tan, nor);
                             float3 binor = math.normalize(math.cross(nor, tan));
                             var rot = quaternion.LookRotation(binor, nor);
 
                             // 法線調整用回転を乗算する（不要な場合は単位回転が入っている）
-                            rot = math.mul(rot, normalAdjustmentRotations[vindex]);
+                            // マイナススケール
+                            rot = math.mul(rot, normalAdjustmentRotations[vindex].value * tdata.negativeScaleQuaternionValue);
+                            //rot = math.mul(rot, normalAdjustmentRotations[vindex]); // オリジナル
 
                             outRotations[vindex] = rot;
                         }
@@ -1619,6 +1497,8 @@ namespace MagicaCloth2
             // vmesh
             [Unity.Collections.ReadOnly]
             public NativeArray<short> teamIds;
+            //[Unity.Collections.ReadOnly]
+            //public NativeArray<VertexAttribute> attributes;
             [Unity.Collections.ReadOnly]
             public NativeArray<float3> positions;
             [Unity.Collections.ReadOnly]
@@ -1636,20 +1516,24 @@ namespace MagicaCloth2
                 var tdata = teamDataArray[teamId];
 
                 int l_vindex = vindex - tdata.proxyCommonChunk.startIndex;
+                //var attr = attributes[vindex];
 
+                // pos/rotはワールド空間
                 var pos = positions[vindex];
                 var rot = rotations[vindex];
 
                 // 本来のTransformの姿勢を求める回転を掛ける
                 int boneIndex = tdata.proxyBoneChunk.startIndex + l_vindex;
-                rot = math.mul(rot, vertexToTransformRotations[boneIndex]);
+                quaternion v2t = vertexToTransformRotations[boneIndex];
+
+                // マイナススケール
+                rot = math.mul(rot, v2t.value * tdata.negativeScaleQuaternionValue);
+                //rot = math.mul(rot, v2t); // オリジナル
 
                 // ワールド姿勢
                 int tindex = tdata.proxyTransformChunk.startIndex + l_vindex;
                 transformPositionArray[tindex] = pos;
                 transformRotationArray[tindex] = rot;
-
-                //Debug.Log($"[{teamId}] vindex:{vindex}, l_vlindex:{l_vindex}, tindex:{tindex}");
             }
         }
 
@@ -1716,18 +1600,23 @@ namespace MagicaCloth2
                 var pos = transformPositionArray[tindex];
                 var rot = transformRotationArray[tindex];
 
+#if true
                 var iprot = math.inverse(prot);
                 var v = pos - ppos;
                 var lpos = math.mul(iprot, v);
 
-                Develop.Assert(pscl.x > 0.0f && pscl.y > 0.0f && pscl.z > 0.0f);
+                //Develop.Assert(pscl.x > 0.0f && pscl.y > 0.0f && pscl.z > 0.0f);
                 lpos /= pscl;
                 var lrot = math.mul(iprot, rot);
+#endif
 
-                // todo:マイナススケール対応
+                // マイナススケール
+                lrot = lrot.value * tdata.negativeScaleQuaternionValue;
 
                 transformLocalPositionArray[tindex] = lpos;
                 transformLocalRotationArray[tindex] = lrot;
+
+                //Debug.Log($"(L) tindex:{tindex}, vindex:{vindex}, lpos:{lpos}, lrot:{lrot}");
             }
         }
 
@@ -1755,7 +1644,7 @@ namespace MagicaCloth2
                 transformPositionArray = bm.positionArray.GetNativeArray(),
                 transformRotationArray = bm.rotationArray.GetNativeArray(),
                 transformScaleArray = bm.scaleArray.GetNativeArray(),
-                transformInverseRotationArray = bm.inverseRotationArray.GetNativeArray(),
+                //transformInverseRotationArray = bm.inverseRotationArray.GetNativeArray(),
             };
             jobHandle = calcMeshConvertJob.Schedule(tm.MappingCount, 1, jobHandle);
 
@@ -1806,8 +1695,8 @@ namespace MagicaCloth2
             public NativeArray<quaternion> transformRotationArray;
             [Unity.Collections.ReadOnly]
             public NativeArray<float3> transformScaleArray;
-            [Unity.Collections.ReadOnly]
-            public NativeArray<quaternion> transformInverseRotationArray;
+            //[Unity.Collections.ReadOnly]
+            //public NativeArray<quaternion> transformInverseRotationArray;
 
             // マッピングメッシュごと
             public void Execute(int index)
@@ -1826,7 +1715,8 @@ namespace MagicaCloth2
                 var pos = transformPositionArray[mdata.centerTransformIndex];
                 var rot = transformRotationArray[mdata.centerTransformIndex];
                 var scl = transformScaleArray[mdata.centerTransformIndex];
-                var irot = transformInverseRotationArray[mdata.centerTransformIndex];
+                //var irot = transformInverseRotationArray[mdata.centerTransformIndex];
+                var irot = math.inverse(rot);
 
                 // proxy
                 var ppos = transformPositionArray[tdata.centerTransformIndex];
@@ -1922,7 +1812,7 @@ namespace MagicaCloth2
                 if (attr.IsInvalid())
                     return;
 
-                // 固定も無視する(todo:一旦こうする）
+                // 固定も書き込まない
                 if (attr.IsFixed())
                     return;
 
@@ -1939,6 +1829,10 @@ namespace MagicaCloth2
                     lnor = math.mul(mdata.toProxyRotation, lnor);
                     //ltan = math.mul(mdata.toProxyRotation, ltan);
                 }
+
+                // マイナススケール
+                lpos *= tdata.negativeScaleDirection;
+                lnor *= tdata.negativeScaleDirection;
 
                 // 以降計算はすべてプロキシメッシュのローカル空間で行う
                 var bw = mappingBoneWeights[mvindex];
@@ -1958,6 +1852,10 @@ namespace MagicaCloth2
                     float3 bipos = proxyVertexBindPosePositions[tvindex];
                     quaternion birot = proxyVertexBindPoseRotations[tvindex];
 
+                    // マイナススケール
+                    bipos *= tdata.negativeScaleDirection;
+                    birot = birot.value * tdata.negativeScaleQuaternionValue;
+
                     float3 pos = math.mul(birot, lpos + bipos);
                     float3 nor = math.mul(birot, lnor);
                     //float3 tan = math.mul(birot, ltan);
@@ -1975,14 +1873,9 @@ namespace MagicaCloth2
                     //otan += tan.xyz * w;
                 }
 
-                // 単位化しないと駄目な状況が発生。仕方なし。
-                //onor = math.normalize(onor);
-                //otan = math.normalize(otan);
-
                 // ここまでのopos/orotはワールド空間
                 // マッピングメッシュのローカル空間に変換する
                 opos = math.transform(mdata.toMappingMatrix, opos);
-                //onor = MathUtility.TransformDirection(onor, mdata.toMappingMatrix);
                 onor = math.normalize(MathUtility.TransformVector(onor, mdata.toMappingMatrix));
 
                 // 格納

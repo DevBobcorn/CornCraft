@@ -587,27 +587,64 @@ namespace MagicaCloth2
                     collisionNormalArray[pindex] = 0;
                     //colliderIdArray[pindex] = 0;
                 }
-                else if (tdata.IsInertiaShift)
+                else if (tdata.IsInertiaShift || tdata.IsNegativeScaleTeleport)
                 {
-                    // 慣性全体シフト
                     var cdata = centerDataArray[teamId];
 
-                    // cdata.frameComponentShiftVector : 全体シフトベクトル
-                    // cdata.frameComponentShiftRotation : 全体シフト回転
-                    // cdata.oldComponentWorldPosition : フレーム移動前のコンポーネント中心位置
+                    var oldPos = oldPosArray[pindex];
+                    var oldRot = oldRotArray[pindex];
+                    var oldPosition = oldPositionArray[pindex];
+                    var oldRotation = oldRotationArray[pindex];
+                    var dispPos = dispPosArray[pindex];
+                    var velocity = velocityArray[pindex];
+                    var realVelocity = realVelocityArray[pindex];
 
-                    float3 prevFrameWorldPosition = cdata.oldComponentWorldPosition;
+                    // ■マイナススケール
+                    if (tdata.IsNegativeScaleTeleport)
+                    {
+                        // 本体のスケール反転に合わせてシミュレーションに影響が出ないように必要な座標系を同様に軸反転させる
+                        // パーティクルはセンター空間で軸反転させる
+                        // 軸反転用マトリックス
+                        float4x4 negativeM = cdata.negativeScaleMatrix;
 
-                    oldPosArray[pindex] = MathUtility.ShiftPosition(oldPosArray[pindex], prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
-                    oldRotArray[pindex] = math.mul(cdata.frameComponentShiftRotation, oldRotArray[pindex]);
+                        oldPos = MathUtility.TransformPoint(oldPos, negativeM);
+                        oldRot = MathUtility.TransformRotation(oldRot, negativeM, 1);
 
-                    oldPositionArray[pindex] = MathUtility.ShiftPosition(oldPositionArray[pindex], prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
-                    oldRotationArray[pindex] = math.mul(cdata.frameComponentShiftRotation, oldRotationArray[pindex]);
+                        oldPosition = MathUtility.TransformPoint(oldPosition, negativeM);
+                        oldRotation = MathUtility.TransformRotation(oldRotation, negativeM, 1);
 
-                    dispPosArray[pindex] = MathUtility.ShiftPosition(dispPosArray[pindex], prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+                        dispPos = MathUtility.TransformPoint(dispPos, negativeM);
 
-                    velocityArray[pindex] = math.mul(cdata.frameComponentShiftRotation, velocityArray[pindex]);
-                    realVelocityArray[pindex] = math.mul(cdata.frameComponentShiftRotation, realVelocityArray[pindex]);
+                        velocity = MathUtility.TransformVector(velocity, negativeM);
+                        realVelocity = MathUtility.TransformVector(realVelocity, negativeM);
+                    }
+
+                    // ■慣性全体シフト
+                    if (tdata.IsInertiaShift)
+                    {
+                        // cdata.frameComponentShiftVector : 全体シフトベクトル
+                        // cdata.frameComponentShiftRotation : 全体シフト回転
+                        // cdata.oldComponentWorldPosition : フレーム移動前のコンポーネント中心位置
+
+                        oldPos = MathUtility.ShiftPosition(oldPos, cdata.oldComponentWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+                        oldRot = math.mul(cdata.frameComponentShiftRotation, oldRot);
+
+                        oldPosition = MathUtility.ShiftPosition(oldPosition, cdata.oldComponentWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+                        oldRotation = math.mul(cdata.frameComponentShiftRotation, oldRotation);
+
+                        dispPos = MathUtility.ShiftPosition(dispPos, cdata.oldComponentWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+
+                        velocity = math.mul(cdata.frameComponentShiftRotation, velocity);
+                        realVelocity = math.mul(cdata.frameComponentShiftRotation, realVelocity);
+                    }
+
+                    oldPosArray[pindex] = oldPos;
+                    oldRotArray[pindex] = oldRot;
+                    oldPositionArray[pindex] = oldPosition;
+                    oldRotationArray[pindex] = oldRotation;
+                    dispPosArray[pindex] = dispPos;
+                    velocityArray[pindex] = velocity;
+                    realVelocityArray[pindex] = realVelocity;
                 }
             }
         }
@@ -1201,7 +1238,7 @@ namespace MagicaCloth2
                     float3 force = 0;
 
                     // 重力
-                    float3 gforce = param.gravityDirection * (param.gravity * tdata.gravityRatio);
+                    float3 gforce = param.worldGravityDirection * (param.gravity * tdata.gravityRatio);
                     force += gforce;
 
                     // 外力
@@ -1467,8 +1504,6 @@ namespace MagicaCloth2
             public NativeArray<ushort> baseLineDataCounts;
             [Unity.Collections.ReadOnly]
             public NativeArray<ushort> baseLineData;
-            //[Unity.Collections.ReadOnly]
-            //public NativeArray<quaternion> vertexToTransformRotations;
 
             // particle
             [Unity.Collections.ReadOnly]
@@ -1495,14 +1530,12 @@ namespace MagicaCloth2
                 // アニメーションポーズ使用の有無
                 // 初期姿勢の計算が不要なら抜ける
                 float blendRatio = tdata.animationPoseRatio;
-                //bool isBasePose = blendRatio > 0.99f;
                 if (blendRatio > 0.99f)
                     return;
 
                 int b_datastart = tdata.baseLineDataChunk.startIndex;
                 int p_start = tdata.particleChunk.startIndex;
                 int v_start = tdata.proxyCommonChunk.startIndex;
-                //int vt_start = tdata.proxyBoneChunk.startIndex;
 
                 // チームスケール
                 float3 scl = tdata.initScale * tdata.scaleRatio;
@@ -1510,7 +1543,6 @@ namespace MagicaCloth2
                 int b_start = baseLineStartDataIndices[bindex];
                 int b_cnt = baseLineDataCounts[bindex];
                 int b_dataindex = b_start + b_datastart;
-                //if (isBasePose == false)
                 {
                     for (int i = 0; i < b_cnt; i++, b_dataindex++)
                     {
@@ -1523,17 +1555,6 @@ namespace MagicaCloth2
                         int p_pindex = p_index + p_start;
 
                         var attr = attributes[vindex];
-                        //if (attr.IsMove() == false || p_index < 0)
-                        //{
-                        //    // 固定もしくはアニメーションポーズを使用
-                        //    // basePos/baseRotをそのままコピーする
-                        //    var bpos = basePosArray[pindex];
-                        //    var brot = baseRotArray[pindex];
-
-                        //    stepBasicPositionArray[pindex] = bpos;
-                        //    stepBasicRotationArray[pindex] = brot;
-                        //}
-                        //else
                         if (attr.IsMove() && p_index >= 0)
                         {
                             // 移動
@@ -1542,8 +1563,21 @@ namespace MagicaCloth2
                             var lrot = vertexLocalRotations[vindex];
                             var ppos = stepBasicPositionArray[p_pindex];
                             var prot = stepBasicRotationArray[p_pindex];
+
+                            // マイナススケール
+                            lpos *= tdata.negativeScaleDirection;
+                            lrot = lrot.value * tdata.negativeScaleQuaternionValue;
+
                             stepBasicPositionArray[pindex] = math.mul(prot, lpos * scl) + ppos;
                             stepBasicRotationArray[pindex] = math.mul(prot, lrot);
+                        }
+                        else
+                        {
+                            // マイナススケール
+                            var prot = stepBasicRotationArray[pindex];
+                            var lw = float4x4.TRS(0, prot, tdata.negativeScaleDirection);
+                            quaternion rot = MathUtility.ToRotation(lw.c1.xyz, lw.c2.xyz);
+                            stepBasicRotationArray[pindex] = rot;
                         }
                     }
                 }
@@ -1562,8 +1596,6 @@ namespace MagicaCloth2
 
                         stepBasicPositionArray[pindex] = math.lerp(stepBasicPositionArray[pindex], bpos, blendRatio);
                         stepBasicRotationArray[pindex] = math.slerp(stepBasicRotationArray[pindex], brot, blendRatio);
-                        //stepBasicPositionArray[pindex] = isBasePose ? bpos : math.lerp(stepBasicPositionArray[pindex], bpos, blendRatio);
-                        //stepBasicRotationArray[pindex] = isBasePose ? brot : math.slerp(stepBasicRotationArray[pindex], brot, blendRatio);
                     }
                 }
             }
@@ -1838,7 +1870,8 @@ namespace MagicaCloth2
             public NativeArray<VertexAttribute> attributes;
             [NativeDisableParallelForRestriction]
             public NativeArray<float3> positions;
-            [Unity.Collections.ReadOnly]
+            //[Unity.Collections.ReadOnly]
+            [NativeDisableParallelForRestriction]
             public NativeArray<quaternion> rotations;
 
             // すべてのパーティクルごと
@@ -1861,6 +1894,7 @@ namespace MagicaCloth2
 
                 var pos = positions[vindex];
                 var rot = rotations[vindex];
+                //Debug.Log($"DispRot [{vindex}] nor:{MathUtility.ToNormal(rot)}, tan:{MathUtility.ToTangent(rot)}");
 
                 if (attr.IsMove() || tdata.IsSpring)
                 {
@@ -1903,6 +1937,15 @@ namespace MagicaCloth2
                 {
                     oldPositionArray[pindex] = pos;
                     oldRotationArray[pindex] = rot;
+                }
+
+                // マイナススケール
+                // 回転をマイナススケールを適用した表示計算用の回転に変換する
+                if (tdata.IsNegativeScale)
+                {
+                    var lw = float4x4.TRS(0, rot, tdata.negativeScaleDirection);
+                    rot = MathUtility.ToRotation(lw.c1.xyz, lw.c2.xyz);
+                    rotations[vindex] = rot;
                 }
             }
         }

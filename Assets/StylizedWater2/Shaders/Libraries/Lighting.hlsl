@@ -227,12 +227,15 @@ float3 ApplyLighting(inout SurfaceData surfaceData, inout float3 sceneColor, Lig
 			#if _TRANSLUCENCY
 			//Keep settings from main light pass, but override these
 			translucencyData.directionalLight = false;
-			translucencyData.lightDir = light.direction;
-			translucencyData.lightColor = light.color * light.distanceAttenuation;
-			translucencyData.strength = translucencyStrength * light.shadowAttenuation;
-			translucencyData.exponent = translucencyExp * light.distanceAttenuation;
+			if(water.vFace > 0)
+			{
+				translucencyData.lightDir = light.direction;
+				translucencyData.lightColor = light.color * light.distanceAttenuation;
+				translucencyData.strength = translucencyStrength * light.shadowAttenuation;
+				translucencyData.exponent = translucencyExp * light.distanceAttenuation;
 				
-			ApplyTranslucency(translucencyData, surfaceData.emission.rgb);
+				ApplyTranslucency(translucencyData, surfaceData.emission.rgb);
+			}
 			#endif
 			#endif
 
