@@ -151,6 +151,7 @@ resource.info.load_completed=Resource loaded
 
 [rendering]
 rendering.debug.reload_chunk_render=Reloading chunk renders...
+rendering.debug.update_env_lighting=Updating environment lighting...
 
 [forge]
 # Messages from Forge handler

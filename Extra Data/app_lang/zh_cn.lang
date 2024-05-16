@@ -151,6 +151,7 @@ resource.info.resource_loaded=资源加载完毕
 
 [rendering]
 rendering.debug.reload_chunk_render=正在重建区块渲染...
+rendering.debug.update_env_lighting=正在更新环境光照...
 
 [forge]
 # Messages from Forge handler
