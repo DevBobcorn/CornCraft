@@ -622,9 +622,9 @@ namespace CraftSharp.Control
 
         public void SetLocation(Location loc, bool reset = false, float mcYaw = 0F)
         {
-            if (reset) // Reset rigidbody
+            if (reset && !playerRigidbody!.isKinematic) // Reset rigidbody
             {
-                playerRigidbody!.velocity = Vector3.zero;
+                playerRigidbody.velocity = Vector3.zero;
             }
             
             playerRigidbody!.position = CoordConvert.MC2Unity(loc);
