@@ -586,7 +586,7 @@ namespace MagicaCloth2
         /// </summary>
         /// <param name="teamId"></param>
         /// <param name="sw"></param>
-        internal void EnableTeamCollider(int teamId, bool sw)
+        internal void EnableTeamCollider(int teamId)
         {
             if (IsValid() == false)
                 return;
@@ -605,7 +605,7 @@ namespace MagicaCloth2
 
                 // フラグ
                 var flag = flagArray[arrayIndex];
-                flag.SetFlag(Flag_Enable, sw);
+                //flag.SetFlag(Flag_Enable, sw); // コライダーのEnableフラグはコライダー固有のものなので変更する必要はない
                 flag.SetFlag(Flag_Reset, true); // Enable/Disableどちらでもリセット
                 flagArray[arrayIndex] = flag;
 
@@ -749,6 +749,10 @@ namespace MagicaCloth2
                 frameRotations[index] = wrot;
                 frameScales[index] = wscl;
 
+                //Debug.Log($"C wpos:{wpos}");
+                //Debug.Log($"C wrot:{wrot}");
+                //Debug.Log($"C wscl:{wscl}");
+
                 // リセット処理
                 if (tdata.IsReset || flag.IsSet(Flag_Reset))
                 {
@@ -763,25 +767,63 @@ namespace MagicaCloth2
                     flag.SetFlag(Flag_Reset, false);
                     flagArray[index] = flag;
                 }
-                else if (tdata.IsInertiaShift)
+                else if (tdata.IsInertiaShift || tdata.IsNegativeScaleTeleport)
                 {
                     // 慣性全体シフト
                     var cdata = centerDataArray[teamId];
 
-                    // cdata.frameComponentShiftVector : 全体シフトベクトル
-                    // cdata.frameComponentShiftRotation : 全体シフト回転
-                    // cdata.oldComponentWorldPosition : フレーム移動前のコンポーネント中心位置
+                    var oldFramePosition = oldFramePositions[index];
+                    var oldFrameRotation = oldFrameRotations[index];
+                    var nowPosition = nowPositions[index];
+                    var nowRotation = nowRotations[index];
+                    var oldPosition = oldPositions[index];
+                    var oldRotation = oldRotations[index];
 
-                    float3 prevFrameWorldPosition = cdata.oldComponentWorldPosition;
+                    // マイナススケール
+                    if (tdata.IsNegativeScaleTeleport)
+                    {
+                        // 本体のスケール反転に合わせてシミュレーションに影響が出ないように必要な座標系を同様に軸反転させる
+                        // コライダーはセンター空間で反転させる
+                        // 回転に関してはパーティクルとは異なり法線接線をスケール方向により反転させて組み直す
 
-                    oldFramePositions[index] = MathUtility.ShiftPosition(oldFramePositions[index], prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
-                    oldFrameRotations[index] = math.mul(cdata.frameComponentShiftRotation, oldFrameRotations[index]);
+                        // センター空間軸反転用マトリックス
+                        float4x4 negativeM = cdata.negativeScaleMatrix;
 
-                    nowPositions[index] = MathUtility.ShiftPosition(nowPositions[index], prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
-                    nowRotations[index] = math.mul(cdata.frameComponentShiftRotation, nowRotations[index]);
+                        oldFramePosition = MathUtility.TransformPoint(oldFramePosition, negativeM);
+                        oldFrameRotation = MathUtility.TransformRotation(oldFrameRotation, negativeM, tdata.negativeScaleChange);
 
-                    oldPositions[index] = MathUtility.ShiftPosition(oldPositions[index], prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
-                    oldRotations[index] = math.mul(cdata.frameComponentShiftRotation, oldRotations[index]);
+                        nowPosition = MathUtility.TransformPoint(nowPosition, negativeM);
+                        nowRotation = MathUtility.TransformRotation(nowRotation, negativeM, tdata.negativeScaleChange);
+
+                        oldPosition = MathUtility.TransformPoint(oldPosition, negativeM);
+                        oldRotation = MathUtility.TransformRotation(oldRotation, negativeM, tdata.negativeScaleChange);
+                    }
+
+                    if (tdata.IsInertiaShift)
+                    {
+                        // cdata.frameComponentShiftVector : 全体シフトベクトル
+                        // cdata.frameComponentShiftRotation : 全体シフト回転
+                        // cdata.oldComponentWorldPosition : フレーム移動前のコンポーネント中心位置
+
+                        float3 prevFrameWorldPosition = cdata.oldComponentWorldPosition;
+
+                        oldFramePosition = MathUtility.ShiftPosition(oldFramePosition, prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+                        oldFrameRotation = math.mul(cdata.frameComponentShiftRotation, oldFrameRotation);
+
+                        nowPosition = MathUtility.ShiftPosition(nowPosition, prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+                        nowRotation = math.mul(cdata.frameComponentShiftRotation, nowRotation);
+
+                        oldPosition = MathUtility.ShiftPosition(oldPosition, prevFrameWorldPosition, cdata.frameComponentShiftVector, cdata.frameComponentShiftRotation);
+                        oldRotation = math.mul(cdata.frameComponentShiftRotation, oldRotation);
+                    }
+
+
+                    oldFramePositions[index] = oldFramePosition;
+                    oldFrameRotations[index] = oldFrameRotation;
+                    nowPositions[index] = nowPosition;
+                    nowRotations[index] = nowRotation;
+                    oldPositions[index] = oldPosition;
+                    oldRotations[index] = oldRotation;
                 }
             }
         }
@@ -995,7 +1037,12 @@ namespace MagicaCloth2
                         : math.forward();
 
                     // スケール
-                    float scl = math.dot(math.abs(cscl), dir); // dirの軸のスケールを使用する
+                    //float scl = math.dot(math.abs(cscl), dir); // dirの軸のスケールを使用する
+
+                    // マイナススケール
+                    float scl0 = math.dot(cscl, dir); // dirの軸のスケールを使用する
+                    dir *= math.sign(scl0); // 方向反転
+                    float scl = math.abs(scl0);
 
                     // x = 始点半径
                     // y = 終点半径
@@ -1004,9 +1051,9 @@ namespace MagicaCloth2
 
                     float sr = csize.x;
                     float er = csize.y;
+                    float length = csize.z;
 
                     // 長さ
-                    float length = csize.z;
                     float slen = alignedCenter ? length * 0.5f : 0.0f;
                     float elen = alignedCenter ? length * 0.5f : (length - sr);
                     slen = math.max(slen - sr, 0.0f);
@@ -1034,7 +1081,11 @@ namespace MagicaCloth2
                 else if (type == ColliderType.Plane)
                 {
                     // 押し出し法線方向をoldposに格納する
-                    float3 n = math.mul(rot, math.up());
+                    // マイナススケール
+                    float3 dir = math.up();
+                    dir *= math.sign(cscl.y); // Y反転時は逆にする
+
+                    float3 n = math.mul(rot, dir);
                     work.oldPos.c0 = n;
                     work.nextPos.c0 = pos;
                 }

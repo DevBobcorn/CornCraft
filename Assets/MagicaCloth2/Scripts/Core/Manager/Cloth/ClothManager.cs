@@ -262,7 +262,7 @@ namespace MagicaCloth2
             int mappingCount = tm.MappingCount;
             if (mappingCount > 0)
             {
-                // マッピングメッシュ頂点姿勢をプロキシメッシュからスキニングし求める
+                // プロキシメッシュからマッピングメッシュの頂点姿勢を求める
                 // マッピングメッシュのローカル空間に座標変換する
                 masterJob = vm.PostMappingMeshUpdate(masterJob);
 

@@ -22,6 +22,7 @@ Material:
   - ADVANCED_LIGHTING
   - _DEPTHEXP_ON
   - _DEPTH_TEX
+  - _RECEIVEDYNAMICEFFECTS_ON
   - _SIMPLE_LIGHTING
   - _VERTEXCOLORWAVEFLATTENING_ON
   - _WORLDSPACEUV_ON
@@ -139,6 +140,7 @@ Material:
     - _BumpScale: 1
     - _CROSSPAN_INTERSECTIONOn: 1
     - _CausticsBrightness: 2
+    - _CausticsChromance: 1
     - _CausticsDistortion: 0.118
     - _CausticsOn: 1
     - _CausticsSpeed: 0.1
@@ -184,6 +186,7 @@ Material:
     - _GlossyReflections: 0
     - _HorizonDistance: 32
     - _IntersectionClipping: 0.175
+    - _IntersectionDistortion: 0.2
     - _IntersectionFalloff: 0.5
     - _IntersectionLength: 2
     - _IntersectionRippleDist: 64
@@ -201,9 +204,9 @@ Material:
     - _NORMALMAPOn: 1
     - _NormalMap: 1
     - _NormalMapOn: 1
-    - _NormalSpeed: 0.2
+    - _NormalSpeed: 1
     - _NormalStrength: 0.225
-    - _NormalSubSpeed: -0.5
+    - _NormalSubSpeed: -0.8
     - _NormalSubTiling: 0.5
     - _NormalTiling: 0.29999995
     - _OcclusionStrength: 1
@@ -214,6 +217,7 @@ Material:
     - _PointSpotLightReflectionSize: 0
     - _PointSpotLightReflectionStrength: 10
     - _QueueOffset: 0
+    - _ReceiveDynamicEffects: 1
     - _ReceiveShadows: 1
     - _ReflectionBlur: 0
     - _ReflectionDistortion: 0.1
@@ -293,7 +297,7 @@ Material:
     - _FoamTiling: {r: 0.1, g: 0.1, b: 0, a: 0}
     - _HorizonColor: {r: 0.68, g: 1, b: 0.99, a: 0.12156863}
     - _IntersectionColor: {r: 1, g: 1, b: 1, a: 1}
-    - _NormalTiling: {r: 0.1, g: 0.1, b: 0, a: 0}
+    - _NormalTiling: {r: 0.2, g: 0.2, b: 0, a: 0}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
     - _ShallowColor: {r: 0, g: 1, b: 0.9905014, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

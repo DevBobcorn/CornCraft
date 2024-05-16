@@ -1070,25 +1070,34 @@ namespace MagicaCloth2
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float3 TransformPoint(in float3 pos, in float4x4 localToWorldMatrix)
+        public static float3 TransformPoint(in float3 pos, in float4x4 m)
         {
-            return math.transform(localToWorldMatrix, pos);
+            return math.transform(m, pos);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float3 TransformVector(in float3 vec, in float4x4 localToWorldMatrix)
+        public static float3 TransformVector(in float3 vec, in float4x4 m)
         {
-            return math.mul(localToWorldMatrix, new float4(vec, 0)).xyz;
+            return math.mul(m, new float4(vec, 0)).xyz;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float3 TransformDirection(in float3 dir, in float4x4 localToWorldMatrix)
+        public static float3 TransformDirection(in float3 dir, in float4x4 m)
         {
             float len = math.length(dir);
             if (len > 0.0f)
-                return math.normalize(TransformVector(dir, localToWorldMatrix)) * len;
+                return math.normalize(TransformVector(dir, m)) * len;
             else
                 return dir;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static quaternion TransformRotation(in quaternion rot, in float4x4 m, in float3 normalTangentFlip)
+        {
+            ToNormalTangent(rot, out float3 nor, out float3 tan);
+            nor = math.mul(m, new float4(nor, 0)).xyz * normalTangentFlip.y;
+            tan = math.mul(m, new float4(tan, 0)).xyz * normalTangentFlip.z;
+            return quaternion.LookRotation(tan, nor);
         }
 
         /// <summary>

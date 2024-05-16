@@ -447,7 +447,7 @@ namespace MagicaCloth2
                 if (attr.IsInvalid())
                     return;
 
-                // 固定も書き込まない(todo:一旦こうする）
+                // 固定も書き込まない
                 if (attr.IsFixed())
                     return;
 
@@ -524,7 +524,7 @@ namespace MagicaCloth2
                 if (attr.IsInvalid())
                     return;
 
-                // 固定も書き込まない(todo:一旦こうする）
+                // 固定も書き込まない
                 if (attr.IsFixed())
                     return;
 

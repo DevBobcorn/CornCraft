@@ -249,7 +249,7 @@ namespace StylizedWater2
             UnityEngine.Profiling.Profiler.BeginSample("Planar Water Reflections", camera);
 
             //Render scale changed
-            if (Math.Abs(renderScale - m_renderScale) > 0.02f)
+            if (Math.Abs(renderScale - m_renderScale) > 0.001f)
             {
                 RenderTexture.ReleaseTemporary(m_reflectionCamera.targetTexture);
                 CreateRenderTexture(m_reflectionCamera, camera);
@@ -261,7 +261,6 @@ namespace StylizedWater2
             
             UpdateCameraProperties(camera, m_reflectionCamera);
             UpdatePerspective(camera, m_reflectionCamera);
-
             
             bool fogEnabled = RenderSettings.fog && !enableFog;
             //Fog is based on clip-space z-distance and doesn't work with oblique projections
@@ -437,7 +436,6 @@ namespace StylizedWater2
             data.requiresDepthTexture = false;
             data.requiresColorTexture = false;
             data.renderShadows = renderShadows;
-
             rendererIndex = PipelineUtilities.ValidateRenderer(rendererIndex);
             data.SetRenderer(rendererIndex);
 
@@ -459,8 +457,10 @@ namespace StylizedWater2
                 colorFormat);
 
             rtDsc.depthBufferBits = 16;
+            //rtDsc.msaaSamples = UniversalRenderPipeline.asset.msaaSampleCount; //Waste of resources, water distortion makes it virtually unnoticeable.
             
             targetCamera.targetTexture = RenderTexture.GetTemporary(rtDsc);
+            targetCamera.targetTexture.filterMode = scale < 1f ? FilterMode.Bilinear : FilterMode.Point;
             targetCamera.targetTexture.name = $"{source.name}_Reflection {rtDsc.width}x{rtDsc.height}";
         }
         

@@ -362,12 +362,14 @@ namespace MagicaCloth2
             /// </summary>
             public float3 componentWorldPosition;
             public quaternion componentWorldRotation;
+            public float3 componentWorldScale;
 
             /// <summary>
             /// 前フレームのコンポーネント姿勢
             /// </summary>
             public float3 oldComponentWorldPosition;
             public quaternion oldComponentWorldRotation;
+            public float3 oldComponentWorldScale;
 
             /// <summary>
             /// 現フレームのコンポーネント移動量
@@ -401,7 +403,7 @@ namespace MagicaCloth2
             /// </summary>
             public float3 nowWorldPosition;
             public quaternion nowWorldRotation;
-            public float3 nowWorldScale; // ※現在未使用
+            //public float3 nowWorldScale; // ※現在未使用
 
             /// <summary>
             /// 前回ステップでの姿勢
@@ -472,13 +474,21 @@ namespace MagicaCloth2
             /// </summary>
             public float3 smoothingVelocity; // (m/s)
 
+            /// <summary>
+            /// マイナススケールによる反転を打ち消すための変換マトリックス
+            /// センター空間
+            /// </summary>
+            public float4x4 negativeScaleMatrix;
+
             internal void Initialize()
             {
                 anchorRotation = quaternion.identity;
                 oldAnchorRotation = quaternion.identity;
 
                 componentWorldRotation = quaternion.identity;
+                componentWorldScale = 1;
                 oldComponentWorldRotation = quaternion.identity;
+                oldComponentWorldScale = 1;
                 frameComponentShiftRotation = quaternion.identity;
 
                 frameWorldRotation = quaternion.identity;
@@ -570,7 +580,7 @@ namespace MagicaCloth2
                     // 初期センター姿勢からローカル重力方向を算出する
                     var rot = MathUtility.ToRotation(math.normalize(nor), math.normalize(tan));
                     var irot = math.inverse(rot);
-                    localGravityDirection = math.mul(irot, parameters.gravityDirection);
+                    localGravityDirection = math.mul(irot, parameters.worldGravityDirection);
                 }
                 constraintData.initLocalGravityDirection = localGravityDirection;
 
@@ -600,6 +610,7 @@ namespace MagicaCloth2
 
             // 初期化時のローカル重力方向
             cdata.initLocalGravityDirection = cprocess.inertiaConstraintData.initLocalGravityDirection;
+            //Debug.Log($"[{cprocess.TeamId}] initLocalGravityDirection:{cdata.initLocalGravityDirection}");
 
             // 固定点リスト
             var c = new DataChunk();

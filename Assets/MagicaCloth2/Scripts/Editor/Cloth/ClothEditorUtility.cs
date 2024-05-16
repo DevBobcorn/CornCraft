@@ -1063,6 +1063,22 @@ namespace MagicaCloth2
                     Handles.Label(cen, i.ToString());
                 }
             }
+            // base line pos
+            if (drawSettings.baseLinePos)
+            {
+                var col = new Color(1.0f, 0.7f, 0.3f);
+                for (int i = 0; i < pcnt; i++)
+                {
+                    if (drawSettings.CheckParticleDrawing(i) == false)
+                        continue;
+
+                    int pindex = tdata.particleChunk.startIndex + i;
+
+                    var pos = sim.stepBasicPositionBuffer[pindex];
+                    GizmoUtility.SetColor(col * colorScale, true);
+                    GizmoUtility.DrawSphere(pos, drawPointSize, true);
+                }
+            }
 #endif
 
             // 空間を戻す

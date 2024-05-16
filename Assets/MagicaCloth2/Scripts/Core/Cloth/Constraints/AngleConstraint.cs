@@ -418,6 +418,7 @@ namespace MagicaCloth2
                             // 復元ベクトル
                             float3 rv = bpos - pbpos;
                             restorationVectorBufferArray[pindex] = rv;
+                            //Debug.Log($"[{pindex}] rv:{rv}");
                         }
                     }
                 }

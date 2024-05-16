@@ -644,6 +644,15 @@ namespace StylizedWater2
             return XRGraphics.enabled;
             #endif
         }
+
+        public static bool RenderGraphEnabled()
+        {
+            #if UNITY_6000_0_OR_NEWER
+            return UnityEngine.Rendering.GraphicsSettings.GetRenderPipelineSettings<RenderGraphSettings>().enableRenderCompatibilityMode == false;
+            #else
+            return false;
+            #endif
+        }
 #endif
     }
 }

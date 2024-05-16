@@ -44,7 +44,7 @@ namespace MagicaCloth2
         /// <summary>
         /// ワールド逆回転
         /// </summary>
-        internal ExNativeArray<quaternion> inverseRotationArray;
+        //internal ExNativeArray<quaternion> inverseRotationArray;
 
         /// <summary>
         /// ワールドスケール
@@ -61,6 +61,11 @@ namespace MagicaCloth2
         /// ローカル回転
         /// </summary>
         internal ExNativeArray<quaternion> localRotationArray;
+
+        /// <summary>
+        /// ワールド変換マトリックス
+        /// </summary>
+        internal ExNativeArray<float4x4> localToWorldMatrixArray;
 
         /// <summary>
         /// 接続チームID(0=なし)
@@ -100,10 +105,11 @@ namespace MagicaCloth2
             initLocalRotationArray?.Dispose();
             positionArray?.Dispose();
             rotationArray?.Dispose();
-            inverseRotationArray?.Dispose();
+            //inverseRotationArray?.Dispose();
             scaleArray?.Dispose();
             localPositionArray?.Dispose();
             localRotationArray?.Dispose();
+            localToWorldMatrixArray?.Dispose();
             teamIdArray?.Dispose();
             //writeIndexArray?.Dispose();
 
@@ -112,10 +118,11 @@ namespace MagicaCloth2
             initLocalRotationArray = null;
             positionArray = null;
             rotationArray = null;
-            inverseRotationArray = null;
+            //inverseRotationArray = null;
             scaleArray = null;
             localPositionArray = null;
             localRotationArray = null;
+            localToWorldMatrixArray = null;
             teamIdArray = null;
             //writeIndexArray = null;
 
@@ -140,10 +147,11 @@ namespace MagicaCloth2
             initLocalRotationArray = new ExNativeArray<quaternion>(capacity);
             positionArray = new ExNativeArray<float3>(capacity);
             rotationArray = new ExNativeArray<quaternion>(capacity);
-            inverseRotationArray = new ExNativeArray<quaternion>(capacity);
+            //inverseRotationArray = new ExNativeArray<quaternion>(capacity);
             scaleArray = new ExNativeArray<float3>(capacity);
             localPositionArray = new ExNativeArray<float3>(capacity);
             localRotationArray = new ExNativeArray<quaternion>(capacity);
+            localToWorldMatrixArray = new ExNativeArray<float4x4>(capacity);
             teamIdArray = new ExNativeArray<short>(capacity);
 
             transformAccessArray = new TransformAccessArray(capacity);
@@ -178,10 +186,11 @@ namespace MagicaCloth2
             // 領域のみ追加
             positionArray.AddRange(cnt);
             rotationArray.AddRange(cnt);
-            inverseRotationArray.AddRange(cnt);
+            //inverseRotationArray.AddRange(cnt);
             scaleArray.AddRange(cnt);
             localPositionArray.AddRange(cnt);
             localRotationArray.AddRange(cnt);
+            localToWorldMatrixArray.AddRange(cnt);
 
             // チームID
             teamIdArray.AddRange(cnt, (short)teamId);
@@ -226,10 +235,11 @@ namespace MagicaCloth2
             initLocalRotationArray.AddRange(count);
             positionArray.AddRange(count);
             rotationArray.AddRange(count);
-            inverseRotationArray.AddRange(count);
+            //inverseRotationArray.AddRange(count);
             scaleArray.AddRange(count);
             localPositionArray.AddRange(count);
             localRotationArray.AddRange(count);
+            localToWorldMatrixArray.AddRange(count);
 
             // チームID
             teamIdArray.AddRange(count, (short)teamId);
@@ -275,10 +285,11 @@ namespace MagicaCloth2
             initLocalRotationArray.Add(t.localRotation);
             positionArray.Add(t.position);
             rotationArray.Add(t.rotation);
-            inverseRotationArray.Add(math.inverse(t.rotation));
+            //inverseRotationArray.Add(math.inverse(t.rotation));
             scaleArray.Add(t.lossyScale);
             localPositionArray.Add(t.localPosition);
             localRotationArray.Add(t.localRotation);
+            localToWorldMatrixArray.Add(float4x4.identity); // ここは単位行列
 
             // チームID
             teamIdArray.Add((short)teamId);
@@ -313,10 +324,11 @@ namespace MagicaCloth2
                 initLocalRotationArray[index] = t.localRotation;
                 positionArray[index] = t.position;
                 rotationArray[index] = t.rotation;
-                inverseRotationArray[index] = math.inverse(t.rotation);
+                //inverseRotationArray[index] = math.inverse(t.rotation);
                 scaleArray[index] = t.lossyScale;
                 localPositionArray[index] = t.localPosition;
                 localRotationArray[index] = t.localRotation;
+                //localToWorldMatrix[index] = t.localToWorldMatrix; // ここは不要
                 teamIdArray[index] = (short)teamId;
                 transformAccessArray[index] = t;
             }
@@ -344,10 +356,11 @@ namespace MagicaCloth2
             initLocalRotationArray[toIndex] = initLocalRotationArray[fromIndex];
             positionArray[toIndex] = positionArray[fromIndex];
             rotationArray[toIndex] = rotationArray[fromIndex];
-            inverseRotationArray[toIndex] = inverseRotationArray[fromIndex];
+            //inverseRotationArray[toIndex] = inverseRotationArray[fromIndex];
             scaleArray[toIndex] = scaleArray[fromIndex];
             localPositionArray[toIndex] = localPositionArray[fromIndex];
             localRotationArray[toIndex] = localRotationArray[fromIndex];
+            //localToWorldMatrix[toIndex] = localToWorldMatrix[fromIndex]; // ここは不要
             transformAccessArray[toIndex] = transformAccessArray[fromIndex];
             teamIdArray[toIndex] = teamIdArray[fromIndex];
         }
@@ -368,10 +381,11 @@ namespace MagicaCloth2
             initLocalRotationArray.Remove(c);
             positionArray.Remove(c);
             rotationArray.Remove(c);
-            inverseRotationArray.Remove(c);
+            //inverseRotationArray.Remove(c);
             scaleArray.Remove(c);
             localPositionArray.Remove(c);
             localRotationArray.Remove(c);
+            localToWorldMatrixArray.Remove(c);
             teamIdArray.RemoveAndFill(c, 0);
 
             // トランスフォーム削除
@@ -456,10 +470,11 @@ namespace MagicaCloth2
             initLocalRotationArray.Expand(c, newLength);
             positionArray.Expand(c, newLength);
             rotationArray.Expand(c, newLength);
-            inverseRotationArray.Expand(c, newLength);
+            //inverseRotationArray.Expand(c, newLength);
             scaleArray.Expand(c, newLength);
             localPositionArray.Expand(c, newLength);
             localRotationArray.Expand(c, newLength);
+            localToWorldMatrixArray.Expand(c, newLength);
 
             // チームID
             teamIdArray.Expand(c, newLength);
@@ -567,7 +582,8 @@ namespace MagicaCloth2
                     scaleList = scaleArray.GetNativeArray(),
                     localPositionArray = localPositionArray.GetNativeArray(),
                     localRotationArray = localRotationArray.GetNativeArray(),
-                    inverseRotationArray = inverseRotationArray.GetNativeArray(),
+                    //inverseRotationArray = inverseRotationArray.GetNativeArray(),
+                    localToWorldMatrixArray = localToWorldMatrixArray.GetNativeArray(),
 
                     teamIdArray = teamIdArray.GetNativeArray(),
 
@@ -595,8 +611,10 @@ namespace MagicaCloth2
             public NativeArray<float3> localPositionArray;
             [Unity.Collections.WriteOnly]
             public NativeArray<quaternion> localRotationArray;
+            //[Unity.Collections.WriteOnly]
+            //public NativeArray<quaternion> inverseRotationArray;
             [Unity.Collections.WriteOnly]
-            public NativeArray<quaternion> inverseRotationArray;
+            public NativeArray<float4x4> localToWorldMatrixArray;
 
             [Unity.Collections.ReadOnly]
             public NativeArray<short> teamIdArray;
@@ -636,8 +654,14 @@ namespace MagicaCloth2
                 var scl = new float3(m2.c0.x, m2.c1.y, m2.c2.z);
                 scaleList[index] = scl;
 
+                //Debug.Log($"ReadTransform [{index}] pos:{pos}, rot:{rot}, scl:{scl}");
+                //Debug.Log($"LtoW:\n{LtoW}");
+
                 // ワールド->ローカル変換用の逆クォータニオン
-                inverseRotationArray[index] = math.inverse(rot);
+                //inverseRotationArray[index] = math.inverse(rot);
+
+                // ワールド変換マトリックス
+                localToWorldMatrixArray[index] = LtoW;
             }
         }
 
@@ -711,10 +735,13 @@ namespace MagicaCloth2
                 {
                     // ワールド回転
                     transform.rotation = worldRotations[index];
+                    //Debug.Log($"World W tindex:{index} rotation only!");
 
                     // BoneSpringのみワールド座標を書き込む
                     if (tdata.IsSpring)
+                    {
                         transform.position = worldPositions[index];
+                    }
                 }
                 else if (flag.IsSet(Flag_LocalPosRotWrite))
                 {
@@ -743,10 +770,11 @@ namespace MagicaCloth2
                 sb.AppendLine($"  -initLocalRotationArray:{initLocalRotationArray.ToSummary()}");
                 sb.AppendLine($"  -positionArray:{positionArray.ToSummary()}");
                 sb.AppendLine($"  -rotationArray:{rotationArray.ToSummary()}");
-                sb.AppendLine($"  -inverseRotationArray:{inverseRotationArray.ToSummary()}");
+                //sb.AppendLine($"  -inverseRotationArray:{inverseRotationArray.ToSummary()}");
                 sb.AppendLine($"  -scaleArray:{scaleArray.ToSummary()}");
                 sb.AppendLine($"  -localPositionArray:{localPositionArray.ToSummary()}");
                 sb.AppendLine($"  -localRotationArray:{localRotationArray.ToSummary()}");
+                sb.AppendLine($"  -localToWorldMatirxArray:{localToWorldMatrixArray.ToSummary()}");
                 sb.AppendLine($"  -teamIdArray:{teamIdArray.ToSummary()}");
 
                 if (transformAccessArray.isCreated)

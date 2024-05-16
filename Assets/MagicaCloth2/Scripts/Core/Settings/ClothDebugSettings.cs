@@ -60,6 +60,7 @@ namespace MagicaCloth2
         //public bool horizontalDistanceConstraint = false;
         public bool collisionNormal = false;
         public bool cellCube = false;
+        public bool baseLinePos = false;
         public int vertexMinIndex = 0;
         public int vertexMaxIndex = 100000;
         public int triangleMinIndex = 0;

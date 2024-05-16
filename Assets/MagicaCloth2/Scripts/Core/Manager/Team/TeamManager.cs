@@ -36,6 +36,8 @@ namespace MagicaCloth2
         public const int Flag_SkipWriting = 14; // 書き込み停止（ストップモーション用）
         public const int Flag_Anchor = 15; // Inertia anchorを利用中
         public const int Flag_AnchorReset = 16; // Inertia anchorの座標リセット
+        public const int Flag_NegativeScale = 17; // マイナススケールの有無
+        public const int Flag_NegativeScaleTeleport = 18; // マイナススケールによるテレポート
 
         // 以下セルフコリジョン
         // !これ以降の順番を変えないこと
@@ -172,8 +174,15 @@ namespace MagicaCloth2
             /// </summary>
             public float3 initScale;            // データ生成時のセンタートランスフォームスケール
             public float scaleRatio;            // 現在のスケール倍率
-            //public float3 scaleDirection;     // フリップ用:スケール値方向(xyz)：(1/-1)のみ
-            //public float4 quaternionScale;    // フリップ用:クォータニオン反転用
+
+            /// <summary>
+            /// マイナススケール
+            /// </summary>
+            public float negativeScaleSign;             // マイナススケールの有無(1:正スケール, -1:マイナススケール)
+            public float3 negativeScaleDirection;       // スケール方向(xyz)：(1:正スケール, -1:マイナススケール)
+            public float3 negativeScaleChange;          // 今回のフレームで変化したスケール(xyz)：(1:変化なし, -1:反転した)
+            public float2 negativeScaleTriangleSign;    // トライアングル法線接線フリップフラグ
+            public float4 negativeScaleQuaternionValue; // クォータニオン反転用
 
             /// <summary>
             /// 同期チームID(0=なし)
@@ -425,22 +434,18 @@ namespace MagicaCloth2
             public bool IsStepRunning => flag.IsSet(Flag_StepRunning);
 
             public bool IsCullingInvisible => flag.IsSet(Flag_CullingInvisible);
-
             public bool IsCullingKeep => flag.IsSet(Flag_CullingKeep);
-
             public bool IsSpring => flag.IsSet(Flag_Spring);
-
+            public bool IsNegativeScale => flag.IsSet(Flag_NegativeScale);
+            public bool IsNegativeScaleTeleport => flag.IsSet(Flag_NegativeScaleTeleport);
             public int ParticleCount => particleChunk.dataLength;
 
             /// <summary>
             /// 現在有効なコライダー数
             /// </summary>
             public int ColliderCount => colliderCount;
-
             public int BaseLineCount => baseLineChunk.dataLength;
-
             public int TriangleCount => proxyTriangleChunk.dataLength;
-
             public int EdgeCount => proxyEdgeChunk.dataLength;
 
             //public int MappingCount => mappingDataIndexSet.Length;
@@ -684,6 +689,11 @@ namespace MagicaCloth2
             team.timeScale = 1.0f;
             team.initScale = cprocess.clothTransformRecord.scale; // 初期スケール
             team.scaleRatio = 1.0f;
+            team.negativeScaleSign = 1;
+            team.negativeScaleDirection = 1;
+            team.negativeScaleChange = 1;
+            team.negativeScaleQuaternionValue = 1;
+            team.negativeScaleTriangleSign = 1;
             //team.centerWorldPosition = cprocess.clothTransformRecord.position;
             team.animationPoseRatio = cprocess.cloth.SerializeData.animationPoseRatio;
             var c = teamDataArray.Add(team);
@@ -768,7 +778,7 @@ namespace MagicaCloth2
                 enableTeamSet.Remove(teamId);
 
             // コライダーの有効状態（内部でコライダートランスフォームの有効状態も設定）
-            MagicaManager.Collider.EnableTeamCollider(teamId, sw);
+            MagicaManager.Collider.EnableTeamCollider(teamId);
 
             // センタートランスフォーム
             MagicaManager.Bone.EnableTransform(team.centerTransformIndex, sw);
@@ -1445,22 +1455,68 @@ namespace MagicaCloth2
                 // 同期中は同期先のコンポーネントトランスフォームからワールド慣性を計算する
                 int centerTransformIndex = (tdata.syncTeamId != 0 && tdata.flag.IsSet(Flag_Synchronization)) ? tdata.syncCenterTransformIndex : cdata.centerTransformIndex;
 
-                // ■コンポーネント位置
+                // ■コンポーネント姿勢
                 float3 componentWorldPos = transformPositionArray[centerTransformIndex];
                 quaternion componentWorldRot = transformRotationArray[centerTransformIndex];
                 float3 componentWorldScl = transformScaleArray[centerTransformIndex];
                 cdata.componentWorldPosition = componentWorldPos;
                 cdata.componentWorldRotation = componentWorldRot;
-                float3 oldComponentWorldPosition = cdata.oldComponentWorldPosition;
-                quaternion oldComponentWorldRotation = cdata.oldComponentWorldRotation;
+                cdata.componentWorldScale = componentWorldScl;
+                //Debug.Log($"componentWorldPos:{componentWorldPos}, componentWorldRot:{componentWorldRot.value}");
 
                 // コンポーネントスケール倍率
                 float componentScaleRatio = math.length(componentWorldScl) / math.length(tdata.initScale);
 
+                // ■マイナススケール
+                // マイナススケールの場合は計算に必要なデータを予め作成しておく
+                float3 oldInverseScaleDirection = tdata.negativeScaleDirection;
+                tdata.negativeScaleDirection = math.sign(componentWorldScl); // 各スケールの方向(1/-1)
+                tdata.negativeScaleChange = oldInverseScaleDirection * tdata.negativeScaleDirection; // 今回スケール反転された方向(1:変化なし, -1:反転あり)
+                //Debug.Log($"inverseScaleChange:{tdata.inverseScaleChange}");
+                if (componentWorldScl.x < 0 || componentWorldScl.y < 0 || componentWorldScl.z < 0)
+                {
+                    tdata.negativeScaleSign = -1; // マイナススケール時は(-1)
+                    tdata.negativeScaleQuaternionValue = new float4(-math.sign(componentWorldScl), 1); // 回転反転用
+                    tdata.negativeScaleTriangleSign.x = (componentWorldScl.x < 0 || componentWorldScl.z < 0) ? -1 : 1; // TriangleBendingの法線フリップフラグ
+                    tdata.negativeScaleTriangleSign.y = componentWorldScl.x < 0 ? -1 : 1; // TriangleBendingの接線フリップフラグ
+                    tdata.flag.SetBits(Flag_NegativeScale, true);
+                }
+                else
+                {
+                    tdata.negativeScaleSign = 1;
+                    tdata.negativeScaleQuaternionValue = 1;
+                    tdata.negativeScaleTriangleSign = 1;
+                    tdata.flag.SetBits(Flag_NegativeScale, false);
+                }
+                // 以前とスケール方向が変わっていたいたら軸反転テレポートを行う
+                if (oldInverseScaleDirection.Equals(tdata.negativeScaleDirection) == false)
+                {
+                    // 軸反転テレポート
+                    // 本体がスケール反転するためシミュレーションに影響が出ないように必要な座標系を同様に反転させる
+                    // 一旦クロスローカル空間に戻し軸反転してからワールドに書き戻す
+                    tdata.flag.SetBits(Flag_NegativeScaleTeleport, true);
+                    //Debug.LogWarning($"Negative Scale detection!");
+
+                    // コンポーネント反転用マトリックス
+                    float4x4 nowComponentLW = float4x4.TRS(componentWorldPos, componentWorldRot, componentWorldScl);
+                    float4x4 oldComponentLW = float4x4.TRS(cdata.oldComponentWorldPosition, cdata.oldComponentWorldRotation, cdata.oldComponentWorldScale);
+                    float4x4 componentNegativeM = math.mul(nowComponentLW, math.inverse(oldComponentLW));
+
+                    // コンポーネント空間のものを反転させる
+                    // Transformに関するものは回転を反転させる必要はない
+                    cdata.oldComponentWorldPosition = MathUtility.TransformPoint(cdata.oldComponentWorldPosition, componentNegativeM);
+                    cdata.oldComponentWorldScale = componentWorldScl; // スケールはリセット
+                    cdata.oldAnchorPosition = MathUtility.TransformPoint(cdata.oldAnchorPosition, componentNegativeM);
+                    cdata.smoothingVelocity = MathUtility.TransformVector(cdata.smoothingVelocity, componentNegativeM);
+                }
+
+                float3 oldComponentWorldPosition = cdata.oldComponentWorldPosition;
+                quaternion oldComponentWorldRotation = cdata.oldComponentWorldRotation;
+                float3 oldComponentWorldScale = cdata.oldComponentWorldScale;
+
                 // ■クロスセンター位置
                 var centerWorldPos = componentWorldPos;
                 var centerWorldRot = componentWorldRot;
-                var centerWorldScl = componentWorldScl;
 
                 // 固定点リストがある場合は固定点の姿勢から算出する、ない場合はクロストランスフォームを使用する
                 if (tdata.fixedDataChunk.IsValid)
@@ -1481,19 +1537,45 @@ namespace MagicaCloth2
                         cen += positions[vindex];
 
                         var rot = rotations[vindex];
+
+                        // マイナススケール
+                        if (tdata.negativeScaleSign < 0)
+                        {
+                            MathUtility.ToNormalTangent(rot, out float3 n, out float3 t);
+                            rot = MathUtility.ToRotation(-n, -t);
+                        }
+
+                        // 頂点バインドポーズを乗算して初期姿勢の一定方向に合わせる
                         rot = math.mul(rot, vertexBindPoseRotations[vindex]);
 
                         nor += MathUtility.ToNormal(rot);
                         tan += MathUtility.ToTangent(rot);
                     }
+
+                    // マイナススケール
+                    nor *= (tdata.negativeScaleDirection.x < 0 || tdata.negativeScaleDirection.z < 0) ? -1 : 1;
+                    tan *= (tdata.negativeScaleDirection.x < 0 || tdata.negativeScaleDirection.y < 0) ? -1 : 1;
+
 #if MC2_DEBUG
                     Develop.Assert(math.length(nor) > 0.0f);
                     Develop.Assert(math.length(tan) > 0.0f);
 #endif
                     centerWorldPos = cen / fcnt;
-                    centerWorldRot = MathUtility.ToRotation(math.normalize(nor), math.normalize(tan));
+                    centerWorldRot = MathUtility.ToRotation(math.normalize(nor), math.normalize(tan)); // 単位化必須
                 }
-                var wtol = MathUtility.WorldToLocalMatrix(centerWorldPos, centerWorldRot, centerWorldScl);
+                var wtol = MathUtility.WorldToLocalMatrix(centerWorldPos, centerWorldRot, componentWorldScl);
+                //Debug.Log($"centerWorldPos:{centerWorldPos}, centerWorldRot:{centerWorldRot.value}");
+                //Debug.Log($"centerWorldRot nor:{math.mul(centerWorldRot, math.up())}, tan:{math.mul(centerWorldRot, math.forward())}, bin:{math.mul(centerWorldRot, math.right())}");
+
+                // ■マイナススケール
+                if (tdata.IsNegativeScaleTeleport)
+                {
+                    // センター反転用変換マトリックスを計算(2)
+                    float4x4 nowLW = float4x4.TRS(centerWorldPos, centerWorldRot, componentWorldScl);
+                    float4x4 oldLW = float4x4.TRS(cdata.oldFrameWorldPosition, cdata.oldFrameWorldRotation, cdata.oldFrameWorldScale);
+                    float4x4 negativeM = math.mul(nowLW, math.inverse(oldLW));
+                    cdata.negativeScaleMatrix = negativeM;
+                }
 
                 // ■アンカー
                 float3 anchorDeltaVector = 0;
@@ -1539,6 +1621,7 @@ namespace MagicaCloth2
 
                     if (isTeleport)
                     {
+                        //Debug.Log($"[{teamId}] Auto Teleport!");
                         switch (param.inertiaConstraint.teleportMode)
                         {
                             case InertiaConstraint.TeleportMode.Reset:
@@ -1573,6 +1656,7 @@ namespace MagicaCloth2
                         float averageRatio = math.saturate(math.pow(1.0f - param.inertiaConstraint.movementInertiaSmoothing, 3.0f) * 0.99f + 0.01f);
                         cdata.smoothingVelocity = math.lerp(cdata.smoothingVelocity, frameDeltaVelocity, averageRatio); // 比重により平滑化
                     }
+                    //Debug.Log($"smoothingVelocity:{cdata.smoothingVelocity}");
 
                     // スムージングした慣性速度に基づいて１つ前のコンポーネント位置を補正する
                     // 処理的にはアンカーと同じ考え
@@ -1584,31 +1668,43 @@ namespace MagicaCloth2
 #endif
 
                 // リセットおよび最新のセンター座標として格納
+                cdata.frameWorldPosition = centerWorldPos;
+                cdata.frameWorldRotation = centerWorldRot;
+                cdata.frameWorldScale = componentWorldScl;
                 if (tdata.IsReset)
                 {
+                    //Debug.LogWarning($"Team Reset!");
                     cdata.oldComponentWorldPosition = componentWorldPos;
                     cdata.oldComponentWorldRotation = componentWorldRot;
+                    cdata.oldComponentWorldScale = componentWorldScl;
                     oldComponentWorldPosition = componentWorldPos;
                     oldComponentWorldRotation = componentWorldRot;
+                    oldComponentWorldScale = componentWorldScl;
 
-                    cdata.frameWorldPosition = centerWorldPos;
-                    cdata.frameWorldRotation = centerWorldRot;
-                    cdata.frameWorldScale = centerWorldScl;
                     cdata.oldFrameWorldPosition = centerWorldPos;
                     cdata.oldFrameWorldRotation = centerWorldRot;
-                    cdata.oldFrameWorldScale = centerWorldScl;
+                    cdata.oldFrameWorldScale = componentWorldScl;
                     cdata.nowWorldPosition = centerWorldPos;
                     cdata.nowWorldRotation = centerWorldRot;
-                    cdata.nowWorldScale = centerWorldScl;
+                    //cdata.nowWorldScale = centerWorldScl;
                     cdata.oldWorldPosition = centerWorldPos;
                     cdata.oldWorldRotation = centerWorldRot;
                     //tdata.centerWorldPosition = centerWorldPos;
                 }
-                else
+                else if (tdata.IsNegativeScaleTeleport)
                 {
-                    cdata.frameWorldPosition = centerWorldPos;
-                    cdata.frameWorldRotation = centerWorldRot;
-                    cdata.frameWorldScale = centerWorldScl;
+                    // マイナススケール
+                    // センター空間に関するものはリセットする
+                    //Debug.LogWarning($"Team NegativeScale Reset!");
+                    cdata.oldFrameWorldPosition = centerWorldPos;
+                    cdata.oldFrameWorldRotation = centerWorldRot;
+                    cdata.oldFrameWorldScale = componentWorldScl;
+                    cdata.nowWorldPosition = centerWorldPos;
+                    cdata.nowWorldRotation = centerWorldRot;
+                    //cdata.nowWorldScale = centerWorldScl;
+                    cdata.oldWorldPosition = centerWorldPos;
+                    cdata.oldWorldRotation = centerWorldRot;
+                    //tdata.centerWorldPosition = centerWorldPos;
                 }
 
                 // ■ワールド慣性シフト
@@ -1628,7 +1724,7 @@ namespace MagicaCloth2
                 {
                     cdata.frameComponentShiftVector = componentWorldPos - oldComponentWorldPosition;
                     cdata.frameComponentShiftRotation = MathUtility.FromToRotation(oldComponentWorldRotation, componentWorldRot);
-                    //Debug.Log($"frameComponentShiftVector:{cdata.frameComponentShiftVector}");
+                    //Debug.Log($"frameComponentShiftVector:{cdata.frameComponentShiftVector}, frameComponentShiftRotation:{cdata.frameComponentShiftRotation.value}");
                     float moveShiftRatio = 0.0f;
                     float rotationShiftRatio = 0.0f;
 
@@ -1954,12 +2050,13 @@ namespace MagicaCloth2
                 cdata.nowWorldRotation = math.slerp(cdata.oldFrameWorldRotation, cdata.frameWorldRotation, tdata.frameInterpolation);
                 cdata.nowWorldRotation = math.normalize(cdata.nowWorldRotation); // 必要
                 float3 wscl = math.lerp(cdata.oldFrameWorldScale, cdata.frameWorldScale, tdata.frameInterpolation);
-                cdata.nowWorldScale = wscl;
+                //cdata.nowWorldScale = wscl;
 
                 // ステップごとの移動量
                 cdata.stepVector = cdata.nowWorldPosition - cdata.oldWorldPosition;
                 cdata.stepRotation = MathUtility.FromToRotation(cdata.oldWorldRotation, cdata.nowWorldRotation);
                 float stepAngle = MathUtility.Angle(cdata.oldWorldRotation, cdata.nowWorldRotation);
+                //Debug.Log($"Team[{teamId}] stepVector:{cdata.stepVector}, stepRotation:{cdata.stepRotation}, stepAngle:{stepAngle}");
 
                 // ローカル慣性
                 float localMovementInertia = 1.0f - param.inertiaConstraint.localInertia;
@@ -2004,10 +2101,14 @@ namespace MagicaCloth2
 
                 // ■重力方向割合 ---------------------------------------------------
                 float gravityDot = 1.0f;
-                if (math.lengthsq(param.gravityDirection) > Define.System.Epsilon)
+                if (math.lengthsq(param.worldGravityDirection) > Define.System.Epsilon)
                 {
-                    var falloffDir = math.mul(cdata.nowWorldRotation, cdata.initLocalGravityDirection);
-                    gravityDot = math.dot(falloffDir, param.gravityDirection);
+                    // マイナススケール
+                    float3 initLocalGravityDirection = cdata.initLocalGravityDirection;
+                    initLocalGravityDirection.y *= tdata.negativeScaleDirection.y; // Yマイナススケール時のみY軸を反転
+
+                    var worldFalloffDir = math.mul(cdata.nowWorldRotation, initLocalGravityDirection);
+                    gravityDot = math.dot(worldFalloffDir, param.worldGravityDirection);
                     gravityDot = math.saturate(gravityDot * 0.5f + 0.5f);
                 }
                 tdata.gravityDot = gravityDot;
@@ -2131,6 +2232,7 @@ namespace MagicaCloth2
                 // コンポーネント位置
                 cdata.oldComponentWorldPosition = cdata.componentWorldPosition;
                 cdata.oldComponentWorldRotation = cdata.componentWorldRotation;
+                cdata.oldComponentWorldScale = cdata.componentWorldScale;
 
                 if (tdata.IsRunning)
                 {
@@ -2159,6 +2261,7 @@ namespace MagicaCloth2
                 tdata.flag.SetBits(Flag_StepRunning, false);
                 tdata.flag.SetBits(Flag_KeepTeleport, false);
                 tdata.flag.SetBits(Flag_InertiaShift, false);
+                tdata.flag.SetBits(Flag_NegativeScaleTeleport, false);
 
                 // 時間調整（floatの精度問題への対処）
                 const float limitTime = 3600.0f; // 60min

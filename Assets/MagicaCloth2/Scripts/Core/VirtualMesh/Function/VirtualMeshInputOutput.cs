@@ -439,7 +439,7 @@ namespace MagicaCloth2
             skinBoneTransformIndices.AddRange(transformIndices, rsetup.skinBoneCount);
             skinBoneBindPoses.AddRange(vcnt);
 
-            // Transformの情報をローカル空間に変換し頂点情報に割り当てる
+            // Transformの情報をクロスローカル空間に変換し頂点情報に割り当てる
             // およびバインドポーズの算出
             var WtoL = rsetup.initRenderWorldtoLocal;
             var LtoW = rsetup.initRenderLocalToWorld;
@@ -899,13 +899,17 @@ namespace MagicaCloth2
                 quaternion rot = transformRotations[vindex];
                 float3 scl = transformScales[vindex];
 
-                // トランスフォーム姿勢をローカル空間に変換する
+                // トランスフォーム姿勢をクロスローカル空間に変換する
+                // オリジナル
+#if true
                 float3 lpos = MathUtility.InverseTransformPoint(pos, WtoL);
                 float3 lnor, ltan;
                 lnor = math.mul(rot, math.up());
                 ltan = math.mul(rot, math.forward());
                 lnor = MathUtility.InverseTransformDirection(lnor, WtoL);
                 ltan = MathUtility.InverseTransformDirection(ltan, WtoL);
+#endif
+                //Debug.Log($"Import [{vindex}] lpos:{lpos}, lnor:{lnor}, ltan:{ltan}");
 
                 localPositions[vindex] = lpos;
                 localNormals[vindex] = lnor;

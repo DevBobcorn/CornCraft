@@ -24,7 +24,7 @@ namespace MagicaCloth2
         /// <summary>
         /// 重力方向（ワールド空間）
         /// </summary>
-        public float3 gravityDirection;
+        public float3 worldGravityDirection;
 
         /// <summary>
         /// 初期姿勢での重力の減衰率(0.0 ~ 1.0)

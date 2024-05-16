@@ -22,6 +22,7 @@ Material:
   - ADVANCED_LIGHTING
   - _DEPTHEXP_ON
   - _DEPTH_TEX
+  - _RECEIVEDYNAMICEFFECTS_ON
   - _SIMPLE_LIGHTING
   - _WORLDSPACEUV_ON
   - _ZCLIP_ON
@@ -203,7 +204,7 @@ Material:
     - _NORMALMAPOn: 1
     - _NormalMap: 1
     - _NormalMapOn: 1
-    - _NormalSpeed: 0.5
+    - _NormalSpeed: 1
     - _NormalStrength: 0.274
     - _NormalSubSpeed: 0.01
     - _NormalSubTiling: 1
@@ -216,6 +217,7 @@ Material:
     - _PointSpotLightReflectionSize: 0
     - _PointSpotLightReflectionStrength: 10
     - _QueueOffset: 0
+    - _ReceiveDynamicEffects: 1
     - _ReceiveShadows: 1
     - _ReflectionBlur: 0
     - _ReflectionDistortion: 0.274

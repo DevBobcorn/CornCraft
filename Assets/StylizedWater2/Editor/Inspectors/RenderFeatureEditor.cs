@@ -36,6 +36,8 @@ namespace StylizedWater2
             }
             EditorGUILayout.Space();
             
+            UI.DrawRenderGraphError();
+            
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
 

@@ -1,7 +1,7 @@
 {
     "name": "sc.stylizedwater2",
     "description": "Stylized water shader for the Universal Render Pipeline",
-    "version": "1.6.3",
+    "version": "1.6.4",
     "unity": "2021.3",
     "unityRelease": "16f1",
     "displayName": "Stylized Water 2",

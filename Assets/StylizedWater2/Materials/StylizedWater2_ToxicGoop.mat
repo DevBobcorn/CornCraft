@@ -20,6 +20,7 @@ Material:
   - ADVANCED_LIGHTING
   - _DEPTHEXP_ON
   - _DEPTH_TEX
+  - _RECEIVEDYNAMICEFFECTS_ON
   - _SIMPLE_LIGHTING
   - _WORLDSPACEUV_ON
   - _ZCLIP_ON
@@ -136,6 +137,7 @@ Material:
     - _BumpScale: 1
     - _CROSSPAN_INTERSECTIONOn: 1
     - _CausticsBrightness: 2
+    - _CausticsChromance: 1
     - _CausticsDistortion: 0.047
     - _CausticsOn: 0
     - _CausticsSpeed: 0.1
@@ -181,6 +183,7 @@ Material:
     - _GlossyReflections: 0
     - _HorizonDistance: 7.1
     - _IntersectionClipping: 0.605
+    - _IntersectionDistortion: 0.2
     - _IntersectionFalloff: 0.816
     - _IntersectionLength: 0.75
     - _IntersectionRippleDist: 32
@@ -200,7 +203,7 @@ Material:
     - _NormalMapOn: 1
     - _NormalSpeed: 0.2
     - _NormalStrength: 0.048
-    - _NormalSubSpeed: -0.5
+    - _NormalSubSpeed: -0.8
     - _NormalSubTiling: 0.5
     - _NormalTiling: -0.48000008
     - _OcclusionStrength: 1
@@ -211,6 +214,7 @@ Material:
     - _PointSpotLightReflectionSize: 0
     - _PointSpotLightReflectionStrength: 10
     - _QueueOffset: 0
+    - _ReceiveDynamicEffects: 1
     - _ReceiveShadows: 0
     - _ReflectionBlur: 0.04
     - _ReflectionDistortion: 0.0467
@@ -246,7 +250,7 @@ Material:
     - _SpecularReflectionsOn: 1
     - _Speed: 1
     - _SrcBlend: 1
-    - _SunReflectionDistortion: 1
+    - _SunReflectionDistortion: 1.18
     - _SunReflectionPerturbance: 0.386
     - _SunReflectionSize: 1
     - _SunReflectionStrength: 1

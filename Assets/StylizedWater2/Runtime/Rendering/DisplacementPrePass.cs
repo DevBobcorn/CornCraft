@@ -115,6 +115,10 @@ namespace StylizedWater2
 
             cmd.SetGlobalVector(_WaterDisplacementCoords, rendererCoords);
         }
+        
+        #if UNITY_6000_0_OR_NEWER //Silence warning spam
+        public override void RecordRenderGraph(UnityEngine.Rendering.RenderGraphModule.RenderGraph renderGraph, ContextContainer frameData) { }
+        #endif
 
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
