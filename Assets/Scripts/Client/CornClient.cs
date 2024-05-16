@@ -168,15 +168,39 @@ namespace CraftSharp
 
         void Update()
         {
-            if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
+            if (Keyboard.current.f5Key.isPressed)
             {
-                selectedRenderPrefab = (selectedRenderPrefab + 1) % playerRenderPrefabs.Length;
-                playerController?.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                if (Keyboard.current.lKey.wasPressedThisFrame) // Debug function, update environment lighting
+                {
+                    CornApp.Notify(Translations.Get("rendering.debug.update_env_lighting"));
+                    // Recalculate dynamic GI
+                    DynamicGI.UpdateEnvironment();
+                }
+                
+                if (Keyboard.current.cKey.wasPressedThisFrame) // Debug function, rebuild chunk renders
+                {
+                    CornApp.Notify(Translations.Get("rendering.debug.reload_chunk_render"));
+                    // Don't destroy block entity renders
+                    ChunkRenderManager!.ReloadChunksRender(false);
+                }
             }
-            else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
+
+            if (playerController != null)
             {
-                selectedRenderPrefab = (selectedRenderPrefab + playerRenderPrefabs.Length - 1) % playerRenderPrefabs.Length;
-                playerController?.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                if (Keyboard.current.f6Key.wasPressedThisFrame) // Select previous
+                {
+                    selectedRenderPrefab = (selectedRenderPrefab + playerRenderPrefabs.Length - 1) % playerRenderPrefabs.Length;
+                    playerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                }
+                else if (Keyboard.current.f7Key.wasPressedThisFrame) // Regenerate current prefab
+                {
+                    playerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                }
+                else if (Keyboard.current.f8Key.wasPressedThisFrame) // Select next
+                {
+                    selectedRenderPrefab = (selectedRenderPrefab + 1) % playerRenderPrefabs.Length;
+                    playerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                }
             }
         }
 

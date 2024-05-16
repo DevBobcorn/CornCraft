@@ -816,13 +816,6 @@ namespace CraftSharp.Rendering
                     lastPlayerBlockLoc = playerBlockLoc; 
                 }
             }
-
-            if (Keyboard.current.qKey.wasPressedThisFrame) // Debug function, reload chunk renders
-            {
-                CornApp.Notify(Translations.Get("rendering.debug.reload_chunk_render"));
-                // Don't destroy block entity renders
-                ReloadChunksRender(false);
-            }
         }
         #endregion
     }
