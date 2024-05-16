@@ -8,10 +8,10 @@ However, unlike MCC itself which runs on modern .NET, CornCraft is a Unity app/g
 
 __*Important!*__ It is __NOT__ recommended to join a public/commercial server with CornCraft, and CornCraft is __NOT__ responsible for server banning due to using this client! The best and safest way to play with this client, at least for now, is to set up a server by yourself or with your friends.
 
-The code CornCraft uses to parse vanilla resource packs is open source as a separate project called [CornModel](https://github.com/DevBobcorn/CornModel). Check it out if you want to make a Minecraft structure viewer, map editor or something like that with Unity.
+The code CornCraft uses to parse vanilla resource packs is also open source as a Unity package called [CraftSharp-Resource](https://github.com/DevBobcorn/CraftSharp-Resource). Check it out if you want to make a Minecraft structure viewer, map editor or something like that with Unity.
 
 ## > Server Setup
-Recommended server versions for CornCraft are <code>1.16.5</code>, <code>1.17.1</code>, <code>1.18.2</code> and <code>1.19.2</code>, both vanilla servers and plugin servers like Spigot are supported.
+Recommended server versions for CornCraft are <code>1.16.5</code>, <code>1.17.1</code> and <code>1.18.2</code>, both vanilla servers and plugin servers like Spigot are supported.
 
 When setting up a server for CornCraft, it is recommended to set the <code>allow-flight</code> option to <code>true</code> in <code>server.properties</code> file, otherwise it's likely you'll be kicked from the server when moving around(because CornCraft does not and likely will not simulate vanilla player physics, it uses Unity's physics system).
 
@@ -30,10 +30,14 @@ Key                                                       | Action
 <kbd>Space</kbd>                                          | Move(/Fly) Up
 <kbd>Left Shift</kbd>                                     | Move(/Fly) Down
 <kbd>Left Ctrl</kbd>                                      | Toggle Walk/Rush Mode
+<kbd>F</kbd>                                              | Perform Interaction
 <kbd>F3</kbd>                                             | Toggle Debug Info
-<kbd>F3</kbd> + <kbd>F4</kbd>                             | Show Game Mode Switch
+<kbd>F3</kbd> + <kbd>F4</kbd> (Hold)                      | Show Game Mode Switch
+<kbd>F5</kbd> + <kbd>C</kbd>                              | Rebuild Chunks
+<kbd>F5</kbd> + <kbd>L</kbd>                              | Update Environment Lighting
 <kbd>F11</kbd>                                            | Toggle Fullscreen
 <kbd>T</kbd> / <kbd>/</kbd>                               | Show Chat Screen
+<kbd>Tab</kbd>                                            | Command Auto-Completion
 <kbd>Esc</kbd>                                            | Pause Game
 
 ## > License
@@ -42,7 +46,6 @@ Like MCC, CornCraft adopts CDDL-1.0 as the license of its code repository, and t
 Some other open-source projects/code examples are used in the project, which don't fall under CDDL-1.0 and use their own licenses. Here's a list of them:
 * [Welai Glow Sans](https://github.com/welai/glow-sans)
 * [Cascadia Code/Mono](https://github.com/microsoft/cascadia-code)
-* [NiloCat Toon URP (Simple Version)](https://github.com/ColinLeung-NiloCat/UnityURPToonLitShaderExample)
 * [FernNPR](https://github.com/FernRender/FernNPR)
 
 More information about CDDL-1.0 can be found on MCC's [home page](https://github.com/MCCTeam/Minecraft-Console-Client), in the license section, and the full license can be reviewed [here](http://opensource.org/licenses/CDDL-1.0).
