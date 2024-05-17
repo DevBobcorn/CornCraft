@@ -13,7 +13,6 @@ using CraftSharp.Protocol;
 using CraftSharp.Protocol.ProfileKey;
 using CraftSharp.Protocol.Message;
 using CraftSharp.Proxy;
-using CraftSharp.Rendering;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
 
