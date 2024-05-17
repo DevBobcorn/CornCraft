@@ -402,7 +402,6 @@ MonoBehaviour:
   AtlasCutoutMipped: {fileID: 2100000, guid: 356fe3b2c3144ef4f82484e1a7bebe4e, type: 2}
   AtlasTranslucent: {fileID: 2100000, guid: 8ee6dff0c60e65743895b69cc4c5bc0a, type: 2}
   StylizedWater: {fileID: 2100000, guid: 832933f1201cf6146a0399fc088e9d6d, type: 2}
-  PlayerSkin: {fileID: 2100000, guid: a7bc66ac351da2644be4e993cc7450e7, type: 2}
 --- !u!114 &331478948
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2433,7 +2432,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5027442766357424345, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5436528971823218233, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
       propertyPath: m_Layer
@@ -2442,7 +2441,16 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3129376051727432842, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 3767240062597777947, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 5436528971823218233, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: fe9e76e5fcb577449bbb0897ab738350, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
