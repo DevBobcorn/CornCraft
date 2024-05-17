@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 1367375308091481784}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.6, y: -0.2, z: -1.8}
+  m_LocalPosition: {x: -2.1715746, y: 2.95159, z: 1.6161884}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -88,7 +88,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Offset: {x: 0, y: 0, z: -1.8}
   m_ApplyAfter: 1
-  m_PreserveComposition: 0
+  m_PreserveComposition: 1
 --- !u!114 &5590602760512935609
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -378,12 +378,12 @@ MonoBehaviour:
   m_RequiresColorTexture: 0
   m_Version: 2
   m_TaaSettings:
-    quality: 3
-    frameInfluence: 0.1
-    jitterScale: 1
-    mipBias: 0
-    varianceClampScale: 0.9
-    contrastAdaptiveSharpening: 0
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
 --- !u!1 &2555420394471349852
 GameObject:
   m_ObjectHideFlags: 0
@@ -455,8 +455,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7372638134847987542}
   - component: {fileID: 8231872019064414601}
-  - component: {fileID: 3111194770495932377}
   - component: {fileID: 4116149368734713233}
+  - component: {fileID: 6762494118358572603}
   m_Layer: 0
   m_Name: Follow Virtual
   m_TagString: Untagged
@@ -473,7 +473,7 @@ Transform:
   m_GameObject: {fileID: 2988304240145284854}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.72561264, y: 2.9515898, z: 0.28813452}
+  m_LocalPosition: {x: -1.5256128, y: 3.05159, z: 2.0881348}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -499,7 +499,7 @@ MonoBehaviour:
   m_Priority: 10
   m_StandbyUpdate: 2
   m_LookAt: {fileID: 0}
-  m_Follow: {fileID: 8731879673068698816}
+  m_Follow: {fileID: 326520688282725313}
   m_Lens:
     FieldOfView: 60.000004
     OrthographicSize: 5
@@ -519,36 +519,6 @@ MonoBehaviour:
         m_Calls: []
   m_LegacyBlendHint: 0
   m_ComponentOwner: {fileID: 5980624386835379129}
---- !u!114 &3111194770495932377
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2988304240145284854}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e501d18bb52cf8c40b1853ca4904654f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_CollideAgainst:
-    serializedVersion: 2
-    m_Bits: 192
-  m_IgnoreTag: 
-  m_TransparentLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_MinimumDistanceFromTarget: 0.1
-  m_AvoidObstacles: 1
-  m_DistanceLimit: 0
-  m_MinimumOcclusionTime: 0
-  m_CameraRadius: 0.1
-  m_Strategy: 0
-  m_MaximumEffort: 4
-  m_SmoothingTime: 0.2
-  m_Damping: 0.1
-  m_DampingWhenOccluded: 0.1
-  m_OptimalTargetDistance: 0
 --- !u!114 &4116149368734713233
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -565,6 +535,36 @@ MonoBehaviour:
   AutoEnableInputs: 1
   XYAxis: {fileID: -3824362744831185708, guid: 29484af9580f082408aafccb8f79b22d, type: 3}
   ZAxis: {fileID: 0}
+--- !u!114 &6762494118358572603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2988304240145284854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e501d18bb52cf8c40b1853ca4904654f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_CollideAgainst:
+    serializedVersion: 2
+    m_Bits: 128
+  m_IgnoreTag: 
+  m_TransparentLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_MinimumDistanceFromTarget: 0.1
+  m_AvoidObstacles: 1
+  m_DistanceLimit: 10
+  m_MinimumOcclusionTime: 0
+  m_CameraRadius: 0
+  m_Strategy: 0
+  m_MaximumEffort: 4
+  m_SmoothingTime: 0.1
+  m_Damping: 0.1
+  m_DampingWhenOccluded: 0.1
+  m_OptimalTargetDistance: 0
 --- !u!1 &3759418466539031928
 GameObject:
   m_ObjectHideFlags: 0
@@ -593,8 +593,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3759418466539031928}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.8, y: -0.1, z: -1.8}
+  m_LocalRotation: {x: 0.13044336, y: 0.86255515, z: -0.39965582, w: 0.28152874}
+  m_LocalPosition: {x: -1.5256128, y: 3.05159, z: 2.0881348}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -699,12 +699,12 @@ MonoBehaviour:
   m_RequiresColorTexture: 0
   m_Version: 2
   m_TaaSettings:
-    quality: 3
-    frameInfluence: 0.1
-    jitterScale: 1
-    mipBias: 0
-    varianceClampScale: 0.9
-    contrastAdaptiveSharpening: 0
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
 --- !u!114 &5719410600145824290
 MonoBehaviour:
   m_ObjectHideFlags: 0

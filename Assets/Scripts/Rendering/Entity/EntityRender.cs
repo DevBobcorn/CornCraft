@@ -138,7 +138,10 @@ namespace CraftSharp.Rendering
                 TurnIntoRagdoll();
             }
             
-            Destroy(this.gameObject);
+            if (this.gameObject != null)
+            {
+                Destroy(this.gameObject);
+            }
         }
 
         public virtual void Initialize(EntityType entityType, Entity source)
