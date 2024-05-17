@@ -18,7 +18,7 @@ MonoBehaviour:
     Duration: 0.45
     DamageStart: 0.24
     DamageEnd: 0.35
-    VisualFXPrefab: {fileID: 1130446560849736, guid: c4d564b5d4682ad46b8621f0fa6f40d9, type: 3}
+    VisualFXPrefab: {fileID: 0}
   - AnimationClip: {fileID: 7400000, guid: 567cd903192f0d343970405d252dc8c3, type: 2}
     Duration: 0.55
     DamageStart: 0.08
