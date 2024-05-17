@@ -88,30 +88,11 @@ namespace CraftSharp
                 yield break;
             }
 
-            // Load in-game translations
-            var s = Path.DirectorySeparatorChar;
-            var langFile = PathHelper.GetPackDirectoryNamed(
-                    $"vanilla-{resourceVersion}{s}assets{s}minecraft{s}lang{s}{CornGlobal.Language}.json");
-            
-            if (!File.Exists(langFile)) // If translation file is not available, try downloading it
-            {
-                yield return StartCoroutine(ResourceDownloader.DownloadLanguageJson(
-                        resourceVersion, CornGlobal.Language, updateStatus,
-                        () => { },
-                        (langJsonDownloaded) => {
-                            if (!langJsonDownloaded)
-                                startUpFlag.Failed = true;
-                        }
-                ));
-            }
-
             if (startUpFlag.Failed)
             {
                 updateStatus("login.login_failed");
                 yield break;
             }
-            
-            Protocol.ChatParser.LoadTranslationRules(langFile);
 
             // First load all possible Block States...
             var loadFlag = new DataLoadFlag();
@@ -180,6 +161,28 @@ namespace CraftSharp
             loadFlag.Finished = false;
             Task.Run(() => BlockEntityPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
+
+            // Load in-game translations (loaded AFTER resource files)
+            var s = Path.DirectorySeparatorChar;
+            var langFile = PathHelper.GetPackDirectoryNamed(
+                    $"vanilla-{resourceVersion}{s}assets{s}minecraft{s}lang{s}{CornGlobal.Language}.json");
+            
+            if (!File.Exists(langFile)) // If translation file is not available, try downloading it
+            {
+                // IMPORTANT: en_us.json is not present in asset manifest, so it cannot
+                // be downloaded with ResourceDownloader.DownloadLanguageJson()
+                // Instead it must be downloaded along with vanilla resource files
+                yield return StartCoroutine(ResourceDownloader.DownloadLanguageJson(
+                        resourceVersion, CornGlobal.Language, updateStatus,
+                        () => { },
+                        (langJsonDownloaded) => {
+                            if (!langJsonDownloaded)
+                                startUpFlag.Failed = true;
+                        }
+                ));
+            }
+
+            Protocol.ChatParser.LoadTranslationRules(langFile);
 
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
