@@ -23,7 +23,7 @@ namespace CraftSharp
 
         public static bool LoginWithSecureProfile { get; set; } = false;
 
-        public static string Language { get; set; } = "zh_cn";
+        public static string Language { get; set; } = "en_us";
         public static bool DebugMode { get; set; } = false;
 
         // Custom app variables
