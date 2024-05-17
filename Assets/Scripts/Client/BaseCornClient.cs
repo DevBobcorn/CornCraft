@@ -18,7 +18,7 @@ namespace CraftSharp
         [SerializeField] public ChunkRenderManager? ChunkRenderManager;
         [SerializeField] public EntityRenderManager? EntityRenderManager;
         [SerializeField] public BaseEnvironmentManager? EnvironmentManager;
-        [SerializeField] public MaterialManager? MaterialManager;
+        [SerializeField] public ChunkMaterialManager? MaterialManager;
         
         [SerializeField] protected PlayerController? playerController;
         [SerializeField] protected GameObject[] playerRenderPrefabs = { };

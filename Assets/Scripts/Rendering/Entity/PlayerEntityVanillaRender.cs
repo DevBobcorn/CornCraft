@@ -31,6 +31,7 @@ namespace CraftSharp.Rendering
                 return;
             }
 
+            /*
             var nameLower = Name?.ToLower();
             var skinMats = CornApp.CurrentClient!.MaterialManager!.SkinMaterials;
 
@@ -44,6 +45,7 @@ namespace CraftSharp.Rendering
 
                 Debug.Log($"Skin applied to {nameLower}");
             }
+            */
         }
     }
 }
