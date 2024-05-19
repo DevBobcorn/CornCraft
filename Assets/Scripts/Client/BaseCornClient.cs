@@ -15,12 +15,20 @@ namespace CraftSharp
     public abstract class BaseCornClient : MonoBehaviour
     {
         #region Inspector Fields
-        [SerializeField] public ChunkRenderManager? ChunkRenderManager;
-        [SerializeField] public EntityRenderManager? EntityRenderManager;
-        [SerializeField] public BaseEnvironmentManager? EnvironmentManager;
-        [SerializeField] public ChunkMaterialManager? MaterialManager;
+        [SerializeField] private ChunkRenderManager? m_ChunkRenderManager;
+        [SerializeField] private EntityRenderManager? m_EntityRenderManager;
+        [SerializeField] private BaseEnvironmentManager? m_EnvironmentManager;
+        [SerializeField] private ChunkMaterialManager? m_ChunkMaterialManager;
+        [SerializeField] private EntityMaterialManager? m_EntityMaterialManager;
+
+        public ChunkRenderManager ChunkRenderManager => m_ChunkRenderManager!;
+        public EntityRenderManager EntityRenderManager => m_EntityRenderManager!;
+        public BaseEnvironmentManager EnvironmentManager => m_EnvironmentManager!;
+        public ChunkMaterialManager ChunkMaterialManager => m_ChunkMaterialManager!;
+        public EntityMaterialManager EntityMaterialManager => m_EntityMaterialManager!;
         
-        [SerializeField] protected PlayerController? playerController;
+        [SerializeField] private PlayerController? m_PlayerController;
+        public PlayerController PlayerController => m_PlayerController!;
         [SerializeField] protected GameObject[] playerRenderPrefabs = { };
         [SerializeField] protected int selectedRenderPrefab;
         [SerializeField] protected CameraController? cameraController;
@@ -36,14 +44,14 @@ namespace CraftSharp
         {
             if (enable)
             {
-                playerController?.EnableInput();
+                m_PlayerController?.EnableInput();
                 cameraController?.EnableInput();
 
                 InputPaused = false;
             }
             else
             {
-                playerController?.DisableInput();
+                m_PlayerController?.DisableInput();
                 cameraController?.DisableInput();
 
                 InputPaused = true;

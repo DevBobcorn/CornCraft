@@ -160,7 +160,7 @@ namespace CraftSharp.Control
             UpdateBlockSelection(cameraController!.GetViewportCenterRay());
 
             // Update player interactions
-            UpdateBlockInteractions(client!.ChunkRenderManager!);
+            UpdateBlockInteractions(client!.ChunkRenderManager);
         }
     }
 }
