@@ -362,6 +362,7 @@ GameObject:
   - component: {fileID: 331478945}
   - component: {fileID: 331478950}
   - component: {fileID: 331478947}
+  - component: {fileID: 331478951}
   - component: {fileID: 331478948}
   m_Layer: 0
   m_Name: Corn Client
@@ -431,11 +432,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03cc3bd21aad4d342aa5a047828471cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChunkRenderManager: {fileID: 2012416857}
-  EntityRenderManager: {fileID: 1463427177}
-  EnvironmentManager: {fileID: 346995815}
-  MaterialManager: {fileID: 331478947}
-  playerController: {fileID: 195804746}
+  m_ChunkRenderManager: {fileID: 2012416857}
+  m_EntityRenderManager: {fileID: 1463427177}
+  m_EnvironmentManager: {fileID: 346995815}
+  m_ChunkMaterialManager: {fileID: 331478947}
+  m_EntityMaterialManager: {fileID: 331478951}
+  m_PlayerController: {fileID: 195804746}
   playerRenderPrefabs:
   - {fileID: 100096, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
   - {fileID: 555365335110124448, guid: 35ba1c4e28397394593efc927034fa83, type: 3}
@@ -444,6 +446,18 @@ MonoBehaviour:
   screenControl: {fileID: 607892726}
   HUDScreen: {fileID: 715034222423469087}
   LoadingScreen: {fileID: 1758638667}
+--- !u!114 &331478951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331478943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39fd12f05531e874595aab9caa997ca4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &346995814
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2311,15 +2325,15 @@ PrefabInstance:
       objectReference: {fileID: 1011435875}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.038140297
+      value: -1.5256128
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.099999905
+      value: 3.05159
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.052203417
+      value: 2.0881348
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalRotation.w

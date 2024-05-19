@@ -45,10 +45,10 @@ namespace CraftSharp.UI
 
         void Update()
         {
-            var entityManager = CornApp.CurrentClient?.EntityRenderManager;
-            var validTagOwners = entityManager?.GetNearbyEntities().Keys.ToList();
+            var entityManager = CornApp.CurrentClient!.EntityRenderManager;
+            var validTagOwners = entityManager.GetNearbyEntities().Keys.ToList();
 
-            if (validTagOwners is not null)
+            if (validTagOwners is not null && validTagOwners.Any())
             {
                 var tagOwners = entityFloatingUIs.Keys.ToArray();
 

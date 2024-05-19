@@ -54,7 +54,7 @@ namespace CraftSharp
             ScreenControl.PushScreen(HUDScreen!);
 
             // Setup chunk render manager
-            ChunkRenderManager!.SetClient(this);
+            ChunkRenderManager.SetClient(this);
 
             // Set up interaction updater
             interactionUpdater = GetComponent<InteractionUpdater>();
@@ -97,7 +97,7 @@ namespace CraftSharp
 
             if (playerRenderPrefabs[selectedRenderPrefab] != null)
             {
-                playerController!.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
             }
             else
             {
@@ -122,25 +122,25 @@ namespace CraftSharp
                 {
                     CornApp.Notify(Translations.Get("rendering.debug.reload_chunk_render"));
                     // Don't destroy block entity renders
-                    ChunkRenderManager!.ReloadChunksRender(false);
+                    ChunkRenderManager.ReloadChunksRender(false);
                 }
             }
 
-            if (playerController != null)
+            if (PlayerController != null)
             {
                 if (Keyboard.current.f6Key.wasPressedThisFrame) // Select previous
                 {
                     selectedRenderPrefab = (selectedRenderPrefab + playerRenderPrefabs.Length - 1) % playerRenderPrefabs.Length;
-                    playerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                    PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
                 }
                 else if (Keyboard.current.f7Key.wasPressedThisFrame) // Regenerate current prefab
                 {
-                    playerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                    PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
                 }
                 else if (Keyboard.current.f8Key.wasPressedThisFrame) // Select next
                 {
                     selectedRenderPrefab = (selectedRenderPrefab + 1) % playerRenderPrefabs.Length;
-                    playerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                    PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
                 }
             }
         }
@@ -168,7 +168,7 @@ namespace CraftSharp
         /// </summary>
         public override IChunkRenderManager GetChunkRenderManager()
         {
-            return ChunkRenderManager!;
+            return ChunkRenderManager;
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace CraftSharp
         /// </summary>
         public override Location GetLocation()
         {
-            return playerController!.Location2Send;
+            return PlayerController.Location2Send;
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace CraftSharp
         /// </summary>
         public override Vector3 GetPosition()
         {
-            return CoordConvert.MC2Unity(playerController!.Location2Send);
+            return CoordConvert.MC2Unity(PlayerController.Location2Send);
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace CraftSharp
         /// <returns>Status info string</returns>
         public override string GetInfoString(bool withDebugInfo)
         {
-            string baseString = $"FPS: {(int)(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}";
+            string baseString = $"FPS: {(int)(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager.GetTimeString()}";
 
             if (withDebugInfo)
             {
@@ -223,7 +223,7 @@ namespace CraftSharp
 
                 if (targetLoc is not null)
                 {
-                    var targetBlock = ChunkRenderManager!.GetBlock(targetLoc.Value);
+                    var targetBlock = ChunkRenderManager.GetBlock(targetLoc.Value);
                     var targetState = targetBlock.State;
                     targetInfo = $"Target: {targetLoc}\n{targetBlock}\nBlockage: {targetState.LightBlockageLevel} Emission: {targetState.LightEmissionLevel}";
                 }
@@ -232,10 +232,10 @@ namespace CraftSharp
                     targetInfo = "\n";
                 }
 
-                locInfo = $"Biome:\t{ChunkRenderManager!.GetBiome(blockLoc)}\nBlock Light:\t{ChunkRenderManager!.GetBlockLight(blockLoc)}";
+                locInfo = $"Biome:\t{ChunkRenderManager.GetBiome(blockLoc)}\nBlock Light:\t{ChunkRenderManager.GetBlockLight(blockLoc)}";
                 
-                return baseString + $"\nLoc: {playerLoc}\n{locInfo}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
-                        $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
+                return baseString + $"\nLoc: {playerLoc}\n{locInfo}\n{targetInfo}\n{PlayerController.GetDebugInfo()}" +
+                        $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
             }
             
             return baseString;

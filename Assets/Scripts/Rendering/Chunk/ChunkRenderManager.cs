@@ -10,7 +10,6 @@ using Unity.Mathematics;
 
 using CraftSharp.Event;
 using CraftSharp.Resource;
-using UnityEngine.InputSystem;
 
 namespace CraftSharp.Rendering
 {

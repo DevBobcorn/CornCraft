@@ -79,20 +79,20 @@ namespace CraftSharp
 
         void Start()
         {
-            //MaterialManager!.LoadPlayerSkins();
+            //MaterialManager.LoadPlayerSkins();
 
             // Push HUD Screen on start
             ScreenControl.PushScreen(HUDScreen!);
 
             // Setup chunk render manager
-            ChunkRenderManager!.SetClient(this);
+            ChunkRenderManager.SetClient(this);
 
             // Set up interaction updater
             interactionUpdater = GetComponent<InteractionUpdater>();
             interactionUpdater!.Initialize(this, CameraController);
 
             // Freeze player controller until terrain is ready
-            playerController!.DisablePhysics();
+            PlayerController.DisablePhysics();
             ScreenControl.PushScreen(LoadingScreen!);
         }
 
@@ -136,7 +136,7 @@ namespace CraftSharp
 
                     if (playerRenderPrefabs[selectedRenderPrefab] != null)
                     {
-                        playerController!.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                        PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
                     }
                     else
                     {
@@ -180,25 +180,25 @@ namespace CraftSharp
                 {
                     CornApp.Notify(Translations.Get("rendering.debug.reload_chunk_render"));
                     // Don't destroy block entity renders
-                    ChunkRenderManager!.ReloadChunksRender(false);
+                    ChunkRenderManager.ReloadChunksRender(false);
                 }
             }
 
-            if (playerController != null)
+            if (PlayerController != null)
             {
                 if (Keyboard.current.f6Key.wasPressedThisFrame) // Select previous
                 {
                     selectedRenderPrefab = (selectedRenderPrefab + playerRenderPrefabs.Length - 1) % playerRenderPrefabs.Length;
-                    playerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                    PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
                 }
                 else if (Keyboard.current.f7Key.wasPressedThisFrame) // Regenerate current prefab
                 {
-                    playerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                    PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
                 }
                 else if (Keyboard.current.f8Key.wasPressedThisFrame) // Select next
                 {
                     selectedRenderPrefab = (selectedRenderPrefab + 1) % playerRenderPrefabs.Length;
-                    playerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                    PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
                 }
             }
         }
@@ -238,10 +238,10 @@ namespace CraftSharp
                 lock (movementLock)
                 {
                     handler?.SendLocationUpdate(
-                            playerController!.Location2Send,
-                            playerController.IsGrounded2Send,
-                            playerController.MCYaw2Send,
-                            playerController.Pitch2Send);
+                            PlayerController.Location2Send,
+                            PlayerController.IsGrounded2Send,
+                            PlayerController.MCYaw2Send,
+                            PlayerController.Pitch2Send);
 
                     // First 2 updates must be player position AND look, and player must not move (to conform with vanilla)
                     // Once yaw and pitch have been sent, switch back to location-only updates (without yaw and pitch)
@@ -338,7 +338,7 @@ namespace CraftSharp
         {
             Loom.QueueOnMainThread(() => {
                 // Clear world data
-                ChunkRenderManager!.ClearChunksData();
+                ChunkRenderManager.ClearChunksData();
             });
 
             switch (reason)
@@ -455,7 +455,7 @@ namespace CraftSharp
         /// </summary>
         public override IChunkRenderManager GetChunkRenderManager()
         {
-            return ChunkRenderManager!;
+            return ChunkRenderManager;
         }
 
         /// <summary>
@@ -481,7 +481,7 @@ namespace CraftSharp
         /// </summary>
         public override Location GetLocation()
         {
-            return playerController!.Location2Send;
+            return PlayerController.Location2Send;
         }
 
         /// <summary>
@@ -489,7 +489,7 @@ namespace CraftSharp
         /// </summary>
         public override Vector3 GetPosition()
         {
-            return CoordConvert.MC2Unity(playerController!.Location2Send);
+            return CoordConvert.MC2Unity(PlayerController.Location2Send);
         }
 
         /// <summary>
@@ -498,7 +498,7 @@ namespace CraftSharp
         /// <returns>Status info string</returns>
         public override string GetInfoString(bool withDebugInfo)
         {
-            string baseString = $"FPS: {(int)(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager!.GetTimeString()}";
+            string baseString = $"FPS: {(int)(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager.GetTimeString()}";
 
             if (withDebugInfo)
             {
@@ -510,7 +510,7 @@ namespace CraftSharp
 
                 if (targetLoc is not null)
                 {
-                    var targetBlock = ChunkRenderManager!.GetBlock(targetLoc.Value);
+                    var targetBlock = ChunkRenderManager.GetBlock(targetLoc.Value);
                     targetInfo = $"Target: {targetLoc}\n{targetBlock}";
                 }
                 else
@@ -518,10 +518,10 @@ namespace CraftSharp
                     targetInfo = "\n";
                 }
 
-                locInfo = $"Biome:\t{ChunkRenderManager!.GetBiome(blockLoc)}\nBlock Light:\t{ChunkRenderManager!.GetBlockLight(blockLoc)}";
+                locInfo = $"Biome:\t{ChunkRenderManager.GetBiome(blockLoc)}\nBlock Light:\t{ChunkRenderManager.GetBlockLight(blockLoc)}";
                 
-                return baseString + $"\nLoc: {playerLoc}\n{locInfo}\n{targetInfo}\n{playerController?.GetDebugInfo()}" +
-                        $"\n{ChunkRenderManager!.GetDebugInfo()}\n{EntityRenderManager!.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
+                return baseString + $"\nLoc: {playerLoc}\n{locInfo}\n{targetInfo}\n{PlayerController?.GetDebugInfo()}" +
+                        $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
             }
             
             return baseString;
@@ -819,7 +819,7 @@ namespace CraftSharp
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => InteractEntity(entityID, type, hand));
 
-            if (EntityRenderManager!.HasEntityRender(entityID))
+            if (EntityRenderManager.HasEntityRender(entityID))
             {
                 if (type == 0)
                     return handler!.SendInteractEntity(entityID, type, (int)hand);
@@ -985,7 +985,7 @@ namespace CraftSharp
 
             ClearTasks();
 
-            ChunkRenderManager!.ClearChunksData();
+            ChunkRenderManager.ClearChunksData();
 
             if (!keepAttr)
             {
@@ -994,10 +994,10 @@ namespace CraftSharp
 
             Loom.QueueOnMainThread(() => {
                 ScreenControl.PushScreen(LoadingScreen!);
-                playerController!.DisablePhysics();
+                PlayerController.DisablePhysics();
 
-                ChunkRenderManager?.ReloadChunksRender();
-                EntityRenderManager?.ReloadEntityRenders();
+                ChunkRenderManager.ReloadChunksRender();
+                EntityRenderManager.ReloadEntityRenders();
             });
         }
 
@@ -1034,13 +1034,13 @@ namespace CraftSharp
                 if (yawIsOffset)
                 {
                     // Offset based off current value
-                    yaw += playerController!.MCYaw2Send;
+                    yaw += PlayerController.MCYaw2Send;
                 }
 
                 if (pitchIsOffset)
                 {
                     // Offset based off current value
-                    pitch += playerController!.Pitch2Send;
+                    pitch += PlayerController.Pitch2Send;
                 }
                 
                 if (!locationReceived) // On entering world or respawning
@@ -1049,13 +1049,13 @@ namespace CraftSharp
 
                     Loom.QueueOnMainThread(() => {
                         // Update player location
-                        playerController!.SetLocation(location, mcYaw: yaw);
+                        PlayerController.SetLocation(location, mcYaw: yaw);
                         // Force refresh environment collider
-                        ChunkRenderManager?.InitializeTerrainCollider(location.GetBlockLoc(), () =>
+                        ChunkRenderManager.InitializeTerrainCollider(location.GetBlockLoc(), () =>
                                 {
                                     // Pop loading screen
                                     ScreenControl.TryPopScreen();
-                                    playerController!.EnablePhysics();
+                                    PlayerController.EnablePhysics();
                                 });
                         // Update camera yaw
                         CameraController.SetYaw(yaw);
@@ -1065,16 +1065,16 @@ namespace CraftSharp
                 else // Position correction from server
                 {                    
                     Loom.QueueOnMainThread(() => {
-                        var offset = playerController!.transform.position - CoordConvert.MC2Unity(location);
+                        var offset = PlayerController.transform.position - CoordConvert.MC2Unity(location);
                         if (offset.magnitude < 8F)
                         {
                             return;
                         }
 
                         // Force refresh environment collider
-                        ChunkRenderManager?.RebuildTerrainCollider(location.GetBlockLoc());
+                        ChunkRenderManager.RebuildTerrainCollider(location.GetBlockLoc());
                         // Then update player location
-                        playerController!.SetLocation(location, reset: true, mcYaw: yaw);
+                        PlayerController.SetLocation(location, reset: true, mcYaw: yaw);
                         //Debug.Log($"Updated to {location} offset: {offset.magnitude}");
                     });
                 }
@@ -1311,7 +1311,7 @@ namespace CraftSharp
         public void OnSpawnEntity(Entity entity)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager!.AddEntityRender(entity);
+                EntityRenderManager.AddEntityRender(entity);
             });
         }
 
@@ -1383,7 +1383,7 @@ namespace CraftSharp
         public void OnDestroyEntities(int[] Entities)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager?.RemoveEntityRenders(Entities);
+                EntityRenderManager.RemoveEntityRenders(Entities);
             });
         }
 
@@ -1398,7 +1398,7 @@ namespace CraftSharp
         public void OnEntityPosition(int EntityID, double Dx, double Dy, double Dz, bool onGround)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager?.MoveEntityRender(EntityID, new(Dx, Dy, Dz));
+                EntityRenderManager.MoveEntityRender(EntityID, new(Dx, Dy, Dz));
             });
         }
 
@@ -1412,7 +1412,7 @@ namespace CraftSharp
         public void OnEntityRotation(int EntityID, byte yaw, byte pitch, bool onGround)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager?.RotateEntityRender(EntityID, yaw, pitch);
+                EntityRenderManager.RotateEntityRender(EntityID, yaw, pitch);
             });
         }
 
@@ -1424,7 +1424,7 @@ namespace CraftSharp
         public void OnEntityHeadLook(int EntityID, byte headYaw)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager?.RotateEntityRenderHead(EntityID, headYaw);
+                EntityRenderManager.RotateEntityRenderHead(EntityID, headYaw);
             });
         }
 
@@ -1439,7 +1439,7 @@ namespace CraftSharp
         public void OnEntityTeleport(int EntityID, double X, double Y, double Z, bool onGround)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager?.TeleportEntityRender(EntityID, new(X, Y, Z));
+                EntityRenderManager.TeleportEntityRender(EntityID, new(X, Y, Z));
             });
         }
 
@@ -1468,7 +1468,7 @@ namespace CraftSharp
             UpdateKeepAlive();
 
             Loom.QueueOnMainThread(() => {
-                EnvironmentManager!.SetTime(timeOfDay);
+                EnvironmentManager.SetTime(timeOfDay);
             });
 
             // calculate server tps
@@ -1624,7 +1624,7 @@ namespace CraftSharp
         public void OnEntityHealth(int entityID, float health)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager?.UpdateEntityHealth(entityID, health);
+                EntityRenderManager.UpdateEntityHealth(entityID, health);
             });
         }
 
@@ -1636,7 +1636,7 @@ namespace CraftSharp
         public void OnEntityMetadata(int entityID, Dictionary<int, object?> metadata)
         {
             Loom.QueueOnMainThread(() => {
-                var entity = EntityRenderManager?.GetEntityRender(entityID);
+                var entity = EntityRenderManager.GetEntityRender(entityID);
 
                 if (entity != null)
                 {
@@ -1700,7 +1700,7 @@ namespace CraftSharp
         public void OnRainChange(bool begin)
         {
             Loom.QueueOnMainThread(() => {
-                EnvironmentManager!.SetRain(begin);
+                EnvironmentManager.SetRain(begin);
             });
         }
 
