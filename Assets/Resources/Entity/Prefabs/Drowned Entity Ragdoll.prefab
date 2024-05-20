@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 463402447885744568}
   - component: {fileID: 7761247717918597199}
+  - component: {fileID: 737679620444507336}
   m_Layer: 13
   m_Name: Drowned Entity Ragdoll
   m_TagString: Untagged
@@ -24,6 +25,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4077839186716515674}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -31,7 +33,6 @@ Transform:
   m_Children:
   - {fileID: 4243557724092460427}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7761247717918597199
 MonoBehaviour:
@@ -47,6 +48,39 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainRigidbody: {fileID: 4643050124253007054}
   visual: {fileID: 4243557724092460427}
+--- !u!114 &737679620444507336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4077839186716515674}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dac0d27ec6af324faf2b6c5f03895b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MaterialEntries:
+  - RenderType: 0
+    m_DefaultMaterial: {fileID: 2100000, guid: 9d9b49349612c66418d23ff9d00c073e, type: 2}
+    TextureId: zombie/drowned
+    m_Renderers:
+    - {fileID: 6662464316021138954}
+    - {fileID: 2567104506122042918}
+    - {fileID: 5528019040828752833}
+    - {fileID: 3218488630771180133}
+    - {fileID: 5333703070255165353}
+    - {fileID: 9044985125668325286}
+  - RenderType: 1
+    m_DefaultMaterial: {fileID: 2100000, guid: 85034b6ccba37a24297e03518e871919, type: 2}
+    TextureId: zombie/drowned_outer_layer
+    m_Renderers:
+    - {fileID: 5107396736571401446}
+    - {fileID: 5121677019006255460}
+    - {fileID: 4594781743757662220}
+    - {fileID: 931291466603727150}
+    - {fileID: 3833937048056113692}
+    - {fileID: 3807609552396368993}
 --- !u!1001 &4426647253298973280
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -275,6 +309,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 4643050124253007054}
   m_SourcePrefab: {fileID: 100100000, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+--- !u!23 &931291466603727150 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3567414536381956942, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2062464635193200825 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2445952202651933401, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
@@ -473,9 +512,34 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.2, y: 0.7, z: 0.2}
   m_Center: {x: 0, y: -0.375, z: 0}
+--- !u!23 &2567104506122042918 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7003462684806122426, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &3218488630771180133 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7943010115397359611, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &3807609552396368993 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -8522564697417828863, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &3833937048056113692 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 601931315343794300, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4243557724092460427 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &4594781743757662220 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -9030441144114736532, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
   m_PrefabInstance: {fileID: 4426647253298973280}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &4640141470434368642 stripped
@@ -531,6 +595,21 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!23 &5107396736571401446 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8903478460182949510, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &5121677019006255460 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8826287973117872900, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &5333703070255165353 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8605115101581682121, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &5430733222972657597 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -706138051735550499, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
@@ -630,6 +709,16 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.2, y: 0.7, z: 0.2}
   m_Center: {x: 0, y: -0.2500001, z: 0}
+--- !u!23 &5528019040828752833 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8203839152763537825, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &6662464316021138954 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6997274158744726634, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &7768436530974500713 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -2980930072535421687, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
@@ -828,3 +917,8 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.2, y: 0.7, z: 0.2}
   m_Center: {x: 0, y: -0.375, z: 0}
+--- !u!23 &9044985125668325286 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4677166563973860806, guid: a949eb5d7a42c8a448bf6d3382dd37d8, type: 3}
+  m_PrefabInstance: {fileID: 4426647253298973280}
+  m_PrefabAsset: {fileID: 0}

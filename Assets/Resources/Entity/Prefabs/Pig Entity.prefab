@@ -41,6 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5171779837212712022}
   - component: {fileID: 2182129141127311030}
+  - component: {fileID: -8188447721031039475}
   m_Layer: 10
   m_Name: Pig Entity
   m_TagString: Untagged
@@ -95,6 +96,30 @@ MonoBehaviour:
   frontRightLeg: {fileID: 2829092200162745753}
   rearLeftLeg: {fileID: 6355137034990961191}
   rearRightLeg: {fileID: 8749899508757009915}
+--- !u!114 &-8188447721031039475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6981470601020151392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dac0d27ec6af324faf2b6c5f03895b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MaterialEntries:
+  - RenderType: 0
+    m_DefaultMaterial: {fileID: 2100000, guid: 73e983ca2a359444f9a7000258033ceb, type: 2}
+    TextureId: pig/pig
+    m_Renderers:
+    - {fileID: 1918988654328608166}
+    - {fileID: 2947318791713644254}
+    - {fileID: 1796967555623823952}
+    - {fileID: 4579069973287907020}
+    - {fileID: 5108597285005914513}
+    - {fileID: 8616044982272853149}
+    - {fileID: 2558659996462635186}
 --- !u!1001 &8785207576479647290
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -223,9 +248,39 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 8513157979690716291}
   m_SourcePrefab: {fileID: 100100000, guid: c6ef79af918031444a2403502004ed47, type: 3}
+--- !u!23 &1796967555623823952 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6997274158744726634, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_PrefabInstance: {fileID: 8785207576479647290}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1918988654328608166 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 7154757170324648860, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_PrefabInstance: {fileID: 8785207576479647290}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &2558659996462635186 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -2708497312253239672, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_PrefabInstance: {fileID: 8785207576479647290}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2829092200162745753 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -2402204331724727389, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_PrefabInstance: {fileID: 8785207576479647290}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &2947318791713644254 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5840510581577029860, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_PrefabInstance: {fileID: 8785207576479647290}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &4579069973287907020 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5073107478801574134, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_PrefabInstance: {fileID: 8785207576479647290}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &5108597285005914513 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4543623588530272171, guid: c6ef79af918031444a2403502004ed47, type: 3}
   m_PrefabInstance: {fileID: 8785207576479647290}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &6355137034990961191 stripped
@@ -264,6 +319,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.6, y: 1, z: 1.5}
   m_Center: {x: 0, y: 0.5, z: 0.2}
+--- !u!23 &8616044982272853149 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1042870270484464295, guid: c6ef79af918031444a2403502004ed47, type: 3}
+  m_PrefabInstance: {fileID: 8785207576479647290}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8749899508757009915 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 37911711452255169, guid: c6ef79af918031444a2403502004ed47, type: 3}
