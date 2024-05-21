@@ -7,7 +7,7 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.6"
       },
-      "hash": "754f83573464822541bc6a666e93141fe7b40b62"
+      "hash": "30ffcc1adc3ca3bc1a4900fb5ab4b0b40079b7e6"
     },
     "com.devbobcorn.craftsharp-protocol": {
       "version": "file:com.devbobcorn.craftsharp-protocol",
@@ -24,9 +24,9 @@
       "source": "git",
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
-        "com.devbobcorn.craftsharp": "1.0.0"
+        "com.devbobcorn.craftsharp": "2.3.0"
       },
-      "hash": "649e22448fc995559db7f84a2fcbee8a1b2b8e10"
+      "hash": "90c4dbd8dafa928d398360f32b61a1b2ab610bed"
     },
     "com.fernrender.core": {
       "version": "file:com.fernrender.core",

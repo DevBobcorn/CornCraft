@@ -149,7 +149,11 @@ namespace CraftSharp
             loadFlag.Finished = false;
             // Load valid packs...
             loadFlag.Finished = false;
-            Task.Run(() => packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status))));
+            Task.Run(() => {
+                // Set up thread locale for testing resource loading with different locales
+                //System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("fr-FR");
+                packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status)));
+            });
             while (!loadFlag.Finished) yield return null;
             
             // Load entity definitions
