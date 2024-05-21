@@ -36,10 +36,14 @@ namespace CraftSharp.UI
             {
                 var target = entityFloatingUIs[entityId];
 
-                if (target != null)
+                if (target != null) // Delay removal
+                {
                     target.Destroy(() => entityFloatingUIs.Remove(entityId));
-                else
+                }
+                else // Remove immediately
+                {
                     entityFloatingUIs.Remove(entityId);
+                }
             }
         }
 
@@ -72,16 +76,28 @@ namespace CraftSharp.UI
                 }
             }
 
-            var camController = CornApp.CurrentClient?.CameraController;
+            var camController = CornApp.CurrentClient!.CameraController;
+            var nullKeyList = new List<int>();
 
-            if (camController != null)
+            foreach (var item in entityFloatingUIs)
             {
-                foreach (var item in entityFloatingUIs)
+                if (item.Value == null)
                 {
-                    var target = item.Value.transform;
-                    target.eulerAngles = camController.GetEularAngles();
-                    var scale = UIScaleCurve!.Evaluate((camController.GetPosition() - target.position).magnitude);
-                    target.localScale = new(scale, scale, 1F);
+                    nullKeyList.Add(item.Key);
+                    continue;
+                }
+
+                var target = item.Value.transform;
+                target.eulerAngles = camController.GetEularAngles();
+                var scale = UIScaleCurve!.Evaluate((camController.GetPosition() - target.position).magnitude);
+                target.localScale = new(scale, scale, 1F);
+            }
+
+            if (nullKeyList.Any())
+            {
+                foreach (var entityId in nullKeyList)
+                {
+                    entityFloatingUIs.Remove(entityId);
                 }
             }
         }

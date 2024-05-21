@@ -152,7 +152,7 @@ Material:
     - _LightIntensityClamp: 1
     - _Metallic: 0
     - _Mode: 0
-    - _OcclusionStrength: 1
+    - _OcclusionStrength: 0
     - _Outline: 1
     - _OutlineWidth: 10
     - _Parallax: 0.02
@@ -165,7 +165,7 @@ Material:
     - _RimSoftness: 0.01
     - _RimThreshold: 0.2
     - _Shininess: 1
-    - _Smoothness: 0.5
+    - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
     - _SpaceScreenThresold: 0.5
     - _SpecularAA: 0

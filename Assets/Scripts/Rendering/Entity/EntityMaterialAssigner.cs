@@ -1,7 +1,8 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CraftSharp.Resource;
 using UnityEngine;
 
 namespace CraftSharp.Rendering
@@ -59,13 +60,18 @@ namespace CraftSharp.Rendering
 
         void Start()
         {
-            var matManager = CornApp.CurrentClient!.EntityMaterialManager;
+            var client = CornApp.CurrentClient!;
+            var matManager = client.EntityMaterialManager;
 
             foreach (var entry in m_MaterialEntries)
             {
                 var textureId = ResourceLocation.FromString(entry.TextureId);
-
-                var mat = matManager.MapMaterial(entry.RenderType, textureId, entry.DefaultMaterial);
+	            var matInstance = matManager.MapMaterial(entry.RenderType, textureId, entry.DefaultMaterial);
+                
+                foreach (var renderer in entry.Renderers)
+                {
+                    renderer.sharedMaterial = matInstance;
+                }
             }
         }
     }

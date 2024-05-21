@@ -29,10 +29,32 @@ namespace CraftSharp.Rendering
         {
             if (!EntityMaterials[renderType].ContainsKey(textureId))
             {
-                var matInstance = new Material(defaultMaterial);
+                var resManager = ResourcePackManager.Instance;
+                // This entry is not present, instanciate it
+                //Debug.Log($"Creating entity material {textureId} ({renderType})");
+                Texture2D mt;
+                if (resManager.EntityTexture2DTable.ContainsKey(textureId))
+                {
+                    mt = resManager.EntityTexture2DTable[textureId];
+                }
+                else
+                {
+                    var defaultTex = defaultMaterial.GetTexture("_BaseMap");
+                    if (defaultTex != null)
+                        mt = resManager.GetMissingEntityTexture(defaultTex.width, defaultTex.height);
+                    else
+                        mt = resManager.GetMissingEntityTexture(64, 64);
+                }
 
-                // TODO: Read and apply textures from ResourcePackManager
-                
+                var matInstance = new Material(defaultMaterial)
+                {
+                    // Read and apply textures from ResourcePackManager
+                    mainTexture = mt,
+                    name = $"Material {textureId} ({renderType})"
+                };
+
+                matInstance.SetTexture("_BaseMap", mt);
+
                 EntityMaterials[renderType].Add(textureId, matInstance);
             }
 

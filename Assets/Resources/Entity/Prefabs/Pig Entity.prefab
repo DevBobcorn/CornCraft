@@ -111,7 +111,7 @@ MonoBehaviour:
   m_MaterialEntries:
   - RenderType: 0
     m_DefaultMaterial: {fileID: 2100000, guid: 73e983ca2a359444f9a7000258033ceb, type: 2}
-    TextureId: pig/pig
+    TextureId: entity/pig/pig
     m_Renderers:
     - {fileID: 1918988654328608166}
     - {fileID: 2947318791713644254}

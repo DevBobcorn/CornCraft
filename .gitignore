@@ -18,6 +18,8 @@
 /[Pp]ackages/com.devbobcorn.craftsharp-resource
 
 # Third party resources & utils
+/[Aa]ssets/Plugins/
+/[Aa]ssets/Plugins.meta
 /[Aa]ssets/AnimeModels/GI - *
 /[Aa]ssets/AnimeModels/SR - *
 /[Aa]ssets/AnimeModels/Test*
