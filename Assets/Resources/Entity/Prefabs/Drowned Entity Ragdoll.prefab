@@ -63,7 +63,7 @@ MonoBehaviour:
   m_MaterialEntries:
   - RenderType: 0
     m_DefaultMaterial: {fileID: 2100000, guid: 9d9b49349612c66418d23ff9d00c073e, type: 2}
-    TextureId: zombie/drowned
+    TextureId: entity/zombie/drowned
     m_Renderers:
     - {fileID: 6662464316021138954}
     - {fileID: 2567104506122042918}
@@ -73,7 +73,7 @@ MonoBehaviour:
     - {fileID: 9044985125668325286}
   - RenderType: 1
     m_DefaultMaterial: {fileID: 2100000, guid: 85034b6ccba37a24297e03518e871919, type: 2}
-    TextureId: zombie/drowned_outer_layer
+    TextureId: entity/zombie/drowned_outer_layer
     m_Renderers:
     - {fileID: 5107396736571401446}
     - {fileID: 5121677019006255460}

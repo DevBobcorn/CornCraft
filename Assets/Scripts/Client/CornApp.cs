@@ -152,7 +152,7 @@ namespace CraftSharp
             Task.Run(() => {
                 // Set up thread locale for testing resource loading with different locales
                 //System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("fr-FR");
-                packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status)));
+                packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status)), true);
             });
             while (!loadFlag.Finished) yield return null;
             

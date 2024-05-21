@@ -151,7 +151,7 @@ Material:
     - _Is_Filter_LightColor: 1
     - _LightIntensityClamp: 1
     - _Metallic: 0
-    - _OcclusionStrength: 1
+    - _OcclusionStrength: 0
     - _Outline: 1
     - _OutlineWidth: 10
     - _Parallax: 0.005
