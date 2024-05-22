@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2865092578086758467}
   - component: {fileID: 9101627775256926883}
+  - component: {fileID: 46715038877026533}
   m_Layer: 10
   m_Name: Creeper Entity
   m_TagString: Untagged
@@ -64,6 +65,29 @@ MonoBehaviour:
   frontRightLeg: {fileID: 1327681276621714228}
   rearLeftLeg: {fileID: 7863232437070785674}
   rearRightLeg: {fileID: 5495456376764087126}
+--- !u!114 &46715038877026533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 64222873330180725}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dac0d27ec6af324faf2b6c5f03895b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MaterialEntries:
+  - RenderType: 0
+    m_DefaultMaterial: {fileID: 2100000, guid: 209cb36955ad601489949007bf930c96, type: 2}
+    TextureId: entity/creeper/creeper
+    m_Renderers:
+    - {fileID: 3427157163724561163}
+    - {fileID: 2146195675548938355}
+    - {fileID: 759130581718962380}
+    - {fileID: 8343843419104436028}
+    - {fileID: 4808854880780757552}
+    - {fileID: 1633686253903181343}
 --- !u!1 &5021628764028966667
 GameObject:
   m_ObjectHideFlags: 0
@@ -187,14 +211,34 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1147719866204130628}
   m_SourcePrefab: {fileID: 100100000, guid: 299e681b127f2384e883a1660bb908ce, type: 3}
+--- !u!23 &759130581718962380 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -4157524182732408741, guid: 299e681b127f2384e883a1660bb908ce, type: 3}
+  m_PrefabInstance: {fileID: 5531960712875600023}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1327681276621714228 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -2402204331724727389, guid: 299e681b127f2384e883a1660bb908ce, type: 3}
   m_PrefabInstance: {fileID: 5531960712875600023}
   m_PrefabAsset: {fileID: 0}
+--- !u!23 &1633686253903181343 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -2708497312253239672, guid: 299e681b127f2384e883a1660bb908ce, type: 3}
+  m_PrefabInstance: {fileID: 5531960712875600023}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &2146195675548938355 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5840510581577029860, guid: 299e681b127f2384e883a1660bb908ce, type: 3}
+  m_PrefabInstance: {fileID: 5531960712875600023}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2416244122707185151 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7876023681238672744, guid: 299e681b127f2384e883a1660bb908ce, type: 3}
+  m_PrefabInstance: {fileID: 5531960712875600023}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &3427157163724561163 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 7154757170324648860, guid: 299e681b127f2384e883a1660bb908ce, type: 3}
   m_PrefabInstance: {fileID: 5531960712875600023}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &4612830767172605382 stripped
@@ -223,6 +267,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.5, y: 1.6, z: 0.8}
   m_Center: {x: 0, y: 0.8, z: 0}
+--- !u!23 &4808854880780757552 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1042870270484464295, guid: 299e681b127f2384e883a1660bb908ce, type: 3}
+  m_PrefabInstance: {fileID: 5531960712875600023}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5426768866080493436 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 299e681b127f2384e883a1660bb908ce, type: 3}
@@ -241,5 +290,10 @@ Transform:
 --- !u!4 &7918160252109125826 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2389032305928245333, guid: 299e681b127f2384e883a1660bb908ce, type: 3}
+  m_PrefabInstance: {fileID: 5531960712875600023}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8343843419104436028 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4543623588530272171, guid: 299e681b127f2384e883a1660bb908ce, type: 3}
   m_PrefabInstance: {fileID: 5531960712875600023}
   m_PrefabAsset: {fileID: 0}

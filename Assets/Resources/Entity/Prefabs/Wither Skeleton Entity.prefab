@@ -20,6 +20,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Wither Skeleton Entity
       objectReference: {fileID: 0}
+    - target: {fileID: 5382370703591475332, guid: 9e064a3d1835d62439a8c7ffc21b679a, type: 3}
+      propertyPath: m_MaterialEntries.Array.data[0].TextureId
+      value: entity/skeleton/wither_skeleton
+      objectReference: {fileID: 0}
+    - target: {fileID: 5382370703591475332, guid: 9e064a3d1835d62439a8c7ffc21b679a, type: 3}
+      propertyPath: m_MaterialEntries.Array.data[0].m_DefaultMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 27aaeec49bd1d5c458ca988a60e8dd4d, type: 2}
     - target: {fileID: 6077115561354809557, guid: 9e064a3d1835d62439a8c7ffc21b679a, type: 3}
       propertyPath: ragdollPrefab
       value: 

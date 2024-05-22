@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9030452115659557066}
   - component: {fileID: 5925457788260179784}
+  - component: {fileID: -5780951746584314969}
   m_Layer: 13
   m_Name: Skeleton Entity Ragdoll
   m_TagString: Untagged
@@ -24,6 +25,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4876183892067970088}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -31,7 +33,6 @@ Transform:
   m_Children:
   - {fileID: 4630957584636829608}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5925457788260179784
 MonoBehaviour:
@@ -47,6 +48,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainRigidbody: {fileID: 7640616358531180499}
   visual: {fileID: 4630957584636829608}
+--- !u!114 &-5780951746584314969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4876183892067970088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dac0d27ec6af324faf2b6c5f03895b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MaterialEntries:
+  - RenderType: 2
+    m_DefaultMaterial: {fileID: 2100000, guid: 7f1ebec433d43fb4b9e5461bcb318604, type: 2}
+    TextureId: entity/skeleton/skeleton
+    m_Renderers:
+    - {fileID: 109018600080392216}
+    - {fileID: 9012945035712753337}
+    - {fileID: 8620453455153281873}
+    - {fileID: 7703583871197502335}
+    - {fileID: 7399708012431355478}
+    - {fileID: 2136872352021685963}
 --- !u!1001 &5174299651558389827
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -227,6 +251,16 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 3424836102066014160}
   m_SourcePrefab: {fileID: 100100000, guid: 935bfc3b2754f3d4aac84bb5bd205da8, type: 3}
+--- !u!23 &109018600080392216 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -4157524182732408741, guid: 935bfc3b2754f3d4aac84bb5bd205da8, type: 3}
+  m_PrefabInstance: {fileID: 5174299651558389827}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &2136872352021685963 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -2708497312253239672, guid: 935bfc3b2754f3d4aac84bb5bd205da8, type: 3}
+  m_PrefabInstance: {fileID: 5174299651558389827}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &3637419482666906551 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -741832106251744268, guid: 935bfc3b2754f3d4aac84bb5bd205da8, type: 3}
@@ -582,6 +616,16 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.125, y: 0.7500002, z: 0.12500003}
   m_Center: {x: 0, y: -0.25000006, z: 0}
+--- !u!23 &7399708012431355478 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2413864688904672789, guid: 935bfc3b2754f3d4aac84bb5bd205da8, type: 3}
+  m_PrefabInstance: {fileID: 5174299651558389827}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &7703583871197502335 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3253409454975574844, guid: 935bfc3b2754f3d4aac84bb5bd205da8, type: 3}
+  m_PrefabInstance: {fileID: 5174299651558389827}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &7708138603533230489 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3257792644167915994, guid: 935bfc3b2754f3d4aac84bb5bd205da8, type: 3}
@@ -780,3 +824,13 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.125, y: 0.75, z: 0.125}
   m_Center: {x: 0, y: -0.375, z: 0}
+--- !u!23 &8620453455153281873 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -5733981035308023022, guid: 935bfc3b2754f3d4aac84bb5bd205da8, type: 3}
+  m_PrefabInstance: {fileID: 5174299651558389827}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &9012945035712753337 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -4982485458470054150, guid: 935bfc3b2754f3d4aac84bb5bd205da8, type: 3}
+  m_PrefabInstance: {fileID: 5174299651558389827}
+  m_PrefabAsset: {fileID: 0}

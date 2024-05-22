@@ -8,6 +8,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1934155648111372310, guid: 3a37e7381ace4f24ca4ba0eff89bc824, type: 3}
+      propertyPath: m_MaterialEntries.Array.data[0].TextureId
+      value: entity/zombie/husk
+      objectReference: {fileID: 0}
+    - target: {fileID: 1934155648111372310, guid: 3a37e7381ace4f24ca4ba0eff89bc824, type: 3}
+      propertyPath: m_MaterialEntries.Array.data[0].m_DefaultMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: a588f5a21531d5d4280bcf90ee43c646, type: 2}
     - target: {fileID: 2708844106504437662, guid: 3a37e7381ace4f24ca4ba0eff89bc824, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
