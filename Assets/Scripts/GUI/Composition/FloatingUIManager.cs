@@ -68,7 +68,7 @@ namespace CraftSharp.UI
                 {
                     var render = entityManager!.GetEntityRender(validTagOwners[i]);
 
-                    if (render?.FloatingInfoPrefab != null)
+                    if (render != null && render.FloatingInfoPrefab != null)
                     {
                         AddForEntity(validTagOwners[i], render);
                         //Debug.Log($"Adding floating UI for #{validTagOwners[i]}");

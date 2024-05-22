@@ -12,7 +12,7 @@ namespace CraftSharp.UI
 
         public abstract void SetInfo(EntityRender entity);
 
-        public virtual void Destroy(Action callback)
+        public virtual void Destroy(Action? callback)
         {
             callback?.Invoke();
             Destroy(gameObject);

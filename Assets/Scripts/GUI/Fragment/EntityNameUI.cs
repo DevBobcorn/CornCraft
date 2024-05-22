@@ -32,7 +32,7 @@ namespace CraftSharp.UI
             }
         }
 
-        public override void Destroy(Action callback)
+        public override void Destroy(Action? callback)
         {
             GetComponent<Animator>()?.SetBool("Expired", true);
 

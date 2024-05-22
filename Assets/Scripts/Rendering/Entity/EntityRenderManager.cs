@@ -31,6 +31,7 @@ namespace CraftSharp.Rendering
         #endregion
 
         private readonly Dictionary<ResourceLocation, GameObject?> entityPrefabs = new();
+        public Dictionary<ResourceLocation, GameObject?> GetAllPrefabs() => entityPrefabs;
         private GameObject? GetPrefabForType(ResourceLocation type) => entityPrefabs.GetValueOrDefault(type, defaultPrefab);
         
         /// <summary>

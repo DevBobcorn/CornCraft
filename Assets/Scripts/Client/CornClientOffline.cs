@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -29,10 +30,8 @@ namespace CraftSharp
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
-        private readonly object movementLock = new();
         private InteractionUpdater? interactionUpdater;
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
-        private readonly Dictionary<int, Entity> entities = new();
         #endregion
 
         void Awake() // In case where the client wasn't properly assigned before
@@ -48,8 +47,6 @@ namespace CraftSharp
 
         void Start()
         {
-            //MaterialManager!.LoadPlayerSkins();
-
             // Push HUD Screen on start
             ScreenControl.PushScreen(HUDScreen!);
 
@@ -82,11 +79,36 @@ namespace CraftSharp
             {
 
             }
+
+            // Generate dummy entities for testing
+            var entityIds = EntityRenderManager.GetAllPrefabs().Keys.ToArray();
+            //Debug.Log($"{entityIds.Length} entity types registered with render");
+
+            for (int i = 0; i < entityIds.Length; i++)
+            {
+                if (!EntityPalette.INSTANCE.CheckEntityType(entityIds[i]))
+                {
+                    // Entity type not present, fake it
+                    EntityPalette.INSTANCE.InjectEntityType(0, entityIds[i]);
+                }
+                
+                var entity = new Entity(100 + i, EntityPalette.INSTANCE
+                        .FromId(entityIds[i]), new(0F, i * 2F, 0F));
+
+                EntityRenderManager.AddEntityRender(entity);
+                //
+            }
         }
 
         public override bool StartClient(StartLoginInfo info)
         {
             var session = info.Session;
+
+            if (!EntityPalette.INSTANCE.CheckEntityType(EntityType.PLAYER_ID))
+            {
+                // Entity type not present, fake it
+                EntityPalette.INSTANCE.InjectEntityType(2077, EntityType.PLAYER_ID);
+            }
 
             // Update entity type for dummy client entity
             clientEntity.Type = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);
