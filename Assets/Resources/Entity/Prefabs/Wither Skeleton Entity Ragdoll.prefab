@@ -8,6 +8,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5780951746584314969, guid: 50c29475bb145be4790d2246f2444a63, type: 3}
+      propertyPath: m_MaterialEntries.Array.data[0].TextureId
+      value: entity/skeleton/wither_skeleton
+      objectReference: {fileID: 0}
+    - target: {fileID: -5780951746584314969, guid: 50c29475bb145be4790d2246f2444a63, type: 3}
+      propertyPath: m_MaterialEntries.Array.data[0].m_DefaultMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 27aaeec49bd1d5c458ca988a60e8dd4d, type: 2}
     - target: {fileID: 109018600080392216, guid: 50c29475bb145be4790d2246f2444a63, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
