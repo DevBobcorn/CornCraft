@@ -144,15 +144,14 @@ namespace CraftSharp
             }
             // Then append overrides
             packManager.AddPack(new("vanilla_fix"));
+            //packManager.AddPack(new("1.16.5 oCd_V 1.5-RESTORATION! 2.4"));
             //packManager.AddPack(new("VanillaBDCraft 64x MC116"));
-            // Load valid packs...
-            loadFlag.Finished = false;
             // Load valid packs...
             loadFlag.Finished = false;
             Task.Run(() => {
                 // Set up thread locale for testing resource loading with different locales
                 //System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("fr-FR");
-                packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status)), true);
+                packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status)));
             });
             while (!loadFlag.Finished) yield return null;
             
@@ -257,7 +256,6 @@ namespace CraftSharp
         public static void Notify(string notification, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, 6F, type));
 
         public static void Notify(string notification, float duration, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, duration, type));
-
 
         void Update()
         {

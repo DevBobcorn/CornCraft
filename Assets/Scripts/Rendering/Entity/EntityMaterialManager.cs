@@ -39,11 +39,12 @@ namespace CraftSharp.Rendering
                 }
                 else
                 {
+                    // The entry is not present, try loading this texture
                     var defaultTex = defaultMaterial.GetTexture("_BaseMap");
                     if (defaultTex != null)
-                        mt = resManager.GetMissingEntityTexture(defaultTex.width, defaultTex.height);
+                        mt = resManager.LoadEntityTextureFromPacks(textureId, defaultTex.width, defaultTex.height);
                     else
-                        mt = resManager.GetMissingEntityTexture(64, 64);
+                        mt = resManager.LoadEntityTextureFromPacks(textureId);
                 }
 
                 var matInstance = new Material(defaultMaterial)
