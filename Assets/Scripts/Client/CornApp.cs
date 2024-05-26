@@ -144,7 +144,7 @@ namespace CraftSharp
             }
             // Then append overrides
             packManager.AddPack(new("vanilla_fix"));
-            //packManager.AddPack(new("1.16.5 oCd_V 1.5-RESTORATION! 2.4"));
+            //packManager.AddPack(new("3D Default 1.16.2+ v1.6.0")); packManager.AddPack(new("crops-3d"));
             //packManager.AddPack(new("VanillaBDCraft 64x MC116"));
             // Load valid packs...
             loadFlag.Finished = false;
