@@ -30,8 +30,11 @@ namespace CraftSharp.UI
             interactionKey = id;
             interactionInfo = info;
 
-            GetComponentInChildren<TMP_Text>().text = info.GetHint();
-            gameObject.name = info.GetHint();
+            var paramTexts = info.GetParamTexts();
+            var hintText = Translations.Get(info.GetHintKey(), paramTexts);
+
+            GetComponentInChildren<TMP_Text>().text = hintText;
+            gameObject.name = info.GetHintKey();
         }
 
         public void SetSelected(bool selected)

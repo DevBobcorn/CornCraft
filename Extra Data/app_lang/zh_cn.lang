@@ -115,6 +115,7 @@ extra.inventory_close=物品栏# {0}已关闭。
 gameplay.control.update_gamemode=游戏模式已更新为{0}
 gameplay.control.switch_to_rush=已切换至跑步模式
 gameplay.control.switch_to_walk=已切换至行走模式
+gameplay.interaction.pick_up=捡起{0}
 gameplay.interaction.go_to_bed=睡觉
 gameplay.interaction.open_door=开门
 gameplay.interaction.close_door=关门

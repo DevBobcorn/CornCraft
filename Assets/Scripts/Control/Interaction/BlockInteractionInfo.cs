@@ -1,31 +1,45 @@
+using CraftSharp.Protocol;
+
 namespace CraftSharp.Control
 {
     public class BlockInteractionInfo : InteractionInfo
     {
-        public BlockLoc Location { get; }// Location for calculating distance
-        public BlockInteractionDefinition Definition { get; }
+        private readonly BlockLoc location; // Location for calculating distance
+        private readonly string[] paramTexts;
+        private readonly BlockInteractionDefinition definition;
 
-        public BlockInteractionInfo(int id, BlockLoc location, BlockInteractionDefinition def)
+        public BlockInteractionInfo(int id, BlockLoc loc, ResourceLocation blockId, BlockInteractionDefinition def)
         {
             Id = id;
-            Location = location;
-            Definition = def;
+            paramTexts = new string[] { ChatParser.TranslateString(blockId.GetTranslationKey("block")) };
+            location = loc;
+            definition = def;
         }
 
-        public override string GetHint()
+        public override string GetHintKey()
         {
-            return Definition.Hint;
+            return definition.HintKey;
+        }
+
+        public override string[] GetParamTexts()
+        {
+            return paramTexts;
+        }
+
+        public BlockInteractionDefinition GetDefinition()
+        {
+            return definition;
         }
 
         public override void RunInteraction(BaseCornClient client)
         {
-            switch (Definition.Type)
+            switch (definition.Type)
             {
                 case BlockInteractionType.Interact:
-                    client.PlaceBlock(Location, Direction.Down);
+                    client.PlaceBlock(location, Direction.Down);
                     break;
                 case BlockInteractionType.Break:
-                    client.DigBlock(Location, true, false);
+                    client.DigBlock(location, true, false);
                     break;
             }
         }

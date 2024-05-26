@@ -50,7 +50,7 @@ debug.request=Performing request to {0}
 [error]
 # Error messages from MCC
 error.ping=Failed to ping this IP.
-error.unsupported=Cannot connect to the server : This version is not supported !
+error.unsupported=Cannot connect to server: This version is unsupported!
 error.determine=Failed to determine server version.
 error.forgeforce=Cannot force Forge support for this Minecraft version!
 error.login=Login failed : 
@@ -99,7 +99,7 @@ exception.palette.entity=Please update entity types handling for this Minecraft 
 exception.palette.item=Please update item types handling for this Minecraft version. See ItemType.cs
 exception.palette.packet=Please update packet type palette for this Minecraft version. See PacketTypePalette.cs
 exception.packet_process=Failed to process incoming packet of type {0}. (PacketID: {1}, Protocol: {2}, LoginPhase: {3}, InnerException: {4}).
-exception.version_unsupport=The protocol version no.{0} is not supported.
+exception.version_unsupport=The protocol version {0} is not supported.
 
 [filemonitor]
 # FileMonitor
@@ -115,6 +115,7 @@ extra.inventory_close=Inventory # {0} closed.
 gameplay.control.update_gamemode=Gamemode updated to {0}
 gameplay.control.switch_to_rush=Switched to rush mode
 gameplay.control.switch_to_walk=Switched to walk mode
+gameplay.interaction.pick_up=Pick {0}
 gameplay.interaction.go_to_bed=Go to bed
 gameplay.interaction.open_door=Open door
 gameplay.interaction.close_door=Close door

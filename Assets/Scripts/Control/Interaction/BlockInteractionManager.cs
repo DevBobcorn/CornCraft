@@ -35,24 +35,6 @@ namespace CraftSharp.Control
             var stateListTable = BlockStatePalette.INSTANCE.StateListTable;
             var statesTable = BlockStatePalette.INSTANCE.StatesTable;
 
-            if (interactions.Properties.ContainsKey("pickable"))
-            {
-                var entries = interactions.Properties["pickable"].DataArray;
-
-                foreach (var entry in entries) {
-                    var blockId = ResourceLocation.FromString(entry.StringValue);
-
-                    if (stateListTable.ContainsKey(blockId)) {
-                        foreach (var stateId in stateListTable[blockId]) {
-                            interactionTable.Add(stateId, new(BlockInteractionType.Break, $"pickable/{blockId}",
-                                    ChatParser.TranslateString(blockId.GetTranslationKey("block"))));
-
-                            //Debug.Log($"Added pickable interaction for blockstate [{stateId}] {statesTable[stateId]}");
-                        }
-                    }
-                }
-            }
-
             if (interactions.Properties.ContainsKey("special"))
             {
                 var entries = interactions.Properties["special"].Properties;
@@ -74,7 +56,7 @@ namespace CraftSharp.Control
                             _          => BlockInteractionType.Interact
                         };
 
-                        var hint = Translations.TryGet(entryCont["hint"].StringValue);
+                        var hint = entryCont["hint"].StringValue;
                         var predicate = BlockStatePredicate.FromString(entryCont["predicate"].StringValue);
 
                         var triggers = entryCont["triggers"].DataArray;
