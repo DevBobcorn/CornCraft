@@ -85,24 +85,25 @@ namespace CraftSharp.Control
                             continue;
                         
                         var blockLoc = playerBlockLoc + new BlockLoc(x, y, z);
-                        var stateId = chunksManager.GetBlock(blockLoc).StateId;
+                        var block = chunksManager.GetBlock(blockLoc);
+                        var stateId = block.StateId;
 
                         if (table.TryGetValue(stateId, out BlockInteractionDefinition? newDef))
                         {
                             if (blockInteractionInfos.ContainsKey(blockLoc))
                             {
-                                var prevDef = blockInteractionInfos[blockLoc].Definition;
+                                var prevDef = blockInteractionInfos[blockLoc].GetDefinition();
                                 if (prevDef.Identifier != newDef.Identifier) // Update this interaction
                                 {
                                     RemoveBlockInteraction(blockLoc);
-                                    AddBlockInteraction(blockLoc, newDef);
+                                    AddBlockInteraction(blockLoc, block.BlockId, newDef);
                                     //Debug.Log($"Upd: [{blockLoc}] {prevDef.Identifier} => {newDef.Identifier}");
                                 }
                                 // Otherwise leave it unchanged
                             }
                             else // Add this interaction
                             {
-                                AddBlockInteraction(blockLoc, newDef);
+                                AddBlockInteraction(blockLoc, block.BlockId, newDef);
                                 //Debug.Log($"Add: [{blockLoc}] {newDef.Identifier}");
                             }
                         }
@@ -117,9 +118,9 @@ namespace CraftSharp.Control
                     }
         }
 
-        private void AddBlockInteraction(BlockLoc location, BlockInteractionDefinition def)
+        private void AddBlockInteraction(BlockLoc location, ResourceLocation blockId, BlockInteractionDefinition def)
         {
-            var info = new BlockInteractionInfo(nextNumeralID, location, def);
+            var info = new BlockInteractionInfo(nextNumeralID, location, blockId, def);
             blockInteractionInfos.Add(location, info);
 
             nextNumeralID++;

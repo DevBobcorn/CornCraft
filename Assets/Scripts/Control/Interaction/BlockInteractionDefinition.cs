@@ -9,13 +9,13 @@ namespace CraftSharp.Control
     {
         public BlockInteractionType Type { get; }
         public string Identifier { get; }
-        public string Hint { get; } // If this property is left empty, the block's name will be used
+        public string HintKey { get; } // If this property is left empty, the block's name will be used
 
-        public BlockInteractionDefinition(BlockInteractionType type, string id, string hint)
+        public BlockInteractionDefinition(BlockInteractionType type, string id, string hintKey)
         {
             Type = type;
             Identifier = id;
-            Hint = hint;
+            HintKey = hintKey;
         }
 
         public override int GetHashCode()
