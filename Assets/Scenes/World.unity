@@ -410,7 +410,7 @@ MonoBehaviour:
   m_EntityMaterialManager: {fileID: 331478949}
   m_PlayerController: {fileID: 195804746}
   playerRenderPrefabs:
-  - {fileID: 100096, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
+  - {fileID: 3760512872237308020, guid: 75e2993040f85d9469c7377f3b5812d1, type: 3}
   selectedRenderPrefab: 0
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}
@@ -1727,15 +1727,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3083690404439012666, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 85.028465
+      value: -2.1715746
       objectReference: {fileID: 0}
     - target: {fileID: 3083690404439012666, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -7.9484043
+      value: 2.95159
       objectReference: {fileID: 0}
     - target: {fileID: 3083690404439012666, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -194.58401
+      value: 1.6161884
       objectReference: {fileID: 0}
     - target: {fileID: 7361313672352195396, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1763,31 +1763,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 85.028465
+      value: -1.5256128
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -7.9484043
+      value: 3.05159
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -196.38402
+      value: 2.0881348
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.28152874
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0.13044336
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0.86255515
       objectReference: {fileID: 0}
     - target: {fileID: 8731879673068698816, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: -0.39965582
       objectReference: {fileID: 0}
     - target: {fileID: 9155130719897283015, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
       propertyPath: m_Cameras.Array.size

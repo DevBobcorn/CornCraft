@@ -384,7 +384,8 @@ namespace CraftSharp.Rendering
 
         #region Chunk updating
         private const int CHUNK_CENTER = Chunk.SIZE / 2 + 1;
-        private const int OPERATION_CYCLE_LENGTH = 64;
+        private const int MASK_CYCLE_LENGTH = 64; // Must be power of 2
+        private int updateTargetMask = 0;
 
         private void UpdateBuildPriority(Location currentBlockLoc, ChunkRender chunk, int offsetY)
         {   // Get this chunk's build priority based on its current distance to the player,
@@ -394,7 +395,11 @@ namespace CraftSharp.Rendering
                             chunk.ChunkZ * Chunk.SIZE + CHUNK_CENTER).DistanceTo(currentBlockLoc) / 16);
         }
 
-        private void UpdateChunkRendersListAdd()
+        /// <summary>
+        /// Use a mask to specify a subset of chunks to update
+        /// </summary>
+        /// <param name="mask">A value from 0x00 to 0x1F (0 to 31)</param>
+        private void UpdateChunkRendersListAdd(int mask)
         {
             var playerLoc = client!.GetLocation();
             var blockLoc = playerLoc.GetBlockLoc();
@@ -410,8 +415,7 @@ namespace CraftSharp.Rendering
             for (int cx = -viewDist;cx <= viewDist;cx++)
                 for (int cz = -viewDist;cz <= viewDist;cz++)
                 {
-                    if (cx * cx + cz * cz >= viewDistSqr) continue;
-
+                    if (((cx + cz) & (MASK_CYCLE_LENGTH - 1)) != mask || cx * cx + cz * cz >= viewDistSqr) continue;
                     int chunkX = blockLoc.GetChunkX() + cx, chunkZ = blockLoc.GetChunkZ() + cz;
                     
                     if (world.IsChunkColumnReady(chunkX, chunkZ))
@@ -449,7 +453,7 @@ namespace CraftSharp.Rendering
 
         }
 
-        private void UpdateChunkRendersListRemove()
+        private void UpdateChunkRendersListRemove(int mask)
         {
             // Add nearby chunks
             var blockLoc   = client!.GetLocation().GetBlockLoc();
@@ -457,8 +461,9 @@ namespace CraftSharp.Rendering
 
             var chunkCoords = renderColumns.Keys.ToArray();
 
-            foreach (var chunkCoord in chunkCoords)
+            for (int i = mask; i < chunkCoords.Length; i += MASK_CYCLE_LENGTH)
             {
+                var chunkCoord = chunkCoords[i];
                 if (Mathf.Abs(blockLoc.GetChunkX() - chunkCoord.x) > unloadDist || Mathf.Abs(blockLoc.GetChunkZ() - chunkCoord.y) > unloadDist)
                 {
                     renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt);
@@ -537,7 +542,6 @@ namespace CraftSharp.Rendering
         }
 
         public const int BUILD_COUNT_LIMIT = 4;
-        private int operationCode = 0;
         private BlockLoc? lastPlayerBlockLoc = null;
         private bool terrainColliderDirty = true;
 
@@ -751,12 +755,11 @@ namespace CraftSharp.Rendering
                 }
             }
 
-            if (operationCode == 8)
-                UpdateChunkRendersListAdd();
-            else if (operationCode == 16)
-                UpdateChunkRendersListRemove();
+            // Update only a small subset of chunks to reduce lag spikes
+            UpdateChunkRendersListAdd(updateTargetMask);
+            UpdateChunkRendersListRemove(updateTargetMask);
             
-            operationCode = (operationCode + 1) % OPERATION_CYCLE_LENGTH;
+            updateTargetMask = (updateTargetMask + 1) % MASK_CYCLE_LENGTH;
         }
 
         void Update()
