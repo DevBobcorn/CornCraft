@@ -441,6 +441,8 @@ MonoBehaviour:
   playerRenderPrefabs:
   - {fileID: 100096, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
   - {fileID: 555365335110124448, guid: 35ba1c4e28397394593efc927034fa83, type: 3}
+  - {fileID: 1847743972792587742, guid: 0ff630b9800a23845be87657af0b61c4, type: 3}
+  - {fileID: 3760512872237308020, guid: 75e2993040f85d9469c7377f3b5812d1, type: 3}
   selectedRenderPrefab: 0
   cameraController: {fileID: 5003336745837788658}
   screenControl: {fileID: 607892726}

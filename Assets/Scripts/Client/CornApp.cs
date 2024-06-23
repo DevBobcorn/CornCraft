@@ -19,6 +19,7 @@ namespace CraftSharp
     public class CornApp : MonoBehaviour
     {
         public const int WINDOWED_APP_WIDTH = 1600, WINDOWED_APP_HEIGHT = 900;
+        public const int EDITOR_FPS_LIMIT = 60;
 
         private BaseCornClient? client = null;
         public BaseCornClient? Client => client;
@@ -45,6 +46,11 @@ namespace CraftSharp
         public static void InitializeApp()
         {
             Loom.Initialize();
+
+            #if UNITY_EDITOR
+            // Limit framerate in editor
+            Application.targetFrameRate = EDITOR_FPS_LIMIT;
+            #endif
 
             // Ensure CornApp instance is created
             _ = Instance;
