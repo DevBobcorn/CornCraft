@@ -1023,9 +1023,36 @@ namespace MagicaCloth2
 
                 // 押出法線
                 var v = cA - cB;
-                Develop.Assert(math.length(v) > 0.0f);
-                float3 n = math.normalize(v);
+                float3 n = v / clen;
                 normal = n;
+
+#if !MC2_DISABLE_EDGE_COLLISION_EXTENSION
+                // ★カプセル半径を考慮した補正
+                // これまでのエッジ-カプセル判定はカプセルの半径が始点と終点で同じであることが前提となっていた
+                // そのためカプセルの始点と終点の半径が異なると間違った衝突判定が行われてしまい、それが原因で大きな振動が発生していた
+                // （これはBoneClothのようにカプセルエッジよりメッシュエッジのほうが長い場合に顕著になる）
+                // そこで始点と終点の半径が異なる場合は、最初の計算の最近接点方向からカプセルエッジを半径分シフトし、
+                // それをもとに再度エッジ-エッジ判定を行うように修正した
+                // これは完璧ではないがおおよそ理想的な判定を行うようになり、また振動の問題も大幅に解決できる
+                // （ただし小刻みな振動はまだ発生することがある）
+                if (sr != er)
+                {
+                    // 押し出し法線方向にカプセル半径を考慮してカプセルの中心線をシフトさせる
+                    float3 soldpos2 = soldpos + n * sr;
+                    float3 eoldpos2 = eoldpos + n * er;
+
+                    // この線分で再び最近接点(s/t)を計算する
+                    MathUtility.ClosestPtSegmentSegment2(nextPosE.c0, nextPosE.c1, soldpos2, eoldpos2, out s, out t);
+
+                    // 最終的にはこのシフト後のsとtを利用するように結果を書き換える
+                    cA = math.lerp(nextPosE.c0, nextPosE.c1, s);
+                    cB = math.lerp(soldpos, eoldpos, t);
+                    v = cA - cB;
+                    clen = math.length(v);
+                    n = v / clen;
+                    normal = n;
+                }
+#endif
 
                 // 変位
                 float3 dB0 = spos - soldpos;

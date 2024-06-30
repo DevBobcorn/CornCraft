@@ -264,7 +264,7 @@ float4 ForwardPassFragment(Varyings input, FRONT_FACE_TYPE_REAL vertexFace : FRO
 	water.waveNormal = normalWS;
 	
 #if _WAVES
-	WaveInfo waves = GetWaveInfo(uv, TIME * _WaveSpeed, _WaveHeight,  lerp(1, 0, vertexColor.b), _WaveFadeDistance.x, _WaveFadeDistance.y);
+	WaveInfo waves = GetWaveInfo(uv, positionWS, TIME * _WaveSpeed, _WaveHeight,  lerp(1, 0, vertexColor.b), _WaveFadeDistance.x, _WaveFadeDistance.y);
 	
 	#if !_FLAT_SHADING
 	waves.normal = normalize(water.vertexNormal + waves.normal);

@@ -389,9 +389,9 @@ namespace StylizedWater2
                         GraphicsSettings.GetRenderPipelineSettings<RenderGraphSettings>().enableRenderCompatibilityMode = true;
 
                         EditorUtility.DisplayDialog($"{AssetInfo.ASSET_NAME} v{AssetInfo.INSTALLED_VERSION}", 
-                            "Please note that this option will be removed in a future Unity version, this version will no longer be functional then." +
+                            "Please note that this fallback option will be removed in a future Unity version, this version of Stylized Water will no longer be completely functional then." +
                             "\n\n" +
-                            "A license upgrade for Unity 6+ support may be available, please check the documentation for information.", "OK");
+                            "A license upgrade for Unity 6+ supported version may be available, please check the documentation for current information.", "OK");
                     }
                     GUILayout.Space(8);
                 }

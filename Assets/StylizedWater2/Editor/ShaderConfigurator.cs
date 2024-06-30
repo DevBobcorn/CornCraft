@@ -279,6 +279,12 @@ namespace StylizedWater2
                         continue;
                     }
 
+                    if (Matches("%fog_integration%"))
+                    {
+                        AddLine($"//Fog integration: {fogIntegration.asset}");
+                        continue;
+                    }
+                    
                     if (Matches("%shader_name%"))
                     {
                         AddLine($"Shader \"{shaderName}{suffix}\"");
@@ -508,7 +514,7 @@ namespace StylizedWater2
                                 }
                                 else
                                 {
-                                    line = $"#include \"{includePath}\"";
+                                    line = $"#include_with_pragmas \"{includePath}\"";
 
                                     AddLine(line);
                                     continue;
@@ -550,8 +556,21 @@ namespace StylizedWater2
                 return String.Join(Environment.NewLine, lines);
             }
         }
-
+        
         public static ShaderMessage[] GetErrorMessages(Shader shader)
+        {
+            ShaderMessage[] messages = GetWarningsAndErrors(shader);
+
+            if (messages != null)
+            {
+                //Filter for errors
+                messages = messages.Where(x => x.severity == ShaderCompilerMessageSeverity.Error).ToArray();
+            }
+            
+            return messages;
+        }
+        
+        public static ShaderMessage[] GetWarningsAndErrors(Shader shader)
         {
             ShaderMessage[] messages = null;
 
@@ -562,7 +581,7 @@ namespace StylizedWater2
             messages = ShaderUtil.GetShaderMessages(shader);
             
             //Filter for errors
-            messages = messages.Where(x => x.severity == ShaderCompilerMessageSeverity.Error).ToArray();
+            //messages = messages.Where(x => x.severity == ShaderCompilerMessageSeverity.Error).ToArray();
 
             return messages;
         }

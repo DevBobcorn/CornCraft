@@ -19,12 +19,14 @@ namespace MagicaCloth2
         /// <summary>
         /// 固定小数点への変換倍率
         /// </summary>
-        const int ToFixed = 100000;
+        //const int ToFixed = 100000;
+        const int ToFixed = 1000000;
 
         /// <summary>
         /// 少数への復元倍率
         /// </summary>
-        const float ToFloat = 0.00001f;
+        //const float ToFloat = 0.00001f;
+        const float ToFloat = 0.000001f;
 
 
         //=========================================================================================

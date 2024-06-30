@@ -54,7 +54,8 @@ namespace MagicaCloth2
         /// </summary>
         /// <param name="editMesh"></param>
         /// <param name="drawSettings"></param>
-        public static void DrawClothEditor(VirtualMeshContainer editMeshContainer, ClothDebugSettings drawSettings, ClothSerializeData serializeData, bool selected, bool direction, bool paint)
+        /// <param name="painting">頂点ペイント中はtrue</param>
+        public static void DrawClothEditor(VirtualMeshContainer editMeshContainer, ClothDebugSettings drawSettings, ClothSerializeData serializeData, bool selected, bool direction, bool painting)
         {
             if (editMeshContainer == null || editMeshContainer.shareVirtualMesh == null || editMeshContainer.shareVirtualMesh.IsSuccess == false)
                 return;
@@ -389,7 +390,7 @@ namespace MagicaCloth2
 #endif
 
             // inertia center
-            if (paint == false && editMesh.CenterFixedPointCount > 0 && drawSettings.inertiaCenter)
+            if (painting == false && editMesh.CenterFixedPointCount > 0 && drawSettings.inertiaCenter)
             {
                 float3 pos = 0;
                 int ccnt = editMesh.CenterFixedPointCount;
@@ -403,17 +404,20 @@ namespace MagicaCloth2
             }
 
             Handles.matrix = Matrix4x4.identity;
+            crot = scam.transform.rotation;
 
             // custom skinning bone
-            if (paint == false)
+            if (painting == false && serializeData.customSkinningSetting.enable && drawSettings.customSkinningBone)
             {
                 Handles.color = SkininngLine * colorScale;
                 var boneList = serializeData.customSkinningSetting.skinningBones;
+#if MC2_CUSTOM_SKINNING_V1
                 for (int i = 0; i < boneList.Count - 1; i++)
                 {
                     var bone1 = boneList[i];
                     if (bone1 == null)
                         continue;
+
                     for (int j = i + 1; j < boneList.Count; j++)
                     {
                         var bone2 = boneList[j];
@@ -426,6 +430,17 @@ namespace MagicaCloth2
                         }
                     }
                 }
+#else
+                // V2
+                for (int i = 0; i < boneList.Count; i++)
+                {
+                    var bone1 = boneList[i];
+                    if (bone1 == null)
+                        continue;
+
+                    GizmoUtility.DrawWireSphere(bone1.position, quaternion.identity, drawSettings.GetCustomSkinningRadius(), crot, true);
+                }
+#endif
             }
         }
 
@@ -1083,12 +1098,15 @@ namespace MagicaCloth2
 
             // 空間を戻す
             Handles.matrix = Matrix4x4.identity;
+            crot = scam.transform.rotation;
 
             // 以下はワールド
             // custom skinning bone
+            if (cprocess.cloth.SerializeData.customSkinningSetting.enable && drawSettings.customSkinningBone)
             {
                 Handles.color = SkininngLine * colorScale;
                 var boneList = cprocess.cloth.SerializeData.customSkinningSetting.skinningBones;
+#if MC2_CUSTOM_SKINNING_V1
                 for (int i = 0; i < boneList.Count - 1; i++)
                 {
                     var bone1 = boneList[i];
@@ -1106,6 +1124,17 @@ namespace MagicaCloth2
                         }
                     }
                 }
+#else
+                // V2
+                for (int i = 0; i < boneList.Count; i++)
+                {
+                    var bone1 = boneList[i];
+                    if (bone1 == null)
+                        continue;
+
+                    GizmoUtility.DrawWireSphere(bone1.position, quaternion.identity, drawSettings.GetCustomSkinningRadius(), crot, true);
+                }
+#endif
             }
 
 

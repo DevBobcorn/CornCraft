@@ -36,6 +36,10 @@ namespace MagicaCloth2
         public float windInfluenceProperty;
         float _windInfluenceProperty;
 
+        [HideInInspector]
+        public float blendWeightProperty;
+        float _blendWeightProperty;
+
         //=========================================================================================
         internal void InitAnimationProperty()
         {
@@ -56,6 +60,9 @@ namespace MagicaCloth2
 
             windInfluenceProperty = serializeData.wind.influence;
             _windInfluenceProperty = windInfluenceProperty;
+
+            blendWeightProperty = serializeData.blendWeight;
+            _blendWeightProperty = blendWeightProperty;
         }
 
         /// <summary>
@@ -107,6 +114,13 @@ namespace MagicaCloth2
                 {
                     _windInfluenceProperty = windInfluenceProperty;
                     serializeData.wind.influence = windInfluenceProperty;
+                    SetParameterChange();
+                }
+
+                if (blendWeightProperty != _blendWeightProperty)
+                {
+                    _blendWeightProperty = blendWeightProperty;
+                    serializeData.blendWeight = blendWeightProperty;
                     SetParameterChange();
                 }
             }

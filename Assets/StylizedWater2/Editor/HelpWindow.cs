@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
 #if URP
@@ -20,7 +21,7 @@ namespace StylizedWater2
     {
         //Window properties
         private static readonly int width = 600;
-        private static readonly int height = 520;
+        private static readonly int height = 620;
 
         [SerializeField]
         private Changelog changelog;
@@ -384,16 +385,16 @@ namespace StylizedWater2
 
                     using (new EditorGUILayout.HorizontalScope(EditorStyles.textField))
                     {
-                        if (AssetInfo.compatibleVersion && !AssetInfo.alphaVersion)
-                        {
-                            GUI.contentColor = UI.GreenColor;
-                            EditorGUILayout.LabelField("Compatible");
-                            GUI.contentColor = defaultColor;
-                        }
-                        else if (!AssetInfo.supportedVersion)
+                        if (!AssetInfo.supportedVersion || AssetInfo.outdatedVersion)
                         {
                             GUI.contentColor = UI.OrangeColor;
                             EditorGUILayout.LabelField("Unsupported");
+                            GUI.contentColor = defaultColor;
+                        }
+                        else if (AssetInfo.compatibleVersion && !AssetInfo.alphaVersion)
+                        {
+                            GUI.contentColor = UI.GreenColor;
+                            EditorGUILayout.LabelField("Compatible");
                             GUI.contentColor = defaultColor;
                         }
                         if (AssetInfo.alphaVersion)
@@ -405,16 +406,19 @@ namespace StylizedWater2
                     }
                 }
                 
+                
+                EditorGUILayout.LabelField(AssetInfo.VersionChecking.GetUnityVersion());
                 UI.DrawNotification(AssetInfo.compatibleVersion == false, "This version of Unity is not compatible." + 
                                                                             "\n\nPlease upgrade to at least Unity " + AssetInfo.MIN_UNITY_VERSION, MessageType.Error);
 
-                UI.DrawNotification(AssetInfo.supportedVersion == false, "This version of Unity is no longer supported. Any errors or issues will need to be resolved locally." + 
-                                                                             "\n\nPlease upgrade to at least Unity " + AssetInfo.MIN_UNITY_VERSION, MessageType.Warning);
+                UI.DrawNotification(AssetInfo.outdatedVersion, "This version of Unity is no longer supported. Any errors or issues will need to be resolved locally." + 
+                                                                        "\n\nPlease upgrade to at least Unity " + AssetInfo.MIN_UNITY_VERSION, MessageType.Warning);
 
                 UI.DrawNotification(AssetInfo.alphaVersion, "Only release Unity versions are subject to support and fixes. You may run into issues at own risk.", MessageType.Warning);
 
                 #if UNITY_6000_0_OR_NEWER
-                UI.DrawNotification(true, "This version does not support Unity 6. You can continue to use it until breaking changes occur.", MessageType.Warning);
+                UI.DrawNotification(true, "This version does not support Unity 6 or newer. You can continue to use it until breaking changes occur."+
+                "\n\nStylized Water 3 will be available as an upgrade for Unity 6+", MessageType.Warning);
                 
                 UI.DrawRenderGraphError();
                 #endif
@@ -594,7 +598,7 @@ namespace StylizedWater2
                     projectDetails = GetProjectDetails();
                 }
             }
-            projectDetailsScrollPos = EditorGUILayout.BeginScrollView(projectDetailsScrollPos, EditorStyles.helpBox, GUILayout.Height(200f));
+            projectDetailsScrollPos = EditorGUILayout.BeginScrollView(projectDetailsScrollPos, EditorStyles.helpBox, GUILayout.Height(300f));
             EditorGUILayout.LabelField(projectDetails, UI.Styles.WordWrapLabel);
             EditorGUILayout.EndScrollView();
 
@@ -674,8 +678,16 @@ namespace StylizedWater2
             stringBuilder.AppendLine($"First available fog integration: {ShaderConfigurator.Fog.GetFirstInstalled().name}");
             stringBuilder.AppendLine($"Underwater Rendering installed: {StylizedWaterEditor.UnderwaterRenderingInstalled()}");
             stringBuilder.AppendLine($"Dynamic Effects installed: {StylizedWaterEditor.DynamicEffectsInstalled()}");
+            
             #if URP
-            stringBuilder.AppendLine($"Render feature present: {(StylizedWaterRenderFeature.GetDefault() ? "True" : "False")}");
+            stringBuilder.AppendLine($"");
+            stringBuilder.AppendLine("Render features (on default renderer):");
+
+            ScriptableRendererFeature[] rendererFeatures = PipelineUtilities.GetDefaultRenderFeatures();
+            for (int i = 0; i < rendererFeatures.Length; i++)
+            {
+                stringBuilder.AppendLine($"• {rendererFeatures[i].name}");
+            }
             #endif
 
             #if URP
@@ -683,6 +695,9 @@ namespace StylizedWater2
             
             stringBuilder.AppendLine($"Depth texture option disabled (anywhere): {PipelineUtilities.IsDepthTextureOptionDisabledAnywhere()}");
             stringBuilder.AppendLine($"Opaque texture option disabled (anywhere): {PipelineUtilities.IsOpaqueTextureOptionDisabledAnywhere()}");
+            #if UNITY_2022_2_OR_NEWER
+            stringBuilder.AppendLine($"Depth Texture Mode, after transparents?: {PipelineUtilities.IsDepthAfterTransparents()}");
+            #endif
             #endif
             
             stringBuilder.AppendLine($"");
@@ -699,22 +714,45 @@ namespace StylizedWater2
 
             string defaultShaderPath = AssetDatabase.GUIDToAssetPath("d7b0192b9bf19c949900035fa781fdc4");
             Shader defaultShader = AssetDatabase.LoadAssetAtPath<Shader>(defaultShaderPath);
-            ShaderMessage[] shaderMessages = ShaderConfigurator.GetErrorMessages(defaultShader);
+
+            ShaderMessage[] shaderMessages = ShaderConfigurator.GetWarningsAndErrors(defaultShader);
             
-            stringBuilder.AppendLine($"Shader compile errors ({shaderMessages?.Length ?? 0}):");
             #if UNITY_6000_0_OR_NEWER
-            ConsoleWindowUtility.GetConsoleLogCounts(out var errors, out var _, out var _);
-            stringBuilder.AppendLine($"Scripting compile errors ({errors}):");
+            //ConsoleWindowUtility.GetConsoleLogCounts(out var errors, out var _, out var _);
             #endif
 
+            List<string> errorMessages = new List<string>();
+            List<string> warningMessages = new List<string>();
             if (shaderMessages != null)
             {
                 foreach (var t in shaderMessages)
                 {
-                    stringBuilder.AppendLine($"• {t.message} {t.file}:{t.line} ({t.platform})");
+                    string message = $"• {t.message} {t.file}:{t.line} ({t.platform})";
+
+                    if (t.severity == ShaderCompilerMessageSeverity.Error)
+                    {
+                        errorMessages.Add(message);
+                    }
+                    
+                    if (t.severity == ShaderCompilerMessageSeverity.Warning)
+                    {
+                        warningMessages.Add(message);
+                    }
+                    
                 }
             }
-
+            
+            stringBuilder.AppendLine($"Shader compile warnings ({warningMessages?.Count ?? 0}):");
+            foreach (var t in warningMessages)
+            {
+                stringBuilder.AppendLine(t);
+            }
+            stringBuilder.AppendLine($"Shader compile errors ({errorMessages?.Count ?? 0}):");
+            foreach (var t in errorMessages)
+            {
+                stringBuilder.AppendLine(t);
+            }
+            
             return stringBuilder.ToString();
         }
         

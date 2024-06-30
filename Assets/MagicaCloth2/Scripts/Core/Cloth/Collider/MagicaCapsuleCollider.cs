@@ -30,6 +30,12 @@ namespace MagicaCloth2
         public Direction direction = Direction.X;
 
         /// <summary>
+        /// Reverse direction.
+        /// 方向を逆転させる
+        /// </summary>
+        public bool reverseDirection = false;
+
+        /// <summary>
         /// 半径をStart/End別々に設定
         /// Set radius separately for Start/End.
         /// </summary>
@@ -86,12 +92,14 @@ namespace MagicaCloth2
         /// <returns></returns>
         public Vector3 GetLocalDir()
         {
+            float rev = reverseDirection ? -1 : 1;
+
             if (direction == Direction.X)
-                return Vector3.right;
+                return Vector3.right * rev;
             else if (direction == Direction.Y)
-                return Vector3.up;
+                return Vector3.up * rev;
             else
-                return Vector3.forward;
+                return Vector3.forward * rev;
         }
 
         /// <summary>
@@ -107,6 +115,12 @@ namespace MagicaCloth2
             else
                 return Vector3.up;
         }
+
+        /// <summary>
+        /// 方向の逆転（基本的にカプセルコライダー用）
+        /// </summary>
+        /// <returns></returns>
+        public override bool IsReverseDirection() => reverseDirection;
 
         public override void DataValidate()
         {

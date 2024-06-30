@@ -62,6 +62,14 @@ namespace MagicaCloth2
                     throw new OperationCanceledException();
                 }
 
+                // クロスの状態検証
+                var statusResult = GenerateStatusCheck();
+                if (statusResult.IsError())
+                {
+                    result.Merge(statusResult);
+                    throw new MagicaClothProcessingException();
+                }
+
                 SetState(State_InitComplete, true);
 
                 // PreBuildデータの利用と検証
@@ -327,7 +335,8 @@ namespace MagicaCloth2
             }
             else
             {
-                result.SetError(Define.Result.CreateCloth_CanNotStart);
+                if (result.IsError() == false)
+                    result.SetError(Define.Result.CreateCloth_CanNotStart);
                 Develop.LogError($"Cloth runtime build failure! [{cloth.name}] : {result.GetResultString()}");
                 return false;
             }

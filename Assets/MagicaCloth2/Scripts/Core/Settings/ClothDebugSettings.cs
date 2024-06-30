@@ -35,9 +35,7 @@ namespace MagicaCloth2
         public DebugAxis animatedAxis = DebugAxis.None;
         public bool animatedShape = false;
         public bool inertiaCenter = true;
-        //public bool basicPosition = false;
-        //public DebugAxis basicAxis = DebugAxis.None;
-        //public bool basicShape = false;
+        public bool customSkinningBone = true;
 
         //=====================================================================
         // ■デバッグ用
@@ -104,16 +102,11 @@ namespace MagicaCloth2
 #endif
         }
 
-        public float GetLineSize()
-        {
-            //return 0.03f; // 固定
-            return 0.05f; // 固定
-        }
+        public float GetLineSize() => 0.05f; // 固定
 
-        public float GetInertiaCenterRadius()
-        {
-            return 0.01f; // 固定
-        }
+        public float GetInertiaCenterRadius() => 0.01f; // 固定
+
+        public float GetCustomSkinningRadius() => 0.02f; // 固定
 
         public bool IsReferOldPos()
         {

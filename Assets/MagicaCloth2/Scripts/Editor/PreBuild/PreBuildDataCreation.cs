@@ -424,7 +424,8 @@ namespace MagicaCloth2
 
                 // ======================= Cloth Data ===============================
                 // クロスデータ作成
-                var distanceConstraintData = DistanceConstraint.CreateData(proxyMesh, cloth.Process.parameters);
+                var parameters = cloth.SerializeData.GetClothParameters();
+                var distanceConstraintData = DistanceConstraint.CreateData(proxyMesh, parameters);
                 if (distanceConstraintData != null)
                 {
                     if (distanceConstraintData.result.IsSuccess())
@@ -437,7 +438,7 @@ namespace MagicaCloth2
                         throw new MagicaClothProcessingException();
                     }
                 }
-                var bendingConstraintData = TriangleBendingConstraint.CreateData(proxyMesh, cloth.Process.parameters);
+                var bendingConstraintData = TriangleBendingConstraint.CreateData(proxyMesh, parameters);
                 if (bendingConstraintData != null)
                 {
                     if (bendingConstraintData.result.IsSuccess())
@@ -450,7 +451,7 @@ namespace MagicaCloth2
                         throw new MagicaClothProcessingException();
                     }
                 }
-                var inertiaConstraintData = InertiaConstraint.CreateData(proxyMesh, cloth.Process.parameters);
+                var inertiaConstraintData = InertiaConstraint.CreateData(proxyMesh, parameters);
                 if (inertiaConstraintData != null)
                 {
                     if (inertiaConstraintData.result.IsSuccess())

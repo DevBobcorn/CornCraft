@@ -160,7 +160,7 @@ Varyings Domain(TessellationFactors factors, OutputPatch<VertexControl, 3> input
 	float2 uv = GetSourceUV(output.uv.xy, positionWS.xz, _WorldSpaceUV);
 
 	//Vertex animation
-	WaveInfo waves = GetWaveInfo(uv, TIME_VERTEX * _WaveSpeed, _WaveHeight, lerp(1, 0, vertexColor.b), _WaveFadeDistance.x, _WaveFadeDistance.y);
+	WaveInfo waves = GetWaveInfo(uv, positionWS, TIME_VERTEX * _WaveSpeed, _WaveHeight, lerp(1, 0, vertexColor.b), _WaveFadeDistance.x, _WaveFadeDistance.y);
 
 	//Offset in direction of normals (only when using mesh uv)
 	if(_WorldSpaceUV == 0) waves.position *= normalInput.normalWS.xyz;
