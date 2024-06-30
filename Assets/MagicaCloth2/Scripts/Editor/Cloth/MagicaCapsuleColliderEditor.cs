@@ -26,6 +26,9 @@ namespace MagicaCloth2
             var directionValue = serializedObject.FindProperty("direction");
             EditorGUILayout.PropertyField(directionValue);
 
+            // reverse direction
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("reverseDirection"));
+
             // aligned on center
             var alignedOnCenterValue = serializedObject.FindProperty("alignedOnCenter");
             EditorGUILayout.PropertyField(alignedOnCenterValue);

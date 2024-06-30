@@ -21,16 +21,15 @@ namespace StylizedWater2
         public const string ASSET_ID = "170386";
         public const string ASSET_ABRV = "SW2";
 
-        public const string INSTALLED_VERSION = "1.6.4";
+        public const string INSTALLED_VERSION = "1.6.7";
         
         public const int SHADER_GENERATOR_VERSION_MAJOR = 1;
         public const int SHADER_GENERATOR_MINOR = 2; 
-        public const int SHADER_GENERATOR_PATCH = 0;
+        public const int SHADER_GENERATOR_PATCH = 1;
         
         public const string MIN_UNITY_VERSION = "2021.3.16f1";
         public const string MIN_URP_VERSION = "12.1.6";
-
-        private const string VERSION_FETCH_URL = "http://www.staggart.xyz/backend/versions/stylizedwater2.php";
+        
         public const string DOC_URL = "http://staggart.xyz/unity/stylized-water-2/sws-2-docs/";
         public const string FORUM_URL = "https://forum.unity.com/threads/999132/";
         public const string EMAIL_URL = "mailto:contact@staggart.xyz?subject=Stylized Water 2";
@@ -38,6 +37,8 @@ namespace StylizedWater2
         
         public static bool supportedVersion = true;
         public static bool compatibleVersion = true;
+        public static bool outdatedVersion = false;
+        
         public static bool alphaVersion = false;
 
 #if !URP //Enabled when com.unity.render-pipelines.universal is below MIN_URP_VERSION
@@ -139,7 +140,7 @@ namespace StylizedWater2
                 //These files change every version, so will trigger when updating or importing the first time
                 if (
                     //Importing the Underwater Rendering extension
-                    assetPath.EndsWith("UnderwaterRenderer.cs"))
+                    assetPath.EndsWith("StylizedWater2/Runtime/Underwater/UnderwaterRenderer.cs"))
                     //Any further extensions...
                 {
                     OnImportExtension("Underwater Rendering");
@@ -147,7 +148,7 @@ namespace StylizedWater2
                     oldShaders = OldShadersPresent();
                 }
 
-                if (assetPath.EndsWith("WaterDynamicEffectsRenderFeature.cs"))
+                if (assetPath.EndsWith("StylizedWater2/Runtime/DynamicEffects/WaterDynamicEffectsRenderFeature.cs"))
                 {
                     OnImportExtension("Dynamic Effects");
                 }
@@ -351,15 +352,24 @@ namespace StylizedWater2
             
             public static void CheckUnityVersion()
             {
+                outdatedVersion = false;
+                supportedVersion = true;
+                compatibleVersion = true;
+                
                 #if !UNITY_2020_3_OR_NEWER
                 compatibleVersion = false;
                 #endif
                 
                 #if !UNITY_2021_3_OR_NEWER
+                outdatedVersion = true;
+                #endif
+                
+                #if UNITY_6000_0_OR_NEWER
                 supportedVersion = false;
                 #endif
 
-                alphaVersion = GetUnityVersion().Contains("f") == false;
+                string versionName = GetUnityVersion();
+                alphaVersion = versionName.Contains("f") == false;
             }
 
             public static string apiResult;

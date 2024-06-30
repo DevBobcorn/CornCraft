@@ -169,11 +169,11 @@ namespace MagicaCloth2
 
             var cpos = collider.transform.TransformPoint(collider.center);
             var crot = collider.transform.rotation;
-            //var cscl = Vector3.one * collider.GetScale(); // スケールはx軸のみ（つまり均等スケールのみ）
+            //var cscl = Vector3.one * collider.GetScale(); // スケールはx軸のみ（つまり一様スケールのみ）
 
             // マイナススケール
             var cscl = collider.transform.lossyScale;
-            //var cscl = Vector3.one * Mathf.Abs(collider.GetScale()); // スケールはx軸のみ（つまり均等スケールのみ）
+            //var cscl = Vector3.one * Mathf.Abs(collider.GetScale()); // スケールはx軸のみ（つまり一様スケールのみ）
 
             // カメラ回転をコライダーのローカル回転に変換
             camRot = Quaternion.Inverse(crot) * camRot;
@@ -186,33 +186,22 @@ namespace MagicaCloth2
                 Handles.matrix = Matrix4x4.TRS(cpos, crot, cscl);
 
                 Handles.color = selected ? ColorCollider : ColorCollider * 0.5f;
-                switch (collider.GetColliderType())
+
+                if (collider is MagicaSphereCollider)
                 {
-                    case ColliderManager.ColliderType.Sphere:
-                        DrawWireSphere(Vector3.zero, Quaternion.identity, size.x, camRot, true);
-                        break;
-                    case ColliderManager.ColliderType.CapsuleX_Center:
-                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.right, Vector3.up, size.x, size.y, size.z, true, camRot, true);
-                        break;
-                    case ColliderManager.ColliderType.CapsuleY_Center:
-                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.up, Vector3.right, size.x, size.y, size.z, true, camRot, true);
-                        break;
-                    case ColliderManager.ColliderType.CapsuleZ_Center:
-                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.forward, Vector3.up, size.x, size.y, size.z, true, camRot, true);
-                        break;
-                    case ColliderManager.ColliderType.CapsuleX_Start:
-                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.right, Vector3.up, size.x, size.y, size.z, false, camRot, true);
-                        break;
-                    case ColliderManager.ColliderType.CapsuleY_Start:
-                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.up, Vector3.right, size.x, size.y, size.z, false, camRot, true);
-                        break;
-                    case ColliderManager.ColliderType.CapsuleZ_Start:
-                        DrawWireCapsule(Vector3.zero, Quaternion.identity, Vector3.forward, Vector3.up, size.x, size.y, size.z, false, camRot, true);
-                        break;
-                    case ColliderManager.ColliderType.Plane:
-                        DrawWireCube(Vector3.zero, Quaternion.identity, new Vector3(1.0f, 0.0f, 1.0f) * 1.0f, true);
-                        DrawLine(Vector3.zero, Vector3.up * 0.25f, true);
-                        break;
+                    DrawWireSphere(Vector3.zero, Quaternion.identity, size.x, camRot, true);
+                }
+                else if (collider is MagicaPlaneCollider)
+                {
+                    DrawWireCube(Vector3.zero, Quaternion.identity, new Vector3(1.0f, 0.0f, 1.0f) * 1.0f, true);
+                    DrawLine(Vector3.zero, Vector3.up * 0.25f, true);
+                }
+                else if (collider is MagicaCapsuleCollider)
+                {
+                    var c = collider as MagicaCapsuleCollider;
+                    var ldir = c.GetLocalDir();
+                    var lup = c.GetLocalUp();
+                    DrawWireCapsule(Vector3.zero, Quaternion.identity, ldir, lup, size.x, size.y, size.z, c.alignedOnCenter, camRot, true);
                 }
             }
             else

@@ -69,7 +69,7 @@ void Gerstner(inout float3 offs, inout float3 nrml,
 #define STEEPNESS_SCALE 0.01
 
 //v1.1.8+
-WaveInfo GetWaveInfo(float2 position, float2 time, float height, float mask, float fadeStart, float fadeEnd)
+WaveInfo GetWaveInfo(float2 uv, float3 positionWS, float2 time, float height, float mask, float fadeStart, float fadeEnd)
 {
 	WaveInfo waves = (WaveInfo)0;
 
@@ -81,7 +81,7 @@ WaveInfo GetWaveInfo(float2 position, float2 time, float height, float mask, flo
 	const float4 steepness = float4(12.0, 12.0, 12.0, 12.0) * _WaveSteepness * lerp(1.0, MAX_WAVE_COUNT, 1/WAVE_COUNT);
 
 	//Distance based scalar
-	float pixelDist = length(GetCurrentViewPosition().xz - position.xy);
+	float pixelDist = length(GetCurrentViewPosition().xz - positionWS.xz);
 	float fadeFactor = saturate((fadeEnd - pixelDist ) / (fadeEnd-fadeStart));
 
 	for (uint i = 0; i <= WAVE_COUNT; i++)
@@ -90,7 +90,7 @@ WaveInfo GetWaveInfo(float2 position, float2 time, float height, float mask, flo
 		freq *= t;
 		amp *= fadeFactor;
 		
-		Gerstner(/*out*/ waves.position, /*out*/ waves.normal, position, amp, freq, steepness, speed, dir1, dir2);
+		Gerstner(/*out*/ waves.position, /*out*/ waves.normal, uv, amp, freq, steepness, speed, dir1, dir2);
 	}
 
 	waves.normal = normalize(waves.normal);
@@ -104,8 +104,13 @@ WaveInfo GetWaveInfo(float2 position, float2 time, float height, float mask, flo
 	return waves;
 }
 
-//Depricated
+//Deprecated (<1.6.5)
 WaveInfo GetWaveInfo(float2 position, float2 time, float fadeStart, float fadeEnd)
 {
-	return GetWaveInfo(position, time, 1.0, 1.0, fadeStart, fadeEnd);
+	return GetWaveInfo(position, float3(position.x, 0, position.y), time, 1.0, 1.0, fadeStart, fadeEnd);
+}
+
+WaveInfo GetWaveInfo(float2 position, float2 time, float mask, float fadeStart, float fadeEnd)
+{
+	return GetWaveInfo(position, float3(position.x, 0, position.y), time, 1.0, 1.0, fadeStart, fadeEnd);
 }

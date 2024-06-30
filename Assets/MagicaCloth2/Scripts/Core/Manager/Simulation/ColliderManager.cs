@@ -49,6 +49,7 @@ namespace MagicaCloth2
         public const byte Flag_Valid = 0x10; // データの有無
         public const byte Flag_Enable = 0x20; // 有効状態
         public const byte Flag_Reset = 0x40; // 位置リセット
+        public const byte Flag_Reverse = 0x80; // 方向逆転
         public ExNativeArray<ExBitFlag8> flagArray;
 
         /// <summary>
@@ -519,6 +520,7 @@ namespace MagicaCloth2
             flag.SetFlag(Flag_Valid, true);
             flag.SetFlag(Flag_Enable, col.isActiveAndEnabled);
             flag.SetFlag(Flag_Reset, true);
+            flag.SetFlag(Flag_Reverse, col.IsReverseDirection());
             flagArray[arrayIndex] = flag;
             centerArray[arrayIndex] = col.center;
             sizeArray[arrayIndex] = col.GetSize();
@@ -636,6 +638,7 @@ namespace MagicaCloth2
 
             var flag = flagArray[arrayIndex];
             flag = DataUtility.SetColliderType(flag, col.GetColliderType());
+            flag.SetFlag(Flag_Reverse, col.IsReverseDirection());
             flagArray[arrayIndex] = flag;
             centerArray[arrayIndex] = col.center;
             sizeArray[arrayIndex] = math.max(col.GetSize(), 0.0001f); // 念のため
@@ -1043,6 +1046,10 @@ namespace MagicaCloth2
                     float scl0 = math.dot(cscl, dir); // dirの軸のスケールを使用する
                     dir *= math.sign(scl0); // 方向反転
                     float scl = math.abs(scl0);
+
+                    // 逆方向
+                    if (flag.IsSet(Flag_Reverse))
+                        dir = -dir;
 
                     // x = 始点半径
                     // y = 終点半径

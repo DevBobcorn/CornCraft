@@ -571,6 +571,82 @@ namespace MagicaCloth2
         }
 
         /// <summary>
+        /// ２つの線分(p1-q1)(p2-q2)の最近接点(s, t)を計算する
+        /// この関数ではs/tのみで接点と距離は計算しない
+        /// </summary>
+        /// <param name="p1">線分１の始点</param>
+        /// <param name="q1">線分１の終点</param>
+        /// <param name="p2">線分２の始点</param>
+        /// <param name="q2">線分２の終点</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ClosestPtSegmentSegment2(in float3 p1, in float3 q1, in float3 p2, in float3 q2, out float s, out float t)
+        {
+            //s = 0.0f;
+            //t = 0.0f;
+            float3 d1 = q1 - p1; // 線分s1の方向ベクトル
+            float3 d2 = q2 - p2; // 線分s2の方向ベクトル
+            float3 r = p1 - p2;
+            float a = math.dot(d1, d1); // 線分s1の距離の平方、常に正
+            float e = math.dot(d2, d2); // 線分s2の距離の平方、常に正
+            float f = math.dot(d2, r);
+            // 片方あるいは両方の線分が点に縮退しているかどうかチェック
+            if (a <= 1e-8f && e <= 1e-8f)
+            {
+                // 両方の線分が点に縮退
+                s = t = 0.0f;
+            }
+            else if (a <= 1e-8f)
+            {
+                // 最初の線分が点に縮退
+                s = 0.0f;
+                t = math.saturate(f / e);
+            }
+            else
+            {
+                float c = math.dot(d1, r);
+                if (e <= 1e-8f)
+                {
+                    // 2番目の線分が点に縮退
+                    t = 0.0f;
+                    s = math.saturate(-c / a);
+                }
+                else
+                {
+                    // ここから一般的な縮退の場合を開始
+                    float b = math.dot(d1, d2);
+                    float denom = a * e - b * b; // 常に正
+                    // 線分が平行でない場合、L1上のL2に対する最近接点を計算、そして
+                    // 線分s1に対してクランプ。そうでない場合は任意s(ここでは0)を選択
+                    if (denom != 0.0f)
+                    {
+                        s = math.saturate((b * f - c * e) / denom);
+                    }
+                    else
+                    {
+                        s = 0.0f;
+                    }
+                    // L2上のs1(s)に対する最近接点を以下を用いて計算
+                    // t = dot((p1 + d1 * s) - p2, d2) / dot(d2, d2) = (b * s + f) / e
+                    t = (b * s + f) / e;
+                    // tが[0,1]の中にあれば終了。
+                    // そうでなければtをクランプ、sをtの新しい値に対して以下を用いて再計算
+                    // s = dot((p2 + d2 * t) - p1, d1) / dot(d1, d1) = (t * b - c) / a
+                    // そしてsを[0,1]にクランプ
+                    if (t < 0.0f)
+                    {
+                        t = 0.0f;
+                        s = math.saturate(-c / a);
+                    }
+                    else if (t > 1.0f)
+                    {
+                        t = 1.0f;
+                        s = math.saturate((b - c) / a);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// 三角形(abc)から点(p)への最近接点とその重心座標uvwを返す
         /// </summary>
         /// <param name="p"></param>
@@ -1102,7 +1178,7 @@ namespace MagicaCloth2
 
         /// <summary>
         /// 距離を空間変換する
-        /// 不均等スケールを考慮して各軸の平均値を返す
+        /// 非一様スケールを考慮して各軸の平均値を返す
         /// </summary>
         /// <param name="dist"></param>
         /// <param name="localToWorldMatrix"></param>
@@ -1385,6 +1461,7 @@ namespace MagicaCloth2
 
             if (math.dot(planeDir, v) < 0.0f)
             {
+                // 押し出し発生
                 // 押出し座標
                 outPos = pos - gv;
 
@@ -1394,9 +1471,10 @@ namespace MagicaCloth2
             }
             else
             {
+                // 押し出し不要。何もしない
                 outPos = pos;
 
-                // 面までの距離を返す
+                // 面までの距離を返す(+)
                 return len;
             }
         }

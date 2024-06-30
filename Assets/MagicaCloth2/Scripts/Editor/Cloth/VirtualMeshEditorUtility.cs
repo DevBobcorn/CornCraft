@@ -55,7 +55,9 @@ namespace MagicaCloth2
                 dummyRotations,
                 vmesh.localNormals.GetNativeArray(),
                 vmesh.localTangents.GetNativeArray(),
+                0,
                 vmesh.boneWeights.GetNativeArray(),
+                vmesh.skinBoneTransformIndices.GetNativeArray(),
                 vmesh.uv.GetNativeArray()
                );
         }
@@ -96,7 +98,9 @@ namespace MagicaCloth2
             var attributes = vmesh.IsMapping ? vm.mappingAttributes : vm.attributes;
             var positions = vmesh.IsMapping ? vm.mappingPositions : vm.positions;
             var rotations = vmesh.IsMapping ? null : vm.rotations;
+            int boneWeightOffset = vmesh.IsMapping ? 0 : tdata.proxySkinBoneChunk.startIndex + tdata.proxyTransformChunk.startIndex;
             var boneWeights = vmesh.IsMapping ? vm.mappingBoneWeights : vm.boneWeights;
+            var skinBoneTransformIndices = vmesh.IsMapping ? vm.skinBoneTransformIndices : vm.skinBoneTransformIndices;
             var uvs = vmesh.IsMapping ? null : vmesh.uv;
             int vstart = vmesh.IsMapping ? tm.mappingDataArray[vmesh.mappingId].mappingCommonChunk.startIndex : tdata.proxyCommonChunk.startIndex;
 
@@ -116,7 +120,9 @@ namespace MagicaCloth2
                 rotations != null ? rotations.GetNativeArray() : dummyRotations,
                 vmesh.localNormals.GetNativeArray(),
                 vmesh.localTangents.GetNativeArray(),
+                boneWeightOffset,
                 boneWeights.GetNativeArray(),
+                skinBoneTransformIndices.GetNativeArray(),
                 uvs != null ? uvs.GetNativeArray() : dummyUvs
                 );
         }
@@ -134,7 +140,9 @@ namespace MagicaCloth2
             NativeArray<quaternion> rotations,
             NativeArray<float3> normals,
             NativeArray<float3> tangents,
+            int boneWeightOffset,
             NativeArray<VirtualMeshBoneWeight> boneWeights,
+            NativeArray<int> skinBoneTransformIndices,
             NativeArray<float2> uvs
             )
         {
@@ -244,6 +252,11 @@ namespace MagicaCloth2
                         continue;
                     var pos = positions[vstart + i];
                     var bw = boneWeights[vstart + i];
+                    bw.boneIndices += boneWeightOffset; // グローバルインデックスに変換
+                    bw.boneIndices.x = skinBoneTransformIndices[bw.boneIndices.x];
+                    bw.boneIndices.y = skinBoneTransformIndices[bw.boneIndices.y];
+                    bw.boneIndices.z = skinBoneTransformIndices[bw.boneIndices.z];
+                    bw.boneIndices.w = skinBoneTransformIndices[bw.boneIndices.w];
                     Handles.Label(pos, $"[{bw.boneIndices.x},{bw.boneIndices.y},{bw.boneIndices.z},{bw.boneIndices.w}] w({bw.weights.x:0.###}, {bw.weights.y:0.###}, {bw.weights.z:0.###}, {bw.weights.w:0.###})");
                 }
             }

@@ -451,7 +451,7 @@ namespace MagicaCloth2
             //public int MappingCount => mappingDataIndexSet.Length;
 
             /// <summary>
-            /// 初期スケール（ｘ軸のみで判定、均等スケールしか認めていない）
+            /// 初期スケール（ｘ軸のみで判定、一様スケールしか認めていない）
             /// </summary>
             public float InitScale => initScale.x;
         }

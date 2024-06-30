@@ -1,13 +1,44 @@
 ﻿// Magica Cloth 2.
 // Copyright (c) 2023 MagicaSoft.
 // https://magicasoft.jp
-
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace MagicaCloth2
 {
     public partial class ClothProcess
     {
+        public ResultCode GenerateStatusCheck()
+        {
+            ResultCode result = new ResultCode();
+
+            // スケール値チェック
+            var scl = cloth.transform.lossyScale;
+            if (Mathf.Approximately(scl.x, 0.0f) || Mathf.Approximately(scl.y, 0.0f) || Mathf.Approximately(scl.z, 0.0f))
+            {
+                // スケール値がゼロ
+                result.SetError(Define.Result.Init_ScaleIsZero);
+            }
+            else if (scl.x < 0.0f || scl.y < 0.0f || scl.z < 0.0f)
+            {
+                // 負のスケール
+                result.SetError(Define.Result.Init_NegativeScale);
+            }
+            else
+            {
+                float diff1 = Mathf.Abs(1.0f - scl.x / scl.y);
+                float diff2 = Mathf.Abs(1.0f - scl.x / scl.z);
+                const float diffTolerance = 0.01f; // 誤差(1%)
+                if (diff1 > diffTolerance || diff2 > diffTolerance)
+                {
+                    // 一様スケールではない
+                    result.SetError(Define.Result.Init_NonUniformScale);
+                }
+            }
+
+            return result;
+        }
+
         internal bool GenerateInitialization()
         {
             result.SetProcess();

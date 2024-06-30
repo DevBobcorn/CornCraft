@@ -156,12 +156,6 @@ namespace MagicaCloth2
         void DispVersion()
         {
             EditorGUILayout.LabelField($"Version {AboutMenu.MagicaClothVersion}");
-            //using (new EditorGUILayout.HorizontalScope())
-            //{
-            //    //GUILayout.FlexibleSpace();
-            //    EditorGUILayout.Space();
-            //    EditorGUILayout.LabelField($"Version {AboutMenu.MagicaClothVersion}", GUILayout.Width(100));
-            //}
         }
 
         void DispStatus()
@@ -177,16 +171,19 @@ namespace MagicaCloth2
             }
             else
             {
+                var result = ClothEditorManager.GetResultCode(cloth);
                 var preBuildData = cloth.GetSerializeData2().preBuildData;
                 if (preBuildData.enabled)
                 {
                     // pre-build
-                    DispClothStatus("[Pre-Build Construction]", preBuildData.DataValidate(), false);
+                    if (result.IsError() == false)
+                        result = preBuildData.DataValidate();
+                    DispClothStatus("[Pre-Build Construction]", result, false);
                 }
                 else
                 {
                     // runtime
-                    DispClothStatus("[Runtime Construction]", ClothEditorManager.GetResultCode(cloth), true);
+                    DispClothStatus("[Runtime Construction]", result, true);
                 }
             }
         }

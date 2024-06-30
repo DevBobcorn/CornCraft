@@ -1,3 +1,22 @@
+1.6.7
+
+Fixed:
+- Enviro fog shading not having any effect since version 3.1.3 due to a code change
+
+1.6.6
+
+Fixed:
+- Workaround for shader error on Mac in Unity 2022.3.15+, regarding "_FOVEATED_RENDERING_NON_UNIFORM_RASTER" (known bug: UUM-67560)
+
+1.6.5
+
+Added:
+- "Sample Water Normal" sub-graph, allows other shaders to read out the water surface normal
+
+Fixed:
+- Distance fading for waves not behaving correctly if an origin shifting system was in use (WaterObject.PositionOffset)
+- Displacement Pre-pass unnecessarily also calculating information per-pixel
+
 1.6.4
 
 Changed:

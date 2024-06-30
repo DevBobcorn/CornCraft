@@ -5,6 +5,7 @@
 %asset_version%
 %unity_version%
 %compiler_version%
+%fog_integration%
 
 %shader_name%
 {
@@ -253,6 +254,11 @@
 			#undef _DISABLE_DEPTH_TEX 
 			#endif
 
+            //Workaround for bug in 2022.3.15+ (UUM-67560). In 2022.3 it seems restricted to Forward+, in Unity6 it affects all rendering paths
+            #if defined(SHADER_API_METAL) && UNITY_VERSION >= 202230
+            //Otherwise undefined
+            #define _FOVEATED_RENDERING_NON_UNIFORM_RASTER 0
+            #endif
             #include_library "Libraries/URP.hlsl"
             //#include "Assets/Amazing Assets/Curved World/Shaders/Core/CurvedWorldTransform.cginc"
 
@@ -295,11 +301,6 @@
 
 			//URP 14+ (2022.2+)
 			#pragma multi_compile _ _FORWARD_PLUS
-            //Workaround for bug in 2022.3.15+ (UUM-67560)
-            #if USE_FORWARD_PLUS && defined(SHADER_API_METAL) && UNITY_VERSION >= 202230
-            //Otherwise undefined
-            #define _FOVEATED_RENDERING_NON_UNIFORM_RASTER 0
-            #endif
 
 			#if UNITY_VERSION >= 202220
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
@@ -400,20 +401,11 @@
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
             #endif
 
-            #pragma shader_feature_local _WAVES
-
-            %tessellation_directives%
-
             #include_library "Libraries/URP.hlsl"
             //#include "Assets/Amazing Assets/Curved World/Shaders/Core/CurvedWorldTransform.cginc"
 
-            #include_library "Libraries/Input.hlsl"
-            
-            #include_library "Libraries/Common.hlsl"
-            #include_library "Libraries/Fog.hlsl"
-            #include_library "Libraries/Waves.hlsl"
-            
-            #pragma multi_compile_fragment _ WATER_DISPLACEMENT_PASS
+            #pragma shader_feature_local_fragment _WAVES
+            #pragma multi_compile _ WATER_DISPLACEMENT_PASS
 
             #if !WATER_DISPLACEMENT_PASS
             #define SHADERPASS_DEPTHONLY
@@ -423,6 +415,12 @@
             #define SHADERPASS_DISPLACEMENT
             #endif
 
+            #include_library "Libraries/Input.hlsl"
+            
+            #include_library "Libraries/Common.hlsl"
+            #include_library "Libraries/Fog.hlsl"
+            #include_library "Libraries/Waves.hlsl"
+
 			%multi_compile dynamic effects%
 			#ifdef DYNAMIC_EFFECTS_ENABLED
 			#include_library "DynamicEffects/DynamicEffects.hlsl"
@@ -430,21 +428,10 @@
 			
             #include_library "Libraries/Vertex.hlsl"
 
-            #if defined(TESSELLATION_ON)
-			#include_library "Libraries/Tesselation.hlsl"
-            #define VertexOutput VertexControl
-            #else
-            #define VertexOutput Varyings
-            #endif
-
             #pragma vertex Vertex
-            VertexOutput Vertex(Attributes v)
+            Varyings Vertex(Attributes v)
             {
-                #if defined(TESSELLATION_ON)
-                return VertexTessellation(v);
-                #else
                 return LitPassVertex(v);
-                #endif
             }
 
             #pragma fragment DepthOnlyFragment
@@ -455,22 +442,20 @@
 
             	float depth = input.positionCS.z;
 
-                #if WATER_DISPLACEMENT_PASS
+                #if defined(SHADERPASS_DISPLACEMENT)
+                float3 offset = 0;
                 float3 positionWS = input.positionWS.xyz;
 
+                #if _WAVES
                 float2 uv = GetSourceUV(input.uv.xy, positionWS.xz, _WorldSpaceUV);
 	            float4 vertexColor = input.color; //Mask already applied in vertex shader
-	            WaveInfo waves = GetWaveInfo(uv, TIME * _WaveSpeed, _WaveHeight,  lerp(1, 0, vertexColor.b), _WaveFadeDistance.x, _WaveFadeDistance.y);
-
-                float3 offset = 0;
+	            WaveInfo waves = GetWaveInfo(uv, positionWS, TIME * _WaveSpeed, _WaveHeight,  lerp(1, 0, vertexColor.b), _WaveFadeDistance.x, _WaveFadeDistance.y);
 
                 offset.y += waves.position.y;
+                #endif
 
                 #if DYNAMIC_EFFECTS_ENABLED
 	            float4 dynamicEffectsData = SampleDynamicEffectsData(positionWS.xyz);
-
-                //Why?
-                dynamicEffectsData.r *= 0.1;
 
                 offset.y += dynamicEffectsData.r;
                 #endif

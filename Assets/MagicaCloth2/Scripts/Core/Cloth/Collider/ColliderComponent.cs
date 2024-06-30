@@ -66,11 +66,17 @@ namespace MagicaCloth2
         /// スケール値を取得
         /// </summary>
         /// <returns></returns>
-        public float GetScale()
+        public virtual float GetScale()
         {
             // X軸のみを見る
             return transform.lossyScale.x;
         }
+
+        /// <summary>
+        /// 方向の逆転（基本的にカプセルコライダー用）
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool IsReverseDirection() => false;
 
         /// <summary>
         /// チームへのコライダー登録通知

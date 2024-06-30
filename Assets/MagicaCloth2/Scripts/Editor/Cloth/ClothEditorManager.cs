@@ -452,6 +452,12 @@ namespace MagicaCloth2
                     result.SetError(Define.Result.CreateCloth_InvalidCloth);
                     throw new MagicaClothProcessingException();
                 }
+                var statusResult = cloth.Process.GenerateStatusCheck();
+                if (statusResult.IsError())
+                {
+                    result.Merge(statusResult);
+                    throw new MagicaClothProcessingException();
+                }
 
                 // メッシュを構築するための最低限のデータが揃っているか確認
                 if (sdata.IsValid() == false)

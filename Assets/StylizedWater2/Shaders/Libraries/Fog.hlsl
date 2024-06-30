@@ -41,7 +41,7 @@ void ApplyFog(inout float3 color, float fogFactor, float4 screenPos, float3 posi
 #endif
 
 #ifdef Enviro3
-	if(_EnviroFogParameters.x > 0)
+	if(any(_EnviroFogParameters) > 0)
 	{
 		foggedColor.rgb = ApplyFogAndVolumetricLights(color.rgb, screenPos.xy / screenPos.w, positionWS, 0);
 	}

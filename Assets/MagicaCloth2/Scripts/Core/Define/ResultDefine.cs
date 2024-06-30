@@ -47,6 +47,9 @@ namespace MagicaCloth2
             Init_InvalidData = 20100,
             Init_InvalidPaintMap,
             Init_PaintMapNotReadable,
+            Init_NonUniformScale,
+            Init_ScaleIsZero,
+            Init_NegativeScale,
 
             // RenderSetup
             RenderSetup_Exception = 20200,

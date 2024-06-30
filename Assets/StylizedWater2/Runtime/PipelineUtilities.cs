@@ -258,6 +258,13 @@ namespace StylizedWater2
             }
         }
 
+        public static ScriptableRendererFeature[] GetDefaultRenderFeatures()
+        {
+            ScriptableRendererData renderer = GetDefaultRenderer();
+
+            return renderer.rendererFeatures.ToArray();
+        }
+
         /// <summary>
         /// Retrieves the given render feature from the default renderer
         /// </summary>
