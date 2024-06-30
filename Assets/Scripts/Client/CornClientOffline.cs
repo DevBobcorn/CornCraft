@@ -80,7 +80,7 @@ namespace CraftSharp
 
             }
 
-            // Generate dummy entities for testing
+            /* Generate dummy entities for testing
             var entityIds = EntityRenderManager.GetAllPrefabs().Keys.ToArray();
             //Debug.Log($"{entityIds.Length} entity types registered with render");
 
@@ -98,6 +98,7 @@ namespace CraftSharp
                 EntityRenderManager.AddEntityRender(entity);
                 //
             }
+            */
         }
 
         public override bool StartClient(StartLoginInfo info)
