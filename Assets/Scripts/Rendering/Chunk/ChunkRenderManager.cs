@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using UnityEngine;
+using UnityEngine.Profiling;
 using Unity.Mathematics;
 
 using CraftSharp.Event;
@@ -126,13 +127,13 @@ namespace CraftSharp.Rendering
         {
             var column = GetChunkRenderColumn(chunkX, chunkZ, false);
 
-            if (column is null)
+            if (column == null)
                 return false;
             
             var chunk = column.GetChunkRender(chunkY, false);
             
             // Empty chunks (air) are null, those chunks are always ready
-            return chunk is null || chunk.State == ChunkBuildState.Ready;
+            return chunk == null || chunk.State == ChunkBuildState.Ready;
         }
         #endregion
 
@@ -216,11 +217,11 @@ namespace CraftSharp.Rendering
         public void SetBlock(BlockLoc blockLoc, Block block)
         {
             var column = GetChunkColumn(blockLoc);
-            if (column is not null)
+            if (column != null)
             {
                 // Update chunk data
                 var chunk = column.GetChunk(blockLoc);
-                if (chunk is null)
+                if (chunk == null)
                     column[blockLoc.GetChunkY(column.MinimumY)] = chunk = new Chunk();
                 chunk[blockLoc.GetChunkBlockX(), blockLoc.GetChunkBlockY(), blockLoc.GetChunkBlockZ()] = block;
                 // Update ambient occulsion and light data cache
@@ -329,7 +330,7 @@ namespace CraftSharp.Rendering
                 var prevBlockEntity = blockEntityRenders[blockLoc];
                 if (prevBlockEntity.Type == blockEntityType) // Auto-created, keep it but replace data tags
                 {
-                    if (tag is null) // Auto-creating a block entity while it is already created
+                    if (tag == null) // Auto-creating a block entity while it is already created
                     {
                         // Do nothing
                     }
@@ -348,7 +349,7 @@ namespace CraftSharp.Rendering
 
             GameObject? blockEntityPrefab = GetPrefabForType(blockEntityType.BlockEntityId);
 
-            if (blockEntityPrefab is not null)
+            if (blockEntityPrefab != null)
             {
                 var blockEntityObj = GameObject.Instantiate(blockEntityPrefab);
                 var blockEntityRender = blockEntityObj!.GetComponent<BlockEntityRender>();
@@ -421,7 +422,7 @@ namespace CraftSharp.Rendering
                     if (world.IsChunkColumnReady(chunkX, chunkZ))
                     {
                         var column = GetChunkRenderColumn(chunkX, chunkZ, false);
-                        if (column is null)
+                        if (column == null)
                         {   // Chunks data is ready, but chunk render column is not
                             //int chunkMask = world[chunkX, chunkZ]!.ChunkMask;
                             // Create it and add the whole column to render list...
@@ -483,7 +484,7 @@ namespace CraftSharp.Rendering
 
         private void QueueChunkRenderBuildIfNotEmpty(ChunkRender? chunkRender)
         {
-            if (chunkRender is not null) // Not empty(air) chunk
+            if (chunkRender != null) // Not empty(air) chunk
                 QueueChunkRenderBuild(chunkRender);
         }
 
@@ -492,7 +493,7 @@ namespace CraftSharp.Rendering
             int chunkX = chunkRender.ChunkX, chunkZ = chunkRender.ChunkZ;
             var chunkColumnData = GetChunkColumn(chunkX, chunkZ);
 
-            if (chunkColumnData is null) // Chunk column data unloaded, cancel
+            if (chunkColumnData == null) // Chunk column data unloaded, cancel
             {
                 int2 chunkCoord = new(chunkRender.ChunkX, chunkRender.ChunkZ);
                 if (renderColumns.ContainsKey(chunkCoord))
@@ -506,7 +507,7 @@ namespace CraftSharp.Rendering
 
             var chunkData = chunkColumnData[chunkRender.ChunkY];
 
-            if (chunkData is null) // Chunk not available or is empty(air chunk), cancel
+            if (chunkData == null) // Chunk not available or is empty(air chunk), cancel
             {
                 chunkRender.State = ChunkBuildState.Cancelled;
                 return;
@@ -525,12 +526,14 @@ namespace CraftSharp.Rendering
             chunkRender.State = ChunkBuildState.Building;
 
             chunkRender.TokenSource = new();
+
+            Profiler.BeginSample("Call Mesh Build");
             
-            Task.Factory.StartNew(() => {
+            Task.Run(() => {
                 var buildResult = builder!.Build(world, chunkData, chunkRender);
 
                 Loom.QueueOnMainThread(() => {
-                    if (chunkRender is not null)
+                    if (chunkRender != null)
                     {
                         if (buildResult == ChunkBuildResult.Cancelled)
                             chunkRender.State = ChunkBuildState.Cancelled;
@@ -539,6 +542,8 @@ namespace CraftSharp.Rendering
                     }
                 });
             }, chunkRender.TokenSource.Token);
+
+            Profiler.EndSample();
         }
 
         public const int BUILD_COUNT_LIMIT = 4;
@@ -626,7 +631,7 @@ namespace CraftSharp.Rendering
             var column = GetChunkRenderColumn(chunkX, chunkZ, false);
             int chunkY = blockLoc.GetChunkY(World.GetDimension().minY);
 
-            if (column is not null) // Queue this chunk to rebuild list...
+            if (column != null) // Queue this chunk to rebuild list...
             {
                 // Create the chunk render object if not present (previously empty)
                 var chunk = column.GetChunkRender(chunkY, true);
@@ -661,7 +666,7 @@ namespace CraftSharp.Rendering
         public void MarkDirtyBecauseOfLightUpdate(int chunkX, int chunkY, int chunkZ)
         {
             var column = GetChunkRenderColumn(chunkX, chunkZ, false);
-            if (column is not null) // Queue this chunk to rebuild list...
+            if (column != null) // Queue this chunk to rebuild list...
             {   // Create the chunk render object if not present (previously empty)
                 var chunk = column.GetChunkRender(chunkY, true);
 
@@ -674,7 +679,7 @@ namespace CraftSharp.Rendering
         {
             terrainColliderDirty = false;
 
-            Task.Factory.StartNew(async () =>
+            Task.Run(async () =>
             {
                 // Wait for old data to be cleared up
                 await Task.Delay(100);
@@ -706,7 +711,7 @@ namespace CraftSharp.Rendering
         {
             terrainColliderDirty = false;
 
-            Task.Factory.StartNew(() =>
+            Task.Run(() =>
             {
                 builder!.BuildTerrainCollider(world, playerBlockLoc, movementCollider!, liquidCollider!, null);
             });
@@ -736,6 +741,7 @@ namespace CraftSharp.Rendering
             int newCount = BUILD_COUNT_LIMIT - chunkRendersBeingBuilt.Count;
 
             // Build chunks in queue...
+            Profiler.BeginSample("Start chunk render build tasks");
             if (newCount > 0)
             {
                 // Start chunk building tasks...
@@ -743,7 +749,7 @@ namespace CraftSharp.Rendering
                 {
                     var nextChunk = chunkRendersToBeBuilt.Dequeue();
 
-                    if (nextChunk is null || GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) is null)
+                    if (nextChunk == null || GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) == null)
                     {   // Chunk is unloaded while waiting in the queue, ignore it...
                         continue;
                     }
@@ -754,10 +760,19 @@ namespace CraftSharp.Rendering
                     }
                 }
             }
+            Profiler.EndSample();
 
             // Update only a small subset of chunks to reduce lag spikes
+            Profiler.BeginSample("Update chunks (Add)");
             UpdateChunkRendersListAdd(updateTargetMask);
-            UpdateChunkRendersListRemove(updateTargetMask);
+            Profiler.EndSample();
+
+            if (chunkRendersToBeBuilt.Count < BUILD_COUNT_LIMIT) // If CPU is not so busy
+            {
+                Profiler.BeginSample("Update chunks (Remove)");
+                UpdateChunkRendersListRemove(updateTargetMask);
+                Profiler.EndSample();
+            }
             
             updateTargetMask = (updateTargetMask + 1) % MASK_CYCLE_LENGTH;
         }
@@ -766,7 +781,7 @@ namespace CraftSharp.Rendering
         {
             var client = CornApp.CurrentClient;
 
-            if (client is null) // Game is not ready, cancel update
+            if (client == null) // Game is not ready, cancel update
                 return;
             
             var playerBlockLoc = client.GetLocation().GetBlockLoc();
@@ -802,7 +817,7 @@ namespace CraftSharp.Rendering
                 }
             }
 
-            if (lastPlayerBlockLoc is not null) // Updating location, update terrain collider if necessary
+            if (lastPlayerBlockLoc != null) // Updating location, update terrain collider if necessary
             {
                 if (terrainColliderDirty || lastPlayerBlockLoc.Value != playerBlockLoc)
                 {
