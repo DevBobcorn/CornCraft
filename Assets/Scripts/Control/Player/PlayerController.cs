@@ -35,8 +35,8 @@ namespace CraftSharp.Control
         private PlayerActions? playerActions;
         public PlayerActions Actions => playerActions!;
 
-        public void EnableInput() => playerActions!.Enable();
-        public void DisableInput() => playerActions!.Disable();
+        public void EnableInput() => playerActions?.Enable();
+        public void DisableInput() => playerActions?.Disable();
 
         public PlayerAbility Ability => ability!;
         public Rigidbody PlayerRigidbody => playerRigidbody!;
