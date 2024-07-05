@@ -14,6 +14,7 @@ namespace CraftSharp.UI
     public class HUDScreen : BaseScreen
     {
         private const float HEALTH_MULTIPLIER = 10F;
+        private static readonly Vector3 STAMINA_TARGET_OFFSET = new(0, -0.5f, 0f);
 
         // UI controls and objects
         [SerializeField] private TMP_Text? latencyText, debugText, modeText;
@@ -232,7 +233,7 @@ namespace CraftSharp.UI
             if (interactionPanel!.ShouldAbsordMouseScroll)
             {
                 var scroll = scrollInput!.action.ReadValue<float>();
-                if (scroll != 0F && interactionPanel is not null)
+                if (scroll != 0F && interactionPanel != null)
                 {
                     if (scroll < 0F)
                         interactionPanel.SelectNextOption();
@@ -296,10 +297,13 @@ namespace CraftSharp.UI
 
             // Update stamina bar position
             var targetPosition = UICamera!.ViewportToWorldPoint(
-                    game!.CameraController.GetTargetViewportPos());
+                    game!.CameraController.GetTargetViewportPos(STAMINA_TARGET_OFFSET));
 
-            staminaBar!.transform.position = Vector3.Lerp(
-                    staminaBar.transform.position, targetPosition, Time.deltaTime * 10F);
+            var newPos = Vector3.Lerp(
+                    staminaBar!.transform.position, targetPosition, Time.deltaTime * 10F);
+            
+            // Don't modify z coordinate
+            staminaBar.transform.position = new Vector3(newPos.x, newPos.y, staminaBar.transform.position.z);
         }
     }
 }
