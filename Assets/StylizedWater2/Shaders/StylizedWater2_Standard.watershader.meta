@@ -14,10 +14,10 @@ ScriptedImporter:
     hidden: 0
     type: 0
     autoIntegration: 1
-    fogIntegration: 1
+    fogIntegration: 7
     lightCookies: 0
     customIncludeDirectives:
-    - enabled: 1
+    - enabled: 0
       type: 0
       value: float _MyParameter;
     - enabled: 0
@@ -36,16 +36,14 @@ ScriptedImporter:
   - Assets/StylizedWater2/Shaders/Libraries/URP.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/Input.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/Common.hlsl
+  - Assets/Enviro 3 - Sky and Weather/Resources/Shader/Includes/FogIncludeHLSL.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/Fog.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/Waves.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/Lighting.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/Reflections.hlsl
-  - Assets/StylizedWater2/Shaders/Underwater/UnderwaterFog.hlsl
-  - Assets/StylizedWater2/Shaders/Underwater/UnderwaterShading.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/Features.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/Foam.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/Caustics.hlsl
-  - Assets/StylizedWater2/Shaders/DynamicEffects/DynamicEffects.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/Vertex.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/Tesselation.hlsl
   - Assets/StylizedWater2/Shaders/Libraries/ForwardPass.hlsl

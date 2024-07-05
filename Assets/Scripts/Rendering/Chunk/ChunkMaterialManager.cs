@@ -63,6 +63,7 @@ namespace CraftSharp.Rendering
             // Translucent
             var translucent = new Material(AtlasTranslucent!);
             translucent.SetTexture("_BaseMap", packManager.GetAtlasArray(false));
+            translucent.EnableKeyword("_ENVIRO3_FOG");
             atlasMaterials.Add(RenderType.TRANSLUCENT, translucent);
 
             // Water
