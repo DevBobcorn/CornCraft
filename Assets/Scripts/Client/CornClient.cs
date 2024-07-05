@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
@@ -94,6 +95,24 @@ namespace CraftSharp
             // Freeze player controller until terrain is ready
             PlayerController.DisablePhysics();
             ScreenControl.PushScreen(LoadingScreen!);
+        }
+
+        private IEnumerator PostInitialization()
+        {
+            yield return new WaitForEndOfFrame();
+
+            GameMode = GameMode.Creative;
+            EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
+
+            // Create player render
+            if (playerRenderPrefabs[selectedRenderPrefab] != null)
+            {
+                PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+            }
+            else
+            {
+                throw new Exception("Player render prefab is not assigned for game client!");
+            }
         }
 
         public override bool StartClient(StartLoginInfo info)

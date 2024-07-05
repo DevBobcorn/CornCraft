@@ -80,25 +80,15 @@ namespace CraftSharp
 
             }
 
-            /* Generate dummy entities for testing
-            var entityIds = EntityRenderManager.GetAllPrefabs().Keys.ToArray();
-            //Debug.Log($"{entityIds.Length} entity types registered with render");
-
-            for (int i = 0; i < entityIds.Length; i++)
+            // Create player render
+            if (playerRenderPrefabs[selectedRenderPrefab] != null)
             {
-                if (!EntityPalette.INSTANCE.CheckEntityType(entityIds[i]))
-                {
-                    // Entity type not present, fake it
-                    EntityPalette.INSTANCE.InjectEntityType(0, entityIds[i]);
-                }
-                
-                var entity = new Entity(100 + i, EntityPalette.INSTANCE
-                        .FromId(entityIds[i]), new(0F, i * 2F, 0F));
-
-                EntityRenderManager.AddEntityRender(entity);
-                //
+                PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
             }
-            */
+            else
+            {
+                throw new Exception("Player render prefab is not assigned for game client!");
+            }
         }
 
         public override bool StartClient(StartLoginInfo info)
@@ -117,15 +107,6 @@ namespace CraftSharp
             clientEntity.Name = session.PlayerName;
             clientEntity.UUID = uuid;
             clientEntity.MaxHealth = 20F;
-
-            if (playerRenderPrefabs[selectedRenderPrefab] != null)
-            {
-                PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
-            }
-            else
-            {
-                throw new Exception("Player render prefab is not assigned for game client!");
-            }
 
             return true; // Client successfully started
         }
