@@ -16,11 +16,11 @@ MonoBehaviour:
   showEffectControls: 0
   showCloudControls: 0
   showFlatCloudControls: 0
-  showFogControls: 1
+  showFogControls: 0
   showSkyControls: 0
-  showLightingControls: 0
+  showLightingControls: 1
   showAuroraControls: 0
-  showEnvironmentControls: 1
+  showEnvironmentControls: 0
   showAudioControls: 0
   showAmbientAudioControls: 0
   showWeatherAudioControls: 0
@@ -73,7 +73,7 @@ MonoBehaviour:
     flatCloudsAmbientIntensity: 1
     flatCloudsAbsorbtion: 0.6
   lightingOverride:
-    directLightIntensityModifier: 0.5
+    directLightIntensityModifier: 0.6
     ambientIntensityModifier: 0.6
   skyOverride:
     intensity: 1
@@ -82,11 +82,11 @@ MonoBehaviour:
     fogDensity: 1
     fogHeightFalloff: 0
     fogHeight: 0
-    fogDensity2: 0.5
-    fogHeightFalloff2: 0.01
+    fogDensity2: 1
+    fogHeightFalloff2: 0
     fogHeight2: -40
-    fogColorBlend: 0.5
-    fogColorMod: {r: 1, g: 1, b: 1, a: 1}
+    fogColorBlend: 0.15
+    fogColorMod: {r: 0, g: 0.21151215, b: 0.3207547, a: 1}
     scattering: 0.39
     extinction: 0.232
     anistropy: 0.105
