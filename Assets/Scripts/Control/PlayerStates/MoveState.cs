@@ -112,8 +112,11 @@ namespace CraftSharp.Control
                 }
             }
 
-            if (inputData.Gameplay.Jump.WasPerformedThisFrame()) // Jump up, keep horizontal speed
+            if (inputData.Gameplay.Jump.WasPerformedThisFrame()) // Jump up
             {
+                // reduce horizontal speed
+                moveVelocity.x *= 0.6F;
+                moveVelocity.z *= 0.6F;
                 moveVelocity.y = ability.JumpSpeedCurve.Evaluate(moveSpeed);
                 info.Grounded = false;
                 // Clear jump flag after jumping once to prevent playing
