@@ -66,9 +66,9 @@ namespace CraftSharp.UI
         public void AddInteractionOption(int id, InteractionInfo info)
         {
             var optionObj = GameObject.Instantiate(interactionOptionPrefab);
-            var option = optionObj?.GetComponent<InteractionOption>();
+            var option = optionObj == null ? null : optionObj.GetComponent<InteractionOption>();
 
-            if (option is not null)
+            if (option != null)
             {
                 option.SetInfo(id, info);
                 interactionOptions.Add(option);
@@ -91,7 +91,7 @@ namespace CraftSharp.UI
             {
                 Debug.LogWarning("Interaction option prefab is not valid");
 
-                if (optionObj is not null)
+                if (optionObj != null)
                     Destroy(optionObj);
             }
 
@@ -151,7 +151,7 @@ namespace CraftSharp.UI
 
             var scrollPos = 1F - (float)selectedIndex / (float)(interactionOptions.Count - 1);
 
-            if (scrollRect is not null)
+            if (scrollRect != null)
                 scrollRect.verticalScrollbar.value = scrollPos;
 
             for (int i = 0;i < interactionOptions.Count;i++)

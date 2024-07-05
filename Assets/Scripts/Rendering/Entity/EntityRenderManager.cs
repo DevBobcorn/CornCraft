@@ -105,7 +105,7 @@ namespace CraftSharp.Rendering
             else
                 entityPrefab = GetPrefabForType(entity.Type.EntityId);
 
-            if (entityPrefab is not null)
+            if (entityPrefab != null)
             {
                 var entityObj    = GameObject.Instantiate(entityPrefab);
                 var entityRender = entityObj!.GetComponent<EntityRender>();
@@ -290,7 +290,7 @@ namespace CraftSharp.Rendering
 
             foreach (var prefabItem in entityPrefabs)
             {
-                if (prefabItem.Value is null)
+                if (prefabItem.Value == null)
                 {
                     Debug.LogWarning($"Prefab for entity type {prefabItem.Key} is not assigned!");
                 }            
@@ -301,7 +301,7 @@ namespace CraftSharp.Rendering
         {
             var client = CornApp.CurrentClient;
 
-            if (client is null) // Game is not ready, cancel update
+            if (client == null) // Game is not ready, cancel update
                 return;
 
             foreach (var render in entityRenders.Values)

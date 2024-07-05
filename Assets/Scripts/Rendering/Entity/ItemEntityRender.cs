@@ -12,7 +12,7 @@ namespace CraftSharp.Rendering
         {
             base.Initialize(entityType, entity);
             
-            if (itemMeshFilter is not null && itemMeshRenderer is not null)
+            if (itemMeshFilter != null && itemMeshRenderer != null)
             {
                 var result = ItemMeshBuilder.BuildItem(entity.Item, true);
 

@@ -34,7 +34,7 @@ namespace CraftSharp.Rendering
 
         public void UpdateCollider(Mesh colliderMesh)
         {
-            if (InteractionCollider is null)
+            if (InteractionCollider == null)
                 InteractionCollider = gameObject.AddComponent<MeshCollider>();
             InteractionCollider.sharedMesh = colliderMesh;
         }

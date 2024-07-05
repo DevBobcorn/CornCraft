@@ -96,7 +96,7 @@ namespace MMD
                     _                                       => null
                 };
 
-                if (collider is not null)
+                if (collider != null)
                 {
                     colliders.Add(rigidIndex, collider);
                 }

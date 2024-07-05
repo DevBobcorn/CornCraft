@@ -236,7 +236,6 @@ namespace CraftSharp.Rendering
 
         protected virtual void TurnIntoRagdoll()
         {
-            // 'ragdollPrefab is not null' is not properly supported in Unity yet, so just use '!='
             if (ragdollPrefab != null) // Create ragdoll in place
             {
                 var ragdollObj = GameObject.Instantiate(ragdollPrefab)!;
@@ -258,7 +257,10 @@ namespace CraftSharp.Rendering
                 }
             }
 
-            visual?.gameObject.SetActive(false);
+            if (visual != null)
+            {
+                visual.gameObject.SetActive(false);
+            }
 
             turnedIntoRagdoll = true;
         }
