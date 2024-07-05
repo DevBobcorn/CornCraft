@@ -219,7 +219,7 @@ namespace CraftSharp
 
             if (withDebugInfo)
             {
-                var targetLoc = interactionUpdater?.TargetBlockLoc;
+                var targetLoc = interactionUpdater == null ? null : interactionUpdater.TargetBlockLoc;
                 var playerLoc = GetLocation();
                 var blockLoc = playerLoc.GetBlockLoc();
 

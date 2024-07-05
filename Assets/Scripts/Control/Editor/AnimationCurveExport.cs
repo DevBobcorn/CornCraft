@@ -11,7 +11,7 @@ namespace CraftSharp.Control
 
         void Start()
         {
-            if (ability is not null && clip is not null)
+            if (ability != null && clip != null)
             {
 #if UNITY_EDITOR
                 var curves = AnimationUtility.GetCurveBindings(clip);
