@@ -77,12 +77,12 @@ namespace CraftSharp.Control
             IsAiming = enable;
         }
 
-        public virtual Vector3 GetTargetViewportPos()
+        public virtual Vector3 GetTargetViewportPos(Vector3 offset)
         {
-            var targetPos = GetTarget()?.position;
-            if (targetPos != null)
+            var target = GetTarget();
+            if (target != null)
             {
-                var pos = renderCamera!.WorldToViewportPoint(targetPos.Value);
+                var pos = renderCamera!.WorldToViewportPoint(target.TransformPoint(offset));
                 pos.z = 0F;
                 return pos;
             }

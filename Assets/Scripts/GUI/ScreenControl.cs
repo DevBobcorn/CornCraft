@@ -28,7 +28,7 @@ namespace CraftSharp.UI
 
         public void PushScreen(BaseScreen screen)
         {
-            if (screen is not null)
+            if (screen != null)
             {
                 screen.EnsureInitialized();
 
@@ -100,7 +100,7 @@ namespace CraftSharp.UI
         void Update()
         {
             var topScreen = GetTopScreen();
-            if (topScreen is not null)
+            if (topScreen != null)
             {
                 topScreen.UpdateScreen();
             }

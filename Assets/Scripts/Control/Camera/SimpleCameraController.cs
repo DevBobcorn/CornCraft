@@ -89,7 +89,7 @@ namespace CraftSharp.Control
 
         public override Transform? GetTarget()
         {
-            return virtualCameraFollow?.Follow;
+            return virtualCameraFollow == null ? null : virtualCameraFollow.Follow;
         }
 
         public override void EnableAimingCamera(bool enable)
@@ -130,14 +130,14 @@ namespace CraftSharp.Control
 
         private bool IsFixed() => IsAiming;
 
-        public override Vector3 GetTargetViewportPos()
+        public override Vector3 GetTargetViewportPos(Vector3 offset)
         {
             if (IsFixed()) // Use screen center if camera is fixed
             {
                 return VIEWPORT_CENTER;
             }
             
-            return base.GetTargetViewportPos();
+            return base.GetTargetViewportPos(offset);
         }
     }
 }
