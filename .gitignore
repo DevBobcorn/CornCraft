@@ -29,6 +29,10 @@
 /[Aa]ssets/Enviro 3 - Sky and Weather
 /[Aa]ssets/Enviro 3 - Sky and Weather.meta
 
+# Demo & tutorial files from KCC
+/[Aa]ssets/KinematicCharacterController/*
+!/[Aa]ssets/KinematicCharacterController/Core/
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
