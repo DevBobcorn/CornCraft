@@ -9,8 +9,8 @@ namespace CraftSharp.Rendering
         [SerializeField] private Renderer[] playerSkinRenderers = { };
 
         private static readonly int GROUNDED_HASH = Animator.StringToHash("Grounded");
-        private static readonly int IN_LIQUID_HASH = Animator.StringToHash("InLiquid");
-        private static readonly int ON_WALL_HASH = Animator.StringToHash("OnWall");
+        private static readonly int FLOATING_HASH = Animator.StringToHash("Floating");
+        private static readonly int CLINGING_HASH = Animator.StringToHash("Clinging");
         private static readonly int GLIDING_HASH = Animator.StringToHash("Gliding");
         private static readonly int MOVING_HASH = Animator.StringToHash("Moving");
         private static readonly int SPRINTING_HASH = Animator.StringToHash("Sprinting");
@@ -32,8 +32,9 @@ namespace CraftSharp.Rendering
                 var mirrored = Time.frameCount % 2 == 0;
                 SetMirroredFlag(mirrored);
             };
+            playerController.OnJumpRequest += this.SetJumpFlag;
 
-            var visualObj = visual!.gameObject;
+            var visualObj = _visualTransform!.gameObject;
 
             // Get player animator
             entityAnimator = visualObj.GetComponent<Animator>();
@@ -56,16 +57,16 @@ namespace CraftSharp.Rendering
         public void InitializeActiveItem(ItemStack? itemStack, ItemActionType actionType)
         {
             // Initialize player active item
-            var accessoryWidget = visual!.GetComponent<PlayerAccessoryWidget>();
+            var accessoryWidget = _visualTransform!.GetComponent<PlayerAccessoryWidget>();
             accessoryWidget.UpdateActiveItem(itemStack, actionType);
         }
 
-        public override void UpdateStateMachine(PlayerStatus info)
+        public override void UpdateAnimatorParams(PlayerStatus info)
         {
             // Update animator parameters
             entityAnimator!.SetBool(GROUNDED_HASH, info.Grounded);
-            entityAnimator.SetBool(IN_LIQUID_HASH, info.InLiquid);
-            entityAnimator.SetBool(ON_WALL_HASH, info.OnWall);
+            entityAnimator.SetBool(FLOATING_HASH, info.Floating);
+            entityAnimator.SetBool(CLINGING_HASH, info.Clinging);
             entityAnimator.SetBool(GLIDING_HASH, info.Gliding);
             entityAnimator.SetBool(MOVING_HASH, info.Moving);
             entityAnimator.SetBool(SPRINTING_HASH, info.Sprinting);

@@ -3,20 +3,58 @@ using UnityEngine;
 
 namespace CraftSharp.Control
 {
+    public enum LiquidStatus
+    {
+        None = 0,
+        Treading,
+        Submerged
+    }
+
     public class PlayerStatus
     {
         // Player data
         public float StaminaLeft = 0F;
 
         // Player status
+
+        /// <summary>
+        /// Whether player currently have contact with liquid
+        /// </summary>
         public bool InLiquid  = false;
+
+        /// <summary>
+        /// Whether player is floating in liquid
+        /// </summary>
+        public bool Floating  = false;
+
+        /// <summary>
+        /// Whether player is grounded
+        /// </summary>
         public bool Grounded  = false;
-        public bool OnWall    = false;
+
+        /// <summary>
+        /// Unused for now
+        /// </summary>
+        public bool Clinging  = false;
+
+        /// <summary>
+        /// Whether player is gliding
+        /// </summary>
         public bool Gliding   = false;
+
+        /// <summary>
+        /// Whether player have active horizontal movement input
+        /// </summary>
         public bool Moving    = false;
+
+        /// <summary>
+        /// Whether player is sprinting
+        /// </summary>
         public bool Sprinting = false;
 
-        public Vector3 MoveVelocity = Vector3.zero;
+        /// <summary>
+        /// Gravity scale. Used only for controlling player entity enablement / disablement
+        /// </summary>
         public float GravityScale = 0F;
 
         public bool Attacking = false;
@@ -34,22 +72,21 @@ namespace CraftSharp.Control
         public float CenterDownDist = 0F;
         public float FrontDownDist  = 0F;
         public float LiquidDist     = 0F;
-        public float GroundSlope    = 0F;
-        public float BarrierAngle   = 0F;
-        public float BarrierDist    = 0F;
+        public float BarrierYawAngle   = 0F;
+        public float BarrierDistance    = 0F;
 
         public float TargetVisualYaw  = 0F;
         public float CurrentVisualYaw = 0F;
 
-        public float YawOffset => Mathf.Abs(Mathf.DeltaAngle(TargetVisualYaw, CurrentVisualYaw));
+        public float YawDeltaAbs => Mathf.Abs(Mathf.DeltaAngle(TargetVisualYaw, CurrentVisualYaw));
 
         public override string ToString()
         {
-            var moveInfo = $"Moving:\t{Moving}\t{CenterDownDist:0.00}\t{FrontDownDist:0.00}\t{LiquidDist:0.00}\nSprinting:\t{Sprinting}";
-            var envInfo = $"Ground Slope:\t{GroundSlope:0.00}\nBarrier Angle:\t{BarrierAngle:0.00}\tDist:\t{BarrierDist:0.00}\nGravity Scale:\t{GravityScale:0.00}";
+            var moveInfo = $"Moving:\t{Moving}\t{CenterDownDist:0.000}\t{FrontDownDist:0.000}\t{LiquidDist:0.000}\nSprinting:\t{Sprinting}\nYaw:\t{CurrentVisualYaw:0.00} -> {TargetVisualYaw:0.00} ({YawDeltaAbs:0.00})";
+            var envInfo = $"\nBarrier Yaw Angle:\t{BarrierYawAngle:0.00}\tDist:\t{BarrierDistance:0.00}\nGravity Scale:\t{GravityScale:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             
-            return $"InLiquid:\t{InLiquid}\nGrounded:\t{Grounded}\nOn Wall:\t{OnWall}\n{moveInfo}\n{envInfo}\n{atkInfo}";
+            return $"InLiquid:\t{InLiquid}\nFloating:\t{Floating}\nGrounded:\t{Grounded}\nClinging:\t{Clinging}\n{envInfo}\n{moveInfo}\n{atkInfo}";
         }
     }
 }

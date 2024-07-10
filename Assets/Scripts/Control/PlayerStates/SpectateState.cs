@@ -1,11 +1,12 @@
 #nullable enable
+using KinematicCharacterController;
 using UnityEngine;
 
 namespace CraftSharp.Control
 {
     public class SpectateState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             var ability = player.Ability;
 
@@ -23,21 +24,23 @@ namespace CraftSharp.Control
                 var moveSpeed = info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
 
                 // Use the target visual yaw as actual movement direction, y speed is set to 0 by this point
-                moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward * moveSpeed;
+                moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, motor.CharacterUp) * Vector3.forward * moveSpeed;
             }
             else
+            {
                 info.Moving = false;
+            }
 
             // Check vertical movement...
             if (inputData.Gameplay.Ascend.IsPressed())
-                moveVelocity.y =  ability.WalkSpeed * 3F;
+                moveVelocity += ability.WalkSpeed * 3F * motor.CharacterUp;
             else if (inputData.Gameplay.Descend.IsPressed())
-                moveVelocity.y = -ability.WalkSpeed * 3F;
-            else
-                moveVelocity.y = 0F;
+                moveVelocity -= ability.WalkSpeed * 3F * motor.CharacterUp;
 
-            // Apply new velocity to rigidbody
-            info.MoveVelocity = moveVelocity;
+            currentVelocity = moveVelocity;
+
+            // Stamina should be full, Restore if not
+            info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
         }
 
         public bool ShouldEnter(PlayerActions inputData, PlayerStatus info) => info.Spectating;
@@ -45,6 +48,5 @@ namespace CraftSharp.Control
         public bool ShouldExit(PlayerActions inputData, PlayerStatus info)  => !info.Spectating;
 
         public override string ToString() => "Spectate";
-
     }
 }

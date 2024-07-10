@@ -12,13 +12,13 @@ namespace CraftSharp.Rendering
 
         protected void UpdateLegAngle()
         {
-            var movFract = Mathf.Clamp01(visualMovementVelocity.x * visualMovementVelocity.x + visualMovementVelocity.z * visualMovementVelocity.z);
+            var movFract = Mathf.Clamp01(_visualMovementVelocity.x * _visualMovementVelocity.x + _visualMovementVelocity.z * _visualMovementVelocity.z);
 
             if (currentMovFract != movFract)
                 currentMovFract = Mathf.MoveTowards(currentMovFract, movFract, Time.deltaTime * 3F);
 
             // Make sure every mob is moving with a different offset
-            var refTime = Time.realtimeSinceStartup + pseudoRandomOffset * cycleTime;
+            var refTime = Time.realtimeSinceStartup + _pseudoRandomOffset * cycleTime;
 
             int fullCnt = (int)(refTime / cycleTime);
             var movTime = (refTime - fullCnt * cycleTime) / cycleTime;

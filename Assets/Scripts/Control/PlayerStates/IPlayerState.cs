@@ -1,18 +1,34 @@
 #nullable enable
+using KinematicCharacterController;
 using UnityEngine;
 
 namespace CraftSharp.Control
 {
     public interface IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player);
+        /// <summary>
+        /// Update before motor calculation. e.g. Force unground for jumping
+        /// </summary>
+        public virtual void UpdateBeforeMotor(float interval, PlayerActions inputData,
+                PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
+
+        /// <summary>
+        /// Update velocity for Kinematic Character Controller motor, as well as perform other state logic
+        /// </summary>
+        public void UpdateMain(ref Vector3 currentVelocity, float interval,
+                PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player);
+        
+        public virtual bool IgnoreCollision()
+        {
+            return false;
+        }
 
         public abstract bool ShouldEnter(PlayerActions inputData, PlayerStatus info);
 
         public abstract bool ShouldExit(PlayerActions inputData, PlayerStatus info);
 
-        public virtual void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player) { }
+        public virtual void OnEnter(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
 
-        public virtual void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player) { }
+        public virtual void OnExit(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
     }
 }

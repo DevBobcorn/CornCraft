@@ -6,22 +6,19 @@ namespace CraftSharp.Control
     public interface PlayerStates
     {
         // Grounded states
-        public static readonly IPlayerState IDLE       = new IdleState();
-        public static readonly IPlayerState MOVE       = new MoveState();
+        public static readonly IPlayerState GROUNDED   = new GroundedState();
 
         // Attack states
         public static readonly IPlayerState MELEE      = new MeleeState();
         public static readonly IPlayerState RANGED_AIM = new RangedAimState();
 
         // On wall states
-        public static readonly IPlayerState CLIMB      = new ClimbState();
+        public static readonly IPlayerState CLIMB      = new ClingingState();
 
         // Airborne states
-        public static readonly IPlayerState FALL       = new FallState();
-        public static readonly IPlayerState GLIDE      = new GlideState();
-        // In water states
-        public static readonly IPlayerState SWIM       = new SwimState();
-        public static readonly IPlayerState TREAD      = new TreadState();
+        public static readonly IPlayerState AIRBORNE   = new AirborneState();
+        // Floating states
+        public static readonly IPlayerState FLOATING  = new FloatingState();
 
         // Special states
         public static readonly IPlayerState SPECTATE = new SpectateState();
@@ -32,9 +29,8 @@ namespace CraftSharp.Control
         {
             List<IPlayerState> list = new()
             {
-                // Grounded States
-                IDLE,
-                MOVE,
+                // Grounded State
+                GROUNDED,
 
                 // Attack States (no state machine entry)
                 // MELEE,
@@ -43,13 +39,11 @@ namespace CraftSharp.Control
                 // On wall States (no state machine entry)
                 // CLIMB,
 
-                // Airborne States
-                FALL,
-                GLIDE,
+                // Airborne State
+                AIRBORNE,
 
-                // In water States
-                SWIM,
-                TREAD,
+                // Floating States
+                FLOATING,
 
                 // Special States
                 SPECTATE

@@ -11,7 +11,7 @@ namespace CraftSharp.Rendering
             if ((Position.Value - transform.position).sqrMagnitude > MOVE_THRESHOLD) // Treat as teleport
                 transform.position = Position.Value;
             else // Smoothly move to current position
-                transform.position = Vector3.SmoothDamp(transform.position, Position.Value, ref visualMovementVelocity, tickMilSec);
+                transform.position = Vector3.SmoothDamp(transform.position, Position.Value, ref _visualMovementVelocity, tickMilSec);
 
             // Update rotation
             if (lastYaw != Yaw.Value || lastPitch != Pitch.Value)

@@ -51,16 +51,10 @@ MonoBehaviour:
   CustomNameJson: 
   IsCustomNameVisible: 0
   CustomName: 
-  Position: {x: 0, y: 0, z: 0}
-  Yaw: 0
-  Pitch: 0
-  HeadYaw: 0
   ObjectData: -1
-  Health: 0
-  MaxHealth: 0
   Pose: 0
-  infoAnchor: {fileID: 743968433924148952}
-  visual: {fileID: 564165796040106859}
+  _infoAnchor: {fileID: 743968433924148952}
+  _visualTransform: {fileID: 564165796040106859}
   ragdollPrefab: {fileID: 0}
   FloatingInfoPrefab: {fileID: 0}
   head: {fileID: 354095174379655454}

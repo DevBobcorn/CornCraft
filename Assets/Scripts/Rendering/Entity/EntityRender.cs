@@ -107,19 +107,35 @@ namespace CraftSharp.Rendering
         /// </summary>
         public Dictionary<int, ItemStack>? Equipment;
 
-        protected Vector3 visualMovementVelocity = Vector3.zero;
-        protected bool turnedIntoRagdoll = false;
+        /// <summary>
+        /// Used to control animation transition (for animators) or limb swing (for vanilla entity renders)
+        /// </summary>
+        protected Vector3 _visualMovementVelocity = Vector3.zero;
 
-        [SerializeField] protected Transform? infoAnchor, visual;
+        /// <summary>
+        /// Whether the current entity has turned into ragdoll form
+        /// </summary>
+        protected bool _turnedIntoRagdoll = false;
+
+        [SerializeField] protected Transform? _infoAnchor;
+        [SerializeField] protected Transform? _visualTransform;
+
+        /// <summary>
+        /// Anchor transform for locating floating labels, health bars, etc.
+        /// </summary>
         public Transform InfoAnchor
         {
-            get => infoAnchor ?? transform;
-            protected set => infoAnchor = value;
+            get => _infoAnchor != null ? _infoAnchor : transform;
+            protected set => _infoAnchor = value;
         }
+
+        /// <summary>
+        /// Visual transform of the entity render
+        /// </summary>
         public Transform VisualTransform
         {
-            get => visual!;
-            protected set => visual = value;
+            get => _visualTransform != null ? _visualTransform : transform;
+            protected set => _visualTransform = value;
         }
 
         [SerializeField] protected GameObject? ragdollPrefab;
@@ -129,11 +145,11 @@ namespace CraftSharp.Rendering
         /// A number made from the entity's numeral id, used in animations to prevent
         /// several mobs of a same type moving synchronisedly, which looks unnatural
         /// </summary>
-        protected float pseudoRandomOffset = 0F;
+        protected float _pseudoRandomOffset = 0F;
 
         public void Unload()
         {
-            if (!turnedIntoRagdoll && Health.Value <= 0F)
+            if (!_turnedIntoRagdoll && Health.Value <= 0F)
             {
                 TurnIntoRagdoll();
             }
@@ -146,10 +162,10 @@ namespace CraftSharp.Rendering
 
         public virtual void Initialize(EntityType entityType, Entity source)
         {
-            if (visual == null)
+            if (_visualTransform == null)
             {
                 Debug.LogWarning("Visual transform for entity render not assigned!");
-                visual = transform;
+                _visualTransform = transform;
             }
 
             NumeralId = source.ID;
@@ -175,9 +191,9 @@ namespace CraftSharp.Rendering
             Equipment = source.Equipment;
 
             UnityEngine.Random.InitState(NumeralId);
-            pseudoRandomOffset = UnityEngine.Random.Range(0F, 1F);
+            _pseudoRandomOffset = UnityEngine.Random.Range(0F, 1F);
 
-            visual.eulerAngles = new(0F, lastYaw, 0F);
+            _visualTransform.eulerAngles = new(0F, lastYaw, 0F);
         }
 
         public virtual void UpdateTransform(float tickMilSec)
@@ -187,7 +203,7 @@ namespace CraftSharp.Rendering
                 transform.position = Position.Value;
             else // Smoothly move to current position
                 transform.position = Vector3.SmoothDamp(transform.position, Position.Value,
-                        ref visualMovementVelocity, tickMilSec);
+                        ref _visualMovementVelocity, tickMilSec);
 
             // Update rotation
             var headYawDelta = Mathf.Abs(Mathf.DeltaAngle(lastHeadYaw, HeadYaw.Value));
@@ -196,23 +212,30 @@ namespace CraftSharp.Rendering
             if (bodyYawDelta > 0.0025F)
             {
                 lastYaw = Mathf.MoveTowardsAngle(lastYaw, Yaw.Value, Time.deltaTime * 300F);
-                visual!.eulerAngles = new(0F, lastYaw, 0F);
+                _visualTransform!.eulerAngles = new(0F, lastYaw, 0F);
             }
 
             if (headYawDelta > 0.0025F)
+            {
                 lastHeadYaw = Mathf.MoveTowardsAngle(lastHeadYaw, HeadYaw.Value, Time.deltaTime * 150F);
+            }
             else
             {
-                if (visualMovementVelocity.magnitude < 0.1F)
+                if (_visualMovementVelocity.magnitude < 0.1F)
+                {
                     Yaw.Value = HeadYaw.Value;
+                }
             }
             
             if (Mathf.Abs(Mathf.DeltaAngle(Yaw.Value, HeadYaw.Value)) > 75F)
+            {
                 Yaw.Value = HeadYaw.Value;
+            }
             
             if (lastPitch != Pitch.Value)
+            {
                 lastPitch = Mathf.MoveTowardsAngle(lastPitch, Pitch.Value, Time.deltaTime * 300F);
-
+            }
         }
 
         public virtual Transform SetupCameraRef(Vector3 pos)
@@ -220,16 +243,15 @@ namespace CraftSharp.Rendering
             var cameraRefObj = new GameObject("Camera Ref");
             var cameraRef = cameraRefObj.transform;
 
-            cameraRef.SetParent(visual, false);
+            cameraRef.SetParent(_visualTransform, false);
             cameraRef.localPosition = pos;
 
             return cameraRef;
         }
 
-        public virtual void SetVisualMovementVelocity(Vector3 velocity)
+        public virtual void SetVisualMovementVelocity(Vector3 velocity, Vector3 upDirection)
         {
-            velocity.y = 0; // Ignore y velocity by default
-            visualMovementVelocity = velocity;
+            _visualMovementVelocity = velocity;
         }
 
         public virtual void UpdateAnimation(float tickMilSec) { }
@@ -246,28 +268,31 @@ namespace CraftSharp.Rendering
 
                 if (ragdoll != null)
                 {
-                    ragdoll.Visual.rotation = visual!.rotation;
-                    ragdoll.Visual.localScale = visual.localScale;
+                    ragdoll.Visual.rotation = _visualTransform!.rotation;
+                    ragdoll.Visual.localScale = _visualTransform.localScale;
 
                     // Make it fly!
-                    if (visualMovementVelocity.sqrMagnitude > 0F)
-                        ragdoll.mainRigidbody?.AddForce(visualMovementVelocity.normalized * 15F, ForceMode.VelocityChange);
-                    else
-                        ragdoll.mainRigidbody?.AddForce(Vector3.up * 10F, ForceMode.VelocityChange);
+                    if (ragdoll.mainRigidbody != null)
+                    {
+                        if (_visualMovementVelocity.sqrMagnitude > 0F)
+                            ragdoll.mainRigidbody.AddForce(_visualMovementVelocity.normalized * 15F, ForceMode.VelocityChange);
+                        else
+                            ragdoll.mainRigidbody.AddForce(Vector3.up * 10F, ForceMode.VelocityChange);
+                    }
                 }
             }
 
-            if (visual != null)
+            if (_visualTransform != null)
             {
-                visual.gameObject.SetActive(false);
+                _visualTransform.gameObject.SetActive(false);
             }
 
-            turnedIntoRagdoll = true;
+            _turnedIntoRagdoll = true;
         }
 
         public virtual void ManagedUpdate(float tickMilSec)
         {
-            if (!turnedIntoRagdoll && Health.Value <= 0F)
+            if (!_turnedIntoRagdoll && Health.Value <= 0F)
             {
                 TurnIntoRagdoll();
             }
