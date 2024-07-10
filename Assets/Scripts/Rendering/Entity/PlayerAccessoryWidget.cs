@@ -10,47 +10,47 @@ namespace CraftSharp.Rendering
 {
     public class PlayerAccessoryWidget : MonoBehaviour
     {
-        [SerializeField] private Transform? mainHandRef;
-        [SerializeField] private Transform? offHandRef;
-        [SerializeField] private Transform? spineRef;
+        [SerializeField] private Transform? _mainHandRef;
+        [SerializeField] private Transform? _offHandRef;
+        [SerializeField] private Transform? _spineRef;
 
-        private Transform? mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
-        private Transform? offHandSlot; // A slot fixed to offHandRef transform (as a child)
-        private Transform? itemMountPivot, itemMountSlot;
-        private PlayerController? player;
-        private PlayerActionItem? currentItem;
-        private Animator? playerAnimator;
+        private Transform? _mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
+        private Transform? _offHandSlot; // A slot fixed to offHandRef transform (as a child)
+        private Transform? _itemMountPivot, _itemMountSlot;
+        private PlayerController? _player;
+        private PlayerActionItem? _currentItem;
+        private Animator? _playerAnimator;
 
         public void SetRefTransforms(Transform mainHandRef, Transform offHandRef, Transform spineRef)
         {
-            this.mainHandRef = mainHandRef;
+            this._mainHandRef = mainHandRef;
             // Create main hand slot transform
             var mainHandSlotObj = new GameObject("Main Hand Slot");
-            mainHandSlot = mainHandSlotObj.transform;
-            mainHandSlot.SetParent(mainHandRef);
+            _mainHandSlot = mainHandSlotObj.transform;
+            _mainHandSlot.SetParent(mainHandRef);
             // Initialize position and rotation
-            mainHandSlot.localPosition = Vector3.zero;
-            mainHandSlot.localEulerAngles = Vector3.zero;
+            _mainHandSlot.localPosition = Vector3.zero;
+            _mainHandSlot.localEulerAngles = Vector3.zero;
 
-            this.offHandRef = offHandRef;
+            this._offHandRef = offHandRef;
             // Create off hand slot transform
             var offHandSlotObj = new GameObject("Off Hand Slot");
-            offHandSlot = offHandSlotObj.transform;
-            offHandSlot.SetParent(offHandRef);
+            _offHandSlot = offHandSlotObj.transform;
+            _offHandSlot.SetParent(offHandRef);
             // Initialize position and rotation
-            offHandSlot.localPosition = Vector3.zero;
-            offHandSlot.localEulerAngles = Vector3.zero;
+            _offHandSlot.localPosition = Vector3.zero;
+            _offHandSlot.localEulerAngles = Vector3.zero;
 
-            this.spineRef = spineRef;
+            this._spineRef = spineRef;
 
             // Create weapon mount slot transform
             var itemMountPivotObj = new GameObject("Item Mount Pivot");
-            itemMountPivot = itemMountPivotObj.transform;
-            itemMountPivot.SetParent(transform);
+            _itemMountPivot = itemMountPivotObj.transform;
+            _itemMountPivot.SetParent(transform);
 
             var itemMountSlotObj = new GameObject("Item Mount Slot");
-            itemMountSlot = itemMountSlotObj.transform;
-            itemMountSlot.SetParent(itemMountPivot);
+            _itemMountSlot = itemMountSlotObj.transform;
+            _itemMountSlot.SetParent(_itemMountPivot);
         }
 
         private void CreateActionItem(ItemStack? itemStack, ItemActionType actionType, PlayerSkillItemConfig psi)
@@ -67,48 +67,48 @@ namespace CraftSharp.Rendering
             switch (actionType)
             {
                 case ItemActionType.MeleeWeaponSword:
-                    currentItem = itemObj!.AddComponent<MeleeWeapon>();
+                    _currentItem = itemObj!.AddComponent<MeleeWeapon>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack, false);
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummySwordItemMesh!, psi.DummyItemMaterial!, new());
 
-                    currentItem.slotEularAngles = new(135F, 90F, -20F);
-                    currentItem.slotPosition = new(0F, 0.2F, -0.25F);
+                    _currentItem.slotEularAngles = new(135F, 90F, -20F);
+                    _currentItem.slotPosition = new(0F, 0.2F, -0.25F);
 
-                    mainHandSlot!.localPosition = new(0F, -0.1F, 0.05F);
-                    mainHandSlot.localEulerAngles = new(-135F, 0F, 45F);
+                    _mainHandSlot!.localPosition = new(0F, -0.1F, 0.05F);
+                    _mainHandSlot.localEulerAngles = new(-135F, 0F, 45F);
 
                     var trailObj = GameObject.Instantiate(psi.SwordTrailPrefab);
                     trailObj.transform.parent = itemObj.transform;
                     trailObj.transform.localPosition = new(0.5F, 0.65F, 0.65F);
 
-                    var sword = currentItem as MeleeWeapon;
+                    var sword = _currentItem as MeleeWeapon;
                     sword!.SlashTrail = trailObj.GetComponent<TrailRenderer>();
 
                     itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
                     break;
                 case ItemActionType.RangedWeaponBow:
-                    currentItem = itemObj!.AddComponent<UselessActionItem>();
+                    _currentItem = itemObj!.AddComponent<UselessActionItem>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack, false);
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummyBowItemMesh!, psi.DummyItemMaterial!, new());
 
-                    currentItem.slotEularAngles = new(-40F, 90F, 20F);
-                    currentItem.slotPosition = new(0F, -0.4F, -0.4F);
+                    _currentItem.slotEularAngles = new(-40F, 90F, 20F);
+                    _currentItem.slotPosition = new(0F, -0.4F, -0.4F);
                     
-                    offHandSlot!.localPosition = new(-0.21F, 0.12F, 0.38F);
-                    offHandSlot.localEulerAngles = new(5F, -150F, 115F);
+                    _offHandSlot!.localPosition = new(-0.21F, 0.12F, 0.38F);
+                    _offHandSlot.localEulerAngles = new(5F, -150F, 115F);
 
                     itemObj.transform.localScale = new(0.6F, 0.6F, 0.6F);
                     break;
                 default:
-                    currentItem = itemObj!.AddComponent<UselessActionItem>();
+                    _currentItem = itemObj!.AddComponent<UselessActionItem>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack, true);
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummySwordItemMesh!, psi.DummyItemMaterial!, new());
 
-                    currentItem.slotEularAngles = new(0F, 90F, 0F);
-                    currentItem.slotPosition = new(0F, 0F, -0.5F);
+                    _currentItem.slotEularAngles = new(0F, 90F, 0F);
+                    _currentItem.slotPosition = new(0F, 0F, -0.5F);
 
                     itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
                     break;
@@ -124,13 +124,13 @@ namespace CraftSharp.Rendering
             }
 
             // Set weapon slot position and rotation
-            itemMountPivot!.localPosition = new(0F, 1.3F, 0F);
+            _itemMountPivot!.localPosition = new(0F, 1.3F, 0F);
 
-            itemMountSlot!.localPosition = currentItem.slotPosition;
-            itemMountSlot!.localEulerAngles = currentItem.slotEularAngles;
+            _itemMountSlot!.localPosition = _currentItem.slotPosition;
+            _itemMountSlot!.localEulerAngles = _currentItem.slotEularAngles;
 
             // Mount weapon on start
-            MoveItemToWidgetSlot(itemMountSlot!);
+            MoveItemToWidgetSlot(_itemMountSlot!);
         }
 
         /// <summary>
@@ -157,15 +157,15 @@ namespace CraftSharp.Rendering
 
         private void DestroyActionItem()
         {
-            if (currentItem != null) SafeDestroy(currentItem.gameObject);
+            if (_currentItem != null) SafeDestroy(_currentItem.gameObject);
         }
 
         private void MoveItemToWidgetSlot(Transform slot)
         {
-            if (currentItem != null)
+            if (_currentItem != null)
             {
-                currentItem.transform.SetParent(slot, false);
-                currentItem.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+                _currentItem.transform.SetParent(slot, false);
+                _currentItem.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             }
         }
 
@@ -193,7 +193,7 @@ namespace CraftSharp.Rendering
             }
             else
             {
-                if ((psi != null) || ((psi = player?.SkillItemConf) != null))
+                if ((psi != null) || (_player != null && (psi = _player.SkillItemConf) != null))
                 {
                     CreateActionItem(itemStack, actionType, psi);
                 }
@@ -203,7 +203,7 @@ namespace CraftSharp.Rendering
                 }
 
                 // Mount weapon on start
-                MoveItemToWidgetSlot(itemMountSlot!);
+                MoveItemToWidgetSlot(_itemMountSlot!);
             }
         }
 
@@ -212,13 +212,13 @@ namespace CraftSharp.Rendering
             switch (state)
             {
                 case PlayerController.CurrentItemState.HoldInMainHand:
-                    MoveItemToWidgetSlot(mainHandSlot!);
+                    MoveItemToWidgetSlot(_mainHandSlot!);
                     break;
                 case PlayerController.CurrentItemState.HoldInOffhand:
-                    MoveItemToWidgetSlot(offHandSlot!);
+                    MoveItemToWidgetSlot(_offHandSlot!);
                     break;
                 case PlayerController.CurrentItemState.Mount:
-                    MoveItemToWidgetSlot(itemMountSlot!);
+                    MoveItemToWidgetSlot(_itemMountSlot!);
                     break;
             }
         }
@@ -229,51 +229,56 @@ namespace CraftSharp.Rendering
         /// </summary>
         public void CleanUpSlots()
         {
-            if (mainHandSlot != null)   SafeDestroy(mainHandSlot.gameObject);
-            if (offHandSlot != null)    SafeDestroy(offHandSlot.gameObject);
-            if (itemMountPivot != null) SafeDestroy(itemMountPivot.gameObject);
-            if (itemMountSlot != null)  SafeDestroy(itemMountSlot.gameObject);
+            if (_mainHandSlot != null)   SafeDestroy(_mainHandSlot.gameObject);
+            if (_offHandSlot != null)    SafeDestroy(_offHandSlot.gameObject);
+            if (_itemMountPivot != null) SafeDestroy(_itemMountPivot.gameObject);
+            if (_itemMountSlot != null)  SafeDestroy(_itemMountSlot.gameObject);
         }
 
         public void Initialize()
         {
-            player = GetComponentInParent<PlayerController>();
-            playerAnimator = GetComponent<Animator>();
+            _player = GetComponentInParent<PlayerController>();
+            _playerAnimator = GetComponent<Animator>();
 
             // If this is used by an actual player object, instead of a preview object etc.
-            if (player)
+            if (_player)
             {
                 // These subscriptions will be cleared when the player render is replaced/destroyed,
                 // so it is not necessary to manually unregister them
-                player.OnItemStateChanged += UpdateActionItemState;
+                _player.OnItemStateChanged += UpdateActionItemState;
 
-                player.OnCurrentItemChanged += (i, iat) => UpdateActiveItem(i, iat, player.SkillItemConf);
+                _player.OnCurrentItemChanged += (i, iat) => UpdateActiveItem(i, iat, _player.SkillItemConf);
 
-                player.OnMeleeDamageStart += () => {
-                    currentItem?.StartAction();
+                _player.OnMeleeDamageStart += () => {
+                    if (_currentItem != null)
+                    {
+                        _currentItem.StartAction();
+                    }
                 };
 
-                player.OnMeleeDamageEnd += () => {
-                    currentItem?.EndAction();
+                _player.OnMeleeDamageEnd += () => {
+                    if (_currentItem != null)
+                    {
+                        _currentItem.EndAction();
+                    }
                 };
             }
         }
 
         void Update()
         {
-            if (spineRef == null || itemMountPivot == null)
+            if (_spineRef == null || _itemMountPivot == null)
                 return;
 
-            itemMountPivot.localEulerAngles = new Vector3(-spineRef.localEulerAngles.x, 0F, 0F);
+            _itemMountPivot.localEulerAngles = new Vector3(-_spineRef.localEulerAngles.x, 0F, 0F);
         }
 
         void OnAnimatorMove()
         {
-            if (player is not null && player.UseRootMotion)
+            if (_player != null && _player.UseRootMotion)
             {
-                var rb = player.PlayerRigidbody;
-
-                rb.position += playerAnimator!.deltaPosition;
+                _player.RootMotionPositionDelta += _playerAnimator!.deltaPosition;
+                _player.RootMotionRotationDelta = _playerAnimator.deltaRotation * _player.RootMotionRotationDelta;
             }
         }
     }

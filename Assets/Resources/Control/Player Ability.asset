@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 626338d7e82f32b4893ae4cf50bbdfc2, type: 3}
   m_Name: Player Ability
   m_EditorClassIdentifier: 
-  ColliderType: 1
   ColliderRadius: 0.31
   ColliderHeight: 1.8
   Climb1mX:
@@ -809,6 +808,8 @@ MonoBehaviour:
     m_RotationOrder: 4
   WalkSpeed: 2.15
   RunSpeed: 6
+  AccSpeed: 25
+  DecSpeed: 15
   SwimSpeed: 4
   SprintSpeed: 10
   GlideSpeed: 2.8
@@ -817,7 +818,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 4.8
+      value: 5
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -826,7 +827,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 5
-      value: 4.8
+      value: 5
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -835,22 +836,22 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 10
-      value: 4
-      inSlope: -0.32337177
-      outSlope: -0.32337177
+      value: 4.3
+      inSlope: -0.30978677
+      outSlope: -0.30978677
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.0658659
+      inWeight: 0.043536566
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  SteerSpeed: 12
+  TurnSpeed: 600
   MaxStamina: 20
   SprintStaminaCost: 3
   SwimStaminaCost: 0.8
   GlideStaminaCost: 0.6
   StaminaRestore: 4
-  MaxFallSpeed: -10
-  MaxGlideFallSpeed: -0.5
+  MaxFallSpeed: 100
+  MaxGlideFallSpeed: 2
   LiquidMoveMultiplier: 0.8

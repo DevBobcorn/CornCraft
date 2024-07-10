@@ -1068,7 +1068,7 @@ namespace CraftSharp
 
                     Loom.QueueOnMainThread(() => {
                         // Update player location
-                        PlayerController.SetLocation(location, mcYaw: yaw);
+                        PlayerController.SetLocationFromServer(location, mcYaw: yaw);
                         // Force refresh environment collider
                         ChunkRenderManager.InitializeTerrainCollider(location.GetBlockLoc(), () =>
                                 {
@@ -1076,9 +1076,8 @@ namespace CraftSharp
                                     ScreenControl.TryPopScreen();
                                     PlayerController.EnablePhysics();
                                 });
-                        // Update camera yaw
-                        CameraController.SetYaw(yaw);
-                        //Debug.Log($"Spawned at {location}");
+                        // Update camera yaw (convert to Unity yaw)
+                        CameraController.SetYaw(yaw + 90F);
                     });
                 }
                 else // Position correction from server
@@ -1093,7 +1092,7 @@ namespace CraftSharp
                         // Force refresh environment collider
                         ChunkRenderManager.RebuildTerrainCollider(location.GetBlockLoc());
                         // Then update player location
-                        PlayerController.SetLocation(location, reset: true, mcYaw: yaw);
+                        PlayerController.SetLocationFromServer(location, reset: true, mcYaw: yaw);
                         //Debug.Log($"Updated to {location} offset: {offset.magnitude}");
                     });
                 }

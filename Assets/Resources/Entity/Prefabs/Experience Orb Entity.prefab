@@ -158,8 +158,8 @@ MonoBehaviour:
   CustomName: 
   ObjectData: -1
   Pose: 0
-  infoAnchor: {fileID: 1002350574447168253}
-  visual: {fileID: 7239491834985379768}
+  _infoAnchor: {fileID: 1002350574447168253}
+  _visualTransform: {fileID: 7239491834985379768}
   ragdollPrefab: {fileID: 0}
   FloatingInfoPrefab: {fileID: 0}
 --- !u!1 &2716930875251792988

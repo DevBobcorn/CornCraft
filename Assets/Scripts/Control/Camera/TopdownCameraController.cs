@@ -11,9 +11,11 @@ namespace CraftSharp.Control
         
 
         // Virtual camera and camera components
-        private CinemachineVirtualCamera? virtualCameraFollow;
-        private CinemachineFramingTransposer? framingTransposer;
-        private CinemachinePOV? followPOV;
+        private CinemachineVirtualCamera? _virtualCameraFollow;
+        private CinemachineFramingTransposer? _framingTransposer;
+        private CinemachinePOV? _followPOV;
+
+        private float? _setYawRequest = null;
 
         public override void EnsureInitialized()
         {
@@ -21,9 +23,9 @@ namespace CraftSharp.Control
             {
                 // Get virtual and render cameras
                 var followObj = transform.Find("Follow Virtual");
-                virtualCameraFollow = followObj.GetComponent<CinemachineVirtualCamera>();
-                followPOV = virtualCameraFollow!.GetCinemachineComponent<CinemachinePOV>();
-                framingTransposer = virtualCameraFollow.GetCinemachineComponent<CinemachineFramingTransposer>();
+                _virtualCameraFollow = followObj.GetComponent<CinemachineVirtualCamera>();
+                _followPOV = _virtualCameraFollow!.GetCinemachineComponent<CinemachinePOV>();
+                _framingTransposer = _virtualCameraFollow.GetCinemachineComponent<CinemachineFramingTransposer>();
 
                 initialized = true;
             }
@@ -53,21 +55,42 @@ namespace CraftSharp.Control
             if (cameraInfo.TargetScale != cameraInfo.CurrentScale)
             {
                 cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, Time.deltaTime * zoomSmoothFactor);
-                framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
+                _framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
             }
         }
 
         public override void SetTarget(Transform target)
         {
             EnsureInitialized();
-            virtualCameraFollow!.Follow = target;
+            _virtualCameraFollow!.Follow = target;
         }
 
-        public override Transform? GetTarget() => virtualCameraFollow?.Follow;
+        public override Transform? GetTarget()
+        {
+            if (_virtualCameraFollow == null)
+            {
+                return null;
+            }
+
+            return _virtualCameraFollow.Follow;
+        }
 
         public override void SetYaw(float yaw)
         {
-            followPOV!.m_HorizontalAxis.Value = yaw;
+            if (_followPOV == null)
+            {
+                _setYawRequest = yaw;
+            }
+            else
+            {
+                _followPOV.m_HorizontalAxis.Value = yaw;
+                _setYawRequest = null;
+            }
+        }
+
+        public override float GetYaw()
+        {
+            return _followPOV!.m_HorizontalAxis.Value;
         }
     }
 }

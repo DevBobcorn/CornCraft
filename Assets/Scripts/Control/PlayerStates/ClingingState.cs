@@ -1,11 +1,12 @@
 #nullable enable
+using KinematicCharacterController;
 using UnityEngine;
 
 namespace CraftSharp.Control
 {
-    public class ClimbState : IPlayerState
+    public class ClingingState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             
         }
@@ -18,15 +19,15 @@ namespace CraftSharp.Control
 
         public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
-            if (info.Spectating || info.Grounded || info.InLiquid) // Exit when player is grounded
+            if (info.Spectating || info.Grounded || info.Floating) // Exit when player is grounded
             {
-                info.OnWall = false;
+                info.Clinging = false;
                 return true;
             }
 
             return false;
         }
 
-        public override string ToString() => "Climb";
+        public override string ToString() => "Clinging";
     }
 }

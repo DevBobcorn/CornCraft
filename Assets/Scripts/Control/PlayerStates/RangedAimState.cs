@@ -1,11 +1,12 @@
 #nullable enable
+using KinematicCharacterController;
 using UnityEngine;
 
 namespace CraftSharp.Control
 {
     public class RangedAimState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             var ability = player.Ability;
 
@@ -26,7 +27,7 @@ namespace CraftSharp.Control
             if (attackStatus.StageTime < rangedAttack.SetupTime)
             {
                 info.Moving = false;
-                info.MoveVelocity = Vector3.zero;
+                currentVelocity = Vector3.zero;
 
                 //info.TargetVisualYaw += rangedAttack.SetupYaw / rangedAttack.SetupTime * Time.deltaTime;
 
@@ -68,13 +69,13 @@ namespace CraftSharp.Control
             if (!info.Attacking)
                 return true;
             
-            if (info.Spectating || info.InLiquid || !info.Grounded)
+            if (info.Spectating || info.Floating || !info.Grounded)
                 return true;
             
             return false;
         }
 
-        public void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void OnEnter(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Attacking = true;
 
@@ -91,19 +92,16 @@ namespace CraftSharp.Control
             attackStatus.AttackStage = 0;
             attackStatus.StageTime = 0F;
 
-            player.OverrideState(rangedAttack.DummyAnimationClip!, rangedAttack.DrawWeapon!);
-            player.CrossFadeState(PlayerAbility.SKILL, 0.01F);
+            player.OverrideStateAnimation(rangedAttack.DummyAnimationClip!, rangedAttack.DrawWeapon!);
+            player.StartCrossFadeState(PlayerAbility.SKILL, 0.01F);
 
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInOffhand);
             player.UseRootMotion = true;
 
-            rigidbody.velocity = Vector3.zero;
-            info.MoveVelocity = Vector3.zero;
-
             player.StartAiming();
         }
 
-        public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void OnExit(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Attacking = false;
 

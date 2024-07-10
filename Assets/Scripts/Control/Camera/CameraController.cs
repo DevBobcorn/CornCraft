@@ -94,10 +94,7 @@ namespace CraftSharp.Control
             return renderCamera!.transform;
         }
 
-        public virtual float GetYaw()
-        {
-            return GetTransform().eulerAngles.y;
-        }
+        public abstract float GetYaw();
 
         public abstract void SetYaw(float yaw);
 

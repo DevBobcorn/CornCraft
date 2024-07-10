@@ -294,7 +294,13 @@ namespace CraftSharp.UI
                 else
                     latencyText!.text =  $"{displayedLatency} ms";
             }
+        }
 
+        void FixedUpdate()
+        {
+            var game = CornApp.CurrentClient;
+            if (game == null) return;
+            
             // Update stamina bar position
             var targetPosition = UICamera!.ViewportToWorldPoint(
                     game!.CameraController.GetTargetViewportPos(STAMINA_TARGET_OFFSET));

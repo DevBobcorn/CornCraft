@@ -1,4 +1,5 @@
 #nullable enable
+using KinematicCharacterController;
 using UnityEngine;
 
 namespace CraftSharp.Control
@@ -20,7 +21,12 @@ namespace CraftSharp.Control
             Operations = op;
         }
 
-        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public bool IgnoreCollision()
+        {
+            return true;
+        }
+
+        public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             if (currentOperation is null)
                 return;
@@ -30,14 +36,14 @@ namespace CraftSharp.Control
             if (currentTime <= 0F)
             {
                 // Finish current operation
-                FinishOperation(info, rigidbody, player);
+                FinishOperation(info, motor, player);
 
                 currentOperationIndex++;
 
                 if (currentOperationIndex < Operations.Length)
                 {
                     // Start next operation in sequence
-                    StartOperation(info, rigidbody, player);
+                    StartOperation(info, motor, player);
                 }
             }
             else
@@ -47,17 +53,8 @@ namespace CraftSharp.Control
                     case ForceMoveDisplacementType.FixedDisplacement:
                         var moveProgress = currentTime / currentOperation.TimeTotal;
                         var curPosition1 = Vector3.Lerp(currentOperation.Destination!.Value, currentOperation.Origin, moveProgress);
-
-                        //rigidbody.position = curPosition1;
-                        //player.transform.position = curPosition1;
-                        rigidbody.MovePosition(curPosition1);
-                        break;
-                    case ForceMoveDisplacementType.CurvesDisplacement:
-                        // Sample animation 
-                        var curPosition2 = currentOperation.SampleTargetAt(currentOperation.TimeTotal - currentTime);
-                        //rigidbody.position = curPosition2;
-                        player.transform.position = curPosition2;
-                        //rigidbody.MovePosition(curPosition2);
+                        //motor.SetPosition(curPosition1);
+                        motor.MoveCharacter(curPosition1);
                         break;
                     case ForceMoveDisplacementType.RootMotionDisplacement:
                         // Do nothing
@@ -66,11 +63,24 @@ namespace CraftSharp.Control
                 }
 
                 // Call operation update
-                currentOperation.OperationUpdate?.Invoke(interval, inputData, info, rigidbody, player);
+                currentOperation.OperationUpdate?.Invoke(interval, inputData, info, motor, player);
             }
         }
 
-        private void StartOperation(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        {
+            if (currentOperation is not null)
+            {
+                switch (currentOperation.DisplacementType)
+                {
+                    case ForceMoveDisplacementType.RootMotionDisplacement:
+                        currentVelocity = Vector3.zero;
+                        break;
+                }
+            }
+        }
+
+        private void StartOperation(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             // Update current operation
             currentOperation = Operations[currentOperationIndex];
@@ -78,7 +88,7 @@ namespace CraftSharp.Control
             if (currentOperation is not null)
             {
                 // Invoke operation init if present
-                currentOperation.OperationInit?.Invoke(info, rigidbody, player);
+                currentOperation.OperationInit?.Invoke(info, motor, player);
                 
                 currentTime = currentOperation.TimeTotal;
 
@@ -87,47 +97,36 @@ namespace CraftSharp.Control
                     case ForceMoveDisplacementType.FixedDisplacement:
                         //rigidbody.isKinematic = true;
                         break;
-                    case ForceMoveDisplacementType.CurvesDisplacement:
-                        info.PlayingRootMotion = true;
-                        rigidbody.isKinematic = true;
-                        break;
                     case ForceMoveDisplacementType.RootMotionDisplacement:
                         info.PlayingRootMotion = true;
+                        player.UseRootMotion = true;
                         break;
                 }
             }
         }
 
-        private void FinishOperation(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        private void FinishOperation(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             if (currentOperation is not null)
             {
-                currentOperation.OperationExit?.Invoke(info, rigidbody, player);
+                currentOperation.OperationExit?.Invoke(info, motor, player);
 
                 switch (currentOperation.DisplacementType)
                 {
                     case ForceMoveDisplacementType.FixedDisplacement:
                         // Perform last move with rigidbody.MovePosition()
-                        rigidbody!.MovePosition(currentOperation.Destination!.Value);
-                        //rigidbody.isKinematic = false;
-                        break;
-                    case ForceMoveDisplacementType.CurvesDisplacement:
-                        // Update ground dist
-                        player.UpdatePlayerStatus();
-                        //Debug.Log($"Ground dist after movement: {info.CenterDownDist}");
-                        if (info.CenterDownDist < 0F) // Move upward a bit to avoid rigidbody from bouncing off the ground
-                        {
-                            player.transform.position += new Vector3(0F, -info.CenterDownDist, 0F);
-                        }
-                        info.PlayingRootMotion = false;
-                        rigidbody.MovePosition(player.transform.position);
-                        rigidbody.isKinematic = false;
-                        rigidbody.velocity = Vector3.zero;
-
-                        info.Grounded = true;
+                        motor.MoveCharacter(currentOperation.Destination!.Value);
                         break;
                     case ForceMoveDisplacementType.RootMotionDisplacement:
+                        player.UseRootMotion = false;
+                        
+                        motor.MoveCharacter(motor.transform.position + motor.CharacterUp * (-info.CenterDownDist + 0.01F));
+                        if (!info.Moving)
+                        {
+                            motor.BaseVelocity = Vector3.zero; // Reset velocity
+                        }
                         info.PlayingRootMotion = false;
+                        
                         break;
                 }
             }
@@ -149,17 +148,16 @@ namespace CraftSharp.Control
         public bool ShouldExit(PlayerActions inputData, PlayerStatus info) =>
                 currentOperationIndex >= Operations.Length && currentTime <= 0F;
 
-        public void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void OnEnter(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             if (Operations.Length > currentOperationIndex)
-                StartOperation(info, rigidbody, player);
+                StartOperation(info, motor, player);
             
-            //info.PlayingForcedAnimation = true;
         }
 
-        public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void OnExit(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
-            //info.PlayingForcedAnimation = false;
+            
         }
 
         public override string ToString() => $"ForceMove [{Name}] {currentOperationIndex + 1}/{Operations.Length} ({currentTime:0.00}/{currentOperation?.TimeTotal:0.00})";

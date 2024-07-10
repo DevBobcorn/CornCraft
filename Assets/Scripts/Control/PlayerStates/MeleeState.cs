@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using KinematicCharacterController;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,13 +8,13 @@ namespace CraftSharp.Control
 {
     public class MeleeState : IPlayerState
     {
-        public void UpdatePlayer(float interval, PlayerActions inputData, PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Sprinting = false;
             info.Moving = inputData.Gameplay.Movement.IsPressed();
 
             info.Grounded = true; // Force grounded
-            info.MoveVelocity = Vector3.zero; // Cancel move
+            currentVelocity = Vector3.zero; // Cancel move
 
             var attackStatus = info.AttackStatus;
             var meleeAttack = attackStatus.CurrentStagedAttack;
@@ -74,12 +75,13 @@ namespace CraftSharp.Control
             attackStatus.StageDamageStart = stageData.DamageStart;
             attackStatus.StageDamageEnd = stageData.DamageEnd;
 
-            player.OverrideState(meleeAttack.DummyAnimationClip!, stageData.AnimationClip!);
-            player.CrossFadeState(PlayerAbility.SKILL, 0F);
+            player.OverrideStateAnimation(meleeAttack.DummyAnimationClip!, stageData.AnimationClip!);
+            player.StartCrossFadeState(PlayerAbility.SKILL, 0F);
             //player.TurnToAttackTarget();
 
             if (stageData.VisualFXPrefab != null)
             {
+                /*
                 var fxObj = GameObject.Instantiate(stageData.VisualFXPrefab);
                 // Disable loop for all particle components
                 foreach (var c in fxObj.GetComponentsInChildren<ParticleSystem>())
@@ -87,6 +89,7 @@ namespace CraftSharp.Control
                     // Main module? c.loop = false;
                 }
                 player.AttachVisualFX(fxObj!);
+                */
             }
         }
 
@@ -101,7 +104,7 @@ namespace CraftSharp.Control
             if (!info.Attacking)
                 return true;
             
-            if (info.Spectating || info.InLiquid || !info.Grounded)
+            if (info.Spectating || info.Floating || !info.Grounded)
                 return true;
             
             return false;
@@ -110,7 +113,7 @@ namespace CraftSharp.Control
         private Action<InputAction.CallbackContext>? chargedAttackCallback;
         private Action<InputAction.CallbackContext>? normalAttackCallback;
 
-        public void OnEnter(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void OnEnter(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Attacking = true;
 
@@ -128,9 +131,6 @@ namespace CraftSharp.Control
 
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInMainHand);
             player.UseRootMotion = true;
-
-            rigidbody.velocity = Vector3.zero;
-            info.MoveVelocity = Vector3.zero;
 
             // Register input action events
             player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
@@ -150,7 +150,7 @@ namespace CraftSharp.Control
             };
         }
 
-        public void OnExit(PlayerStatus info, Rigidbody rigidbody, PlayerController player)
+        public void OnExit(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Attacking = false;
 

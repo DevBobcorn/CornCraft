@@ -19,20 +19,22 @@ namespace CraftSharp.Control
 
         // Virtual camera and camera components
         [SerializeField] private CinemachineVirtualCamera? virtualCameraFollow;
-        private CinemachineFramingTransposer? framingTransposer;
+        private CinemachineFramingTransposer? _framingTransposer;
         [SerializeField] private CinemachineVirtualCamera? virtualCameraAim;
 
-        private CinemachinePOV? followPOV, aimingPOV;
+        private CinemachinePOV? _followPOV, _aimingPOV;
+
+        private float? _setYawRequest = null;
 
         public override void EnsureInitialized()
         {
             if (!initialized)
             {
                 // Get virtual and render cameras
-                followPOV = virtualCameraFollow!.GetCinemachineComponent<CinemachinePOV>();
-                framingTransposer = virtualCameraFollow.GetCinemachineComponent<CinemachineFramingTransposer>();
+                _followPOV = virtualCameraFollow!.GetCinemachineComponent<CinemachinePOV>();
+                _framingTransposer = virtualCameraFollow.GetCinemachineComponent<CinemachineFramingTransposer>();
 
-                aimingPOV = virtualCameraAim!.GetCinemachineComponent<CinemachinePOV>();
+                _aimingPOV = virtualCameraAim!.GetCinemachineComponent<CinemachinePOV>();
 
                 initialized = true;
             }
@@ -72,8 +74,13 @@ namespace CraftSharp.Control
                 virtualCameraFollow!.m_Lens.FieldOfView = fov;
                 spriteRenderCamera!.fieldOfView = fov;
 
-                framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
-                framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
+                _framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
+                _framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
+            }
+
+            if (_setYawRequest != null)
+            {
+                SetYaw(_setYawRequest.Value);
             }
         }
 
@@ -92,44 +99,6 @@ namespace CraftSharp.Control
             return virtualCameraFollow == null ? null : virtualCameraFollow.Follow;
         }
 
-        public override void EnableAimingCamera(bool enable)
-        {
-            EnsureInitialized();
-            IsAiming = enable;
-
-            if (enable)
-            {
-                aimingPOV!.m_HorizontalAxis.Value = followPOV!.m_HorizontalAxis.Value;
-                aimingPOV!.m_VerticalAxis.Value = followPOV!.m_VerticalAxis.Value;
-
-                virtualCameraAim!.MoveToTopOfPrioritySubqueue();
-                EventManager.Instance.Broadcast(new CrosshairEvent(true));
-            }
-            else
-            {
-                followPOV!.m_HorizontalAxis.Value = aimingPOV!.m_HorizontalAxis.Value;
-                followPOV!.m_VerticalAxis.Value = aimingPOV!.m_VerticalAxis.Value;
-
-                virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
-                EventManager.Instance.Broadcast(new CrosshairEvent(false));
-            }
-        }
-
-        public override void SetYaw(float yaw)
-        {
-            followPOV!.m_HorizontalAxis.Value = yaw;
-        }
-
-        public override float GetYaw()
-        {
-            if (IsAiming)
-                return aimingPOV!.m_HorizontalAxis.Value;
-            
-            return followPOV!.m_HorizontalAxis.Value;
-        }
-
-        private bool IsFixed() => IsAiming;
-
         public override Vector3 GetTargetViewportPos(Vector3 offset)
         {
             if (IsFixed()) // Use screen center if camera is fixed
@@ -139,5 +108,53 @@ namespace CraftSharp.Control
             
             return base.GetTargetViewportPos(offset);
         }
+
+        public override void EnableAimingCamera(bool enable)
+        {
+            EnsureInitialized();
+            IsAiming = enable;
+
+            if (enable)
+            {
+                _aimingPOV!.m_HorizontalAxis.Value = _followPOV!.m_HorizontalAxis.Value;
+                _aimingPOV!.m_VerticalAxis.Value = _followPOV!.m_VerticalAxis.Value;
+
+                virtualCameraAim!.MoveToTopOfPrioritySubqueue();
+                EventManager.Instance.Broadcast(new CrosshairEvent(true));
+            }
+            else
+            {
+                _followPOV!.m_HorizontalAxis.Value = _aimingPOV!.m_HorizontalAxis.Value;
+                _followPOV!.m_VerticalAxis.Value = _aimingPOV!.m_VerticalAxis.Value;
+
+                virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
+                EventManager.Instance.Broadcast(new CrosshairEvent(false));
+            }
+        }
+
+        public override void SetYaw(float yaw)
+        {
+            if (_followPOV == null)
+            {
+                _setYawRequest = yaw;
+            }
+            else
+            {
+                _followPOV.m_HorizontalAxis.Value = yaw;
+                _setYawRequest = null;
+            }
+        }
+
+        public override float GetYaw()
+        {
+            if (IsAiming)
+            {
+                return _aimingPOV!.m_HorizontalAxis.Value;
+            }
+            
+            return _followPOV!.m_HorizontalAxis.Value;
+        }
+
+        private bool IsFixed() => IsAiming;
     }
 }
