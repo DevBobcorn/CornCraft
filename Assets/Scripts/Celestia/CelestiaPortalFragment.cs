@@ -59,7 +59,7 @@ namespace CraftSharp
                     var newBlock = CreateBlock(bridgeEdge,
                             new Vector3(i, verticalPos + edgeOffset - randomOffset, forwardPos + j));
                     var riseSpeed = defaultRiseSpeed + UnityEngine.Random.Range(-0.1F, 0.1F);
-                    bridgeBlocks.Add((newBlock, riseSpeed, targetHeight + edgeOffset));
+                    bridgeBlocks.Add((newBlock, riseSpeed, targetHeight + j * 0.0625F + edgeOffset));
                 }
             }
 

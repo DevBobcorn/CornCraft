@@ -83,7 +83,7 @@ MonoBehaviour:
   bridgeEdge: {fileID: 6280996216578334597, guid: 25df61a37a7361f4599002ff2af43432, type: 3}
   regularRail: {fileID: 5369743078286888248, guid: 064762344eaae9746803e3ea83c69103, type: 3}
   poweredRail: {fileID: 5369743078286888248, guid: 5f65e4cc5a28f6545bf55aa545c01c0a, type: 3}
-  portalOffset: 1.5
+  portalOffset: 2
   portalWidth: 4
   portalHeight: 10
   portalFrame: {fileID: 7992725482465875916, guid: f0358a370072ce7418bd063716a4b5ff, type: 3}
