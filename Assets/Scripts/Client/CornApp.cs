@@ -18,7 +18,7 @@ namespace CraftSharp
 {
     public class CornApp : MonoBehaviour
     {
-        public const int WINDOWED_APP_WIDTH = 1600, WINDOWED_APP_HEIGHT = 900;
+        public const int WINDOWED_APP_WIDTH = 1280, WINDOWED_APP_HEIGHT = 720;
         public const int EDITOR_FPS_LIMIT = 60;
 
         private BaseCornClient? client = null;
