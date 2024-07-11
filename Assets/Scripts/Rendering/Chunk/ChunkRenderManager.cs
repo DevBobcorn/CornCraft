@@ -384,7 +384,7 @@ namespace CraftSharp.Rendering
         #endregion
 
         #region Chunk updating
-        private const int CHUNK_CENTER = Chunk.SIZE / 2 + 1;
+        private const int CHUNK_CENTER = Chunk.SIZE >> 1;
         private const int MASK_CYCLE_LENGTH = 64; // Must be power of 2
         private int updateTargetMask = 0;
 
@@ -412,6 +412,8 @@ namespace CraftSharp.Rendering
             int chunkColumnSize = (World.GetDimension().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
             int offsetY = World.GetDimension().minY;
 
+            var renderCamera = client.CameraController.RenderCamera;
+
             // Add nearby chunks
             for (int cx = -viewDist;cx <= viewDist;cx++)
                 for (int cz = -viewDist;cz <= viewDist;cz++)
@@ -428,9 +430,11 @@ namespace CraftSharp.Rendering
                             // Create it and add the whole column to render list...
                             columnRender = GetChunkRenderColumn(chunkX, chunkZ, true)!;
                             for (int chunkY = 0;chunkY < chunkColumnSize;chunkY++)
-                            {   // Create chunk renders and queue them...
+                            {
+                                // Create chunk renders and queue them...
                                 if (!world[chunkX, chunkZ]!.ChunkIsEmpty(chunkY))
-                                {   // This chunk is not empty and needs to be added and queued
+                                {
+                                    // This chunk is not empty and needs to be added and queued
                                     var chunk = columnRender.GetChunkRender(chunkY, true);
                                     UpdateBuildPriority(playerLoc, chunk, offsetY);
                                     QueueChunkRenderBuild(chunk);
@@ -441,9 +445,9 @@ namespace CraftSharp.Rendering
                         {
                             foreach (var chunk in column.GetChunkRenders().Values)
                             {
-                                //if (chunk.State == ChunkBuildState.Delayed || chunk.State == ChunkBuildState.Cancelled)
-                                if (chunk.State == ChunkBuildState.Delayed)
-                                {   // Queue delayed or cancelled chunk builds...
+                                if (chunk.State == ChunkBuildState.Delayed && renderCamera.ChunkInViewport(chunkX, chunk.ChunkY, chunkZ, offsetY))
+                                {
+                                    // Queue delayed or cancelled chunk builds...
                                     UpdateBuildPriority(playerLoc, chunk, offsetY);
                                     QueueChunkRenderBuild(chunk);
                                 }

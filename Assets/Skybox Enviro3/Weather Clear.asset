@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cbac6e678443724c9bd2baf5d564c1d, type: 3}
   m_Name: Weather Clear
   m_EditorClassIdentifier: 
-  showEditor: 0
+  showEditor: 1
   showEffectControls: 0
   showCloudControls: 1
   showFlatCloudControls: 0
-  showFogControls: 0
+  showFogControls: 1
   showSkyControls: 0
   showLightingControls: 0
   showAuroraControls: 0
@@ -27,7 +27,7 @@ MonoBehaviour:
   showLightningControls: 0
   cloudsOverride:
     ambientLightIntensity: 1
-    showLayer1: 1
+    showLayer1: 0
     coverageLayer1: -0.2
     dilateCoverageLayer1: 0.929
     dilateTypeLayer1: 1
@@ -80,7 +80,7 @@ MonoBehaviour:
     skyColorTint: {r: 1, g: 1, b: 1, a: 1}
   fogOverride:
     fogDensity: 1
-    fogHeightFalloff: 0
+    fogHeightFalloff: 0.02
     fogHeight: 0
     fogDensity2: 0.2
     fogHeightFalloff2: 0.01

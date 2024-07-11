@@ -200,7 +200,7 @@ MonoBehaviour:
   showDensityControls: 0
   showTextureControls: 0
   showWindControls: 0
-  cloudAnimLayer1: {x: -0.43030992, y: 0, z: -0.3635879}
+  cloudAnimLayer1: {x: -0.094948575, y: 0, z: -0.8181392}
   cloudAnimLayer2: {x: 0, y: 0, z: 0}
   cloudAnimNonScaledLayer1: {x: 0, y: 0, z: 0}
   cloudAnimNonScaledLayer2: {x: 0, y: 0, z: 0}
@@ -221,14 +221,14 @@ MonoBehaviour:
   showSaveLoad: 0
   active: 1
   Settings:
-    simulate: 1
+    simulate: 0
     secSerial: 0
     minSerial: 0
-    hourSerial: 9
-    daySerial: 26
-    monthSerial: 6
-    yearSerial: 2024
-    timeOfDay: 9
+    hourSerial: 10
+    daySerial: 1
+    monthSerial: 1
+    yearSerial: 1
+    timeOfDay: 10
     latitude: 0
     longitude: 0
     utcOffset: 0
@@ -237,8 +237,8 @@ MonoBehaviour:
     nightLengthModifier: 1
   preset: {fileID: 11400000, guid: 82acdd278499d74498ad37dd931734d1, type: 2}
   showTimeControls: 1
-  showLocationControls: 0
-  LST: 49.986633
+  showLocationControls: 1
+  LST: 235.80591
 --- !u!114 &-1033463005042072443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -251,7 +251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 375eef0084d44344ebf50cbba7c1eadb, type: 3}
   m_Name: Sky Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 0
+  showModuleInspector: 1
   showSaveLoad: 1
   active: 1
   Settings:
@@ -319,9 +319,9 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     frontColorGradient2:
       serializedVersion: 2
-      key0: {r: 0.07058824, g: 0.09411765, b: 0.3019608, a: 1}
-      key1: {r: 0.07058824, g: 0.09411765, b: 0.3019608, a: 1}
-      key2: {r: 0.07058824, g: 0.09411765, b: 0.3019608, a: 0}
+      key0: {r: 0.014195444, g: 0.2735849, b: 0.2006383, a: 1}
+      key1: {r: 0, g: 0.09019608, b: 0.2, a: 1}
+      key2: {r: 0, g: 0.09019608, b: 0.2, a: 0}
       key3: {r: 0.6415094, g: 0.39747813, b: 0.26326096, a: 0}
       key4: {r: 0.34282663, g: 0.4525284, b: 0.6792453, a: 0}
       key5: {r: 0.4764151, g: 0.6458101, b: 1, a: 0}
@@ -349,9 +349,9 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     frontColorGradient3:
       serializedVersion: 2
-      key0: {r: 0.050980393, g: 0.07058824, b: 0.24705882, a: 1}
-      key1: {r: 0.050980393, g: 0.07058824, b: 0.24705882, a: 1}
-      key2: {r: 0.050980393, g: 0.07058824, b: 0.24705882, a: 0}
+      key0: {r: 0, g: 0.09106474, b: 0.2, a: 1}
+      key1: {r: 0, g: 0.09019608, b: 0.2, a: 1}
+      key2: {r: 0, g: 0.09019608, b: 0.2, a: 0}
       key3: {r: 0.35599858, g: 0.4621879, b: 0.6037736, a: 0}
       key4: {r: 0.21560162, g: 0.36202627, b: 0.5377358, a: 0}
       key5: {r: 0.15806337, g: 0.40404686, b: 0.9056604, a: 0}
@@ -359,7 +359,7 @@ MonoBehaviour:
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
       ctime1: 9830
-      ctime2: 23323
+      ctime2: 22937
       ctime3: 32768
       ctime4: 36044
       ctime5: 65535
@@ -379,13 +379,13 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     frontColorGradient4:
       serializedVersion: 2
-      key0: {r: 0.050980393, g: 0.07058824, b: 0.24705882, a: 1}
-      key1: {r: 0.050980393, g: 0.07058824, b: 0.24705882, a: 1}
-      key2: {r: 0.050980393, g: 0.07058824, b: 0.24705882, a: 0}
+      key0: {r: 0, g: 0.007843138, b: 0.039215688, a: 1}
+      key1: {r: 0, g: 0.007843138, b: 0.039215688, a: 1}
+      key2: {r: 0, g: 0.007843138, b: 0.039215688, a: 0}
       key3: {r: 0.16398183, g: 0.34142488, b: 0.5188679, a: 0}
       key4: {r: 0.14276282, g: 0.29724503, b: 0.45172718, a: 0}
       key5: {r: 0.12495552, g: 0.30849513, b: 0.6792453, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0.12495552, g: 0.30849513, b: 0.6792453, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
       ctime1: 9830
@@ -393,7 +393,7 @@ MonoBehaviour:
       ctime3: 32768
       ctime4: 36044
       ctime5: 65535
-      ctime6: 0
+      ctime6: 65535
       ctime7: 0
       atime0: 0
       atime1: 65535
@@ -409,9 +409,9 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     frontColorGradient5:
       serializedVersion: 2
-      key0: {r: 0.05490196, g: 0.13725491, b: 0.3019608, a: 1}
-      key1: {r: 0.05490196, g: 0.13725491, b: 0.3019608, a: 1}
-      key2: {r: 0.13349947, g: 0.15872619, b: 0.3773585, a: 0}
+      key0: {r: 0, g: 0.007843138, b: 0.039215688, a: 1}
+      key1: {r: 0, g: 0.007843138, b: 0.039215688, a: 1}
+      key2: {r: 0, g: 0.007843138, b: 0.039215688, a: 0}
       key3: {r: 0.06541474, g: 0.26604164, b: 0.6603774, a: 0}
       key4: {r: 0.05502618, g: 0.22379138, b: 0.5555024, a: 0}
       key5: {r: 0.055535786, g: 0.13623697, b: 0.3018868, a: 0}
@@ -469,13 +469,13 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     backColorGradient1:
       serializedVersion: 2
-      key0: {r: 0.08627451, g: 0.11372549, b: 0.34117648, a: 1}
+      key0: {r: 0.029369881, g: 0.04652626, b: 0.18867922, a: 1}
       key1: {r: 0.08627451, g: 0.11372549, b: 0.34117648, a: 1}
       key2: {r: 0.08810965, g: 0.113260925, b: 0.33962262, a: 0}
       key3: {r: 0.1439124, g: 0.24335337, b: 0.3962264, a: 0}
       key4: {r: 0.14462443, g: 0.22903053, b: 0.4716981, a: 0}
       key5: {r: 0.5564146, g: 0.617559, b: 0.7490196, a: 0}
-      key6: {r: 1.0093603, g: 1.120279, b: 1.3587542, a: 0}
+      key6: {r: 0.5564146, g: 0.617559, b: 0.7490196, a: 0}
       key7: {r: 1.0093603, g: 1.120279, b: 1.3587542, a: 0}
       ctime0: 0
       ctime1: 9830
@@ -499,9 +499,9 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     backColorGradient2:
       serializedVersion: 2
-      key0: {r: 0.07058824, g: 0.09411765, b: 0.3019608, a: 1}
-      key1: {r: 0.07058824, g: 0.09411765, b: 0.3019608, a: 1}
-      key2: {r: 0.06977572, g: 0.092986815, b: 0.3018868, a: 0}
+      key0: {r: 0, g: 0.08932413, b: 0.20754719, a: 1}
+      key1: {r: 0, g: 0.09019608, b: 0.20784314, a: 1}
+      key2: {r: 0, g: 0.09019608, b: 0.20784314, a: 0}
       key3: {r: 0.14462443, g: 0.2701294, b: 0.4716981, a: 0}
       key4: {r: 0.11814703, g: 0.235986, b: 0.4245283, a: 0}
       key5: {r: 0.5594963, g: 0.67877066, b: 0.9339623, a: 0}
@@ -529,9 +529,9 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     backColorGradient3:
       serializedVersion: 2
-      key0: {r: 0.047058824, g: 0.06666667, b: 0.24705882, a: 1}
-      key1: {r: 0.047058824, g: 0.06666667, b: 0.24705882, a: 1}
-      key2: {r: 0.047436804, g: 0.06790358, b: 0.24528301, a: 0}
+      key0: {r: 0, g: 0.007843138, b: 0.039215688, a: 1}
+      key1: {r: 0, g: 0.007843138, b: 0.039215688, a: 1}
+      key2: {r: 0, g: 0.007843138, b: 0.039215688, a: 0}
       key3: {r: 0.12615699, g: 0.2354197, b: 0.4245283, a: 0}
       key4: {r: 0.11881164, g: 0.21231776, b: 0.36504444, a: 0}
       key5: {r: 0.10622107, g: 0.30720985, b: 0.7264151, a: 0}
@@ -559,9 +559,9 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     backColorGradient4:
       serializedVersion: 2
-      key0: {r: 0.050980393, g: 0.07058824, b: 0.24705882, a: 1}
-      key1: {r: 0.050980393, g: 0.07058824, b: 0.24705882, a: 1}
-      key2: {r: 0.052064795, g: 0.06886638, b: 0.24528301, a: 0}
+      key0: {r: 0, g: 0.007843138, b: 0.039215688, a: 1}
+      key1: {r: 0, g: 0.007843138, b: 0.039215688, a: 1}
+      key2: {r: 0, g: 0.007843138, b: 0.039215688, a: 0}
       key3: {r: 0.13510145, g: 0.23963216, b: 0.41509432, a: 0}
       key4: {r: 0.12047333, g: 0.21410206, b: 0.37014997, a: 0}
       key5: {r: 0.16838734, g: 0.38746652, b: 0.8301887, a: 0}
@@ -589,16 +589,16 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     backColorGradient5:
       serializedVersion: 2
-      key0: {r: 0.050980393, g: 0.07450981, b: 0.28235295, a: 1}
-      key1: {r: 0.050980393, g: 0.07450981, b: 0.28235295, a: 1}
-      key2: {r: 0.052064802, g: 0.073716745, b: 0.2830189, a: 0}
+      key0: {r: 0, g: 0.007843138, b: 0.039215688, a: 1}
+      key1: {r: 0, g: 0.007843138, b: 0.039215688, a: 1}
+      key2: {r: 0, g: 0.007843138, b: 0.039215688, a: 0}
       key3: {r: 0.13883945, g: 0.256586, b: 0.4528302, a: 0}
       key4: {r: 0.10290611, g: 0.1901784, b: 0.3356322, a: 0}
       key5: {r: 0.12322002, g: 0.30227578, b: 0.6698113, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
-      ctime1: 9830
+      ctime1: 10601
       ctime2: 24479
       ctime3: 32768
       ctime4: 36044
@@ -900,7 +900,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    intensity: 3
+    intensity: 2
     sunScale: 12
     moonScale: 7
     starsTwinklingSpeed: 0.1
@@ -949,7 +949,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     skyColorTint: {r: 1, g: 1, b: 1, a: 1}
   preset: {fileID: 11400000, guid: 44f43418b8d8b8142863e38d1e49e174, type: 2}
-  showSkyControls: 0
+  showSkyControls: 1
   showSkySunControls: 1
   showSkyMoonControls: 0
   showSkyStarsControls: 0
@@ -1026,7 +1026,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b18a0693e95fd064e9d0a3b96e538236, type: 3}
   m_Name: Lighting Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 0
+  showModuleInspector: 1
   showSaveLoad: 1
   active: 1
   Settings:
@@ -1630,7 +1630,7 @@ MonoBehaviour:
   showSaveLoad: 0
   active: 1
   Settings:
-    season: 1
+    season: 3
     changeSeason: 1
     springStart: 60
     springEnd: 92
@@ -1772,7 +1772,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    temperature: 19.522558
+    temperature: 4.1700144
     temperatureWeatherMod: 0
     temperatureCustomMod: 0
     temperatureChangingSpeed: 0.1
@@ -1828,7 +1828,7 @@ MonoBehaviour:
     defaultSkyReflectionTex: {fileID: 0}
   preset: {fileID: 11400000, guid: da668770e38694d49af97ecfd05fd7eb, type: 2}
   showReflectionControls: 1
-  lastReflectionUpdate: 9.025
+  lastReflectionUpdate: 10.025
   lastReflectionUpdatePos: {x: -1.5256128, y: 3.05159, z: 2.0881348}
 --- !u!114 &5286980405202375680
 MonoBehaviour:
@@ -1898,7 +1898,7 @@ MonoBehaviour:
     floatingPointOriginMod: {x: 0, y: 0, z: 0}
     globalFogHeight: 0
     fogDensity: 1
-    fogHeightFalloff: 0
+    fogHeightFalloff: 0.02
     fogHeight: 0
     fogDensity2: 0.2
     fogHeightFalloff2: 0.01
@@ -1977,6 +1977,80 @@ MonoBehaviour:
   showVolumetricsControls: 0
   showUnityFogControls: 0
   fogLights:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}

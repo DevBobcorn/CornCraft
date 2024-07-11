@@ -117,7 +117,7 @@ namespace CraftSharp.Resource
             for (int i = buffer.vert.Length; i < verts.Length; i++) // For each new vertex in the mesh
             {
                 // Calculate vertex lighting
-                tints[i] = new float4(portalColor, 1F);
+                tints[i] = new float4(portalColor, 0.5F);
                 // Offset vertices
                 verts[i] = verts[i] + posOffset;
             }
