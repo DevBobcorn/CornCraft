@@ -81,7 +81,7 @@ namespace CraftSharp.Control
         #endregion
 
         private Animator? previewAnimator = null;
-        private PlayerAccessoryWidget? accessoryWidget = null;
+        private PlayerRenderWidget? accessoryWidget = null;
         private AnimatorOverrideController? animatorOverrideController;
         private AnimationModeDriver? m_Driver;
         private bool m_FixedTransform = false;
@@ -222,8 +222,8 @@ namespace CraftSharp.Control
                     previewAnimator.applyRootMotion = true;
 
                     // Add and initialize player widgets (See PlayerEntityRigged.cs)
-                    if (!(accessoryWidget = charaPreview.GetComponent<PlayerAccessoryWidget>()))
-                        accessoryWidget = charaPreview.AddComponent<PlayerAccessoryWidget>();
+                    if (!(accessoryWidget = charaPreview.GetComponent<PlayerRenderWidget>()))
+                        accessoryWidget = charaPreview.AddComponent<PlayerRenderWidget>();
                     accessoryWidget.Initialize();
 
                     var itemMountRef = previewAnimator!.GetBoneTransform(HumanBodyBones.Spine);

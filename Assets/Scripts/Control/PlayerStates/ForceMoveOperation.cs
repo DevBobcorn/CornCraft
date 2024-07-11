@@ -15,11 +15,6 @@ namespace CraftSharp.Control
         public readonly ForceMoveDisplacementType DisplacementType;
         public readonly Vector3 Origin;
 
-        // Offset using curves
-        public readonly Quaternion? RootMotionRotation;
-        public readonly float RootMotionPlaybackSpeed = 1F;
-        public readonly float RootMotionTimeOffset = 0F;
-
         // Offset using linear lerp
         public readonly Vector3? Destination;
         public readonly float TimeTotal;
@@ -29,14 +24,11 @@ namespace CraftSharp.Control
         public readonly OperationExitAction?   OperationExit;
         public readonly OperationUpdateAction? OperationUpdate;
 
-        public ForceMoveOperation(Vector3 origin, Quaternion rotation, float timeOffset, float time, OperationInitAction? init = null, OperationExitAction? exit = null, OperationUpdateAction? update = null)
+        public ForceMoveOperation(Vector3 origin, float time, OperationInitAction? init = null, OperationExitAction? exit = null, OperationUpdateAction? update = null)
         {
             DisplacementType = ForceMoveDisplacementType.RootMotionDisplacement;
 
             Origin = origin;
-
-            RootMotionRotation = rotation;
-            RootMotionTimeOffset = timeOffset;
 
             TimeTotal = time;
 

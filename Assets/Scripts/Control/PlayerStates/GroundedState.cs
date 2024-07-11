@@ -8,8 +8,8 @@ namespace CraftSharp.Control
 {
     public class GroundedState : IPlayerState
     {
-        private const float THRESHOLD_CLIMB_1M = -1.35F;
-        private const float THRESHOLD_CLIMB_UP = -0.51F;
+        private const float THRESHOLD_CLIMB_1M =  1.35F;
+        private const float THRESHOLD_CLIMB_UP = 0.626F;
 
         private bool _jumpRequested = false;
         private bool _jumpConfirmed = false;
@@ -18,24 +18,24 @@ namespace CraftSharp.Control
         public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             // Check climb over barrier
-            if (info.Moving && info.FrontDownDist <= THRESHOLD_CLIMB_UP &&
-                    info.FrontDownDist > THRESHOLD_CLIMB_1M && info.YawDeltaAbs < 10F && info.BarrierYawAngle < 30F) // Climb up platform
+            if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP &&
+                    info.BarrierHeight < THRESHOLD_CLIMB_1M && info.YawDeltaAbs < 10F && info.BarrierYawAngle < 30F) // Climb up platform
             {
                 if (info.YawDeltaAbs <= 10F && info.BarrierYawAngle < 30F) // Trying to moving forward
                 {
-                    var moveHorDir = Quaternion.AngleAxis(info.TargetVisualYaw, Vector3.up) * Vector3.forward;
-                    var horOffset = info.BarrierDistance - 1.0F;
+                    var forwardDir = player.GetTargetOrientation() * Vector3.forward;
 
                     var curPos  = motor.transform.position;
-                    var dstPos = curPos + (-info.FrontDownDist - 0.95F) * Vector3.up+ moveHorDir * horOffset;
+                    var dstPos = curPos + (info.BarrierHeight - 0.95F) * motor.CharacterUp + forwardDir * (0.7F - info.BarrierDistance);
 
                     player.StartForceMoveOperation("Climb over barrier",
                         new ForceMoveOperation[] {
-                                new(curPos, dstPos, 0.1F),
-                                new(dstPos, player.GetCurrentOrientation(), 0F, 0.9F,
+                                new(curPos, dstPos, 0.2F),
+                                new(dstPos, 0.9F,
                                     init: (info, motor, player) => {
                                         player.RandomizeMirroredFlag();
                                         player.StartCrossFadeState(PlayerAbility.CLIMB_1M);
+                                        motor.SetPosition(dstPos);
                                     },
                                     exit: (info, motor, player) => {
                                         info.Grounded = true;

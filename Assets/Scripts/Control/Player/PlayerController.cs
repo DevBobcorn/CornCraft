@@ -5,6 +5,7 @@ using UnityEngine;
 using CraftSharp.Event;
 using CraftSharp.Rendering;
 using KinematicCharacterController;
+using System.Linq;
 
 namespace CraftSharp.Control
 {
@@ -95,16 +96,14 @@ namespace CraftSharp.Control
         {
             var prevRender = _playerRender;
 
-            // Initialize and assign new visual gameobject
+            if (prevRender != null)
+            {
+                // Unload and then destroy previous render object, if present
+                prevRender.Unload();
+            }
+
             // Clear existing event subscriptions
             OnPlayerUpdate = null;
-            OnRandomizeMirroredFlag = null;
-            OnMeleeDamageStart = null;
-            OnMeleeDamageEnd = null;
-            OnCurrentItemChanged = null;
-            OnItemStateChanged = null;
-            OnCrossFadeState = null;
-            OnJumpRequest = null;
             
             // Update controller's player render
             if (renderObj.TryGetComponent<EntityRender>(out _playerRender))
@@ -170,12 +169,6 @@ namespace CraftSharp.Control
                 _cameraController!.SetTarget(transform);
             }
 
-            if (prevRender != null)
-            {
-                // Dispose previous render gameobject
-                Destroy(prevRender.gameObject);
-            }
-
             _playerRender!.transform.localPosition = Vector3.zero;
         }
 
@@ -192,8 +185,6 @@ namespace CraftSharp.Control
             // Initialize camera orientation, this has nothing to do with player yaw, just initial orientation
             _cameraController!.transform.rotation = Quaternion.LookRotation(_initialForward, _initialUpward);
 
-
-
             // Set stamina to max value
             Status!.StaminaLeft = _ability!.MaxStamina;
             // And broadcast current stamina
@@ -208,7 +199,7 @@ namespace CraftSharp.Control
             // Register hotbar item event for updating item visuals
             heldItemCallback = (e) =>
             {
-                OnCurrentItemChanged?.Invoke(e.ItemStack, e.ActionType);
+                OnCurrentItemChanged?.Invoke(e.ItemStack, e.ActionType, null);
                 // Exit attack state when active item is changed
                 Status!.Attacking = false;
                 CurrentActionType = e.ActionType;
@@ -271,8 +262,8 @@ namespace CraftSharp.Control
 
             // Reset player status
             Status.Grounded = false;
-            Status.InLiquid  = false;
-            Status.Clinging    = false;
+            Status.InLiquid = false;
+            Status.Clinging = false;
             Status.Sprinting = false;
 
             Status.EntityDisabled = true;
@@ -303,7 +294,7 @@ namespace CraftSharp.Control
         public event ItemStateEventHandler? OnItemStateChanged;
         public void ChangeItemState(CurrentItemState itemState) => OnItemStateChanged?.Invoke(itemState);
 
-        public delegate void ItemStackEventHandler(ItemStack? item, ItemActionType actionType);
+        public delegate void ItemStackEventHandler(ItemStack? item, ItemActionType actionType, PlayerSkillItemConfig? config);
         public event ItemStackEventHandler? OnCurrentItemChanged;
 
         public delegate void CrossFadeStateEventHandler(string stateName, float time, int layer, float timeOffset);
