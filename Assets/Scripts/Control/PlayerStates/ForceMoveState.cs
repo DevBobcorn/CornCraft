@@ -95,7 +95,6 @@ namespace CraftSharp.Control
                 switch (currentOperation.DisplacementType)
                 {
                     case ForceMoveDisplacementType.FixedDisplacement:
-                        //rigidbody.isKinematic = true;
                         break;
                     case ForceMoveDisplacementType.RootMotionDisplacement:
                         info.PlayingRootMotion = true;

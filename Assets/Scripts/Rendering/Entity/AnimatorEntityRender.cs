@@ -50,9 +50,10 @@ namespace CraftSharp.Rendering
 
         public virtual void UpdateAnimatorParams(PlayerStatus info) { }
 
-        public virtual void SetMirroredFlag(bool flag)
+        public virtual void RandomizeMirroredFlag()
         {
-            entityAnimator!.SetBool(MIRRORED_HASH, flag);
+            var mirrored = Time.frameCount % 2 == 0;
+            entityAnimator!.SetBool(MIRRORED_HASH, mirrored);
         }
 
         public virtual void SetJumpFlag()

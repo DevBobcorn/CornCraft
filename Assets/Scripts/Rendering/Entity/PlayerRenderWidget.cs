@@ -8,7 +8,7 @@ using CraftSharp.Resource;
 
 namespace CraftSharp.Rendering
 {
-    public class PlayerAccessoryWidget : MonoBehaviour
+    public class PlayerRenderWidget : MonoBehaviour
     {
         [SerializeField] private Transform? _mainHandRef;
         [SerializeField] private Transform? _offHandRef;
@@ -223,6 +223,22 @@ namespace CraftSharp.Rendering
             }
         }
 
+        private void StartItemAction()
+        {
+            if (_currentItem != null)
+            {
+                _currentItem.StartAction();
+            }
+        }
+
+        private void EndItemAction()
+        {
+            if (_currentItem != null)
+            {
+                _currentItem.EndAction();
+            }
+        }
+
         /// <summary>
         /// Used by skill editor to clean up temporary slots attached to chara preview.
         /// SetRefTransforms() needs to be called again before using these slots.
@@ -240,28 +256,25 @@ namespace CraftSharp.Rendering
             _player = GetComponentInParent<PlayerController>();
             _playerAnimator = GetComponent<Animator>();
 
-            // If this is used by an actual player object, instead of a preview object etc.
-            if (_player)
+            // Subscribe player controller events
+            if (_player != null)
             {
-                // These subscriptions will be cleared when the player render is replaced/destroyed,
-                // so it is not necessary to manually unregister them
-                _player.OnItemStateChanged += UpdateActionItemState;
+                _player.OnItemStateChanged += this.UpdateActionItemState;
+                _player.OnCurrentItemChanged += this.UpdateActiveItem;
+                _player.OnMeleeDamageStart += this.StartItemAction;
+                _player.OnMeleeDamageEnd += this.EndItemAction;
+            }
+        }
 
-                _player.OnCurrentItemChanged += (i, iat) => UpdateActiveItem(i, iat, _player.SkillItemConf);
-
-                _player.OnMeleeDamageStart += () => {
-                    if (_currentItem != null)
-                    {
-                        _currentItem.StartAction();
-                    }
-                };
-
-                _player.OnMeleeDamageEnd += () => {
-                    if (_currentItem != null)
-                    {
-                        _currentItem.EndAction();
-                    }
-                };
+        public void Unload()
+        {
+            // Unsubscribe player controller events
+            if (_player != null)
+            {
+                _player.OnItemStateChanged -= this.UpdateActionItemState;
+                _player.OnCurrentItemChanged -= this.UpdateActiveItem;
+                _player.OnMeleeDamageStart -= this.StartItemAction;
+                _player.OnMeleeDamageEnd -= this.EndItemAction;
             }
         }
 

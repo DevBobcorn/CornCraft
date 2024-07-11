@@ -6,8 +6,6 @@ namespace CraftSharp.Rendering
 {
     public class PlayerEntityRiggedRender : AnimatorEntityRender
     {
-        [SerializeField] private Renderer[] playerSkinRenderers = { };
-
         private static readonly int GROUNDED_HASH = Animator.StringToHash("Grounded");
         private static readonly int FLOATING_HASH = Animator.StringToHash("Floating");
         private static readonly int CLINGING_HASH = Animator.StringToHash("Clinging");
@@ -24,14 +22,11 @@ namespace CraftSharp.Rendering
         {
             base.Initialize(entityType, entity);
 
-            // Subscribe player events
+            // Subscribe player controller events
             var playerController = GetComponentInParent<PlayerController>();
             playerController.OnCrossFadeState += this.CrossFadeState;
             playerController.OnOverrideState += this.OverrideState;
-            playerController.OnRandomizeMirroredFlag += () => {
-                var mirrored = Time.frameCount % 2 == 0;
-                SetMirroredFlag(mirrored);
-            };
+            playerController.OnRandomizeMirroredFlag += this.RandomizeMirroredFlag;
             playerController.OnJumpRequest += this.SetJumpFlag;
 
             var visualObj = _visualTransform!.gameObject;
@@ -43,22 +38,43 @@ namespace CraftSharp.Rendering
             entityAnimator.runtimeAnimatorController = animatorOverrideController;
 
             // Add and initialize player widgets
-            var accessoryWidget = visualObj.AddComponent<PlayerAccessoryWidget>();
-            accessoryWidget.Initialize();
+            var renderWidget = visualObj.AddComponent<PlayerRenderWidget>();
+            renderWidget.Initialize();
 
             var itemMountRef = entityAnimator!.GetBoneTransform(HumanBodyBones.Spine);
             var mainHandRef = entityAnimator.GetBoneTransform(HumanBodyBones.RightHand);
             var offHandRef = entityAnimator.GetBoneTransform(HumanBodyBones.LeftHand);
-            accessoryWidget.SetRefTransforms(mainHandRef, offHandRef, itemMountRef);
+            renderWidget.SetRefTransforms(mainHandRef, offHandRef, itemMountRef);
+        }
 
-            UpdateSkinMaterial();
+        public override void Unload()
+        {
+            // Unsubscribe player controller events. This is necessary because we
+            // cannot effectively clear all subscriptions from the event publisher
+            var playerController = GetComponentInParent<PlayerController>();
+            playerController.OnCrossFadeState -= this.CrossFadeState;
+            playerController.OnOverrideState -= this.OverrideState;
+            playerController.OnRandomizeMirroredFlag -= this.RandomizeMirroredFlag;
+            playerController.OnJumpRequest -= this.SetJumpFlag;
+
+            var visualObj = _visualTransform!.gameObject;
+
+            // Unload player widgets, allowing it to unsubscribe their events from player controller
+            var renderWidget = visualObj.GetComponent<PlayerRenderWidget>();
+            renderWidget.Unload();
+
+            // Self destruction
+            if (this.gameObject != null)
+            {
+                Destroy(this.gameObject);
+            }
         }
 
         public void InitializeActiveItem(ItemStack? itemStack, ItemActionType actionType)
         {
             // Initialize player active item
-            var accessoryWidget = _visualTransform!.GetComponent<PlayerAccessoryWidget>();
-            accessoryWidget.UpdateActiveItem(itemStack, actionType);
+            var renderWidget = _visualTransform!.GetComponent<PlayerRenderWidget>();
+            renderWidget.UpdateActiveItem(itemStack, actionType);
         }
 
         public override void UpdateAnimatorParams(PlayerStatus info)
@@ -75,35 +91,6 @@ namespace CraftSharp.Rendering
 
             entityAnimator.SetBool(ROOT_MOTION_HASH, info.PlayingRootMotion);
             entityAnimator.SetBool(ATTACKING_HASH, info.Attacking);
-        }
-
-        private void UpdateSkinMaterial()
-        {
-            if (playerSkinRenderers.Length == 0)
-            {
-                // No render in this model uses player skin, no need to update
-                return;
-            }
-
-            /*
-            var nameLower = Name?.ToLower();
-            var skinMats = CornApp.CurrentClient!.MaterialManager!.SkinMaterials;
-
-            // Find skin and change materials
-            if (nameLower is not null && skinMats.ContainsKey(nameLower))
-            {
-                var mat = skinMats[nameLower];
-
-                foreach (var renderer in playerSkinRenderers)
-                    renderer.sharedMaterial = mat;
-
-                Debug.Log($"Skin applied to {nameLower}");
-            }
-            else
-            {
-                Debug.LogWarning($"Failed to apply skin for {nameLower}");
-            }
-            */
         }
     }
 }

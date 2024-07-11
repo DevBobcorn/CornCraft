@@ -147,19 +147,9 @@ namespace CraftSharp.Rendering
         /// </summary>
         protected float _pseudoRandomOffset = 0F;
 
-        public void Unload()
-        {
-            if (!_turnedIntoRagdoll && Health.Value <= 0F)
-            {
-                TurnIntoRagdoll();
-            }
-            
-            if (this.gameObject != null)
-            {
-                Destroy(this.gameObject);
-            }
-        }
-
+        /// <summary>
+        /// Initialize this entity render
+        /// </summary>
         public virtual void Initialize(EntityType entityType, Entity source)
         {
             if (_visualTransform == null)
@@ -194,6 +184,17 @@ namespace CraftSharp.Rendering
             _pseudoRandomOffset = UnityEngine.Random.Range(0F, 1F);
 
             _visualTransform.eulerAngles = new(0F, lastYaw, 0F);
+        }
+
+        /// <summary>
+        /// Finalize this entity render
+        /// </summary>
+        public virtual void Unload()
+        {
+            if (this.gameObject != null)
+            {
+                Destroy(this.gameObject);
+            }
         }
 
         public virtual void UpdateTransform(float tickMilSec)
@@ -258,7 +259,8 @@ namespace CraftSharp.Rendering
 
         protected virtual void TurnIntoRagdoll()
         {
-            if (ragdollPrefab != null) // Create ragdoll in place
+            // Create ragdoll in place
+            if (ragdollPrefab != null)
             {
                 var ragdollObj = GameObject.Instantiate(ragdollPrefab)!;
 
@@ -266,6 +268,7 @@ namespace CraftSharp.Rendering
 
                 var ragdoll = ragdollObj.GetComponentInChildren<EntityRagdoll>();
 
+                // Assign own rotation and localScale to ragdoll object
                 if (ragdoll != null)
                 {
                     ragdoll.Visual.rotation = _visualTransform!.rotation;
@@ -282,6 +285,7 @@ namespace CraftSharp.Rendering
                 }
             }
 
+            // Hide own visual
             if (_visualTransform != null)
             {
                 _visualTransform.gameObject.SetActive(false);

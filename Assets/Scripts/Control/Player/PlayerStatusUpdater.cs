@@ -11,7 +11,6 @@ namespace CraftSharp.Control
         // Ground distance check
         private const float GROUND_RAYCAST_START   = 2.5F;
         private const float GROUND_RAYCAST_DIST    = 5.0F;
-        private const float GROUND_RAYCAST_OFFSET  = 0.8F; // The distance to move forward for front raycast
 
         private const float LIQUID_RAYCAST_START   = 2.0F; // Liquid raycast goes downward from top of player
         private const float LIQUID_RAYCAST_DIST    = 5.0F;
@@ -34,7 +33,6 @@ namespace CraftSharp.Control
             bool groundCheck = motor.GroundingStatus.FoundAnyGround;
 
             var rayCenter = transform.position + GROUND_RAYCAST_START * motor.CharacterUp;
-            var rayFront  = rayCenter + frontDirNormalized * GROUND_RAYCAST_OFFSET;
 
             // Cast a ray downwards
             if (Physics.Raycast(rayCenter, -motor.CharacterUp, out RaycastHit centerDownHit, GROUND_RAYCAST_DIST, SolidLayer))
@@ -44,13 +42,37 @@ namespace CraftSharp.Control
 
             Debug.DrawRay(rayCenter, motor.CharacterUp * -GROUND_RAYCAST_DIST, Color.cyan);
 
-            // Cast another ray downwards in front of the player
-            if (Physics.Raycast(rayFront, -motor.CharacterUp, out RaycastHit frontDownHit, GROUND_RAYCAST_DIST, SolidLayer))
-                Status.FrontDownDist = frontDownHit.distance - GROUND_RAYCAST_START;
-            else
-                Status.FrontDownDist = GROUND_RAYCAST_DIST - GROUND_RAYCAST_START;
+            // Perform barrier check
+            var barrierCheckRayHeight = 0.1F;
+            var barrierCheckRayOrigin = transform.position + barrierCheckRayHeight * motor.CharacterUp;
+
+            // Cast another ray forward from the height of barrier to figure out the slope angle before the player
+            if (Physics.Raycast(barrierCheckRayOrigin, frontDirNormalized, out RaycastHit barrierForwardHit, 1F, SolidLayer))
+            {
+                Status.BarrierYawAngle = Vector3.Angle(frontDirNormalized, -barrierForwardHit.normal);
+                Status.BarrierDistance = barrierForwardHit.distance;
+
+                // Cast another ray downwards in front of the player
+                var rayFront  = rayCenter + frontDirNormalized * (barrierForwardHit.distance + 0.1F);
+
+                if (Physics.Raycast(rayFront, -motor.CharacterUp, out RaycastHit barrierDownwardHit, GROUND_RAYCAST_DIST, SolidLayer))
+                    Status.BarrierHeight = GROUND_RAYCAST_START - barrierDownwardHit.distance;
+                else
+                    Status.BarrierHeight = GROUND_RAYCAST_START - GROUND_RAYCAST_DIST;
+                
+                Debug.DrawRay(rayFront,  motor.CharacterUp * -GROUND_RAYCAST_DIST, Color.green);
+            }
+            else // No barrier
+            {
+                Status.BarrierYawAngle = 0F;
+                Status.BarrierDistance = 0F;
+
+                Status.BarrierHeight = GROUND_RAYCAST_START - GROUND_RAYCAST_DIST;
+            }
+
+            Debug.DrawRay(barrierCheckRayOrigin, frontDirNormalized, Color.blue);
+
             
-            Debug.DrawRay(rayFront,  motor.CharacterUp * -GROUND_RAYCAST_DIST, Color.green);
 
             // Perform water volume check, if not using water check from server
             if (!_useServerLiquidCheck)
@@ -107,23 +129,6 @@ namespace CraftSharp.Control
             {
                 Status.LiquidDist = 0F;
             }
-
-            var barrierCheckRayHeight = Status.FrontDownDist < -0.2F ? -Status.FrontDownDist - 0.1F : 0.1F;
-            var barrierCheckRayOrigin = transform.position + barrierCheckRayHeight * motor.CharacterUp;
-
-            // Cast another ray forward from the height of barrier to figure out the slope angle before the player
-            if (Physics.Raycast(barrierCheckRayOrigin, frontDirNormalized, out RaycastHit raycastHit, 1F, SolidLayer))
-            {
-                Status.BarrierYawAngle = Vector3.Angle(frontDirNormalized, -raycastHit.normal);
-                Status.BarrierDistance = raycastHit.distance;
-            }
-            else // No barrier
-            {
-                Status.BarrierYawAngle = 0F;
-                Status.BarrierDistance = 0F;
-            }
-
-            Debug.DrawRay(barrierCheckRayOrigin, frontDirNormalized, Color.blue);
         }
 
         private Action<PlayerLiquidEvent>? serverLiquidCallback;
