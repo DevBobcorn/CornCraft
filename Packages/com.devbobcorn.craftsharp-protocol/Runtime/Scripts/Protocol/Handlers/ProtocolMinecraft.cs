@@ -137,7 +137,7 @@ namespace CraftSharp.Protocol.Handlers
                 {
                     cancelToken.ThrowIfCancellationRequested();
 
-                    handler.OnHandlerUpdate();
+                    handler.OnHandlerUpdate(packetQueue.Count);
                     stopWatch.Restart();
 
                     while (packetQueue.TryTake(out Tuple<int, Queue<byte>>? packetInfo))
@@ -145,9 +145,16 @@ namespace CraftSharp.Protocol.Handlers
                         (int packetID, Queue<byte> packetData) = packetInfo;
                         HandlePacket(packetID, packetData);
 
+                        /*
+                        // Use this to figure out if there're certain types of packets that's taking too long to handle
+                        // And if that is the case, consider caching them somewhere to avoid flooding our packet queue
+                        if (stopWatch.ElapsedMilliseconds >= 50)
+                            Debug.Log(packetPalette.GetIncommingTypeById(packetID));
+                        */
+
                         if (stopWatch.Elapsed.Milliseconds >= 50)
                         {
-                            handler.OnHandlerUpdate();
+                            handler.OnHandlerUpdate(packetQueue.Count);
                             stopWatch.Restart();
                         }
                     }
@@ -1086,20 +1093,22 @@ namespace CraftSharp.Protocol.Handlers
                                 int localZ = (int)((block >> 4) & 0x0F);
                                 int localY = (int)(block & 0x0F);
 
-                                Block bloc = new Block((ushort)blockId);
+                                var bloc = new Block((ushort)blockId);
                                 int blockX = (sectionX * 16) + localX;
                                 int blockY = (sectionY * 16) + localY;
                                 int blockZ = (sectionZ * 16) + localZ;
                                 var blockLoc = new BlockLoc(blockX, blockY, blockZ);
-                                handler.GetChunkRenderManager().SetBlock(blockLoc, bloc);
+
+                                //handler.GetChunkRenderManager().SetBlock(blockLoc, bloc);
                             }
                             break;
                         }
                     case PacketTypesIn.BlockChange:
                         {
                             var blockLoc = dataTypes.ReadNextBlockLoc(packetData);
-                            handler.GetChunkRenderManager().SetBlock(blockLoc,
-                                    new Block((ushort) dataTypes.ReadNextVarInt(packetData)));
+                            var bloc = new Block((ushort) dataTypes.ReadNextVarInt(packetData));
+                            
+                            //handler.GetChunkRenderManager().SetBlock(blockLoc, bloc);
                             break;
                         }
                     case PacketTypesIn.BlockEntityData:

@@ -17,7 +17,7 @@ namespace CraftSharp.UI
         private static readonly Vector3 STAMINA_TARGET_OFFSET = new(0, -0.5f, 0f);
 
         // UI controls and objects
-        [SerializeField] private TMP_Text? latencyText, debugText, modeText;
+        [SerializeField] private TMP_Text? latencyText, packetsText, debugText, modeText;
         [SerializeField] private Animator? modePanelAnimator, crosshairAnimator, statusPanelAnimator;
         [SerializeField] private Button[] modeButtons = new Button[4];
         [SerializeField] private ValueBar? healthBar;
@@ -37,6 +37,7 @@ namespace CraftSharp.UI
         private bool modePanelShown  = false;
         private int  selectedMode    = 0;
         private int displayedLatency = 0;
+        private int displayedPackets  = 0;
 
         [SerializeField] [Range(0.1F, 1F)] private float transitionTime = 0.1F;
         private float transitionCooldown = 0F;
@@ -279,13 +280,12 @@ namespace CraftSharp.UI
             
             debugText!.text = game.GetInfoString(debugInfo);
 
-            var realLatency = game.GetOwnLatency();
-            if (displayedLatency != realLatency)
+            var currentLatency = game.GetOwnLatency();
+            var currentPackets = game.GetPacketCount();
+
+            if (displayedLatency != currentLatency)
             {
-                if (realLatency > displayedLatency)
-                    displayedLatency++;
-                else
-                    displayedLatency--;
+                displayedLatency = (int) Mathf.Lerp(displayedLatency, currentLatency, 0.55F);
                 
                 if (displayedLatency >= 500)
                     latencyText!.text =  $"<color=red>{displayedLatency} ms</color>";
@@ -293,6 +293,21 @@ namespace CraftSharp.UI
                     latencyText!.text =  $"<color=orange>{displayedLatency} ms</color>";
                 else
                     latencyText!.text =  $"{displayedLatency} ms";
+            }
+
+            if (displayedPackets != currentPackets)
+            {
+                displayedPackets = currentPackets;
+
+                if (packetsText != null)
+                {
+                    if (displayedPackets >= 500)
+                        packetsText.text =  $"[<color=red>{displayedPackets}</color>]";
+                    else if (displayedPackets >= 100)
+                        packetsText.text =  $"[<color=orange>{displayedPackets}</color>]";
+                    else
+                        packetsText.text =  $"[{displayedPackets}]";
+                }
             }
         }
 

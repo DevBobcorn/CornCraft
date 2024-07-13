@@ -156,7 +156,7 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Called ~20 times per second (20 ticks per second)
         /// </summary>
-        void OnHandlerUpdate();
+        void OnHandlerUpdate(int pc);
 
         /// <summary>
         /// Called when an entity has spawned

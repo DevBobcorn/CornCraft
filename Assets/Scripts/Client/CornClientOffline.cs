@@ -164,6 +164,7 @@ namespace CraftSharp
         public override string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
         public override string GetSessionID() => string.Empty;
         public override double GetServerTPS() => 20;
+        public override int GetPacketCount() => 0;
         public override float GetTickMilSec() => 0.05F;
 
         /// <summary>
@@ -218,8 +219,9 @@ namespace CraftSharp
 
             if (withDebugInfo)
             {
-                var targetLoc = interactionUpdater == null ? null : interactionUpdater.TargetBlockLoc;
                 var playerLoc = GetLocation();
+                /*
+                var targetLoc = interactionUpdater == null ? null : interactionUpdater.TargetBlockLoc;
                 var blockLoc = playerLoc.GetBlockLoc();
 
                 string targetInfo, locInfo;
@@ -239,6 +241,8 @@ namespace CraftSharp
                 
                 return baseString + $"\nLoc: {playerLoc}\n{locInfo}\n{targetInfo}\n{PlayerController.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
+                */
+                return baseString + $"\nLoc: {playerLoc}\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
             }
             
             return baseString;

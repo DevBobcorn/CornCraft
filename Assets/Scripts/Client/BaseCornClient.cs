@@ -88,6 +88,7 @@ namespace CraftSharp
         public abstract string GetSessionID();
         public abstract double GetServerTPS();
         public abstract float GetTickMilSec();
+        public abstract int GetPacketCount();
         // Retrieve gameplay info
         public abstract IChunkRenderManager GetChunkRenderManager();
         public abstract Container? GetInventory(int inventoryId);
