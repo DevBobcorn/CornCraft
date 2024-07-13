@@ -52,6 +52,7 @@ namespace CraftSharp
         private const int maxSamples = 5;
         private readonly List<double> tpsSamples = new(maxSamples);
         private double sampleSum = 0;
+        private int packetCount = 0;
         
         TcpClient? tcpClient;
         IMinecraftCom? handler;
@@ -245,7 +246,7 @@ namespace CraftSharp
         /// <summary>
         /// Called ~20 times per second by the protocol handler (on net read thread)
         /// </summary>
-        public void OnHandlerUpdate()
+        public void OnHandlerUpdate(int pc)
         {
             lock (chatQueue)
             {
@@ -277,6 +278,7 @@ namespace CraftSharp
                 }
             }
 
+            packetCount = pc;
         }
 
         #region Disconnect logic
@@ -402,7 +404,7 @@ namespace CraftSharp
             }
             else
             {
-                TaskWithResult<T> taskWithResult = new TaskWithResult<T>(task);
+                TaskWithResult<T> taskWithResult = new(task);
                 lock (threadTasksLock)
                 {
                     threadTasks.Enqueue(taskWithResult.ExecuteSynchronously);
@@ -467,6 +469,7 @@ namespace CraftSharp
         public override string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
         public override string GetSessionID() => sessionId!;
         public override double GetServerTPS() => averageTPS;
+        public override int GetPacketCount() => packetCount;
         public override float GetTickMilSec() => (float)(1D / averageTPS);
 
         /// <summary>
@@ -521,8 +524,10 @@ namespace CraftSharp
 
             if (withDebugInfo)
             {
-                var targetLoc = interactionUpdater == null ? null : interactionUpdater.TargetBlockLoc;
                 var playerLoc = GetLocation();
+
+                /*
+                var targetLoc = interactionUpdater == null ? null : interactionUpdater.TargetBlockLoc;
                 var blockLoc = playerLoc.GetBlockLoc();
 
                 string targetInfo, locInfo;
@@ -541,6 +546,8 @@ namespace CraftSharp
                 
                 return baseString + $"\nLoc: {playerLoc}\n{locInfo}\n{targetInfo}\n{PlayerController?.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
+                */
+                return baseString + $"\nLoc: {playerLoc}\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
             }
             
             return baseString;
