@@ -64,7 +64,7 @@ namespace CraftSharp.Rendering
             renderWidget.Unload();
 
             // Self destruction
-            if (this.gameObject != null)
+            if (this != null)
             {
                 Destroy(this.gameObject);
             }

@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +8,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 
 using CraftSharp.Resource;
+using UnityEngine.Profiling;
 
 namespace CraftSharp.Rendering
 {
@@ -194,8 +194,16 @@ namespace CraftSharp.Rendering
                             return;
 
                         // TODO Improve below cleaning
-                        chunkRender.GetComponent<MeshFilter>().sharedMesh?.Clear(false);
+                        Profiler.BeginSample("Clear chunk render mesh");
+
+                        var mesh = chunkRender.GetComponent<MeshFilter>().sharedMesh;
+                        if (mesh != null)
+                        {
+                            mesh.Clear(false);
+                        }
                         chunkRender.ClearCollider();
+                    
+                        Profiler.EndSample();
 
                         chunkRender.State = ChunkBuildState.Ready;
                     });
@@ -204,9 +212,15 @@ namespace CraftSharp.Rendering
                 }
                 else
                 {
-                    Loom.QueueOnMainThread(() => {
+                    Loom.QueueOnMainThreadMinor(() => {
                         if (chunkRender == null || chunkRender.gameObject == null)
                             return;
+                        
+                        Profiler.BeginSample("Update chunk render mesh");
+
+                        Profiler.BeginSample("Build and apply mesh data");
+
+                        Profiler.BeginSample("Build mesh data");
 
                         // Visual Mesh
                         // Count layers, vertices and face indices
@@ -221,7 +235,7 @@ namespace CraftSharp.Rendering
                         }
                         
                         var meshDataArr  = Mesh.AllocateWritableMeshData(1);
-                        var materialArr  = new UnityEngine.Material[layerCount];
+                        var materialArr  = new Material[layerCount];
                         var meshData = meshDataArr[0];
                         meshData.subMeshCount = layerCount;
 
@@ -294,8 +308,15 @@ namespace CraftSharp.Rendering
                             }
                         }
 
+                        Profiler.EndSample(); // "Build mesh data"
+                        Profiler.BeginSample("Create mesh object");
+
                         var visualMesh = new Mesh { subMeshCount = layerCount };
                         Mesh.ApplyAndDisposeWritableMeshData(meshDataArr, visualMesh);
+
+                        Profiler.EndSample(); // "Create mesh object"
+
+                        Profiler.EndSample(); // "Build and apply mesh data"
 
                         visualMesh.RecalculateNormals();
                         visualMesh.RecalculateBounds();
@@ -309,6 +330,10 @@ namespace CraftSharp.Rendering
 
                         if (colVertCount > 0)
                         {
+                            Profiler.BeginSample("Build and apply mesh data");
+
+                            Profiler.BeginSample("Build mesh data");
+
                             var colMeshDataArr  = Mesh.AllocateWritableMeshData(1);
                             var colMeshData = colMeshDataArr[0];
                             colMeshData.subMeshCount = 1;
@@ -340,8 +365,16 @@ namespace CraftSharp.Rendering
                             }
 
                             colMeshData.SetSubMesh(0, new(0, (colVertCount / 2) * 3){ vertexCount = colVertCount });
+
+                            Profiler.EndSample(); // "Build mesh data"
+                            Profiler.BeginSample("Create mesh object");
+
                             var colliderMesh = new Mesh { subMeshCount = 1 };
                             Mesh.ApplyAndDisposeWritableMeshData(colMeshDataArr, colliderMesh);
+
+                            Profiler.EndSample(); // "Create mesh object"
+
+                            Profiler.EndSample(); // "Build and apply mesh data"
 
                             colliderMesh.RecalculateNormals();
                             colliderMesh.RecalculateBounds();
@@ -350,9 +383,15 @@ namespace CraftSharp.Rendering
 
                         }
                         else
+                        {
                             chunkRender.ClearCollider();
+                        }
+                        
+                        Profiler.EndSample(); // "Update chunk render mesh"
                         
                         chunkRender.State = ChunkBuildState.Ready;
+
+                        chunkRender.gameObject.SetActive(true);
                     });
 
                     return ChunkBuildResult.Succeeded;
@@ -371,7 +410,7 @@ namespace CraftSharp.Rendering
         // (or say PhysX) bug, so we dynamically build the mesh collider around the
         // player as a solution to this. See the problem discussion at
         // https://forum.unity.com/threads/ball-rolling-on-mesh-hits-edges.772760/
-        public void BuildTerrainCollider(World world, BlockLoc playerBlockLoc, MeshCollider movementCollider, MeshCollider liquidCollider, Action? callback)
+        public void BuildTerrainCollider(World world, BlockLoc playerBlockLoc, MeshCollider movementCollider, MeshCollider liquidCollider, Action callback)
         {
             int offsetY = World.GetDimension().minY;
             

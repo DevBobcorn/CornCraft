@@ -9,8 +9,8 @@ namespace CraftSharp.UI
 {
     public class FloatingUIManager : MonoBehaviour
     {
-        private Dictionary<int, FloatingUI> entityFloatingUIs = new();
-        [SerializeField] public AnimationCurve? UIScaleCurve;
+        private readonly Dictionary<int, FloatingUI> entityFloatingUIs = new();
+        public AnimationCurve? UIScaleCurve;
 
         public void AddForEntity(int entityId, EntityRender? render)
         {
