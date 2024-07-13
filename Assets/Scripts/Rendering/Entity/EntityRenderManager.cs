@@ -87,7 +87,11 @@ namespace CraftSharp.Rendering
             // destroy this entity first
             if (entityRenders.ContainsKey(entity.ID))
             {
-                entityRenders[entity.ID]?.Unload();
+                if (entityRenders[entity.ID] != null)
+                {
+                    entityRenders[entity.ID].Unload();
+                }
+                
                 entityRenders.Remove(entity.ID);
 
                 if (nearbyEntities.ContainsKey(entity.ID))

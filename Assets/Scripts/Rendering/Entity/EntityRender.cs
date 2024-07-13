@@ -191,7 +191,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         public virtual void Unload()
         {
-            if (this.gameObject != null)
+            if (this != null)
             {
                 Destroy(this.gameObject);
             }

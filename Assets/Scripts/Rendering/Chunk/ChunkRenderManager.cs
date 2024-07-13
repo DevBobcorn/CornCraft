@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -6,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.Profiling;
 using Unity.Mathematics;
 
@@ -20,14 +20,14 @@ namespace CraftSharp.Rendering
         public const string SOLID_LAYER_NAME = "Solid";
         public const string LIQUID_SURFACE_LAYER_NAME = "LiquidSurface";
 
-        [SerializeField] private Transform? blockEntityParent;
+        [SerializeField] private Transform blockEntityParent;
 
         #region GameObject Prefabs for each block entity type
-        [SerializeField] private GameObject? defaultPrefab;
+        [SerializeField] private GameObject defaultPrefab;
         #endregion
 
-        private readonly Dictionary<ResourceLocation, GameObject?> blockEntityPrefabs = new();
-        private GameObject? GetPrefabForType(ResourceLocation type) => blockEntityPrefabs.GetValueOrDefault(type, defaultPrefab);
+        private readonly Dictionary<ResourceLocation, GameObject> blockEntityPrefabs = new();
+        private GameObject GetPrefabForType(ResourceLocation type) => blockEntityPrefabs.GetValueOrDefault(type, defaultPrefab);
 
         /// <summary>
         /// World data, accessible on both Unity thread and mesh builder threads
@@ -74,11 +74,11 @@ namespace CraftSharp.Rendering
         private PriorityQueue<ChunkRender> chunkRendersToBeBuilt = new();
         private List<ChunkRender> chunkRendersBeingBuilt = new();
 
-        private BaseCornClient? client;
-        private ChunkRenderBuilder? builder;
+        private BaseCornClient client;
+        private ChunkRenderBuilder builder;
 
         // Terrain collider for movement
-        private MeshCollider? movementCollider, liquidCollider;
+        private MeshCollider movementCollider, liquidCollider;
 
         public void SetClient(BaseCornClient client) => this.client = client;
 
@@ -88,10 +88,38 @@ namespace CraftSharp.Rendering
         }
 
         #region Chunk render access
+        private ObjectPool<ChunkRender> chunkRenderPool;
+
+        private static ChunkRender CreateNewChunkRender()
+        {
+            // Create a new chunk render object...
+            var chunkObj = new GameObject($"Chunk [Pooled]")
+            {
+                layer = LayerMask.NameToLayer(ChunkRenderManager.SOLID_LAYER_NAME)
+            };
+            ChunkRender newChunk = chunkObj.AddComponent<ChunkRender>();
+            
+            return newChunk;
+        }
+
+        private static void GetChunkRender(ChunkRender chunk)
+        {
+            //chunk.gameObject.hideFlags = HideFlags.None;
+        }
+
+        private static void ReleaseChunkRender(ChunkRender chunk)
+        {
+            // Unparent and hide this chunk render
+            chunk.transform.parent = null;
+            var chunkObj = chunk.gameObject;
+            chunkObj.name = $"Chunk [Pooled]";
+            chunkObj.SetActive(false);
+        }
+
         private ChunkRenderColumn CreateChunkRenderColumn(int chunkX, int chunkZ)
         {
             // Create this chunk column...
-            GameObject columnObj = new GameObject($"Column [{chunkX}, {chunkZ}]");
+            var columnObj = new GameObject($"Column [{chunkX}, {chunkZ}]");
             ChunkRenderColumn newColumn = columnObj.AddComponent<ChunkRenderColumn>();
             newColumn.ChunkX = chunkX;
             newColumn.ChunkZ = chunkZ;
@@ -102,7 +130,7 @@ namespace CraftSharp.Rendering
             return newColumn;
         }
 
-        private ChunkRenderColumn? GetChunkRenderColumn(int chunkX, int chunkZ, bool createIfEmpty)
+        private ChunkRenderColumn GetChunkRenderColumn(int chunkX, int chunkZ, bool createIfEmpty)
         {
             int2 chunkCoord = new(chunkX, chunkZ);
             if (renderColumns.ContainsKey(chunkCoord))
@@ -110,7 +138,9 @@ namespace CraftSharp.Rendering
 
             if (createIfEmpty)
             {
+                Profiler.BeginSample("Create chunk render object");
                 ChunkRenderColumn newColumn = CreateChunkRenderColumn(chunkX, chunkZ);
+                Profiler.EndSample();
                 renderColumns.Add(chunkCoord, newColumn);
                 return newColumn;
             }
@@ -118,9 +148,14 @@ namespace CraftSharp.Rendering
             return null;
         }
 
-        public ChunkRender? GetChunkRender(int chunkX, int chunkY, int chunkZ)
+        public ChunkRender GetChunkRender(int chunkX, int chunkY, int chunkZ)
         {
-            return GetChunkRenderColumn(chunkX, chunkZ, false)?.GetChunkRender(chunkY, false);
+            var column = GetChunkRenderColumn(chunkX, chunkZ, false);
+
+            if (column == null)
+                return null;
+
+            return column.GetChunkRender(chunkY);
         }
 
         public bool IsChunkRenderReady(int chunkX, int chunkY, int chunkZ)
@@ -130,7 +165,7 @@ namespace CraftSharp.Rendering
             if (column == null)
                 return false;
             
-            var chunk = column.GetChunkRender(chunkY, false);
+            var chunk = column.GetChunkRender(chunkY);
             
             // Empty chunks (air) are null, those chunks are always ready
             return chunk == null || chunk.State == ChunkBuildState.Ready;
@@ -142,7 +177,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Store a chunk, invoked from network thread
         /// </summary>
-        public void StoreChunk(int chunkX, int chunkY, int chunkZ, int chunkColumnSize, Chunk? chunk)
+        public void StoreChunk(int chunkX, int chunkY, int chunkZ, int chunkColumnSize, Chunk chunk)
         {
             world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
         }
@@ -248,7 +283,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Get a chunk column from the world by a block location
         /// </summary>
-        public ChunkColumn? GetChunkColumn(BlockLoc blockLoc)
+        public ChunkColumn GetChunkColumn(BlockLoc blockLoc)
         {
             return world.GetChunkColumn(blockLoc);
         }
@@ -256,7 +291,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Get a chunk column from the world
         /// </summary>
-        public ChunkColumn? GetChunkColumn(int chunkX, int chunkZ)
+        public ChunkColumn GetChunkColumn(int chunkX, int chunkZ)
         {
             return world[chunkX, chunkZ];
         }
@@ -310,7 +345,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         /// <param name="blockLoc">Location of the block entity</param>
         /// <returns>Block entity render at the location. Null if not present</returns>
-        public BlockEntityRender? GetBlockEntityRender(BlockLoc blockLoc)
+        public BlockEntityRender GetBlockEntityRender(BlockLoc blockLoc)
         {
             if (blockEntityRenders.ContainsKey(blockLoc))
                 return blockEntityRenders[blockLoc];
@@ -322,7 +357,7 @@ namespace CraftSharp.Rendering
         /// Add a new block entity render to the world
         /// </summary>
         /// <param name="tags">Pass in null if auto-creating this block entity</param>
-        public void AddBlockEntityRender(BlockLoc blockLoc, BlockEntityType blockEntityType, Dictionary<string, object>? tags = null)
+        public void AddBlockEntityRender(BlockLoc blockLoc, BlockEntityType blockEntityType, Dictionary<string, object> tags = null)
         {
             // If the location is occupied by a block entity already
             if (blockEntityRenders.ContainsKey(blockLoc))
@@ -330,7 +365,7 @@ namespace CraftSharp.Rendering
                 var prevBlockEntity = blockEntityRenders[blockLoc];
                 if (prevBlockEntity.Type == blockEntityType) // Auto-created, keep it but replace data tags
                 {
-                    if (tag == null) // Auto-creating a block entity while it is already created
+                    if (tags == null) // Auto-creating a block entity while it is already created
                     {
                         // Do nothing
                     }
@@ -347,7 +382,7 @@ namespace CraftSharp.Rendering
                 }
             }
 
-            GameObject? blockEntityPrefab = GetPrefabForType(blockEntityType.BlockEntityId);
+            GameObject blockEntityPrefab = GetPrefabForType(blockEntityType.BlockEntityId);
 
             if (blockEntityPrefab != null)
             {
@@ -435,7 +470,7 @@ namespace CraftSharp.Rendering
                                 if (!world[chunkX, chunkZ]!.ChunkIsEmpty(chunkY))
                                 {
                                     // This chunk is not empty and needs to be added and queued
-                                    var chunk = columnRender.GetChunkRender(chunkY, true);
+                                    var chunk = columnRender.GetOrCreateChunkRender(chunkY, chunkRenderPool);
                                     UpdateBuildPriority(playerLoc, chunk, offsetY);
                                     QueueChunkRenderBuild(chunk);
                                 }
@@ -471,7 +506,7 @@ namespace CraftSharp.Rendering
                 var chunkCoord = chunkCoords[i];
                 if (Mathf.Abs(blockLoc.GetChunkX() - chunkCoord.x) > unloadDist || Mathf.Abs(blockLoc.GetChunkZ() - chunkCoord.y) > unloadDist)
                 {
-                    renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt);
+                    renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
                     renderColumns.Remove(chunkCoord);
                 }
             }
@@ -486,7 +521,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        private void QueueChunkRenderBuildIfNotEmpty(ChunkRender? chunkRender)
+        private void QueueChunkRenderBuildIfNotEmpty(ChunkRender chunkRender)
         {
             if (chunkRender != null) // Not empty(air) chunk
                 QueueChunkRenderBuild(chunkRender);
@@ -502,7 +537,7 @@ namespace CraftSharp.Rendering
                 int2 chunkCoord = new(chunkRender.ChunkX, chunkRender.ChunkZ);
                 if (renderColumns.ContainsKey(chunkCoord))
                 {
-                    renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt);
+                    renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
                     renderColumns.Remove(chunkCoord, out _);
                 }
                 chunkRender.State = ChunkBuildState.Cancelled;
@@ -531,7 +566,7 @@ namespace CraftSharp.Rendering
 
             chunkRender.TokenSource = new();
 
-            Profiler.BeginSample("Call Mesh Build");
+            Profiler.BeginSample("Task");
             
             Task.Run(() => {
                 var buildResult = builder!.Build(world, chunkData, chunkRender);
@@ -567,7 +602,7 @@ namespace CraftSharp.Rendering
             Loom.QueueOnMainThread(() => {
                 if (renderColumns.ContainsKey(chunkCoord))
                 {
-                    renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt);
+                    renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
                     renderColumns.Remove(chunkCoord);
                 }
 
@@ -611,7 +646,7 @@ namespace CraftSharp.Rendering
 
             foreach (var chunkCoord in chunkCoords)
             {
-                renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt);
+                renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
                 renderColumns.Remove(chunkCoord);
             }
             renderColumns.Clear();
@@ -638,18 +673,18 @@ namespace CraftSharp.Rendering
             if (column != null) // Queue this chunk to rebuild list...
             {
                 // Create the chunk render object if not present (previously empty)
-                var chunk = column.GetChunkRender(chunkY, true);
+                var chunk = column.GetOrCreateChunkRender(chunkY, chunkRenderPool);
 
                 // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                 QueueChunkRenderBuild(chunk);
 
                 if (blockLoc.GetChunkBlockY() == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
                 {   // Queue the chunk below, if it isn't empty
-                    QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkY - 1, false));
+                    QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkY - 1));
                 }
                 else if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1 && ((chunkY + 1) * Chunk.SIZE) < World.GetDimension().height) // In the top layer of this chunk
                 {   // Queue the chunk above, if it isn't empty
-                    QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkY + 1, false));
+                    QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkY + 1));
                 }
             }
 
@@ -672,14 +707,14 @@ namespace CraftSharp.Rendering
             var column = GetChunkRenderColumn(chunkX, chunkZ, false);
             if (column != null) // Queue this chunk to rebuild list...
             {   // Create the chunk render object if not present (previously empty)
-                var chunk = column.GetChunkRender(chunkY, true);
+                var chunk = column.GetOrCreateChunkRender(chunkY, chunkRenderPool);
 
                 // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                 QueueChunkRenderBuild(chunk);
             }
         }
 
-        public void InitializeTerrainCollider(BlockLoc playerBlockLoc, Action? callback = null)
+        public void InitializeTerrainCollider(BlockLoc playerBlockLoc, Action callback = null)
         {
             terrainColliderDirty = false;
 
@@ -721,6 +756,12 @@ namespace CraftSharp.Rendering
             });
         }
 
+        void Awake()
+        {
+            // Create Unity object pools on awake
+            chunkRenderPool = new(CreateNewChunkRender, GetChunkRender, ReleaseChunkRender, null, false, 500);
+        }
+
         void Start()
         {
             client = CornApp.CurrentClient;
@@ -728,12 +769,16 @@ namespace CraftSharp.Rendering
             var modelTable = ResourcePackManager.Instance.StateModelTable;
             builder = new(modelTable);
 
-            var movementColliderObj = new GameObject("Movement Collider");
-            movementColliderObj.layer = LayerMask.NameToLayer(MOVEMENT_LAYER_NAME);
+            var movementColliderObj = new GameObject("Movement Collider")
+            {
+                layer = LayerMask.NameToLayer(MOVEMENT_LAYER_NAME)
+            };
             movementCollider = movementColliderObj.AddComponent<MeshCollider>();
 
-            var liquidColliderObj = new GameObject("Liquid Collider");
-            liquidColliderObj.layer = LayerMask.NameToLayer(LIQUID_SURFACE_LAYER_NAME);
+            var liquidColliderObj = new GameObject("Liquid Collider")
+            {
+                layer = LayerMask.NameToLayer(LIQUID_SURFACE_LAYER_NAME)
+            };
             liquidCollider = liquidColliderObj.AddComponent<MeshCollider>();
         }
 
@@ -746,22 +791,21 @@ namespace CraftSharp.Rendering
 
             // Build chunks in queue...
             Profiler.BeginSample("Start chunk render build tasks");
-            if (newCount > 0)
+            // Start chunk building tasks...
+            while (newCount > 0 && chunkRendersToBeBuilt.Count > 0)
             {
-                // Start chunk building tasks...
-                while (chunkRendersToBeBuilt.Count > 0 && newCount > 0)
-                {
-                    var nextChunk = chunkRendersToBeBuilt.Dequeue();
+                var nextChunk = chunkRendersToBeBuilt.Dequeue();
 
-                    if (nextChunk == null || GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) == null)
-                    {   // Chunk is unloaded while waiting in the queue, ignore it...
-                        continue;
-                    }
-                    else
-                    {
-                        BuildChunkRender(nextChunk);
-                        newCount--;
-                    }
+                if (nextChunk == null || GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) == null)
+                {   // Chunk is unloaded while waiting in the queue, ignore it...
+                    continue;
+                }
+                else
+                {
+                    Profiler.BeginSample("Build tasks");
+                    BuildChunkRender(nextChunk);
+                    Profiler.EndSample();
+                    newCount--;
                 }
             }
             Profiler.EndSample();
