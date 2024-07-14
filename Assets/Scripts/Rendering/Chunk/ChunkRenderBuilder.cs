@@ -14,10 +14,14 @@ namespace CraftSharp.Rendering
 {
     public class ChunkRenderBuilder
     {
-        private static readonly int waterLayerIndex = ChunkRender.TypeIndex(RenderType.WATER);
-        private static readonly int lavaLayerIndex  = ChunkRender.TypeIndex(RenderType.SOLID);
+        private static readonly int WATER_LAYER_INDEX = ChunkRender.TypeIndex(RenderType.WATER);
+        private static readonly int LAVA_LAYER_INDEX  = ChunkRender.TypeIndex(RenderType.SOLID);
         public const int MOVEMENT_RADIUS = 3;
         public const int MOVEMENT_RADIUS_SQR = MOVEMENT_RADIUS * MOVEMENT_RADIUS;
+
+        private static int vertexBuildTimeSum = 0;
+        public static int VertexBuildTimeSum => vertexBuildTimeSum;
+        private static readonly Queue<int> vertexBuildTimeRecord = new(Enumerable.Repeat(0, 200));
 
         private static BlockLoc GetBlockLocInChunkRender(ChunkRender chunk, int x, int y, int z, int offsetY)
         {
@@ -36,22 +40,6 @@ namespace CraftSharp.Rendering
         {
             float l = world.GetBlockLight(location) / 9F;
             return math.max(0.5F, math.pow(l, 1.4f));
-        }
-
-        private float[] GetFaceLights(World world, BlockLoc blockLoc)
-        {
-            return new float[]
-            {
-                // Sample neighbors
-                GetBlockLight(world, blockLoc.Up()),
-                GetBlockLight(world, blockLoc.Down()),
-                GetBlockLight(world, blockLoc.North()),
-                GetBlockLight(world, blockLoc.South()),
-                GetBlockLight(world, blockLoc.East()),
-                GetBlockLight(world, blockLoc.West()),
-                // Sample self
-                GetBlockLight(world, blockLoc)
-            };
         }
 
         private float[] GetCornerLights(World world, BlockLoc blockLoc)
@@ -105,7 +93,7 @@ namespace CraftSharp.Rendering
 
             for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
             {
-                result[y * 9 + z * 3 + x] = world.GetAmbientOcclusion(blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
+                result[y * 9 + z * 3 + x] = false; // world.GetAmbientOcclusion(blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
             }
 
             return result;
@@ -115,6 +103,9 @@ namespace CraftSharp.Rendering
         {
             try
             {
+                var sw = new System.Diagnostics.Stopwatch();
+                sw.Start();
+
                 var ts = chunkRender.TokenSource;
 
                 int count = ChunkRender.TYPES.Length, layerMask = 0;
@@ -126,7 +117,7 @@ namespace CraftSharp.Rendering
                 
                 float3[] colliderVerts = { };
 
-                // Build chunk mesh block by block
+                // Build chunk vertices block by block
                 for (int x = 0;x < Chunk.SIZE;x++)
                 {
                     for (int y = 0;y < Chunk.SIZE;y++)
@@ -150,7 +141,7 @@ namespace CraftSharp.Rendering
                                 if (liquidCullFlags != 0)
                                 {
                                     var liquidHeights = world.GetLiquidHeights(blockLoc);
-                                    var liquidLayerIndex = state.InWater ? waterLayerIndex : lavaLayerIndex;
+                                    var liquidLayerIndex = state.InWater ? WATER_LAYER_INDEX : LAVA_LAYER_INDEX;
                                     var liquidTexture = FluidGeometry.LiquidTextures[state.InWater ? 0 : 1];
                                     var lights = GetCornerLights(world, blockLoc);
 
@@ -187,9 +178,22 @@ namespace CraftSharp.Rendering
                     }
                 }
 
+                var time = (int) sw.ElapsedMilliseconds;
+
+                lock (vertexBuildTimeRecord)
+                {
+                    if (vertexBuildTimeRecord.TryDequeue(out int prev))
+                    {
+                        vertexBuildTimeSum -= prev;
+                        vertexBuildTimeRecord.Enqueue(time);
+                        vertexBuildTimeSum += time;
+                    }
+                }
+
                 if (layerMask == 0) // Skip empty chunks...
                 {
-                    Loom.QueueOnMainThread(() => {
+                    Loom.QueueOnMainThread(() => 
+                    {
                         if (chunkRender == null || chunkRender.gameObject == null)
                             return;
 
@@ -494,7 +498,9 @@ namespace CraftSharp.Rendering
                     movementCollider!.sharedMesh = colliderMesh;
                 }
                 else
-                    movementCollider!.sharedMesh?.Clear();
+                {
+                    movementCollider!.sharedMesh = null;
+                }
                 
                 if (fldVertCount > 0)
                 {
@@ -532,7 +538,9 @@ namespace CraftSharp.Rendering
                     liquidCollider!.sharedMesh = colliderMesh;
                 }
                 else
-                    liquidCollider!.sharedMesh?.Clear();
+                {
+                    liquidCollider!.sharedMesh = null;
+                }
                 
                 colVertAttrs.Dispose();
 
