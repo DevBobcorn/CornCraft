@@ -41,10 +41,10 @@ namespace CraftSharp.Rendering
             BoxMaxZ = centerZ + LIGHT_CALC_BOX_RADIUS;
 
             lightBlockage = world.GetValuesFromSection(BoxMinX, BoxMinY, BoxMinZ, LIGHT_CALC_BOX_SIZE, LIGHT_CALC_BOX_SIZE,
-                    LIGHT_CALC_BOX_SIZE, state => state.LightBlockageLevel);
+                    LIGHT_CALC_BOX_SIZE, bloc => bloc.State.LightBlockageLevel);
             
             updatedValues = world.GetValuesFromSection(BoxMinX, BoxMinY, BoxMinZ, LIGHT_CALC_BOX_SIZE, LIGHT_CALC_BOX_SIZE,
-                    LIGHT_CALC_BOX_SIZE, state => state.LightEmissionLevel);
+                    LIGHT_CALC_BOX_SIZE, bloc => bloc.State.LightEmissionLevel);
         }
 
         public byte[,,] RecalculateLightValues()

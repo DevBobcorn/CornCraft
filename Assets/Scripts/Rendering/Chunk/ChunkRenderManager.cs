@@ -82,9 +82,13 @@ namespace CraftSharp.Rendering
 
         public void SetClient(BaseCornClient client) => this.client = client;
 
+        private static int dataBuildTimeSum = 0, vertexBuildTimeSum = 0;
+        private static readonly Queue<int> dataBuildTimeRecord = new(Enumerable.Repeat(0, 200));
+        private static readonly Queue<int> vertexBuildTimeRecord = new(Enumerable.Repeat(0, 200));
+
         public string GetDebugInfo()
         {
-            return $"Queued Chunks: {chunkRendersToBeBuilt.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Build Time Avg: {ChunkRenderBuilder.VertexBuildTimeSum / 200F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
+            return $"Queued Chunks: {chunkRendersToBeBuilt.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Data Build Time Avg: {dataBuildTimeSum / 200F:0.00} ms\n- Vert Build Time Avg: {vertexBuildTimeSum / 200F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
         }
 
         #region Chunk render access
@@ -427,7 +431,7 @@ namespace CraftSharp.Rendering
         {   // Get this chunk's build priority based on its current distance to the player,
             // a smaller value means a higher priority...
             chunk.Priority = (int)(
-                    new Location(chunk.ChunkX * Chunk.SIZE + CHUNK_CENTER, chunk.ChunkY * Chunk.SIZE + CHUNK_CENTER + offsetY,
+                    new Location(chunk.ChunkX * Chunk.SIZE + CHUNK_CENTER, chunk.ChunkYIndex * Chunk.SIZE + CHUNK_CENTER + offsetY,
                             chunk.ChunkZ * Chunk.SIZE + CHUNK_CENTER).DistanceTo(currentBlockLoc) / 16);
         }
 
@@ -471,15 +475,18 @@ namespace CraftSharp.Rendering
                                 {
                                     // This chunk is not empty and needs to be added and queued
                                     var chunk = columnRender.GetOrCreateChunkRender(chunkY, chunkRenderPool);
+                                    /*
                                     if (renderCamera.ChunkInViewport(chunkX, chunk.ChunkY, chunkZ, offsetY))
                                     {
-                                        UpdateBuildPriority(playerLoc, chunk, offsetY);
-                                        QueueChunkRenderBuild(chunk);
+                                        
                                     }
                                     else
                                     {
                                         chunk.State = ChunkBuildState.Delayed;
                                     }
+                                    */
+                                    UpdateBuildPriority(playerLoc, chunk, offsetY);
+                                    QueueChunkRenderBuild(chunk);
                                 }
                             }
                         }
@@ -487,7 +494,7 @@ namespace CraftSharp.Rendering
                         {
                             foreach (var chunk in column.GetChunkRenders().Values)
                             {
-                                if (chunk.State == ChunkBuildState.Delayed && renderCamera.ChunkInViewport(chunkX, chunk.ChunkY, chunkZ, offsetY))
+                                if (chunk.State == ChunkBuildState.Delayed && renderCamera.ChunkInViewport(chunkX, chunk.ChunkYIndex, chunkZ, offsetY))
                                 {
                                     // Queue delayed or cancelled chunk builds...
                                     UpdateBuildPriority(playerLoc, chunk, offsetY);
@@ -536,7 +543,7 @@ namespace CraftSharp.Rendering
 
         public void BuildChunkRender(ChunkRender chunkRender)
         {
-            int chunkX = chunkRender.ChunkX, chunkZ = chunkRender.ChunkZ;
+            int chunkX = chunkRender.ChunkX, chunkZ = chunkRender.ChunkZ, chunkYIndex = chunkRender.ChunkYIndex;
             var chunkColumnData = GetChunkColumn(chunkX, chunkZ);
 
             if (chunkColumnData == null) // Chunk column data unloaded, cancel
@@ -551,7 +558,7 @@ namespace CraftSharp.Rendering
                 return;
             }
 
-            var chunkData = chunkColumnData[chunkRender.ChunkY];
+            var chunkData = chunkColumnData[chunkYIndex];
 
             if (chunkData == null) // Chunk not available or is empty(air chunk), cancel
             {
@@ -562,7 +569,11 @@ namespace CraftSharp.Rendering
             if (!(  world.IsChunkColumnLoaded(chunkX, chunkZ - 1) && // ZNeg neighbor present
                     world.IsChunkColumnLoaded(chunkX, chunkZ + 1) && // ZPos neighbor present
                     world.IsChunkColumnLoaded(chunkX - 1, chunkZ) && // XNeg neighbor present
-                    world.IsChunkColumnLoaded(chunkX + 1, chunkZ) )) // XPos neighbor present
+                    world.IsChunkColumnLoaded(chunkX + 1, chunkZ) && // XPos neighbor present
+                    world.IsChunkColumnLoaded(chunkX - 1, chunkZ - 1) &&
+                    world.IsChunkColumnLoaded(chunkX - 1, chunkZ + 1) &&
+                    world.IsChunkColumnLoaded(chunkX + 1, chunkZ - 1) &&
+                    world.IsChunkColumnLoaded(chunkX + 1, chunkZ + 1) ))
             {
                 chunkRender.State = ChunkBuildState.Delayed;
                 return; // Not all neighbor data ready, delay it
@@ -575,7 +586,40 @@ namespace CraftSharp.Rendering
 
             Task.Run(() =>
             {
-                var buildResult = builder!.Build(world, chunkData, chunkRender);
+                var sw = new System.Diagnostics.Stopwatch();
+                sw.Start();
+
+                // Build chunk data
+                var buildData = world.GetChunkBuildData(chunkX, chunkZ, chunkYIndex);
+
+                var time = (int) sw.ElapsedMilliseconds;
+
+                lock (dataBuildTimeRecord)
+                {
+                    if (dataBuildTimeRecord.TryDequeue(out int prev))
+                    {
+                        dataBuildTimeSum -= prev;
+                        dataBuildTimeRecord.Enqueue(time);
+                        dataBuildTimeSum += time;
+                    }
+                }
+
+                sw.Restart();
+
+                // Build chunk vertex
+                var buildResult = builder.Build(buildData, chunkRender);
+
+                time = (int) sw.ElapsedMilliseconds;
+
+                lock (vertexBuildTimeRecord)
+                {
+                    if (vertexBuildTimeRecord.TryDequeue(out int prev))
+                    {
+                        vertexBuildTimeSum -= prev;
+                        vertexBuildTimeRecord.Enqueue(time);
+                        vertexBuildTimeSum += time;
+                    }
+                }
 
                 Loom.QueueOnMainThread(() =>
                 {
@@ -587,6 +631,7 @@ namespace CraftSharp.Rendering
                         chunkRendersBeingBuilt.Remove(chunkRender);
                     }
                 });
+
             }, chunkRender.TokenSource.Token);
         }
 

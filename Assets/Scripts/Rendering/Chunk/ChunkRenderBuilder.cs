@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Unity.Collections;
 using Unity.Mathematics;
 
 using CraftSharp.Resource;
-using UnityEngine.Profiling;
 
 namespace CraftSharp.Rendering
 {
@@ -16,18 +16,9 @@ namespace CraftSharp.Rendering
     {
         private static readonly int WATER_LAYER_INDEX = ChunkRender.TypeIndex(RenderType.WATER);
         private static readonly int LAVA_LAYER_INDEX  = ChunkRender.TypeIndex(RenderType.SOLID);
-        public const int MOVEMENT_RADIUS = 3;
+        public const int MOVEMENT_RADIUS = 4;
         public const int MOVEMENT_RADIUS_SQR = MOVEMENT_RADIUS * MOVEMENT_RADIUS;
-
-        private static int vertexBuildTimeSum = 0;
-        public static int VertexBuildTimeSum => vertexBuildTimeSum;
-        private static readonly Queue<int> vertexBuildTimeRecord = new(Enumerable.Repeat(0, 200));
-
-        private static BlockLoc GetBlockLocInChunkRender(ChunkRender chunk, int x, int y, int z, int offsetY)
-        {
-            // Offset y coordinate by the current dimension's minY...
-            return new(chunk.ChunkX * Chunk.SIZE + x, chunk.ChunkY * Chunk.SIZE + y + offsetY, chunk.ChunkZ * Chunk.SIZE + z);
-        }
+        public const int MOVEMENT_DIAMETER = MOVEMENT_RADIUS + 1 + MOVEMENT_RADIUS;
 
         private readonly Dictionary<int, BlockStateModel> modelTable;
 
@@ -36,76 +27,10 @@ namespace CraftSharp.Rendering
             this.modelTable = modelTable;
         }
 
-        private float GetBlockLight(World world, BlockLoc location)
-        {
-            float l = world.GetBlockLight(location) / 9F;
-            return math.max(0.5F, math.pow(l, 1.4f));
-        }
-
-        private float[] GetCornerLights(World world, BlockLoc blockLoc)
-        {
-            var result = new float[8];
-
-            for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
-            {
-                var sample = GetBlockLight(world, blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
-
-                if (y != 2 && z != 2 && x != 2) // [0] x0z0 y0
-                {
-                    result[0] += sample;
-                }
-                if (y != 2 && z != 2 && x != 0) // [1] x1z0 y0
-                {
-                    result[1] += sample;
-                }
-                if (y != 2 && z != 0 && x != 2) // [2] x0z1 y0
-                {
-                    result[2] += sample;
-                }
-                if (y != 2 && z != 0 && x != 0) // [3] x1z1 y0
-                {
-                    result[3] += sample;
-                }
-                if (y != 0 && z != 2 && x != 2) // [4] x0z0 y1
-                {
-                    result[4] += sample;
-                }
-                if (y != 0 && z != 2 && x != 0) // [5] x1z0 y1
-                {
-                    result[5] += sample;
-                }
-                if (y != 0 && z != 0 && x != 2) // [6] x0z1 y1
-                {
-                    result[6] += sample;
-                }
-                if (y != 0 && z != 0 && x != 0) // [7] x1z1 y1
-                {
-                    result[7] += sample;
-                }
-            }
-
-            return result.Select(x => x / 8F).ToArray();
-        }
-
-        private bool[] GetAllNeighborAO(World world, BlockLoc blockLoc)
-        {
-            var result = new bool[27];
-
-            for (int y = 0; y < 3; y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)
-            {
-                result[y * 9 + z * 3 + x] = false; // world.GetAmbientOcclusion(blockLoc + new BlockLoc(x - 1, y - 1, z - 1));
-            }
-
-            return result;
-        }
-
-        public ChunkBuildResult Build(World world, Chunk chunkData, ChunkRender chunkRender)
+        public ChunkBuildResult Build(ChunkBuildData data, ChunkRender chunkRender)
         {
             try
             {
-                var sw = new System.Diagnostics.Stopwatch();
-                sw.Start();
-
                 var ts = chunkRender.TokenSource;
 
                 int count = ChunkRender.TYPES.Length, layerMask = 0;
@@ -117,36 +42,127 @@ namespace CraftSharp.Rendering
                 
                 float3[] colliderVerts = { };
 
-                // Build chunk vertices block by block
-                for (int x = 0;x < Chunk.SIZE;x++)
+                var blocs = data.Blocks;
+                var light = data.Light;
+                var allao = data.AO;
+                var allcolor = data.Color;
+
+                int getCullFlags(int x, int y, int z, Block self, BlockNeighborCheck check)
                 {
-                    for (int y = 0;y < Chunk.SIZE;y++)
+                    int cullFlags = 0;
+
+                    if (check(self, blocs[x, y + 1, z])) // Up
+                        cullFlags |= (1 << 0);
+
+                    if (check(self, blocs[x, y - 1, z])) // Down
+                        cullFlags |= (1 << 1);
+                    
+                    if (check(self, blocs[x, y, z + 1])) // South
+                        cullFlags |= (1 << 2);
+
+                    if (check(self, blocs[x, y, z - 1])) // North
+                        cullFlags |= (1 << 3);
+                    
+                    if (check(self, blocs[x + 1, y, z])) // East
+                        cullFlags |= (1 << 4);
+
+                    if (check(self, blocs[x - 1, y, z])) // West
+                        cullFlags |= (1 << 5);
+                    
+                    return cullFlags;
+                }
+
+                float[] getCornerLights(int x, int y, int z)
+                {
+                    var result = new float[8];
+
+                    for (int y_ = 0; y_ < 3; y_++) for (int z_ = 0; z_ < 3; z_++) for (int x_ = 0; x_ < 3; x_++)
                     {
-                        for (int z = 0;z < Chunk.SIZE;z++)
+                        float sample = math.max(0.5F, math.pow(light[x + x_ - 1, y + y_ - 1, z + z_ - 1] / 9F, 1.4f));
+
+                        if (y_ != 2 && z_ != 2 && x_ != 2) // [0] x0z0 y0
                         {
+                            result[0] += sample;
+                        }
+                        if (y_ != 2 && z_ != 2 && x_ != 0) // [1] x1z0 y0
+                        {
+                            result[1] += sample;
+                        }
+                        if (y_ != 2 && z_ != 0 && x_ != 2) // [2] x0z1 y0
+                        {
+                            result[2] += sample;
+                        }
+                        if (y_ != 2 && z_ != 0 && x_ != 0) // [3] x1z1 y0
+                        {
+                            result[3] += sample;
+                        }
+                        if (y_ != 0 && z_ != 2 && x_ != 2) // [4] x0z0 y1
+                        {
+                            result[4] += sample;
+                        }
+                        if (y_ != 0 && z_ != 2 && x_ != 0) // [5] x1z0 y1
+                        {
+                            result[5] += sample;
+                        }
+                        if (y_ != 0 && z_ != 0 && x_ != 2) // [6] x0z1 y1
+                        {
+                            result[6] += sample;
+                        }
+                        if (y_ != 0 && z_ != 0 && x_ != 0) // [7] x1z1 y1
+                        {
+                            result[7] += sample;
+                        }
+                    }
+
+                    return result.Select(x => x / 8F).ToArray();
+                }
+
+                bool[] getAllNeighborAO(int x, int y, int z)
+                {
+                    var result = new bool[27];
+
+                    for (int y_ = 0; y_ < 3; y_++) for (int z_ = 0; z_ < 3; z_++) for (int x_ = 0; x_ < 3; x_++)
+                    {
+                        result[y_ * 9 + z_ * 3 + x_] = allao[x + x_ - 1, y + y_ - 1, z + z_ - 1];
+                    }
+
+                    return result;
+                }
+
+                // Build chunk vertices block by block
+                for (int x = 1;x <= Chunk.SIZE;x++) // From 1 to 16, because we have a padding for blocks in adjacent chunks
+                {
+                    int blocX = x - 1;
+
+                    for (int y = 1;y <= Chunk.SIZE;y++)
+                    {
+                        int blocY = y - 1;
+
+                        for (int z = 1;z <= Chunk.SIZE;z++)
+                        {
+                            int blocZ = z - 1;
+
                             if (ts.IsCancellationRequested)
                                 return ChunkBuildResult.Cancelled;
 
-                            var blockLoc = GetBlockLocInChunkRender(chunkRender, x, y, z, offsetY);
-
-                            var bloc = chunkData[x, y, z];
+                            var bloc = data.Blocks[x, y, z];
                             var state = bloc.State;
                             var stateId = bloc.StateId;
 
                             if (state.InLiquid) // Build liquid here
                             {
                                 var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                                int liquidCullFlags = world.GetCullFlags(blockLoc, bloc, neighborCheck);
+                                int liquidCullFlags = getCullFlags(x, y, z, bloc, neighborCheck);
 
                                 if (liquidCullFlags != 0)
                                 {
-                                    var liquidHeights = world.GetLiquidHeights(blockLoc);
+                                    var liquidHeights = new byte[9] { 15, 15, 15, 15, 15, 15, 15, 15, 15 }; // TODO: Implement
                                     var liquidLayerIndex = state.InWater ? WATER_LAYER_INDEX : LAVA_LAYER_INDEX;
                                     var liquidTexture = FluidGeometry.LiquidTextures[state.InWater ? 0 : 1];
-                                    var lights = GetCornerLights(world, blockLoc);
+                                    var lights = getCornerLights(x, y, z);
 
-                                    FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], new(z, y, x), liquidTexture,
-                                            liquidHeights, liquidCullFlags, lights, world.GetWaterColor(blockLoc));
+                                    FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], new float3(blocZ, blocY, blocX), liquidTexture,
+                                            liquidHeights, liquidCullFlags, lights, /*world.GetWaterColor(blockLoc)*/ new float3(1F));
                                     
                                     layerMask |= (1 << liquidLayerIndex);
                                 }
@@ -155,7 +171,7 @@ namespace CraftSharp.Rendering
                             // If air-like (air, water block, etc), ignore it...
                             if (state.LikeAir) continue;
                             
-                            int cullFlags = world.GetCullFlags(blockLoc, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
+                            int cullFlags = getCullFlags(x, y, z, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
                             
                             if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
@@ -163,30 +179,18 @@ namespace CraftSharp.Rendering
 
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;
-                                var color  = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, blockLoc, state);
-                                var lights = GetCornerLights(world, blockLoc);
-                                var ao = GetAllNeighborAO(world, blockLoc);
+                                var color  = allcolor[blocX, blocY, blocZ];
+                                var lights = getCornerLights(x, y, z);
+                                var ao = getAllNeighborAO(x, y, z);
 
                                 if (state.NoCollision)
-                                    models[chosen].Build(ref visualBuffer[layerIndex], new(z, y, x), cullFlags, ao, lights, color);
+                                    models[chosen].Build(ref visualBuffer[layerIndex], new float3(blocZ, blocY, blocX), cullFlags, ao, lights, color);
                                 else
-                                    models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new(z, y, x), cullFlags, ao, lights, color);
+                                    models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new float3(blocZ, blocY, blocX), cullFlags, ao, lights, color);
                                 
                                 layerMask |= (1 << layerIndex);
                             }
                         }
-                    }
-                }
-
-                var time = (int) sw.ElapsedMilliseconds;
-
-                lock (vertexBuildTimeRecord)
-                {
-                    if (vertexBuildTimeRecord.TryDequeue(out int prev))
-                    {
-                        vertexBuildTimeSum -= prev;
-                        vertexBuildTimeRecord.Enqueue(time);
-                        vertexBuildTimeSum += time;
                     }
                 }
 
@@ -409,6 +413,8 @@ namespace CraftSharp.Rendering
             }
         }
 
+        private static readonly Func<Block, Block> getBlock = (bloc) => bloc;
+
         // For player movement, it is not favorable to use per-chunk mesh colliders
         // because player can get stuck on the edge of chunks due to a bug of Unity
         // (or say PhysX) bug, so we dynamically build the mesh collider around the
@@ -417,27 +423,58 @@ namespace CraftSharp.Rendering
         public void BuildTerrainCollider(World world, BlockLoc playerBlockLoc, MeshCollider movementCollider, MeshCollider liquidCollider, Action callback)
         {
             int offsetY = World.GetDimension().minY;
+
+            var blocs = world.GetValuesFromSection(
+                    playerBlockLoc.X - MOVEMENT_RADIUS,
+                    playerBlockLoc.Y - MOVEMENT_RADIUS,
+                    playerBlockLoc.Z - MOVEMENT_RADIUS,
+                    MOVEMENT_DIAMETER, MOVEMENT_DIAMETER, MOVEMENT_DIAMETER, getBlock);
             
             float3[] movementVerts = { }, fluidVerts = { };
 
-            for (int x = -MOVEMENT_RADIUS;x <= MOVEMENT_RADIUS;x++)
-                for (int y = -MOVEMENT_RADIUS;y <= MOVEMENT_RADIUS;y++)
-                    for (int z = -MOVEMENT_RADIUS;z <= MOVEMENT_RADIUS;z++)
+            int getCullFlags(int x, int y, int z, Block self, BlockNeighborCheck check)
+            {
+                int cullFlags = 0;
+
+                if (check(self, blocs[x, y + 1, z])) // Up
+                    cullFlags |= (1 << 0);
+
+                if (check(self, blocs[x, y - 1, z])) // Down
+                    cullFlags |= (1 << 1);
+                
+                if (check(self, blocs[x, y, z + 1])) // South
+                    cullFlags |= (1 << 2);
+
+                if (check(self, blocs[x, y, z - 1])) // North
+                    cullFlags |= (1 << 3);
+                
+                if (check(self, blocs[x + 1, y, z])) // East
+                    cullFlags |= (1 << 4);
+
+                if (check(self, blocs[x - 1, y, z])) // West
+                    cullFlags |= (1 << 5);
+                
+                return cullFlags;
+            }
+
+            for (int x = -MOVEMENT_RADIUS + 1;x < MOVEMENT_RADIUS;x++)
+                for (int y = -MOVEMENT_RADIUS + 1;y < MOVEMENT_RADIUS;y++)
+                    for (int z = -MOVEMENT_RADIUS + 1;z < MOVEMENT_RADIUS;z++)
                     {
                         if (x * x + y * y + z * z > MOVEMENT_RADIUS_SQR)
                             continue;
 
                         var blockLoc = playerBlockLoc + new BlockLoc(x, y, z);
-                        var bloc = world.GetBlock(blockLoc);
+                        var bloc = blocs[MOVEMENT_RADIUS + x, MOVEMENT_RADIUS + y, MOVEMENT_RADIUS + z];
                         var state = bloc.State;
 
                         if (state.InWater || state.InLava) // Build liquid collider
                         {
                             var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                            int liquidCullFlags = world.GetCullFlags(blockLoc, bloc, neighborCheck);
+                            int liquidCullFlags = getCullFlags(x + MOVEMENT_RADIUS, y + MOVEMENT_RADIUS, z + MOVEMENT_RADIUS, bloc, neighborCheck);
 
                             if (liquidCullFlags != 0)
-                                FluidGeometry.BuildCollider(ref fluidVerts, new((float)blockLoc.Z, (float)blockLoc.Y, (float)blockLoc.X), liquidCullFlags);
+                                FluidGeometry.BuildCollider(ref fluidVerts, new(blockLoc.Z, blockLoc.Y, blockLoc.X), liquidCullFlags);
                         }
 
                         if (state.LikeAir || state.NoCollision)
@@ -445,15 +482,15 @@ namespace CraftSharp.Rendering
                         
                         // Build collider here
                         var stateId = bloc.StateId;
-                        int cullFlags = world.GetCullFlags(blockLoc, bloc, BlockNeighborChecks.NON_FULL_SOLID);
+                        int cullFlags = getCullFlags(x + MOVEMENT_RADIUS, y + MOVEMENT_RADIUS, z + MOVEMENT_RADIUS, bloc, BlockNeighborChecks.NON_FULL_SOLID);
                         
                         if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                         {
                             // They all have the same collider so we just pick the 1st one
-                            modelTable[stateId].Geometries[0].BuildCollider(ref movementVerts, new((float)blockLoc.Z, (float)blockLoc.Y, (float)blockLoc.X), cullFlags);
+                            modelTable[stateId].Geometries[0].BuildCollider(ref movementVerts, new(blockLoc.Z, blockLoc.Y, blockLoc.X), cullFlags);
                         }
                     }
-                
+
             Loom.QueueOnMainThread(() => {
                 int movVertCount = movementVerts.Length;
                 int fldVertCount = fluidVerts.Length;

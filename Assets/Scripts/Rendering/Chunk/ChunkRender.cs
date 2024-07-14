@@ -25,7 +25,13 @@ namespace CraftSharp.Rendering
             _                        => 0
         };
 
-        public int ChunkX, ChunkY, ChunkZ;
+        public int ChunkX, ChunkZ;
+        /// <summary>
+        /// Non-negative value marking the position of this chunk in the chunk column from bottom to top.
+        /// <br/>
+        /// This value always starts from 0, and is unaffected by y-offset value.
+        /// </summary>
+        public int ChunkYIndex;
         public ChunkBuildState State = ChunkBuildState.Pending;
 
         public CancellationTokenSource TokenSource = null;
@@ -58,6 +64,6 @@ namespace CraftSharp.Rendering
             TokenSource?.Cancel();
         }
 
-        public override string ToString() => $"[ChunkRender {ChunkX}, {ChunkY}, {ChunkZ}]";
+        public override string ToString() => $"[ChunkRender {ChunkX}, {ChunkYIndex}, {ChunkZ}]";
     }
 }
