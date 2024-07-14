@@ -11,41 +11,41 @@ namespace CraftSharp.Rendering
 
         private readonly Dictionary<int, ChunkRender> chunks = new();
 
-        private ChunkRender CreateChunkRender(int chunkY, IObjectPool<ChunkRender> pool)
+        private ChunkRender CreateChunkRender(int chunkYIndex, IObjectPool<ChunkRender> pool)
         {
             // Get one from pool
             var chunk = pool.Get();
 
             chunk.ChunkX = this.ChunkX;
-            chunk.ChunkY = chunkY;
             chunk.ChunkZ = this.ChunkZ;
+            chunk.ChunkYIndex = chunkYIndex;
 
             var chunkObj = chunk.gameObject;
-            chunkObj.name = $"Chunk [{chunkY}]";
+            chunkObj.name = $"Chunk [{chunkYIndex}]";
 
             // Set its parent to this chunk column...
             chunkObj.transform.parent = this.transform;
-            chunkObj.transform.localPosition = CoordConvert.MC2Unity(this.ChunkX * Chunk.SIZE, chunkY * Chunk.SIZE + World.GetDimension().minY, this.ChunkZ * Chunk.SIZE);
+            chunkObj.transform.localPosition = CoordConvert.MC2Unity(this.ChunkX * Chunk.SIZE, chunkYIndex * Chunk.SIZE + World.GetDimension().minY, this.ChunkZ * Chunk.SIZE);
 
             chunkObj.hideFlags = HideFlags.HideAndDontSave;
 
             return chunk;
         }
 
-        public bool HasChunkRender(int chunkY) => chunks.ContainsKey(chunkY);
+        public bool HasChunkRender(int chunkYIndex) => chunks.ContainsKey(chunkYIndex);
 
         public Dictionary<int, ChunkRender> GetChunkRenders() => chunks;
 
-        public ChunkRender GetChunkRender(int chunkY)
+        public ChunkRender GetChunkRender(int chunkYIndex)
         {
-            if (chunks.ContainsKey(chunkY))
+            if (chunks.ContainsKey(chunkYIndex))
             {
-                return chunks[chunkY];
+                return chunks[chunkYIndex];
             }
             else
             {
                 // This chunk doesn't currently exist...
-                if (chunkY >= 0 && chunkY * Chunk.SIZE < World.GetDimension().height)
+                if (chunkYIndex >= 0 && chunkYIndex * Chunk.SIZE < World.GetDimension().height)
                 {
                     return null;
                 }
@@ -57,20 +57,20 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public ChunkRender GetOrCreateChunkRender(int chunkY, IObjectPool<ChunkRender> pool)
+        public ChunkRender GetOrCreateChunkRender(int chunkYIndex, IObjectPool<ChunkRender> pool)
         {
-            if (chunks.ContainsKey(chunkY))
+            if (chunks.ContainsKey(chunkYIndex))
             {
-                return chunks[chunkY];
+                return chunks[chunkYIndex];
             }
             else
             {
                 // This chunk doesn't currently exist...
-                if (chunkY >= 0 && chunkY * Chunk.SIZE < World.GetDimension().height)
+                if (chunkYIndex >= 0 && chunkYIndex * Chunk.SIZE < World.GetDimension().height)
                 {
                     Profiler.BeginSample("Create chunk render object");
-                    ChunkRender newChunk = CreateChunkRender(chunkY, pool);
-                    chunks.Add(chunkY, newChunk);
+                    ChunkRender newChunk = CreateChunkRender(chunkYIndex, pool);
+                    chunks.Add(chunkYIndex, newChunk);
                     Profiler.EndSample();
                     return newChunk;
                 }
