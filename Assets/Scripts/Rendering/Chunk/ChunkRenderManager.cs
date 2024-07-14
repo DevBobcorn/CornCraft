@@ -84,7 +84,7 @@ namespace CraftSharp.Rendering
 
         public string GetDebugInfo()
         {
-            return $"Queued Chunks: {chunkRendersToBeBuilt.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\nBlock Entity Count: {blockEntityRenders.Count}";
+            return $"Queued Chunks: {chunkRendersToBeBuilt.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Build Time Avg: {ChunkRenderBuilder.VertexBuildTimeSum / 200F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
         }
 
         #region Chunk render access
@@ -456,7 +456,7 @@ namespace CraftSharp.Rendering
                     if (((cx + cz) & (MASK_CYCLE_LENGTH - 1)) != mask || cx * cx + cz * cz >= viewDistSqr) continue;
                     int chunkX = blockLoc.GetChunkX() + cx, chunkZ = blockLoc.GetChunkZ() + cz;
                     
-                    if (world.IsChunkColumnReady(chunkX, chunkZ))
+                    if (world.IsChunkColumnLoaded(chunkX, chunkZ))
                     {
                         var column = GetChunkRenderColumn(chunkX, chunkZ, false);
                         if (column == null)
@@ -471,8 +471,15 @@ namespace CraftSharp.Rendering
                                 {
                                     // This chunk is not empty and needs to be added and queued
                                     var chunk = columnRender.GetOrCreateChunkRender(chunkY, chunkRenderPool);
-                                    UpdateBuildPriority(playerLoc, chunk, offsetY);
-                                    QueueChunkRenderBuild(chunk);
+                                    if (renderCamera.ChunkInViewport(chunkX, chunk.ChunkY, chunkZ, offsetY))
+                                    {
+                                        UpdateBuildPriority(playerLoc, chunk, offsetY);
+                                        QueueChunkRenderBuild(chunk);
+                                    }
+                                    else
+                                    {
+                                        chunk.State = ChunkBuildState.Delayed;
+                                    }
                                 }
                             }
                         }
@@ -552,10 +559,10 @@ namespace CraftSharp.Rendering
                 return;
             }
 
-            if (!(  world.IsChunkColumnReady(chunkX, chunkZ - 1) && // ZNeg neighbor present
-                    world.IsChunkColumnReady(chunkX, chunkZ + 1) && // ZPos neighbor present
-                    world.IsChunkColumnReady(chunkX - 1, chunkZ) && // XNeg neighbor present
-                    world.IsChunkColumnReady(chunkX + 1, chunkZ) )) // XPos neighbor present
+            if (!(  world.IsChunkColumnLoaded(chunkX, chunkZ - 1) && // ZNeg neighbor present
+                    world.IsChunkColumnLoaded(chunkX, chunkZ + 1) && // ZPos neighbor present
+                    world.IsChunkColumnLoaded(chunkX - 1, chunkZ) && // XNeg neighbor present
+                    world.IsChunkColumnLoaded(chunkX + 1, chunkZ) )) // XPos neighbor present
             {
                 chunkRender.State = ChunkBuildState.Delayed;
                 return; // Not all neighbor data ready, delay it
@@ -566,26 +573,24 @@ namespace CraftSharp.Rendering
 
             chunkRender.TokenSource = new();
 
-            Profiler.BeginSample("Task");
-            
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 var buildResult = builder!.Build(world, chunkData, chunkRender);
 
-                Loom.QueueOnMainThread(() => {
+                Loom.QueueOnMainThread(() =>
+                {
                     if (chunkRender != null)
                     {
                         if (buildResult == ChunkBuildResult.Cancelled)
                             chunkRender.State = ChunkBuildState.Cancelled;
-                        
+
                         chunkRendersBeingBuilt.Remove(chunkRender);
                     }
                 });
             }, chunkRender.TokenSource.Token);
-
-            Profiler.EndSample();
         }
 
-        public const int BUILD_COUNT_LIMIT = 4;
+        public const int BUILD_COUNT_LIMIT = 6;
         private BlockLoc? lastPlayerBlockLoc = null;
         private bool terrainColliderDirty = true;
 
@@ -728,7 +733,7 @@ namespace CraftSharp.Rendering
 
                 int delayCount = 50; // Max delay time to stop waiting forever
                 
-                while (!world.IsChunkColumnReady(chunkX, chunkZ) && delayCount > 0)
+                while (!world.IsChunkColumnLoaded(chunkX, chunkZ) && delayCount > 0)
                 {
                     // Wait until the chunk column data is ready
                     await Task.Delay(100);

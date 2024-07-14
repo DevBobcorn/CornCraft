@@ -150,8 +150,7 @@ namespace CraftSharp
             }
             // Then append overrides
             packManager.AddPack(new("vanilla_fix"));
-            packManager.AddPack(new("Greenfield.Texture.Pack.1.17"));
-            //packManager.AddPack(new("VanillaBDCraft 64x MC116"));
+            //packManager.AddPack(new("Greenfield.Texture.Pack.1.17"));
             // Load valid packs...
             loadFlag.Finished = false;
             Task.Run(() => {
