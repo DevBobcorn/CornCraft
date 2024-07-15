@@ -35,12 +35,14 @@ namespace CraftSharp.Rendering
 
                 int count = ChunkRender.TYPES.Length, layerMask = 0;
                 int offsetY = World.GetDimension().minY;
-
-                var visualBuffer = new VertexBuffer[count];
-                for (int i = 0;i < count;i++)
-                    visualBuffer[i] = new();
                 
-                float3[] colliderVerts = { };
+                // Set up vertex counter
+                var vertexCount = new int[count];
+                for (int i = 0;i < count;i++)
+                {
+                    vertexCount[i] = 0;
+                }
+                int colliderVertexCount = 0;
 
                 var blocs = data.Blocks;
                 var light = data.Light;
@@ -129,22 +131,92 @@ namespace CraftSharp.Rendering
                     return result;
                 }
 
-                // Build chunk vertices block by block
+                // Collect vertex count and layer mask before collecting actual vertex data
                 for (int x = 1;x <= Chunk.SIZE;x++) // From 1 to 16, because we have a padding for blocks in adjacent chunks
                 {
                     int blocX = x - 1;
-
                     for (int y = 1;y <= Chunk.SIZE;y++)
                     {
                         int blocY = y - 1;
-
                         for (int z = 1;z <= Chunk.SIZE;z++)
                         {
                             int blocZ = z - 1;
+                            var bloc = data.Blocks[x, y, z];
+                            var state = bloc.State;
+                            var stateId = bloc.StateId;
 
-                            if (ts.IsCancellationRequested)
-                                return ChunkBuildResult.Cancelled;
+                            if (state.InLiquid) // Build liquid here
+                            {
+                                var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
+                                int liquidCullFlags = getCullFlags(x, y, z, bloc, neighborCheck);
 
+                                if (liquidCullFlags != 0)
+                                {
+                                    var liquidLayerIndex = state.InWater ? WATER_LAYER_INDEX : LAVA_LAYER_INDEX;
+                                    vertexCount[liquidLayerIndex] += FluidGeometry.GetVertexCount(liquidCullFlags);
+                                    
+                                    layerMask |= (1 << liquidLayerIndex);
+                                }
+                            }
+
+                            // If air-like (air, water block, etc), ignore it...
+                            if (state.LikeAir) continue;
+                            
+                            int cullFlags = getCullFlags(x, y, z, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
+                            
+                            if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
+                            {
+                                int layerIndex = ChunkRender.TypeIndex(modelTable[stateId].RenderType);
+
+                                var models = modelTable[stateId].Geometries;
+                                var chosen = (x + y + z) % models.Length;
+
+                                if (state.NoCollision)
+                                {
+                                    vertexCount[layerIndex] += models[chosen].GetVertexCount(cullFlags);
+                                }
+                                else
+                                {
+                                    int vertCount = models[chosen].GetVertexCount(cullFlags);
+                                    vertexCount[layerIndex] += vertCount;
+                                    colliderVertexCount += vertCount;
+                                }
+                                
+                                layerMask |= (1 << layerIndex);
+                            }
+                        }
+                    }
+                }
+
+                // Create vertex buffers for containing vertex data
+                var visualBuffer = new VertexBuffer[count];
+                for (int layer = 0;layer < count;layer++)
+                {
+                    if ((layerMask & (1 << layer)) != 0)
+                    {
+                        visualBuffer[layer] = new(vertexCount[layer]);
+                    }
+                }
+                float3[] colliderVerts = new float3[colliderVertexCount];
+
+                // Setup vertex offset
+                var vertOffset = new uint[count];
+                for (int layer = 0;layer < count;layer++)
+                {
+                    vertOffset[layer] = 0;
+                }
+                uint colliderVertOffset = 0;
+
+                // Build mesh vertices block by block
+                for (int x = 1;x <= Chunk.SIZE;x++) // From 1 to 16, because we have a padding for blocks in adjacent chunks
+                {
+                    int blocX = x - 1;
+                    for (int y = 1;y <= Chunk.SIZE;y++)
+                    {
+                        int blocY = y - 1;
+                        for (int z = 1;z <= Chunk.SIZE;z++)
+                        {
+                            int blocZ = z - 1;
                             var bloc = data.Blocks[x, y, z];
                             var state = bloc.State;
                             var stateId = bloc.StateId;
@@ -161,10 +233,8 @@ namespace CraftSharp.Rendering
                                     var liquidTexture = FluidGeometry.LiquidTextures[state.InWater ? 0 : 1];
                                     var lights = getCornerLights(x, y, z);
 
-                                    FluidGeometry.Build(ref visualBuffer[liquidLayerIndex], new float3(blocZ, blocY, blocX), liquidTexture,
-                                            liquidHeights, liquidCullFlags, lights, /*world.GetWaterColor(blockLoc)*/ new float3(1F));
-                                    
-                                    layerMask |= (1 << liquidLayerIndex);
+                                    FluidGeometry.Build(visualBuffer[liquidLayerIndex], ref vertOffset[liquidLayerIndex], new float3(blocZ, blocY, blocX),
+                                            liquidTexture, liquidHeights, liquidCullFlags, lights, new float3(1F));
                                 }
                             }
 
@@ -184,15 +254,22 @@ namespace CraftSharp.Rendering
                                 var ao = getAllNeighborAO(x, y, z);
 
                                 if (state.NoCollision)
-                                    models[chosen].Build(ref visualBuffer[layerIndex], new float3(blocZ, blocY, blocX), cullFlags, ao, lights, color);
+                                {
+                                    models[chosen].Build(visualBuffer[layerIndex], ref vertOffset[layerIndex], new float3(blocZ, blocY, blocX),
+                                            cullFlags, ao, lights, color);
+                                }
                                 else
-                                    models[chosen].BuildWithCollider(ref visualBuffer[layerIndex], ref colliderVerts, new float3(blocZ, blocY, blocX), cullFlags, ao, lights, color);
-                                
-                                layerMask |= (1 << layerIndex);
+                                {
+                                    models[chosen].BuildWithCollider(visualBuffer[layerIndex], ref vertOffset[layerIndex], colliderVerts,
+                                            ref colliderVertOffset, new float3(blocZ, blocY, blocX), cullFlags, ao, lights, color);
+                                }
                             }
                         }
                     }
                 }
+
+                if (ts.IsCancellationRequested)
+                    return ChunkBuildResult.Cancelled;
 
                 if (layerMask == 0) // Skip empty chunks...
                 {
@@ -420,7 +497,7 @@ namespace CraftSharp.Rendering
         // (or say PhysX) bug, so we dynamically build the mesh collider around the
         // player as a solution to this. See the problem discussion at
         // https://forum.unity.com/threads/ball-rolling-on-mesh-hits-edges.772760/
-        public void BuildTerrainCollider(World world, BlockLoc playerBlockLoc, MeshCollider movementCollider, MeshCollider liquidCollider, Action callback)
+        public void BuildTerrainCollider(World world, BlockLoc playerBlockLoc, MeshCollider solidCollider, MeshCollider fluidCollider, Action callback)
         {
             int offsetY = World.GetDimension().minY;
 
@@ -429,8 +506,6 @@ namespace CraftSharp.Rendering
                     playerBlockLoc.Y - MOVEMENT_RADIUS,
                     playerBlockLoc.Z - MOVEMENT_RADIUS,
                     MOVEMENT_DIAMETER, MOVEMENT_DIAMETER, MOVEMENT_DIAMETER, getBlock);
-            
-            float3[] movementVerts = { }, fluidVerts = { };
 
             int getCullFlags(int x, int y, int z, Block self, BlockNeighborCheck check)
             {
@@ -457,6 +532,11 @@ namespace CraftSharp.Rendering
                 return cullFlags;
             }
 
+            // Set up vertex counter
+            int fluidVertCount = 0;
+            int solidVertCount = 0;
+
+            // Collect vertex count before collecting actual vertex data
             for (int x = -MOVEMENT_RADIUS + 1;x < MOVEMENT_RADIUS;x++)
                 for (int y = -MOVEMENT_RADIUS + 1;y < MOVEMENT_RADIUS;y++)
                     for (int z = -MOVEMENT_RADIUS + 1;z < MOVEMENT_RADIUS;z++)
@@ -474,7 +554,9 @@ namespace CraftSharp.Rendering
                             int liquidCullFlags = getCullFlags(x + MOVEMENT_RADIUS, y + MOVEMENT_RADIUS, z + MOVEMENT_RADIUS, bloc, neighborCheck);
 
                             if (liquidCullFlags != 0)
-                                FluidGeometry.BuildCollider(ref fluidVerts, new(blockLoc.Z, blockLoc.Y, blockLoc.X), liquidCullFlags);
+                            {
+                                fluidVertCount += FluidGeometry.GetVertexCount(liquidCullFlags);
+                            }
                         }
 
                         if (state.LikeAir || state.NoCollision)
@@ -487,35 +569,75 @@ namespace CraftSharp.Rendering
                         if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                         {
                             // They all have the same collider so we just pick the 1st one
-                            modelTable[stateId].Geometries[0].BuildCollider(ref movementVerts, new(blockLoc.Z, blockLoc.Y, blockLoc.X), cullFlags);
+                            solidVertCount += modelTable[stateId].Geometries[0].GetVertexCount(cullFlags);
+                        }
+                    }
+
+            // Create vertex buffers for containing vertex data
+            var fluidVerts = new float3[fluidVertCount];
+            var solidVerts = new float3[solidVertCount];
+
+            // Setup vertex offset
+            uint fluidVertOffset = 0;
+            uint solidVertOffset = 0;
+
+            // Build mesh vertices block by block
+            for (int x = -MOVEMENT_RADIUS + 1;x < MOVEMENT_RADIUS;x++)
+                for (int y = -MOVEMENT_RADIUS + 1;y < MOVEMENT_RADIUS;y++)
+                    for (int z = -MOVEMENT_RADIUS + 1;z < MOVEMENT_RADIUS;z++)
+                    {
+                        if (x * x + y * y + z * z > MOVEMENT_RADIUS_SQR)
+                            continue;
+
+                        var blockLoc = playerBlockLoc + new BlockLoc(x, y, z);
+                        var bloc = blocs[MOVEMENT_RADIUS + x, MOVEMENT_RADIUS + y, MOVEMENT_RADIUS + z];
+                        var state = bloc.State;
+
+                        if (state.InWater || state.InLava) // Build liquid collider
+                        {
+                            var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
+                            int liquidCullFlags = getCullFlags(x + MOVEMENT_RADIUS, y + MOVEMENT_RADIUS, z + MOVEMENT_RADIUS, bloc, neighborCheck);
+
+                            if (liquidCullFlags != 0)
+                                FluidGeometry.BuildCollider(fluidVerts, ref fluidVertOffset, new float3(blockLoc.Z, blockLoc.Y, blockLoc.X), liquidCullFlags);
+                        }
+
+                        if (state.LikeAir || state.NoCollision)
+                            continue;
+                        
+                        // Build collider here
+                        var stateId = bloc.StateId;
+                        int cullFlags = getCullFlags(x + MOVEMENT_RADIUS, y + MOVEMENT_RADIUS, z + MOVEMENT_RADIUS, bloc, BlockNeighborChecks.NON_FULL_SOLID);
+                        
+                        if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
+                        {
+                            // They all have the same collider so we just pick the 1st one
+                            modelTable[stateId].Geometries[0].BuildCollider(solidVerts, ref solidVertOffset, new float3(blockLoc.Z, blockLoc.Y, blockLoc.X), cullFlags);
                         }
                     }
 
             Loom.QueueOnMainThread(() => {
-                int movVertCount = movementVerts.Length;
-                int fldVertCount = fluidVerts.Length;
-
                 // Make vertex attributes
                 var colVertAttrs = new NativeArray<VertexAttributeDescriptor>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
                 colVertAttrs[0]  = new(VertexAttribute.Position,  dimension: 3);
 
-                if (movVertCount > 0)
+                if (solidVertCount > 0)
                 {
-                    var colMeshDataArr  = Mesh.AllocateWritableMeshData(1);
+                    var colMeshDataArr = Mesh.AllocateWritableMeshData(1);
                     var colMeshData = colMeshDataArr[0];
                     colMeshData.subMeshCount = 1;
 
-                    colMeshData.SetVertexBufferParams(movVertCount,          colVertAttrs);
-                    colMeshData.SetIndexBufferParams((movVertCount / 2) * 3, IndexFormat.UInt32);
+                    colMeshData.SetVertexBufferParams(solidVertCount,          colVertAttrs);
+                    colMeshData.SetIndexBufferParams((solidVertCount / 2) * 3, IndexFormat.UInt32);
 
                     // Copy the source arrays to mesh data
                     var colPositions = colMeshData.GetVertexData<float3>(0);
-                    colPositions.CopyFrom(movementVerts);
+                    colPositions.CopyFrom(solidVerts);
 
                     // Generate triangle arrays
                     var colTriIndices = colMeshData.GetIndexData<uint>();
                     uint vi = 0; int ti = 0;
-                    for (;vi < movVertCount;vi += 4U, ti += 6)
+                    for (;vi < solidVertCount;vi += 4U, ti += 6)
                     {
                         colTriIndices[ti]     = vi;
                         colTriIndices[ti + 1] = vi + 3U;
@@ -525,28 +647,28 @@ namespace CraftSharp.Rendering
                         colTriIndices[ti + 5] = vi + 3U;
                     }
 
-                    colMeshData.SetSubMesh(0, new(0, (movVertCount / 2) * 3){ vertexCount = movVertCount });
+                    colMeshData.SetSubMesh(0, new(0, (solidVertCount / 2) * 3){ vertexCount = solidVertCount });
                     var colliderMesh = new Mesh { subMeshCount = 1 };
                     Mesh.ApplyAndDisposeWritableMeshData(colMeshDataArr, colliderMesh);
 
                     colliderMesh.RecalculateNormals();
                     colliderMesh.RecalculateBounds();
 
-                    movementCollider!.sharedMesh = colliderMesh;
+                    solidCollider!.sharedMesh = colliderMesh;
                 }
                 else
                 {
-                    movementCollider!.sharedMesh = null;
+                    solidCollider!.sharedMesh = null;
                 }
                 
-                if (fldVertCount > 0)
+                if (fluidVertCount > 0)
                 {
-                    var colMeshDataArr  = Mesh.AllocateWritableMeshData(1);
+                    var colMeshDataArr = Mesh.AllocateWritableMeshData(1);
                     var colMeshData = colMeshDataArr[0];
                     colMeshData.subMeshCount = 1;
 
-                    colMeshData.SetVertexBufferParams(fldVertCount,          colVertAttrs);
-                    colMeshData.SetIndexBufferParams((fldVertCount / 2) * 3, IndexFormat.UInt32);
+                    colMeshData.SetVertexBufferParams(fluidVertCount,          colVertAttrs);
+                    colMeshData.SetIndexBufferParams((fluidVertCount / 2) * 3, IndexFormat.UInt32);
 
                     // Copy the source arrays to mesh data
                     var colPositions = colMeshData.GetVertexData<float3>(0);
@@ -555,7 +677,7 @@ namespace CraftSharp.Rendering
                     // Generate triangle arrays
                     var colTriIndices = colMeshData.GetIndexData<uint>();
                     uint vi = 0; int ti = 0;
-                    for (;vi < fldVertCount;vi += 4U, ti += 6)
+                    for (;vi < fluidVertCount;vi += 4U, ti += 6)
                     {
                         colTriIndices[ti]     = vi;
                         colTriIndices[ti + 1] = vi + 3U;
@@ -565,18 +687,18 @@ namespace CraftSharp.Rendering
                         colTriIndices[ti + 5] = vi + 3U;
                     }
 
-                    colMeshData.SetSubMesh(0, new(0, (fldVertCount / 2) * 3){ vertexCount = fldVertCount });
+                    colMeshData.SetSubMesh(0, new(0, (fluidVertCount / 2) * 3){ vertexCount = fluidVertCount });
                     var colliderMesh = new Mesh { subMeshCount = 1 };
                     Mesh.ApplyAndDisposeWritableMeshData(colMeshDataArr, colliderMesh);
 
                     colliderMesh.RecalculateNormals();
                     colliderMesh.RecalculateBounds();
 
-                    liquidCollider!.sharedMesh = colliderMesh;
+                    fluidCollider!.sharedMesh = colliderMesh;
                 }
                 else
                 {
-                    liquidCollider!.sharedMesh = null;
+                    fluidCollider!.sharedMesh = null;
                 }
                 
                 colVertAttrs.Dispose();

@@ -126,9 +126,11 @@ namespace CraftSharp
 
         public void Start()
         {
-            var visualBuffer = new VertexBuffer();
-            CelestiaPortalGeometry.Build(ref visualBuffer, new float3(-0.5F),
-                    0b110000, new float3(1F), 0.05F, 32, 8);
+            var cullFlags = 0b110000;
+            uint verOffset = 0;
+            // Portal geometry should have same vertex count as cube geometry
+            var visualBuffer = new VertexBuffer(CubeGeometry.GetVertexCount(cullFlags));
+            CelestiaPortalGeometry.Build(visualBuffer, ref verOffset, new float3(-0.5F), cullFlags, new float3(1F), 0.05F, 32, 8);
             
             var portalBlockMesh = VertexBufferBuilder.BuildMesh(visualBuffer);
             var portalBlockObject = new GameObject("Portal Block");
