@@ -118,6 +118,10 @@ namespace CraftSharp.Rendering
             var chunkObj = chunk.gameObject;
             chunkObj.name = $"Chunk [Pooled]";
             chunkObj.SetActive(false);
+
+            var meshFilter = chunkObj.GetComponent<MeshFilter>();
+            Destroy(meshFilter.sharedMesh);
+            meshFilter.sharedMesh = null;
         }
 
         private ChunkRenderColumn CreateChunkRenderColumn(int chunkX, int chunkZ)

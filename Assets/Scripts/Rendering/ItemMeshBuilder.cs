@@ -28,11 +28,6 @@ namespace CraftSharp.Rendering
             if (itemModel is null) return null;
 
             // Make and set mesh...
-            var visualBuffer = new VertexBuffer();
-
-            int fluidVertexCount = visualBuffer.vert.Length;
-            int fluidTriIdxCount = (fluidVertexCount / 2) * 3;
-
             float3[] colors;
 
             var tintFunc = ItemPalette.INSTANCE.GetTintRule(itemId);
@@ -43,9 +38,11 @@ namespace CraftSharp.Rendering
 
             // TODO Get and build the right geometry (base or override)
             var itemGeometry = itemModel.Geometry;
-            itemGeometry.Build(ref visualBuffer, useItemCenter ? ITEM_CENTER : ITEM_ORIGIN, colors);
+            int vertexCount = itemGeometry.GetVertexCount();
+            var visualBuffer = new VertexBuffer(vertexCount);
+            uint vertexOffset = 0;
+            itemGeometry.Build(visualBuffer, ref vertexOffset, useItemCenter ? ITEM_CENTER : ITEM_ORIGIN, colors);
 
-            int vertexCount = visualBuffer.vert.Length;
             int triIdxCount = (vertexCount / 2) * 3;
 
             var meshDataArr = Mesh.AllocateWritableMeshData(1);
