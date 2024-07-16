@@ -200,7 +200,7 @@ MonoBehaviour:
   showDensityControls: 0
   showTextureControls: 0
   showWindControls: 0
-  cloudAnimLayer1: {x: -0.094948575, y: 0, z: -0.8181392}
+  cloudAnimLayer1: {x: 0.35677835, y: 0, z: 0.7767975}
   cloudAnimLayer2: {x: 0, y: 0, z: 0}
   cloudAnimNonScaledLayer1: {x: 0, y: 0, z: 0}
   cloudAnimNonScaledLayer2: {x: 0, y: 0, z: 0}
@@ -217,7 +217,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0081d4f9e5d6e0a4d9fe8e7a8d7256b6, type: 3}
   m_Name: Time Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 1
+  showModuleInspector: 0
   showSaveLoad: 0
   active: 1
   Settings:
@@ -251,7 +251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 375eef0084d44344ebf50cbba7c1eadb, type: 3}
   m_Name: Sky Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 1
+  showModuleInspector: 0
   showSaveLoad: 1
   active: 1
   Settings:
@@ -1026,7 +1026,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b18a0693e95fd064e9d0a3b96e538236, type: 3}
   m_Name: Lighting Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 1
+  showModuleInspector: 0
   showSaveLoad: 1
   active: 1
   Settings:
@@ -1772,7 +1772,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    temperature: 4.1700144
+    temperature: 4.6864386
     temperatureWeatherMod: 0
     temperatureCustomMod: 0
     temperatureChangingSpeed: 0.1
@@ -1829,7 +1829,7 @@ MonoBehaviour:
   preset: {fileID: 11400000, guid: da668770e38694d49af97ecfd05fd7eb, type: 2}
   showReflectionControls: 1
   lastReflectionUpdate: 10.025
-  lastReflectionUpdatePos: {x: -1.5256128, y: 3.05159, z: 2.0881348}
+  lastReflectionUpdatePos: {x: 704.2223, y: -85.34769, z: -1589.5942}
 --- !u!114 &5286980405202375680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1883,7 +1883,7 @@ MonoBehaviour:
   Settings:
     volumetrics: 1
     steps: 32
-    quality: 2
+    quality: 1
     scattering: 0.045
     extinction: 0.089
     anistropy: 0.6
@@ -1898,10 +1898,10 @@ MonoBehaviour:
     floatingPointOriginMod: {x: 0, y: 0, z: 0}
     globalFogHeight: 0
     fogDensity: 1
-    fogHeightFalloff: 0.02
+    fogHeightFalloff: 0.005
     fogHeight: 0
-    fogDensity2: 0.2
-    fogHeightFalloff2: 0.01
+    fogDensity2: 1
+    fogHeightFalloff2: 0.02
     fogHeight2: 0
     fogMaxOpacity: 0.7
     startDistance: 20
@@ -1977,6 +1977,8 @@ MonoBehaviour:
   showVolumetricsControls: 0
   showUnityFogControls: 0
   fogLights:
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
