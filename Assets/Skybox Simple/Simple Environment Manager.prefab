@@ -162,7 +162,7 @@ GameObject:
   - component: {fileID: 4680534492281049065}
   - component: {fileID: 8248344031915582242}
   m_Layer: 0
-  m_Name: BoatAttack Environment Manager
+  m_Name: Simple Environment Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -2,7 +2,7 @@
 A Minecraft client implementation made with Unity.
 
 ## > About
-__CornCraft__ is a Unity version of Minecraft. It connects to vanilla servers(version 1.16.2 to 1.20.1) and provides basic graphical, vanilla-like gameplay support. It is based on another open source project, [Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client), and makes heavy use of its cross-version Minecraft protocol implementation.
+__CornCraft__ is a Unity version of Minecraft. It connects to vanilla servers(version 1.16.2 to 1.19.4) and provides basic graphical, vanilla-like gameplay support. It is based on another open source project, [Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client), and makes heavy use of its cross-version Minecraft protocol implementation.
 
 However, unlike MCC itself which runs on modern .NET, CornCraft is a Unity app/game and runs on Mono/IL2CPP backend, so a large part of the code from MCC has been refactored or rewritten to adapt to Unity's environment.
 
@@ -19,6 +19,8 @@ For <code>1.19.1</code> or higher servers, it is also necessary to set <code>enf
 
 ## > Building & Running
 The project is made and tested with Unity 2022.3.26f1, so it is recommended to use this version(or newer) of Unity to build this game.
+
+**Some third-party assets are not included in this repo**, for more information please see [here](./Assets/Third%20Party%20Assets.md).
 
 Resource files will now be automatically downloaded if they're not present, so manual downloading is no longer necessary.
 

@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Skybox BoatAttack
+  m_Name: Skybox Simple
   m_Shader: {fileID: 4800000, guid: 375dd840ed8484cb68923f5aebe560fe, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
