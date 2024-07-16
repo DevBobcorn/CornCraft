@@ -18,7 +18,7 @@ MonoBehaviour:
   showFlatCloudControls: 0
   showFogControls: 1
   showSkyControls: 0
-  showLightingControls: 0
+  showLightingControls: 1
   showAuroraControls: 0
   showEnvironmentControls: 0
   showAudioControls: 0
