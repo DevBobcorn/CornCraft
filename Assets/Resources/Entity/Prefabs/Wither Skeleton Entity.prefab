@@ -16,6 +16,18 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 27aaeec49bd1d5c458ca988a60e8dd4d, type: 2}
+    - target: {fileID: 4630957584636829608, guid: 9e064a3d1835d62439a8c7ffc21b679a, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4630957584636829608, guid: 9e064a3d1835d62439a8c7ffc21b679a, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4630957584636829608, guid: 9e064a3d1835d62439a8c7ffc21b679a, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.9
+      objectReference: {fileID: 0}
     - target: {fileID: 4876183892067970088, guid: 9e064a3d1835d62439a8c7ffc21b679a, type: 3}
       propertyPath: m_Name
       value: Wither Skeleton Entity

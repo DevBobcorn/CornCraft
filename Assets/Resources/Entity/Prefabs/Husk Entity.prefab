@@ -16,6 +16,22 @@ PrefabInstance:
       propertyPath: m_MaterialEntries.Array.data[0].m_DefaultMaterial
       value: 
       objectReference: {fileID: 2100000, guid: a588f5a21531d5d4280bcf90ee43c646, type: 2}
+    - target: {fileID: 1097585871379594057, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 1097585871379594057, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 1097585871379594057, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 1097585871379594057, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2708844106504437662, guid: de352ea1b227fb94595c67cebf39d0d5, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
