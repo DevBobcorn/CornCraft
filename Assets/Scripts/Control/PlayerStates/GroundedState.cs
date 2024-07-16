@@ -15,10 +15,15 @@ namespace CraftSharp.Control
         private bool _jumpConfirmed = false;
         private bool _walkToggleRequested = false;
 
+        /// <summary>
+        /// Cooldown variable for climb over check.
+        /// </summary>
+        private float _groundedCooldown = 0F;
+
         public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
-            // Check climb over barrier
-            if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
+            // Check climb over barrier Workround: Use a cooldown value to disable climb over right after landing
+            if (_groundedCooldown < 0F && info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
                     info.WallDistance - info.BarrierDistance > 0.7F && info.YawDeltaAbs < 10F && info.BarrierYawAngle < 30F) // Climb up platform
             {
                 if (info.YawDeltaAbs <= 10F && info.BarrierYawAngle < 30F) // Trying to moving forward
@@ -86,6 +91,9 @@ namespace CraftSharp.Control
 
             // Reset gliding state
             info.Gliding = false;
+
+            // Update grounded cooldown
+            _groundedCooldown -= interval;
 
             // Check walk toggle request
             if (_walkToggleRequested)
@@ -222,6 +230,9 @@ namespace CraftSharp.Control
             _jumpRequested = false;
             _jumpConfirmed = false;
             _walkToggleRequested = false;
+
+            // Set cooldown
+            _groundedCooldown = 0.5F;
 
             // Register input action events
             player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
