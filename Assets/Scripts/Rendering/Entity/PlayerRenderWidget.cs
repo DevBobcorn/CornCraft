@@ -290,7 +290,16 @@ namespace CraftSharp.Rendering
         {
             if (_player != null && _player.UseRootMotion)
             {
-                _player.RootMotionPositionDelta += _playerAnimator!.deltaPosition;
+                if (_player.IgnoreAnimatorScale)
+                {
+                    _player.RootMotionPositionDelta += _playerAnimator!.deltaPosition;
+                }
+                else
+                {
+                    // Only uniform scale is supported
+                    _player.RootMotionPositionDelta += _playerAnimator!.deltaPosition / _playerAnimator!.transform.localScale.x;
+                }
+                
                 _player.RootMotionRotationDelta = _playerAnimator.deltaRotation * _player.RootMotionRotationDelta;
             }
         }

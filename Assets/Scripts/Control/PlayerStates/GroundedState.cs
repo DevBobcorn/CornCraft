@@ -8,7 +8,7 @@ namespace CraftSharp.Control
 {
     public class GroundedState : IPlayerState
     {
-        private const float THRESHOLD_CLIMB_1M =  1.35F;
+        private const float THRESHOLD_CLIMB_1M =   1.1F;
         private const float THRESHOLD_CLIMB_UP = 0.626F;
 
         private bool _jumpRequested = false;
@@ -18,30 +18,36 @@ namespace CraftSharp.Control
         public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             // Check climb over barrier
-            if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP &&
-                    info.BarrierHeight < THRESHOLD_CLIMB_1M && info.YawDeltaAbs < 10F && info.BarrierYawAngle < 30F) // Climb up platform
+            if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
+                    info.WallDistance - info.BarrierDistance > 0.7F && info.YawDeltaAbs < 10F && info.BarrierYawAngle < 30F) // Climb up platform
             {
                 if (info.YawDeltaAbs <= 10F && info.BarrierYawAngle < 30F) // Trying to moving forward
                 {
                     var forwardDir = player.GetTargetOrientation() * Vector3.forward;
-
-                    var curPos  = motor.transform.position;
-                    var dstPos = curPos + (info.BarrierHeight - 0.95F) * motor.CharacterUp + forwardDir * (0.7F - info.BarrierDistance);
+                    var offset = forwardDir * (motor.Capsule.radius - info.BarrierDistance);
 
                     player.StartForceMoveOperation("Climb over barrier",
                         new ForceMoveOperation[] {
-                                new(curPos, dstPos, 0.2F),
-                                new(dstPos, 0.9F,
-                                    init: (info, motor, player) => {
+                                new(offset, 0.8F,
+                                    init: (info, motor, player) =>
+                                    {
                                         player.RandomizeMirroredFlag();
-                                        player.StartCrossFadeState(PlayerAbility.CLIMB_1M);
-                                        motor.SetPosition(dstPos);
+                                        player.StartCrossFadeState(PlayerAbility.CLIMB_1M, 0.1F);
+                                        info.PlayingRootMotion = true;
+                                        //motor.SetPosition(dstPos);
+                                        player.UseRootMotion = true;
+                                        player.IgnoreAnimatorScale = true;
                                     },
-                                    exit: (info, motor, player) => {
+                                    exit: (info, motor, player) =>
+                                    {
                                         info.Grounded = true;
+                                        player.UseRootMotion = false;
+                                        info.PlayingRootMotion = false;
                                     },
                                     update: (interval, inputData, info, motor, player) =>
-                                        info.Moving = inputData.Gameplay.Movement.IsPressed()
+                                    {
+                                        info.Moving = inputData.Gameplay.Movement.IsPressed();
+                                    }
                                 )
                         } );
 

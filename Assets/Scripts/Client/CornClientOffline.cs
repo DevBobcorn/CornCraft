@@ -219,30 +219,8 @@ namespace CraftSharp
 
             if (withDebugInfo)
             {
-                var playerLoc = GetLocation();
-                /*
-                var targetLoc = interactionUpdater == null ? null : interactionUpdater.TargetBlockLoc;
-                var blockLoc = playerLoc.GetBlockLoc();
-
-                string targetInfo, locInfo;
-
-                if (targetLoc is not null)
-                {
-                    var targetBlock = ChunkRenderManager.GetBlock(targetLoc.Value);
-                    var targetState = targetBlock.State;
-                    targetInfo = $"Target: {targetLoc}\n{targetBlock}\nBlockage: {targetState.LightBlockageLevel} Emission: {targetState.LightEmissionLevel}";
-                }
-                else
-                {
-                    targetInfo = "\n";
-                }
-
-                locInfo = $"Biome:\t{ChunkRenderManager.GetBiome(blockLoc)}\nBlock Light:\t{ChunkRenderManager.GetBlockLight(blockLoc)}";
-                
-                return baseString + $"\nLoc: {playerLoc}\n{locInfo}\n{targetInfo}\n{PlayerController.GetDebugInfo()}" +
-                        $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
-                */
-                return baseString + $"\nLoc: {playerLoc}\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():00.00}";
+                return baseString + $"\nLoc: {GetLocation()}\n{PlayerController.GetDebugInfo()}" +
+                        $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():0.0}";
             }
             
             return baseString;

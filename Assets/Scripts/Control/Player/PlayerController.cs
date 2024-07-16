@@ -5,11 +5,10 @@ using UnityEngine;
 using CraftSharp.Event;
 using CraftSharp.Rendering;
 using KinematicCharacterController;
-using System.Linq;
 
 namespace CraftSharp.Control
 {
-    [RequireComponent(/*typeof (Rigidbody), */typeof (PlayerStatusUpdater))]
+    [RequireComponent(typeof (PlayerStatusUpdater))]
     public class PlayerController : MonoBehaviour, ICharacterController
     {
         public enum CurrentItemState
@@ -45,7 +44,18 @@ namespace CraftSharp.Control
         public PlayerAbility Ability => _ability!;
         private IPlayerState _currentState = PlayerStates.GROUNDED;
         private IPlayerState? _pendingState = null;
+
+        /// <summary>
+        /// Whether player root motion should be applied.
+        /// </summary>
         public bool UseRootMotion { get; set; } = false;
+
+        /// <summary>
+        /// Whether to countervail animator scale when applying root motion displacement.
+        /// <br>
+        /// Only uniform scale is supported.
+        /// </summary>
+        public bool IgnoreAnimatorScale { get; set; } = false;
         public Vector3 RootMotionPositionDelta { get; set; } = Vector3.zero;
         public Quaternion RootMotionRotationDelta { get; set; } = Quaternion.identity;
 

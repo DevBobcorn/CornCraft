@@ -96,7 +96,6 @@ namespace CraftSharp.Control
             player.StartCrossFadeState(PlayerAbility.SKILL, 0.01F);
 
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInOffhand);
-            player.UseRootMotion = true;
 
             player.StartAiming();
         }
@@ -109,7 +108,6 @@ namespace CraftSharp.Control
             attackStatus.AttackCooldown = 0F;
 
             player.ChangeItemState(PlayerController.CurrentItemState.Mount);
-            player.UseRootMotion = false;
 
             player.StopAiming();
         }
