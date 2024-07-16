@@ -1099,7 +1099,7 @@ namespace CraftSharp.Protocol.Handlers
                                 int blockZ = (sectionZ * 16) + localZ;
                                 var blockLoc = new BlockLoc(blockX, blockY, blockZ);
 
-                                //handler.GetChunkRenderManager().SetBlock(blockLoc, bloc);
+                                handler.GetChunkRenderManager().SetBlock(blockLoc, bloc);
                             }
                             break;
                         }
@@ -1108,7 +1108,7 @@ namespace CraftSharp.Protocol.Handlers
                             var blockLoc = dataTypes.ReadNextBlockLoc(packetData);
                             var bloc = new Block((ushort) dataTypes.ReadNextVarInt(packetData));
                             
-                            //handler.GetChunkRenderManager().SetBlock(blockLoc, bloc);
+                            handler.GetChunkRenderManager().SetBlock(blockLoc, bloc);
                             break;
                         }
                     case PacketTypesIn.BlockEntityData:
