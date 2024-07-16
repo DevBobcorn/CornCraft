@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace CraftSharp.Rendering
 {
-    public class CornEnvironmentManager : BaseEnvironmentManager
+    public class SimpleEnvironmentManager : BaseEnvironmentManager
     {
         private const float TICK_SECONDS = 0.05F;
 
