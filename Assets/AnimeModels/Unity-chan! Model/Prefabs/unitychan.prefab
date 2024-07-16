@@ -2157,7 +2157,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 1.25, y: 1.25, z: 1.25}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 400322}
@@ -3904,6 +3904,7 @@ MonoBehaviour:
   center: {x: -0.15, y: 0, z: 0}
   size: {x: 0.07, y: 0.001, z: 0.32}
   direction: 0
+  reverseDirection: 0
   radiusSeparation: 0
   alignedOnCenter: 1
 --- !u!1 &100164
@@ -4326,6 +4327,7 @@ MonoBehaviour:
   center: {x: -0.1, y: 0, z: 0}
   size: {x: 0.04, y: 0.001, z: 0.35}
   direction: 0
+  reverseDirection: 0
   radiusSeparation: 0
   alignedOnCenter: 1
 --- !u!1 &100188
@@ -5111,6 +5113,7 @@ MonoBehaviour:
   center: {x: -0.1, y: 0, z: 0}
   size: {x: 0.04, y: 0.001, z: 0.35}
   direction: 0
+  reverseDirection: 0
   radiusSeparation: 0
   alignedOnCenter: 1
 --- !u!1 &100226
@@ -6738,6 +6741,7 @@ MonoBehaviour:
   center: {x: -0.15, y: 0, z: 0}
   size: {x: 0.07, y: 0.001, z: 0.32}
   direction: 0
+  reverseDirection: 0
   radiusSeparation: 0
   alignedOnCenter: 1
 --- !u!1 &100312
@@ -7650,12 +7654,14 @@ MonoBehaviour:
       animatedAxis: 0
       animatedShape: 0
       inertiaCenter: 1
+      customSkinningBone: 1
   animationPoseRatioProperty: 0
   gravityProperty: 0
   dampingProperty: 0
   worldInertiaProperty: 0
   localInertiaProperty: 0
   windInfluenceProperty: 0
+  blendWeightProperty: 0
 --- !u!1 &1427946734156719889
 GameObject:
   m_ObjectHideFlags: 0
@@ -8139,12 +8145,14 @@ MonoBehaviour:
       animatedAxis: 0
       animatedShape: 0
       inertiaCenter: 1
+      customSkinningBone: 1
   animationPoseRatioProperty: 0
   gravityProperty: 0
   dampingProperty: 0
   worldInertiaProperty: 0
   localInertiaProperty: 0
   windInfluenceProperty: 0
+  blendWeightProperty: 0
 --- !u!1 &2316400963350190723
 GameObject:
   m_ObjectHideFlags: 0
@@ -8592,12 +8600,14 @@ MonoBehaviour:
       animatedAxis: 0
       animatedShape: 0
       inertiaCenter: 1
+      customSkinningBone: 1
   animationPoseRatioProperty: 0
   gravityProperty: 0
   dampingProperty: 0
   worldInertiaProperty: 0
   localInertiaProperty: 0
   windInfluenceProperty: 0
+  blendWeightProperty: 0
 --- !u!1 &3319170781849066676
 GameObject:
   m_ObjectHideFlags: 0
@@ -9037,12 +9047,14 @@ MonoBehaviour:
       animatedAxis: 0
       animatedShape: 0
       inertiaCenter: 1
+      customSkinningBone: 1
   animationPoseRatioProperty: 0
   gravityProperty: 0
   dampingProperty: 0
   worldInertiaProperty: 0
   localInertiaProperty: 0
   windInfluenceProperty: 0
+  blendWeightProperty: 0
 --- !u!1 &4918367737478916059
 GameObject:
   m_ObjectHideFlags: 0
@@ -9521,12 +9533,14 @@ MonoBehaviour:
       animatedAxis: 0
       animatedShape: 0
       inertiaCenter: 1
+      customSkinningBone: 1
   animationPoseRatioProperty: 0
   gravityProperty: 0
   dampingProperty: 0
   worldInertiaProperty: 0
   localInertiaProperty: 0
   windInfluenceProperty: 0
+  blendWeightProperty: 0
 --- !u!1 &7844589992263343426
 GameObject:
   m_ObjectHideFlags: 0
@@ -9974,9 +9988,11 @@ MonoBehaviour:
       animatedAxis: 0
       animatedShape: 0
       inertiaCenter: 1
+      customSkinningBone: 1
   animationPoseRatioProperty: 0
   gravityProperty: 0
   dampingProperty: 0
   worldInertiaProperty: 0
   localInertiaProperty: 0
   windInfluenceProperty: 0
+  blendWeightProperty: 0
