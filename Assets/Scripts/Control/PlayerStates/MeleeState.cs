@@ -131,6 +131,7 @@ namespace CraftSharp.Control
 
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInMainHand);
             player.UseRootMotion = true;
+            player.IgnoreAnimatorScale = false;
 
             // Register input action events
             player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
