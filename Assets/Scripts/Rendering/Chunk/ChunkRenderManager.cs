@@ -271,7 +271,11 @@ namespace CraftSharp.Rendering
                 bool shouldRecalcLight = column.UpdateCachedBlockData(blockLoc, block.State);
                 if (shouldRecalcLight)
                 {
-                    RecalculateBlockLightAt(blockLoc);
+                    /* TODO: Queue this somewhere
+                    Task.Run(() => {
+                        RecalculateBlockLightAt(blockLoc);
+                    });
+                    */
                 }
             }
 
@@ -475,20 +479,12 @@ namespace CraftSharp.Rendering
                             for (int chunkY = 0;chunkY < chunkColumnSize;chunkY++)
                             {
                                 // Create chunk renders and queue them...
-                                if (!world[chunkX, chunkZ]!.ChunkIsEmpty(chunkY))
+                                if (!(world[chunkX, chunkZ]?.ChunkIsEmpty(chunkY) ?? true))
                                 {
                                     // This chunk is not empty and needs to be added and queued
                                     var chunk = columnRender.GetOrCreateChunkRender(chunkY, chunkRenderPool);
-                                    /*
-                                    if (renderCamera.ChunkInViewport(chunkX, chunk.ChunkY, chunkZ, offsetY))
-                                    {
-                                        
-                                    }
-                                    else
-                                    {
-                                        chunk.State = ChunkBuildState.Delayed;
-                                    }
-                                    */
+                                    //var inView = renderCamera.ChunkInViewport(chunkX, chunk.ChunkYIndex, chunkZ, offsetY);
+
                                     UpdateBuildPriority(playerLoc, chunk, offsetY);
                                     QueueChunkRenderBuild(chunk);
                                 }
@@ -498,8 +494,10 @@ namespace CraftSharp.Rendering
                         {
                             foreach (var chunk in column.GetChunkRenders().Values)
                             {
-                                if (chunk.State == ChunkBuildState.Delayed && renderCamera.ChunkInViewport(chunkX, chunk.ChunkYIndex, chunkZ, offsetY))
+                                if (chunk.State == ChunkBuildState.Delayed)
                                 {
+                                    //var inView = renderCamera.ChunkInViewport(chunkX, chunk.ChunkYIndex, chunkZ, offsetY);
+
                                     // Queue delayed or cancelled chunk builds...
                                     UpdateBuildPriority(playerLoc, chunk, offsetY);
                                     QueueChunkRenderBuild(chunk);
