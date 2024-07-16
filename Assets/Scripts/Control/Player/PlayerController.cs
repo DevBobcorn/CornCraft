@@ -161,6 +161,8 @@ namespace CraftSharp.Control
 
                 CameraRef = _playerRender.SetupCameraRef(new(0F, 1.5F, 0F));
                 _cameraController!.SetTarget(CameraRef);
+
+                _playerRender!.transform.localPosition = Vector3.zero;
             }
             else
             {
@@ -168,8 +170,6 @@ namespace CraftSharp.Control
                 // Use own transform
                 _cameraController!.SetTarget(transform);
             }
-
-            _playerRender!.transform.localPosition = Vector3.zero;
         }
 
         private Action<GameModeUpdateEvent>? gameModeCallback;

@@ -215,7 +215,7 @@ namespace CraftSharp
         /// <returns>Status info string</returns>
         public override string GetInfoString(bool withDebugInfo)
         {
-            string baseString = $"FPS: {(int)(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager.GetTimeString()}";
+            string baseString = $"FPS: {Mathf.Round(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager.GetTimeString()}";
 
             if (withDebugInfo)
             {
