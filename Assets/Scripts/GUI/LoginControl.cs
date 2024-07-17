@@ -55,19 +55,48 @@ namespace CraftSharp.UI
 
             if (sip.Length > 1)
             {
-                try
+                if (sip.Length == 2) // IPv4 with port
                 {
-                    port = Convert.ToUInt16(sip[1]);
+                    try
+                    {
+                        port = Convert.ToUInt16(sip[1]);
+                    }
+                    catch (FormatException) { return false; }
                 }
-                catch (FormatException) { return false; }
+                else // IPv6 address maybe
+                {
+                    server = server.TrimStart('[');
+                    sip = server.Split(']');
+                    host = sip[0];
+
+                    if (sip.Length > 1)
+                    {
+                        if (sip.Length == 2) // IPv6 with port
+                        {
+                            try
+                            {
+                                // Trim ':' before port
+                                port = Convert.ToUInt16(sip[1].TrimStart(':'));
+                            }
+                            catch (FormatException) { return false; }
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
             }
 
-            if (host == "localhost" || host.Contains('.'))
+            if (host == "localhost" || host.Contains('.') || host.Contains(':'))
             {
-                // Server IP (IP or domain names contains at least a dot)
+                // IPv4 addresses or domain names contain at least a dot
                 if (sip.Length == 1 && host.Contains('.') && host.Any(c => char.IsLetter(c)) && CornGlobal.ResolveSrvRecords)
+                {
                     //Domain name without port may need Minecraft SRV Record lookup
                     ProtocolHandler.MinecraftServiceLookup(ref host, ref port);
+                }
+
                 return true;
             }
 
