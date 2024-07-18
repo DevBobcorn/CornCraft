@@ -526,6 +526,14 @@ namespace CraftSharp.UI
 
         void Start()
         {
+            // Generate default data or check update (Need to be done with priority because it contains translation texts)
+            var extraDataDir = PathHelper.GetExtraDataDirectory();
+            var builtinResLoad = BuiltinResourceHelper.ReadyBuiltinResource(
+                    CornApp.CORN_CRAFT_BUILTIN_FILE_NAME, CornApp.CORN_CRAFT_BUILTIN_VERSION, extraDataDir,
+                    (status) => { }, () => { }, (succeed) => { });
+            
+            while (builtinResLoad.MoveNext()) { /* Do nothing */ }
+            
             // Initialize controls
             usernameOptions!.text = string.Empty;
             usernamePanel!.alpha  = 0F; // Hide at start
