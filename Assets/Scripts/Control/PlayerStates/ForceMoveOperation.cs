@@ -31,10 +31,20 @@ namespace CraftSharp.Control
             OperationUpdate = update;
         }
 
+        /// <summary>
+        /// Callback invoked upon operation begins
+        /// </summary>
         public delegate void OperationInitAction(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player);
 
+        /// <summary>
+        /// Callback invoked upon operation ends
+        /// </summary>
         public delegate void OperationExitAction(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player);
 
-        public delegate void OperationUpdateAction(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player);
+        /// <summary>
+        /// Callback invoked upon operation updates
+        /// </summary>
+        /// <returns>Whether to terminate the operation</returns>
+        public delegate bool OperationUpdateAction(float interval, float curTime, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player);
     }
 }

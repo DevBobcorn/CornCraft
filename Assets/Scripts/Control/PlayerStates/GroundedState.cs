@@ -14,6 +14,7 @@ namespace CraftSharp.Control
         private bool _jumpRequested = false;
         private bool _jumpConfirmed = false;
         private bool _walkToggleRequested = false;
+        private bool _sprintRequested = false;
 
         /// <summary>
         /// Cooldown variable for climb over check.
@@ -29,17 +30,16 @@ namespace CraftSharp.Control
                 if (info.YawDeltaAbs <= 10F && info.BarrierYawAngle < 30F) // Trying to moving forward
                 {
                     var forwardDir = player.GetTargetOrientation() * Vector3.forward;
-                    var offset = forwardDir * (motor.Capsule.radius - info.BarrierDistance);
+                    var offset = /* forwardDir * (1.5F - info.BarrierDistance) */ + (info.BarrierHeight - 0.9F) * motor.CharacterUp;
 
                     player.StartForceMoveOperation("Climb over barrier",
                         new ForceMoveOperation[] {
-                                new(offset, 0.8F,
+                                new(offset, 1.3F,
                                     init: (info, motor, player) =>
                                     {
                                         player.RandomizeMirroredFlag();
                                         player.StartCrossFadeState(PlayerAbility.CLIMB_1M, 0.1F);
                                         info.PlayingRootMotion = true;
-                                        //motor.SetPosition(dstPos);
                                         player.UseRootMotion = true;
                                         player.IgnoreAnimatorScale = true;
                                     },
@@ -49,9 +49,11 @@ namespace CraftSharp.Control
                                         player.UseRootMotion = false;
                                         info.PlayingRootMotion = false;
                                     },
-                                    update: (interval, inputData, info, motor, player) =>
+                                    update: (interval, curTime, inputData, info, motor, player) =>
                                     {
                                         info.Moving = inputData.Gameplay.Movement.IsPressed();
+                                        // Terminate force move action if almost finished and player is eager to move
+                                        return curTime < 0.4F && info.Moving;
                                     }
                                 )
                         } );
@@ -133,10 +135,12 @@ namespace CraftSharp.Control
                 {
                     float moveSpeed;
 
-                    if ((inputData.Gameplay.Sprint.IsPressed() || info.Sprinting) && info.StaminaLeft > 0.1F)
+                    if ((_sprintRequested || info.Sprinting) && info.StaminaLeft > 0F)
                         info.Sprinting = true;
                     else
                         info.Sprinting = false;
+                    
+                    _sprintRequested = false;
                     
                     if (info.Sprinting)
                         moveSpeed = ability.SprintSpeed;
@@ -173,16 +177,24 @@ namespace CraftSharp.Control
                 {
                     // Reset sprinting state
                     info.Sprinting = false;
+                    _sprintRequested = false;
 
                     // Smooth deceleration
                     moveVelocity = Vector3.MoveTowards(currentVelocity, Vector3.zero, ability.DecSpeed * interval);
                 }
 
-                // Workaround: Used when fake grounded status is used (to avoid airborne state when moving off a block)
+                // Workaround: Used when fake grounded status is active (to avoid airborne state when moving off a block)
                 if (!motor.GroundingStatus.FoundAnyGround)
                 {
                     // Apply fake gravity
-                    moveVelocity -= motor.CharacterUp * 6;
+                    if (info.Moving)
+                    {
+                        moveVelocity -= motor.CharacterUp * 5F;
+                    }
+                    else
+                    {
+                        moveVelocity -= motor.CharacterUp;
+                    }
                 }
             }
 
@@ -221,6 +233,7 @@ namespace CraftSharp.Control
         private Action<InputAction.CallbackContext>? normalAttackCallback;
         private Action<InputAction.CallbackContext>? jumpRequestCallback;
         private Action<InputAction.CallbackContext>? walkToggleRequestCallback;
+        private Action<InputAction.CallbackContext>? sprintRequestCallback;
 
         public void OnEnter(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
@@ -230,9 +243,10 @@ namespace CraftSharp.Control
             _jumpRequested = false;
             _jumpConfirmed = false;
             _walkToggleRequested = false;
+            _sprintRequested = false;
 
             // Set cooldown
-            _groundedCooldown = 0.5F;
+            _groundedCooldown = 0.3F;
 
             // Register input action events
             player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
@@ -255,6 +269,12 @@ namespace CraftSharp.Control
             {
                 // Set walk toggle flag
                 _walkToggleRequested = true;
+            };
+
+            player.Actions.Gameplay.Sprint.performed += sprintRequestCallback = (context) =>
+            {
+                // Set sprint flag
+                _sprintRequested = true;
             };
         }
 

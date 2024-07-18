@@ -5276,10 +5276,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5454645792870506942, guid: 51b8087cdfed24041b1fa94df8112e5a, type: 3}
-      propertyPath: MaxStableDistanceFromLedge
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6493157887190711041, guid: 51b8087cdfed24041b1fa94df8112e5a, type: 3}
       propertyPath: m_Radius
       value: 0.4
