@@ -49,7 +49,22 @@ namespace CraftSharp.Control
             else
             {
                 // Call operation update
-                currentOperation.OperationUpdate?.Invoke(interval, inputData, info, motor, player);
+                var terminate = currentOperation.OperationUpdate?.Invoke(interval, currentTime, inputData, info, motor, player);
+
+                if (terminate ?? false)
+                {
+                    // Finish current operation
+                    FinishOperation(info, motor, player);
+
+                    currentOperationIndex++;
+                    currentTime = 0F;
+
+                    if (currentOperationIndex < Operations.Length)
+                    {
+                        // Start next operation in sequence
+                        StartOperation(info, motor, player);
+                    }
+                }
             }
         }
 
@@ -58,8 +73,7 @@ namespace CraftSharp.Control
             if (currentOperation is not null)
             {
                 // Distribute offset evenly into the movement
-                //currentVelocity = currentOperation.Offset / currentOperation.Time;
-                currentVelocity = Vector3.zero;
+                currentVelocity = currentOperation.Offset / currentOperation.Time;
             }
             else
             {
