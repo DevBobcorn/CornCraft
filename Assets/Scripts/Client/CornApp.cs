@@ -21,6 +21,11 @@ namespace CraftSharp
         public const int WINDOWED_APP_WIDTH = 1280, WINDOWED_APP_HEIGHT = 720;
         public const int EDITOR_FPS_LIMIT = 60;
 
+        public const string CORN_CRAFT_BUILTIN_FILE_NAME = "CornCraftBuiltin";
+        public const int    CORN_CRAFT_BUILTIN_VERSION = 1;
+        public const string VANILLAFIX_FILE_NAME = "VanillaFix";
+        public const int    VANILLAFIX_VERSION = 1;
+
         private BaseCornClient? client = null;
         public BaseCornClient? Client => client;
 
@@ -119,9 +124,9 @@ namespace CraftSharp
 
             // Load resource packs...
             packManager.ClearPacks();
-            // Download base pack if not present (Check pack.mcmeta because the
-            // folder is present even if only language files are downloaded)
-            if (!File.Exists(PathHelper.GetPackFile($"vanilla-{resourceVersion}", "pack.mcmeta"))) // Prepare resources first
+
+            // Download base pack if not present (Check pack.mcmeta because the folder is present even if only language files are downloaded)
+            if (!File.Exists(PathHelper.GetPackFile($"vanilla-{resourceVersion}", "pack.mcmeta")))
             {
                 Debug.Log($"Resources for {resourceVersion} not present. Downloading...");
                 bool downloadSucceeded = false;
@@ -137,6 +142,13 @@ namespace CraftSharp
                     yield break;
                 }
             }
+            
+            // Generate vanilla_fix or check update
+            var vanillaFixDir = PathHelper.GetPackDirectoryNamed("vanilla_fix");
+            yield return StartCoroutine(BuiltinResourceHelper.ReadyBuiltinResource(
+                    VANILLAFIX_FILE_NAME, VANILLAFIX_VERSION, vanillaFixDir,
+                    (status) => { }, () => { }, (succeed) => { }));
+
             // First add base resources
             ResourcePack basePack = new($"vanilla-{resourceVersion}");
             packManager.AddPack(basePack);
@@ -148,9 +160,11 @@ namespace CraftSharp
                 startUpFlag.Failed = true;
                 yield break;
             }
+
             // Then append overrides
             packManager.AddPack(new("vanilla_fix"));
             //packManager.AddPack(new("Greenfield.Texture.Pack.1.17"));
+
             // Load valid packs...
             loadFlag.Finished = false;
             Task.Run(() => {
