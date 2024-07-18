@@ -27,7 +27,6 @@ namespace CraftSharp
 
         #region Players and Entities
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
-        private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
         private InteractionUpdater? interactionUpdater;
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
