@@ -1116,13 +1116,25 @@ namespace CraftSharp.Protocol.Handlers
                             var blockLoc = dataTypes.ReadNextBlockLoc(packetData);
                             var ttt = dataTypes.ReadNextVarInt(packetData);
                             var tag = dataTypes.ReadNextNbt(packetData);
-                            // Output block entity data
-                            var typeId = ResourceLocation.FromString((string) tag["id"]);
-                            var type = BlockEntityPalette.INSTANCE.FromId(typeId);
-                            //UnityEngine.Debug.Log($"Single [{blockLoc}] {Json.Object2Json(tag)}");
-                            Loom.QueueOnMainThread(() => {
-                                handler.GetChunkRenderManager().AddBlockEntityRender(blockLoc, type, tag);
-                            });
+                            
+                            if (protocolVersion < MC_1_18_1_Version)
+                            {
+                                // Block entity id is sent with nbt data
+                                var typeId = ResourceLocation.FromString((string) tag["id"]);
+                                var type = BlockEntityPalette.INSTANCE.FromId(typeId);
+                                //UnityEngine.Debug.Log($"Single [{blockLoc}] {Json.Object2Json(tag)}");
+                                Loom.QueueOnMainThread(() => {
+                                    handler.GetChunkRenderManager().AddBlockEntityRender(blockLoc, type, tag);
+                                });
+                            }
+                            else
+                            {
+                                // Block entity id is sent as varint
+                                var type = BlockEntityPalette.INSTANCE.FromNumId(ttt);
+                                Loom.QueueOnMainThread(() => {
+                                    handler.GetChunkRenderManager().AddBlockEntityRender(blockLoc, type, tag);
+                                });
+                            }
                             break;
                         }
                     case PacketTypesIn.UnloadChunk:
