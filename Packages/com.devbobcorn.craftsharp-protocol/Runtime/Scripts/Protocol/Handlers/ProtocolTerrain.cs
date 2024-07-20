@@ -318,15 +318,7 @@ namespace CraftSharp.Protocol.Handlers
                     // Output block entity data
                     var blockLoc = new BlockLoc(x, y, z);
 
-                    if (!tag.ContainsKey("id"))
-                    {
-                        //UnityEngine.Debug.Log($"Block entity data without id: {Json.Object2Json(tag)}");
-                        // TODO: Create block entity from block
-                        continue;
-                    }
-
-                    var typeId = ResourceLocation.FromString((string) tag["id"]);
-                    var type = BlockEntityPalette.INSTANCE.FromId(typeId);
+                    var type = BlockEntityPalette.INSTANCE.FromNumId(ttt);
                     //UnityEngine.Debug.Log($"Chunk17 [{blockLoc}] {Json.Object2Json(tag)}");
                     Loom.QueueOnMainThread(() => {
                         chunksManager.AddBlockEntityRender(blockLoc, type, tag);

@@ -43,6 +43,19 @@
       "dependencies": {},
       "hash": "d9efd7e7ab826faa137ff3325d57fab85129a548"
     },
+    "com.stalomeow.star-rail-npr-shader": {
+      "version": "https://github.com/stalomeow/StarRailNPRShader.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.render-pipelines.core": "14.0.10",
+        "com.unity.render-pipelines.universal": "14.0.10",
+        "com.unity.burst": "1.8.12",
+        "com.unity.mathematics": "1.2.6",
+        "com.unity.nuget.newtonsoft-json": "3.2.1"
+      },
+      "hash": "63b00dd897076587d6e7fa20b5fcc2c1516f5765"
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,

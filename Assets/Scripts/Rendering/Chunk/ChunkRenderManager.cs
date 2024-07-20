@@ -379,7 +379,7 @@ namespace CraftSharp.Rendering
                 {
                     if (tags == null) // Auto-creating a block entity while it is already created
                     {
-                        // Do nothing
+                        prevBlockEntity.BlockEntityTags = new();
                     }
                     else // Update block entity data tags
                     {
