@@ -1,4 +1,4 @@
-Shader "CornShader/Lit (Transparent with Enviro 3 Fog)"
+Shader "CornShader/Lit (Stencil)"
 {
     // Keep properties of StandardSpecular shader for upgrade reasons.
     Properties
@@ -68,6 +68,17 @@ Shader "CornShader/Lit (Transparent with Enviro 3 Fog)"
                 "LightMode" = "UniversalForward"
             }
 
+            // Write to Honkai Star Rail character stencil
+            // This will be used later by Bloom post-processing
+            Stencil
+            {
+                Ref 1
+                WriteMask 1
+                Comp Always
+                Pass Replace
+                Fail Keep
+            }
+
             // -------------------------------------
             // Render State Commands
             // Use same blending / depth states as Standard shader
@@ -99,8 +110,6 @@ Shader "CornShader/Lit (Transparent with Enviro 3 Fog)"
             #pragma shader_feature_local_fragment _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _ALPHAPREMULTIPLY_ON _ALPHAMODULATE_ON
             #pragma shader_feature_local_fragment _ _SPECGLOSSMAP _SPECULAR_COLOR
-            //#pragma shader_feature_local_fragment _GLOSSINESS_FROM_BASE_ALPHA
-            #define _ENVIRO3_FOG
 
             // -------------------------------------
             // Universal Pipeline keywords
@@ -140,7 +149,6 @@ Shader "CornShader/Lit (Transparent with Enviro 3 Fog)"
             // -------------------------------------
             // Includes
             #include "Packages/com.devbobcorn.craftsharp-resource/Runtime/CornShaders/Tex2DArrayLitInput.hlsl"
-            #include_with_pragmas "Assets/Enviro 3 - Sky and Weather/Resources/Shader/Includes/FogIncludeHLSL.hlsl"
             #include "Packages/com.devbobcorn.craftsharp-resource/Runtime/CornShaders/Tex2DArrayLitForwardPass.hlsl"
             ENDHLSL
         }

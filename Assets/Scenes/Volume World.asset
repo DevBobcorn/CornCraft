@@ -92,7 +92,7 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: 1
   Threshold:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 0.7
   Tint:
     m_OverrideState: 0
@@ -101,7 +101,7 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 2
   CharactersOnly:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 1
   BlurFirstRTWidth:
     m_OverrideState: 0
