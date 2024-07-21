@@ -16,22 +16,14 @@ namespace CraftSharp.Rendering
         [SerializeField] public Material? StylizedWater;
 
         private readonly Dictionary<RenderType, Material> atlasMaterials = new();
-        private Dictionary<RenderType, Material> foglessAtlasMaterials = new();
         private Material? defaultAtlasMaterial;
 
         private bool atlasInitialized = false;
 
-        public Material GetAtlasMaterial(RenderType renderType, bool disableFog = false)
+        public Material GetAtlasMaterial(RenderType renderType)
         {
             EnsureAtlasInitialized();
-            if (disableFog)
-            {
-                return foglessAtlasMaterials.GetValueOrDefault(renderType, defaultAtlasMaterial!);
-            }
-            else
-            {
-                return atlasMaterials.GetValueOrDefault(renderType, defaultAtlasMaterial!);
-            }
+            return atlasMaterials.GetValueOrDefault(renderType, defaultAtlasMaterial!);
         }
 
         public void EnsureAtlasInitialized()
@@ -70,16 +62,6 @@ namespace CraftSharp.Rendering
             var water = new Material(StylizedWater!);
             //water.SetTexture("_BaseMap", packManager.GetAtlasArray(false));
             atlasMaterials.Add(RenderType.WATER, water);
-
-            // Make fogless variants
-            foglessAtlasMaterials = atlasMaterials.ToDictionary(x => x.Key, x =>
-            {
-                // Make a copy of the material
-                var m = new Material(x.Value);
-                // Set disable fog keyword
-                m.EnableKeyword("_DISABLE_FOG");
-                return m;
-            });
 
             atlasInitialized = true;
         }

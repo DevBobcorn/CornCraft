@@ -103,7 +103,7 @@ namespace CraftSharp.Rendering
             // Recalculate mesh normals
             mesh.RecalculateNormals();
 
-            var material = CornApp.CurrentClient!.ChunkMaterialManager.GetAtlasMaterial(itemModel.RenderType, true);
+            var material = CornApp.CurrentClient!.ChunkMaterialManager.GetAtlasMaterial(itemModel.RenderType);
 
             return (mesh, material, itemGeometry.DisplayTransforms);
         }

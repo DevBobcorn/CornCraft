@@ -200,7 +200,7 @@ MonoBehaviour:
   showDensityControls: 0
   showTextureControls: 0
   showWindControls: 0
-  cloudAnimLayer1: {x: -0.9295231, y: 0, z: 0.96782905}
+  cloudAnimLayer1: {x: -0.48510993, y: 0, z: 0.59882206}
   cloudAnimLayer2: {x: 0, y: 0, z: 0}
   cloudAnimNonScaledLayer1: {x: 0, y: 0, z: 0}
   cloudAnimNonScaledLayer2: {x: 0, y: 0, z: 0}
@@ -1091,11 +1091,11 @@ MonoBehaviour:
         time: 0.4
         value: 0
         inSlope: 0
-        outSlope: 8.407758
+        outSlope: -0
         tangentMode: 1
         weightedMode: 0
         inWeight: 0.33333334
-        outWeight: 0.035001237
+        outWeight: 0.32250023
       - serializedVersion: 3
         time: 0.58217514
         value: 0.4979985
@@ -1842,7 +1842,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ccdfb360c52f049bf71126aa74826f, type: 3}
   m_Name: Weather Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 0
+  showModuleInspector: 1
   showSaveLoad: 1
   active: 1
   Settings:
@@ -1877,7 +1877,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4eacb969ef7bfec4ba69d66b0a873f2f, type: 3}
   m_Name: Fog Module
   m_EditorClassIdentifier: 
-  showModuleInspector: 0
+  showModuleInspector: 1
   showSaveLoad: 1
   active: 1
   Settings:
@@ -1898,12 +1898,12 @@ MonoBehaviour:
     floatingPointOriginMod: {x: 0, y: 0, z: 0}
     globalFogHeight: 0
     fogDensity: 1
-    fogHeightFalloff: 0.005
+    fogHeightFalloff: 0.03
     fogHeight: 0
     fogDensity2: 1
     fogHeightFalloff2: 0.02
     fogHeight2: 0
-    fogMaxOpacity: 0.7
+    fogMaxOpacity: 1
     startDistance: 20
     fogColorBlend: 1
     fogColorMod: {r: 1, g: 1, b: 1, a: 1}
@@ -1977,6 +1977,72 @@ MonoBehaviour:
   showVolumetricsControls: 0
   showUnityFogControls: 0
   fogLights:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}

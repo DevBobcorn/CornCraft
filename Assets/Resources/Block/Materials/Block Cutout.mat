@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Block Cutout
-  m_Shader: {fileID: 4800000, guid: 550f6abc174fc2c4595c82177088bc37, type: 3}
+  m_Shader: {fileID: 4800000, guid: f3914716f812b2b418489a4395ee4408, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
