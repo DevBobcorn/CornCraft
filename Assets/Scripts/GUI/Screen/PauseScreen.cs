@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -9,8 +8,8 @@ namespace CraftSharp.UI
     public class PauseScreen : BaseScreen
     {
         // UI controls and objects
-        [SerializeField] private Button? resumeButton, quitButton;
-        [SerializeField] private Animator? screenAnimator;
+        [SerializeField] private Button resumeButton, quitButton;
+        [SerializeField] private Animator screenAnimator;
 
         private bool isActive = false;
 
@@ -18,7 +17,7 @@ namespace CraftSharp.UI
         {
             set {
                 isActive = value;
-                screenAnimator!.SetBool(SHOW_HASH, isActive);
+                screenAnimator.SetBool(SHOW_HASH, isActive);
             }
 
             get {
@@ -38,27 +37,34 @@ namespace CraftSharp.UI
 
         public void Back2Game()
         {
-            CornApp.CurrentClient?.ScreenControl.TryPopScreen();
+            var client = CornApp.CurrentClient;
+            if (client == null) return;
+
+            client.ScreenControl.TryPopScreen();
         }
 
         public void QuitGame()
         {
-            CornApp.CurrentClient?.Disconnect();
+            var client = CornApp.CurrentClient;
+            if (client == null) return;
+
+            client.Disconnect();
         }
 
         protected override void Initialize()
         {
             // Initialize controls and add listeners
-            resumeButton!.onClick.AddListener(this.Back2Game);
-            quitButton!.onClick.AddListener(this.QuitGame);
+            resumeButton.onClick.AddListener(this.Back2Game);
+            quitButton.onClick.AddListener(this.QuitGame);
         }
 
         public override void UpdateScreen()
         {
             // Escape key cannot be used here, otherwise it will push pause screen back after poping it
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
                 Back2Game();
+            }
         }
-
     }
 }

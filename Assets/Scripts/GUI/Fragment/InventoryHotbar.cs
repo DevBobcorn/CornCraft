@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using UnityEngine;
 
@@ -11,14 +10,18 @@ namespace CraftSharp.UI
         public const int HOTBAR_LENGTH = 9;
 
         [SerializeField] private InventoryItemSlot[] itemSlots = { };
-        [SerializeField] private RectTransform? slotSelection;
+        [SerializeField] private RectTransform slotSelection;
+
+        #nullable enable
 
         private Action<HotbarUpdateEvent>? hotbarUpdateCallback;
         private Action<HeldItemChangeEvent>? heldItemChangeCallback;
 
+        #nullable disable
+
         private void SelectSlot(int slot)
         {
-            slotSelection!.SetParent(itemSlots[slot].transform, false);
+            slotSelection.SetParent(itemSlots[slot].transform, false);
             slotSelection.SetAsLastSibling();
         }
 

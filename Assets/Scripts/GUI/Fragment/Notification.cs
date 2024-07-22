@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -19,7 +18,7 @@ namespace CraftSharp.UI
             Error
         }
 
-        private Animator? anim;
+        private Animator anim;
         private int numeralID;
         private float timeLeft = float.MaxValue;
 
@@ -57,9 +56,8 @@ namespace CraftSharp.UI
             if (timeLeft <= 0F) // Time to go....
             {
                 // Play fade away animation...
-                anim?.SetBool(EXPIRED_HASH, true);
+                anim.SetBool(EXPIRED_HASH, true);
             }
         }
-
     }
 }

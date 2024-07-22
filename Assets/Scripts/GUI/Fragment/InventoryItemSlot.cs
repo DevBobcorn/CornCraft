@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 using Unity.Mathematics;
 using TMPro;
@@ -13,11 +12,13 @@ namespace CraftSharp.UI
         private static readonly int SHOW_HASH = Animator.StringToHash("Show");
         private static readonly int UPDATE_HASH = Animator.StringToHash("Update");
 
-        [SerializeField] private GameObject? modelObject;
-        [SerializeField] private TMP_Text? itemText;
-        [SerializeField] private MeshFilter? itemMeshFilter;
-        [SerializeField] private MeshRenderer? itemMeshRenderer;
-        [SerializeField] private Animator? itemAnimator;
+        [SerializeField] private GameObject modelObject;
+        [SerializeField] private TMP_Text itemText;
+        [SerializeField] private MeshFilter itemMeshFilter;
+        [SerializeField] private MeshRenderer itemMeshRenderer;
+        [SerializeField] private Animator itemAnimator;
+
+        #nullable enable
 
         // Use null for empty items
         private ItemStack? itemStack = null;
@@ -28,17 +29,19 @@ namespace CraftSharp.UI
             // Update item mesh
             UpdateItemMesh();
             // Visually emphasize the change
-            itemAnimator!.SetTrigger(UPDATE_HASH);
+            itemAnimator.SetTrigger(UPDATE_HASH);
         }
+
+        #nullable disable
 
         public void ShowItemStack()
         {
-            itemAnimator!.SetBool(SHOW_HASH, true);
+            itemAnimator.SetBool(SHOW_HASH, true);
         }
 
         public void HideItemStack()
         {
-            itemAnimator!.SetBool(SHOW_HASH, false);
+            itemAnimator.SetBool(SHOW_HASH, false);
         }
 
         private void UpdateItemMesh()
@@ -47,18 +50,18 @@ namespace CraftSharp.UI
 
             if (result != null) // If build suceeded
             {
-                itemMeshFilter!.sharedMesh = result.Value.mesh;
-                itemMeshRenderer!.sharedMaterial = result.Value.material;
+                itemMeshFilter.sharedMesh = result.Value.mesh;
+                itemMeshRenderer.sharedMaterial = result.Value.material;
 
                 // Handle GUI display transform
                 bool hasGUITransform = result.Value.transforms.TryGetValue(DisplayPosition.GUI, out float3x3 t);
                 // Make use of the debug text
-                itemText!.text = itemStack!.Count > 1 ? itemStack.Count.ToString() : string.Empty;
+                itemText.text = itemStack.Count > 1 ? itemStack.Count.ToString() : string.Empty;
 
                 if (hasGUITransform) // Apply specified local transform
                 {
                     // Apply local translation, '1' in translation field means 0.1 unit in local space, so multiply with 0.1
-                    modelObject!.transform.localPosition = t.c0 * 0.1F;
+                    modelObject.transform.localPosition = t.c0 * 0.1F;
                     // Apply local rotation
                     modelObject.transform.localEulerAngles = Vector3.zero;
                     // - MC ROT X
@@ -73,7 +76,7 @@ namespace CraftSharp.UI
                 else // Apply uniform local transform
                 {
                     // Apply local translation, set to zero
-                    modelObject!.transform.localPosition = Vector3.zero;
+                    modelObject.transform.localPosition = Vector3.zero;
                     // Apply local rotation
                     modelObject.transform.localEulerAngles = Vector3.zero;
                     // Apply local scale
@@ -82,8 +85,8 @@ namespace CraftSharp.UI
             }
             else // If build failed (item is empty or invalid)
             {
-                itemMeshFilter!.sharedMesh = null;
-                itemText!.text = string.Empty;
+                itemMeshFilter.sharedMesh = null;
+                itemText.text = string.Empty;
             }
         }
     }

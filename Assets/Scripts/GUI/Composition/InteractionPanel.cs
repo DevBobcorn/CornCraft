@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,11 +13,11 @@ namespace CraftSharp.UI
     {
         private static readonly int SHOW_HASH = Animator.StringToHash("Show");
 
-        [SerializeField] private GameObject? interactionOptionPrefab;
-        [SerializeField] private RectTransform? container;
+        [SerializeField] private GameObject interactionOptionPrefab;
+        [SerializeField] private RectTransform container;
 
-        private Animator? scrollHint;
-        private ScrollRect? scrollRect;
+        private Animator scrollHint;
+        private ScrollRect scrollRect;
 
         private readonly List<InteractionOption> interactionOptions = new();
 
@@ -26,11 +25,15 @@ namespace CraftSharp.UI
 
         public bool ShouldAbsordMouseScroll => interactionOptions.Count > 1;
 
+        #nullable enable
+
         private Action<InteractionAddEvent>?     addCallback;
         private Action<InteractionRemoveEvent>?  removeCallback;
 
         public delegate void ItemCountEventHandler(int newCount);
         public event ItemCountEventHandler? OnItemCountChange;
+
+        #nullable disable
 
         void Start()
         {
@@ -73,9 +76,9 @@ namespace CraftSharp.UI
                 option.SetInfo(id, info);
                 interactionOptions.Add(option);
 
-                optionObj!.transform.SetParent(container, false);
-                optionObj!.transform.localScale = Vector3.one;
-                optionObj!.transform.SetAsLastSibling();
+                optionObj.transform.SetParent(container, false);
+                optionObj.transform.localScale = Vector3.one;
+                optionObj.transform.SetAsLastSibling();
 
                 if (interactionOptions.Count == 1)
                 {
@@ -85,7 +88,7 @@ namespace CraftSharp.UI
                 else if (selectedIndex < 0 || selectedIndex >= interactionOptions.Count)
                     SetSelected(0); // There's at least 1 option available after adding
                 
-                scrollHint!.SetBool(SHOW_HASH, interactionOptions.Count > 1); // Show or hide scroll hint
+                scrollHint.SetBool(SHOW_HASH, interactionOptions.Count > 1); // Show or hide scroll hint
             }
             else
             {
@@ -131,7 +134,7 @@ namespace CraftSharp.UI
                 }
             }
 
-            scrollHint!.SetBool(SHOW_HASH, interactionOptions.Count > 1); // Show or hide scroll hint
+            scrollHint.SetBool(SHOW_HASH, interactionOptions.Count > 1); // Show or hide scroll hint
             OnItemCountChange?.Invoke(interactionOptions.Count);
         }
 

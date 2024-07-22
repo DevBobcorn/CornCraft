@@ -1,6 +1,4 @@
-#nullable enable
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
@@ -22,6 +20,8 @@ namespace CraftSharp
     [RequireComponent(typeof (InteractionUpdater))]
     public class CornClient : BaseCornClient, IMinecraftComHandler
     {
+        #nullable enable
+
         #region Login Information
         private string? host;
         private int port;
@@ -56,9 +56,10 @@ namespace CraftSharp
         
         TcpClient? tcpClient;
         IMinecraftCom? handler;
-
         Tuple<Thread, CancellationTokenSource>? timeoutdetector = null;
         #endregion
+
+        #nullable disable
 
         #region Players and Entities
         private bool locationReceived = false;
@@ -67,7 +68,7 @@ namespace CraftSharp
         private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
         private readonly object movementLock = new();
-        private InteractionUpdater? interactionUpdater;
+        private InteractionUpdater interactionUpdater;
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         #endregion
 
@@ -81,12 +82,11 @@ namespace CraftSharp
 
         void Start()
         {
-            //MaterialManager.LoadPlayerSkins();
-
-            // Push HUD Screen on start
-            ScreenControl.PushScreen(HUDScreen!);
-
-            // Setup chunk render manager
+            // Set up screen control
+            ScreenControl.SetClient(this);
+            ScreenControl.SetLoadingScreen(true);
+            
+            // Set up chunk render manager
             ChunkRenderManager.SetClient(this);
 
             // Set up interaction updater
@@ -95,25 +95,6 @@ namespace CraftSharp
 
             // Freeze player controller until terrain is ready
             PlayerController.DisablePhysics();
-            ScreenControl.PushScreen(LoadingScreen!);
-        }
-
-        private IEnumerator PostInitialization()
-        {
-            yield return new WaitForEndOfFrame();
-
-            GameMode = GameMode.Creative;
-            EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
-
-            // Create player render
-            if (playerRenderPrefabs[selectedRenderPrefab] != null)
-            {
-                PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
-            }
-            else
-            {
-                throw new Exception("Player render prefab is not assigned for game client!");
-            }
         }
 
         public override bool StartClient(StartLoginInfo info)
@@ -286,30 +267,28 @@ namespace CraftSharp
         /// <summary>
         /// Periodically checks for server keepalives and consider that connection has been lost if the last received keepalive is too old.
         /// </summary>
-        private void TimeoutDetector(object? o)
+        private void TimeoutDetector(object o)
         {
+            var token = (CancellationToken) o;
             UpdateKeepAlive();
+
             do
             {
-                bool end = false;
                 for (int i = 0;i < 30;i++) // 15 seconds in total
                 {
                     Thread.Sleep(TimeSpan.FromSeconds(0.5));
-                    end = ((CancellationToken)o!).IsCancellationRequested;
 
-                    if (end) break;
+                    if (token.IsCancellationRequested) break;
                 }
 
-                if (end) break;
-
-                if (((CancellationToken)o!).IsCancellationRequested)
+                if (token.IsCancellationRequested)
                     return;
                 
                 lock (lastKeepAliveLock)
                 {
                     if (lastKeepAlive.AddSeconds(30) < DateTime.Now)
                     {
-                        if (((CancellationToken)o!).IsCancellationRequested)
+                        if (token.IsCancellationRequested)
                             return;
                         
                         OnConnectionLost(DisconnectReason.ConnectionLost, Translations.Get("error.timeout"));
@@ -317,7 +296,7 @@ namespace CraftSharp
                     }
                 }
             }
-            while (!((CancellationToken)o!).IsCancellationRequested);
+            while (!token.IsCancellationRequested);
         }
 
         /// <summary>
@@ -460,6 +439,7 @@ namespace CraftSharp
         #endregion
 
         #region Getters: Retrieve data for use in other methods
+        #nullable enable
 
         // Retrieve client connection info
         public override string GetServerHost() => host!;
@@ -997,7 +977,7 @@ namespace CraftSharp
             }
 
             Loom.QueueOnMainThread(() => {
-                ScreenControl.PushScreen(LoadingScreen!);
+                ScreenControl.SetLoadingScreen(true);
                 PlayerController.DisablePhysics();
 
                 ChunkRenderManager.ReloadChunksRender();
@@ -1058,7 +1038,7 @@ namespace CraftSharp
                         ChunkRenderManager.InitializeTerrainCollider(location.GetBlockLoc(), () =>
                                 {
                                     // Pop loading screen
-                                    ScreenControl.TryPopScreen();
+                                    ScreenControl.SetLoadingScreen(false);
                                     PlayerController.EnablePhysics();
                                 });
                         // Update camera yaw (convert to Unity yaw)
@@ -1738,6 +1718,5 @@ namespace CraftSharp
         public void OnLoginSuccess(Guid uuid, string userName, Tuple<string, string, string>[]? playerProperty) { }
 
         #endregion
-
     }
 }

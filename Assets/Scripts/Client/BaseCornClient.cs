@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,58 +14,64 @@ namespace CraftSharp
     public abstract class BaseCornClient : MonoBehaviour
     {
         #region Inspector Fields
-        [SerializeField] private ChunkRenderManager? m_ChunkRenderManager;
-        [SerializeField] private EntityRenderManager? m_EntityRenderManager;
-        [SerializeField] private BaseEnvironmentManager? m_EnvironmentManager;
-        [SerializeField] private ChunkMaterialManager? m_ChunkMaterialManager;
-        [SerializeField] private EntityMaterialManager? m_EntityMaterialManager;
+        [SerializeField] private ChunkRenderManager m_ChunkRenderManager;
+        [SerializeField] private EntityRenderManager m_EntityRenderManager;
+        [SerializeField] private BaseEnvironmentManager m_EnvironmentManager;
+        [SerializeField] private ChunkMaterialManager m_ChunkMaterialManager;
+        [SerializeField] private EntityMaterialManager m_EntityMaterialManager;
 
-        public ChunkRenderManager ChunkRenderManager => m_ChunkRenderManager!;
-        public EntityRenderManager EntityRenderManager => m_EntityRenderManager!;
-        public BaseEnvironmentManager EnvironmentManager => m_EnvironmentManager!;
-        public ChunkMaterialManager ChunkMaterialManager => m_ChunkMaterialManager!;
-        public EntityMaterialManager EntityMaterialManager => m_EntityMaterialManager!;
+        public ChunkRenderManager ChunkRenderManager => m_ChunkRenderManager;
+        public EntityRenderManager EntityRenderManager => m_EntityRenderManager;
+        public BaseEnvironmentManager EnvironmentManager => m_EnvironmentManager;
+        public ChunkMaterialManager ChunkMaterialManager => m_ChunkMaterialManager;
+        public EntityMaterialManager EntityMaterialManager => m_EntityMaterialManager;
         
-        [SerializeField] private PlayerController? m_PlayerController;
-        public PlayerController PlayerController => m_PlayerController!;
+        [SerializeField] private PlayerController m_PlayerController;
+        public PlayerController PlayerController => m_PlayerController;
         [SerializeField] protected GameObject[] playerRenderPrefabs = { };
         [SerializeField] protected int selectedRenderPrefab;
-        [SerializeField] protected CameraController? cameraController;
-        public CameraController CameraController => cameraController!;
-        [SerializeField] protected ScreenControl? screenControl;
-        public ScreenControl ScreenControl => screenControl!;
-        [SerializeField] protected HUDScreen? HUDScreen;
-        [SerializeField] protected LoadingScreen? LoadingScreen;
+        [SerializeField] protected CameraController m_CameraController;
+        public CameraController CameraController => m_CameraController;
+        [SerializeField] protected ScreenControl screenControl;
+        public ScreenControl ScreenControl => screenControl;
+        [SerializeField] protected Camera m_UICamera;
+        public Camera UICamera => m_UICamera;
         #endregion
 
         public bool InputPaused { get; private set; } = false;
         public void EnableInput(bool enable)
         {
-            if (enable)
+            if (m_CameraController != null && m_PlayerController != null)
             {
-                m_PlayerController?.EnableInput();
-                cameraController?.EnableInput();
+                if (enable)
+                {
+                    m_PlayerController.EnableInput();
+                    m_CameraController.EnableInput();
 
-                InputPaused = false;
-            }
-            else
-            {
-                m_PlayerController?.DisableInput();
-                cameraController?.DisableInput();
+                    InputPaused = false;
+                }
+                else
+                {
+                    m_PlayerController.DisableInput();
+                    m_CameraController.DisableInput();
 
-                InputPaused = true;
+                    InputPaused = true;
+                }
             }
         }
 
         public void EnableCameraZoom(bool enable)
         {
-            if (enable)
+            if (m_CameraController != null)
             {
-                cameraController?.EnableZoom();
-            }
-            else
-            {
-                cameraController?.DisableZoom();
+                if (enable)
+                {
+                    m_CameraController.EnableZoom();
+                }
+                else
+                {
+                    m_CameraController.DisableZoom();
+                }
             }
         }
 
@@ -78,6 +83,7 @@ namespace CraftSharp
         public abstract void Disconnect();
 
         #region Getters: Retrieve data for use in other methods
+        #nullable enable
 
         // Retrieve client connection info
         public abstract string GetServerHost();
@@ -91,6 +97,7 @@ namespace CraftSharp
         public abstract int GetPacketCount();
         // Retrieve gameplay info
         public abstract IChunkRenderManager GetChunkRenderManager();
+        
         public abstract Container? GetInventory(int inventoryId);
         public abstract ItemStack? GetActiveItem();
         public abstract Location GetLocation();

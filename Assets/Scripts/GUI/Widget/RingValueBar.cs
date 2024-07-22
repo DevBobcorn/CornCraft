@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,7 +14,7 @@ namespace CraftSharp.UI
 
         [SerializeField] [Range(30F, 360F)] private float fullBarDegree = 40F;
 
-        [SerializeField] private Image? backgroundImage, fillImage;
+        [SerializeField] private Image backgroundImage, fillImage;
 
         void Start()
         {
@@ -46,7 +45,6 @@ namespace CraftSharp.UI
                 fillImage!.color = warningColor;
             else
                 fillImage!.color = normalColor;
-            
         }
     }
 }

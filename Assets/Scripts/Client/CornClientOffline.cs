@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,19 +15,23 @@ namespace CraftSharp
     [RequireComponent(typeof (InteractionUpdater))]
     public class CornClientOffline : BaseCornClient
     {
+        #nullable enable
+
         #region Login Information
         private const string username = "OfflinePlayer";
         private Guid uuid = Guid.Empty;
         #endregion
 
-        #region Client Control
+        #region Dummy Client Control
 
         #endregion
+
+        #nullable disable
 
         #region Players and Entities
         private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private readonly Dictionary<int, Container> inventories = new();
-        private InteractionUpdater? interactionUpdater;
+        private InteractionUpdater interactionUpdater;
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         #endregion
 
@@ -45,9 +48,9 @@ namespace CraftSharp
 
         void Start()
         {
-            // Push HUD Screen on start
-            ScreenControl.PushScreen(HUDScreen!);
-
+            // Set up screen control
+            ScreenControl.SetClient(this);
+            
             // Setup chunk render manager
             ChunkRenderManager.SetClient(this);
 
@@ -154,6 +157,7 @@ namespace CraftSharp
         }
 
         #region Getters: Retrieve data for use in other methods
+        #nullable enable
 
         // Retrieve client connection info
         public override string GetServerHost() => string.Empty;

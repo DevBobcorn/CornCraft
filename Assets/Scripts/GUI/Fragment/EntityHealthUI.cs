@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 using TMPro;
 
@@ -8,8 +7,8 @@ namespace CraftSharp.UI
 {
     public class EntityHealthUI : FloatingUI
     {
-        [SerializeField] private TMP_Text? levelText;
-        [SerializeField] private BaseValueBar? healthBar;
+        [SerializeField] private TMP_Text levelText;
+        [SerializeField] private BaseValueBar healthBar;
         [SerializeField] private string textFormat = "Lv.{0:0}";
 
         private void UpdateHealth()

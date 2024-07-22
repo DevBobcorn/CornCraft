@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,8 +16,8 @@ namespace CraftSharp.UI
 
         [SerializeField] private RectTransform.Axis barAxis = RectTransform.Axis.Horizontal;
 
-        [SerializeField] private RectTransform? barFillTransform, deltaFillTransform, displayFillTransform;
-        private Image? displayFillImage, deltaFillImage;
+        [SerializeField] private RectTransform barFillTransform, deltaFillTransform, displayFillTransform;
+        private Image displayFillImage, deltaFillImage;
 
         private float fullBarLength;
 

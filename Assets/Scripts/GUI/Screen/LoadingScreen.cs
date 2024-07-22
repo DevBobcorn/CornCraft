@@ -1,9 +1,4 @@
-#nullable enable
-using System;
 using UnityEngine;
-using UnityEngine.UI;
-
-using CraftSharp.Event;
 
 namespace CraftSharp.UI
 {
@@ -13,13 +8,13 @@ namespace CraftSharp.UI
         private bool isActive = false;
 
         // UI controls and objects
-        [SerializeField] private Animator? screenAnimator;
+        [SerializeField] private Animator screenAnimator;
 
         public override bool IsActive
         {
             set {
                 isActive = value;
-                screenAnimator!.SetBool(SHOW_HASH, isActive);
+                screenAnimator.SetBool(SHOW_HASH, isActive);
             }
 
             get {
@@ -40,11 +35,6 @@ namespace CraftSharp.UI
         protected override void Initialize()
         {
 
-        }
-
-        void OnDestroy()
-        {
-            
         }
 
         public override void UpdateScreen()

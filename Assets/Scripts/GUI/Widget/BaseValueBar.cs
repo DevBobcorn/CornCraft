@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 using TMPro;
 
@@ -7,7 +6,7 @@ namespace CraftSharp.UI
     public abstract class BaseValueBar : MonoBehaviour
     {
         protected float maxValue = 100F, curValue = 100F, displayValue = 100F;
-        [SerializeField] private TMP_Text? barText;
+        [SerializeField] private TMP_Text barText;
         [SerializeField] private string textFormat = "{0:0}/{1:0}";
 
         public virtual float MaxValue

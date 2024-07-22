@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -17,20 +16,17 @@ namespace CraftSharp.UI
         private static readonly Vector3 STAMINA_TARGET_OFFSET = new(0, -0.5f, 0f);
 
         // UI controls and objects
-        [SerializeField] private TMP_Text? latencyText, packetsText, debugText, modeText;
-        [SerializeField] private Animator? modePanelAnimator, crosshairAnimator, statusPanelAnimator;
+        [SerializeField] private TMP_Text latencyText, packetsText, debugText, modeText;
+        [SerializeField] private Animator modePanelAnimator, crosshairAnimator, statusPanelAnimator;
         [SerializeField] private Button[] modeButtons = new Button[4];
-        [SerializeField] private ValueBar? healthBar;
-        [SerializeField] private RingValueBar? staminaBar;
-        [SerializeField] private InteractionPanel? interactionPanel;
-        [SerializeField] private InventoryHotbar? inventoryHotbar;
-        [SerializeField] protected InputActionReference? scrollInput;
-        [SerializeField] private Camera? UICamera;
-        [SerializeField] private Animator? screenAnimator;
+        [SerializeField] private ValueBar healthBar;
+        [SerializeField] private RingValueBar staminaBar;
+        [SerializeField] private InteractionPanel interactionPanel;
+        [SerializeField] private InventoryHotbar inventoryHotbar;
+        [SerializeField] protected InputActionReference scrollInput;
+        [SerializeField] private Animator screenAnimator;
 
-        private Animator? staminaBarAnimator;
-        private ChatScreen? chatScreen;
-        private PauseScreen? pauseScreen;
+        private Animator staminaBarAnimator;
 
         private bool isActive = false, debugInfo = true;
 
@@ -47,16 +43,16 @@ namespace CraftSharp.UI
             set {
                 isActive = value;
                 
-                screenAnimator!.SetBool(SHOW_HASH, isActive);
+                screenAnimator.SetBool(SHOW_HASH, isActive);
 
                 if (isActive)
                 {
                     transitionCooldown = transitionTime;
-                    inventoryHotbar!.ShowItems();
+                    inventoryHotbar.ShowItems();
                 }
                 else
                 {
-                    inventoryHotbar!.HideItems();
+                    inventoryHotbar.HideItems();
                 }
             }
 
@@ -78,9 +74,9 @@ namespace CraftSharp.UI
         protected override void Initialize()
         {
             // Initialize controls...
-            staminaBarAnimator = staminaBar!.GetComponent<Animator>();
+            staminaBarAnimator = staminaBar.GetComponent<Animator>();
 
-            crosshairCallback = (e) => crosshairAnimator!.SetBool(SHOW_HASH, e.Show);
+            crosshairCallback = (e) => crosshairAnimator.SetBool(SHOW_HASH, e.Show);
 
             gameModeCallback = (e) => {
                 var showStatus = e.GameMode switch {
@@ -92,14 +88,14 @@ namespace CraftSharp.UI
                     _                   => false
                 };
 
-                statusPanelAnimator!.SetBool(SHOW_HASH, showStatus);
+                statusPanelAnimator.SetBool(SHOW_HASH, showStatus);
             };
 
             healthCallback = (e) => {
                 if (e.UpdateMaxHealth)
-                    healthBar!.MaxValue = e.Health * HEALTH_MULTIPLIER;
+                    healthBar.MaxValue = e.Health * HEALTH_MULTIPLIER;
 
-                healthBar!.CurValue = e.Health * HEALTH_MULTIPLIER;
+                healthBar.CurValue = e.Health * HEALTH_MULTIPLIER;
             };
 
             staminaCallback = (e) => {
@@ -125,37 +121,37 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(healthCallback);
             EventManager.Instance.Register(staminaCallback);
 
-            // Initialize screens
-            chatScreen  = GameObject.FindObjectOfType<ChatScreen>(true);
-            pauseScreen = GameObject.FindObjectOfType<PauseScreen>(true);
-
             // Initialize controls
             var game = CornApp.CurrentClient;
             if (game != null)
             {
-                interactionPanel!.OnItemCountChange += newCount =>
+                interactionPanel.OnItemCountChange += newCount =>
                 {
                     // Disable camera zoom if there're more than 1 interaction options
                     if (newCount > 1)
                     {
-                        scrollInput!.action.Enable();
+                        scrollInput.action.Enable();
                         game.EnableCameraZoom(false);
                     }
                     else
                     {
-                        scrollInput!.action.Disable();
+                        scrollInput.action.Disable();
                         game.EnableCameraZoom(true);
                     }
                 };
 
-                crosshairAnimator!.SetBool(SHOW_HASH, false);
+                crosshairAnimator.SetBool(SHOW_HASH, false);
             }
         }
+
+        #nullable enable
 
         private Action<CrosshairEvent>?         crosshairCallback;
         private Action<GameModeUpdateEvent>?    gameModeCallback;
         private Action<HealthUpdateEvent>?      healthCallback;
         private Action<StaminaUpdateEvent>?     staminaCallback;
+
+        #nullable disable
 
         void OnDestroy()
         {
@@ -191,7 +187,7 @@ namespace CraftSharp.UI
                     if (modePanelShown) // Select next gamemode
                     {
                         selectedMode = (selectedMode + 1) % buttonCount;
-                        modeText!.text = ChatParser.TranslateString($"gameMode.{((GameMode) selectedMode).GetIdentifier()}");
+                        modeText.text = ChatParser.TranslateString($"gameMode.{((GameMode) selectedMode).GetIdentifier()}");
                         modeButtons[selectedMode].Select();
                     }
                     else // Show gamemode switch
@@ -199,12 +195,12 @@ namespace CraftSharp.UI
                         selectedMode = (int) game.GameMode;
                         if (selectedMode >= 0 && selectedMode < modeButtons.Length)
                         {
-                            modeText!.text = ChatParser.TranslateString($"gameMode.{((GameMode) selectedMode).GetIdentifier()}");
-                            modePanelAnimator!.SetBool(SHOW_HASH, true);
+                            modeText.text = ChatParser.TranslateString($"gameMode.{((GameMode) selectedMode).GetIdentifier()}");
+                            modePanelAnimator.SetBool(SHOW_HASH, true);
                             modePanelShown = true;
                             modeButtons[selectedMode].Select();
                             // Hide crosshair (if shown)
-                            crosshairAnimator!.SetBool(SHOW_HASH, false);
+                            crosshairAnimator.SetBool(SHOW_HASH, false);
                         }
                     }
                 }
@@ -214,7 +210,7 @@ namespace CraftSharp.UI
             {
                 if (modePanelShown) // Hide gamemode switch
                 {
-                    modePanelAnimator!.SetBool(SHOW_HASH, false);
+                    modePanelAnimator.SetBool(SHOW_HASH, false);
                     modePanelShown = false;
 
                     if (selectedMode != (int) game.GameMode) // Commit switch request
@@ -229,11 +225,11 @@ namespace CraftSharp.UI
             }
 
             if (Keyboard.current.fKey.wasPressedThisFrame) // Execute interactions
-                interactionPanel!.RunInteractionOption();
+                interactionPanel.RunInteractionOption();
 
-            if (interactionPanel!.ShouldAbsordMouseScroll)
+            if (interactionPanel.ShouldAbsordMouseScroll)
             {
-                var scroll = scrollInput!.action.ReadValue<float>();
+                var scroll = scrollInput.action.ReadValue<float>();
                 if (scroll != 0F && interactionPanel != null)
                 {
                     if (scroll < 0F)
@@ -265,20 +261,20 @@ namespace CraftSharp.UI
 
             if (Keyboard.current.slashKey.wasPressedThisFrame)
             {   // Open chat screen and input a slash
-                game.ScreenControl.PushScreen(chatScreen!);
-                chatScreen!.SetChatMessage("/", 1);
+                var chatScreen = game.ScreenControl.PushScreen<ChatScreen>();
+                chatScreen.SetChatMessage("/", 1);
             }
             else if (Keyboard.current.tKey.wasPressedThisFrame) // Just open chat screen
             {
-                game.ScreenControl.PushScreen(chatScreen!);
+                game.ScreenControl.PushScreen<ChatScreen>();
             }
 
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
-                game.ScreenControl.PushScreen(pauseScreen!);
+                game.ScreenControl.PushScreen<PauseScreen>();
             }
             
-            debugText!.text = game.GetInfoString(debugInfo);
+            debugText.text = game.GetInfoString(debugInfo);
 
             var currentLatency = game.GetOwnLatency();
             var currentPackets = game.GetPacketCount();
@@ -288,11 +284,11 @@ namespace CraftSharp.UI
                 displayedLatency = (int) Mathf.Lerp(displayedLatency, currentLatency, 0.55F);
                 
                 if (displayedLatency >= 500)
-                    latencyText!.text =  $"<color=red>{displayedLatency} ms</color>";
+                    latencyText.text =  $"<color=red>{displayedLatency} ms</color>";
                 else if (displayedLatency >= 100)
-                    latencyText!.text =  $"<color=orange>{displayedLatency} ms</color>";
+                    latencyText.text =  $"<color=orange>{displayedLatency} ms</color>";
                 else
-                    latencyText!.text =  $"{displayedLatency} ms";
+                    latencyText.text =  $"{displayedLatency} ms";
             }
 
             if (displayedPackets != currentPackets)
@@ -317,11 +313,11 @@ namespace CraftSharp.UI
             if (game == null) return;
             
             // Update stamina bar position
-            var targetPosition = UICamera!.ViewportToWorldPoint(
-                    game!.CameraController.GetTargetViewportPos(STAMINA_TARGET_OFFSET));
+            var targetPosition = game.UICamera.ViewportToWorldPoint(
+                    game.CameraController.GetTargetViewportPos(STAMINA_TARGET_OFFSET));
 
             var newPos = Vector3.Lerp(
-                    staminaBar!.transform.position, targetPosition, Time.deltaTime * 10F);
+                    staminaBar.transform.position, targetPosition, Time.deltaTime * 10F);
             
             // Don't modify z coordinate
             staminaBar.transform.position = new Vector3(newPos.x, newPos.y, staminaBar.transform.position.z);

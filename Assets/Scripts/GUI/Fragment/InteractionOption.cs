@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 using TMPro;
 
@@ -14,15 +13,15 @@ namespace CraftSharp.UI
         private static readonly int EXPIRED  = Animator.StringToHash("Expired");
         private static readonly int EXECUTED = Animator.StringToHash("Executed");
 
-        private Animator? anim;
+        private Animator animator;
         private int interactionKey;
         public int InteractionId => interactionKey;
 
-        public InteractionInfo? interactionInfo;
+        public InteractionInfo interactionInfo;
 
         void Awake()
         {
-            anim = GetComponent<Animator>();
+            animator = GetComponent<Animator>();
         }
 
         public void SetInfo(int id, InteractionInfo info)
@@ -40,18 +39,18 @@ namespace CraftSharp.UI
         public void SetSelected(bool selected)
         {
             // Set selected param in animator
-            anim?.SetBool(SELECTED, selected);
+            animator.SetBool(SELECTED, selected);
         }
 
         public void Remove()
         {
             // Play fade away animation...
-            anim?.SetBool(EXPIRED, true);
+            animator.SetBool(EXPIRED, true);
         }
 
-        public void Execute(BaseCornClient? client)
+        public void Execute(BaseCornClient client)
         {
-            anim?.SetTrigger(EXECUTED); // Execution visual feedback
+            animator.SetTrigger(EXECUTED); // Execution visual feedback
 
             if (client == null) return;
             interactionInfo?.RunInteraction(client);
@@ -63,6 +62,5 @@ namespace CraftSharp.UI
             EventManager.Instance.Broadcast<NotificationExpireEvent>(new(interactionKey));
             Destroy(this.gameObject);
         }
-
     }
 }

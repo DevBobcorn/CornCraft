@@ -1,4 +1,3 @@
-#nullable enable
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,9 +9,9 @@ namespace CraftSharp.UI
     public class FloatingUIManager : MonoBehaviour
     {
         private readonly Dictionary<int, FloatingUI> entityFloatingUIs = new();
-        public AnimationCurve? UIScaleCurve;
+        public AnimationCurve UIScaleCurve;
 
-        public void AddForEntity(int entityId, EntityRender? render)
+        public void AddForEntity(int entityId, EntityRender render)
         {
             if (render != null && !entityFloatingUIs.ContainsKey(entityId))
             {
@@ -20,8 +19,8 @@ namespace CraftSharp.UI
                 if (infoTagPrefab == null) return;
 
                 // Make a new floating UI here...
-                var fUIObj = GameObject.Instantiate(infoTagPrefab);
-                fUIObj!.transform.SetParent(render.InfoAnchor, false);
+                var fUIObj = Instantiate(infoTagPrefab);
+                fUIObj.transform.SetParent(render.InfoAnchor, false);
 
                 var fUI = fUIObj.GetComponent<FloatingUI>();
                 fUI.SetInfo(render);
@@ -49,7 +48,10 @@ namespace CraftSharp.UI
 
         void Update()
         {
-            var entityManager = CornApp.CurrentClient!.EntityRenderManager;
+            var client = CornApp.CurrentClient;
+            if (client == null) return;
+            
+            var entityManager = client.EntityRenderManager;
             var validTagOwners = entityManager.GetNearbyEntities().Keys.ToList();
 
             if (validTagOwners is not null && validTagOwners.Any())
@@ -66,7 +68,7 @@ namespace CraftSharp.UI
 
                 for (int i = 0;i < validTagOwners.Count;i++)
                 {
-                    var render = entityManager!.GetEntityRender(validTagOwners[i]);
+                    var render = entityManager.GetEntityRender(validTagOwners[i]);
 
                     if (render != null && render.FloatingInfoPrefab != null)
                     {
@@ -76,7 +78,7 @@ namespace CraftSharp.UI
                 }
             }
 
-            var camController = CornApp.CurrentClient!.CameraController;
+            var camController = client.CameraController;
             var nullKeyList = new List<int>();
 
             foreach (var item in entityFloatingUIs)
@@ -89,7 +91,7 @@ namespace CraftSharp.UI
 
                 var target = item.Value.transform;
                 target.eulerAngles = camController.GetEularAngles();
-                var scale = UIScaleCurve!.Evaluate((camController.GetPosition() - target.position).magnitude);
+                var scale = UIScaleCurve.Evaluate((camController.GetPosition() - target.position).magnitude);
                 // Countervail entity render scale (support uniform scale only)
                 scale *= 1F / target.transform.parent.lossyScale.x;
                 target.localScale = new(scale, scale, 1F);
