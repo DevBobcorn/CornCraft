@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEditor.Animations;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace MMD {
     
@@ -49,15 +50,8 @@ namespace MMD {
             //ゲームオブジェクトの作成
             GameObject visualObj;
 
-            {
-                using var converter = header_.model_name switch
-                {
-                    "koikatu" => new PMXKKSConverter(true),
-                    _         => new PMXConverter()
-                };
-
-                visualObj = converter.CreateGameObject(pmx_format, physics_type, animation_type, use_ik, use_leg_d_bones, scale);
-            }
+            using var converter = new PMXConverter();
+            visualObj = converter.CreateGameObject(pmx_format, physics_type, animation_type, use_ik, use_leg_d_bones, scale);
 
             // Assign animator controller
             var player_animator = visualObj.GetComponent<Animator>();
@@ -76,7 +70,6 @@ namespace MMD {
             // アセットリストの更新
             AssetDatabase.Refresh();
         }
-
 
         /// <summary>
         /// モデル名取得

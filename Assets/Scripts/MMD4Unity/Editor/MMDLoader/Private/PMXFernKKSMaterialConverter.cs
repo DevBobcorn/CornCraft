@@ -33,6 +33,38 @@ namespace MMD
             return HIDDEN_MATERIALS.Any(x => materialBaseName.Contains(x));
         }
 
+        private static readonly string[] BASE_MODEL_TRANSPARENT_MATERIALS = {
+            "mayuge",
+            "noseline",
+            //"tooth",
+            "eyeline",
+            "namida",
+            //"sirome",
+            "hitomi",
+            "gageye",
+        };
+
+        private static readonly string[] OUTFIT_MODEL_TRANSPARENT_MATERIALS = {
+            
+        };
+
+        public static string GetMaterialBaseName(string materialName)
+        {
+            materialName = materialName.ToLower();
+
+            return materialName;
+        }
+
+        private static bool IsTransparentByName(bool isBaseModel, string materialName)
+        {
+            materialName = GetMaterialBaseName(materialName);
+
+            if (isBaseModel)
+                return BASE_MODEL_TRANSPARENT_MATERIALS.Any(x => materialName.Contains(x));
+            else
+                return OUTFIT_MODEL_TRANSPARENT_MATERIALS.Any(x => materialName.Contains(x));
+        }
+
         /// <summary>
         /// マテリアルをUnity用に変換する
         /// </summary>
@@ -43,7 +75,7 @@ namespace MMD
         {
             PMXFormat.Material material = format_.material_list.material[material_index];
 
-            string materialBaseName = PMXKKSConverter.GetMaterialBaseName(material.name);
+            string materialBaseName = GetMaterialBaseName(material.name);
 
             var main_texture_path = $"{format_.meta_header.folder}/{material.name}_MT_CT.png";
             // KKS Only: Base textures are named "basename_MT_CT.png"

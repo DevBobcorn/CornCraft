@@ -89,8 +89,8 @@ namespace MMD
                 // Colliderの設定
                 ColliderComponent collider = rigidbody.shape_type switch
                 {
-                    PMXFormat.Rigidbody.ShapeType.Sphere    => EntrySphereCollider(rigidbody, result),
-                    PMXFormat.Rigidbody.ShapeType.Capsule   => EntryCapsuleCollider(rigidbody, result),
+                    PMXFormat.Rigidbody.ShapeType.Sphere    => EntrySphereCollider(rigidbody, result, scale_),
+                    PMXFormat.Rigidbody.ShapeType.Capsule   => EntryCapsuleCollider(rigidbody, result, scale_),
 
                     // TODO: Find a proper way to handle box colliders
                     _                                       => null
@@ -104,6 +104,28 @@ namespace MMD
 
             return result;
         }
+
+        public static ColliderComponent AttachColliderFromRigid(Transform root, Transform parent, PMXFormat.Rigidbody rigidbody, float scale)
+        {
+            var result = new GameObject("r_" + rigidbody.name);
+            result.transform.parent = root;
+            
+            //位置・回転の設定
+            result.transform.localPosition = rigidbody.collider_position * scale;
+            result.transform.localRotation = Quaternion.Euler(rigidbody.collider_rotation * Mathf.Rad2Deg);
+
+            result.transform.SetParent(parent, true);
+
+            // Colliderの設定
+            return rigidbody.shape_type switch
+            {
+                PMXFormat.Rigidbody.ShapeType.Sphere    => EntrySphereCollider(rigidbody, result, scale),
+                PMXFormat.Rigidbody.ShapeType.Capsule   => EntryCapsuleCollider(rigidbody, result, scale),
+
+                // TODO: Find a proper way to handle box colliders
+                _                                       => null
+            };
+        }
         
         /// <summary>
         /// Magica Sphere Colliderの設定
@@ -111,10 +133,10 @@ namespace MMD
         /// <param name='rigidbody'>PMX用剛体データ</param>
         /// <param name='obj'>Magica Clothes用剛体ゲームオブジェクト</param>
         /// <returns>The generated collider</returns>
-        MagicaSphereCollider EntrySphereCollider(PMXFormat.Rigidbody rigidbody, GameObject obj)
+        static MagicaSphereCollider EntrySphereCollider(PMXFormat.Rigidbody rigidbody, GameObject obj, float scale)
         {
             var collider = obj.AddComponent<MagicaSphereCollider>();
-            collider.SetSize(rigidbody.shape_size.x * scale_); // radius
+            collider.SetSize(rigidbody.shape_size.x * scale); // radius
 
             return collider;
         }
@@ -125,14 +147,14 @@ namespace MMD
         /// <param name='rigidbody'>PMX用剛体データ</param>
         /// <param name='obj'>Magica Clothes用剛体ゲームオブジェクト</param>
         /// <returns>The generated collider</returns>
-        MagicaCapsuleCollider EntryCapsuleCollider(PMXFormat.Rigidbody rigidbody, GameObject obj)
+        static MagicaCapsuleCollider EntryCapsuleCollider(PMXFormat.Rigidbody rigidbody, GameObject obj, float scale)
         {
             var collider = obj.AddComponent<MagicaCapsuleCollider>();
             collider.direction = MagicaCapsuleCollider.Direction.Y;
             collider.SetSize(
-                rigidbody.shape_size.x * scale_, // Start radius
-                rigidbody.shape_size.x * scale_, // End radius
-                (rigidbody.shape_size.y + rigidbody.shape_size.x * 2.0f) * scale_ // length (height)
+                rigidbody.shape_size.x * scale, // Start radius
+                rigidbody.shape_size.x * scale, // End radius
+                (rigidbody.shape_size.y + rigidbody.shape_size.x * 2.0f) * scale // length (height)
             );
 
             return collider;
