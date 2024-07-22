@@ -3,7 +3,6 @@ using UnityEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.UIElements;
 
 namespace MMD
 {
@@ -12,6 +11,7 @@ namespace MMD
         private Animator targetAnimator = null;
         private GameObject target = null;
         private string pmxFilePath = "";
+        private float pmxScale = 0.078F;
 
         [MenuItem("MMD for Unity/Chara Physics Util")]
         static void Init()
@@ -104,6 +104,8 @@ namespace MMD
 
                         pmxFilePath = GUILayout.TextField(pmxFilePath);
 
+                        pmxScale = EditorGUILayout.FloatField(pmxScale);
+
                         if (GUILayout.Button("Remove All Magica Colliders"))
                         {
                             RemoveAllColliders(target);
@@ -111,7 +113,7 @@ namespace MMD
 
                         if (GUILayout.Button("Add Magica Colliders from .pmx File"))
                         {
-                            AddCollidersFromPMX(pmxFilePath.Trim('\"'), target, targetAnimator);
+                            AddCollidersFromPMX(pmxFilePath.Trim('\"'), pmxScale, target, targetAnimator);
                         }
 
                     GUILayout.EndHorizontal();
@@ -376,7 +378,7 @@ namespace MMD
             AssetDatabase.Refresh();
         }
 
-        private static void AddCollidersFromPMX(string pmxFilePath, GameObject target, Animator animator)
+        private static void AddCollidersFromPMX(string pmxFilePath, float pmxScale, GameObject target, Animator animator)
         {
             PMX.PMXFormat pmx_format = null;
             try {
@@ -406,8 +408,7 @@ namespace MMD
                     var boneTransform = GetTransformForPMXBone(target.transform, animator, boneName);
                     if (boneTransform != null)
                     {
-                        // 0.078F, funny number, huh?
-                        var collider = PMXMagicaPhysicsConverter.AttachColliderFromRigid(tRoot.transform, boneTransform, col, 0.078F);
+                        var collider = PMXMagicaPhysicsConverter.AttachColliderFromRigid(tRoot.transform, boneTransform, col, pmxScale);
 
                         // Perform post-processing
                         if (collider != null)
