@@ -1,40 +1,52 @@
-#nullable enable
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace CraftSharp.UI
 {
     public class ScreenControl : MonoBehaviour
     {
-        [SerializeField] private BaseCornClient? client;
+        private BaseCornClient client;
         private readonly Stack<BaseScreen> screenStack = new();
 
-        public bool IsTopScreen(BaseScreen screen)
+        [SerializeField] private ChatScreen m_ChatScreen;
+        [SerializeField] private DeathScreen m_DeathScreen;
+        [SerializeField] private HUDScreen m_HUDScreen;
+        [SerializeField] private LoadingScreen m_LoadingScreen;
+        [SerializeField] private PauseScreen m_PauseScreen;
+
+        private readonly Dictionary<Type, BaseScreen> screenRegistry = new();
+
+        /// <summary>
+        /// Should be called on client start
+        /// </summary>
+        public void SetClient(BaseCornClient client)
         {
-            return GetTopScreen() == screen;
+            this.client = client;
+
+            // Initialize screens
+            screenRegistry.Add(typeof (ChatScreen),    m_ChatScreen);
+            screenRegistry.Add(typeof (DeathScreen),   m_DeathScreen);
+            screenRegistry.Add(typeof (HUDScreen),     m_HUDScreen);
+            screenRegistry.Add(typeof (LoadingScreen), m_LoadingScreen);
+            screenRegistry.Add(typeof (PauseScreen),   m_PauseScreen);
+
+            // Push HUD Screen on start, before pushing Loading Screen
+            PushScreen<HUDScreen>();
         }
 
-        public BaseScreen? GetTopScreen()
+        public T PushScreen<T>() where T : BaseScreen
         {
-            if (screenStack.Count <= 0)
+            if (screenRegistry.ContainsKey(typeof (T)))
             {
-                //Debug.LogError("Trying to peek an already empty screen stack!");
-                return null;
-            }
-
-            return screenStack.Peek();
-        }
-
-        public void PushScreen(BaseScreen screen)
-        {
-            if (screen != null)
-            {
+                var screen = screenRegistry[typeof (T)];
                 screen.EnsureInitialized();
 
                 // Deactive previous top screen if present
                 if (screenStack.Count > 0)
+                {
                     screenStack.Peek().IsActive = false;
+                }
                 
                 // Push and activate new top screen
                 screenStack.Push(screen);
@@ -44,6 +56,14 @@ namespace CraftSharp.UI
                 screen.transform.SetAsLastSibling();
 
                 UpdateScreenStates();
+
+                return (T) screen;
+            }
+            else
+            {
+                Debug.LogWarning($"Screen type [{typeof (T)}] is not registered!");
+
+                return null;
             }
         }
 
@@ -74,10 +94,12 @@ namespace CraftSharp.UI
         private void UpdateScreenStates()
         {
             // Get States
-            bool releaseCursor = (screenStack.Count > 0) ? screenStack.Peek().ReleaseCursor() : false;
+            bool releaseCursor = (screenStack.Count > 0) && screenStack.Peek().ReleaseCursor();
             bool shouldPauseInput = false;
             foreach (var w in screenStack)
+            {
                 shouldPauseInput = shouldPauseInput || w.ShouldPause();
+            }
             
             //Debug.Log($"In window stack: {string.Join(' ', screenStack)}");
 
@@ -97,11 +119,35 @@ namespace CraftSharp.UI
             Cursor.lockState = releaseCursor ? CursorLockMode.None : CursorLockMode.Locked;
         }
 
+        public void SetLoadingScreen(bool loading)
+        {
+            if (loading)
+            {
+                if (screenStack.Count > 0 && screenStack.Peek() is LoadingScreen)
+                {
+                    // Do nothing...
+                }
+                else
+                {
+                    PushScreen<LoadingScreen>();
+                }
+            }
+            else
+            {
+                if (screenStack.Count > 0 && screenStack.Peek() is LoadingScreen)
+                {
+                    TryPopScreen();
+                }
+            }
+        }
+
         void Update()
         {
-            var topScreen = GetTopScreen();
-            if (topScreen != null)
+            if (screenStack.Count > 0)
             {
+                var topScreen = screenStack.Peek();
+                
+                // Update screen at stack top
                 topScreen.UpdateScreen();
             }
         }

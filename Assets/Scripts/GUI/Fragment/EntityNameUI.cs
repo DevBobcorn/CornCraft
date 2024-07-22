@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using UnityEngine;
 using TMPro;
@@ -11,9 +10,9 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (Animator))]
     public class EntityNameUI : FloatingUI
     {
-        [SerializeField] private TMP_Text? nameText;
-        [SerializeField] private TMP_Text? descriptionText;
-        private Action? destroyCallback;
+        [SerializeField] private TMP_Text nameText;
+        [SerializeField] private TMP_Text descriptionText;
+        private Action destroyCallback;
 
         public override void SetInfo(EntityRender entityRender)
         {
@@ -22,19 +21,20 @@ namespace CraftSharp.UI
             if (nameText != null)
             {
                 nameText.text = (entityRender.Name ?? entityRender.CustomName) ??
-                        ChatParser.TranslateString(entityRender.Type!.EntityId.GetTranslationKey("entity"));
+                        ChatParser.TranslateString(entityRender.Type.EntityId.GetTranslationKey("entity"));
 
             }
 
             if (descriptionText != null)
             {
-                descriptionText.text = $"<{entityRender.Type!.EntityId}>";
+                descriptionText.text = $"<{entityRender.Type.EntityId}>";
             }
         }
 
-        public override void Destroy(Action? callback)
+        public override void Destroy(Action callback)
         {
-            GetComponent<Animator>()?.SetBool("Expired", true);
+            var animator = GetComponent<Animator>();
+            animator.SetBool("Expired", true);
 
             // Store this for later invocation
             destroyCallback = callback;

@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,16 +12,16 @@ namespace CraftSharp.UI
         private bool isActive = false;
 
         // UI controls and objects
-        [SerializeField] private Button? respawnButton, quitButton;
-        private CanvasGroup? screenGroup;
+        [SerializeField] private Button respawnButton, quitButton;
+        private CanvasGroup screenGroup;
 
         public override bool IsActive
         {
             set {
                 isActive = value;
-                screenGroup!.alpha = value ? 1F : 0F;
-                screenGroup!.blocksRaycasts = value;
-                screenGroup!.interactable   = value;
+                screenGroup.alpha = value ? 1F : 0F;
+                screenGroup.blocksRaycasts = value;
+                screenGroup.interactable   = value;
             }
 
             get {
@@ -42,29 +41,46 @@ namespace CraftSharp.UI
 
         public void Respawn()
         {
-            CornApp.CurrentClient?.SendRespawnPacket();
+            var client = CornApp.CurrentClient;
+            if (client == null) return;
+
+            client.SendRespawnPacket();
         }
 
         public void QuitGame()
         {
-            CornApp.CurrentClient?.Disconnect();
+            var client = CornApp.CurrentClient;
+            if (client == null) return;
+
+            client.Disconnect();
         }
 
+        #nullable enable
+
         private Action<HealthUpdateEvent>? healthCallback;
+
+        #nullable disable
 
         protected override void Initialize()
         {
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
 
-            respawnButton!.onClick.AddListener(this.Respawn);
-            quitButton!.onClick.AddListener(this.QuitGame);
+            respawnButton.onClick.AddListener(this.Respawn);
+            quitButton.onClick.AddListener(this.QuitGame);
 
             healthCallback = (e) => {
+                var client = CornApp.CurrentClient;
+                if (client == null) return;
+
                 if (e.Health <= 0F && !this.isActive)
-                    CornApp.CurrentClient?.ScreenControl.PushScreen(this);
+                {
+                    client.ScreenControl.PushScreen<DeathScreen>();
+                }
                 else if (e.Health > 0F && this.isActive) // Hide death screen
-                    CornApp.CurrentClient?.ScreenControl.TryPopScreen();
+                {
+                    client.ScreenControl.TryPopScreen();
+                }
             };
 
             EventManager.Instance.Register(healthCallback);
@@ -73,7 +89,9 @@ namespace CraftSharp.UI
         void OnDestroy()
         {
             if (healthCallback is not null)
+            {
                 EventManager.Instance.Unregister(healthCallback);
+            }
         }
 
         public override void UpdateScreen()

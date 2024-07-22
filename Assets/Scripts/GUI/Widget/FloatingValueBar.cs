@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 
 namespace CraftSharp.UI
@@ -14,8 +13,8 @@ namespace CraftSharp.UI
         [SerializeField] [Range(0.1F, 1F)] private float warningThreshold = 0.3F;
         [SerializeField] [Range(0.1F, 1F)] private float dangerThreshold  = 0.1F;
 
-        [SerializeField] private SpriteRenderer? displayFillRenderer, deltaFillRenderer;
-        private Transform? displayTransform, deltaTransform;
+        [SerializeField] private SpriteRenderer displayFillRenderer, deltaFillRenderer;
+        private Transform displayTransform, deltaTransform;
 
         void Start()
         {
@@ -63,8 +62,6 @@ namespace CraftSharp.UI
                 displayFillRenderer!.color = warningColor;
             else
                 displayFillRenderer!.color = normalColor;
-
         }
-
     }
 }

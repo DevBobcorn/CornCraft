@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,13 +18,13 @@ namespace CraftSharp.UI
         {
             set {
                 isActive = value;
-                screenGroup!.alpha = value ? 1F : 0F;
+                screenGroup.alpha = value ? 1F : 0F;
                 screenGroup.blocksRaycasts = value;
                 screenGroup.interactable   = value;
                 // Focus chat input on enter chat screen
                 if (value)
                 {
-                    chatInput!.text = string.Empty;
+                    chatInput.text = string.Empty;
                     chatInput.ActivateInputField();
                 }
             }
@@ -36,12 +35,12 @@ namespace CraftSharp.UI
         }
 
         // UI controls and objects
-        [SerializeField] private CanvasGroup? autoCompletePanelGroup;
-        [SerializeField] private RectTransform? chatScrollRectTransform;
-        [SerializeField] private TMP_InputField? chatInput;
-        [SerializeField] private TMP_Text? chatContent, autoCompleteOptions;
-        private CanvasGroup? screenGroup;
-        private TMP_InputField? chatInputGhost;
+        [SerializeField] private CanvasGroup autoCompletePanelGroup;
+        [SerializeField] private RectTransform chatScrollRectTransform;
+        [SerializeField] private TMP_InputField chatInput;
+        [SerializeField] private TMP_Text chatContent, autoCompleteOptions;
+        private CanvasGroup screenGroup;
+        private TMP_InputField chatInputGhost;
 
         // Chat message data
         private List<string> chatHistory = new List<string>();
@@ -63,13 +62,13 @@ namespace CraftSharp.UI
 
         public void SetChatMessage(string message, int caretPos)
         {
-            chatInput!.text = message;
+            chatInput.text = message;
             chatInput.caretPosition = caretPos;
         }
 
         private void ShowCompletions()
         {
-            autoCompletePanelGroup!.alpha = 1F;
+            autoCompletePanelGroup.alpha = 1F;
             autoCompletePanelGroup.interactable = true;
             autoCompletePanelGroup.blocksRaycasts = true;
             completionsShown = true;
@@ -77,7 +76,7 @@ namespace CraftSharp.UI
 
         private void HideCompletions()
         {
-            autoCompletePanelGroup!.alpha = 0F;
+            autoCompletePanelGroup.alpha = 0F;
             autoCompletePanelGroup.interactable = false;
             autoCompletePanelGroup.blocksRaycasts = false;
             completionsShown = false;
@@ -90,7 +89,7 @@ namespace CraftSharp.UI
             if (message.StartsWith("/") && message.Length > 1)
             {
                 string requestText;
-                if (chatInput!.caretPosition > 0 && chatInput.caretPosition < message.Length)
+                if (chatInput.caretPosition > 0 && chatInput.caretPosition < message.Length)
                     requestText = message[0..chatInput.caretPosition];
                 else
                     requestText = message;
@@ -115,12 +114,17 @@ namespace CraftSharp.UI
 
         public void SendChatMessage()
         {
-            if (chatInput!.text.Trim() == string.Empty)
+            if (chatInput.text.Trim() == string.Empty)
                 return;
             
             string chat = chatInput.text;
             // Send if client exists...
-            CornApp.CurrentClient?.TrySendChat(chat);
+            var client = CornApp.CurrentClient;
+            if (client != null)
+            {
+                client.TrySendChat(chat);
+            }
+            
             chatInput.text = string.Empty;
 
             // Remove the chat text from previous history if present
@@ -133,7 +137,10 @@ namespace CraftSharp.UI
 
         public void RequestAutoCompleteChat(string message)
         {
-            CornApp.CurrentClient?.SendAutoCompleteRequest(message);
+            var client = CornApp.CurrentClient;
+            if (client == null) return;
+
+            client.SendAutoCompleteRequest(message);
         }
 
         public void PrevChatMessage()
@@ -142,10 +149,10 @@ namespace CraftSharp.UI
             {
                 if (chatIndex == chatHistory.Count)
                 {   // Store to buffer...
-                    chatBuffer = chatInput!.text;
+                    chatBuffer = chatInput.text;
                 }
                 chatIndex--;
-                chatInput!.text = chatHistory[chatIndex];
+                chatInput.text = chatHistory[chatIndex];
                 chatInput.caretPosition = chatHistory[chatIndex].Length;
             }
         }
@@ -158,12 +165,12 @@ namespace CraftSharp.UI
                 if (chatIndex == chatHistory.Count)
                 {
                     // Restore buffer...
-                    chatInput!.text = chatBuffer;
+                    chatInput.text = chatBuffer;
                     chatInput.caretPosition = chatBuffer.Length;
                 }
                 else
                 {
-                    chatInput!.text = chatHistory[chatIndex];
+                    chatInput.text = chatHistory[chatIndex];
                     chatInput.caretPosition = chatHistory[chatIndex].Length;
                 }
             }
@@ -198,30 +205,34 @@ namespace CraftSharp.UI
                     i == completionIndex ? $"<color=yellow>{completionOptions[i]}</color>" : completionOptions[i]
                 ).Append('\n');
             }
-            autoCompleteOptions!.text = str.ToString();
+            autoCompleteOptions.text = str.ToString();
         }
+
+        #nullable enable
 
         private Action<ChatMessageEvent>? chatCallback;
         private Action<AutoCompletionEvent>? autoCompleteCallback;
+
+        #nullable disable
 
         protected override void Initialize()
         {
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
 
-            chatInput!.onValueChanged.AddListener(this.OnChatInputChange);
+            chatInput.onValueChanged.AddListener(this.OnChatInputChange);
 
-            var chatInputGhostObj = GameObject.Instantiate(chatInput.gameObject, Vector3.zero, Quaternion.identity);
+            var chatInputGhostObj = Instantiate(chatInput.gameObject, Vector3.zero, Quaternion.identity);
             chatInputGhostObj.name = "Chat Input Ghost";
             chatInputGhostObj.SetActive(false);
             chatInputGhost = chatInputGhostObj.GetComponent<TMP_InputField>();
 
-            chatContent!.text = string.Empty;
+            chatContent.text = string.Empty;
 
-            autoCompletePanelGroup!.alpha = 0F;
+            autoCompletePanelGroup.alpha = 0F;
             autoCompletePanelGroup.interactable = false;
             autoCompletePanelGroup.blocksRaycasts = false;
-            autoCompleteOptions!.text = string.Empty; // Clear up at start
+            autoCompleteOptions.text = string.Empty; // Clear up at start
 
             // Register callbacks
             chatCallback = (e) => {
@@ -281,11 +292,15 @@ namespace CraftSharp.UI
         {
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
-                CornApp.CurrentClient?.ScreenControl.TryPopScreen();
+                var client = CornApp.CurrentClient;
+                if (client != null)
+                {
+                    client.ScreenControl.TryPopScreen();
+                }
                 return;
             }
 
-            if (chatInput!.IsActive())
+            if (chatInput.IsActive())
             {
                 if (Keyboard.current.enterKey.wasPressedThisFrame)
                 {

@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using UnityEngine;
 
@@ -8,11 +7,11 @@ namespace CraftSharp.UI
 {
     public abstract class FloatingUI : MonoBehaviour
     {
-        protected EntityRender? entityRender;
+        protected EntityRender entityRender;
 
         public abstract void SetInfo(EntityRender entity);
 
-        public virtual void Destroy(Action? callback)
+        public virtual void Destroy(Action callback)
         {
             callback?.Invoke();
             Destroy(gameObject);
