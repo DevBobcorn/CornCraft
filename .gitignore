@@ -9,9 +9,7 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
-# CornModel resources
-/[Rr]esource [Pp]acks/*/
-!/[Rr]esource [Pp]acks/vanilla_fix/
+# Minor config files & session cache
 /*.ini
 
 # Embedded packages
@@ -20,10 +18,8 @@
 # Third party resources & utils
 /[Aa]ssets/Plugins/
 /[Aa]ssets/Plugins.meta
-/[Aa]ssets/AnimeModels/GI - *
-/[Aa]ssets/AnimeModels/SR - *
-/[Aa]ssets/AnimeModels/ZZZ - *
-/[Aa]ssets/AnimeModels/Test*
+/[Aa]ssets/AnimeModels/*
+!/[Aa]ssets/AnimeModels/Unity*
 /[Aa]ssets/Hovl Studio
 /[Aa]ssets/Hovl Studio.meta
 /[Aa]ssets/Enviro 3 - Sky and Weather
