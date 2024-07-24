@@ -1,12 +1,13 @@
 {
   "dependencies": {
     "com.devbobcorn.craftsharp": {
-      "version": "file:com.devbobcorn.craftsharp",
+      "version": "https://github.com/DevBobcorn/CraftSharp.git",
       "depth": 0,
-      "source": "embedded",
+      "source": "git",
       "dependencies": {
         "com.unity.mathematics": "1.2.6"
-      }
+      },
+      "hash": "6c7be672b4c4b8bfc34d9b1eea330fe1a8e0f2ea"
     },
     "com.devbobcorn.craftsharp-protocol": {
       "version": "file:com.devbobcorn.craftsharp-protocol",
@@ -23,7 +24,7 @@
       "source": "embedded",
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
-        "com.devbobcorn.craftsharp": "2.4.2"
+        "com.devbobcorn.craftsharp": "2.6.0"
       }
     },
     "com.fernrender.core": {

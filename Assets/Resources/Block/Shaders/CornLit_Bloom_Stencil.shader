@@ -1,4 +1,4 @@
-Shader "CornShader/Lit (Stencil)"
+Shader "CornShader/Lit (Bloom Stencil)"
 {
     // Keep properties of StandardSpecular shader for upgrade reasons.
     Properties
