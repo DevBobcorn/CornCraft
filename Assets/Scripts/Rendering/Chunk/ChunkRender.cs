@@ -11,7 +11,8 @@ namespace CraftSharp.Rendering
         {
             RenderType.SOLID,         RenderType.CUTOUT,
             RenderType.CUTOUT_MIPPED, RenderType.TRANSLUCENT,
-            RenderType.WATER
+            RenderType.WATER,         RenderType.FOLIAGE,
+            RenderType.PLANTS,        RenderType.TALL_PLANTS
         };
 
         public static int TypeIndex(RenderType type) => type switch
@@ -21,6 +22,9 @@ namespace CraftSharp.Rendering
             RenderType.CUTOUT_MIPPED => 2,
             RenderType.TRANSLUCENT   => 3,
             RenderType.WATER         => 4,
+            RenderType.FOLIAGE       => 5,
+            RenderType.PLANTS        => 6,
+            RenderType.TALL_PLANTS   => 7,
             
             _                        => 0
         };

@@ -74,13 +74,14 @@ namespace CraftSharp.Rendering
                     return cullFlags;
                 }
 
+                // Value range of each corner light: [0, 15]
                 float[] getCornerLights(int x, int y, int z)
                 {
                     var result = new float[8];
 
                     for (int y_ = 0; y_ < 3; y_++) for (int z_ = 0; z_ < 3; z_++) for (int x_ = 0; x_ < 3; x_++)
                     {
-                        float sample = math.clamp(math.pow(light[x + x_ - 1, y + y_ - 1, z + z_ - 1] / 9F, 1.4f), 0.5F, 1.2F);
+                        byte sample = light[x + x_ - 1, y + y_ - 1, z + z_ - 1];
 
                         if (y_ != 2 && z_ != 2 && x_ != 2) // [0] x0z0 y0
                         {
