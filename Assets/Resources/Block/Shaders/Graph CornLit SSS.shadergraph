@@ -107,9 +107,6 @@
         },
         {
             "m_Id": "cb871653be234ea2b9624b87493035be"
-        },
-        {
-            "m_Id": "1a2828a6b47048b185c8e4c378d8b380"
         }
     ],
     "m_GroupDatas": [
@@ -125,20 +122,6 @@
     ],
     "m_StickyNoteDatas": [],
     "m_Edges": [
-        {
-            "m_OutputSlot": {
-                "m_Node": {
-                    "m_Id": "1a2828a6b47048b185c8e4c378d8b380"
-                },
-                "m_SlotId": 1
-            },
-            "m_InputSlot": {
-                "m_Node": {
-                    "m_Id": "b6498ad0d3e7459990076a8b3e246321"
-                },
-                "m_SlotId": 0
-            }
-        },
         {
             "m_OutputSlot": {
                 "m_Node": {
@@ -380,6 +363,20 @@
         {
             "m_OutputSlot": {
                 "m_Node": {
+                    "m_Id": "d0d341b2785d4b159d8d5e838bea7ff2"
+                },
+                "m_SlotId": 7
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "317dbce0fd454ab8bbf9f4a0baa74a75"
+                },
+                "m_SlotId": 0
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
                     "m_Id": "debc914a70474b76bbb73efee5cb744c"
                 },
                 "m_SlotId": 1
@@ -400,7 +397,7 @@
             },
             "m_InputSlot": {
                 "m_Node": {
-                    "m_Id": "1a2828a6b47048b185c8e4c378d8b380"
+                    "m_Id": "b6498ad0d3e7459990076a8b3e246321"
                 },
                 "m_SlotId": 0
             }
@@ -608,46 +605,6 @@
     "m_Value": 0.0,
     "m_DefaultValue": 0.0,
     "m_Labels": []
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.OneMinusNode",
-    "m_ObjectId": "1a2828a6b47048b185c8e4c378d8b380",
-    "m_Group": {
-        "m_Id": "a41f667b9a8e40cd908d944d3a3e7142"
-    },
-    "m_Name": "One Minus",
-    "m_DrawState": {
-        "m_Expanded": true,
-        "m_Position": {
-            "serializedVersion": "2",
-            "x": -1049.0,
-            "y": 809.0,
-            "width": 128.0,
-            "height": 94.0
-        }
-    },
-    "m_Slots": [
-        {
-            "m_Id": "9e09a62ba0724879b71be63758ecc2ae"
-        },
-        {
-            "m_Id": "837f5ad9ff074d12b53d23d06a4a583f"
-        }
-    ],
-    "synonyms": [
-        "complement",
-        "invert",
-        "opposite"
-    ],
-    "m_Precision": 0,
-    "m_PreviewExpanded": false,
-    "m_DismissedVersion": 0,
-    "m_PreviewMode": 0,
-    "m_CustomColors": {
-        "m_SerializableColors": []
-    }
 }
 
 {
@@ -1884,30 +1841,6 @@
 
 {
     "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
-    "m_ObjectId": "837f5ad9ff074d12b53d23d06a4a583f",
-    "m_Id": 1,
-    "m_DisplayName": "Out",
-    "m_SlotType": 1,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "Out",
-    "m_StageCapability": 3,
-    "m_Value": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0,
-        "w": 0.0
-    },
-    "m_DefaultValue": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0,
-        "w": 0.0
-    }
-}
-
-{
-    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.ColorRGBMaterialSlot",
     "m_ObjectId": "83ca6702e66b4bbdbb2f989a06af69c9",
     "m_Id": 0,
@@ -2265,30 +2198,6 @@
 {
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
-    "m_ObjectId": "9e09a62ba0724879b71be63758ecc2ae",
-    "m_Id": 0,
-    "m_DisplayName": "In",
-    "m_SlotType": 0,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "In",
-    "m_StageCapability": 3,
-    "m_Value": {
-        "x": 1.0,
-        "y": 1.0,
-        "z": 1.0,
-        "w": 1.0
-    },
-    "m_DefaultValue": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0,
-        "w": 0.0
-    }
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
     "m_ObjectId": "a02be102f29340d58c6f9ad5aef78193",
     "m_Id": 0,
     "m_DisplayName": "A",
@@ -2357,8 +2266,8 @@
     "m_ObjectId": "a41f667b9a8e40cd908d944d3a3e7142",
     "m_Title": "Block Light",
     "m_Position": {
-        "x": -1168.0001220703125,
-        "y": 549.9999389648438
+        "x": -1288.0,
+        "y": 550.0
     }
 }
 
