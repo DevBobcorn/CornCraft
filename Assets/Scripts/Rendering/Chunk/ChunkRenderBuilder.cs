@@ -120,13 +120,16 @@ namespace CraftSharp.Rendering
                     return result.Select(x => x / 8F).ToArray();
                 }
 
-                bool[] getAllNeighborAO(int x, int y, int z)
+                int getNeighborCastAOMask(int x, int y, int z)
                 {
-                    var result = new bool[27];
+                    int result = 0;
 
                     for (int y_ = 0; y_ < 3; y_++) for (int z_ = 0; z_ < 3; z_++) for (int x_ = 0; x_ < 3; x_++)
                     {
-                        result[y_ * 9 + z_ * 3 + x_] = allao[x + x_ - 1, y + y_ - 1, z + z_ - 1];
+                        if (allao[x + x_ - 1, y + y_ - 1, z + z_ - 1])
+                        {
+                            result |= 1 << (y_ * 9 + z_ * 3 + x_);
+                        }
                     }
 
                     return result;
@@ -246,23 +249,26 @@ namespace CraftSharp.Rendering
                             
                             if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
-                                int layerIndex = ChunkRender.TypeIndex(modelTable[stateId].RenderType);
+                                var renderType = modelTable[stateId].RenderType;
+                                int layerIndex = ChunkRender.TypeIndex(renderType);
+
+                                var useThicknessData = renderType == RenderType.FOLIAGE;
 
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;
                                 var color  = allcolor[blocX, blocY, blocZ];
                                 var lights = getCornerLights(x, y, z);
-                                var ao = getAllNeighborAO(x, y, z);
+                                var aoMask = getNeighborCastAOMask(x, y, z);
 
                                 if (state.NoCollision)
                                 {
                                     models[chosen].Build(visualBuffer[layerIndex], ref vertOffset[layerIndex], new float3(blocZ, blocY, blocX),
-                                            cullFlags, ao, lights, color);
+                                            cullFlags, aoMask, lights, color, useThicknessData);
                                 }
                                 else
                                 {
                                     models[chosen].BuildWithCollider(visualBuffer[layerIndex], ref vertOffset[layerIndex], colliderVerts,
-                                            ref colliderVertOffset, new float3(blocZ, blocY, blocX), cullFlags, ao, lights, color);
+                                            ref colliderVertOffset, new float3(blocZ, blocY, blocX), cullFlags, aoMask, lights, color, useThicknessData);
                                 }
                             }
                         }
