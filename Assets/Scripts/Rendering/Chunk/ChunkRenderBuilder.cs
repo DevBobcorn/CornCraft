@@ -252,7 +252,7 @@ namespace CraftSharp.Rendering
                                 var renderType = modelTable[stateId].RenderType;
                                 int layerIndex = ChunkRender.TypeIndex(renderType);
 
-                                var useThicknessData = renderType == RenderType.FOLIAGE;
+                                var useThicknessData = renderType == RenderType.FOLIAGE || renderType == RenderType.PLANTS || renderType == RenderType.TALL_PLANTS;
 
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;

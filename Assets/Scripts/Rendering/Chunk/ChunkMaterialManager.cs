@@ -13,6 +13,7 @@ namespace CraftSharp.Rendering
         [SerializeField] public Material AtlasTranslucent;
         [SerializeField] public Material StylizedWater;
         [SerializeField] public Material Foliage;
+        [SerializeField] public Material Plants;
 
         private readonly Dictionary<RenderType, Material> atlasMaterials = new();
         private Material defaultAtlasMaterial;
@@ -68,14 +69,16 @@ namespace CraftSharp.Rendering
             atlasMaterials.Add(RenderType.FOLIAGE, foliage);
 
             // Plants
-            var plants = new Material(AtlasCutoutMipped);
+            var plants = new Material(Plants);
             plants.SetTexture("_BaseMap", packManager.GetAtlasArray(false));
             atlasMaterials.Add(RenderType.PLANTS, plants);
 
             // Tall Plants
-            var tallPlants = new Material(AtlasCutoutMipped);
+            var tallPlants = new Material(Plants);
             tallPlants.SetTexture("_BaseMap", packManager.GetAtlasArray(false));
             atlasMaterials.Add(RenderType.TALL_PLANTS, tallPlants);
+
+            Debug.Log($"Atlas is sRGB: " + packManager.GetAtlasArray(false).isDataSRGB + " " + packManager.GetAtlasArray(true).isDataSRGB);
 
             atlasInitialized = true;
         }
