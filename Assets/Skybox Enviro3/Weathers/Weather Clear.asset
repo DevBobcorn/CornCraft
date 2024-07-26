@@ -80,10 +80,10 @@ MonoBehaviour:
     skyColorTint: {r: 1, g: 1, b: 1, a: 1}
   fogOverride:
     fogDensity: 1
-    fogHeightFalloff: 0.03
+    fogHeightFalloff: 0.02
     fogHeight: 0
     fogDensity2: 1
-    fogHeightFalloff2: 0.02
+    fogHeightFalloff2: 0.03
     fogHeight2: 0
     fogColorBlend: 1
     fogColorMod: {r: 1, g: 1, b: 1, a: 1}

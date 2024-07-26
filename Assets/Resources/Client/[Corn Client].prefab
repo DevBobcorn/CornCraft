@@ -180,6 +180,7 @@ MonoBehaviour:
   AtlasTranslucent: {fileID: 2100000, guid: 8ee6dff0c60e65743895b69cc4c5bc0a, type: 2}
   StylizedWater: {fileID: 2100000, guid: 002453dd655f38e42968cf609e04ee33, type: 2}
   Foliage: {fileID: 2100000, guid: adf0649238070f449b01459c6e16a664, type: 2}
+  Plants: {fileID: 2100000, guid: 4962df059f7094841bc40cc6d1ab4d5d, type: 2}
 --- !u!114 &5810336599918708874
 MonoBehaviour:
   m_ObjectHideFlags: 0
