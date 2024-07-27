@@ -78,8 +78,6 @@ namespace CraftSharp.Rendering
             tallPlants.SetTexture("_BaseMap", packManager.GetAtlasArray(false));
             atlasMaterials.Add(RenderType.TALL_PLANTS, tallPlants);
 
-            Debug.Log($"Atlas is sRGB: " + packManager.GetAtlasArray(false).isDataSRGB + " " + packManager.GetAtlasArray(true).isDataSRGB);
-
             atlasInitialized = true;
         }
     }
