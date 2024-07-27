@@ -11,27 +11,6 @@ namespace CraftSharp.Rendering
 
         private readonly Dictionary<int, ChunkRender> chunks = new();
 
-        private ChunkRender CreateChunkRender(int chunkYIndex, IObjectPool<ChunkRender> pool)
-        {
-            // Get one from pool
-            var chunk = pool.Get();
-
-            chunk.ChunkX = this.ChunkX;
-            chunk.ChunkZ = this.ChunkZ;
-            chunk.ChunkYIndex = chunkYIndex;
-
-            var chunkObj = chunk.gameObject;
-            chunkObj.name = $"Chunk [{chunkYIndex}]";
-
-            // Set its parent to this chunk column...
-            chunkObj.transform.parent = this.transform;
-            chunkObj.transform.localPosition = CoordConvert.MC2Unity(this.ChunkX * Chunk.SIZE, chunkYIndex * Chunk.SIZE + World.GetDimension().minY, this.ChunkZ * Chunk.SIZE);
-
-            chunkObj.hideFlags = HideFlags.HideAndDontSave;
-
-            return chunk;
-        }
-
         public bool HasChunkRender(int chunkYIndex) => chunks.ContainsKey(chunkYIndex);
 
         public Dictionary<int, ChunkRender> GetChunkRenders() => chunks;
@@ -51,34 +30,53 @@ namespace CraftSharp.Rendering
                 }
                 else
                 {
-                    //Debug.Log("Trying to get a chunk at invalid height: " + chunkY);
+                    //Debug.Log("Trying to get a ChunkRender at invalid height: " + chunkY);
                     return null;
                 }
             }
         }
 
+        /// <summary>
+        /// Get existing ChunkRender or create one from object pool
+        /// </summary>
         public ChunkRender GetOrCreateChunkRender(int chunkYIndex, IObjectPool<ChunkRender> pool)
         {
             if (chunks.ContainsKey(chunkYIndex))
             {
                 return chunks[chunkYIndex];
             }
+
+            // This ChunkRender doesn't currently exist...
+            if (chunkYIndex >= 0 && chunkYIndex * Chunk.SIZE < World.GetDimension().height)
+            {
+                Profiler.BeginSample("Create chunk render object");
+
+                // Get one from pool
+                var chunk = pool.Get();
+
+                chunk.ChunkX = this.ChunkX;
+                chunk.ChunkZ = this.ChunkZ;
+                chunk.ChunkYIndex = chunkYIndex;
+
+                var chunkObj = chunk.gameObject;
+                chunkObj.name = $"Chunk [{chunkYIndex}]";
+
+                // Set its parent to this ChunkRenderColumn...
+                chunkObj.transform.parent = this.transform;
+                chunkObj.transform.localPosition = new(0F, chunkYIndex * Chunk.SIZE + World.GetDimension().minY, 0F);
+
+                chunkObj.hideFlags = HideFlags.HideAndDontSave;
+                
+                chunks.Add(chunkYIndex, chunk);
+
+                Profiler.EndSample();
+
+                return chunk;
+            }
             else
             {
-                // This chunk doesn't currently exist...
-                if (chunkYIndex >= 0 && chunkYIndex * Chunk.SIZE < World.GetDimension().height)
-                {
-                    Profiler.BeginSample("Create chunk render object");
-                    ChunkRender newChunk = CreateChunkRender(chunkYIndex, pool);
-                    chunks.Add(chunkYIndex, newChunk);
-                    Profiler.EndSample();
-                    return newChunk;
-                }
-                else
-                {
-                    //Debug.Log("Trying to get a chunk at invalid height: " + chunkY);
-                    return null;
-                }
+                //Debug.Log("Trying to get a ChunkRender at invalid height: " + chunkY);
+                return null;
             }
         }
 
@@ -96,24 +94,21 @@ namespace CraftSharp.Rendering
 
                 // Unload all chunks in this column, except empty chunks...
                 if (chunk != null)
-                {   // Before destroying the chunk object, do one last thing
-                    
-
+                {
+                    // Before releasing the chunk object, do one last thing
                     if (chunks2Build.Contains(chunk))
+                    {
                         chunks2Build.Remove(chunk);
+                    }
                     
                     chunksBeingBuilt.Remove(chunk);
                     chunk.Unload();
-                    // Return this chunk render to pool
+
+                    // Return this ChunkRender to pool
                     pool.Release(chunk);
                 }
             }
             chunks.Clear();
-
-            if (this != null)
-            {
-                Destroy(this.gameObject);
-            }
         }
 
         public override string ToString() => $"[ChunkRenderColumn {ChunkX}, {ChunkZ}]";

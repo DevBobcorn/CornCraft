@@ -92,8 +92,12 @@ namespace CraftSharp.Rendering
         }
 
         #region Chunk render access
+        private ObjectPool<ChunkRenderColumn> chunkRenderColumnPool;
         private ObjectPool<ChunkRender> chunkRenderPool;
 
+        /// <summary>
+        /// Creation method used by object pool
+        /// </summary>
         private static ChunkRender CreateNewChunkRender()
         {
             // Create a new chunk render object...
@@ -106,14 +110,12 @@ namespace CraftSharp.Rendering
             return newChunk;
         }
 
-        private static void GetChunkRender(ChunkRender chunk)
+        /// <summary>
+        /// Release method used by object pool
+        /// </summary>
+        private static void OnReleaseChunkRender(ChunkRender chunk)
         {
-            //chunk.gameObject.hideFlags = HideFlags.None;
-        }
-
-        private static void ReleaseChunkRender(ChunkRender chunk)
-        {
-            // Unparent and hide this chunk render
+            // Unparent and hide this ChunkRender
             chunk.transform.parent = null;
             var chunkObj = chunk.gameObject;
             chunkObj.name = $"Chunk [Pooled]";
@@ -124,59 +126,88 @@ namespace CraftSharp.Rendering
             meshFilter.sharedMesh = null;
         }
 
-        private ChunkRenderColumn CreateChunkRenderColumn(int chunkX, int chunkZ)
+        /// <summary>
+        /// Creation method used by object pool
+        /// </summary>
+        private static ChunkRenderColumn CreateNewChunkRenderColumn()
         {
             // Create this chunk column...
-            var columnObj = new GameObject($"Column [{chunkX}, {chunkZ}]");
+            var columnObj = new GameObject($"Column [Pooled]");
             ChunkRenderColumn newColumn = columnObj.AddComponent<ChunkRenderColumn>();
-            newColumn.ChunkX = chunkX;
-            newColumn.ChunkZ = chunkZ;
-            // Set its parent to this world...
-            columnObj.transform.parent = this.transform;
-            columnObj.transform.localPosition = Vector3.zero;
 
             return newColumn;
         }
 
-        private ChunkRenderColumn GetChunkRenderColumn(int chunkX, int chunkZ, bool createIfEmpty)
+        /// <summary>
+        /// Release method used by object pool
+        /// </summary>
+        private static void OnReleaseChunkRenderColumn(ChunkRenderColumn column)
+        {
+            var columnObj = column.gameObject;
+            columnObj.name = $"Column [Pooled]";
+        }
+
+        /// <summary>
+        /// Get existing ChunkRenderColumn, returns null if not present
+        /// </summary>
+        private ChunkRenderColumn GetChunkRenderColumn(int chunkX, int chunkZ)
         {
             int2 chunkCoord = new(chunkX, chunkZ);
-            if (renderColumns.ContainsKey(chunkCoord))
-                return renderColumns[chunkCoord];
 
-            if (createIfEmpty)
+            if (renderColumns.ContainsKey(chunkCoord))
             {
-                Profiler.BeginSample("Create chunk render object");
-                ChunkRenderColumn newColumn = CreateChunkRenderColumn(chunkX, chunkZ);
-                Profiler.EndSample();
-                renderColumns.Add(chunkCoord, newColumn);
-                return newColumn;
+                return renderColumns[chunkCoord];
             }
 
             return null;
         }
 
+        /// <summary>
+        /// Get existing ChunkRenderColumn or create one from object pool if not present
+        /// </summary>
+        private ChunkRenderColumn GetOrCreateChunkRenderColumn(int chunkX, int chunkZ)
+        {
+            int2 chunkCoord = new(chunkX, chunkZ);
+
+            if (renderColumns.ContainsKey(chunkCoord))
+            {
+                return renderColumns[chunkCoord];
+            }
+                
+            // This ChunkRenderColumn doesn't currently exist...
+            Profiler.BeginSample("Create chunk render object");
+
+            // Get one from pool
+            var column = chunkRenderColumnPool.Get();
+
+            column.ChunkX = chunkX;
+            column.ChunkZ = chunkZ;
+
+            var columnObj = column.gameObject;
+            columnObj.name = $"Column [{chunkX}, {chunkZ}]";
+
+            // Set its parent to world transform...
+            columnObj.transform.parent = this.transform;
+            columnObj.transform.localPosition = CoordConvert.MC2Unity(chunkX * Chunk.SIZE, 0F, chunkZ * Chunk.SIZE);
+
+            renderColumns.Add(chunkCoord, column);
+
+            Profiler.EndSample();
+
+            return column;
+        }
+
+        /// <summary>
+        /// Get existing ChunkRender, returns null if not present
+        /// </summary>
         public ChunkRender GetChunkRender(int chunkX, int chunkY, int chunkZ)
         {
-            var column = GetChunkRenderColumn(chunkX, chunkZ, false);
+            var column = GetChunkRenderColumn(chunkX, chunkZ);
 
             if (column == null)
                 return null;
 
             return column.GetChunkRender(chunkY);
-        }
-
-        public bool IsChunkRenderReady(int chunkX, int chunkY, int chunkZ)
-        {
-            var column = GetChunkRenderColumn(chunkX, chunkZ, false);
-
-            if (column == null)
-                return false;
-            
-            var chunk = column.GetChunkRender(chunkY);
-            
-            // Empty chunks (air) are null, those chunks are always ready
-            return chunk == null || chunk.State == ChunkBuildState.Ready;
         }
         #endregion
 
@@ -444,9 +475,9 @@ namespace CraftSharp.Rendering
         }
 
         /// <summary>
-        /// Use a mask to specify a subset of chunks to update
+        /// Use a mask to specify an evenly distributed subset of ChunkRenders to update
         /// </summary>
-        /// <param name="mask">A value from 0x00 to 0x1F (0 to 31)</param>
+        /// <param name="mask">A value from 0 to MASK_CYCLE_LENGTH - 1</param>
         private void UpdateChunkRendersListAdd(int mask)
         {
             var playerLoc = client!.GetLocation();
@@ -459,7 +490,7 @@ namespace CraftSharp.Rendering
             int chunkColumnSize = (World.GetDimension().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
             int offsetY = World.GetDimension().minY;
 
-            var renderCamera = client.CameraController.RenderCamera;
+            //var renderCamera = client.CameraController.RenderCamera;
 
             // Add nearby chunks
             for (int cx = -viewDist;cx <= viewDist;cx++)
@@ -470,12 +501,12 @@ namespace CraftSharp.Rendering
                     
                     if (world.IsChunkColumnLoaded(chunkX, chunkZ))
                     {
-                        var column = GetChunkRenderColumn(chunkX, chunkZ, false);
+                        var column = GetChunkRenderColumn(chunkX, chunkZ);
                         if (column == null)
                         {   // Chunks data is ready, but chunk render column is not
                             //int chunkMask = world[chunkX, chunkZ]!.ChunkMask;
                             // Create it and add the whole column to render list...
-                            columnRender = GetChunkRenderColumn(chunkX, chunkZ, true)!;
+                            columnRender = GetOrCreateChunkRenderColumn(chunkX, chunkZ);
                             for (int chunkY = 0;chunkY < chunkColumnSize;chunkY++)
                             {
                                 // Create chunk renders and queue them...
@@ -509,6 +540,10 @@ namespace CraftSharp.Rendering
 
         }
 
+        /// <summary>
+        /// Use a mask to specify an evenly distributed subset of ChunkRenders to update
+        /// </summary>
+        /// <param name="mask">A value from 0 to MASK_CYCLE_LENGTH - 1</param>
         private void UpdateChunkRendersListRemove(int mask)
         {
             // Add nearby chunks
@@ -522,7 +557,12 @@ namespace CraftSharp.Rendering
                 var chunkCoord = chunkCoords[i];
                 if (Mathf.Abs(blockLoc.GetChunkX() - chunkCoord.x) > unloadDist || Mathf.Abs(blockLoc.GetChunkZ() - chunkCoord.y) > unloadDist)
                 {
-                    renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
+                    var column = renderColumns[chunkCoord];
+                    column.Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
+
+                    // Return this ChunkRenderColumn to pool
+                    chunkRenderColumnPool.Release(column);
+
                     renderColumns.Remove(chunkCoord);
                 }
             }
@@ -553,8 +593,13 @@ namespace CraftSharp.Rendering
                 int2 chunkCoord = new(chunkRender.ChunkX, chunkRender.ChunkZ);
                 if (renderColumns.ContainsKey(chunkCoord))
                 {
-                    renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
-                    renderColumns.Remove(chunkCoord, out _);
+                    var column = renderColumns[chunkCoord];
+                    column.Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
+
+                    // Return this ChunkRenderColumn to pool
+                    chunkRenderColumnPool.Release(column);
+
+                    renderColumns.Remove(chunkCoord);
                 }
                 chunkRender.State = ChunkBuildState.Cancelled;
                 return;
@@ -654,7 +699,12 @@ namespace CraftSharp.Rendering
             Loom.QueueOnMainThread(() => {
                 if (renderColumns.ContainsKey(chunkCoord))
                 {
-                    renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
+                    var column = renderColumns[chunkCoord];
+                    column.Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
+
+                    // Return this ChunkRenderColumn to pool
+                    chunkRenderColumnPool.Release(column);
+
                     renderColumns.Remove(chunkCoord);
                 }
 
@@ -698,7 +748,12 @@ namespace CraftSharp.Rendering
 
             foreach (var chunkCoord in chunkCoords)
             {
-                renderColumns[chunkCoord].Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
+                var column = renderColumns[chunkCoord];
+                column.Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
+
+                // Return this ChunkRenderColumn to pool
+                chunkRenderColumnPool.Release(column);
+
                 renderColumns.Remove(chunkCoord);
             }
             renderColumns.Clear();
@@ -719,7 +774,7 @@ namespace CraftSharp.Rendering
         public void MarkDirtyAt(BlockLoc blockLoc)
         {
             int chunkX = blockLoc.GetChunkX(), chunkZ = blockLoc.GetChunkZ();
-            var column = GetChunkRenderColumn(chunkX, chunkZ, false);
+            var column = GetChunkRenderColumn(chunkX, chunkZ);
             int chunkY = blockLoc.GetChunkY(World.GetDimension().minY);
 
             if (column != null) // Queue this chunk to rebuild list...
@@ -756,7 +811,7 @@ namespace CraftSharp.Rendering
 
         public void MarkDirtyBecauseOfLightUpdate(int chunkX, int chunkY, int chunkZ)
         {
-            var column = GetChunkRenderColumn(chunkX, chunkZ, false);
+            var column = GetChunkRenderColumn(chunkX, chunkZ);
             if (column != null) // Queue this chunk to rebuild list...
             {   // Create the chunk render object if not present (previously empty)
                 var chunk = column.GetOrCreateChunkRender(chunkY, chunkRenderPool);
@@ -811,7 +866,8 @@ namespace CraftSharp.Rendering
         void Awake()
         {
             // Create Unity object pools on awake
-            chunkRenderPool = new(CreateNewChunkRender, GetChunkRender, ReleaseChunkRender, null, false, 500);
+            chunkRenderPool = new(CreateNewChunkRender, null, OnReleaseChunkRender, null, false, 5000);
+            chunkRenderColumnPool = new(CreateNewChunkRenderColumn, null, OnReleaseChunkRenderColumn, null, false, 500);
         }
 
         void Start()
@@ -848,7 +904,7 @@ namespace CraftSharp.Rendering
             {
                 var nextChunk = chunkRendersToBeBuilt.Dequeue();
 
-                if (nextChunk == null || GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ, false) == null)
+                if (nextChunk == null || GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ) == null)
                 {   // Chunk is unloaded while waiting in the queue, ignore it...
                     continue;
                 }
