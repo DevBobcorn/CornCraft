@@ -1,13 +1,12 @@
 {
   "dependencies": {
     "com.devbobcorn.craftsharp": {
-      "version": "https://github.com/DevBobcorn/CraftSharp.git",
+      "version": "file:com.devbobcorn.craftsharp",
       "depth": 0,
-      "source": "git",
+      "source": "embedded",
       "dependencies": {
         "com.unity.mathematics": "1.2.6"
-      },
-      "hash": "6c7be672b4c4b8bfc34d9b1eea330fe1a8e0f2ea"
+      }
     },
     "com.devbobcorn.craftsharp-protocol": {
       "version": "file:com.devbobcorn.craftsharp-protocol",

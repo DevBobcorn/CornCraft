@@ -5,7 +5,11 @@
     "m_Properties": [],
     "m_Keywords": [],
     "m_Dropdowns": [],
-    "m_CategoryData": [],
+    "m_CategoryData": [
+        {
+            "m_Id": "60d149c8c4274845b32cc93d1cc1a21e"
+        }
+    ],
     "m_Nodes": [
         {
             "m_Id": "a8806eacea1049ef80dec5dcf7f528c9"
@@ -80,6 +84,20 @@
                     "m_Id": "22157cc1ada643febaab17abd9396281"
                 },
                 "m_SlotId": 1
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "22157cc1ada643febaab17abd9396281"
+                },
+                "m_SlotId": 2
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "a8806eacea1049ef80dec5dcf7f528c9"
+                },
+                "m_SlotId": 0
             }
         },
         {
@@ -977,6 +995,29 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
+    "m_ObjectId": "4486c20a57984a67a00d48a5b64eff04",
+    "m_Id": 0,
+    "m_DisplayName": "Offset",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Offset",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "47a58b5f23484beaae1f18d5a896f847",
     "m_Id": 3,
@@ -1205,6 +1246,14 @@
         "z": 0.0
     },
     "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "60d149c8c4274845b32cc93d1cc1a21e",
+    "m_Name": "",
+    "m_ChildObjectList": []
 }
 
 {
@@ -1530,13 +1579,17 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 718.5,
-            "y": 0.0,
-            "width": 0.0,
-            "height": 0.0
+            "x": 726.0,
+            "y": -81.0,
+            "width": 86.0,
+            "height": 53.0
         }
     },
-    "m_Slots": [],
+    "m_Slots": [
+        {
+            "m_Id": "4486c20a57984a67a00d48a5b64eff04"
+        }
+    ],
     "synonyms": [],
     "m_Precision": 0,
     "m_PreviewExpanded": true,

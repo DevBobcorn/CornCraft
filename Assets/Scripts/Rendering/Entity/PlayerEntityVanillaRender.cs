@@ -8,9 +8,9 @@ namespace CraftSharp.Rendering
         [SerializeField] private Renderer[] playerSkinRenderers = { };
         [SerializeField] private Transform? leftArm, rightArm;
 
-        public override void Initialize(EntityType entityType, Entity entity)
+        public override void Initialize(EntityType entityType, Entity entity, Vector3Int originOffset)
         {
-            base.Initialize(entityType, entity);
+            base.Initialize(entityType, entity, originOffset);
             
             UpdateSkinMaterial();
         }

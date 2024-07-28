@@ -120,7 +120,7 @@ namespace CraftSharp.Rendering
                 entityObj.transform.parent = transform;
 
                 // Initialize the entity
-                entityRender.Initialize(entity.Type, entity);
+                entityRender.Initialize(entity.Type, entity, _worldOriginOffset);
             }
         }
 
@@ -148,12 +148,13 @@ namespace CraftSharp.Rendering
         /// Move an entity render by given delta value
         /// </summary>
         /// <param name="entityId">Numeral id of the entity to move</param>
-        /// <param name="location">Location delta</param>
-        public void MoveEntityRender(int entityId, Location location)
+        /// <param name="delta">Location delta</param>
+        public void MoveEntityRender(int entityId, Location delta)
         {
             if (entityRenders.ContainsKey(entityId))
             {
-                entityRenders[entityId].Position.Value += CoordConvert.MC2Unity(location);
+                // Delta value, world origin offset doesn't apply
+                entityRenders[entityId].Position.Value += CoordConvert.MC2UnityDelta(delta);
             }
         }
 
@@ -166,7 +167,7 @@ namespace CraftSharp.Rendering
         {
             if (entityRenders.ContainsKey(entityId))
             {
-                entityRenders[entityId].Position.Value = CoordConvert.MC2Unity(location);
+                entityRenders[entityId].Position.Value = CoordConvert.MC2Unity(_worldOriginOffset, location);
             }
         }
 
@@ -261,6 +262,19 @@ namespace CraftSharp.Rendering
             }
 
             return targetPos;
+        }
+
+        private Vector3Int _worldOriginOffset = Vector3Int.zero;
+
+        public void SetWorldOriginOffset(Vector3 posDelta, Vector3Int offset)
+        {
+            _worldOriginOffset = offset;
+
+            // Move all registered EntityRenders
+            foreach (var render in entityRenders.Values)
+            {
+                render.TeleportByDelta(posDelta);
+            }
         }
 
         void Start()

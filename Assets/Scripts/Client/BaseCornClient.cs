@@ -14,6 +14,7 @@ namespace CraftSharp
     public abstract class BaseCornClient : MonoBehaviour
     {
         #region Inspector Fields
+        [SerializeField] private Transform m_WorldAnchor;
         [SerializeField] private ChunkRenderManager m_ChunkRenderManager;
         [SerializeField] private EntityRenderManager m_EntityRenderManager;
         [SerializeField] private BaseEnvironmentManager m_EnvironmentManager;
@@ -77,6 +78,31 @@ namespace CraftSharp
 
         public GameMode GameMode { get; protected set; } = GameMode.Survival;
         public byte CurrentSlot { get; protected set; } = 0;
+
+        public Vector3Int WorldOriginOffset { get; private set; } = Vector3Int.zero;
+
+        protected virtual void SetWorldOriginOffset(Vector3Int offset)
+        {
+            var delta = offset - WorldOriginOffset;
+            var posDelta = CoordConvert.GetPosDelta(delta);
+
+            // Move world anchor
+            m_WorldAnchor.position = CoordConvert.MC2Unity(offset, Location.Zero);
+
+            // Move chunk renders
+            ChunkRenderManager.SetWorldOriginOffset(posDelta, offset);
+
+            // Move entities
+            EntityRenderManager.SetWorldOriginOffset(posDelta, offset);
+
+            // Move client player
+            var playerDelta = PlayerController.SetWorldOriginOffset(offset);
+
+            // Move active camera
+            CameraController.TeleportByDelta(playerDelta);
+
+            WorldOriginOffset = offset;
+        }
 
         public abstract bool StartClient(StartLoginInfo info);
         

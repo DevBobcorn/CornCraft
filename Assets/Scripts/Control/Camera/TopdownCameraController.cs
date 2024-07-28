@@ -75,6 +75,14 @@ namespace CraftSharp.Control
             return _virtualCameraFollow.Follow;
         }
 
+        public override void TeleportByDelta(Vector3 posDelta)
+        {
+            if (_virtualCameraFollow != null)
+            {
+                _virtualCameraFollow.OnTargetObjectWarped(_virtualCameraFollow.Follow, posDelta);
+            }
+        }
+
         public override void SetYaw(float yaw)
         {
             if (_followPOV == null)

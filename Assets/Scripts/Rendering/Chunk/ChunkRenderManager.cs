@@ -17,7 +17,7 @@ namespace CraftSharp.Rendering
     public class ChunkRenderManager : MonoBehaviour, IChunkRenderManager
     {
         public const string MOVEMENT_LAYER_NAME = "Movement";
-        public const string SOLID_LAYER_NAME = "Solid";
+        public const string INTERACTION_LAYER_NAME = "Interaction";
         public const string LIQUID_SURFACE_LAYER_NAME = "LiquidSurface";
 
         [SerializeField] private Transform blockEntityParent;
@@ -34,6 +34,9 @@ namespace CraftSharp.Rendering
         /// </summary>
         private readonly World world = new();
 
+        /// <summary>
+        /// Light calculator used for updating block lights
+        /// </summary>
         private readonly LightCalculator lightCalc = new();
 
         /// <summary>
@@ -82,6 +85,31 @@ namespace CraftSharp.Rendering
 
         public void SetClient(BaseCornClient client) => this.client = client;
 
+        private Vector3Int _worldOriginOffset = Vector3Int.zero;
+
+        public void SetWorldOriginOffset(Vector3 posDelta, Vector3Int offset)
+        {
+            _worldOriginOffset = offset;
+
+            // Move all registered ChunkColumns
+            foreach (var pair in renderColumns)
+            {
+                pair.Value.transform.localPosition = CoordConvert.MC2Unity(_worldOriginOffset, pair.Key.x * Chunk.SIZE, 0F, pair.Key.y * Chunk.SIZE);
+            }
+
+            // Move all registered BlockEntityRenders
+            foreach (var pair in blockEntityRenders)
+            {
+                pair.Value.transform.localPosition = CoordConvert.MC2Unity(_worldOriginOffset, pair.Key.ToCenterLocation());
+            }
+
+            // Update collider positions and force flush collider transform changes
+            movementCollider.transform.position += posDelta;
+            liquidCollider.transform.position += posDelta;
+
+            Physics.SyncTransforms();
+        }
+
         private static int dataBuildTimeSum = 0, vertexBuildTimeSum = 0;
         private static readonly Queue<int> dataBuildTimeRecord = new(Enumerable.Repeat(0, 200));
         private static readonly Queue<int> vertexBuildTimeRecord = new(Enumerable.Repeat(0, 200));
@@ -103,7 +131,7 @@ namespace CraftSharp.Rendering
             // Create a new chunk render object...
             var chunkObj = new GameObject($"Chunk [Pooled]")
             {
-                layer = LayerMask.NameToLayer(ChunkRenderManager.SOLID_LAYER_NAME)
+                layer = LayerMask.NameToLayer(ChunkRenderManager.INTERACTION_LAYER_NAME)
             };
             ChunkRender newChunk = chunkObj.AddComponent<ChunkRender>();
             
@@ -188,7 +216,7 @@ namespace CraftSharp.Rendering
 
             // Set its parent to world transform...
             columnObj.transform.parent = this.transform;
-            columnObj.transform.localPosition = CoordConvert.MC2Unity(chunkX * Chunk.SIZE, 0F, chunkZ * Chunk.SIZE);
+            columnObj.transform.localPosition = CoordConvert.MC2Unity(_worldOriginOffset, chunkX * Chunk.SIZE, 0F, chunkZ * Chunk.SIZE);
 
             renderColumns.Add(chunkCoord, column);
 
@@ -436,7 +464,7 @@ namespace CraftSharp.Rendering
 
                 blockEntityObj.name = $"[{blockLoc}] {blockEntityType}";
                 blockEntityObj.transform.parent = blockEntityParent;
-                blockEntityObj.transform.position = CoordConvert.MC2Unity(blockLoc.ToCenterLocation());
+                blockEntityObj.transform.localPosition = CoordConvert.MC2Unity(_worldOriginOffset, blockLoc.ToCenterLocation());
 
                 // Initialize the entity
                 blockEntityRender.Initialize(blockLoc, blockEntityType, tags ?? new());
@@ -846,7 +874,7 @@ namespace CraftSharp.Rendering
                 var inLiquid = GetBlock(playerBlockLoc).State.InLiquid;
                 EventManager.Instance.Broadcast(new PlayerLiquidEvent(inLiquid));
 
-                builder!.BuildTerrainCollider(world, playerBlockLoc, movementCollider!, liquidCollider!, callback);
+                builder!.BuildTerrainCollider(world, playerBlockLoc, _worldOriginOffset, movementCollider!, liquidCollider!, callback);
 
                 // Set last player location
                 lastPlayerBlockLoc = playerBlockLoc;
@@ -859,7 +887,7 @@ namespace CraftSharp.Rendering
 
             Task.Run(() =>
             {
-                builder!.BuildTerrainCollider(world, playerBlockLoc, movementCollider!, liquidCollider!, null);
+                builder!.BuildTerrainCollider(world, playerBlockLoc, _worldOriginOffset, movementCollider!, liquidCollider!, null);
             });
         }
 

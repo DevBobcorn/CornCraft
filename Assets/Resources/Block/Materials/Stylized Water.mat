@@ -15,7 +15,6 @@ Material:
   - _ADVANCED_SHADING
   - _CAUSTICS
   - _DISTANCE_NORMALS
-  - _FOAM
   - _NORMALMAP
   - _REFRACTION
   - _TRANSLUCENCY
@@ -147,7 +146,7 @@ Material:
     - _CausticsDistortion: 0.047
     - _CausticsOn: 1
     - _CausticsSpeed: 0.1
-    - _CausticsTiling: 0.1
+    - _CausticsTiling: 0.125
     - _ColorAbsorption: 0
     - _CrossPan_IntersectionOn: 0
     - _Cull: 0
@@ -170,7 +169,7 @@ Material:
     - _FoamBaseAmount: 0.297
     - _FoamClipping: 0
     - _FoamDistortion: 0
-    - _FoamOn: 1
+    - _FoamOn: 0
     - _FoamOpacity: 0
     - _FoamSize: 0.606
     - _FoamSpeed: 0.06000001

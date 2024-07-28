@@ -504,7 +504,7 @@ namespace CraftSharp.Rendering
         // (or say PhysX) bug, so we dynamically build the mesh collider around the
         // player as a solution to this. See the problem discussion at
         // https://forum.unity.com/threads/ball-rolling-on-mesh-hits-edges.772760/
-        public void BuildTerrainCollider(World world, BlockLoc playerBlockLoc, MeshCollider solidCollider, MeshCollider fluidCollider, Action callback)
+        public void BuildTerrainCollider(World world, BlockLoc playerBlockLoc, Vector3Int originOffset, MeshCollider solidCollider, MeshCollider fluidCollider, Action callback)
         {
             int offsetY = World.GetDimension().minY;
 
@@ -596,7 +596,7 @@ namespace CraftSharp.Rendering
                         if (x * x + y * y + z * z > MOVEMENT_RADIUS_SQR)
                             continue;
 
-                        var blockLoc = playerBlockLoc + new BlockLoc(x, y, z);
+                        var blockLocInMesh = new BlockLoc(x, y, z);
                         var bloc = blocs[MOVEMENT_RADIUS + x, MOVEMENT_RADIUS + y, MOVEMENT_RADIUS + z];
                         var state = bloc.State;
 
@@ -606,7 +606,7 @@ namespace CraftSharp.Rendering
                             int liquidCullFlags = getCullFlags(x + MOVEMENT_RADIUS, y + MOVEMENT_RADIUS, z + MOVEMENT_RADIUS, bloc, neighborCheck);
 
                             if (liquidCullFlags != 0)
-                                FluidGeometry.BuildCollider(fluidVerts, ref fluidVertOffset, new float3(blockLoc.Z, blockLoc.Y, blockLoc.X), liquidCullFlags);
+                                FluidGeometry.BuildCollider(fluidVerts, ref fluidVertOffset, new float3(blockLocInMesh.Z, blockLocInMesh.Y, blockLocInMesh.X), liquidCullFlags);
                         }
 
                         if (state.LikeAir || state.NoCollision)
@@ -619,7 +619,7 @@ namespace CraftSharp.Rendering
                         if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                         {
                             // They all have the same collider so we just pick the 1st one
-                            modelTable[stateId].Geometries[0].BuildCollider(solidVerts, ref solidVertOffset, new float3(blockLoc.Z, blockLoc.Y, blockLoc.X), cullFlags);
+                            modelTable[stateId].Geometries[0].BuildCollider(solidVerts, ref solidVertOffset, new float3(blockLocInMesh.Z, blockLocInMesh.Y, blockLocInMesh.X), cullFlags);
                         }
                     }
 
@@ -707,6 +707,13 @@ namespace CraftSharp.Rendering
                 {
                     fluidCollider!.sharedMesh = null;
                 }
+
+                var newColliderPos = CoordConvert.MC2Unity(originOffset, playerBlockLoc.ToLocation());
+
+                solidCollider.transform.position = newColliderPos;
+                fluidCollider.transform.position = newColliderPos;
+
+                Physics.SyncTransforms();
                 
                 colVertAttrs.Dispose();
 

@@ -185,6 +185,23 @@ namespace CraftSharp
                 }
             }
 
+            if (Keyboard.current.uKey.wasPressedThisFrame)
+            {
+                SetWorldOriginOffset(WorldOriginOffset + new Vector3Int( 0, 0, 1));
+            }
+            if (Keyboard.current.kKey.wasPressedThisFrame)
+            {
+                SetWorldOriginOffset(WorldOriginOffset + new Vector3Int( 1, 0, 0));
+            }
+            if (Keyboard.current.jKey.wasPressedThisFrame)
+            {
+                SetWorldOriginOffset(WorldOriginOffset + new Vector3Int( 0, 0,-1));
+            }
+            if (Keyboard.current.hKey.wasPressedThisFrame)
+            {
+                SetWorldOriginOffset(WorldOriginOffset + new Vector3Int(-1, 0, 0));
+            }
+
             if (PlayerController != null)
             {
                 if (Keyboard.current.f6Key.wasPressedThisFrame) // Select previous
@@ -491,7 +508,8 @@ namespace CraftSharp
         /// </summary>
         public override Vector3 GetPosition()
         {
-            return CoordConvert.MC2Unity(PlayerController.Location2Send);
+            //return CoordConvert.MC2Unity(PlayerController.Location2Send);
+            return PlayerController.transform.position;
         }
 
         /// <summary>
@@ -504,7 +522,7 @@ namespace CraftSharp
 
             if (withDebugInfo)
             {
-                return baseString + $"\nLoc: {GetLocation()}\n{PlayerController.GetDebugInfo()}" +
+                return baseString + $"\nLoc: {GetLocation()}\n{PlayerController.GetDebugInfo()}\nWorld Origin Offset: {WorldOriginOffset}" +
                         $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():0.0}";
             }
             
@@ -1048,10 +1066,10 @@ namespace CraftSharp
                 else // Position correction from server
                 {                    
                     Loom.QueueOnMainThread(() => {
-                        var offset = PlayerController.transform.position - CoordConvert.MC2Unity(location);
-                        if (offset.magnitude < 8F)
+                        var delta = PlayerController.transform.position - CoordConvert.MC2Unity(WorldOriginOffset, location);
+                        if (delta.magnitude < 8F)
                         {
-                            return;
+                            return; // I don't like this packet.
                         }
 
                         // Force refresh environment collider

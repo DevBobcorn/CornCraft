@@ -44,9 +44,9 @@ MonoBehaviour:
   m_Name: Volume World
   m_EditorClassIdentifier: 
   components:
+  - {fileID: 7008897878513536980}
   - {fileID: 4946541637662509968}
   - {fileID: -1093482682418985227}
-  - {fileID: 7008897878513536980}
 --- !u!114 &4946541637662509968
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -107,8 +107,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   active: 1
   postExposure:
-    m_OverrideState: 0
-    m_Value: 0
+    m_OverrideState: 1
+    m_Value: 0.2
   contrast:
     m_OverrideState: 0
     m_Value: 0
@@ -119,5 +119,5 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 0
   saturation:
-    m_OverrideState: 0
-    m_Value: 0
+    m_OverrideState: 1
+    m_Value: 15
