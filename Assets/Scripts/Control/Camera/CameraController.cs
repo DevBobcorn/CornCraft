@@ -71,6 +71,12 @@ namespace CraftSharp.Control
 
         public abstract Transform? GetTarget();
 
+        /// <summary>
+        /// Used when updating world origin offset to seamlessly teleport the camera
+        /// and maintain its relative position to following target
+        /// </summary>
+        public abstract void TeleportByDelta(Vector3 posDelta);
+
         public virtual void EnableAimingCamera(bool enable)
         {
             EnsureInitialized();

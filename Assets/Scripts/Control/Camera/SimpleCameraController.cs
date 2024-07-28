@@ -99,6 +99,19 @@ namespace CraftSharp.Control
             return virtualCameraFollow == null ? null : virtualCameraFollow.Follow;
         }
 
+        public override void TeleportByDelta(Vector3 posDelta)
+        {
+            if (virtualCameraFollow != null)
+            {
+                virtualCameraFollow.OnTargetObjectWarped(virtualCameraFollow.Follow, posDelta);
+            }
+
+            if (virtualCameraAim != null)
+            {
+                virtualCameraAim.OnTargetObjectWarped(virtualCameraAim.Follow, posDelta);
+            }
+        }
+
         public override Vector3 GetTargetViewportPos(Vector3 offset)
         {
             if (IsFixed()) // Use screen center if camera is fixed

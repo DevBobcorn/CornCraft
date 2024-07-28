@@ -8,9 +8,9 @@ namespace CraftSharp.Rendering
         public MeshFilter? itemMeshFilter;
         public MeshRenderer? itemMeshRenderer;
 
-        public override void Initialize(EntityType entityType, Entity entity)
+        public override void Initialize(EntityType entityType, Entity entity, Vector3Int originOffset)
         {
-            base.Initialize(entityType, entity);
+            base.Initialize(entityType, entity, originOffset);
             
             if (itemMeshFilter != null && itemMeshRenderer != null)
             {

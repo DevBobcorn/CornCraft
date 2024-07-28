@@ -368,7 +368,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SolidLayer:
     serializedVersion: 2
-    m_Bits: 192
+    m_Bits: 64
   LiquidSurfaceLayer:
     serializedVersion: 2
     m_Bits: 16384

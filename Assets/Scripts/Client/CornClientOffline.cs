@@ -209,7 +209,7 @@ namespace CraftSharp
         /// </summary>
         public override Vector3 GetPosition()
         {
-            return CoordConvert.MC2Unity(PlayerController.Location2Send);
+            return CoordConvert.MC2Unity(WorldOriginOffset, PlayerController.Location2Send);
         }
 
         /// <summary>

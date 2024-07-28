@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace CraftSharp.Rendering
@@ -150,7 +151,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Initialize this entity render
         /// </summary>
-        public virtual void Initialize(EntityType entityType, Entity source)
+        public virtual void Initialize(EntityType entityType, Entity source, Vector3Int originOffset)
         {
             if (_visualTransform == null)
             {
@@ -166,7 +167,7 @@ namespace CraftSharp.Rendering
             CustomName = source.CustomName;
             type = entityType;
 
-            Position.Value = CoordConvert.MC2Unity(source.Location);
+            Position.Value = CoordConvert.MC2Unity(originOffset, source.Location);
             lastPosition = Position.Value;
             lastYaw = Yaw.Value = source.Yaw;
             lastHeadYaw = HeadYaw.Value = source.HeadYaw;
@@ -195,6 +196,16 @@ namespace CraftSharp.Rendering
             {
                 Destroy(this.gameObject);
             }
+        }
+
+        /// <summary>
+        /// Used when updating world origin offset to seamlessly teleport the EntityRender
+        /// and maintain its relative position to everything else
+        /// </summary>
+        public virtual void TeleportByDelta(Vector3 posDelta)
+        {
+            Position.Value += posDelta;
+            transform.position += posDelta;
         }
 
         public virtual void UpdateTransform(float tickMilSec)

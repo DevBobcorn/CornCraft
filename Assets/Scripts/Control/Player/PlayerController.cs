@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using UnityEngine;
+using Unity.Mathematics;
 
 using CraftSharp.Event;
 using CraftSharp.Rendering;
@@ -129,7 +130,7 @@ namespace CraftSharp.Control
                 }
 
                 // Initialize player entity render
-                _playerRender.Initialize(entity.Type, entity);
+                _playerRender.Initialize(entity.Type, entity, Vector3Int.zero);
                 // Workaround: This value should not be applied to entity render for client player
                 _playerRender.VisualTransform.localRotation = Quaternion.identity;
 
@@ -547,11 +548,13 @@ namespace CraftSharp.Control
 
         public void AfterCharacterUpdate(float deltaTime)
         {
+            var newLocation = CoordConvert.Unity2MC(_worldOriginOffset, transform.position);
+
             // Update values to send to server
             Location2Send = new(
-                Math.Round(transform.position.z, 2),
-                Math.Round(transform.position.y, 2),
-                Math.Round(transform.position.x, 2)
+                Math.Round(newLocation.X, 2),
+                Math.Round(newLocation.Y, 2),
+                Math.Round(newLocation.Z, 2)
             );
 
             if (_playerRender != null)
@@ -575,6 +578,25 @@ namespace CraftSharp.Control
         private delegate void PlayerUpdateEventHandler(Vector3 velocity, float interval, PlayerStatus status);
         private event PlayerUpdateEventHandler? OnPlayerUpdate;
 
+        private Vector3Int _worldOriginOffset = Vector3Int.zero;
+
+        /// <summary>
+        /// Called when updating world origin offset to teleport the
+        /// player seamlessly, returns actual position delta applied
+        /// </summary>
+        public Vector3 SetWorldOriginOffset(Vector3Int offset)
+        {
+            _worldOriginOffset = offset;
+
+            // Recalculate position in Unity scene based on new world origin
+            var updatedPosition = CoordConvert.MC2Unity(offset, Location2Send);
+            var playerPosDelta = updatedPosition - transform.position;
+
+            Motor.SetPosition(updatedPosition);
+
+            return playerPosDelta;
+        }
+
         public void SetLocationFromServer(Location loc, bool reset = false, float mcYaw = 0F)
         {
             if (reset) // Reset motor velocity TODO: Check
@@ -589,7 +611,7 @@ namespace CraftSharp.Control
             Status!.CurrentVisualYaw = newUnityYaw;
 
             // Update current location and yaw
-            Motor.SetPositionAndRotation(CoordConvert.MC2Unity(loc), newRotation);
+            Motor.SetPositionAndRotation(CoordConvert.MC2Unity(_worldOriginOffset, loc), newRotation);
 
             // Update local data
             Location2Send = loc;
