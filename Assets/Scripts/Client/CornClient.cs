@@ -185,21 +185,38 @@ namespace CraftSharp
                 }
             }
 
-            if (Keyboard.current.uKey.wasPressedThisFrame)
+            var playerPos = PlayerController.transform.position;
+
+            if (Mathf.Abs(playerPos.x) > 512F || Mathf.Abs(playerPos.z) > 512F)
             {
-                SetWorldOriginOffset(WorldOriginOffset + new Vector3Int( 0, 0, 1));
-            }
-            if (Keyboard.current.kKey.wasPressedThisFrame)
-            {
-                SetWorldOriginOffset(WorldOriginOffset + new Vector3Int( 1, 0, 0));
-            }
-            if (Keyboard.current.jKey.wasPressedThisFrame)
-            {
-                SetWorldOriginOffset(WorldOriginOffset + new Vector3Int( 0, 0,-1));
-            }
-            if (Keyboard.current.hKey.wasPressedThisFrame)
-            {
-                SetWorldOriginOffset(WorldOriginOffset + new Vector3Int(-1, 0, 0));
+                // World origin shifting logic
+                var updatedOffset = WorldOriginOffset;
+
+                while (playerPos.x > 512F)
+                {
+                    playerPos.x -= 512F;
+                    updatedOffset.x += 1;
+                }
+
+                while (playerPos.x < -512F)
+                {
+                    playerPos.x += 512F;
+                    updatedOffset.x -= 1;
+                }
+
+                while (playerPos.z > 512F)
+                {
+                    playerPos.z -= 512F;
+                    updatedOffset.z += 1;
+                }
+
+                while (playerPos.z < -512F)
+                {
+                    playerPos.z += 512F;
+                    updatedOffset.z -= 1;
+                }
+
+                SetWorldOriginOffset(updatedOffset);
             }
 
             if (PlayerController != null)
