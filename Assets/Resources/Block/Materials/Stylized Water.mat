@@ -224,8 +224,8 @@ Material:
     - _ReflectionBlur: 0
     - _ReflectionDistortion: 0.146
     - _ReflectionFresnel: 6
-    - _ReflectionLighting: 1
-    - _ReflectionStrength: 1
+    - _ReflectionLighting: 0.5
+    - _ReflectionStrength: 0.5
     - _Reflectivity: 1
     - _RefractionAmount: 0.05
     - _RefractionChromaticAberration: 1

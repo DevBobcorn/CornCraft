@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +9,11 @@ namespace CraftSharp.Rendering
 {
     public class EntityMaterialManager : MonoBehaviour
     {
+        [SerializeField] private Material m_EnityDissolveMaterial;
+        public Material EnityDissolveMaterial => m_EnityDissolveMaterial;
+        [SerializeField] private string m_EnityDissolveMaterialTextureName = "_Texture";
+        public string EnityDissolveMaterialTextureName => m_EnityDissolveMaterialTextureName;
+
         /// <summary>
         /// A material instance is created for each rendertype-texture pair,
         /// and all entities that uses this material share the same instance.
@@ -40,11 +44,7 @@ namespace CraftSharp.Rendering
                 else
                 {
                     // The entry is not present, try loading this texture
-                    var defaultTex = defaultMaterial.GetTexture("_BaseMap");
-                    if (defaultTex != null)
-                        mt = resManager.LoadEntityTextureFromPacks(textureId, defaultTex.width, defaultTex.height);
-                    else
-                        mt = resManager.LoadEntityTextureFromPacks(textureId);
+                    mt = resManager.LoadEntityTextureFromPacks(textureId);
                 }
 
                 var matInstance = new Material(defaultMaterial)
@@ -60,6 +60,26 @@ namespace CraftSharp.Rendering
             }
 
             return EntityMaterials[renderType][textureId];
+        }
+
+        /// <summary>
+        /// Get a texture with given id, or load it if not present. This should ONLY be used when
+        /// creating special materials which cannot be retrieved from entity material table.
+        /// </summary>
+        /// <param name="textureId">Texture identifier</param>
+        public Texture2D GetTexture(ResourceLocation textureId)
+        {
+            var resManager = ResourcePackManager.Instance;
+
+            if (resManager.EntityTexture2DTable.ContainsKey(textureId))
+            {
+                return resManager.EntityTexture2DTable[textureId];
+            }
+            else
+            {
+                // The entry is not present, try loading this texture
+                return resManager.LoadEntityTextureFromPacks(textureId);
+            }
         }
 
         public void ClearTables()

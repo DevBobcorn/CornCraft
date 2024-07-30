@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CraftSharp.Resource;
 using UnityEngine;
 
 namespace CraftSharp.Rendering
@@ -63,10 +62,23 @@ namespace CraftSharp.Rendering
             var client = CornApp.CurrentClient!;
             var matManager = client.EntityMaterialManager;
 
+            var isRagdoll = GetComponent<EntityRagdoll>() != null;
+
             foreach (var entry in m_MaterialEntries)
             {
                 var textureId = ResourceLocation.FromString(entry.TextureId);
-	            var matInstance = matManager.MapMaterial(entry.RenderType, textureId, entry.DefaultMaterial);
+	            Material matInstance;
+                
+                if (isRagdoll)
+                {
+                    matInstance = new Material(matManager.EnityDissolveMaterial);
+                    var texture = matManager.GetTexture(textureId);
+                    matInstance.SetTexture(matManager.EnityDissolveMaterialTextureName, texture);
+                }
+                else
+                {
+                    matInstance = matManager.MapMaterial(entry.RenderType, textureId, entry.DefaultMaterial);
+                }
                 
                 foreach (var renderer in entry.Renderers)
                 {
