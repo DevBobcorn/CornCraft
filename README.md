@@ -48,7 +48,7 @@ Like MCC, CornCraft adopts CDDL-1.0 as the license of its code repository, and t
 Some other open-source projects/code examples are used in the project, which don't fall under CDDL-1.0 and use their own licenses. Here's a list of them:
 * [Welai Glow Sans](https://github.com/welai/glow-sans)
 * [Cascadia Code/Mono](https://github.com/microsoft/cascadia-code)
-* [FernNPR](https://github.com/FernRender/FernNPR)
+* [Star Rail NPR Shader](https://github.com/stalomeow/StarRailNPRShader)
 
 More information about CDDL-1.0 can be found on MCC's [home page](https://github.com/MCCTeam/Minecraft-Console-Client), in the license section, and the full license can be reviewed [here](http://opensource.org/licenses/CDDL-1.0).
 
