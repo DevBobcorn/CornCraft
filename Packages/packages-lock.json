@@ -27,22 +27,6 @@
         "com.devbobcorn.craftsharp": "2.6.0"
       }
     },
-    "com.fernrender.core": {
-      "version": "file:com.fernrender.core",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.unity.render-pipelines.core": "14.0.6",
-        "com.unity.shadergraph": "14.0.6"
-      }
-    },
-    "com.jasonma.lwgui": {
-      "version": "https://github.com/DeJhon-Huang/LWGUI.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "d9efd7e7ab826faa137ff3325d57fab85129a548"
-    },
     "com.stalomeow.star-rail-npr-shader": {
       "version": "https://github.com/stalomeow/StarRailNPRShader.git",
       "depth": 0,
