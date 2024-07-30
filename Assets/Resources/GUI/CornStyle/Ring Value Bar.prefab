@@ -192,7 +192,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.70925015, b: 0.29622638, a: 1}
+  m_Color: {r: 0.043137252, g: 0.95546234, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -267,7 +267,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.1981132, g: 0.09066242, b: 0, a: 0.5882353}
+  m_Color: {r: 0, g: 0.31826603, b: 0.7075472, a: 0.5882353}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -347,7 +347,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   barText: {fileID: 3202784215809564109}
   textFormat: '{0:0}/{1:0}'
-  normalColor: {r: 1, g: 0.72203434, b: 0.04150939, a: 1}
+  normalColor: {r: 0.043137256, g: 0.95686275, b: 1, a: 1}
   warningColor: {r: 1, g: 0.4401363, b: 0.015686274, a: 1}
   dangerColor: {r: 1, g: 0, b: 0, a: 1}
   warningThreshold: 0.3

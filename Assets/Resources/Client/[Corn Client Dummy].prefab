@@ -97,6 +97,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39fd12f05531e874595aab9caa997ca4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_EnityDissolveMaterial: {fileID: 2100000, guid: 419fa088881e428449d30cf26d7b8ef7, type: 2}
+  m_EnityDissolveMaterialTextureName: _Texture
 --- !u!114 &8991044412032759198
 MonoBehaviour:
   m_ObjectHideFlags: 0
