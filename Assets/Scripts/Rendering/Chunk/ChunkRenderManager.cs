@@ -119,7 +119,7 @@ namespace CraftSharp.Rendering
 
         public string GetDebugInfo()
         {
-            return $"Unfinished Light Updates: {lightUpdateChecklist.Count}\nQueued Chunks: {chunkRendersToBeBuilt.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Data Build Time Avg: {dataBuildTimeSum / 200F:0.00} ms\n- Vert Build Time Avg: {vertexBuildTimeSum / 200F:0.00} ms\n- Light Data Time Avg: {LightCalculator.DataTimeSum / 20F:0.00} ms\n- Light Calc Time Avg: {LightCalculator.CalcTimeSum / 20F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
+            return $"Unfinished Light Updates: {lightUpdateChecklist.Count}\nQueued Chunks: {chunkRendersToBeBuilt.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Data Build Time Avg: {dataBuildTimeSum / 200F:0.00} ms\n- Vert Build Time Avg: {vertexBuildTimeSum / 200F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
         }
 
         #region Chunk render access
@@ -268,17 +268,8 @@ namespace CraftSharp.Rendering
             // Recalculate block light
             var result = lightCalc.RecalculateLightValues(world, chunkPos);
 
-            // Apply the result to chunk light data
-            var boxMinX = (chunkPos.x - 1) << 4;
-            var boxMinY = ((chunkPos.y - 1) << 4) + World.GetDimension().minY;
-            var boxMinZ = (chunkPos.z - 1) << 4;
-
-            for (int x = (1 << 4); x < (2 << 4); x++)
-                for (int y = (1 << 4); y < (2 << 4); y++)
-                    for (int z = (1 << 4); z < (2 << 4); z++)
-                    {
-                        world.SetBlockLight(new(boxMinX + x, boxMinY + y, boxMinZ + z), result[x, y, z]);
-                    }
+            // Write back updated light values
+            world.SetBlockLightForChunk(chunkPos.x, chunkPos.y, chunkPos.z, result);
 
             Loom.QueueOnMainThread(() =>
             {
@@ -323,33 +314,42 @@ namespace CraftSharp.Rendering
                 {
                     var cp = new int3(blockLoc.GetChunkX(), blockLoc.GetChunkYIndex(column.MinimumY), blockLoc.GetChunkZ());
 
-                    // Get affected neighbor mask
-                    int mask = LightCalculator.GetAffectedNeighborMask(blockLoc);
+                    // Calculate neighbor chunks which might be affected by this light update
+                    int px = blockLoc.GetChunkBlockX();
+                    int py = blockLoc.GetChunkBlockY();
+                    int pz = blockLoc.GetChunkBlockZ();
 
-                    // Faces
-                    if ((mask & (1 << 16)) != 0) AddLightUpdateRequest(new(cp.x + 1, cp.y,     cp.z    ));
-                    if ((mask & (1 << 22)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y + 1, cp.z    ));
-                    if ((mask & (1 << 14)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y,     cp.z + 1));
-                    if ((mask & (1 << 10)) != 0) AddLightUpdateRequest(new(cp.x - 1, cp.y,     cp.z    ));
-                    if ((mask & (1 <<  4)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y - 1, cp.z    ));
-                    if ((mask & (1 << 12)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y,     cp.z - 1));
+                    // 6 face neighbors
+                    if (px <= 13) AddLightUpdateRequest(new(cp.x - 1, cp.y,     cp.z    ));
+                    if (py <= 13) AddLightUpdateRequest(new(cp.x,     cp.y - 1, cp.z    ));
+                    if (pz <= 13) AddLightUpdateRequest(new(cp.x,     cp.y,     cp.z - 1));
+                    if (px >=  2) AddLightUpdateRequest(new(cp.x + 1, cp.y,     cp.z    ));
+                    if (py >=  2) AddLightUpdateRequest(new(cp.x,     cp.y + 1, cp.z    ));
+                    if (pz >=  2) AddLightUpdateRequest(new(cp.x,     cp.y,     cp.z + 1));
 
-                    // Edges
-                    // - XY
-                    if ((mask & (1 <<  1)) != 0) AddLightUpdateRequest(new(cp.x - 1, cp.y - 1, cp.z    ));
-                    if ((mask & (1 <<  7)) != 0) AddLightUpdateRequest(new(cp.x + 1, cp.y - 1, cp.z    ));
-                    if ((mask & (1 << 19)) != 0) AddLightUpdateRequest(new(cp.x - 1, cp.y + 1, cp.z    ));
-                    if ((mask & (1 << 25)) != 0) AddLightUpdateRequest(new(cp.x + 1, cp.y + 1, cp.z    ));
-                    // - ZY
-                    if ((mask & (1 <<  3)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y - 1, cp.z - 1));
-                    if ((mask & (1 <<  5)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y - 1, cp.z + 1));
-                    if ((mask & (1 << 21)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y + 1, cp.z - 1));
-                    if ((mask & (1 << 23)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y + 1, cp.z + 1));
-                    // -XZ
-                    if ((mask & (1 <<  9)) != 0) AddLightUpdateRequest(new(cp.x - 1, cp.y,     cp.z - 1));
-                    if ((mask & (1 << 15)) != 0) AddLightUpdateRequest(new(cp.x + 1, cp.y,     cp.z - 1));
-                    if ((mask & (1 << 11)) != 0) AddLightUpdateRequest(new(cp.x - 1, cp.y,     cp.z + 1));
-                    if ((mask & (1 << 17)) != 0) AddLightUpdateRequest(new(cp.x + 1, cp.y,     cp.z + 1));
+                    // 12 edge neighbors
+                    if (px + py <= 12) AddLightUpdateRequest(new(cp.x - 1, cp.y - 1, cp.z    ));
+                    if (px - py >=  3) AddLightUpdateRequest(new(cp.x + 1, cp.y - 1, cp.z    ));
+                    if (py - px >=  3) AddLightUpdateRequest(new(cp.x - 1, cp.y + 1, cp.z    ));
+                    if (px + py >= 18) AddLightUpdateRequest(new(cp.x + 1, cp.y + 1, cp.z    ));
+                    if (pz + py <= 12) AddLightUpdateRequest(new(cp.x,     cp.y - 1, cp.z - 1));
+                    if (pz - py >=  3) AddLightUpdateRequest(new(cp.x,     cp.y - 1, cp.z + 1));
+                    if (py - pz >=  3) AddLightUpdateRequest(new(cp.x,     cp.y + 1, cp.z - 1));
+                    if (pz + py >= 18) AddLightUpdateRequest(new(cp.x,     cp.y + 1, cp.z + 1));
+                    if (px + pz <= 12) AddLightUpdateRequest(new(cp.x - 1, cp.y,     cp.z - 1));
+                    if (px - pz >=  3) AddLightUpdateRequest(new(cp.x + 1, cp.y,     cp.z - 1));
+                    if (pz - px >=  3) AddLightUpdateRequest(new(cp.x - 1, cp.y,     cp.z + 1));
+                    if (px + pz >= 18) AddLightUpdateRequest(new(cp.x + 1, cp.y,     cp.z + 1));
+
+                    // 8 corner neighbors
+                    if (px + py + pz <= 11) AddLightUpdateRequest(new(cp.x - 1, cp.y - 1, cp.z - 1));
+                    if (px - py - pz >=  4) AddLightUpdateRequest(new(cp.x + 1, cp.y - 1, cp.z - 1));
+                    if (py - px - pz >=  4) AddLightUpdateRequest(new(cp.x - 1, cp.y + 1, cp.z - 1));
+                    if (pz - px - py >=  4) AddLightUpdateRequest(new(cp.x - 1, cp.y - 1, cp.z + 1));
+                    if (py + pz - px >= 19) AddLightUpdateRequest(new(cp.x - 1, cp.y + 1, cp.z + 1));
+                    if (px + pz - py >= 19) AddLightUpdateRequest(new(cp.x + 1, cp.y - 1, cp.z + 1));
+                    if (px + py - pz >= 19) AddLightUpdateRequest(new(cp.x + 1, cp.y + 1, cp.z - 1));
+                    if (py + pz + px >= 34) AddLightUpdateRequest(new(cp.x + 1, cp.y + 1, cp.z + 1));
 
                     // Self
                     AddLightUpdateRequest(cp);
