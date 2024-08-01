@@ -744,15 +744,14 @@ namespace CraftSharp.Protocol.Handlers
                 
                 chunkColumn.SetLights(skyLight, blockLight);
 
-                /* TODO: Figure out when these will be triggered and when they will not
+                // TODO: Figure out when these will be triggered and when they will not
                 Loom.QueueOnMainThread(() => {
                     for (int i = 0; i < updatedSections.Length; i++)
                     {
                         int chunkY = updatedSections[i] - 1;
-                        chunksManager.NotifyLightUpdate(chunkX, chunkY, chunkZ);
+                        chunksManager.QueueChunkBuildAfterLightUpdate(chunkX, chunkY, chunkZ);
                     }
                 });
-                */
             }
         }
     }
