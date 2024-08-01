@@ -749,7 +749,7 @@ namespace CraftSharp.Protocol.Handlers
                     for (int i = 0; i < updatedSections.Length; i++)
                     {
                         int chunkY = updatedSections[i] - 1;
-                        chunksManager.MarkDirtyBecauseOfLightUpdate(chunkX, chunkY, chunkZ);
+                        chunksManager.NotifyLightUpdate(chunkX, chunkY, chunkZ);
                     }
                 });
                 */
