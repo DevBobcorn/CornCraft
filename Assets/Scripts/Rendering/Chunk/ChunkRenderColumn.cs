@@ -85,7 +85,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         /// <param name="chunksBeingBuilt"></param>
         /// <param name="chunks2Build"></param>
-        public void Unload(ref List<ChunkRender> chunksBeingBuilt, ref PriorityQueue<ChunkRender> chunks2Build, IObjectPool<ChunkRender> pool)
+        public void Unload(List<ChunkRender> chunksBeingBuilt, PriorityQueue<ChunkRender> chunks2Build, IObjectPool<ChunkRender> pool)
         {
             // Unload this chunk column...
             foreach (int i in chunks.Keys)

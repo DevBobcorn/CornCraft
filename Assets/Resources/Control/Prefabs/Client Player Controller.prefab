@@ -325,7 +325,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Capsule: {fileID: 6493157887190711041}
-  CapsuleRadius: 0.3
+  CapsuleRadius: 0.4
   CapsuleHeight: 1.8
   CapsuleYOffset: 0.91
   CapsulePhysicsMaterial: {fileID: 13400000, guid: 11508097031b7f04c8ab9dcba71d230e, type: 2}
@@ -394,7 +394,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.3
+  m_Radius: 0.4
   m_Height: 1.8
   m_Direction: 1
   m_Center: {x: 0, y: 0.91, z: 0}

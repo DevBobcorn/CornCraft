@@ -497,7 +497,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        private static readonly Func<Block, Block> getBlock = (bloc) => bloc;
+        private readonly Block[,,] surroundings = new Block[MOVEMENT_DIAMETER, MOVEMENT_DIAMETER, MOVEMENT_DIAMETER];
 
         // For player movement, it is not favorable to use per-chunk mesh colliders
         // because player can get stuck on the edge of chunks due to a bug of Unity
@@ -508,32 +508,32 @@ namespace CraftSharp.Rendering
         {
             int offsetY = World.GetDimension().minY;
 
-            var blocs = world.GetValuesFromSection(
+            world.GetValuesFromSection(
                     playerBlockLoc.X - MOVEMENT_RADIUS,
                     playerBlockLoc.Y - MOVEMENT_RADIUS,
                     playerBlockLoc.Z - MOVEMENT_RADIUS,
-                    MOVEMENT_DIAMETER, MOVEMENT_DIAMETER, MOVEMENT_DIAMETER, getBlock);
+                    MOVEMENT_DIAMETER, MOVEMENT_DIAMETER, MOVEMENT_DIAMETER, bloc => bloc, surroundings);
 
             int getCullFlags(int x, int y, int z, Block self, BlockNeighborCheck check)
             {
                 int cullFlags = 0;
 
-                if (check(self, blocs[x, y + 1, z])) // Up
+                if (check(self, surroundings[x, y + 1, z])) // Up
                     cullFlags |= (1 << 0);
 
-                if (check(self, blocs[x, y - 1, z])) // Down
+                if (check(self, surroundings[x, y - 1, z])) // Down
                     cullFlags |= (1 << 1);
                 
-                if (check(self, blocs[x, y, z + 1])) // South
+                if (check(self, surroundings[x, y, z + 1])) // South
                     cullFlags |= (1 << 2);
 
-                if (check(self, blocs[x, y, z - 1])) // North
+                if (check(self, surroundings[x, y, z - 1])) // North
                     cullFlags |= (1 << 3);
                 
-                if (check(self, blocs[x + 1, y, z])) // East
+                if (check(self, surroundings[x + 1, y, z])) // East
                     cullFlags |= (1 << 4);
 
-                if (check(self, blocs[x - 1, y, z])) // West
+                if (check(self, surroundings[x - 1, y, z])) // West
                     cullFlags |= (1 << 5);
                 
                 return cullFlags;
@@ -552,7 +552,7 @@ namespace CraftSharp.Rendering
                             continue;
 
                         var blockLoc = playerBlockLoc + new BlockLoc(x, y, z);
-                        var bloc = blocs[MOVEMENT_RADIUS + x, MOVEMENT_RADIUS + y, MOVEMENT_RADIUS + z];
+                        var bloc = surroundings[MOVEMENT_RADIUS + x, MOVEMENT_RADIUS + y, MOVEMENT_RADIUS + z];
                         var state = bloc.State;
 
                         if (state.InWater || state.InLava) // Build liquid collider
@@ -597,7 +597,7 @@ namespace CraftSharp.Rendering
                             continue;
 
                         var blockLocInMesh = new BlockLoc(x, y, z);
-                        var bloc = blocs[MOVEMENT_RADIUS + x, MOVEMENT_RADIUS + y, MOVEMENT_RADIUS + z];
+                        var bloc = surroundings[MOVEMENT_RADIUS + x, MOVEMENT_RADIUS + y, MOVEMENT_RADIUS + z];
                         var state = bloc.State;
 
                         if (state.InWater || state.InLava) // Build liquid collider

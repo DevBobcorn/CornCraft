@@ -539,7 +539,16 @@ namespace CraftSharp
 
             if (withDebugInfo)
             {
-                return baseString + $"\nLoc: {GetLocation()}\n{PlayerController.GetDebugInfo()}\nWorld Origin Offset: {WorldOriginOffset}" +
+                // Light debugging
+                var playerBlockLoc = GetLocation().GetBlockLoc();
+                var block = ChunkRenderManager.GetBlock(playerBlockLoc);
+                var lightEmission = block.State.LightEmissionLevel;
+                var lightBlockage = block.State.LightBlockageLevel;
+                var lightValue = ChunkRenderManager.GetBlockLight(playerBlockLoc);
+
+                var lightInfo = $"Emission: {lightEmission}\tBlockage: {lightBlockage}\nLight Value: {lightValue}";
+
+                return baseString + $"\nLoc: {GetLocation()}\n{PlayerController.GetDebugInfo()}\n{lightInfo}\nWorld Origin Offset: {WorldOriginOffset}" +
                         $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():0.0}";
             }
             

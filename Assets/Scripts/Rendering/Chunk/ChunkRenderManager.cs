@@ -74,8 +74,11 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Unity thread access only
         /// </summary>
-        private PriorityQueue<ChunkRender> chunkRendersToBeBuilt = new();
-        private List<ChunkRender> chunkRendersBeingBuilt = new();
+        private readonly PriorityQueue<ChunkRender> chunkRendersToBeBuilt = new();
+        private readonly List<ChunkRender> chunkRendersBeingBuilt = new();
+
+        private readonly HashSet<int3> lightUpdateRequests = new();
+        private readonly HashSet<int3> lightUpdateChecklist = new();
 
         private BaseCornClient client;
         private ChunkRenderBuilder builder;
@@ -116,7 +119,7 @@ namespace CraftSharp.Rendering
 
         public string GetDebugInfo()
         {
-            return $"Queued Chunks: {chunkRendersToBeBuilt.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Data Build Time Avg: {dataBuildTimeSum / 200F:0.00} ms\n- Vert Build Time Avg: {vertexBuildTimeSum / 200F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
+            return $"Unfinished Light Updates: {lightUpdateChecklist.Count}\nQueued Chunks: {chunkRendersToBeBuilt.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Data Build Time Avg: {dataBuildTimeSum / 200F:0.00} ms\n- Vert Build Time Avg: {vertexBuildTimeSum / 200F:0.00} ms\n- Light Data Time Avg: {LightCalculator.DataTimeSum / 20F:0.00} ms\n- Light Calc Time Avg: {LightCalculator.CalcTimeSum / 20F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
         }
 
         #region Chunk render access
@@ -131,7 +134,7 @@ namespace CraftSharp.Rendering
             // Create a new chunk render object...
             var chunkObj = new GameObject($"Chunk [Pooled]")
             {
-                layer = LayerMask.NameToLayer(ChunkRenderManager.INTERACTION_LAYER_NAME)
+                layer = LayerMask.NameToLayer(INTERACTION_LAYER_NAME)
             };
             ChunkRender newChunk = chunkObj.AddComponent<ChunkRender>();
             
@@ -257,57 +260,31 @@ namespace CraftSharp.Rendering
             world.CreateEmptyChunkColumn(chunkX, chunkZ, chunkColumnSize);
         }
 
-        private void RecalculateBlockLightAt(BlockLoc center)
+        /// <summary>
+        /// Should be invoked using a Task or worker thread
+        /// </summary>
+        private void RecalculateBlockLight(int3 chunkPos)
         {
-            // Set up light calculator
-            lightCalc.SetUpRecalculateArea(world, center);
             // Recalculate block light
-            var result = lightCalc.RecalculateLightValues();
+            var result = lightCalc.RecalculateLightValues(world, chunkPos);
 
             // Apply the result to chunk light data
-            int boxMinX = lightCalc.BoxMinX;
-            int boxMinY = lightCalc.BoxMinY;
-            int boxMinZ = lightCalc.BoxMinZ;
+            var boxMinX = (chunkPos.x - 1) << 4;
+            var boxMinY = ((chunkPos.y - 1) << 4) + World.GetDimension().minY;
+            var boxMinZ = (chunkPos.z - 1) << 4;
 
-            for (int x = LightCalculator.MAX_SPREAD_DIST; x < LightCalculator.LIGHT_CALC_BOX_SIZE - LightCalculator.MAX_SPREAD_DIST; x++)
-                for (int y = LightCalculator.MAX_SPREAD_DIST; y < LightCalculator.LIGHT_CALC_BOX_SIZE - LightCalculator.MAX_SPREAD_DIST; y++)
-                    for (int z = LightCalculator.MAX_SPREAD_DIST; z < LightCalculator.LIGHT_CALC_BOX_SIZE - LightCalculator.MAX_SPREAD_DIST; z++)
+            for (int x = (1 << 4); x < (2 << 4); x++)
+                for (int y = (1 << 4); y < (2 << 4); y++)
+                    for (int z = (1 << 4); z < (2 << 4); z++)
                     {
-                        if (LightCalculator.ManhattanDistToCenter(x, y, z) >= LightCalculator.MAX_SPREAD_DIST)
-                        {
-                            // These light might be recalculated, but they are not
-                            // within the affect range of this block change
-                            continue;
-                        }
-
                         world.SetBlockLight(new(boxMinX + x, boxMinY + y, boxMinZ + z), result[x, y, z]);
                     }
-            
-            // Mark chunk renders as dirty
-            int worldMinY = World.GetDimension().minY;
-            int worldMaxY = World.GetDimension().maxY;
-
-            var minAffectedBlockLoc = new BlockLoc(
-                lightCalc.BoxMinX + LightCalculator.MAX_SPREAD_DIST,
-                math.max(worldMinY, lightCalc.BoxMinY + LightCalculator.MAX_SPREAD_DIST),
-                lightCalc.BoxMinZ + LightCalculator.MAX_SPREAD_DIST
-            );
-
-            var maxAffectedBlockLoc = new BlockLoc(
-                lightCalc.BoxMaxX - LightCalculator.MAX_SPREAD_DIST,
-                math.min(worldMaxY, lightCalc.BoxMaxY - LightCalculator.MAX_SPREAD_DIST),
-                lightCalc.BoxMaxZ - LightCalculator.MAX_SPREAD_DIST
-            );
 
             Loom.QueueOnMainThread(() =>
             {
-                for (int chunkX = minAffectedBlockLoc.GetChunkX(); chunkX <= maxAffectedBlockLoc.GetChunkX(); chunkX++)
-                    for (int chunkZ = minAffectedBlockLoc.GetChunkZ(); chunkZ <= maxAffectedBlockLoc.GetChunkZ(); chunkZ++)
-                        for (int chunkY = minAffectedBlockLoc.GetChunkY(worldMinY);
-                                chunkY <= maxAffectedBlockLoc.GetChunkY(worldMinY); chunkY++)
-                        {
-                            MarkDirtyBecauseOfLightUpdate(chunkX, chunkY, chunkZ);
-                        }
+                QueueChunkBuildAfterLightUpdate(chunkPos.x, chunkPos.y, chunkPos.z);
+
+                lightUpdateChecklist.Remove(chunkPos);
             });
         }
 
@@ -319,25 +296,20 @@ namespace CraftSharp.Rendering
         public void SetBlock(BlockLoc blockLoc, Block block)
         {
             var column = GetChunkColumn(blockLoc);
+            bool shouldRecalcLight = false;
+
             if (column != null)
             {
                 // Update chunk data
                 var chunk = column.GetChunk(blockLoc);
                 if (chunk == null)
-                    column[blockLoc.GetChunkY(column.MinimumY)] = chunk = new Chunk();
+                    column[blockLoc.GetChunkYIndex(column.MinimumY)] = chunk = new Chunk();
                 chunk[blockLoc.GetChunkBlockX(), blockLoc.GetChunkBlockY(), blockLoc.GetChunkBlockZ()] = block;
                 // Update ambient occulsion and light data cache
-                bool shouldRecalcLight = column.UpdateCachedBlockData(blockLoc, block.State);
-                if (shouldRecalcLight)
-                {
-                    /* TODO: Queue this somewhere
-                    Task.Run(() => {
-                        RecalculateBlockLightAt(blockLoc);
-                    });
-                    */
-                }
+                shouldRecalcLight = column.UpdateCachedBlockData(blockLoc, block.State);
             }
 
+            // Block render is considered separately even if chunk data is not present
             Loom.QueueOnMainThread(() => {
                 // Check if the location has a block entity and remove it
                 RemoveBlockEntityRender(blockLoc);
@@ -346,9 +318,54 @@ namespace CraftSharp.Rendering
                 {
                     AddBlockEntityRender(blockLoc, blockEntityType, null);
                 }
-                // Mark the chunk dirty and queue for mesh rebuild
-                MarkDirtyAt(blockLoc);
+
+                if (shouldRecalcLight)
+                {
+                    var cp = new int3(blockLoc.GetChunkX(), blockLoc.GetChunkYIndex(column.MinimumY), blockLoc.GetChunkZ());
+
+                    // Get affected neighbor mask
+                    int mask = LightCalculator.GetAffectedNeighborMask(blockLoc);
+
+                    // Faces
+                    if ((mask & (1 << 16)) != 0) AddLightUpdateRequest(new(cp.x + 1, cp.y,     cp.z    ));
+                    if ((mask & (1 << 22)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y + 1, cp.z    ));
+                    if ((mask & (1 << 14)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y,     cp.z + 1));
+                    if ((mask & (1 << 10)) != 0) AddLightUpdateRequest(new(cp.x - 1, cp.y,     cp.z    ));
+                    if ((mask & (1 <<  4)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y - 1, cp.z    ));
+                    if ((mask & (1 << 12)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y,     cp.z - 1));
+
+                    // Edges
+                    // - XY
+                    if ((mask & (1 <<  1)) != 0) AddLightUpdateRequest(new(cp.x - 1, cp.y - 1, cp.z    ));
+                    if ((mask & (1 <<  7)) != 0) AddLightUpdateRequest(new(cp.x + 1, cp.y - 1, cp.z    ));
+                    if ((mask & (1 << 19)) != 0) AddLightUpdateRequest(new(cp.x - 1, cp.y + 1, cp.z    ));
+                    if ((mask & (1 << 25)) != 0) AddLightUpdateRequest(new(cp.x + 1, cp.y + 1, cp.z    ));
+                    // - ZY
+                    if ((mask & (1 <<  3)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y - 1, cp.z - 1));
+                    if ((mask & (1 <<  5)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y - 1, cp.z + 1));
+                    if ((mask & (1 << 21)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y + 1, cp.z - 1));
+                    if ((mask & (1 << 23)) != 0) AddLightUpdateRequest(new(cp.x,     cp.y + 1, cp.z + 1));
+                    // -XZ
+                    if ((mask & (1 <<  9)) != 0) AddLightUpdateRequest(new(cp.x - 1, cp.y,     cp.z - 1));
+                    if ((mask & (1 << 15)) != 0) AddLightUpdateRequest(new(cp.x + 1, cp.y,     cp.z - 1));
+                    if ((mask & (1 << 11)) != 0) AddLightUpdateRequest(new(cp.x - 1, cp.y,     cp.z + 1));
+                    if ((mask & (1 << 17)) != 0) AddLightUpdateRequest(new(cp.x + 1, cp.y,     cp.z + 1));
+
+                    // Self
+                    AddLightUpdateRequest(cp);
+                }
+                else
+                {
+                    // Mark the chunk dirty and queue for mesh rebuild
+                    MarkDirtyAt(blockLoc);
+                }
             });
+        }
+
+        private void AddLightUpdateRequest(int3 chunkPos)
+        {
+            lightUpdateRequests.Add(chunkPos);
+            lightUpdateChecklist.Add(chunkPos);
         }
 
         /// <summary>
@@ -586,7 +603,7 @@ namespace CraftSharp.Rendering
                 if (Mathf.Abs(blockLoc.GetChunkX() - chunkCoord.x) > unloadDist || Mathf.Abs(blockLoc.GetChunkZ() - chunkCoord.y) > unloadDist)
                 {
                     var column = renderColumns[chunkCoord];
-                    column.Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
+                    column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuilt, chunkRenderPool);
 
                     // Return this ChunkRenderColumn to pool
                     chunkRenderColumnPool.Release(column);
@@ -622,7 +639,7 @@ namespace CraftSharp.Rendering
                 if (renderColumns.ContainsKey(chunkCoord))
                 {
                     var column = renderColumns[chunkCoord];
-                    column.Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
+                    column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuilt, chunkRenderPool);
 
                     // Return this ChunkRenderColumn to pool
                     chunkRenderColumnPool.Release(column);
@@ -634,7 +651,6 @@ namespace CraftSharp.Rendering
             }
 
             var chunkData = chunkColumnData[chunkYIndex];
-
             if (chunkData == null) // Chunk not available or is empty(air chunk), cancel
             {
                 chunkRender.State = ChunkBuildState.Cancelled;
@@ -648,7 +664,8 @@ namespace CraftSharp.Rendering
                     world.IsChunkColumnLoaded(chunkX - 1, chunkZ - 1) &&
                     world.IsChunkColumnLoaded(chunkX - 1, chunkZ + 1) &&
                     world.IsChunkColumnLoaded(chunkX + 1, chunkZ - 1) &&
-                    world.IsChunkColumnLoaded(chunkX + 1, chunkZ + 1) ))
+                    world.IsChunkColumnLoaded(chunkX + 1, chunkZ + 1) 
+            ))
             {
                 chunkRender.State = ChunkBuildState.Delayed;
                 return; // Not all neighbor data ready, delay it
@@ -728,7 +745,7 @@ namespace CraftSharp.Rendering
                 if (renderColumns.ContainsKey(chunkCoord))
                 {
                     var column = renderColumns[chunkCoord];
-                    column.Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
+                    column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuilt, chunkRenderPool);
 
                     // Return this ChunkRenderColumn to pool
                     chunkRenderColumnPool.Release(column);
@@ -763,6 +780,7 @@ namespace CraftSharp.Rendering
         {
             // Clear the queue first...
             chunkRendersToBeBuilt.Clear();
+            lightUpdateRequests.Clear();
 
             // And cancel current chunk builds
             foreach (var chunkRender in chunkRendersBeingBuilt)
@@ -770,6 +788,7 @@ namespace CraftSharp.Rendering
                 chunkRender.TokenSource?.Cancel();
             }
             chunkRendersBeingBuilt.Clear();
+            lightUpdateChecklist.Clear();
 
             // Clear all chunk columns in world
             var chunkCoords = renderColumns.Keys.ToArray();
@@ -777,7 +796,7 @@ namespace CraftSharp.Rendering
             foreach (var chunkCoord in chunkCoords)
             {
                 var column = renderColumns[chunkCoord];
-                column.Unload(ref chunkRendersBeingBuilt, ref chunkRendersToBeBuilt, chunkRenderPool);
+                column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuilt, chunkRenderPool);
 
                 // Return this ChunkRenderColumn to pool
                 chunkRenderColumnPool.Release(column);
@@ -799,53 +818,56 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public void MarkDirtyAt(BlockLoc blockLoc)
+        private void MarkDirtyAt(BlockLoc blockLoc)
         {
             int chunkX = blockLoc.GetChunkX(), chunkZ = blockLoc.GetChunkZ();
             var column = GetChunkRenderColumn(chunkX, chunkZ);
-            int chunkY = blockLoc.GetChunkY(World.GetDimension().minY);
+            int chunkYIndex = blockLoc.GetChunkYIndex(World.GetDimension().minY);
 
             if (column != null) // Queue this chunk to rebuild list...
             {
                 // Create the chunk render object if not present (previously empty)
-                var chunk = column.GetOrCreateChunkRender(chunkY, chunkRenderPool);
+                var chunk = column.GetOrCreateChunkRender(chunkYIndex, chunkRenderPool);
 
                 // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                 QueueChunkRenderBuild(chunk);
 
-                if (blockLoc.GetChunkBlockY() == 0 && (chunkY - 1) >= 0) // In the bottom layer of this chunk
+                if (blockLoc.GetChunkBlockY() == 0 && (chunkYIndex - 1) >= 0) // In the bottom layer of this chunk
                 {   // Queue the chunk below, if it isn't empty
-                    QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkY - 1));
+                    QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkYIndex - 1));
                 }
-                else if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1 && ((chunkY + 1) * Chunk.SIZE) < World.GetDimension().height) // In the top layer of this chunk
+                else if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1 && ((chunkYIndex + 1) * Chunk.SIZE) < World.GetDimension().height) // In the top layer of this chunk
                 {   // Queue the chunk above, if it isn't empty
-                    QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkY + 1));
+                    QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkYIndex + 1));
                 }
             }
 
             if (blockLoc.GetChunkBlockX() == 0) // Check MC X direction neighbors
-                QueueChunkRenderBuildIfNotEmpty(GetChunkRender(chunkX - 1, chunkY, chunkZ));
+                QueueChunkRenderBuildIfNotEmpty(GetChunkRender(chunkX - 1, chunkYIndex, chunkZ));
             else if (blockLoc.GetChunkBlockX() == Chunk.SIZE - 1)
-                QueueChunkRenderBuildIfNotEmpty(GetChunkRender(chunkX + 1, chunkY, chunkZ));
+                QueueChunkRenderBuildIfNotEmpty(GetChunkRender(chunkX + 1, chunkYIndex, chunkZ));
 
             if (blockLoc.GetChunkBlockZ() == 0) // Check MC Z direction neighbors
-                QueueChunkRenderBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ - 1));
+                QueueChunkRenderBuildIfNotEmpty(GetChunkRender(chunkX, chunkYIndex, chunkZ - 1));
             else if (blockLoc.GetChunkBlockZ() == Chunk.SIZE - 1)
-                QueueChunkRenderBuildIfNotEmpty(GetChunkRender(chunkX, chunkY, chunkZ + 1));
+                QueueChunkRenderBuildIfNotEmpty(GetChunkRender(chunkX, chunkYIndex, chunkZ + 1));
             
             if (blockLoc.DistanceSquared(client!.GetLocation().GetBlockLoc()) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)
                 terrainColliderDirty = true; // Terrain collider needs to be updated
         }
 
-        public void MarkDirtyBecauseOfLightUpdate(int chunkX, int chunkY, int chunkZ)
+        /// <summary>
+        /// Queue a chunk mesh rebuild after light update
+        /// </summary>
+        public void QueueChunkBuildAfterLightUpdate(int chunkX, int chunkYIndex, int chunkZ)
         {
             var column = GetChunkRenderColumn(chunkX, chunkZ);
             if (column != null) // Queue this chunk to rebuild list...
             {   // Create the chunk render object if not present (previously empty)
-                var chunk = column.GetOrCreateChunkRender(chunkY, chunkRenderPool);
+                var chunk = column.GetOrCreateChunkRender(chunkYIndex, chunkRenderPool);
 
                 // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
-                QueueChunkRenderBuild(chunk);
+                QueueChunkRenderBuildIfNotEmpty(chunk);
             }
         }
 
@@ -926,7 +948,27 @@ namespace CraftSharp.Rendering
             int newCount = BUILD_COUNT_LIMIT - chunkRendersBeingBuilt.Count;
 
             // Build chunks in queue...
-            Profiler.BeginSample("Start chunk render build tasks");
+            Profiler.BeginSample("Start chunk render build(/light update) tasks");
+            // Start light update tasks
+            while (newCount > 0 && lightUpdateRequests.Count > 0)
+            {
+                var cp = lightUpdateRequests.First();
+                lightUpdateRequests.Remove(cp);
+
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        RecalculateBlockLight(cp);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e);
+                    }
+                });
+                newCount--;
+            }
+
             // Start chunk building tasks...
             while (newCount > 0 && chunkRendersToBeBuilt.Count > 0)
             {

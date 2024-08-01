@@ -13,6 +13,7 @@
 /*.ini
 
 # Embedded packages
+/[Pp]ackages/com.devbobcorn.craftsharp
 /[Pp]ackages/com.devbobcorn.craftsharp-resource
 
 # Third party resources & utils
