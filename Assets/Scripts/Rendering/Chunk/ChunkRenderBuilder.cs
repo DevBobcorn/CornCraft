@@ -252,7 +252,15 @@ namespace CraftSharp.Rendering
                                 var renderType = modelTable[stateId].RenderType;
                                 int layerIndex = ChunkRender.TypeIndex(renderType);
 
-                                var useThicknessData = renderType == RenderType.FOLIAGE || renderType == RenderType.PLANTS || renderType == RenderType.TALL_PLANTS;
+                                var datFormat = BlockGeometry.ExtraVertexData.Light;
+                                if (renderType == RenderType.FOLIAGE)
+                                {
+                                    datFormat = BlockGeometry.ExtraVertexData.Light_BlockNormal;
+                                }
+                                else if (renderType == RenderType.PLANTS || renderType == RenderType.TALL_PLANTS)
+                                {
+                                    datFormat = BlockGeometry.ExtraVertexData.Light_CrossNormal;
+                                }
 
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;
@@ -262,13 +270,13 @@ namespace CraftSharp.Rendering
 
                                 if (state.NoCollision)
                                 {
-                                    models[chosen].Build(visualBuffer[layerIndex], ref vertOffset[layerIndex], new float3(blocZ, blocY, blocX),
-                                            cullFlags, aoMask, lights, color, useThicknessData);
+                                    models[chosen].Build(visualBuffer[layerIndex], ref vertOffset[layerIndex],
+                                            new float3(blocZ, blocY, blocX), cullFlags, aoMask, lights, color, datFormat);
                                 }
                                 else
                                 {
                                     models[chosen].BuildWithCollider(visualBuffer[layerIndex], ref vertOffset[layerIndex], colliderVerts,
-                                            ref colliderVertOffset, new float3(blocZ, blocY, blocX), cullFlags, aoMask, lights, color, useThicknessData);
+                                            ref colliderVertOffset, new float3(blocZ, blocY, blocX), cullFlags, aoMask, lights, color, datFormat);
                                 }
                             }
                         }
