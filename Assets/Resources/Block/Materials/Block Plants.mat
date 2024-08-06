@@ -17,7 +17,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2450
   stringTagMap:
     RenderType: TransparentCutout
   disabledShaderPasses: []
@@ -87,7 +87,7 @@ Material:
     - _AlphaToMask: 1
     - _Alpha_Clipping_Threshold: 0.5
     - _BackLightMultiplier: 4
-    - _Back_Scatter_Multiplier: 4
+    - _Back_Scatter_Multiplier: 7
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
