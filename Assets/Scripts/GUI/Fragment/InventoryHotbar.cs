@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 
 using CraftSharp.Event;
+using UnityEngine.UI;
 
 namespace CraftSharp.UI
 {
@@ -10,7 +11,8 @@ namespace CraftSharp.UI
         public const int HOTBAR_LENGTH = 9;
 
         [SerializeField] private InventoryItemSlot[] itemSlots = { };
-        [SerializeField] private RectTransform slotSelection;
+
+        private InventoryItemSlot selectedSlot;
 
         #nullable enable
 
@@ -21,12 +23,22 @@ namespace CraftSharp.UI
 
         private void SelectSlot(int slot)
         {
-            slotSelection.SetParent(itemSlots[slot].transform, false);
-            slotSelection.SetAsLastSibling();
+            if (selectedSlot != null)
+            {
+                selectedSlot.DeselectSlot();
+            }
+
+            selectedSlot = itemSlots[slot];
+            selectedSlot.SelectSlot();
         }
 
         public void Start()
         {
+            for (int i = 0; i < itemSlots.Length; i++)
+            {
+                itemSlots[i].SetKeyHint((i + 1).ToString());
+            }
+
             hotbarUpdateCallback = (e) => {
                 itemSlots[e.HotbarSlot].UpdateItemStack(e.ItemStack);
             };
