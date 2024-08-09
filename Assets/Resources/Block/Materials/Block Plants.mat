@@ -87,7 +87,7 @@ Material:
     - _AlphaToMask: 1
     - _Alpha_Clipping_Threshold: 0.5
     - _BackLightMultiplier: 4
-    - _Back_Scatter_Multiplier: 7
+    - _Back_Scatter_Multiplier: 5
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
