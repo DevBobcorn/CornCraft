@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using Unity.Mathematics;
 using TMPro;
 
@@ -11,17 +12,30 @@ namespace CraftSharp.UI
     {
         private static readonly int SHOW_HASH = Animator.StringToHash("Show");
         private static readonly int UPDATE_HASH = Animator.StringToHash("Update");
+        private static readonly int SELECTED_HASH = Animator.StringToHash("Selected");
 
         [SerializeField] private GameObject modelObject;
         [SerializeField] private TMP_Text itemText;
         [SerializeField] private MeshFilter itemMeshFilter;
         [SerializeField] private MeshRenderer itemMeshRenderer;
         [SerializeField] private Animator itemAnimator;
+        [SerializeField] private Sprite selectedSprite;
+        [SerializeField] private TMP_Text keyHintText;
+
+        private Animator _slotAnimator;
+        private Animator SlotAnimator => _slotAnimator == null ? (_slotAnimator = GetComponent<Animator>()) : _slotAnimator;
+        private Image _slotImage;
+        private Image SlotImage => _slotImage == null ? (_slotImage = GetComponent<Image>()) : _slotImage;
 
         #nullable enable
 
         // Use null for empty items
         private ItemStack? itemStack = null;
+
+        public void SetKeyHint(string keyHint)
+        {
+            keyHintText.text = keyHint;
+        }
 
         public void UpdateItemStack(ItemStack? newItemStack)
         {
@@ -42,6 +56,18 @@ namespace CraftSharp.UI
         public void HideItemStack()
         {
             itemAnimator.SetBool(SHOW_HASH, false);
+        }
+
+        public void SelectSlot()
+        {
+            SlotImage.overrideSprite = selectedSprite;
+            SlotAnimator.SetBool(SELECTED_HASH, true);
+        }
+
+        public void DeselectSlot()
+        {
+            SlotImage.overrideSprite = null;
+            SlotAnimator.SetBool(SELECTED_HASH, false);
         }
 
         private void UpdateItemMesh()
