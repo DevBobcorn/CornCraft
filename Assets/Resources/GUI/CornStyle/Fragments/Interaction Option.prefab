@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Test
+  m_text: Don't Panic
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9baf05edbcb5b8a4caaa1987e9d8cb2a, type: 2}
   m_sharedMaterial: {fileID: -8751252669686695664, guid: 9baf05edbcb5b8a4caaa1987e9d8cb2a, type: 2}
@@ -199,7 +199,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 83f804db1e50ca344aed24f89a08122d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 08f2a98d3db5f4f47933fd8436d42d50, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -241,10 +241,10 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1328062480338999282}
   - {fileID: 3933228021075533870}
   - {fileID: 5022831263287644640}
   - {fileID: 6495673591624407117}
-  - {fileID: 1328062480338999282}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -305,6 +305,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9b98419de44384f86bb14ddb9b0086, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  optionIconImage: {fileID: 1328062480338999293}
+  enterLocationSprite: {fileID: 21300000, guid: 9f1882c083945c84fbb6898735467c61, type: 3}
+  rideSprite: {fileID: 21300000, guid: 3f6d806aadaea87498e39ef3a4e5081e, type: 3}
+  itemIconSprite: {fileID: 21300000, guid: d2c5ef49f56a08f41988a868f8d50a4e, type: 3}
 --- !u!1 &3089032005487245566
 GameObject:
   m_ObjectHideFlags: 0
