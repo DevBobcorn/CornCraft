@@ -29,34 +29,7 @@ namespace CraftSharp.Control
             {
                 if (info.YawDeltaAbs <= 10F && info.BarrierYawAngle < 30F) // Trying to moving forward
                 {
-                    var forwardDir = player.GetTargetOrientation() * Vector3.forward;
-                    var offset = /* forwardDir * (1.5F - info.BarrierDistance) */ + (info.BarrierHeight - 0.9F) * motor.CharacterUp;
-
-                    player.StartForceMoveOperation("Climb over barrier",
-                        new ForceMoveOperation[] {
-                                new(offset, 1.3F,
-                                    init: (info, motor, player) =>
-                                    {
-                                        player.RandomizeMirroredFlag();
-                                        player.StartCrossFadeState(PlayerAbility.CLIMB_1M, 0.1F);
-                                        info.PlayingRootMotion = true;
-                                        player.UseRootMotion = true;
-                                        player.IgnoreAnimatorScale = true;
-                                    },
-                                    exit: (info, motor, player) =>
-                                    {
-                                        info.Grounded = true;
-                                        player.UseRootMotion = false;
-                                        info.PlayingRootMotion = false;
-                                    },
-                                    update: (interval, curTime, inputData, info, motor, player) =>
-                                    {
-                                        info.Moving = inputData.Gameplay.Movement.IsPressed();
-                                        // Terminate force move action if almost finished and player is eager to move
-                                        return curTime < 0.4F && info.Moving;
-                                    }
-                                )
-                        } );
+                    player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight);
 
                     // Prevent jump preparation
                     _jumpRequested = false;

@@ -46,6 +46,8 @@ namespace CraftSharp.Control
         private IPlayerState _currentState = PlayerStates.GROUNDED;
         private IPlayerState? _pendingState = null;
 
+        private bool _usingAnimator = false;
+
         /// <summary>
         /// Whether player root motion should be applied.
         /// </summary>
@@ -158,6 +160,8 @@ namespace CraftSharp.Control
                     var activeItem = CornApp.CurrentClient!.GetActiveItem();
                     riggedRender.InitializeActiveItem(activeItem,
                             PlayerActionHelper.GetItemActionType(activeItem));
+                    // Set animator flag
+                    _usingAnimator = true;
                 }
                 else // Player render is vanilla/entity render
                 {
@@ -168,6 +172,8 @@ namespace CraftSharp.Control
                         // Update render
                         _playerRender.UpdateAnimation(0.05F);
                     };
+                    // Reset animator flag
+                    _usingAnimator = false;
                 }
 
                 CameraRef = _playerRender.SetupCameraRef(new(0F, 1.5F, 0F));
@@ -180,6 +186,8 @@ namespace CraftSharp.Control
                 Debug.LogWarning("Player render not found in game object!");
                 // Use own transform
                 _cameraController!.SetTarget(transform);
+                // Reset animator flag
+                _usingAnimator = false;
             }
         }
 
@@ -338,6 +346,61 @@ namespace CraftSharp.Control
         {
             Status!.WalkMode = !Status.WalkMode;
             CornApp.Notify(Translations.Get($"gameplay.control.switch_to_{(Status.WalkMode ? "walk" : "rush")}"));
+        }
+
+        public void ClimbOverBarrier(float barrierDist, float barrierHeight)
+        {
+            if (_usingAnimator)
+            {
+                var offset = (barrierHeight - 0.9F) * Motor.CharacterUp;
+                
+                StartForceMoveOperation("Climb over barrier (RootMotion)",
+                        new ForceMoveOperation[] {
+                                new(offset, 1.3F,
+                                    init: (info, motor, player) =>
+                                    {
+                                        player.RandomizeMirroredFlag();
+                                        player.StartCrossFadeState(PlayerAbility.CLIMB_1M, 0.1F);
+                                        info.PlayingRootMotion = true;
+                                        player.UseRootMotion = true;
+                                        player.IgnoreAnimatorScale = true;
+                                    },
+                                    exit: (info, motor, player) =>
+                                    {
+                                        info.Grounded = true;
+                                        player.UseRootMotion = false;
+                                        info.PlayingRootMotion = false;
+                                    },
+                                    update: (interval, curTime, inputData, info, motor, player) =>
+                                    {
+                                        info.Moving = inputData.Gameplay.Movement.IsPressed();
+                                        // Terminate force move action if almost finished and player is eager to move
+                                        return curTime < 0.4F && info.Moving;
+                                    }
+                                )
+                        } );
+            }
+            else
+            {
+                var forwardDir = GetTargetOrientation() * Vector3.forward;
+                var offset = forwardDir * barrierDist + barrierHeight * Motor.CharacterUp;
+
+                StartForceMoveOperation("Climb over barrier (Direct)",
+                        new ForceMoveOperation[] {
+                                new(offset, 0.5F,
+                                    exit: (info, motor, player) =>
+                                    {
+                                        info.Grounded = true;
+                                    },
+                                    update: (interval, curTime, inputData, info, motor, player) =>
+                                    {
+                                        info.Moving = inputData.Gameplay.Movement.IsPressed();
+                                        // Don't terminate till the time 
+                                        return false;
+                                    }
+                                )
+                        } );
+            }
         }
 
         public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)
