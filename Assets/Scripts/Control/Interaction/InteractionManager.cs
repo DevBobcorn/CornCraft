@@ -4,20 +4,19 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-using CraftSharp.Protocol;
-
 namespace CraftSharp.Control
 {
-    public class BlockInteractionManager
+    public class InteractionManager
     {
-        public static readonly BlockInteractionManager INSTANCE = new();
+        public static readonly InteractionManager INSTANCE = new();
 
-        private static readonly Dictionary<int, BlockInteractionDefinition> interactionTable = new();
+        private static readonly Dictionary<int, BlockInteractionDefinition> blockInteractionTable = new();
 
-        public Dictionary<int, BlockInteractionDefinition> InteractionTable => interactionTable;
+        public Dictionary<int, BlockInteractionDefinition> BlockInteractionTable => blockInteractionTable;
 
         public void PrepareData(DataLoadFlag flag)
         {
+            // Block interactions
             string interactionPath = PathHelper.GetExtraDataFile("block_interaction.json");
 
             if (!File.Exists(interactionPath))
@@ -29,7 +28,7 @@ namespace CraftSharp.Control
             }
             
             // Load block interaction definitions...
-            interactionTable.Clear();
+            blockInteractionTable.Clear();
             var interactions = Json.ParseJson(File.ReadAllText(interactionPath, Encoding.UTF8));
 
             var stateListTable = BlockStatePalette.INSTANCE.StateListTable;
@@ -56,6 +55,18 @@ namespace CraftSharp.Control
                             _          => BlockInteractionType.Interact
                         };
 
+                        var iconType = InteractionIconType.Dialog;
+                        if (entryCont.ContainsKey("icon_type"))
+                        {
+                            iconType = entryCont["icon_type"].StringValue switch
+                            {
+                                "interact"       => InteractionIconType.Dialog,
+                                "enter_location" => InteractionIconType.EnterLocation,
+                                "item_icon"      => InteractionIconType.ItemIcon,
+                                _                => InteractionIconType.Dialog
+                            };
+                        }
+                        
                         var hint = entryCont["hint"].StringValue;
                         var predicate = BlockStatePredicate.FromString(entryCont["predicate"].StringValue);
 
@@ -71,7 +82,8 @@ namespace CraftSharp.Control
                                 {
                                     if (predicate.Check(statesTable[stateId]))
                                     {
-                                        interactionTable.Add(stateId, new(interactionType, $"special/{entryName}", hint));
+                                        blockInteractionTable.Add(stateId, new(interactionType,
+                                                iconType, blockId, $"special/{entryName}", hint));
 
                                         //Debug.Log($"Added {entryName} interaction for blockstate [{stateId}] {statesTable[stateId]}");
                                     }
@@ -83,12 +95,15 @@ namespace CraftSharp.Control
 
                     }
                     else
+                    {
                         Debug.LogWarning($"Invalid special block interation definition: {entryName}");
+                    }
                 }
             }
 
-            flag.Finished = true;
+            // TODO: Entity interactions
 
+            flag.Finished = true;
         }
     }
 }

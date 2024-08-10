@@ -14,6 +14,7 @@ using CraftSharp.Protocol.Message;
 using CraftSharp.Proxy;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
+using CraftSharp.Rendering;
 
 namespace CraftSharp
 {
@@ -360,6 +361,9 @@ namespace CraftSharp
             tcpClient = null;
             
             Loom.QueueOnMainThread(() => {
+                // Clear item mesh cache
+                ItemMeshBuilder.ClearMeshCache();
+                
                 // Return to login scene
                 CornApp.Instance.BackToLogin();
             });

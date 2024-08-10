@@ -57,6 +57,22 @@ namespace CraftSharp.UI
 
         }
 
+        public void ShowItemIcons()
+        {
+            foreach (var option in interactionOptions)
+            {
+                option.ShowItemIcon();
+            }
+        }
+
+        public void HideItemIcons()
+        {
+            foreach (var option in interactionOptions)
+            {
+                option.HideItemIcon();
+            }
+        }
+
         void OnDestroy()
         {
             if (addCallback is not null)

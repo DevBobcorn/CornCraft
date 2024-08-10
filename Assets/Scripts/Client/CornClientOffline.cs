@@ -9,6 +9,7 @@ using CraftSharp.Event;
 using CraftSharp.Protocol;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
+using CraftSharp.Rendering;
 
 namespace CraftSharp
 {
@@ -152,6 +153,9 @@ namespace CraftSharp
 
         public override void Disconnect()
         {
+            // Clear item mesh cache
+            ItemMeshBuilder.ClearMeshCache();
+            
             // Return to login scene
             CornApp.Instance.BackToLogin();
         }

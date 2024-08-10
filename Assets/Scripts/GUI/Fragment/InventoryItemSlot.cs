@@ -23,14 +23,18 @@ namespace CraftSharp.UI
         [SerializeField] private TMP_Text keyHintText;
 
         private Animator _slotAnimator;
-        private Animator SlotAnimator => _slotAnimator == null ? (_slotAnimator = GetComponent<Animator>()) : _slotAnimator;
         private Image _slotImage;
-        private Image SlotImage => _slotImage == null ? (_slotImage = GetComponent<Image>()) : _slotImage;
 
         #nullable enable
 
         // Use null for empty items
         private ItemStack? itemStack = null;
+
+        void Awake()
+        {
+            _slotAnimator = GetComponent<Animator>();
+            _slotImage = GetComponent<Image>();
+        }
 
         public void SetKeyHint(string keyHint)
         {
@@ -60,19 +64,19 @@ namespace CraftSharp.UI
 
         public void SelectSlot()
         {
-            SlotImage.overrideSprite = selectedSprite;
-            SlotAnimator.SetBool(SELECTED_HASH, true);
+            _slotImage.overrideSprite = selectedSprite;
+            _slotAnimator.SetBool(SELECTED_HASH, true);
         }
 
         public void DeselectSlot()
         {
-            SlotImage.overrideSprite = null;
-            SlotAnimator.SetBool(SELECTED_HASH, false);
+            _slotImage.overrideSprite = null;
+            _slotAnimator.SetBool(SELECTED_HASH, false);
         }
 
         private void UpdateItemMesh()
         {
-            var result = ItemMeshBuilder.BuildItem(itemStack, true);
+            var result = ItemMeshBuilder.BuildItem(itemStack);
 
             if (result != null) // If build suceeded
             {

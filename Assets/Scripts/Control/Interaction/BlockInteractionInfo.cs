@@ -16,6 +16,16 @@ namespace CraftSharp.Control
             definition = def;
         }
 
+        public override InteractionIconType GetIconType()
+        {
+            return definition.IconType;
+        }
+
+        public override ResourceLocation GetIconItemId()
+        {
+            return definition.IconItemId;
+        }
+
         public override string GetHintKey()
         {
             return definition.HintKey;
