@@ -48,11 +48,15 @@ namespace CraftSharp.UI
                 if (isActive)
                 {
                     transitionCooldown = transitionTime;
+                    // Show 3d items
                     inventoryHotbar.ShowItems();
+                    interactionPanel.ShowItemIcons();
                 }
                 else
                 {
+                    // Hide 3d items
                     inventoryHotbar.HideItems();
+                    interactionPanel.HideItemIcons();
                 }
             }
 

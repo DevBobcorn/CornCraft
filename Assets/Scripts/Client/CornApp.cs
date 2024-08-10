@@ -117,7 +117,7 @@ namespace CraftSharp
                 yield return null;
             
             loadFlag.Finished = false;
-            Task.Run(() => BlockInteractionManager.INSTANCE.PrepareData(loadFlag));
+            Task.Run(() => InteractionManager.INSTANCE.PrepareData(loadFlag));
             while (!loadFlag.Finished) yield return null;
 
             var packManager = ResourcePackManager.Instance;

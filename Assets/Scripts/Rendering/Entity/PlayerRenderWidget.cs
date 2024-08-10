@@ -68,7 +68,7 @@ namespace CraftSharp.Rendering
             {
                 case ItemActionType.MeleeWeaponSword:
                     _currentItem = itemObj!.AddComponent<MeleeWeapon>();
-                    meshData = ItemMeshBuilder.BuildItem(itemStack, false);
+                    meshData = ItemMeshBuilder.BuildItem(itemStack);
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummySwordItemMesh!, psi.DummyItemMaterial!, new());
 
@@ -89,7 +89,7 @@ namespace CraftSharp.Rendering
                     break;
                 case ItemActionType.RangedWeaponBow:
                     _currentItem = itemObj!.AddComponent<UselessActionItem>();
-                    meshData = ItemMeshBuilder.BuildItem(itemStack, false);
+                    meshData = ItemMeshBuilder.BuildItem(itemStack);
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummyBowItemMesh!, psi.DummyItemMaterial!, new());
 
@@ -103,7 +103,7 @@ namespace CraftSharp.Rendering
                     break;
                 default:
                     _currentItem = itemObj!.AddComponent<UselessActionItem>();
-                    meshData = ItemMeshBuilder.BuildItem(itemStack, true);
+                    meshData = ItemMeshBuilder.BuildItem(itemStack);
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummySwordItemMesh!, psi.DummyItemMaterial!, new());
 

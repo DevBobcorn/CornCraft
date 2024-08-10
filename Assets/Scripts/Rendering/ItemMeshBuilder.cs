@@ -12,15 +12,47 @@ namespace CraftSharp.Rendering
     public class ItemMeshBuilder
     {
         private static readonly float3 ITEM_CENTER = new(-0.5F, -0.5F, -0.5F);
-        private static readonly float3 ITEM_ORIGIN = new(-0.5F, 0F, 0F);
+
+        private static readonly Dictionary<ResourceLocation,
+                (Mesh mesh, Material material, Dictionary<DisplayPosition, float3x3> transforms)> DEFAULT_MESH_CACHE = new();
+        
+        private static readonly List<Mesh> UNCACHED_ITEM_MESHES = new();
+
+        public static void ClearMeshCache()
+        {
+            foreach ((var mesh, _, _) in DEFAULT_MESH_CACHE.Values)
+            {
+                Object.Destroy(mesh);
+            }
+            DEFAULT_MESH_CACHE.Clear();
+
+            foreach (var mesh in UNCACHED_ITEM_MESHES)
+            {
+                Object.Destroy(mesh);
+            }
+            UNCACHED_ITEM_MESHES.Clear();
+        }
+
+        private static bool NBTDontAffectMesh(Dictionary<string, object> nbt)
+        {
+            return nbt.Count == 0;
+        }
 
         public static (Mesh mesh, Material material, Dictionary<DisplayPosition, float3x3> transforms)?
-                BuildItem(ItemStack? itemStack, bool useItemCenter)
+                BuildItem(ItemStack? itemStack)
         {
             if (itemStack is null) return null;
 
             var packManager = ResourcePackManager.Instance;
             var itemId = itemStack.ItemType.ItemId;
+
+            // Use mesh cache if possible
+            var shouldUseCache = itemStack.NBT is null || NBTDontAffectMesh(itemStack.NBT);
+
+            if (shouldUseCache && DEFAULT_MESH_CACHE.ContainsKey(itemId))
+            {
+                return DEFAULT_MESH_CACHE[itemId];
+            }
 
             var itemNumId = ItemPalette.INSTANCE.ToNumId(itemId);
             packManager.ItemModelTable.TryGetValue(itemNumId, out ItemModel? itemModel);
@@ -41,7 +73,7 @@ namespace CraftSharp.Rendering
             int vertexCount = itemGeometry.GetVertexCount();
             var visualBuffer = new VertexBuffer(vertexCount);
             uint vertexOffset = 0;
-            itemGeometry.Build(visualBuffer, ref vertexOffset, useItemCenter ? ITEM_CENTER : ITEM_ORIGIN, colors);
+            itemGeometry.Build(visualBuffer, ref vertexOffset, ITEM_CENTER, colors);
 
             int triIdxCount = (vertexCount / 2) * 3;
 
@@ -105,7 +137,16 @@ namespace CraftSharp.Rendering
 
             var material = CornApp.CurrentClient!.ChunkMaterialManager.GetAtlasMaterial(itemModel.RenderType);
 
-            return (mesh, material, itemGeometry.DisplayTransforms);
+            // Store in cache if applicable
+            if (shouldUseCache)
+            {
+                return DEFAULT_MESH_CACHE[itemId] = (mesh, material, itemGeometry.DisplayTransforms);
+            }
+            else
+            {
+                UNCACHED_ITEM_MESHES.Add(mesh);
+                return (mesh, material, itemGeometry.DisplayTransforms);
+            }
         }
     }
 }

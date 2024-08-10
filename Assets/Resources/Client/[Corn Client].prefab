@@ -157,9 +157,8 @@ MonoBehaviour:
   m_EntityMaterialManager: {fileID: 5810336599918708874}
   m_PlayerController: {fileID: 0}
   playerRenderPrefabs:
-  - {fileID: 100096, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
-  - {fileID: 1778761982222961344, guid: 9e6f8c96018ba074c87f1f35387901df, type: 3}
-  - {fileID: 8612628606253291152, guid: af13cf29a10f19a4b9b4bce4e230a8c9, type: 3}
+  - {fileID: 555365335110124448, guid: 35ba1c4e28397394593efc927034fa83, type: 3}
+  - {fileID: 6981470601020151392, guid: f664c332fccf0fa4f944002281a8fc2b, type: 3}
   selectedRenderPrefab: 0
   m_CameraController: {fileID: 0}
   screenControl: {fileID: 0}
