@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 555365335110124451}
   - component: {fileID: 8342844355249743112}
+  - component: {fileID: -3013842615680842665}
   m_Layer: 10
   m_Name: PlayerA Entity
   m_TagString: Untagged
@@ -77,6 +78,35 @@ MonoBehaviour:
   - {fileID: 713587719333753473}
   leftArm: {fileID: 8794437465467807533}
   rightArm: {fileID: 171314523628604116}
+--- !u!114 &-3013842615680842665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555365335110124448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dac0d27ec6af324faf2b6c5f03895b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MaterialEntries:
+  - RenderType: 0
+    m_DefaultMaterial: {fileID: 2100000, guid: 313a34978b221bb47b22191711861061, type: 2}
+    TextureId: <PLAYER_SKIN>
+    m_Renderers:
+    - {fileID: 7009192520960174314}
+    - {fileID: 8922029764178602502}
+    - {fileID: 2202360803229003974}
+    - {fileID: 8801070055260835716}
+    - {fileID: 8180521053428223265}
+    - {fileID: 212660048522909420}
+    - {fileID: 1268373328062573701}
+    - {fileID: 3593001890126006222}
+    - {fileID: 8589888583319953737}
+    - {fileID: 577751473788036348}
+    - {fileID: 4662996401513761094}
+    - {fileID: 713587719333753473}
 --- !u!1 &6818280935886831979
 GameObject:
   m_ObjectHideFlags: 0
