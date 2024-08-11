@@ -203,7 +203,7 @@ MonoBehaviour:
   creeperPrefab: {fileID: 64222873330180725, guid: cd277fe01833f4d4baa800b3350d5181, type: 3}
   pigPrefab: {fileID: 6981470601020151392, guid: f664c332fccf0fa4f944002281a8fc2b, type: 3}
   cowPrefab: {fileID: 4806443658253136590, guid: 4f6d262fa25584b4da315ea245ef1261, type: 3}
-  mooshroomPrefab: {fileID: 4806443658253136590, guid: 4f6d262fa25584b4da315ea245ef1261, type: 3}
+  mooshroomPrefab: {fileID: 4806443658253136590, guid: c7f7b19e458052e408d8d1723d542d06, type: 3}
   sheepPrefab: {fileID: 4220059389467633426, guid: 4ba512a15c4292c48b372bb5f24dd1f3, type: 3}
   itemPrefab: {fileID: 2689602071572206800, guid: cc86897375396434c8dd1b69218db138, type: 3}
   arrowPrefab: {fileID: 2689602071572206800, guid: 986313fb3599f44428afb02dcb218f5c, type: 3}

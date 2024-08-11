@@ -188,6 +188,14 @@ namespace CraftSharp.Rendering
         }
 
         /// <summary>
+        /// Get variable table for render control (pose, texture, etc.)
+        /// </summary>
+        public virtual Dictionary<string, string>? GetControlVariables()
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Finalize this entity render
         /// </summary>
         public virtual void Unload()

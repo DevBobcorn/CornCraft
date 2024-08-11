@@ -121,6 +121,13 @@ namespace CraftSharp.Rendering
 
                 // Initialize the entity
                 entityRender.Initialize(entity.Type, entity, _worldOriginOffset);
+
+                // Initialize materials (This requires nbt data)
+                EntityMaterialAssigner materialControl;
+                if (entityObj.TryGetComponent(out materialControl))
+                {
+                    materialControl.InitializeMaterials(entityRender.GetControlVariables(), entity.Metadata);
+                }
             }
         }
 
