@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using Unity.Mathematics;
+using System.Linq;
 using UnityEngine;
 
 namespace CraftSharp.Rendering
@@ -101,7 +101,30 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Entity metadata
         /// </summary>
-        public Dictionary<int, object?>? Metadata;
+        public Dictionary<int, object?>? Metadata { get; private set; }
+
+        /// <summary>
+        /// Update entity metadata, validate control variables,
+        /// then check for visual/material update
+        /// </summary>
+        public void UpdateMetadata(Dictionary<int, object?> updatedMeta)
+        {
+            // Create if not present
+            Metadata ??= new();
+
+            foreach (var entry in updatedMeta)
+            {
+                Metadata[entry.Key] = entry.Value;
+            }
+
+            // TODO: Update control variables
+
+            // Update own materials
+            if (TryGetComponent(out EntityMaterialAssigner materialControl))
+            {
+                materialControl.UpdateMaterials(null, updatedMeta.Keys.ToHashSet(), GetControlVariables(), Metadata);
+            }
+        }
 
         /// <summary>
         /// Entity equipment
@@ -140,7 +163,7 @@ namespace CraftSharp.Rendering
         }
 
         [SerializeField] protected GameObject? ragdollPrefab;
-        [SerializeField] public GameObject? FloatingInfoPrefab;
+        public GameObject? FloatingInfoPrefab;
 
         /// <summary>
         /// A number made from the entity's numeral id, used in animations to prevent
@@ -151,7 +174,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Initialize this entity render
         /// </summary>
-        public virtual void Initialize(EntityType entityType, Entity source, Vector3Int originOffset)
+        public virtual void Initialize(Entity source, Vector3Int originOffset)
         {
             if (_visualTransform == null)
             {
@@ -165,7 +188,7 @@ namespace CraftSharp.Rendering
             CustomNameJson = source.CustomNameJson;
             IsCustomNameVisible = source.IsCustomNameVisible;
             CustomName = source.CustomName;
-            type = entityType;
+            type = source.Type;
 
             Position.Value = CoordConvert.MC2Unity(originOffset, source.Location);
             lastPosition = Position.Value;
@@ -285,12 +308,11 @@ namespace CraftSharp.Rendering
 
                 ragdollObj.transform.position = transform.position;
 
-                var ragdoll = ragdollObj.GetComponentInChildren<EntityRagdoll>();
-
                 // Assign own rotation and localScale to ragdoll object
+                var ragdoll = ragdollObj.GetComponentInChildren<EntityRagdoll>();
                 if (ragdoll != null)
                 {
-                    ragdoll.Visual.rotation = _visualTransform!.rotation;
+                    ragdollObj.transform.rotation = _visualTransform!.rotation;
                     ragdoll.Visual.localScale = _visualTransform.localScale;
 
                     // Make it fly!
@@ -300,6 +322,12 @@ namespace CraftSharp.Rendering
                             ragdoll.mainRigidbody.AddForce(_visualMovementVelocity.normalized * 15F, ForceMode.VelocityChange);
                         else
                             ragdoll.mainRigidbody.AddForce(Vector3.up * 10F, ForceMode.VelocityChange);
+                    }
+
+                    // Initialize ragdoll materials using own metadata
+                    if (ragdoll.gameObject.TryGetComponent(out EntityMaterialAssigner materialControl))
+                    {
+                        materialControl.InitializeMaterials(GetControlVariables(), Metadata);
                     }
                 }
             }

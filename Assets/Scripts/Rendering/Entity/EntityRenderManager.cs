@@ -120,11 +120,10 @@ namespace CraftSharp.Rendering
                 entityObj.transform.parent = transform;
 
                 // Initialize the entity
-                entityRender.Initialize(entity.Type, entity, _worldOriginOffset);
+                entityRender.Initialize(entity, _worldOriginOffset);
 
-                // Initialize materials (This requires nbt data)
-                EntityMaterialAssigner materialControl;
-                if (entityObj.TryGetComponent(out materialControl))
+                // Initialize materials (This requires metadata to be present)
+                if (entityObj.TryGetComponent(out EntityMaterialAssigner materialControl))
                 {
                     materialControl.InitializeMaterials(entityRender.GetControlVariables(), entity.Metadata);
                 }
