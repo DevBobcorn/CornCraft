@@ -437,7 +437,7 @@ namespace CraftSharp.Protocol.Handlers
                 if (itemID == -1)
                     return null;
                 
-                Item type = itemPalette.FromNumId(itemID);
+                Item type = itemPalette.GetByNumId(itemID);
                 byte itemCount = ReadNextByte(cache);
                 Dictionary<string, object> nbt = ReadNextNbt(cache);
                 return new ItemStack(type, itemCount, nbt);
@@ -451,14 +451,14 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="entityPalette">Mappings for converting entity type Ids to EntityType</param>
         /// <param name="living">TRUE for living entities (layout differs)</param>
         /// <returns>Entity information</returns>
-        public Entity ReadNextEntity(Queue<byte> cache, EntityPalette entityPalette, bool living)
+        public Entity ReadNextEntity(Queue<byte> cache, EntityTypePalette entityPalette, bool living)
         {
             int entityID = ReadNextVarInt(cache);
             Guid entityUUID = ReadNextUUID(cache); // MC 1.8+
 
             EntityType entityType;
             // Entity type data type change from byte to varint after 1.14
-            entityType = entityPalette.FromNumId(ReadNextVarInt(cache));
+            entityType = entityPalette.GetByNumId(ReadNextVarInt(cache));
 
             Double entityX = ReadNextDouble(cache);
             Double entityY = ReadNextDouble(cache);
@@ -1319,7 +1319,7 @@ namespace CraftSharp.Protocol.Handlers
             else
             {
                 slotData.AddRange(GetBool(true)); // Item is present
-                slotData.AddRange(GetVarInt(itemPalette.ToNumId(item.ItemType.ItemId)));
+                slotData.AddRange(GetVarInt(itemPalette.GetNumIdById(item.ItemType.ItemId)));
                 slotData.Add((byte)item.Count);
                 slotData.AddRange(GetNbt(item.NBT));
             }

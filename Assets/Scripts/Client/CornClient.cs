@@ -130,7 +130,7 @@ namespace CraftSharp
                 if (handler.Login(this.playerKeyPair, session, info.AccountLower)) // Login
                 {
                     // Update entity type for dummy client entity
-                    clientEntity.Type = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);
+                    clientEntity.Type = EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID);
                     // Update client entity name
                     clientEntity.Name = session.PlayerName;
                     clientEntity.UUID = uuid;
@@ -1359,7 +1359,7 @@ namespace CraftSharp
             string? playerName = null;
             if (onlinePlayers.ContainsKey(uuid))
                 playerName = onlinePlayers[uuid].Name;
-            Entity playerEntity = new(entityID, EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID), location, uuid, playerName);
+            Entity playerEntity = new(entityID, EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID), location, uuid, playerName);
             OnSpawnEntity(playerEntity);
         }
 
@@ -1671,7 +1671,6 @@ namespace CraftSharp
 
                 if (entity != null)
                 {
-                    entity.Metadata = metadata;
                     if (entity.Type!.ContainsItem && metadata.TryGetValue(7, out object? itemObj) && itemObj != null && itemObj.GetType() == typeof(ItemStack))
                     {
                         var item = (ItemStack?) itemObj;
@@ -1691,6 +1690,8 @@ namespace CraftSharp
                     {
                         entity.IsCustomNameVisible = bool.Parse(nameVisableObj.ToString()!);
                     }
+
+                    entity.UpdateMetadata(metadata);
                 }
             });
         }

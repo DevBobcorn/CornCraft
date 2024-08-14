@@ -31,8 +31,7 @@ namespace CraftSharp.Control
             blockInteractionTable.Clear();
             var interactions = Json.ParseJson(File.ReadAllText(interactionPath, Encoding.UTF8));
 
-            var stateListTable = BlockStatePalette.INSTANCE.StateListTable;
-            var statesTable = BlockStatePalette.INSTANCE.StatesTable;
+            var palette = BlockStatePalette.INSTANCE;
 
             if (interactions.Properties.ContainsKey("special"))
             {
@@ -76,17 +75,12 @@ namespace CraftSharp.Control
                         {
                             var blockId = ResourceLocation.FromString(trigger.StringValue);
 
-                            if (stateListTable.ContainsKey(blockId))
+                            if (palette.TryGetAllNumIds(blockId, out int[] stateIds, x => predicate.Check(x)))
                             {
-                                foreach (var stateId in stateListTable[blockId])
+                                foreach (var stateId in stateIds)
                                 {
-                                    if (predicate.Check(statesTable[stateId]))
-                                    {
-                                        blockInteractionTable.Add(stateId, new(interactionType,
-                                                iconType, blockId, $"special/{entryName}", hint));
-
-                                        //Debug.Log($"Added {entryName} interaction for blockstate [{stateId}] {statesTable[stateId]}");
-                                    }
+                                    blockInteractionTable.Add(stateId, new(interactionType, iconType, blockId, $"special/{entryName}", hint));
+                                    //Debug.Log($"Added {entryName} interaction for blockstate [{stateId}] {palette.GetByNumId(stateId)}");
                                 }
                             }
                             //else

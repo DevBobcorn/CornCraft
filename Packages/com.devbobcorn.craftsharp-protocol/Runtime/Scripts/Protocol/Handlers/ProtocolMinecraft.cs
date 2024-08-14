@@ -1121,7 +1121,7 @@ namespace CraftSharp.Protocol.Handlers
                             {
                                 // Block entity id is sent with nbt data
                                 var typeId = ResourceLocation.FromString((string) tag["id"]);
-                                var type = BlockEntityPalette.INSTANCE.FromId(typeId);
+                                var type = BlockEntityTypePalette.INSTANCE.GetById(typeId);
                                 //UnityEngine.Debug.Log($"Single [{blockLoc}] {Json.Object2Json(tag)}");
                                 Loom.QueueOnMainThread(() => {
                                     handler.GetChunkRenderManager().AddBlockEntityRender(blockLoc, type, tag);
@@ -1130,7 +1130,7 @@ namespace CraftSharp.Protocol.Handlers
                             else
                             {
                                 // Block entity id is sent as varint
-                                var type = BlockEntityPalette.INSTANCE.FromNumId(ttt);
+                                var type = BlockEntityTypePalette.INSTANCE.GetByNumId(ttt);
                                 Loom.QueueOnMainThread(() => {
                                     handler.GetChunkRenderManager().AddBlockEntityRender(blockLoc, type, tag);
                                 });
@@ -1502,7 +1502,7 @@ namespace CraftSharp.Protocol.Handlers
                         }
                     case PacketTypesIn.SpawnEntity:
                         {
-                            Entity entity = dataTypes.ReadNextEntity(packetData, EntityPalette.INSTANCE, false);
+                            Entity entity = dataTypes.ReadNextEntity(packetData, EntityTypePalette.INSTANCE, false);
                             handler.OnSpawnEntity(entity);
                             break;
                         }
@@ -1532,7 +1532,7 @@ namespace CraftSharp.Protocol.Handlers
                         }
                    case PacketTypesIn.SpawnLivingEntity:
                         {
-                            Entity entity = dataTypes.ReadNextEntity(packetData, EntityPalette.INSTANCE, true);
+                            Entity entity = dataTypes.ReadNextEntity(packetData, EntityTypePalette.INSTANCE, true);
                             // packet before 1.15 has metadata at the end
                             // this is not handled in dataTypes.ReadNextEntity()
                             // we are simply ignoring leftover data in packet
@@ -1559,7 +1559,7 @@ namespace CraftSharp.Protocol.Handlers
                             double y = dataTypes.ReadNextDouble(packetData);
                             double z = dataTypes.ReadNextDouble(packetData);
                             dataTypes.ReadNextShort(packetData); // TODO Use this value
-                            handler.OnSpawnEntity(new(entityId, EntityPalette.INSTANCE.FromId(EntityType.EXPERIENCE_ORB_ID),
+                            handler.OnSpawnEntity(new(entityId, EntityTypePalette.INSTANCE.GetById(EntityType.EXPERIENCE_ORB_ID),
                                     new(x, y, z), 0, 0, 0, 0));
                             break;
                         }
