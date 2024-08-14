@@ -54,7 +54,7 @@ namespace CraftSharp.Rendering
                 return DEFAULT_MESH_CACHE[itemId];
             }
 
-            var itemNumId = ItemPalette.INSTANCE.ToNumId(itemId);
+            var itemNumId = ItemPalette.INSTANCE.GetNumIdById(itemId);
             packManager.ItemModelTable.TryGetValue(itemNumId, out ItemModel? itemModel);
 
             if (itemModel is null) return null;

@@ -117,7 +117,7 @@ namespace CraftSharp.UI
 
         private void UpdateItemMesh(ResourceLocation itemId)
         {
-            var result = ItemMeshBuilder.BuildItem(new ItemStack(ItemPalette.INSTANCE.FromId(itemId), 1));
+            var result = ItemMeshBuilder.BuildItem(new ItemStack(ItemPalette.INSTANCE.GetById(itemId), 1));
 
             if (result != null) // If build suceeded
             {

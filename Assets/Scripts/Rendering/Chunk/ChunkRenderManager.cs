@@ -305,7 +305,7 @@ namespace CraftSharp.Rendering
                 // Check if the location has a block entity and remove it
                 RemoveBlockEntityRender(blockLoc);
                 // Auto-create block entity if present
-                if (BlockEntityPalette.INSTANCE.GetBlockEntityForBlock(block.BlockId, out BlockEntityType blockEntityType))
+                if (BlockEntityTypePalette.INSTANCE.GetBlockEntityForBlock(block.BlockId, out BlockEntityType blockEntityType))
                 {
                     AddBlockEntityRender(blockLoc, blockEntityType, null);
                 }

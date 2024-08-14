@@ -176,12 +176,12 @@ namespace CraftSharp
             
             // Load entity definitions
             loadFlag.Finished = false;
-            Task.Run(() => EntityPalette.INSTANCE.PrepareData(entityVersion, loadFlag));
+            Task.Run(() => EntityTypePalette.INSTANCE.PrepareData(entityVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
             // Load block entity definitions (after all blockstates are loaded)
             loadFlag.Finished = false;
-            Task.Run(() => BlockEntityPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            Task.Run(() => BlockEntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
             // Load in-game translations (loaded AFTER resource files)

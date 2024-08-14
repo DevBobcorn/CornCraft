@@ -74,8 +74,8 @@ namespace CraftSharp
             try
             {
                 DummyOnInventoryOpen(0, new Container(ContainerType.PlayerInventory));
-                DummyOnSetSlot(0, 36, new ItemStack(ItemPalette.INSTANCE.FromId(new("diamond_sword")), 1), 0);
-                DummyOnSetSlot(0, 37, new ItemStack(ItemPalette.INSTANCE.FromId(new("bow")), 1), 0);
+                DummyOnSetSlot(0, 36, new ItemStack(ItemPalette.INSTANCE.GetById(new("diamond_sword")), 1), 0);
+                DummyOnSetSlot(0, 37, new ItemStack(ItemPalette.INSTANCE.GetById(new("bow")), 1), 0);
             }
             catch
             {
@@ -97,14 +97,14 @@ namespace CraftSharp
         {
             var session = info.Session;
 
-            if (!EntityPalette.INSTANCE.CheckEntityType(EntityType.PLAYER_ID))
+            if (!EntityTypePalette.INSTANCE.CheckId(EntityType.PLAYER_ID))
             {
                 // Entity type not present, fake it
-                EntityPalette.INSTANCE.InjectEntityType(2077, EntityType.PLAYER_ID);
+                EntityTypePalette.INSTANCE.InjectEntityType(2077, EntityType.PLAYER_ID);
             }
 
             // Update entity type for dummy client entity
-            clientEntity.Type = EntityPalette.INSTANCE.FromId(EntityType.PLAYER_ID);
+            clientEntity.Type = EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID);
             // Update client entity name
             clientEntity.Name = session.PlayerName;
             clientEntity.UUID = uuid;
