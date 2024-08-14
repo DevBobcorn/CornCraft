@@ -18,9 +18,9 @@ namespace CraftSharp.Rendering
         private static readonly int ROOT_MOTION_HASH = Animator.StringToHash("RootMotion");
         private static readonly int ATTACKING_HASH = Animator.StringToHash("Attacking");
 
-        public override void Initialize(EntityType entityType, Entity entity, Vector3Int originOffset)
+        public override void Initialize(Entity entity, Vector3Int originOffset)
         {
-            base.Initialize(entityType, entity, originOffset);
+            base.Initialize(entity, originOffset);
 
             // Subscribe player controller events
             var playerController = GetComponentInParent<PlayerController>();

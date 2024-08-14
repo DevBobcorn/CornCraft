@@ -131,8 +131,8 @@ namespace CraftSharp.Control
                     Destroy(collider);
                 }
 
-                // Initialize player entity render
-                _playerRender.Initialize(entity.Type, entity, Vector3Int.zero);
+                // Initialize player entity render (originOffset not used here)
+                _playerRender.Initialize(entity, Vector3Int.zero);
                 // Workaround: This value should not be applied to entity render for client player
                 _playerRender.VisualTransform.localRotation = Quaternion.identity;
 
