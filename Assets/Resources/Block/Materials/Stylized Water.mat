@@ -207,7 +207,7 @@ Material:
     - _NormalMap: 1
     - _NormalMapOn: 1
     - _NormalSpeed: 1
-    - _NormalStrength: 0.202
+    - _NormalStrength: 0.2
     - _NormalSubSpeed: -0.8
     - _NormalSubTiling: 0.5
     - _NormalTiling: -0.48000008
@@ -224,8 +224,8 @@ Material:
     - _ReflectionBlur: 0
     - _ReflectionDistortion: 0.146
     - _ReflectionFresnel: 6
-    - _ReflectionLighting: 0.7
-    - _ReflectionStrength: 0.6
+    - _ReflectionLighting: 0.8
+    - _ReflectionStrength: 0.9
     - _Reflectivity: 1
     - _RefractionAmount: 0.05
     - _RefractionChromaticAberration: 1
@@ -236,7 +236,7 @@ Material:
     - _RiverModeOn: 0
     - _SHARP_INERSECTIONOn: 1
     - _ShadingMode: 1
-    - _ShadowStrength: 0.5
+    - _ShadowStrength: 0
     - _ShoreLineLength: 0
     - _ShoreLineWaveDistance: 23
     - _ShoreLineWaveStr: 1
@@ -250,15 +250,15 @@ Material:
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SparkleIntensity: 0
-    - _SparkleSize: 0.302
+    - _SparkleSize: 0.01
     - _SpecularHighlights: 1
     - _SpecularReflectionsOn: 1
     - _Speed: 1
     - _SrcBlend: 1
-    - _SunReflectionDistortion: 0.8
+    - _SunReflectionDistortion: 0.7
     - _SunReflectionPerturbance: 0.386
-    - _SunReflectionSize: 0.7
-    - _SunReflectionStrength: 15
+    - _SunReflectionSize: 0.1
+    - _SunReflectionStrength: 10
     - _Surface: 0
     - _TEXTURE_INTERSECTIONOn: 0
     - _Texture_IntersectionOn: 1
@@ -268,7 +268,7 @@ Material:
     - _TranslucencyExp: 4
     - _TranslucencyOn: 1
     - _TranslucencyReflectionMask: 0
-    - _TranslucencyStrength: 1
+    - _TranslucencyStrength: 0.05
     - _TranslucencyStrengthDirect: 0.05
     - _UnderwaterRefractionOffset: 0.2
     - _UnderwaterSurfaceSmoothness: 0.8
