@@ -1,0 +1,248 @@
+{
+    "minecraft:banner": [
+        "minecraft:black_banner",
+        "minecraft:blue_banner",
+        "minecraft:brown_banner",
+        "minecraft:cyan_banner",
+        "minecraft:gray_banner",
+        "minecraft:green_banner",
+        "minecraft:light_blue_banner",
+        "minecraft:light_gray_banner",
+        "minecraft:lime_banner",
+        "minecraft:magenta_banner",
+        "minecraft:orange_banner",
+        "minecraft:pink_banner",
+        "minecraft:purple_banner",
+        "minecraft:red_banner",
+        "minecraft:white_banner",
+        "minecraft:yellow_banner",
+        "minecraft:black_wall_banner",
+        "minecraft:blue_wall_banner",
+        "minecraft:brown_wall_banner",
+        "minecraft:cyan_wall_banner",
+        "minecraft:gray_wall_banner",
+        "minecraft:green_wall_banner",
+        "minecraft:light_blue_wall_banner",
+        "minecraft:light_gray_wall_banner",
+        "minecraft:lime_wall_banner",
+        "minecraft:magenta_wall_banner",
+        "minecraft:orange_wall_banner",
+        "minecraft:pink_wall_banner",
+        "minecraft:purple_wall_banner",
+        "minecraft:red_wall_banner",
+        "minecraft:white_wall_banner",
+        "minecraft:yellow_wall_banner"
+    ],
+    "minecraft:barrel": [
+        "minecraft:barrel"
+    ],
+    "minecraft:beacon": [
+        "minecraft:beacon"
+    ],
+    "minecraft:bed": [
+        "minecraft:black_bed",
+        "minecraft:blue_bed",
+        "minecraft:brown_bed",
+        "minecraft:cyan_bed",
+        "minecraft:gray_bed",
+        "minecraft:green_bed",
+        "minecraft:light_blue_bed",
+        "minecraft:light_gray_bed",
+        "minecraft:lime_bed",
+        "minecraft:magenta_bed",
+        "minecraft:orange_bed",
+        "minecraft:pink_bed",
+        "minecraft:purple_bed",
+        "minecraft:red_bed",
+        "minecraft:white_bed",
+        "minecraft:yellow_bed"
+    ],
+    "minecraft:beehive": [
+        "minecraft:beehive"
+    ],
+    "minecraft:bell": [
+        "minecraft:bell"
+    ],
+    "minecraft:blast_furnace": [
+        "minecraft:blast_furnace"
+    ],
+    "minecraft:brewing_stand": [
+        "minecraft:brewing_stand"
+    ],
+    "minecraft:campfire": [
+        "minecraft:campfire",
+        "minecraft:soul_campfire"
+    ],
+    "minecraft:chest": [
+        "minecraft:chest"
+    ],
+    "minecraft:comparator": [
+        "minecraft:comparator"
+    ],
+    "minecraft:command_block": [
+        "minecraft:command_block",
+        "minecraft:chain_command_block",
+        "minecraft:repeating_command_block"
+    ],
+    "minecraft:conduit": [
+        "minecraft:conduit"
+    ],
+    "minecraft:daylight_detector": [
+        "minecraft:daylight_detector"
+    ],
+    "minecraft:dispenser": [
+        "minecraft:dispenser"
+    ],
+    "minecraft:dropper": [
+        "minecraft:dropper"
+    ],
+    "minecraft:enchanting_table": [
+        "minecraft:enchanting_table"
+    ],
+    "minecraft:ender_chest": [
+        "minecraft:ender_chest"
+    ],
+    "minecraft:end_gateway": [
+        "minecraft:end_gateway"
+    ],
+    "minecraft:end_portal": [
+        "minecraft:end_portal"
+    ],
+    "minecraft:furnace": [
+        "minecraft:furnace"
+    ],
+    "minecraft:hopper": [
+        "minecraft:hopper"
+    ],
+    "minecraft:jigsaw": [
+        "minecraft:jigsaw"
+    ],
+    "minecraft:jukebox": [
+        "minecraft:jukebox"
+    ],
+    "minecraft:lectern": [
+        "minecraft:lectern"
+    ],
+    "minecraft:mob_spawner": [
+        "minecraft:spawner"
+    ],
+    "minecraft:piston": [
+    ],
+    "minecraft:shulker_box": [
+        "minecraft:black_shulker_box",
+        "minecraft:blue_shulker_box",
+        "minecraft:brown_shulker_box",
+        "minecraft:cyan_shulker_box",
+        "minecraft:gray_shulker_box",
+        "minecraft:green_shulker_box",
+        "minecraft:light_blue_shulker_box",
+        "minecraft:light_gray_shulker_box",
+        "minecraft:lime_shulker_box",
+        "minecraft:magenta_shulker_box",
+        "minecraft:orange_shulker_box",
+        "minecraft:pink_shulker_box",
+        "minecraft:purple_shulker_box",
+        "minecraft:red_shulker_box",
+        "minecraft:white_shulker_box",
+        "minecraft:yellow_shulker_box",
+        "minecraft:shulker_box"
+    ],
+    "minecraft:sign": [
+        "minecraft:dark_oak_sign",
+        "minecraft:spruce_sign",
+        "minecraft:warped_sign",
+        "minecraft:jungle_sign",
+        "minecraft:oak_sign",
+        "minecraft:crimson_sign",
+        "minecraft:acacia_sign",
+        "minecraft:birch_sign",
+        "minecraft:mangrove_sign",
+        "minecraft:cherry_sign",
+        "minecraft:bamboo_sign",
+        "minecraft:dark_oak_wall_sign",
+        "minecraft:spruce_wall_sign",
+        "minecraft:warped_wall_sign",
+        "minecraft:jungle_wall_sign",
+        "minecraft:oak_wall_sign",
+        "minecraft:crimson_wall_sign",
+        "minecraft:acacia_wall_sign",
+        "minecraft:birch_wall_sign",
+        "minecraft:mangrove_wall_sign",
+        "minecraft:cherry_wall_sign",
+        "minecraft:bamboo_wall_sign"
+    ],
+    "minecraft:hanging_sign": [
+        "minecraft:dark_oak_hanging_sign",
+        "minecraft:spruce_hanging_sign",
+        "minecraft:warped_hanging_sign",
+        "minecraft:jungle_hanging_sign",
+        "minecraft:oak_hanging_sign",
+        "minecraft:crimson_hanging_sign",
+        "minecraft:acacia_hanging_sign",
+        "minecraft:birch_hanging_sign",
+        "minecraft:mangrove_hanging_sign",
+        "minecraft:cherry_hanging_sign",
+        "minecraft:bamboo_hanging_sign",
+        "minecraft:dark_oak_wall_hanging_sign",
+        "minecraft:spruce_wall_hanging_sign",
+        "minecraft:warped_wall_hanging_sign",
+        "minecraft:jungle_wall_hanging_sign",
+        "minecraft:oak_wall_hanging_sign",
+        "minecraft:crimson_wall_hanging_sign",
+        "minecraft:acacia_wall_hanging_sign",
+        "minecraft:birch_wall_hanging_sign",
+        "minecraft:mangrove_wall_hanging_sign",
+        "minecraft:cherry_wall_hanging_sign",
+        "minecraft:bamboo_wall_hanging_sign"
+    ],
+    "minecraft:skull": [
+        "minecraft:skeleton_skull",
+        "minecraft:wither_skeleton_skull",
+        "minecraft:zombie_head",
+        "minecraft:player_head",
+        "minecraft:creeper_head",
+        "minecraft:dragon_head",
+        "minecraft:piglin_head",
+        "minecraft:skeleton_wall_skull",
+        "minecraft:wither_skeleton_wall_skull",
+        "minecraft:zombie_wall_head",
+        "minecraft:player_wall_head",
+        "minecraft:creeper_wall_head",
+        "minecraft:dragon_wall_head",
+        "minecraft:piglin_wall_head"
+    ],
+    "minecraft:smoker": [
+        "minecraft:smoker"
+    ],
+    "minecraft:structure_block": [
+        "minecraft:structure_block"
+    ],
+    "minecraft:trapped_chest": [
+        "minecraft:trapped_chest"
+    ],
+    "minecraft:sculk_sensor": [
+        "minecraft:sculk_sensor"
+    ],
+    "minecraft:calibrated_sculk_sensor": [
+        "minecraft:calibrated_sculk_sensor"
+    ],
+    "minecraft:sculk_catalyst": [
+        "minecraft:sculk_catalyst"
+    ],
+    "minecraft:sculk_shrieker": [
+        "minecraft:sculk_shrieker"
+    ],
+    "minecraft:chiseled_bookself": [
+        "minecraft:chiseled_bookself"
+    ],
+    "minecraft:suspicious_sand": [
+        "minecraft:suspicious_sand"
+    ],
+    "minecraft:brushable_block": [
+        "minecraft:suspicious_sand",
+        "minecraft:suspicious_gravel"
+    ],
+    "minecraft:decorated_pot": [
+        "minecraft:decorated_pot"
+    ]
+}

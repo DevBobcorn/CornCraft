@@ -1,0 +1,8510 @@
+{
+  "minecraft:allay": {
+    "width": 0.35,
+    "height": 0.6,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_dancing"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "data_can_duplicate"
+      }
+    }
+  },
+  "minecraft:area_effect_cloud": {
+    "width": 6.0,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "float",
+        "name": "data_radius"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_color"
+      },
+      "10": {
+        "data_type": "boolean",
+        "name": "data_waiting"
+      },
+      "11": {
+        "data_type": "particle",
+        "name": "data_particle"
+      }
+    }
+  },
+  "minecraft:armor_stand": {
+    "width": 0.5,
+    "height": 1.975,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_client_flags"
+      },
+      "16": {
+        "data_type": "rotations",
+        "name": "data_head_pose"
+      },
+      "17": {
+        "data_type": "rotations",
+        "name": "data_body_pose"
+      },
+      "18": {
+        "data_type": "rotations",
+        "name": "data_left_arm_pose"
+      },
+      "19": {
+        "data_type": "rotations",
+        "name": "data_right_arm_pose"
+      },
+      "20": {
+        "data_type": "rotations",
+        "name": "data_left_leg_pose"
+      },
+      "21": {
+        "data_type": "rotations",
+        "name": "data_right_leg_pose"
+      }
+    }
+  },
+  "minecraft:arrow": {
+    "width": 0.5,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "id_flags"
+      },
+      "9": {
+        "data_type": "byte",
+        "name": "pierce_level"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "id_effect_color"
+      }
+    }
+  },
+  "minecraft:axolotl": {
+    "width": 0.75,
+    "height": 0.42,
+    "size_fixed": false,
+    "category": "axolotls",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_variant"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "data_playing_dead"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "from_bucket"
+      }
+    }
+  },
+  "minecraft:bat": {
+    "width": 0.5,
+    "height": 0.9,
+    "size_fixed": false,
+    "category": "ambient",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "byte",
+        "name": "data_id_flags"
+      }
+    }
+  },
+  "minecraft:bee": {
+    "width": 0.7,
+    "height": 0.6,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_flags_id"
+      },
+      "18": {
+        "data_type": "int",
+        "name": "data_remaining_anger_time"
+      }
+    }
+  },
+  "minecraft:blaze": {
+    "width": 0.6,
+    "height": 1.8,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "byte",
+        "name": "data_flags_id"
+      }
+    }
+  },
+  "minecraft:boat": {
+    "width": 1.375,
+    "height": 0.5625,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "int",
+        "name": "data_id_hurt"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_id_hurtdir"
+      },
+      "10": {
+        "data_type": "float",
+        "name": "data_id_damage"
+      },
+      "11": {
+        "data_type": "int",
+        "name": "data_id_type"
+      },
+      "12": {
+        "data_type": "boolean",
+        "name": "data_id_paddle_left"
+      },
+      "13": {
+        "data_type": "boolean",
+        "name": "data_id_paddle_right"
+      },
+      "14": {
+        "data_type": "int",
+        "name": "data_id_bubble_time"
+      }
+    }
+  },
+  "minecraft:camel": {
+    "width": 1.7,
+    "height": 2.375,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_id_flags"
+      },
+      "18": {
+        "data_type": "optional_uuid",
+        "name": "data_id_owner_uuid"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "dash"
+      },
+      "20": {
+        "data_type": "long",
+        "name": "last_pose_change_tick"
+      }
+    }
+  },
+  "minecraft:cat": {
+    "width": 0.6,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_flags_id"
+      },
+      "18": {
+        "data_type": "optional_uuid",
+        "name": "data_owneruuid_id"
+      },
+      "19": {
+        "data_type": "cat_variant",
+        "name": "data_variant_id"
+      },
+      "20": {
+        "data_type": "boolean",
+        "name": "is_lying"
+      },
+      "21": {
+        "data_type": "boolean",
+        "name": "relax_state_one"
+      },
+      "22": {
+        "data_type": "int",
+        "name": "data_collar_color"
+      }
+    }
+  },
+  "minecraft:cave_spider": {
+    "width": 0.7,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "byte",
+        "name": "data_flags_id"
+      }
+    }
+  },
+  "minecraft:chest_boat": {
+    "width": 1.375,
+    "height": 0.5625,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "int",
+        "name": "data_id_hurt"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_id_hurtdir"
+      },
+      "10": {
+        "data_type": "float",
+        "name": "data_id_damage"
+      },
+      "11": {
+        "data_type": "int",
+        "name": "data_id_type"
+      },
+      "12": {
+        "data_type": "boolean",
+        "name": "data_id_paddle_left"
+      },
+      "13": {
+        "data_type": "boolean",
+        "name": "data_id_paddle_right"
+      },
+      "14": {
+        "data_type": "int",
+        "name": "data_id_bubble_time"
+      }
+    }
+  },
+  "minecraft:chest_minecart": {
+    "width": 0.98,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "int",
+        "name": "data_id_hurt"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_id_hurtdir"
+      },
+      "10": {
+        "data_type": "float",
+        "name": "data_id_damage"
+      },
+      "11": {
+        "data_type": "int",
+        "name": "data_id_display_block"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_id_display_offset"
+      },
+      "13": {
+        "data_type": "boolean",
+        "name": "data_id_custom_display"
+      }
+    }
+  },
+  "minecraft:chicken": {
+    "width": 0.4,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      }
+    }
+  },
+  "minecraft:cod": {
+    "width": 0.5,
+    "height": 0.3,
+    "size_fixed": false,
+    "category": "water_ambient",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "from_bucket"
+      }
+    }
+  },
+  "minecraft:command_block_minecart": {
+    "width": 0.98,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "int",
+        "name": "data_id_hurt"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_id_hurtdir"
+      },
+      "10": {
+        "data_type": "float",
+        "name": "data_id_damage"
+      },
+      "11": {
+        "data_type": "int",
+        "name": "data_id_display_block"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_id_display_offset"
+      },
+      "13": {
+        "data_type": "boolean",
+        "name": "data_id_custom_display"
+      },
+      "14": {
+        "data_type": "string",
+        "name": "data_id_command_name"
+      },
+      "15": {
+        "data_type": "component",
+        "name": "data_id_last_output"
+      }
+    }
+  },
+  "minecraft:cow": {
+    "width": 0.9,
+    "height": 1.4,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      }
+    }
+  },
+  "minecraft:creeper": {
+    "width": 0.6,
+    "height": 1.7,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "int",
+        "name": "data_swell_dir"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "data_is_powered"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "data_is_ignited"
+      }
+    }
+  },
+  "minecraft:dolphin": {
+    "width": 0.9,
+    "height": 0.6,
+    "size_fixed": false,
+    "category": "water_creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "block_pos",
+        "name": "treasure_pos"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "got_fish"
+      },
+      "18": {
+        "data_type": "int",
+        "name": "moistness_level"
+      }
+    }
+  },
+  "minecraft:donkey": {
+    "width": 1.3964844,
+    "height": 1.5,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_id_flags"
+      },
+      "18": {
+        "data_type": "optional_uuid",
+        "name": "data_id_owner_uuid"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "data_id_chest"
+      }
+    }
+  },
+  "minecraft:dragon_fireball": {
+    "width": 1.0,
+    "height": 1.0,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      }
+    }
+  },
+  "minecraft:drowned": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_special_type_id"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "data_drowned_conversion_id"
+      }
+    }
+  },
+  "minecraft:egg": {
+    "width": 0.25,
+    "height": 0.25,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_item_stack"
+      }
+    }
+  },
+  "minecraft:elder_guardian": {
+    "width": 1.9975,
+    "height": 1.9975,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_id_moving"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_id_attack_target"
+      }
+    }
+  },
+  "minecraft:end_crystal": {
+    "width": 2.0,
+    "height": 2.0,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "optional_block_pos",
+        "name": "data_beam_target"
+      },
+      "9": {
+        "data_type": "boolean",
+        "name": "data_show_bottom"
+      }
+    }
+  },
+  "minecraft:ender_dragon": {
+    "width": 16.0,
+    "height": 8.0,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "int",
+        "name": "data_phase"
+      }
+    }
+  },
+  "minecraft:ender_pearl": {
+    "width": 0.25,
+    "height": 0.25,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_item_stack"
+      }
+    }
+  },
+  "minecraft:enderman": {
+    "width": 0.6,
+    "height": 2.9,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "block_state",
+        "name": "data_carry_state"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "data_creepy"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "data_stared_at"
+      }
+    }
+  },
+  "minecraft:endermite": {
+    "width": 0.4,
+    "height": 0.3,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      }
+    }
+  },
+  "minecraft:evoker": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "is_celebrating"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_spell_casting_id"
+      }
+    }
+  },
+  "minecraft:evoker_fangs": {
+    "width": 0.5,
+    "height": 0.8,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      }
+    }
+  },
+  "minecraft:experience_bottle": {
+    "width": 0.25,
+    "height": 0.25,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_item_stack"
+      }
+    }
+  },
+  "minecraft:experience_orb": {
+    "width": 0.5,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      }
+    }
+  },
+  "minecraft:eye_of_ender": {
+    "width": 0.25,
+    "height": 0.25,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_item_stack"
+      }
+    }
+  },
+  "minecraft:falling_block": {
+    "width": 0.98,
+    "height": 0.98,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "block_pos",
+        "name": "data_start_pos"
+      }
+    }
+  },
+  "minecraft:fireball": {
+    "width": 1.0,
+    "height": 1.0,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_item_stack"
+      }
+    }
+  },
+  "minecraft:firework_rocket": {
+    "width": 0.25,
+    "height": 0.25,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_id_fireworks_item"
+      },
+      "9": {
+        "data_type": "optional_unsigned_int",
+        "name": "data_attached_to_target"
+      },
+      "10": {
+        "data_type": "boolean",
+        "name": "data_shot_at_angle"
+      }
+    }
+  },
+  "minecraft:fishing_bobber": {
+    "width": 0.25,
+    "height": 0.25,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "int",
+        "name": "data_hooked_entity"
+      },
+      "9": {
+        "data_type": "boolean",
+        "name": "data_biting"
+      }
+    }
+  },
+  "minecraft:fox": {
+    "width": 0.6,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_type_id"
+      },
+      "18": {
+        "data_type": "byte",
+        "name": "data_flags_id"
+      },
+      "19": {
+        "data_type": "optional_uuid",
+        "name": "data_trusted_id_0"
+      },
+      "20": {
+        "data_type": "optional_uuid",
+        "name": "data_trusted_id_1"
+      }
+    }
+  },
+  "minecraft:frog": {
+    "width": 0.5,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "frog_variant",
+        "name": "data_variant_id"
+      },
+      "18": {
+        "data_type": "optional_unsigned_int",
+        "name": "data_tongue_target_id"
+      }
+    }
+  },
+  "minecraft:furnace_minecart": {
+    "width": 0.98,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "int",
+        "name": "data_id_hurt"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_id_hurtdir"
+      },
+      "10": {
+        "data_type": "float",
+        "name": "data_id_damage"
+      },
+      "11": {
+        "data_type": "int",
+        "name": "data_id_display_block"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_id_display_offset"
+      },
+      "13": {
+        "data_type": "boolean",
+        "name": "data_id_custom_display"
+      },
+      "14": {
+        "data_type": "boolean",
+        "name": "data_id_fuel"
+      }
+    }
+  },
+  "minecraft:ghast": {
+    "width": 4.0,
+    "height": 4.0,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_is_charging"
+      }
+    }
+  },
+  "minecraft:giant": {
+    "width": 3.6,
+    "height": 12.0,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      }
+    }
+  },
+  "minecraft:glow_item_frame": {
+    "width": 0.5,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_item"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_rotation"
+      }
+    }
+  },
+  "minecraft:glow_squid": {
+    "width": 0.8,
+    "height": 0.8,
+    "size_fixed": false,
+    "category": "underground_water_creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "int",
+        "name": "data_dark_ticks_remaining"
+      }
+    }
+  },
+  "minecraft:goat": {
+    "width": 0.9,
+    "height": 1.3,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "data_is_screaming_goat"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "data_has_left_horn"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "data_has_right_horn"
+      }
+    }
+  },
+  "minecraft:guardian": {
+    "width": 0.85,
+    "height": 0.85,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_id_moving"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_id_attack_target"
+      }
+    }
+  },
+  "minecraft:hoglin": {
+    "width": 1.3964844,
+    "height": 1.4,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "data_immune_to_zombification"
+      }
+    }
+  },
+  "minecraft:hopper_minecart": {
+    "width": 0.98,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "int",
+        "name": "data_id_hurt"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_id_hurtdir"
+      },
+      "10": {
+        "data_type": "float",
+        "name": "data_id_damage"
+      },
+      "11": {
+        "data_type": "int",
+        "name": "data_id_display_block"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_id_display_offset"
+      },
+      "13": {
+        "data_type": "boolean",
+        "name": "data_id_custom_display"
+      }
+    }
+  },
+  "minecraft:horse": {
+    "width": 1.3964844,
+    "height": 1.6,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_id_flags"
+      },
+      "18": {
+        "data_type": "optional_uuid",
+        "name": "data_id_owner_uuid"
+      },
+      "19": {
+        "data_type": "int",
+        "name": "data_id_type_variant"
+      }
+    }
+  },
+  "minecraft:husk": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_special_type_id"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "data_drowned_conversion_id"
+      }
+    }
+  },
+  "minecraft:illusioner": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "is_celebrating"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_spell_casting_id"
+      }
+    }
+  },
+  "minecraft:iron_golem": {
+    "width": 1.4,
+    "height": 2.7,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "byte",
+        "name": "data_flags_id"
+      }
+    }
+  },
+  "minecraft:item": {
+    "width": 0.25,
+    "height": 0.25,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_item"
+      }
+    }
+  },
+  "minecraft:item_frame": {
+    "width": 0.5,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_item"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_rotation"
+      }
+    }
+  },
+  "minecraft:leash_knot": {
+    "width": 0.375,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      }
+    }
+  },
+  "minecraft:lightning_bolt": {
+    "width": 0.0,
+    "height": 0.0,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      }
+    }
+  },
+  "minecraft:llama": {
+    "width": 0.9,
+    "height": 1.87,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_id_flags"
+      },
+      "18": {
+        "data_type": "optional_uuid",
+        "name": "data_id_owner_uuid"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "data_id_chest"
+      },
+      "20": {
+        "data_type": "int",
+        "name": "data_strength_id"
+      },
+      "21": {
+        "data_type": "int",
+        "name": "data_swag_id"
+      },
+      "22": {
+        "data_type": "int",
+        "name": "data_variant_id"
+      }
+    }
+  },
+  "minecraft:llama_spit": {
+    "width": 0.25,
+    "height": 0.25,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      }
+    }
+  },
+  "minecraft:magma_cube": {
+    "width": 2.04,
+    "height": 2.04,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "int",
+        "name": "id_size"
+      }
+    }
+  },
+  "minecraft:marker": {
+    "width": 0.0,
+    "height": 0.0,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      }
+    }
+  },
+  "minecraft:minecart": {
+    "width": 0.98,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "int",
+        "name": "data_id_hurt"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_id_hurtdir"
+      },
+      "10": {
+        "data_type": "float",
+        "name": "data_id_damage"
+      },
+      "11": {
+        "data_type": "int",
+        "name": "data_id_display_block"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_id_display_offset"
+      },
+      "13": {
+        "data_type": "boolean",
+        "name": "data_id_custom_display"
+      }
+    }
+  },
+  "minecraft:mooshroom": {
+    "width": 0.9,
+    "height": 1.4,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "string",
+        "name": "data_type"
+      }
+    }
+  },
+  "minecraft:mule": {
+    "width": 1.3964844,
+    "height": 1.6,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_id_flags"
+      },
+      "18": {
+        "data_type": "optional_uuid",
+        "name": "data_id_owner_uuid"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "data_id_chest"
+      }
+    }
+  },
+  "minecraft:ocelot": {
+    "width": 0.6,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "data_trusting"
+      }
+    }
+  },
+  "minecraft:painting": {
+    "width": 0.5,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "painting_variant",
+        "name": "data_painting_variant_id"
+      }
+    }
+  },
+  "minecraft:panda": {
+    "width": 1.3,
+    "height": 1.25,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "unhappy_counter"
+      },
+      "18": {
+        "data_type": "int",
+        "name": "sneeze_counter"
+      },
+      "19": {
+        "data_type": "int",
+        "name": "eat_counter"
+      },
+      "20": {
+        "data_type": "byte",
+        "name": "main_gene_id"
+      },
+      "21": {
+        "data_type": "byte",
+        "name": "hidden_gene_id"
+      },
+      "22": {
+        "data_type": "byte",
+        "name": "data_id_flags"
+      }
+    }
+  },
+  "minecraft:parrot": {
+    "width": 0.5,
+    "height": 0.9,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_flags_id"
+      },
+      "18": {
+        "data_type": "optional_uuid",
+        "name": "data_owneruuid_id"
+      },
+      "19": {
+        "data_type": "int",
+        "name": "data_variant_id"
+      }
+    }
+  },
+  "minecraft:phantom": {
+    "width": 0.9,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "int",
+        "name": "id_size"
+      }
+    }
+  },
+  "minecraft:pig": {
+    "width": 0.9,
+    "height": 0.9,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "data_saddle_id"
+      },
+      "18": {
+        "data_type": "int",
+        "name": "data_boost_time"
+      }
+    }
+  },
+  "minecraft:piglin": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_immune_to_zombification"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "data_is_charging_crossbow"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "data_is_dancing"
+      }
+    }
+  },
+  "minecraft:piglin_brute": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_immune_to_zombification"
+      }
+    }
+  },
+  "minecraft:pillager": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "is_celebrating"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "is_charging_crossbow"
+      }
+    }
+  },
+  "minecraft:player": {
+    "width": 0.6,
+    "height": 1.8,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "float",
+        "name": "data_player_absorption_id"
+      },
+      "16": {
+        "data_type": "int",
+        "name": "data_score_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_player_mode_customisation"
+      },
+      "18": {
+        "data_type": "byte",
+        "name": "data_player_main_hand"
+      },
+      "19": {
+        "data_type": "compound_tag",
+        "name": "data_shoulder_left"
+      },
+      "20": {
+        "data_type": "compound_tag",
+        "name": "data_shoulder_right"
+      }
+    }
+  },
+  "minecraft:polar_bear": {
+    "width": 1.4,
+    "height": 1.4,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "data_standing_id"
+      }
+    }
+  },
+  "minecraft:potion": {
+    "width": 0.25,
+    "height": 0.25,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_item_stack"
+      }
+    }
+  },
+  "minecraft:pufferfish": {
+    "width": 0.7,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "water_ambient",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "from_bucket"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "puff_state"
+      }
+    }
+  },
+  "minecraft:rabbit": {
+    "width": 0.4,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_type_id"
+      }
+    }
+  },
+  "minecraft:ravager": {
+    "width": 1.95,
+    "height": 2.2,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "is_celebrating"
+      }
+    }
+  },
+  "minecraft:salmon": {
+    "width": 0.7,
+    "height": 0.4,
+    "size_fixed": false,
+    "category": "water_ambient",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "from_bucket"
+      }
+    }
+  },
+  "minecraft:sheep": {
+    "width": 0.9,
+    "height": 1.3,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_wool_id"
+      }
+    }
+  },
+  "minecraft:shulker": {
+    "width": 1.0,
+    "height": 1.0,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "direction",
+        "name": "data_attach_face_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_peek_id"
+      },
+      "18": {
+        "data_type": "byte",
+        "name": "data_color_id"
+      }
+    }
+  },
+  "minecraft:shulker_bullet": {
+    "width": 0.3125,
+    "height": 0.3125,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      }
+    }
+  },
+  "minecraft:silverfish": {
+    "width": 0.4,
+    "height": 0.3,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      }
+    }
+  },
+  "minecraft:skeleton": {
+    "width": 0.6,
+    "height": 1.99,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_stray_conversion_id"
+      }
+    }
+  },
+  "minecraft:skeleton_horse": {
+    "width": 1.3964844,
+    "height": 1.6,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_id_flags"
+      },
+      "18": {
+        "data_type": "optional_uuid",
+        "name": "data_id_owner_uuid"
+      }
+    }
+  },
+  "minecraft:slime": {
+    "width": 2.04,
+    "height": 2.04,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "int",
+        "name": "id_size"
+      }
+    }
+  },
+  "minecraft:small_fireball": {
+    "width": 0.3125,
+    "height": 0.3125,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_item_stack"
+      }
+    }
+  },
+  "minecraft:snow_golem": {
+    "width": 0.7,
+    "height": 1.9,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "byte",
+        "name": "data_pumpkin_id"
+      }
+    }
+  },
+  "minecraft:snowball": {
+    "width": 0.25,
+    "height": 0.25,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "item_stack",
+        "name": "data_item_stack"
+      }
+    }
+  },
+  "minecraft:spawner_minecart": {
+    "width": 0.98,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "int",
+        "name": "data_id_hurt"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_id_hurtdir"
+      },
+      "10": {
+        "data_type": "float",
+        "name": "data_id_damage"
+      },
+      "11": {
+        "data_type": "int",
+        "name": "data_id_display_block"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_id_display_offset"
+      },
+      "13": {
+        "data_type": "boolean",
+        "name": "data_id_custom_display"
+      }
+    }
+  },
+  "minecraft:spectral_arrow": {
+    "width": 0.5,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "id_flags"
+      },
+      "9": {
+        "data_type": "byte",
+        "name": "pierce_level"
+      }
+    }
+  },
+  "minecraft:spider": {
+    "width": 1.4,
+    "height": 0.9,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "byte",
+        "name": "data_flags_id"
+      }
+    }
+  },
+  "minecraft:squid": {
+    "width": 0.8,
+    "height": 0.8,
+    "size_fixed": false,
+    "category": "water_creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      }
+    }
+  },
+  "minecraft:stray": {
+    "width": 0.6,
+    "height": 1.99,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      }
+    }
+  },
+  "minecraft:strider": {
+    "width": 0.9,
+    "height": 1.7,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_boost_time"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "data_suffocating"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "data_saddle_id"
+      }
+    }
+  },
+  "minecraft:tadpole": {
+    "width": 0.4,
+    "height": 0.3,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "from_bucket"
+      }
+    }
+  },
+  "minecraft:tnt": {
+    "width": 0.98,
+    "height": 0.98,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "int",
+        "name": "data_fuse_id"
+      }
+    }
+  },
+  "minecraft:tnt_minecart": {
+    "width": 0.98,
+    "height": 0.7,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "int",
+        "name": "data_id_hurt"
+      },
+      "9": {
+        "data_type": "int",
+        "name": "data_id_hurtdir"
+      },
+      "10": {
+        "data_type": "float",
+        "name": "data_id_damage"
+      },
+      "11": {
+        "data_type": "int",
+        "name": "data_id_display_block"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_id_display_offset"
+      },
+      "13": {
+        "data_type": "boolean",
+        "name": "data_id_custom_display"
+      }
+    }
+  },
+  "minecraft:trader_llama": {
+    "width": 0.9,
+    "height": 1.87,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_id_flags"
+      },
+      "18": {
+        "data_type": "optional_uuid",
+        "name": "data_id_owner_uuid"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "data_id_chest"
+      },
+      "20": {
+        "data_type": "int",
+        "name": "data_strength_id"
+      },
+      "21": {
+        "data_type": "int",
+        "name": "data_swag_id"
+      },
+      "22": {
+        "data_type": "int",
+        "name": "data_variant_id"
+      }
+    }
+  },
+  "minecraft:trident": {
+    "width": 0.5,
+    "height": 0.5,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "id_flags"
+      },
+      "9": {
+        "data_type": "byte",
+        "name": "pierce_level"
+      },
+      "10": {
+        "data_type": "byte",
+        "name": "id_loyalty"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "id_foil"
+      }
+    }
+  },
+  "minecraft:tropical_fish": {
+    "width": 0.5,
+    "height": 0.4,
+    "size_fixed": false,
+    "category": "water_ambient",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "from_bucket"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_id_type_variant"
+      }
+    }
+  },
+  "minecraft:turtle": {
+    "width": 1.2,
+    "height": 0.4,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "block_pos",
+        "name": "home_pos"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "has_egg"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "laying_egg"
+      },
+      "20": {
+        "data_type": "block_pos",
+        "name": "travel_pos"
+      },
+      "21": {
+        "data_type": "boolean",
+        "name": "going_home"
+      },
+      "22": {
+        "data_type": "boolean",
+        "name": "travelling"
+      }
+    }
+  },
+  "minecraft:vex": {
+    "width": 0.4,
+    "height": 0.8,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "byte",
+        "name": "data_flags_id"
+      }
+    }
+  },
+  "minecraft:villager": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_unhappy_counter"
+      },
+      "18": {
+        "data_type": "villager_data",
+        "name": "data_villager_data"
+      }
+    }
+  },
+  "minecraft:vindicator": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "is_celebrating"
+      }
+    }
+  },
+  "minecraft:wandering_trader": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_unhappy_counter"
+      }
+    }
+  },
+  "minecraft:warden": {
+    "width": 0.9,
+    "height": 2.9,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "int",
+        "name": "client_anger_level"
+      }
+    }
+  },
+  "minecraft:witch": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "is_celebrating"
+      },
+      "17": {
+        "data_type": "boolean",
+        "name": "data_using_item"
+      }
+    }
+  },
+  "minecraft:wither": {
+    "width": 0.9,
+    "height": 3.5,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "int",
+        "name": "data_target_a"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_target_b"
+      },
+      "18": {
+        "data_type": "int",
+        "name": "data_target_c"
+      },
+      "19": {
+        "data_type": "int",
+        "name": "data_id_inv"
+      }
+    }
+  },
+  "minecraft:wither_skeleton": {
+    "width": 0.7,
+    "height": 2.4,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      }
+    }
+  },
+  "minecraft:wither_skull": {
+    "width": 0.3125,
+    "height": 0.3125,
+    "size_fixed": false,
+    "category": "misc",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "boolean",
+        "name": "data_dangerous"
+      }
+    }
+  },
+  "minecraft:wolf": {
+    "width": 0.6,
+    "height": 0.85,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_flags_id"
+      },
+      "18": {
+        "data_type": "optional_uuid",
+        "name": "data_owneruuid_id"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "data_interested_id"
+      },
+      "20": {
+        "data_type": "int",
+        "name": "data_collar_color"
+      },
+      "21": {
+        "data_type": "int",
+        "name": "data_remaining_anger_time"
+      }
+    }
+  },
+  "minecraft:zoglin": {
+    "width": 1.3964844,
+    "height": 1.4,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      }
+    }
+  },
+  "minecraft:zombie": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_special_type_id"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "data_drowned_conversion_id"
+      }
+    }
+  },
+  "minecraft:zombie_horse": {
+    "width": 1.3964844,
+    "height": 1.6,
+    "size_fixed": false,
+    "category": "creature",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "byte",
+        "name": "data_id_flags"
+      },
+      "18": {
+        "data_type": "optional_uuid",
+        "name": "data_id_owner_uuid"
+      }
+    }
+  },
+  "minecraft:zombie_villager": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_special_type_id"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "data_drowned_conversion_id"
+      },
+      "19": {
+        "data_type": "boolean",
+        "name": "data_converting_id"
+      },
+      "20": {
+        "data_type": "villager_data",
+        "name": "data_villager_data"
+      }
+    }
+  },
+  "minecraft:zombified_piglin": {
+    "width": 0.6,
+    "height": 1.95,
+    "size_fixed": false,
+    "category": "monster",
+    "metadata": {
+      "0": {
+        "data_type": "byte",
+        "name": "data_shared_flags_id"
+      },
+      "1": {
+        "data_type": "int",
+        "name": "data_air_supply_id"
+      },
+      "2": {
+        "data_type": "optional_component",
+        "name": "data_custom_name"
+      },
+      "3": {
+        "data_type": "boolean",
+        "name": "data_custom_name_visible"
+      },
+      "4": {
+        "data_type": "boolean",
+        "name": "data_silent"
+      },
+      "5": {
+        "data_type": "boolean",
+        "name": "data_no_gravity"
+      },
+      "6": {
+        "data_type": "pose",
+        "name": "data_pose"
+      },
+      "7": {
+        "data_type": "int",
+        "name": "data_ticks_frozen"
+      },
+      "8": {
+        "data_type": "byte",
+        "name": "data_living_entity_flags"
+      },
+      "9": {
+        "data_type": "float",
+        "name": "data_health_id"
+      },
+      "10": {
+        "data_type": "int",
+        "name": "data_effect_color_id"
+      },
+      "11": {
+        "data_type": "boolean",
+        "name": "data_effect_ambience_id"
+      },
+      "12": {
+        "data_type": "int",
+        "name": "data_arrow_count_id"
+      },
+      "13": {
+        "data_type": "int",
+        "name": "data_stinger_count_id"
+      },
+      "14": {
+        "data_type": "optional_block_pos",
+        "name": "sleeping_pos_id"
+      },
+      "15": {
+        "data_type": "byte",
+        "name": "data_mob_flags_id"
+      },
+      "16": {
+        "data_type": "boolean",
+        "name": "data_baby_id"
+      },
+      "17": {
+        "data_type": "int",
+        "name": "data_special_type_id"
+      },
+      "18": {
+        "data_type": "boolean",
+        "name": "data_drowned_conversion_id"
+      }
+    }
+  }
+}
