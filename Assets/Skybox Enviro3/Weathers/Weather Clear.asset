@@ -74,7 +74,7 @@ MonoBehaviour:
     flatCloudsAbsorbtion: 0.6
   lightingOverride:
     directLightIntensityModifier: 1.2
-    ambientIntensityModifier: 1.5
+    ambientIntensityModifier: 1
   skyOverride:
     intensity: 1
     skyColorTint: {r: 1, g: 1, b: 1, a: 1}
@@ -87,8 +87,8 @@ MonoBehaviour:
     fogHeight2: 0
     fogColorBlend: 0.7
     fogColorMod: {r: 1, g: 1, b: 1, a: 1}
-    scattering: 1.5
-    extinction: 0.25
+    scattering: 1.8
+    extinction: 0.3
     anistropy: 0.01
     unityFogDensity: 0
     unityFogStartDistance: 0
