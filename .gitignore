@@ -19,6 +19,7 @@
 # Third party resources & utils
 /[Aa]ssets/Plugins/
 /[Aa]ssets/Plugins.meta
+/[Aa]ssets/AnimeAnimations/*
 /[Aa]ssets/AnimeModels/*
 !/[Aa]ssets/AnimeModels/Unity*
 /[Aa]ssets/Hovl Studio
