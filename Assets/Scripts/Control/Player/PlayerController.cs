@@ -352,11 +352,11 @@ namespace CraftSharp.Control
         {
             if (_usingAnimator)
             {
-                var offset = (barrierHeight - 0.9F) * Motor.CharacterUp;
+                var offset = (barrierHeight - 1F + Ability.ClimbOverExtraUpward) * Motor.CharacterUp + Ability.ClimbOverExtraForward * Motor.CharacterForward;
                 
                 StartForceMoveOperation("Climb over barrier (RootMotion)",
                         new ForceMoveOperation[] {
-                                new(offset, 1.3F,
+                                new(offset, Ability.ClimbOverMoveTime,
                                     init: (info, motor, player) =>
                                     {
                                         player.RandomizeMirroredFlag();
@@ -365,6 +365,12 @@ namespace CraftSharp.Control
                                         player.UseRootMotion = true;
                                         player.IgnoreAnimatorScale = true;
                                     },
+                                    update: (interval, curTime, inputData, info, motor, player) => false
+                                ),
+                                new(offset, Ability.ClimbOverTotalTime - Ability.ClimbOverMoveTime - Ability.ClimbOverCheckExit,
+                                    update: (interval, curTime, inputData, info, motor, player) => false
+                                ),
+                                new(Vector3.zero, Ability.ClimbOverCheckExit,
                                     exit: (info, motor, player) =>
                                     {
                                         info.Grounded = true;
@@ -375,7 +381,7 @@ namespace CraftSharp.Control
                                     {
                                         info.Moving = inputData.Gameplay.Movement.IsPressed();
                                         // Terminate force move action if almost finished and player is eager to move
-                                        return curTime < 0.4F && info.Moving;
+                                        return info.Moving;
                                     }
                                 )
                         } );

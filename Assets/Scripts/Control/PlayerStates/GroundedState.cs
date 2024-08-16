@@ -25,7 +25,7 @@ namespace CraftSharp.Control
         {
             // Check climb over barrier Workround: Use a cooldown value to disable climb over right after landing
             if (_groundedCooldown < 0F && info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
-                    info.WallDistance - info.BarrierDistance > 0.7F && info.YawDeltaAbs < 10F && info.BarrierYawAngle < 30F) // Climb up platform
+                    info.BarrierDistance < player.Ability.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F && info.YawDeltaAbs < 10F && info.BarrierYawAngle < 30F) // Climb up platform
             {
                 if (info.YawDeltaAbs <= 10F && info.BarrierYawAngle < 30F) // Trying to moving forward
                 {
