@@ -9,8 +9,8 @@ namespace CraftSharp.Control
         public Vector3 CurrentVelocity = Vector3.zero;
         public Transform? Target;
 
-        public float CurrentScale = 1F;
-        public float TargetScale  = 1F;
+        public float CurrentScale =   0F;
+        public float TargetScale  = 0.5F;
 
         public float CurrentYaw   = 0F;
         public float CurrentPitch = 0F;

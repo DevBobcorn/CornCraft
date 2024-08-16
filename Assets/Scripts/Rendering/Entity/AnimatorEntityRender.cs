@@ -48,7 +48,7 @@ namespace CraftSharp.Rendering
             entityAnimator.SetFloat(HORIZONTAL_SPEED_HASH, (velocity - vertical).magnitude);
         }
 
-        public virtual void UpdateAnimatorParams(PlayerStatus info) { }
+        public virtual void UpdateAnimator(PlayerStatus info) { }
 
         public virtual void RandomizeMirroredFlag()
         {

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 626338d7e82f32b4893ae4cf50bbdfc2, type: 3}
   m_Name: Player Ability
   m_EditorClassIdentifier: 
-  ClimbOverMaxDist: 0.5
+  ClimbOverMaxDist: 0.6
   ClimbOverExtraOffset: {x: 0, y: 0, z: 0}
   ClimbOverTotalTime: 1.2
   ClimbOverMoveTime: 0.3
