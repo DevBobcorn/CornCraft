@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 using CraftSharp.Control;
 
@@ -17,6 +16,8 @@ namespace CraftSharp.Rendering
 
         private static readonly int ROOT_MOTION_HASH = Animator.StringToHash("RootMotion");
         private static readonly int ATTACKING_HASH = Animator.StringToHash("Attacking");
+
+        private PlayerRiggedRenderWidget playerRenderWidget;
 
         public override void Initialize(Entity entity, Vector3Int originOffset)
         {
@@ -38,13 +39,36 @@ namespace CraftSharp.Rendering
             entityAnimator.runtimeAnimatorController = animatorOverrideController;
 
             // Add and initialize player widgets
-            var renderWidget = visualObj.AddComponent<PlayerRenderWidget>();
-            renderWidget.Initialize();
+            playerRenderWidget = visualObj.GetComponent<PlayerRiggedRenderWidget>();
+            playerRenderWidget.Initialize();
 
             var itemMountRef = entityAnimator!.GetBoneTransform(HumanBodyBones.Spine);
             var mainHandRef = entityAnimator.GetBoneTransform(HumanBodyBones.RightHand);
             var offHandRef = entityAnimator.GetBoneTransform(HumanBodyBones.LeftHand);
-            renderWidget.SetRefTransforms(mainHandRef, offHandRef, itemMountRef);
+
+            playerRenderWidget.SetRefTransforms(mainHandRef, offHandRef, itemMountRef);
+        }
+
+        public override Transform SetupCameraRef()
+        {
+            if (playerRenderWidget != null)
+            {
+                var pos = playerRenderWidget.m_CameraRefPos;
+
+                return SetupCameraRef(pos);
+            }
+
+            return base.SetupCameraRef();
+        }
+
+        public Vector2 GetClimberOverOffset()
+        {
+            if (playerRenderWidget != null)
+            {
+                return playerRenderWidget.m_ClimbOverOffset;
+            }
+
+            return Vector2.zero;
         }
 
         public override void Unload()
@@ -60,7 +84,7 @@ namespace CraftSharp.Rendering
             var visualObj = _visualTransform!.gameObject;
 
             // Unload player widgets, allowing it to unsubscribe their events from player controller
-            var renderWidget = visualObj.GetComponent<PlayerRenderWidget>();
+            var renderWidget = visualObj.GetComponent<PlayerRiggedRenderWidget>();
             renderWidget.Unload();
 
             // Self destruction
@@ -70,17 +94,21 @@ namespace CraftSharp.Rendering
             }
         }
 
+        #nullable enable
+
         public void InitializeActiveItem(ItemStack? itemStack, ItemActionType actionType)
         {
             // Initialize player active item
-            var renderWidget = _visualTransform!.GetComponent<PlayerRenderWidget>();
+            var renderWidget = _visualTransform!.GetComponent<PlayerRiggedRenderWidget>();
             renderWidget.UpdateActiveItem(itemStack, actionType);
         }
+
+        #nullable disable
 
         public override void UpdateAnimatorParams(PlayerStatus info)
         {
             // Update animator parameters
-            entityAnimator!.SetBool(GROUNDED_HASH, info.Grounded);
+            entityAnimator.SetBool(GROUNDED_HASH, info.Grounded);
             entityAnimator.SetBool(FLOATING_HASH, info.Floating);
             entityAnimator.SetBool(CLINGING_HASH, info.Clinging);
             entityAnimator.SetBool(GLIDING_HASH, info.Gliding);

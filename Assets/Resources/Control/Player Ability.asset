@@ -13,11 +13,10 @@ MonoBehaviour:
   m_Name: Player Ability
   m_EditorClassIdentifier: 
   ClimbOverMaxDist: 0.5
-  ClimbOverExtraForward: 0.1
-  ClimbOverExtraUpward: 0.11
-  ClimbOverTotalTime: 1.1
-  ClimbOverMoveTime: 0.33
-  ClimbOverCheckExit: 0.2
+  ClimbOverExtraOffset: {x: 0, y: 0, z: 0}
+  ClimbOverTotalTime: 1.2
+  ClimbOverMoveTime: 0.3
+  ClimbOverCheckExit: 0.6
   WalkSpeed: 2.15
   RunSpeed: 6
   AccSpeed: 25

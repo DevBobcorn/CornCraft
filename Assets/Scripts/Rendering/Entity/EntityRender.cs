@@ -281,7 +281,15 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public virtual Transform SetupCameraRef(Vector3 pos)
+        public virtual Transform SetupCameraRef()
+        {
+            // TODO: Get pos by entity size
+            var pos = new Vector3(0F, 1.6F, 0F);
+
+            return SetupCameraRef(pos);
+        }
+
+        protected Transform SetupCameraRef(Vector3 pos)
         {
             var cameraRefObj = new GameObject("Camera Ref");
             var cameraRef = cameraRefObj.transform;

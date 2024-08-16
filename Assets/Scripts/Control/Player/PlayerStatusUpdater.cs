@@ -132,6 +132,11 @@ namespace CraftSharp.Control
             else // Not grounded in last update
             {
                 Status.Grounded = groundCheck;
+
+                if (groundCheck)
+                {
+                    Status.TimeSinceGrounded = 0F;
+                }
             }
             
             // Cast a ray downwards again, but check liquid layer this time

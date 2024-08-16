@@ -33,6 +33,11 @@ namespace CraftSharp.Control
         public bool Grounded  = false;
 
         /// <summary>
+        /// Time since grounded, only used when Grounded is true
+        /// </summary>
+        public float TimeSinceGrounded = 0F;
+
+        /// <summary>
         /// Unused for now
         /// </summary>
         public bool Clinging  = false;
