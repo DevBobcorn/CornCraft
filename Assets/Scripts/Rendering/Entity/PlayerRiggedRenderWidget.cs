@@ -282,7 +282,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        void Update()
+        public void ManagedUpdate()
         {
             if (_spineRef == null || _itemMountPivot == null)
                 return;

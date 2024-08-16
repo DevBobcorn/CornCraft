@@ -105,7 +105,7 @@ namespace CraftSharp.Rendering
 
         #nullable disable
 
-        public override void UpdateAnimatorParams(PlayerStatus info)
+        public override void UpdateAnimator(PlayerStatus info)
         {
             // Update animator parameters
             entityAnimator.SetBool(GROUNDED_HASH, info.Grounded);
@@ -119,6 +119,9 @@ namespace CraftSharp.Rendering
 
             entityAnimator.SetBool(ROOT_MOTION_HASH, info.PlayingRootMotion);
             entityAnimator.SetBool(ATTACKING_HASH, info.Attacking);
+
+            // Update animator widget
+            playerRenderWidget.ManagedUpdate();
         }
     }
 }

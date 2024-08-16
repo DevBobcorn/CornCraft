@@ -120,6 +120,12 @@ namespace CraftSharp.Control
                         moveSpeed = ability.SprintSpeed;
                     else
                         moveSpeed = info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
+                    
+                    // Workaround: Slow down when walking downstairs
+                    if (!motor.GroundingStatus.FoundAnyGround)
+                    {
+                        moveSpeed *= 0.3F;
+                    }
 
                     // Smooth rotation for player model
                     info.CurrentVisualYaw = Mathf.MoveTowardsAngle(Mathf.LerpAngle(info.CurrentVisualYaw,

@@ -91,6 +91,9 @@ namespace CraftSharp
             {
                 throw new Exception("Player render prefab is not assigned for game client!");
             }
+
+            // Update camera yaw
+            CameraController.SetYaw(0F);
         }
 
         public override bool StartClient(StartLoginInfo info)

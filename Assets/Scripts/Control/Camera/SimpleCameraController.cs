@@ -46,12 +46,8 @@ namespace CraftSharp.Control
 
             // Initialize camera scale
             zoomInput!.action.Enable();
-            cameraInfo.CurrentScale = cameraInfo.TargetScale;
-
-            // Apply default Fov
-            var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
-            virtualCameraFollow!.m_Lens.FieldOfView = fov;
-            spriteRenderCamera!.fieldOfView = fov;
+            cameraInfo.TargetScale = 0.8F;
+            cameraInfo.CurrentScale = cameraInfo.TargetScale - 0.2F;
 
             // Aiming is not enabled by default
             EnableAimingCamera(false);

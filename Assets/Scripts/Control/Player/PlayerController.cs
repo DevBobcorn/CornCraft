@@ -150,7 +150,7 @@ namespace CraftSharp.Control
                         // Update player render velocity
                         _playerRender.SetVisualMovementVelocity(velocity, Motor.CharacterUp);
                         // Upload animator state machine parameters
-                        riggedRender.UpdateAnimatorParams(status);
+                        riggedRender.UpdateAnimator(status);
                         // Update render
                         _playerRender.UpdateAnimation(0.05F);
                     };
@@ -363,7 +363,7 @@ namespace CraftSharp.Control
                     extraOffset = Ability.ClimbOverExtraOffset;
                 }
 
-                var offset = (barrierHeight - 1F + extraOffset.y) * Motor.CharacterUp + extraOffset.x * Motor.CharacterForward;
+                var offset = (barrierHeight * 0.5F - 0.5F + extraOffset.y) * Motor.CharacterUp + extraOffset.x * Motor.CharacterForward;
                 
                 StartForceMoveOperation("Climb over barrier (RootMotion)",
                         new ForceMoveOperation[] {
@@ -396,6 +396,7 @@ namespace CraftSharp.Control
                                     }
                                 )
                         } );
+                Debug.Log($"Climb over {barrierHeight}");
             }
             else
             {
@@ -595,8 +596,6 @@ namespace CraftSharp.Control
 
         public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
         {
-            // TODO: Root Motion
-
             var status = _statusUpdater!.Status;
 
             float prevStamina = status.StaminaLeft;
