@@ -5347,7 +5347,7 @@ Transform:
   m_GameObject: {fileID: 5853253062527226390}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.5256128, y: 3.05159, z: 2.0881348}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5380,7 +5380,7 @@ MonoBehaviour:
   Reflections: {fileID: 3607125083166130530, guid: db69de11a56f8724aa8ca19d04c4a01b, type: 2}
   Sky: {fileID: -1033463005042072443, guid: db69de11a56f8724aa8ca19d04c4a01b, type: 2}
   Fog: {fileID: 6137975383063632260, guid: db69de11a56f8724aa8ca19d04c4a01b, type: 2}
-  VolumetricClouds: {fileID: 0}
+  VolumetricClouds: {fileID: -6431167543344897848, guid: db69de11a56f8724aa8ca19d04c4a01b, type: 2}
   FlatClouds: {fileID: 0}
   Weather: {fileID: 5286980405202375680, guid: db69de11a56f8724aa8ca19d04c4a01b, type: 2}
   Aurora: {fileID: 0}
