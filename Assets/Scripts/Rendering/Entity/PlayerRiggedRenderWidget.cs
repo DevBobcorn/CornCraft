@@ -8,11 +8,15 @@ using CraftSharp.Resource;
 
 namespace CraftSharp.Rendering
 {
-    public class PlayerRenderWidget : MonoBehaviour
+    [RequireComponent(typeof (Animator))]
+    public class PlayerRiggedRenderWidget : MonoBehaviour
     {
-        [SerializeField] private Transform? _mainHandRef;
-        [SerializeField] private Transform? _offHandRef;
-        [SerializeField] private Transform? _spineRef;
+        private Transform? _mainHandRef;
+        private Transform? _offHandRef;
+        private Transform? _spineRef;
+
+        public Vector3 m_CameraRefPos = new(0F, 1.2F, 0F);
+        public Vector2 m_ClimbOverOffset = new(0F, 0F);
 
         private Transform? _mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
         private Transform? _offHandSlot; // A slot fixed to offHandRef transform (as a child)
@@ -292,7 +296,7 @@ namespace CraftSharp.Rendering
             {
                 if (_player.IgnoreAnimatorScale)
                 {
-                    _player.RootMotionPositionDelta += _playerAnimator!.deltaPosition / _playerAnimator!.transform.localScale.x;
+                    _player.RootMotionPositionDelta += _playerAnimator!.deltaPosition / transform.localScale.x;
                 }
                 else
                 {

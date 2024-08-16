@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using UnityEngine;
-using Unity.Mathematics;
 
 using CraftSharp.Event;
 using CraftSharp.Rendering;
@@ -176,7 +175,7 @@ namespace CraftSharp.Control
                     _usingAnimator = false;
                 }
 
-                CameraRef = _playerRender.SetupCameraRef(new(0F, 1.5F, 0F));
+                CameraRef = _playerRender.SetupCameraRef();
                 _cameraController!.SetTarget(CameraRef);
 
                 _playerRender!.transform.localPosition = Vector3.zero;
@@ -348,11 +347,23 @@ namespace CraftSharp.Control
             CornApp.Notify(Translations.Get($"gameplay.control.switch_to_{(Status.WalkMode ? "walk" : "rush")}"));
         }
 
-        public void ClimbOverBarrier(float barrierDist, float barrierHeight)
+        public void ClimbOverBarrier(float barrierDist, float barrierHeight, bool walkUp)
         {
-            if (_usingAnimator)
+            if (_usingAnimator && barrierHeight > 0.6F)
             {
-                var offset = (barrierHeight - 1F + Ability.ClimbOverExtraUpward) * Motor.CharacterUp + Ability.ClimbOverExtraForward * Motor.CharacterForward;
+                PlayerEntityRiggedRender? riggedRender;
+                Vector2 extraOffset;
+
+                if ((riggedRender = _playerRender as PlayerEntityRiggedRender) != null)
+                {
+                    extraOffset = riggedRender.GetClimberOverOffset();
+                }
+                else
+                {
+                    extraOffset = Ability.ClimbOverExtraOffset;
+                }
+
+                var offset = (barrierHeight - 1F + extraOffset.y) * Motor.CharacterUp + extraOffset.x * Motor.CharacterForward;
                 
                 StartForceMoveOperation("Climb over barrier (RootMotion)",
                         new ForceMoveOperation[] {
@@ -393,7 +404,7 @@ namespace CraftSharp.Control
 
                 StartForceMoveOperation("Climb over barrier (Direct)",
                         new ForceMoveOperation[] {
-                                new(offset, 0.5F,
+                                new(offset, barrierHeight * 0.3F,
                                     exit: (info, motor, player) =>
                                     {
                                         info.Grounded = true;
@@ -401,7 +412,7 @@ namespace CraftSharp.Control
                                     update: (interval, curTime, inputData, info, motor, player) =>
                                     {
                                         info.Moving = inputData.Gameplay.Movement.IsPressed();
-                                        // Don't terminate till the time 
+                                        // Don't terminate till the time ends
                                         return false;
                                     }
                                 )

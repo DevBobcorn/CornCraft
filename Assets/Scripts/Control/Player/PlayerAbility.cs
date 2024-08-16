@@ -9,8 +9,7 @@ namespace CraftSharp.Control
         // Force move animation state names
         public static readonly string CLIMB_1M = "Climb1m";
         [Range(0.1F, 3F)] public float ClimbOverMaxDist    = 0.5F;
-        [Range(0F, 1F)] public float ClimbOverExtraForward = 0.2F;
-        [Range(0F, 1F)] public float ClimbOverExtraUpward  = 0.2F;
+        public Vector3 ClimbOverExtraOffset = Vector2.zero;
         [Range(0.1F, 5F)] public float ClimbOverTotalTime  = 1.1F;
         [Range(0.1F, 5F)] public float ClimbOverMoveTime   = 0.3F;
         [Range(0.1F, 5F)] public float ClimbOverCheckExit  = 0.2F;

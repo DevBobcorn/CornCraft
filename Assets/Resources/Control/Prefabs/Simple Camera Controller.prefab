@@ -438,11 +438,11 @@ MonoBehaviour:
   zoomSensitivity: 0.03
   nearFov: 55
   farFov: 65
-  cameraZOffsetNear: 0.8
-  cameraZOffsetFar: 3.5
+  cameraZOffsetNear: 0.5
+  cameraZOffsetFar: 5
   cameraYOffsetNear: 0
-  cameraYOffsetFar: -1
-  cameraYOffsetClip: -0.2
+  cameraYOffsetFar: -2
+  cameraYOffsetClip: -0.4
   virtualCameraFollow: {fileID: 8231872019064414601}
   virtualCameraAim: {fileID: 7808910476651940505}
 --- !u!1 &2988304240145284854

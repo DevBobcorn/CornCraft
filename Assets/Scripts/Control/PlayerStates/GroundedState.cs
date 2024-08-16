@@ -8,31 +8,32 @@ namespace CraftSharp.Control
 {
     public class GroundedState : IPlayerState
     {
-        private const float THRESHOLD_CLIMB_1M =   1.1F;
-        private const float THRESHOLD_CLIMB_UP = 0.626F;
+        private const float THRESHOLD_CLIMB_1M = 1.1F;
+        private const float THRESHOLD_WALK_UP  = 0.6F;
+        private const float THRESHOLD_CLIMB_UP = 0.4F;
 
         private bool _jumpRequested = false;
         private bool _jumpConfirmed = false;
         private bool _walkToggleRequested = false;
         private bool _sprintRequested = false;
 
-        /// <summary>
-        /// Cooldown variable for climb over check.
-        /// </summary>
-        private float _groundedCooldown = 0F;
-
         public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             // Check climb over barrier Workround: Use a cooldown value to disable climb over right after landing
-            if (_groundedCooldown < 0F && info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
-                    info.BarrierDistance < player.Ability.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F && info.YawDeltaAbs < 10F && info.BarrierYawAngle < 30F) // Climb up platform
+            if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
+                    info.BarrierDistance < player.Ability.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
             {
-                if (info.YawDeltaAbs <= 10F && info.BarrierYawAngle < 30F) // Trying to moving forward
-                {
-                    player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight);
+                bool walkUp = info.BarrierHeight < THRESHOLD_WALK_UP;
 
-                    // Prevent jump preparation
-                    _jumpRequested = false;
+                if (walkUp || (info.TimeSinceGrounded > 0.3F && info.BarrierYawAngle < 30F)) // Check if available, for high barriers check cooldown and angle
+                {
+                    if (info.YawDeltaAbs <= 10F) // Trying to moving forward
+                    {
+                        player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, walkUp);
+
+                        // Prevent jump preparation
+                        _jumpRequested = false;
+                    }
                 }
             }
             
@@ -67,8 +68,8 @@ namespace CraftSharp.Control
             // Reset gliding state
             info.Gliding = false;
 
-            // Update grounded cooldown
-            _groundedCooldown -= interval;
+            // Update grounded timer
+            info.TimeSinceGrounded += interval;
 
             // Check walk toggle request
             if (_walkToggleRequested)
@@ -217,9 +218,6 @@ namespace CraftSharp.Control
             _jumpConfirmed = false;
             _walkToggleRequested = false;
             _sprintRequested = false;
-
-            // Set cooldown
-            _groundedCooldown = 0.3F;
 
             // Register input action events
             player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
