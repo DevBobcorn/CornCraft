@@ -85,6 +85,7 @@ namespace CraftSharp.Control
                 if (info.CenterDownDist < 0.2F && Vector3.Dot(moveVelocity, motor.CharacterUp) <= 0)
                 {
                     info.Grounded = true;
+                    info.TimeSinceGrounded = 0F;
                 }
             }
 

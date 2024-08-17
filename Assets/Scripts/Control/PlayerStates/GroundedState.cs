@@ -35,6 +35,8 @@ namespace CraftSharp.Control
                         _jumpRequested = false;
                     }
                 }
+
+                //Debug.Log($"Walk: {walkUp}, Height: {info.BarrierHeight}, Timer: {info.TimeSinceGrounded}");
             }
             
             if (_jumpRequested) // Jump
@@ -124,7 +126,7 @@ namespace CraftSharp.Control
                     // Workaround: Slow down when walking downstairs
                     if (!motor.GroundingStatus.FoundAnyGround)
                     {
-                        moveSpeed *= 0.3F;
+                        moveSpeed *= 0.35F;
                     }
 
                     // Smooth rotation for player model
