@@ -127,16 +127,13 @@ namespace CraftSharp.Control
                 if (!groundCheck && Status.CenterDownDist > 1.25F)
                 {
                     Status.Grounded = false;
+                    Status.TimeSinceGrounded = -1F;
                 }
             }
             else // Not grounded in last update
             {
                 Status.Grounded = groundCheck;
-
-                if (groundCheck)
-                {
-                    Status.TimeSinceGrounded = 0F;
-                }
+                Status.TimeSinceGrounded = groundCheck ? 0F : -1F;
             }
             
             // Cast a ray downwards again, but check liquid layer this time

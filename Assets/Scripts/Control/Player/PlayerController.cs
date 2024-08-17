@@ -385,6 +385,7 @@ namespace CraftSharp.Control
                                     exit: (info, motor, player) =>
                                     {
                                         info.Grounded = true;
+                                        info.TimeSinceGrounded = Mathf.Max(0F, info.TimeSinceGrounded);
                                         player.UseRootMotion = false;
                                         info.PlayingRootMotion = false;
                                     },
@@ -396,7 +397,6 @@ namespace CraftSharp.Control
                                     }
                                 )
                         } );
-                Debug.Log($"Climb over {barrierHeight}");
             }
             else
             {
@@ -409,6 +409,7 @@ namespace CraftSharp.Control
                                     exit: (info, motor, player) =>
                                     {
                                         info.Grounded = true;
+                                        info.TimeSinceGrounded = Mathf.Max(0F, info.TimeSinceGrounded);
                                     },
                                     update: (interval, curTime, inputData, info, motor, player) =>
                                     {
