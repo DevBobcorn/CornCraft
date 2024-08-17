@@ -271,12 +271,12 @@ namespace CraftSharp.Rendering
                                 if (state.NoCollision)
                                 {
                                     models[chosen].Build(visualBuffer[layerIndex], ref vertOffset[layerIndex],
-                                            new float3(blocZ, blocY, blocX), cullFlags, aoMask, lights, color, datFormat);
+                                            new float3(blocZ, blocY, blocX), cullFlags, aoMask, 0.2F, lights, color, datFormat);
                                 }
                                 else
                                 {
                                     models[chosen].BuildWithCollider(visualBuffer[layerIndex], ref vertOffset[layerIndex], colliderVerts,
-                                            ref colliderVertOffset, new float3(blocZ, blocY, blocX), cullFlags, aoMask, lights, color, datFormat);
+                                            ref colliderVertOffset, new float3(blocZ, blocY, blocX), cullFlags, aoMask, 0.2F, lights, color, datFormat);
                                 }
                             }
                         }
