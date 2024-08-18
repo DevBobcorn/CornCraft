@@ -1,5 +1,20 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6267408122647031173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d69a19d29ef66464ea0afc7cd84fd6c2, type: 3}
+  m_Name: VolumetricFogRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  downsampleDepthShader: {fileID: 4800000, guid: cffeaeec0396a2c4dad475266cc8dfeb, type: 3}
+  volumetricFogShader: {fileID: 4800000, guid: 08f816187f9af0244a95556ee0cab83f, type: 3}
 --- !u!114 &-408358162207867921
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58,11 +73,11 @@ MonoBehaviour:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: 4449293429892402646}
-  - {fileID: 1605678757105429606}
   - {fileID: -408358162207867921}
+  - {fileID: 4449293429892402646}
   - {fileID: -403224962210285753}
-  m_RendererFeatureMap: d64d3716cd10bf3d66eca88452844816effb77406a3855fa47b7e282087567fa
+  - {fileID: -6267408122647031173}
+  m_RendererFeatureMap: effb77406a3855fad64d3716cd10bf3d47b7e282087567fa7bd239c384b105a9
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -101,19 +116,6 @@ MonoBehaviour:
   m_CopyDepthMode: 2
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
---- !u!114 &1605678757105429606
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f5beaef983462df4a944c521f9064a91, type: 3}
-  m_Name: EnviroURPRenderFeature
-  m_EditorClassIdentifier: 
-  m_Active: 1
 --- !u!114 &3243682960101790912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154,7 +156,7 @@ MonoBehaviour:
     AfterOpaque: 1
     Source: 1
     NormalSamples: 2
-    Intensity: 0.2
+    Intensity: 0.3
     DirectLightingStrength: 0.5
     Radius: 0.5
     Samples: 0

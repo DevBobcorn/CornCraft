@@ -12,6 +12,10 @@ namespace CraftSharp.Rendering
 
         [SerializeField] private long startTime;
 
+        [SerializeField] private Transform? followTarget;
+
+        [SerializeField] AtmosphericHeightFog.HeightFogGlobal fogGlobal;
+
         private int ticks;
         private int lastRecTicks;
         private bool simulate = false;
@@ -88,6 +92,17 @@ namespace CraftSharp.Rendering
                     UpdateTimeRelated();
                 }
             }
+
+            if (followTarget != null)
+            {
+                transform.position = followTarget.position;
+
+                if (fogGlobal != null)
+                {
+                    fogGlobal.fogHeightStart = transform.position.y - 10F;
+                    fogGlobal.fogHeightEnd = transform.position.y + 300F;
+                }
+            }
         }
 
         private void SetPlayableSpeed(double speed)
@@ -117,13 +132,46 @@ namespace CraftSharp.Rendering
             UpdateTimeRelated();
         }
 
+        private float GetDayNightLerp(float normalizedTOD)
+        {
+            float halfGap = 0.1F;
+            float gap = 2 * halfGap;
+            float keepTime = 0.5F - gap;
+
+            if (normalizedTOD < halfGap)
+            {
+                return 0.5F - (normalizedTOD / halfGap) * 0.5F;
+            }
+            else if (normalizedTOD < halfGap + keepTime)
+            {
+                return 0F;
+            }
+            else if (normalizedTOD < halfGap + keepTime + gap)
+            {
+                return (normalizedTOD - halfGap - keepTime) / gap;
+            }
+            else if (normalizedTOD < halfGap + keepTime + gap + keepTime)
+            {
+                return 1F;
+            }
+            else
+            {
+                return ((normalizedTOD - halfGap - keepTime - gap - keepTime) / halfGap) * 0.5F;
+            }
+        }
+
         private void UpdateTimeRelated()
         {
             double normalizedTOD = ticks / 24000D;
 
             playableDirector!.time = playableDirector.duration * normalizedTOD;
 
-            //DynamicGI.UpdateEnvironment();
+            if (fogGlobal != null)
+            {
+                fogGlobal.timeOfDay = GetDayNightLerp((float) normalizedTOD);
+            }
+
+            DynamicGI.UpdateEnvironment();
         }
 
         public static (int hours, int minutes, int seconds) Tick2HMS(int ticks)
