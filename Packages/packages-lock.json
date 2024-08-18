@@ -1,5 +1,14 @@
 {
   "dependencies": {
+    "com.cqf.urpvolumetricfog": {
+      "version": "https://github.com/CristianQiu/Unity-URP-Volumetric-Light.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.render-pipelines.universal": ""
+      },
+      "hash": "92bda28cb1d0d606a26d7c8c94dd0e261aa95bc6"
+    },
     "com.devbobcorn.craftsharp": {
       "version": "file:com.devbobcorn.craftsharp",
       "depth": 0,
