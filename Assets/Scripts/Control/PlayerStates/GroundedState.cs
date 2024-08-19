@@ -18,9 +18,8 @@ namespace CraftSharp.Control
         private bool _walkToggleRequested = false;
         private bool _sprintRequested = false;
 
-        public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        private void CheckClimbOver(PlayerStatus info, PlayerController player)
         {
-            // Check climb over barrier Workround: Use a cooldown value to disable climb over right after landing
             if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
                     info.BarrierDistance < player.Ability.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
             {
@@ -30,6 +29,7 @@ namespace CraftSharp.Control
                 {
                     if (info.YawDeltaAbs <= 10F) // Trying to moving forward
                     {
+                        // Workround: Use a cooldown value to disable climbing in a short period after landing
                         if (info.TimeSinceGrounded > 0.3F)
                         {
                             player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, walkUp);
@@ -39,9 +39,12 @@ namespace CraftSharp.Control
                         _jumpRequested = false;
                     }
                 }
-
-                //Debug.Log($"Walk: {walkUp}, Height: {info.BarrierHeight}, Timer: {info.TimeSinceGrounded}");
             }
+        }
+
+        public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        {
+            CheckClimbOver(info, player);
             
             if (_jumpRequested) // Jump
             {
