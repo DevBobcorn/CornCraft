@@ -20,8 +20,6 @@ namespace CraftSharp.Control
 
         public ItemActionType CurrentActionType { get; private set; } = ItemActionType.None;
 
-        public PlayerStagedSkill? MeleeSwordAttack;
-        public PlayerChargedSkill? RangedBowAttack;
         [SerializeField] private CameraController? _cameraController;
         [SerializeField] private PlayerStatusUpdater? _statusUpdater;
         [SerializeField] private PlayerAbility? _ability;
@@ -226,7 +224,7 @@ namespace CraftSharp.Control
 
             // Initialize player state (idle on start)
             Status.Grounded = true;
-            _currentState.OnEnter(Status, Motor, this);
+            _currentState.OnEnter(PlayerStates.PRE_INIT, Status, Motor, this);
         }
 
         void OnDestroy()
@@ -338,29 +336,31 @@ namespace CraftSharp.Control
         public event Action? OnMeleeDamageEnd;
         public void MeleeDamageEnd() => OnMeleeDamageEnd?.Invoke();
 
-        public event Action<string>? OnJumpRequest;
-        public void StartJump(string stateName) => OnJumpRequest?.Invoke(stateName);
-
         public void ToggleWalkMode()
         {
             Status!.WalkMode = !Status.WalkMode;
             CornApp.Notify(Translations.Get($"gameplay.control.switch_to_{(Status.WalkMode ? "walk" : "rush")}"));
         }
 
-        public void ClimbOverBarrier(float barrierDist, float barrierHeight, bool walkUp)
+        public void ClimbOverBarrier(float barrierDist, float barrierHeight, bool walkUp, bool fromLiquid)
         {
-            if (_usingAnimator && barrierHeight > 0.6F)
+            if (_usingAnimator && !walkUp)
             {
                 PlayerEntityRiggedRender? riggedRender;
                 Vector2 extraOffset;
 
                 if ((riggedRender = _playerRender as PlayerEntityRiggedRender) != null)
                 {
-                    extraOffset = riggedRender.GetClimberOverOffset();
+                    extraOffset = riggedRender.GetClimbOverOffset();
                 }
                 else
                 {
                     extraOffset = Ability.ClimbOverExtraOffset;
+                }
+
+                if (fromLiquid)
+                {
+                    extraOffset.x += 0.1F;
                 }
 
                 var offset = (barrierHeight * 0.5F - 0.5F + extraOffset.y) * Motor.CharacterUp + extraOffset.x * Motor.CharacterForward;
@@ -385,9 +385,9 @@ namespace CraftSharp.Control
                                     exit: (info, motor, player) =>
                                     {
                                         info.Grounded = true;
-                                        info.TimeSinceGrounded = Mathf.Max(0F, info.TimeSinceGrounded);
                                         player.UseRootMotion = false;
                                         info.PlayingRootMotion = false;
+                                        StartCrossFadeState(GroundedState.GetEntryAnimatorStateName(info));
                                     },
                                     update: (interval, curTime, inputData, info, motor, player) =>
                                     {
@@ -409,7 +409,6 @@ namespace CraftSharp.Control
                                     exit: (info, motor, player) =>
                                     {
                                         info.Grounded = true;
-                                        info.TimeSinceGrounded = Mathf.Max(0F, info.TimeSinceGrounded);
                                     },
                                     update: (interval, curTime, inputData, info, motor, player) =>
                                     {
@@ -430,14 +429,16 @@ namespace CraftSharp.Control
 
         private void ChangeToState(IPlayerState state)
         {
+            var prevState = _currentState;
+
             //Debug.Log($"Exit state [{_currentState}]");
-            _currentState.OnExit(_statusUpdater!.Status, Motor, this);
+            _currentState.OnExit(state, _statusUpdater!.Status, Motor, this);
 
             // Exit previous state and enter this state
             _currentState = state;
             
             //Debug.Log($"Enter state [{_currentState}]");
-            _currentState.OnEnter(_statusUpdater!.Status, Motor, this);
+            _currentState.OnEnter(prevState, _statusUpdater!.Status, Motor, this);
         }
 
         public void AttachVisualFX(GameObject fxObj)
@@ -452,25 +453,15 @@ namespace CraftSharp.Control
             }
         }
 
-        public bool TryStartNormalAttack()
+        public bool TryStartNormalAttack(IPlayerState attackState, PlayerStagedSkill? skillData)
         {
             if (Status!.AttackStatus.AttackCooldown <= 0F)
             {
-                if (CurrentActionType == ItemActionType.MeleeWeaponSword)
-                {
-                    _currentState.OnExit(Status, Motor, this);
-                    // Specify attack data to use
-                    Status.AttackStatus.CurrentStagedAttack = MeleeSwordAttack;
-                    // Enter attack state
-                    _currentState = PlayerStates.MELEE;
-                    _currentState.OnEnter(_statusUpdater!.Status, Motor, this);
-                    return true;
-                }
-                else if (CurrentActionType == ItemActionType.RangedWeaponBow)
-                {
-                    // TODO: Implement
-                    return false;
-                }
+                // Specify attack data to use
+                Status.AttackStatus.CurrentStagedAttack = skillData;
+
+                // Update player state
+                ChangeToState(attackState);
                 
                 return false;
             }
@@ -478,7 +469,7 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public bool TryStartChargedAttack()
+        public bool TryStartChargedAttack(IPlayerState attackState, PlayerChargedSkill? skillData)
         {
             if (Status!.AttackStatus.AttackCooldown <= 0F)
             {
@@ -489,12 +480,12 @@ namespace CraftSharp.Control
                 }
                 else if (CurrentActionType == ItemActionType.RangedWeaponBow)
                 {
-                    _currentState.OnExit(Status, Motor, this);
                     // Specify attack data to use
-                    Status.AttackStatus.CurrentChargedAttack = RangedBowAttack;
-                    // Enter attack state
-                    _currentState = PlayerStates.RANGED_AIM;
-                    _currentState.OnEnter(_statusUpdater!.Status, Motor, this);
+                    Status.AttackStatus.CurrentChargedAttack = skillData;
+
+                    // Update player state
+                    ChangeToState(attackState);
+
                     return true;
                 }
                 

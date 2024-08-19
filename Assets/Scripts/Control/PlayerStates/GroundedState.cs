@@ -18,6 +18,28 @@ namespace CraftSharp.Control
         private bool _walkToggleRequested = false;
         private bool _sprintRequested = false;
 
+        private float _timeSinceGrounded = -1F;
+
+
+        public static string GetEntryAnimatorStateName(PlayerStatus info)
+        {
+            if (info.Moving)
+            {
+                if (info.Sprinting)
+                {
+                    return AnimatorEntityRender.SPRINT_NAME;
+                }
+                else
+                {
+                    return info.WalkMode ? AnimatorEntityRender.WALK_NAME : AnimatorEntityRender.RUN_NAME;
+                }
+            }
+            else
+            {
+                return AnimatorEntityRender.IDLE_NAME;
+            }
+        }
+
         private void CheckClimbOver(PlayerStatus info, PlayerController player)
         {
             if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
@@ -30,9 +52,9 @@ namespace CraftSharp.Control
                     if (info.YawDeltaAbs <= 10F) // Trying to moving forward
                     {
                         // Workround: Use a cooldown value to disable climbing in a short period after landing
-                        if (info.TimeSinceGrounded > 0.3F)
+                        if (_timeSinceGrounded > 0.3F)
                         {
-                            player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, walkUp);
+                            player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, walkUp, false);
                         }
 
                         // Prevent jump preparation if climbing is successfully initiated, or only timer is not ready
@@ -44,13 +66,11 @@ namespace CraftSharp.Control
 
         public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
-            CheckClimbOver(info, player);
-            
-            if (_jumpRequested) // Jump
+            if (info.Grounded)
             {
-                
-                // Check if jumping is available
-                if (info.Grounded)
+                CheckClimbOver(info, player);
+
+                if (_jumpRequested) // Jump
                 {
                     // Set jump confirmation flag
                     _jumpConfirmed = true;
@@ -60,26 +80,11 @@ namespace CraftSharp.Control
                     // Randomize mirror flag before jumping
                     player.RandomizeMirroredFlag();
 
-                    string stateName;
+                    string stateName = "JumpFor" + GetEntryAnimatorStateName(info);
 
-                    if (info.Moving)
-                    {
-                        if (info.Sprinting)
-                        {
-                            stateName = AnimatorEntityRender.JUMP_SPRINT_NAME;
-                        }
-                        else
-                        {
-                            stateName = info.WalkMode ? AnimatorEntityRender.JUMP_WALK_NAME : AnimatorEntityRender.JUMP_RUN_NAME;
-                        }
-                    }
-                    else
-                    {
-                        stateName = AnimatorEntityRender.JUMP_NAME;
-                    }
+                    // Go to jump state
+                    player.StartCrossFadeState(stateName, 0.1F);
 
-                    // Set up jump flag for animator
-                    player.StartJump(stateName);
                     // Also reset grounded flag
                     info.Grounded = false;
                 }
@@ -97,7 +102,7 @@ namespace CraftSharp.Control
             info.Gliding = false;
 
             // Update grounded timer
-            info.TimeSinceGrounded += interval;
+            _timeSinceGrounded += interval;
 
             // Check walk toggle request
             if (_walkToggleRequested)
@@ -117,9 +122,6 @@ namespace CraftSharp.Control
 
                 // Apply vertical velocity to reduced horizontal velocity
                 moveVelocity = currentVelocity * 0.7F + motor.CharacterUp * ability.JumpSpeedCurve.Evaluate(currentVelocity.magnitude);
-
-                // Reset jump confirmation flag
-                _jumpConfirmed = false;
             }
             else // Stay on ground
             {
@@ -153,6 +155,10 @@ namespace CraftSharp.Control
                     if (!motor.GroundingStatus.FoundAnyGround)
                     {
                         moveSpeed *= 0.35F;
+                    }
+                    else if (_timeSinceGrounded >= 0F && _timeSinceGrounded < 0.5F)
+                    {
+                        moveSpeed *= _timeSinceGrounded / 0.5F;
                     }
 
                     // Smooth rotation for player model
@@ -243,7 +249,7 @@ namespace CraftSharp.Control
         private Action<InputAction.CallbackContext>? walkToggleRequestCallback;
         private Action<InputAction.CallbackContext>? sprintRequestCallback;
 
-        public void OnEnter(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Sprinting = false;
 
@@ -256,12 +262,14 @@ namespace CraftSharp.Control
             // Register input action events
             player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
             {
-                player.TryStartChargedAttack();
+                // TODO: Get the right data according to weapon type
+                player.TryStartChargedAttack(PlayerStates.RANGED_AIM, player.Ability.RangedBowAttack_Charged);
             };
 
             player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>
             {
-                player.TryStartNormalAttack();
+                // TODO: Get the right data according to weapon type
+                player.TryStartNormalAttack(PlayerStates.MELEE, player.Ability.MeleeSwordAttack_Staged);
             };
 
             player.Actions.Gameplay.Jump.performed += jumpRequestCallback = (context) =>
@@ -281,9 +289,31 @@ namespace CraftSharp.Control
                 // Set sprint flag
                 _sprintRequested = true;
             };
+
+            if (prevState is not ForceMoveState)
+            {
+                string stateName;
+
+                if (prevState == PlayerStates.AIRBORNE)
+                {
+                    stateName = AnimatorEntityRender.LANDING_NAME;
+                }
+                else
+                {
+                    stateName = GetEntryAnimatorStateName(info);
+                }
+
+                player.StartCrossFadeState(stateName, 0.1F);
+
+                _timeSinceGrounded = 0F;
+            }
+            else
+            {
+                _timeSinceGrounded = Mathf.Max(_timeSinceGrounded, 0F);
+            }
         }
 
-        public void OnExit(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Sprinting = false;
 
@@ -292,6 +322,16 @@ namespace CraftSharp.Control
             player.Actions.Attack.NormalAttack.performed -= normalAttackCallback;
             player.Actions.Gameplay.Jump.performed -= jumpRequestCallback;
             player.Actions.Gameplay.WalkToggle.performed -= walkToggleRequestCallback;
+
+            // Ungrounded, go to falling state
+            if (nextState == PlayerStates.AIRBORNE && !info.Grounded && !_jumpConfirmed)
+            {
+                // Make sure it isn't jumping
+                player.StartCrossFadeState(AnimatorEntityRender.FALLING_NAME, 0.2F);
+            }
+
+            // Reset jump confirmation flag
+            _jumpConfirmed = false;
         }
 
         public override string ToString() => "Grounded";

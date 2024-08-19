@@ -75,7 +75,7 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public void OnEnter(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Attacking = true;
 
@@ -100,7 +100,7 @@ namespace CraftSharp.Control
             player.StartAiming();
         }
 
-        public void OnExit(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Attacking = false;
 

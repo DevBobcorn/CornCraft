@@ -113,7 +113,7 @@ namespace CraftSharp.Control
         private Action<InputAction.CallbackContext>? chargedAttackCallback;
         private Action<InputAction.CallbackContext>? normalAttackCallback;
 
-        public void OnEnter(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Attacking = true;
 
@@ -136,7 +136,8 @@ namespace CraftSharp.Control
             // Register input action events
             player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
             {
-                player.TryStartChargedAttack();
+                // TODO: Get the right data according to weapon type
+                player.TryStartChargedAttack(PlayerStates.RANGED_AIM, player.Ability.RangedBowAttack_Charged);
             };
 
             player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>
@@ -151,7 +152,7 @@ namespace CraftSharp.Control
             };
         }
 
-        public void OnExit(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Attacking = false;
 

@@ -5,6 +5,9 @@ namespace CraftSharp.Control
 {
     public interface PlayerStates
     {
+        // Used before player init
+        public static readonly IPlayerState PRE_INIT   = new GroundedState();
+
         // Grounded states
         public static readonly IPlayerState GROUNDED   = new GroundedState();
 
@@ -12,8 +15,8 @@ namespace CraftSharp.Control
         public static readonly IPlayerState MELEE      = new MeleeState();
         public static readonly IPlayerState RANGED_AIM = new RangedAimState();
 
-        // On wall states
-        public static readonly IPlayerState CLIMB      = new ClingingState();
+        // Clinging states
+        public static readonly IPlayerState CLINGING   = new ClingingState();
 
         // Airborne states
         public static readonly IPlayerState AIRBORNE   = new AirborneState();
@@ -29,6 +32,9 @@ namespace CraftSharp.Control
         {
             List<IPlayerState> list = new()
             {
+                // Pre-init State
+                PRE_INIT,
+
                 // Grounded State
                 GROUNDED,
 
@@ -36,7 +42,7 @@ namespace CraftSharp.Control
                 // MELEE,
                 // RANGED_AIM
 
-                // On wall States (no state machine entry)
+                // Clinging States (no state machine entry)
                 // CLIMB,
 
                 // Airborne State

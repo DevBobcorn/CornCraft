@@ -27,8 +27,8 @@ namespace CraftSharp.Control
 
         public abstract bool ShouldExit(PlayerActions inputData, PlayerStatus info);
 
-        public virtual void OnEnter(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
+        public virtual void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
 
-        public virtual void OnExit(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
+        public virtual void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
     }
 }
