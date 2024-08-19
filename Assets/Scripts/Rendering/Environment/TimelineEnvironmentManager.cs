@@ -14,7 +14,7 @@ namespace CraftSharp.Rendering
 
         [SerializeField] private Transform? followTarget;
 
-        [SerializeField] AtmosphericHeightFog.HeightFogGlobal fogGlobal;
+        [SerializeField] AtmosphericHeightFog.HeightFogGlobal? fogGlobal;
 
         private int ticks;
         private int lastRecTicks;
