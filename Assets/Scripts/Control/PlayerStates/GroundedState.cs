@@ -1,9 +1,10 @@
 #nullable enable
 using System;
-using CraftSharp.Rendering;
 using KinematicCharacterController;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
+using CraftSharp.Rendering;
 
 namespace CraftSharp.Control
 {
