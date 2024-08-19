@@ -85,7 +85,6 @@ namespace CraftSharp.Control
                 if (info.CenterDownDist < 0.2F && Vector3.Dot(moveVelocity, motor.CharacterUp) <= 0)
                 {
                     info.Grounded = true;
-                    info.TimeSinceGrounded = 0F;
                 }
             }
 
@@ -118,7 +117,7 @@ namespace CraftSharp.Control
 
         private Action<InputAction.CallbackContext>? glideToggleRequestCallback;
 
-        public void OnEnter(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Sprinting = false;
 
@@ -132,7 +131,7 @@ namespace CraftSharp.Control
             };
         }
 
-        public void OnExit(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             // Unregister input action events
             player.Actions.Gameplay.Jump.performed -= glideToggleRequestCallback;

@@ -34,6 +34,7 @@ namespace CraftSharp.Control
 
             // Grounded state update
             bool groundCheck = motor.GroundingStatus.FoundAnyGround;
+            //Status.GroundedCheck = groundCheck;
 
             var rayCenter = transform.position + GROUND_RAYCAST_START * motor.CharacterUp;
 
@@ -93,8 +94,6 @@ namespace CraftSharp.Control
 
             Debug.DrawRay(barrierCheckRayOrigin, frontDirNormalized, Color.blue);
 
-            
-
             // Perform water volume check, if not using water check from server
             if (!_useServerLiquidCheck)
             {
@@ -127,13 +126,11 @@ namespace CraftSharp.Control
                 if (!groundCheck && Status.CenterDownDist > 1.25F)
                 {
                     Status.Grounded = false;
-                    Status.TimeSinceGrounded = -1F;
                 }
             }
             else // Not grounded in last update
             {
                 Status.Grounded = groundCheck;
-                Status.TimeSinceGrounded = groundCheck ? 0F : -1F;
             }
             
             // Cast a ray downwards again, but check liquid layer this time

@@ -25,7 +25,7 @@ namespace CraftSharp.Control
         [Range(0.1F, 10F)] public float SprintSpeed = 3.5F;
         [Range(0.1F, 10F)] public float GlideSpeed  = 3.6F;
         public AnimationCurve JumpSpeedCurve = new();
-        [Range( 10F, 1000F)] public float TurnSpeed = 600F;
+        [Range(10F, 1000F)] public float TurnSpeed =  600F;
 
         [Range(  1F, 100F)] public float MaxStamina        =  20F;
         [Range(0.1F, 100F)] public float SprintStaminaCost =   3F;
@@ -33,8 +33,11 @@ namespace CraftSharp.Control
         [Range(0.1F, 100F)] public float GlideStaminaCost  = 0.1F;
         [Range(0.1F, 100F)] public float StaminaRestore    =   1F;
 
-        [Range(1F, 100F)] public float MaxFallSpeed         =  20F;
-        [Range(1F, 100F)] public float MaxGlideFallSpeed    =   1F;
-        [Range( 0.1F,    1F)] public float LiquidMoveMultiplier = 0.85F;
+        [Range(1F, 100F)] public float MaxFallSpeed         =   20F;
+        [Range(1F, 100F)] public float MaxGlideFallSpeed    =    1F;
+        [Range(0.1F, 1F)] public float LiquidMoveMultiplier = 0.85F;
+
+        public PlayerStagedSkill? MeleeSwordAttack_Staged;
+        public PlayerChargedSkill? RangedBowAttack_Charged;
     }
 }

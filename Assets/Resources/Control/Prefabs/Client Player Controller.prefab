@@ -302,8 +302,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d32161aaff9cb0419e64d4f69a5e1ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MeleeSwordAttack: {fileID: 11400000, guid: e9daf537efee7104daf40cc676392536, type: 2}
-  RangedBowAttack: {fileID: 11400000, guid: 33dfb0310f5ab1a4284d261824057ad2, type: 2}
   _cameraController: {fileID: 0}
   _statusUpdater: {fileID: 2543192715876108228}
   _ability: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
@@ -339,8 +337,8 @@ MonoBehaviour:
   MaxStepHeight: 0.4
   AllowSteppingWithoutStableGrounding: 0
   MinRequiredStepDepth: 0
-  LedgeAndDenivelationHandling: 1
-  MaxStableDistanceFromLedge: 0.3
+  LedgeAndDenivelationHandling: 0
+  MaxStableDistanceFromLedge: 0
   MaxVelocityForLedgeSnap: 0
   MaxStableDenivelationAngle: 180
   InteractiveRigidbodyHandling: 1

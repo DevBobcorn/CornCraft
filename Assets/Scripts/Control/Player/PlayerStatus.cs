@@ -33,9 +33,9 @@ namespace CraftSharp.Control
         public bool Grounded  = false;
 
         /// <summary>
-        /// Time since grounded, only used when Grounded is true
+        /// Whether player is grounded (interal use)
         /// </summary>
-        public float TimeSinceGrounded = 0F;
+        //public bool GroundedCheck  = false;
 
         /// <summary>
         /// Unused for now
@@ -92,7 +92,7 @@ namespace CraftSharp.Control
             var envInfo = $"\nBarrier Yaw Angle:\t{BarrierYawAngle:0.00}\tDist:\t{BarrierDistance:0.00} ({WallDistance:0.00})\tHgt:{BarrierHeight:0.00}\nGravity Scale:\t{GravityScale:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             
-            return $"InLiquid:\t{InLiquid}\nFloating:\t{Floating}\nGrounded:\t{Grounded}\n- Time: {TimeSinceGrounded:0.00}\nClinging:\t{Clinging}\n{envInfo}\n{moveInfo}\n{atkInfo}";
+            return $"InLiquid:\t{InLiquid}\nFloating:\t{Floating}\nGrounded:\t{Grounded}\nClinging:\t{Clinging}\n{envInfo}\n{moveInfo}\n{atkInfo}";
         }
     }
 }

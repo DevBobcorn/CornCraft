@@ -5,9 +5,6 @@ namespace CraftSharp.Rendering
 {
     public class PlayerEntityRiggedRender : AnimatorEntityRender
     {
-        private static readonly int GROUNDED_HASH = Animator.StringToHash("Grounded");
-        private static readonly int FLOATING_HASH = Animator.StringToHash("Floating");
-        private static readonly int CLINGING_HASH = Animator.StringToHash("Clinging");
         private static readonly int GLIDING_HASH = Animator.StringToHash("Gliding");
         private static readonly int MOVING_HASH = Animator.StringToHash("Moving");
         private static readonly int SPRINTING_HASH = Animator.StringToHash("Sprinting");
@@ -28,7 +25,6 @@ namespace CraftSharp.Rendering
             playerController.OnCrossFadeState += this.CrossFadeState;
             playerController.OnOverrideState += this.OverrideState;
             playerController.OnRandomizeMirroredFlag += this.RandomizeMirroredFlag;
-            playerController.OnJumpRequest += this.StartJumpState;
 
             var visualObj = _visualTransform!.gameObject;
 
@@ -61,7 +57,7 @@ namespace CraftSharp.Rendering
             return base.SetupCameraRef();
         }
 
-        public Vector2 GetClimberOverOffset()
+        public Vector2 GetClimbOverOffset()
         {
             if (playerRenderWidget != null)
             {
@@ -79,7 +75,6 @@ namespace CraftSharp.Rendering
             playerController.OnCrossFadeState -= this.CrossFadeState;
             playerController.OnOverrideState -= this.OverrideState;
             playerController.OnRandomizeMirroredFlag -= this.RandomizeMirroredFlag;
-            playerController.OnJumpRequest -= this.StartJumpState;
 
             var visualObj = _visualTransform!.gameObject;
 
@@ -108,9 +103,6 @@ namespace CraftSharp.Rendering
         public override void UpdateAnimator(PlayerStatus info)
         {
             // Update animator parameters
-            entityAnimator.SetBool(GROUNDED_HASH, info.Grounded);
-            entityAnimator.SetBool(FLOATING_HASH, info.Floating);
-            entityAnimator.SetBool(CLINGING_HASH, info.Clinging);
             entityAnimator.SetBool(GLIDING_HASH, info.Gliding);
             entityAnimator.SetBool(MOVING_HASH, info.Moving);
             entityAnimator.SetBool(SPRINTING_HASH, info.Sprinting);

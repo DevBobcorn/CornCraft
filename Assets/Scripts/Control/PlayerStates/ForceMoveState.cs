@@ -109,14 +109,14 @@ namespace CraftSharp.Control
         public bool ShouldExit(PlayerActions inputData, PlayerStatus info) =>
                 currentOperationIndex >= Operations.Length && currentTime <= 0F;
 
-        public void OnEnter(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             if (Operations.Length > currentOperationIndex)
                 StartOperation(info, motor, player);
             
         }
 
-        public void OnExit(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             
         }
