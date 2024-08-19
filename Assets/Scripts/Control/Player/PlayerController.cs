@@ -338,8 +338,8 @@ namespace CraftSharp.Control
         public event Action? OnMeleeDamageEnd;
         public void MeleeDamageEnd() => OnMeleeDamageEnd?.Invoke();
 
-        public event Action? OnJumpRequest;
-        public void StartJump() => OnJumpRequest?.Invoke();
+        public event Action<string>? OnJumpRequest;
+        public void StartJump(string stateName) => OnJumpRequest?.Invoke(stateName);
 
         public void ToggleWalkMode()
         {

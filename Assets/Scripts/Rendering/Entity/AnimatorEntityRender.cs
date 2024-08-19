@@ -10,6 +10,11 @@ namespace CraftSharp.Rendering
         protected static readonly int MIRRORED_HASH = Animator.StringToHash("Mirrored");
         protected static readonly int JUMP_HASH = Animator.StringToHash("Jump");
 
+        public static readonly string JUMP_SPRINT_NAME = "JumpForSprint";
+        public static readonly string JUMP_RUN_NAME = "JumpForRun";
+        public static readonly string JUMP_WALK_NAME = "JumpForWalk";
+        public static readonly string JUMP_NAME = "Jump";
+
         protected static readonly int VERTICAL_SPEED_HASH = Animator.StringToHash("VerticalSpeed");
         protected static readonly int HORIZONTAL_SPEED_HASH = Animator.StringToHash("HorizontalSpeed");
 
@@ -56,9 +61,10 @@ namespace CraftSharp.Rendering
             entityAnimator!.SetBool(MIRRORED_HASH, mirrored);
         }
 
-        public virtual void SetJumpFlag()
+        public virtual void StartJumpState(string stateName)
         {
-            entityAnimator!.SetTrigger(JUMP_HASH);
+            //entityAnimator!.SetTrigger(JUMP_HASH);
+            entityAnimator!.CrossFade(stateName, 0.1F, 0);
         }
 
         public virtual void CrossFadeState(string stateName, float time, int layer, float timeOffset)
