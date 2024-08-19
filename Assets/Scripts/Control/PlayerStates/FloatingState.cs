@@ -9,8 +9,34 @@ namespace CraftSharp.Control
         private bool _forceUngroundRequested = false;
         private bool _forceUngroundConfirmed = false;
 
+        public const float THRESHOLD_CLIMB_1M = 1.1F + 0.7F;
+        public const float THRESHOLD_WALK_UP  = 0.6F + 0.7F;
+        public const float THRESHOLD_CLIMB_UP = 0.4F + 0.7F;
+
+        private void CheckClimbOverInLiquid(PlayerStatus info, PlayerController player)
+        {
+            if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
+                    info.BarrierDistance < player.Ability.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
+            {
+                bool walkUp = info.BarrierHeight < THRESHOLD_WALK_UP;
+
+                if (walkUp || info.BarrierYawAngle < 30F) // Check if available, for high barriers check cooldown and angle
+                {
+                    if (info.YawDeltaAbs <= 10F) // Trying to moving forward
+                    {
+                        player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, walkUp);
+
+                        // Prevent unground preparation if climbing is successfully initiated, or only timer is not ready
+                        _forceUngroundRequested = false;
+                    }
+                }
+            }
+        }
+
         public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
+            CheckClimbOverInLiquid(info, player);
+
             if (_forceUngroundRequested) // Force unground
             {
                 if (info.Grounded)
