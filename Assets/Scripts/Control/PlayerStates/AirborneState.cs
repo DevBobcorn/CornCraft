@@ -120,6 +120,7 @@ namespace CraftSharp.Control
         public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Sprinting = false;
+            info.Gliding = false;
 
             // Reset request flags
             _glideToggleRequested = false;

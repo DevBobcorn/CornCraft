@@ -2,6 +2,8 @@
 using KinematicCharacterController;
 using UnityEngine;
 
+using CraftSharp.Rendering;
+
 namespace CraftSharp.Control
 {
     public class SpectateState : IPlayerState
@@ -46,6 +48,15 @@ namespace CraftSharp.Control
         public bool ShouldEnter(PlayerActions inputData, PlayerStatus info) => info.Spectating;
 
         public bool ShouldExit(PlayerActions inputData, PlayerStatus info)  => !info.Spectating;
+
+        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        {
+            // Ungrounded, go to falling state
+            if (nextState == PlayerStates.AIRBORNE && !info.Grounded)
+            {
+                player.StartCrossFadeState(AnimatorEntityRender.FALLING_NAME, 0.2F);
+            }
+        }
 
         public override string ToString() => "Spectate";
     }
