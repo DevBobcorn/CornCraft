@@ -113,7 +113,7 @@ Material:
     - _FogHeightEnd: 564
     - _FogHeightFalloff: 1
     - _FogHeightStart: 54
-    - _FogIntensity: 0.6
+    - _FogIntensity: 0.8
     - _FogLayersMode: 0
     - _GlossMapScale: 0
     - _Glossiness: 0
@@ -138,7 +138,7 @@ Material:
     - _SkyboxFogFalloff: 1
     - _SkyboxFogFill: 0
     - _SkyboxFogHeight: 1
-    - _SkyboxFogIntensity: 0.5
+    - _SkyboxFogIntensity: 0.6
     - _SkyboxFogOffset: 0
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
