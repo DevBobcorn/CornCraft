@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using CraftSharp.Rendering;
 using KinematicCharacterController;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -25,13 +26,16 @@ namespace CraftSharp.Control
             {
                 bool walkUp = info.BarrierHeight < THRESHOLD_WALK_UP;
 
-                if (walkUp || (info.TimeSinceGrounded > 0.3F && info.BarrierYawAngle < 30F)) // Check if available, for high barriers check cooldown and angle
+                if (walkUp || info.BarrierYawAngle < 30F) // Check if available, for high barriers check cooldown and angle
                 {
                     if (info.YawDeltaAbs <= 10F) // Trying to moving forward
                     {
-                        player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, walkUp);
+                        if (info.TimeSinceGrounded > 0.3F)
+                        {
+                            player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, walkUp);
+                        }
 
-                        // Prevent jump preparation
+                        // Prevent jump preparation if climbing is successfully initiated, or only timer is not ready
                         _jumpRequested = false;
                     }
                 }
@@ -52,8 +56,27 @@ namespace CraftSharp.Control
                     motor.ForceUnground(0.1F);
                     // Randomize mirror flag before jumping
                     player.RandomizeMirroredFlag();
+
+                    string stateName;
+
+                    if (info.Moving)
+                    {
+                        if (info.Sprinting)
+                        {
+                            stateName = AnimatorEntityRender.JUMP_SPRINT_NAME;
+                        }
+                        else
+                        {
+                            stateName = info.WalkMode ? AnimatorEntityRender.JUMP_WALK_NAME : AnimatorEntityRender.JUMP_RUN_NAME;
+                        }
+                    }
+                    else
+                    {
+                        stateName = AnimatorEntityRender.JUMP_NAME;
+                    }
+
                     // Set up jump flag for animator
-                    player.StartJump();
+                    player.StartJump(stateName);
                     // Also reset grounded flag
                     info.Grounded = false;
                 }

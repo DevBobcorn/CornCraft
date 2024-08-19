@@ -28,7 +28,7 @@ namespace CraftSharp.Rendering
             playerController.OnCrossFadeState += this.CrossFadeState;
             playerController.OnOverrideState += this.OverrideState;
             playerController.OnRandomizeMirroredFlag += this.RandomizeMirroredFlag;
-            playerController.OnJumpRequest += this.SetJumpFlag;
+            playerController.OnJumpRequest += this.StartJumpState;
 
             var visualObj = _visualTransform!.gameObject;
 
@@ -79,7 +79,7 @@ namespace CraftSharp.Rendering
             playerController.OnCrossFadeState -= this.CrossFadeState;
             playerController.OnOverrideState -= this.OverrideState;
             playerController.OnRandomizeMirroredFlag -= this.RandomizeMirroredFlag;
-            playerController.OnJumpRequest -= this.SetJumpFlag;
+            playerController.OnJumpRequest -= this.StartJumpState;
 
             var visualObj = _visualTransform!.gameObject;
 
