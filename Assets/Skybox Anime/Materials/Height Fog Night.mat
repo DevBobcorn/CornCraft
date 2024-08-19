@@ -113,7 +113,7 @@ Material:
     - _FogHeightEnd: 564
     - _FogHeightFalloff: 1
     - _FogHeightStart: 54
-    - _FogIntensity: 1
+    - _FogIntensity: 0.8
     - _FogLayersMode: 0
     - _GlossMapScale: 0
     - _Glossiness: 0
@@ -124,7 +124,7 @@ Material:
     - _Metallic: 0
     - _NoiseCat: 1
     - _NoiseDistanceEnd: 200
-    - _NoiseIntensity: 0
+    - _NoiseIntensity: 1
     - _NoiseMax: 1
     - _NoiseMin: 1
     - _NoiseModeBlend: 1
@@ -137,8 +137,8 @@ Material:
     - _SkyboxFogBottom: 0.5
     - _SkyboxFogFalloff: 1
     - _SkyboxFogFill: 0
-    - _SkyboxFogHeight: 1.71
-    - _SkyboxFogIntensity: 0.5
+    - _SkyboxFogHeight: 1
+    - _SkyboxFogIntensity: 0.6
     - _SkyboxFogOffset: 0
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
