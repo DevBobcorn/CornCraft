@@ -82,7 +82,7 @@ MonoBehaviour:
   AtlasSolid: {fileID: 2100000, guid: 14c6bc8a8f8380d4f91066b493db8705, type: 2}
   AtlasCutout: {fileID: 2100000, guid: 9799fbe4314dcb04a95084e6b0a1626f, type: 2}
   AtlasCutoutMipped: {fileID: 2100000, guid: 356fe3b2c3144ef4f82484e1a7bebe4e, type: 2}
-  AtlasTranslucent: {fileID: 2100000, guid: 8ee6dff0c60e65743895b69cc4c5bc0a, type: 2}
+  AtlasTranslucent: {fileID: 2100000, guid: 6721cc8fabad23b45b323d5ddcccad2b, type: 2}
   StylizedWater: {fileID: 2100000, guid: 002453dd655f38e42968cf609e04ee33, type: 2}
   Foliage: {fileID: 2100000, guid: adf0649238070f449b01459c6e16a664, type: 2}
   Plants: {fileID: 2100000, guid: 4962df059f7094841bc40cc6d1ab4d5d, type: 2}

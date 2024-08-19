@@ -12,7 +12,9 @@ namespace CraftSharp.Rendering
 
         [SerializeField] private long startTime;
 
-        [SerializeField] private Transform? followTarget;
+        [SerializeField] private Camera? mainCamera;
+
+        [SerializeField] private AnimeSunDirection? animeSunControl;
 
         [SerializeField] AtmosphericHeightFog.HeightFogGlobal? fogGlobal;
 
@@ -73,6 +75,11 @@ namespace CraftSharp.Rendering
             }
 
             SetTime(startTime);
+
+            if (fogGlobal != null && fogGlobal.mainCamera == null)
+            {
+                fogGlobal.mainCamera = mainCamera;
+            }
         }
 
         void Update()
@@ -93,9 +100,9 @@ namespace CraftSharp.Rendering
                 }
             }
 
-            if (followTarget != null)
+            if (mainCamera != null)
             {
-                transform.position = followTarget.position;
+                transform.position = mainCamera.transform.position;
 
                 if (fogGlobal != null)
                 {
@@ -162,13 +169,24 @@ namespace CraftSharp.Rendering
 
         private void UpdateTimeRelated()
         {
-            double normalizedTOD = ticks / 24000D;
+            double playableTOD = ticks / 24000D;
+            playableDirector!.time = playableDirector.duration * playableTOD;
 
-            playableDirector!.time = playableDirector.duration * normalizedTOD;
+            // Update directional light
+            // 00:00 - 0.00 - 270
+            // 06:00 - 0.25 - 180
+            // 12:00 - 0.50 -  90
+            // 18:00 - 0.75 -   0
+            // 24:00 - 1.00 - -90
+
+            if (animeSunControl != null)
+            {
+                animeSunControl.SetTime((float) playableTOD);
+            }
 
             if (fogGlobal != null)
             {
-                fogGlobal.timeOfDay = GetDayNightLerp((float) normalizedTOD);
+                fogGlobal.timeOfDay = GetDayNightLerp((float) playableTOD);
             }
 
             DynamicGI.UpdateEnvironment();
