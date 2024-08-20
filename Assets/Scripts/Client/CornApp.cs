@@ -163,14 +163,17 @@ namespace CraftSharp
 
             // Then append overrides
             packManager.AddPack(new("vanilla_fix"));
-            //packManager.AddPack(new("Greenfield.Texture.Pack.1.17"));
-
+            //packManager.AddPack(new("Bare Bones 1.16"));
             // Load valid packs...
             loadFlag.Finished = false;
             Task.Run(() => {
-                // Set up thread locale for testing resource loading with different locales
-                //System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("fr-FR");
-                packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status)));
+                try {
+                    // Set up thread locale for testing resource loading with different locales
+                    //System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("fr-FR");
+                    packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status)));
+                } catch (Exception e) {
+                    Debug.Log($"Error loading resources: {e}");
+                }
             });
             while (!loadFlag.Finished) yield return null;
             
