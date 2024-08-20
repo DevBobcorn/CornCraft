@@ -19,8 +19,10 @@
 # Third party resources & utils
 /[Aa]ssets/Plugins/
 /[Aa]ssets/Plugins.meta
-/[Aa]ssets/AnimeAnimations/*
-/[Aa]ssets/AnimeModels/*
+/[Aa]ssets/AnimeAnimations
+/[Aa]ssets/AnimeAnimations.meta
+/[Aa]ssets/AnimeModels
+/[Aa]ssets/AnimeModels.meta
 /[Aa]ssets/Hovl Studio
 /[Aa]ssets/Hovl Studio.meta
 /[Aa]ssets/Enviro 3 - Sky and Weather
