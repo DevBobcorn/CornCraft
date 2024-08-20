@@ -14,13 +14,16 @@ namespace CraftSharp.Control
         private const float THRESHOLD_WALK_UP  = 0.6F;
         private const float THRESHOLD_CLIMB_UP = 0.4F;
 
+        private const float SPRINT_START_TIME = 0.5F;
+
         private bool _jumpRequested = false;
         private bool _jumpConfirmed = false;
         private bool _walkToggleRequested = false;
         private bool _sprintRequested = false;
+        private bool _sprintContinues = false;
 
         private float _timeSinceGrounded = -1F;
-
+        private float _timeSinceSprintStart = -1F;
 
         public static string GetEntryAnimatorStateName(PlayerStatus info)
         {
@@ -136,21 +139,50 @@ namespace CraftSharp.Control
                     player.RandomizeMirroredFlag();
                 }
 
-                if (info.Moving) // Moving
+                var sprintStarting = info.Sprinting && _timeSinceSprintStart < SPRINT_START_TIME;
+
+                if (info.Moving || sprintStarting) // Moving (or starting to sprint)
                 {
                     float moveSpeed;
 
-                    if ((_sprintRequested || info.Sprinting) && info.StaminaLeft > 0F)
+                    // Initiate sprinting check
+                    if (_sprintRequested && info.StaminaLeft > 0F)
+                    {
                         info.Sprinting = true;
+                        _timeSinceSprintStart = 0F;
+                        sprintStarting = true;
+                    }
+
+                    // Continue sprinting check
+                    if (info.Sprinting && _timeSinceSprintStart >= SPRINT_START_TIME && !_sprintContinues)
+                    {
+                        if (inputData.Gameplay.Sprint.IsPressed())
+                        {
+                            _sprintContinues = true;
+                        }
+                        else
+                        {
+                            _sprintContinues = false;
+                        }
+                    }
+
+                    if (sprintStarting || _sprintContinues)
+                    {
+                        info.Sprinting = true;
+                        _timeSinceSprintStart += interval;
+
+                        moveSpeed = ability.SprintSpeed;
+                    }
                     else
+                    {
                         info.Sprinting = false;
+                        _sprintContinues = false;
+                        _timeSinceSprintStart = -1F;
+
+                        moveSpeed = info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
+                    }
                     
                     _sprintRequested = false;
-                    
-                    if (info.Sprinting)
-                        moveSpeed = ability.SprintSpeed;
-                    else
-                        moveSpeed = info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
                     
                     // Workaround: Slow down when walking downstairs
                     if (!motor.GroundingStatus.FoundAnyGround)
@@ -192,7 +224,9 @@ namespace CraftSharp.Control
                 {
                     // Reset sprinting state
                     info.Sprinting = false;
+                    _timeSinceSprintStart = -1F;
                     _sprintRequested = false;
+                    _sprintContinues = false;
 
                     // Smooth deceleration
                     moveVelocity = Vector3.MoveTowards(currentVelocity, Vector3.zero, ability.DecSpeed * interval);
