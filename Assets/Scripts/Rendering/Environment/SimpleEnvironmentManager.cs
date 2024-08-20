@@ -22,7 +22,7 @@ namespace CraftSharp.Rendering
         private float lastUpdateEnvLightingTODAngle = 0;
 
         private int ticks;
-        private int lastRecTicks;
+        private int lastRecTicks = int.MinValue;
         private bool simulate = false;
 
         private float deltaSeconds = 0F;

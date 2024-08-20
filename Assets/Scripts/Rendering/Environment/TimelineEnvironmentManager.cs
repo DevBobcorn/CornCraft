@@ -19,7 +19,7 @@ namespace CraftSharp.Rendering
         [SerializeField] AtmosphericHeightFog.HeightFogGlobal? fogGlobal;
 
         private int ticks;
-        private int lastRecTicks;
+        private int lastRecTicks = int.MinValue;
         private bool simulate = false;
 
         private float deltaSeconds = 0F;
@@ -65,6 +65,8 @@ namespace CraftSharp.Rendering
             playableDirector = GetComponent<PlayableDirector>();
             SetPlayableSpeed(4D / 1200D);
 
+            SetTime(startTime);
+
             if (simulate)
             {
                 playableDirector!.Resume();
@@ -73,8 +75,6 @@ namespace CraftSharp.Rendering
             {
                 playableDirector!.Pause();
             }
-
-            SetTime(startTime);
 
             if (fogGlobal != null && fogGlobal.mainCamera == null)
             {
