@@ -15,6 +15,7 @@ namespace CraftSharp.Rendering
         private Transform? _offHandRef;
         private Transform? _spineRef;
 
+        public Vector3 m_VisualOffset = new(0F, 0.1F, 0F);
         public Vector3 m_CameraRefPos = new(0F, 1.2F, 0F);
         public Vector2 m_ClimbOverOffset = new(0F, 0F);
 
@@ -27,6 +28,8 @@ namespace CraftSharp.Rendering
 
         public void SetRefTransforms(Transform mainHandRef, Transform offHandRef, Transform spineRef)
         {
+            transform.localPosition = m_VisualOffset;
+
             this._mainHandRef = mainHandRef;
             // Create main hand slot transform
             var mainHandSlotObj = new GameObject("Main Hand Slot");
