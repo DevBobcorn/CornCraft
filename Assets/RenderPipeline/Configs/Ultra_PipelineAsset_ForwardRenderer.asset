@@ -73,11 +73,12 @@ MonoBehaviour:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
+  - {fileID: 9210576758712642591}
   - {fileID: -408358162207867921}
   - {fileID: 4449293429892402646}
   - {fileID: -403224962210285753}
   - {fileID: -6267408122647031173}
-  m_RendererFeatureMap: effb77406a3855fad64d3716cd10bf3d47b7e282087567fa7bd239c384b105a9
+  m_RendererFeatureMap: 1f2c8927c38ad27feffb77406a3855fad64d3716cd10bf3d47b7e282087567fa7bd239c384b105a9
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -172,3 +173,16 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 3302065f671a8450b82c9ddf07426f3a, type: 3}
   - {fileID: 2800000, guid: 56a77a3e8d64f47b6afe9e3c95cb57d5, type: 3}
   m_Shader: {fileID: 4800000, guid: 0849e84e3d62649e8882e9d6f056a017, type: 3}
+--- !u!114 &9210576758712642591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 729a2e952309e2547a3747b2cdd9a36f, type: 3}
+  m_Name: ShapesRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
