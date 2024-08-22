@@ -14,7 +14,7 @@ namespace CraftSharp.Control
         private const float THRESHOLD_WALK_UP  = 0.6F;
         private const float THRESHOLD_CLIMB_UP = 0.4F;
 
-        private const float SPRINT_START_TIME = 0.5F;
+        private const float SPRINT_START_TIME = 0.9F;
 
         private bool _jumpRequested = false;
         private bool _jumpConfirmed = false;
@@ -171,7 +171,14 @@ namespace CraftSharp.Control
                         info.Sprinting = true;
                         _timeSinceSprintStart += interval;
 
-                        moveSpeed = ability.SprintSpeed;
+                        if (info.Moving)
+                        {
+                            moveSpeed = ability.SprintSpeed;
+                        }
+                        else
+                        {
+                            moveSpeed = Mathf.Lerp(ability.SprintSpeed, 0.4F * ability.SprintSpeed, _timeSinceSprintStart / SPRINT_START_TIME);
+                        }
                     }
                     else
                     {
@@ -187,7 +194,7 @@ namespace CraftSharp.Control
                     // Workaround: Slow down when walking downstairs
                     if (!motor.GroundingStatus.FoundAnyGround)
                     {
-                        moveSpeed *= 0.35F;
+                        moveSpeed *= info.Moving ? (info.Sprinting ? 0.8F : 0.35F) : 1F;
                     }
                     else if (_timeSinceGrounded >= 0F && _timeSinceGrounded < 0.5F)
                     {

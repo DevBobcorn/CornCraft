@@ -29,8 +29,7 @@ Shader "AnimeSkybox/Cloud"
 
         LOD 100
         Blend SrcAlpha OneMinusSrcAlpha
-        ZWrite On
-        ZTest LEqual
+        ZWrite Off
         
         Pass
         {
@@ -129,7 +128,7 @@ Shader "AnimeSkybox/Cloud"
            
                float UVdisturbance =  remap(Noise.b,0,1,0,0.03);
 
-               float4 baseMap = tex2D(_CloudMap, i.uv + UVdisturbance);
+               float4 baseMap = tex2D(_CloudMap, i.uv/* + UVdisturbance*/);
 
                float baseMapSMstep = smoothstep(clamp((_Cloud_SDF_TSb-0.08),0,1.5),_Cloud_SDF_TSb,baseMap.b);
      
