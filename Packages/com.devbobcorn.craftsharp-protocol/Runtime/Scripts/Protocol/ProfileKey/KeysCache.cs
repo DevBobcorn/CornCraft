@@ -75,7 +75,7 @@ namespace CraftSharp.Protocol.ProfileKey
         /// <returns>TRUE if keys are seeded from file</returns>
         public static bool InitializeDiskCache()
         {
-            cachemonitor = new FileMonitor(AppDomain.CurrentDomain.BaseDirectory, KeysCacheFilePlaintext, new FileSystemEventHandler(OnChanged));
+            cachemonitor = new FileMonitor(PathHelper.GetRootDirectory(), KeysCacheFilePlaintext, new FileSystemEventHandler(OnChanged));
             updatetimer.Elapsed += HandlePending;
             return LoadFromDisk();
         }
@@ -190,7 +190,7 @@ namespace CraftSharp.Protocol.ProfileKey
 
             try
             {
-                FileMonitor.WriteAllLinesWithRetries(KeysCacheFilePlaintext, KeysCacheLines);
+                FileMonitor.WriteAllLinesWithRetries(PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + KeysCacheFilePlaintext, KeysCacheLines);
             }
             catch (IOException e)
             {

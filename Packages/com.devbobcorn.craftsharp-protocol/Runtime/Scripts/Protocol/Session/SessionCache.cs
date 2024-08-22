@@ -17,7 +17,7 @@ namespace CraftSharp.Protocol.Session
     {
         private const string SessionCacheFilePlaintext = "SessionCache.ini";
         private const string SessionCacheFileSerialized = "SessionCache.db";
-        private static readonly string SessionCacheFileMinecraft = String.Concat(
+        private static readonly string SessionCacheFileMinecraft = string.Concat(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             Path.DirectorySeparatorChar,
             ".minecraft",
@@ -88,7 +88,7 @@ namespace CraftSharp.Protocol.Session
         /// <returns>TRUE if session tokens are seeded from file</returns>
         public static bool InitializeDiskCache()
         {
-            cachemonitor = new FileMonitor(AppDomain.CurrentDomain.BaseDirectory, SessionCacheFilePlaintext, new FileSystemEventHandler(OnChanged));
+            cachemonitor = new FileMonitor(PathHelper.GetRootDirectory(), SessionCacheFilePlaintext, new FileSystemEventHandler(OnChanged));
             updatetimer.Elapsed += HandlePending;
             return LoadFromDisk();
         }
@@ -175,14 +175,14 @@ namespace CraftSharp.Protocol.Session
             }
 
             //Serialized session cache file in binary format
-            if (File.Exists(SessionCacheFileSerialized))
+            if (File.Exists(PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + SessionCacheFileSerialized))
             {
                 if (CornGlobal.DebugMode)
                     Debug.Log(Translations.Get("cache.converting", SessionCacheFileSerialized));
 
                 try
                 {
-                    using (FileStream fs = new FileStream(SessionCacheFileSerialized, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (FileStream fs = new FileStream(PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + SessionCacheFileSerialized, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         Dictionary<string, SessionToken> sessionsTemp = (Dictionary<string, SessionToken>)formatter.Deserialize(fs);
                         foreach (KeyValuePair<string, SessionToken> item in sessionsTemp)
@@ -204,14 +204,14 @@ namespace CraftSharp.Protocol.Session
             }
 
             //User-editable session cache file in text format
-            if (File.Exists(SessionCacheFilePlaintext))
+            if (File.Exists(PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + SessionCacheFilePlaintext))
             {
                 if (CornGlobal.DebugMode)
                     Debug.Log(Translations.Get("cache.loading_session", SessionCacheFilePlaintext));
 
                 try
                 {
-                    foreach (string line in FileMonitor.ReadAllLinesWithRetries(SessionCacheFilePlaintext))
+                    foreach (string line in FileMonitor.ReadAllLinesWithRetries(PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + SessionCacheFilePlaintext))
                     {
                         if (!line.Trim().StartsWith("#"))
                         {
@@ -264,7 +264,7 @@ namespace CraftSharp.Protocol.Session
 
             try
             {
-                FileMonitor.WriteAllLinesWithRetries(SessionCacheFilePlaintext, sessionCacheLines);
+                FileMonitor.WriteAllLinesWithRetries(PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + SessionCacheFilePlaintext, sessionCacheLines);
             }
             catch (IOException e)
             {
