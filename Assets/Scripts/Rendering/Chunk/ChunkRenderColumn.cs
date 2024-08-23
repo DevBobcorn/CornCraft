@@ -85,7 +85,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         /// <param name="chunksBeingBuilt"></param>
         /// <param name="chunks2Build"></param>
-        public void Unload(List<ChunkRender> chunksBeingBuilt, PriorityQueue<ChunkRender> chunks2Build, IObjectPool<ChunkRender> pool)
+        public void Unload(List<ChunkRender> chunksBeingBuilt, HashSet<ChunkRender> chunks2BuildAsSet, PriorityQueue<ChunkRender> chunks2Build, IObjectPool<ChunkRender> pool)
         {
             // Unload this chunk column...
             foreach (int i in chunks.Keys)
@@ -96,9 +96,10 @@ namespace CraftSharp.Rendering
                 if (chunk != null)
                 {
                     // Before releasing the chunk object, do one last thing
-                    if (chunks2Build.Contains(chunk))
+                    if (chunks2BuildAsSet.Contains(chunk))
                     {
                         chunks2Build.Remove(chunk);
+                        chunks2BuildAsSet.Remove(chunk);
                     }
                     
                     chunksBeingBuilt.Remove(chunk);

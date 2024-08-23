@@ -75,6 +75,7 @@ namespace CraftSharp.Rendering
         /// Unity thread access only
         /// </summary>
         private readonly PriorityQueue<ChunkRender> chunkRendersToBeBuilt = new();
+        private readonly HashSet<ChunkRender> chunkRendersToBeBuiltAsSet = new();
         private readonly List<ChunkRender> chunkRendersBeingBuilt = new();
 
         private readonly HashSet<int3> lightUpdateRequests = new();
@@ -119,7 +120,7 @@ namespace CraftSharp.Rendering
 
         public string GetDebugInfo()
         {
-            return $"Unfinished Light Updates: {lightUpdateChecklist.Count}\nQueued Chunks: {chunkRendersToBeBuilt.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Data Build Time Avg: {dataBuildTimeSum / 200F:0.00} ms\n- Vert Build Time Avg: {vertexBuildTimeSum / 200F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
+            return $"Unfinished Light Updates: {lightUpdateChecklist.Count}\nQueued Chunks: {chunkRendersToBeBuiltAsSet.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Data Build Time Avg: {dataBuildTimeSum / 200F:0.00} ms\n- Vert Build Time Avg: {vertexBuildTimeSum / 200F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
         }
 
         #region Chunk render access
@@ -603,7 +604,7 @@ namespace CraftSharp.Rendering
                 if (Mathf.Abs(blockLoc.GetChunkX() - chunkCoord.x) > unloadDist || Mathf.Abs(blockLoc.GetChunkZ() - chunkCoord.y) > unloadDist)
                 {
                     var column = renderColumns[chunkCoord];
-                    column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuilt, chunkRenderPool);
+                    column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuiltAsSet, chunkRendersToBeBuilt, chunkRenderPool);
 
                     // Return this ChunkRenderColumn to pool
                     chunkRenderColumnPool.Release(column);
@@ -615,9 +616,10 @@ namespace CraftSharp.Rendering
 
         private void QueueChunkRenderBuild(ChunkRender chunkRender)
         {
-            if (!chunkRendersToBeBuilt.Contains(chunkRender))
+            if (!chunkRendersToBeBuiltAsSet.Contains(chunkRender))
             {
                 chunkRendersToBeBuilt.Enqueue(chunkRender);
+                chunkRendersToBeBuiltAsSet.Add(chunkRender);
                 chunkRender.State = ChunkBuildState.Pending;
             }
         }
@@ -639,7 +641,7 @@ namespace CraftSharp.Rendering
                 if (renderColumns.ContainsKey(chunkCoord))
                 {
                     var column = renderColumns[chunkCoord];
-                    column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuilt, chunkRenderPool);
+                    column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuiltAsSet, chunkRendersToBeBuilt, chunkRenderPool);
 
                     // Return this ChunkRenderColumn to pool
                     chunkRenderColumnPool.Release(column);
@@ -745,7 +747,7 @@ namespace CraftSharp.Rendering
                 if (renderColumns.ContainsKey(chunkCoord))
                 {
                     var column = renderColumns[chunkCoord];
-                    column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuilt, chunkRenderPool);
+                    column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuiltAsSet, chunkRendersToBeBuilt, chunkRenderPool);
 
                     // Return this ChunkRenderColumn to pool
                     chunkRenderColumnPool.Release(column);
@@ -780,6 +782,7 @@ namespace CraftSharp.Rendering
         {
             // Clear the queue first...
             chunkRendersToBeBuilt.Clear();
+            chunkRendersToBeBuiltAsSet.Clear();
             lightUpdateRequests.Clear();
 
             // And cancel current chunk builds
@@ -796,7 +799,7 @@ namespace CraftSharp.Rendering
             foreach (var chunkCoord in chunkCoords)
             {
                 var column = renderColumns[chunkCoord];
-                column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuilt, chunkRenderPool);
+                column.Unload(chunkRendersBeingBuilt, chunkRendersToBeBuiltAsSet, chunkRendersToBeBuilt, chunkRenderPool);
 
                 // Return this ChunkRenderColumn to pool
                 chunkRenderColumnPool.Release(column);
@@ -969,8 +972,11 @@ namespace CraftSharp.Rendering
                 newCount--;
             }
 
+            // Make sure no null element in hashset
+            chunkRendersToBeBuiltAsSet.Remove(null);
+
             // Start chunk building tasks...
-            while (newCount > 0 && chunkRendersToBeBuilt.Count > 0)
+            while (newCount > 0 && chunkRendersToBeBuiltAsSet.Count > 0)
             {
                 var nextChunk = chunkRendersToBeBuilt.Dequeue();
 
@@ -980,6 +986,8 @@ namespace CraftSharp.Rendering
                 }
                 else
                 {
+                    chunkRendersToBeBuiltAsSet.Remove(nextChunk);
+
                     Profiler.BeginSample("Build tasks");
                     BuildChunkRender(nextChunk);
                     Profiler.EndSample();
@@ -993,7 +1001,7 @@ namespace CraftSharp.Rendering
             UpdateChunkRendersListAdd(updateTargetMask);
             Profiler.EndSample();
 
-            if (chunkRendersToBeBuilt.Count < BUILD_COUNT_LIMIT) // If CPU is not so busy
+            if (chunkRendersToBeBuiltAsSet.Count < BUILD_COUNT_LIMIT) // If CPU is not so busy
             {
                 Profiler.BeginSample("Update chunks (Remove)");
                 UpdateChunkRendersListRemove(updateTargetMask);
