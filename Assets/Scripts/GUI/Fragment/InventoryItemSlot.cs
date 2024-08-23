@@ -10,17 +10,17 @@ namespace CraftSharp.UI
 {
     public class InventoryItemSlot : MonoBehaviour
     {
-        private static readonly int SHOW_HASH = Animator.StringToHash("Show");
-        private static readonly int UPDATE_HASH = Animator.StringToHash("Update");
         private static readonly int SELECTED_HASH = Animator.StringToHash("Selected");
 
         [SerializeField] private GameObject modelObject;
         [SerializeField] private TMP_Text itemText;
         [SerializeField] private MeshFilter itemMeshFilter;
         [SerializeField] private MeshRenderer itemMeshRenderer;
-        [SerializeField] private Animator itemAnimator;
+        [SerializeField] private Transform slotCenterRef;
         [SerializeField] private Sprite selectedSprite;
         [SerializeField] private TMP_Text keyHintText;
+
+        [SerializeField] private float fullItemScale = 60F;
 
         private Animator _slotAnimator;
         private Image _slotImage;
@@ -46,20 +46,14 @@ namespace CraftSharp.UI
             itemStack = newItemStack;
             // Update item mesh
             UpdateItemMesh();
-            // Visually emphasize the change
-            itemAnimator.SetTrigger(UPDATE_HASH);
+            // TODO: Visually emphasize the change
         }
 
         #nullable disable
 
-        public void ShowItemStack()
+        public void SetSlotItemScale(float scale)
         {
-            itemAnimator.SetBool(SHOW_HASH, true);
-        }
-
-        public void HideItemStack()
-        {
-            itemAnimator.SetBool(SHOW_HASH, false);
+            slotCenterRef.transform.localScale = new Vector3(scale, scale, scale) * fullItemScale;
         }
 
         public void SelectSlot()

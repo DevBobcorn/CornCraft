@@ -2,11 +2,10 @@ using System;
 using UnityEngine;
 
 using CraftSharp.Event;
-using UnityEngine.UI;
 
 namespace CraftSharp.UI
 {
-    public class InventoryHotbar : MonoBehaviour
+    public class InventoryHotbar : MonoBehaviour, IAlphaListener
     {
         public const int HOTBAR_LENGTH = 9;
 
@@ -21,6 +20,9 @@ namespace CraftSharp.UI
 
         #nullable disable
 
+        private CanvasGroup[] parentCanvasGroups = { };
+        private float selfAlpha = 1F;
+
         private void SelectSlot(int slot)
         {
             if (selectedSlot != null)
@@ -34,6 +36,8 @@ namespace CraftSharp.UI
 
         public void Start()
         {
+            parentCanvasGroups = GetComponentsInParent<CanvasGroup>(true);
+            
             for (int i = 0; i < itemSlots.Length; i++)
             {
                 itemSlots[i].SetKeyHint((i + 1).ToString());
@@ -51,19 +55,37 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(heldItemChangeCallback);
         }
 
-        public void ShowItems()
+        public void UpdateAlpha(float alpha)
         {
             for (int i = 0; i < itemSlots.Length; i++)
             {
-                itemSlots[i].ShowItemStack();
+                itemSlots[i].SetSlotItemScale(alpha);
             }
+
+            selfAlpha = alpha;
         }
 
-        public void HideItems()
+        void Update()
         {
-            for (int i = 0; i < itemSlots.Length; i++)
+            if (parentCanvasGroups.Length > 0)
             {
-                itemSlots[i].HideItemStack();
+                float updatedAlpha = 1F;
+
+                for (int i = 0; i < parentCanvasGroups.Length; i++)
+                {
+                    if ((!parentCanvasGroups[i].gameObject.activeSelf) || parentCanvasGroups[i].alpha == 0F)
+                    {
+                        updatedAlpha = 0F;
+                        break;
+                    }
+
+                    updatedAlpha *= parentCanvasGroups[i].alpha;
+                }
+
+                if (selfAlpha != updatedAlpha)
+                {
+                    UpdateAlpha(updatedAlpha);
+                }
             }
         }
 
