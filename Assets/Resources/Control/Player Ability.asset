@@ -66,3 +66,5 @@ MonoBehaviour:
   MaxFallSpeed: 100
   MaxGlideFallSpeed: 2
   LiquidMoveMultiplier: 0.8
+  MeleeSwordAttack_Staged: {fileID: 11400000, guid: e9daf537efee7104daf40cc676392536, type: 2}
+  RangedBowAttack_Charged: {fileID: 11400000, guid: 33dfb0310f5ab1a4284d261824057ad2, type: 2}
