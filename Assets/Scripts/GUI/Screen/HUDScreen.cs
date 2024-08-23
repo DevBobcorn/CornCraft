@@ -12,7 +12,7 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class HUDScreen : BaseScreen
     {
-        private const float HEALTH_MULTIPLIER = 10F;
+        private const float HEALTH_MULTIPLIER = 1F;
         private static readonly Vector3 STAMINA_TARGET_OFFSET = new(0, -0.5f, 0f);
 
         // UI controls and objects

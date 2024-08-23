@@ -1,9 +1,8 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace CraftSharp.UI
 {
-    public class ValueBar : BaseValueBar
+    public class ValueBar : BaseValueBar, IAlphaListener
     {
         [SerializeField] private Color normalColor   = Color.white;
         [SerializeField] private Color reduceColor   = new(1F, 0.521F, 0.596F); // 255 133 152 #FF8598
@@ -14,25 +13,37 @@ namespace CraftSharp.UI
         [SerializeField] [Range(0.1F, 1F)] private float warningThreshold = 0.3F;
         [SerializeField] [Range(0.1F, 1F)] private float dangerThreshold  = 0.1F;
 
-        [SerializeField] private RectTransform.Axis barAxis = RectTransform.Axis.Horizontal;
+        [SerializeField] private bool horizontalBar = true;
 
-        [SerializeField] private RectTransform barFillTransform, deltaFillTransform, displayFillTransform;
-        private Image displayFillImage, deltaFillImage;
+        private Shapes.Rectangle selfRect;
+        [SerializeField] private Shapes.Rectangle deltaFillRect, displayFillRect;
 
-        private float fullBarLength;
+        [SerializeField] private float fullBarLength;
+        [SerializeField] private float fullAlpha = 0.75F;
+
+        private CanvasGroup[] parentCanvasGroups = { };
+        private float selfAlpha = 1F;
 
         void Start()
         {
-            deltaFillImage   = deltaFillTransform!.GetComponent<Image>();
-            displayFillImage = displayFillTransform!.GetComponent<Image>();
-
-            if (barAxis == RectTransform.Axis.Horizontal)
-                fullBarLength = barFillTransform!.rect.width;
-            else
-                fullBarLength = barFillTransform!.rect.height;
+            selfRect = GetComponent<Shapes.Rectangle>();
+            parentCanvasGroups = GetComponentsInParent<CanvasGroup>(true);
 
             UpdateValue();
+        }
 
+        public void UpdateAlpha(float alpha)
+        {
+            selfRect.Color = IAlphaListener.GetColorWithAlpha(selfRect.Color, alpha);
+            deltaFillRect.Color = IAlphaListener.GetColorWithAlpha(deltaFillRect.Color, alpha);
+            displayFillRect.Color = IAlphaListener.GetColorWithAlpha(displayFillRect.Color, alpha);
+
+            if (barText != null)
+            {
+                barText.color = IAlphaListener.GetColorWithAlpha(barText.color, alpha);
+            }
+
+            selfAlpha = alpha;
         }
 
         protected override void UpdateValue()
@@ -41,34 +52,73 @@ namespace CraftSharp.UI
             {
                 // Calculate new display value
                 displayValue = Mathf.Max(displayValue - maxValue * Time.deltaTime, curValue);
+
                 // Then update visuals
-                float curValuePos = (curValue / maxValue) * fullBarLength;
-                displayFillTransform!.SetSizeWithCurrentAnchors(barAxis, curValuePos);
-                deltaFillImage!.color = reduceColor;
-                deltaFillTransform!.anchoredPosition = new(curValuePos, 0F);
-                deltaFillTransform.SetSizeWithCurrentAnchors(barAxis, (displayValue - curValue) / maxValue * fullBarLength);
+                if (horizontalBar)
+                    displayFillRect.Width = curValue / maxValue * fullBarLength;
+                else
+                    displayFillRect.Height = curValue / maxValue * fullBarLength;
+                
+                deltaFillRect.Color = IAlphaListener.GetColorWithAlpha(reduceColor, selfAlpha);
+
+                if (horizontalBar)
+                    deltaFillRect.Width = displayValue / maxValue * fullBarLength;
+                else
+                    deltaFillRect.Height = displayValue / maxValue * fullBarLength;
             }
             else // Increase visual fill
             {
                 // Calculate new display value
                 displayValue = Mathf.Min(displayValue + maxValue * Time.deltaTime, curValue);
+
                 // Then update visuals
-                float displayValuePos = (displayValue / maxValue) * fullBarLength;
-                displayFillTransform!.SetSizeWithCurrentAnchors(barAxis, displayValuePos);
-                deltaFillImage!.color = increaseColor;
-                deltaFillTransform!.anchoredPosition = new(displayValuePos, 0F);
-                deltaFillTransform.SetSizeWithCurrentAnchors(barAxis, (curValue - displayValue) / maxValue * fullBarLength);
+                if (horizontalBar)
+                    displayFillRect.Width = displayValue / maxValue * fullBarLength;
+                else
+                    displayFillRect.Height = displayValue / maxValue * fullBarLength;
+                
+                deltaFillRect.Color = IAlphaListener.GetColorWithAlpha(increaseColor, selfAlpha);
+
+                if (horizontalBar)
+                    deltaFillRect.Width = curValue / maxValue * fullBarLength;
+                else
+                    deltaFillRect.Height = curValue / maxValue * fullBarLength;
             }
 
             float displayFrac = displayValue / maxValue;
 
             if (displayFrac < dangerThreshold)
-                displayFillImage!.color = dangerColor;
+                displayFillRect.Color = IAlphaListener.GetColorWithAlpha(dangerColor, selfAlpha);
             else if (displayFrac < warningThreshold)
-                displayFillImage!.color = warningColor;
+                displayFillRect.Color = IAlphaListener.GetColorWithAlpha(warningColor, selfAlpha);
             else
-                displayFillImage!.color = normalColor;
+                displayFillRect.Color = IAlphaListener.GetColorWithAlpha(normalColor, selfAlpha);
         }
 
+        protected override void Update()
+        {
+            base.Update();
+
+            if (parentCanvasGroups.Length > 0)
+            {
+                float updatedAlpha = fullAlpha;
+
+                for (int i = 0; i < parentCanvasGroups.Length; i++)
+                {
+                    if ((!parentCanvasGroups[i].gameObject.activeSelf) || parentCanvasGroups[i].alpha == 0F)
+                    {
+                        updatedAlpha = 0F;
+                        break;
+                    }
+
+                    updatedAlpha *= parentCanvasGroups[i].alpha;
+                }
+
+                if (selfAlpha != updatedAlpha)
+                {
+                    UpdateAlpha(updatedAlpha);
+                }
+            }
+        }
     }
 }
