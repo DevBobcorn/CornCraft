@@ -107,7 +107,9 @@ namespace CraftSharp.Rendering
                 entityPrefab = serverSlimPlayerPrefab;
             }
             else
+            {
                 entityPrefab = GetPrefabForType(entity.Type.EntityId);
+            }
 
             if (entityPrefab != null)
             {
@@ -125,7 +127,7 @@ namespace CraftSharp.Rendering
                 // Initialize materials (This requires metadata to be present)
                 if (entityObj.TryGetComponent(out EntityMaterialAssigner materialControl))
                 {
-                    materialControl.InitializeMaterials(entityRender.GetControlVariables(), entity.Metadata);
+                    materialControl.InitializeMaterials(entity.Type, entityRender.GetControlVariables(), entity.Metadata);
                 }
             }
         }
