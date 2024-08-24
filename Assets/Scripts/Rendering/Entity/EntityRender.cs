@@ -40,12 +40,12 @@ namespace CraftSharp.Rendering
         /// </summary>
         public string? CustomName;
 
-        private EntityType? type;
+        private EntityType type = EntityType.DUMMY_ENTITY_TYPE;
 
         /// <summary>
         /// Entity type
         /// </summary>
-        public EntityType Type => type!;
+        public EntityType Type => type;
 
         /// <summary>
         /// Entity position
@@ -122,7 +122,7 @@ namespace CraftSharp.Rendering
             // Update own materials
             if (TryGetComponent(out EntityMaterialAssigner materialControl))
             {
-                materialControl.UpdateMaterials(null, updatedMeta.Keys.ToHashSet(), GetControlVariables(), Metadata);
+                materialControl.UpdateMaterials(type, null, updatedMeta.Keys.ToHashSet(), GetControlVariables(), Metadata);
             }
         }
 
@@ -335,7 +335,7 @@ namespace CraftSharp.Rendering
                     // Initialize ragdoll materials using own metadata
                     if (ragdoll.gameObject.TryGetComponent(out EntityMaterialAssigner materialControl))
                     {
-                        materialControl.InitializeMaterials(GetControlVariables(), Metadata);
+                        materialControl.InitializeMaterials(type, GetControlVariables(), Metadata);
                     }
                 }
             }

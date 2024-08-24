@@ -18,9 +18,8 @@ namespace CraftSharp.Rendering
         public Renderer[] Renderers => m_Renderers;
 
         public bool DynamicTextureId { get; private set; } = false;
-        public string TextureIdTemplate { get; private set; } = string.Empty;
-        public string[] TextureIdVariables { get; private set; } = { };
-        public HashSet<int> TextureIdMetaSlots { get; private set; } = new();
+        public List<(string, string)>? TextureIdVariables { get; private set; }
+        public HashSet<int>? DependentMetaSlots { get; private set; }
 
         public EntityMaterialEntry(EntityRenderType renderType, Material material, Renderer[] renderers)
         {
@@ -35,7 +34,7 @@ namespace CraftSharp.Rendering
             m_Renderers = renderers;
         }
 
-        public void SetupDynamicTextureId()
+        public void SetupDynamicTextureId(EntityType entityType)
         {
             if (DynamicTextureId)
             {
@@ -43,37 +42,50 @@ namespace CraftSharp.Rendering
                 return;
             }
 
+            TextureIdVariables = new();
+            DependentMetaSlots = new();
+
             // Turn texture id into a string template. e.g. entity/cow/{COLOR}_mooshroom
             string pattern = @"\{.*?\}"; // Non-greedy matching using '?'
-            List<string> vars = new();
-            HashSet<int> metaSlots = new();
 
-            string convert(string slotText)
+            string convert(string variable)
             {
-                if (slotText.StartsWith("meta@"))
+                var split = variable.Split('=');
+                var variableName = split[0];
+                var defaultValue = split.Length > 1 ? split[1] : "<missing>";
+
+                if (variableName.StartsWith("meta@"))
                 {
-                    var slotNum = slotText[5..].Split("@")[0];
-                    if (int.TryParse(slotNum, out int slot))
+                    var metaName = variableName[5..].Split("@")[0];
+
+                    if (!entityType.MetaEntriesByName.TryGetValue(metaName, out EntityMetaEntry metaEntry))
                     {
-                        metaSlots.Add(slot);
+                        Debug.LogWarning($"{metaName} is not a valid entity metadata slot for {entityType}!");
+                        return $"[{metaName}]";
                     }
+
+                    var metaSlot = entityType.MetaSlotByName[metaEntry.Name];
+                    DependentMetaSlots.Add(metaSlot);
+                    //Debug.Log($"{TextureId} depends on meta [{metaSlot}] {metaEntry.Name}");
+                }
+                else
+                {
+                    //Debug.Log($"{TextureId} depends on variable named {variableName}");
                 }
 
-                vars.Add(slotText[1..^1]);
+                TextureIdVariables.Add((variableName, defaultValue));
                 
-                return $"{{{vars.Count - 1}}}";
+                return $"{{{TextureIdVariables.Count - 1}}}";
             }
 
-            TextureId = Regex.Replace(TextureId, pattern, m => convert(m.Value));
+            TextureId = Regex.Replace(TextureId, pattern, m => convert(m.Value[1..^1]));
 
-            if (vars.Count == 0)
+            if (TextureIdVariables.Count == 0)
             {
                 Debug.LogWarning($"Malformed texture id: {TextureId}");
             }
             else
             {
-                TextureIdVariables = vars.ToArray();
-                TextureIdMetaSlots = metaSlots;
                 DynamicTextureId = true;
             }
         }
@@ -105,44 +117,59 @@ namespace CraftSharp.Rendering
                     EntityRenderType.SOLID, x.Key, x.Value.ToArray() ) ).ToArray();
         }
 
-        private string GetVariableValue(string variable, Dictionary<string, string>? variables, Dictionary<int, object?>? metadata)
+        private string GetVariableValue(EntityType entityType, string variableName, string defaultValue, Dictionary<string, string>? variables, Dictionary<int, object?>? metadata)
         {
-            var split = variable.Split('=');
-            var defaultValue = split.Length > 1 ? split[1] : "<missing>";
-
-            if (split[0].StartsWith("meta@"))
+            if (variableName.StartsWith("meta@"))
             {
                 if (metadata is null)
                 {
                     return defaultValue;
                 }
 
-                var metaEntry = split[0][5..].Split('@', 2);
+                var metaEntrySplit = variableName[5..].Split('@', 2);
+                var metaName = metaEntrySplit[0];
 
-                if (!int.TryParse(metaEntry[0], out int metaSlot))
+                if (!entityType.MetaEntriesByName.TryGetValue(metaName, out EntityMetaEntry metaEntry))
                 {
-                    Debug.LogWarning($"{metaEntry[0]} is not a valid entity metadata slot!");
+                    Debug.LogWarning($"{metaName} is not a valid entity metadata slot for {entityType}!");
+                    return defaultValue;
+                }
+
+                var metaSlot = entityType.MetaSlotByName[metaEntry.Name];
+                var metaValue = metadata[metaSlot];
+
+                if (metaValue is null)
+                {
+                    Debug.LogWarning($"Failed to get meta {metaName} at slot {metaSlot} for {entityType}!");
                     return defaultValue;
                 }
 
                 // Return the value directly
-                return metadata[metaSlot]?.ToString() ?? defaultValue;
+                return metaValue.ToString();
             }
             else
             {
                 // Look in variable table
-                return variables?.GetValueOrDefault(split[0], defaultValue) ?? defaultValue;
+                var value = variables?.GetValueOrDefault(variableName, defaultValue);
+
+                if (value is null)
+                {
+                    Debug.LogWarning($"Failed to get variable {variableName} for {entityType}!");
+                    return defaultValue;
+                }
+
+                return value;
             }
         }
 
         private bool IsTextureIdAffected(EntityMaterialEntry entry, HashSet<string>? updatedVars, HashSet<int>? updatedMeta)
         {
-            if (updatedVars is not null && entry.TextureIdVariables.Any(x => updatedVars.Contains(x)))
+            if (updatedVars is not null && entry.TextureIdVariables.Any(x => updatedVars.Contains(x.Item1)))
             {
                 return true;
             }
 
-            if (updatedMeta is not null && entry.TextureIdMetaSlots.Any(x => updatedMeta.Contains(x)))
+            if (updatedMeta is not null && entry.DependentMetaSlots.Any(x => updatedMeta.Contains(x)))
             {
                 return true;
             }
@@ -153,14 +180,15 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Update materials after variable/updatedMeta value change
         /// </summary>
-        public void UpdateMaterials(HashSet<string>? updatedVars, HashSet<int>? updatedMeta, Dictionary<string, string>? variables, Dictionary<int, object?>? metadata)
+        public void UpdateMaterials(EntityType entityType, HashSet<string>? updatedVars, HashSet<int>? updatedMeta, Dictionary<string, string>? variables, Dictionary<int, object?>? metadata)
         {
             var client = CornApp.CurrentClient!;
             var matManager = client.EntityMaterialManager;
 
             var isRagdoll = GetComponent<EntityRagdoll>() != null;
 
-            Debug.Log($"Updating meta ({gameObject.name}): {string.Join(", ", updatedMeta)}");
+            //var info = updatedMeta.Select(x => entityType.MetaEntries[x].Name + ": [" + metadata?[x] + "],");
+            //Debug.Log($"Updating meta ({gameObject.name}):\n{string.Join("\n", info)}");
 
             for (int i = 0; i < m_MaterialEntries.Length; i++)
             {
@@ -170,9 +198,9 @@ namespace CraftSharp.Rendering
                 if (entry.DynamicTextureId && IsTextureIdAffected(entry, updatedVars, updatedMeta))
                 {
                     var vars = entry.TextureIdVariables.Select(x =>
-                            GetVariableValue(x, variables, metadata)).ToArray();
+                            GetVariableValue(entityType, x.Item1, x.Item2, variables, metadata)).ToArray();
                     var interpolated = string.Format(entry.TextureId, vars);
-                    Debug.Log($"Updating texture {entry.TextureId} with {string.Join(", ", vars)}");
+                    //Debug.Log($"Updating texture {entry.TextureId} with {string.Join(", ", vars)}");
                     textureId = ResourceLocation.FromString(interpolated);
                 }
                 else
@@ -201,7 +229,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public void InitializeMaterials(Dictionary<string, string>? variables, Dictionary<int, object?>? metadata)
+        public void InitializeMaterials(EntityType entityType, Dictionary<string, string>? variables, Dictionary<int, object?>? metadata)
         {
             var client = CornApp.CurrentClient!;
             var matManager = client.EntityMaterialManager;
@@ -216,13 +244,13 @@ namespace CraftSharp.Rendering
                 if (entry.TextureId.Contains('{'))
                 {
                     // Extract updatedVars in texture id
-                    entry.SetupDynamicTextureId();
+                    entry.SetupDynamicTextureId(entityType);
                 }
 
                 if (entry.DynamicTextureId)
                 {
                     var vars = entry.TextureIdVariables.Select(x =>
-                            GetVariableValue(x, variables, metadata)).ToArray();
+                            GetVariableValue(entityType, x.Item1, x.Item2, variables, metadata)).ToArray();
                     var interpolated = string.Format(entry.TextureId, vars);
                     textureId = ResourceLocation.FromString(interpolated);
                 }

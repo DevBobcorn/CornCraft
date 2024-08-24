@@ -2,9 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using CraftSharp.Inventory;
 using System.IO;
 using System.IO.Compression;
+using UnityEngine;
+
+using CraftSharp.Inventory;
 
 namespace CraftSharp.Protocol.Handlers
 {
@@ -625,12 +627,11 @@ namespace CraftSharp.Protocol.Handlers
                         value = ReadNextInt(cache);
                         break;
                     case EntityMetaDataType.Vector3Int: // 1.8 only
-                        value = new List<int>()
-                        {
+                        value = new Vector3Int(
                             ReadNextInt(cache),
                             ReadNextInt(cache),
-                            ReadNextInt(cache),
-                        };
+                            ReadNextInt(cache)
+                        );
                         break;
                     case EntityMetaDataType.Byte: // byte
                         value = ReadNextByte(cache);
@@ -661,12 +662,12 @@ namespace CraftSharp.Protocol.Handlers
                         value = ReadNextBool(cache);
                         break;
                     case EntityMetaDataType.Rotation: // Rotation (3x floats)
-                        value = new List<float>
-                        {
+                        value = new Vector3
+                        (
                             ReadNextFloat(cache),
                             ReadNextFloat(cache),
                             ReadNextFloat(cache)
-                        };
+                        );
                         break;
                     case EntityMetaDataType.Position: // Position
                         value = ReadNextLocation(cache);
@@ -700,12 +701,12 @@ namespace CraftSharp.Protocol.Handlers
                         ReadParticleData(cache, itemPalette);
                         break;
                     case EntityMetaDataType.VillagerData: // Villager Data (3x VarInt)
-                        value = new List<int>
-                        {
+                        value = new Vector3Int
+                        (
                             ReadNextVarInt(cache),
                             ReadNextVarInt(cache),
                             ReadNextVarInt(cache)
-                        };
+                        );
                         break;
                     case EntityMetaDataType.OptionalVarInt: // Optional VarInt
                         if (ReadNextBool(cache))
@@ -742,21 +743,21 @@ namespace CraftSharp.Protocol.Handlers
                         value = ReadNextVarInt(cache);
                         break;
                     case EntityMetaDataType.Vector3: // Vector 3f
-                        value = new List<float>
-                        {
+                        value = new Vector3
+                        (
                             ReadNextFloat(cache),
                             ReadNextFloat(cache),
                             ReadNextFloat(cache)
-                        };
+                        );
                         break;
                     case EntityMetaDataType.Quaternion: // Quaternion
-                        value = new List<float>
-                        {
+                        value = new Quaternion
+                        (
                             ReadNextFloat(cache),
                             ReadNextFloat(cache),
                             ReadNextFloat(cache),
                             ReadNextFloat(cache)
-                        };
+                        );
                         break;
                 }
 

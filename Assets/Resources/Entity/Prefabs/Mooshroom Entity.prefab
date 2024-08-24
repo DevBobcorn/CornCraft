@@ -430,7 +430,7 @@ MonoBehaviour:
   m_MaterialEntries:
   - RenderType: 0
     m_DefaultMaterial: {fileID: 2100000, guid: 68366e947df623c438e0fd3c213254da, type: 2}
-    TextureId: entity/cow/{meta@17=red}_mooshroom
+    TextureId: entity/cow/{meta@data_type=red}_mooshroom
     m_Renderers:
     - {fileID: 6948032671767311936}
     - {fileID: 5920890146341887288}
@@ -442,7 +442,7 @@ MonoBehaviour:
     - {fileID: 6435625524966792020}
   - RenderType: 2
     m_DefaultMaterial: {fileID: 2100000, guid: a5f577e1c4a04974a812b3069f4ab167, type: 2}
-    TextureId: block/{meta@17=red}_mushroom
+    TextureId: block/{meta@data_type=red}_mushroom
     m_Renderers:
     - {fileID: 8556023643677546428}
     - {fileID: 7288425756664798795}
