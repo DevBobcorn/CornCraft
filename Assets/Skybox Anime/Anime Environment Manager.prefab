@@ -559,7 +559,7 @@ Transform:
   m_GameObject: {fileID: 8231469542009771001}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 100, z: 0}
+  m_LocalPosition: {x: 0, y: 50, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -657,13 +657,13 @@ MonoBehaviour:
   - {fileID: 617025360, guid: a698ec7122f53e94b98336cc45901747, type: 3}
   - {fileID: -1685203855, guid: a698ec7122f53e94b98336cc45901747, type: 3}
   - {fileID: -2028114413, guid: a698ec7122f53e94b98336cc45901747, type: 3}
-  cloudQuadCount: 50
+  cloudQuadCount: 25
   cloudHeight: 0
-  cloudRadius: 400
-  maxElevation: 300
+  cloudRadius: 300
+  maxElevation: 200
   maxFadeDelay: 100
-  minSize: 40
-  maxSize: 70
+  minSize: 30
+  maxSize: 50
 --- !u!1 &8524034377444472758
 GameObject:
   m_ObjectHideFlags: 0
@@ -791,10 +791,10 @@ MonoBehaviour:
   - {fileID: 1159435747, guid: 998d576937589bb4d935f032beee4db8, type: 3}
   - {fileID: 1088514880, guid: 998d576937589bb4d935f032beee4db8, type: 3}
   - {fileID: -774865111, guid: 998d576937589bb4d935f032beee4db8, type: 3}
-  cloudQuadCount: 20
+  cloudQuadCount: 16
   cloudHeight: 0
-  cloudRadius: 400
+  cloudRadius: 300
   maxElevation: 4
   maxFadeDelay: 100
-  minSize: 40
-  maxSize: 60
+  minSize: 20
+  maxSize: 30
