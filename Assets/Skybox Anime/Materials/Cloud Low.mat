@@ -36,6 +36,10 @@ Material:
     - _Cloud_SDF_TS: 0.121
     - _Cloud_SDF_TSa: 0.051
     - _Cloud_SDF_TSb: 0.003
+    - _FadeMultiplier: 0.01
+    - _FadeOffset: 0
+    - _FadeSmoothness: 0.001
+    - _FadeTimeScale: 0.02
     - _SunMoon: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
