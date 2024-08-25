@@ -5,15 +5,14 @@ exclude_ext = [
     '.py', '.zip'
 ]
 
-def zipdir(path, zipf):
-    for root, _, files in os.walk(path):
+def zipdir(datadir, zipf):
+    for root, _, files in os.walk(datadir):
         for file in files:
             ext = file[file.rfind('.'):]
 
             if not ext in exclude_ext:
-                zipf.write(os.path.join(root, file), 
-                        os.path.relpath(os.path.join(root, file),
-                                        os.path.join(path, '..')))
+                zipf.write(os.path.join(root, file),
+                        os.path.relpath(os.path.join(root, file), datadir))
             else:
                 print(f'Excluding file {file}')
 
