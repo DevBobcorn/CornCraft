@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,13 +11,12 @@ namespace AnimeSkybox
 
         [SerializeField] private int cloudQuadCount = 12;
 
-        [SerializeField] private float cloudHeight  =   0F;
-        [SerializeField] private float cloudRadius  = 400F;
-        [SerializeField] private float cloudScale   = 100F;
+        [SerializeField] private float cloudHeight =   0F;
+        [SerializeField] private float cloudRadius = 400F;
         [SerializeField] private float maxElevation = 100F;
         [SerializeField] private float maxFadeDelay = 100F;
-        [SerializeField] private float minSize = 0.5F;
-        [SerializeField] private float maxSize = 1.5F;
+        [SerializeField] private float minSize = 80F;
+        [SerializeField] private float maxSize = 120F;
 
         void Start()
         {
@@ -85,7 +83,7 @@ namespace AnimeSkybox
                 
                 var spriteIndices = cloudSprite.triangles;
 
-                vertices.AddRange(spriteVertices.Select(pos => cloudRotation * new Vector3(pos.x * cloudSize * cloudScale, (pos.y - minY) * cloudSize * cloudScale + cloudElev + cloudHeight, cloudRadius)));
+                vertices.AddRange(spriteVertices.Select(pos => cloudRotation * new Vector3(pos.x * cloudSize, (pos.y - minY) * cloudSize + cloudElev + cloudHeight, cloudRadius)));
                 uvs.AddRange(spriteUVs);
                 delays.AddRange(Enumerable.Repeat(new Vector2(fadeDelay, 0F), spriteVertexCount));
                 triangles.AddRange(spriteIndices.Select(x => vertexIndexOffset + x));
