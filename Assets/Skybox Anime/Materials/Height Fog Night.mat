@@ -113,7 +113,7 @@ Material:
     - _FogHeightEnd: 564
     - _FogHeightFalloff: 1
     - _FogHeightStart: 54
-    - _FogIntensity: 0.5
+    - _FogIntensity: 1
     - _FogLayersMode: 0
     - _GlossMapScale: 0
     - _Glossiness: 0

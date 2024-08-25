@@ -49,16 +49,17 @@ Shader "AnimeSkybox/Skybox"
         _galaxyTex("银河贴图", 2D) = "white"{}
         _galaxy_INT("银河默认强度", range(0,1)) = 0.2
         _galaxy_intensity("银河强度", range(0,2)) = 1
-
     }
  
     SubShader
     {
-        Tags { "Queue"="Geometry" 
-               "RenderType" = "Opaque"
-               "IgnoreProjector" = "True" 
-               "RenderPipeline" = "UniversalPipeline" 
-             }
+        Tags {
+            "Queue"="Geometry" 
+            "RenderType" = "Opaque"
+            "IgnoreProjector" = "True" 
+            "RenderPipeline" = "UniversalPipeline" 
+        }
+
         LOD 100
  
         Pass
@@ -93,15 +94,12 @@ Shader "AnimeSkybox/Skybox"
             {
                 float4 Varying_StarColorUVAndNoise_UV : TEXCOORD0;
                 float4 Varying_NoiseUV_large          : TEXCOORD1;
-                float4 Varying_WorldPosAndAngle    : TEXCOORD2;
+                float4 Varying_WorldPosAndAngle       : TEXCOORD2;
                 float4 Varying_IrradianceColor        : TEXCOORD3;
-                float3 Test                          : TEXCOORD4;
+                float3 Test                           : TEXCOORD4;
                 float4 UV  : TEXCOORD5; 
                 float4 positionWS : TEXCOORD6;
                 float4 positionCS : SV_POSITION;
-
-
-            
             };
  
             CBUFFER_START(UnityPerMaterial)
@@ -144,14 +142,14 @@ Shader "AnimeSkybox/Skybox"
             float _starIntensityLinearDamping;
 
             sampler2D _StarDotMap;
-             float4 _StarDotMap_ST;
+            float4 _StarDotMap_ST;
 
             float _NoiseSpeed;
 
-             sampler2D _NoiseMap;
+            sampler2D _NoiseMap;
             float4 _NoiseMap_ST;
 
-           sampler2D _StarColorLut;
+            sampler2D _StarColorLut;
             float4 _StarColorLut_ST;
 
             sampler2D _galaxyTex;
@@ -175,10 +173,6 @@ Shader "AnimeSkybox/Skybox"
                 return in_cos < 0.0 ?  UNITY_PI - local_abs_acos : local_abs_acos;
             }
 
-
-
-       
- 
             v2f vert(appdata v)
             {
                 v2f o = (v2f)0;
@@ -187,12 +181,10 @@ Shader "AnimeSkybox/Skybox"
                 float3 _worldPos = mul(UNITY_MATRIX_M, float4(v.vertex.xyz, 1.0)).xyz;
                 float3 NormalizeWorldPos = normalize(_worldPos);
          
-			        	float4 _clippos  = mul(UNITY_MATRIX_VP, float4(_worldPos, 1.0));
-
+			    float4 _clippos  = mul(UNITY_MATRIX_VP, float4(_worldPos, 1.0));
 
                 o.positionCS= _clippos;
                 o.UV = v.uv;
-
 
                 o.Varying_StarColorUVAndNoise_UV.xy = TRANSFORM_TEX(v.uv.xz , _StarDotMap);
                 o.Varying_StarColorUVAndNoise_UV.zw = v.uv * 20.0;
@@ -202,94 +194,76 @@ Shader "AnimeSkybox/Skybox"
                 o.Varying_NoiseUV_large.xy = (v.uv.xz * _NoiseMap_ST.xy) + _timeScaleValue.xy;
                 o.Varying_NoiseUV_large.zw = (v.uv.xz * _NoiseMap_ST.xy * 2.0) + _timeScaleValue.zw;
 
-
-
-              //  Light mainLight = GetMainLight();
+                // Light mainLight = GetMainLight();
                 //float3 _viewDir = normalize(_worldPos.xyz );/*_WorldSpaceCameraPos*/
                 float3 SunDirection = dot(normalize(vertexInput.positionWS),_SunDirection.xyz);
-               // float _WPDotSun = dot(SunDirection, _worldPos.xyz);
+                // float _WPDotSun = dot(SunDirection, _worldPos.xyz);
                 float SunDirectionRemapClamp =clamp((SunDirection * 0.5) + 0.5,0,1.0);
                 float _miu = clamp( dot(float3(0,1,0), NormalizeWorldPos), -1, 1 );
                 float _angle_up_to_down_1_n1 = (UNITY_HALF_PI - FastAcos(_miu)) * UNITY_INV_HALF_PI;
-             
-             
+                
                 o.Varying_WorldPosAndAngle.xyz = NormalizeWorldPos;
                 o.Varying_WorldPosAndAngle.w   = _angle_up_to_down_1_n1;
 
-                  float2 _irradianceMap_G_uv;
-                  _irradianceMap_G_uv.x = abs(_angle_up_to_down_1_n1) / max(_IrradianceMapG_maxAngleRange, 0.001f);
-                  _irradianceMap_G_uv.y = 0.5;
-                  float _irradianceMapG = tex2Dlod(_IrradianceMap, float4( _irradianceMap_G_uv, 0.0, 0.0 )).y;
+                float2 _irradianceMap_G_uv;
+                _irradianceMap_G_uv.x = abs(_angle_up_to_down_1_n1) / max(_IrradianceMapG_maxAngleRange, 0.001f);
+                _irradianceMap_G_uv.y = 0.5;
+                float _irradianceMapG = tex2Dlod(_IrradianceMap, float4( _irradianceMap_G_uv, 0.0, 0.0 )).y;
 
-                  float3 _sunAdditionPartColor = _irradianceMapG * _SunAdditionColor * _SunAdditionIntensity;
+                float3 _sunAdditionPartColor = _irradianceMapG * _SunAdditionColor * _SunAdditionIntensity;
 
-                     
+                float _upFactor = smoothstep(0, 1, clamp((abs(_SunDirection.y) - 0.2) * 10/3, 0, 1));
+                float _VDotSunFactor = smoothstep(0, 1, (SunDirectionRemapClamp -1)/0.7 + 1);
+                float _sunAdditionPartFactor = lerp(_VDotSunFactor, 1.0, _upFactor);///
+                float3 _additionPart = _sunAdditionPartColor * _sunAdditionPartFactor;
+                float3 _sumIrradianceRGColor =  _additionPart;
 
-                 float _upFactor = smoothstep(0, 1, clamp((abs(_SunDirection.y) - 0.2) * 10/3, 0, 1));
-                 float _VDotSunFactor = smoothstep(0, 1, (SunDirectionRemapClamp -1)/0.7 + 1);
-                 float _sunAdditionPartFactor = lerp(_VDotSunFactor, 1.0, _upFactor);///
-                 float3 _additionPart = _sunAdditionPartColor * _sunAdditionPartFactor;
-                 float3 _sumIrradianceRGColor =  _additionPart;
+                o.Varying_IrradianceColor.xyz = _sumIrradianceRGColor;
 
-                 o.Varying_IrradianceColor.xyz = _sumIrradianceRGColor;
+                o.Test.xyz = float3(_irradianceMap_G_uv.x,_irradianceMap_G_uv.x,_irradianceMap_G_uv.x);
 
-                 o.Test.xyz = float3(_irradianceMap_G_uv.x,_irradianceMap_G_uv.x,_irradianceMap_G_uv.x);
-           
-
- 
                 return o;
             }
  
             half4 frag(v2f i) : SV_Target
             {
-             
-      
-                 float sunDist = distance(i.UV.xyz, _SunDirection.xyz);
-                 float MoonDist = distance(i.UV.xyz,_MoonDirection);
-                 float sunArea = 1 - (sunDist * _SunRadius);
-                 float moonArea = 1 - clamp((MoonDist * _MoonMaskRadius),0,1);
+                float sunDist = distance(i.UV.xyz, _SunDirection.xyz);
+                float MoonDist = distance(i.UV.xyz,_MoonDirection);
+                float sunArea = 1 - (sunDist * _SunRadius);
+                float moonArea = 1 - clamp((MoonDist * _MoonMaskRadius),0,1);
                 // float moonGalaxyMask = 1 - clamp((MoonDist * 10),0,1);
 
-                 float moonGalaxyMask = step(0.084,MoonDist);
+                float moonGalaxyMask = step(0.084,MoonDist);
 
-                 float sunArea2 = 1- (sunDist*_SunScattering);//散射扩散
-                 float moonArea2 = 1 - (MoonDist*0.5);
-                 moonArea2 = smoothstep(0.5,1,moonArea2);
-                 float sunArea3 = 1- (sunDist*0.4);
-                 sunArea3 = smoothstep(0.05,1.21,sunArea3);
-               
-                 sunArea = smoothstep(_SunInnerBoundary,_SunOuterBoundary,sunArea);
+                float sunArea2 = 1- (sunDist*_SunScattering);//散射扩散
+                float moonArea2 = 1 - (MoonDist*0.5);
+                moonArea2 = smoothstep(0.5,1,moonArea2);
+                float sunArea3 = 1- (sunDist*0.4);
+                sunArea3 = smoothstep(0.05,1.21,sunArea3);
+                
+                sunArea = smoothstep(_SunInnerBoundary,_SunOuterBoundary,sunArea);
                 
                 float3 MoonUV = mul(i.UV.xyz,LToW);
                 float2 moonUV = MoonUV.xy * _MoonTex_ST.xy*_MoonRadius + _MoonTex_ST.zw;
                
-               
-
                 float  _WorldPosDotUp = dot(i.Varying_WorldPosAndAngle.xyz, float3(0,1,0));
                 float  _WorldPosDotUpstep = smoothstep(0,0.1,_WorldPosDotUp);
 
-
-               float _WorldPosDotUpstep1  = 1-abs(_WorldPosDotUp );
-               _WorldPosDotUpstep1 = smoothstep(0.4,1,_WorldPosDotUpstep1 );
-            
-              
+                float _WorldPosDotUpstep1  = 1-abs(_WorldPosDotUp );
+                _WorldPosDotUpstep1 = smoothstep(0.4,1,_WorldPosDotUpstep1 );
+                
                 float _WorldPosDotUpstep2 = clamp(0,1,smoothstep(0,0.01,_WorldPosDotUp)+ smoothstep(0.5,1,_WorldPosDotUpstep1)) ;
-       
                 float  _WorldPosDotUp_Multi999 = _sun_disk_power_999;
 
-       
-           
-                  float4 moonTex = tex2D(_MoonTex, moonUV)*moonArea*_WorldPosDotUpstep; 
+                float4 moonTex = tex2D(_MoonTex, moonUV)*moonArea*_WorldPosDotUpstep; 
 
-                 // float3 galaxyUV = mul(i.UV.xyz,galaxyLToW);
-                  float4 galaxyTex = tex2D(_galaxyTex,i.UV.xz * _galaxyTex_ST.xy + _galaxyTex_ST.zw);
-           
-                  sunArea = sunArea *  _WorldPosDotUpstep;
+                // float3 galaxyUV = mul(i.UV.xyz,galaxyLToW);
+                float4 galaxyTex = tex2D(_galaxyTex,i.UV.xz * _galaxyTex_ST.xy + _galaxyTex_ST.zw);
+        
+                sunArea = sunArea *  _WorldPosDotUpstep;
 
                 float3 _sun_disk = dot(min(1, pow(sunArea3 , _WorldPosDotUp_Multi999 * float3(1, 0.1, 0.01))),float3(1, 0.16, 0.03))* _sun_color_intensity * _sun_color;
 
-   
-                
                 float3 _sun_disk_sunArea = sunArea * _sun_color_intensity * _sun_color ;
                 _sun_disk = _sun_disk + _sun_disk_sunArea * 3;
          
@@ -300,38 +274,29 @@ Shader "AnimeSkybox/Skybox"
                     _irradianceMap_R_uv.x = abs(i.Varying_WorldPosAndAngle.w) / max(_IrradianceMapR_maxAngleRange,0.001f);
                     _irradianceMap_R_uv.y = 0.5;
 
-                 float _irradianceMapR = tex2Dlod(_IrradianceMap, float4(_irradianceMap_R_uv, 0.0, 0.0)).x;
+                float _irradianceMapR = tex2Dlod(_IrradianceMap, float4(_irradianceMap_R_uv, 0.0, 0.0)).x;
 
-
-
-
-               
-
-                  float _VDotSunDampingA = max(0, lerp( 1, sunArea2 , _mainColorSunGatherFactor ));
-                  float _VDotSunDampingA_pow3 = _VDotSunDampingA * _VDotSunDampingA * _VDotSunDampingA;
-              
-                    float3 _upPartColor   = lerp(_upPartSkyColor, _upPartSunColor, _VDotSunDampingA_pow3);
-                  float3 _downPartColor = lerp(_downPartSkyColor, _downPartSunColor, _VDotSunDampingA_pow3);
-                  float3 _mainColor = lerp(_upPartColor, _downPartColor, _irradianceMapR);
+                float _VDotSunDampingA = max(0, lerp( 1, sunArea2 , _mainColorSunGatherFactor ));
+                float _VDotSunDampingA_pow3 = _VDotSunDampingA * _VDotSunDampingA * _VDotSunDampingA;
+            
+                float3 _upPartColor   = lerp(_upPartSkyColor, _upPartSunColor, _VDotSunDampingA_pow3);
+                float3 _downPartColor = lerp(_downPartSkyColor, _downPartSunColor, _VDotSunDampingA_pow3);
+                float3 _mainColor = lerp(_upPartColor, _downPartColor, _irradianceMapR);
 
                 float _VDotMoonDampingA = max(0, lerp( 1, moonArea2 , _mainColorMoonGatherFactor ));
-                  float _VDotMoonDampingA_pow3 = _VDotMoonDampingA *_VDotMoonDampingA;
+                float _VDotMoonDampingA_pow3 = _VDotMoonDampingA *_VDotMoonDampingA;
 
-                 float SSS = clamp( _VDotSunDampingA_pow3*_VDotSunDampingA *_VDotSunDampingA  * _WorldPosDotUpstep1 ,0,1);////改进ing
-            
-                  SSS = smoothstep(0.02,0.5, SSS );
+                float SSS = clamp( _VDotSunDampingA_pow3*_VDotSunDampingA *_VDotSunDampingA  * _WorldPosDotUpstep1 ,0,1);////改进ing
+        
+                SSS = smoothstep(0.02,0.5, SSS );
 
-                  SSS = SSS *  _WorldPosDotUpstep2;
-      
-                 float3 SSSS =  SSS *_sun_color_Scat;
-                  
-                  float3 FmoonColor =  (moonTex.xyz*_Moon_color*_Moon_color_intensity) + _VDotMoonDampingA_pow3*_MoonScatteringColor;
-
-            
+                SSS = SSS *  _WorldPosDotUpstep2;
+    
+                float3 SSSS =  SSS *_sun_color_Scat;
+                
+                float3 FmoonColor =  (moonTex.xyz*_Moon_color*_Moon_color_intensity) + _VDotMoonDampingA_pow3*_MoonScatteringColor;
 
                 float3 _day_part_color = (_sun_disk * _LDotDirClampn11_smooth ) + i.Varying_IrradianceColor.xyz + _mainColor+ FmoonColor;
-
-
 
                 float _starExistNoise1 = tex2D(_NoiseMap, i.Varying_NoiseUV_large.xy).r;
                 float _starExistNoise2 = tex2D(_NoiseMap, i.Varying_NoiseUV_large.zw).r;
@@ -357,12 +322,10 @@ Shader "AnimeSkybox/Skybox"
                 float3 _finalStarColor = _star_intensity * _starColor*moonGalaxyMask;
 
                galaxyTex.w = pow(galaxyTex.w,10);
-              float3 galaxyColor =clamp((galaxyTex.xyz*galaxyTex.w*_WorldPosDotUp *_galaxy_INT*moonGalaxyMask*_galaxy_intensity),0,1);
+                float3 galaxyColor =clamp((galaxyTex.xyz*galaxyTex.w*_WorldPosDotUp *_galaxy_INT*moonGalaxyMask*_galaxy_intensity),0,1);
 
 
-             return float4(SSSS+_day_part_color+_finalStarColor+galaxyColor,1);
-            //return float4(moonGalaxyMask ,moonGalaxyMask ,moonGalaxyMask ,1);
-              
+                return float4(SSSS + _day_part_color + _finalStarColor + galaxyColor, 1);
             }
             ENDHLSL
         }
