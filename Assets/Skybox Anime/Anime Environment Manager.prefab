@@ -659,12 +659,12 @@ MonoBehaviour:
   - {fileID: -2028114413, guid: a698ec7122f53e94b98336cc45901747, type: 3}
   cloudQuadCount: 50
   cloudHeight: 0
-  cloudRadius: 400
-  cloudScale: 40
+  minDist: 400
+  maxDist: 400
   maxElevation: 300
   maxFadeDelay: 100
-  minSize: 0.5
-  maxSize: 1.5
+  minSize: 50
+  maxSize: 150
 --- !u!1 &8524034377444472758
 GameObject:
   m_ObjectHideFlags: 0
@@ -794,9 +794,9 @@ MonoBehaviour:
   - {fileID: -774865111, guid: 998d576937589bb4d935f032beee4db8, type: 3}
   cloudQuadCount: 20
   cloudHeight: 0
-  cloudRadius: 400
-  cloudScale: 40
+  minDist: 400
+  maxDist: 400
   maxElevation: 4
   maxFadeDelay: 100
-  minSize: 0.8
-  maxSize: 1.2
+  minSize: 80
+  maxSize: 120
