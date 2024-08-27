@@ -134,11 +134,11 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _SkyboxCat: 1
-    - _SkyboxFogBottom: 0
+    - _SkyboxFogBottom: 0.5
     - _SkyboxFogFalloff: 8
     - _SkyboxFogFill: 0
     - _SkyboxFogHeight: 2
-    - _SkyboxFogIntensity: 0.9
+    - _SkyboxFogIntensity: 1
     - _SkyboxFogOffset: 0
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
