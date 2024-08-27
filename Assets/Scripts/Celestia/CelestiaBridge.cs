@@ -63,7 +63,7 @@ namespace CraftSharp
         {
             if (enterSignalReceived)
             {
-                var posLim = stopFragmentIndex * fragmentLength + 10;
+                var posLim = stopFragmentIndex * fragmentLength + 11;
                 viewerMoveSpeed += Time.deltaTime * enterPortalSpeed;
 
                 var newPos = viewerTransform.position + new Vector3(0F, 0F, viewerMoveSpeed * Time.deltaTime);
@@ -73,7 +73,7 @@ namespace CraftSharp
             }
             else if (stopSignalReceived)
             {
-                var posLim = (stopFragmentIndex - 2) * fragmentLength;
+                var posLim = (stopFragmentIndex - 1) * fragmentLength;
                 var speed = viewerMoveSpeed;
                 var dist = posLim - viewerTransform.position.z;
 

@@ -33,7 +33,6 @@ namespace CraftSharp
             while (nextFragmentIndex < targetFragmentIndex)
             {
                 CreateFragment(nextFragmentIndex);
-                Debug.Log($"Creating {nextFragmentIndex}");
                 nextFragmentIndex++;
             }
         }
@@ -44,6 +43,7 @@ namespace CraftSharp
             fragmentObj.transform.SetParent(transform, false);
             fragmentObj.transform.localPosition = new Vector3(0F, 0F, fragIndex * fragmentLength);
             fragmentObj.name = $"Fragment #{fragIndex}";
+            fragmentObj.layer = gameObject.layer;
 
             var fragment = fragmentObj.GetComponent<MeshFilter>();
 
@@ -55,7 +55,7 @@ namespace CraftSharp
                         float cloudSize = Random.Range(minSize, maxSize);
                         float cloudDist = Random.Range(0F, fragmentLength);
                         float cloudXPos = Random.Range(-spreadWidth, spreadWidth);
-                        float cloudElev = Mathf.Abs(cloudXPos) / spreadWidth * 15F;
+                        float cloudElev = Mathf.Abs(cloudXPos) / spreadWidth * 25F;
 
                         var minY = cloudSprite.vertices.Min(x => x.y);
                         

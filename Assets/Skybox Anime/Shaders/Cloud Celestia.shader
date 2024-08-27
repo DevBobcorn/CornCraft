@@ -1,4 +1,4 @@
-Shader "AnimeSkybox/Cloud"
+Shader "AnimeSkybox/Cloud Celestia"
 {
     Properties
     {
@@ -49,6 +49,7 @@ Shader "AnimeSkybox/Cloud"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 
             #include "Packages/jp.keijiro.noiseshader/Shader/SimplexNoise2D.hlsl"
+            #include "Assets/BOXOPHOBIC/Atmospheric Height Fog/Core/Includes/AtmosphericHeightFog.cginc"
 
             struct Attributes
             {
@@ -139,6 +140,15 @@ Shader "AnimeSkybox/Cloud"
                 float3 CloudColor = lerp(CloudColorAB, CloudColorCD, baseMap.r);
                 float3 EdgeColor = _Cloud_edgeColor * baseMap.g * SunDirection.x;
                 CloudColor = CloudColor + EdgeColor;
+
+                #ifdef ATMOSPHERIC_HEIGHT_FOG_INCLUDED
+                    if (AHF_Enabled)
+                    {
+                        float4 fogParams = GetAtmosphericHeightFog(i.positionWS.xyz);
+                        // Apply reduced fog
+                        CloudColor.rgb = lerp(CloudColor.rgb, fogParams.rgb, saturate(fogParams.a - baseMap.g * SunDirection.x - 0.1));
+                    }
+                #endif
               
                 return float4(CloudColor, fadeAlpha * baseMap.a);
                 //return float4(i.uv, 0, 1);
