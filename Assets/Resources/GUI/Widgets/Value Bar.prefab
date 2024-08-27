@@ -340,7 +340,6 @@ MonoBehaviour:
   deltaFillRect: {fileID: 1335041601804840777}
   displayFillRect: {fileID: 8433498088108343189}
   fullBarLength: 680
-  fullAlpha: 0.75
 --- !u!114 &7749223063945866378
 MonoBehaviour:
   m_ObjectHideFlags: 0

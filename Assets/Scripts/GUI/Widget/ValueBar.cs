@@ -19,7 +19,6 @@ namespace CraftSharp.UI
         [SerializeField] private Shapes.Rectangle deltaFillRect, displayFillRect;
 
         [SerializeField] private float fullBarLength;
-        [SerializeField] private float fullAlpha = 0.75F;
 
         private CanvasGroup[] parentCanvasGroups = { };
         private float selfAlpha = 1F;
@@ -101,7 +100,7 @@ namespace CraftSharp.UI
 
             if (parentCanvasGroups.Length > 0)
             {
-                float updatedAlpha = fullAlpha;
+                float updatedAlpha = 1F;
 
                 for (int i = 0; i < parentCanvasGroups.Length; i++)
                 {
