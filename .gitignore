@@ -38,6 +38,9 @@
 /[Aa]ssets/HoloDissolveFX
 /[Aa]ssets/HoloDissolveFX.meta
 
+# Untracked assets
+/[Aa]ssets/Skybox Anime/Materials/*
+/[Aa]ssets/Scenes/RenderLab.meta
 /[Aa]ssets/Scenes/RenderLab
 /[Aa]ssets/Scenes/RenderLab.meta
 /[Aa]ssets/Scenes/RenderLab.unity
