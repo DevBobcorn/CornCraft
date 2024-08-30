@@ -203,7 +203,7 @@ MonoBehaviour:
   zoomSmoothFactor: 4
   zoomSensitivity: 0.05
   cameraZOffsetNear: 15
-  cameraZOffsetFar: 30
+  cameraZOffsetFar: 100
 --- !u!1 &3065445415443076883
 GameObject:
   m_ObjectHideFlags: 0
@@ -450,7 +450,7 @@ Transform:
   m_GameObject: {fileID: 5623223608624361124}
   serializedVersion: 2
   m_LocalRotation: {x: 0.25881907, y: -0, z: -0, w: 0.9659259}
-  m_LocalPosition: {x: 0, y: 429.93372, z: -744.66705}
+  m_LocalPosition: {x: 0, y: 15, z: -25.980762}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -496,7 +496,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 16320
+    m_Bits: 16321
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0

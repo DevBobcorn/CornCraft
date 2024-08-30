@@ -12,7 +12,7 @@ namespace CraftSharp.Rendering
 
         [SerializeField] private long startTime;
 
-        [SerializeField] private Camera? mainCamera;
+        private Camera? mainCamera;
 
         [SerializeField] private AnimeSunDirection? animeSunControl;
 
@@ -74,6 +74,11 @@ namespace CraftSharp.Rendering
             else
             {
                 playableDirector!.Pause();
+            }
+
+            if (mainCamera == null)
+            {
+                mainCamera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
             }
 
             if (fogGlobal != null && fogGlobal.mainCamera == null)
