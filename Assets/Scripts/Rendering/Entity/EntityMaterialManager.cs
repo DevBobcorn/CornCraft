@@ -19,6 +19,8 @@ namespace CraftSharp.Rendering
         public Material EnityDissolveMaterial => m_EnityDissolveMaterial;
         [SerializeField] private string m_EnityDissolveMaterialTextureName = "_Texture";
         public string EnityDissolveMaterialTextureName => m_EnityDissolveMaterialTextureName;
+        [SerializeField] private string m_EnityDissolveMaterialColorName = "_Colour";
+        public string EnityDissolveMaterialColorName => m_EnityDissolveMaterialColorName;
 
         /// <summary>
         /// A material instance is created for each rendertype-texture pair,

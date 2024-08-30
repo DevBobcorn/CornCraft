@@ -215,7 +215,7 @@ namespace CraftSharp.Rendering
                     matManager.ApplyTextureOrSkin(textureId, tex =>
                     {
                         matInstance.SetTexture(matManager.EnityDissolveMaterialTextureName, tex);
-                        matInstance.color = matManager.EntityBaseColor;
+                        matInstance.SetColor("_Colour", matManager.EntityBaseColor);
                         AssignMaterialToRenderer(entry.Renderers, matInstance);
                     });
                 }
@@ -273,7 +273,7 @@ namespace CraftSharp.Rendering
                     matManager.ApplyTextureOrSkin(textureId, texture =>
                     {
                         matInstance.SetTexture(matManager.EnityDissolveMaterialTextureName, texture);
-                        matInstance.color = matManager.EntityBaseColor;
+                        matInstance.SetColor("_Colour", matManager.EntityBaseColor);
                         AssignMaterialToRenderer(entry.Renderers, matInstance);
                     });
                 }
