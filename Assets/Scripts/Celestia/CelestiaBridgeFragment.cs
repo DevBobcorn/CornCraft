@@ -37,7 +37,7 @@ namespace CraftSharp
 
         private float GetRailBlockOffset(int posInFragment)
         {
-            return posInFragment / 7.5F + 0.6F;
+            return posInFragment / 7.5F;
         }
 
         public virtual void BuildFragment(int fragIndex)
