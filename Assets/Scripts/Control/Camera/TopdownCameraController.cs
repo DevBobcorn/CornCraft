@@ -35,9 +35,13 @@ namespace CraftSharp.Control
         {
             EnsureInitialized();
 
+            // Activate virtual camera
+            _virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
+
             // Initialize camera scale
             zoomInput!.action.Enable();
-            cameraInfo.CurrentScale = cameraInfo.TargetScale;
+            cameraInfo.TargetScale = 0.8F;
+            cameraInfo.CurrentScale = cameraInfo.TargetScale - 0.2F;
 
             // Aiming is not enabled by default
             EnableAimingCamera(false);
