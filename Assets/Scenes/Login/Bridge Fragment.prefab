@@ -52,7 +52,7 @@ MonoBehaviour:
   perlinSampleUnit: 0.1
   defaultRiseSpeed: 1.3
   targetHeight: 0
-  edgeOffset: 0.25
+  edgeOffset: 0.125
   bridgeBlock: {fileID: 6280996216578334597, guid: ab68220f0cd4e0c429a1e29c2cfd73b6, type: 3}
   bridgeEdge: {fileID: 6280996216578334597, guid: 25df61a37a7361f4599002ff2af43432, type: 3}
   regularRail: {fileID: 5369743078286888248, guid: 064762344eaae9746803e3ea83c69103, type: 3}
