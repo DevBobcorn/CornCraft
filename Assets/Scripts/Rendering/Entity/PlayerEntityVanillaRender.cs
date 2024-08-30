@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CraftSharp.Rendering
@@ -19,6 +20,13 @@ namespace CraftSharp.Rendering
 
             leftArm!.localEulerAngles  = new(-currentLegAngle * currentMovFract, 0F, 0F);
             rightArm!.localEulerAngles = new( currentLegAngle * currentMovFract, 0F, 0F);
+        }
+
+        public override Dictionary<string, string>? GetControlVariables()
+        {
+            return new Dictionary<string, string>(){
+                ["player_skin"] = $"skin:{UUID}"
+            };
         }
     }
 }

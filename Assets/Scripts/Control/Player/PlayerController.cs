@@ -120,7 +120,14 @@ namespace CraftSharp.Control
             {
                 // Initialize head yaw to look forward
                 _playerRender.HeadYaw.Value = Entity.GetHeadYawFromByte(127); // i.e. -90F
+                _playerRender.UUID = entity.UUID;
                 _playerRender.transform.SetParent(transform, false);
+
+                // Initialize materials (This requires metadata to be present)
+                if (renderObj.TryGetComponent(out EntityMaterialAssigner materialControl))
+                {
+                    materialControl.InitializeMaterials(entity.Type, _playerRender.GetControlVariables(), entity.Metadata);
+                }
 
                 // Destroy these colliders, so that they won't affect our movement
                 foreach (var collider in _playerRender.GetComponentsInChildren<Collider>())

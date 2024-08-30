@@ -209,23 +209,31 @@ namespace CraftSharp.Rendering
                     continue;
                 }
 
-                Material matInstance;
-
                 if (isRagdoll)
                 {
-                    matInstance = new Material(matManager.EnityDissolveMaterial);
-                    var texture = matManager.GetTexture(textureId);
-                    matInstance.SetTexture(matManager.EnityDissolveMaterialTextureName, texture);
+                    var matInstance = new Material(matManager.EnityDissolveMaterial);
+                    matManager.ApplyTextureOrSkin(textureId, tex =>
+                    {
+                        matInstance.SetTexture(matManager.EnityDissolveMaterialTextureName, tex);
+                        matInstance.color = matManager.EntityBaseColor;
+                        AssignMaterialToRenderer(entry.Renderers, matInstance);
+                    });
                 }
                 else
                 {
-                    matInstance = matManager.MapMaterial(entry.RenderType, textureId, entry.DefaultMaterial);
+                    matManager.ApplyMaterial(entry.RenderType, textureId, entry.DefaultMaterial, matInstance =>
+                    {
+                        AssignMaterialToRenderer(entry.Renderers, matInstance);
+                    });
                 }
+            }
+        }
 
-                for (int j = 0; j < entry.Renderers.Length; j++)
-                {
-                    entry.Renderers[j].sharedMaterial = matInstance;
-                }
+        private static void AssignMaterialToRenderer(Renderer[] renderers, Material matInstance)
+        {
+            for (int j = 0; j < renderers.Length; j++)
+            {
+                renderers[j].sharedMaterial = matInstance;
             }
         }
 
@@ -258,23 +266,23 @@ namespace CraftSharp.Rendering
                 {
                     textureId = ResourceLocation.FromString(entry.TextureId);
                 }
-
-	            Material matInstance;
                 
                 if (isRagdoll)
                 {
-                    matInstance = new Material(matManager.EnityDissolveMaterial);
-                    var texture = matManager.GetTexture(textureId);
-                    matInstance.SetTexture(matManager.EnityDissolveMaterialTextureName, texture);
+                    var matInstance = new Material(matManager.EnityDissolveMaterial);
+                    matManager.ApplyTextureOrSkin(textureId, texture =>
+                    {
+                        matInstance.SetTexture(matManager.EnityDissolveMaterialTextureName, texture);
+                        matInstance.color = matManager.EntityBaseColor;
+                        AssignMaterialToRenderer(entry.Renderers, matInstance);
+                    });
                 }
                 else
                 {
-                    matInstance = matManager.MapMaterial(entry.RenderType, textureId, entry.DefaultMaterial);
-                }
-
-                for (int j = 0; j < entry.Renderers.Length; j++)
-                {
-                    entry.Renderers[j].sharedMaterial = matInstance;
+                    matManager.ApplyMaterial(entry.RenderType, textureId, entry.DefaultMaterial, matInstance =>
+                    {
+                        AssignMaterialToRenderer(entry.Renderers, matInstance);
+                    });
                 }
             }
         }

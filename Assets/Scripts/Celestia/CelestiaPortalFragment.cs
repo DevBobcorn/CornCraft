@@ -178,7 +178,7 @@ namespace CraftSharp
                 // Prototype and other portal blocks share the same
                 // material instance
                 portalBlockPrototype.GetComponent<MeshRenderer>().sharedMaterial
-                        .SetColor("_EmissionColor", portalBlockEmissionColor * emissionTime);
+                        .SetFloat("_EmissionTime", emissionTime);
             }
 
             foreach (var (portalBlock, speed) in portalBlocks)

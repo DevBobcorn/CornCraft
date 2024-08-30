@@ -93,7 +93,7 @@ MonoBehaviour:
   m_MaterialEntries:
   - RenderType: 0
     m_DefaultMaterial: {fileID: 2100000, guid: 313a34978b221bb47b22191711861061, type: 2}
-    TextureId: <PLAYER_SKIN>
+    TextureId: '{player_skin}'
     m_Renderers:
     - {fileID: 7009192520960174314}
     - {fileID: 8922029764178602502}
