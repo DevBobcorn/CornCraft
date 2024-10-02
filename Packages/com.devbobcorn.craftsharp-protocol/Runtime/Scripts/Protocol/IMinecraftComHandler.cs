@@ -53,6 +53,18 @@ namespace CraftSharp.Protocol
         void InvokeOnNetMainThread(Action task);
 
         /// <summary>
+        /// Called when a network packet received or sent
+        /// </summary>
+        /// <remarks>
+        /// Only called if <see cref="CornGlobal.CapturePackets"/> is set to True
+        /// </remarks>
+        /// <param name="packetId">Packet Id</param>
+        /// <param name="packetData">A copy of Packet Data</param>
+        /// <param name="isLogin">The packet is login phase or playing phase</param>
+        /// <param name="isInbound">The packet is received from server or sent by client</param>
+        void OnNetworkPacket(int packetId, byte[] packetData, bool isLogin, bool isInbound);
+
+        /// <summary>
         /// Called when a server was successfully joined
         /// </summary>
         void OnGameJoined();

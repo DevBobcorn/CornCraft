@@ -258,7 +258,7 @@ namespace CraftSharp
                 nextMessageSendTime = DateTime.Now + TimeSpan.FromSeconds(CornGlobal.MessageCooldown);
             }
         }
-
+        
         /// <summary>
         /// Called ~20 times per second by the protocol handler (on net read thread)
         /// </summary>
@@ -482,6 +482,7 @@ namespace CraftSharp
         // Retrieve client connection info
         public override string GetServerHost() => host!;
         public override int GetServerPort() => port;
+        public override int GetProtocolVersion() => protocolVersion;
         public override string GetUsername() => username!;
         public override Guid GetUserUuid() => uuid;
         public override string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
@@ -979,13 +980,20 @@ namespace CraftSharp
         /// Called when a network packet received or sent
         /// </summary>
         /// <remarks>
-        /// Only called if <see cref="networkPacketEventEnabled"/> is set to True
+        /// Only called if <see cref="CornGlobal.CapturePackets"/> is set to True
         /// </remarks>
-        /// <param name="packetID">Packet ID</param>
+        /// <param name="packetId">Packet Id</param>
         /// <param name="packetData">A copy of Packet Data</param>
         /// <param name="isLogin">The packet is login phase or playing phase</param>
         /// <param name="isInbound">The packet is received from server or sent by client</param>
-        public void OnNetworkPacket(int packetID, List<byte> packetData, bool isLogin, bool isInbound) { }
+        public void OnNetworkPacket(int packetId, byte[] packetData, bool isLogin, bool isInbound)
+        {
+            if (!isLogin)
+            {
+                // Regular in-game packet
+                EventManager.Instance.BroadcastOnUnityThread(new PacketEvent(isInbound, packetId, packetData));
+            }
+        }
 
         /// <summary>
         /// Called when a server was successfully joined
@@ -1641,7 +1649,7 @@ namespace CraftSharp
         /// <summary>
         /// Called when DisplayScoreboard
         /// </summary>
-        /// <param name="entityname">The entity whose score this is. For players, this is their username; for other entities, it is their UUID.</param>
+        /// <param name="entityname">The entity whose score this is. For players, this is their DUMMY_USERNAME; for other entities, it is their UUID.</param>
         /// <param name="action">0 to create/update an item. 1 to remove an item.</param>
         /// <param name="objectivename">The name of the objective the score belongs to</param>
         /// <param name="value">he score to be displayed next to the entry. Only sent when Action does not equal 1.</param>
@@ -1762,7 +1770,7 @@ namespace CraftSharp
         /// Called when the protocol handler receives "Login Success" packet
         /// </summary>
         /// <param name="uuid">The player's UUID received from the server</param>
-        /// <param name="userName">The player's username received from the server</param>
+        /// <param name="userName">The player's DUMMY_USERNAME received from the server</param>
         /// <param name="playerProperty">Tuple<Name, Value, Signature(empty if there is no signature)></param>
         public void OnLoginSuccess(Guid uuid, string userName, Tuple<string, string, string>[]? playerProperty) { }
 

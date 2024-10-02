@@ -114,6 +114,7 @@ namespace CraftSharp
         // Retrieve client connection info
         public abstract string GetServerHost();
         public abstract int GetServerPort();
+        public abstract int GetProtocolVersion();
         public abstract string GetUsername();
         public abstract Guid GetUserUuid();
         public abstract string GetUserUuidStr();

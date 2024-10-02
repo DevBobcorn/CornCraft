@@ -12,6 +12,7 @@ namespace CraftSharp.UI
         [SerializeField] private ChatScreen m_ChatScreen;
         [SerializeField] private DeathScreen m_DeathScreen;
         [SerializeField] private HUDScreen m_HUDScreen;
+        [SerializeField] private PacketScreen m_PacketScreen;
         [SerializeField] private LoadingScreen m_LoadingScreen;
         [SerializeField] private PauseScreen m_PauseScreen;
 
@@ -28,6 +29,7 @@ namespace CraftSharp.UI
             screenRegistry.Add(typeof (ChatScreen),    m_ChatScreen);
             screenRegistry.Add(typeof (DeathScreen),   m_DeathScreen);
             screenRegistry.Add(typeof (HUDScreen),     m_HUDScreen);
+            screenRegistry.Add(typeof (PacketScreen),  m_PacketScreen);
             screenRegistry.Add(typeof (LoadingScreen), m_LoadingScreen);
             screenRegistry.Add(typeof (PauseScreen),   m_PauseScreen);
 
@@ -98,7 +100,7 @@ namespace CraftSharp.UI
             bool shouldPauseInput = false;
             foreach (var w in screenStack)
             {
-                shouldPauseInput = shouldPauseInput || w.ShouldPause();
+                shouldPauseInput = shouldPauseInput || w.ShouldPauseInput();
             }
             
             //Debug.Log($"In window stack: {string.Join(' ', screenStack)}");
