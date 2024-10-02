@@ -142,14 +142,14 @@ namespace CraftSharp.Protocol.Handlers
 
                     while (packetQueue.TryTake(out Tuple<int, Queue<byte>>? packetInfo))
                     {
-                        (int packetID, Queue<byte> packetData) = packetInfo;
-                        HandlePacket(packetID, packetData);
+                        (int packetId, Queue<byte> packetData) = packetInfo;
+                        HandlePacket(packetId, packetData);
 
                         /*
                         // Use this to figure out if there're certain types of packets that's taking too long to handle
                         // And if that is the case, consider caching them somewhere to avoid flooding our packet queue
                         if (stopWatch.ElapsedMilliseconds >= 50)
-                            Debug.Log(packetPalette.GetIncommingTypeById(packetID));
+                            Debug.Log(packetPalette.GetIncommingTypeById(packetId));
                         */
 
                         if (stopWatch.Elapsed.Milliseconds >= 50)
@@ -208,7 +208,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <summary>
         /// Read the next packet from the network
         /// </summary>
-        /// <param name="packetID">will contain packet ID</param>
+        /// <param name="packetId">will contain packet Id</param>
         /// <param name="packetData">will contain raw packet Data</param>
         internal Tuple<int, Queue<byte>> ReadNextPacket()
         {
@@ -227,9 +227,12 @@ namespace CraftSharp.Protocol.Handlers
                 }
             }
 
-            int packetID = dataTypes.ReadNextVarInt(packetData); //Packet ID
+            int packetId = dataTypes.ReadNextVarInt(packetData); //Packet ID
 
-            return new(packetID, packetData);
+            if (CornGlobal.CapturePackets)
+                handler.OnNetworkPacket(packetId, packetData.ToArray(), login_phase, true);
+
+            return new(packetId, packetData);
         }
 
         /// <summary>
@@ -1896,6 +1899,11 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="packetData">packet Data</param>
         private void SendPacket(int packetId, IEnumerable<byte> packetData)
         {
+            if (CornGlobal.CapturePackets)
+            {
+                handler.OnNetworkPacket(packetId, packetData.ToArray(), login_phase, false);
+            }
+            
             //Debug.Log("[C -> S] Sending packet " + packetId + " > " + dataTypes.ByteArrayToString(packetData.ToArray()));
 
             // The inner packet

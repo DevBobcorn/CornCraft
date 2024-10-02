@@ -43,7 +43,7 @@ namespace CraftSharp.UI
         private TMP_InputField chatInputGhost;
 
         // Chat message data
-        private List<string> chatHistory = new List<string>();
+        private List<string> chatHistory = new();
         private int chatIndex = 0, completionIndex = -1, completionStart = 0, completionLength = 0;
         private string chatBuffer = string.Empty;
         private bool completionsShown = false;
@@ -55,7 +55,7 @@ namespace CraftSharp.UI
             return true;
         }
 
-        public override bool ShouldPause()
+        public override bool ShouldPauseInput()
         {
             return true;
         }

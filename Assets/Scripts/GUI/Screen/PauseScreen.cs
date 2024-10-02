@@ -30,7 +30,7 @@ namespace CraftSharp.UI
             return true;
         }
 
-        public override bool ShouldPause()
+        public override bool ShouldPauseInput()
         {
             return true;
         }

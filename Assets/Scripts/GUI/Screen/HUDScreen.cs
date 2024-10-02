@@ -68,7 +68,7 @@ namespace CraftSharp.UI
             return false;
         }
 
-        public override bool ShouldPause()
+        public override bool ShouldPauseInput()
         {
             return false;
         }
@@ -227,7 +227,14 @@ namespace CraftSharp.UI
             }
 
             if (Keyboard.current.fKey.wasPressedThisFrame) // Execute interactions
+            {
                 interactionPanel.RunInteractionOption();
+            }
+
+            if (Keyboard.current.pKey.wasPressedThisFrame) // Open packet screen
+            {
+                game.ScreenControl.PushScreen<PacketScreen>();
+            }
 
             if (interactionPanel.ShouldAbsordMouseScroll)
             {

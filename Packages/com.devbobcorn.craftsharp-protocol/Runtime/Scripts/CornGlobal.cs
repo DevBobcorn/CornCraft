@@ -19,6 +19,7 @@ namespace CraftSharp
         public static bool SignMessageInCommand   { get; set; } = false;
         public static bool SignChat               { get; set; } = false;
 
+        public static bool CapturePackets         { get; set; } = false;
         public static double MessageCooldown      { get; set; } = 1.0D;
 
         public static bool LoginWithSecureProfile { get; set; } = false;

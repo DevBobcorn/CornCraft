@@ -16,10 +16,11 @@ namespace CraftSharp
     [RequireComponent(typeof (InteractionUpdater))]
     public class CornClientOffline : BaseCornClient
     {
-        #nullable enable
+#nullable enable
 
         #region Login Information
-        private const string username = "OfflinePlayer";
+        private const int DUMMY_PROTOCOL_VERSION = 754;
+        private const string DUMMY_USERNAME = "OfflinePlayer";
         private Guid uuid = Guid.Empty;
         #endregion
 
@@ -43,7 +44,7 @@ namespace CraftSharp
                 CornApp.SetCurrentClient(this);
 
                 // Start up by self since it's not started from login screen
-                StartClient(new(false, new(), null, "dummy", 0, 754, null, "dummy_player"));
+                StartClient(new(false, new(), null, "dummy", 0, DUMMY_PROTOCOL_VERSION, null, "dummy_player"));
             }
         }
 
@@ -169,7 +170,8 @@ namespace CraftSharp
         // Retrieve client connection info
         public override string GetServerHost() => string.Empty;
         public override int GetServerPort() => 0;
-        public override string GetUsername() => username!;
+        public override int GetProtocolVersion() => DUMMY_PROTOCOL_VERSION;
+        public override string GetUsername() => DUMMY_USERNAME!;
         public override Guid GetUserUuid() => uuid;
         public override string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
         public override string GetSessionID() => string.Empty;
