@@ -6,7 +6,7 @@ Here's a list of the assets:
 
 - [**Shapes**](https://assetstore.unity.com/packages/tools/particles-effects/shapes-173167): Used for rendering high-quality vector shapes.
 
-- [**Atmospheric Height Fog**](https://assetstore.unity.com/packages/tools/particles-effects/enviro-3-sky-and-weather-236601): Provides fog for environment, can be removed.
+- [**Atmospheric Height Fog**](https://assetstore.unity.com/packages/vfx/shaders/fullscreen-camera-effects/atmospheric-height-fog-optimized-fog-for-consoles-mobile-and-vr-143825): Provides fog for environment, can be removed.
 
 - [**Magica Cloth 2**](https://assetstore.unity.com/packages/tools/physics/magica-cloth-2-242307): Cloth/Hair physics simulation for rigged characters. You can remove the `Physics` GameObject from player render prefab if not using this asset, or you can instead use the blocky-lookng vanilla player render.
 
