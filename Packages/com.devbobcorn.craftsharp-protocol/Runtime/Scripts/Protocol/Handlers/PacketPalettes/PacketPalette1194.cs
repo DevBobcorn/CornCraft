@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace CraftSharp.Protocol.Handlers.PacketPalettes
 {
@@ -39,7 +39,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x1E, PacketTypesIn.UnloadChunk },                // (Wiki name: Forget Chunk)
             { 0x1F, PacketTypesIn.ChangeGameState },            // (Wiki name: Game Event)
             { 0x20, PacketTypesIn.OpenHorseWindow },            // (Wiki name: Horse Screen Open)
-            { 0x21, PacketTypesIn.HurtAnimation },              // Added in 1.19.4
+            { 0x21, PacketTypesIn.HurtAnimation },              // 1.19.4
             { 0x22, PacketTypesIn.InitializeWorldBorder },      //
             { 0x23, PacketTypesIn.KeepAlive },                  //
             { 0x24, PacketTypesIn.ChunkData },                  //
@@ -59,7 +59,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x32, PacketTypesIn.Ping },                       // (Wiki name: Ping (play))
             { 0x33, PacketTypesIn.CraftRecipeResponse },        // (Wiki name: Place Ghost Recipe)
             { 0x34, PacketTypesIn.PlayerAbilities },            //
-            { 0x35, PacketTypesIn.ChatMessage },                // Changed in 1.19 (Completely changed) (Wiki name: Player Chat Message) - TODO
+            { 0x35, PacketTypesIn.ChatMessage },                // Changed in 1.19 (Completely changed) (Wiki name: Player Chat Message)
             { 0x36, PacketTypesIn.EndCombatEvent },             // (Wiki name: Player Combat End)
             { 0x37, PacketTypesIn.EnterCombatEvent },           // (Wiki name: Player Combat Enter)
             { 0x38, PacketTypesIn.DeathCombatEvent },           // (Wiki name: Player Combat Kill)
@@ -175,14 +175,9 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x32, PacketTypesOut.UseItem },                     // Changed in 1.19 (Added a "Sequence" field) (Wiki name: Use Item) 
         };
 
-        protected override Dictionary<int, PacketTypesIn> GetListIn()
-        {
-            return typeIn;
-        }
-
-        protected override Dictionary<int, PacketTypesOut> GetListOut()
-        {
-            return typeOut;
-        }
+        protected override Dictionary<int, PacketTypesIn> GetListIn() => typeIn;
+        protected override Dictionary<int, PacketTypesOut> GetListOut() => typeOut;
+        protected override Dictionary<int, ConfigurationPacketTypesIn> GetConfigurationListIn() => new();
+        protected override Dictionary<int, ConfigurationPacketTypesOut> GetConfigurationListOut() => new();
     }
 }

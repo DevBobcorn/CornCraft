@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 using CraftSharp.Control;
 using CraftSharp.Event;
 using CraftSharp.Protocol;
+using CraftSharp.Protocol.Handlers;
 using CraftSharp.Protocol.ProfileKey;
 using CraftSharp.Protocol.Message;
 using CraftSharp.Proxy;
@@ -520,7 +521,7 @@ namespace CraftSharp
         /// <summary>
         /// Get current player location (in Minecraft world)
         /// </summary>
-        public override Location GetLocation()
+        public override Location GetCurrentLocation()
         {
             return PlayerController.Location2Send;
         }
@@ -545,7 +546,7 @@ namespace CraftSharp
             if (withDebugInfo)
             {
                 // Light debugging
-                var playerBlockLoc = GetLocation().GetBlockLoc();
+                var playerBlockLoc = GetCurrentLocation().GetBlockLoc();
                 var block = ChunkRenderManager.GetBlock(playerBlockLoc);
                 var lightEmission = block.State.LightEmissionLevel;
                 var lightBlockage = block.State.LightBlockageLevel;
@@ -553,7 +554,7 @@ namespace CraftSharp
 
                 var lightInfo = $"Emission: {lightEmission}\tBlockage: {lightBlockage}\nLight Value: {lightValue}";
 
-                return baseString + $"\nLoc: {GetLocation()}\n{PlayerController.GetDebugInfo()}\n{lightInfo}\nWorld Origin Offset: {WorldOriginOffset}" +
+                return baseString + $"\nLoc: {GetCurrentLocation()}\n{PlayerController.GetDebugInfo()}\n{lightInfo}\nWorld Origin Offset: {WorldOriginOffset}" +
                         $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():0.0}";
             }
             
@@ -671,7 +672,7 @@ namespace CraftSharp
         /// <param name="text">Text to send to the server</param>
         private void SendChat(string text)
         {
-            if (String.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text))
                 return;
 
             int maxLength = handler!.GetMaxChatMessageLength();
@@ -890,7 +891,7 @@ namespace CraftSharp
             // Look at block before attempting to break it
             if (lookAtBlock)
             {
-                UpdateLocation(GetLocation(), new Location(blockLoc.X, blockLoc.Y, blockLoc.Z));
+                UpdateLocation(GetCurrentLocation(), new Location(blockLoc.X, blockLoc.Y, blockLoc.Z));
             }
 
             // Send dig start and dig end, will need to wait for server response to know dig result
@@ -998,8 +999,13 @@ namespace CraftSharp
         /// <summary>
         /// Called when a server was successfully joined
         /// </summary>
-        public void OnGameJoined()
+        public void OnGameJoined(bool isOnlineMode)
         {
+            if (protocolVersion < ProtocolMinecraft.MC_1_19_3_Version || playerKeyPair == null || !isOnlineMode)
+                SetCanSendMessage(true);
+            else
+                SetCanSendMessage(false);
+
             handler!.SendBrandInfo(CornGlobal.BrandInfo.Trim());
 
             if (CornGlobal.MCSettings.Enabled)
@@ -1012,13 +1018,17 @@ namespace CraftSharp
                     CornGlobal.MCSettings.Skin_All,
                     CornGlobal.MCSettings.MainHand);
 
+            if (protocolVersion >= ProtocolMinecraft.MC_1_19_3_Version
+                && playerKeyPair != null && isOnlineMode)
+                handler.SendPlayerSession(playerKeyPair);
+
             ClearInventories();
         }
 
         /// <summary>
         /// Called when the player respawns, which happens on login, respawn and world change.
         /// </summary>
-        public void OnRespawn(bool keepAttr, bool keepMeta)
+        public void OnRespawn()
         {
             // Reset location received flag
             locationReceived = false;
@@ -1027,7 +1037,7 @@ namespace CraftSharp
 
             ChunkRenderManager.ClearChunksData();
 
-            if (!keepAttr)
+            //if (!keepAttr)
             {
                 ClearInventories();
             }
@@ -1058,7 +1068,7 @@ namespace CraftSharp
             float pitch = Convert.ToSingle(-Math.Asin(dy / r) / Math.PI * 180);
             if (yaw < 0) yaw += 360;
 
-            UpdateLocation(location, false, yaw, false, pitch);
+            UpdateLocation(location, yaw, pitch);
         }
 
         /// <summary>
@@ -1067,22 +1077,10 @@ namespace CraftSharp
         /// <param name="location">The new location</param>
         /// <param name="yaw">Yaw to look at</param>
         /// <param name="pitch">Pitch to look at</param>
-        public void UpdateLocation(Location location, bool yawIsOffset, float yaw, bool pitchIsOffset, float pitch)
+        public void UpdateLocation(Location location, float yaw, float pitch)
         {
             lock (movementLock)
             {
-                if (yawIsOffset)
-                {
-                    // Offset based off current value
-                    yaw += PlayerController.MCYaw2Send;
-                }
-
-                if (pitchIsOffset)
-                {
-                    // Offset based off current value
-                    pitch += PlayerController.Pitch2Send;
-                }
-                
                 if (!locationReceived) // On entering world or respawning
                 {
                     locationReceived = true;
@@ -1342,6 +1340,16 @@ namespace CraftSharp
                     onlinePlayers.Remove(uuid);
                 }
             }
+        }
+
+        /// <summary>
+        /// Called when a player has been killed by another entity
+        /// </summary>
+        /// <param name="killerEntityId">Killer's entity id</param>
+        /// <param name="chatMessage">message sent in chat when player is killed</param>
+        public void OnPlayerKilled(int killerEntityId, string chatMessage)
+        {
+
         }
 
         /// <summary>
@@ -1649,11 +1657,16 @@ namespace CraftSharp
         /// <summary>
         /// Called when DisplayScoreboard
         /// </summary>
-        /// <param name="entityname">The entity whose score this is. For players, this is their DUMMY_USERNAME; for other entities, it is their UUID.</param>
+        /// <param name="entityName">The entity whose score this is. For players, this is their username; for other entities, it is their UUID.</param>
         /// <param name="action">0 to create/update an item. 1 to remove an item.</param>
-        /// <param name="objectivename">The name of the objective the score belongs to</param>
-        /// <param name="value">he score to be displayed next to the entry. Only sent when Action does not equal 1.</param>
-        public void OnUpdateScore(string entityname, int action, string objectivename, int value) { }
+        /// <param name="objectiveName">The name of the objective the score belongs to</param>
+        /// <param name="objectiveDisplayName">The name of the objective the score belongs to, but with chat formatting</param>
+        /// <param name="objectiveValue">The score to be displayed next to the entry. Only sent when Action does not equal 1.</param>
+        /// <param name="numberFormat">Number format: 0 - blank, 1 - styled, 2 - fixed</param>
+        public void OnUpdateScore(string entityName, int action, string objectiveName, string objectiveDisplayName, int objectiveValue, int numberFormat)
+        {
+
+        }
 
         /// <summary>
         /// Called when the health of an entity changed

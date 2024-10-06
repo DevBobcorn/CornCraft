@@ -83,7 +83,7 @@ namespace CraftSharp.Protocol
             {
                 try
                 {
-                    if (ProtocolMinecraft.doPing(serverIP, serverPort, ref versionNameTmp, ref protocolversionTmp, ref forgeInfoTmp))
+                    if (ProtocolMinecraft.DoPing(serverIP, serverPort, ref versionNameTmp, ref protocolversionTmp, ref forgeInfoTmp))
                     {
                         success = true;
                     }

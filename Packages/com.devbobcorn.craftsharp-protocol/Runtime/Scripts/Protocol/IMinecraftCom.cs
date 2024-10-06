@@ -244,6 +244,12 @@ namespace CraftSharp.Protocol
         bool SendSpectate(Guid uuid);
 
         /// <summary>
+        /// Send player session
+        /// </summary>
+        /// <returns></returns>
+        bool SendPlayerSession(PlayerKeyPair? playerKeyPair);
+
+        /// <summary>
         /// Get net main thread ID
         /// </summary>
         /// <returns>Net main thread ID</returns>

@@ -526,7 +526,7 @@ namespace CraftSharp.Rendering
         /// <param name="mask">A value from 0 to MASK_CYCLE_LENGTH - 1</param>
         private void UpdateChunkRendersListAdd(int mask)
         {
-            var playerLoc = client!.GetLocation();
+            var playerLoc = client!.GetCurrentLocation();
             var blockLoc = playerLoc.GetBlockLoc();
             ChunkRenderColumn columnRender;
 
@@ -593,7 +593,7 @@ namespace CraftSharp.Rendering
         private void UpdateChunkRendersListRemove(int mask)
         {
             // Add nearby chunks
-            var blockLoc   = client!.GetLocation().GetBlockLoc();
+            var blockLoc   = client!.GetCurrentLocation().GetBlockLoc();
             int unloadDist = Mathf.RoundToInt(CornGlobal.MCSettings.RenderDistance * 2F);
 
             var chunkCoords = renderColumns.Keys.ToArray();
@@ -855,7 +855,7 @@ namespace CraftSharp.Rendering
             else if (blockLoc.GetChunkBlockZ() == Chunk.SIZE - 1)
                 QueueChunkRenderBuildIfNotEmpty(GetChunkRender(chunkX, chunkYIndex, chunkZ + 1));
             
-            if (blockLoc.DistanceSquared(client!.GetLocation().GetBlockLoc()) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)
+            if (blockLoc.DistanceSquared(client!.GetCurrentLocation().GetBlockLoc()) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)
                 terrainColliderDirty = true; // Terrain collider needs to be updated
         }
 
@@ -1018,7 +1018,7 @@ namespace CraftSharp.Rendering
             if (client == null) // Game is not ready, cancel update
                 return;
             
-            var playerBlockLoc = client.GetLocation().GetBlockLoc();
+            var playerBlockLoc = client.GetCurrentLocation().GetBlockLoc();
 
             foreach (var pair in blockEntityRenders)
             {

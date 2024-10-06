@@ -208,7 +208,7 @@ namespace CraftSharp
         /// <summary>
         /// Get current player location (in Minecraft world)
         /// </summary>
-        public override Location GetLocation()
+        public override Location GetCurrentLocation()
         {
             return PlayerController.Location2Send;
         }
@@ -231,7 +231,7 @@ namespace CraftSharp
 
             if (withDebugInfo)
             {
-                return baseString + $"\nLoc: {GetLocation()}\n{PlayerController.GetDebugInfo()}" +
+                return baseString + $"\nLoc: {GetCurrentLocation()}\n{PlayerController.GetDebugInfo()}" +
                         $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():0.0}";
             }
             
