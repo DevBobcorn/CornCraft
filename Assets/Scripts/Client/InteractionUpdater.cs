@@ -59,7 +59,7 @@ namespace CraftSharp.Control
 
         private void UpdateBlockInteractions(ChunkRenderManager chunksManager)
         {
-            var playerBlockLoc = client!.GetLocation().GetBlockLoc();
+            var playerBlockLoc = client!.GetCurrentLocation().GetBlockLoc();
             var table = InteractionManager.INSTANCE.BlockInteractionTable;
 
             // Remove expired interactions

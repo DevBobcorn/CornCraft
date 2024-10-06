@@ -27,7 +27,7 @@ namespace CraftSharp.Protocol
         string[] GetOnlinePlayers();
         Dictionary<string, string> GetOnlinePlayersWithUUID();
         PlayerInfo? GetPlayerInfo(Guid uuid);
-        Location GetLocation();
+        Location GetCurrentLocation();
         IChunkRenderManager GetChunkRenderManager();
 
         public void SetCanSendMessage(bool canSendMessage);
@@ -67,7 +67,7 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Called when a server was successfully joined
         /// </summary>
-        void OnGameJoined();
+        void OnGameJoined(bool isOnlineMode);
 
         /// <summary>
         /// Called when the protocol handler receives a chat message
@@ -136,7 +136,7 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Called when the player respawns, which happens on login, respawn and world change.
         /// </summary>
-        void OnRespawn(bool keepAttr, bool keepMeta);
+        void OnRespawn();
 
         /// <summary>
         /// Called when a new player joins the game
@@ -151,14 +151,19 @@ namespace CraftSharp.Protocol
         void OnPlayerLeave(Guid uuid);
 
         /// <summary>
+        /// Called when a player has been killed by another entity
+        /// </summary>
+        /// <param name="killerEntityId">Killer's entity id</param>
+        /// <param name="chatMessage">message sent in chat when player is killed</param>
+        void OnPlayerKilled(int killerEntityId, string chatMessage);
+
+        /// <summary>
         /// Called when the server sets the new location for the player
         /// </summary>
         /// <param name="location">New location of the player</param>
-        /// <param name="yawIsOffset">Whether yaw is an offset value or a new value</param>
         /// <param name="yaw">Yaw value, measured in degrees</param>
-        /// <param name="pitchIsOffset">Whether pitch is an offset value or a new value</param>
         /// <param name="pitch">Pitch value, measured in degrees</param>
-        void UpdateLocation(Location location, bool yawIsOffset, float yaw, bool pitchIsOffset, float pitch);
+        void UpdateLocation(Location location, float yaw, float pitch);
 
         /// <summary>
         /// Called when the connection has been lost
@@ -366,11 +371,13 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Called when DisplayScoreboard
         /// </summary>
-        /// <param name="entityname">The entity whose score this is. For players, this is their username; for other entities, it is their UUID.</param>
+        /// <param name="entityName">The entity whose score this is. For players, this is their username; for other entities, it is their UUID.</param>
         /// <param name="action">0 to create/update an item. 1 to remove an item.</param>
-        /// <param name="objectivename">The name of the objective the score belongs to</param>
-        /// <param name="value">he score to be displayed next to the entry. Only sent when Action does not equal 1.</param>
-        void OnUpdateScore(string entityname, int action, string objectivename, int value);
+        /// <param name="objectiveName">The name of the objective the score belongs to</param>
+        /// <param name="objectiveDisplayName">The name of the objective the score belongs to, but with chat formatting</param>
+        /// <param name="objectiveValue">The score to be displayed next to the entry. Only sent when Action does not equal 1.</param>
+        /// <param name="numberFormat">Number format: 0 - blank, 1 - styled, 2 - fixed</param>
+        void OnUpdateScore(string entityName, int action, string objectiveName, string objectiveDisplayName, int objectiveValue, int numberFormat);
 
         /// <summary>
         /// Called when tradeList is received from server

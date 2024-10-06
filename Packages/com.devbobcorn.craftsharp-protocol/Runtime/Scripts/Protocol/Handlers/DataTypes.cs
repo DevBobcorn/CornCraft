@@ -772,7 +772,7 @@ namespace CraftSharp.Protocol.Handlers
         /// </summary>
         /// <param name="cache"></param>
         /// <param name="itemPalette"></param>
-        protected void ReadParticleData(Queue<byte> cache, ItemPalette itemPalette)
+        public void ReadParticleData(Queue<byte> cache, ItemPalette itemPalette)
         {
             int ParticleID = ReadNextVarInt(cache);
 
@@ -954,6 +954,23 @@ namespace CraftSharp.Protocol.Handlers
             int demand = ReadNextInt(cache);
             return new VillagerTrade(inputItem1, outputItem, inputItem2, tradeDisabled, numberOfTradeUses,
                 maximumNumberOfTradeUses, xp, specialPrice, priceMultiplier, demand);
+        }
+
+        public string ReadNextChat(Queue<byte> cache)
+        {
+            if (protocolversion >= ProtocolMinecraft.MC_1_20_4_Version)
+            {
+                // Read as NBT
+                var r = ReadNextNbt(cache);
+                var msg = ChatParser.ParseText(r);
+                return msg;
+            }
+            else
+            {
+                // Read as String
+                var json = ReadNextString(cache);
+                return ChatParser.ParseText(json);
+            }
         }
 
         /// <summary>

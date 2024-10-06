@@ -127,7 +127,7 @@ namespace CraftSharp
         
         public abstract Container? GetInventory(int inventoryId);
         public abstract ItemStack? GetActiveItem();
-        public abstract Location GetLocation();
+        public abstract Location GetCurrentLocation();
         public abstract Vector3 GetPosition();
         public abstract string GetInfoString(bool withDebugInfo);
         public abstract Dictionary<string, int> GetPlayersLatency();

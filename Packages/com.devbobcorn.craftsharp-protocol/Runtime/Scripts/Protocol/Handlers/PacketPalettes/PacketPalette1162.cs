@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace CraftSharp.Protocol.Handlers.PacketPalettes
 {
     public class PacketPalette1162 : PacketTypePalette
     {
-        private Dictionary<int, PacketTypesIn> typeIn = new Dictionary<int, PacketTypesIn>()
+        private readonly Dictionary<int, PacketTypesIn> typeIn = new()
         {
             { 0x00, PacketTypesIn.SpawnEntity },
             { 0x01, PacketTypesIn.SpawnExperienceOrb },
@@ -100,7 +100,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x5B, PacketTypesIn.Tags },
         };
 
-        private Dictionary<int, PacketTypesOut> typeOut = new Dictionary<int, PacketTypesOut>()
+        private readonly Dictionary<int, PacketTypesOut> typeOut = new()
         {
             { 0x00, PacketTypesOut.TeleportConfirm },
             { 0x01, PacketTypesOut.QueryBlockNBT },
@@ -152,14 +152,9 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x2F, PacketTypesOut.UseItem },
         };
 
-        protected override Dictionary<int, PacketTypesIn> GetListIn()
-        {
-            return typeIn;
-        }
-
-        protected override Dictionary<int, PacketTypesOut> GetListOut()
-        {
-            return typeOut;
-        }
+        protected override Dictionary<int, PacketTypesIn> GetListIn() => typeIn;
+        protected override Dictionary<int, PacketTypesOut> GetListOut() => typeOut;
+        protected override Dictionary<int, ConfigurationPacketTypesIn> GetConfigurationListIn() => new();
+        protected override Dictionary<int, ConfigurationPacketTypesOut> GetConfigurationListOut() => new();
     }
 }

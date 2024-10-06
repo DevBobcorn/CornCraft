@@ -5,11 +5,14 @@
     /// </summary>
     public enum PacketTypesOut
     {
+        AcknowledgeConfiguration,    // Added in 1.20.2
         AdvancementTab,              //
         Animation,                   //
+        ChangeContainerSlotState,    // Added in 1.20.3
         ChatCommand,                 // Added in 1.19
         ChatMessage,                 //
         ChatPreview,                 // Added in 1.19
+        ChunkBatchReceived,          // Added in 1.20.2
         ClickWindow,                 //
         ClickWindowButton,           //
         ClientSettings,              //
@@ -29,6 +32,7 @@
         MessageAcknowledgment,       // Added in 1.19.1 (1.19.2)
         NameItem,                    //
         PickItem,                    //
+        PingRequest,                 // Added in 1.20.2
         PlayerAbilities,             //
         PlayerBlockPlacement,        //
         PlayerDigging,               //

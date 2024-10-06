@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 
 using CraftSharp.Protocol.Message;
+using System.Linq;
 
 namespace CraftSharp.Protocol
 {
@@ -29,6 +30,52 @@ namespace CraftSharp.Protocol
 
         public static Dictionary<int, MessageType>? ChatId2Type;
 
+        public static void ReadChatType(Dictionary<string, object> registryCodec)
+        {
+            Dictionary<int, MessageType> chatTypeDictionary = ChatId2Type ?? new();
+
+            // Check if the chat type registry is in the correct format
+            if (!registryCodec.ContainsKey("minecraft:chat_type"))
+            {
+
+                // If not, then we force the registry to be in the correct format
+                if (registryCodec.ContainsKey("chat_type"))
+                {
+
+                    foreach (var key in registryCodec.Keys.ToArray())
+                    {
+                        // Skip entries with a namespace already
+                        if (key.Contains(':', StringComparison.OrdinalIgnoreCase)) continue;
+
+                        // Assume all other entries are in the minecraft namespace
+                        registryCodec["minecraft:" + key] = registryCodec[key];
+                        registryCodec.Remove(key);
+                    }
+                }
+            }
+
+            var chatTypeListNbt = (object[])(((Dictionary<string, object>)registryCodec["minecraft:chat_type"])["value"]);
+            foreach (var (chatName, chatId) in from Dictionary<string, object> chatTypeNbt in chatTypeListNbt
+                                               let chatName = (string)chatTypeNbt["name"]
+                                               let chatId = (int)chatTypeNbt["id"]
+                                               select (chatName, chatId))
+            {
+                chatTypeDictionary[chatId] = chatName switch
+                {
+                    "minecraft:chat" => MessageType.CHAT,
+                    "minecraft:emote_command" => MessageType.EMOTE_COMMAND,
+                    "minecraft:msg_command_incoming" => MessageType.MSG_COMMAND_INCOMING,
+                    "minecraft:msg_command_outgoing" => MessageType.MSG_COMMAND_OUTGOING,
+                    "minecraft:say_command" => MessageType.SAY_COMMAND,
+                    "minecraft:team_msg_command_incoming" => MessageType.TEAM_MSG_COMMAND_INCOMING,
+                    "minecraft:team_msg_command_outgoing" => MessageType.TEAM_MSG_COMMAND_OUTGOING,
+                    _ => MessageType.CHAT,
+                };
+            }
+
+            ChatId2Type = chatTypeDictionary;
+        }
+
         /// <summary>
         /// The main function to convert text from MC 1.6+ JSON to MC 1.5.2 formatted text
         /// </summary>
@@ -39,7 +86,12 @@ namespace CraftSharp.Protocol
         {
             return JSONData2String(Json.ParseJson(json), "", links);
         }
-        
+
+        public static string ParseText(Dictionary<string, object> nbt)
+        {
+            return NbtToString(nbt);
+        }
+
         /// <summary>
         /// The main function to convert text from MC 1.9+ JSON to MC 1.5.2 formatted text
         /// </summary>
@@ -330,5 +382,89 @@ namespace CraftSharp.Protocol
             return "";
         }
 
+        private static string NbtToString(Dictionary<string, object> nbt)
+        {
+            if (nbt.Count == 1 && nbt.TryGetValue("", out object? rootMessage))
+            {
+                // Nameless root tag
+                return (string)rootMessage;
+            }
+
+            string message = string.Empty;
+            string colorCode = string.Empty;
+            StringBuilder extraBuilder = new StringBuilder();
+            foreach (var kvp in nbt)
+            {
+                string key = kvp.Key;
+                object value = kvp.Value;
+
+                switch (key)
+                {
+                    case "text":
+                        {
+                            message = (string)value;
+                        }
+                        break;
+                    case "extra":
+                        {
+                            object[] extras = (object[])value;
+                            for (var i = 0; i < extras.Length; i++)
+                            {
+                                var extraDict = extras[i] switch
+                                {
+                                    int => new Dictionary<string, object> { { "text", $"{extras[i]}" } },
+                                    string => new Dictionary<string, object>
+                                {
+                                    { "text", (string)extras[i] }
+                                },
+                                    _ => (Dictionary<string, object>)extras[i]
+                                };
+
+                                extraBuilder.Append(NbtToString(extraDict) + "§r");
+                            }
+                        }
+                        break;
+                    case "translate":
+                        {
+                            if (nbt.TryGetValue("translate", out object translate))
+                            {
+                                var translateKey = (string)translate;
+                                List<string> translateString = new();
+                                if (nbt.TryGetValue("with", out object withComponent))
+                                {
+                                    var withs = (object[])withComponent;
+                                    for (var i = 0; i < withs.Length; i++)
+                                    {
+                                        var withDict = withs[i] switch
+                                        {
+                                            int => new Dictionary<string, object> { { "text", $"{withs[i]}" } },
+                                            string => new Dictionary<string, object>
+                                        {
+                                            { "text", (string)withs[i] }
+                                        },
+                                            _ => (Dictionary<string, object>)withs[i]
+                                        };
+
+                                        translateString.Add(NbtToString(withDict));
+                                    }
+                                }
+
+                                message = TranslateString(translateKey, translateString);
+                            }
+                        }
+                        break;
+                    case "color":
+                        {
+                            if (nbt.TryGetValue("color", out object color))
+                            {
+                                colorCode = Color2tag((string)color);
+                            }
+                        }
+                        break;
+                }
+            }
+
+            return colorCode + message + extraBuilder.ToString();
+        }
     }
 }

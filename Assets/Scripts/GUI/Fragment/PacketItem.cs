@@ -25,7 +25,7 @@ namespace CraftSharp.UI
             // Update color
             background.color = this.inBound ? inBoundColor : outBoundColor;
 
-            var packetName = this.inBound ? palette.GetIncommingTypeById(packetId).ToString()
+            var packetName = this.inBound ? palette.GetIncomingTypeById(packetId).ToString()
                     : palette.GetOutgoingTypeById(packetId).ToString();
 
             // Update text
