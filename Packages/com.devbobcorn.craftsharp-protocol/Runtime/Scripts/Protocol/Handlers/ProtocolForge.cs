@@ -64,7 +64,7 @@ namespace CraftSharp.Protocol.Handlers
 
                     if (packetID == 0x40) // Disconnect
                     {
-                        mcHandler.OnConnectionLost(DisconnectReason.LoginRejected, ChatParser.ParseText(dataTypes.ReadNextString(packetData)));
+                        mcHandler.OnConnectionLost(DisconnectReason.LoginRejected, ChatParser.ParseText(DataTypes.ReadNextString(packetData)));
                         return false;
                     }
                     else
@@ -87,12 +87,12 @@ namespace CraftSharp.Protocol.Handlers
             if (ForgeEnabled())
             {
                 // Forge special VarShort field.
-                return (int)dataTypes.ReadNextVarShort(packetData);
+                return (int)DataTypes.ReadNextVarShort(packetData);
             }
             else
             {
                 // Vanilla regular Short field
-                return (int)dataTypes.ReadNextShort(packetData);
+                return (int)DataTypes.ReadNextShort(packetData);
             }
         }
 
@@ -109,7 +109,7 @@ namespace CraftSharp.Protocol.Handlers
             {
                 if (channel == "FML|HS")
                 {
-                    FMLHandshakeDiscriminator discriminator = (FMLHandshakeDiscriminator)dataTypes.ReadNextByte(packetData);
+                    FMLHandshakeDiscriminator discriminator = (FMLHandshakeDiscriminator)DataTypes.ReadNextByte(packetData);
 
                     if (discriminator == FMLHandshakeDiscriminator.HandshakeReset)
                     {
@@ -130,13 +130,13 @@ namespace CraftSharp.Protocol.Handlers
                             string[] channels = { "FML|HS", "FML", "FML|MP", "FML", "FORGE" };
                             protocolMC.SendPluginChannelPacket("REGISTER", Encoding.UTF8.GetBytes(string.Join("\0", channels)));
 
-                            byte fmlProtocolVersion = dataTypes.ReadNextByte(packetData);
+                            byte fmlProtocolVersion = DataTypes.ReadNextByte(packetData);
 
                             if (CornGlobal.DebugMode)
                                 Debug.Log(Translations.Get("forge.version", fmlProtocolVersion));
 
                             if (fmlProtocolVersion >= 1)
-                                currentDimension = dataTypes.ReadNextInt(packetData);
+                                currentDimension = DataTypes.ReadNextInt(packetData);
 
                             // Tell the server we're running the same version.
                             SendForgeHandshakePacket(FMLHandshakeDiscriminator.ClientHello, new byte[] { fmlProtocolVersion });
@@ -148,10 +148,10 @@ namespace CraftSharp.Protocol.Handlers
                             for (int i = 0; i < forgeInfo.Mods.Count; i++)
                             {
                                 ForgeInfo.ForgeMod mod = forgeInfo.Mods[i];
-                                mods[i] = dataTypes.ConcatBytes(dataTypes.GetString(mod.ModID), dataTypes.GetString(mod.Version));
+                                mods[i] = DataTypes.ConcatBytes(DataTypes.GetString(mod.ModID), DataTypes.GetString(mod.Version));
                             }
                             SendForgeHandshakePacket(FMLHandshakeDiscriminator.ModList,
-                                dataTypes.ConcatBytes(DataTypes.GetVarInt(forgeInfo.Mods.Count), dataTypes.ConcatBytes(mods)));
+                                DataTypes.ConcatBytes(DataTypes.GetVarInt(forgeInfo.Mods.Count), DataTypes.ConcatBytes(mods)));
 
                             fmlHandshakeState = FMLHandshakeClientState.WAITINGSERVERDATA;
 
@@ -179,9 +179,9 @@ namespace CraftSharp.Protocol.Handlers
                                 return false;
 
                             // 1.8+ has more than one registry.
-                            bool hasNextRegistry = dataTypes.ReadNextBool(packetData);
-                            string registryName = dataTypes.ReadNextString(packetData);
-                            int registrySize = dataTypes.ReadNextVarInt(packetData);
+                            bool hasNextRegistry = DataTypes.ReadNextBool(packetData);
+                            string registryName = DataTypes.ReadNextString(packetData);
+                            int registrySize = DataTypes.ReadNextVarInt(packetData);
                             if (CornGlobal.DebugMode)
                                 Debug.Log(Translations.Get("forge.registry_2", registryName, registrySize));
                             if (!hasNextRegistry)
@@ -263,9 +263,9 @@ namespace CraftSharp.Protocol.Handlers
                 // The content of each message is mapped into a class inside FMLHandshakeMessages.java
                 // FMLHandshakeHandler will then process the packet, e.g. handleServerModListOnClient() for Server Mod List.
 
-                string fmlChannel = dataTypes.ReadNextString(packetData);
-                dataTypes.ReadNextVarInt(packetData); // Packet length
-                int packetID = dataTypes.ReadNextVarInt(packetData);
+                string fmlChannel = DataTypes.ReadNextString(packetData);
+                DataTypes.ReadNextVarInt(packetData); // Packet length
+                int packetID = DataTypes.ReadNextVarInt(packetData);
 
                 if (fmlChannel == "fml:handshake")
                 {
@@ -291,19 +291,19 @@ namespace CraftSharp.Protocol.Handlers
                                 Debug.Log(Translations.Get("forge.fml2.mod"));
 
                             List<string> mods = new List<string>();
-                            int modCount = dataTypes.ReadNextVarInt(packetData);
+                            int modCount = DataTypes.ReadNextVarInt(packetData);
                             for (int i = 0; i < modCount; i++)
-                                mods.Add(dataTypes.ReadNextString(packetData));
+                                mods.Add(DataTypes.ReadNextString(packetData));
 
                             Dictionary<string, string> channels = new Dictionary<string, string>();
-                            int channelCount = dataTypes.ReadNextVarInt(packetData);
+                            int channelCount = DataTypes.ReadNextVarInt(packetData);
                             for (int i = 0; i < channelCount; i++)
-                                channels.Add(dataTypes.ReadNextString(packetData), dataTypes.ReadNextString(packetData));
+                                channels.Add(DataTypes.ReadNextString(packetData), DataTypes.ReadNextString(packetData));
 
                             List<string> registries = new List<string>();
-                            int registryCount = dataTypes.ReadNextVarInt(packetData);
+                            int registryCount = DataTypes.ReadNextVarInt(packetData);
                             for (int i = 0; i < registryCount; i++)
-                                registries.Add(dataTypes.ReadNextString(packetData));
+                                registries.Add(DataTypes.ReadNextString(packetData));
 
                             // Server Mod List Reply: FMLHandshakeMessages.java > C2SModListReply > encode()
                             //
@@ -326,21 +326,21 @@ namespace CraftSharp.Protocol.Handlers
                             fmlResponsePacket.AddRange(DataTypes.GetVarInt(2));
                             fmlResponsePacket.AddRange(DataTypes.GetVarInt(mods.Count));
                             foreach (string mod in mods)
-                                fmlResponsePacket.AddRange(dataTypes.GetString(mod));
+                                fmlResponsePacket.AddRange(DataTypes.GetString(mod));
 
                             fmlResponsePacket.AddRange(DataTypes.GetVarInt(channels.Count));
                             foreach (KeyValuePair<string, string> item in channels)
                             {
-                                fmlResponsePacket.AddRange(dataTypes.GetString(item.Key));
-                                fmlResponsePacket.AddRange(dataTypes.GetString(item.Value));
+                                fmlResponsePacket.AddRange(DataTypes.GetString(item.Key));
+                                fmlResponsePacket.AddRange(DataTypes.GetString(item.Value));
                             }
 
                             fmlResponsePacket.AddRange(DataTypes.GetVarInt(registries.Count));
                             foreach (string registry in registries)
                             {
-                                fmlResponsePacket.AddRange(dataTypes.GetString(registry));
+                                fmlResponsePacket.AddRange(DataTypes.GetString(registry));
                                 // We don't have Registry mapping from server, leave it empty
-                                fmlResponsePacket.AddRange(dataTypes.GetString(""));
+                                fmlResponsePacket.AddRange(DataTypes.GetString(""));
                             }
                             fmlResponseReady = true;
                             break;
@@ -357,7 +357,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             if (CornGlobal.DebugMode)
                             {
-                                string registryName = dataTypes.ReadNextString(packetData);
+                                string registryName = DataTypes.ReadNextString(packetData);
                                 Debug.Log(Translations.Get("forge.fml2.registry", registryName));
                             }
 
@@ -371,12 +371,12 @@ namespace CraftSharp.Protocol.Handlers
                             // [ Config Name ][ String ]
                             // [ Config Data ][  ....  ] // Remaining packet data (1)
                             //
-                            // [1] Config data may containt a standard Minecraft string readable with dataTypes.readNextString()
+                            // [1] Config data may containt a standard Minecraft string readable with DataTypes.readNextString()
                             // We're ignoring this packet in MCC
 
                             if (CornGlobal.DebugMode)
                             {
-                                string configName = dataTypes.ReadNextString(packetData);
+                                string configName = DataTypes.ReadNextString(packetData);
                                 Debug.Log(Translations.Get("forge.fml2.config", configName));
                             }
 
@@ -394,7 +394,7 @@ namespace CraftSharp.Protocol.Handlers
                     {
                         // Wrap our FML packet into a LoginPluginResponse payload
                         responseData.Clear();
-                        responseData.AddRange(dataTypes.GetString(fmlChannel));
+                        responseData.AddRange(DataTypes.GetString(fmlChannel));
                         responseData.AddRange(DataTypes.GetVarInt(fmlResponsePacket.Count));
                         responseData.AddRange(fmlResponsePacket);
                         return true;
@@ -415,7 +415,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="data">packet Data</param>
         private void SendForgeHandshakePacket(FMLHandshakeDiscriminator discriminator, byte[] data)
         {
-            protocolMC.SendPluginChannelPacket("FML|HS", dataTypes.ConcatBytes(new byte[] { (byte)discriminator }, data));
+            protocolMC.SendPluginChannelPacket("FML|HS", DataTypes.ConcatBytes(new byte[] { (byte)discriminator }, data));
         }
 
         #nullable enable

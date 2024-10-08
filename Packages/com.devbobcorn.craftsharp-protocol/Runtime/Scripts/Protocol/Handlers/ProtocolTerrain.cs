@@ -37,15 +37,15 @@ namespace CraftSharp.Protocol.Handlers
         private Chunk? ReadBlockStatesField(Queue<byte> cache)
         {
             // read Block states (Type: Paletted Container)
-            byte bitsPerEntry = dataTypes.ReadNextByte(cache);
+            byte bitsPerEntry = DataTypes.ReadNextByte(cache);
 
             // 1.18(1.18.1) add a palette named "Single valued" to replace the vertical strip bitmask in the old
             if (bitsPerEntry == 0 && protocolVersion >= ProtocolMinecraft.MC_1_18_1_Version)
             {
                 // Palettes: Single valued - 1.18(1.18.1) and above
-                ushort blockId = (ushort)dataTypes.ReadNextVarInt(cache);
+                ushort blockId = (ushort)DataTypes.ReadNextVarInt(cache);
 
-                dataTypes.SkipNextVarInt(cache); // Data Array Length will be zero
+                DataTypes.SkipNextVarInt(cache); // Data Array Length will be zero
 
                 // Empty chunks will not be stored
                 if (blockId == 0)
@@ -74,14 +74,14 @@ namespace CraftSharp.Protocol.Handlers
                 uint valueMask = (uint)((1 << bitsPerEntry) - 1);
 
                 int paletteLength = 0; // Assume zero when length is absent
-                if (usePalette) paletteLength = dataTypes.ReadNextVarInt(cache);
+                if (usePalette) paletteLength = DataTypes.ReadNextVarInt(cache);
 
                 Span<uint> palette = paletteLength < 256 ? stackalloc uint[paletteLength] : new uint[paletteLength];
                 for (int i = 0; i < paletteLength; i++)
-                    palette[i] = (uint)dataTypes.ReadNextVarInt(cache);
+                    palette[i] = (uint)DataTypes.ReadNextVarInt(cache);
 
                 //// Block IDs are packed in the array of 64-bits integers
-                dataTypes.SkipNextVarInt(cache); // Entry length
+                DataTypes.SkipNextVarInt(cache); // Entry length
                 Span<byte> entryDataByte = stackalloc byte[8];
                 Span<long> entryDataLong = MemoryMarshal.Cast<byte, long>(entryDataByte); // Faster than MemoryMarshal.Read<long>
 
@@ -100,7 +100,7 @@ namespace CraftSharp.Protocol.Handlers
 
                                 // When overlapping, move forward to the beginning of the next Long
                                 startOffset = 0;
-                                dataTypes.ReadDataReverse(cache, entryDataByte); // read long
+                                DataTypes.ReadDataReverse(cache, entryDataByte); // read long
                             }
 
                             uint blockId = (uint)(entryDataLong[0] >> startOffset) & valueMask;
@@ -142,7 +142,7 @@ namespace CraftSharp.Protocol.Handlers
             // Vertical offset of a 'cell' which is 4*4*4
             int cellYOffset = chunkY << 2;
 
-            byte bitsPerEntry = dataTypes.ReadNextByte(cache); // Bits Per Entry
+            byte bitsPerEntry = DataTypes.ReadNextByte(cache); // Bits Per Entry
 
             // Direct Mode: Bit mask covering bitsPerEntry bits
             // EG, if bitsPerEntry = 5, valueMask = 00011111 in binary
@@ -150,8 +150,8 @@ namespace CraftSharp.Protocol.Handlers
 
             if (bitsPerEntry == 0) // Single valued
             {
-                short biomeId = (short) dataTypes.ReadNextVarInt(cache); // Value
-                dataTypes.SkipNextVarInt(cache); // Data Array Length
+                short biomeId = (short) DataTypes.ReadNextVarInt(cache); // Value
+                DataTypes.SkipNextVarInt(cache); // Data Array Length
                 // Data Array must be empty
 
                 // Fill the whole section with this biome
@@ -161,16 +161,16 @@ namespace CraftSharp.Protocol.Handlers
             {
                 if (bitsPerEntry <= 3) // For biomes the given value is always used, and will be <= 3
                 {
-                    int paletteLength = dataTypes.ReadNextVarInt(cache); // Palette Length
+                    int paletteLength = DataTypes.ReadNextVarInt(cache); // Palette Length
 
                     Span<uint> palette = paletteLength < 256 ? stackalloc uint[paletteLength] : new uint[paletteLength];
                     for (int i = 0; i < paletteLength; i++)
-                        palette[i] = (uint)dataTypes.ReadNextVarInt(cache); // Palette
+                        palette[i] = (uint)DataTypes.ReadNextVarInt(cache); // Palette
 
                     //// Biome IDs are packed in the array of 64-bits integers
-                    int dataArrayLength = dataTypes.ReadNextVarInt(cache); // Data Array Length
+                    int dataArrayLength = DataTypes.ReadNextVarInt(cache); // Data Array Length
 
-                    //dataTypes.DropData(dataArrayLength * 8, cache); // Data Array
+                    //DataTypes.DropData(dataArrayLength * 8, cache); // Data Array
                     //UnityEngine.Debug.Log($"Biome data length: {dataArrayLength}");
 
                     Span<byte> entryDataByte = stackalloc byte[8];
@@ -190,7 +190,7 @@ namespace CraftSharp.Protocol.Handlers
 
                                     // When overlapping, move forward to the beginning of the next Long
                                     startOffset = 0;
-                                    dataTypes.ReadDataReverse(cache, entryDataByte); // read long
+                                    DataTypes.ReadDataReverse(cache, entryDataByte); // read long
                                 }
 
                                 uint biomeId = (uint)(entryDataLong[0] >> startOffset) & valueMask;
@@ -243,24 +243,24 @@ namespace CraftSharp.Protocol.Handlers
 
             if (protocolVersion >= ProtocolMinecraft.MC_1_18_1_Version) // 1.18, 1.18.1 and above
             {
-                dataSize = dataTypes.ReadNextVarInt(cache); // Size
+                dataSize = DataTypes.ReadNextVarInt(cache); // Size
 
                 // Prepare an empty array and do nothing else here
                 biomes = new short[64 * chunkColumnSize];
             }
             else // 1.17 and 1.17.1, read biome data right here
             {
-                int biomesLength = dataTypes.ReadNextVarInt(cache); // Biomes length
+                int biomesLength = DataTypes.ReadNextVarInt(cache); // Biomes length
                 biomes = new short[biomesLength];
 
                 // Read all biome data at once before other chunk data
                 for (int i = 0; i < biomesLength; i++)
-                    biomes[i] = (short) dataTypes.ReadNextVarInt(cache); // Biomes
+                    biomes[i] = (short) DataTypes.ReadNextVarInt(cache); // Biomes
                 
-                dataSize = dataTypes.ReadNextVarInt(cache); // Size
+                dataSize = DataTypes.ReadNextVarInt(cache); // Size
             }
 
-            //var aaa = dataTypes.ReadData(dataSize, cache);
+            //var aaa = DataTypes.ReadData(dataSize, cache);
 
             int totalSize = cache.Count;
 
@@ -274,7 +274,7 @@ namespace CraftSharp.Protocol.Handlers
                     ((verticalStripBitmask![chunkY / 64] & (1UL << (chunkY % 64))) != 0))
                 {
                     // Non-air block count inside chunk section, for lighting purposes
-                    int blockCount = dataTypes.ReadNextShort(cache);
+                    int blockCount = DataTypes.ReadNextShort(cache);
                     
                     // Read Block states (Type: Paletted Container)
                     var chunk = ReadBlockStatesField(cache);
@@ -302,17 +302,17 @@ namespace CraftSharp.Protocol.Handlers
             //UnityEngine.Debug.Log($"Data size: {dataSize} Consumed size: {consumedSize} Bytes left: {cache.Count} Error: {error}");
 
             if (error > 0) // Error correction
-                dataTypes.ReadData(error, cache);
+                DataTypes.ReadData(error, cache);
 
             // Read block entity data
-            int blockEntityCount = dataTypes.ReadNextVarInt(cache);
+            int blockEntityCount = DataTypes.ReadNextVarInt(cache);
             if (blockEntityCount > 0)
             {
                 for (int i = 0; i < blockEntityCount; i++) {
-                    var packedXZ = dataTypes.ReadNextByte(cache);
-                    var y = dataTypes.ReadNextShort(cache);
-                    var ttt = dataTypes.ReadNextVarInt(cache);
-                    var tag = dataTypes.ReadNextNbt(cache);
+                    var packedXZ = DataTypes.ReadNextByte(cache);
+                    var y = DataTypes.ReadNextShort(cache);
+                    var ttt = DataTypes.ReadNextVarInt(cache);
+                    var tag = DataTypes.ReadNextNbt(cache);
                     int x = (chunkX << 4) + (packedXZ >> 4);
                     int z = (chunkZ << 4) + (packedXZ & 15);
                     // Output block entity data
@@ -371,7 +371,7 @@ namespace CraftSharp.Protocol.Handlers
             int biomesLength = 0;
                                 
             if (protocolVersion >= ProtocolMinecraft.MC_1_16_2_Version && chunksContinuous)
-                biomesLength = dataTypes.ReadNextVarInt(cache); // Biomes length - 1.16.2 and above
+                biomesLength = DataTypes.ReadNextVarInt(cache); // Biomes length - 1.16.2 and above
             
             short[] biomes = new short[biomesLength];
 
@@ -380,13 +380,13 @@ namespace CraftSharp.Protocol.Handlers
                 if (protocolVersion >= ProtocolMinecraft.MC_1_16_2_Version)
                 {
                     for (int i = 0; i < biomesLength; i++) // Biomes - 1.16.2 and above
-                        biomes[i] = (short) dataTypes.ReadNextVarInt(cache);
+                        biomes[i] = (short) DataTypes.ReadNextVarInt(cache);
                 }
                 else
-                    dataTypes.ReadData(1024 * 4, cache); // Biomes - 1.15 and above
+                    DataTypes.ReadData(1024 * 4, cache); // Biomes - 1.15 and above
             }
 
-            int dataSize = dataTypes.ReadNextVarInt(cache);
+            int dataSize = DataTypes.ReadNextVarInt(cache);
 
             const int chunkColumnSize = 16;
 
@@ -403,9 +403,9 @@ namespace CraftSharp.Protocol.Handlers
                     if ((chunkMask & (1 << chunkY)) != 0)
                     {
                         // 1.14 and above Non-air block count inside chunk section, for lighting purposes
-                        dataTypes.ReadNextShort(cache);
+                        DataTypes.ReadNextShort(cache);
 
-                        byte bitsPerBlock = dataTypes.ReadNextByte(cache);
+                        byte bitsPerBlock = DataTypes.ReadNextByte(cache);
                         bool usePalette = (bitsPerBlock <= 8);
 
                         // Vanilla Minecraft will use at least 4 bits per block
@@ -416,18 +416,18 @@ namespace CraftSharp.Protocol.Handlers
                         // is not used, MC 1.13+ does not send the field at all in this case
                         int paletteLength = 0; // Assume zero when length is absent
                         if (usePalette)
-                            paletteLength = dataTypes.ReadNextVarInt(cache);
+                            paletteLength = DataTypes.ReadNextVarInt(cache);
 
                         int[] palette = new int[paletteLength];
                         for (int i = 0; i < paletteLength; i++)
-                            palette[i] = dataTypes.ReadNextVarInt(cache);
+                            palette[i] = DataTypes.ReadNextVarInt(cache);
 
                         // Bit mask covering bitsPerBlock bits
                         // EG, if bitsPerBlock = 5, valueMask = 00011111 in binary
                         uint valueMask = (uint)((1 << bitsPerBlock) - 1);
 
                         // Block IDs are packed in the array of 64-bits integers
-                        ulong[] dataArray = dataTypes.ReadNextULongArray(cache);
+                        ulong[] dataArray = DataTypes.ReadNextULongArray(cache);
 
                         Chunk chunk = new Chunk();
 
@@ -518,11 +518,11 @@ namespace CraftSharp.Protocol.Handlers
             }
 
             // Read block entity data
-            int blockEntityCount = dataTypes.ReadNextVarInt(cache);
+            int blockEntityCount = DataTypes.ReadNextVarInt(cache);
             if (blockEntityCount > 0)
             {
                 for (int i = 0; i < blockEntityCount; i++) {
-                    var tag = dataTypes.ReadNextNbt(cache);
+                    var tag = DataTypes.ReadNextNbt(cache);
                     // Output block entity data
                     var blockLoc = new BlockLoc((int) tag["x"], (int) tag["y"], (int) tag["z"]);
                     var typeId = ResourceLocation.FromString((string) tag["id"]);
@@ -575,24 +575,24 @@ namespace CraftSharp.Protocol.Handlers
         /// <returns>Indicies of chunk sections whose light data is included</returns>
         public int[] ReadChunkColumnLightData17(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
         {
-            var trustEdges = dataTypes.ReadNextBool(cache);
+            var trustEdges = DataTypes.ReadNextBool(cache);
 
             // Sky Light Mask
-            var skyLightMask = dataTypes.ReadNextULongArray(cache);
+            var skyLightMask = DataTypes.ReadNextULongArray(cache);
 
             // Block Light Mask
-            var blockLightMask = dataTypes.ReadNextULongArray(cache);
+            var blockLightMask = DataTypes.ReadNextULongArray(cache);
 
             // Empty Sky Light Mask
-            var emptySkyLightMask = dataTypes.ReadNextULongArray(cache);
+            var emptySkyLightMask = DataTypes.ReadNextULongArray(cache);
 
             // Empty Block Light Mask
-            var emptyBlockLightMask = dataTypes.ReadNextULongArray(cache);
+            var emptyBlockLightMask = DataTypes.ReadNextULongArray(cache);
 
             int ptr = 0, ulLen = sizeof(ulong) << 3;
 
             // Sky Light Arrays
-            int skyLightArrayCount = dataTypes.ReadNextVarInt(cache);
+            int skyLightArrayCount = DataTypes.ReadNextVarInt(cache);
             var skyLightIndices = new int[skyLightArrayCount];
 
             for (int li = 0;li < skyLightMask.Length;li++)
@@ -607,7 +607,7 @@ namespace CraftSharp.Protocol.Handlers
 
             for (int i = 0;i < skyLightArrayCount;i++)
             {
-                var skyLightArray = dataTypes.ReadNextByteArray(cache);
+                var skyLightArray = DataTypes.ReadNextByteArray(cache);
                 var chunkBlockY = skyLightIndices[i] * 16;
 
                 ReadLightArray(skyLightArray, chunkBlockY, ref skyLight);
@@ -620,7 +620,7 @@ namespace CraftSharp.Protocol.Handlers
             }
             
             // Block Light Arrays
-            int blockLightArrayCount = dataTypes.ReadNextVarInt(cache);
+            int blockLightArrayCount = DataTypes.ReadNextVarInt(cache);
             var blockLightIndices = new int[blockLightArrayCount];
 
             ptr = 0;
@@ -634,7 +634,7 @@ namespace CraftSharp.Protocol.Handlers
 
             for (int i = 0;i < blockLightArrayCount;i++)
             {
-                var blockLightArray = dataTypes.ReadNextByteArray(cache);
+                var blockLightArray = DataTypes.ReadNextByteArray(cache);
                 var chunkBlockY = blockLightIndices[i] * 16;
 
                 ReadLightArray(blockLightArray, chunkBlockY, ref blockLight);
@@ -650,19 +650,19 @@ namespace CraftSharp.Protocol.Handlers
         /// <returns>Indicies of chunk sections whose light data is included</returns>
         public int[] ReadChunkColumnLightData16(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
         {
-            var trustEdges = dataTypes.ReadNextBool(cache);
+            var trustEdges = DataTypes.ReadNextBool(cache);
             
             // Sky Light Mask
-            var skyLightMask = dataTypes.ReadNextVarInt(cache);
+            var skyLightMask = DataTypes.ReadNextVarInt(cache);
 
             // Block Light Mask
-            var blockLightMask = dataTypes.ReadNextVarInt(cache);
+            var blockLightMask = DataTypes.ReadNextVarInt(cache);
 
             // Empty Sky Light Mask
-            var emptySkyLightMask = dataTypes.ReadNextVarInt(cache);
+            var emptySkyLightMask = DataTypes.ReadNextVarInt(cache);
 
             // Empty Block Light Mask
-            var emptyBlockLightMask = dataTypes.ReadNextVarInt(cache);
+            var emptyBlockLightMask = DataTypes.ReadNextVarInt(cache);
 
             var updatedSections = new HashSet<int>();
 
@@ -674,7 +674,7 @@ namespace CraftSharp.Protocol.Handlers
                 
                 updatedSections.Add(i);
 
-                var skyLightArray = dataTypes.ReadNextByteArray(cache);
+                var skyLightArray = DataTypes.ReadNextByteArray(cache);
                 var chunkBlockY = i * 16;
 
                 ReadLightArray(skyLightArray, chunkBlockY, ref skyLight);
@@ -688,7 +688,7 @@ namespace CraftSharp.Protocol.Handlers
                 
                 updatedSections.Add(i);
 
-                var blockLightArray = dataTypes.ReadNextByteArray(cache);
+                var blockLightArray = DataTypes.ReadNextByteArray(cache);
                 var chunkBlockY = i * 16;
 
                 ReadLightArray(blockLightArray, chunkBlockY, ref blockLight);

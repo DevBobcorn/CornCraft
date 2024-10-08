@@ -217,13 +217,13 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="packetData">will contain raw packet Data</param>
         internal Tuple<int, Queue<byte>> ReadNextPacket()
         {
-            int size = dataTypes.ReadNextVarIntRAW(socketWrapper); //Packet size
+            int size = DataTypes.ReadNextVarIntRAW(socketWrapper); //Packet size
             Queue<byte> packetData = new(socketWrapper.ReadDataRAW(size)); //Packet contents
 
             //Handle packet decompression
             if (compression_treshold >= 0)
             {
-                int sizeUncompressed = dataTypes.ReadNextVarInt(packetData);
+                int sizeUncompressed = DataTypes.ReadNextVarInt(packetData);
                 if (sizeUncompressed != 0) // != 0 means compressed, let's decompress
                 {
                     byte[] toDecompress = packetData.ToArray();
@@ -232,7 +232,7 @@ namespace CraftSharp.Protocol.Handlers
                 }
             }
 
-            int packetId = dataTypes.ReadNextVarInt(packetData); //Packet ID
+            int packetId = DataTypes.ReadNextVarInt(packetData); //Packet ID
 
             if (CornGlobal.CapturePackets)
                 handler.OnNetworkPacket(packetId, packetData.ToArray(), currentState == CurrentState.Login, true);
@@ -263,13 +263,13 @@ namespace CraftSharp.Protocol.Handlers
                             // Set Compression
                             case 0x03:
                                 // MC 1.8+
-                                compression_treshold = dataTypes.ReadNextVarInt(packetData);
+                                compression_treshold = DataTypes.ReadNextVarInt(packetData);
                                 break;
 
                             // Login Plugin Request
                             case 0x04:
-                                var messageId = dataTypes.ReadNextVarInt(packetData);
-                                var channel = dataTypes.ReadNextString(packetData);
+                                var messageId = DataTypes.ReadNextVarInt(packetData);
+                                var channel = DataTypes.ReadNextString(packetData);
                                 List<byte> responseData = new();
                                 var understood = pForge.HandleLoginPluginRequest(channel, packetData, ref responseData);
                                 SendLoginPluginResponse(messageId, understood, responseData.ToArray());
@@ -305,7 +305,7 @@ namespace CraftSharp.Protocol.Handlers
                                 break;
 
                             case ConfigurationPacketTypesIn.RegistryData:
-                                var registryCodec = dataTypes.ReadNextNbt(packetData);
+                                var registryCodec = DataTypes.ReadNextNbt(packetData);
                                 ChatParser.ReadChatType(registryCodec);
 
                                 World.StoreDimensionList(registryCodec);
@@ -313,8 +313,8 @@ namespace CraftSharp.Protocol.Handlers
                                 break;
 
                             case ConfigurationPacketTypesIn.RemoveResourcePack:
-                                if (dataTypes.ReadNextBool(packetData)) // Has UUID
-                                    dataTypes.ReadNextUUID(packetData); // UUID
+                                if (DataTypes.ReadNextBool(packetData)) // Has UUID
+                                    DataTypes.ReadNextUUID(packetData); // UUID
                                 break;
 
                             case ConfigurationPacketTypesIn.ResourcePack:
@@ -360,15 +360,15 @@ namespace CraftSharp.Protocol.Handlers
             var uuid = Guid.Empty;
 
             if (protocolVersion >= MC_1_20_4_Version)
-                uuid = dataTypes.ReadNextUUID(packetData);
+                uuid = DataTypes.ReadNextUUID(packetData);
 
-            var url = dataTypes.ReadNextString(packetData);
-            var hash = dataTypes.ReadNextString(packetData);
+            var url = DataTypes.ReadNextString(packetData);
+            var hash = DataTypes.ReadNextString(packetData);
 
             if (protocolVersion >= MC_1_17_Version)
             {
-                dataTypes.ReadNextBool(packetData); // Forced
-                if (dataTypes.ReadNextBool(packetData)) // Has Prompt Message
+                DataTypes.ReadNextBool(packetData); // Forced
+                if (DataTypes.ReadNextBool(packetData)) // Has Prompt Message
                     dataTypes.ReadNextChat(packetData); // Prompt Message
             }
 
@@ -381,11 +381,11 @@ namespace CraftSharp.Protocol.Handlers
             var responseHeader = Array.Empty<byte>(); // After 1.10, the MC does not include resource pack hash in responses
 
             var basePacketData = protocolVersion >= MC_1_20_4_Version && uuid != Guid.Empty
-                ? dataTypes.ConcatBytes(responseHeader, DataTypes.GetUUID(uuid))
+                ? DataTypes.ConcatBytes(responseHeader, DataTypes.GetUUID(uuid))
                 : responseHeader;
 
-            var acceptedResourcePackData = dataTypes.ConcatBytes(basePacketData, DataTypes.GetVarInt(3));
-            var loadedResourcePackData = dataTypes.ConcatBytes(basePacketData, DataTypes.GetVarInt(0));
+            var acceptedResourcePackData = DataTypes.ConcatBytes(basePacketData, DataTypes.GetVarInt(3));
+            var loadedResourcePackData = DataTypes.ConcatBytes(basePacketData, DataTypes.GetVarInt(0));
 
             if (currentState == CurrentState.Configuration)
             {
@@ -428,28 +428,28 @@ namespace CraftSharp.Protocol.Handlers
 
                         handler.OnGameJoined(isOnlineMode);
 
-                        int playerEntityId = dataTypes.ReadNextInt(packetData);
+                        int playerEntityId = DataTypes.ReadNextInt(packetData);
                         handler.OnReceivePlayerEntityID(playerEntityId);
 
                         if (protocolVersion >= MC_1_16_2_Version)
-                            dataTypes.ReadNextBool(packetData);                       // Is hardcore - 1.16.2 and above
+                            DataTypes.ReadNextBool(packetData);                       // Is hardcore - 1.16.2 and above
 
                         if (protocolVersion < MC_1_20_2_Version)
-                            handler.OnGamemodeUpdate(Guid.Empty, dataTypes.ReadNextByte(packetData));
+                            handler.OnGamemodeUpdate(Guid.Empty, DataTypes.ReadNextByte(packetData));
 
                         if (protocolVersion >= MC_1_16_Version)
                         {
                             if (protocolVersion < MC_1_20_2_Version)
-                                dataTypes.ReadNextByte(packetData);                   // Previous Gamemode - 1.16 and above
+                                DataTypes.ReadNextByte(packetData);                   // Previous Gamemode - 1.16 and above
                             
-                            int worldCount = dataTypes.ReadNextVarInt(packetData);    // Dimension Count (World Count) - 1.16 and above
+                            int worldCount = DataTypes.ReadNextVarInt(packetData);    // Dimension Count (World Count) - 1.16 and above
                             for (int i = 0; i < worldCount; i++)
-                                dataTypes.ReadNextString(packetData);                 // Dimension Names (World Names) - 1.16 and above
+                                DataTypes.ReadNextString(packetData);                 // Dimension Names (World Names) - 1.16 and above
 
                             if (protocolVersion < MC_1_20_2_Version)
                             {
                                 // Registry Codec (Dimension Codec) - 1.16 and above
-                                var registryCodec = dataTypes.ReadNextNbt(packetData);
+                                var registryCodec = DataTypes.ReadNextNbt(packetData);
 
                                 // Read and store defined dimensions 1.16.2 and above
                                 World.StoreDimensionList(registryCodec);
@@ -472,19 +472,19 @@ namespace CraftSharp.Protocol.Handlers
                             if (protocolVersion >= MC_1_16_Version)
                             {
                                 if (protocolVersion >= MC_1_19_Version)
-                                    dimensionTypeName = dataTypes.ReadNextString(packetData); // Dimension Type: Identifier
+                                    dimensionTypeName = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
                                 else if (protocolVersion >= MC_1_16_2_Version)
-                                    dimensionType = dataTypes.ReadNextNbt(packetData);        // Dimension Type: NBT Tag Compound
+                                    dimensionType = DataTypes.ReadNextNbt(packetData);        // Dimension Type: NBT Tag Compound
                                 else
-                                    dataTypes.ReadNextString(packetData);
+                                    DataTypes.ReadNextString(packetData);
                                 this.currentDimension = 0;
                             }
                             else
-                                this.currentDimension = dataTypes.ReadNextInt(packetData);
+                                this.currentDimension = DataTypes.ReadNextInt(packetData);
 
                             if (protocolVersion >= MC_1_16_Version)
                             {
-                                string dimensionName = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
+                                string dimensionName = DataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
 
                                 if (protocolVersion >= MC_1_16_2_Version && protocolVersion <= MC_1_18_2_Version)
                                 {
@@ -499,67 +499,67 @@ namespace CraftSharp.Protocol.Handlers
                         }
 
                         if (protocolVersion >= MC_1_15_Version && protocolVersion < MC_1_20_2_Version)
-                            dataTypes.ReadNextLong(packetData);           // Hashed world seed - 1.15 and above
+                            DataTypes.ReadNextLong(packetData);           // Hashed world seed - 1.15 and above
 
                         if (protocolVersion >= MC_1_16_2_Version)
-                            dataTypes.ReadNextVarInt(packetData);         // Max Players - 1.16.2 and above
+                            DataTypes.ReadNextVarInt(packetData);         // Max Players - 1.16.2 and above
                         else
-                            dataTypes.ReadNextByte(packetData);           // Max Players - 1.16.1 and below
+                            DataTypes.ReadNextByte(packetData);           // Max Players - 1.16.1 and below
 
                         if (protocolVersion < MC_1_16_Version)
-                            dataTypes.SkipNextString(packetData);         // Level Type - 1.15 and below
+                            DataTypes.SkipNextString(packetData);         // Level Type - 1.15 and below
                             
-                        dataTypes.ReadNextVarInt(packetData);             // View distance - 1.14 and above
+                        DataTypes.ReadNextVarInt(packetData);             // View distance - 1.14 and above
                             
                         if (protocolVersion >= MC_1_18_1_Version)
-                            dataTypes.ReadNextVarInt(packetData);         // Simulation Distance - 1.18 and above
+                            DataTypes.ReadNextVarInt(packetData);         // Simulation Distance - 1.18 and above
                             
-                        dataTypes.ReadNextBool(packetData);               // Reduced debug info - 1.8 and above
+                        DataTypes.ReadNextBool(packetData);               // Reduced debug info - 1.8 and above
 
                         if (protocolVersion >= MC_1_15_Version)
-                            dataTypes.ReadNextBool(packetData);           // Enable respawn screen - 1.15 and above
+                            DataTypes.ReadNextBool(packetData);           // Enable respawn screen - 1.15 and above
 
                         if (protocolVersion < MC_1_20_2_Version)
                         {
                             if (protocolVersion >= MC_1_16_Version)
                             {
-                                dataTypes.ReadNextBool(packetData);           // Is Debug - 1.16 and above
-                                dataTypes.ReadNextBool(packetData);           // Is Flat - 1.16 and above
+                                DataTypes.ReadNextBool(packetData);           // Is Debug - 1.16 and above
+                                DataTypes.ReadNextBool(packetData);           // Is Flat - 1.16 and above
                             }
                             if (protocolVersion >= MC_1_19_Version)
                             {
-                                if (dataTypes.ReadNextBool(packetData))       // Has death location
+                                if (DataTypes.ReadNextBool(packetData))       // Has death location
                                 {
-                                    dataTypes.SkipNextString(packetData);     // Death dimension name: Identifier
-                                    dataTypes.ReadNextLocation(packetData);   // Death location
+                                    DataTypes.SkipNextString(packetData);     // Death dimension name: Identifier
+                                    DataTypes.ReadNextLocation(packetData);   // Death location
                                 }
                             }
 
                             if (protocolVersion >= MC_1_20_Version)
-                                dataTypes.ReadNextVarInt(packetData); // Portal Cooldown - 1.20 and above
+                                DataTypes.ReadNextVarInt(packetData); // Portal Cooldown - 1.20 and above
                         }
                         else
                         {
                             {
-                                dataTypes.ReadNextBool(packetData);                           // Do limited crafting
-                                var dimensionTypeName = dataTypes.ReadNextString(packetData); // Dimension Type: Identifier
-                                dataTypes.ReadNextString(packetData);                         // Dimension Name (World Name) - 1.16 and above
+                                DataTypes.ReadNextBool(packetData);                           // Do limited crafting
+                                var dimensionTypeName = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
+                                DataTypes.ReadNextString(packetData);                         // Dimension Name (World Name) - 1.16 and above
 
                                 World.SetDimension(dimensionTypeName);
 
-                                dataTypes.ReadNextLong(packetData); // Hashed world seed
-                                handler.OnGamemodeUpdate(Guid.Empty, dataTypes.ReadNextByte(packetData));
-                                dataTypes.ReadNextByte(packetData); // Previous Gamemode
-                                dataTypes.ReadNextBool(packetData); // Is Debug
-                                dataTypes.ReadNextBool(packetData); // Is Flat
+                                DataTypes.ReadNextLong(packetData); // Hashed world seed
+                                handler.OnGamemodeUpdate(Guid.Empty, DataTypes.ReadNextByte(packetData));
+                                DataTypes.ReadNextByte(packetData); // Previous Gamemode
+                                DataTypes.ReadNextBool(packetData); // Is Debug
+                                DataTypes.ReadNextBool(packetData); // Is Flat
                                 
-                                if (dataTypes.ReadNextBool(packetData))     // Has death location
+                                if (DataTypes.ReadNextBool(packetData))     // Has death location
                                 {
-                                    dataTypes.SkipNextString(packetData);   // Death dimension name: Identifier
-                                    dataTypes.ReadNextLocation(packetData); // Death location
+                                    DataTypes.SkipNextString(packetData);   // Death dimension name: Identifier
+                                    DataTypes.ReadNextLocation(packetData); // Death location
                                 }
 
-                                dataTypes.ReadNextVarInt(packetData); // Portal Cooldown
+                                DataTypes.ReadNextVarInt(packetData); // Portal Cooldown
                             }
                         }
                         break;
@@ -582,47 +582,47 @@ namespace CraftSharp.Protocol.Handlers
 
                         if (protocolVersion <= MC_1_18_2_Version) // 1.18 and below
                         {
-                            string message = dataTypes.ReadNextString(packetData);
+                            string message = DataTypes.ReadNextString(packetData);
 
                             Guid senderUUID;
                             //Hide system messages or xp bar messages?
-                            messageType = dataTypes.ReadNextByte(packetData);
+                            messageType = DataTypes.ReadNextByte(packetData);
                             if ((messageType == 1 && !CornGlobal.DisplaySystemMessages)
                                 || (messageType == 2 && !CornGlobal.DisplayXPBarMessages))
                                 break;
 
                             if (protocolVersion >= MC_1_16_5_Version)
-                                senderUUID = dataTypes.ReadNextUUID(packetData);
+                                senderUUID = DataTypes.ReadNextUUID(packetData);
                             else senderUUID = Guid.Empty;
 
                             handler.OnTextReceived(new(message, null, true, messageType, senderUUID));
                         }
                         else if (protocolVersion == MC_1_19_Version) // 1.19
                         {
-                            string signedChat = dataTypes.ReadNextString(packetData);
+                            string signedChat = DataTypes.ReadNextString(packetData);
 
-                            bool hasUnsignedChatContent = dataTypes.ReadNextBool(packetData);
+                            bool hasUnsignedChatContent = DataTypes.ReadNextBool(packetData);
                             string? unsignedChatContent =
-                                hasUnsignedChatContent ? dataTypes.ReadNextString(packetData) : null;
+                                hasUnsignedChatContent ? DataTypes.ReadNextString(packetData) : null;
 
-                            messageType = dataTypes.ReadNextVarInt(packetData);
+                            messageType = DataTypes.ReadNextVarInt(packetData);
                             if ((messageType == 1 && !CornGlobal.DisplaySystemMessages)
                                 || (messageType == 2 && !CornGlobal.DisplayXPBarMessages))
                                 break;
 
-                            Guid senderUUID = dataTypes.ReadNextUUID(packetData);
-                            string senderDisplayName = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                            Guid senderUUID = DataTypes.ReadNextUUID(packetData);
+                            string senderDisplayName = ChatParser.ParseText(DataTypes.ReadNextString(packetData));
 
-                            bool hasSenderTeamName = dataTypes.ReadNextBool(packetData);
+                            bool hasSenderTeamName = DataTypes.ReadNextBool(packetData);
                             string? senderTeamName = hasSenderTeamName
-                                ? ChatParser.ParseText(dataTypes.ReadNextString(packetData))
+                                ? ChatParser.ParseText(DataTypes.ReadNextString(packetData))
                                 : null;
 
-                            long timestamp = dataTypes.ReadNextLong(packetData);
+                            long timestamp = DataTypes.ReadNextLong(packetData);
 
-                            long salt = dataTypes.ReadNextLong(packetData);
+                            long salt = DataTypes.ReadNextLong(packetData);
 
-                            byte[] messageSignature = dataTypes.ReadNextByteArray(packetData);
+                            byte[] messageSignature = DataTypes.ReadNextByteArray(packetData);
 
                             bool verifyResult;
                             if (!isOnlineMode)
@@ -643,44 +643,44 @@ namespace CraftSharp.Protocol.Handlers
                         else if (protocolVersion == MC_1_19_2_Version)
                         {
                             // 1.19.1 - 1.19.2
-                            byte[]? precedingSignature = dataTypes.ReadNextBool(packetData)
-                                ? dataTypes.ReadNextByteArray(packetData)
+                            byte[]? precedingSignature = DataTypes.ReadNextBool(packetData)
+                                ? DataTypes.ReadNextByteArray(packetData)
                                 : null;
-                            Guid senderUUID = dataTypes.ReadNextUUID(packetData);
-                            byte[] headerSignature = dataTypes.ReadNextByteArray(packetData);
+                            Guid senderUUID = DataTypes.ReadNextUUID(packetData);
+                            byte[] headerSignature = DataTypes.ReadNextByteArray(packetData);
 
-                            string signedChat = dataTypes.ReadNextString(packetData);
-                            string? decorated = dataTypes.ReadNextBool(packetData)
-                                ? dataTypes.ReadNextString(packetData)
+                            string signedChat = DataTypes.ReadNextString(packetData);
+                            string? decorated = DataTypes.ReadNextBool(packetData)
+                                ? DataTypes.ReadNextString(packetData)
                                 : null;
 
-                            long timestamp = dataTypes.ReadNextLong(packetData);
-                            long salt = dataTypes.ReadNextLong(packetData);
+                            long timestamp = DataTypes.ReadNextLong(packetData);
+                            long salt = DataTypes.ReadNextLong(packetData);
 
-                            int lastSeenMessageListLen = dataTypes.ReadNextVarInt(packetData);
+                            int lastSeenMessageListLen = DataTypes.ReadNextVarInt(packetData);
                             LastSeenMessageList.AcknowledgedMessage[] lastSeenMessageList =
                                 new LastSeenMessageList.AcknowledgedMessage[lastSeenMessageListLen];
                             for (int i = 0; i < lastSeenMessageListLen; ++i)
                             {
-                                Guid user = dataTypes.ReadNextUUID(packetData);
-                                byte[] lastSignature = dataTypes.ReadNextByteArray(packetData);
+                                Guid user = DataTypes.ReadNextUUID(packetData);
+                                byte[] lastSignature = DataTypes.ReadNextByteArray(packetData);
                                 lastSeenMessageList[i] = new(user, lastSignature, true);
                             }
 
                             LastSeenMessageList lastSeenMessages = new(lastSeenMessageList);
 
-                            string? unsignedChatContent = dataTypes.ReadNextBool(packetData)
-                                ? dataTypes.ReadNextString(packetData)
+                            string? unsignedChatContent = DataTypes.ReadNextBool(packetData)
+                                ? DataTypes.ReadNextString(packetData)
                                 : null;
 
-                            MessageFilterType filterEnum = (MessageFilterType)dataTypes.ReadNextVarInt(packetData);
+                            MessageFilterType filterEnum = (MessageFilterType)DataTypes.ReadNextVarInt(packetData);
                             if (filterEnum == MessageFilterType.PartiallyFiltered)
-                                dataTypes.ReadNextULongArray(packetData);
+                                DataTypes.ReadNextULongArray(packetData);
 
-                            int chatTypeId = dataTypes.ReadNextVarInt(packetData);
-                            string chatName = dataTypes.ReadNextString(packetData);
-                            string? targetName = dataTypes.ReadNextBool(packetData)
-                                ? dataTypes.ReadNextString(packetData)
+                            int chatTypeId = DataTypes.ReadNextVarInt(packetData);
+                            string chatName = DataTypes.ReadNextString(packetData);
+                            string? targetName = DataTypes.ReadNextBool(packetData)
+                                ? DataTypes.ReadNextString(packetData)
                                 : null;
 
                             Dictionary<string, Json.JSONData> chatInfo = Json.ParseJson(chatName).Properties;
@@ -741,52 +741,52 @@ namespace CraftSharp.Protocol.Handlers
                             // 1.19.3+
                             // Header section
                             // net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket#write
-                            Guid senderUUID = dataTypes.ReadNextUUID(packetData);
-                            int index = dataTypes.ReadNextVarInt(packetData);
+                            Guid senderUUID = DataTypes.ReadNextUUID(packetData);
+                            int index = DataTypes.ReadNextVarInt(packetData);
                             // Signature is fixed size of 256 bytes
-                            byte[]? messageSignature = dataTypes.ReadNextBool(packetData)
-                                ? dataTypes.ReadNextByteArray(packetData, 256)
+                            byte[]? messageSignature = DataTypes.ReadNextBool(packetData)
+                                ? DataTypes.ReadNextByteArray(packetData, 256)
                                 : null;
 
                             // Body
                             // net.minecraft.network.message.MessageBody.Serialized#write
-                            string message = dataTypes.ReadNextString(packetData);
-                            long timestamp = dataTypes.ReadNextLong(packetData);
-                            long salt = dataTypes.ReadNextLong(packetData);
+                            string message = DataTypes.ReadNextString(packetData);
+                            long timestamp = DataTypes.ReadNextLong(packetData);
+                            long salt = DataTypes.ReadNextLong(packetData);
 
                             // Previous Messages
                             // net.minecraft.network.message.LastSeenMessageList.Indexed#write
                             // net.minecraft.network.message.MessageSignatureData.Indexed#write
-                            int totalPreviousMessages = dataTypes.ReadNextVarInt(packetData);
+                            int totalPreviousMessages = DataTypes.ReadNextVarInt(packetData);
                             Tuple<int, byte[]?>[] previousMessageSignatures =
                                 new Tuple<int, byte[]?>[totalPreviousMessages];
                             for (int i = 0; i < totalPreviousMessages; i++)
                             {
                                 // net.minecraft.network.message.MessageSignatureData.Indexed#fromBuf
-                                int messageId = dataTypes.ReadNextVarInt(packetData) - 1;
+                                int messageId = DataTypes.ReadNextVarInt(packetData) - 1;
                                 if (messageId == -1)
                                     previousMessageSignatures[i] = new Tuple<int, byte[]?>(messageId,
-                                        dataTypes.ReadNextByteArray(packetData, 256));
+                                        DataTypes.ReadNextByteArray(packetData, 256));
                                 else
                                     previousMessageSignatures[i] = new Tuple<int, byte[]?>(messageId, null);
                             }
 
                             // Other
-                            string? unsignedChatContent = dataTypes.ReadNextBool(packetData)
-                                ? dataTypes.ReadNextString(packetData)
+                            string? unsignedChatContent = DataTypes.ReadNextBool(packetData)
+                                ? DataTypes.ReadNextString(packetData)
                                 : null;
 
-                            MessageFilterType filterType = (MessageFilterType)dataTypes.ReadNextVarInt(packetData);
+                            MessageFilterType filterType = (MessageFilterType)DataTypes.ReadNextVarInt(packetData);
 
                             if (filterType == MessageFilterType.PartiallyFiltered)
-                                dataTypes.ReadNextULongArray(packetData);
+                                DataTypes.ReadNextULongArray(packetData);
 
                             // Network Target
                             // net.minecraft.network.message.MessageType.Serialized#write
-                            int chatTypeId = dataTypes.ReadNextVarInt(packetData);
-                            string chatName = dataTypes.ReadNextString(packetData);
-                            string? targetName = dataTypes.ReadNextBool(packetData)
-                                ? dataTypes.ReadNextString(packetData)
+                            int chatTypeId = DataTypes.ReadNextVarInt(packetData);
+                            string chatName = DataTypes.ReadNextString(packetData);
+                            string? targetName = DataTypes.ReadNextBool(packetData)
+                                ? DataTypes.ReadNextString(packetData)
                                 : null;
 
                             ChatParser.MessageType messageTypeEnum =
@@ -851,7 +851,7 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.ChunkBatchFinished:
                     {
-                        var batchSize = dataTypes.ReadNextVarInt(packetData); // Number of chunks received
+                        var batchSize = DataTypes.ReadNextVarInt(packetData); // Number of chunks received
 
                         if (batchSize > 0)
                         {
@@ -880,15 +880,15 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.HideMessage:
                     {
-                        var hideMessageSignature = dataTypes.ReadNextByteArray(packetData);
+                        var hideMessageSignature = DataTypes.ReadNextByteArray(packetData);
                         Debug.Log($"HideMessage was not processed! (SigLen={hideMessageSignature.Length})");
                         break;
                     }
                 case PacketTypesIn.SystemChat:
-                    string systemMessage = dataTypes.ReadNextString(packetData);
+                    string systemMessage = DataTypes.ReadNextString(packetData);
                     if (protocolVersion >= MC_1_19_3_Version)
                     {
-                        bool isOverlay = dataTypes.ReadNextBool(packetData);
+                        bool isOverlay = DataTypes.ReadNextBool(packetData);
                         if (isOverlay)
                         {
                             if (!CornGlobal.DisplayXPBarMessages)
@@ -904,7 +904,7 @@ namespace CraftSharp.Protocol.Handlers
                     }
                     else
                     {
-                        int msgType = dataTypes.ReadNextVarInt(packetData);
+                        int msgType = DataTypes.ReadNextVarInt(packetData);
                         if ((msgType == 1 && !CornGlobal.DisplaySystemMessages))
                             break;
                         handler.OnTextReceived(new(systemMessage, null, true, msgType, Guid.Empty, true));
@@ -912,11 +912,11 @@ namespace CraftSharp.Protocol.Handlers
 
                     break;
                 case PacketTypesIn.ProfilelessChatMessage:
-                    string message_ = dataTypes.ReadNextString(packetData);
-                    int messageType_ = dataTypes.ReadNextVarInt(packetData);
-                    string messageName = dataTypes.ReadNextString(packetData);
-                    string? targetName_ = dataTypes.ReadNextBool(packetData)
-                        ? dataTypes.ReadNextString(packetData)
+                    string message_ = DataTypes.ReadNextString(packetData);
+                    int messageType_ = DataTypes.ReadNextVarInt(packetData);
+                    string messageName = DataTypes.ReadNextString(packetData);
+                    string? targetName_ = DataTypes.ReadNextBool(packetData)
+                        ? DataTypes.ReadNextString(packetData)
                         : null;
                     ChatMessage profilelessChat = new(message_, targetName_ ?? messageName, true, messageType_,
                         Guid.Empty, true);
@@ -927,24 +927,24 @@ namespace CraftSharp.Protocol.Handlers
                     // 1.8 - 1.16.5
                     if (protocolVersion <= MC_1_16_5_Version)
                     {
-                        var eventType = (CombatEventType)dataTypes.ReadNextVarInt(packetData);
+                        var eventType = (CombatEventType)DataTypes.ReadNextVarInt(packetData);
 
                         if (eventType == CombatEventType.EntityDead)
                         {
-                            dataTypes.SkipNextVarInt(packetData);
+                            DataTypes.SkipNextVarInt(packetData);
 
                             handler.OnPlayerKilled(
-                                dataTypes.ReadNextInt(packetData),
-                                ChatParser.ParseText(dataTypes.ReadNextString(packetData))
+                                DataTypes.ReadNextInt(packetData),
+                                ChatParser.ParseText(DataTypes.ReadNextString(packetData))
                             );
                         }
                     }
                     break;
                 case PacketTypesIn.DeathCombatEvent:
-                    dataTypes.SkipNextVarInt(packetData);
+                    DataTypes.SkipNextVarInt(packetData);
 
                     handler.OnPlayerKilled(
-                        protocolVersion >= MC_1_20_Version ? -1 : dataTypes.ReadNextInt(packetData),
+                        protocolVersion >= MC_1_20_Version ? -1 : DataTypes.ReadNextInt(packetData),
                         ChatParser.ParseText(dataTypes.ReadNextChat(packetData))
                     );
 
@@ -952,19 +952,19 @@ namespace CraftSharp.Protocol.Handlers
                 case PacketTypesIn.DamageEvent: // 1.19.4
                     if (protocolVersion >= MC_1_19_4_Version)
                     {
-                        var entityId = dataTypes.ReadNextVarInt(packetData);
-                        var sourceTypeId = dataTypes.ReadNextVarInt(packetData);
-                        var sourceCauseId = dataTypes.ReadNextVarInt(packetData);
-                        var sourceDirectId = dataTypes.ReadNextVarInt(packetData);
+                        var entityId = DataTypes.ReadNextVarInt(packetData);
+                        var sourceTypeId = DataTypes.ReadNextVarInt(packetData);
+                        var sourceCauseId = DataTypes.ReadNextVarInt(packetData);
+                        var sourceDirectId = DataTypes.ReadNextVarInt(packetData);
 
                         Location? sourcePos;
-                        if (dataTypes.ReadNextBool(packetData))
+                        if (DataTypes.ReadNextBool(packetData))
                         {
                             sourcePos = new Location()
                             {
-                                X = dataTypes.ReadNextDouble(packetData),
-                                Y = dataTypes.ReadNextDouble(packetData),
-                                Z = dataTypes.ReadNextDouble(packetData)
+                                X = DataTypes.ReadNextDouble(packetData),
+                                Y = DataTypes.ReadNextDouble(packetData),
+                                Z = DataTypes.ReadNextDouble(packetData)
                             };
                         }
 
@@ -974,12 +974,12 @@ namespace CraftSharp.Protocol.Handlers
                 case PacketTypesIn.MessageHeader: // 1.19.2 only
                     if (protocolVersion == MC_1_19_2_Version)
                     {
-                        byte[]? precedingSignature = dataTypes.ReadNextBool(packetData)
-                            ? dataTypes.ReadNextByteArray(packetData)
+                        byte[]? precedingSignature = DataTypes.ReadNextBool(packetData)
+                            ? DataTypes.ReadNextByteArray(packetData)
                             : null;
-                        Guid senderUUID = dataTypes.ReadNextUUID(packetData);
-                        byte[] headerSignature = dataTypes.ReadNextByteArray(packetData);
-                        byte[] bodyDigest = dataTypes.ReadNextByteArray(packetData);
+                        Guid senderUUID = DataTypes.ReadNextUUID(packetData);
+                        byte[] headerSignature = DataTypes.ReadNextByteArray(packetData);
+                        byte[] bodyDigest = DataTypes.ReadNextByteArray(packetData);
 
                         bool verifyResult;
 
@@ -1012,15 +1012,15 @@ namespace CraftSharp.Protocol.Handlers
                         Dictionary<string, object>? dimensionTypeRespawn = null;
                         // MC 1.16+
                         if (protocolVersion >= MC_1_19_Version)
-                            dimensionTypeNameRespawn = dataTypes.ReadNextString(packetData); // Dimension Type: Identifier
+                            dimensionTypeNameRespawn = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
                         else if (protocolVersion >= MC_1_16_2_Version)
-                            dimensionTypeRespawn = dataTypes.ReadNextNbt(packetData);        // Dimension Type: NBT Tag Compound
+                            dimensionTypeRespawn = DataTypes.ReadNextNbt(packetData);        // Dimension Type: NBT Tag Compound
                         else
-                            dataTypes.ReadNextString(packetData);
+                            DataTypes.ReadNextString(packetData);
                             
                         this.currentDimension = 0;
 
-                        string dimensionName = dataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
+                        string dimensionName = DataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
                             
                         if (protocolVersion >= MC_1_16_2_Version && protocolVersion <= MC_1_18_2_Version)
                         {
@@ -1031,30 +1031,30 @@ namespace CraftSharp.Protocol.Handlers
                             World.SetDimension(dimensionTypeNameRespawn!);
                         }
 
-                        dataTypes.ReadNextLong(packetData);               // Hashed world seed - 1.15 and above
-                        dataTypes.ReadNextByte(packetData);               // Gamemode
-                        dataTypes.ReadNextByte(packetData);               // Previous Game mode - 1.16 and above
+                        DataTypes.ReadNextLong(packetData);               // Hashed world seed - 1.15 and above
+                        DataTypes.ReadNextByte(packetData);               // Gamemode
+                        DataTypes.ReadNextByte(packetData);               // Previous Game mode - 1.16 and above
 
-                        dataTypes.ReadNextBool(packetData);               // Is Debug - 1.16 and above
-                        dataTypes.ReadNextBool(packetData);               // Is Flat - 1.16 and above
+                        DataTypes.ReadNextBool(packetData);               // Is Debug - 1.16 and above
+                        DataTypes.ReadNextBool(packetData);               // Is Flat - 1.16 and above
 
                         if (protocolVersion < MC_1_20_2_Version)
-                            dataTypes.ReadNextBool(packetData); // Copy metadata (Data Kept) - 1.16 - 1.20.2
+                            DataTypes.ReadNextBool(packetData); // Copy metadata (Data Kept) - 1.16 - 1.20.2
 
                         if (protocolVersion >= MC_1_19_Version)
                         {
-                            if (dataTypes.ReadNextBool(packetData))     // Has death location
+                            if (DataTypes.ReadNextBool(packetData))     // Has death location
                             {
-                                dataTypes.ReadNextString(packetData);   // Death dimension name: Identifier
-                                dataTypes.ReadNextLocation(packetData); // Death location
+                                DataTypes.ReadNextString(packetData);   // Death dimension name: Identifier
+                                DataTypes.ReadNextLocation(packetData); // Death location
                             }
                         }
 
                         if (protocolVersion >= MC_1_20_Version)
-                            dataTypes.ReadNextVarInt(packetData); // Portal Cooldown - 1.20 and above
+                            DataTypes.ReadNextVarInt(packetData); // Portal Cooldown - 1.20 and above
 
                         if (protocolVersion >= MC_1_20_2_Version)
-                            dataTypes.ReadNextBool(packetData);   // Copy metadata (Data Kept) - 1.20.2 and ab
+                            DataTypes.ReadNextBool(packetData);   // Copy metadata (Data Kept) - 1.20.2 and ab
 
                         handler.OnRespawn();
                         break;
@@ -1063,14 +1063,14 @@ namespace CraftSharp.Protocol.Handlers
                     {
                         // These always need to be read, since we need the field after them for teleport confirm
                         var location = new Location(
-                            dataTypes.ReadNextDouble(packetData), // X
-                            dataTypes.ReadNextDouble(packetData), // Y
-                            dataTypes.ReadNextDouble(packetData) // Z
+                            DataTypes.ReadNextDouble(packetData), // X
+                            DataTypes.ReadNextDouble(packetData), // Y
+                            DataTypes.ReadNextDouble(packetData) // Z
                         );
 
-                        float yaw = dataTypes.ReadNextFloat(packetData);
-                        float pitch = dataTypes.ReadNextFloat(packetData);
-                        byte locMask = dataTypes.ReadNextByte(packetData);
+                        float yaw = DataTypes.ReadNextFloat(packetData);
+                        float pitch = DataTypes.ReadNextFloat(packetData);
+                        byte locMask = DataTypes.ReadNextByte(packetData);
 
                         // entity handling require player pos for distance calculating
                         var currentLocation = handler.GetCurrentLocation();
@@ -1078,7 +1078,7 @@ namespace CraftSharp.Protocol.Handlers
                         location.Y = (locMask & 1 << 1) != 0 ? currentLocation.Y + location.Y : location.Y;
                         location.Z = (locMask & 1 << 2) != 0 ? currentLocation.Z + location.Z : location.Z;
                         
-                        int teleportId = dataTypes.ReadNextVarInt(packetData);
+                        int teleportId = DataTypes.ReadNextVarInt(packetData);
 
                         if (teleportId < 0)
                         {
@@ -1097,36 +1097,36 @@ namespace CraftSharp.Protocol.Handlers
                         SendPacket(PacketTypesOut.TeleportConfirm, DataTypes.GetVarInt(teleportId));
                             
                         if (protocolVersion >= MC_1_17_Version && protocolVersion < MC_1_19_4_Version)
-                            dataTypes.ReadNextBool(packetData); // Dismount Vehicle    - 1.17 to 1.19.3
+                            DataTypes.ReadNextBool(packetData); // Dismount Vehicle    - 1.17 to 1.19.3
                     }
                     break;
                 case PacketTypesIn.ChunkData:
                     {
                         var chunkRenderManager = handler.GetChunkRenderManager();
 
-                        int chunkX = dataTypes.ReadNextInt(packetData);
-                        int chunkZ = dataTypes.ReadNextInt(packetData);
+                        int chunkX = DataTypes.ReadNextInt(packetData);
+                        int chunkZ = DataTypes.ReadNextInt(packetData);
 
                         if (protocolVersion >= MC_1_17_Version)
                         {
                             ulong[]? verticalStripBitmask = null;
 
                             if (protocolVersion == MC_1_17_Version || protocolVersion == MC_1_17_1_Version)
-                                verticalStripBitmask = dataTypes.ReadNextULongArray(packetData); // Bit Mask Length  and  Primary Bit Mask
+                                verticalStripBitmask = DataTypes.ReadNextULongArray(packetData); // Bit Mask Length  and  Primary Bit Mask
 
-                            dataTypes.ReadNextNbt(packetData); // Heightmaps
+                            DataTypes.ReadNextNbt(packetData); // Heightmaps
 
                             pTerrain.ProcessChunkColumnData17(chunkX, chunkZ, verticalStripBitmask, packetData);
                         }
                         else
                         {
-                            bool chunksContinuous = dataTypes.ReadNextBool(packetData);
+                            bool chunksContinuous = DataTypes.ReadNextBool(packetData);
                             if (protocolVersion >= MC_1_16_Version && protocolVersion <= MC_1_16_1_Version)
-                                dataTypes.ReadNextBool(packetData); // Ignore old data - 1.16 to 1.16.1 only
+                                DataTypes.ReadNextBool(packetData); // Ignore old data - 1.16 to 1.16.1 only
                                 
-                            ushort chunkMask = (ushort)dataTypes.ReadNextVarInt(packetData);
+                            ushort chunkMask = (ushort)DataTypes.ReadNextVarInt(packetData);
 
-                            dataTypes.ReadNextNbt(packetData);  // Heightmaps - 1.14 and above
+                            DataTypes.ReadNextNbt(packetData);  // Heightmaps - 1.14 and above
 
                             pTerrain.ProcessChunkColumnData16(chunkX, chunkZ, chunkMask, 0, false, chunksContinuous, currentDimension, packetData);
                         }
@@ -1137,16 +1137,16 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.UpdateLight:
                     {
-                        int chunkX = dataTypes.ReadNextVarInt(packetData);
-                        int chunkZ = dataTypes.ReadNextVarInt(packetData);
+                        int chunkX = DataTypes.ReadNextVarInt(packetData);
+                        int chunkZ = DataTypes.ReadNextVarInt(packetData);
 
                         pTerrain.ProcessChunkLightData(chunkX, chunkZ, packetData);
                         break;
                     }
                 case PacketTypesIn.MapData:
                     {
-                        int mapId = dataTypes.ReadNextVarInt(packetData);
-                        byte scale = dataTypes.ReadNextByte(packetData);
+                        int mapId = DataTypes.ReadNextVarInt(packetData);
+                        byte scale = DataTypes.ReadNextByte(packetData);
 
                         bool trackingPosition = true; //  1.9+
                         bool locked = false;          // 1.14+
@@ -1154,15 +1154,15 @@ namespace CraftSharp.Protocol.Handlers
                         // 1.17+ (locked and trackingPosition switched places)
                         if (protocolVersion >= MC_1_17_Version)
                         {
-                            locked = dataTypes.ReadNextBool(packetData);
+                            locked = DataTypes.ReadNextBool(packetData);
 
-                            trackingPosition = dataTypes.ReadNextBool(packetData);
+                            trackingPosition = DataTypes.ReadNextBool(packetData);
                         }
                         else
                         {
-                            trackingPosition = dataTypes.ReadNextBool(packetData);
+                            trackingPosition = DataTypes.ReadNextBool(packetData);
 
-                            locked = dataTypes.ReadNextBool(packetData);
+                            locked = DataTypes.ReadNextBool(packetData);
                         }
 
                         int iconCount = 0;
@@ -1171,29 +1171,29 @@ namespace CraftSharp.Protocol.Handlers
                         // 1.9 or later needs tracking position to be true to get the icons
                         if (trackingPosition)
                         {
-                            iconCount = dataTypes.ReadNextVarInt(packetData);
+                            iconCount = DataTypes.ReadNextVarInt(packetData);
 
                             for (int i = 0; i < iconCount; i++)
                             {
                                 MapIcon mapIcon = new();
 
                                 // 1.13.2+
-                                mapIcon.Type = (MapIconType)dataTypes.ReadNextVarInt(packetData);
+                                mapIcon.Type = (MapIconType)DataTypes.ReadNextVarInt(packetData);
 
-                                mapIcon.X = dataTypes.ReadNextByte(packetData);
-                                mapIcon.Z = dataTypes.ReadNextByte(packetData);
+                                mapIcon.X = DataTypes.ReadNextByte(packetData);
+                                mapIcon.Z = DataTypes.ReadNextByte(packetData);
 
                                 // 1.13.2+
-                                mapIcon.Direction = dataTypes.ReadNextByte(packetData);
+                                mapIcon.Direction = DataTypes.ReadNextByte(packetData);
 
-                                if (dataTypes.ReadNextBool(packetData)) // Has Display Name?
-                                    mapIcon.DisplayName = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                                if (DataTypes.ReadNextBool(packetData)) // Has Display Name?
+                                    mapIcon.DisplayName = ChatParser.ParseText(DataTypes.ReadNextString(packetData));
 
                                 icons.Add(mapIcon);
                             }
                         }
 
-                        byte colsUpdated = dataTypes.ReadNextByte(packetData); // width
+                        byte colsUpdated = DataTypes.ReadNextByte(packetData); // width
                         byte rowsUpdated = 0; // height
                         byte mapColX = 0;
                         byte mapRowZ = 0;
@@ -1201,10 +1201,10 @@ namespace CraftSharp.Protocol.Handlers
 
                         if (colsUpdated > 0)
                         {
-                            rowsUpdated = dataTypes.ReadNextByte(packetData); // height
-                            mapColX = dataTypes.ReadNextByte(packetData);
-                            mapRowZ = dataTypes.ReadNextByte(packetData);
-                            colors = dataTypes.ReadNextByteArray(packetData);
+                            rowsUpdated = DataTypes.ReadNextByte(packetData); // height
+                            mapColX = DataTypes.ReadNextByte(packetData);
+                            mapRowZ = DataTypes.ReadNextByte(packetData);
+                            colors = DataTypes.ReadNextByteArray(packetData);
                         }
 
                         handler.OnMapData(mapId, scale, trackingPosition, locked, icons, colsUpdated, rowsUpdated, mapColX, mapRowZ, colors);
@@ -1212,8 +1212,8 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.TradeList: // MC 1.14 or greater
                     {
-                        int windowId = dataTypes.ReadNextVarInt(packetData);
-                        int size = dataTypes.ReadNextByte(packetData);
+                        int windowId = DataTypes.ReadNextVarInt(packetData);
+                        int size = DataTypes.ReadNextByte(packetData);
                         List<VillagerTrade> trades = new();
                         for (int tradeId = 0; tradeId < size; tradeId++)
                         {
@@ -1222,17 +1222,17 @@ namespace CraftSharp.Protocol.Handlers
                         }
                         VillagerInfo villagerInfo = new VillagerInfo()
                         {
-                            Level = dataTypes.ReadNextVarInt(packetData),
-                            Experience = dataTypes.ReadNextVarInt(packetData),
-                            IsRegularVillager = dataTypes.ReadNextBool(packetData),
-                            CanRestock = dataTypes.ReadNextBool(packetData)
+                            Level = DataTypes.ReadNextVarInt(packetData),
+                            Experience = DataTypes.ReadNextVarInt(packetData),
+                            IsRegularVillager = DataTypes.ReadNextBool(packetData),
+                            CanRestock = DataTypes.ReadNextBool(packetData)
                         };
                         handler.OnTradeList(windowId, trades, villagerInfo);
                     }
                     break;
                 case PacketTypesIn.Title:
                     {
-                        int action = dataTypes.ReadNextVarInt(packetData);
+                        int action = DataTypes.ReadNextVarInt(packetData);
                         string titleText = string.Empty;
                         string subtitleText = string.Empty;
                         string actionbarText = string.Empty;
@@ -1244,23 +1244,23 @@ namespace CraftSharp.Protocol.Handlers
                         if (action == 0)
                         {
                             json = titleText;
-                            titleText = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                            titleText = ChatParser.ParseText(DataTypes.ReadNextString(packetData));
                         }
                         else if (action == 1)
                         {
                             json = subtitleText;
-                            subtitleText = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                            subtitleText = ChatParser.ParseText(DataTypes.ReadNextString(packetData));
                         }
                         else if (action == 2)
                         {
                             json = actionbarText;
-                            actionbarText = ChatParser.ParseText(dataTypes.ReadNextString(packetData));
+                            actionbarText = ChatParser.ParseText(DataTypes.ReadNextString(packetData));
                         }
                         else if (action == 3)
                         {
-                            fadein = dataTypes.ReadNextInt(packetData);
-                            stay = dataTypes.ReadNextInt(packetData);
-                            fadeout = dataTypes.ReadNextInt(packetData);
+                            fadein = DataTypes.ReadNextInt(packetData);
+                            stay = DataTypes.ReadNextInt(packetData);
+                            fadeout = DataTypes.ReadNextInt(packetData);
                         }
                         handler.OnTitle(action, titleText, subtitleText, actionbarText, fadein, stay, fadeout, json);
 
@@ -1269,19 +1269,19 @@ namespace CraftSharp.Protocol.Handlers
                 case PacketTypesIn.MultiBlockChange:
                     {
                         // MC 1.16.2+
-                        long chunkSection = dataTypes.ReadNextLong(packetData);
+                        long chunkSection = DataTypes.ReadNextLong(packetData);
                         int sectionX = (int)(chunkSection >> 42);
                         int sectionY = (int)((chunkSection << 44) >> 44);
                         int sectionZ = (int)((chunkSection << 22) >> 42);
                             
                         if(protocolVersion < MC_1_20_Version)
-                            dataTypes.ReadNextBool(packetData); // Useless boolean (Related to light update)
+                            DataTypes.ReadNextBool(packetData); // Useless boolean (Related to light update)
 
-                        int blocksSize = dataTypes.ReadNextVarInt(packetData);
+                        int blocksSize = DataTypes.ReadNextVarInt(packetData);
 
                         for (int i = 0; i < blocksSize; i++)
                         {
-                            ulong block = (ulong)dataTypes.ReadNextVarLong(packetData);
+                            ulong block = (ulong)DataTypes.ReadNextVarLong(packetData);
                             int blockId = (int)(block >> 12);
                             int localX = (int)((block >> 8) & 0x0F);
                             int localZ = (int)((block >> 4) & 0x0F);
@@ -1299,17 +1299,17 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.BlockChange:
                     {
-                        var blockLoc = dataTypes.ReadNextBlockLoc(packetData);
-                        var bloc = new Block((ushort) dataTypes.ReadNextVarInt(packetData));
+                        var blockLoc = DataTypes.ReadNextBlockLoc(packetData);
+                        var bloc = new Block((ushort) DataTypes.ReadNextVarInt(packetData));
                             
                         handler.GetChunkRenderManager().SetBlock(blockLoc, bloc);
                         break;
                     }
                 case PacketTypesIn.BlockEntityData:
                     {
-                        var blockLoc = dataTypes.ReadNextBlockLoc(packetData);
-                        var ttt = dataTypes.ReadNextVarInt(packetData);
-                        var tag = dataTypes.ReadNextNbt(packetData);
+                        var blockLoc = DataTypes.ReadNextBlockLoc(packetData);
+                        var ttt = DataTypes.ReadNextVarInt(packetData);
+                        var tag = DataTypes.ReadNextNbt(packetData);
                             
                         if (protocolVersion < MC_1_18_1_Version)
                         {
@@ -1333,8 +1333,8 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.UnloadChunk:
                     {
-                        int chunkX = dataTypes.ReadNextInt(packetData);
-                        int chunkZ = dataTypes.ReadNextInt(packetData);
+                        int chunkX = DataTypes.ReadNextInt(packetData);
+                        int chunkZ = DataTypes.ReadNextInt(packetData);
 
                         // Warning: It is legal to include unloaded chunks in the UnloadChunk packet. Since chunks that have not been loaded are not recorded, this may result in loading chunks that should be unloaded and inaccurate statistics.
                         handler.GetChunkRenderManager().UnloadChunkColumn(chunkX, chunkZ);
@@ -1342,8 +1342,8 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.ChangeGameState:
                     {
-                        byte changeReason = dataTypes.ReadNextByte(packetData);
-                        float changeValue = dataTypes.ReadNextFloat(packetData);
+                        byte changeReason = DataTypes.ReadNextByte(packetData);
+                        float changeValue = DataTypes.ReadNextFloat(packetData);
                         switch (changeReason)
                         {
                             case 1: // End raining
@@ -1362,7 +1362,7 @@ namespace CraftSharp.Protocol.Handlers
                     }
                     break;
                 case PacketTypesIn.SetDisplayChatPreview:
-                    bool previewsChatSetting = dataTypes.ReadNextBool(packetData);
+                    bool previewsChatSetting = DataTypes.ReadNextBool(packetData);
                     // TODO handler.OnChatPreviewSettingUpdate(previewsChatSetting);
                     break;
                 case PacketTypesIn.ChatPreview:
@@ -1371,23 +1371,23 @@ namespace CraftSharp.Protocol.Handlers
                 case PacketTypesIn.PlayerInfo:
                     if (protocolVersion >= MC_1_19_3_Version)
                     {
-                        byte actionBitset = dataTypes.ReadNextByte(packetData);
-                        int numberOfActions = dataTypes.ReadNextVarInt(packetData);
+                        byte actionBitset = DataTypes.ReadNextByte(packetData);
+                        int numberOfActions = DataTypes.ReadNextVarInt(packetData);
                         for (int i = 0; i < numberOfActions; i++)
                         {
-                            Guid playerUuid = dataTypes.ReadNextUUID(packetData);
+                            Guid playerUuid = DataTypes.ReadNextUUID(packetData);
 
                             PlayerInfo player;
                             if ((actionBitset & (1 << 0)) > 0) // Actions bit 0: add player
                             {
-                                string name = dataTypes.ReadNextString(packetData);
-                                int numberOfProperties = dataTypes.ReadNextVarInt(packetData);
+                                string name = DataTypes.ReadNextString(packetData);
+                                int numberOfProperties = DataTypes.ReadNextVarInt(packetData);
                                 for (int j = 0; j < numberOfProperties; ++j)
                                 {
-                                    dataTypes.SkipNextString(packetData);
-                                    dataTypes.SkipNextString(packetData);
-                                    if (dataTypes.ReadNextBool(packetData))
-                                        dataTypes.SkipNextString(packetData);
+                                    DataTypes.SkipNextString(packetData);
+                                    DataTypes.SkipNextString(packetData);
+                                    if (DataTypes.ReadNextBool(packetData))
+                                        DataTypes.SkipNextString(packetData);
                                 }
 
                                 player = new(name, playerUuid);
@@ -1409,13 +1409,13 @@ namespace CraftSharp.Protocol.Handlers
 
                             if ((actionBitset & (1 << 1)) > 0) // Actions bit 1: initialize chat
                             {
-                                bool hasSignatureData = dataTypes.ReadNextBool(packetData);
+                                bool hasSignatureData = DataTypes.ReadNextBool(packetData);
                                 if (hasSignatureData)
                                 {
-                                    Guid chatUuid = dataTypes.ReadNextUUID(packetData);
-                                    long publicKeyExpiryTime = dataTypes.ReadNextLong(packetData);
-                                    byte[] encodedPublicKey = dataTypes.ReadNextByteArray(packetData);
-                                    byte[] publicKeySignature = dataTypes.ReadNextByteArray(packetData);
+                                    Guid chatUuid = DataTypes.ReadNextUUID(packetData);
+                                    long publicKeyExpiryTime = DataTypes.ReadNextLong(packetData);
+                                    byte[] encodedPublicKey = DataTypes.ReadNextByteArray(packetData);
+                                    byte[] publicKeySignature = DataTypes.ReadNextByteArray(packetData);
                                     player.SetPublicKey(chatUuid, publicKeyExpiryTime, encodedPublicKey,
                                         publicKeySignature);
 
@@ -1439,24 +1439,24 @@ namespace CraftSharp.Protocol.Handlers
 
                             if ((actionBitset & 1 << 2) > 0) // Actions bit 2: update gamemode
                             {
-                                handler.OnGamemodeUpdate(playerUuid, dataTypes.ReadNextVarInt(packetData));
+                                handler.OnGamemodeUpdate(playerUuid, DataTypes.ReadNextVarInt(packetData));
                             }
 
                             if ((actionBitset & (1 << 3)) > 0) // Actions bit 3: update listed
                             {
-                                player.Listed = dataTypes.ReadNextBool(packetData);
+                                player.Listed = DataTypes.ReadNextBool(packetData);
                             }
 
                             if ((actionBitset & (1 << 4)) > 0) // Actions bit 4: update latency
                             {
-                                int latency = dataTypes.ReadNextVarInt(packetData);
+                                int latency = DataTypes.ReadNextVarInt(packetData);
                                 handler.OnLatencyUpdate(playerUuid, latency); //Update latency;
                             }
 
                             if ((actionBitset & (1 << 5)) > 0) // Actions bit 5: update display name
                             {
-                                if (dataTypes.ReadNextBool(packetData))
-                                    player.DisplayName = dataTypes.ReadNextString(packetData);
+                                if (DataTypes.ReadNextBool(packetData))
+                                    player.DisplayName = DataTypes.ReadNextString(packetData);
                                 else
                                     player.DisplayName = null;
                             }
@@ -1464,19 +1464,19 @@ namespace CraftSharp.Protocol.Handlers
                     }
                     else // 1.8 - 1.19.2
                     {
-                        int action = dataTypes.ReadNextVarInt(packetData); // Action Name
-                        int numberOfPlayers = dataTypes.ReadNextVarInt(packetData); // Number Of Players 
+                        int action = DataTypes.ReadNextVarInt(packetData); // Action Name
+                        int numberOfPlayers = DataTypes.ReadNextVarInt(packetData); // Number Of Players 
 
                         for (int i = 0; i < numberOfPlayers; i++)
                         {
-                            Guid uuid = dataTypes.ReadNextUUID(packetData); // Player UUID
+                            Guid uuid = DataTypes.ReadNextUUID(packetData); // Player UUID
 
                             switch (action)
                             {
                                 case 0x00: //Player Join (Add player since 1.19)
-                                    string name = dataTypes.ReadNextString(packetData); // Player name
+                                    string name = DataTypes.ReadNextString(packetData); // Player name
                                     int propNum =
-                                        dataTypes.ReadNextVarInt(
+                                        DataTypes.ReadNextVarInt(
                                             packetData); // Number of properties in the following array
 
                                     // Property: Tuple<Name, Value, Signature(empty if there is no signature)
@@ -1488,48 +1488,48 @@ namespace CraftSharp.Protocol.Handlers
                                     for (int p = 0; p < propNum; p++)
                                     {
                                         string propertyName =
-                                            dataTypes.ReadNextString(packetData); // Name: String (32767)
+                                            DataTypes.ReadNextString(packetData); // Name: String (32767)
                                         string val =
-                                            dataTypes.ReadNextString(packetData); // Value: String (32767)
+                                            DataTypes.ReadNextString(packetData); // Value: String (32767)
                                         string? propertySignature = null;
-                                        if (dataTypes.ReadNextBool(packetData)) // Is Signed
+                                        if (DataTypes.ReadNextBool(packetData)) // Is Signed
                                             propertySignature =
-                                                dataTypes.ReadNextString(
+                                                DataTypes.ReadNextString(
                                                     packetData); // Signature: String (32767)
                                         if (useProperty)
                                             properties![p] = new(propertyName, val, propertySignature);
                                     }
 #pragma warning restore CS0162 // Unreachable code detected
 
-                                    int gameMode = dataTypes.ReadNextVarInt(packetData); // Gamemode
+                                    int gameMode = DataTypes.ReadNextVarInt(packetData); // Gamemode
                                     handler.OnGamemodeUpdate(uuid, gameMode);
 
-                                    int ping = dataTypes.ReadNextVarInt(packetData); // Ping
+                                    int ping = DataTypes.ReadNextVarInt(packetData); // Ping
 
                                     string? displayName = null;
-                                    if (dataTypes.ReadNextBool(packetData)) // Has display name
-                                        displayName = dataTypes.ReadNextString(packetData); // Display name
+                                    if (DataTypes.ReadNextBool(packetData)) // Has display name
+                                        displayName = DataTypes.ReadNextString(packetData); // Display name
 
                                     // 1.19 Additions
                                     long? keyExpiration = null;
                                     byte[]? publicKey = null, signature = null;
                                     if (protocolVersion >= MC_1_19_Version)
                                     {
-                                        if (dataTypes.ReadNextBool(
+                                        if (DataTypes.ReadNextBool(
                                                 packetData)) // Has Sig Data (if true, red the following fields)
                                         {
-                                            keyExpiration = dataTypes.ReadNextLong(packetData); // Timestamp
+                                            keyExpiration = DataTypes.ReadNextLong(packetData); // Timestamp
 
                                             int publicKeyLength =
-                                                dataTypes.ReadNextVarInt(packetData); // Public Key Length 
+                                                DataTypes.ReadNextVarInt(packetData); // Public Key Length 
                                             if (publicKeyLength > 0)
-                                                publicKey = dataTypes.ReadData(publicKeyLength,
+                                                publicKey = DataTypes.ReadData(publicKeyLength,
                                                     packetData); // Public key
 
                                             int signatureLength =
-                                                dataTypes.ReadNextVarInt(packetData); // Signature Length 
+                                                DataTypes.ReadNextVarInt(packetData); // Signature Length 
                                             if (signatureLength > 0)
-                                                signature = dataTypes.ReadData(signatureLength,
+                                                signature = DataTypes.ReadData(signatureLength,
                                                     packetData); // Public key
                                         }
                                     }
@@ -1538,20 +1538,20 @@ namespace CraftSharp.Protocol.Handlers
                                         displayName, keyExpiration, publicKey, signature));
                                     break;
                                 case 0x01: //Update gamemode
-                                    handler.OnGamemodeUpdate(uuid, dataTypes.ReadNextVarInt(packetData));
+                                    handler.OnGamemodeUpdate(uuid, DataTypes.ReadNextVarInt(packetData));
                                     break;
                                 case 0x02: //Update latency
-                                    int latency = dataTypes.ReadNextVarInt(packetData);
+                                    int latency = DataTypes.ReadNextVarInt(packetData);
                                     handler.OnLatencyUpdate(uuid, latency); //Update latency;
                                     break;
                                 case 0x03: //Update display name
-                                    if (dataTypes.ReadNextBool(packetData))
+                                    if (DataTypes.ReadNextBool(packetData))
                                     {
                                         PlayerInfo? player = handler.GetPlayerInfo(uuid);
                                         if (player != null)
-                                            player.DisplayName = dataTypes.ReadNextString(packetData);
+                                            player.DisplayName = DataTypes.ReadNextString(packetData);
                                         else
-                                            dataTypes.SkipNextString(packetData);
+                                            DataTypes.SkipNextString(packetData);
                                     }
 
                                     break;
@@ -1566,75 +1566,75 @@ namespace CraftSharp.Protocol.Handlers
                     }
                     break;
                 case PacketTypesIn.PlayerRemove:
-                    int numberOfLeavePlayers = dataTypes.ReadNextVarInt(packetData);
+                    int numberOfLeavePlayers = DataTypes.ReadNextVarInt(packetData);
                     for (int i = 0; i < numberOfLeavePlayers; ++i)
                     {
-                        Guid playerUuid = dataTypes.ReadNextUUID(packetData);
+                        Guid playerUuid = DataTypes.ReadNextUUID(packetData);
                         handler.OnPlayerLeave(playerUuid);
                     }
 
                     break;
                 case PacketTypesIn.TabComplete:
                     {   // MC 1.13 or greater
-                        autocomplete_transaction_id = dataTypes.ReadNextVarInt(packetData);
-                        int completionStart  = dataTypes.ReadNextVarInt(packetData); // Start of text to replace
-                        int completionLength = dataTypes.ReadNextVarInt(packetData); // Length of text to replace
+                        autocomplete_transaction_id = DataTypes.ReadNextVarInt(packetData);
+                        int completionStart  = DataTypes.ReadNextVarInt(packetData); // Start of text to replace
+                        int completionLength = DataTypes.ReadNextVarInt(packetData); // Length of text to replace
 
-                        int resultCount = dataTypes.ReadNextVarInt(packetData);
+                        int resultCount = DataTypes.ReadNextVarInt(packetData);
                         var completeResults = new List<string>();
 
                         for (int i = 0; i < resultCount; i++)
                         {
-                            completeResults.Add(dataTypes.ReadNextString(packetData));
+                            completeResults.Add(DataTypes.ReadNextString(packetData));
                             // MC 1.13+ Skip optional tooltip for each tab-complete result
-                            if (dataTypes.ReadNextBool(packetData))
-                                dataTypes.SkipNextString(packetData);
+                            if (DataTypes.ReadNextBool(packetData))
+                                DataTypes.SkipNextString(packetData);
                         }
                         handler.OnTabComplete(completionStart, completionLength, completeResults);
                         break;
                     }
                 case PacketTypesIn.PluginMessage:
                     {
-                        string channel = dataTypes.ReadNextString(packetData);
+                        string channel = DataTypes.ReadNextString(packetData);
                         // Length is unneeded as the whole remaining packetData is the entire payload of the packet.
                         //handler.OnPluginChannelMessage(channel, packetData.ToArray());
                         return pForge.HandlePluginMessage(channel, packetData, ref currentDimension);
                     }
                 case PacketTypesIn.Disconnect:
-                    handler.OnConnectionLost(DisconnectReason.InGameKick, ChatParser.ParseText(dataTypes.ReadNextString(packetData)));
+                    handler.OnConnectionLost(DisconnectReason.InGameKick, ChatParser.ParseText(DataTypes.ReadNextString(packetData)));
                     return false;
                 case PacketTypesIn.OpenWindow:
                     {   // MC 1.14 or greater
-                        int windowId = dataTypes.ReadNextVarInt(packetData);
-                        int windowType = dataTypes.ReadNextVarInt(packetData);
-                        string title = dataTypes.ReadNextString(packetData);
+                        int windowId = DataTypes.ReadNextVarInt(packetData);
+                        int windowType = DataTypes.ReadNextVarInt(packetData);
+                        string title = DataTypes.ReadNextString(packetData);
                         var inventory = new Container(windowId, windowType, ChatParser.ParseText(title));
                         handler.OnInventoryOpen(windowId, inventory);
                     }
                     break;
                 case PacketTypesIn.CloseWindow:
                     {
-                        byte windowId = dataTypes.ReadNextByte(packetData);
+                        byte windowId = DataTypes.ReadNextByte(packetData);
                         lock (window_actions) { window_actions[windowId] = 0; }
                         handler.OnInventoryClose(windowId);
                         break;
                     }
                 case PacketTypesIn.WindowItems:
                     {
-                        byte windowId = dataTypes.ReadNextByte(packetData);
+                        byte windowId = DataTypes.ReadNextByte(packetData);
                         int stateId = -1;
                         int elements = 0;
 
                         if (protocolVersion >= MC_1_17_1_Version)
                         {
                             // State ID and Elements as VarInt - 1.17.1 and above
-                            stateId = dataTypes.ReadNextVarInt(packetData);
-                            elements = dataTypes.ReadNextVarInt(packetData);
+                            stateId = DataTypes.ReadNextVarInt(packetData);
+                            elements = DataTypes.ReadNextVarInt(packetData);
                         }
                         else
                         {
                             // Elements as Short - 1.17 and below
-                            dataTypes.ReadNextShort(packetData);
+                            DataTypes.ReadNextShort(packetData);
                         }
 
                         var inventorySlots = new Dictionary<int, ItemStack>();
@@ -1653,20 +1653,20 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.SetSlot:
                     {
-                        byte windowId = dataTypes.ReadNextByte(packetData);
+                        byte windowId = DataTypes.ReadNextByte(packetData);
                         int stateId = -1;
                         if (protocolVersion >= MC_1_17_1_Version)
-                            stateId = dataTypes.ReadNextVarInt(packetData); // State ID - 1.17.1 and above
-                        short slotId2 = dataTypes.ReadNextShort(packetData);
+                            stateId = DataTypes.ReadNextVarInt(packetData); // State ID - 1.17.1 and above
+                        short slotId2 = DataTypes.ReadNextShort(packetData);
                         ItemStack? item = dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
                         handler.OnSetSlot(windowId, slotId2, item!, stateId);
                         break;
                     }
                 case PacketTypesIn.WindowConfirmation:
                     {
-                        byte windowId = dataTypes.ReadNextByte(packetData);
-                        short actionId = dataTypes.ReadNextShort(packetData);
-                        bool accepted = dataTypes.ReadNextBool(packetData);
+                        byte windowId = DataTypes.ReadNextByte(packetData);
+                        short actionId = DataTypes.ReadNextShort(packetData);
+                        bool accepted = DataTypes.ReadNextBool(packetData);
                         if (!accepted)
                         {
                             SendWindowConfirmation(windowId, actionId, accepted);
@@ -1675,23 +1675,23 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.ResourcePackSend:
                     {
-                        string url = dataTypes.ReadNextString(packetData);
-                        string hash = dataTypes.ReadNextString(packetData);
+                        string url = DataTypes.ReadNextString(packetData);
+                        string hash = DataTypes.ReadNextString(packetData);
                         bool forced = true; // Assume forced for MC 1.16 and below
                         if (protocolVersion >= MC_1_17_Version)
                         {
-                            forced = dataTypes.ReadNextBool(packetData);
-                            bool hasPromptMessage = dataTypes.ReadNextBool(packetData);   // Has Prompt Message (Boolean) - 1.17 and above
+                            forced = DataTypes.ReadNextBool(packetData);
+                            bool hasPromptMessage = DataTypes.ReadNextBool(packetData);   // Has Prompt Message (Boolean) - 1.17 and above
                             if (hasPromptMessage)
-                                dataTypes.SkipNextString(packetData); // Prompt Message (Optional Chat) - 1.17 and above
+                                DataTypes.SkipNextString(packetData); // Prompt Message (Optional Chat) - 1.17 and above
                         }
                         // Some server plugins may send invalid resource packs to probe the client and we need to ignore them (issue #1056)
                         if (!url.StartsWith("http") && hash.Length != 40) // Some server may have null hash value
                             break;
                         //Send back "accepted" and "successfully loaded" responses for plugins or server config making use of resource pack mandatory
                         byte[] responseHeader = new byte[0];
-                        SendPacket(PacketTypesOut.ResourcePackStatus, dataTypes.ConcatBytes(responseHeader, DataTypes.GetVarInt(3))); //Accepted pack
-                        SendPacket(PacketTypesOut.ResourcePackStatus, dataTypes.ConcatBytes(responseHeader, DataTypes.GetVarInt(0))); //Successfully loaded
+                        SendPacket(PacketTypesOut.ResourcePackStatus, DataTypes.ConcatBytes(responseHeader, DataTypes.GetVarInt(3))); //Accepted pack
+                        SendPacket(PacketTypesOut.ResourcePackStatus, DataTypes.ConcatBytes(responseHeader, DataTypes.GetVarInt(0))); //Successfully loaded
                         break;
                     }
                 case PacketTypesIn.SpawnEntity:
@@ -1711,13 +1711,13 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.EntityEquipment:
                     {
-                        int entityId = dataTypes.ReadNextVarInt(packetData);
+                        int entityId = DataTypes.ReadNextVarInt(packetData);
                         if (protocolVersion >= MC_1_16_Version)
                         {
                             bool hasNext;
                             do
                             {
-                                byte bitsData = dataTypes.ReadNextByte(packetData);
+                                byte bitsData = DataTypes.ReadNextByte(packetData);
                                 //  Top bit set if another entry follows, and otherwise unset if this is the last item in the array
                                 hasNext = (bitsData >> 7) == 1 ? true : false;
                                 int slot2 = bitsData >> 1;
@@ -1727,7 +1727,7 @@ namespace CraftSharp.Protocol.Handlers
                         }
                         else
                         {
-                            int slot2 = dataTypes.ReadNextVarInt(packetData);
+                            int slot2 = DataTypes.ReadNextVarInt(packetData);
                             ItemStack? item = dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
                             handler.OnEntityEquipment(entityId, slot2, item!);
                         }
@@ -1737,53 +1737,53 @@ namespace CraftSharp.Protocol.Handlers
                     {
                         Entity entity = dataTypes.ReadNextEntity(packetData, EntityTypePalette.INSTANCE, true);
                         // packet before 1.15 has metadata at the end
-                        // this is not handled in dataTypes.ReadNextEntity()
+                        // this is not handled in DataTypes.ReadNextEntity()
                         // we are simply ignoring leftover data in packet
                         handler.OnSpawnEntity(entity);
                         break;
                     }
                 case PacketTypesIn.SpawnPlayer:
                     {
-                        int entityId = dataTypes.ReadNextVarInt(packetData);
-                        Guid UUID = dataTypes.ReadNextUUID(packetData);
-                        double x = dataTypes.ReadNextDouble(packetData);
-                        double y = dataTypes.ReadNextDouble(packetData);
-                        double z = dataTypes.ReadNextDouble(packetData);
-                        byte yaw = dataTypes.ReadNextByte(packetData);
-                        byte pitch = dataTypes.ReadNextByte(packetData);
+                        int entityId = DataTypes.ReadNextVarInt(packetData);
+                        Guid UUID = DataTypes.ReadNextUUID(packetData);
+                        double x = DataTypes.ReadNextDouble(packetData);
+                        double y = DataTypes.ReadNextDouble(packetData);
+                        double z = DataTypes.ReadNextDouble(packetData);
+                        byte yaw = DataTypes.ReadNextByte(packetData);
+                        byte pitch = DataTypes.ReadNextByte(packetData);
                         Location location = new Location(x, y, z);
                         handler.OnSpawnPlayer(entityId, UUID, location, yaw, pitch);
                         break;
                     }
                 case PacketTypesIn.SpawnExperienceOrb:
                     {
-                        int entityId = dataTypes.ReadNextVarInt(packetData);
-                        double x = dataTypes.ReadNextDouble(packetData);
-                        double y = dataTypes.ReadNextDouble(packetData);
-                        double z = dataTypes.ReadNextDouble(packetData);
-                        dataTypes.ReadNextShort(packetData); // TODO Use this value
+                        int entityId = DataTypes.ReadNextVarInt(packetData);
+                        double x = DataTypes.ReadNextDouble(packetData);
+                        double y = DataTypes.ReadNextDouble(packetData);
+                        double z = DataTypes.ReadNextDouble(packetData);
+                        DataTypes.ReadNextShort(packetData); // TODO Use this value
                         handler.OnSpawnEntity(new(entityId, EntityTypePalette.INSTANCE.GetById(EntityType.EXPERIENCE_ORB_ID),
                                 new(x, y, z), 0, 0, 0, 0));
                         break;
                     }
                 case PacketTypesIn.EntityEffect:
                     {
-                        int entityId = dataTypes.ReadNextVarInt(packetData);
+                        int entityId = DataTypes.ReadNextVarInt(packetData);
                         Inventory.Effects effect = Effects.Speed;
-                        if (Enum.TryParse(dataTypes.ReadNextByte(packetData).ToString(), out effect))
+                        if (Enum.TryParse(DataTypes.ReadNextByte(packetData).ToString(), out effect))
                         {
-                            int amplifier = dataTypes.ReadNextByte(packetData);
-                            int duration = dataTypes.ReadNextVarInt(packetData);
-                            byte flags = dataTypes.ReadNextByte(packetData);
+                            int amplifier = DataTypes.ReadNextByte(packetData);
+                            int duration = DataTypes.ReadNextVarInt(packetData);
+                            byte flags = DataTypes.ReadNextByte(packetData);
                                 
                             bool hasFactorData = false;
                             Dictionary<string, object>? factorCodec = null;
 
                             if (protocolVersion >= MC_1_19_Version)
                             {
-                                hasFactorData = dataTypes.ReadNextBool(packetData);
+                                hasFactorData = DataTypes.ReadNextBool(packetData);
                                 // Temp disabled to avoid crashing TODO Check how it works
-                                //factorCodec = dataTypes.ReadNextNbt(packetData);
+                                //factorCodec = DataTypes.ReadNextNbt(packetData);
                             }
 
                             handler.OnEntityEffect(entityId, effect, amplifier, duration, flags, hasFactorData, factorCodec);
@@ -1794,22 +1794,22 @@ namespace CraftSharp.Protocol.Handlers
                     {
                         int entityCount = 1; // 1.17.0 has only one entity per packet
                         if (protocolVersion != MC_1_17_Version)
-                            entityCount = dataTypes.ReadNextVarInt(packetData); // All other versions have a "count" field
+                            entityCount = DataTypes.ReadNextVarInt(packetData); // All other versions have a "count" field
                         int[] entityList = new int[entityCount];
                         for (int i = 0; i < entityCount; i++)
                         {
-                            entityList[i] = dataTypes.ReadNextVarInt(packetData);
+                            entityList[i] = DataTypes.ReadNextVarInt(packetData);
                         }
                         handler.OnDestroyEntities(entityList);
                         break;
                     }
                 case PacketTypesIn.EntityPosition:
                     {
-                        int entityId = dataTypes.ReadNextVarInt(packetData);
-                        double deltaX = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                        double deltaY = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                        double deltaZ = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                        bool onGround = dataTypes.ReadNextBool(packetData);
+                        int entityId = DataTypes.ReadNextVarInt(packetData);
+                        double deltaX = Convert.ToDouble(DataTypes.ReadNextShort(packetData));
+                        double deltaY = Convert.ToDouble(DataTypes.ReadNextShort(packetData));
+                        double deltaZ = Convert.ToDouble(DataTypes.ReadNextShort(packetData));
+                        bool onGround = DataTypes.ReadNextBool(packetData);
                         deltaX = deltaX / (128 * 32);
                         deltaY = deltaY / (128 * 32);
                         deltaZ = deltaZ / (128 * 32);
@@ -1818,13 +1818,13 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.EntityPositionAndRotation:
                     {
-                        int entityId = dataTypes.ReadNextVarInt(packetData);
-                        double deltaX = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                        double deltaY = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                        double deltaZ = Convert.ToDouble(dataTypes.ReadNextShort(packetData));
-                        byte yaw = dataTypes.ReadNextByte(packetData);
-                        byte pitch = dataTypes.ReadNextByte(packetData);
-                        bool onGround = dataTypes.ReadNextBool(packetData);
+                        int entityId = DataTypes.ReadNextVarInt(packetData);
+                        double deltaX = Convert.ToDouble(DataTypes.ReadNextShort(packetData));
+                        double deltaY = Convert.ToDouble(DataTypes.ReadNextShort(packetData));
+                        double deltaZ = Convert.ToDouble(DataTypes.ReadNextShort(packetData));
+                        byte yaw = DataTypes.ReadNextByte(packetData);
+                        byte pitch = DataTypes.ReadNextByte(packetData);
+                        bool onGround = DataTypes.ReadNextBool(packetData);
                         deltaX = deltaX / (128 * 32);
                         deltaY = deltaY / (128 * 32);
                         deltaZ = deltaZ / (128 * 32);
@@ -1834,39 +1834,39 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.EntityRotation:
                     {
-                        int entityId = dataTypes.ReadNextVarInt(packetData);
-                        byte yaw = dataTypes.ReadNextByte(packetData);
-                        byte pitch = dataTypes.ReadNextByte(packetData);
-                        bool onGround = dataTypes.ReadNextBool(packetData);
+                        int entityId = DataTypes.ReadNextVarInt(packetData);
+                        byte yaw = DataTypes.ReadNextByte(packetData);
+                        byte pitch = DataTypes.ReadNextByte(packetData);
+                        bool onGround = DataTypes.ReadNextBool(packetData);
                         handler.OnEntityRotation(entityId, yaw, pitch, onGround);
                         break;
                     }
                 case PacketTypesIn.EntityHeadLook:
                     {
-                        int entityId = dataTypes.ReadNextVarInt(packetData);
-                        byte headYaw = dataTypes.ReadNextByte(packetData);
+                        int entityId = DataTypes.ReadNextVarInt(packetData);
+                        byte headYaw = DataTypes.ReadNextByte(packetData);
                         handler.OnEntityHeadLook(entityId, headYaw);
                         break;
                     }
                 case PacketTypesIn.EntityProperties:
                     {
-                        int entityId = dataTypes.ReadNextVarInt(packetData);
-                        int NumberOfProperties = protocolVersion >= MC_1_17_Version ? dataTypes.ReadNextVarInt(packetData) : dataTypes.ReadNextInt(packetData);
+                        int entityId = DataTypes.ReadNextVarInt(packetData);
+                        int NumberOfProperties = protocolVersion >= MC_1_17_Version ? DataTypes.ReadNextVarInt(packetData) : DataTypes.ReadNextInt(packetData);
                         Dictionary<string, double> keys = new Dictionary<string, double>();
                         for (int i = 0; i < NumberOfProperties; i++)
                         {
-                            string _key = dataTypes.ReadNextString(packetData);
-                            double _value = dataTypes.ReadNextDouble(packetData);
+                            string _key = DataTypes.ReadNextString(packetData);
+                            double _value = DataTypes.ReadNextDouble(packetData);
 
                             List<double> op0 = new();
                             List<double> op1 = new();
                             List<double> op2 = new();
-                            int NumberOfModifiers = dataTypes.ReadNextVarInt(packetData);
+                            int NumberOfModifiers = DataTypes.ReadNextVarInt(packetData);
                             for (int j = 0; j < NumberOfModifiers; j++)
                             {
-                                dataTypes.ReadNextUUID(packetData);
-                                double amount = dataTypes.ReadNextDouble(packetData);
-                                byte operation = dataTypes.ReadNextByte(packetData);
+                                DataTypes.ReadNextUUID(packetData);
+                                double amount = DataTypes.ReadNextDouble(packetData);
+                                byte operation = DataTypes.ReadNextByte(packetData);
                                 switch (operation)
                                 {
                                     case 0: op0.Add(amount); break;
@@ -1884,7 +1884,7 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.EntityMetadata:
                     {
-                        int entityId = dataTypes.ReadNextVarInt(packetData);
+                        int entityId = DataTypes.ReadNextVarInt(packetData);
                         Dictionary<int, object?> metadata = dataTypes.ReadNextMetadata(packetData,
                                 ItemPalette.INSTANCE, entityMetadataPalette);
 
@@ -1904,44 +1904,44 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.EntityStatus:
                     {
-                        int entityId = dataTypes.ReadNextInt(packetData);
-                        byte status = dataTypes.ReadNextByte(packetData);
+                        int entityId = DataTypes.ReadNextInt(packetData);
+                        byte status = DataTypes.ReadNextByte(packetData);
                         handler.OnEntityStatus(entityId, status);
                         break;
                     }
                 case PacketTypesIn.TimeUpdate:
                     {
-                        long WorldAge = dataTypes.ReadNextLong(packetData);
-                        long TimeOfday = dataTypes.ReadNextLong(packetData);
+                        long WorldAge = DataTypes.ReadNextLong(packetData);
+                        long TimeOfday = DataTypes.ReadNextLong(packetData);
                         handler.OnTimeUpdate(WorldAge, TimeOfday);
                         break;
                     }
                 case PacketTypesIn.EntityTeleport:
                     {
-                        int entityId = dataTypes.ReadNextVarInt(packetData);
-                        double tX = dataTypes.ReadNextDouble(packetData);
-                        double tY = dataTypes.ReadNextDouble(packetData);
-                        double tZ = dataTypes.ReadNextDouble(packetData);
-                        byte yaw = dataTypes.ReadNextByte(packetData);
-                        byte pitch = dataTypes.ReadNextByte(packetData);
-                        bool onGround = dataTypes.ReadNextBool(packetData);
+                        int entityId = DataTypes.ReadNextVarInt(packetData);
+                        double tX = DataTypes.ReadNextDouble(packetData);
+                        double tY = DataTypes.ReadNextDouble(packetData);
+                        double tZ = DataTypes.ReadNextDouble(packetData);
+                        byte yaw = DataTypes.ReadNextByte(packetData);
+                        byte pitch = DataTypes.ReadNextByte(packetData);
+                        bool onGround = DataTypes.ReadNextBool(packetData);
                         handler.OnEntityTeleport(entityId, tX, tY, tZ, onGround);
                         break;
                     }
                 case PacketTypesIn.UpdateHealth:
                     {
-                        float health = dataTypes.ReadNextFloat(packetData);
+                        float health = DataTypes.ReadNextFloat(packetData);
                         int food;
-                        food = dataTypes.ReadNextVarInt(packetData);
-                        dataTypes.ReadNextFloat(packetData); // Food Saturation
+                        food = DataTypes.ReadNextVarInt(packetData);
+                        DataTypes.ReadNextFloat(packetData); // Food Saturation
                         handler.OnUpdateHealth(health, food);
                         break;
                     }
                 case PacketTypesIn.SetExperience:
                     {
-                        float experiencebar = dataTypes.ReadNextFloat(packetData);
-                        int level = dataTypes.ReadNextVarInt(packetData);
-                        int totalexperience = dataTypes.ReadNextVarInt(packetData);
+                        float experiencebar = DataTypes.ReadNextFloat(packetData);
+                        int level = DataTypes.ReadNextVarInt(packetData);
+                        int totalexperience = DataTypes.ReadNextVarInt(packetData);
                         handler.OnSetExperience(experiencebar, level, totalexperience);
                         break;
                     }
@@ -1949,39 +1949,39 @@ namespace CraftSharp.Protocol.Handlers
                     {
                         Location explosionLocation;
                         if (protocolVersion >= MC_1_19_3_Version)
-                            explosionLocation = new(dataTypes.ReadNextDouble(packetData),
-                                dataTypes.ReadNextDouble(packetData), dataTypes.ReadNextDouble(packetData));
+                            explosionLocation = new(DataTypes.ReadNextDouble(packetData),
+                                DataTypes.ReadNextDouble(packetData), DataTypes.ReadNextDouble(packetData));
                         else
-                            explosionLocation = new(dataTypes.ReadNextFloat(packetData),
-                                dataTypes.ReadNextFloat(packetData), dataTypes.ReadNextFloat(packetData));
+                            explosionLocation = new(DataTypes.ReadNextFloat(packetData),
+                                DataTypes.ReadNextFloat(packetData), DataTypes.ReadNextFloat(packetData));
 
-                        var explosionStrength = dataTypes.ReadNextFloat(packetData);
+                        var explosionStrength = DataTypes.ReadNextFloat(packetData);
                         var explosionBlockCount = protocolVersion >= MC_1_17_Version
-                            ? dataTypes.ReadNextVarInt(packetData)
-                            : dataTypes.ReadNextInt(packetData); // Record count
+                            ? DataTypes.ReadNextVarInt(packetData)
+                            : DataTypes.ReadNextInt(packetData); // Record count
 
                         // Records
                         for (var i = 0; i < explosionBlockCount; i++)
-                            dataTypes.ReadData(3, packetData);
+                            DataTypes.ReadData(3, packetData);
 
                         // Maybe use in the future when the physics are implemented
-                        dataTypes.ReadNextFloat(packetData); // Player Motion X
-                        dataTypes.ReadNextFloat(packetData); // Player Motion Y
-                        dataTypes.ReadNextFloat(packetData); // Player Motion Z
+                        DataTypes.ReadNextFloat(packetData); // Player Motion X
+                        DataTypes.ReadNextFloat(packetData); // Player Motion Y
+                        DataTypes.ReadNextFloat(packetData); // Player Motion Z
 
                         if (protocolVersion >= MC_1_20_4_Version)
                         {
                             var itemPalette = ItemPalette.INSTANCE; 
 
-                            dataTypes.ReadNextVarInt(packetData); // Block Interaction
+                            DataTypes.ReadNextVarInt(packetData); // Block Interaction
                             dataTypes.ReadParticleData(packetData, itemPalette); // Small Explosion Particles
                             dataTypes.ReadParticleData(packetData, itemPalette); // Large Explosion Particles
 
                             // Explosion Sound
-                            dataTypes.ReadNextString(packetData); // Sound Name
-                            var hasFixedRange = dataTypes.ReadNextBool(packetData);
+                            DataTypes.ReadNextString(packetData); // Sound Name
+                            var hasFixedRange = DataTypes.ReadNextBool(packetData);
                             if (hasFixedRange)
-                                dataTypes.ReadNextFloat(packetData); // Range
+                                DataTypes.ReadNextFloat(packetData); // Range
                         }
 
                         handler.OnExplosion(explosionLocation, explosionStrength, explosionBlockCount);
@@ -1989,14 +1989,14 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.HeldItemChange:
                     {
-                        byte slot = dataTypes.ReadNextByte(packetData);
+                        byte slot = DataTypes.ReadNextByte(packetData);
                         handler.OnHeldItemChange(slot);
                         break;
                     }
                 case PacketTypesIn.ScoreboardObjective:
                     {
-                        string objectiveName = dataTypes.ReadNextString(packetData);
-                        byte mode = dataTypes.ReadNextByte(packetData);
+                        string objectiveName = DataTypes.ReadNextString(packetData);
+                        byte mode = DataTypes.ReadNextByte(packetData);
 
                         var objectiveValue = string.Empty;
                         var objectiveType = -1;
@@ -2005,12 +2005,12 @@ namespace CraftSharp.Protocol.Handlers
                         if (mode == 0 || mode == 2)
                         {
                             objectiveValue = dataTypes.ReadNextChat(packetData);
-                            objectiveType = dataTypes.ReadNextVarInt(packetData);
+                            objectiveType = DataTypes.ReadNextVarInt(packetData);
 
                             if (protocolVersion >= MC_1_20_4_Version)
                             {
-                                if (dataTypes.ReadNextBool(packetData)) // Has Number Format
-                                    numberFormat = dataTypes.ReadNextVarInt(packetData); // Number Format
+                                if (DataTypes.ReadNextBool(packetData)) // Has Number Format
+                                    numberFormat = DataTypes.ReadNextVarInt(packetData); // Number Format
                             }
                         }
 
@@ -2019,7 +2019,7 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.UpdateScore:
                     {
-                        var entityName = dataTypes.ReadNextString(packetData);
+                        var entityName = DataTypes.ReadNextString(packetData);
 
                         var action3 = 0;
                         var objectiveName3 = string.Empty;
@@ -2029,27 +2029,27 @@ namespace CraftSharp.Protocol.Handlers
 
                         if (protocolVersion >= MC_1_20_4_Version)
                         {
-                            objectiveName3 = dataTypes.ReadNextString(packetData); // Objective Name
-                            objectiveValue2 = dataTypes.ReadNextVarInt(packetData); // Value
+                            objectiveName3 = DataTypes.ReadNextString(packetData); // Objective Name
+                            objectiveValue2 = DataTypes.ReadNextVarInt(packetData); // Value
 
-                            if (dataTypes.ReadNextBool(packetData)) // Has Display Name
+                            if (DataTypes.ReadNextBool(packetData)) // Has Display Name
                                 objectiveDisplayName3 =
-                                    ChatParser.ParseText(dataTypes.ReadNextString(packetData)); // Has Display Name
+                                    ChatParser.ParseText(DataTypes.ReadNextString(packetData)); // Has Display Name
 
-                            if (dataTypes.ReadNextBool(packetData)) // Has Number Format
-                                numberFormat2 = dataTypes.ReadNextVarInt(packetData); // Number Format
+                            if (DataTypes.ReadNextBool(packetData)) // Has Number Format
+                                numberFormat2 = DataTypes.ReadNextVarInt(packetData); // Number Format
                         }
                         else
                         {
                             action3 = protocolVersion >= MC_1_18_2_Version
-                                ? dataTypes.ReadNextVarInt(packetData)
-                                : dataTypes.ReadNextByte(packetData);
+                                ? DataTypes.ReadNextVarInt(packetData)
+                                : DataTypes.ReadNextByte(packetData);
 
                             if (action3 != 1)
-                                objectiveName3 = dataTypes.ReadNextString(packetData);
+                                objectiveName3 = DataTypes.ReadNextString(packetData);
 
                             if (action3 != 1)
-                                objectiveValue2 = dataTypes.ReadNextVarInt(packetData);
+                                objectiveValue2 = DataTypes.ReadNextVarInt(packetData);
                         }
 
                         handler.OnUpdateScore(entityName, action3, objectiveName3, objectiveDisplayName3, objectiveValue2,
@@ -2059,22 +2059,22 @@ namespace CraftSharp.Protocol.Handlers
                     }
                 case PacketTypesIn.BlockBreakAnimation:
                     {
-                        int playerId = dataTypes.ReadNextVarInt(packetData);
-                        Location blockLocation = dataTypes.ReadNextLocation(packetData);
-                        byte stage = dataTypes.ReadNextByte(packetData);
+                        int playerId = DataTypes.ReadNextVarInt(packetData);
+                        Location blockLocation = DataTypes.ReadNextLocation(packetData);
+                        byte stage = DataTypes.ReadNextByte(packetData);
                         handler.OnBlockBreakAnimation(playerId, blockLocation, stage);
                         break;
                     }
                 case PacketTypesIn.EntityAnimation:
                     {
-                        int playerId = dataTypes.ReadNextVarInt(packetData);
-                        byte animation = dataTypes.ReadNextByte(packetData);
+                        int playerId = DataTypes.ReadNextVarInt(packetData);
+                        byte animation = DataTypes.ReadNextByte(packetData);
                         handler.OnEntityAnimation(playerId, animation);
                         break;
                     }
                 case PacketTypesIn.SetTickingState:
-                    dataTypes.ReadNextFloat(packetData);
-                    dataTypes.ReadNextBool(packetData);
+                    DataTypes.ReadNextFloat(packetData);
+                    DataTypes.ReadNextBool(packetData);
                     break;
                 default:
                     return false; //Ignored packet
@@ -2161,20 +2161,20 @@ namespace CraftSharp.Protocol.Handlers
                 handler.OnNetworkPacket(packetId, packetData.ToArray(), currentState == CurrentState.Login, false);
             }
 
-            //log.Info($"[C -> S] Sending packet {packetId:X} > {dataTypes.ByteArrayToString(packetData.ToArray())}");
+            //log.Info($"[C -> S] Sending packet {packetId:X} > {DataTypes.ByteArrayToString(packetData.ToArray())}");
 
             //The inner packet
-            var thePacket = dataTypes.ConcatBytes(DataTypes.GetVarInt(packetId), packetData.ToArray());
+            var thePacket = DataTypes.ConcatBytes(DataTypes.GetVarInt(packetId), packetData.ToArray());
 
             if (compression_treshold >= 0) //Compression enabled?
             {
                 thePacket = thePacket.Length >= compression_treshold
-                    ? dataTypes.ConcatBytes(DataTypes.GetVarInt(thePacket.Length), ZlibUtils.Compress(thePacket))
-                    : dataTypes.ConcatBytes(DataTypes.GetVarInt(0), thePacket);
+                    ? DataTypes.ConcatBytes(DataTypes.GetVarInt(thePacket.Length), ZlibUtils.Compress(thePacket))
+                    : DataTypes.ConcatBytes(DataTypes.GetVarInt(0), thePacket);
             }
 
-            //log.Debug("[C -> S] Sending packet " + packetId + " > " + dataTypes.ByteArrayToString(dataTypes.ConcatBytes(dataTypes.GetVarInt(thePacket.Length), thePacket)));
-            socketWrapper.SendDataRAW(dataTypes.ConcatBytes(DataTypes.GetVarInt(thePacket.Length), thePacket));
+            //log.Debug("[C -> S] Sending packet " + packetId + " > " + DataTypes.ByteArrayToString(DataTypes.ConcatBytes(DataTypes.GetVarInt(thePacket.Length), thePacket)));
+            socketWrapper.SendDataRAW(DataTypes.ConcatBytes(DataTypes.GetVarInt(thePacket.Length), thePacket));
         }
 
         /// <summary>
@@ -2184,15 +2184,15 @@ namespace CraftSharp.Protocol.Handlers
         public bool Login(PlayerKeyPair? playerKeyPair, SessionToken session, string accountLower)
         {
             // 1. Send the handshake packet
-            SendPacket(0x00, dataTypes.ConcatBytes(
+            SendPacket(0x00, DataTypes.ConcatBytes(
                     // Protocol Version
                     DataTypes.GetVarInt(protocolVersion),
 
                     // Server Address
-                    dataTypes.GetString(pForge.GetServerAddress(handler.GetServerHost())),
+                    DataTypes.GetString(pForge.GetServerAddress(handler.GetServerHost())),
 
                     // Server Port
-                    dataTypes.GetUShort((ushort)handler.GetServerPort()),
+                    DataTypes.GetUShort((ushort)handler.GetServerPort()),
 
                     // Next State
                     DataTypes.GetVarInt(2)) // 2 is for the Login state
@@ -2200,27 +2200,27 @@ namespace CraftSharp.Protocol.Handlers
 
             // 2. Send the Login Start packet
             List<byte> fullLoginPacket = new();
-            fullLoginPacket.AddRange(dataTypes.GetString(handler.GetUsername())); // Username
+            fullLoginPacket.AddRange(DataTypes.GetString(handler.GetUsername())); // Username
 
             // 1.19 - 1.19.2
             if (protocolVersion is >= MC_1_19_Version and < MC_1_19_3_Version)
             {
                 if (playerKeyPair == null)
-                    fullLoginPacket.AddRange(dataTypes.GetBool(false)); // Has Sig Data
+                    fullLoginPacket.AddRange(DataTypes.GetBool(false)); // Has Sig Data
                 else
                 {
-                    fullLoginPacket.AddRange(dataTypes.GetBool(true)); // Has Sig Data
+                    fullLoginPacket.AddRange(DataTypes.GetBool(true)); // Has Sig Data
                     fullLoginPacket.AddRange(
                         DataTypes.GetLong(playerKeyPair.GetExpirationMilliseconds())); // Expiration time
                     fullLoginPacket.AddRange(
-                        dataTypes.GetArray(playerKeyPair.PublicKey.Key)); // Public key received from Microsoft API
+                        DataTypes.GetArray(playerKeyPair.PublicKey.Key)); // Public key received from Microsoft API
                     if (protocolVersion >= MC_1_19_2_Version)
                         fullLoginPacket.AddRange(
-                            dataTypes.GetArray(playerKeyPair.PublicKey
+                            DataTypes.GetArray(playerKeyPair.PublicKey
                                 .SignatureV2!)); // Public key signature received from Microsoft API
                     else
                         fullLoginPacket.AddRange(
-                            dataTypes.GetArray(playerKeyPair.PublicKey
+                            DataTypes.GetArray(playerKeyPair.PublicKey
                                 .Signature!)); // Public key signature received from Microsoft API
                 }
             }
@@ -2231,10 +2231,10 @@ namespace CraftSharp.Protocol.Handlers
                 case >= MC_1_19_2_Version and < MC_1_20_2_Version:
                     {
                         if (uuid == Guid.Empty)
-                            fullLoginPacket.AddRange(dataTypes.GetBool(false)); // Has UUID
+                            fullLoginPacket.AddRange(DataTypes.GetBool(false)); // Has UUID
                         else
                         {
-                            fullLoginPacket.AddRange(dataTypes.GetBool(true)); // Has UUID
+                            fullLoginPacket.AddRange(DataTypes.GetBool(true)); // Has UUID
                             fullLoginPacket.AddRange(DataTypes.GetUUID(uuid)); // UUID
                         }
 
@@ -2262,16 +2262,16 @@ namespace CraftSharp.Protocol.Handlers
                     // Login rejected
                     case 0x00:
                         handler.OnConnectionLost(DisconnectReason.LoginRejected,
-                            ChatParser.ParseText(dataTypes.ReadNextString(packetData)));
+                            ChatParser.ParseText(DataTypes.ReadNextString(packetData)));
                         return false;
 
                     // Encryption request
                     case 0x01:
                         {
                             isOnlineMode = true;
-                            var serverId = dataTypes.ReadNextString(packetData);
-                            var serverPublicKey = dataTypes.ReadNextByteArray(packetData);
-                            var token = dataTypes.ReadNextByteArray(packetData);
+                            var serverId = DataTypes.ReadNextString(packetData);
+                            var serverPublicKey = DataTypes.ReadNextByteArray(packetData);
+                            var token = DataTypes.ReadNextByteArray(packetData);
                             return StartEncryption(accountLower, handler.GetUserUuidStr(), handler.GetSessionID(), token, serverId,
                                 serverPublicKey, playerKeyPair, session);
                         }
@@ -2348,29 +2348,29 @@ namespace CraftSharp.Protocol.Handlers
 
             // Encryption Response packet
             List<byte> encryptionResponse = new();
-            encryptionResponse.AddRange(dataTypes.GetArray(RSAService.Encrypt(secretKey, false)));     // Shared Secret
+            encryptionResponse.AddRange(DataTypes.GetArray(RSAService.Encrypt(secretKey, false)));     // Shared Secret
             
             // 1.19 - 1.19.2
             if (protocolVersion >= MC_1_19_Version && protocolVersion < MC_1_19_3_Version)
             {
                 if (playerKeyPair is null)
                 {
-                    encryptionResponse.AddRange(dataTypes.GetBool(true));                              // Has Verify Token
-                    encryptionResponse.AddRange(dataTypes.GetArray(RSAService.Encrypt(token, false))); // Verify Token
+                    encryptionResponse.AddRange(DataTypes.GetBool(true));                              // Has Verify Token
+                    encryptionResponse.AddRange(DataTypes.GetArray(RSAService.Encrypt(token, false))); // Verify Token
                 }
                 else
                 {
                     byte[] salt = GenerateSalt();
-                    byte[] messageSignature = playerKeyPair.PrivateKey.SignData(dataTypes.ConcatBytes(token, salt));
+                    byte[] messageSignature = playerKeyPair.PrivateKey.SignData(DataTypes.ConcatBytes(token, salt));
 
-                    encryptionResponse.AddRange(dataTypes.GetBool(false));                            // Has Verify Token
+                    encryptionResponse.AddRange(DataTypes.GetBool(false));                            // Has Verify Token
                     encryptionResponse.AddRange(salt);                                                // Salt
-                    encryptionResponse.AddRange(dataTypes.GetArray(messageSignature));                // Message Signature
+                    encryptionResponse.AddRange(DataTypes.GetArray(messageSignature));                // Message Signature
                 }
             }
             else
             {
-                encryptionResponse.AddRange(dataTypes.GetArray(RSAService.Encrypt(token, false)));    // Verify Token
+                encryptionResponse.AddRange(DataTypes.GetArray(RSAService.Encrypt(token, false)));    // Verify Token
             }
 
             SendPacket(0x01, encryptionResponse);
@@ -2394,26 +2394,26 @@ namespace CraftSharp.Protocol.Handlers
                     //Login rejected
                     case 0x00:
                         handler.OnConnectionLost(DisconnectReason.LoginRejected,
-                            ChatParser.ParseText(dataTypes.ReadNextString(packetData)));
+                            ChatParser.ParseText(DataTypes.ReadNextString(packetData)));
                         return false;
                     //Login successful
                     case 0x02:
                         {
                             var uuidReceived = protocolVersion >= MC_1_16_Version
-                                ? dataTypes.ReadNextUUID(packetData)
-                                : Guid.Parse(dataTypes.ReadNextString(packetData));
-                            var userName = dataTypes.ReadNextString(packetData);
+                                ? DataTypes.ReadNextUUID(packetData)
+                                : Guid.Parse(DataTypes.ReadNextString(packetData));
+                            var userName = DataTypes.ReadNextString(packetData);
                             Tuple<string, string, string>[]? playerProperty = null;
                             if (protocolVersion >= MC_1_19_Version)
                             {
-                                var count = dataTypes.ReadNextVarInt(packetData); // Number Of Properties
+                                var count = DataTypes.ReadNextVarInt(packetData); // Number Of Properties
                                 playerProperty = new Tuple<string, string, string>[count];
                                 for (var i = 0; i < count; ++i)
                                 {
-                                    var name = dataTypes.ReadNextString(packetData);
-                                    var value = dataTypes.ReadNextString(packetData);
-                                    var isSigned = dataTypes.ReadNextBool(packetData);
-                                    var signature = isSigned ? dataTypes.ReadNextString(packetData) : string.Empty;
+                                    var name = DataTypes.ReadNextString(packetData);
+                                    var value = DataTypes.ReadNextString(packetData);
+                                    var isSigned = DataTypes.ReadNextBool(packetData);
+                                    var signature = isSigned ? DataTypes.ReadNextString(packetData) : string.Empty;
                                     playerProperty[i] = new Tuple<string, string, string>(name, value, signature);
                                 }
                             }
@@ -2467,23 +2467,23 @@ namespace CraftSharp.Protocol.Handlers
             byte[] protocolVersion = DataTypes.GetVarInt(-1);
             byte[] serverPort = BitConverter.GetBytes((ushort)port); Array.Reverse(serverPort);
             byte[] nextState  = DataTypes.GetVarInt(1);
-            byte[] packet = dataTypes.ConcatBytes(packetId, protocolVersion, dataTypes.GetString(host), serverPort, nextState);
-            byte[] tosend = dataTypes.ConcatBytes(DataTypes.GetVarInt(packet.Length), packet);
+            byte[] packet = DataTypes.ConcatBytes(packetId, protocolVersion, DataTypes.GetString(host), serverPort, nextState);
+            byte[] tosend = DataTypes.ConcatBytes(DataTypes.GetVarInt(packet.Length), packet);
 
             socketWrapper.SendDataRAW(tosend);
 
             byte[] statusRequest = DataTypes.GetVarInt(0);
-            byte[] requestPacket = dataTypes.ConcatBytes(DataTypes.GetVarInt(statusRequest.Length), statusRequest);
+            byte[] requestPacket = DataTypes.ConcatBytes(DataTypes.GetVarInt(statusRequest.Length), statusRequest);
 
             socketWrapper.SendDataRAW(requestPacket);
 
-            int packetLength = dataTypes.ReadNextVarIntRAW(socketWrapper);
+            int packetLength = DataTypes.ReadNextVarIntRAW(socketWrapper);
             if (packetLength > 0) // Read Response length
             {
                 Queue<byte> packetData = new Queue<byte>(socketWrapper.ReadDataRAW(packetLength));
-                if (dataTypes.ReadNextVarInt(packetData) == 0x00) //Read Packet Id
+                if (DataTypes.ReadNextVarInt(packetData) == 0x00) //Read Packet Id
                 {
-                    string result = dataTypes.ReadNextString(packetData); //Get the Json data
+                    string result = DataTypes.ReadNextString(packetData); //Get the Json data
 
                     if (CornGlobal.DebugMode)
                         Debug.Log(result);
@@ -2666,7 +2666,7 @@ namespace CraftSharp.Protocol.Handlers
                     List<byte> fields = new();
 
                     // Command: String
-                    fields.AddRange(dataTypes.GetString(command));
+                    fields.AddRange(DataTypes.GetString(command));
 
                     // Timestamp: Instant(Long)
                     DateTimeOffset timeNow = DateTimeOffset.UtcNow;
@@ -2685,7 +2685,7 @@ namespace CraftSharp.Protocol.Handlers
                         fields.AddRange(DataTypes.GetVarInt(needSigned.Count)); // Signature Length: VarInt
                         foreach ((string argName, string message) in needSigned)
                         {
-                            fields.AddRange(dataTypes.GetString(argName)); // Argument name: String
+                            fields.AddRange(DataTypes.GetString(argName)); // Argument name: String
 
                             byte[] sign;
                             if (protocolVersion == MC_1_19_Version)
@@ -2705,7 +2705,7 @@ namespace CraftSharp.Protocol.Handlers
                     }
 
                     if (protocolVersion <= MC_1_19_2_Version)
-                        fields.AddRange(dataTypes.GetBool(false)); // Signed Preview: Boolean
+                        fields.AddRange(DataTypes.GetBool(false)); // Signed Preview: Boolean
 
                     if (protocolVersion == MC_1_19_2_Version)
                     {
@@ -2761,7 +2761,7 @@ namespace CraftSharp.Protocol.Handlers
                 List<byte> fields = new();
 
                 // 	Message: String (up to 256 chars)
-                fields.AddRange(dataTypes.GetString(message));
+                fields.AddRange(DataTypes.GetString(message));
 
                 if (protocolVersion >= MC_1_19_Version)
                 {
@@ -2787,7 +2787,7 @@ namespace CraftSharp.Protocol.Handlers
                             if (protocolVersion < MC_1_19_3_Version)
                                 fields.AddRange(DataTypes.GetVarInt(0)); // Signature Length: VarInt (1.19 - 1.19.2)
                             else
-                                fields.AddRange(dataTypes.GetBool(false)); // Has signature: bool (1.19.3)
+                                fields.AddRange(DataTypes.GetBool(false)); // Has signature: bool (1.19.3)
                         }
                         else
                         {
@@ -2808,14 +2808,14 @@ namespace CraftSharp.Protocol.Handlers
                                     messageIndex++, timeNow, ref salt, acknowledgment_1_19_3);
 
                             if (protocolVersion >= MC_1_19_3_Version)
-                                fields.AddRange(dataTypes.GetBool(true));
+                                fields.AddRange(DataTypes.GetBool(true));
                             else
                                 fields.AddRange(DataTypes.GetVarInt(sign.Length));
                             fields.AddRange(sign);
                         }
 
                         if (protocolVersion <= MC_1_19_2_Version)
-                            fields.AddRange(dataTypes.GetBool(false)); // Signed Preview: Boolean
+                            fields.AddRange(DataTypes.GetBool(false)); // Signed Preview: Boolean
 
                         if (protocolVersion >= MC_1_19_3_Version)
                         {
@@ -2858,15 +2858,15 @@ namespace CraftSharp.Protocol.Handlers
         /// <returns>True if properly sent</returns>
         public bool SendAutoCompleteText(string text)
         {
-            if (String.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text))
                 return false;
             try
             {
                 byte[] transactionId = DataTypes.GetVarInt(autocomplete_transaction_id);
                 byte[] requestPacket = new byte[] { };
 
-                requestPacket = dataTypes.ConcatBytes(requestPacket, transactionId);
-                requestPacket = dataTypes.ConcatBytes(requestPacket, dataTypes.GetString(text));
+                requestPacket = DataTypes.ConcatBytes(requestPacket, transactionId);
+                requestPacket = DataTypes.ConcatBytes(requestPacket, DataTypes.GetString(text));
 
                 SendPacket(PacketTypesOut.TabComplete, requestPacket);
                 return true;
@@ -2919,7 +2919,7 @@ namespace CraftSharp.Protocol.Handlers
                 return false;
             // Plugin channels were significantly changed between Minecraft 1.12 and 1.13
             // https://wiki.vg/index.php?title=Pre-release_protocol&oldid=14132#Plugin_Channels
-            return SendPluginChannelPacket("minecraft:brand", dataTypes.GetString(brandInfo));
+            return SendPluginChannelPacket("minecraft:brand", DataTypes.GetString(brandInfo));
         }
 
         /// <summary>
@@ -2938,7 +2938,7 @@ namespace CraftSharp.Protocol.Handlers
             try
             {
                 List<byte> fields = new();
-                fields.AddRange(dataTypes.GetString(language));
+                fields.AddRange(DataTypes.GetString(language));
                 fields.Add(viewDistance);
                 fields.AddRange(DataTypes.GetVarInt(chatMode));
                 fields.Add(chatColors ? (byte)1 : (byte)0);
@@ -2976,17 +2976,17 @@ namespace CraftSharp.Protocol.Handlers
 
             if (yaw.HasValue && pitch.HasValue)
             {
-                yawpitch = dataTypes.ConcatBytes(dataTypes.GetFloat(yaw.Value), dataTypes.GetFloat(pitch.Value));
+                yawpitch = DataTypes.ConcatBytes(DataTypes.GetFloat(yaw.Value), DataTypes.GetFloat(pitch.Value));
                 packetType = PacketTypesOut.PlayerPositionAndRotation;
             }
 
             try
             {
-                SendPacket(packetType, dataTypes.ConcatBytes(
-                    dataTypes.GetDouble(location.X),
-                    dataTypes.GetDouble(location.Y),
+                SendPacket(packetType, DataTypes.ConcatBytes(
+                    DataTypes.GetDouble(location.X),
+                    DataTypes.GetDouble(location.Y),
                     new byte[0],
-                    dataTypes.GetDouble(location.Z),
+                    DataTypes.GetDouble(location.Z),
                     yawpitch,
                     new byte[] { onGround ? (byte)1 : (byte)0 }));
                 return true;
@@ -3005,7 +3005,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             try
             {
-                SendPacket(PacketTypesOut.PluginMessage, dataTypes.ConcatBytes(dataTypes.GetString(channel), data));
+                SendPacket(PacketTypesOut.PluginMessage, DataTypes.ConcatBytes(DataTypes.GetString(channel), data));
                 return true;
             }
             catch (SocketException) { return false; }
@@ -3024,7 +3024,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             try
             {
-                SendPacket(0x02, dataTypes.ConcatBytes(DataTypes.GetVarInt(messageId), dataTypes.GetBool(understood), data));
+                SendPacket(0x02, DataTypes.ConcatBytes(DataTypes.GetVarInt(messageId), DataTypes.GetBool(understood), data));
                 return true;
             }
             catch (SocketException) { return false; }
@@ -3050,7 +3050,7 @@ namespace CraftSharp.Protocol.Handlers
                 // Currently hardcoded to false
                 // TODO: Update to reflect the real player state
                 if (protocolVersion >= MC_1_16_Version)
-                    fields.AddRange(dataTypes.GetBool(false));
+                    fields.AddRange(DataTypes.GetBool(false));
 
                 SendPacket(PacketTypesOut.InteractEntity, fields);
                 return true;
@@ -3068,15 +3068,15 @@ namespace CraftSharp.Protocol.Handlers
                 List<byte> fields = new();
                 fields.AddRange(DataTypes.GetVarInt(entityId));
                 fields.AddRange(DataTypes.GetVarInt(type));
-                fields.AddRange(dataTypes.GetFloat(X));
-                fields.AddRange(dataTypes.GetFloat(Y));
-                fields.AddRange(dataTypes.GetFloat(Z));
+                fields.AddRange(DataTypes.GetFloat(X));
+                fields.AddRange(DataTypes.GetFloat(Y));
+                fields.AddRange(DataTypes.GetFloat(Z));
                 fields.AddRange(DataTypes.GetVarInt(hand));
                 // Is player Sneaking (Only 1.16 and above)
                 // Currently hardcoded to false
                 // TODO: Update to reflect the real player state
                 if (protocolVersion >= MC_1_16_Version)
-                    fields.AddRange(dataTypes.GetBool(false));
+                    fields.AddRange(DataTypes.GetBool(false));
                 SendPacket(PacketTypesOut.InteractEntity, fields);
                 return true;
             }
@@ -3097,7 +3097,7 @@ namespace CraftSharp.Protocol.Handlers
                 // Currently hardcoded to false
                 // TODO: Update to reflect the real player state
                 if (protocolVersion >= MC_1_16_Version)
-                    fields.AddRange(dataTypes.GetBool(false));
+                    fields.AddRange(DataTypes.GetBool(false));
                 SendPacket(PacketTypesOut.InteractEntity, fields);
                 return true;
             }
@@ -3133,7 +3133,7 @@ namespace CraftSharp.Protocol.Handlers
             {
                 List<byte> packet = new();
                 packet.AddRange(DataTypes.GetVarInt(status));
-                packet.AddRange(dataTypes.GetBlockLoc(blockLoc));
+                packet.AddRange(DataTypes.GetBlockLoc(blockLoc));
                 packet.AddRange(DataTypes.GetVarInt(dataTypes.GetBlockFace(face)));
                 if (protocolVersion >= MC_1_19_Version)
                     packet.AddRange(DataTypes.GetVarInt(sequenceId));
@@ -3151,11 +3151,11 @@ namespace CraftSharp.Protocol.Handlers
             {
                 List<byte> packet = new();
                 packet.AddRange(DataTypes.GetVarInt(hand));
-                packet.AddRange(dataTypes.GetBlockLoc(location));
+                packet.AddRange(DataTypes.GetBlockLoc(location));
                 packet.AddRange(DataTypes.GetVarInt(dataTypes.GetBlockFace(face)));
-                packet.AddRange(dataTypes.GetFloat(0.5f)); // cursorX
-                packet.AddRange(dataTypes.GetFloat(0.5f)); // cursorY
-                packet.AddRange(dataTypes.GetFloat(0.5f)); // cursorZ
+                packet.AddRange(DataTypes.GetFloat(0.5f)); // cursorX
+                packet.AddRange(DataTypes.GetFloat(0.5f)); // cursorY
+                packet.AddRange(DataTypes.GetFloat(0.5f)); // cursorZ
                 packet.Add(0); // insideBlock = false;
                 if (protocolVersion >= MC_1_19_Version)
                     packet.AddRange(DataTypes.GetVarInt(sequenceId));
@@ -3172,7 +3172,7 @@ namespace CraftSharp.Protocol.Handlers
             try
             {
                 List<byte> packet = new();
-                packet.AddRange(dataTypes.GetShort(slot));
+                packet.AddRange(DataTypes.GetShort(slot));
                 SendPacket(PacketTypesOut.HeldItemChange, packet);
                 return true;
             }
@@ -3193,7 +3193,7 @@ namespace CraftSharp.Protocol.Handlers
             try
             {
                 List<byte> packet = new();
-                packet.AddRange(dataTypes.GetShort((short)slot));
+                packet.AddRange(DataTypes.GetShort((short)slot));
                 packet.AddRange(dataTypes.GetItemSlot(new ItemStack(itemType, count, nbt), ItemPalette.INSTANCE));
                 SendPacket(PacketTypesOut.CreativeInventoryAction, packet);
                 return true;
@@ -3208,7 +3208,7 @@ namespace CraftSharp.Protocol.Handlers
             try
             {
                 List<byte> packet = new();
-                packet.AddRange(dataTypes.GetFloat(desiredNumberOfChunksPerBatch));
+                packet.AddRange(DataTypes.GetFloat(desiredNumberOfChunksPerBatch));
                 SendPacket(PacketTypesOut.ChunkBatchReceived, packet);
                 return true;
             }
@@ -3298,11 +3298,11 @@ namespace CraftSharp.Protocol.Handlers
                     line4 = line1.Substring(0, 23);
 
                 List<byte> packet = new();
-                packet.AddRange(dataTypes.GetLocation(sign));
-                packet.AddRange(dataTypes.GetString(line1));
-                packet.AddRange(dataTypes.GetString(line2));
-                packet.AddRange(dataTypes.GetString(line3));
-                packet.AddRange(dataTypes.GetString(line4));
+                packet.AddRange(DataTypes.GetLocation(sign));
+                packet.AddRange(DataTypes.GetString(line1));
+                packet.AddRange(DataTypes.GetString(line2));
+                packet.AddRange(DataTypes.GetString(line3));
+                packet.AddRange(DataTypes.GetString(line4));
                 SendPacket(PacketTypesOut.UpdateSign, packet);
                 return true;
             }
@@ -3317,7 +3317,7 @@ namespace CraftSharp.Protocol.Handlers
             {
                 List<byte> packet = new();
                 packet.Add(windowId);
-                packet.AddRange(dataTypes.GetShort(actionId));
+                packet.AddRange(DataTypes.GetShort(actionId));
                 packet.Add(accepted ? (byte)1 : (byte)0);
                 SendPacket(PacketTypesOut.WindowConfirmation, packet);
                 return true;
@@ -3400,7 +3400,7 @@ namespace CraftSharp.Protocol.Handlers
             try
             {
                 List<byte> packet = new();
-                packet.AddRange(dataTypes.GetString(itemName.Length > 50 ? itemName[..50] : itemName));
+                packet.AddRange(DataTypes.GetString(itemName.Length > 50 ? itemName[..50] : itemName));
                 SendPacket(PacketTypesOut.NameItem, packet);
                 return true;
             }
