@@ -11,22 +11,22 @@ namespace CraftSharp.Protocol.Handlers
 
         public static void Read(DataTypes dataTypes, Queue<byte> packetData, int protocolVersion)
         {
-            int count = dataTypes.ReadNextVarInt(packetData);
+            int count = DataTypes.ReadNextVarInt(packetData);
             Nodes = new CommandNode[count];
             for (int i = 0; i < count; ++i)
             {
-                byte flags = dataTypes.ReadNextByte(packetData);
+                byte flags = DataTypes.ReadNextByte(packetData);
 
-                int childCount = dataTypes.ReadNextVarInt(packetData);
+                int childCount = DataTypes.ReadNextVarInt(packetData);
                 int[] childs = new int[childCount];
                 for (int j = 0; j < childCount; ++j)
-                    childs[j] = dataTypes.ReadNextVarInt(packetData);
+                    childs[j] = DataTypes.ReadNextVarInt(packetData);
 
-                int redirectNode = ((flags & 0x08) == 0x08) ? dataTypes.ReadNextVarInt(packetData) : -1;
+                int redirectNode = ((flags & 0x08) == 0x08) ? DataTypes.ReadNextVarInt(packetData) : -1;
 
-                string? name = ((flags & 0x03) == 1 || (flags & 0x03) == 2) ? dataTypes.ReadNextString(packetData) : null;
+                string? name = ((flags & 0x03) == 1 || (flags & 0x03) == 2) ? DataTypes.ReadNextString(packetData) : null;
 
-                int parserId = ((flags & 0x03) == 2) ? dataTypes.ReadNextVarInt(packetData) : -1;
+                int parserId = ((flags & 0x03) == 2) ? DataTypes.ReadNextVarInt(packetData) : -1;
                 Parser? parser = null;
                 if ((flags & 0x03) == 2)
                 {
@@ -97,11 +97,11 @@ namespace CraftSharp.Protocol.Handlers
                         };
                 }
 
-                string? suggestionsType = ((flags & 0x10) == 0x10) ? dataTypes.ReadNextString(packetData) : null;
+                string? suggestionsType = ((flags & 0x10) == 0x10) ? DataTypes.ReadNextString(packetData) : null;
 
                 Nodes[i] = new(flags, childs, redirectNode, name, parser, suggestionsType);
             }
-            RootIdx = dataTypes.ReadNextVarInt(packetData);
+            RootIdx = DataTypes.ReadNextVarInt(packetData);
 
             //ConsoleIO.OnDeclareMinecraftCommand(ExtractRootCommand());
         }
@@ -230,11 +230,11 @@ namespace CraftSharp.Protocol.Handlers
 
             public ParserFloat(DataTypes dataTypes, Queue<byte> packetData)
             {
-                Flags = dataTypes.ReadNextByte(packetData);
+                Flags = DataTypes.ReadNextByte(packetData);
                 if ((Flags & 0x01) > 0)
-                    Min = dataTypes.ReadNextFloat(packetData);
+                    Min = DataTypes.ReadNextFloat(packetData);
                 if ((Flags & 0x02) > 0)
-                    Max = dataTypes.ReadNextFloat(packetData);
+                    Max = DataTypes.ReadNextFloat(packetData);
             }
 
             public override bool Check(string text)
@@ -260,11 +260,11 @@ namespace CraftSharp.Protocol.Handlers
 
             public ParserDouble(DataTypes dataTypes, Queue<byte> packetData)
             {
-                Flags = dataTypes.ReadNextByte(packetData);
+                Flags = DataTypes.ReadNextByte(packetData);
                 if ((Flags & 0x01) > 0)
-                    Min = dataTypes.ReadNextDouble(packetData);
+                    Min = DataTypes.ReadNextDouble(packetData);
                 if ((Flags & 0x02) > 0)
-                    Max = dataTypes.ReadNextDouble(packetData);
+                    Max = DataTypes.ReadNextDouble(packetData);
             }
 
             public override bool Check(string text)
@@ -290,11 +290,11 @@ namespace CraftSharp.Protocol.Handlers
 
             public ParserInteger(DataTypes dataTypes, Queue<byte> packetData)
             {
-                Flags = dataTypes.ReadNextByte(packetData);
+                Flags = DataTypes.ReadNextByte(packetData);
                 if ((Flags & 0x01) > 0)
-                    Min = dataTypes.ReadNextInt(packetData);
+                    Min = DataTypes.ReadNextInt(packetData);
                 if ((Flags & 0x02) > 0)
-                    Max = dataTypes.ReadNextInt(packetData);
+                    Max = DataTypes.ReadNextInt(packetData);
             }
 
             public override bool Check(string text)
@@ -320,11 +320,11 @@ namespace CraftSharp.Protocol.Handlers
 
             public ParserLong(DataTypes dataTypes, Queue<byte> packetData)
             {
-                Flags = dataTypes.ReadNextByte(packetData);
+                Flags = DataTypes.ReadNextByte(packetData);
                 if ((Flags & 0x01) > 0)
-                    Min = dataTypes.ReadNextLong(packetData);
+                    Min = DataTypes.ReadNextLong(packetData);
                 if ((Flags & 0x02) > 0)
-                    Max = dataTypes.ReadNextLong(packetData);
+                    Max = DataTypes.ReadNextLong(packetData);
             }
 
             public override bool Check(string text)
@@ -351,7 +351,7 @@ namespace CraftSharp.Protocol.Handlers
 
             public ParserString(DataTypes dataTypes, Queue<byte> packetData)
             {
-                Type = (StringType)dataTypes.ReadNextVarInt(packetData);
+                Type = (StringType)DataTypes.ReadNextVarInt(packetData);
             }
 
             public override bool Check(string text)
@@ -376,7 +376,7 @@ namespace CraftSharp.Protocol.Handlers
 
             public ParserEntity(DataTypes dataTypes, Queue<byte> packetData)
             {
-                Flags = dataTypes.ReadNextByte(packetData);
+                Flags = DataTypes.ReadNextByte(packetData);
             }
 
             public override bool Check(string text)
@@ -526,7 +526,7 @@ namespace CraftSharp.Protocol.Handlers
 
             public ParserScoreHolder(DataTypes dataTypes, Queue<byte> packetData)
             {
-                Flags = dataTypes.ReadNextByte(packetData);
+                Flags = DataTypes.ReadNextByte(packetData);
             }
 
             public override bool Check(string text)
@@ -551,7 +551,7 @@ namespace CraftSharp.Protocol.Handlers
 
             public ParserRange(DataTypes dataTypes, Queue<byte> packetData)
             {
-                Decimals = dataTypes.ReadNextBool(packetData);
+                Decimals = DataTypes.ReadNextBool(packetData);
             }
 
             public override bool Check(string text)
@@ -576,7 +576,7 @@ namespace CraftSharp.Protocol.Handlers
 
             public ParserResourceOrTag(DataTypes dataTypes, Queue<byte> packetData)
             {
-                Registry = dataTypes.ReadNextString(packetData);
+                Registry = DataTypes.ReadNextString(packetData);
             }
 
             public override bool Check(string text)
@@ -601,7 +601,7 @@ namespace CraftSharp.Protocol.Handlers
 
             public ParserResource(DataTypes dataTypes, Queue<byte> packetData)
             {
-                Registry = dataTypes.ReadNextString(packetData);
+                Registry = DataTypes.ReadNextString(packetData);
             }
 
             public override bool Check(string text)
@@ -627,7 +627,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             public ParserTime(DataTypes dataTypes, Queue<byte> packetData)
             {
-                dataTypes.ReadNextInt(packetData);
+                DataTypes.ReadNextInt(packetData);
             }
 
             public override bool Check(string text)
