@@ -543,7 +543,7 @@ namespace CraftSharp.Protocol.Handlers
 
         #endregion
 
-        #region Version dependent data readers
+        #region Complex data readers
 
         /// <summary>
         /// Read a single item slot from a cache of bytes and remove it from the cache
