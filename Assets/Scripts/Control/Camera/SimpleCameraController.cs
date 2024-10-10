@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 using Cinemachine;
 
@@ -18,11 +17,11 @@ namespace CraftSharp.Control
         [SerializeField] private float cameraYOffsetClip =  0.1F;
 
         // Virtual camera and camera components
-        [SerializeField] private CinemachineVirtualCamera? virtualCameraFollow;
-        private CinemachineFramingTransposer? _framingTransposer;
-        [SerializeField] private CinemachineVirtualCamera? virtualCameraAim;
+        [SerializeField] private CinemachineVirtualCamera virtualCameraFollow;
+        private CinemachineFramingTransposer _framingTransposer;
+        [SerializeField] private CinemachineVirtualCamera virtualCameraAim;
 
-        private CinemachinePOV? _followPOV, _aimingPOV;
+        private CinemachinePOV _followPOV, _aimingPOV;
 
         private float? _setYawRequest = null;
 
@@ -44,10 +43,18 @@ namespace CraftSharp.Control
         {
             EnsureInitialized();
 
+            // Enable Cinemachine and zoom input
+            zoomInput.action.Enable();
+            EnableCinemachineInput();
+
             // Initialize camera scale
-            zoomInput!.action.Enable();
             cameraInfo.TargetScale = 0.8F;
             cameraInfo.CurrentScale = cameraInfo.TargetScale - 0.2F;
+
+            // Make sure sprite camera uses same fov as main camera
+            var fov = Mathf.Lerp(nearFov, farFov, cameraInfo.CurrentScale);
+            virtualCameraFollow!.m_Lens.FieldOfView = fov;
+            spriteRenderCamera!.fieldOfView = fov;
 
             // Aiming is not enabled by default
             EnableAimingCamera(false);
@@ -55,6 +62,11 @@ namespace CraftSharp.Control
 
         void Update()
         {
+            if (_setYawRequest != null)
+            {
+                SetYaw(_setYawRequest.Value);
+            }
+
             var zoom = zoomInput!.action.ReadValue<float>();
             if (zoom != 0F)
             {
@@ -73,11 +85,6 @@ namespace CraftSharp.Control
                 _framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
                 _framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
             }
-
-            if (_setYawRequest != null)
-            {
-                SetYaw(_setYawRequest.Value);
-            }
         }
 
         public override void SetTarget(Transform target)
@@ -90,7 +97,7 @@ namespace CraftSharp.Control
             virtualCameraAim!.Follow = target;
         }
 
-        public override Transform? GetTarget()
+        public override Transform GetTarget()
         {
             return virtualCameraFollow == null ? null : virtualCameraFollow.Follow;
         }

@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 
 namespace CraftSharp.Control

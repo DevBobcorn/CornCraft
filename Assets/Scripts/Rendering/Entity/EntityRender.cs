@@ -291,7 +291,7 @@ namespace CraftSharp.Rendering
 
         protected Transform SetupCameraRef(Vector3 pos)
         {
-            var cameraRefObj = new GameObject("Camera Ref");
+            var cameraRefObj = new GameObject($"Camera Ref Obj");
             var cameraRef = cameraRefObj.transform;
 
             cameraRef.SetParent(_visualTransform, false);

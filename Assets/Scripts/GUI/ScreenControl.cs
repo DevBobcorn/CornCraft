@@ -110,11 +110,11 @@ namespace CraftSharp.UI
             {
                 if (shouldPauseInput)
                 {
-                    client.EnableInput(false);
+                    client.ToggleInputPause(false);
                 }
                 else
                 {
-                    client.EnableInput(true);
+                    client.ToggleInputPause(true);
                 }
             }
 

@@ -1,4 +1,5 @@
 #nullable enable
+using CraftSharp.Control;
 using UnityEngine;
 using UnityEngine.Playables;
 
@@ -23,6 +24,21 @@ namespace CraftSharp.Rendering
         private bool simulate = false;
 
         private float deltaSeconds = 0F;
+
+        public override void SetCamera(Camera mainCamera)
+        {
+            this.mainCamera = mainCamera;
+
+            if (fogGlobal != null)
+            {
+                fogGlobal.mainCamera = mainCamera;
+
+                if (!fogGlobal.gameObject.activeSelf)
+                {
+                    fogGlobal.gameObject.SetActive(true);
+                }
+            }
+        }
 
         public override void SetRain(bool raining)
         {
@@ -75,16 +91,6 @@ namespace CraftSharp.Rendering
             {
                 playableDirector!.Pause();
             }
-
-            if (mainCamera == null)
-            {
-                mainCamera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
-            }
-
-            if (fogGlobal != null && fogGlobal.mainCamera == null)
-            {
-                fogGlobal.mainCamera = mainCamera;
-            }
         }
 
         void Update()
@@ -113,6 +119,13 @@ namespace CraftSharp.Rendering
                 {
                     fogGlobal.fogHeightStart = transform.position.y - 10F;
                     fogGlobal.fogHeightEnd = transform.position.y + 300F;
+                }
+            }
+            else // Main camera temporarily unavailable, disable fog to avoid it flooding the console
+            {
+                if (fogGlobal != null && fogGlobal.gameObject.activeSelf)
+                {
+                    fogGlobal.gameObject.SetActive(false);
                 }
             }
         }

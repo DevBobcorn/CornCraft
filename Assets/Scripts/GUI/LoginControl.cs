@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Linq;
 using System.Collections;
@@ -14,6 +13,7 @@ using CraftSharp.Protocol;
 using CraftSharp.Protocol.Handlers.Forge;
 using CraftSharp.Protocol.ProfileKey;
 using CraftSharp.Protocol.Session;
+using CraftSharp.Rendering;
 
 namespace CraftSharp.UI
 {
@@ -21,21 +21,26 @@ namespace CraftSharp.UI
     {
         private const string LOCALHOST_ADDRESS = "127.0.0.1";
 
-        [SerializeField] private TMP_InputField? serverInput, usernameInput, authCodeInput;
-        [SerializeField] private Button?         loginButton, authConfirmButton, authCancelButton;
-        [SerializeField] private Button?         loginCloseButton, authLinkButton, authCloseButton, localhostButton;
-        [SerializeField] private Button?         localGameButton, loginPanelButton, quitButton;
-        [SerializeField] private TMP_Text?       loadStateInfoText, usernameOptions, usernamePlaceholder, authLinkText;
-        [SerializeField] private CanvasGroup?    loginPanel, usernamePanel, authPanel;
-        [SerializeField] private TMP_Dropdown?   loginDropDown;
+        [SerializeField] private TMP_InputField serverInput, usernameInput, authCodeInput;
+        [SerializeField] private Button         loginButton, authConfirmButton, authCancelButton;
+        [SerializeField] private Button         loginCloseButton, authLinkButton, authCloseButton, localhostButton;
+        [SerializeField] private Button         localGameButton, loginPanelButton, quitButton;
+        [SerializeField] private TMP_Text       loadStateInfoText, usernameOptions, usernamePlaceholder, authLinkText;
+        [SerializeField] private CanvasGroup    loginPanel, usernamePanel, authPanel;
+        [SerializeField] private TMP_Dropdown   loginDropDown;
 
-        [SerializeField] private Button?         enterGamePanel;
+        [SerializeField] private Button         enterGamePanel;
 
-        [SerializeField] private CelestiaBridge? celestiaBridge;
+        [SerializeField] private BaseEnvironmentManager environmentManager;
+        [SerializeField] private CelestiaBridge celestiaBridge;
+
+        #nullable enable
 
         private bool preparingGame = false, authenticating = false, authCancelled = false;
         private bool resourceLoaded = false;
         private StartLoginInfo? loginInfo = null;
+
+        #nullable disable
 
         // Login auto-complete
         int  usernameIndex =  0;
@@ -142,15 +147,17 @@ namespace CraftSharp.UI
         {
             loginInfo = null;
 
-            string serverText = serverInput!.text;
-            string account = usernameInput!.text;
+            string serverText = serverInput.text;
+            string account = usernameInput.text;
             string accountLower = account.ToLower();
 
-            SessionToken session = new SessionToken();
+            var session = new SessionToken();
+            #nullable enable
             PlayerKeyPair? playerKeyPair = null;
+            #nullable disable
 
             var result = ProtocolHandler.LoginResult.LoginRequired;
-            var microsoftLogin = loginDropDown!.value == 0; // Dropdown value is 0 if use Microsoft login
+            var microsoftLogin = loginDropDown.value == 0; // Dropdown value is 0 if use Microsoft login
 
             // Login Microsoft/Offline player account
             if (!microsoftLogin)
@@ -159,7 +166,7 @@ namespace CraftSharp.UI
                 {
                     CornApp.Notify(Translations.Get("login.offline_username_invalid"), Notification.Type.Warning);
                     preparingGame = false;
-                    loadStateInfoText!.text = Translations.Get("login.login_failed");
+                    loadStateInfoText.text = Translations.Get("login.login_failed");
                     yield break;
                 }
 
@@ -219,7 +226,7 @@ namespace CraftSharp.UI
                         result = ProtocolHandler.LoginResult.UserCancel;
                     else // Proceed authentication...
                     {
-                        var code = authCodeInput!.text.Trim();
+                        var code = authCodeInput.text.Trim();
                         try
                         {
                             result = ProtocolHandler.MicrosoftBrowserLogin(code, out session, ref account);
@@ -242,7 +249,7 @@ namespace CraftSharp.UI
                 {
                     CornApp.Notify(Translations.Get("login.server_name_invalid"), Notification.Type.Warning);
                     preparingGame = false;
-                    loadStateInfoText!.text = Translations.Get("login.login_failed");
+                    loadStateInfoText.text = Translations.Get("login.login_failed");
                     yield break;
                 }
 
@@ -284,9 +291,11 @@ namespace CraftSharp.UI
 
                 // Get server version
                 Debug.Log(Translations.Get("mcc.retrieve")); // Retrieve server information
-                loadStateInfoText!.text = Translations.Get("mcc.retrieve");
+                loadStateInfoText.text = Translations.Get("mcc.retrieve");
                 int protocolVersion = 0;
+                #nullable enable
                 ForgeInfo? forgeInfo = null;
+                #nullable disable
                 string receivedVersionName = string.Empty;
 
                 bool pingResult = false;
@@ -300,7 +309,7 @@ namespace CraftSharp.UI
                 {
                     CornApp.Notify(Translations.Get("error.ping"), Notification.Type.Error);
                     preparingGame = false;
-                    loadStateInfoText!.text = Translations.Get("login.login_failed");
+                    loadStateInfoText.text = Translations.Get("login.login_failed");
                     yield break;
                 }
                 else
@@ -348,7 +357,7 @@ namespace CraftSharp.UI
                     _                                                => "error.login.unknown"
                 };
                 failureMessage += Translations.Get(failureReason);
-                loadStateInfoText!.text = Translations.Get("login.login_failed");
+                loadStateInfoText.text = Translations.Get("login.login_failed");
                 CornApp.Notify(failureMessage, Notification.Type.Error);
 
                 if (result == ProtocolHandler.LoginResult.SSLError)
@@ -366,7 +375,7 @@ namespace CraftSharp.UI
 
             var resLoadFlag = new DataLoadFlag();
             yield return StartCoroutine(CornApp.Instance.PrepareDataAndResource(info.ProtocolVersion, resLoadFlag,
-                    (status) => loadStateInfoText!.text = Translations.Get(status)));
+                    (status) => loadStateInfoText.text = Translations.Get(status)));
             
             if (resLoadFlag.Failed)
             {
@@ -376,32 +385,32 @@ namespace CraftSharp.UI
             else
             {
                 resourceLoaded = true;
-                yield return StartCoroutine(celestiaBridge!.StopAndMakePortal(() =>
+                yield return StartCoroutine(celestiaBridge.StopAndMakePortal(() =>
                 {
                     // Set enter game panel to active
-                    enterGamePanel!.gameObject.SetActive(true);
+                    enterGamePanel.gameObject.SetActive(true);
                     // TODO: Show hint for player
-                    loadStateInfoText!.text = Translations.Get("login.click_to_enter");
+                    loadStateInfoText.text = Translations.Get("login.click_to_enter");
                 }));
             }
         }
 
         public void ShowLoginPanel()
         {   // Show login panel and hide button
-            loginPanel!.alpha = 1F;
-            loginPanel!.blocksRaycasts = true;
-            loginPanel!.interactable = true;
-            loginPanelButton!.gameObject.SetActive(false);
-            loginPanelButton!.interactable = false;
+            loginPanel.alpha = 1F;
+            loginPanel.blocksRaycasts = true;
+            loginPanel.interactable = true;
+            loginPanelButton.gameObject.SetActive(false);
+            loginPanelButton.interactable = false;
         }
 
         public void HideLoginPanel()
         {   // Hide login panel and show button
-            loginPanel!.alpha = 0F;
-            loginPanel!.blocksRaycasts = false;
-            loginPanel!.interactable = false;
-            loginPanelButton!.gameObject.SetActive(true);
-            loginPanelButton!.interactable = true;
+            loginPanel.alpha = 0F;
+            loginPanel.blocksRaycasts = false;
+            loginPanel.interactable = false;
+            loginPanelButton.gameObject.SetActive(true);
+            loginPanelButton.interactable = true;
         }
 
         private void RefreshUsernames()
@@ -415,13 +424,13 @@ namespace CraftSharp.UI
                         i == usernameIndex ? $"<color=yellow>{shownNames[i]}</color>" : shownNames[i]
                     ).Append('\n');
                 }
-                usernameOptions!.text = str.ToString();
-                usernamePanel!.alpha = 1F;
+                usernameOptions.text = str.ToString();
+                usernamePanel.alpha = 1F;
                 namesShown         = true;
             }
             else // Hide them away...
             {
-                usernamePanel!.alpha = 0F;
+                usernamePanel.alpha = 0F;
                 namesShown        = false;
             }
         }
@@ -437,37 +446,37 @@ namespace CraftSharp.UI
         public void HideUsernamePanel(string message)
         {
             usernameIndex = 0;
-            usernamePanel!.alpha = 0F;
+            usernamePanel.alpha = 0F;
             namesShown = false;
         }
 
         public void UpdateUsernamePlaceholder(int selection)
         {
-            usernamePlaceholder!.text = selection == 0 ? "Email Address" : "User Name";
+            usernamePlaceholder.text = selection == 0 ? "Email Address" : "User Name";
         }
 
         public void CopyAuthLink()
         {
-            GUIUtility.systemCopyBuffer = authLinkText!.text;
+            GUIUtility.systemCopyBuffer = authLinkText.text;
             CornApp.Notify(Translations.Get("login.link_copied"), Notification.Type.Success);
         }
 
         public void PasteAuthCode()
         {
-            authCodeInput!.text = GUIUtility.systemCopyBuffer;
+            authCodeInput.text = GUIUtility.systemCopyBuffer;
         }
 
         private void ShowAuthPanel(string url)
         {
             // Update auth panel link text
-            authLinkText!.text = url;
+            authLinkText.text = url;
 
             // Clear existing text if any
-            authCodeInput!.text = string.Empty;
+            authCodeInput.text = string.Empty;
 
-            authPanel!.alpha = 1F;
-            authPanel!.blocksRaycasts = true;
-            authPanel!.interactable = true;
+            authPanel.alpha = 1F;
+            authPanel.blocksRaycasts = true;
+            authPanel.interactable = true;
 
             authenticating = true;
             authCancelled = false;
@@ -475,9 +484,9 @@ namespace CraftSharp.UI
 
         private void HideAuthPanel()
         {
-            authPanel!.alpha = 0F;
-            authPanel!.blocksRaycasts = false;
-            authPanel!.interactable = false;
+            authPanel.alpha = 0F;
+            authPanel.blocksRaycasts = false;
+            authPanel.interactable = false;
 
             authenticating = false;
         }
@@ -490,7 +499,7 @@ namespace CraftSharp.UI
 
         public void ConfirmAuth()
         {
-            var code = authCodeInput!.text.Trim();
+            var code = authCodeInput.text.Trim();
 
             if (string.IsNullOrEmpty(code))
             {
@@ -507,7 +516,7 @@ namespace CraftSharp.UI
         {
             if (resourceLoaded && loginInfo is not null)
             {
-                celestiaBridge!.EnterPortal();
+                celestiaBridge.EnterPortal();
 
                 yield return new WaitForSecondsRealtime(2F);
 
@@ -515,7 +524,7 @@ namespace CraftSharp.UI
                 // this scene is unloaded and LoginControl object is destroyed
                 CornApp.Instance.StartLoginCoroutine(loginInfo,
                         (succeeded) => preparingGame = false,
-                        (status) => loadStateInfoText!.text = Translations.Get(status));
+                        (status) => loadStateInfoText.text = Translations.Get(status));
             }
         }
 
@@ -526,6 +535,12 @@ namespace CraftSharp.UI
 
         void Start()
         {
+            // Set camera for environment manager
+            if (environmentManager != null)
+            {
+                environmentManager.SetCamera(GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>());
+            }
+
             // Generate default data or check update (Need to be done with priority because it contains translation texts)
             var extraDataDir = PathHelper.GetExtraDataDirectory();
             var builtinResLoad = BuiltinResourceHelper.ReadyBuiltinResource(
@@ -535,11 +550,11 @@ namespace CraftSharp.UI
             while (builtinResLoad.MoveNext()) { /* Do nothing */ }
             
             // Initialize controls
-            usernameOptions!.text = string.Empty;
-            usernamePanel!.alpha  = 0F; // Hide at start
-            enterGamePanel!.gameObject.SetActive(false);
+            usernameOptions.text = string.Empty;
+            usernamePanel.alpha  = 0F; // Hide at start
+            enterGamePanel.gameObject.SetActive(false);
             enterGamePanel.onClick.AddListener(() => StartCoroutine(EnterGame()));
-            loginDropDown!.onValueChanged.AddListener(this.UpdateUsernamePlaceholder);
+            loginDropDown.onValueChanged.AddListener(this.UpdateUsernamePlaceholder);
 
             //Load cached sessions from disk if necessary
             if (CornGlobal.SessionCaching == CacheType.Disk)
@@ -553,9 +568,9 @@ namespace CraftSharp.UI
             }
 
             // TODO Also initialize server with cached values
-            serverInput!.text = LOCALHOST_ADDRESS;
+            serverInput.text = LOCALHOST_ADDRESS;
             if (cachedNames.Length > 0)
-                usernameInput!.text = cachedNames[0];
+                usernameInput.text = cachedNames[0];
             
             loginDropDown.value = 0;
             UpdateUsernamePlaceholder(0);
@@ -565,29 +580,29 @@ namespace CraftSharp.UI
             HideAuthPanel();
 
             // Add listeners
-            localhostButton!.onClick.AddListener(() => serverInput.text = LOCALHOST_ADDRESS);
+            localhostButton.onClick.AddListener(() => serverInput.text = LOCALHOST_ADDRESS);
 
-            usernameInput!.onValueChanged.AddListener(this.UpdateUsernamePanel);
+            usernameInput.onValueChanged.AddListener(this.UpdateUsernamePanel);
             usernameInput.onSelect.AddListener(this.UpdateUsernamePanel);
             usernameInput.onEndEdit.AddListener(this.HideUsernamePanel);
 
-            localGameButton!.onClick.AddListener(this.TryConnectDummyServer);
-            quitButton!.onClick.AddListener(this.QuitGame);
+            localGameButton.onClick.AddListener(this.TryConnectDummyServer);
+            quitButton.onClick.AddListener(this.QuitGame);
 
-            loginButton!.onClick.AddListener(this.TryConnectServer);
-            authLinkButton!.onClick.AddListener(this.CopyAuthLink);
-            authCancelButton!.onClick.AddListener(this.CancelAuth);
-            authConfirmButton!.onClick.AddListener(this.ConfirmAuth);
-            authCodeInput!.GetComponentInChildren<Button>().onClick.AddListener(this.PasteAuthCode);
+            loginButton.onClick.AddListener(this.TryConnectServer);
+            authLinkButton.onClick.AddListener(this.CopyAuthLink);
+            authCancelButton.onClick.AddListener(this.CancelAuth);
+            authConfirmButton.onClick.AddListener(this.ConfirmAuth);
+            authCodeInput.GetComponentInChildren<Button>().onClick.AddListener(this.PasteAuthCode);
 
-            loginCloseButton!.onClick.AddListener(this.HideLoginPanel);
-            loginPanelButton!.onClick.AddListener(this.ShowLoginPanel);
+            loginCloseButton.onClick.AddListener(this.HideLoginPanel);
+            loginPanelButton.onClick.AddListener(this.ShowLoginPanel);
             // Cancel auth, not just hide panel (so basically this button is totally the same as authCancelButton)...
-            authCloseButton!.onClick.AddListener(this.CancelAuth);
+            authCloseButton.onClick.AddListener(this.CancelAuth);
 
             // Used for testing MC format code parsing
-            // loadStateInfoText!.text = StringConvert.MC2TMP("Hello world §a[§a§a-1, §a1 §6[Bl§b[HHH]ah] Hello §c[Color RE§rD]  §a1§r] (blah)");
-            loadStateInfoText!.text = $"CornCraft {CornGlobal.Version} Powered by <u>Minecraft Console Client</u>";
+            // loadStateInfoText.text = StringConvert.MC2TMP("Hello world §a[§a§a-1, §a1 §6[Bl§b[HHH]ah] Hello §c[Color RE§rD]  §a1§r] (blah)");
+            loadStateInfoText.text = $"CornCraft {CornGlobal.Version} Powered by <u>Minecraft Console Client</u>";
 
             // Release cursor (Useful when re-entering login scene from game)
             Cursor.lockState = CursorLockMode.None;
@@ -612,8 +627,8 @@ namespace CraftSharp.UI
                 {
                     if (usernameIndex >= 0 && usernameIndex < shownNames.Length)
                     {
-                        usernameInput!.text = shownNames[usernameIndex];
-                        usernameInput!.MoveTextEnd(false);
+                        usernameInput.text = shownNames[usernameIndex];
+                        usernameInput.MoveTextEnd(false);
                     }
                 }
             }

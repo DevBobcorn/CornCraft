@@ -302,14 +302,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d32161aaff9cb0419e64d4f69a5e1ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cameraController: {fileID: 0}
-  _statusUpdater: {fileID: 2543192715876108228}
-  _ability: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
-  _initialUpward: {x: 0, y: 1, z: 0}
-  _initialForward: {x: 0, y: 0, z: 1}
-  SkillItemConf: {fileID: 11400000, guid: d50d776819a982b49b745438ebbebd20, type: 2}
-  CameraRef: {fileID: 0}
-  _motor: {fileID: 5454645792870506942}
+  m_AbilityConfig: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
+  m_SkillItemConfig: {fileID: 11400000, guid: d50d776819a982b49b745438ebbebd20, type: 2}
+  m_StatusUpdater: {fileID: 2543192715876108228}
+  m_InitialUpward: {x: 0, y: 1, z: 0}
+  m_InitialForward: {x: 0, y: 0, z: 1}
+  m_Motor: {fileID: 5454645792870506942}
 --- !u!114 &5454645792870506942
 MonoBehaviour:
   m_ObjectHideFlags: 0

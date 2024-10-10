@@ -8,7 +8,7 @@ namespace CraftSharp.Control
     {
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
-            var ability = player.Ability;
+            var ability = player.AbilityConfig;
 
             info.Sprinting = false;
             info.Gliding = false;
@@ -93,7 +93,7 @@ namespace CraftSharp.Control
             attackStatus.StageTime = 0F;
 
             player.OverrideStateAnimation(rangedAttack.DummyAnimationClip!, rangedAttack.DrawWeapon!);
-            player.StartCrossFadeState(PlayerAbility.SKILL, 0.01F);
+            player.StartCrossFadeState(PlayerAbilityConfig.SKILL, 0.01F);
 
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInOffhand);
 

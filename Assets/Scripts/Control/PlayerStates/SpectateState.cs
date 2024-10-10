@@ -10,7 +10,7 @@ namespace CraftSharp.Control
     {
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
-            var ability = player.Ability;
+            var ability = player.AbilityConfig;
 
             info.Sprinting = false;
 

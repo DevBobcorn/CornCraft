@@ -252,7 +252,7 @@ namespace CraftSharp
 
             // Enter world scene, and find the client instance in that scene
             updateStatus("login.enter_world_scene");
-            yield return EnterWorldScene(info.Online ? "World" : "World Offline");
+            yield return EnterWorldScene("World " + (info.Online ? "Online" : "Offline"));
 
             // Start client
             if (client != null)
@@ -268,7 +268,7 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Should only be externally called by CornClient
+        /// Should only be externally called by CornClientOnline
         /// </summary>
         public void BackToLogin() => SceneManager.LoadScene("Login");
 

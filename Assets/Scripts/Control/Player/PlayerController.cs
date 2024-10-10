@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using UnityEngine;
 
@@ -20,29 +19,16 @@ namespace CraftSharp.Control
 
         public ItemActionType CurrentActionType { get; private set; } = ItemActionType.None;
 
-        [SerializeField] private CameraController? _cameraController;
-        [SerializeField] private PlayerStatusUpdater? _statusUpdater;
-        [SerializeField] private PlayerAbility? _ability;
-        
-        [SerializeField] private Vector3 _initialUpward = Vector3.up;
-        [SerializeField] private Vector3 _initialForward = Vector3.forward;
+        // AbilityConfig & Skill Fields
+        [SerializeField] private PlayerAbilityConfig m_AbilityConfig;
+        [SerializeField] private PlayerSkillItemConfig m_SkillItemConfig;
 
-        public PlayerSkillItemConfig? SkillItemConf;
-        public Transform? CameraRef;
-        [SerializeField] private KinematicCharacterMotor? _motor;
-        public KinematicCharacterMotor Motor => _motor!;
-        
-        private EntityRender? _playerRender;
-        private PlayerActions? _playerActions;
-        public PlayerActions Actions => _playerActions!;
+        public PlayerAbilityConfig AbilityConfig => m_AbilityConfig;
+        public PlayerSkillItemConfig SkillItemConfig => m_SkillItemConfig;
 
-        public void EnableInput() => _playerActions?.Enable();
-        public void DisableInput() => _playerActions?.Disable();
-
-        public PlayerAbility Ability => _ability!;
-        private IPlayerState _currentState = PlayerStates.GROUNDED;
-        private IPlayerState? _pendingState = null;
-
+        // Status Fields
+        [SerializeField] private PlayerStatusUpdater m_StatusUpdater;
+        public PlayerStatus Status => m_StatusUpdater == null ? null : m_StatusUpdater.Status;
         private bool _usingAnimator = false;
 
         /// <summary>
@@ -51,15 +37,44 @@ namespace CraftSharp.Control
         public bool UseRootMotion { get; set; } = false;
 
         /// <summary>
-        /// Whether to countervail animator scale when applying root motion displacement.
-        /// <br>
-        /// Only uniform scale is supported.
+        /// Whether to countervail animator scale when applying root motion displacement. Only uniform scale is supported.
         /// </summary>
         public bool IgnoreAnimatorScale { get; set; } = false;
+
+        /// <summary>
+        /// Root motion position delta. Reset after applied.
+        /// </summary>
         public Vector3 RootMotionPositionDelta { get; set; } = Vector3.zero;
+
+        /// <summary>
+        /// Root motion rotation delta. Reset after applied.
+        /// </summary>
         public Quaternion RootMotionRotationDelta { get; set; } = Quaternion.identity;
 
-        public PlayerStatus? Status => _statusUpdater == null ? null : _statusUpdater.Status;
+        // Camera & Player Render Fields
+        private CameraController m_CameraController;
+        private Transform m_CameraRef;
+        private EntityRender m_PlayerRender;
+        [SerializeField] private Vector3 m_InitialUpward = Vector3.up;
+        [SerializeField] private Vector3 m_InitialForward = Vector3.forward;
+        [SerializeField] private KinematicCharacterMotor m_Motor;
+        public KinematicCharacterMotor Motor => m_Motor;
+
+        // Input System Fields & Methods
+        private PlayerActions m_PlayerActions;
+        public PlayerActions Actions => m_PlayerActions;
+
+        public void EnableInput() => m_PlayerActions?.Enable();
+        public void DisableInput() => m_PlayerActions?.Disable();
+
+        // Player State Fields
+
+        #nullable enable
+
+        private IPlayerState? _currentState = PlayerStates.GROUNDED;
+        private IPlayerState? _pendingState = null;
+
+        #nullable disable
 
         // Values for sending over to the server. Should only be set
         // from the unity thread and read from the network thread
@@ -86,10 +101,10 @@ namespace CraftSharp.Control
         /// </summary>
         public bool IsGrounded2Send { get; private set; }
 
-        public void UpdatePlayerRenderFromPrefab(Entity entity, GameObject renderPrefab)
+        public void SwitchPlayerRenderFromPrefab(Entity entity, GameObject renderPrefab)
         {
             GameObject renderObj;
-            if (renderPrefab.GetComponent<Animator>() != null) // Model prefab, wrap it up
+            if (renderPrefab.TryGetComponent(out Animator _)) // Model prefab, wrap it up
             {
                 renderObj = AnimatorEntityRender.CreateFromModel(renderPrefab);
             }
@@ -99,12 +114,12 @@ namespace CraftSharp.Control
             }
             renderObj!.name = $"Player Entity ({renderPrefab.name})";
 
-            UpdatePlayerRender(entity, renderObj);
+            SwitchPlayerRender(entity, renderObj);
         }
 
-        private void UpdatePlayerRender(Entity entity, GameObject renderObj)
+        private void SwitchPlayerRender(Entity entity, GameObject renderObj)
         {
-            var prevRender = _playerRender;
+            var prevRender = m_PlayerRender;
 
             if (prevRender != null)
             {
@@ -116,29 +131,29 @@ namespace CraftSharp.Control
             OnPlayerUpdate = null;
             
             // Update controller's player render
-            if (renderObj.TryGetComponent<EntityRender>(out _playerRender))
+            if (renderObj.TryGetComponent<EntityRender>(out m_PlayerRender))
             {
                 // Initialize head yaw to look forward
-                _playerRender.HeadYaw.Value = Entity.GetHeadYawFromByte(127); // i.e. -90F
-                _playerRender.UUID = entity.UUID;
-                _playerRender.transform.SetParent(transform, false);
+                m_PlayerRender.HeadYaw.Value = Entity.GetHeadYawFromByte(127); // i.e. -90F
+                m_PlayerRender.UUID = entity.UUID;
+                m_PlayerRender.transform.SetParent(transform, false);
 
                 // Initialize materials (This requires metadata to be present)
                 if (renderObj.TryGetComponent(out EntityMaterialAssigner materialControl))
                 {
-                    materialControl.InitializeMaterials(entity.Type, _playerRender.GetControlVariables(), entity.Metadata);
+                    materialControl.InitializeMaterials(entity.Type, m_PlayerRender.GetControlVariables(), entity.Metadata);
                 }
 
                 // Destroy these colliders, so that they won't affect our movement
-                foreach (var collider in _playerRender.GetComponentsInChildren<Collider>())
+                foreach (var collider in m_PlayerRender.GetComponentsInChildren<Collider>())
                 {
                     Destroy(collider);
                 }
 
                 // Initialize player entity render (originOffset not used here)
-                _playerRender.Initialize(entity, Vector3Int.zero);
+                m_PlayerRender.Initialize(entity, Vector3Int.zero);
                 // Workaround: This value should not be applied to entity render for client player
-                _playerRender.VisualTransform.localRotation = Quaternion.identity;
+                m_PlayerRender.VisualTransform.localRotation = Quaternion.identity;
 
                 // Update render gameobject layer (do this last to ensure all children are present)
                 foreach (var child in renderObj.GetComponentsInChildren<Transform>())
@@ -146,18 +161,18 @@ namespace CraftSharp.Control
                     child.gameObject.layer = this.gameObject.layer;
                 }
 
-                var riggedRender = _playerRender as PlayerEntityRiggedRender;
+                var riggedRender = m_PlayerRender as PlayerEntityRiggedRender;
                 if (riggedRender != null) // If player render is rigged render
                 {
                     // Additionally, update player state machine for rigged rendersInitialize
                     OnPlayerUpdate += (velocity, _, status) =>
                     {
                         // Update player render velocity
-                        _playerRender.SetVisualMovementVelocity(velocity, Motor.CharacterUp);
+                        m_PlayerRender.SetVisualMovementVelocity(velocity, Motor.CharacterUp);
                         // Upload animator state machine parameters
                         riggedRender.UpdateAnimator(status);
                         // Update render
-                        _playerRender.UpdateAnimation(0.05F);
+                        m_PlayerRender.UpdateAnimation(0.05F);
                     };
                     // Initialize current item held by player
                     // TODO: Remove direct reference to client
@@ -172,46 +187,100 @@ namespace CraftSharp.Control
                     OnPlayerUpdate += (velocity, _, _) =>
                     {
                         // Update player render velocity
-                        _playerRender.SetVisualMovementVelocity(velocity, Motor.CharacterUp);
+                        m_PlayerRender.SetVisualMovementVelocity(velocity, Motor.CharacterUp);
                         // Update render
-                        _playerRender.UpdateAnimation(0.05F);
+                        m_PlayerRender.UpdateAnimation(0.05F);
                     };
                     // Reset animator flag
                     _usingAnimator = false;
                 }
-
-                CameraRef = _playerRender.SetupCameraRef();
-                _cameraController!.SetTarget(CameraRef);
-
-                _playerRender!.transform.localPosition = Vector3.zero;
+                // Setup camera ref and use it
+                m_CameraRef = m_PlayerRender.SetupCameraRef();
+                // Reset player render local position
+                m_PlayerRender!.transform.localPosition = Vector3.zero;
             }
             else
             {
                 Debug.LogWarning("Player render not found in game object!");
                 // Use own transform
-                _cameraController!.SetTarget(transform);
+                m_CameraRef = transform;
                 // Reset animator flag
                 _usingAnimator = false;
             }
+
+            if (m_CameraController != null)
+            {
+                m_CameraController.SetTarget(m_CameraRef);
+            }
         }
+
+        public void HandleCameraControllerSwitch(CameraController cameraController)
+        {
+            m_CameraController = cameraController;
+
+            if (m_CameraRef != null)
+            {
+                cameraController.transform.rotation = Quaternion.LookRotation(m_InitialForward, m_InitialUpward);
+                cameraController.SetTarget(m_CameraRef);
+            }
+            else
+            {
+                Debug.LogWarning("Camera ref is not present when switching to a new camera controller.");
+            }
+        }
+
+        #nullable enable
 
         private Action<GameModeUpdateEvent>? gameModeCallback;
         private Action<HeldItemChangeEvent>? heldItemCallback;
 
+        public delegate void ItemStateEventHandler(CurrentItemState weaponState);
+        public event ItemStateEventHandler? OnItemStateChanged;
+        public void ChangeItemState(CurrentItemState itemState) => OnItemStateChanged?.Invoke(itemState);
+
+        public delegate void ItemStackEventHandler(ItemStack? item, ItemActionType actionType, PlayerSkillItemConfig? config);
+        public event ItemStackEventHandler? OnCurrentItemChanged;
+
+        public delegate void CrossFadeStateEventHandler(string stateName, float time, int layer, float timeOffset);
+        public event CrossFadeStateEventHandler? OnCrossFadeState;
+        public void StartCrossFadeState(string stateName, float time = 0.2F, int layer = 0, float timeOffset = 0F)
+        {
+            OnCrossFadeState?.Invoke(stateName, time, layer, timeOffset);
+        }
+
+        public delegate void OverrideStateEventHandler(AnimationClip dummyClip, AnimationClip animationClip);
+        public event OverrideStateEventHandler? OnOverrideState;
+        public void OverrideStateAnimation(AnimationClip dummyClip, AnimationClip animationClip)
+        {
+            OnOverrideState?.Invoke(dummyClip, animationClip);
+        }
+
+        public event Action? OnRandomizeMirroredFlag;
+        public void RandomizeMirroredFlag() => OnRandomizeMirroredFlag?.Invoke();
+
+        public event Action? OnMeleeDamageStart;
+        public void MeleeDamageStart() => OnMeleeDamageStart?.Invoke();
+
+        public event Action? OnMeleeDamageEnd;
+        public void MeleeDamageEnd() => OnMeleeDamageEnd?.Invoke();
+
+        // Used only by player renders, will be cleared and reassigned upon player render update
+        private delegate void PlayerUpdateEventHandler(Vector3 velocity, float interval, PlayerStatus status);
+        private event PlayerUpdateEventHandler? OnPlayerUpdate;
+
+        #nullable disable
+
         void Start()
         {
-            _playerActions = new PlayerActions();
-            _playerActions.Enable();
+            m_PlayerActions = new PlayerActions();
+            m_PlayerActions.Enable();
 
             Motor.CharacterController = this;
 
-            // Initialize camera orientation, this has nothing to do with player yaw, just initial orientation
-            _cameraController!.transform.rotation = Quaternion.LookRotation(_initialForward, _initialUpward);
-
             // Set stamina to max value
-            Status!.StaminaLeft = _ability!.MaxStamina;
+            Status!.StaminaLeft = m_AbilityConfig!.MaxStamina;
             // And broadcast current stamina
-            EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, _ability!.MaxStamina));
+            EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, m_AbilityConfig!.MaxStamina));
             // Initialize health value
             EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
 
@@ -236,7 +305,7 @@ namespace CraftSharp.Control
 
         void OnDestroy()
         {
-            _playerActions?.Disable();
+            m_PlayerActions?.Disable();
 
             if (gameModeCallback is not null)
                 EventManager.Instance.Unregister(gameModeCallback);
@@ -292,9 +361,9 @@ namespace CraftSharp.Control
             Status.EntityDisabled = true;
 
             // Hide entity render
-            if (_playerRender != null)
+            if (m_PlayerRender != null)
             {
-                _playerRender.gameObject.SetActive(false);
+                m_PlayerRender.gameObject.SetActive(false);
             }
         }
 
@@ -307,42 +376,12 @@ namespace CraftSharp.Control
             Status.EntityDisabled = false;
 
             // Show entity render
-            if (_playerRender != null)
+            if (m_PlayerRender != null)
             {
-                _playerRender.gameObject.SetActive(true);
+                m_PlayerRender.gameObject.SetActive(true);
             }
         }
         
-        public delegate void ItemStateEventHandler(CurrentItemState weaponState);
-        public event ItemStateEventHandler? OnItemStateChanged;
-        public void ChangeItemState(CurrentItemState itemState) => OnItemStateChanged?.Invoke(itemState);
-
-        public delegate void ItemStackEventHandler(ItemStack? item, ItemActionType actionType, PlayerSkillItemConfig? config);
-        public event ItemStackEventHandler? OnCurrentItemChanged;
-
-        public delegate void CrossFadeStateEventHandler(string stateName, float time, int layer, float timeOffset);
-        public event CrossFadeStateEventHandler? OnCrossFadeState;
-        public void StartCrossFadeState(string stateName, float time = 0.2F, int layer = 0, float timeOffset = 0F)
-        {
-            OnCrossFadeState?.Invoke(stateName, time, layer, timeOffset);
-        }
-
-        public delegate void OverrideStateEventHandler(AnimationClip dummyClip, AnimationClip animationClip);
-        public event OverrideStateEventHandler? OnOverrideState;
-        public void OverrideStateAnimation(AnimationClip dummyClip, AnimationClip animationClip)
-        {
-            OnOverrideState?.Invoke(dummyClip, animationClip);
-        }
-
-        public event Action? OnRandomizeMirroredFlag;
-        public void RandomizeMirroredFlag() => OnRandomizeMirroredFlag?.Invoke();
-
-        public event Action? OnMeleeDamageStart;
-        public void MeleeDamageStart() => OnMeleeDamageStart?.Invoke();
-
-        public event Action? OnMeleeDamageEnd;
-        public void MeleeDamageEnd() => OnMeleeDamageEnd?.Invoke();
-
         public void ToggleWalkMode()
         {
             Status!.WalkMode = !Status.WalkMode;
@@ -353,16 +392,15 @@ namespace CraftSharp.Control
         {
             if (_usingAnimator && !walkUp)
             {
-                PlayerEntityRiggedRender? riggedRender;
                 Vector2 extraOffset;
 
-                if ((riggedRender = _playerRender as PlayerEntityRiggedRender) != null)
+                if (m_PlayerRender is PlayerEntityRiggedRender riggedRender)
                 {
                     extraOffset = riggedRender.GetClimbOverOffset();
                 }
                 else
                 {
-                    extraOffset = Ability.ClimbOverExtraOffset;
+                    extraOffset = AbilityConfig.ClimbOverExtraOffset;
                 }
 
                 if (fromLiquid)
@@ -374,21 +412,21 @@ namespace CraftSharp.Control
                 
                 StartForceMoveOperation("Climb over barrier (RootMotion)",
                         new ForceMoveOperation[] {
-                                new(offset, Ability.ClimbOverMoveTime,
+                                new(offset, AbilityConfig.ClimbOverMoveTime,
                                     init: (info, motor, player) =>
                                     {
                                         player.RandomizeMirroredFlag();
-                                        player.StartCrossFadeState(PlayerAbility.CLIMB_1M, 0.1F);
+                                        player.StartCrossFadeState(PlayerAbilityConfig.CLIMB_1M, 0.1F);
                                         info.PlayingRootMotion = true;
                                         player.UseRootMotion = true;
                                         player.IgnoreAnimatorScale = true;
                                     },
                                     update: (interval, curTime, inputData, info, motor, player) => false
                                 ),
-                                new(offset, Ability.ClimbOverTotalTime - Ability.ClimbOverMoveTime - Ability.ClimbOverCheckExit,
+                                new(offset, AbilityConfig.ClimbOverTotalTime - AbilityConfig.ClimbOverMoveTime - AbilityConfig.ClimbOverCheckExit,
                                     update: (interval, curTime, inputData, info, motor, player) => false
                                 ),
-                                new(Vector3.zero, Ability.ClimbOverCheckExit,
+                                new(Vector3.zero, AbilityConfig.ClimbOverCheckExit,
                                     exit: (info, motor, player) =>
                                     {
                                         info.Grounded = true;
@@ -439,20 +477,20 @@ namespace CraftSharp.Control
             var prevState = _currentState;
 
             //Debug.Log($"Exit state [{_currentState}]");
-            _currentState.OnExit(state, _statusUpdater!.Status, Motor, this);
+            _currentState.OnExit(state, m_StatusUpdater!.Status, Motor, this);
 
             // Exit previous state and enter this state
             _currentState = state;
             
             //Debug.Log($"Enter state [{_currentState}]");
-            _currentState.OnEnter(prevState, _statusUpdater!.Status, Motor, this);
+            _currentState.OnEnter(prevState, m_StatusUpdater!.Status, Motor, this);
         }
 
         public void AttachVisualFX(GameObject fxObj)
         {
-            if (_playerRender != null)
+            if (m_PlayerRender != null)
             {
-                fxObj.transform.SetParent(_playerRender.VisualTransform);
+                fxObj.transform.SetParent(m_PlayerRender.VisualTransform);
             }
             else
             {
@@ -460,7 +498,7 @@ namespace CraftSharp.Control
             }
         }
 
-        public bool TryStartNormalAttack(IPlayerState attackState, PlayerStagedSkill? skillData)
+        public bool TryStartNormalAttack(IPlayerState attackState, PlayerStagedSkill skillData)
         {
             if (Status!.AttackStatus.AttackCooldown <= 0F)
             {
@@ -476,7 +514,7 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public bool TryStartChargedAttack(IPlayerState attackState, PlayerChargedSkill? skillData)
+        public bool TryStartChargedAttack(IPlayerState attackState, PlayerChargedSkill skillData)
         {
             if (Status!.AttackStatus.AttackCooldown <= 0F)
             {
@@ -504,35 +542,35 @@ namespace CraftSharp.Control
 
         public void StartAiming()
         {
-            AlignVisualYawToCamera();
-            _cameraController!.EnableAimingCamera(true);
+            if (m_CameraController != null)
+            {
+                // Align target visual yaw with camera, immediately
+                Status!.TargetVisualYaw = m_CameraController.GetYaw();
+
+                m_CameraController.EnableAimingCamera(true);
+            }
         }
 
         public void StopAiming()
         {
-            _cameraController!.EnableAimingCamera(false);
-        }
-
-        /// <summary>
-        /// Align player orientation with camera, immediately
-        /// </summary>
-        private void AlignVisualYawToCamera()
-        {
-            Status!.TargetVisualYaw = _cameraController!.GetYaw();
+            if (m_CameraController != null)
+            {
+                m_CameraController.EnableAimingCamera(false);
+            }
         }
 
         public Quaternion GetCurrentOrientation()
         {
-            var upward = _initialUpward;
-            var forward = Quaternion.AngleAxis(Status!.CurrentVisualYaw, upward) * _initialForward;
+            var upward = m_InitialUpward;
+            var forward = Quaternion.AngleAxis(Status!.CurrentVisualYaw, upward) * m_InitialForward;
 
             return Quaternion.LookRotation(forward, upward);
         }
 
         public Quaternion GetTargetOrientation()
         {
-            var upward = _initialUpward;
-            var forward = Quaternion.AngleAxis(Status!.TargetVisualYaw, upward) * _initialForward;
+            var upward = m_InitialUpward;
+            var forward = Quaternion.AngleAxis(Status!.TargetVisualYaw, upward) * m_InitialForward;
 
             return Quaternion.LookRotation(forward, upward);
         }
@@ -544,20 +582,20 @@ namespace CraftSharp.Control
         {
             if (!Status!.EntityDisabled)
             {
-                _statusUpdater!.UpdatePlayerStatus(Motor, GetTargetOrientation());
+                m_StatusUpdater!.UpdatePlayerStatus(Motor, GetTargetOrientation());
             }
         }
 
         public void BeforeCharacterUpdate(float deltaTime)
         {
-            var status = _statusUpdater!.Status;
+            var status = m_StatusUpdater!.Status;
 
             // Update target player visual yaw before updating player status
-            var horInput = _playerActions!.Gameplay.Movement.ReadValue<Vector2>();
+            var horInput = m_PlayerActions!.Gameplay.Movement.ReadValue<Vector2>();
             if (horInput != Vector2.zero)
             {
                 var userInputYaw = GetYawFromVector2(horInput);
-                status.TargetVisualYaw = _cameraController!.GetYaw() + userInputYaw;
+                status.TargetVisualYaw = m_CameraController!.GetYaw() + userInputYaw;
             }
 
             // Update player status (in water, grounded, etc)
@@ -569,12 +607,12 @@ namespace CraftSharp.Control
                 ChangeToState(_pendingState);
                 _pendingState = null;
             }
-            else if (_currentState.ShouldExit(_playerActions!, status))
+            else if (_currentState.ShouldExit(m_PlayerActions!, status))
             {
                 // Try to exit current state and enter another one
                 foreach (var state in PlayerStates.STATES)
                 {
-                    if (state != _currentState && state.ShouldEnter(_playerActions!, status))
+                    if (state != _currentState && state.ShouldEnter(m_PlayerActions!, status))
                     {
                         ChangeToState(state);
                         break;
@@ -582,30 +620,30 @@ namespace CraftSharp.Control
                 }
             }
 
-            _currentState.UpdateBeforeMotor(deltaTime, _playerActions!, status, Motor, this);
+            _currentState.UpdateBeforeMotor(deltaTime, m_PlayerActions!, status, Motor, this);
         }
 
         public void UpdateRotation(ref Quaternion currentRotation, float deltaTime)
         {
-            var upward = _initialUpward;
-            var forward = Quaternion.AngleAxis(Status!.CurrentVisualYaw, upward) * _initialForward;
+            var upward = m_InitialUpward;
+            var forward = Quaternion.AngleAxis(Status!.CurrentVisualYaw, upward) * m_InitialForward;
 
             currentRotation = Quaternion.LookRotation(forward, upward);
         }
 
         public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
         {
-            var status = _statusUpdater!.Status;
+            var status = m_StatusUpdater!.Status;
 
             float prevStamina = status.StaminaLeft;
             
             // Update player physics and transform using updated current state
-            _currentState.UpdateMain(ref currentVelocity, deltaTime, _playerActions!, status, Motor, this);
+            _currentState.UpdateMain(ref currentVelocity, deltaTime, m_PlayerActions!, status, Motor, this);
 
             // Broadcast current stamina if changed
             if (prevStamina != status.StaminaLeft)
             {
-                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, _ability!.MaxStamina));
+                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, m_AbilityConfig!.MaxStamina));
             }
             
 
@@ -635,26 +673,26 @@ namespace CraftSharp.Control
                 Math.Round(newLocation.Z, 2)
             );
 
-            if (_playerRender != null)
+            if (m_PlayerRender != null)
             {
                 // Update client player data
                 MCYaw2Send = Status!.CurrentVisualYaw - 90F; // Coordinate system conversion
                 Pitch2Send = 0F;
             }
 
-            if (_cameraController!.IsAiming)
+            if (m_CameraController != null)
             {
-                AlignVisualYawToCamera();
+                if (m_CameraController.IsAiming)
+                {
+                    // Align target visual yaw with camera, immediately
+                    Status!.TargetVisualYaw = m_CameraController.GetYaw();
+                }
             }
 
             // Reset root motion deltas
             RootMotionPositionDelta = Vector3.zero;
             RootMotionRotationDelta = Quaternion.identity;
         }
-
-        // Used only by player renders, will be cleared and reassigned upon player render update
-        private delegate void PlayerUpdateEventHandler(Vector3 velocity, float interval, PlayerStatus status);
-        private event PlayerUpdateEventHandler? OnPlayerUpdate;
 
         private Vector3Int _worldOriginOffset = Vector3Int.zero;
 
@@ -710,10 +748,10 @@ namespace CraftSharp.Control
         {
             string statusInfo;
 
-            if (_statusUpdater!.Status.Spectating)
+            if (m_StatusUpdater!.Status.Spectating)
                 statusInfo = string.Empty;
             else
-                statusInfo = _statusUpdater!.Status.ToString();
+                statusInfo = m_StatusUpdater!.Status.ToString();
             
             return $"ActionType:\t{CurrentActionType}\nState:\t{_currentState}\n{statusInfo}";
         }
@@ -727,11 +765,11 @@ namespace CraftSharp.Control
 
         public bool IsColliderValidForCollisions(Collider coll)
         {
-            if (_statusUpdater == null)
+            if (m_StatusUpdater == null)
             {
                 return true;
             }
-            return !_statusUpdater.Status.Spectating && !_currentState.IgnoreCollision();
+            return !m_StatusUpdater.Status.Spectating && !_currentState.IgnoreCollision();
         }
 
         public void OnGroundHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport)

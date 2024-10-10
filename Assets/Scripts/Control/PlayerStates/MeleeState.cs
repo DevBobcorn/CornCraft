@@ -76,7 +76,7 @@ namespace CraftSharp.Control
             attackStatus.StageDamageEnd = stageData.DamageEnd;
 
             player.OverrideStateAnimation(meleeAttack.DummyAnimationClip!, stageData.AnimationClip!);
-            player.StartCrossFadeState(PlayerAbility.SKILL, 0F);
+            player.StartCrossFadeState(PlayerAbilityConfig.SKILL, 0F);
             //player.TurnToAttackTarget();
 
             if (stageData.VisualFXPrefab != null)
@@ -137,7 +137,7 @@ namespace CraftSharp.Control
             player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
             {
                 // TODO: Get the right data according to weapon type
-                player.TryStartChargedAttack(PlayerStates.RANGED_AIM, player.Ability.RangedBowAttack_Charged);
+                player.TryStartChargedAttack(PlayerStates.RANGED_AIM, player.AbilityConfig.RangedBowAttack_Charged);
             };
 
             player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>
