@@ -1,7 +1,6 @@
-#nullable enable
 using UnityEngine;
-using Cinemachine;
 using UnityEngine.InputSystem;
+using Cinemachine;
 
 namespace CraftSharp.Control
 {
@@ -10,23 +9,29 @@ namespace CraftSharp.Control
         /// <summary>
         /// Camera used for actual rendering
         /// </summary>
-        [SerializeField] protected Camera? renderCamera;
+        protected Camera renderCamera;
 
         /// <summary>
         /// Camera used for rendering sprites, without post processing.
         /// The clear depth flag of this camera should be set to false
         /// </summary>
-        [SerializeField] protected Camera? spriteRenderCamera;
+        protected Camera spriteRenderCamera;
 
-        [SerializeField] protected InputActionReference? zoomInput;
+        [SerializeField] protected InputActionReference zoomInput;
         [SerializeField] [Range(0F, 20F)] protected float zoomSmoothFactor = 4.0F;
         [SerializeField] [Range(0F,  2F)] protected float zoomSensitivity = 0.5F;
 
         protected static readonly Vector3 VIEWPORT_CENTER    = new(0.5F,  0.5F, 0F);
         protected CameraInfo cameraInfo = new();
-        public Camera? RenderCamera => renderCamera;
+        public Camera RenderCamera => renderCamera;
 
-        public virtual void EnableInput()
+        public void SetCameras(Camera mainCamera, Camera spriteCamera)
+        {
+            renderCamera = mainCamera;
+            spriteRenderCamera = spriteCamera;
+        }
+
+        public virtual void EnableCinemachineInput()
         {
             foreach (var input in GetComponentsInChildren<CinemachineInputProvider>())
             {
@@ -34,7 +39,7 @@ namespace CraftSharp.Control
             }
         }
 
-        public virtual void DisableInput()
+        public virtual void DisableCinemachineInput()
         {
             foreach (var input in GetComponentsInChildren<CinemachineInputProvider>())
             {
@@ -44,19 +49,19 @@ namespace CraftSharp.Control
 
         public virtual void EnableZoom()
         {
-            zoomInput!.action.Enable();
+            zoomInput.action.Enable();
         }
 
         public virtual void DisableZoom()
         {
-            zoomInput!.action.Disable();
+            zoomInput.action.Disable();
         }
 
         // Flag variables
         protected bool initialized = false;
         public bool IsAiming { get; protected set; } = false;
 
-        public virtual Ray? GetViewportCenterRay()
+        public virtual Ray? GetPointerRay()
         {
             if (renderCamera != null)
             {
@@ -69,7 +74,7 @@ namespace CraftSharp.Control
 
         public abstract void SetTarget(Transform target);
 
-        public abstract Transform? GetTarget();
+        public abstract Transform GetTarget();
 
         /// <summary>
         /// Used when updating world origin offset to seamlessly teleport the camera
@@ -88,7 +93,7 @@ namespace CraftSharp.Control
             var target = GetTarget();
             if (target != null)
             {
-                var pos = renderCamera!.WorldToViewportPoint(target.TransformPoint(offset));
+                var pos = renderCamera.WorldToViewportPoint(target.TransformPoint(offset));
                 pos.z = 0F;
                 return pos;
             }
@@ -97,7 +102,7 @@ namespace CraftSharp.Control
 
         public virtual Transform GetTransform()
         {
-            return renderCamera!.transform;
+            return renderCamera.transform;
         }
 
         public abstract float GetYaw();

@@ -157,8 +157,11 @@ namespace CraftSharp.Control
 
         void Update()
         {
-            // Update target block selection
-            UpdateBlockSelection(cameraController!.GetViewportCenterRay());
+            if (cameraController != null)
+            {
+                // Update target block selection
+                UpdateBlockSelection(cameraController!.GetPointerRay());
+            }
 
             // Update player interactions
             UpdateBlockInteractions(client!.ChunkRenderManager);

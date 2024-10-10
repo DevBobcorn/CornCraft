@@ -16,7 +16,7 @@ namespace CraftSharp.Control
         private void CheckClimbOverInLiquid(PlayerStatus info, PlayerController player)
         {
             if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
-                    info.BarrierDistance < player.Ability.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
+                    info.BarrierDistance < player.AbilityConfig.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
             {
                 if (info.BarrierYawAngle < 30F) // Check if available, for high barriers check cooldown and angle
                 {
@@ -53,7 +53,7 @@ namespace CraftSharp.Control
 
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
-            var ability = player.Ability;
+            var ability = player.AbilityConfig;
             
             info.Sprinting = false;
             info.Gliding = false;

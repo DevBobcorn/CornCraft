@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 using Cinemachine;
 
@@ -9,11 +8,10 @@ namespace CraftSharp.Control
         [SerializeField] private float cameraZOffsetNear =   15F;
         [SerializeField] private float cameraZOffsetFar  =   30F;
         
-
         // Virtual camera and camera components
-        private CinemachineVirtualCamera? _virtualCameraFollow;
-        private CinemachineFramingTransposer? _framingTransposer;
-        private CinemachinePOV? _followPOV;
+        private CinemachineVirtualCamera _virtualCameraFollow;
+        private CinemachineFramingTransposer _framingTransposer;
+        private CinemachinePOV _followPOV;
 
         private float? _setYawRequest = null;
 
@@ -38,10 +36,16 @@ namespace CraftSharp.Control
             // Activate virtual camera
             _virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
 
+            // Enable Cinemachine and zoom input
+            zoomInput.action.Enable();
+            EnableCinemachineInput();
+
             // Initialize camera scale
-            zoomInput!.action.Enable();
             cameraInfo.TargetScale = 0.8F;
             cameraInfo.CurrentScale = cameraInfo.TargetScale - 0.2F;
+
+            // Make sure sprite camera uses same fov as main camera
+            spriteRenderCamera!.fieldOfView = _virtualCameraFollow.m_Lens.FieldOfView;
 
             // Aiming is not enabled by default
             EnableAimingCamera(false);
@@ -49,6 +53,11 @@ namespace CraftSharp.Control
 
         void Update()
         {
+            if (_setYawRequest != null)
+            {
+                SetYaw(_setYawRequest.Value);
+            }
+
             var zoom = zoomInput!.action.ReadValue<float>();
             if (zoom != 0F)
             {
@@ -69,7 +78,7 @@ namespace CraftSharp.Control
             _virtualCameraFollow!.Follow = target;
         }
 
-        public override Transform? GetTarget()
+        public override Transform GetTarget()
         {
             if (_virtualCameraFollow == null)
             {

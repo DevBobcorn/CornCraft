@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace CraftSharp.Rendering
 {
-    [CreateAssetMenu(fileName = "Player Skill Item Config", menuName = "CornCraft/Player Skill Item Config")]
+    [CreateAssetMenu(fileName = "Player Skill Item Config", menuName = "Config/Player Skill Item Config")]
     public class PlayerSkillItemConfig : ScriptableObject
     {
         [SerializeField] public Material DummyItemMaterial;

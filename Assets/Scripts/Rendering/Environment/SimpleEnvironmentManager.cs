@@ -27,6 +27,11 @@ namespace CraftSharp.Rendering
 
         private float deltaSeconds = 0F;
 
+        public override void SetCamera(Camera mainCamera)
+        {
+            // TODO: Implement
+        }
+
         public override void SetRain(bool raining)
         {
             // TODO: Implement

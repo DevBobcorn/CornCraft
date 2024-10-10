@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 using CraftSharp.Control;
 using CraftSharp.Protocol;
@@ -14,54 +15,63 @@ namespace CraftSharp
     public abstract class BaseCornClient : MonoBehaviour
     {
         #region Inspector Fields
+        // World Fields
         [SerializeField] private Transform m_WorldAnchor;
         [SerializeField] private ChunkRenderManager m_ChunkRenderManager;
         [SerializeField] private EntityRenderManager m_EntityRenderManager;
         [SerializeField] private BaseEnvironmentManager m_EnvironmentManager;
         [SerializeField] private ChunkMaterialManager m_ChunkMaterialManager;
         [SerializeField] private EntityMaterialManager m_EntityMaterialManager;
-
         public ChunkRenderManager ChunkRenderManager => m_ChunkRenderManager;
         public EntityRenderManager EntityRenderManager => m_EntityRenderManager;
         public BaseEnvironmentManager EnvironmentManager => m_EnvironmentManager;
         public ChunkMaterialManager ChunkMaterialManager => m_ChunkMaterialManager;
         public EntityMaterialManager EntityMaterialManager => m_EntityMaterialManager;
         
+        // Player Fields
         [SerializeField] private PlayerController m_PlayerController;
+        [SerializeField] private GameObject[] m_PlayerRenderPrefabs = { };
+        private int m_SelectedRenderPrefab;
         public PlayerController PlayerController => m_PlayerController;
-        [SerializeField] protected GameObject[] playerRenderPrefabs = { };
-        [SerializeField] protected int selectedRenderPrefab;
-        [SerializeField] protected CameraController m_CameraController;
+
+        // Camera Fields
+        [SerializeField] private GameObject[] m_CameraControllerPrefabs = { };
+        private CameraController m_CameraController;
+        private int m_SelectedCameraController = 0;
         public CameraController CameraController => m_CameraController;
-        [SerializeField] protected ScreenControl screenControl;
-        public ScreenControl ScreenControl => screenControl;
+        public Camera MainCamera;
+        public Camera SpriteCamera;
+
+        // UI Fields
+        [SerializeField] protected ScreenControl m_ScreenControl;
+        public ScreenControl ScreenControl => m_ScreenControl;
         [SerializeField] protected Camera m_UICamera;
         public Camera UICamera => m_UICamera;
         #endregion
 
         public bool InputPaused { get; private set; } = false;
-        public void EnableInput(bool enable)
+        public void ToggleInputPause(bool enable)
         {
             if (m_CameraController != null && m_PlayerController != null)
             {
                 if (enable)
                 {
                     m_PlayerController.EnableInput();
-                    m_CameraController.EnableInput();
+                    m_CameraController.EnableCinemachineInput();
 
                     InputPaused = false;
                 }
                 else
                 {
                     m_PlayerController.DisableInput();
-                    m_CameraController.DisableInput();
+                    m_CameraController.DisableCinemachineInput();
 
                     InputPaused = true;
                 }
             }
         }
 
-        public void EnableCameraZoom(bool enable)
+        public void ToggleCameraZoom(bool enable)
         {
             if (m_CameraController != null)
             {
@@ -74,6 +84,64 @@ namespace CraftSharp
                     m_CameraController.DisableZoom();
                 }
             }
+        }
+
+        public void SwitchFirstCameraController()
+        {
+            if (m_CameraControllerPrefabs.Length == 0) return;
+
+            m_SelectedCameraController = 0;
+            SwitchCameraController(m_CameraControllerPrefabs[0]);
+        }
+
+        public void SwitchCameraControllerBy(int indexOffset)
+        {
+            if (m_CameraControllerPrefabs.Length == 0) return;
+
+            var index = m_SelectedCameraController + indexOffset;
+            while (index < 0) index += m_CameraControllerPrefabs.Length;
+
+            m_SelectedCameraController = index % m_CameraControllerPrefabs.Length;
+            SwitchCameraController(m_CameraControllerPrefabs[m_SelectedCameraController]);
+        }
+
+        private void SwitchCameraController(GameObject controllerPrefab)
+        {
+            var prevControllerObj = m_CameraController == null ? null : m_CameraController.gameObject;
+
+            // Destroy the old one
+            if (prevControllerObj != null)
+            {
+                Destroy(prevControllerObj);
+            }
+
+            var cameraControllerObj = GameObject.Instantiate(controllerPrefab);
+            m_CameraController = cameraControllerObj.GetComponent<CameraController>();
+
+            // Assign Cameras
+            m_CameraController.SetCameras(MainCamera, SpriteCamera);
+
+            // Call player controller handler
+            m_PlayerController.HandleCameraControllerSwitch(m_CameraController);
+        }
+
+        public void SwitchFirstPlayerRender(Entity clientEntity)
+        {
+            if (m_PlayerRenderPrefabs.Length == 0) return;
+
+            m_SelectedRenderPrefab = 0;
+            PlayerController.SwitchPlayerRenderFromPrefab(clientEntity, m_PlayerRenderPrefabs[0]);
+        }
+
+        public void SwitchPlayerRenderBy(Entity clientEntity, int indexOffset)
+        {
+            if (m_PlayerRenderPrefabs.Length == 0) return;
+
+            var index = m_SelectedRenderPrefab + indexOffset;
+            while (index < 0) index += m_PlayerRenderPrefabs.Length;
+
+            m_SelectedRenderPrefab = index % m_PlayerRenderPrefabs.Length;
+            PlayerController.SwitchPlayerRenderFromPrefab(clientEntity, m_PlayerRenderPrefabs[m_SelectedRenderPrefab]);
         }
 
         public GameMode GameMode { get; protected set; } = GameMode.Survival;

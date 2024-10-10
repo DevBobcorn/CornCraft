@@ -20,7 +20,7 @@ using CraftSharp.Rendering;
 namespace CraftSharp
 {
     [RequireComponent(typeof (InteractionUpdater))]
-    public class CornClient : BaseCornClient, IMinecraftComHandler
+    public class CornClientOnline : BaseCornClient, IMinecraftComHandler
     {
         #nullable enable
 
@@ -91,6 +91,9 @@ namespace CraftSharp
             // Set up chunk render manager
             ChunkRenderManager.SetClient(this);
 
+            // Set up environment manager
+            EnvironmentManager.SetCamera(MainCamera);
+
             // Set up interaction updater
             interactionUpdater = GetComponent<InteractionUpdater>();
             interactionUpdater!.Initialize(this, CameraController);
@@ -137,14 +140,10 @@ namespace CraftSharp
                     clientEntity.UUID = uuid;
                     clientEntity.MaxHealth = 20F;
 
-                    if (playerRenderPrefabs[selectedRenderPrefab] != null)
-                    {
-                        PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
-                    }
-                    else
-                    {
-                        throw new Exception("Player render prefab is not assigned for game client!");
-                    }
+                    // Create player render
+                    SwitchFirstPlayerRender(clientEntity);
+                    // Create camera controller
+                    SwitchFirstCameraController();
 
                     return true; // Client successfully started
                 }
@@ -225,18 +224,29 @@ namespace CraftSharp
             {
                 if (Keyboard.current.f6Key.wasPressedThisFrame) // Select previous
                 {
-                    selectedRenderPrefab = (selectedRenderPrefab + playerRenderPrefabs.Length - 1) % playerRenderPrefabs.Length;
-                    PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                    SwitchPlayerRenderBy(clientEntity, -1);
                 }
                 else if (Keyboard.current.f7Key.wasPressedThisFrame) // Regenerate current prefab
                 {
-                    PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                    SwitchPlayerRenderBy(clientEntity,  0);
                 }
                 else if (Keyboard.current.f8Key.wasPressedThisFrame) // Select next
                 {
-                    selectedRenderPrefab = (selectedRenderPrefab + 1) % playerRenderPrefabs.Length;
-                    PlayerController.UpdatePlayerRenderFromPrefab(clientEntity, playerRenderPrefabs[selectedRenderPrefab]);
+                    SwitchPlayerRenderBy(clientEntity,  1);
                 }
+            }
+
+            if (Keyboard.current.numpad4Key.wasPressedThisFrame) // Select previous
+            {
+                SwitchCameraControllerBy(-1);
+            }
+            else if (Keyboard.current.numpad5Key.wasPressedThisFrame) // Regenerate current prefab
+            {
+                SwitchCameraControllerBy( 0);
+            }
+            else if (Keyboard.current.numpad6Key.wasPressedThisFrame) // Select next
+            {
+                SwitchCameraControllerBy( 1);
             }
         }
 
@@ -632,7 +642,7 @@ namespace CraftSharp
         /// <returns>Dictionay of online players, key is UUID, value is Player name</returns>
         public override Dictionary<string, string> GetOnlinePlayersWithUUID()
         {
-            Dictionary<string, string> uuid2Player = new Dictionary<string, string>();
+            var uuid2Player = new Dictionary<string, string>();
             lock (onlinePlayers)
             {
                 foreach (Guid key in onlinePlayers.Keys)

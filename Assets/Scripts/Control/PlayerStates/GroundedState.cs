@@ -47,7 +47,7 @@ namespace CraftSharp.Control
         private void CheckClimbOver(PlayerStatus info, PlayerController player)
         {
             if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
-                    info.BarrierDistance < player.Ability.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
+                    info.BarrierDistance < player.AbilityConfig.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
             {
                 bool walkUp = info.BarrierHeight < THRESHOLD_WALK_UP;
 
@@ -100,7 +100,7 @@ namespace CraftSharp.Control
 
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
-            var ability = player.Ability;
+            var ability = player.AbilityConfig;
 
             // Reset gliding state
             info.Gliding = false;
@@ -305,13 +305,13 @@ namespace CraftSharp.Control
             player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
             {
                 // TODO: Get the right data according to weapon type
-                player.TryStartChargedAttack(PlayerStates.RANGED_AIM, player.Ability.RangedBowAttack_Charged);
+                player.TryStartChargedAttack(PlayerStates.RANGED_AIM, player.AbilityConfig.RangedBowAttack_Charged);
             };
 
             player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>
             {
                 // TODO: Get the right data according to weapon type
-                player.TryStartNormalAttack(PlayerStates.MELEE, player.Ability.MeleeSwordAttack_Staged);
+                player.TryStartNormalAttack(PlayerStates.MELEE, player.AbilityConfig.MeleeSwordAttack_Staged);
             };
 
             player.Actions.Gameplay.Jump.performed += jumpRequestCallback = (context) =>

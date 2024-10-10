@@ -200,7 +200,7 @@ namespace CraftSharp.Rendering
             }
             else
             {
-                if ((psi != null) || (_player != null && (psi = _player.SkillItemConf) != null))
+                if ((psi != null) || (_player != null && (psi = _player.SkillItemConfig) != null))
                 {
                     CreateActionItem(itemStack, actionType, psi);
                 }

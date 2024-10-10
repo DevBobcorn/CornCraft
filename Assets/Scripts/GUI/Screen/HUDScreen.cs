@@ -133,12 +133,12 @@ namespace CraftSharp.UI
                     if (newCount > 1)
                     {
                         scrollInput.action.Enable();
-                        game.EnableCameraZoom(false);
+                        game.ToggleCameraZoom(false);
                     }
                     else
                     {
                         scrollInput.action.Disable();
-                        game.EnableCameraZoom(true);
+                        game.ToggleCameraZoom(true);
                     }
                 };
 
@@ -321,15 +321,18 @@ namespace CraftSharp.UI
             var game = CornApp.CurrentClient;
             if (game == null) return;
             
-            // Update stamina bar position
-            var targetPosition = game.UICamera.ViewportToWorldPoint(
-                    game.CameraController.GetTargetViewportPos(STAMINA_TARGET_OFFSET));
+            if (game.CameraController != null)
+            {
+                // Update stamina bar position
+                var targetPosition = game.UICamera.ViewportToWorldPoint(
+                        game.CameraController.GetTargetViewportPos(STAMINA_TARGET_OFFSET));
 
-            var newPos = Vector3.Lerp(
-                    staminaBar.transform.position, targetPosition, Time.deltaTime * 10F);
-            
-            // Don't modify z coordinate
-            staminaBar.transform.position = new Vector3(newPos.x, newPos.y, staminaBar.transform.position.z);
+                var newPos = Vector3.Lerp(
+                        staminaBar.transform.position, targetPosition, Time.deltaTime * 10F);
+
+                // Don't modify z coordinate
+                staminaBar.transform.position = new Vector3(newPos.x, newPos.y, staminaBar.transform.position.z);
+            }
         }
     }
 }

@@ -1,10 +1,9 @@
-#nullable enable
 using UnityEngine;
 
 namespace CraftSharp.Control
 {
-    [CreateAssetMenu(fileName = "Player Ability", menuName = "CornCraft/Player Ability")]
-    public class PlayerAbility : ScriptableObject
+    [CreateAssetMenu(fileName = "Player Ability Config", menuName = "Config/Player Ability Config")]
+    public class PlayerAbilityConfig : ScriptableObject
     {
         // Force move animation state names
         public static readonly string CLIMB_1M = "Climb1m";
@@ -37,7 +36,7 @@ namespace CraftSharp.Control
         [Range(1F, 100F)] public float MaxGlideFallSpeed    =    1F;
         [Range(0.1F, 1F)] public float LiquidMoveMultiplier = 0.85F;
 
-        public PlayerStagedSkill? MeleeSwordAttack_Staged;
-        public PlayerChargedSkill? RangedBowAttack_Charged;
+        public PlayerStagedSkill MeleeSwordAttack_Staged;
+        public PlayerChargedSkill RangedBowAttack_Charged;
     }
 }
