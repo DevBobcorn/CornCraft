@@ -19,8 +19,8 @@ namespace CraftSharp
 #nullable enable
 
         #region Login Information
-        private const int DUMMY_PROTOCOL_VERSION = 754;
-        private const string DUMMY_USERNAME = "OfflinePlayer";
+        public static readonly int DUMMY_PROTOCOL_VERSION = ProtocolHandler.GetMinSupported();
+        public static readonly string DUMMY_USERNAME = "dummy_user";
         private Guid uuid = Guid.Empty;
         #endregion
 

@@ -114,9 +114,19 @@ namespace CraftSharp.Protocol
         }
         #nullable disable
 
-        public static bool IsProtocolSupported(int version)
+        public static bool IsProtocolSupported(int protocol)
         {
-            return ProtocolVersion2MCVer(version) != "unknown";
+            return ACCECPTED_VERSIONS.ContainsKey(protocol);
+        }
+
+        public static int GetMinSupported()
+        {
+            return ACCECPTED_VERSIONS.Min(x => x.Key);
+        }
+
+        public static int GetMaxSupported()
+        {
+            return ACCECPTED_VERSIONS.Max(x => x.Key);
         }
 
         /// <summary>
@@ -173,6 +183,24 @@ namespace CraftSharp.Protocol
                     case "1.19.1":
                     case "1.19.2":
                         return 760;
+                    case "1.19.3":
+                        return 761;
+                    case "1.19.4":
+                        return 762;
+                    case "1.20":
+                    case "1.20.1":
+                        return 763;
+                    case "1.20.2":
+                        return 764;
+                    case "1.20.3":
+                    case "1.20.4":
+                        return 765;
+                    case "1.20.5":
+                    case "1.20.6":
+                        return 766;
+                    case "1.21":
+                    case "1.21.1":
+                        return 767;
                     default:
                         return 0;
                 }
@@ -190,6 +218,29 @@ namespace CraftSharp.Protocol
             }
         }
 
+        private static readonly Dictionary<int, string> ACCECPTED_VERSIONS = new()
+        {
+                [751] = "1.16.2",
+                [753] = "1.16.3",
+                [754] = "1.16.5",
+                [755] = "1.17",
+                [756] = "1.17.1",
+                [757] = "1.18.1",
+                [758] = "1.18.2",
+                [759] = "1.19",
+                [760] = "1.19.2",
+                [761] = "1.19.3",
+                [762] = "1.19.4",
+
+                /*
+                [763] = "1.20",
+                [764] = "1.20.2",
+                [765] = "1.20.3",
+                [766] = "1.20.5",
+                [767] = "1.21"
+                */
+        };
+
         /// <summary>
         /// Convert a network protocol version number to human-readable Minecraft version number
         /// </summary>
@@ -198,25 +249,12 @@ namespace CraftSharp.Protocol
         /// <returns>The 1.X.X version number, or unknown if could not determine protocol version</returns>
         public static string ProtocolVersion2MCVer(int protocol)
         {
-            return protocol switch
+            if (ACCECPTED_VERSIONS.TryGetValue(protocol, out string versionName))
             {
-                735 => "1.16",
-                736 => "1.16.1",
-                751 => "1.16.2",
-                753 => "1.16.3",
-                754 => "1.16.5",
-                755 => "1.17",
-                756 => "1.17.1",
-                757 => "1.18.1",
-                758 => "1.18.2",
-                759 => "1.19",
-                760 => "1.19.2",
-                761 => "1.19.3",
-                762 => "1.19.4",
-                763 => "1.20",
-                
-                _   => "unknown"
-            };
+                return versionName;
+            }
+
+            return "unknown";
         }
 
         /// <summary>

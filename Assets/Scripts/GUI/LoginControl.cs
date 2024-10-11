@@ -118,11 +118,11 @@ namespace CraftSharp.UI
             preparingGame = true;
 
             var serverVersionName = "<dummy>";
-            var protocolVersion = 754; // 1.16.5
+            var protocolVersion = CornClientOffline.DUMMY_PROTOCOL_VERSION;
             CornApp.Notify(Translations.Get("mcc.server_protocol", serverVersionName, protocolVersion));
 
             var session = new SessionToken { PlayerName = "OfflinePlayer" };
-            var accountLower = "dummy_user";
+            var accountLower = CornClientOffline.DUMMY_USERNAME.ToLower();
             // Dummy authentication completed, hide the panel...
             HideLoginPanel();
             // Store current login info
@@ -331,8 +331,31 @@ namespace CraftSharp.UI
                     }
                     else
                     {
-                        CornApp.Notify(Translations.Get("error.unsupported"), Notification.Type.Error);
-                        preparingGame = false;
+                        int maxSupported = ProtocolHandler.GetMaxSupported();
+
+                        if (protocolVersion > maxSupported)
+                        {
+                            // This version is not directly supported, yet still
+                            // might be joinable if ViaBackwards' installed
+
+                            protocolVersion = maxSupported; // Try our luck
+
+                            // Authentication completed, hide the panel...
+                            HideLoginPanel();
+                            // Store current login info
+                            loginInfo = new StartLoginInfo(true, session, playerKeyPair, host, port,
+                                    protocolVersion, null, accountLower);
+                            // Display a notification
+                            var maxMCVersion = ProtocolHandler.ProtocolVersion2MCVer(maxSupported);
+                            CornApp.Notify($"Using supported version {maxMCVersion} (protocol v{protocolVersion})", Notification.Type.Warning);
+                            // No need to yield return this coroutine because it's the last step here
+                            StartCoroutine(StoreLoginInfoAndLoadResource(loginInfo));
+                        }
+                        else
+                        {
+                            CornApp.Notify(Translations.Get("error.unsupported"), Notification.Type.Error);
+                            preparingGame = false;
+                        }
                     }
                 }
                 else // Unable to determine server version

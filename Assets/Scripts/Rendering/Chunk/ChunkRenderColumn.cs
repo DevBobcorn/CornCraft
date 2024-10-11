@@ -24,7 +24,7 @@ namespace CraftSharp.Rendering
             else
             {
                 // This chunk doesn't currently exist...
-                if (chunkYIndex >= 0 && chunkYIndex * Chunk.SIZE < World.GetDimension().height)
+                if (chunkYIndex >= 0 && chunkYIndex * Chunk.SIZE < World.GetDimensionType().height)
                 {
                     return null;
                 }
@@ -47,7 +47,7 @@ namespace CraftSharp.Rendering
             }
 
             // This ChunkRender doesn't currently exist...
-            if (chunkYIndex >= 0 && chunkYIndex * Chunk.SIZE < World.GetDimension().height)
+            if (chunkYIndex >= 0 && chunkYIndex * Chunk.SIZE < World.GetDimensionType().height)
             {
                 Profiler.BeginSample("Create chunk render object");
 
@@ -63,7 +63,7 @@ namespace CraftSharp.Rendering
 
                 // Set its parent to this ChunkRenderColumn...
                 chunkObj.transform.parent = this.transform;
-                chunkObj.transform.localPosition = new(0F, chunkYIndex * Chunk.SIZE + World.GetDimension().minY, 0F);
+                chunkObj.transform.localPosition = new(0F, chunkYIndex * Chunk.SIZE + World.GetDimensionType().minY, 0F);
 
                 chunkObj.hideFlags = HideFlags.HideAndDontSave;
                 

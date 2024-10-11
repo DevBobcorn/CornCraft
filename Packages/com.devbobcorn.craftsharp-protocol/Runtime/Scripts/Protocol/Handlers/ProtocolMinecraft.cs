@@ -308,7 +308,7 @@ namespace CraftSharp.Protocol.Handlers
                                 var registryCodec = DataTypes.ReadNextNbt(packetData);
                                 ChatParser.ReadChatType(registryCodec);
 
-                                World.StoreDimensionList(registryCodec);
+                                World.StoreDimensionTypeList(registryCodec);
 
                                 break;
 
@@ -452,7 +452,7 @@ namespace CraftSharp.Protocol.Handlers
                                 var registryCodec = DataTypes.ReadNextNbt(packetData);
 
                                 // Read and store defined dimensions 1.16.2 and above
-                                World.StoreDimensionList(registryCodec);
+                                World.StoreDimensionTypeList(registryCodec);
 
                                 // Read and store defined biomes 1.16.2 and above
                                 World.StoreBiomeList(registryCodec);
@@ -484,16 +484,23 @@ namespace CraftSharp.Protocol.Handlers
 
                             if (protocolVersion >= MC_1_16_Version)
                             {
-                                string dimensionName = DataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
+                                string dimensionName = DataTypes.ReadNextString(packetData); // Dimension Id (World Id) - 1.16 and above
+                                var dimensionId = ResourceLocation.FromString(dimensionName);
 
                                 if (protocolVersion >= MC_1_16_2_Version && protocolVersion <= MC_1_18_2_Version)
                                 {
-                                    World.StoreOneDimension(dimensionName, dimensionType!);
-                                    World.SetDimension(dimensionName);
+                                    // Store the received dimension type with received dimension id
+                                    World.StoreOneDimensionType(dimensionId, dimensionType!);
+
+                                    World.SetDimensionType(dimensionId);
+                                    World.SetDimensionId(dimensionId);
                                 }
                                 else if (protocolVersion >= MC_1_19_Version)
                                 {
-                                    World.SetDimension(dimensionTypeName!);
+                                    var dimensionTypeId = ResourceLocation.FromString(dimensionTypeName!);
+
+                                    World.SetDimensionType(dimensionTypeId);
+                                    World.SetDimensionId(dimensionId);
                                 }
                             }
                         }
@@ -540,27 +547,29 @@ namespace CraftSharp.Protocol.Handlers
                         }
                         else
                         {
-                            {
-                                DataTypes.ReadNextBool(packetData);                           // Do limited crafting
-                                var dimensionTypeName = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
-                                DataTypes.ReadNextString(packetData);                         // Dimension Name (World Name) - 1.16 and above
+                            DataTypes.ReadNextBool(packetData);                           // Do limited crafting
+                            var dimensionTypeName = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
+                            var dimensionName = DataTypes.ReadNextString(packetData);     // Dimension Name (World Name) - 1.16 and above
+                            
+                            var dimensionTypeId = ResourceLocation.FromString(dimensionTypeName);
+                            var dimensionId = ResourceLocation.FromString(dimensionName);
 
-                                World.SetDimension(dimensionTypeName);
+                            World.SetDimensionType(dimensionTypeId);
+                            World.SetDimensionId(dimensionId);
 
-                                DataTypes.ReadNextLong(packetData); // Hashed world seed
-                                handler.OnGamemodeUpdate(Guid.Empty, DataTypes.ReadNextByte(packetData));
-                                DataTypes.ReadNextByte(packetData); // Previous Gamemode
-                                DataTypes.ReadNextBool(packetData); // Is Debug
-                                DataTypes.ReadNextBool(packetData); // Is Flat
+                            DataTypes.ReadNextLong(packetData); // Hashed world seed
+                            handler.OnGamemodeUpdate(Guid.Empty, DataTypes.ReadNextByte(packetData));
+                            DataTypes.ReadNextByte(packetData); // Previous Gamemode
+                            DataTypes.ReadNextBool(packetData); // Is Debug
+                            DataTypes.ReadNextBool(packetData); // Is Flat
                                 
-                                if (DataTypes.ReadNextBool(packetData))     // Has death location
-                                {
-                                    DataTypes.SkipNextString(packetData);   // Death dimension name: Identifier
-                                    DataTypes.ReadNextLocation(packetData); // Death location
-                                }
-
-                                DataTypes.ReadNextVarInt(packetData); // Portal Cooldown
+                            if (DataTypes.ReadNextBool(packetData))     // Has death location
+                            {
+                                DataTypes.SkipNextString(packetData);   // Death dimension name: Identifier
+                                DataTypes.ReadNextLocation(packetData); // Death location
                             }
+
+                            DataTypes.ReadNextVarInt(packetData); // Portal Cooldown
                         }
                         break;
                     }
@@ -1010,6 +1019,7 @@ namespace CraftSharp.Protocol.Handlers
                     {
                         string? dimensionTypeNameRespawn = null;
                         Dictionary<string, object>? dimensionTypeRespawn = null;
+
                         // MC 1.16+
                         if (protocolVersion >= MC_1_19_Version)
                             dimensionTypeNameRespawn = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
@@ -1021,14 +1031,22 @@ namespace CraftSharp.Protocol.Handlers
                         this.currentDimension = 0;
 
                         string dimensionName = DataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
-                            
+                        var dimensionId = ResourceLocation.FromString(dimensionName);
+
                         if (protocolVersion >= MC_1_16_2_Version && protocolVersion <= MC_1_18_2_Version)
                         {
-                            World.SetDimension(dimensionName);
+                            // Store the received dimension type with received dimension id
+                            World.StoreOneDimensionType(dimensionId, dimensionTypeRespawn!);
+
+                            World.SetDimensionType(dimensionId);
+                            World.SetDimensionId(dimensionId);
                         }
                         else if (protocolVersion >= MC_1_19_Version)
                         {
-                            World.SetDimension(dimensionTypeNameRespawn!);
+                            var dimensionTypeIdRespawn = ResourceLocation.FromString(dimensionTypeNameRespawn);
+
+                            World.SetDimensionType(dimensionTypeIdRespawn);
+                            World.SetDimensionId(dimensionId);
                         }
 
                         DataTypes.ReadNextLong(packetData);               // Hashed world seed - 1.15 and above
@@ -1978,7 +1996,7 @@ namespace CraftSharp.Protocol.Handlers
                             dataTypes.ReadParticleData(packetData, itemPalette); // Large Explosion Particles
 
                             // Explosion Sound
-                            DataTypes.ReadNextString(packetData); // Sound Name
+                            DataTypes.ReadNextString(packetData); // Sound Id
                             var hasFixedRange = DataTypes.ReadNextBool(packetData);
                             if (hasFixedRange)
                                 DataTypes.ReadNextFloat(packetData); // Range
