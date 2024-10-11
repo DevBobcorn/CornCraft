@@ -746,6 +746,7 @@ namespace CraftSharp.Control
 
         public string GetDebugInfo()
         {
+            /*
             string statusInfo;
 
             if (m_StatusUpdater!.Status.Spectating)
@@ -754,6 +755,9 @@ namespace CraftSharp.Control
                 statusInfo = m_StatusUpdater!.Status.ToString();
             
             return $"ActionType:\t{CurrentActionType}\nState:\t{_currentState}\n{statusInfo}";
+            */
+
+            return $"ActionType:\t{CurrentActionType}\nState:\t{_currentState}";
         }
 
         // Misc methods from Kinematic Character Controller

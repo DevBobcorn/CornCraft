@@ -236,7 +236,7 @@ namespace CraftSharp.Protocol.Handlers
             // Biome data of this whole chunk column
             short[]? biomes = null;
 
-            int chunkColumnSize = (World.GetDimension().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
+            int chunkColumnSize = (World.GetDimensionType().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
             int chunkMask = 0;
 
             int dataSize;
@@ -730,7 +730,7 @@ namespace CraftSharp.Protocol.Handlers
             }
             else
             {
-                int chunkColumnSize = (World.GetDimension().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
+                int chunkColumnSize = (World.GetDimensionType().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
 
                 var skyLight   = new byte[4096 * (chunkColumnSize + 2)];
                 var blockLight = new byte[4096 * (chunkColumnSize + 2)];

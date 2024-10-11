@@ -34,7 +34,7 @@ namespace CraftSharp.Rendering
                 var ts = chunkRender.TokenSource;
 
                 int count = ChunkRender.TYPES.Length, layerMask = 0;
-                int offsetY = World.GetDimension().minY;
+                int offsetY = World.GetDimensionType().minY;
                 
                 // Set up vertex counter
                 var vertexCount = new int[count];
@@ -514,7 +514,7 @@ namespace CraftSharp.Rendering
         // https://forum.unity.com/threads/ball-rolling-on-mesh-hits-edges.772760/
         public void BuildTerrainCollider(World world, BlockLoc playerBlockLoc, Vector3Int originOffset, MeshCollider solidCollider, MeshCollider fluidCollider, Action callback)
         {
-            int offsetY = World.GetDimension().minY;
+            int offsetY = World.GetDimensionType().minY;
 
             world.GetValuesFromSection(
                     playerBlockLoc.X - MOVEMENT_RADIUS,

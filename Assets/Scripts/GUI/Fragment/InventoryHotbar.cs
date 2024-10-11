@@ -44,7 +44,14 @@ namespace CraftSharp.UI
             }
 
             hotbarUpdateCallback = (e) => {
-                itemSlots[e.HotbarSlot].UpdateItemStack(e.ItemStack);
+                if (e.HotbarSlot >= 0 && e.HotbarSlot < itemSlots.Length)
+                {
+                    itemSlots[e.HotbarSlot].UpdateItemStack(e.ItemStack);
+                }
+                else
+                {
+                    Debug.LogWarning($"Trying to set hotbar at invalid index: {e.HotbarSlot}");
+                }
             };
 
             heldItemChangeCallback = (e) => {

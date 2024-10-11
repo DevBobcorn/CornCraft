@@ -533,8 +533,8 @@ namespace CraftSharp.Rendering
             int viewDist = CornGlobal.MCSettings.RenderDistance;
             int viewDistSqr = viewDist * viewDist;
 
-            int chunkColumnSize = (World.GetDimension().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
-            int offsetY = World.GetDimension().minY;
+            int chunkColumnSize = (World.GetDimensionType().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
+            int offsetY = World.GetDimensionType().minY;
 
             //var renderCamera = client.CameraController.RenderCamera;
 
@@ -825,7 +825,7 @@ namespace CraftSharp.Rendering
         {
             int chunkX = blockLoc.GetChunkX(), chunkZ = blockLoc.GetChunkZ();
             var column = GetChunkRenderColumn(chunkX, chunkZ);
-            int chunkYIndex = blockLoc.GetChunkYIndex(World.GetDimension().minY);
+            int chunkYIndex = blockLoc.GetChunkYIndex(World.GetDimensionType().minY);
 
             if (column != null) // Queue this chunk to rebuild list...
             {
@@ -839,7 +839,7 @@ namespace CraftSharp.Rendering
                 {   // Queue the chunk below, if it isn't empty
                     QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkYIndex - 1));
                 }
-                else if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1 && ((chunkYIndex + 1) * Chunk.SIZE) < World.GetDimension().height) // In the top layer of this chunk
+                else if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1 && ((chunkYIndex + 1) * Chunk.SIZE) < World.GetDimensionType().height) // In the top layer of this chunk
                 {   // Queue the chunk above, if it isn't empty
                     QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkYIndex + 1));
                 }
