@@ -2,7 +2,7 @@
 A Minecraft client implementation made with Unity.
 
 ## > About
-__CornCraft__ is a Unity version of Minecraft. It connects to vanilla servers(version 1.16.2 to 1.19.4) and provides basic graphical, vanilla-like gameplay support. It is based on another open source project, [Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client), and makes heavy use of its cross-version Minecraft protocol implementation.
+__CornCraft__ is a Unity version of Minecraft. It connects to vanilla servers(version 1.16.2 to 1.19.4) and provides basic graphical gameplay support. It is based on another open source project, [Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client), and makes heavy use of its cross-version Minecraft protocol implementation.
 
 However, unlike MCC itself which runs on modern .NET, CornCraft is a Unity app/game and runs on Mono/IL2CPP backend, so a large part of the code from MCC has been refactored or rewritten to adapt to Unity's environment.
 
@@ -18,7 +18,7 @@ When setting up a server for CornCraft, it is recommended to set the <code>allow
 For <code>1.19.1</code> or higher servers, it is also necessary to set <code>enforce-secure-profile</code> to <code>false</code> so that CornCraft can log in correctly.
 
 ## > Building & Running
-The project is made and tested with Unity 2022.3.26f1, so it is recommended to use this version(or newer) of Unity to build this game.
+The project is made and tested with Unity 2022.3.50f1, so it is recommended to use this version(or newer) of Unity to build this game.
 
 **Some third-party assets are not included in this repo**, for more information please see [here](./Assets/Third%20Party%20Assets.md).
 
@@ -28,17 +28,18 @@ Resource files will now be automatically downloaded if they're not present, so m
 Most basic controls in CornCraft are similar to vanilla Java Edition. They're hard-coded for now, but will be configurable in the future. Here's a list of currently supported actions:
 Key                                                       | Action
 ---                                                       | :---:
-<kbd>W</kbd> / <kbd>A</kbd> / <kbd>S</kbd> / <kbd>D</kbd> | Move(/Fly) Horizontally
-<kbd>Space</kbd>                                          | Move(/Fly) Up
-<kbd>Left Shift</kbd>                                     | Move(/Fly) Down
+<kbd>W</kbd> / <kbd>A</kbd> / <kbd>S</kbd> / <kbd>D</kbd> | Move Horizontally
+<kbd>Space</kbd>                                          | Move Up in Air (Jump if Grounded)
+<kbd>Left Shift</kbd>                                     | Move Down in Air
 <kbd>Left Ctrl</kbd>                                      | Toggle Walk/Rush Mode
 <kbd>F</kbd>                                              | Perform Interaction
 <kbd>F3</kbd>                                             | Toggle Debug Info
 <kbd>F3</kbd> + <kbd>F4</kbd> (Hold)                      | Show Game Mode Switch
 <kbd>F5</kbd> + <kbd>C</kbd>                              | Rebuild Chunks
-<kbd>F5</kbd> + <kbd>L</kbd>                              | Update Environment Lighting
+<kbd>F5</kbd> + <kbd>L</kbd>                              | Update Global Illumination
+<kbd>F6</kbd> / <kbd>F7</kbd> / <kbd>F8</kbd>             | Load Previous/Reload/Load Next Player Model
 <kbd>F11</kbd>                                            | Toggle Fullscreen
-<kbd>T</kbd> / <kbd>/</kbd>                               | Show Chat Screen
+<kbd>T</kbd> / <kbd>/</kbd>                               | Show Chat Screen/Input Command
 <kbd>Tab</kbd>                                            | Command Auto-Completion
 <kbd>Esc</kbd>                                            | Pause Game
 
