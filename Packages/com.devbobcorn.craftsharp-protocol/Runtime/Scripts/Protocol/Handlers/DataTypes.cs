@@ -77,6 +77,16 @@ namespace CraftSharp.Protocol.Handlers
         }
 
         /// <summary>
+        /// Read a single signed byte from a cache of bytes and remove it from the cache
+        /// </summary>
+        /// <returns>The byte that was read</returns>
+        public static sbyte ReadNextSByte(Queue<byte> cache)
+        {
+            sbyte result = (sbyte) cache.Dequeue(); // two's complement
+            return result;
+        }
+
+        /// <summary>
         /// Read a single byte from a cache of bytes and remove it from the cache
         /// </summary>
         /// <returns>The byte that was read</returns>
