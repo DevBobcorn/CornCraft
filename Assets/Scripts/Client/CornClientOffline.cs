@@ -150,17 +150,12 @@ namespace CraftSharp
                 }
             }
 
-            if (Keyboard.current.numpad4Key.wasPressedThisFrame) // Select previous
+            if (Keyboard.current.shiftKey.isPressed)
             {
-                SwitchCameraControllerBy(-1);
-            }
-            else if (Keyboard.current.numpad5Key.wasPressedThisFrame) // Regenerate current prefab
-            {
-                SwitchCameraControllerBy(0);
-            }
-            else if (Keyboard.current.numpad6Key.wasPressedThisFrame) // Select next
-            {
-                SwitchCameraControllerBy(1);
+                if (Keyboard.current.tabKey.wasPressedThisFrame) // Select next camera controller
+                {
+                    SwitchCameraControllerBy(1);
+                }
             }
         }
 
