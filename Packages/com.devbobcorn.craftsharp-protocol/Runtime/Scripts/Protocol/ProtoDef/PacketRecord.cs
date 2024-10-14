@@ -63,8 +63,6 @@ namespace CraftSharp.Protocol.ProtoDef
 
             entryPath2Value.Add(entryPath, entryValue);
             entryPath2TypeId.Add(entryPath, entryValueTypeId);
-
-            Console.WriteLine($"[{entryPath}]: {GetValueAsString(entryValue)} ({entryValueTypeId})");
         }
 
         public bool TryGetEntryValue(string parentPath, string entryName, out object? entryValue)

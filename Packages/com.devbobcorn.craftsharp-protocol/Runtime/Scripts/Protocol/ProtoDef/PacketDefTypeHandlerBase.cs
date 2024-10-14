@@ -82,8 +82,6 @@ namespace CraftSharp.Protocol.ProtoDef
                     // Nested type definitions don't have custom type ids
                     var handler = BuildDefTypeHandler(scope, dependentTypeId, dependentTypeId, dependentTypeParams, typeDict);
 
-                    //Console.WriteLine($"- Loading {dependentTypeId} as a dependency for {underlyingTypeId}");
-
                     // Register type
                     RegisterType(underlyingTypeId, handler);
 
@@ -341,7 +339,6 @@ namespace CraftSharp.Protocol.ProtoDef
             var nativeTypeId = new ResourceLocation(typeIdPath);
             if (NATIVE_TYPE_IDS.Contains(nativeTypeId))
             {
-                Console.WriteLine($"Using native type which was not declared in type dictionary: {nativeTypeId}");
                 return nativeTypeId;
             }
 
@@ -371,11 +368,11 @@ namespace CraftSharp.Protocol.ProtoDef
         {
             if (LOADED_DEF_TYPES.TryAdd(typeId, typeHandler))
             {
-                Console.WriteLine($"- Type {typeId} registered.");
+                WriteLine($"- Type {typeId} registered.");
             }
             else
             {
-                Console.WriteLine($"- Type {typeId} is already registered!");
+                WriteLine($"- Type {typeId} is already registered!");
             }
         }
 
@@ -395,16 +392,10 @@ namespace CraftSharp.Protocol.ProtoDef
                     if (LOADED_DEF_TYPES.ContainsKey(typeId))
                     {
                         // Probably loaded as a dependency of other types
-                        //Console.WriteLine($"- Skipping loaded type {underlyingTypeId}");
-
                         continue;
                     }
 
-                    if (pair.Value is null)
-                    {
-                        Console.WriteLine($"- Definition of {typeId} is null");
-                    }
-                    else
+                    if (pair.Value is not null)
                     {
                         var (underlyingTypeId, underlyingTypeParams) = GetUnderlyingTypeIdAndParams(scope, pair.Value, typeDict);
                         var handler = BuildDefTypeHandler(scope, typeId, underlyingTypeId, underlyingTypeParams, typeDict);
@@ -419,7 +410,7 @@ namespace CraftSharp.Protocol.ProtoDef
             }
             else
             {
-                Console.WriteLine("Types field not defined!");
+                WriteLine("Types field not defined!");
             }
         }
 
@@ -464,6 +455,11 @@ namespace CraftSharp.Protocol.ProtoDef
         }
 
         public readonly ResourceLocation TypeId;
+
+        protected static void WriteLine(string line)
+        {
+            Console.WriteLine(line);
+        }
 
         public virtual Type GetValueType()
         {

@@ -48,26 +48,21 @@ namespace CraftSharp.Protocol.ProtoDef.NativeTypes
         {
             CheckIfAllParametersResolvedOrElseThrow();
 
-            //var compareToPath = PacketRecord.GetAbsolutePath(parentPath, _compareTo);
-
             if (rec.TryGetEntryValue(parentPath, _compareTo, out object? entryValue))
             {
                 string entryValueAsString = PacketRecord.GetValueAsString(entryValue);
 
                 if (_fields.TryGetValue(entryValueAsString, out PacketDefTypeHandlerBase? chosenHandler))
                 {
-                    //Console.WriteLine($"[{compareToPath}] is {entryValueAsString}. Handler {chosenHandler.GetType().Name}");
                     return chosenHandler.ReadValue(rec, parentPath, cache);
                 }
                 else if (_defaultHandler is not null)
                 {
-                    //Console.WriteLine($"[{compareToPath}] is {entryValueAsString}. Defualt handler {_defaultHandler.GetType().Name}");
                     return _defaultHandler.ReadValue(rec, parentPath, cache);
                 }
                 else
                 {
-                    //throw new InvalidDataException($"Compare field {_compareTo} with value {entryValueAsString} has no matching and no default type is given!");
-                    Console.WriteLine($"Compare field [{_compareTo}] with value {entryValueAsString} has no matching and no default type is given!");
+                    //WriteLine($"Compare field [{_compareTo}] with value {entryValueAsString} has no matching and no default type is given!");
                     // Well sometimes nothing is given. Just do nothing.
 
                     return null;

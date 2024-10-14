@@ -22,8 +22,6 @@ namespace CraftSharp.Protocol.ProtoDef.Tests
             {
                 cache.Enqueue(buffer[i]);
             }
-
-            //Console.WriteLine($"{buffer.Length} byte(s) written. Current length: {cache.Count} byte(s)");
         }
 
         public void WriteBool(bool paramBool)
@@ -34,8 +32,6 @@ namespace CraftSharp.Protocol.ProtoDef.Tests
         public void WriteByte(byte b)
         {
             cache.Enqueue(b);
-
-            //Console.WriteLine($"1 byte(s) written. Current length: {cache.Count} byte(s)");
         }
 
         public void WriteShort(short number)
