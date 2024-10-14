@@ -368,11 +368,11 @@ namespace CraftSharp.Protocol.ProtoDef
         {
             if (LOADED_DEF_TYPES.TryAdd(typeId, typeHandler))
             {
-                WriteLine($"- Type {typeId} registered.");
+                //WriteLine($"- Type {typeId} registered.");
             }
             else
             {
-                WriteLine($"- Type {typeId} is already registered!");
+                //WriteLine($"- Type {typeId} is already registered!");
             }
         }
 
@@ -458,7 +458,7 @@ namespace CraftSharp.Protocol.ProtoDef
 
         protected static void WriteLine(string line)
         {
-            Console.WriteLine(line);
+            UnityEngine.Debug.Log(line);
         }
 
         public virtual Type GetValueType()
