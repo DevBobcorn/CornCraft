@@ -39,7 +39,9 @@ Key                                                       | Action
 <kbd>F5</kbd> + <kbd>L</kbd>                              | Update Global Illumination
 <kbd>F6</kbd> / <kbd>F7</kbd> / <kbd>F8</kbd>             | Load Previous/Reload/Load Next Player Model
 <kbd>F11</kbd>                                            | Toggle Fullscreen
+<kbd>Shift</kbd> + <kbd>Tab</kbd>                         | Switch to Next Camera Controller
 <kbd>T</kbd> / <kbd>/</kbd>                               | Show Chat Screen/Input Command
+<kbd>P</kbd>                                              | Show Packet Inspector Screen
 <kbd>Tab</kbd>                                            | Command Auto-Completion
 <kbd>Esc</kbd>                                            | Pause Game
 
