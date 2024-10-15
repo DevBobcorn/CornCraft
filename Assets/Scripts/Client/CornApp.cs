@@ -13,6 +13,9 @@ using CraftSharp.Event;
 using CraftSharp.Control;
 using CraftSharp.Resource;
 using CraftSharp.UI;
+using CraftSharp.Protocol.ProtoDef;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace CraftSharp
 {
@@ -22,7 +25,7 @@ namespace CraftSharp
         public const int EDITOR_FPS_LIMIT = 60;
 
         public const string CORN_CRAFT_BUILTIN_FILE_NAME = "CornCraftBuiltin";
-        public const int    CORN_CRAFT_BUILTIN_VERSION = 2;
+        public const int    CORN_CRAFT_BUILTIN_VERSION = 3;
         public const string VANILLAFIX_FILE_NAME = "VanillaFix";
         public const int    VANILLAFIX_VERSION = 1;
 
@@ -43,6 +46,35 @@ namespace CraftSharp
                 var magic = new GameObject("Corn Craft");
                 GameObject.DontDestroyOnLoad(magic);
                 return instance = magic.AddComponent<CornApp>();
+            }
+        }
+
+        private string parserProtocol = string.Empty;
+        public string ParserProtocol => parserProtocol;
+
+        public void LoadProtocolParser(string version)
+        {
+            parserProtocol = version;
+
+            if (!string.IsNullOrEmpty(parserProtocol))
+            {
+                PacketDefTypeHandlerBase.ResetLoadedTypes();
+            }
+
+            var jsonPath = PathHelper.GetExtraDataFile($"protos{Path.DirectorySeparatorChar}protocol-{version}.json");
+
+            if (File.Exists(jsonPath))
+            {
+                var jsonText = File.ReadAllText(jsonPath);
+                var jsonDoc = JsonConvert.DeserializeObject<JObject>(jsonText)!;
+
+                PacketDefTypeHandlerBase.RegisterTypesRecursive(null, jsonDoc);
+
+                Debug.Log($"Loaded protocol v{version} for parser.");
+            }
+            else
+            {
+                Debug.LogWarning($"Protocol definition not found for protocol v{version}");
             }
         }
 
@@ -68,6 +100,7 @@ namespace CraftSharp
             var dataVersion     = string.Empty;
             var entityVersion   = string.Empty;
             var resourceVersion = string.Empty;
+            var protodefVersion = string.Empty;
 
             try
             {
@@ -88,6 +121,7 @@ namespace CraftSharp
                         entityVersion = dataVersion;
                     
                     resourceVersion = entries["resource"].StringValue;
+                    protodefVersion = entries["protodef"].StringValue;
                 }
             }
             catch (Exception e)
@@ -208,6 +242,9 @@ namespace CraftSharp
             }
 
             Protocol.ChatParser.LoadTranslationRules(langFile);
+
+            // Load ProtoDef
+            LoadProtocolParser(protodefVersion);
 
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {

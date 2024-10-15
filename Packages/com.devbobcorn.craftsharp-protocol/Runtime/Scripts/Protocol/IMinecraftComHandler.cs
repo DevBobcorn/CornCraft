@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using CraftSharp.Protocol.Message;
 using CraftSharp.Inventory;
+using CraftSharp.Protocol.Handlers;
 
 namespace CraftSharp.Protocol
 {
@@ -60,9 +61,9 @@ namespace CraftSharp.Protocol
         /// </remarks>
         /// <param name="packetId">Packet Id</param>
         /// <param name="packetData">A copy of Packet Data</param>
-        /// <param name="isLogin">The packet is login phase or playing phase</param>
+        /// <param name="currentState">The current game state in which the packet is handled</param>
         /// <param name="isInbound">The packet is received from server or sent by client</param>
-        void OnNetworkPacket(int packetId, byte[] packetData, bool isLogin, bool isInbound);
+        void OnNetworkPacket(int packetId, byte[] packetData, CurrentState currentState, bool isInbound);
 
         /// <summary>
         /// Called when a server was successfully joined

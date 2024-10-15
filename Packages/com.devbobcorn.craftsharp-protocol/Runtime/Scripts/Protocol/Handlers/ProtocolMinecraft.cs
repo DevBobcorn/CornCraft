@@ -235,7 +235,7 @@ namespace CraftSharp.Protocol.Handlers
             int packetId = DataTypes.ReadNextVarInt(packetData); //Packet ID
 
             if (CornGlobal.CapturePackets)
-                handler.OnNetworkPacket(packetId, packetData.ToArray(), currentState == CurrentState.Login, true);
+                handler.OnNetworkPacket(packetId, packetData.ToArray(), currentState, true);
 
             return new(packetId, packetData);
         }
@@ -2176,7 +2176,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             if (CornGlobal.CapturePackets)
             {
-                handler.OnNetworkPacket(packetId, packetData.ToArray(), currentState == CurrentState.Login, false);
+                handler.OnNetworkPacket(packetId, packetData.ToArray(), currentState, false);
             }
 
             //log.Info($"[C -> S] Sending packet {packetId:X} > {DataTypes.ByteArrayToString(packetData.ToArray())}");
@@ -3452,7 +3452,7 @@ namespace CraftSharp.Protocol.Handlers
         }
     }
 
-    internal enum CurrentState
+    public enum CurrentState
     {
         Login = 0,
         Configuration,
