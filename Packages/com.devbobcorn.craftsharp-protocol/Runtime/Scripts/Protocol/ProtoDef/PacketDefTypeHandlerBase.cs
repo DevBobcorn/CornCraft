@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using CraftSharp.Protocol.ProtoDef.NativeTypes;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CraftSharp.Protocol.ProtoDef
 {
@@ -293,8 +294,23 @@ namespace CraftSharp.Protocol.ProtoDef
             }
             else
             {
-                throw new InvalidOperationException("Handler for types with parameters should NOT be taken from this dictionary!");
+                throw new InvalidOperationException($"Handler for type {typeId} is dummy and shouldn't be taken from this table!");
             }
+        }
+
+        public static bool TryGetLoadedHandler(ResourceLocation typeId, [MaybeNullWhen(false)] out PacketDefTypeHandlerBase? handler)
+        {
+            if (LOADED_DEF_TYPES.TryGetValue(typeId, out PacketDefTypeHandlerBase? h))
+            {
+                if (h is not null)
+                {
+                    handler = h;
+                    return true;
+                }
+            }
+
+            handler = null;
+            return false;
         }
 
         private static ResourceLocation GetTypeId(string? scope, string typeIdPath, JObject typeDict)

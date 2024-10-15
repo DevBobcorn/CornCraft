@@ -3,70 +3,82 @@
         "name": "1.16.2",
         "data": "1.16",
         "entity": "1.16.2",
-        "resource": "1.16.5"
+        "resource": "1.16.5",
+        "protodef": "751"
     },
     "753": {
         "name": "1.16.3/1.16.4",
         "data": "1.16",
         "entity": "1.16.2",
-        "resource": "1.16.5"
+        "resource": "1.16.5",
+        "protodef": "751"
     },
     "754": {
         "name": "1.16.5",
         "data": "1.16",
         "entity": "1.16.2",
-        "resource": "1.16.5"
+        "resource": "1.16.5",
+        "protodef": "751"
     },
 
     "755": {
         "name": "1.17",
         "data": "1.17",
-        "resource": "1.18.2"
+        "resource": "1.18.2",
+        "protodef": "755"
     },
     "756": {
-        "name": "1.17",
+        "name": "1.17.1",
         "data": "1.17",
-        "resource": "1.18.2"
+        "resource": "1.18.2",
+        "protodef": "756"
     },
 
     "757": {
         "name": "1.18/1.18.1",
         "data": "1.18",
         "entity": "1.17",
-        "resource": "1.18.2"
+        "resource": "1.18.2",
+        "protodef": "757"
     },
     "758": {
         "name": "1.18.2",
         "data": "1.18",
         "entity": "1.17",
-        "resource": "1.18.2"
+        "resource": "1.18.2",
+        "protodef": "758"
     },
 
     "759": {
         "name": "1.19/1.19.1",
         "data": "1.19",
-        "resource": "1.19.4"
+        "resource": "1.19.4",
+        "protodef": "759"
     },
     "760": {
         "name": "1.19.2",
         "data": "1.19",
-        "resource": "1.19.4"
+        "resource": "1.19.4",
+        "protodef": "760"
     },
     "761": {
         "name": "1.19.3",
         "data": "1.19.3",
-        "resource": "1.19.4"
+        "resource": "1.19.4",
+        "protodef": "761"
     },
     "762": {
         "name": "1.19.4",
         "data": "1.19.4",
-        "resource": "1.19.4"
+        "resource": "1.19.4",
+        "protodef": "762"
     },
 
     "763": {
         "name": "1.20/1.20.1",
         "data": "1.20",
         "entity": "1.19.4",
-        "resource": "1.20.1"
+        "resource": "1.20.1",
+        "protodef": "763"
     }
 }
