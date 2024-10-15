@@ -55,6 +55,6 @@ Some other open-source projects/code examples are used in the project, which don
 More information about CDDL-1.0 can be found on MCC's [home page](https://github.com/MCCTeam/Minecraft-Console-Client), in the license section, and the full license can be reviewed [here](http://opensource.org/licenses/CDDL-1.0).
 
 ## > Screenshots
-![Screenshot 1](https://s2.loli.net/2024/10/15/XFd1UHj2sLQeVNz.png)
+![Screenshot 1](https://s2.loli.net/2024/10/15/yNopOxURMAjWhdQ.png)
 ![Screenshot 2](https://s2.loli.net/2022/10/24/pLfmGiEbBOqFzTZ.png)
 ![Screenshot 3](https://s2.loli.net/2022/10/25/RSZK3FbOdHXkanm.png)
