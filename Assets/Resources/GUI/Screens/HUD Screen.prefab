@@ -123,7 +123,6 @@ MonoBehaviour:
   staminaBar: {fileID: 7597801883631828757}
   interactionPanel: {fileID: 6129123592338504208}
   inventoryHotbar: {fileID: 5854284655586894102}
-  scrollInput: {fileID: 1626063912436494066, guid: 3cf5ae6b9323ca5438eb565ac4b04128, type: 3}
   screenAnimator: {fileID: 1504176643780891591}
   transitionTime: 0.1
 --- !u!95 &1504176643780891591

@@ -2,6 +2,7 @@ using UnityEngine;
 using Cinemachine;
 
 using CraftSharp.Event;
+using UnityEngine.InputSystem;
 
 namespace CraftSharp.Control
 {
@@ -43,12 +44,11 @@ namespace CraftSharp.Control
         {
             EnsureInitialized();
 
-            // Enable Cinemachine and zoom input
-            zoomInput.action.Enable();
+            // Enable Cinemachine input
             EnableCinemachineInput();
 
             // Initialize camera scale
-            cameraInfo.TargetScale = 0.8F;
+            cameraInfo.TargetScale = 0.7F;
             cameraInfo.CurrentScale = cameraInfo.TargetScale - 0.2F;
 
             // Make sure sprite camera uses same fov as main camera
@@ -67,11 +67,11 @@ namespace CraftSharp.Control
                 SetYaw(_setYawRequest.Value);
             }
 
-            var zoom = zoomInput!.action.ReadValue<float>();
-            if (zoom != 0F)
+            var mouseScroll = Mouse.current.scroll.value.y;
+            if (mouseScroll != 0F && Keyboard.current.shiftKey.IsPressed())
             {
                 // Update target camera status according to user input
-                cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - zoom * zoomSensitivity);
+                cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - mouseScroll * zoomSensitivity);
             }
             
             if (cameraInfo.TargetScale != cameraInfo.CurrentScale)

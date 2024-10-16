@@ -196,12 +196,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a3fe4220809306438b4c60a5ad923c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiDistanceScale: 1
-  zoomInput: {fileID: -5148916355534214663, guid: 29484af9580f082408aafccb8f79b22d, type: 3}
-  zoomSmoothFactor: 4
-  zoomSensitivity: 0.05
+  zoomSmoothFactor: 10
+  zoomSensitivity: 0.001
   cameraZOffsetNear: 15
-  cameraZOffsetFar: 100
+  cameraZOffsetFar: 75
 --- !u!1 &3067012548342389156
 GameObject:
   m_ObjectHideFlags: 0
@@ -289,5 +287,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerIndex: -1
   AutoEnableInputs: 1
-  XYAxis: {fileID: -5630151704836100654, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  XYAxis: {fileID: -3824362744831185708, guid: 29484af9580f082408aafccb8f79b22d, type: 3}
   ZAxis: {fileID: 0}

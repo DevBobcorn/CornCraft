@@ -23,7 +23,6 @@ namespace CraftSharp.UI
         [SerializeField] private RingValueBar staminaBar;
         [SerializeField] private InteractionPanel interactionPanel;
         [SerializeField] private InventoryHotbar inventoryHotbar;
-        [SerializeField] protected InputActionReference scrollInput;
         [SerializeField] private Animator screenAnimator;
 
         private Animator staminaBarAnimator;
@@ -132,12 +131,12 @@ namespace CraftSharp.UI
                     // Disable camera zoom if there're more than 1 interaction options
                     if (newCount > 1)
                     {
-                        scrollInput.action.Enable();
+                        //scrollInput.action.Enable();
                         game.ToggleCameraZoom(false);
                     }
                     else
                     {
-                        scrollInput.action.Disable();
+                        //scrollInput.action.Disable();
                         game.ToggleCameraZoom(true);
                     }
                 };
@@ -236,19 +235,26 @@ namespace CraftSharp.UI
                 game.ScreenControl.PushScreen<PacketScreen>();
             }
 
-            if (interactionPanel.ShouldAbsordMouseScroll)
+            var mouseScroll = Mouse.current.scroll.value.y;
+            if (mouseScroll != 0F && !Keyboard.current.shiftKey.IsPressed())
             {
-                var scroll = scrollInput.action.ReadValue<float>();
-                if (scroll != 0F && interactionPanel != null)
+                if (interactionPanel != null && interactionPanel.ShouldConsumeMouseScroll) // Interaction option selection
                 {
-                    if (scroll < 0F)
+                    if (mouseScroll < 0F)
                         interactionPanel.SelectNextOption();
                     else
                         interactionPanel.SelectPrevOption();
                 }
+                else // Hotbar slot selection
+                {
+                    if (mouseScroll < 0F)
+                        game.ChangeSlotBy(1);
+                    else
+                        game.ChangeSlotBy(-1);
+                }
             }
-
-            // Hotbar slot switching
+            
+            // Hotbar slot selection by key
             if (Keyboard.current.digit1Key.wasPressedThisFrame)
                 game.ChangeSlot(0);
             if (Keyboard.current.digit2Key.wasPressedThisFrame)

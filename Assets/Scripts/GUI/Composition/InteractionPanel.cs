@@ -23,7 +23,7 @@ namespace CraftSharp.UI
 
         private int selectedIndex = 0;
 
-        public bool ShouldAbsordMouseScroll => interactionOptions.Count > 1;
+        public bool ShouldConsumeMouseScroll => interactionOptions.Count > 1;
 
         #nullable enable
 
