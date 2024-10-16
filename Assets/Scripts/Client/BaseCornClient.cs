@@ -217,6 +217,14 @@ namespace CraftSharp
         public abstract bool DigBlock(BlockLoc blockLoc, bool swingArms = true, bool lookAtBlock = true);
         public abstract bool ChangeSlot(short slot);
 
+        public bool ChangeSlotBy(short offset)
+        {
+            var index = CurrentSlot + offset;
+            while (index < 0) index += 9;
+
+            return ChangeSlot((short) (index % 9));
+        }
+
         #endregion
 
     }

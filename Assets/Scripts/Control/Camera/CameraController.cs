@@ -17,13 +17,14 @@ namespace CraftSharp.Control
         /// </summary>
         protected Camera spriteRenderCamera;
 
-        [SerializeField] protected InputActionReference zoomInput;
         [SerializeField] [Range(0F, 20F)] protected float zoomSmoothFactor = 4.0F;
         [SerializeField] [Range(0F,  2F)] protected float zoomSensitivity = 0.5F;
 
         protected static readonly Vector3 VIEWPORT_CENTER    = new(0.5F,  0.5F, 0F);
         protected CameraInfo cameraInfo = new();
         public Camera RenderCamera => renderCamera;
+
+        private bool zoomDisabled = false;
 
         public void SetCameras(Camera mainCamera, Camera spriteCamera)
         {
@@ -37,6 +38,11 @@ namespace CraftSharp.Control
             {
                 input.enabled = true;
             }
+
+            if (!zoomDisabled)
+            {
+                EnableZoom();
+            }
         }
 
         public virtual void DisableCinemachineInput()
@@ -45,16 +51,18 @@ namespace CraftSharp.Control
             {
                 input.enabled = false;
             }
+
+            EnableZoom();
         }
 
         public virtual void EnableZoom()
         {
-            zoomInput.action.Enable();
+            zoomDisabled = false;
         }
 
         public virtual void DisableZoom()
         {
-            zoomInput.action.Disable();
+            zoomDisabled = true;
         }
 
         // Flag variables

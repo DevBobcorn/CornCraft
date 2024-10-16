@@ -302,15 +302,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c42e6541d8d9fb43a6166d532d500d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  renderCamera: {fileID: 0}
-  spriteRenderCamera: {fileID: 0}
-  zoomInput: {fileID: -5148916355534214663, guid: 29484af9580f082408aafccb8f79b22d, type: 3}
-  zoomSmoothFactor: 4
-  zoomSensitivity: 0.015
+  zoomSmoothFactor: 10
+  zoomSensitivity: 0.0015
   nearFov: 55
   farFov: 65
-  cameraZOffsetNear: 0.5
-  cameraZOffsetFar: 4
+  cameraZOffsetNear: 0.8
+  cameraZOffsetFar: 5
   cameraYOffsetNear: 0
   cameraYOffsetFar: -2
   cameraYOffsetClip: -0.35

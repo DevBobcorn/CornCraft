@@ -13,15 +13,6 @@
                     "processors": "ScaleVector2(x=0.1,y=0.1)",
                     "interactions": "",
                     "initialStateCheck": true
-                },
-                {
-                    "name": "Zoom",
-                    "type": "Value",
-                    "id": "a9252152-3648-42cf-90cb-62abf5f4cad4",
-                    "expectedControlType": "Axis",
-                    "processors": "Scale(factor=0.01)",
-                    "interactions": "",
-                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -44,28 +35,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "Look",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "1bc1cf97-9084-4add-9cbe-9d6586fedbc7",
-                    "path": "<Joystick>/{Hatswitch}",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Look",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "39b340c1-88d1-49dc-ab88-dad377aeb4ea",
-                    "path": "<Mouse>/scroll/y",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Zoom",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
