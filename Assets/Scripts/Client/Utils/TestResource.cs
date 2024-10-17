@@ -59,10 +59,14 @@ namespace CraftSharp
                 var collider = modelObject.AddComponent<MeshCollider>();
 
                 int vertexCount = geometry.GetVertexCount(cullFlags);
+                int fluidVertexCount = 0;
 
                 if (state.InWater || state.InLava)
-                    vertexCount += FluidGeometry.GetVertexCount(cullFlags);
-
+                {
+                    fluidVertexCount = FluidGeometry.GetVertexCount(cullFlags);
+                    vertexCount += fluidVertexCount;
+                }
+                
                 // Make and set mesh...
                 var visualBuffer = new VertexBuffer(vertexCount);
 
@@ -74,9 +78,6 @@ namespace CraftSharp
                 else if (state.InLava)
                     FluidGeometry.Build(visualBuffer, ref vertexOffset, float3.zero, FluidGeometry.LiquidTextures[1], FLUID_HEIGHTS,
                             cullFlags, DUMMY_BLOCK_VERT_LIGHT, BlockGeometry.DEFAULT_COLOR);
-
-                int fluidVertexCount = visualBuffer.vert.Length;
-                int fluidTriIdxCount = (fluidVertexCount / 2) * 3;
 
                 var color = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, BlockLoc.Zero, state);
                 geometry.Build(visualBuffer, ref vertexOffset, float3.zero, cullFlags, 0, 0F, DUMMY_BLOCK_VERT_LIGHT, color);
@@ -129,6 +130,8 @@ namespace CraftSharp
 
                 if (state.InWater || state.InLava)
                 {
+                    int fluidTriIdxCount = (fluidVertexCount / 2) * 3;
+
                     meshData.subMeshCount = 2;
                     meshData.SetSubMesh(0, new SubMeshDescriptor(0, fluidTriIdxCount)
                     {
