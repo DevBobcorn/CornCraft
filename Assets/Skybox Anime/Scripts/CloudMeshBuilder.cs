@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.U2D;
 
-namespace CraftSharp.Rendering
+namespace AnimeSkybox
 {
     public class CloudMeshBuilder
     {

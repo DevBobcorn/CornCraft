@@ -1,0 +1,17 @@
+{
+    "name": "MMD4Unity.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:406190ab8ee569c46bc05a890e5127a0",
+        "GUID:2313f8091e1ee1d4da0ff1afe6dd7dd2"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

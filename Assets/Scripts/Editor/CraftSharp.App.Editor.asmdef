@@ -1,0 +1,22 @@
+{
+    "name": "CraftSharp.App.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:35221d0dd57f3f043a31179a0855b5d1",
+        "GUID:12f53a11a1a93e749aa191e5f5057c3a",
+        "GUID:1d55b30736838504ba37ae5d72961b55",
+        "GUID:96a7e93392a0e594cab64500e0c75d13"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

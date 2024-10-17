@@ -1,5 +1,4 @@
 using System.Linq;
-using CraftSharp.Rendering;
 using UnityEngine;
 
 namespace AnimeSkybox
