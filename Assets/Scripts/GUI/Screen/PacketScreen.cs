@@ -94,8 +94,8 @@ namespace CraftSharp.UI
             // Prepare buttons
             recordButton.onClick.AddListener(() =>
             {
-                CornGlobal.CapturePackets = !CornGlobal.CapturePackets;
-                recordButton.GetComponentInChildren<TMP_Text>().text = CornGlobal.CapturePackets ? "\u25a0" : "\u25b6";
+                ProtocolSettings.CapturePackets = !ProtocolSettings.CapturePackets;
+                recordButton.GetComponentInChildren<TMP_Text>().text = ProtocolSettings.CapturePackets ? "\u25a0" : "\u25b6";
             });
             clearButton.onClick.AddListener(() =>
             {

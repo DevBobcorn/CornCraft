@@ -57,7 +57,7 @@ namespace CraftSharp.Protocol
         /// Called when a network packet received or sent
         /// </summary>
         /// <remarks>
-        /// Only called if <see cref="CornGlobal.CapturePackets"/> is set to True
+        /// Only called if <see cref="ProtocolSettings.CapturePackets"/> is set to True
         /// </remarks>
         /// <param name="packetId">Packet Id</param>
         /// <param name="packetData">A copy of Packet Data</param>

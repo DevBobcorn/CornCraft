@@ -24,7 +24,7 @@ namespace CraftSharp
         /// <param name="handler">Callback for file changes</param>
         public FileMonitor(string folder, string filename, FileSystemEventHandler handler)
         {
-            if (CornGlobal.DebugMode)
+            if (ProtocolSettings.DebugMode)
             {
                 string callerClass = new System.Diagnostics.StackFrame(1).GetMethod().DeclaringType.Name;
                 UnityEngine.Debug.Log(Translations.Get("filemonitor.init", callerClass, Path.Combine(folder, filename)));
@@ -42,7 +42,7 @@ namespace CraftSharp
             }
             catch
             {
-                if (CornGlobal.DebugMode)
+                if (ProtocolSettings.DebugMode)
                 {
                     string callerClass = new System.Diagnostics.StackFrame(1).GetMethod().DeclaringType.Name;
                     UnityEngine.Debug.LogError(Translations.Get("filemonitor.fail", callerClass));

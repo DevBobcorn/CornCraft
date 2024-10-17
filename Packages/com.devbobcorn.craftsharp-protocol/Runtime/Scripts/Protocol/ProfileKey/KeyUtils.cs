@@ -30,7 +30,7 @@ namespace CraftSharp.Protocol.ProfileKey
 
                 response = request.Post("application/json", "");
 
-                if (CornGlobal.DebugMode)
+                if (ProtocolSettings.DebugMode)
                 {
                     Debug.Log(response.Body.ToString());
                 }

@@ -79,7 +79,7 @@ namespace CraftSharp
         static Translations()
         {
             translations = new Dictionary<string, string>();
-            LoadTranslationsFile(CornGlobal.Language);
+            LoadTranslationsFile(ProtocolSettings.Language);
         }
 
         /// <summary>

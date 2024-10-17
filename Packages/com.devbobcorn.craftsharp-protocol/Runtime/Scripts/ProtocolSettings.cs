@@ -3,7 +3,7 @@ using CraftSharp.Protocol.Session;
 
 namespace CraftSharp
 {
-    public static class CornGlobal
+    public static class ProtocolSettings
     {
         public static string Version { get; private set; } = "0.1.0";
         public static string BrandInfo => $"CornCraft/{Version}";
@@ -25,7 +25,7 @@ namespace CraftSharp
         public static bool LoginWithSecureProfile { get; set; } = false;
 
         public static string Language { get; set; } = "en_us";
-        public static bool DebugMode { get; set; } = true;
+        public static bool DebugMode { get; set; } = false;
 
         // Custom app variables
         public static CacheType SessionCaching = CacheType.Disk;

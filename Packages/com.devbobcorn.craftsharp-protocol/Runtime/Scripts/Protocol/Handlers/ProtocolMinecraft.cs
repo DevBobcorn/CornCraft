@@ -234,7 +234,7 @@ namespace CraftSharp.Protocol.Handlers
 
             int packetId = DataTypes.ReadNextVarInt(packetData); //Packet ID
 
-            if (CornGlobal.CapturePackets)
+            if (ProtocolSettings.CapturePackets)
                 handler.OnNetworkPacket(packetId, packetData.ToArray(), currentState, true);
 
             return new(packetId, packetData);
@@ -596,8 +596,8 @@ namespace CraftSharp.Protocol.Handlers
                             Guid senderUUID;
                             //Hide system messages or xp bar messages?
                             messageType = DataTypes.ReadNextByte(packetData);
-                            if ((messageType == 1 && !CornGlobal.DisplaySystemMessages)
-                                || (messageType == 2 && !CornGlobal.DisplayXPBarMessages))
+                            if ((messageType == 1 && !ProtocolSettings.DisplaySystemMessages)
+                                || (messageType == 2 && !ProtocolSettings.DisplayXPBarMessages))
                                 break;
 
                             if (protocolVersion >= MC_1_16_5_Version)
@@ -615,8 +615,8 @@ namespace CraftSharp.Protocol.Handlers
                                 hasUnsignedChatContent ? DataTypes.ReadNextString(packetData) : null;
 
                             messageType = DataTypes.ReadNextVarInt(packetData);
-                            if ((messageType == 1 && !CornGlobal.DisplaySystemMessages)
-                                || (messageType == 2 && !CornGlobal.DisplayXPBarMessages))
+                            if ((messageType == 1 && !ProtocolSettings.DisplaySystemMessages)
+                                || (messageType == 2 && !ProtocolSettings.DisplayXPBarMessages))
                                 break;
 
                             Guid senderUUID = DataTypes.ReadNextUUID(packetData);
@@ -900,12 +900,12 @@ namespace CraftSharp.Protocol.Handlers
                         bool isOverlay = DataTypes.ReadNextBool(packetData);
                         if (isOverlay)
                         {
-                            if (!CornGlobal.DisplayXPBarMessages)
+                            if (!ProtocolSettings.DisplayXPBarMessages)
                                 break;
                         }
                         else
                         {
-                            if (!CornGlobal.DisplaySystemMessages)
+                            if (!ProtocolSettings.DisplaySystemMessages)
                                 break;
                         }
 
@@ -914,7 +914,7 @@ namespace CraftSharp.Protocol.Handlers
                     else
                     {
                         int msgType = DataTypes.ReadNextVarInt(packetData);
-                        if ((msgType == 1 && !CornGlobal.DisplaySystemMessages))
+                        if ((msgType == 1 && !ProtocolSettings.DisplaySystemMessages))
                             break;
                         handler.OnTextReceived(new(systemMessage, null, true, msgType, Guid.Empty, true));
                     }
@@ -2174,7 +2174,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="packetData">packet Data</param>
         private void SendPacket(int packetId, IEnumerable<byte> packetData)
         {
-            if (CornGlobal.CapturePackets)
+            if (ProtocolSettings.CapturePackets)
             {
                 handler.OnNetworkPacket(packetId, packetData.ToArray(), currentState, false);
             }
@@ -2503,7 +2503,7 @@ namespace CraftSharp.Protocol.Handlers
                 {
                     string result = DataTypes.ReadNextString(packetData); //Get the Json data
 
-                    if (CornGlobal.DebugMode)
+                    if (ProtocolSettings.DebugMode)
                         Debug.Log(result);
 
                     if (!String.IsNullOrEmpty(result) && result.StartsWith("{") && result.EndsWith("}"))
@@ -2563,7 +2563,7 @@ namespace CraftSharp.Protocol.Handlers
             try
             {
                 byte[] fields = dataTypes.GetAcknowledgment(acknowledgment,
-                    isOnlineMode && CornGlobal.LoginWithSecureProfile);
+                    isOnlineMode && ProtocolSettings.LoginWithSecureProfile);
 
                 SendPacket(PacketTypesOut.MessageAcknowledgment, fields);
 
@@ -2667,7 +2667,7 @@ namespace CraftSharp.Protocol.Handlers
             {
                 List<Tuple<string, string>>? needSigned = null; // List< Argument Name, Argument Value >
                 if (playerKeyPair != null && isOnlineMode && protocolVersion >= MC_1_19_Version
-                    && CornGlobal.LoginWithSecureProfile && CornGlobal.SignMessageInCommand)
+                    && ProtocolSettings.LoginWithSecureProfile && ProtocolSettings.SignMessageInCommand)
                     needSigned = DeclareCommands.CollectSignArguments(command);
 
                 lock (MessageSigningLock)
@@ -2729,7 +2729,7 @@ namespace CraftSharp.Protocol.Handlers
                     {
                         // Message Acknowledgment (1.19.2)
                         fields.AddRange(dataTypes.GetAcknowledgment(acknowledgment_1_19_2!,
-                            isOnlineMode && CornGlobal.LoginWithSecureProfile));
+                            isOnlineMode && ProtocolSettings.LoginWithSecureProfile));
                     }
                     else if (protocolVersion >= MC_1_19_3_Version)
                     {
@@ -2798,8 +2798,8 @@ namespace CraftSharp.Protocol.Handlers
                         DateTimeOffset timeNow = DateTimeOffset.UtcNow;
                         fields.AddRange(DataTypes.GetLong(timeNow.ToUnixTimeMilliseconds()));
 
-                        if (!isOnlineMode || playerKeyPair == null || !CornGlobal.LoginWithSecureProfile ||
-                            !CornGlobal.SignChat)
+                        if (!isOnlineMode || playerKeyPair == null || !ProtocolSettings.LoginWithSecureProfile ||
+                            !ProtocolSettings.SignChat)
                         {
                             fields.AddRange(DataTypes.GetLong(0)); // Salt: Long
                             if (protocolVersion < MC_1_19_3_Version)
@@ -2847,7 +2847,7 @@ namespace CraftSharp.Protocol.Handlers
                         {
                             // Message Acknowledgment
                             fields.AddRange(dataTypes.GetAcknowledgment(acknowledgment_1_19_2!,
-                                isOnlineMode && CornGlobal.LoginWithSecureProfile));
+                                isOnlineMode && ProtocolSettings.LoginWithSecureProfile));
                         }
                     }
                 }

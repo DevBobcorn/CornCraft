@@ -38,6 +38,9 @@ namespace CraftSharp.Rendering
             return nbt.Count == 0;
         }
 
+        /// <summary>
+        /// Build item mesh, material and transforms from given item stack.
+        /// </summary>
         public static (Mesh mesh, Material material, Dictionary<DisplayPosition, float3x3> transforms)?
                 BuildItem(ItemStack? itemStack)
         {
@@ -64,12 +67,36 @@ namespace CraftSharp.Rendering
 
             var tintFunc = ItemPalette.INSTANCE.GetTintRule(itemId);
             if (tintFunc is null)
-                colors = new float3[]{ new(1F, 0F, 0F), new(0F, 0F, 1F), new(0F, 1F, 0F) };
+                colors = new float3[] { new(1F, 0F, 0F), new(0F, 0F, 1F), new(0F, 1F, 0F) };
             else
                 colors = tintFunc.Invoke(itemStack);
 
             // TODO Get and build the right geometry (base or override)
             var itemGeometry = itemModel.Geometry;
+
+            var mesh = BuildItemMesh(itemGeometry, colors);
+
+            var material = CornApp.CurrentClient!.ChunkMaterialManager.GetAtlasMaterial(itemModel.RenderType);
+
+            // Store in cache if applicable
+            if (shouldUseCache)
+            {
+                return DEFAULT_MESH_CACHE[itemId] = (mesh, material, itemGeometry.DisplayTransforms);
+            }
+            else
+            {
+                UNCACHED_ITEM_MESHES.Add(mesh);
+                return (mesh, material, itemGeometry.DisplayTransforms);
+            }
+        }
+
+        /// <summary>
+        /// Build item mesh directly from item geometry. Not recommended because
+        /// it doesn't utilize the model cache table.
+        /// </summary>
+        public static Mesh BuildItemMesh(ItemGeometry itemGeometry, float3[] colors)
+        {
+            
             int vertexCount = itemGeometry.GetVertexCount();
             var visualBuffer = new VertexBuffer(vertexCount);
             uint vertexOffset = 0;
@@ -135,18 +162,7 @@ namespace CraftSharp.Rendering
             // Recalculate mesh normals
             mesh.RecalculateNormals();
 
-            var material = CornApp.CurrentClient!.ChunkMaterialManager.GetAtlasMaterial(itemModel.RenderType);
-
-            // Store in cache if applicable
-            if (shouldUseCache)
-            {
-                return DEFAULT_MESH_CACHE[itemId] = (mesh, material, itemGeometry.DisplayTransforms);
-            }
-            else
-            {
-                UNCACHED_ITEM_MESHES.Add(mesh);
-                return (mesh, material, itemGeometry.DisplayTransforms);
-            }
+            return mesh;
         }
     }
 }
