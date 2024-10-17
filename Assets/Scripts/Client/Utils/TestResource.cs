@@ -15,6 +15,7 @@ using CraftSharp.Molang.Runtime;
 using CraftSharp.Resource;
 using CraftSharp.Rendering;
 using UnityEngine.InputSystem;
+using CraftSharp.Resource.BedrockEntity;
 
 namespace CraftSharp
 {
@@ -22,11 +23,10 @@ namespace CraftSharp
     {
         private static readonly byte[] FLUID_HEIGHTS = new byte[] { 15, 15, 15, 15, 15, 15, 15, 15, 15 };
 
-        private static readonly float3 ITEM_CENTER = new(-0.5F, -0.5F, -0.5F);
-
         public TMP_Text InfoText;
         public Animator CrosshairAnimator;
-        [SerializeField] private ChunkMaterialManager materialManager;
+        [SerializeField] private ChunkMaterialManager chunkMaterialManager;
+        [SerializeField] private EntityMaterialManager entityMaterialManager;
 
         [SerializeField] private RectTransform inventory;
         [SerializeField] private GameObject inventoryItemPrefab;
@@ -166,12 +166,12 @@ namespace CraftSharp
                 {
                     render.sharedMaterials =
                         new []{
-                            materialManager.GetAtlasMaterial(RenderType.WATER),
-                            materialManager.GetAtlasMaterial(stateModel.RenderType)
+                            chunkMaterialManager.GetAtlasMaterial(RenderType.WATER),
+                            chunkMaterialManager.GetAtlasMaterial(stateModel.RenderType)
                         };
                 }
                 else
-                    render.sharedMaterial = materialManager.GetAtlasMaterial(stateModel.RenderType);
+                    render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(stateModel.RenderType);
 
                 altitude += 1;
             }
@@ -219,7 +219,7 @@ namespace CraftSharp
 
                 filter.sharedMesh = itemMesh;
                 collider.sharedMesh = itemMesh;
-                render.sharedMaterial = materialManager.GetAtlasMaterial(itemModel.RenderType);
+                render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(itemModel.RenderType);
 
                 altitude += 1;
             }
@@ -286,8 +286,7 @@ namespace CraftSharp
             }
 
             filter.sharedMesh = itemMesh;
-            // Use material variants with fog disabled
-            render.sharedMaterial = materialManager.GetAtlasMaterial(itemModel.RenderType);
+            render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(itemModel.RenderType);
         }
 
         private IEnumerator DoBuild(string dataVersion, string resourceVersion, string[] resourceOverrides)
@@ -389,14 +388,10 @@ namespace CraftSharp
 
         private IEnumerator DoEntityBuild()
         {
-            yield return null;
-
-            /*
-
             var entityResPath = PathHelper.GetPackDirectoryNamed("bedrock_res");
             var playerModelsPath = PathHelper.GetPackDirectoryNamed("player_models");
 
-            var entityResManager = new EntityResourceManager(entityResPath, playerModelsPath);
+            var entityResManager = new BedrockEntityResourceManager(entityResPath, playerModelsPath);
 
             yield return StartCoroutine(entityResManager.LoadEntityResources(new(),
                     (status) => Loom.QueueOnMainThread(() => InfoText.text = Translations.Get(status))));
@@ -416,11 +411,11 @@ namespace CraftSharp
                 entityRenderObj.transform.SetParent(testmentObj.transform);
                 entityRenderObj.transform.localPosition= new(i * 2, 0, - (entityPerRow - j) * 2);
 
-                var entityRender = entityRenderObj.AddComponent<EntityModelRender>();
+                var entityRender = entityRenderObj.AddComponent<BedrockModelEntityRender>();
                 try
                 {
                     entityRender.SetDefinitionData(entityDef);
-                    entityRender.BuildEntityModel(entityResManager, materialManager);
+                    entityRender.BuildEntityModel(entityResManager, entityMaterialManager);
                 }
                 catch (Exception e)
                 {
@@ -429,8 +424,6 @@ namespace CraftSharp
                 
                 index++;
             }
-
-            */
         }
 
         void Start()

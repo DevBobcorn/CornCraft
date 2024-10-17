@@ -822,6 +822,7 @@ GameObject:
   - component: {fileID: 964542881}
   - component: {fileID: 964542883}
   - component: {fileID: 964542882}
+  - component: {fileID: 964542884}
   m_Layer: 0
   m_Name: '[Testment]'
   m_TagString: Untagged
@@ -878,11 +879,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   InfoText: {fileID: 1389106677}
   CrosshairAnimator: {fileID: 1488379972}
-  materialManager: {fileID: 964542882}
+  chunkMaterialManager: {fileID: 964542882}
+  entityMaterialManager: {fileID: 964542884}
   inventory: {fileID: 1323800610}
   inventoryItemPrefab: {fileID: 1333662668710857103, guid: 59a68f6be0f373746ad02f4f1bd71d93, type: 3}
   InventoryBuildList: 44000000c2010000e4000000e9000000e8000000290100004a010000a6010000e10000000001000004010000d2000000a0030000ae0100000e010000df020000440200005b0200003d02000084030000
   viewer: {fileID: 963194231}
+--- !u!114 &964542884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 964542879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39fd12f05531e874595aab9caa997ca4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EntityBaseColor: {r: 0.8627451, g: 0.8627451, b: 0.8627451, a: 1}
+  m_EnityDissolveMaterial: {fileID: 2100000, guid: 419fa088881e428449d30cf26d7b8ef7, type: 2}
+  m_EnityDissolveMaterialTextureName: _Texture
+  m_EnityDissolveMaterialColorName: _Colour
+  BedrockEntitySolid: {fileID: 2100000, guid: 4c85d187070a73a4dab748d8fb723ad7, type: 2}
+  BedrockEntityCutout: {fileID: 2100000, guid: a05dea9d3b1b3f44e8595824de6e7e6e, type: 2}
+  BedrockEntityCutoutDoubleSided: {fileID: 2100000, guid: 348df5940fcd6ff49ba95df0c2baddd2, type: 2}
+  BedrockEntityTranslucent: {fileID: 2100000, guid: 7c491abaab4c5b74fbd248bb5b82ef3c, type: 2}
 --- !u!1 &1028116430
 GameObject:
   m_ObjectHideFlags: 0
