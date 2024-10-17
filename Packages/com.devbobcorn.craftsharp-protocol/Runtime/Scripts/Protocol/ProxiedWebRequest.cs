@@ -58,7 +58,7 @@ namespace CraftSharp.Protocol
         private void SetupBasicHeaders()
         {
             Headers.Add("Host", host);
-            Headers.Add("User-Agent", "CornCraft/" + CornGlobal.Version);
+            Headers.Add("User-Agent", "CornCraft/" + ProtocolSettings.Version);
             Headers.Add("Accept", "*/*");
             Headers.Add("Connection", "close");
         }

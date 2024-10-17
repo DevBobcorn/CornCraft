@@ -224,7 +224,7 @@ namespace CraftSharp
             // Load in-game translations (loaded AFTER resource files)
             var s = Path.DirectorySeparatorChar;
             var langFile = PathHelper.GetPackDirectoryNamed(
-                    $"vanilla-{resourceVersion}{s}assets{s}minecraft{s}lang{s}{CornGlobal.Language}.json");
+                    $"vanilla-{resourceVersion}{s}assets{s}minecraft{s}lang{s}{ProtocolSettings.Language}.json");
             
             if (!File.Exists(langFile)) // If translation file is not available, try downloading it
             {
@@ -232,7 +232,7 @@ namespace CraftSharp
                 // be downloaded with ResourceDownloader.DownloadLanguageJson()
                 // Instead it must be downloaded along with vanilla resource files
                 yield return StartCoroutine(ResourceDownloader.DownloadLanguageJson(
-                        resourceVersion, CornGlobal.Language, updateStatus,
+                        resourceVersion, ProtocolSettings.Language, updateStatus,
                         () => { },
                         (langJsonDownloaded) => {
                             if (!langJsonDownloaded)

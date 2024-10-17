@@ -69,7 +69,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             }
             else if (forgeEnabled)
             {
-                if (CornGlobal.DebugMode)
+                if (ProtocolSettings.DebugMode)
                     Debug.Log("Ignoring unknown packet ID of 0x" + packetId.ToString("X2"));
                 return PacketTypesIn.Unknown;
             }
@@ -97,7 +97,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             }
             else if (forgeEnabled)
             {
-                if (CornGlobal.DebugMode)
+                if (ProtocolSettings.DebugMode)
                     Debug.Log("Ignoring unknown packet ID of 0x" + packetId.ToString("X2"));
                 return ConfigurationPacketTypesIn.Unknown;
             }
@@ -127,7 +127,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             }
             else if (forgeEnabled)
             {
-                if (CornGlobal.DebugMode)
+                if (ProtocolSettings.DebugMode)
                     Debug.Log("Ignoring unknown packet ID of 0x" + packetId.ToString("X2"));
                 return PacketTypesOut.Unknown;
             }
@@ -155,7 +155,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             }
             else if (forgeEnabled)
             {
-                if (CornGlobal.DebugMode)
+                if (ProtocolSettings.DebugMode)
                     Debug.Log("Ignoring unknown packet ID of 0x" + packetId.ToString("X2"));
                 return ConfigurationPacketTypesOut.Unknown;
             }

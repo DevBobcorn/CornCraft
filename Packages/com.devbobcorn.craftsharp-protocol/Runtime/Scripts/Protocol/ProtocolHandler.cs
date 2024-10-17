@@ -470,7 +470,7 @@ namespace CraftSharp.Protocol
             List<String> http_request = new List<string>();
             http_request.Add("POST " + endpoint + " HTTP/1.1");
             http_request.Add("Host: " + host);
-            http_request.Add("User-Agent: CornCraft/" + CornGlobal.Version);
+            http_request.Add("User-Agent: CornCraft/" + ProtocolSettings.Version);
             http_request.Add("Content-Type: application/json");
             http_request.Add("Content-Length: " + Encoding.ASCII.GetBytes(request).Length);
             http_request.Add("Connection: close");
@@ -509,7 +509,7 @@ namespace CraftSharp.Protocol
             {
                 try
                 {
-                    if (CornGlobal.DebugMode)
+                    if (ProtocolSettings.DebugMode)
                         Debug.Log(Translations.Get("debug.request", host));
 
                     //TcpClient client = ProxyHandler.newTcpClient(host, 443, true);

@@ -530,7 +530,7 @@ namespace CraftSharp.Rendering
             var blockLoc = playerLoc.GetBlockLoc();
             ChunkRenderColumn columnRender;
 
-            int viewDist = CornGlobal.MCSettings.RenderDistance;
+            int viewDist = ProtocolSettings.MCSettings.RenderDistance;
             int viewDistSqr = viewDist * viewDist;
 
             int chunkColumnSize = (World.GetDimensionType().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
@@ -594,7 +594,7 @@ namespace CraftSharp.Rendering
         {
             // Add nearby chunks
             var blockLoc   = client!.GetCurrentLocation().GetBlockLoc();
-            int unloadDist = Mathf.RoundToInt(CornGlobal.MCSettings.RenderDistance * 2F);
+            int unloadDist = Mathf.RoundToInt(ProtocolSettings.MCSettings.RenderDistance * 2F);
 
             var chunkCoords = renderColumns.Keys.ToArray();
 

@@ -132,7 +132,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             byte fmlProtocolVersion = DataTypes.ReadNextByte(packetData);
 
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                                 Debug.Log(Translations.Get("forge.version", fmlProtocolVersion));
 
                             if (fmlProtocolVersion >= 1)
@@ -142,7 +142,7 @@ namespace CraftSharp.Protocol.Handlers
                             SendForgeHandshakePacket(FMLHandshakeDiscriminator.ClientHello, new byte[] { fmlProtocolVersion });
 
                             // Then tell the server that we're running the same mods.
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                                 Debug.Log(Translations.Get("forge.send_mod"));
                             byte[][] mods = new byte[forgeInfo.Mods.Count][];
                             for (int i = 0; i < forgeInfo.Mods.Count; i++)
@@ -162,7 +162,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             Thread.Sleep(2000);
 
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                                 Debug.Log(Translations.Get("forge.accept"));
                             // Tell the server that yes, we are OK with the mods it has
                             // even though we don't actually care what mods it has.
@@ -182,7 +182,7 @@ namespace CraftSharp.Protocol.Handlers
                             bool hasNextRegistry = DataTypes.ReadNextBool(packetData);
                             string registryName = DataTypes.ReadNextString(packetData);
                             int registrySize = DataTypes.ReadNextVarInt(packetData);
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                                 Debug.Log(Translations.Get("forge.registry_2", registryName, registrySize));
                             if (!hasNextRegistry)
                                 fmlHandshakeState = FMLHandshakeClientState.PENDINGCOMPLETE;
@@ -193,7 +193,7 @@ namespace CraftSharp.Protocol.Handlers
                             // Just say yes.
                             if (discriminator != FMLHandshakeDiscriminator.HandshakeAck)
                                 return false;
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                                 Debug.Log(Translations.Get("forge.accept_registry"));
                             SendForgeHandshakePacket(FMLHandshakeDiscriminator.HandshakeAck,
                                 new byte[] { (byte)FMLHandshakeClientState.PENDINGCOMPLETE });
@@ -207,7 +207,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             SendForgeHandshakePacket(FMLHandshakeDiscriminator.HandshakeAck,
                                 new byte[] { (byte)FMLHandshakeClientState.COMPLETE });
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                                 Debug.Log(Translations.Get("forge.complete"));
                             fmlHandshakeState = FMLHandshakeClientState.DONE;
                             return true;
@@ -287,7 +287,7 @@ namespace CraftSharp.Protocol.Handlers
                             //
                             // [1]: Version is usually set to "FML2" for FML stuff and "1" for mods
 
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                                 Debug.Log(Translations.Get("forge.fml2.mod"));
 
                             List<string> mods = new List<string>();
@@ -319,7 +319,7 @@ namespace CraftSharp.Protocol.Handlers
                             // We are supposed to validate server info against our set of installed mods, then reply with our list
                             // In MCC, we just want to send a valid response so we'll reply back with data collected from the server.
 
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                                 Debug.Log(Translations.Get("forge.fml2.mod_send"));
 
                             // Packet ID 2: Client to Server Mod List
@@ -355,7 +355,7 @@ namespace CraftSharp.Protocol.Handlers
                             // Registry Snapshot: ForgeRegistry.java > Snapshot > read(PacketBuffer)
                             // Not documented yet. We're ignoring this packet in MCC
 
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                             {
                                 string registryName = DataTypes.ReadNextString(packetData);
                                 Debug.Log(Translations.Get("forge.fml2.registry", registryName));
@@ -374,7 +374,7 @@ namespace CraftSharp.Protocol.Handlers
                             // [1] Config data may containt a standard Minecraft string readable with DataTypes.readNextString()
                             // We're ignoring this packet in MCC
 
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                             {
                                 string configName = DataTypes.ReadNextString(packetData);
                                 Debug.Log(Translations.Get("forge.fml2.config", configName));
@@ -385,7 +385,7 @@ namespace CraftSharp.Protocol.Handlers
                             break;
 
                         default:
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                                 Debug.Log(Translations.Get("forge.fml2.unknown", packetID));
                             break;
                     }
@@ -400,7 +400,7 @@ namespace CraftSharp.Protocol.Handlers
                         return true;
                     }
                 }
-                else if (CornGlobal.DebugMode)
+                else if (ProtocolSettings.DebugMode)
                 {
                     Debug.Log(Translations.Get("forge.fml2.unknown_channel", fmlChannel));
                 }
@@ -494,7 +494,7 @@ namespace CraftSharp.Protocol.Handlers
                     if (forgeInfo.Mods.Any())
                     {
                         Translations.Get("forge.with_mod", forgeInfo.Mods.Count);
-                        if (CornGlobal.DebugMode)
+                        if (ProtocolSettings.DebugMode)
                         {
                             Debug.Log(Translations.Get("forge.mod_list"));
                             foreach (ForgeInfo.ForgeMod mod in forgeInfo.Mods)

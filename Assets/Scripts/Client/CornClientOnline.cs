@@ -261,7 +261,7 @@ namespace CraftSharp
             {
                 string text = chatQueue.Dequeue();
                 handler!.SendChatMessage(text, playerKeyPair);
-                nextMessageSendTime = DateTime.Now + TimeSpan.FromSeconds(CornGlobal.MessageCooldown);
+                nextMessageSendTime = DateTime.Now + TimeSpan.FromSeconds(ProtocolSettings.MessageCooldown);
             }
         }
         
@@ -986,7 +986,7 @@ namespace CraftSharp
         /// Called when a network packet received or sent
         /// </summary>
         /// <remarks>
-        /// Only called if <see cref="CornGlobal.CapturePackets"/> is set to True
+        /// Only called if <see cref="ProtocolSettings.CapturePackets"/> is set to True
         /// </remarks>
         /// <param name="packetId">Packet Id</param>
         /// <param name="packetData">A copy of Packet Data</param>
@@ -1011,17 +1011,17 @@ namespace CraftSharp
             else
                 SetCanSendMessage(false);
 
-            handler!.SendBrandInfo(CornGlobal.BrandInfo.Trim());
+            handler!.SendBrandInfo(ProtocolSettings.BrandInfo.Trim());
 
-            if (CornGlobal.MCSettings.Enabled)
+            if (ProtocolSettings.MCSettings.Enabled)
                 handler.SendClientSettings(
-                    CornGlobal.MCSettings.Locale,
-                    CornGlobal.MCSettings.RenderDistance,
-                    CornGlobal.MCSettings.Difficulty,
-                    CornGlobal.MCSettings.ChatMode,
-                    CornGlobal.MCSettings.ChatColors,
-                    CornGlobal.MCSettings.Skin_All,
-                    CornGlobal.MCSettings.MainHand);
+                    ProtocolSettings.MCSettings.Locale,
+                    ProtocolSettings.MCSettings.RenderDistance,
+                    ProtocolSettings.MCSettings.Difficulty,
+                    ProtocolSettings.MCSettings.ChatMode,
+                    ProtocolSettings.MCSettings.ChatColors,
+                    ProtocolSettings.MCSettings.Skin_All,
+                    ProtocolSettings.MCSettings.MainHand);
 
             if (protocolVersion >= ProtocolMinecraft.MC_1_19_3_Version
                 && playerKeyPair != null && isOnlineMode)
@@ -1136,7 +1136,7 @@ namespace CraftSharp
 
             if (message.isSignedChat)
             {
-                if (!CornGlobal.ShowIllegalSignedChat && !message.isSystemChat && !(bool)message.isSignatureLegal!)
+                if (!ProtocolSettings.ShowIllegalSignedChat && !message.isSystemChat && !(bool)message.isSignatureLegal!)
                     return;
                 messageText = ChatParser.ParseSignedChat(message, links);
             }

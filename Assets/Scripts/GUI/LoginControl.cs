@@ -96,7 +96,7 @@ namespace CraftSharp.UI
             if (host == "localhost" || host.Contains('.') || host.Contains(':'))
             {
                 // IPv4 addresses or domain names contain at least a dot
-                if (sip.Length == 1 && host.Contains('.') && host.Any(c => char.IsLetter(c)) && CornGlobal.ResolveSrvRecords)
+                if (sip.Length == 1 && host.Contains('.') && host.Any(c => char.IsLetter(c)) && ProtocolSettings.ResolveSrvRecords)
                 {
                     //Domain name without port may need Minecraft SRV Record lookup
                     ProtocolHandler.MinecraftServiceLookup(ref host, ref port);
@@ -178,7 +178,7 @@ namespace CraftSharp.UI
             }
             else
             {   // Validate cached session or login new session.
-                if (CornGlobal.SessionCaching != CacheType.None && SessionCache.Contains(accountLower))
+                if (ProtocolSettings.SessionCaching != CacheType.None && SessionCache.Contains(accountLower))
                 {
                     session = SessionCache.Get(accountLower);
                     result = ProtocolHandler.GetTokenValidation(session);
@@ -253,20 +253,20 @@ namespace CraftSharp.UI
                     yield break;
                 }
 
-                if (CornGlobal.SessionCaching != CacheType.None)
+                if (ProtocolSettings.SessionCaching != CacheType.None)
                     SessionCache.Store(accountLower, session);
 
-                if (microsoftLogin && CornGlobal.LoginWithSecureProfile)
+                if (microsoftLogin && ProtocolSettings.LoginWithSecureProfile)
                 {
                     // Load cached profile key from disk if necessary
-                    if (CornGlobal.ProfileKeyCaching == CacheType.Disk)
+                    if (ProtocolSettings.ProfileKeyCaching == CacheType.Disk)
                     {
                         bool cacheKeyLoaded = KeysCache.InitializeDiskCache();
-                        if (CornGlobal.DebugMode)
+                        if (ProtocolSettings.DebugMode)
                             Debug.Log(Translations.Get(cacheKeyLoaded ? "debug.keys_cache_ok" : "debug.keys_cache_fail"));
                     }
 
-                    if (CornGlobal.ProfileKeyCaching != CacheType.None && KeysCache.Contains(accountLower))
+                    if (ProtocolSettings.ProfileKeyCaching != CacheType.None && KeysCache.Contains(accountLower))
                     {
                         playerKeyPair = KeysCache.Get(accountLower);
                         if (playerKeyPair.NeedRefresh())
@@ -279,14 +279,14 @@ namespace CraftSharp.UI
                     {
                         Debug.Log(Translations.Get("mcc.fetching_key"));
                         playerKeyPair = KeyUtils.GetNewProfileKeys(session.ID);
-                        if (CornGlobal.ProfileKeyCaching != CacheType.None && playerKeyPair != null)
+                        if (ProtocolSettings.ProfileKeyCaching != CacheType.None && playerKeyPair != null)
                         {
                             KeysCache.Store(accountLower, playerKeyPair);
                         }
                     }
                 }
 
-                if (CornGlobal.DebugMode)
+                if (ProtocolSettings.DebugMode)
                     Debug.Log(Translations.Get("debug.session_id", session.ID));
 
                 // Get server version
@@ -580,10 +580,10 @@ namespace CraftSharp.UI
             loginDropDown.onValueChanged.AddListener(this.UpdateUsernamePlaceholder);
 
             //Load cached sessions from disk if necessary
-            if (CornGlobal.SessionCaching == CacheType.Disk)
+            if (ProtocolSettings.SessionCaching == CacheType.Disk)
             {
                 bool cacheLoaded = SessionCache.InitializeDiskCache();
-                if (CornGlobal.DebugMode)
+                if (ProtocolSettings.DebugMode)
                     Debug.Log(Translations.Get(cacheLoaded ? "debug.session_cache_ok" : "debug.session_cache_fail"));
                 
                 if (cacheLoaded)
@@ -625,7 +625,7 @@ namespace CraftSharp.UI
 
             // Used for testing MC format code parsing
             // loadStateInfoText.text = StringConvert.MC2TMP("Hello world §a[§a§a-1, §a1 §6[Bl§b[HHH]ah] Hello §c[Color RE§rD]  §a1§r] (blah)");
-            loadStateInfoText.text = $"CornCraft {CornGlobal.Version} Powered by <u>Minecraft Console Client</u>";
+            loadStateInfoText.text = $"CornCraft {ProtocolSettings.Version} Powered by <u>Minecraft Console Client</u>";
 
             // Release cursor (Useful when re-entering login scene from game)
             Cursor.lockState = CursorLockMode.None;

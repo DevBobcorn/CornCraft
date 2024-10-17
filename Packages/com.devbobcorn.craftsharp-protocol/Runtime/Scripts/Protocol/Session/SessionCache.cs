@@ -57,11 +57,11 @@ namespace CraftSharp.Protocol.Session
                 sessions.Add(login, session);
             }
 
-            if (CornGlobal.SessionCaching == CacheType.Disk && updatetimer.Enabled == true)
+            if (ProtocolSettings.SessionCaching == CacheType.Disk && updatetimer.Enabled == true)
             {
                 pendingadds.Add(new KeyValuePair<string, SessionToken>(login, session));
             }
-            else if (CornGlobal.SessionCaching == CacheType.Disk)
+            else if (ProtocolSettings.SessionCaching == CacheType.Disk)
             {
                 SaveToDisk();
             }
@@ -130,7 +130,7 @@ namespace CraftSharp.Protocol.Session
             //Grab sessions in the Minecraft directory
             if (File.Exists(SessionCacheFileMinecraft))
             {
-                if (CornGlobal.DebugMode) Debug.Log(Translations.Get("cache.loading", Path.GetFileName(SessionCacheFileMinecraft)));
+                if (ProtocolSettings.DebugMode) Debug.Log(Translations.Get("cache.loading", Path.GetFileName(SessionCacheFileMinecraft)));
                 Json.JSONData mcSession = new Json.JSONData(Json.JSONData.DataType.String);
                 try
                 {
@@ -163,7 +163,7 @@ namespace CraftSharp.Protocol.Session
                                         sessionItem["uuid"].StringValue.Replace("-", ""),
                                         clientID
                                     ));
-                                    if (CornGlobal.DebugMode)
+                                    if (ProtocolSettings.DebugMode)
                                         Debug.Log(Translations.Get("cache.loaded", login, session.ID));
                                     sessions[login] = session;
                                 }
@@ -177,7 +177,7 @@ namespace CraftSharp.Protocol.Session
             //Serialized session cache file in binary format
             if (File.Exists(PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + SessionCacheFileSerialized))
             {
-                if (CornGlobal.DebugMode)
+                if (ProtocolSettings.DebugMode)
                     Debug.Log(Translations.Get("cache.converting", SessionCacheFileSerialized));
 
                 try
@@ -187,7 +187,7 @@ namespace CraftSharp.Protocol.Session
                         Dictionary<string, SessionToken> sessionsTemp = (Dictionary<string, SessionToken>)formatter.Deserialize(fs);
                         foreach (KeyValuePair<string, SessionToken> item in sessionsTemp)
                         {
-                            if (CornGlobal.DebugMode)
+                            if (ProtocolSettings.DebugMode)
                                 Debug.Log(Translations.Get("cache.loaded", item.Key, item.Value.ID));
                             sessions[item.Key] = item.Value;
                         }
@@ -206,7 +206,7 @@ namespace CraftSharp.Protocol.Session
             //User-editable session cache file in text format
             if (File.Exists(PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + SessionCacheFilePlaintext))
             {
-                if (CornGlobal.DebugMode)
+                if (ProtocolSettings.DebugMode)
                     Debug.Log(Translations.Get("cache.loading_session", SessionCacheFilePlaintext));
 
                 try
@@ -222,17 +222,17 @@ namespace CraftSharp.Protocol.Session
                                 {
                                     string login = keyValue[0].ToLower();
                                     SessionToken session = SessionToken.FromString(keyValue[1]);
-                                    if (CornGlobal.DebugMode)
+                                    if (ProtocolSettings.DebugMode)
                                         Debug.Log(Translations.Get("cache.loaded", login, session.ID));
                                     sessions[login] = session;
                                 }
                                 catch (InvalidDataException e)
                                 {
-                                    if (CornGlobal.DebugMode)
+                                    if (ProtocolSettings.DebugMode)
                                         Debug.Log(Translations.Get("cache.ignore_string", keyValue[1], e.Message));
                                 }
                             }
-                            else if (CornGlobal.DebugMode)
+                            else if (ProtocolSettings.DebugMode)
                             {
                                 Debug.Log(Translations.Get("cache.ignore_line", line));
                             }
@@ -253,11 +253,11 @@ namespace CraftSharp.Protocol.Session
         /// </summary>
         private static void SaveToDisk()
         {
-            if (CornGlobal.DebugMode)
+            if (ProtocolSettings.DebugMode)
                 Debug.Log(Translations.Get("cache.saving"));
 
             List<string> sessionCacheLines = new List<string>();
-            sessionCacheLines.Add("# Generated by CornClient " + CornGlobal.Version + " - Edit at own risk!");
+            sessionCacheLines.Add("# Generated by CornClient " + ProtocolSettings.Version + " - Edit at own risk!");
             sessionCacheLines.Add("# Login=SessionID,PlayerName,UUID,ClientID");
             foreach (KeyValuePair<string, SessionToken> entry in sessions)
                 sessionCacheLines.Add(entry.Key + '=' + entry.Value.ToString());

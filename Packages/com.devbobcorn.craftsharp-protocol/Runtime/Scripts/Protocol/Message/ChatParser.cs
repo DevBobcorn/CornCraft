@@ -100,7 +100,7 @@ namespace CraftSharp.Protocol
         /// <returns>Returns the translated text</returns>
         public static string ParseSignedChat(ChatMessage message, List<string>? links = null)
         {
-            string chatContent = CornGlobal.ShowModifiedChat && message.unsignedContent != null ? message.unsignedContent : message.content;
+            string chatContent = ProtocolSettings.ShowModifiedChat && message.unsignedContent != null ? message.unsignedContent : message.content;
             string content = message.isJson ? ParseText(chatContent, links) : chatContent;
             string sender = message.displayName!;
 
@@ -160,27 +160,27 @@ namespace CraftSharp.Protocol
             string color = string.Empty;
             if (message.isSystemChat)
             {
-                if (CornGlobal.MarkSystemMessage)
+                if (ProtocolSettings.MarkSystemMessage)
                     color = "§z §r "; // Custom color code §z : Background Gray
             }
             else
             {
                 if ((bool)message.isSignatureLegal!)
                 {
-                    if (CornGlobal.ShowModifiedChat && message.unsignedContent != null)
+                    if (ProtocolSettings.ShowModifiedChat && message.unsignedContent != null)
                     {
-                        if (CornGlobal.MarkModifiedMsg)
+                        if (ProtocolSettings.MarkModifiedMsg)
                             color = "§x §r "; // Custom color code §x : Background Yellow
                     }
                     else
                     {
-                        if (CornGlobal.MarkLegallySignedMsg)
+                        if (ProtocolSettings.MarkLegallySignedMsg)
                             color = "§y §r "; // Custom color code §y : Background Green
                     }
                 }
                 else
                 {
-                    if (CornGlobal.MarkIllegallySignedMsg)
+                    if (ProtocolSettings.MarkIllegallySignedMsg)
                         color = "§w §r "; // Custom color code §w : Background Red
                 }
             }
@@ -246,7 +246,7 @@ namespace CraftSharp.Protocol
                 foreach (var text in translations.Properties)
                     translationRules[text.Key] = text.Value.StringValue;
 
-                if (CornGlobal.DebugMode)
+                if (ProtocolSettings.DebugMode)
                     Debug.Log(Translations.Get("chat.loaded"));
             }
             else // No external dictionary found.

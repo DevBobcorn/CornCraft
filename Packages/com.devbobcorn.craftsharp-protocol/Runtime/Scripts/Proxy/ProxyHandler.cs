@@ -29,11 +29,11 @@ namespace CraftSharp.Proxy
         {
             try
             {
-                if (login ? CornGlobal.ProxyEnabledLogin : CornGlobal.ProxyEnabledIngame)
+                if (login ? ProtocolSettings.ProxyEnabledLogin : ProtocolSettings.ProxyEnabledIngame)
                 {
                     ProxyType innerProxytype = ProxyType.Http;
 
-                    switch (CornGlobal.ProxyType)
+                    switch (ProtocolSettings.ProxyType)
                     {
                         case Type.HTTP: innerProxytype = ProxyType.Http; break;
                         case Type.SOCKS4: innerProxytype = ProxyType.Socks4; break;
@@ -41,15 +41,15 @@ namespace CraftSharp.Proxy
                         case Type.SOCKS5: innerProxytype = ProxyType.Socks5; break;
                     }
 
-                    if (CornGlobal.ProxyUsername != "" && CornGlobal.ProxyPassword != "")
+                    if (ProtocolSettings.ProxyUsername != "" && ProtocolSettings.ProxyPassword != "")
                     {
-                        proxy = factory.CreateProxyClient(innerProxytype, CornGlobal.ProxyHost, CornGlobal.ProxyPort, CornGlobal.ProxyUsername, CornGlobal.ProxyPassword);
+                        proxy = factory.CreateProxyClient(innerProxytype, ProtocolSettings.ProxyHost, ProtocolSettings.ProxyPort, ProtocolSettings.ProxyUsername, ProtocolSettings.ProxyPassword);
                     }
-                    else proxy = factory.CreateProxyClient(innerProxytype, CornGlobal.ProxyHost, CornGlobal.ProxyPort);
+                    else proxy = factory.CreateProxyClient(innerProxytype, ProtocolSettings.ProxyHost, ProtocolSettings.ProxyPort);
 
                     if (!proxy_ok)
                     {
-                        Debug.Log(Translations.Get("proxy.connected", CornGlobal.ProxyHost, CornGlobal.ProxyPort));
+                        Debug.Log(Translations.Get("proxy.connected", ProtocolSettings.ProxyHost, ProtocolSettings.ProxyPort));
                         proxy_ok = true;
                     }
 
