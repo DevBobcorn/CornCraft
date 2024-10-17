@@ -106,6 +106,10 @@ MonoBehaviour:
   m_EnityDissolveMaterial: {fileID: 2100000, guid: 419fa088881e428449d30cf26d7b8ef7, type: 2}
   m_EnityDissolveMaterialTextureName: _Texture
   m_EnityDissolveMaterialColorName: _Colour
+  BedrockEntitySolid: {fileID: 2100000, guid: 4c85d187070a73a4dab748d8fb723ad7, type: 2}
+  BedrockEntityCutout: {fileID: 2100000, guid: a05dea9d3b1b3f44e8595824de6e7e6e, type: 2}
+  BedrockEntityCutoutDoubleSided: {fileID: 2100000, guid: 348df5940fcd6ff49ba95df0c2baddd2, type: 2}
+  BedrockEntityTranslucent: {fileID: 2100000, guid: 7c491abaab4c5b74fbd248bb5b82ef3c, type: 2}
 --- !u!114 &8991044412032759198
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1072,7 +1076,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 390473801096230046, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_fontSize
-      value: 35.85
+      value: 35.7
       objectReference: {fileID: 0}
     - target: {fileID: 411776170313800663, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1208,7 +1212,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1548419857005476720, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_fontSize
-      value: 46.55
+      value: 46.35
       objectReference: {fileID: 0}
     - target: {fileID: 1597046327235566010, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_SizeDelta.x
@@ -1252,7 +1256,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3621640533663428678, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_fontSize
-      value: 46.55
+      value: 46.35
       objectReference: {fileID: 0}
     - target: {fileID: 3850850348760909226, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1268,7 +1272,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4051555152798750997, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_fontSize
-      value: 35.85
+      value: 35.7
       objectReference: {fileID: 0}
     - target: {fileID: 4116231945711108716, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_SizeDelta.y
@@ -1280,7 +1284,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4526179069394025124, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_fontSize
-      value: 35.85
+      value: 35.7
       objectReference: {fileID: 0}
     - target: {fileID: 4609332545817986873, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1476,7 +1480,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7299574259987197818, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_fontSize
-      value: 35.85
+      value: 35.7
       objectReference: {fileID: 0}
     - target: {fileID: 7334470615264588308, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_SizeDelta.y

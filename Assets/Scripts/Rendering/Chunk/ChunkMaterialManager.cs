@@ -7,13 +7,13 @@ namespace CraftSharp.Rendering
 {
     public class ChunkMaterialManager : MonoBehaviour
     {
-        [SerializeField] public Material AtlasSolid;
-        [SerializeField] public Material AtlasCutout;
-        [SerializeField] public Material AtlasCutoutMipped;
-        [SerializeField] public Material AtlasTranslucent;
-        [SerializeField] public Material StylizedWater;
-        [SerializeField] public Material Foliage;
-        [SerializeField] public Material Plants;
+        public Material AtlasSolid;
+        public Material AtlasCutout;
+        public Material AtlasCutoutMipped;
+        public Material AtlasTranslucent;
+        public Material StylizedWater;
+        public Material Foliage;
+        public Material Plants;
 
         private readonly Dictionary<RenderType, Material> atlasMaterials = new();
         private Material defaultAtlasMaterial;

@@ -22,6 +22,11 @@ namespace CraftSharp.Rendering
         [SerializeField] private string m_EnityDissolveMaterialColorName = "_Colour";
         public string EnityDissolveMaterialColorName => m_EnityDissolveMaterialColorName;
 
+        public Material BedrockEntitySolid;
+        public Material BedrockEntityCutout;
+        public Material BedrockEntityCutoutDoubleSided;
+        public Material BedrockEntityTranslucent;
+
         /// <summary>
         /// A material instance is created for each rendertype-texture pair,
         /// and all entities that uses this material share the same instance.
@@ -239,6 +244,24 @@ namespace CraftSharp.Rendering
                 Debug.LogWarning($"Failed to get player texture info for {playerUUID}!");
                 // Don't use callback
             }
+        }
+
+        public Material GetBedrockEntityMaterialTemplate(EntityRenderType renderType)
+        {
+            return renderType switch
+            {
+                EntityRenderType.SOLID          => BedrockEntitySolid,
+                EntityRenderType.CUTOUT         => BedrockEntityCutout,
+                EntityRenderType.CUTOUT_CULLOFF => BedrockEntityCutoutDoubleSided,
+                EntityRenderType.TRANSLUCENT    => BedrockEntityTranslucent,
+
+                EntityRenderType.SOLID_EMISSIVE          => BedrockEntitySolid,
+                EntityRenderType.CUTOUT_EMISSIVE         => BedrockEntityCutout,
+                EntityRenderType.CUTOUT_CULLOFF_EMISSIVE => BedrockEntityCutoutDoubleSided,
+                EntityRenderType.TRANSLUCENT_EMISSIVE    => BedrockEntityTranslucent,
+
+                _ =>                            BedrockEntitySolid
+            };
         }
 
         public void ClearTables()
