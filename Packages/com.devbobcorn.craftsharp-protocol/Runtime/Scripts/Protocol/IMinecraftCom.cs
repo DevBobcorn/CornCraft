@@ -221,6 +221,13 @@ namespace CraftSharp.Protocol
         bool SendPlayerDigging(int status, BlockLoc blockLoc, Direction face, int sequenceId);
 
         /// <summary>
+        /// Send player action packet to the server.
+        /// </summary>
+        /// <param name="status">3-6 for various purposes ( https://wiki.vg/Protocol#Player_Action )</param>
+        /// <returns>True if packet was succcessfully sent</returns>
+        bool SendPlayerAction(int status);
+
+        /// <summary>
         /// Change text on a sign
         /// </summary>
         /// <param name="location">Location of Sign block</param>

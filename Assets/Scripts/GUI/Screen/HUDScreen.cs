@@ -274,6 +274,16 @@ namespace CraftSharp.UI
             if (Keyboard.current.digit9Key.wasPressedThisFrame)
                 game.ChangeSlot(8);
 
+            if (Keyboard.current.qKey.wasPressedThisFrame)
+            {
+                game.DropItem(Keyboard.current.ctrlKey.isPressed);
+            }
+
+            if (Keyboard.current.fKey.wasPressedThisFrame)
+            {
+                game.SwapItemOnHands();
+            }
+
             if (Keyboard.current.slashKey.wasPressedThisFrame)
             {   // Open chat screen and input a slash
                 var chatScreen = game.ScreenControl.PushScreen<ChatScreen>();

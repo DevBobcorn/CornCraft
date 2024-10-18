@@ -7,9 +7,13 @@ namespace CraftSharp.UI
 {
     public class InventoryHotbar : MonoBehaviour, IAlphaListener
     {
+        private static readonly int SHOW_HASH = Animator.StringToHash("Show");
         public const int HOTBAR_LENGTH = 9;
 
         [SerializeField] private InventoryItemSlot[] itemSlots = { };
+        [SerializeField] private InventoryItemSlot offhandItemSlot;
+
+        [SerializeField] private Animator hotbarAnimator;
 
         private InventoryItemSlot selectedSlot;
 
@@ -43,8 +47,17 @@ namespace CraftSharp.UI
                 itemSlots[i].SetKeyHint((i + 1).ToString());
             }
 
+            offhandItemSlot.SetKeyHint("F");
+
             hotbarUpdateCallback = (e) => {
-                if (e.HotbarSlot >= 0 && e.HotbarSlot < itemSlots.Length)
+                if (e.HotbarSlot == HOTBAR_LENGTH)
+                {
+                    offhandItemSlot.UpdateItemStack(e.ItemStack);
+                    var offhandIsEmpty = e.ItemStack?.IsEmpty ?? true;
+
+                    hotbarAnimator.SetBool(SHOW_HASH, !offhandIsEmpty);
+                }
+                else if (e.HotbarSlot >= 0 && e.HotbarSlot < HOTBAR_LENGTH)
                 {
                     itemSlots[e.HotbarSlot].UpdateItemStack(e.ItemStack);
                 }
@@ -64,7 +77,7 @@ namespace CraftSharp.UI
 
         public void UpdateAlpha(float alpha)
         {
-            for (int i = 0; i < itemSlots.Length; i++)
+            for (int i = 0; i < HOTBAR_LENGTH; i++)
             {
                 itemSlots[i].SetSlotItemScale(alpha);
             }
