@@ -32,7 +32,9 @@ Key                                                       | Action
 <kbd>Space</kbd>                                          | Move Up in Air (Jump if Grounded)
 <kbd>Left Shift</kbd>                                     | Move Down in Air
 <kbd>Left Ctrl</kbd>                                      | Toggle Walk/Rush Mode
-<kbd>F</kbd>                                              | Perform Interaction
+<kbd>Mouse Scroll</kbd>                                   | Select Hotbar Slot
+<kbd>F</kbd>                                              | Swap Items on Hands
+<kbd>X</kbd>                                              | Perform Interaction
 <kbd>F3</kbd>                                             | Toggle Debug Info
 <kbd>F3</kbd> + <kbd>F4</kbd> (Hold)                      | Show Game Mode Switch
 <kbd>F5</kbd> + <kbd>C</kbd>                              | Rebuild Chunks
@@ -40,6 +42,7 @@ Key                                                       | Action
 <kbd>F6</kbd> / <kbd>F7</kbd> / <kbd>F8</kbd>             | Load Previous/Reload/Load Next Player Model
 <kbd>F11</kbd>                                            | Toggle Fullscreen
 <kbd>Shift</kbd> + <kbd>Tab</kbd>                         | Switch to Next Camera Controller
+<kbd>Shift</kbd> + <kbd>Mouse Scroll</kbd>                | Adjust Camera Zoom
 <kbd>T</kbd> / <kbd>/</kbd>                               | Show Chat Screen/Input Command
 <kbd>P</kbd>                                              | Show Packet Inspector Screen
 <kbd>Tab</kbd>                                            | Command Auto-Completion
