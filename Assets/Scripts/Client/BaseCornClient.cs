@@ -212,9 +212,13 @@ namespace CraftSharp
         public abstract bool SendRespawnPacket();
         public abstract bool SendEntityAction(EntityActionType entityAction);
         public abstract void SendAutoCompleteRequest(string text);
-        public abstract bool UseItemOnHand();
+        public abstract bool UseItemOnMainHand();
+        public abstract bool UseItemOnOffHand();
+        public abstract bool DoWindowAction(int windowId, int slotId, WindowActionType action);
         public abstract bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, Hand hand = Hand.MainHand);
         public abstract bool DigBlock(BlockLoc blockLoc, bool swingArms = true, bool lookAtBlock = true);
+        public abstract bool DropItem(bool dropEntireStack);
+        public abstract bool SwapItemOnHands();
         public abstract bool ChangeSlot(short slot);
 
         public bool ChangeSlotBy(short offset)

@@ -17,6 +17,7 @@ using CraftSharp.Protocol.Handlers.Forge;
 using CraftSharp.Protocol.ProfileKey;
 using CraftSharp.Protocol.Message;
 using CraftSharp.Protocol.Session;
+using Codice.Client.BaseCommands.Merge.Xml;
 
 namespace CraftSharp.Protocol.Handlers
 {
@@ -3163,6 +3164,25 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
+        // Shares same packet id with player digging. See https://wiki.vg/Protocol#Player_Action
+        public bool SendPlayerAction(int status)
+        {
+            try
+            {
+                List<byte> packet = new();
+                packet.AddRange(DataTypes.GetVarInt(status));
+                packet.AddRange(DataTypes.GetBlockLoc(BlockLoc.Zero)); // Location is always set to 0/0/0
+                packet.AddRange(DataTypes.GetVarInt(dataTypes.GetBlockFace(Direction.Down))); // Face is always set to -Y
+                if (protocolVersion >= MC_1_19_Version)
+                    packet.AddRange(DataTypes.GetVarInt(0)); // Sequence is always set to 0
+                SendPacket(PacketTypesOut.PlayerDigging, packet);
+                return true;
+            }
+            catch (SocketException) { return false; }
+            catch (System.IO.IOException) { return false; }
+            catch (ObjectDisposedException) { return false; }
+        }
+
         public bool SendPlayerBlockPlacement(int hand, BlockLoc location, Direction face, int sequenceId)
         {
             try
@@ -3201,9 +3221,165 @@ namespace CraftSharp.Protocol.Handlers
 
         public bool SendWindowAction(int windowId, int slotId, WindowActionType action, ItemStack? item, List<Tuple<short, ItemStack?>> changedSlots, int stateId)
         {
-            // TODO
+            try
+            {
+                var itemPalette = ItemPalette.INSTANCE;
 
-            return false;
+                short actionNumber;
+                lock (window_actions)
+                {
+                    if (!window_actions.ContainsKey(windowId))
+                        window_actions[windowId] = 0;
+                    actionNumber = (short)(window_actions[windowId] + 1);
+                    window_actions[windowId] = actionNumber;
+                }
+
+                byte button = 0;
+                byte mode = 0;
+
+                switch (action)
+                {
+                    case WindowActionType.LeftClick:
+                        button = 0;
+                        break;
+                    case WindowActionType.RightClick:
+                        button = 1;
+                        break;
+                    case WindowActionType.MiddleClick:
+                        button = 2;
+                        mode = 3;
+                        break;
+                    case WindowActionType.ShiftClick:
+                        button = 0;
+                        mode = 1;
+                        item = new ItemStack(Item.NULL, 0);
+                        break;
+                    case WindowActionType.ShiftRightClick: // Right-shift click uses button 1
+                        button = 1;
+                        mode = 1;
+                        item = new ItemStack(Item.NULL, 0);
+                        break;
+                    case WindowActionType.DropItem:
+                        button = 0;
+                        mode = 4;
+                        item = new ItemStack(Item.NULL, 0);
+                        break;
+                    case WindowActionType.DropItemStack:
+                        button = 1;
+                        mode = 4;
+                        item = new ItemStack(Item.NULL, 0);
+                        break;
+                    case WindowActionType.StartDragLeft:
+                        button = 0;
+                        mode = 5;
+                        item = new ItemStack(Item.NULL, 0);
+                        slotId = -999;
+                        break;
+                    case WindowActionType.StartDragRight:
+                        button = 4;
+                        mode = 5;
+                        item = new ItemStack(Item.NULL, 0);
+                        slotId = -999;
+                        break;
+                    case WindowActionType.StartDragMiddle:
+                        button = 8;
+                        mode = 5;
+                        item = new ItemStack(Item.NULL, 0);
+                        slotId = -999;
+                        break;
+                    case WindowActionType.EndDragLeft:
+                        button = 2;
+                        mode = 5;
+                        item = new ItemStack(Item.NULL, 0);
+                        slotId = -999;
+                        break;
+                    case WindowActionType.EndDragRight:
+                        button = 6;
+                        mode = 5;
+                        item = new ItemStack(Item.NULL, 0);
+                        slotId = -999;
+                        break;
+                    case WindowActionType.EndDragMiddle:
+                        button = 10;
+                        mode = 5;
+                        item = new ItemStack(Item.NULL, 0);
+                        slotId = -999;
+                        break;
+                    case WindowActionType.AddDragLeft:
+                        button = 1;
+                        mode = 5;
+                        item = new ItemStack(Item.NULL, 0);
+                        break;
+                    case WindowActionType.AddDragRight:
+                        button = 5;
+                        mode = 5;
+                        item = new ItemStack(Item.NULL, 0);
+                        break;
+                    case WindowActionType.AddDragMiddle:
+                        button = 9;
+                        mode = 5;
+                        item = new ItemStack(Item.NULL, 0);
+                        break;
+                }
+
+                List<byte> packet = new()
+                {
+                    (byte)windowId // Window ID
+                };
+
+                switch (protocolVersion)
+                {
+                    // 1.18+
+                    case >= MC_1_18_1_Version:
+                        packet.AddRange(DataTypes.GetVarInt(stateId)); // State ID
+                        packet.AddRange(DataTypes.GetShort((short)slotId)); // Slot ID
+                        break;
+                    // 1.17.1
+                    case MC_1_17_1_Version:
+                        packet.AddRange(DataTypes.GetShort((short)slotId)); // Slot ID
+                        packet.AddRange(DataTypes.GetVarInt(stateId)); // State ID
+                        break;
+                    // Older
+                    default:
+                        packet.AddRange(DataTypes.GetShort((short)slotId)); // Slot ID
+                        break;
+                }
+
+                packet.Add(button); // Button
+
+                if (protocolVersion < MC_1_17_Version)
+                    packet.AddRange(DataTypes.GetShort(actionNumber));
+
+                packet.AddRange(DataTypes.GetVarInt(mode)); // 1.9+  Mode
+
+                // 1.17+  Array of changed slots
+                if (protocolVersion >= MC_1_17_Version)
+                {
+                    packet.AddRange(DataTypes.GetVarInt(changedSlots.Count)); // Length of the array
+                    foreach (var slot in changedSlots)
+                    {
+                        packet.AddRange(DataTypes.GetShort(slot.Item1)); // slot ID
+                        packet.AddRange(dataTypes.GetItemSlot(slot.Item2, itemPalette)); // slot Data
+                    }
+                }
+
+                packet.AddRange(dataTypes.GetItemSlot(item, itemPalette)); // Carried item (Clicked item)
+
+                SendPacket(PacketTypesOut.ClickWindow, packet);
+                return true;
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
+            catch (System.IO.IOException)
+            {
+                return false;
+            }
+            catch (ObjectDisposedException)
+            {
+                return false;
+            }
         }
 
         public bool SendCreativeInventoryAction(int slot, Item itemType, int count, Dictionary<string, object>? nbt)

@@ -344,10 +344,28 @@ namespace CraftSharp
         public override void SendAutoCompleteRequest(string text) { }
 
         /// <summary>
-        /// Use the item currently in the player's hand
+        /// Use the item currently in the player's main hand
         /// </summary>
         /// <returns>TRUE if the item was successfully used</returns>
-        public override bool UseItemOnHand()
+        public override bool UseItemOnMainHand()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Use the item currently in the player's off hand
+        /// </summary>
+        /// <returns>TRUE if the item was successfully used</returns>
+        public override bool UseItemOnOffHand()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Click a slot in the specified window
+        /// </summary>
+        /// <returns>TRUE if the slot was successfully clicked</returns>
+        public override bool DoWindowAction(int windowId, int slotId, WindowActionType action)
         {
             return false;
         }
@@ -370,6 +388,23 @@ namespace CraftSharp
         /// <param name="swingArms">Also perform the "arm swing" animation</param>
         /// <param name="lookAtBlock">Also look at the block before digging</param>
         public override bool DigBlock(BlockLoc blockLoc, bool swingArms = true, bool lookAtBlock = true)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Drop item in active hotbar slot
+        /// </summary>
+        /// <param name="dropEntireStack">Whether or not to drop the entire item stack</param>
+        public override bool DropItem(bool dropEntireStack)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Swap item stacks in main hand and off hand
+        /// </summary>
+        public override bool SwapItemOnHands()
         {
             return false;
         }
