@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Playables;
 
 using AnimeSkybox;
 
@@ -9,6 +10,9 @@ namespace CraftSharp
     public class CelestialCloudMesh : MonoBehaviour
     {
         [SerializeField] private Sprite[] cloudSprites;
+        //[SerializeField] private MeshRenderer referenceRenderer;
+        [SerializeField] private AnimationClip cloudMaterialAnimation;
+        [SerializeField] private PlayableDirector skyboxDirector;
         [SerializeField] private int cloudQuadCountPerFragment = 12;
         [SerializeField] private GameObject cloudFragmentPrefab;
 
@@ -46,6 +50,10 @@ namespace CraftSharp
             fragmentObj.layer = gameObject.layer;
 
             var fragment = fragmentObj.GetComponent<MeshFilter>();
+
+            // Set animated values for new renderer
+            var newRenderer = fragment.GetComponent<MeshRenderer>();
+            cloudMaterialAnimation.SampleAnimation(fragmentObj, (float) skyboxDirector.time);
 
             // Build fragment
             fragment.sharedMesh = CloudMeshBuilder.BuildCloudMesh(cloudSprites, cloudQuadCountPerFragment, maxFadeDelay,
