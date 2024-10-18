@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using CraftSharp.Rendering;
 
-namespace CraftSharp.Control
+namespace CraftSharp.Control.Editor
 {
     public class SkillEditorWindow : TimeAreaWindow
     {

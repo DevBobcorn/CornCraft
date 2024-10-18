@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace CraftSharp.Control
+namespace CraftSharp.Control.Editor
 {
     public class SkillStageTrack
     {
