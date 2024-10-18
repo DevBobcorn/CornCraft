@@ -7,13 +7,12 @@ using UnityEditor;
 
 using CraftSharp.Molang.Utils;
 using CraftSharp.Molang.Runtime.Value;
-using CraftSharp.Rendering;
 using CraftSharp.Resource.BedrockEntity;
 
-namespace CraftSharp.Demo
+namespace CraftSharp.Rendering.Editor
 {
     [CustomEditor(typeof (BedrockModelEntityRender))]
-    public class EntityModelRenderEditor : Editor
+    public class EntityModelRenderEditor : UnityEditor.Editor
     {
         private static readonly MoPath ANIM_TIME_KEY = new("query.anim_time");
         private int selectedTexture = 0;
