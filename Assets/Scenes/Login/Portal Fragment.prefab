@@ -134,5 +134,5 @@ MonoBehaviour:
   portalHeight: 7
   portalFrame: {fileID: 7992725482465875916, guid: f0358a370072ce7418bd063716a4b5ff, type: 3}
   portalBlockMaterial: {fileID: 2100000, guid: a05d1b9b1798fd74b8f20257346d4d34, type: 2}
-  portalBlockEmissionColor: {r: 0.8470589, g: 1.5137256, b: 1.8196079, a: 1}
+  portalBlockEmissionColor: {r: 0.69736314, g: 1.2462138, b: 1.4980392, a: 1}
   FrameGenerationComplete: 0

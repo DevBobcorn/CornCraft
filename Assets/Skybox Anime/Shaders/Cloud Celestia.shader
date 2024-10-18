@@ -146,7 +146,7 @@ Shader "AnimeSkybox/Cloud Celestia"
                     {
                         float4 fogParams = GetAtmosphericHeightFog(i.positionWS.xyz);
                         // Apply reduced fog
-                        CloudColor.rgb = lerp(CloudColor.rgb, fogParams.rgb, saturate(fogParams.a - baseMap.g * SunDirection.x - 0.1));
+                        CloudColor.rgb = lerp(CloudColor.rgb, fogParams.rgb, saturate(fogParams.a - baseMap.g * SunDirection.x));
                         //CloudColor.rgb = lerp(CloudColor.rgb, fogParams.rgb, saturate(fogParams.a));
                     }
                 #endif

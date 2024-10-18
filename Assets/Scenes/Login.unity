@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 1569991966}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.25011063, g: 0.54814404, b: 1.0110343, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3746,6 +3745,8 @@ MonoBehaviour:
   - {fileID: 1159435747, guid: 998d576937589bb4d935f032beee4db8, type: 3}
   - {fileID: 1088514880, guid: 998d576937589bb4d935f032beee4db8, type: 3}
   - {fileID: -774865111, guid: 998d576937589bb4d935f032beee4db8, type: 3}
+  cloudMaterialAnimation: {fileID: 7400000, guid: 5c3ab3e05ee9f7140b803c0fefff9d76, type: 2}
+  skyboxDirector: {fileID: 1986500445}
   cloudQuadCountPerFragment: 14
   cloudFragmentPrefab: {fileID: 2600535528161968790, guid: 89fd5763e8fea9e4e88140e0a656d6b3, type: 3}
   viewerTransform: {fileID: 963194228}
@@ -5533,7 +5534,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36.8
+  m_fontSize: 39.35
   m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -6109,6 +6110,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f0512a64ac98b54faf26ff55b22bb23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!320 &1986500445 stripped
+PlayableDirector:
+  m_CorrespondingSourceObject: {fileID: 3349952773640179275, guid: bbe272d07c0263e43b1e96b5bf275b99, type: 3}
+  m_PrefabInstance: {fileID: 1278589612}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2018853166
 GameObject:
   m_ObjectHideFlags: 0
@@ -6187,6 +6193,7 @@ MonoBehaviour:
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
+  m_ScrollDeltaPerTick: 6
 --- !u!1 &2021730238
 GameObject:
   m_ObjectHideFlags: 0

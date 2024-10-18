@@ -35,9 +35,11 @@ MonoBehaviour:
   m_Active: 1
   m_SceneShadowDepthBits: 16
   m_SceneShadowTileResolution: 512
+  m_SceneShadowDebugMode: 0
   m_EnableSelfShadow: 1
   m_SelfShadowDepthBits: 16
   m_SelfShadowTileResolution: 1024
+  m_SelfShadowDebugMode: 0
   m_EnableFrontHairShadow: 1
   m_FrontHairShadowDownscale: 2
   m_FrontHairShadowDepthBits: 16
