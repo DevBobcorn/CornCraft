@@ -82,6 +82,8 @@ namespace CraftSharp.UI
                 itemSlots[i].SetSlotItemScale(alpha);
             }
 
+            offhandItemSlot.SetSlotItemScale(alpha);
+
             selfAlpha = alpha;
         }
 
