@@ -225,7 +225,7 @@ namespace CraftSharp.UI
                 }
             }
 
-            if (Keyboard.current.fKey.wasPressedThisFrame) // Execute interactions
+            if (Keyboard.current.xKey.wasPressedThisFrame) // Execute interactions
             {
                 interactionPanel.RunInteractionOption();
             }
