@@ -19,7 +19,7 @@ using CraftSharp.Resource.BedrockEntity;
 
 namespace CraftSharp
 {
-    public class Test : MonoBehaviour
+    public class TestResource : MonoBehaviour
     {
         private static readonly byte[] FLUID_HEIGHTS = new byte[] { 15, 15, 15, 15, 15, 15, 15, 15, 15 };
 
