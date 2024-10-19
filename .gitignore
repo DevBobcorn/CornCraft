@@ -48,6 +48,8 @@
 # Demo & tutorial files from KCC
 /[Aa]ssets/KinematicCharacterController/*
 !/[Aa]ssets/KinematicCharacterController/Core/
+!/[Aa]ssets/KinematicCharacterController/KinematicCharacterController.asmdef
+!/[Aa]ssets/KinematicCharacterController/KinematicCharacterController.asmdef.meta
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
