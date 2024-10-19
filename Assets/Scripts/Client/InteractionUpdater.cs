@@ -1,4 +1,3 @@
-#nullable enable
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -11,20 +10,23 @@ namespace CraftSharp.Control
     public class InteractionUpdater : MonoBehaviour
     {
         [SerializeField] private LayerMask blockSelectionLayer;
-        [SerializeField] private ChunkRenderManager? chunkRenderManager;
-        [SerializeField] private EntityRenderManager? entityRenderManager;
+        [SerializeField] private GameObject blockSelectionFramePrefab;
+
+        private GameObject blockSelectionFrame;
 
         public readonly Dictionary<BlockLoc, BlockInteractionInfo> blockInteractionInfos = new();
         public BlockLoc? TargetBlockLoc = null;
-        private BaseCornClient? client;
-        private CameraController? cameraController;
+        private BaseCornClient client;
+        private CameraController cameraController;
 
         private int nextNumeralID = 1;
 
         private void UpdateBlockSelection(Ray? viewRay)
         {
-            if (viewRay is null)
+            if (viewRay is null || client == null)
+            {
                 return;
+            }
             
             Vector3? castResultPos;
             Vector3? castSurfaceDir;
@@ -42,14 +44,34 @@ namespace CraftSharp.Control
                 Vector3 offseted = PointOnCubeSurface(castResultPos.Value) ?
                         castResultPos.Value - castSurfaceDir.Value * 0.5F : castResultPos.Value;
 
-                TargetBlockLoc = new BlockLoc(
-                        Mathf.FloorToInt(offseted.z),
-                        Mathf.FloorToInt(offseted.y),
-                        Mathf.FloorToInt(offseted.x));
+                int unityX = Mathf.FloorToInt(offseted.x);
+                int unityY = Mathf.FloorToInt(offseted.y);
+                int unityZ = Mathf.FloorToInt(offseted.z);
+                var unityBlockPos = new Vector3(unityX, unityY, unityZ);
+
+                TargetBlockLoc = CoordConvert.Unity2MC(client.WorldOriginOffset, unityBlockPos).GetBlockLoc();
+
+                if (blockSelectionFrame == null)
+                {
+                    blockSelectionFrame = GameObject.Instantiate(blockSelectionFramePrefab);
+
+                    blockSelectionFrame.transform.SetParent(transform, false);
+                }
+                else if (!blockSelectionFrame.activeSelf)
+                {
+                    blockSelectionFrame.SetActive(true);
+                }
+
+                blockSelectionFrame.transform.position = unityBlockPos;
             }
             else
             {
                 TargetBlockLoc = null;
+
+                if (blockSelectionFrame.activeSelf)
+                {
+                    blockSelectionFrame.SetActive(false);
+                }
             }
         }
 
@@ -88,7 +110,7 @@ namespace CraftSharp.Control
                         var block = chunksManager.GetBlock(blockLoc);
                         var stateId = block.StateId;
 
-                        if (table.TryGetValue(stateId, out BlockInteractionDefinition? newDef))
+                        if (table.TryGetValue(stateId, out BlockInteractionDefinition newDef))
                         {
                             if (blockInteractionInfos.ContainsKey(blockLoc))
                             {
@@ -157,14 +179,26 @@ namespace CraftSharp.Control
 
         void Update()
         {
-            if (cameraController != null)
+            if (cameraController != null && cameraController.IsAiming)
             {
                 // Update target block selection
                 UpdateBlockSelection(cameraController!.GetPointerRay());
             }
+            else
+            {
+                TargetBlockLoc = null;
 
-            // Update player interactions
-            UpdateBlockInteractions(client!.ChunkRenderManager);
+                if (blockSelectionFrame.activeSelf)
+                {
+                    blockSelectionFrame.SetActive(false);
+                }
+            }
+
+            if (client != null)
+            {
+                // Update player interactions
+                UpdateBlockInteractions(client.ChunkRenderManager);
+            }
         }
     }
 }

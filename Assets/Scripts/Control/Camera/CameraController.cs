@@ -90,7 +90,7 @@ namespace CraftSharp.Control
         /// </summary>
         public abstract void TeleportByDelta(Vector3 posDelta);
 
-        public virtual void EnableAimingCamera(bool enable)
+        public virtual void ToggleAimingCamera(bool enable)
         {
             EnsureInitialized();
             IsAiming = enable;

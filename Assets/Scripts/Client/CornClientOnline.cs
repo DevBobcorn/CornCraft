@@ -70,7 +70,6 @@ namespace CraftSharp
         private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
         private readonly object movementLock = new();
-        private InteractionUpdater interactionUpdater;
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         #endregion
 
@@ -93,10 +92,6 @@ namespace CraftSharp
 
             // Set up environment manager
             EnvironmentManager.SetCamera(MainCamera);
-
-            // Set up interaction updater
-            interactionUpdater = GetComponent<InteractionUpdater>();
-            interactionUpdater!.Initialize(this, CameraController);
 
             // Freeze player controller until terrain is ready
             PlayerController.DisablePhysics();
@@ -552,14 +547,26 @@ namespace CraftSharp
             {
                 // Light debugging
                 var playerBlockLoc = GetCurrentLocation().GetBlockLoc();
-                var block = ChunkRenderManager.GetBlock(playerBlockLoc);
-                var lightEmission = block.State.LightEmissionLevel;
-                var lightBlockage = block.State.LightBlockageLevel;
-                var lightValue = ChunkRenderManager.GetBlockLight(playerBlockLoc);
+                //var block = ChunkRenderManager.GetBlock(playerBlockLoc);
+                //var lightEmission = block.State.LightEmissionLevel;
+                //var lightBlockage = block.State.LightBlockageLevel;
+                //var lightValue = ChunkRenderManager.GetBlockLight(playerBlockLoc);
+                //var lightInfo = $"Emission: {lightEmission}\tBlockage: {lightBlockage}\nLight Value: {lightValue}";
 
-                var lightInfo = $"Emission: {lightEmission}\tBlockage: {lightBlockage}\nLight Value: {lightValue}";
+                // Ray casting debugging
+                string targetInfo;
+                if (interactionUpdater.TargetBlockLoc is not null)
+                {
+                    var targetBlockLoc = interactionUpdater.TargetBlockLoc.Value;
+                    var targetBlock = ChunkRenderManager.GetBlock(targetBlockLoc);
+                    targetInfo = $"Target BlockLoc:\t{targetBlockLoc}\nTarget Block:\t{targetBlock.State}";
+                }
+                else
+                {
+                    targetInfo = string.Empty;
+                }
 
-                return baseString + $"\nLoc: {GetCurrentLocation()}\n{PlayerController.GetDebugInfo()}\n{lightInfo}\nWorld Origin Offset: {WorldOriginOffset}" +
+                return baseString + $"\nLoc: {GetCurrentLocation()}\n{PlayerController.GetDebugInfo()}\n{targetInfo}\nWorld Origin Offset: {WorldOriginOffset}" +
                         $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():0.0}";
             }
             

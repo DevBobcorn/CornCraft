@@ -48,7 +48,7 @@ namespace CraftSharp.Control
             spriteRenderCamera!.fieldOfView = _virtualCameraFollow.m_Lens.FieldOfView;
 
             // Aiming is not enabled by default
-            EnableAimingCamera(false);
+            ToggleAimingCamera(false);
         }
 
         void Update()

@@ -57,7 +57,7 @@ namespace CraftSharp.Control
             spriteRenderCamera!.fieldOfView = fov;
 
             // Aiming is not enabled by default
-            EnableAimingCamera(false);
+            ToggleAimingCamera(false);
         }
 
         void Update()
@@ -125,7 +125,7 @@ namespace CraftSharp.Control
             return base.GetTargetViewportPos(offset);
         }
 
-        public override void EnableAimingCamera(bool enable)
+        public override void ToggleAimingCamera(bool enable)
         {
             EnsureInitialized();
             IsAiming = enable;

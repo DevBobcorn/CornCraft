@@ -547,7 +547,7 @@ namespace CraftSharp.Control
                 // Align target visual yaw with camera, immediately
                 Status!.TargetVisualYaw = m_CameraController.GetYaw();
 
-                m_CameraController.EnableAimingCamera(true);
+                m_CameraController.ToggleAimingCamera(true);
             }
         }
 
@@ -555,7 +555,7 @@ namespace CraftSharp.Control
         {
             if (m_CameraController != null)
             {
-                m_CameraController.EnableAimingCamera(false);
+                m_CameraController.ToggleAimingCamera(false);
             }
         }
 

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 
 using CraftSharp.Control;
 using CraftSharp.Protocol;
@@ -33,6 +32,7 @@ namespace CraftSharp
         [SerializeField] private GameObject[] m_PlayerRenderPrefabs = { };
         private int m_SelectedRenderPrefab;
         public PlayerController PlayerController => m_PlayerController;
+        [SerializeField] protected InteractionUpdater interactionUpdater;
 
         // Camera Fields
         [SerializeField] private GameObject[] m_CameraControllerPrefabs = { };
@@ -123,6 +123,9 @@ namespace CraftSharp
 
             // Call player controller handler
             m_PlayerController.HandleCameraControllerSwitch(m_CameraController);
+
+            // Set camera controller for interaction updater
+            interactionUpdater.Initialize(this, CameraController);
         }
 
         public void SwitchFirstPlayerRender(Entity clientEntity)
