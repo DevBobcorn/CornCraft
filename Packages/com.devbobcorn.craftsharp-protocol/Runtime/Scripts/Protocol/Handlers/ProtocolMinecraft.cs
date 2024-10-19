@@ -17,7 +17,6 @@ using CraftSharp.Protocol.Handlers.Forge;
 using CraftSharp.Protocol.ProfileKey;
 using CraftSharp.Protocol.Message;
 using CraftSharp.Protocol.Session;
-using Codice.Client.BaseCommands.Merge.Xml;
 
 namespace CraftSharp.Protocol.Handlers
 {
