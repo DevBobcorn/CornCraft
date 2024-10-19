@@ -16,7 +16,6 @@ using CraftSharp.Proxy;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
 using CraftSharp.Rendering;
-using Codice.Client.BaseCommands.Merge.Xml;
 
 namespace CraftSharp
 {
