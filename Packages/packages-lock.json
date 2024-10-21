@@ -14,7 +14,7 @@
       "source": "embedded",
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
-        "com.devbobcorn.craftsharp": "3.3.0"
+        "com.devbobcorn.craftsharp": "4.0.0"
       }
     },
     "com.devbobcorn.craftsharp-resource": {
