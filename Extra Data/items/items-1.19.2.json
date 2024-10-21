@@ -1,0 +1,7728 @@
+{
+  "minecraft:air": {
+    "protocol_id": 0,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:stone": {
+    "protocol_id": 1,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stone"
+  },
+  "minecraft:granite": {
+    "protocol_id": 2,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:granite"
+  },
+  "minecraft:polished_granite": {
+    "protocol_id": 3,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_granite"
+  },
+  "minecraft:diorite": {
+    "protocol_id": 4,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:diorite"
+  },
+  "minecraft:polished_diorite": {
+    "protocol_id": 5,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_diorite"
+  },
+  "minecraft:andesite": {
+    "protocol_id": 6,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:andesite"
+  },
+  "minecraft:polished_andesite": {
+    "protocol_id": 7,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_andesite"
+  },
+  "minecraft:deepslate": {
+    "protocol_id": 8,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate"
+  },
+  "minecraft:cobbled_deepslate": {
+    "protocol_id": 9,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cobbled_deepslate"
+  },
+  "minecraft:polished_deepslate": {
+    "protocol_id": 10,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_deepslate"
+  },
+  "minecraft:calcite": {
+    "protocol_id": 11,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:calcite"
+  },
+  "minecraft:tuff": {
+    "protocol_id": 12,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:tuff"
+  },
+  "minecraft:dripstone_block": {
+    "protocol_id": 13,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dripstone_block"
+  },
+  "minecraft:grass_block": {
+    "protocol_id": 14,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:grass_block"
+  },
+  "minecraft:dirt": {
+    "protocol_id": 15,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dirt"
+  },
+  "minecraft:coarse_dirt": {
+    "protocol_id": 16,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:coarse_dirt"
+  },
+  "minecraft:podzol": {
+    "protocol_id": 17,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:podzol"
+  },
+  "minecraft:rooted_dirt": {
+    "protocol_id": 18,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:rooted_dirt"
+  },
+  "minecraft:mud": {
+    "protocol_id": 19,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mud"
+  },
+  "minecraft:crimson_nylium": {
+    "protocol_id": 20,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_nylium"
+  },
+  "minecraft:warped_nylium": {
+    "protocol_id": 21,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_nylium"
+  },
+  "minecraft:cobblestone": {
+    "protocol_id": 22,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cobblestone"
+  },
+  "minecraft:oak_planks": {
+    "protocol_id": 23,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_planks"
+  },
+  "minecraft:spruce_planks": {
+    "protocol_id": 24,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_planks"
+  },
+  "minecraft:birch_planks": {
+    "protocol_id": 25,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_planks"
+  },
+  "minecraft:jungle_planks": {
+    "protocol_id": 26,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_planks"
+  },
+  "minecraft:acacia_planks": {
+    "protocol_id": 27,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_planks"
+  },
+  "minecraft:dark_oak_planks": {
+    "protocol_id": 28,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_planks"
+  },
+  "minecraft:mangrove_planks": {
+    "protocol_id": 29,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_planks"
+  },
+  "minecraft:crimson_planks": {
+    "protocol_id": 30,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_planks"
+  },
+  "minecraft:warped_planks": {
+    "protocol_id": 31,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_planks"
+  },
+  "minecraft:oak_sapling": {
+    "protocol_id": 32,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_sapling"
+  },
+  "minecraft:spruce_sapling": {
+    "protocol_id": 33,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_sapling"
+  },
+  "minecraft:birch_sapling": {
+    "protocol_id": 34,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_sapling"
+  },
+  "minecraft:jungle_sapling": {
+    "protocol_id": 35,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_sapling"
+  },
+  "minecraft:acacia_sapling": {
+    "protocol_id": 36,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_sapling"
+  },
+  "minecraft:dark_oak_sapling": {
+    "protocol_id": 37,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_sapling"
+  },
+  "minecraft:mangrove_propagule": {
+    "protocol_id": 38,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_propagule"
+  },
+  "minecraft:bedrock": {
+    "protocol_id": 39,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:bedrock"
+  },
+  "minecraft:sand": {
+    "protocol_id": 40,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sand"
+  },
+  "minecraft:red_sand": {
+    "protocol_id": 41,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_sand"
+  },
+  "minecraft:gravel": {
+    "protocol_id": 42,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gravel"
+  },
+  "minecraft:coal_ore": {
+    "protocol_id": 43,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:coal_ore"
+  },
+  "minecraft:deepslate_coal_ore": {
+    "protocol_id": 44,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_coal_ore"
+  },
+  "minecraft:iron_ore": {
+    "protocol_id": 45,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:iron_ore"
+  },
+  "minecraft:deepslate_iron_ore": {
+    "protocol_id": 46,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_iron_ore"
+  },
+  "minecraft:copper_ore": {
+    "protocol_id": 47,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:copper_ore"
+  },
+  "minecraft:deepslate_copper_ore": {
+    "protocol_id": 48,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_copper_ore"
+  },
+  "minecraft:gold_ore": {
+    "protocol_id": 49,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gold_ore"
+  },
+  "minecraft:deepslate_gold_ore": {
+    "protocol_id": 50,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_gold_ore"
+  },
+  "minecraft:redstone_ore": {
+    "protocol_id": 51,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:redstone_ore"
+  },
+  "minecraft:deepslate_redstone_ore": {
+    "protocol_id": 52,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_redstone_ore"
+  },
+  "minecraft:emerald_ore": {
+    "protocol_id": 53,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:emerald_ore"
+  },
+  "minecraft:deepslate_emerald_ore": {
+    "protocol_id": 54,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_emerald_ore"
+  },
+  "minecraft:lapis_ore": {
+    "protocol_id": 55,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lapis_ore"
+  },
+  "minecraft:deepslate_lapis_ore": {
+    "protocol_id": 56,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_lapis_ore"
+  },
+  "minecraft:diamond_ore": {
+    "protocol_id": 57,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:diamond_ore"
+  },
+  "minecraft:deepslate_diamond_ore": {
+    "protocol_id": 58,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_diamond_ore"
+  },
+  "minecraft:nether_gold_ore": {
+    "protocol_id": 59,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:nether_gold_ore"
+  },
+  "minecraft:nether_quartz_ore": {
+    "protocol_id": 60,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:nether_quartz_ore"
+  },
+  "minecraft:ancient_debris": {
+    "protocol_id": 61,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:ancient_debris"
+  },
+  "minecraft:coal_block": {
+    "protocol_id": 62,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:coal_block"
+  },
+  "minecraft:raw_iron_block": {
+    "protocol_id": 63,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:raw_iron_block"
+  },
+  "minecraft:raw_copper_block": {
+    "protocol_id": 64,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:raw_copper_block"
+  },
+  "minecraft:raw_gold_block": {
+    "protocol_id": 65,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:raw_gold_block"
+  },
+  "minecraft:amethyst_block": {
+    "protocol_id": 66,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:amethyst_block"
+  },
+  "minecraft:budding_amethyst": {
+    "protocol_id": 67,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:budding_amethyst"
+  },
+  "minecraft:iron_block": {
+    "protocol_id": 68,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:iron_block"
+  },
+  "minecraft:copper_block": {
+    "protocol_id": 69,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:copper_block"
+  },
+  "minecraft:gold_block": {
+    "protocol_id": 70,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gold_block"
+  },
+  "minecraft:diamond_block": {
+    "protocol_id": 71,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:diamond_block"
+  },
+  "minecraft:netherite_block": {
+    "protocol_id": 72,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:netherite_block"
+  },
+  "minecraft:exposed_copper": {
+    "protocol_id": 73,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:exposed_copper"
+  },
+  "minecraft:weathered_copper": {
+    "protocol_id": 74,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:weathered_copper"
+  },
+  "minecraft:oxidized_copper": {
+    "protocol_id": 75,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oxidized_copper"
+  },
+  "minecraft:cut_copper": {
+    "protocol_id": 76,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cut_copper"
+  },
+  "minecraft:exposed_cut_copper": {
+    "protocol_id": 77,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:exposed_cut_copper"
+  },
+  "minecraft:weathered_cut_copper": {
+    "protocol_id": 78,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:weathered_cut_copper"
+  },
+  "minecraft:oxidized_cut_copper": {
+    "protocol_id": 79,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oxidized_cut_copper"
+  },
+  "minecraft:cut_copper_stairs": {
+    "protocol_id": 80,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cut_copper_stairs"
+  },
+  "minecraft:exposed_cut_copper_stairs": {
+    "protocol_id": 81,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:exposed_cut_copper_stairs"
+  },
+  "minecraft:weathered_cut_copper_stairs": {
+    "protocol_id": 82,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:weathered_cut_copper_stairs"
+  },
+  "minecraft:oxidized_cut_copper_stairs": {
+    "protocol_id": 83,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oxidized_cut_copper_stairs"
+  },
+  "minecraft:cut_copper_slab": {
+    "protocol_id": 84,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cut_copper_slab"
+  },
+  "minecraft:exposed_cut_copper_slab": {
+    "protocol_id": 85,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:exposed_cut_copper_slab"
+  },
+  "minecraft:weathered_cut_copper_slab": {
+    "protocol_id": 86,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:weathered_cut_copper_slab"
+  },
+  "minecraft:oxidized_cut_copper_slab": {
+    "protocol_id": 87,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oxidized_cut_copper_slab"
+  },
+  "minecraft:waxed_copper_block": {
+    "protocol_id": 88,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_copper_block"
+  },
+  "minecraft:waxed_exposed_copper": {
+    "protocol_id": 89,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_exposed_copper"
+  },
+  "minecraft:waxed_weathered_copper": {
+    "protocol_id": 90,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_weathered_copper"
+  },
+  "minecraft:waxed_oxidized_copper": {
+    "protocol_id": 91,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_oxidized_copper"
+  },
+  "minecraft:waxed_cut_copper": {
+    "protocol_id": 92,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_cut_copper"
+  },
+  "minecraft:waxed_exposed_cut_copper": {
+    "protocol_id": 93,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_exposed_cut_copper"
+  },
+  "minecraft:waxed_weathered_cut_copper": {
+    "protocol_id": 94,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_weathered_cut_copper"
+  },
+  "minecraft:waxed_oxidized_cut_copper": {
+    "protocol_id": 95,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_oxidized_cut_copper"
+  },
+  "minecraft:waxed_cut_copper_stairs": {
+    "protocol_id": 96,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_cut_copper_stairs"
+  },
+  "minecraft:waxed_exposed_cut_copper_stairs": {
+    "protocol_id": 97,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_exposed_cut_copper_stairs"
+  },
+  "minecraft:waxed_weathered_cut_copper_stairs": {
+    "protocol_id": 98,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_weathered_cut_copper_stairs"
+  },
+  "minecraft:waxed_oxidized_cut_copper_stairs": {
+    "protocol_id": 99,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_oxidized_cut_copper_stairs"
+  },
+  "minecraft:waxed_cut_copper_slab": {
+    "protocol_id": 100,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_cut_copper_slab"
+  },
+  "minecraft:waxed_exposed_cut_copper_slab": {
+    "protocol_id": 101,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_exposed_cut_copper_slab"
+  },
+  "minecraft:waxed_weathered_cut_copper_slab": {
+    "protocol_id": 102,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_weathered_cut_copper_slab"
+  },
+  "minecraft:waxed_oxidized_cut_copper_slab": {
+    "protocol_id": 103,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:waxed_oxidized_cut_copper_slab"
+  },
+  "minecraft:oak_log": {
+    "protocol_id": 104,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_log"
+  },
+  "minecraft:spruce_log": {
+    "protocol_id": 105,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_log"
+  },
+  "minecraft:birch_log": {
+    "protocol_id": 106,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_log"
+  },
+  "minecraft:jungle_log": {
+    "protocol_id": 107,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_log"
+  },
+  "minecraft:acacia_log": {
+    "protocol_id": 108,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_log"
+  },
+  "minecraft:dark_oak_log": {
+    "protocol_id": 109,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_log"
+  },
+  "minecraft:mangrove_log": {
+    "protocol_id": 110,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_log"
+  },
+  "minecraft:mangrove_roots": {
+    "protocol_id": 111,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_roots"
+  },
+  "minecraft:muddy_mangrove_roots": {
+    "protocol_id": 112,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:muddy_mangrove_roots"
+  },
+  "minecraft:crimson_stem": {
+    "protocol_id": 113,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_stem"
+  },
+  "minecraft:warped_stem": {
+    "protocol_id": 114,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_stem"
+  },
+  "minecraft:stripped_oak_log": {
+    "protocol_id": 115,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_oak_log"
+  },
+  "minecraft:stripped_spruce_log": {
+    "protocol_id": 116,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_spruce_log"
+  },
+  "minecraft:stripped_birch_log": {
+    "protocol_id": 117,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_birch_log"
+  },
+  "minecraft:stripped_jungle_log": {
+    "protocol_id": 118,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_jungle_log"
+  },
+  "minecraft:stripped_acacia_log": {
+    "protocol_id": 119,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_acacia_log"
+  },
+  "minecraft:stripped_dark_oak_log": {
+    "protocol_id": 120,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_dark_oak_log"
+  },
+  "minecraft:stripped_mangrove_log": {
+    "protocol_id": 121,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_mangrove_log"
+  },
+  "minecraft:stripped_crimson_stem": {
+    "protocol_id": 122,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_crimson_stem"
+  },
+  "minecraft:stripped_warped_stem": {
+    "protocol_id": 123,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_warped_stem"
+  },
+  "minecraft:stripped_oak_wood": {
+    "protocol_id": 124,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_oak_wood"
+  },
+  "minecraft:stripped_spruce_wood": {
+    "protocol_id": 125,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_spruce_wood"
+  },
+  "minecraft:stripped_birch_wood": {
+    "protocol_id": 126,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_birch_wood"
+  },
+  "minecraft:stripped_jungle_wood": {
+    "protocol_id": 127,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_jungle_wood"
+  },
+  "minecraft:stripped_acacia_wood": {
+    "protocol_id": 128,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_acacia_wood"
+  },
+  "minecraft:stripped_dark_oak_wood": {
+    "protocol_id": 129,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_dark_oak_wood"
+  },
+  "minecraft:stripped_mangrove_wood": {
+    "protocol_id": 130,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_mangrove_wood"
+  },
+  "minecraft:stripped_crimson_hyphae": {
+    "protocol_id": 131,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_crimson_hyphae"
+  },
+  "minecraft:stripped_warped_hyphae": {
+    "protocol_id": 132,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stripped_warped_hyphae"
+  },
+  "minecraft:oak_wood": {
+    "protocol_id": 133,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_wood"
+  },
+  "minecraft:spruce_wood": {
+    "protocol_id": 134,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_wood"
+  },
+  "minecraft:birch_wood": {
+    "protocol_id": 135,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_wood"
+  },
+  "minecraft:jungle_wood": {
+    "protocol_id": 136,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_wood"
+  },
+  "minecraft:acacia_wood": {
+    "protocol_id": 137,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_wood"
+  },
+  "minecraft:dark_oak_wood": {
+    "protocol_id": 138,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_wood"
+  },
+  "minecraft:mangrove_wood": {
+    "protocol_id": 139,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_wood"
+  },
+  "minecraft:crimson_hyphae": {
+    "protocol_id": 140,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_hyphae"
+  },
+  "minecraft:warped_hyphae": {
+    "protocol_id": 141,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_hyphae"
+  },
+  "minecraft:oak_leaves": {
+    "protocol_id": 142,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_leaves"
+  },
+  "minecraft:spruce_leaves": {
+    "protocol_id": 143,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_leaves"
+  },
+  "minecraft:birch_leaves": {
+    "protocol_id": 144,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_leaves"
+  },
+  "minecraft:jungle_leaves": {
+    "protocol_id": 145,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_leaves"
+  },
+  "minecraft:acacia_leaves": {
+    "protocol_id": 146,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_leaves"
+  },
+  "minecraft:dark_oak_leaves": {
+    "protocol_id": 147,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_leaves"
+  },
+  "minecraft:mangrove_leaves": {
+    "protocol_id": 148,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_leaves"
+  },
+  "minecraft:azalea_leaves": {
+    "protocol_id": 149,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:azalea_leaves"
+  },
+  "minecraft:flowering_azalea_leaves": {
+    "protocol_id": 150,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:flowering_azalea_leaves"
+  },
+  "minecraft:sponge": {
+    "protocol_id": 151,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sponge"
+  },
+  "minecraft:wet_sponge": {
+    "protocol_id": 152,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:wet_sponge"
+  },
+  "minecraft:glass": {
+    "protocol_id": 153,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:glass"
+  },
+  "minecraft:tinted_glass": {
+    "protocol_id": 154,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:tinted_glass"
+  },
+  "minecraft:lapis_block": {
+    "protocol_id": 155,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lapis_block"
+  },
+  "minecraft:sandstone": {
+    "protocol_id": 156,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sandstone"
+  },
+  "minecraft:chiseled_sandstone": {
+    "protocol_id": 157,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chiseled_sandstone"
+  },
+  "minecraft:cut_sandstone": {
+    "protocol_id": 158,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cut_sandstone"
+  },
+  "minecraft:cobweb": {
+    "protocol_id": 159,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cobweb"
+  },
+  "minecraft:grass": {
+    "protocol_id": 160,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:grass"
+  },
+  "minecraft:fern": {
+    "protocol_id": 161,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:fern"
+  },
+  "minecraft:azalea": {
+    "protocol_id": 162,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:azalea"
+  },
+  "minecraft:flowering_azalea": {
+    "protocol_id": 163,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:flowering_azalea"
+  },
+  "minecraft:dead_bush": {
+    "protocol_id": 164,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_bush"
+  },
+  "minecraft:seagrass": {
+    "protocol_id": 165,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:seagrass"
+  },
+  "minecraft:sea_pickle": {
+    "protocol_id": 166,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sea_pickle"
+  },
+  "minecraft:white_wool": {
+    "protocol_id": 167,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:white_wool"
+  },
+  "minecraft:orange_wool": {
+    "protocol_id": 168,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:orange_wool"
+  },
+  "minecraft:magenta_wool": {
+    "protocol_id": 169,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:magenta_wool"
+  },
+  "minecraft:light_blue_wool": {
+    "protocol_id": 170,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_blue_wool"
+  },
+  "minecraft:yellow_wool": {
+    "protocol_id": 171,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:yellow_wool"
+  },
+  "minecraft:lime_wool": {
+    "protocol_id": 172,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lime_wool"
+  },
+  "minecraft:pink_wool": {
+    "protocol_id": 173,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pink_wool"
+  },
+  "minecraft:gray_wool": {
+    "protocol_id": 174,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gray_wool"
+  },
+  "minecraft:light_gray_wool": {
+    "protocol_id": 175,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_gray_wool"
+  },
+  "minecraft:cyan_wool": {
+    "protocol_id": 176,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cyan_wool"
+  },
+  "minecraft:purple_wool": {
+    "protocol_id": 177,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purple_wool"
+  },
+  "minecraft:blue_wool": {
+    "protocol_id": 178,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blue_wool"
+  },
+  "minecraft:brown_wool": {
+    "protocol_id": 179,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brown_wool"
+  },
+  "minecraft:green_wool": {
+    "protocol_id": 180,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:green_wool"
+  },
+  "minecraft:red_wool": {
+    "protocol_id": 181,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_wool"
+  },
+  "minecraft:black_wool": {
+    "protocol_id": 182,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:black_wool"
+  },
+  "minecraft:dandelion": {
+    "protocol_id": 183,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dandelion"
+  },
+  "minecraft:poppy": {
+    "protocol_id": 184,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:poppy"
+  },
+  "minecraft:blue_orchid": {
+    "protocol_id": 185,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blue_orchid"
+  },
+  "minecraft:allium": {
+    "protocol_id": 186,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:allium"
+  },
+  "minecraft:azure_bluet": {
+    "protocol_id": 187,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:azure_bluet"
+  },
+  "minecraft:red_tulip": {
+    "protocol_id": 188,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_tulip"
+  },
+  "minecraft:orange_tulip": {
+    "protocol_id": 189,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:orange_tulip"
+  },
+  "minecraft:white_tulip": {
+    "protocol_id": 190,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:white_tulip"
+  },
+  "minecraft:pink_tulip": {
+    "protocol_id": 191,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pink_tulip"
+  },
+  "minecraft:oxeye_daisy": {
+    "protocol_id": 192,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oxeye_daisy"
+  },
+  "minecraft:cornflower": {
+    "protocol_id": 193,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cornflower"
+  },
+  "minecraft:lily_of_the_valley": {
+    "protocol_id": 194,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lily_of_the_valley"
+  },
+  "minecraft:wither_rose": {
+    "protocol_id": 195,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:wither_rose"
+  },
+  "minecraft:spore_blossom": {
+    "protocol_id": 196,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spore_blossom"
+  },
+  "minecraft:brown_mushroom": {
+    "protocol_id": 197,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brown_mushroom"
+  },
+  "minecraft:red_mushroom": {
+    "protocol_id": 198,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_mushroom"
+  },
+  "minecraft:crimson_fungus": {
+    "protocol_id": 199,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_fungus"
+  },
+  "minecraft:warped_fungus": {
+    "protocol_id": 200,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_fungus"
+  },
+  "minecraft:crimson_roots": {
+    "protocol_id": 201,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_roots"
+  },
+  "minecraft:warped_roots": {
+    "protocol_id": 202,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_roots"
+  },
+  "minecraft:nether_sprouts": {
+    "protocol_id": 203,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:nether_sprouts"
+  },
+  "minecraft:weeping_vines": {
+    "protocol_id": 204,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:weeping_vines"
+  },
+  "minecraft:twisting_vines": {
+    "protocol_id": 205,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:twisting_vines"
+  },
+  "minecraft:sugar_cane": {
+    "protocol_id": 206,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sugar_cane"
+  },
+  "minecraft:kelp": {
+    "protocol_id": 207,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:kelp"
+  },
+  "minecraft:moss_carpet": {
+    "protocol_id": 208,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:moss_carpet"
+  },
+  "minecraft:moss_block": {
+    "protocol_id": 209,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:moss_block"
+  },
+  "minecraft:hanging_roots": {
+    "protocol_id": 210,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:hanging_roots"
+  },
+  "minecraft:big_dripleaf": {
+    "protocol_id": 211,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:big_dripleaf"
+  },
+  "minecraft:small_dripleaf": {
+    "protocol_id": 212,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:small_dripleaf"
+  },
+  "minecraft:bamboo": {
+    "protocol_id": 213,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:bamboo"
+  },
+  "minecraft:oak_slab": {
+    "protocol_id": 214,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_slab"
+  },
+  "minecraft:spruce_slab": {
+    "protocol_id": 215,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_slab"
+  },
+  "minecraft:birch_slab": {
+    "protocol_id": 216,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_slab"
+  },
+  "minecraft:jungle_slab": {
+    "protocol_id": 217,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_slab"
+  },
+  "minecraft:acacia_slab": {
+    "protocol_id": 218,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_slab"
+  },
+  "minecraft:dark_oak_slab": {
+    "protocol_id": 219,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_slab"
+  },
+  "minecraft:mangrove_slab": {
+    "protocol_id": 220,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_slab"
+  },
+  "minecraft:crimson_slab": {
+    "protocol_id": 221,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_slab"
+  },
+  "minecraft:warped_slab": {
+    "protocol_id": 222,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_slab"
+  },
+  "minecraft:stone_slab": {
+    "protocol_id": 223,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stone_slab"
+  },
+  "minecraft:smooth_stone_slab": {
+    "protocol_id": 224,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_stone_slab"
+  },
+  "minecraft:sandstone_slab": {
+    "protocol_id": 225,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sandstone_slab"
+  },
+  "minecraft:cut_sandstone_slab": {
+    "protocol_id": 226,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cut_sandstone_slab"
+  },
+  "minecraft:petrified_oak_slab": {
+    "protocol_id": 227,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:petrified_oak_slab"
+  },
+  "minecraft:cobblestone_slab": {
+    "protocol_id": 228,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cobblestone_slab"
+  },
+  "minecraft:brick_slab": {
+    "protocol_id": 229,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brick_slab"
+  },
+  "minecraft:stone_brick_slab": {
+    "protocol_id": 230,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stone_brick_slab"
+  },
+  "minecraft:mud_brick_slab": {
+    "protocol_id": 231,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mud_brick_slab"
+  },
+  "minecraft:nether_brick_slab": {
+    "protocol_id": 232,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:nether_brick_slab"
+  },
+  "minecraft:quartz_slab": {
+    "protocol_id": 233,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:quartz_slab"
+  },
+  "minecraft:red_sandstone_slab": {
+    "protocol_id": 234,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_sandstone_slab"
+  },
+  "minecraft:cut_red_sandstone_slab": {
+    "protocol_id": 235,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cut_red_sandstone_slab"
+  },
+  "minecraft:purpur_slab": {
+    "protocol_id": 236,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purpur_slab"
+  },
+  "minecraft:prismarine_slab": {
+    "protocol_id": 237,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:prismarine_slab"
+  },
+  "minecraft:prismarine_brick_slab": {
+    "protocol_id": 238,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:prismarine_brick_slab"
+  },
+  "minecraft:dark_prismarine_slab": {
+    "protocol_id": 239,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_prismarine_slab"
+  },
+  "minecraft:smooth_quartz": {
+    "protocol_id": 240,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_quartz"
+  },
+  "minecraft:smooth_red_sandstone": {
+    "protocol_id": 241,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_red_sandstone"
+  },
+  "minecraft:smooth_sandstone": {
+    "protocol_id": 242,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_sandstone"
+  },
+  "minecraft:smooth_stone": {
+    "protocol_id": 243,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_stone"
+  },
+  "minecraft:bricks": {
+    "protocol_id": 244,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:bricks"
+  },
+  "minecraft:bookshelf": {
+    "protocol_id": 245,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:bookshelf"
+  },
+  "minecraft:mossy_cobblestone": {
+    "protocol_id": 246,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mossy_cobblestone"
+  },
+  "minecraft:obsidian": {
+    "protocol_id": 247,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:obsidian"
+  },
+  "minecraft:torch": {
+    "protocol_id": 248,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:torch"
+  },
+  "minecraft:end_rod": {
+    "protocol_id": 249,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:end_rod"
+  },
+  "minecraft:chorus_plant": {
+    "protocol_id": 250,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chorus_plant"
+  },
+  "minecraft:chorus_flower": {
+    "protocol_id": 251,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chorus_flower"
+  },
+  "minecraft:purpur_block": {
+    "protocol_id": 252,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purpur_block"
+  },
+  "minecraft:purpur_pillar": {
+    "protocol_id": 253,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purpur_pillar"
+  },
+  "minecraft:purpur_stairs": {
+    "protocol_id": 254,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purpur_stairs"
+  },
+  "minecraft:spawner": {
+    "protocol_id": 255,
+    "rarity": "epic",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spawner"
+  },
+  "minecraft:chest": {
+    "protocol_id": 256,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chest"
+  },
+  "minecraft:crafting_table": {
+    "protocol_id": 257,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crafting_table"
+  },
+  "minecraft:farmland": {
+    "protocol_id": 258,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:farmland"
+  },
+  "minecraft:furnace": {
+    "protocol_id": 259,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:furnace"
+  },
+  "minecraft:ladder": {
+    "protocol_id": 260,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:ladder"
+  },
+  "minecraft:cobblestone_stairs": {
+    "protocol_id": 261,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cobblestone_stairs"
+  },
+  "minecraft:snow": {
+    "protocol_id": 262,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:snow"
+  },
+  "minecraft:ice": {
+    "protocol_id": 263,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:ice"
+  },
+  "minecraft:snow_block": {
+    "protocol_id": 264,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:snow_block"
+  },
+  "minecraft:cactus": {
+    "protocol_id": 265,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cactus"
+  },
+  "minecraft:clay": {
+    "protocol_id": 266,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:clay"
+  },
+  "minecraft:jukebox": {
+    "protocol_id": 267,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jukebox"
+  },
+  "minecraft:oak_fence": {
+    "protocol_id": 268,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_fence"
+  },
+  "minecraft:spruce_fence": {
+    "protocol_id": 269,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_fence"
+  },
+  "minecraft:birch_fence": {
+    "protocol_id": 270,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_fence"
+  },
+  "minecraft:jungle_fence": {
+    "protocol_id": 271,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_fence"
+  },
+  "minecraft:acacia_fence": {
+    "protocol_id": 272,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_fence"
+  },
+  "minecraft:dark_oak_fence": {
+    "protocol_id": 273,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_fence"
+  },
+  "minecraft:mangrove_fence": {
+    "protocol_id": 274,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_fence"
+  },
+  "minecraft:crimson_fence": {
+    "protocol_id": 275,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_fence"
+  },
+  "minecraft:warped_fence": {
+    "protocol_id": 276,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_fence"
+  },
+  "minecraft:pumpkin": {
+    "protocol_id": 277,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pumpkin"
+  },
+  "minecraft:carved_pumpkin": {
+    "protocol_id": 278,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:carved_pumpkin"
+  },
+  "minecraft:jack_o_lantern": {
+    "protocol_id": 279,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jack_o_lantern"
+  },
+  "minecraft:netherrack": {
+    "protocol_id": 280,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:netherrack"
+  },
+  "minecraft:soul_sand": {
+    "protocol_id": 281,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:soul_sand"
+  },
+  "minecraft:soul_soil": {
+    "protocol_id": 282,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:soul_soil"
+  },
+  "minecraft:basalt": {
+    "protocol_id": 283,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:basalt"
+  },
+  "minecraft:polished_basalt": {
+    "protocol_id": 284,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_basalt"
+  },
+  "minecraft:smooth_basalt": {
+    "protocol_id": 285,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_basalt"
+  },
+  "minecraft:soul_torch": {
+    "protocol_id": 286,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:soul_torch"
+  },
+  "minecraft:glowstone": {
+    "protocol_id": 287,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:glowstone"
+  },
+  "minecraft:infested_stone": {
+    "protocol_id": 288,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:infested_stone"
+  },
+  "minecraft:infested_cobblestone": {
+    "protocol_id": 289,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:infested_cobblestone"
+  },
+  "minecraft:infested_stone_bricks": {
+    "protocol_id": 290,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:infested_stone_bricks"
+  },
+  "minecraft:infested_mossy_stone_bricks": {
+    "protocol_id": 291,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:infested_mossy_stone_bricks"
+  },
+  "minecraft:infested_cracked_stone_bricks": {
+    "protocol_id": 292,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:infested_cracked_stone_bricks"
+  },
+  "minecraft:infested_chiseled_stone_bricks": {
+    "protocol_id": 293,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:infested_chiseled_stone_bricks"
+  },
+  "minecraft:infested_deepslate": {
+    "protocol_id": 294,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:infested_deepslate"
+  },
+  "minecraft:stone_bricks": {
+    "protocol_id": 295,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stone_bricks"
+  },
+  "minecraft:mossy_stone_bricks": {
+    "protocol_id": 296,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mossy_stone_bricks"
+  },
+  "minecraft:cracked_stone_bricks": {
+    "protocol_id": 297,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cracked_stone_bricks"
+  },
+  "minecraft:chiseled_stone_bricks": {
+    "protocol_id": 298,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chiseled_stone_bricks"
+  },
+  "minecraft:packed_mud": {
+    "protocol_id": 299,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:packed_mud"
+  },
+  "minecraft:mud_bricks": {
+    "protocol_id": 300,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mud_bricks"
+  },
+  "minecraft:deepslate_bricks": {
+    "protocol_id": 301,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_bricks"
+  },
+  "minecraft:cracked_deepslate_bricks": {
+    "protocol_id": 302,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cracked_deepslate_bricks"
+  },
+  "minecraft:deepslate_tiles": {
+    "protocol_id": 303,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_tiles"
+  },
+  "minecraft:cracked_deepslate_tiles": {
+    "protocol_id": 304,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cracked_deepslate_tiles"
+  },
+  "minecraft:chiseled_deepslate": {
+    "protocol_id": 305,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chiseled_deepslate"
+  },
+  "minecraft:reinforced_deepslate": {
+    "protocol_id": 306,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:reinforced_deepslate"
+  },
+  "minecraft:brown_mushroom_block": {
+    "protocol_id": 307,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brown_mushroom_block"
+  },
+  "minecraft:red_mushroom_block": {
+    "protocol_id": 308,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_mushroom_block"
+  },
+  "minecraft:mushroom_stem": {
+    "protocol_id": 309,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mushroom_stem"
+  },
+  "minecraft:iron_bars": {
+    "protocol_id": 310,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:iron_bars"
+  },
+  "minecraft:chain": {
+    "protocol_id": 311,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chain"
+  },
+  "minecraft:glass_pane": {
+    "protocol_id": 312,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:glass_pane"
+  },
+  "minecraft:melon": {
+    "protocol_id": 313,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:melon"
+  },
+  "minecraft:vine": {
+    "protocol_id": 314,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:vine"
+  },
+  "minecraft:glow_lichen": {
+    "protocol_id": 315,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:glow_lichen"
+  },
+  "minecraft:brick_stairs": {
+    "protocol_id": 316,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brick_stairs"
+  },
+  "minecraft:stone_brick_stairs": {
+    "protocol_id": 317,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stone_brick_stairs"
+  },
+  "minecraft:mud_brick_stairs": {
+    "protocol_id": 318,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mud_brick_stairs"
+  },
+  "minecraft:mycelium": {
+    "protocol_id": 319,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mycelium"
+  },
+  "minecraft:lily_pad": {
+    "protocol_id": 320,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lily_pad"
+  },
+  "minecraft:nether_bricks": {
+    "protocol_id": 321,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:nether_bricks"
+  },
+  "minecraft:cracked_nether_bricks": {
+    "protocol_id": 322,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cracked_nether_bricks"
+  },
+  "minecraft:chiseled_nether_bricks": {
+    "protocol_id": 323,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chiseled_nether_bricks"
+  },
+  "minecraft:nether_brick_fence": {
+    "protocol_id": 324,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:nether_brick_fence"
+  },
+  "minecraft:nether_brick_stairs": {
+    "protocol_id": 325,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:nether_brick_stairs"
+  },
+  "minecraft:sculk": {
+    "protocol_id": 326,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sculk"
+  },
+  "minecraft:sculk_vein": {
+    "protocol_id": 327,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sculk_vein"
+  },
+  "minecraft:sculk_catalyst": {
+    "protocol_id": 328,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sculk_catalyst"
+  },
+  "minecraft:sculk_shrieker": {
+    "protocol_id": 329,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sculk_shrieker"
+  },
+  "minecraft:enchanting_table": {
+    "protocol_id": 330,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:enchanting_table"
+  },
+  "minecraft:end_portal_frame": {
+    "protocol_id": 331,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:end_portal_frame"
+  },
+  "minecraft:end_stone": {
+    "protocol_id": 332,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:end_stone"
+  },
+  "minecraft:end_stone_bricks": {
+    "protocol_id": 333,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:end_stone_bricks"
+  },
+  "minecraft:dragon_egg": {
+    "protocol_id": 334,
+    "rarity": "epic",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dragon_egg"
+  },
+  "minecraft:sandstone_stairs": {
+    "protocol_id": 335,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sandstone_stairs"
+  },
+  "minecraft:ender_chest": {
+    "protocol_id": 336,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:ender_chest"
+  },
+  "minecraft:emerald_block": {
+    "protocol_id": 337,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:emerald_block"
+  },
+  "minecraft:oak_stairs": {
+    "protocol_id": 338,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_stairs"
+  },
+  "minecraft:spruce_stairs": {
+    "protocol_id": 339,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_stairs"
+  },
+  "minecraft:birch_stairs": {
+    "protocol_id": 340,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_stairs"
+  },
+  "minecraft:jungle_stairs": {
+    "protocol_id": 341,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_stairs"
+  },
+  "minecraft:acacia_stairs": {
+    "protocol_id": 342,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_stairs"
+  },
+  "minecraft:dark_oak_stairs": {
+    "protocol_id": 343,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_stairs"
+  },
+  "minecraft:mangrove_stairs": {
+    "protocol_id": 344,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_stairs"
+  },
+  "minecraft:crimson_stairs": {
+    "protocol_id": 345,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_stairs"
+  },
+  "minecraft:warped_stairs": {
+    "protocol_id": 346,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_stairs"
+  },
+  "minecraft:command_block": {
+    "protocol_id": 347,
+    "rarity": "epic",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:command_block"
+  },
+  "minecraft:beacon": {
+    "protocol_id": 348,
+    "rarity": "rare",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:beacon"
+  },
+  "minecraft:cobblestone_wall": {
+    "protocol_id": 349,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cobblestone_wall"
+  },
+  "minecraft:mossy_cobblestone_wall": {
+    "protocol_id": 350,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mossy_cobblestone_wall"
+  },
+  "minecraft:brick_wall": {
+    "protocol_id": 351,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brick_wall"
+  },
+  "minecraft:prismarine_wall": {
+    "protocol_id": 352,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:prismarine_wall"
+  },
+  "minecraft:red_sandstone_wall": {
+    "protocol_id": 353,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_sandstone_wall"
+  },
+  "minecraft:mossy_stone_brick_wall": {
+    "protocol_id": 354,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mossy_stone_brick_wall"
+  },
+  "minecraft:granite_wall": {
+    "protocol_id": 355,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:granite_wall"
+  },
+  "minecraft:stone_brick_wall": {
+    "protocol_id": 356,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stone_brick_wall"
+  },
+  "minecraft:mud_brick_wall": {
+    "protocol_id": 357,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mud_brick_wall"
+  },
+  "minecraft:nether_brick_wall": {
+    "protocol_id": 358,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:nether_brick_wall"
+  },
+  "minecraft:andesite_wall": {
+    "protocol_id": 359,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:andesite_wall"
+  },
+  "minecraft:red_nether_brick_wall": {
+    "protocol_id": 360,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_nether_brick_wall"
+  },
+  "minecraft:sandstone_wall": {
+    "protocol_id": 361,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sandstone_wall"
+  },
+  "minecraft:end_stone_brick_wall": {
+    "protocol_id": 362,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:end_stone_brick_wall"
+  },
+  "minecraft:diorite_wall": {
+    "protocol_id": 363,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:diorite_wall"
+  },
+  "minecraft:blackstone_wall": {
+    "protocol_id": 364,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blackstone_wall"
+  },
+  "minecraft:polished_blackstone_wall": {
+    "protocol_id": 365,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_blackstone_wall"
+  },
+  "minecraft:polished_blackstone_brick_wall": {
+    "protocol_id": 366,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_blackstone_brick_wall"
+  },
+  "minecraft:cobbled_deepslate_wall": {
+    "protocol_id": 367,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cobbled_deepslate_wall"
+  },
+  "minecraft:polished_deepslate_wall": {
+    "protocol_id": 368,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_deepslate_wall"
+  },
+  "minecraft:deepslate_brick_wall": {
+    "protocol_id": 369,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_brick_wall"
+  },
+  "minecraft:deepslate_tile_wall": {
+    "protocol_id": 370,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_tile_wall"
+  },
+  "minecraft:anvil": {
+    "protocol_id": 371,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:anvil"
+  },
+  "minecraft:chipped_anvil": {
+    "protocol_id": 372,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chipped_anvil"
+  },
+  "minecraft:damaged_anvil": {
+    "protocol_id": 373,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:damaged_anvil"
+  },
+  "minecraft:chiseled_quartz_block": {
+    "protocol_id": 374,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chiseled_quartz_block"
+  },
+  "minecraft:quartz_block": {
+    "protocol_id": 375,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:quartz_block"
+  },
+  "minecraft:quartz_bricks": {
+    "protocol_id": 376,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:quartz_bricks"
+  },
+  "minecraft:quartz_pillar": {
+    "protocol_id": 377,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:quartz_pillar"
+  },
+  "minecraft:quartz_stairs": {
+    "protocol_id": 378,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:quartz_stairs"
+  },
+  "minecraft:white_terracotta": {
+    "protocol_id": 379,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:white_terracotta"
+  },
+  "minecraft:orange_terracotta": {
+    "protocol_id": 380,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:orange_terracotta"
+  },
+  "minecraft:magenta_terracotta": {
+    "protocol_id": 381,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:magenta_terracotta"
+  },
+  "minecraft:light_blue_terracotta": {
+    "protocol_id": 382,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_blue_terracotta"
+  },
+  "minecraft:yellow_terracotta": {
+    "protocol_id": 383,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:yellow_terracotta"
+  },
+  "minecraft:lime_terracotta": {
+    "protocol_id": 384,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lime_terracotta"
+  },
+  "minecraft:pink_terracotta": {
+    "protocol_id": 385,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pink_terracotta"
+  },
+  "minecraft:gray_terracotta": {
+    "protocol_id": 386,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gray_terracotta"
+  },
+  "minecraft:light_gray_terracotta": {
+    "protocol_id": 387,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_gray_terracotta"
+  },
+  "minecraft:cyan_terracotta": {
+    "protocol_id": 388,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cyan_terracotta"
+  },
+  "minecraft:purple_terracotta": {
+    "protocol_id": 389,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purple_terracotta"
+  },
+  "minecraft:blue_terracotta": {
+    "protocol_id": 390,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blue_terracotta"
+  },
+  "minecraft:brown_terracotta": {
+    "protocol_id": 391,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brown_terracotta"
+  },
+  "minecraft:green_terracotta": {
+    "protocol_id": 392,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:green_terracotta"
+  },
+  "minecraft:red_terracotta": {
+    "protocol_id": 393,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_terracotta"
+  },
+  "minecraft:black_terracotta": {
+    "protocol_id": 394,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:black_terracotta"
+  },
+  "minecraft:barrier": {
+    "protocol_id": 395,
+    "rarity": "epic",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:barrier"
+  },
+  "minecraft:light": {
+    "protocol_id": 396,
+    "rarity": "epic",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light"
+  },
+  "minecraft:hay_block": {
+    "protocol_id": 397,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:hay_block"
+  },
+  "minecraft:white_carpet": {
+    "protocol_id": 398,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:white_carpet"
+  },
+  "minecraft:orange_carpet": {
+    "protocol_id": 399,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:orange_carpet"
+  },
+  "minecraft:magenta_carpet": {
+    "protocol_id": 400,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:magenta_carpet"
+  },
+  "minecraft:light_blue_carpet": {
+    "protocol_id": 401,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_blue_carpet"
+  },
+  "minecraft:yellow_carpet": {
+    "protocol_id": 402,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:yellow_carpet"
+  },
+  "minecraft:lime_carpet": {
+    "protocol_id": 403,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lime_carpet"
+  },
+  "minecraft:pink_carpet": {
+    "protocol_id": 404,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pink_carpet"
+  },
+  "minecraft:gray_carpet": {
+    "protocol_id": 405,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gray_carpet"
+  },
+  "minecraft:light_gray_carpet": {
+    "protocol_id": 406,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_gray_carpet"
+  },
+  "minecraft:cyan_carpet": {
+    "protocol_id": 407,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cyan_carpet"
+  },
+  "minecraft:purple_carpet": {
+    "protocol_id": 408,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purple_carpet"
+  },
+  "minecraft:blue_carpet": {
+    "protocol_id": 409,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blue_carpet"
+  },
+  "minecraft:brown_carpet": {
+    "protocol_id": 410,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brown_carpet"
+  },
+  "minecraft:green_carpet": {
+    "protocol_id": 411,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:green_carpet"
+  },
+  "minecraft:red_carpet": {
+    "protocol_id": 412,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_carpet"
+  },
+  "minecraft:black_carpet": {
+    "protocol_id": 413,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:black_carpet"
+  },
+  "minecraft:terracotta": {
+    "protocol_id": 414,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:terracotta"
+  },
+  "minecraft:packed_ice": {
+    "protocol_id": 415,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:packed_ice"
+  },
+  "minecraft:dirt_path": {
+    "protocol_id": 416,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dirt_path"
+  },
+  "minecraft:sunflower": {
+    "protocol_id": 417,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sunflower"
+  },
+  "minecraft:lilac": {
+    "protocol_id": 418,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lilac"
+  },
+  "minecraft:rose_bush": {
+    "protocol_id": 419,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:rose_bush"
+  },
+  "minecraft:peony": {
+    "protocol_id": 420,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:peony"
+  },
+  "minecraft:tall_grass": {
+    "protocol_id": 421,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:tall_grass"
+  },
+  "minecraft:large_fern": {
+    "protocol_id": 422,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:large_fern"
+  },
+  "minecraft:white_stained_glass": {
+    "protocol_id": 423,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:white_stained_glass"
+  },
+  "minecraft:orange_stained_glass": {
+    "protocol_id": 424,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:orange_stained_glass"
+  },
+  "minecraft:magenta_stained_glass": {
+    "protocol_id": 425,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:magenta_stained_glass"
+  },
+  "minecraft:light_blue_stained_glass": {
+    "protocol_id": 426,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_blue_stained_glass"
+  },
+  "minecraft:yellow_stained_glass": {
+    "protocol_id": 427,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:yellow_stained_glass"
+  },
+  "minecraft:lime_stained_glass": {
+    "protocol_id": 428,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lime_stained_glass"
+  },
+  "minecraft:pink_stained_glass": {
+    "protocol_id": 429,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pink_stained_glass"
+  },
+  "minecraft:gray_stained_glass": {
+    "protocol_id": 430,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gray_stained_glass"
+  },
+  "minecraft:light_gray_stained_glass": {
+    "protocol_id": 431,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_gray_stained_glass"
+  },
+  "minecraft:cyan_stained_glass": {
+    "protocol_id": 432,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cyan_stained_glass"
+  },
+  "minecraft:purple_stained_glass": {
+    "protocol_id": 433,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purple_stained_glass"
+  },
+  "minecraft:blue_stained_glass": {
+    "protocol_id": 434,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blue_stained_glass"
+  },
+  "minecraft:brown_stained_glass": {
+    "protocol_id": 435,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brown_stained_glass"
+  },
+  "minecraft:green_stained_glass": {
+    "protocol_id": 436,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:green_stained_glass"
+  },
+  "minecraft:red_stained_glass": {
+    "protocol_id": 437,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_stained_glass"
+  },
+  "minecraft:black_stained_glass": {
+    "protocol_id": 438,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:black_stained_glass"
+  },
+  "minecraft:white_stained_glass_pane": {
+    "protocol_id": 439,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:white_stained_glass_pane"
+  },
+  "minecraft:orange_stained_glass_pane": {
+    "protocol_id": 440,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:orange_stained_glass_pane"
+  },
+  "minecraft:magenta_stained_glass_pane": {
+    "protocol_id": 441,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:magenta_stained_glass_pane"
+  },
+  "minecraft:light_blue_stained_glass_pane": {
+    "protocol_id": 442,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_blue_stained_glass_pane"
+  },
+  "minecraft:yellow_stained_glass_pane": {
+    "protocol_id": 443,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:yellow_stained_glass_pane"
+  },
+  "minecraft:lime_stained_glass_pane": {
+    "protocol_id": 444,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lime_stained_glass_pane"
+  },
+  "minecraft:pink_stained_glass_pane": {
+    "protocol_id": 445,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pink_stained_glass_pane"
+  },
+  "minecraft:gray_stained_glass_pane": {
+    "protocol_id": 446,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gray_stained_glass_pane"
+  },
+  "minecraft:light_gray_stained_glass_pane": {
+    "protocol_id": 447,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_gray_stained_glass_pane"
+  },
+  "minecraft:cyan_stained_glass_pane": {
+    "protocol_id": 448,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cyan_stained_glass_pane"
+  },
+  "minecraft:purple_stained_glass_pane": {
+    "protocol_id": 449,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purple_stained_glass_pane"
+  },
+  "minecraft:blue_stained_glass_pane": {
+    "protocol_id": 450,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blue_stained_glass_pane"
+  },
+  "minecraft:brown_stained_glass_pane": {
+    "protocol_id": 451,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brown_stained_glass_pane"
+  },
+  "minecraft:green_stained_glass_pane": {
+    "protocol_id": 452,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:green_stained_glass_pane"
+  },
+  "minecraft:red_stained_glass_pane": {
+    "protocol_id": 453,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_stained_glass_pane"
+  },
+  "minecraft:black_stained_glass_pane": {
+    "protocol_id": 454,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:black_stained_glass_pane"
+  },
+  "minecraft:prismarine": {
+    "protocol_id": 455,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:prismarine"
+  },
+  "minecraft:prismarine_bricks": {
+    "protocol_id": 456,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:prismarine_bricks"
+  },
+  "minecraft:dark_prismarine": {
+    "protocol_id": 457,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_prismarine"
+  },
+  "minecraft:prismarine_stairs": {
+    "protocol_id": 458,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:prismarine_stairs"
+  },
+  "minecraft:prismarine_brick_stairs": {
+    "protocol_id": 459,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:prismarine_brick_stairs"
+  },
+  "minecraft:dark_prismarine_stairs": {
+    "protocol_id": 460,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_prismarine_stairs"
+  },
+  "minecraft:sea_lantern": {
+    "protocol_id": 461,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sea_lantern"
+  },
+  "minecraft:red_sandstone": {
+    "protocol_id": 462,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_sandstone"
+  },
+  "minecraft:chiseled_red_sandstone": {
+    "protocol_id": 463,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chiseled_red_sandstone"
+  },
+  "minecraft:cut_red_sandstone": {
+    "protocol_id": 464,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cut_red_sandstone"
+  },
+  "minecraft:red_sandstone_stairs": {
+    "protocol_id": 465,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_sandstone_stairs"
+  },
+  "minecraft:repeating_command_block": {
+    "protocol_id": 466,
+    "rarity": "epic",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:repeating_command_block"
+  },
+  "minecraft:chain_command_block": {
+    "protocol_id": 467,
+    "rarity": "epic",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chain_command_block"
+  },
+  "minecraft:magma_block": {
+    "protocol_id": 468,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:magma_block"
+  },
+  "minecraft:nether_wart_block": {
+    "protocol_id": 469,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:nether_wart_block"
+  },
+  "minecraft:warped_wart_block": {
+    "protocol_id": 470,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_wart_block"
+  },
+  "minecraft:red_nether_bricks": {
+    "protocol_id": 471,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_nether_bricks"
+  },
+  "minecraft:bone_block": {
+    "protocol_id": 472,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:bone_block"
+  },
+  "minecraft:structure_void": {
+    "protocol_id": 473,
+    "rarity": "epic",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:structure_void"
+  },
+  "minecraft:shulker_box": {
+    "protocol_id": 474,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:shulker_box"
+  },
+  "minecraft:white_shulker_box": {
+    "protocol_id": 475,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:white_shulker_box"
+  },
+  "minecraft:orange_shulker_box": {
+    "protocol_id": 476,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:orange_shulker_box"
+  },
+  "minecraft:magenta_shulker_box": {
+    "protocol_id": 477,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:magenta_shulker_box"
+  },
+  "minecraft:light_blue_shulker_box": {
+    "protocol_id": 478,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:light_blue_shulker_box"
+  },
+  "minecraft:yellow_shulker_box": {
+    "protocol_id": 479,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:yellow_shulker_box"
+  },
+  "minecraft:lime_shulker_box": {
+    "protocol_id": 480,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:lime_shulker_box"
+  },
+  "minecraft:pink_shulker_box": {
+    "protocol_id": 481,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:pink_shulker_box"
+  },
+  "minecraft:gray_shulker_box": {
+    "protocol_id": 482,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:gray_shulker_box"
+  },
+  "minecraft:light_gray_shulker_box": {
+    "protocol_id": 483,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:light_gray_shulker_box"
+  },
+  "minecraft:cyan_shulker_box": {
+    "protocol_id": 484,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:cyan_shulker_box"
+  },
+  "minecraft:purple_shulker_box": {
+    "protocol_id": 485,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:purple_shulker_box"
+  },
+  "minecraft:blue_shulker_box": {
+    "protocol_id": 486,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:blue_shulker_box"
+  },
+  "minecraft:brown_shulker_box": {
+    "protocol_id": 487,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:brown_shulker_box"
+  },
+  "minecraft:green_shulker_box": {
+    "protocol_id": 488,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:green_shulker_box"
+  },
+  "minecraft:red_shulker_box": {
+    "protocol_id": 489,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:red_shulker_box"
+  },
+  "minecraft:black_shulker_box": {
+    "protocol_id": 490,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:black_shulker_box"
+  },
+  "minecraft:white_glazed_terracotta": {
+    "protocol_id": 491,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:white_glazed_terracotta"
+  },
+  "minecraft:orange_glazed_terracotta": {
+    "protocol_id": 492,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:orange_glazed_terracotta"
+  },
+  "minecraft:magenta_glazed_terracotta": {
+    "protocol_id": 493,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:magenta_glazed_terracotta"
+  },
+  "minecraft:light_blue_glazed_terracotta": {
+    "protocol_id": 494,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_blue_glazed_terracotta"
+  },
+  "minecraft:yellow_glazed_terracotta": {
+    "protocol_id": 495,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:yellow_glazed_terracotta"
+  },
+  "minecraft:lime_glazed_terracotta": {
+    "protocol_id": 496,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lime_glazed_terracotta"
+  },
+  "minecraft:pink_glazed_terracotta": {
+    "protocol_id": 497,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pink_glazed_terracotta"
+  },
+  "minecraft:gray_glazed_terracotta": {
+    "protocol_id": 498,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gray_glazed_terracotta"
+  },
+  "minecraft:light_gray_glazed_terracotta": {
+    "protocol_id": 499,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_gray_glazed_terracotta"
+  },
+  "minecraft:cyan_glazed_terracotta": {
+    "protocol_id": 500,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cyan_glazed_terracotta"
+  },
+  "minecraft:purple_glazed_terracotta": {
+    "protocol_id": 501,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purple_glazed_terracotta"
+  },
+  "minecraft:blue_glazed_terracotta": {
+    "protocol_id": 502,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blue_glazed_terracotta"
+  },
+  "minecraft:brown_glazed_terracotta": {
+    "protocol_id": 503,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brown_glazed_terracotta"
+  },
+  "minecraft:green_glazed_terracotta": {
+    "protocol_id": 504,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:green_glazed_terracotta"
+  },
+  "minecraft:red_glazed_terracotta": {
+    "protocol_id": 505,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_glazed_terracotta"
+  },
+  "minecraft:black_glazed_terracotta": {
+    "protocol_id": 506,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:black_glazed_terracotta"
+  },
+  "minecraft:white_concrete": {
+    "protocol_id": 507,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:white_concrete"
+  },
+  "minecraft:orange_concrete": {
+    "protocol_id": 508,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:orange_concrete"
+  },
+  "minecraft:magenta_concrete": {
+    "protocol_id": 509,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:magenta_concrete"
+  },
+  "minecraft:light_blue_concrete": {
+    "protocol_id": 510,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_blue_concrete"
+  },
+  "minecraft:yellow_concrete": {
+    "protocol_id": 511,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:yellow_concrete"
+  },
+  "minecraft:lime_concrete": {
+    "protocol_id": 512,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lime_concrete"
+  },
+  "minecraft:pink_concrete": {
+    "protocol_id": 513,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pink_concrete"
+  },
+  "minecraft:gray_concrete": {
+    "protocol_id": 514,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gray_concrete"
+  },
+  "minecraft:light_gray_concrete": {
+    "protocol_id": 515,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_gray_concrete"
+  },
+  "minecraft:cyan_concrete": {
+    "protocol_id": 516,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cyan_concrete"
+  },
+  "minecraft:purple_concrete": {
+    "protocol_id": 517,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purple_concrete"
+  },
+  "minecraft:blue_concrete": {
+    "protocol_id": 518,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blue_concrete"
+  },
+  "minecraft:brown_concrete": {
+    "protocol_id": 519,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brown_concrete"
+  },
+  "minecraft:green_concrete": {
+    "protocol_id": 520,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:green_concrete"
+  },
+  "minecraft:red_concrete": {
+    "protocol_id": 521,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_concrete"
+  },
+  "minecraft:black_concrete": {
+    "protocol_id": 522,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:black_concrete"
+  },
+  "minecraft:white_concrete_powder": {
+    "protocol_id": 523,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:white_concrete_powder"
+  },
+  "minecraft:orange_concrete_powder": {
+    "protocol_id": 524,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:orange_concrete_powder"
+  },
+  "minecraft:magenta_concrete_powder": {
+    "protocol_id": 525,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:magenta_concrete_powder"
+  },
+  "minecraft:light_blue_concrete_powder": {
+    "protocol_id": 526,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_blue_concrete_powder"
+  },
+  "minecraft:yellow_concrete_powder": {
+    "protocol_id": 527,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:yellow_concrete_powder"
+  },
+  "minecraft:lime_concrete_powder": {
+    "protocol_id": 528,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lime_concrete_powder"
+  },
+  "minecraft:pink_concrete_powder": {
+    "protocol_id": 529,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pink_concrete_powder"
+  },
+  "minecraft:gray_concrete_powder": {
+    "protocol_id": 530,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gray_concrete_powder"
+  },
+  "minecraft:light_gray_concrete_powder": {
+    "protocol_id": 531,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_gray_concrete_powder"
+  },
+  "minecraft:cyan_concrete_powder": {
+    "protocol_id": 532,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cyan_concrete_powder"
+  },
+  "minecraft:purple_concrete_powder": {
+    "protocol_id": 533,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purple_concrete_powder"
+  },
+  "minecraft:blue_concrete_powder": {
+    "protocol_id": 534,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blue_concrete_powder"
+  },
+  "minecraft:brown_concrete_powder": {
+    "protocol_id": 535,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brown_concrete_powder"
+  },
+  "minecraft:green_concrete_powder": {
+    "protocol_id": 536,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:green_concrete_powder"
+  },
+  "minecraft:red_concrete_powder": {
+    "protocol_id": 537,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_concrete_powder"
+  },
+  "minecraft:black_concrete_powder": {
+    "protocol_id": 538,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:black_concrete_powder"
+  },
+  "minecraft:turtle_egg": {
+    "protocol_id": 539,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:turtle_egg"
+  },
+  "minecraft:dead_tube_coral_block": {
+    "protocol_id": 540,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_tube_coral_block"
+  },
+  "minecraft:dead_brain_coral_block": {
+    "protocol_id": 541,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_brain_coral_block"
+  },
+  "minecraft:dead_bubble_coral_block": {
+    "protocol_id": 542,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_bubble_coral_block"
+  },
+  "minecraft:dead_fire_coral_block": {
+    "protocol_id": 543,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_fire_coral_block"
+  },
+  "minecraft:dead_horn_coral_block": {
+    "protocol_id": 544,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_horn_coral_block"
+  },
+  "minecraft:tube_coral_block": {
+    "protocol_id": 545,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:tube_coral_block"
+  },
+  "minecraft:brain_coral_block": {
+    "protocol_id": 546,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brain_coral_block"
+  },
+  "minecraft:bubble_coral_block": {
+    "protocol_id": 547,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:bubble_coral_block"
+  },
+  "minecraft:fire_coral_block": {
+    "protocol_id": 548,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:fire_coral_block"
+  },
+  "minecraft:horn_coral_block": {
+    "protocol_id": 549,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:horn_coral_block"
+  },
+  "minecraft:tube_coral": {
+    "protocol_id": 550,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:tube_coral"
+  },
+  "minecraft:brain_coral": {
+    "protocol_id": 551,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brain_coral"
+  },
+  "minecraft:bubble_coral": {
+    "protocol_id": 552,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:bubble_coral"
+  },
+  "minecraft:fire_coral": {
+    "protocol_id": 553,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:fire_coral"
+  },
+  "minecraft:horn_coral": {
+    "protocol_id": 554,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:horn_coral"
+  },
+  "minecraft:dead_brain_coral": {
+    "protocol_id": 555,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_brain_coral"
+  },
+  "minecraft:dead_bubble_coral": {
+    "protocol_id": 556,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_bubble_coral"
+  },
+  "minecraft:dead_fire_coral": {
+    "protocol_id": 557,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_fire_coral"
+  },
+  "minecraft:dead_horn_coral": {
+    "protocol_id": 558,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_horn_coral"
+  },
+  "minecraft:dead_tube_coral": {
+    "protocol_id": 559,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_tube_coral"
+  },
+  "minecraft:tube_coral_fan": {
+    "protocol_id": 560,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:tube_coral_fan"
+  },
+  "minecraft:brain_coral_fan": {
+    "protocol_id": 561,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brain_coral_fan"
+  },
+  "minecraft:bubble_coral_fan": {
+    "protocol_id": 562,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:bubble_coral_fan"
+  },
+  "minecraft:fire_coral_fan": {
+    "protocol_id": 563,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:fire_coral_fan"
+  },
+  "minecraft:horn_coral_fan": {
+    "protocol_id": 564,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:horn_coral_fan"
+  },
+  "minecraft:dead_tube_coral_fan": {
+    "protocol_id": 565,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_tube_coral_fan"
+  },
+  "minecraft:dead_brain_coral_fan": {
+    "protocol_id": 566,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_brain_coral_fan"
+  },
+  "minecraft:dead_bubble_coral_fan": {
+    "protocol_id": 567,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_bubble_coral_fan"
+  },
+  "minecraft:dead_fire_coral_fan": {
+    "protocol_id": 568,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_fire_coral_fan"
+  },
+  "minecraft:dead_horn_coral_fan": {
+    "protocol_id": 569,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dead_horn_coral_fan"
+  },
+  "minecraft:blue_ice": {
+    "protocol_id": 570,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blue_ice"
+  },
+  "minecraft:conduit": {
+    "protocol_id": 571,
+    "rarity": "rare",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:conduit"
+  },
+  "minecraft:polished_granite_stairs": {
+    "protocol_id": 572,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_granite_stairs"
+  },
+  "minecraft:smooth_red_sandstone_stairs": {
+    "protocol_id": 573,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_red_sandstone_stairs"
+  },
+  "minecraft:mossy_stone_brick_stairs": {
+    "protocol_id": 574,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mossy_stone_brick_stairs"
+  },
+  "minecraft:polished_diorite_stairs": {
+    "protocol_id": 575,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_diorite_stairs"
+  },
+  "minecraft:mossy_cobblestone_stairs": {
+    "protocol_id": 576,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mossy_cobblestone_stairs"
+  },
+  "minecraft:end_stone_brick_stairs": {
+    "protocol_id": 577,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:end_stone_brick_stairs"
+  },
+  "minecraft:stone_stairs": {
+    "protocol_id": 578,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stone_stairs"
+  },
+  "minecraft:smooth_sandstone_stairs": {
+    "protocol_id": 579,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_sandstone_stairs"
+  },
+  "minecraft:smooth_quartz_stairs": {
+    "protocol_id": 580,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_quartz_stairs"
+  },
+  "minecraft:granite_stairs": {
+    "protocol_id": 581,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:granite_stairs"
+  },
+  "minecraft:andesite_stairs": {
+    "protocol_id": 582,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:andesite_stairs"
+  },
+  "minecraft:red_nether_brick_stairs": {
+    "protocol_id": 583,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_nether_brick_stairs"
+  },
+  "minecraft:polished_andesite_stairs": {
+    "protocol_id": 584,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_andesite_stairs"
+  },
+  "minecraft:diorite_stairs": {
+    "protocol_id": 585,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:diorite_stairs"
+  },
+  "minecraft:cobbled_deepslate_stairs": {
+    "protocol_id": 586,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cobbled_deepslate_stairs"
+  },
+  "minecraft:polished_deepslate_stairs": {
+    "protocol_id": 587,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_deepslate_stairs"
+  },
+  "minecraft:deepslate_brick_stairs": {
+    "protocol_id": 588,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_brick_stairs"
+  },
+  "minecraft:deepslate_tile_stairs": {
+    "protocol_id": 589,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_tile_stairs"
+  },
+  "minecraft:polished_granite_slab": {
+    "protocol_id": 590,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_granite_slab"
+  },
+  "minecraft:smooth_red_sandstone_slab": {
+    "protocol_id": 591,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_red_sandstone_slab"
+  },
+  "minecraft:mossy_stone_brick_slab": {
+    "protocol_id": 592,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mossy_stone_brick_slab"
+  },
+  "minecraft:polished_diorite_slab": {
+    "protocol_id": 593,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_diorite_slab"
+  },
+  "minecraft:mossy_cobblestone_slab": {
+    "protocol_id": 594,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mossy_cobblestone_slab"
+  },
+  "minecraft:end_stone_brick_slab": {
+    "protocol_id": 595,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:end_stone_brick_slab"
+  },
+  "minecraft:smooth_sandstone_slab": {
+    "protocol_id": 596,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_sandstone_slab"
+  },
+  "minecraft:smooth_quartz_slab": {
+    "protocol_id": 597,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smooth_quartz_slab"
+  },
+  "minecraft:granite_slab": {
+    "protocol_id": 598,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:granite_slab"
+  },
+  "minecraft:andesite_slab": {
+    "protocol_id": 599,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:andesite_slab"
+  },
+  "minecraft:red_nether_brick_slab": {
+    "protocol_id": 600,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_nether_brick_slab"
+  },
+  "minecraft:polished_andesite_slab": {
+    "protocol_id": 601,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_andesite_slab"
+  },
+  "minecraft:diorite_slab": {
+    "protocol_id": 602,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:diorite_slab"
+  },
+  "minecraft:cobbled_deepslate_slab": {
+    "protocol_id": 603,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cobbled_deepslate_slab"
+  },
+  "minecraft:polished_deepslate_slab": {
+    "protocol_id": 604,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_deepslate_slab"
+  },
+  "minecraft:deepslate_brick_slab": {
+    "protocol_id": 605,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_brick_slab"
+  },
+  "minecraft:deepslate_tile_slab": {
+    "protocol_id": 606,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:deepslate_tile_slab"
+  },
+  "minecraft:scaffolding": {
+    "protocol_id": 607,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:scaffolding"
+  },
+  "minecraft:redstone": {
+    "protocol_id": 608,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:redstone_wire"
+  },
+  "minecraft:redstone_torch": {
+    "protocol_id": 609,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:redstone_torch"
+  },
+  "minecraft:redstone_block": {
+    "protocol_id": 610,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:redstone_block"
+  },
+  "minecraft:repeater": {
+    "protocol_id": 611,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:repeater"
+  },
+  "minecraft:comparator": {
+    "protocol_id": 612,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:comparator"
+  },
+  "minecraft:piston": {
+    "protocol_id": 613,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:piston"
+  },
+  "minecraft:sticky_piston": {
+    "protocol_id": 614,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sticky_piston"
+  },
+  "minecraft:slime_block": {
+    "protocol_id": 615,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:slime_block"
+  },
+  "minecraft:honey_block": {
+    "protocol_id": 616,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:honey_block"
+  },
+  "minecraft:observer": {
+    "protocol_id": 617,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:observer"
+  },
+  "minecraft:hopper": {
+    "protocol_id": 618,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:hopper"
+  },
+  "minecraft:dispenser": {
+    "protocol_id": 619,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dispenser"
+  },
+  "minecraft:dropper": {
+    "protocol_id": 620,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dropper"
+  },
+  "minecraft:lectern": {
+    "protocol_id": 621,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lectern"
+  },
+  "minecraft:target": {
+    "protocol_id": 622,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:target"
+  },
+  "minecraft:lever": {
+    "protocol_id": 623,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lever"
+  },
+  "minecraft:lightning_rod": {
+    "protocol_id": 624,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lightning_rod"
+  },
+  "minecraft:daylight_detector": {
+    "protocol_id": 625,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:daylight_detector"
+  },
+  "minecraft:sculk_sensor": {
+    "protocol_id": 626,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:sculk_sensor"
+  },
+  "minecraft:tripwire_hook": {
+    "protocol_id": 627,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:tripwire_hook"
+  },
+  "minecraft:trapped_chest": {
+    "protocol_id": 628,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:trapped_chest"
+  },
+  "minecraft:tnt": {
+    "protocol_id": 629,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:tnt"
+  },
+  "minecraft:redstone_lamp": {
+    "protocol_id": 630,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:redstone_lamp"
+  },
+  "minecraft:note_block": {
+    "protocol_id": 631,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:note_block"
+  },
+  "minecraft:stone_button": {
+    "protocol_id": 632,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stone_button"
+  },
+  "minecraft:polished_blackstone_button": {
+    "protocol_id": 633,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_blackstone_button"
+  },
+  "minecraft:oak_button": {
+    "protocol_id": 634,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_button"
+  },
+  "minecraft:spruce_button": {
+    "protocol_id": 635,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_button"
+  },
+  "minecraft:birch_button": {
+    "protocol_id": 636,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_button"
+  },
+  "minecraft:jungle_button": {
+    "protocol_id": 637,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_button"
+  },
+  "minecraft:acacia_button": {
+    "protocol_id": 638,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_button"
+  },
+  "minecraft:dark_oak_button": {
+    "protocol_id": 639,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_button"
+  },
+  "minecraft:mangrove_button": {
+    "protocol_id": 640,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_button"
+  },
+  "minecraft:crimson_button": {
+    "protocol_id": 641,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_button"
+  },
+  "minecraft:warped_button": {
+    "protocol_id": 642,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_button"
+  },
+  "minecraft:stone_pressure_plate": {
+    "protocol_id": 643,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stone_pressure_plate"
+  },
+  "minecraft:polished_blackstone_pressure_plate": {
+    "protocol_id": 644,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_blackstone_pressure_plate"
+  },
+  "minecraft:light_weighted_pressure_plate": {
+    "protocol_id": 645,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_weighted_pressure_plate"
+  },
+  "minecraft:heavy_weighted_pressure_plate": {
+    "protocol_id": 646,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:heavy_weighted_pressure_plate"
+  },
+  "minecraft:oak_pressure_plate": {
+    "protocol_id": 647,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_pressure_plate"
+  },
+  "minecraft:spruce_pressure_plate": {
+    "protocol_id": 648,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_pressure_plate"
+  },
+  "minecraft:birch_pressure_plate": {
+    "protocol_id": 649,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_pressure_plate"
+  },
+  "minecraft:jungle_pressure_plate": {
+    "protocol_id": 650,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_pressure_plate"
+  },
+  "minecraft:acacia_pressure_plate": {
+    "protocol_id": 651,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_pressure_plate"
+  },
+  "minecraft:dark_oak_pressure_plate": {
+    "protocol_id": 652,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_pressure_plate"
+  },
+  "minecraft:mangrove_pressure_plate": {
+    "protocol_id": 653,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_pressure_plate"
+  },
+  "minecraft:crimson_pressure_plate": {
+    "protocol_id": 654,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_pressure_plate"
+  },
+  "minecraft:warped_pressure_plate": {
+    "protocol_id": 655,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_pressure_plate"
+  },
+  "minecraft:iron_door": {
+    "protocol_id": 656,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:iron_door"
+  },
+  "minecraft:oak_door": {
+    "protocol_id": 657,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_door"
+  },
+  "minecraft:spruce_door": {
+    "protocol_id": 658,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_door"
+  },
+  "minecraft:birch_door": {
+    "protocol_id": 659,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_door"
+  },
+  "minecraft:jungle_door": {
+    "protocol_id": 660,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_door"
+  },
+  "minecraft:acacia_door": {
+    "protocol_id": 661,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_door"
+  },
+  "minecraft:dark_oak_door": {
+    "protocol_id": 662,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_door"
+  },
+  "minecraft:mangrove_door": {
+    "protocol_id": 663,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_door"
+  },
+  "minecraft:crimson_door": {
+    "protocol_id": 664,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_door"
+  },
+  "minecraft:warped_door": {
+    "protocol_id": 665,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_door"
+  },
+  "minecraft:iron_trapdoor": {
+    "protocol_id": 666,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:iron_trapdoor"
+  },
+  "minecraft:oak_trapdoor": {
+    "protocol_id": 667,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_trapdoor"
+  },
+  "minecraft:spruce_trapdoor": {
+    "protocol_id": 668,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_trapdoor"
+  },
+  "minecraft:birch_trapdoor": {
+    "protocol_id": 669,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_trapdoor"
+  },
+  "minecraft:jungle_trapdoor": {
+    "protocol_id": 670,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_trapdoor"
+  },
+  "minecraft:acacia_trapdoor": {
+    "protocol_id": 671,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_trapdoor"
+  },
+  "minecraft:dark_oak_trapdoor": {
+    "protocol_id": 672,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_trapdoor"
+  },
+  "minecraft:mangrove_trapdoor": {
+    "protocol_id": 673,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_trapdoor"
+  },
+  "minecraft:crimson_trapdoor": {
+    "protocol_id": 674,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_trapdoor"
+  },
+  "minecraft:warped_trapdoor": {
+    "protocol_id": 675,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_trapdoor"
+  },
+  "minecraft:oak_fence_gate": {
+    "protocol_id": 676,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:oak_fence_gate"
+  },
+  "minecraft:spruce_fence_gate": {
+    "protocol_id": 677,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:spruce_fence_gate"
+  },
+  "minecraft:birch_fence_gate": {
+    "protocol_id": 678,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:birch_fence_gate"
+  },
+  "minecraft:jungle_fence_gate": {
+    "protocol_id": 679,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jungle_fence_gate"
+  },
+  "minecraft:acacia_fence_gate": {
+    "protocol_id": 680,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:acacia_fence_gate"
+  },
+  "minecraft:dark_oak_fence_gate": {
+    "protocol_id": 681,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dark_oak_fence_gate"
+  },
+  "minecraft:mangrove_fence_gate": {
+    "protocol_id": 682,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:mangrove_fence_gate"
+  },
+  "minecraft:crimson_fence_gate": {
+    "protocol_id": 683,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crimson_fence_gate"
+  },
+  "minecraft:warped_fence_gate": {
+    "protocol_id": 684,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:warped_fence_gate"
+  },
+  "minecraft:powered_rail": {
+    "protocol_id": 685,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:powered_rail"
+  },
+  "minecraft:detector_rail": {
+    "protocol_id": 686,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:detector_rail"
+  },
+  "minecraft:rail": {
+    "protocol_id": 687,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:rail"
+  },
+  "minecraft:activator_rail": {
+    "protocol_id": 688,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:activator_rail"
+  },
+  "minecraft:saddle": {
+    "protocol_id": 689,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:minecart": {
+    "protocol_id": 690,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:chest_minecart": {
+    "protocol_id": 691,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:furnace_minecart": {
+    "protocol_id": 692,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:tnt_minecart": {
+    "protocol_id": 693,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:hopper_minecart": {
+    "protocol_id": 694,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:carrot_on_a_stick": {
+    "protocol_id": 695,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:warped_fungus_on_a_stick": {
+    "protocol_id": 696,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:elytra": {
+    "protocol_id": 697,
+    "rarity": "uncommon",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:oak_boat": {
+    "protocol_id": 698,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:oak_chest_boat": {
+    "protocol_id": 699,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:spruce_boat": {
+    "protocol_id": 700,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:spruce_chest_boat": {
+    "protocol_id": 701,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:birch_boat": {
+    "protocol_id": 702,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:birch_chest_boat": {
+    "protocol_id": 703,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:jungle_boat": {
+    "protocol_id": 704,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:jungle_chest_boat": {
+    "protocol_id": 705,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:acacia_boat": {
+    "protocol_id": 706,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:acacia_chest_boat": {
+    "protocol_id": 707,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:dark_oak_boat": {
+    "protocol_id": 708,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:dark_oak_chest_boat": {
+    "protocol_id": 709,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:mangrove_boat": {
+    "protocol_id": 710,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:mangrove_chest_boat": {
+    "protocol_id": 711,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:structure_block": {
+    "protocol_id": 712,
+    "rarity": "epic",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:structure_block"
+  },
+  "minecraft:jigsaw": {
+    "protocol_id": 713,
+    "rarity": "epic",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:jigsaw"
+  },
+  "minecraft:turtle_helmet": {
+    "protocol_id": 714,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:scute": {
+    "protocol_id": 715,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:flint_and_steel": {
+    "protocol_id": 716,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:apple": {
+    "protocol_id": 717,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:bow": {
+    "protocol_id": 718,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:arrow": {
+    "protocol_id": 719,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:coal": {
+    "protocol_id": 720,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:charcoal": {
+    "protocol_id": 721,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:diamond": {
+    "protocol_id": 722,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:emerald": {
+    "protocol_id": 723,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:lapis_lazuli": {
+    "protocol_id": 724,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:quartz": {
+    "protocol_id": 725,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:amethyst_shard": {
+    "protocol_id": 726,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:raw_iron": {
+    "protocol_id": 727,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:iron_ingot": {
+    "protocol_id": 728,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:raw_copper": {
+    "protocol_id": 729,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:copper_ingot": {
+    "protocol_id": 730,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:raw_gold": {
+    "protocol_id": 731,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:gold_ingot": {
+    "protocol_id": 732,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:netherite_ingot": {
+    "protocol_id": 733,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:netherite_scrap": {
+    "protocol_id": 734,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:wooden_sword": {
+    "protocol_id": 735,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:wooden_shovel": {
+    "protocol_id": 736,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:wooden_pickaxe": {
+    "protocol_id": 737,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:wooden_axe": {
+    "protocol_id": 738,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:wooden_hoe": {
+    "protocol_id": 739,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:stone_sword": {
+    "protocol_id": 740,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:stone_shovel": {
+    "protocol_id": 741,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:stone_pickaxe": {
+    "protocol_id": 742,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:stone_axe": {
+    "protocol_id": 743,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:stone_hoe": {
+    "protocol_id": 744,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:golden_sword": {
+    "protocol_id": 745,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:golden_shovel": {
+    "protocol_id": 746,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:golden_pickaxe": {
+    "protocol_id": 747,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:golden_axe": {
+    "protocol_id": 748,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:golden_hoe": {
+    "protocol_id": 749,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:iron_sword": {
+    "protocol_id": 750,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:iron_shovel": {
+    "protocol_id": 751,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:iron_pickaxe": {
+    "protocol_id": 752,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:iron_axe": {
+    "protocol_id": 753,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:iron_hoe": {
+    "protocol_id": 754,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:diamond_sword": {
+    "protocol_id": 755,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:diamond_shovel": {
+    "protocol_id": 756,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:diamond_pickaxe": {
+    "protocol_id": 757,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:diamond_axe": {
+    "protocol_id": 758,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:diamond_hoe": {
+    "protocol_id": 759,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:netherite_sword": {
+    "protocol_id": 760,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:netherite_shovel": {
+    "protocol_id": 761,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:netherite_pickaxe": {
+    "protocol_id": 762,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:netherite_axe": {
+    "protocol_id": 763,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:netherite_hoe": {
+    "protocol_id": 764,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:stick": {
+    "protocol_id": 765,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:bowl": {
+    "protocol_id": 766,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:mushroom_stew": {
+    "protocol_id": 767,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": true
+  },
+  "minecraft:string": {
+    "protocol_id": 768,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:tripwire"
+  },
+  "minecraft:feather": {
+    "protocol_id": 769,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:gunpowder": {
+    "protocol_id": 770,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:wheat_seeds": {
+    "protocol_id": 771,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:wheat"
+  },
+  "minecraft:wheat": {
+    "protocol_id": 772,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:bread": {
+    "protocol_id": 773,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:leather_helmet": {
+    "protocol_id": 774,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:leather_chestplate": {
+    "protocol_id": 775,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:leather_leggings": {
+    "protocol_id": 776,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:leather_boots": {
+    "protocol_id": 777,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:chainmail_helmet": {
+    "protocol_id": 778,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:chainmail_chestplate": {
+    "protocol_id": 779,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:chainmail_leggings": {
+    "protocol_id": 780,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:chainmail_boots": {
+    "protocol_id": 781,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:iron_helmet": {
+    "protocol_id": 782,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:iron_chestplate": {
+    "protocol_id": 783,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:iron_leggings": {
+    "protocol_id": 784,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:iron_boots": {
+    "protocol_id": 785,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:diamond_helmet": {
+    "protocol_id": 786,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:diamond_chestplate": {
+    "protocol_id": 787,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:diamond_leggings": {
+    "protocol_id": 788,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:diamond_boots": {
+    "protocol_id": 789,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:golden_helmet": {
+    "protocol_id": 790,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:golden_chestplate": {
+    "protocol_id": 791,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:golden_leggings": {
+    "protocol_id": 792,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:golden_boots": {
+    "protocol_id": 793,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:netherite_helmet": {
+    "protocol_id": 794,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:netherite_chestplate": {
+    "protocol_id": 795,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:netherite_leggings": {
+    "protocol_id": 796,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:netherite_boots": {
+    "protocol_id": 797,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:flint": {
+    "protocol_id": 798,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:porkchop": {
+    "protocol_id": 799,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:cooked_porkchop": {
+    "protocol_id": 800,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:painting": {
+    "protocol_id": 801,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:golden_apple": {
+    "protocol_id": 802,
+    "rarity": "rare",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:enchanted_golden_apple": {
+    "protocol_id": 803,
+    "rarity": "epic",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:oak_sign": {
+    "protocol_id": 804,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:oak_sign"
+  },
+  "minecraft:spruce_sign": {
+    "protocol_id": 805,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:spruce_sign"
+  },
+  "minecraft:birch_sign": {
+    "protocol_id": 806,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:birch_sign"
+  },
+  "minecraft:jungle_sign": {
+    "protocol_id": 807,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:jungle_sign"
+  },
+  "minecraft:acacia_sign": {
+    "protocol_id": 808,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:acacia_sign"
+  },
+  "minecraft:dark_oak_sign": {
+    "protocol_id": 809,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:dark_oak_sign"
+  },
+  "minecraft:mangrove_sign": {
+    "protocol_id": 810,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:mangrove_sign"
+  },
+  "minecraft:crimson_sign": {
+    "protocol_id": 811,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:crimson_sign"
+  },
+  "minecraft:warped_sign": {
+    "protocol_id": 812,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:warped_sign"
+  },
+  "minecraft:bucket": {
+    "protocol_id": 813,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false
+  },
+  "minecraft:water_bucket": {
+    "protocol_id": 814,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:lava_bucket": {
+    "protocol_id": 815,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:powder_snow_bucket": {
+    "protocol_id": 816,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:powder_snow"
+  },
+  "minecraft:snowball": {
+    "protocol_id": 817,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false
+  },
+  "minecraft:leather": {
+    "protocol_id": 818,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:milk_bucket": {
+    "protocol_id": 819,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:pufferfish_bucket": {
+    "protocol_id": 820,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:salmon_bucket": {
+    "protocol_id": 821,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:cod_bucket": {
+    "protocol_id": 822,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:tropical_fish_bucket": {
+    "protocol_id": 823,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:axolotl_bucket": {
+    "protocol_id": 824,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:tadpole_bucket": {
+    "protocol_id": 825,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:brick": {
+    "protocol_id": 826,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:clay_ball": {
+    "protocol_id": 827,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:dried_kelp_block": {
+    "protocol_id": 828,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dried_kelp_block"
+  },
+  "minecraft:paper": {
+    "protocol_id": 829,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:book": {
+    "protocol_id": 830,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:slime_ball": {
+    "protocol_id": 831,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:egg": {
+    "protocol_id": 832,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false
+  },
+  "minecraft:compass": {
+    "protocol_id": 833,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:recovery_compass": {
+    "protocol_id": 834,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:bundle": {
+    "protocol_id": 835,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:fishing_rod": {
+    "protocol_id": 836,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:clock": {
+    "protocol_id": 837,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:spyglass": {
+    "protocol_id": 838,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:glowstone_dust": {
+    "protocol_id": 839,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:cod": {
+    "protocol_id": 840,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:salmon": {
+    "protocol_id": 841,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:tropical_fish": {
+    "protocol_id": 842,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:pufferfish": {
+    "protocol_id": 843,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:cooked_cod": {
+    "protocol_id": 844,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:cooked_salmon": {
+    "protocol_id": 845,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:ink_sac": {
+    "protocol_id": 846,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:glow_ink_sac": {
+    "protocol_id": 847,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:cocoa_beans": {
+    "protocol_id": 848,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cocoa"
+  },
+  "minecraft:white_dye": {
+    "protocol_id": 849,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:orange_dye": {
+    "protocol_id": 850,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:magenta_dye": {
+    "protocol_id": 851,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:light_blue_dye": {
+    "protocol_id": 852,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:yellow_dye": {
+    "protocol_id": 853,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:lime_dye": {
+    "protocol_id": 854,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:pink_dye": {
+    "protocol_id": 855,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:gray_dye": {
+    "protocol_id": 856,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:light_gray_dye": {
+    "protocol_id": 857,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:cyan_dye": {
+    "protocol_id": 858,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:purple_dye": {
+    "protocol_id": 859,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:blue_dye": {
+    "protocol_id": 860,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:brown_dye": {
+    "protocol_id": 861,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:green_dye": {
+    "protocol_id": 862,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:red_dye": {
+    "protocol_id": 863,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:black_dye": {
+    "protocol_id": 864,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:bone_meal": {
+    "protocol_id": 865,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:bone": {
+    "protocol_id": 866,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:sugar": {
+    "protocol_id": 867,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:cake": {
+    "protocol_id": 868,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:cake"
+  },
+  "minecraft:white_bed": {
+    "protocol_id": 869,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:white_bed"
+  },
+  "minecraft:orange_bed": {
+    "protocol_id": 870,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:orange_bed"
+  },
+  "minecraft:magenta_bed": {
+    "protocol_id": 871,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:magenta_bed"
+  },
+  "minecraft:light_blue_bed": {
+    "protocol_id": 872,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:light_blue_bed"
+  },
+  "minecraft:yellow_bed": {
+    "protocol_id": 873,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:yellow_bed"
+  },
+  "minecraft:lime_bed": {
+    "protocol_id": 874,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:lime_bed"
+  },
+  "minecraft:pink_bed": {
+    "protocol_id": 875,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:pink_bed"
+  },
+  "minecraft:gray_bed": {
+    "protocol_id": 876,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:gray_bed"
+  },
+  "minecraft:light_gray_bed": {
+    "protocol_id": 877,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:light_gray_bed"
+  },
+  "minecraft:cyan_bed": {
+    "protocol_id": 878,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:cyan_bed"
+  },
+  "minecraft:purple_bed": {
+    "protocol_id": 879,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:purple_bed"
+  },
+  "minecraft:blue_bed": {
+    "protocol_id": 880,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:blue_bed"
+  },
+  "minecraft:brown_bed": {
+    "protocol_id": 881,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:brown_bed"
+  },
+  "minecraft:green_bed": {
+    "protocol_id": 882,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:green_bed"
+  },
+  "minecraft:red_bed": {
+    "protocol_id": 883,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:red_bed"
+  },
+  "minecraft:black_bed": {
+    "protocol_id": 884,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false,
+    "block": "minecraft:black_bed"
+  },
+  "minecraft:cookie": {
+    "protocol_id": 885,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:filled_map": {
+    "protocol_id": 886,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:shears": {
+    "protocol_id": 887,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:melon_slice": {
+    "protocol_id": 888,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:dried_kelp": {
+    "protocol_id": 889,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:pumpkin_seeds": {
+    "protocol_id": 890,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pumpkin_stem"
+  },
+  "minecraft:melon_seeds": {
+    "protocol_id": 891,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:melon_stem"
+  },
+  "minecraft:beef": {
+    "protocol_id": 892,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:cooked_beef": {
+    "protocol_id": 893,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:chicken": {
+    "protocol_id": 894,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:cooked_chicken": {
+    "protocol_id": 895,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:rotten_flesh": {
+    "protocol_id": 896,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:ender_pearl": {
+    "protocol_id": 897,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false
+  },
+  "minecraft:blaze_rod": {
+    "protocol_id": 898,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:ghast_tear": {
+    "protocol_id": 899,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:gold_nugget": {
+    "protocol_id": 900,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:nether_wart": {
+    "protocol_id": 901,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:nether_wart"
+  },
+  "minecraft:potion": {
+    "protocol_id": 902,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:glass_bottle": {
+    "protocol_id": 903,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:spider_eye": {
+    "protocol_id": 904,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:fermented_spider_eye": {
+    "protocol_id": 905,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:blaze_powder": {
+    "protocol_id": 906,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:magma_cream": {
+    "protocol_id": 907,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:brewing_stand": {
+    "protocol_id": 908,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brewing_stand"
+  },
+  "minecraft:cauldron": {
+    "protocol_id": 909,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cauldron"
+  },
+  "minecraft:ender_eye": {
+    "protocol_id": 910,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:glistering_melon_slice": {
+    "protocol_id": 911,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:allay_spawn_egg": {
+    "protocol_id": 912,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:axolotl_spawn_egg": {
+    "protocol_id": 913,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:bat_spawn_egg": {
+    "protocol_id": 914,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:bee_spawn_egg": {
+    "protocol_id": 915,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:blaze_spawn_egg": {
+    "protocol_id": 916,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:cat_spawn_egg": {
+    "protocol_id": 917,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:cave_spider_spawn_egg": {
+    "protocol_id": 918,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:chicken_spawn_egg": {
+    "protocol_id": 919,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:cod_spawn_egg": {
+    "protocol_id": 920,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:cow_spawn_egg": {
+    "protocol_id": 921,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:creeper_spawn_egg": {
+    "protocol_id": 922,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:dolphin_spawn_egg": {
+    "protocol_id": 923,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:donkey_spawn_egg": {
+    "protocol_id": 924,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:drowned_spawn_egg": {
+    "protocol_id": 925,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:elder_guardian_spawn_egg": {
+    "protocol_id": 926,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:enderman_spawn_egg": {
+    "protocol_id": 927,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:endermite_spawn_egg": {
+    "protocol_id": 928,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:evoker_spawn_egg": {
+    "protocol_id": 929,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:fox_spawn_egg": {
+    "protocol_id": 930,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:frog_spawn_egg": {
+    "protocol_id": 931,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:ghast_spawn_egg": {
+    "protocol_id": 932,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:glow_squid_spawn_egg": {
+    "protocol_id": 933,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:goat_spawn_egg": {
+    "protocol_id": 934,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:guardian_spawn_egg": {
+    "protocol_id": 935,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:hoglin_spawn_egg": {
+    "protocol_id": 936,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:horse_spawn_egg": {
+    "protocol_id": 937,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:husk_spawn_egg": {
+    "protocol_id": 938,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:llama_spawn_egg": {
+    "protocol_id": 939,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:magma_cube_spawn_egg": {
+    "protocol_id": 940,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:mooshroom_spawn_egg": {
+    "protocol_id": 941,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:mule_spawn_egg": {
+    "protocol_id": 942,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:ocelot_spawn_egg": {
+    "protocol_id": 943,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:panda_spawn_egg": {
+    "protocol_id": 944,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:parrot_spawn_egg": {
+    "protocol_id": 945,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:phantom_spawn_egg": {
+    "protocol_id": 946,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:pig_spawn_egg": {
+    "protocol_id": 947,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:piglin_spawn_egg": {
+    "protocol_id": 948,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:piglin_brute_spawn_egg": {
+    "protocol_id": 949,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:pillager_spawn_egg": {
+    "protocol_id": 950,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:polar_bear_spawn_egg": {
+    "protocol_id": 951,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:pufferfish_spawn_egg": {
+    "protocol_id": 952,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:rabbit_spawn_egg": {
+    "protocol_id": 953,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:ravager_spawn_egg": {
+    "protocol_id": 954,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:salmon_spawn_egg": {
+    "protocol_id": 955,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:sheep_spawn_egg": {
+    "protocol_id": 956,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:shulker_spawn_egg": {
+    "protocol_id": 957,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:silverfish_spawn_egg": {
+    "protocol_id": 958,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:skeleton_spawn_egg": {
+    "protocol_id": 959,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:skeleton_horse_spawn_egg": {
+    "protocol_id": 960,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:slime_spawn_egg": {
+    "protocol_id": 961,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:spider_spawn_egg": {
+    "protocol_id": 962,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:squid_spawn_egg": {
+    "protocol_id": 963,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:stray_spawn_egg": {
+    "protocol_id": 964,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:strider_spawn_egg": {
+    "protocol_id": 965,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:tadpole_spawn_egg": {
+    "protocol_id": 966,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:trader_llama_spawn_egg": {
+    "protocol_id": 967,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:tropical_fish_spawn_egg": {
+    "protocol_id": 968,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:turtle_spawn_egg": {
+    "protocol_id": 969,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:vex_spawn_egg": {
+    "protocol_id": 970,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:villager_spawn_egg": {
+    "protocol_id": 971,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:vindicator_spawn_egg": {
+    "protocol_id": 972,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:wandering_trader_spawn_egg": {
+    "protocol_id": 973,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:warden_spawn_egg": {
+    "protocol_id": 974,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:witch_spawn_egg": {
+    "protocol_id": 975,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:wither_skeleton_spawn_egg": {
+    "protocol_id": 976,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:wolf_spawn_egg": {
+    "protocol_id": 977,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:zoglin_spawn_egg": {
+    "protocol_id": 978,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:zombie_spawn_egg": {
+    "protocol_id": 979,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:zombie_horse_spawn_egg": {
+    "protocol_id": 980,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:zombie_villager_spawn_egg": {
+    "protocol_id": 981,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:zombified_piglin_spawn_egg": {
+    "protocol_id": 982,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:experience_bottle": {
+    "protocol_id": 983,
+    "rarity": "uncommon",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:fire_charge": {
+    "protocol_id": 984,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:writable_book": {
+    "protocol_id": 985,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:written_book": {
+    "protocol_id": 986,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false
+  },
+  "minecraft:item_frame": {
+    "protocol_id": 987,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:glow_item_frame": {
+    "protocol_id": 988,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:flower_pot": {
+    "protocol_id": 989,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:flower_pot"
+  },
+  "minecraft:carrot": {
+    "protocol_id": 990,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true,
+    "block": "minecraft:carrots"
+  },
+  "minecraft:potato": {
+    "protocol_id": 991,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true,
+    "block": "minecraft:potatoes"
+  },
+  "minecraft:baked_potato": {
+    "protocol_id": 992,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:poisonous_potato": {
+    "protocol_id": 993,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:map": {
+    "protocol_id": 994,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:golden_carrot": {
+    "protocol_id": 995,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:skeleton_skull": {
+    "protocol_id": 996,
+    "rarity": "uncommon",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:skeleton_skull"
+  },
+  "minecraft:wither_skeleton_skull": {
+    "protocol_id": 997,
+    "rarity": "uncommon",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:wither_skeleton_skull"
+  },
+  "minecraft:player_head": {
+    "protocol_id": 998,
+    "rarity": "uncommon",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:player_head"
+  },
+  "minecraft:zombie_head": {
+    "protocol_id": 999,
+    "rarity": "uncommon",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:zombie_head"
+  },
+  "minecraft:creeper_head": {
+    "protocol_id": 1000,
+    "rarity": "uncommon",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:creeper_head"
+  },
+  "minecraft:dragon_head": {
+    "protocol_id": 1001,
+    "rarity": "uncommon",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:dragon_head"
+  },
+  "minecraft:nether_star": {
+    "protocol_id": 1002,
+    "rarity": "uncommon",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:pumpkin_pie": {
+    "protocol_id": 1003,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:firework_rocket": {
+    "protocol_id": 1004,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:firework_star": {
+    "protocol_id": 1005,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:enchanted_book": {
+    "protocol_id": 1006,
+    "rarity": "uncommon",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:nether_brick": {
+    "protocol_id": 1007,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:prismarine_shard": {
+    "protocol_id": 1008,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:prismarine_crystals": {
+    "protocol_id": 1009,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:rabbit": {
+    "protocol_id": 1010,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:cooked_rabbit": {
+    "protocol_id": 1011,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:rabbit_stew": {
+    "protocol_id": 1012,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": true
+  },
+  "minecraft:rabbit_foot": {
+    "protocol_id": 1013,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:rabbit_hide": {
+    "protocol_id": 1014,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:armor_stand": {
+    "protocol_id": 1015,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false
+  },
+  "minecraft:iron_horse_armor": {
+    "protocol_id": 1016,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:golden_horse_armor": {
+    "protocol_id": 1017,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:diamond_horse_armor": {
+    "protocol_id": 1018,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:leather_horse_armor": {
+    "protocol_id": 1019,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:lead": {
+    "protocol_id": 1020,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:name_tag": {
+    "protocol_id": 1021,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:command_block_minecart": {
+    "protocol_id": 1022,
+    "rarity": "epic",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:mutton": {
+    "protocol_id": 1023,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:cooked_mutton": {
+    "protocol_id": 1024,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:white_banner": {
+    "protocol_id": 1025,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:white_banner"
+  },
+  "minecraft:orange_banner": {
+    "protocol_id": 1026,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:orange_banner"
+  },
+  "minecraft:magenta_banner": {
+    "protocol_id": 1027,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:magenta_banner"
+  },
+  "minecraft:light_blue_banner": {
+    "protocol_id": 1028,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:light_blue_banner"
+  },
+  "minecraft:yellow_banner": {
+    "protocol_id": 1029,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:yellow_banner"
+  },
+  "minecraft:lime_banner": {
+    "protocol_id": 1030,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:lime_banner"
+  },
+  "minecraft:pink_banner": {
+    "protocol_id": 1031,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:pink_banner"
+  },
+  "minecraft:gray_banner": {
+    "protocol_id": 1032,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:gray_banner"
+  },
+  "minecraft:light_gray_banner": {
+    "protocol_id": 1033,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:light_gray_banner"
+  },
+  "minecraft:cyan_banner": {
+    "protocol_id": 1034,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:cyan_banner"
+  },
+  "minecraft:purple_banner": {
+    "protocol_id": 1035,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:purple_banner"
+  },
+  "minecraft:blue_banner": {
+    "protocol_id": 1036,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:blue_banner"
+  },
+  "minecraft:brown_banner": {
+    "protocol_id": 1037,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:brown_banner"
+  },
+  "minecraft:green_banner": {
+    "protocol_id": 1038,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:green_banner"
+  },
+  "minecraft:red_banner": {
+    "protocol_id": 1039,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:red_banner"
+  },
+  "minecraft:black_banner": {
+    "protocol_id": 1040,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": false,
+    "block": "minecraft:black_banner"
+  },
+  "minecraft:end_crystal": {
+    "protocol_id": 1041,
+    "rarity": "rare",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:chorus_fruit": {
+    "protocol_id": 1042,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:popped_chorus_fruit": {
+    "protocol_id": 1043,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:beetroot": {
+    "protocol_id": 1044,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true
+  },
+  "minecraft:beetroot_seeds": {
+    "protocol_id": 1045,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:beetroots"
+  },
+  "minecraft:beetroot_soup": {
+    "protocol_id": 1046,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": true
+  },
+  "minecraft:dragon_breath": {
+    "protocol_id": 1047,
+    "rarity": "uncommon",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:splash_potion": {
+    "protocol_id": 1048,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:spectral_arrow": {
+    "protocol_id": 1049,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:tipped_arrow": {
+    "protocol_id": 1050,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:lingering_potion": {
+    "protocol_id": 1051,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:shield": {
+    "protocol_id": 1052,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:totem_of_undying": {
+    "protocol_id": 1053,
+    "rarity": "uncommon",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:shulker_shell": {
+    "protocol_id": 1054,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:iron_nugget": {
+    "protocol_id": 1055,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:knowledge_book": {
+    "protocol_id": 1056,
+    "rarity": "epic",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:debug_stick": {
+    "protocol_id": 1057,
+    "rarity": "epic",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_13": {
+    "protocol_id": 1058,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_cat": {
+    "protocol_id": 1059,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_blocks": {
+    "protocol_id": 1060,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_chirp": {
+    "protocol_id": 1061,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_far": {
+    "protocol_id": 1062,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_mall": {
+    "protocol_id": 1063,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_mellohi": {
+    "protocol_id": 1064,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_stal": {
+    "protocol_id": 1065,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_strad": {
+    "protocol_id": 1066,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_ward": {
+    "protocol_id": 1067,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_11": {
+    "protocol_id": 1068,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_wait": {
+    "protocol_id": 1069,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_otherside": {
+    "protocol_id": 1070,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_5": {
+    "protocol_id": 1071,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:music_disc_pigstep": {
+    "protocol_id": 1072,
+    "rarity": "rare",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:disc_fragment_5": {
+    "protocol_id": 1073,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:trident": {
+    "protocol_id": 1074,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:phantom_membrane": {
+    "protocol_id": 1075,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:nautilus_shell": {
+    "protocol_id": 1076,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:heart_of_the_sea": {
+    "protocol_id": 1077,
+    "rarity": "uncommon",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:crossbow": {
+    "protocol_id": 1078,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:suspicious_stew": {
+    "protocol_id": 1079,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": true
+  },
+  "minecraft:loom": {
+    "protocol_id": 1080,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:loom"
+  },
+  "minecraft:flower_banner_pattern": {
+    "protocol_id": 1081,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:creeper_banner_pattern": {
+    "protocol_id": 1082,
+    "rarity": "uncommon",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:skull_banner_pattern": {
+    "protocol_id": 1083,
+    "rarity": "uncommon",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:mojang_banner_pattern": {
+    "protocol_id": 1084,
+    "rarity": "epic",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:globe_banner_pattern": {
+    "protocol_id": 1085,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:piglin_banner_pattern": {
+    "protocol_id": 1086,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:goat_horn": {
+    "protocol_id": 1087,
+    "rarity": "common",
+    "stack_limit": 1,
+    "edible": false
+  },
+  "minecraft:composter": {
+    "protocol_id": 1088,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:composter"
+  },
+  "minecraft:barrel": {
+    "protocol_id": 1089,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:barrel"
+  },
+  "minecraft:smoker": {
+    "protocol_id": 1090,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smoker"
+  },
+  "minecraft:blast_furnace": {
+    "protocol_id": 1091,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blast_furnace"
+  },
+  "minecraft:cartography_table": {
+    "protocol_id": 1092,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cartography_table"
+  },
+  "minecraft:fletching_table": {
+    "protocol_id": 1093,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:fletching_table"
+  },
+  "minecraft:grindstone": {
+    "protocol_id": 1094,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:grindstone"
+  },
+  "minecraft:smithing_table": {
+    "protocol_id": 1095,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:smithing_table"
+  },
+  "minecraft:stonecutter": {
+    "protocol_id": 1096,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:stonecutter"
+  },
+  "minecraft:bell": {
+    "protocol_id": 1097,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:bell"
+  },
+  "minecraft:lantern": {
+    "protocol_id": 1098,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lantern"
+  },
+  "minecraft:soul_lantern": {
+    "protocol_id": 1099,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:soul_lantern"
+  },
+  "minecraft:sweet_berries": {
+    "protocol_id": 1100,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true,
+    "block": "minecraft:sweet_berry_bush"
+  },
+  "minecraft:glow_berries": {
+    "protocol_id": 1101,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": true,
+    "block": "minecraft:cave_vines"
+  },
+  "minecraft:campfire": {
+    "protocol_id": 1102,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:campfire"
+  },
+  "minecraft:soul_campfire": {
+    "protocol_id": 1103,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:soul_campfire"
+  },
+  "minecraft:shroomlight": {
+    "protocol_id": 1104,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:shroomlight"
+  },
+  "minecraft:honeycomb": {
+    "protocol_id": 1105,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  },
+  "minecraft:bee_nest": {
+    "protocol_id": 1106,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:bee_nest"
+  },
+  "minecraft:beehive": {
+    "protocol_id": 1107,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:beehive"
+  },
+  "minecraft:honey_bottle": {
+    "protocol_id": 1108,
+    "rarity": "common",
+    "stack_limit": 16,
+    "edible": true
+  },
+  "minecraft:honeycomb_block": {
+    "protocol_id": 1109,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:honeycomb_block"
+  },
+  "minecraft:lodestone": {
+    "protocol_id": 1110,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lodestone"
+  },
+  "minecraft:crying_obsidian": {
+    "protocol_id": 1111,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:crying_obsidian"
+  },
+  "minecraft:blackstone": {
+    "protocol_id": 1112,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blackstone"
+  },
+  "minecraft:blackstone_slab": {
+    "protocol_id": 1113,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blackstone_slab"
+  },
+  "minecraft:blackstone_stairs": {
+    "protocol_id": 1114,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blackstone_stairs"
+  },
+  "minecraft:gilded_blackstone": {
+    "protocol_id": 1115,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gilded_blackstone"
+  },
+  "minecraft:polished_blackstone": {
+    "protocol_id": 1116,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_blackstone"
+  },
+  "minecraft:polished_blackstone_slab": {
+    "protocol_id": 1117,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_blackstone_slab"
+  },
+  "minecraft:polished_blackstone_stairs": {
+    "protocol_id": 1118,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_blackstone_stairs"
+  },
+  "minecraft:chiseled_polished_blackstone": {
+    "protocol_id": 1119,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:chiseled_polished_blackstone"
+  },
+  "minecraft:polished_blackstone_bricks": {
+    "protocol_id": 1120,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_blackstone_bricks"
+  },
+  "minecraft:polished_blackstone_brick_slab": {
+    "protocol_id": 1121,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_blackstone_brick_slab"
+  },
+  "minecraft:polished_blackstone_brick_stairs": {
+    "protocol_id": 1122,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:polished_blackstone_brick_stairs"
+  },
+  "minecraft:cracked_polished_blackstone_bricks": {
+    "protocol_id": 1123,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cracked_polished_blackstone_bricks"
+  },
+  "minecraft:respawn_anchor": {
+    "protocol_id": 1124,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:respawn_anchor"
+  },
+  "minecraft:candle": {
+    "protocol_id": 1125,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:candle"
+  },
+  "minecraft:white_candle": {
+    "protocol_id": 1126,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:white_candle"
+  },
+  "minecraft:orange_candle": {
+    "protocol_id": 1127,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:orange_candle"
+  },
+  "minecraft:magenta_candle": {
+    "protocol_id": 1128,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:magenta_candle"
+  },
+  "minecraft:light_blue_candle": {
+    "protocol_id": 1129,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_blue_candle"
+  },
+  "minecraft:yellow_candle": {
+    "protocol_id": 1130,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:yellow_candle"
+  },
+  "minecraft:lime_candle": {
+    "protocol_id": 1131,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:lime_candle"
+  },
+  "minecraft:pink_candle": {
+    "protocol_id": 1132,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pink_candle"
+  },
+  "minecraft:gray_candle": {
+    "protocol_id": 1133,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:gray_candle"
+  },
+  "minecraft:light_gray_candle": {
+    "protocol_id": 1134,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:light_gray_candle"
+  },
+  "minecraft:cyan_candle": {
+    "protocol_id": 1135,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:cyan_candle"
+  },
+  "minecraft:purple_candle": {
+    "protocol_id": 1136,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:purple_candle"
+  },
+  "minecraft:blue_candle": {
+    "protocol_id": 1137,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:blue_candle"
+  },
+  "minecraft:brown_candle": {
+    "protocol_id": 1138,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:brown_candle"
+  },
+  "minecraft:green_candle": {
+    "protocol_id": 1139,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:green_candle"
+  },
+  "minecraft:red_candle": {
+    "protocol_id": 1140,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:red_candle"
+  },
+  "minecraft:black_candle": {
+    "protocol_id": 1141,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:black_candle"
+  },
+  "minecraft:small_amethyst_bud": {
+    "protocol_id": 1142,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:small_amethyst_bud"
+  },
+  "minecraft:medium_amethyst_bud": {
+    "protocol_id": 1143,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:medium_amethyst_bud"
+  },
+  "minecraft:large_amethyst_bud": {
+    "protocol_id": 1144,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:large_amethyst_bud"
+  },
+  "minecraft:amethyst_cluster": {
+    "protocol_id": 1145,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:amethyst_cluster"
+  },
+  "minecraft:pointed_dripstone": {
+    "protocol_id": 1146,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pointed_dripstone"
+  },
+  "minecraft:ochre_froglight": {
+    "protocol_id": 1147,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:ochre_froglight"
+  },
+  "minecraft:verdant_froglight": {
+    "protocol_id": 1148,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:verdant_froglight"
+  },
+  "minecraft:pearlescent_froglight": {
+    "protocol_id": 1149,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:pearlescent_froglight"
+  },
+  "minecraft:frogspawn": {
+    "protocol_id": 1150,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false,
+    "block": "minecraft:frogspawn"
+  },
+  "minecraft:echo_shard": {
+    "protocol_id": 1151,
+    "rarity": "common",
+    "stack_limit": 64,
+    "edible": false
+  }
+}
