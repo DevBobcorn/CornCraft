@@ -98,7 +98,6 @@ namespace CraftSharp
             var versionDictPath = PathHelper.GetExtraDataFile("versions.json");
 
             var dataVersion     = string.Empty;
-            var entityVersion   = string.Empty;
             var resourceVersion = string.Empty;
             var protodefVersion = string.Empty;
 
@@ -113,12 +112,6 @@ namespace CraftSharp
                     var entries = versions.Properties[version].Properties;
 
                     dataVersion = entries["data"].StringValue;
-
-                    // Check entity data version override
-                    if (entries.ContainsKey("entity"))
-                        entityVersion = entries["entity"].StringValue;
-                    else
-                        entityVersion = dataVersion;
                     
                     resourceVersion = entries["resource"].StringValue;
                     protodefVersion = entries["protodef"].StringValue;
@@ -149,7 +142,7 @@ namespace CraftSharp
             Task.Run(() => ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished)
                 yield return null;
-            
+
             loadFlag.Finished = false;
             Task.Run(() => InteractionManager.INSTANCE.PrepareData(loadFlag));
             while (!loadFlag.Finished) yield return null;
@@ -213,7 +206,7 @@ namespace CraftSharp
             
             // Load entity definitions
             loadFlag.Finished = false;
-            Task.Run(() => EntityTypePalette.INSTANCE.PrepareData(entityVersion, loadFlag));
+            Task.Run(() => EntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
             // Load block entity definitions (after all blockstates are loaded)

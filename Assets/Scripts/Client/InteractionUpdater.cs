@@ -68,7 +68,7 @@ namespace CraftSharp.Control
             {
                 TargetBlockLoc = null;
 
-                if (blockSelectionFrame.activeSelf)
+                if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
                 {
                     blockSelectionFrame.SetActive(false);
                 }
@@ -188,7 +188,7 @@ namespace CraftSharp.Control
             {
                 TargetBlockLoc = null;
 
-                if (blockSelectionFrame.activeSelf)
+                if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
                 {
                     blockSelectionFrame.SetActive(false);
                 }
