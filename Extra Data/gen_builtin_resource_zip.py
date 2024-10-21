@@ -2,7 +2,7 @@ import os
 import zipfile
 
 exclude_ext = [
-    '.py', '.zip'
+    '.py', '.zip', '.md', '.csv'
 ]
 
 def zipdir(datadir, zipf):

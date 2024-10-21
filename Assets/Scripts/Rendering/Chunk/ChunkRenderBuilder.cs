@@ -164,7 +164,7 @@ namespace CraftSharp.Rendering
                             }
 
                             // If air-like (air, water block, etc), ignore it...
-                            if (state.LikeAir) continue;
+                            if (state.NoSolidMesh) continue;
                             
                             int cullFlags = getCullFlags(x, y, z, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
                             
@@ -243,7 +243,7 @@ namespace CraftSharp.Rendering
                             }
 
                             // If air-like (air, water block, etc), ignore it...
-                            if (state.LikeAir) continue;
+                            if (state.NoSolidMesh) continue;
                             
                             int cullFlags = getCullFlags(x, y, z, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
                             
@@ -574,7 +574,7 @@ namespace CraftSharp.Rendering
                             }
                         }
 
-                        if (state.LikeAir || state.NoCollision)
+                        if (state.NoSolidMesh || state.NoCollision)
                             continue;
                         
                         // Build collider here
@@ -617,7 +617,7 @@ namespace CraftSharp.Rendering
                                 FluidGeometry.BuildCollider(fluidVerts, ref fluidVertOffset, new float3(blockLocInMesh.Z, blockLocInMesh.Y, blockLocInMesh.X), liquidCullFlags);
                         }
 
-                        if (state.LikeAir || state.NoCollision)
+                        if (state.NoSolidMesh || state.NoCollision)
                             continue;
                         
                         // Build collider here

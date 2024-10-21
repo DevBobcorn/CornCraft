@@ -429,7 +429,7 @@ namespace CraftSharp
         void Start()
         {
             var overrides = new string[] { "vanilla_fix"/*, "3D Default 1.16.2+ v1.6.0"*/ };
-            string resVersion = "1.16.5", dataVersion = "1.16";
+            string resVersion = "1.16.5", dataVersion = "1.16.5";
 
             if (!Directory.Exists(PathHelper.GetPackDirectoryNamed($"vanilla-{resVersion}"))) // Prepare resources first
             {
@@ -449,7 +449,7 @@ namespace CraftSharp
                 StartCoroutine(DoBuild(dataVersion, resVersion, overrides));
             }
 
-            StartCoroutine(DoEntityBuild());
+            //StartCoroutine(DoEntityBuild());
 
             IsPaused = false;
         }
