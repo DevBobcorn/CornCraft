@@ -1,4 +1,4 @@
-Data files in this folder comes from various sources:
+Data files in this folder come from various sources:
 
 File                                                      | Source
 ---                                                       | :---:
