@@ -4,6 +4,7 @@
     "width": 0.35,
     "height": 0.6,
     "size_fixed": false,
+    "update_interval": 2,
     "category": "creature",
     "metadata": {
       "0": {
@@ -85,6 +86,7 @@
     "width": 6.0,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 2147483647,
     "category": "misc",
     "metadata": {
       "0": {
@@ -142,6 +144,7 @@
     "width": 0.5,
     "height": 1.975,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -239,6 +242,7 @@
     "width": 0.5,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 20,
     "category": "misc",
     "metadata": {
       "0": {
@@ -292,6 +296,7 @@
     "width": 0.75,
     "height": 0.42,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "axolotls",
     "metadata": {
       "0": {
@@ -381,6 +386,7 @@
     "width": 0.5,
     "height": 0.9,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "ambient",
     "metadata": {
       "0": {
@@ -458,6 +464,7 @@
     "width": 0.7,
     "height": 0.6,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -543,6 +550,7 @@
     "width": 0.6,
     "height": 1.8,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -620,6 +628,7 @@
     "width": 1.375,
     "height": 0.5625,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -689,6 +698,7 @@
     "width": 1.375,
     "height": 0.5625,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -758,6 +768,7 @@
     "width": 0.6,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -859,6 +870,7 @@
     "width": 1.7,
     "height": 2.375,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -952,6 +964,7 @@
     "width": 0.7,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -1029,6 +1042,7 @@
     "width": 0.4,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -1106,6 +1120,7 @@
     "width": 0.5,
     "height": 0.3,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "water_ambient",
     "metadata": {
       "0": {
@@ -1183,6 +1198,7 @@
     "width": 0.9,
     "height": 1.4,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -1260,6 +1276,7 @@
     "width": 0.6,
     "height": 1.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -1345,6 +1362,7 @@
     "width": 0.9,
     "height": 0.6,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "water_creature",
     "metadata": {
       "0": {
@@ -1430,6 +1448,7 @@
     "width": 1.3964844,
     "height": 1.5,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -1519,6 +1538,7 @@
     "width": 1.0,
     "height": 1.0,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -1560,6 +1580,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -1645,6 +1666,7 @@
     "width": 1.9975,
     "height": 1.9975,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -1726,6 +1748,7 @@
     "width": 2.0,
     "height": 2.0,
     "size_fixed": false,
+    "update_interval": 2147483647,
     "category": "misc",
     "metadata": {
       "0": {
@@ -1775,6 +1798,7 @@
     "width": 16.0,
     "height": 8.0,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -1852,6 +1876,7 @@
     "width": 0.6,
     "height": 2.9,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -1937,6 +1962,7 @@
     "width": 0.4,
     "height": 0.3,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -2010,6 +2036,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -2091,6 +2118,7 @@
     "width": 0.5,
     "height": 0.8,
     "size_fixed": false,
+    "update_interval": 2,
     "category": "misc",
     "metadata": {
       "0": {
@@ -2132,6 +2160,7 @@
     "width": 0.5,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 20,
     "category": "misc",
     "metadata": {
       "0": {
@@ -2173,6 +2202,7 @@
     "width": 0.25,
     "height": 0.25,
     "size_fixed": false,
+    "update_interval": 4,
     "category": "misc",
     "metadata": {
       "0": {
@@ -2218,6 +2248,7 @@
     "width": 0.98,
     "height": 0.98,
     "size_fixed": false,
+    "update_interval": 20,
     "category": "misc",
     "metadata": {
       "0": {
@@ -2263,6 +2294,7 @@
     "width": 0.25,
     "height": 0.25,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -2316,6 +2348,7 @@
     "width": 0.6,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -2409,6 +2442,7 @@
     "width": 0.5,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -2494,6 +2528,7 @@
     "width": 4.0,
     "height": 4.0,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -2571,6 +2606,7 @@
     "width": 3.6,
     "height": 12.0,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -2644,6 +2680,7 @@
     "width": 0.5,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 2147483647,
     "category": "misc",
     "metadata": {
       "0": {
@@ -2693,6 +2730,7 @@
     "width": 0.8,
     "height": 0.8,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "underground_water_creature",
     "metadata": {
       "0": {
@@ -2770,6 +2808,7 @@
     "width": 0.9,
     "height": 1.3,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -2859,6 +2898,7 @@
     "width": 0.85,
     "height": 0.85,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -2940,6 +2980,7 @@
     "width": 1.3964844,
     "height": 1.4,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -3021,6 +3062,7 @@
     "width": 1.3964844,
     "height": 1.6,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -3110,6 +3152,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -3195,6 +3238,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -3276,6 +3320,7 @@
     "width": 1.4,
     "height": 2.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -3353,6 +3398,7 @@
     "width": 0.25,
     "height": 0.25,
     "size_fixed": false,
+    "update_interval": 20,
     "category": "misc",
     "metadata": {
       "0": {
@@ -3398,6 +3444,7 @@
     "width": 0.5,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 2147483647,
     "category": "misc",
     "metadata": {
       "0": {
@@ -3447,6 +3494,7 @@
     "width": 1.0,
     "height": 1.0,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -3492,6 +3540,7 @@
     "width": 0.375,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 2147483647,
     "category": "misc",
     "metadata": {
       "0": {
@@ -3533,6 +3582,7 @@
     "width": 0.0,
     "height": 0.0,
     "size_fixed": false,
+    "update_interval": 2147483647,
     "category": "misc",
     "metadata": {
       "0": {
@@ -3574,6 +3624,7 @@
     "width": 0.9,
     "height": 1.87,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -3675,6 +3726,7 @@
     "width": 0.25,
     "height": 0.25,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -3716,6 +3768,7 @@
     "width": 2.04,
     "height": 2.04,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -3793,6 +3846,7 @@
     "width": 0.0,
     "height": 0.0,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -3834,6 +3888,7 @@
     "width": 0.98,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -3899,6 +3954,7 @@
     "width": 0.98,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -3964,6 +4020,7 @@
     "width": 0.98,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -4037,6 +4094,7 @@
     "width": 0.98,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -4106,6 +4164,7 @@
     "width": 0.98,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -4171,6 +4230,7 @@
     "width": 0.98,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -4236,6 +4296,7 @@
     "width": 0.98,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -4301,6 +4362,7 @@
     "width": 1.3964844,
     "height": 1.6,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -4390,6 +4452,7 @@
     "width": 0.9,
     "height": 1.4,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -4471,6 +4534,7 @@
     "width": 0.6,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -4552,6 +4616,7 @@
     "width": 0.5,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 2147483647,
     "category": "misc",
     "metadata": {
       "0": {
@@ -4597,6 +4662,7 @@
     "width": 1.3,
     "height": 1.25,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -4698,6 +4764,7 @@
     "width": 0.5,
     "height": 0.9,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -4787,6 +4854,7 @@
     "width": 0.9,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -4864,6 +4932,7 @@
     "width": 0.9,
     "height": 0.9,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -4949,6 +5018,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -5038,6 +5108,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -5115,6 +5186,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -5196,6 +5268,7 @@
     "width": 1.4,
     "height": 1.4,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -5277,6 +5350,7 @@
     "width": 0.98,
     "height": 0.98,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -5322,6 +5396,7 @@
     "width": 0.7,
     "height": 0.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "water_ambient",
     "metadata": {
       "0": {
@@ -5403,6 +5478,7 @@
     "width": 0.4,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -5484,6 +5560,7 @@
     "width": 1.95,
     "height": 2.2,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -5561,6 +5638,7 @@
     "width": 0.7,
     "height": 0.4,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "water_ambient",
     "metadata": {
       "0": {
@@ -5638,6 +5716,7 @@
     "width": 0.9,
     "height": 1.3,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -5719,6 +5798,7 @@
     "width": 1.0,
     "height": 1.0,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -5804,6 +5884,7 @@
     "width": 0.3125,
     "height": 0.3125,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -5845,6 +5926,7 @@
     "width": 0.4,
     "height": 0.3,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -5918,6 +6000,7 @@
     "width": 0.6,
     "height": 1.99,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -5995,6 +6078,7 @@
     "width": 1.3964844,
     "height": 1.6,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -6080,6 +6164,7 @@
     "width": 2.04,
     "height": 2.04,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -6157,6 +6242,7 @@
     "width": 0.3125,
     "height": 0.3125,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -6202,6 +6288,7 @@
     "width": 0.7,
     "height": 1.9,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -6279,6 +6366,7 @@
     "width": 0.25,
     "height": 0.25,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -6324,6 +6412,7 @@
     "width": 0.5,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 20,
     "category": "misc",
     "metadata": {
       "0": {
@@ -6373,6 +6462,7 @@
     "width": 1.4,
     "height": 0.9,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -6450,6 +6540,7 @@
     "width": 0.8,
     "height": 0.8,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "water_creature",
     "metadata": {
       "0": {
@@ -6523,6 +6614,7 @@
     "width": 0.6,
     "height": 1.99,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -6596,6 +6688,7 @@
     "width": 0.9,
     "height": 1.7,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -6685,6 +6778,7 @@
     "width": 0.4,
     "height": 0.3,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -6762,6 +6856,7 @@
     "width": 0.25,
     "height": 0.25,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -6807,6 +6902,7 @@
     "width": 0.25,
     "height": 0.25,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -6852,6 +6948,7 @@
     "width": 0.25,
     "height": 0.25,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -6897,6 +6994,7 @@
     "width": 0.25,
     "height": 0.25,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -6942,6 +7040,7 @@
     "width": 0.5,
     "height": 0.5,
     "size_fixed": false,
+    "update_interval": 20,
     "category": "misc",
     "metadata": {
       "0": {
@@ -6999,6 +7098,7 @@
     "width": 0.9,
     "height": 1.87,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -7100,6 +7200,7 @@
     "width": 0.5,
     "height": 0.4,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "water_ambient",
     "metadata": {
       "0": {
@@ -7181,6 +7282,7 @@
     "width": 1.2,
     "height": 0.4,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -7282,6 +7384,7 @@
     "width": 0.4,
     "height": 0.8,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -7359,6 +7462,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "misc",
     "metadata": {
       "0": {
@@ -7444,6 +7548,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -7521,6 +7626,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -7602,6 +7708,7 @@
     "width": 0.9,
     "height": 2.9,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -7679,6 +7786,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -7760,6 +7868,7 @@
     "width": 0.9,
     "height": 3.5,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -7849,6 +7958,7 @@
     "width": 0.7,
     "height": 2.4,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -7922,6 +8032,7 @@
     "width": 0.3125,
     "height": 0.3125,
     "size_fixed": false,
+    "update_interval": 10,
     "category": "misc",
     "metadata": {
       "0": {
@@ -7967,6 +8078,7 @@
     "width": 0.6,
     "height": 0.85,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -8064,6 +8176,7 @@
     "width": 1.3964844,
     "height": 1.4,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -8141,6 +8254,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -8226,6 +8340,7 @@
     "width": 1.3964844,
     "height": 1.6,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "creature",
     "metadata": {
       "0": {
@@ -8311,6 +8426,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -8404,6 +8520,7 @@
     "width": 0.6,
     "height": 1.95,
     "size_fixed": false,
+    "update_interval": 3,
     "category": "monster",
     "metadata": {
       "0": {
@@ -8489,6 +8606,7 @@
     "width": 0.6,
     "height": 1.8,
     "size_fixed": false,
+    "update_interval": 2,
     "category": "misc",
     "metadata": {
       "0": {
@@ -8582,6 +8700,7 @@
     "width": 0.25,
     "height": 0.25,
     "size_fixed": false,
+    "update_interval": 5,
     "category": "misc",
     "metadata": {
       "0": {
