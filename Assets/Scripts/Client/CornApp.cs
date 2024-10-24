@@ -25,7 +25,7 @@ namespace CraftSharp
         public const int EDITOR_FPS_LIMIT = 60;
 
         public const string CORN_CRAFT_BUILTIN_FILE_NAME = "CornCraftBuiltin";
-        public const int    CORN_CRAFT_BUILTIN_VERSION = 5;
+        public const int    CORN_CRAFT_BUILTIN_VERSION = 6;
         public const string VANILLAFIX_FILE_NAME = "VanillaFix";
         public const int    VANILLAFIX_VERSION = 1;
 
@@ -132,12 +132,12 @@ namespace CraftSharp
                 yield break;
             }
 
-            // First load all possible Block States...
+            // Load block/blockstate definitions...
             var loadFlag = new DataLoadFlag();
             Task.Run(() => BlockStatePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
-            // Then load all Items...
+            // Load item definitions...
             loadFlag.Finished = false;
             Task.Run(() => ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished)
@@ -147,9 +147,23 @@ namespace CraftSharp
             Task.Run(() => InteractionManager.INSTANCE.PrepareData(loadFlag));
             while (!loadFlag.Finished) yield return null;
 
-            var packManager = ResourcePackManager.Instance;
+            // Load entity definitions
+            loadFlag.Finished = false;
+            Task.Run(() => EntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            while (!loadFlag.Finished) yield return null;
+
+            // Load block entity definitions (after all blockstates are loaded)
+            loadFlag.Finished = false;
+            Task.Run(() => BlockEntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            while (!loadFlag.Finished) yield return null;
+
+            // Load particle definitions
+            loadFlag.Finished = false;
+            Task.Run(() => ParticleTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            while (!loadFlag.Finished) yield return null;
 
             // Load resource packs...
+            var packManager = ResourcePackManager.Instance;
             packManager.ClearPacks();
 
             // Download base pack if not present (Check pack.mcmeta because the folder is present even if only language files are downloaded)
@@ -202,16 +216,6 @@ namespace CraftSharp
                     Debug.Log($"Error loading resources: {e}");
                 }
             });
-            while (!loadFlag.Finished) yield return null;
-            
-            // Load entity definitions
-            loadFlag.Finished = false;
-            Task.Run(() => EntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
-            while (!loadFlag.Finished) yield return null;
-
-            // Load block entity definitions (after all blockstates are loaded)
-            loadFlag.Finished = false;
-            Task.Run(() => BlockEntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
             // Load in-game translations (loaded AFTER resource files)

@@ -102,13 +102,13 @@ namespace CraftSharp.Rendering
 
             GameObject? entityPrefab;
 
-            if (entity.Type.EntityId == EntityType.PLAYER_ID) // TODO Apply right model
+            if (entity.Type.TypeId == EntityType.PLAYER_ID) // TODO Apply right model
             {
                 entityPrefab = serverSlimPlayerPrefab;
             }
             else
             {
-                entityPrefab = GetPrefabForType(entity.Type.EntityId);
+                entityPrefab = GetPrefabForType(entity.Type.TypeId);
             }
 
             if (entityPrefab != null)

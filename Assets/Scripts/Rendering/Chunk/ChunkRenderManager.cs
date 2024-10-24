@@ -471,7 +471,7 @@ namespace CraftSharp.Rendering
                 }
             }
 
-            GameObject blockEntityPrefab = GetPrefabForType(blockEntityType.BlockEntityId);
+            GameObject blockEntityPrefab = GetPrefabForType(blockEntityType.TypeId);
 
             if (blockEntityPrefab != null)
             {
