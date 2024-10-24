@@ -5,11 +5,13 @@
   },
   "minecraft:block": {
     "protocol_id": 1,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "block"
   },
   "minecraft:block_marker": {
     "protocol_id": 2,
-    "render_always": true
+    "render_always": true,
+    "extra_data": "block"
   },
   "minecraft:bubble": {
     "protocol_id": 3,
@@ -53,11 +55,13 @@
   },
   "minecraft:dust": {
     "protocol_id": 13,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "dust"
   },
   "minecraft:dust_color_transition": {
     "protocol_id": 14,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "dust_color_transition"
   },
   "minecraft:effect": {
     "protocol_id": 15,
@@ -81,7 +85,8 @@
   },
   "minecraft:entity_effect": {
     "protocol_id": 20,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "color"
   },
   "minecraft:explosion_emitter": {
     "protocol_id": 21,
@@ -113,7 +118,8 @@
   },
   "minecraft:falling_dust": {
     "protocol_id": 28,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "block"
   },
   "minecraft:firework": {
     "protocol_id": 29,
@@ -141,7 +147,8 @@
   },
   "minecraft:sculk_charge": {
     "protocol_id": 35,
-    "render_always": true
+    "render_always": true,
+    "extra_data": "sculk_charge"
   },
   "minecraft:sculk_charge_pop": {
     "protocol_id": 36,
@@ -177,11 +184,13 @@
   },
   "minecraft:item": {
     "protocol_id": 44,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "item"
   },
   "minecraft:vibration": {
     "protocol_id": 45,
-    "render_always": true
+    "render_always": true,
+    "extra_data": "vibration"
   },
   "minecraft:item_slime": {
     "protocol_id": 46,
@@ -397,7 +406,8 @@
   },
   "minecraft:shriek": {
     "protocol_id": 99,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "shriek"
   },
   "minecraft:egg_crack": {
     "protocol_id": 100,
@@ -421,7 +431,8 @@
   },
   "minecraft:dust_pillar": {
     "protocol_id": 105,
-    "render_always": true
+    "render_always": true,
+    "extra_data": "block"
   },
   "minecraft:ominous_spawning": {
     "protocol_id": 106,

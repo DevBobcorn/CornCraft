@@ -9,11 +9,13 @@
   },
   "minecraft:block": {
     "protocol_id": 2,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "block"
   },
   "minecraft:block_marker": {
     "protocol_id": 3,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "block"
   },
   "minecraft:bubble": {
     "protocol_id": 4,
@@ -57,11 +59,13 @@
   },
   "minecraft:dust": {
     "protocol_id": 14,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "dust"
   },
   "minecraft:dust_color_transition": {
     "protocol_id": 15,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "dust_color_transition"
   },
   "minecraft:effect": {
     "protocol_id": 16,
@@ -101,7 +105,8 @@
   },
   "minecraft:falling_dust": {
     "protocol_id": 25,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "block"
   },
   "minecraft:firework": {
     "protocol_id": 26,
@@ -125,7 +130,8 @@
   },
   "minecraft:sculk_charge": {
     "protocol_id": 31,
-    "render_always": true
+    "render_always": true,
+    "extra_data": "sculk_charge"
   },
   "minecraft:sculk_charge_pop": {
     "protocol_id": 32,
@@ -161,11 +167,13 @@
   },
   "minecraft:item": {
     "protocol_id": 40,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "item"
   },
   "minecraft:vibration": {
     "protocol_id": 41,
-    "render_always": true
+    "render_always": true,
+    "extra_data": "vibration"
   },
   "minecraft:item_slime": {
     "protocol_id": 42,
@@ -373,7 +381,8 @@
   },
   "minecraft:shriek": {
     "protocol_id": 93,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "shriek"
   },
   "minecraft:egg_crack": {
     "protocol_id": 94,

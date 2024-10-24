@@ -17,7 +17,8 @@
   },
   "minecraft:block": {
     "protocol_id": 4,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "block"
   },
   "minecraft:bubble": {
     "protocol_id": 5,
@@ -61,11 +62,13 @@
   },
   "minecraft:dust": {
     "protocol_id": 15,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "dust"
   },
   "minecraft:dust_color_transition": {
     "protocol_id": 16,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "dust_color_transition"
   },
   "minecraft:effect": {
     "protocol_id": 17,
@@ -101,7 +104,8 @@
   },
   "minecraft:falling_dust": {
     "protocol_id": 25,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "block"
   },
   "minecraft:firework": {
     "protocol_id": 26,
@@ -145,11 +149,13 @@
   },
   "minecraft:item": {
     "protocol_id": 36,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "item"
   },
   "minecraft:vibration": {
     "protocol_id": 37,
-    "render_always": false
+    "render_always": false,
+    "extra_data": "vibration"
   },
   "minecraft:item_slime": {
     "protocol_id": 38,
