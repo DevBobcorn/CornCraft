@@ -403,6 +403,16 @@ namespace CraftSharp.Rendering
             return world.GetBiome(blockLoc);
         }
 
+        public ResourceLocation GetDimensionId()
+        {
+            return World.GetDimensionId();
+        }
+
+        public DimensionType GetDimensionType()
+        {
+            return World.GetDimensionType();
+        }
+
         /// <summary>
         /// Get block light at the specified location
         /// </summary>

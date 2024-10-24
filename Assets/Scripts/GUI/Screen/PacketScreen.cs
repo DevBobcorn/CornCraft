@@ -224,7 +224,7 @@ namespace CraftSharp.UI
             var typeId = new ResourceLocation(packetItem.InBound ? "play/toClient" : "play/toServer", "packet");
             PacketDefTypeHandlerBase.TryGetLoadedHandler(typeId, out PacketDefTypeHandlerBase packetHandler);
 
-            if (!string.IsNullOrEmpty(parserProtocol) && packetHandler is not null)
+            if (packetHandler is not null)
             {
                 try
                 {
@@ -246,7 +246,7 @@ namespace CraftSharp.UI
                     }
 
                     // Use the handler to read the packet
-                    var packetValue = packetHandler.ReadValue(new PacketRecord(), string.Empty, byteQueue);
+                    var packetValue = packetHandler.ReadValue(new PacketRecord(parserProtocol), string.Empty, byteQueue);
 
                     // Serialize the read object as json string
                     var serialized = JsonConvert.SerializeObject(packetValue, SERIALIZER_SETTINGS);

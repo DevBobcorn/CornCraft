@@ -16,6 +16,8 @@ namespace CraftSharp.Protocol
 
     public static class ChatParser
     {
+        public static readonly ResourceLocation CHAT_TYPE_ID = new("chat_type");
+
         public enum MessageType
         {
             CHAT,
@@ -28,52 +30,52 @@ namespace CraftSharp.Protocol
             RAW_MSG
         };
 
-        public static Dictionary<int, MessageType>? ChatId2Type;
-
-        public static void ReadChatType(Dictionary<string, object> registryCodec)
+        public class MessageTypePalette : IdentifierPalette<MessageType>
         {
-            Dictionary<int, MessageType> chatTypeDictionary = ChatId2Type ?? new();
+            public override string Name => "MessageType Palette";
 
-            // Check if the chat type registry is in the correct format
-            if (!registryCodec.ContainsKey("minecraft:chat_type"))
+            public void Register(ResourceLocation id, int numId, MessageType obj)
             {
-
-                // If not, then we force the registry to be in the correct format
-                if (registryCodec.ContainsKey("chat_type"))
-                {
-
-                    foreach (var key in registryCodec.Keys.ToArray())
-                    {
-                        // Skip entries with a namespace already
-                        if (key.Contains(':', StringComparison.OrdinalIgnoreCase)) continue;
-
-                        // Assume all other entries are in the minecraft namespace
-                        registryCodec["minecraft:" + key] = registryCodec[key];
-                        registryCodec.Remove(key);
-                    }
-                }
+                base.AddEntry(id, numId, obj);
             }
 
-            var chatTypeListNbt = (object[])(((Dictionary<string, object>)registryCodec["minecraft:chat_type"])["value"]);
-            foreach (var (chatName, chatId) in from Dictionary<string, object> chatTypeNbt in chatTypeListNbt
-                                               let chatName = (string)chatTypeNbt["name"]
-                                               let chatId = (int)chatTypeNbt["id"]
-                                               select (chatName, chatId))
+            public void RegisterDummy(ResourceLocation id, int numId, MessageType obj)
             {
-                chatTypeDictionary[chatId] = chatName switch
+                base.AddDirectionalEntry(id, numId, obj);
+            }
+
+            public void Clear()
+            {
+                base.ClearEntries();
+            }
+
+            protected override MessageType UnknownObject => MessageType.CHAT;
+        }
+
+        public static readonly MessageTypePalette MessageTypeRegistry = new();
+
+        public static void ReadChatType((ResourceLocation id, int numId, object? obj)[] chatTypeList)
+        {
+            MessageTypeRegistry.Clear();
+            
+            foreach (var (chatName, chatId, _) in chatTypeList)
+            {
+                // Convert to ResourceLocation first to make sure namespace is handled properly
+                var messageType = chatName.ToString() switch
                 {
-                    "minecraft:chat" => MessageType.CHAT,
-                    "minecraft:emote_command" => MessageType.EMOTE_COMMAND,
-                    "minecraft:msg_command_incoming" => MessageType.MSG_COMMAND_INCOMING,
-                    "minecraft:msg_command_outgoing" => MessageType.MSG_COMMAND_OUTGOING,
-                    "minecraft:say_command" => MessageType.SAY_COMMAND,
+                    "minecraft:chat"                      => MessageType.CHAT,
+                    "minecraft:emote_command"             => MessageType.EMOTE_COMMAND,
+                    "minecraft:msg_command_incoming"      => MessageType.MSG_COMMAND_INCOMING,
+                    "minecraft:msg_command_outgoing"      => MessageType.MSG_COMMAND_OUTGOING,
+                    "minecraft:say_command"               => MessageType.SAY_COMMAND,
                     "minecraft:team_msg_command_incoming" => MessageType.TEAM_MSG_COMMAND_INCOMING,
                     "minecraft:team_msg_command_outgoing" => MessageType.TEAM_MSG_COMMAND_OUTGOING,
-                    _ => MessageType.CHAT,
-                };
-            }
 
-            ChatId2Type = chatTypeDictionary;
+                    _                                     => MessageType.CHAT,
+                };
+
+                MessageTypeRegistry.Register(chatName, chatId, messageType);
+            }
         }
 
         /// <summary>
@@ -110,8 +112,9 @@ namespace CraftSharp.Protocol
             MessageType chatType;
             if (message.isSystemChat)
                 chatType = MessageType.RAW_MSG;
-            else if (!ChatId2Type!.TryGetValue(message.chatTypeId, out chatType))
+            else if (!MessageTypeRegistry.TryGetByNumId(message.chatTypeId, out chatType))
                 chatType = MessageType.CHAT;
+
             switch (chatType)
             {
                 case MessageType.CHAT:

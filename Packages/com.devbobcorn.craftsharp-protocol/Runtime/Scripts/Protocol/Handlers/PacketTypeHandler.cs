@@ -48,7 +48,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             PacketTypePalette p;
             
-            if (protocol > ProtocolMinecraft.MC_1_20_Version)
+            if (protocol > ProtocolMinecraft.MC_1_20_4_Version)
                 throw new NotImplementedException(Translations.Get("exception.palette.packet"));
             
             if (protocol <= ProtocolMinecraft.MC_1_16_1_Version)
@@ -65,8 +65,14 @@ namespace CraftSharp.Protocol.Handlers
                 p = new PacketPalette1192();
             else if (protocol <= ProtocolMinecraft.MC_1_19_3_Version)
                 p = new PacketPalette1193();
-            else
+            else if (protocol <= ProtocolMinecraft.MC_1_19_4_Version)
                 p = new PacketPalette1194();
+            else if (protocol <= ProtocolMinecraft.MC_1_20_Version)
+                p = new PacketPalette1194();
+            else if (protocol <= ProtocolMinecraft.MC_1_20_2_Version)
+                p = new PacketPalette1202();
+            else //if (protocol <= ProtocolMinecraft.MC_1_20_4_Version)
+                p = new PacketPalette1204();
 
             p.SetForgeEnabled(this.forgeEnabled);
             return p;

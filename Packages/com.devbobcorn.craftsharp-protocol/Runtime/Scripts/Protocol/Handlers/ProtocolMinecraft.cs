@@ -48,6 +48,7 @@ namespace CraftSharp.Protocol.Handlers
         public const int MC_1_20_Version   = 763;
         public const int MC_1_20_2_Version = 764;
         public const int MC_1_20_4_Version = 765;
+        public const int MC_1_20_6_Version = 766;
 
         private int compression_treshold = -1;
         private int autocomplete_transaction_id = 0;
@@ -98,30 +99,30 @@ namespace CraftSharp.Protocol.Handlers
             // You can find it in https://wiki.vg/Protocol#Player_Chat_Message or /net/minecraft/network/message/MessageType.java
             if (protocolVersion >= MC_1_19_2_Version)
             {
-                ChatParser.ChatId2Type = new()
-                {
-                    { 0,  ChatParser.MessageType.CHAT },
-                    { 1,  ChatParser.MessageType.SAY_COMMAND },
-                    { 2,  ChatParser.MessageType.MSG_COMMAND_INCOMING },
-                    { 3,  ChatParser.MessageType.MSG_COMMAND_OUTGOING },
-                    { 4,  ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING },
-                    { 5,  ChatParser.MessageType.TEAM_MSG_COMMAND_OUTGOING },
-                    { 6,  ChatParser.MessageType.EMOTE_COMMAND },
-                };
+                var charTypeRegistry = ChatParser.MessageTypeRegistry;
+                charTypeRegistry.Clear();
+
+                charTypeRegistry.Register(new ResourceLocation("chat"), 0, ChatParser.MessageType.CHAT);
+                charTypeRegistry.Register(new ResourceLocation("say_command"), 1, ChatParser.MessageType.SAY_COMMAND);
+                charTypeRegistry.Register(new ResourceLocation("msg_command_incoming"), 2, ChatParser.MessageType.MSG_COMMAND_INCOMING);
+                charTypeRegistry.Register(new ResourceLocation("msg_command_outgoing"), 3, ChatParser.MessageType.MSG_COMMAND_OUTGOING);
+                charTypeRegistry.Register(new ResourceLocation("team_msg_command_incoming"), 4, ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING);
+                charTypeRegistry.Register(new ResourceLocation("team_msg_command_outgoing"), 5, ChatParser.MessageType.TEAM_MSG_COMMAND_OUTGOING);
+                charTypeRegistry.Register(new ResourceLocation("emote_command"), 7, ChatParser.MessageType.EMOTE_COMMAND);
             }
             else if (protocolVersion >= MC_1_19_Version)
             {
-                ChatParser.ChatId2Type = new()
-                {
-                    { 0,  ChatParser.MessageType.CHAT },
-                    { 1,  ChatParser.MessageType.RAW_MSG },
-                    { 2,  ChatParser.MessageType.RAW_MSG },
-                    { 3,  ChatParser.MessageType.SAY_COMMAND },
-                    { 4,  ChatParser.MessageType.MSG_COMMAND_INCOMING },
-                    { 5,  ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING },
-                    { 6,  ChatParser.MessageType.EMOTE_COMMAND },
-                    { 7,  ChatParser.MessageType.RAW_MSG },
-                };
+                var charTypeRegistry = ChatParser.MessageTypeRegistry;
+                charTypeRegistry.Clear();
+
+                charTypeRegistry.Register(new ResourceLocation("chat"), 0, ChatParser.MessageType.CHAT);
+                charTypeRegistry.Register(new ResourceLocation("raw_msg"), 1, ChatParser.MessageType.RAW_MSG);
+                charTypeRegistry.RegisterDummy(new ResourceLocation("raw_msg"), 2, ChatParser.MessageType.RAW_MSG);
+                charTypeRegistry.Register(new ResourceLocation("say_command"), 3, ChatParser.MessageType.SAY_COMMAND);
+                charTypeRegistry.Register(new ResourceLocation("msg_command_incoming"), 4, ChatParser.MessageType.MSG_COMMAND_INCOMING);
+                charTypeRegistry.Register(new ResourceLocation("team_msg_command_outgoing"), 5, ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING);
+                charTypeRegistry.Register(new ResourceLocation("emote_command"), 5, ChatParser.MessageType.EMOTE_COMMAND);
+                charTypeRegistry.RegisterDummy(new ResourceLocation("raw_msg"), 7, ChatParser.MessageType.RAW_MSG);
             }
         }
 
@@ -240,6 +241,20 @@ namespace CraftSharp.Protocol.Handlers
             return new(packetId, packetData);
         }
 
+        static (ResourceLocation id, int numId, object? obj)[] ReadRegistryCodecArray(object[] entries)
+        {
+            return entries.Select(x =>
+            {
+                var entry = (x as Dictionary<string, object>)!;
+
+                var id = ResourceLocation.FromString((string)entry["name"]);
+                var numId = (int)entry["id"];
+                object? obj = entry.ContainsKey("element") ? entry["element"] : null;
+
+                return (id, numId, obj);
+            }).ToArray();
+        }
+
         /// <summary>
         /// Handle the given packet
         /// </summary>
@@ -305,10 +320,52 @@ namespace CraftSharp.Protocol.Handlers
                                 break;
 
                             case ConfigurationPacketTypesIn.RegistryData:
-                                var registryCodec = DataTypes.ReadNextNbt(packetData);
-                                ChatParser.ReadChatType(registryCodec);
 
-                                World.StoreDimensionTypeList(registryCodec);
+                                if (protocolVersion <= MC_1_20_2_Version) // Different registries are wrapped in one nbt structure
+                                {
+                                    var registryCodec = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT).ToDictionary(
+                                            x => ResourceLocation.FromString(x.Key), x => x.Value);
+
+                                    if (registryCodec.TryGetValue(ChatParser.CHAT_TYPE_ID, out object chatTypes))
+                                    {
+                                        var chatTypeListNbt = ((Dictionary<string, object>) chatTypes)["value"];
+                                        var chatTypeList = ReadRegistryCodecArray((object[]) chatTypeListNbt);
+
+                                        ChatParser.ReadChatType(chatTypeList);
+                                    }
+
+                                    if (registryCodec.TryGetValue(World.DIMENSION_TYPE_ID, out object dimensionTypes))
+                                    {
+                                        var dimensionListNbt = ((Dictionary<string, object>) dimensionTypes)["value"];
+                                        var dimensionList = ReadRegistryCodecArray((object[]) dimensionListNbt);
+
+                                        World.StoreDimensionTypeList(dimensionList);
+                                    }
+                                }
+                                else // Different registries are sent in separate packets respectively
+                                {
+                                    var registryId = ResourceLocation.FromString(DataTypes.ReadNextString(packetData));
+                                    var entryCount = DataTypes.ReadNextVarInt(packetData);
+
+                                    if (registryId == ChatParser.CHAT_TYPE_ID)
+                                    {
+                                        var chatTypeList = new (ResourceLocation, int, object?)[entryCount];
+
+                                        for (int i = 0; i < entryCount; i++)
+                                        {
+                                            var entryId = ResourceLocation.FromString(DataTypes.ReadNextString(packetData));
+                                            var entryHasObj = DataTypes.ReadNextBool(packetData);
+                                            var entryObj = entryHasObj ? DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT) : null;
+
+                                            chatTypeList[i] = (entryId, i, entryObj);
+                                        }
+                                    }
+
+                                    if (registryId == World.DIMENSION_TYPE_ID)
+                                    {
+
+                                    }
+                                }
 
                                 break;
 
@@ -449,13 +506,26 @@ namespace CraftSharp.Protocol.Handlers
                             if (protocolVersion < MC_1_20_2_Version)
                             {
                                 // Registry Codec (Dimension Codec) - 1.16 and above
-                                var registryCodec = DataTypes.ReadNextNbt(packetData);
+                                var registryCodec = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT).ToDictionary(
+                                            x => ResourceLocation.FromString(x.Key), x => x.Value);
 
-                                // Read and store defined dimensions 1.16.2 and above
-                                World.StoreDimensionTypeList(registryCodec);
+                                if (registryCodec.TryGetValue(World.DIMENSION_TYPE_ID, out object dimensionTypes))
+                                {
+                                    var dimensionListNbt = ((Dictionary<string, object>) dimensionTypes)["value"];
+                                    var dimensionList = ReadRegistryCodecArray((object[]) dimensionListNbt);
 
-                                // Read and store defined biomes 1.16.2 and above
-                                World.StoreBiomeList(registryCodec);
+                                    // Read and store defined dimensions 1.16.2 and above
+                                    World.StoreDimensionTypeList(dimensionList);
+                                }
+
+                                if (registryCodec.TryGetValue(World.WORLDGEN_BIOME_ID, out object worldgenBiomes))
+                                {
+                                    var biomeListNbt = ((Dictionary<string, object>) worldgenBiomes)["value"];
+                                    var biomeList = ReadRegistryCodecArray((object[]) biomeListNbt);
+
+                                    // Read and store defined biomes 1.16.2 and above
+                                    World.StoreBiomeList(biomeList);
+                                }
                             }
                         }
 
@@ -474,7 +544,7 @@ namespace CraftSharp.Protocol.Handlers
                                 if (protocolVersion >= MC_1_19_Version)
                                     dimensionTypeName = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
                                 else if (protocolVersion >= MC_1_16_2_Version)
-                                    dimensionType = DataTypes.ReadNextNbt(packetData);        // Dimension Type: NBT Tag Compound
+                                    dimensionType = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
                                 else
                                     DataTypes.ReadNextString(packetData);
                                 this.currentDimension = 0;
@@ -697,8 +767,10 @@ namespace CraftSharp.Protocol.Handlers
                                 (chatInfo.ContainsKey("insertion") ? chatInfo["insertion"] : chatInfo["text"])
                                 .StringValue;
                             string? senderTeamName = null;
-                            ChatParser.MessageType messageTypeEnum =
-                                ChatParser.ChatId2Type!.GetValueOrDefault(chatTypeId, ChatParser.MessageType.CHAT);
+                            if (!ChatParser.MessageTypeRegistry.TryGetByNumId(chatTypeId, out ChatParser.MessageType messageTypeEnum))
+                            {
+                                messageTypeEnum = ChatParser.MessageType.CHAT;
+                            }
                             if (targetName != null &&
                                 (messageTypeEnum == ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING ||
                                     messageTypeEnum == ChatParser.MessageType.TEAM_MSG_COMMAND_OUTGOING))
@@ -798,8 +870,10 @@ namespace CraftSharp.Protocol.Handlers
                                 ? DataTypes.ReadNextString(packetData)
                                 : null;
 
-                            ChatParser.MessageType messageTypeEnum =
-                                ChatParser.ChatId2Type!.GetValueOrDefault(chatTypeId, ChatParser.MessageType.CHAT);
+                            if (!ChatParser.MessageTypeRegistry.TryGetByNumId(chatTypeId, out ChatParser.MessageType messageTypeEnum))
+                            {
+                                messageTypeEnum = ChatParser.MessageType.CHAT;
+                            }
 
                             Dictionary<string, Json.JSONData> chatInfo =
                                 Json.ParseJson(targetName ?? chatName).Properties;
@@ -1024,7 +1098,7 @@ namespace CraftSharp.Protocol.Handlers
                         if (protocolVersion >= MC_1_19_Version)
                             dimensionTypeNameRespawn = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
                         else if (protocolVersion >= MC_1_16_2_Version)
-                            dimensionTypeRespawn = DataTypes.ReadNextNbt(packetData);        // Dimension Type: NBT Tag Compound
+                            dimensionTypeRespawn = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
                         else
                             DataTypes.ReadNextString(packetData);
                             
@@ -1132,7 +1206,7 @@ namespace CraftSharp.Protocol.Handlers
                             if (protocolVersion == MC_1_17_Version || protocolVersion == MC_1_17_1_Version)
                                 verticalStripBitmask = DataTypes.ReadNextULongArray(packetData); // Bit Mask Length  and  Primary Bit Mask
 
-                            DataTypes.ReadNextNbt(packetData); // Heightmaps
+                            DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Heightmaps
 
                             pTerrain.ProcessChunkColumnData17(chunkX, chunkZ, verticalStripBitmask, packetData);
                         }
@@ -1144,7 +1218,7 @@ namespace CraftSharp.Protocol.Handlers
                                 
                             ushort chunkMask = (ushort)DataTypes.ReadNextVarInt(packetData);
 
-                            DataTypes.ReadNextNbt(packetData);  // Heightmaps - 1.14 and above
+                            DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT);  // Heightmaps - 1.14 and above
 
                             pTerrain.ProcessChunkColumnData16(chunkX, chunkZ, chunkMask, 0, false, chunksContinuous, currentDimension, packetData);
                         }
@@ -1327,7 +1401,7 @@ namespace CraftSharp.Protocol.Handlers
                     {
                         var blockLoc = DataTypes.ReadNextBlockLoc(packetData);
                         var ttt = DataTypes.ReadNextVarInt(packetData);
-                        var tag = DataTypes.ReadNextNbt(packetData);
+                        var tag = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT);
                             
                         if (protocolVersion < MC_1_18_1_Version)
                         {
@@ -2661,7 +2735,7 @@ namespace CraftSharp.Protocol.Handlers
             command = Regex.Replace(command, @"\s+", " ");
             command = Regex.Replace(command, @"\s$", string.Empty);
 
-            Debug.Log("chat command = " + command);
+            //Debug.Log("chat command = " + command);
 
             try
             {

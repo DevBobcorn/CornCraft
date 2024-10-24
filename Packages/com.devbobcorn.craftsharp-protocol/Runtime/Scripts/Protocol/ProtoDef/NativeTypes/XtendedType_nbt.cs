@@ -19,7 +19,7 @@ namespace CraftSharp.Protocol.ProtoDef.NativeTypes
         public override Dictionary<string, object> ReadValueAsType(PacketRecord rec, string parentPath, Queue<byte> cache)
         {
             // May be a TAG_END (0) in which case no NBT is present, in this case it'll be an empty dictionary.
-            return DataTypes.ReadNextNbt(cache);
+            return DataTypes.ReadNextNbt(cache, rec.ProtocolVersion >= ProtocolMinecraft.MC_1_20_2_Version);
         }
     }
 }

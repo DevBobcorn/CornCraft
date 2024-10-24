@@ -49,17 +49,14 @@ namespace CraftSharp
             }
         }
 
-        private string parserProtocol = string.Empty;
-        public string ParserProtocol => parserProtocol;
+        private int parserProtocol = 0;
+        public int ParserProtocol => parserProtocol;
 
-        public void LoadProtocolParser(string version)
+        public void LoadProtocolParser(int version)
         {
             parserProtocol = version;
 
-            if (!string.IsNullOrEmpty(parserProtocol))
-            {
-                PacketDefTypeHandlerBase.ResetLoadedTypes();
-            }
+            PacketDefTypeHandlerBase.ResetLoadedTypes();
 
             var jsonPath = PathHelper.GetExtraDataFile($"protos{Path.DirectorySeparatorChar}protocol-{version}.json");
 
@@ -143,6 +140,7 @@ namespace CraftSharp
             while (!loadFlag.Finished)
                 yield return null;
 
+            // Load interaction definitions AFTER block/blockstate definitions are loaded
             loadFlag.Finished = false;
             Task.Run(() => InteractionManager.INSTANCE.PrepareData(loadFlag));
             while (!loadFlag.Finished) yield return null;
@@ -152,7 +150,7 @@ namespace CraftSharp
             Task.Run(() => EntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
-            // Load block entity definitions (after all blockstates are loaded)
+            // Load block entity definitions AFTER block/blockstate definitions are loaded
             loadFlag.Finished = false;
             Task.Run(() => BlockEntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
@@ -241,7 +239,8 @@ namespace CraftSharp
             Protocol.ChatParser.LoadTranslationRules(langFile);
 
             // Load ProtoDef
-            LoadProtocolParser(protodefVersion);
+            int protodefVersionInt = int.Parse(protodefVersion);
+            LoadProtocolParser(protodefVersionInt);
 
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
