@@ -1772,7 +1772,7 @@ namespace CraftSharp
         /// Teleporting to other entityies is NOT implemented yet
         public bool Spectate(Entity entity)
         {
-            if (entity.Type.EntityId == EntityType.PLAYER_ID)
+            if (entity.Type.TypeId == EntityType.PLAYER_ID)
                 return SpectateByUUID(entity.UUID);
             return false;
         }

@@ -21,13 +21,13 @@ namespace CraftSharp.UI
             if (nameText != null)
             {
                 nameText.text = (entityRender.Name ?? entityRender.CustomName) ??
-                        ChatParser.TranslateString(entityRender.Type.EntityId.GetTranslationKey("entity"));
+                        ChatParser.TranslateString(entityRender.Type.TypeId.GetTranslationKey("entity"));
 
             }
 
             if (descriptionText != null)
             {
-                descriptionText.text = $"<{entityRender.Type.EntityId}>";
+                descriptionText.text = $"<{entityRender.Type.TypeId}>";
             }
         }
 
