@@ -20,6 +20,8 @@ namespace CraftSharp.Protocol.Handlers
         /// </summary>
         private readonly int protocolVersion;
 
+        public bool UseAnonymousNBT => protocolVersion >= ProtocolMinecraft.MC_1_20_2_Version;
+
         /// <summary>
         /// Initialize a new DataTypes instance
         /// </summary>
@@ -389,15 +391,15 @@ namespace CraftSharp.Protocol.Handlers
         /// <summary>
         /// Read an uncompressed Named Binary Tag blob and remove it from the cache
         /// </summary>
-        public static Dictionary<string, object> ReadNextNbt(Queue<byte> cache)
+        public static Dictionary<string, object> ReadNextNbt(Queue<byte> cache, bool useAnonymousNbt)
         {
-            return ReadNextNbt(cache, true);
+            return ReadNextNbt(cache, true, useAnonymousNbt);
         }
 
         /// <summary>
         /// Read Named Binary Tag from compressed bytes
         /// </summary>
-        public static Dictionary<string, object> ReadNbtFromBytes(byte[] bytes)
+        public static Dictionary<string, object> ReadNbtFromBytes(byte[] bytes, bool useAnonymousNbt)
         {
             using (var compressedStream = new MemoryStream(bytes))
                 using (var zipStream = new GZipStream(compressedStream, CompressionMode.Decompress))
@@ -407,13 +409,13 @@ namespace CraftSharp.Protocol.Handlers
                         bytes = memStream.ToArray();
                     }
                 
-            return ReadNextNbt(new(bytes), true);
+            return ReadNextNbt(new(bytes), true, useAnonymousNbt);
         }
 
         /// <summary>
         /// Read an uncompressed Named Binary Tag blob and remove it from the cache (internal)
         /// </summary>
-        private static Dictionary<string, object> ReadNextNbt(Queue<byte> cache, bool root)
+        private static Dictionary<string, object> ReadNextNbt(Queue<byte> cache, bool root, bool useAnonymousNbt)
         {
             Dictionary<string, object> nbtData = new();
 
@@ -425,15 +427,39 @@ namespace CraftSharp.Protocol.Handlers
                     return nbtData;
                 }
 
-                if (cache.Peek() != 10) // TAG_Compound
-                    throw new InvalidDataException("Failed to decode NBT: Does not start with TAG_Compound");
-                ReadNextByte(cache); // Tag type (TAG_Compound)
+                var nextId = cache.Dequeue();
+                if (!useAnonymousNbt)
+                {
+                    if (nextId is not 10) // TAG_Compound
+                        throw new System.IO.InvalidDataException(
+                            "Failed to decode NBT: Does not start with TAG_Compound");
 
-                // NBT root name
-                string rootName = Encoding.ASCII.GetString(ReadData(ReadNextUShort(cache), cache));
+                    // NBT root name
+                    var rootName = Encoding.ASCII.GetString(ReadData(ReadNextUShort(cache), cache));
 
-                if (!String.IsNullOrEmpty(rootName))
-                    nbtData[""] = rootName;
+                    if (!string.IsNullOrEmpty(rootName))
+                        nbtData[""] = rootName;
+                }
+                // In 1.20.2 The root TAG_Compound doesn't have a name
+                // In 1.20.3+ The root can be TAG_Compound or TAG_String
+                else
+                {
+                    if (nextId is not (10 or 8)) // TAG_Compound or TAG_String
+                        throw new System.IO.InvalidDataException(
+                            "Failed to decode NBT: Does not start with TAG_Compound or TAG_String");
+
+                    // Read TAG_String
+                    if (nextId is 8)
+                    {
+                        var byteArrayLength = ReadNextUShort(cache);
+                        var result = Encoding.UTF8.GetString(ReadData(byteArrayLength, cache));
+
+                        return new Dictionary<string, object>()
+                        {
+                            { "", result }
+                        };
+                    }
+                }
             }
 
             while (true)
@@ -445,7 +471,7 @@ namespace CraftSharp.Protocol.Handlers
 
                 int fieldNameLength = ReadNextUShort(cache);
                 string fieldName = Encoding.ASCII.GetString(ReadData(fieldNameLength, cache));
-                object fieldValue = ReadNbtField(cache, fieldType);
+                object fieldValue = ReadNbtField(cache, fieldType, useAnonymousNbt);
 
                 // This will override previous tags with the same name
                 nbtData[fieldName] = fieldValue;
@@ -455,7 +481,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <summary>
         /// Read a single Named Binary Tag field of the specified type and remove it from the cache
         /// </summary>
-        private static object ReadNbtField(Queue<byte> cache, int fieldType)
+        private static object ReadNbtField(Queue<byte> cache, int fieldType, bool useAnonymousNbt)
         {
             switch (fieldType)
             {
@@ -480,23 +506,23 @@ namespace CraftSharp.Protocol.Handlers
                     int listLength = ReadNextInt(cache);
                     object[] listItems = new object[listLength];
                     for (int i = 0; i < listLength; i++)
-                        listItems[i] = ReadNbtField(cache, listType);
+                        listItems[i] = ReadNbtField(cache, listType, useAnonymousNbt);
                     return listItems;
                 case 10: // TAG_Compound
-                    return ReadNextNbt(cache, false);
+                    return ReadNextNbt(cache, false, useAnonymousNbt);
                 case 11: // TAG_Int_Array
                     listType = 3;
                     listLength = ReadNextInt(cache);
                     listItems = new object[listLength];
                     for (int i = 0; i < listLength; i++)
-                        listItems[i] = ReadNbtField(cache, listType);
+                        listItems[i] = ReadNbtField(cache, listType, useAnonymousNbt);
                     return listItems;
                 case 12: // TAG_Long_Array
                     listType = 4;
                     listLength = ReadNextInt(cache);
                     listItems = new object[listLength];
                     for (int i = 0; i < listLength; i++)
-                        listItems[i] = ReadNbtField(cache, listType);
+                        listItems[i] = ReadNbtField(cache, listType, useAnonymousNbt);
                     return listItems;
                 default:
                     throw new InvalidDataException("Failed to decode NBT: Unknown field type " + fieldType);
@@ -572,7 +598,7 @@ namespace CraftSharp.Protocol.Handlers
                 
                 Item type = itemPalette.GetByNumId(itemID);
                 byte itemCount = ReadNextByte(cache);
-                Dictionary<string, object> nbt = ReadNextNbt(cache);
+                Dictionary<string, object> nbt = ReadNextNbt(cache, UseAnonymousNBT);
                 return new ItemStack(type, itemCount, nbt);
             }
             else return null;
@@ -732,7 +758,7 @@ namespace CraftSharp.Protocol.Handlers
                         value = ReadNextVarInt(cache);
                         break;
                     case EntityMetaDataType.Nbt: // NBT
-                        value = ReadNextNbt(cache);
+                        value = ReadNextNbt(cache, UseAnonymousNBT);
                         break;
                     case EntityMetaDataType.Particle: // Particle
                         // Skip data only, not used
@@ -999,7 +1025,7 @@ namespace CraftSharp.Protocol.Handlers
             if (protocolVersion >= ProtocolMinecraft.MC_1_20_4_Version)
             {
                 // Read as NBT
-                var r = ReadNextNbt(cache);
+                var r = ReadNextNbt(cache, UseAnonymousNBT);
                 var msg = ChatParser.ParseText(r);
                 return msg;
             }

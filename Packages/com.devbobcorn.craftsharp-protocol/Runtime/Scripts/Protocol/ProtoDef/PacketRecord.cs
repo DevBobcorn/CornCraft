@@ -4,8 +4,15 @@ using System.Collections.Generic;
 
 namespace CraftSharp.Protocol.ProtoDef
 {
-    public class PacketRecord
+    public record PacketRecord
     {
+        public readonly int ProtocolVersion;
+
+        public PacketRecord(int protocolVersion)
+        {
+            ProtocolVersion = protocolVersion;
+        }
+
         private readonly Dictionary<string, object?> entryPath2Value = new();
         private readonly Dictionary<string, ResourceLocation> entryPath2TypeId = new();
 

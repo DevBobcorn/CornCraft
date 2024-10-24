@@ -553,6 +553,9 @@ namespace CraftSharp
                 //var lightValue = ChunkRenderManager.GetBlockLight(playerBlockLoc);
                 //var lightInfo = $"Emission: {lightEmission}\tBlockage: {lightBlockage}\nLight Value: {lightValue}";
 
+                var dimensionId = ChunkRenderManager.GetDimensionId();
+                var biomeId = ChunkRenderManager.GetBiome(playerBlockLoc).BiomeId;
+
                 // Ray casting debugging
                 string targetInfo;
                 if (interactionUpdater.TargetBlockLoc is not null)
@@ -566,7 +569,7 @@ namespace CraftSharp
                     targetInfo = string.Empty;
                 }
 
-                return baseString + $"\nLoc: {GetCurrentLocation()}\n{PlayerController.GetDebugInfo()}\n{targetInfo}\nWorld Origin Offset: {WorldOriginOffset}" +
+                return baseString + $"\nLoc: {GetCurrentLocation()}\n{PlayerController.GetDebugInfo()}\nDimension: {dimensionId}\nBiome: {biomeId}\n{targetInfo}\nWorld Origin Offset: {WorldOriginOffset}" +
                         $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():0.0}";
             }
             

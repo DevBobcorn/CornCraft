@@ -312,7 +312,7 @@ namespace CraftSharp.Protocol.Handlers
                     var packedXZ = DataTypes.ReadNextByte(cache);
                     var y = DataTypes.ReadNextShort(cache);
                     var ttt = DataTypes.ReadNextVarInt(cache);
-                    var tag = DataTypes.ReadNextNbt(cache);
+                    var tag = DataTypes.ReadNextNbt(cache, dataTypes.UseAnonymousNBT);
                     int x = (chunkX << 4) + (packedXZ >> 4);
                     int z = (chunkZ << 4) + (packedXZ & 15);
                     // Output block entity data
@@ -522,7 +522,7 @@ namespace CraftSharp.Protocol.Handlers
             if (blockEntityCount > 0)
             {
                 for (int i = 0; i < blockEntityCount; i++) {
-                    var tag = DataTypes.ReadNextNbt(cache);
+                    var tag = DataTypes.ReadNextNbt(cache, dataTypes.UseAnonymousNBT);
                     // Output block entity data
                     var blockLoc = new BlockLoc((int) tag["x"], (int) tag["y"], (int) tag["z"]);
                     var typeId = ResourceLocation.FromString((string) tag["id"]);
