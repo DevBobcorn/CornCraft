@@ -51,7 +51,7 @@ namespace CraftSharp.UI
         /// Load server information in ServerIP and ServerPort variables from a "serverip:port" couple or server alias
         /// </summary>
         /// <returns>True if the server IP was valid and loaded, false otherwise</returns>
-        public bool ParseServerIP(string server, out string host, ref ushort port)
+        private static bool ParseServerIP(string server, out string host, out ushort port)
         {
             server = server.ToLower();
             string[] sip = server.Split(':');
@@ -96,7 +96,7 @@ namespace CraftSharp.UI
             if (host == "localhost" || host.Contains('.') || host.Contains(':'))
             {
                 // IPv4 addresses or domain names contain at least a dot
-                if (sip.Length == 1 && host.Contains('.') && host.Any(c => char.IsLetter(c)) && ProtocolSettings.ResolveSrvRecords)
+                if (sip.Length == 1 && host.Contains('.') && host.Any(char.IsLetter) && ProtocolSettings.ResolveSrvRecords)
                 {
                     //Domain name without port may need Minecraft SRV Record lookup
                     ProtocolHandler.MinecraftServiceLookup(ref host, ref port);
@@ -117,7 +117,7 @@ namespace CraftSharp.UI
             }
             preparingGame = true;
 
-            var serverVersionName = "<dummy>";
+            const string serverVersionName = "<dummy>";
             var protocolVersion = CornClientOffline.DUMMY_PROTOCOL_VERSION;
             CornApp.Notify(Translations.Get("mcc.server_protocol", serverVersionName, protocolVersion));
 
@@ -131,7 +131,7 @@ namespace CraftSharp.UI
             StartCoroutine(StoreLoginInfoAndLoadResource(loginInfo));
         }
 
-        public void TryConnectServer()
+        private void TryConnectServer()
         {
             if (preparingGame)
             {
@@ -242,10 +242,7 @@ namespace CraftSharp.UI
             // Proceed to target server
             if (result == ProtocolHandler.LoginResult.Success)
             {
-                string host;   // Server ip address
-                ushort port = 25565; // Server port
-
-                if (!ParseServerIP(serverText, out host, ref port))
+                if (!ParseServerIP(serverText, out var host, out var port))
                 {
                     CornApp.Notify(Translations.Get("login.server_name_invalid"), Notification.Type.Warning);
                     preparingGame = false;
@@ -261,7 +258,7 @@ namespace CraftSharp.UI
                     // Load cached profile key from disk if necessary
                     if (ProtocolSettings.ProfileKeyCaching == CacheType.Disk)
                     {
-                        bool cacheKeyLoaded = KeysCache.InitializeDiskCache();
+                        var cacheKeyLoaded = KeysCache.InitializeDiskCache();
                         if (ProtocolSettings.DebugMode)
                             Debug.Log(Translations.Get(cacheKeyLoaded ? "debug.keys_cache_ok" : "debug.keys_cache_fail"));
                     }
@@ -269,10 +266,9 @@ namespace CraftSharp.UI
                     if (ProtocolSettings.ProfileKeyCaching != CacheType.None && KeysCache.Contains(accountLower))
                     {
                         playerKeyPair = KeysCache.Get(accountLower);
-                        if (playerKeyPair.NeedRefresh())
-                            Debug.Log(Translations.Get("mcc.profile_key_invalid"));
-                        else
-                            Debug.Log(Translations.Get("mcc.profile_key_valid", session.PlayerName));
+                        Debug.Log(playerKeyPair.NeedRefresh()
+                            ? Translations.Get("mcc.profile_key_invalid")
+                            : Translations.Get("mcc.profile_key_valid", session.PlayerName));
                     }
 
                     if (playerKeyPair == null || playerKeyPair.NeedRefresh())
@@ -335,8 +331,8 @@ namespace CraftSharp.UI
 
                         if (protocolVersion > maxSupported)
                         {
-                            // This version is not directly supported, yet still
-                            // might be joinable if ViaBackwards' installed
+                            // This version is not directly supported, yet might
+                            // still be joinable if ViaBackwards' installed
 
                             protocolVersion = maxSupported; // Try our luck
 
@@ -346,8 +342,8 @@ namespace CraftSharp.UI
                             loginInfo = new StartLoginInfo(true, session, playerKeyPair, host, port,
                                     protocolVersion, null, accountLower);
                             // Display a notification
-                            var maxMCVersion = ProtocolHandler.ProtocolVersion2MCVer(maxSupported);
-                            CornApp.Notify($"Using supported version {maxMCVersion} (protocol v{protocolVersion})", Notification.Type.Warning);
+                            var maxMcVersion = ProtocolHandler.ProtocolVersion2MCVer(maxSupported);
+                            CornApp.Notify($"Using supported version {maxMcVersion} (protocol v{protocolVersion})", Notification.Type.Warning);
                             // No need to yield return this coroutine because it's the last step here
                             StartCoroutine(StoreLoginInfoAndLoadResource(loginInfo));
                         }
@@ -366,8 +362,8 @@ namespace CraftSharp.UI
             }
             else
             {
-                string failureMessage = Translations.Get("error.login");
-                string failureReason = result switch
+                var failureMessage = Translations.Get("error.login");
+                var failureReason = result switch
                 {
                     ProtocolHandler.LoginResult.AccountMigrated      => "error.login.migrated",
                     ProtocolHandler.LoginResult.ServiceUnavailable   => "error.login.server",
@@ -412,13 +408,12 @@ namespace CraftSharp.UI
                 {
                     // Set enter game panel to active
                     enterGamePanel.gameObject.SetActive(true);
-                    // TODO: Show hint for player
                     loadStateInfoText.text = Translations.Get("login.click_to_enter");
                 }));
             }
         }
 
-        public void ShowLoginPanel()
+        private void ShowLoginPanel()
         {   // Show login panel and hide button
             loginPanel.alpha = 1F;
             loginPanel.blocksRaycasts = true;
@@ -427,7 +422,7 @@ namespace CraftSharp.UI
             loginPanelButton.interactable = false;
         }
 
-        public void HideLoginPanel()
+        private void HideLoginPanel()
         {   // Hide login panel and show button
             loginPanel.alpha = 0F;
             loginPanel.blocksRaycasts = false;
@@ -458,7 +453,7 @@ namespace CraftSharp.UI
             }
         }
 
-        public void UpdateUsernamePanel(string message)
+        private void UpdateUsernamePanel(string message)
         {
             shownNames = cachedNames.Where(
                     (login) => login != message && login.Contains(message)).ToArray();
@@ -466,25 +461,25 @@ namespace CraftSharp.UI
             RefreshUsernames();
         }
 
-        public void HideUsernamePanel(string message)
+        private void HideUsernamePanel(string message)
         {
             usernameIndex = 0;
             usernamePanel.alpha = 0F;
             namesShown = false;
         }
 
-        public void UpdateUsernamePlaceholder(int selection)
+        private void UpdateUsernamePlaceholder(int selection)
         {
             usernamePlaceholder.text = selection == 0 ? "Email Address" : "User Name";
         }
 
-        public void CopyAuthLink()
+        private void CopyAuthLink()
         {
             GUIUtility.systemCopyBuffer = authLinkText.text;
             CornApp.Notify(Translations.Get("login.link_copied"), Notification.Type.Success);
         }
 
-        public void PasteAuthCode()
+        private void PasteAuthCode()
         {
             authCodeInput.text = GUIUtility.systemCopyBuffer;
         }
@@ -514,13 +509,13 @@ namespace CraftSharp.UI
             authenticating = false;
         }
 
-        public void CancelAuth()
+        private void CancelAuth()
         {
             authCancelled = true;
             HideAuthPanel();
         }
 
-        public void ConfirmAuth()
+        private void ConfirmAuth()
         {
             var code = authCodeInput.text.Trim();
 
@@ -535,7 +530,7 @@ namespace CraftSharp.UI
             HideAuthPanel();
         }
 
-        public IEnumerator EnterGame()
+        private IEnumerator EnterGame()
         {
             if (resourceLoaded && loginInfo is not null)
             {
@@ -551,12 +546,12 @@ namespace CraftSharp.UI
             }
         }
 
-        public void QuitGame()
+        private static void QuitGame()
         {
             Application.Quit();
         }
 
-        void Start()
+        private void Start()
         {
             // Set camera for environment manager
             if (environmentManager != null)
@@ -582,7 +577,7 @@ namespace CraftSharp.UI
             //Load cached sessions from disk if necessary
             if (ProtocolSettings.SessionCaching == CacheType.Disk)
             {
-                bool cacheLoaded = SessionCache.InitializeDiskCache();
+                var cacheLoaded = SessionCache.InitializeDiskCache();
                 if (ProtocolSettings.DebugMode)
                     Debug.Log(Translations.Get(cacheLoaded ? "debug.session_cache_ok" : "debug.session_cache_fail"));
                 
@@ -590,7 +585,7 @@ namespace CraftSharp.UI
                     cachedNames = SessionCache.GetCachedLogins();
             }
 
-            // TODO Also initialize server with cached values
+            // TODO: Also initialize server with cached values
             serverInput.text = LOCALHOST_ADDRESS;
             if (cachedNames.Length > 0)
                 usernameInput.text = cachedNames[0];
@@ -610,7 +605,7 @@ namespace CraftSharp.UI
             usernameInput.onEndEdit.AddListener(this.HideUsernamePanel);
 
             localGameButton.onClick.AddListener(this.TryConnectDummyServer);
-            quitButton.onClick.AddListener(this.QuitGame);
+            quitButton.onClick.AddListener(QuitGame);
 
             loginButton.onClick.AddListener(this.TryConnectServer);
             authLinkButton.onClick.AddListener(this.CopyAuthLink);
@@ -631,7 +626,7 @@ namespace CraftSharp.UI
             Cursor.lockState = CursorLockMode.None;
         }
 
-        void Update()
+        private void Update()
         {
             if (namesShown)
             {

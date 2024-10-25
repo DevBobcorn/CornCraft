@@ -6,6 +6,7 @@
   "minecraft:comparator": "cutout",
   "minecraft:potted_flowering_azalea_bush": "cutout",
   "minecraft:grass": "plants",
+  "minecraft:short_grass": "plants",
   "minecraft:white_stained_glass": "translucent",
   "minecraft:orange_stained_glass": "translucent",
   "minecraft:fire": "cutout",

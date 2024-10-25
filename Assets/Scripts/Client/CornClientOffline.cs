@@ -56,7 +56,7 @@ namespace CraftSharp
             ChunkRenderManager.SetClient(this);
 
             // Set up environment manager
-            EnvironmentManager.SetCamera(MainCamera);
+            EnvironmentManager.SetCamera(m_MainCamera);
 
             // Post initialization
             StartCoroutine(PostInitialization());
@@ -160,7 +160,7 @@ namespace CraftSharp
             ItemMeshBuilder.ClearMeshCache();
             
             // Return to login scene
-            CornApp.Instance.BackToLogin();
+            CornApp.BackToLogin();
         }
 
         #region Getters: Retrieve data for use in other methods
@@ -174,7 +174,7 @@ namespace CraftSharp
         public override Guid GetUserUuid() => uuid;
         public override string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
         public override string GetSessionID() => string.Empty;
-        public override double GetServerTPS() => 20;
+        public override double GetServerTps() => 20;
         public override int GetPacketCount() => 0;
         public override float GetTickMilSec() => 0.05F;
 
@@ -231,7 +231,7 @@ namespace CraftSharp
             if (withDebugInfo)
             {
                 return baseString + $"\nLoc: {GetCurrentLocation()}\n{PlayerController.GetDebugInfo()}" +
-                        $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTPS():0.0}";
+                        $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTps():0.0}";
             }
             
             return baseString;

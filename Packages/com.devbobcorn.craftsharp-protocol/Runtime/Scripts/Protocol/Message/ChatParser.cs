@@ -32,7 +32,7 @@ namespace CraftSharp.Protocol
 
         public class MessageTypePalette : IdentifierPalette<MessageType>
         {
-            public override string Name => "MessageType Palette";
+            protected override string Name => "MessageType Palette";
 
             public void Register(ResourceLocation id, int numId, MessageType obj)
             {
@@ -60,21 +60,29 @@ namespace CraftSharp.Protocol
             
             foreach (var (chatName, chatId, _) in chatTypeList)
             {
-                // Convert to ResourceLocation first to make sure namespace is handled properly
-                var messageType = chatName.ToString() switch
+                try
                 {
-                    "minecraft:chat"                      => MessageType.CHAT,
-                    "minecraft:emote_command"             => MessageType.EMOTE_COMMAND,
-                    "minecraft:msg_command_incoming"      => MessageType.MSG_COMMAND_INCOMING,
-                    "minecraft:msg_command_outgoing"      => MessageType.MSG_COMMAND_OUTGOING,
-                    "minecraft:say_command"               => MessageType.SAY_COMMAND,
-                    "minecraft:team_msg_command_incoming" => MessageType.TEAM_MSG_COMMAND_INCOMING,
-                    "minecraft:team_msg_command_outgoing" => MessageType.TEAM_MSG_COMMAND_OUTGOING,
+                    // Convert to ResourceLocation first to make sure namespace is handled properly
+                    var messageType = chatName.ToString() switch
+                    {
+                        "minecraft:chat"                      => MessageType.CHAT,
+                        "minecraft:emote_command"             => MessageType.EMOTE_COMMAND,
+                        "minecraft:msg_command_incoming"      => MessageType.MSG_COMMAND_INCOMING,
+                        "minecraft:msg_command_outgoing"      => MessageType.MSG_COMMAND_OUTGOING,
+                        "minecraft:say_command"               => MessageType.SAY_COMMAND,
+                        "minecraft:team_msg_command_incoming" => MessageType.TEAM_MSG_COMMAND_INCOMING,
+                        "minecraft:team_msg_command_outgoing" => MessageType.TEAM_MSG_COMMAND_OUTGOING,
 
-                    _                                     => MessageType.CHAT,
-                };
-
-                MessageTypeRegistry.Register(chatName, chatId, messageType);
+                        _                                     => throw new InvalidDataException(),
+                    };
+                    
+                    MessageTypeRegistry.Register(chatName, chatId, messageType);
+                }
+                catch
+                {
+                    Debug.LogWarning($"Unknown message type {chatName}. Treating as chat message.");
+                    MessageTypeRegistry.RegisterDummy(chatName, chatId, MessageType.CHAT);
+                }
             }
         }
 

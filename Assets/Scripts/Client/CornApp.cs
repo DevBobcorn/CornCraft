@@ -21,27 +21,27 @@ namespace CraftSharp
 {
     public class CornApp : MonoBehaviour
     {
-        public const int WINDOWED_APP_WIDTH = 1280, WINDOWED_APP_HEIGHT = 720;
-        public const int EDITOR_FPS_LIMIT = 60;
+        private const int WINDOWED_APP_WIDTH = 1280;
+        private const int WINDOWED_APP_HEIGHT = 720;
+        private const int EDITOR_FPS_LIMIT = 60;
 
         public const string CORN_CRAFT_BUILTIN_FILE_NAME = "CornCraftBuiltin";
         public const int    CORN_CRAFT_BUILTIN_VERSION = 6;
-        public const string VANILLAFIX_FILE_NAME = "VanillaFix";
-        public const int    VANILLAFIX_VERSION = 1;
+        private const string VANILLAFIX_FILE_NAME = "VanillaFix";
+        private const int    VANILLAFIX_VERSION = 1;
 
-        private BaseCornClient? client = null;
-        public BaseCornClient? Client => client;
+        public BaseCornClient? Client { get; private set; }
 
         public static BaseCornClient? CurrentClient => Instance.Client;
-        public static void SetCurrentClient(BaseCornClient c) => Instance.client = c;
+        public static void SetCurrentClient(BaseCornClient c) => Instance.Client = c;
 
         private static CornApp? instance;
         public static CornApp Instance
         {
             get
             {
-                if (instance != null)
-                    return instance;
+                if (instance)
+                    return instance!;
                 
                 var magic = new GameObject("Corn Craft");
                 GameObject.DontDestroyOnLoad(magic);
@@ -52,7 +52,7 @@ namespace CraftSharp
         private int parserProtocol = 0;
         public int ParserProtocol => parserProtocol;
 
-        public void LoadProtocolParser(int version)
+        private void LoadProtocolParser(int version)
         {
             parserProtocol = version;
 
@@ -104,9 +104,9 @@ namespace CraftSharp
                 var versions = Json.ParseJson(File.ReadAllText(versionDictPath, Encoding.UTF8));
                 var version = protocolVersion.ToString();
 
-                if (versions.Properties.ContainsKey(version))
+                if (versions.Properties.TryGetValue(version, out var property))
                 {
-                    var entries = versions.Properties[version].Properties;
+                    var entries = property.Properties;
 
                     dataVersion = entries["data"].StringValue;
                     
@@ -168,7 +168,7 @@ namespace CraftSharp
             if (!File.Exists(PathHelper.GetPackFile($"vanilla-{resourceVersion}", "pack.mcmeta")))
             {
                 Debug.Log($"Resources for {resourceVersion} not present. Downloading...");
-                bool downloadSucceeded = false;
+                var downloadSucceeded = false;
                 yield return StartCoroutine(ResourceDownloader.DownloadResource(resourceVersion,
                         updateStatus, () => { },
                         (succeeded) => downloadSucceeded = succeeded));
@@ -209,7 +209,8 @@ namespace CraftSharp
                 try {
                     // Set up thread locale for testing resource loading with different locales
                     //System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("fr-FR");
-                    packManager.LoadPacks(loadFlag, (status) => Loom.QueueOnMainThread(() => updateStatus(status)));
+                    packManager.LoadPacks(loadFlag, (status) =>
+                        Loom.QueueOnMainThread(() => updateStatus(status)), true);
                 } catch (Exception e) {
                     Debug.Log($"Error loading resources: {e}");
                 }
@@ -239,7 +240,7 @@ namespace CraftSharp
             Protocol.ChatParser.LoadTranslationRules(langFile);
 
             // Load ProtoDef
-            int protodefVersionInt = int.Parse(protodefVersion);
+            var protodefVersionInt = int.Parse(protodefVersion);
             LoadProtocolParser(protodefVersionInt);
 
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
@@ -254,19 +255,19 @@ namespace CraftSharp
         private IEnumerator EnterWorldScene(string sceneName)
         {
             // Prepare scene and unity objects
-            var op = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+            var op = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single)!;
             op.allowSceneActivation = false;
 
             while (op.progress < 0.9F) yield return null;
 
             // Scene is loaded, activate it
             op.allowSceneActivation = true;
-            bool fullyLoaded = false;
+            var fullyLoaded = false;
 
             // Wait till everything's ready
             op.completed += (operation) =>
             {
-                client = Component.FindObjectOfType<BaseCornClient>();
+                Client = Component.FindObjectOfType<BaseCornClient>();
                 fullyLoaded = true;
             };
 
@@ -281,16 +282,16 @@ namespace CraftSharp
         private IEnumerator StartLogin(StartLoginInfo info, Action<bool> callback, Action<string> updateStatus)
         {
             // Clear client value
-            client = null;
+            Client = null;
 
             // Enter world scene, and find the client instance in that scene
             updateStatus("login.enter_world_scene");
             yield return EnterWorldScene("World " + (info.Online ? "Online" : "Offline"));
 
             // Start client
-            if (client != null)
+            if (Client)
             {
-                var succeeded = client!.StartClient(info);
+                var succeeded = Client!.StartClient(info);
                 callback(succeeded);
             }
             else // Failed to find client instance in scene
@@ -303,7 +304,7 @@ namespace CraftSharp
         /// <summary>
         /// Should only be externally called by CornClientOnline
         /// </summary>
-        public void BackToLogin() => SceneManager.LoadScene("Login");
+        public static void BackToLogin() => SceneManager.LoadScene("Login");
 
         // Should be called from the Unity thread only, not net read thread
         public static void Notify(string notification) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification));
@@ -312,7 +313,7 @@ namespace CraftSharp
 
         public static void Notify(string notification, float duration, Notification.Type type) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification, duration, type));
 
-        void Update()
+        private void Update()
         {
             if (Keyboard.current.f11Key.wasPressedThisFrame) // Toggle full screen
             {
@@ -323,7 +324,7 @@ namespace CraftSharp
                 }
                 else
                 {
-                    var maxRes = Screen.resolutions[Screen.resolutions.Length - 1];
+                    var maxRes = Screen.resolutions[^1];
                     Screen.SetResolution(maxRes.width, maxRes.height, true);
                     Screen.fullScreen = true;
                 }

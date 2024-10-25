@@ -50,13 +50,13 @@ namespace CraftSharp.Protocol.Handlers
         public const int MC_1_20_4_Version = 765;
         public const int MC_1_20_6_Version = 766;
 
-        private int compression_treshold = -1;
+        private int compression_threshold = -1;
         private int autocomplete_transaction_id = 0;
         private readonly Dictionary<int, short> window_actions = new();
         private CurrentState currentState = CurrentState.Login;
         private readonly int protocolVersion;
         private int currentDimension;
-        private bool isOnlineMode = false;
+        private bool isOnlineMode;
         private readonly BlockingCollection<Tuple<int, Queue<byte>>> packetQueue = new();
         private float LastYaw, LastPitch;
         private long chunkBatchStartTime;
@@ -64,22 +64,22 @@ namespace CraftSharp.Protocol.Handlers
         private int oldSamplesWeight = 1;
 
         private bool receiveDeclareCommands = false, receivePlayerInfo = false;
-        private object MessageSigningLock = new();
+        private readonly object MessageSigningLock = new();
         private Guid chatUuid = Guid.NewGuid();
         private int pendingAcknowledgments = 0, messageIndex = 0;
         private LastSeenMessagesCollector lastSeenMessagesCollector;
         private LastSeenMessageList.AcknowledgedMessage? lastReceivedMessage = null;
 
-        readonly ProtocolForge pForge;
-        readonly ProtocolTerrain pTerrain;
-        readonly IMinecraftComHandler handler;
-        readonly EntityMetadataPalette entityMetadataPalette;
-        readonly PacketTypePalette packetPalette;
-        readonly SocketWrapper socketWrapper;
-        readonly DataTypes dataTypes;
-        Tuple<Thread, CancellationTokenSource>? netMain = null; // Net main thread
-        Tuple<Thread, CancellationTokenSource>? netReader = null; // Net reader thread
-        readonly RandomNumberGenerator randomGen;
+        private readonly ProtocolForge pForge;
+        private readonly ProtocolTerrain pTerrain;
+        private readonly IMinecraftComHandler handler;
+        private readonly EntityMetadataPalette entityMetadataPalette;
+        private readonly PacketTypePalette packetPalette;
+        private readonly SocketWrapper socketWrapper;
+        private readonly DataTypes dataTypes;
+        private Tuple<Thread, CancellationTokenSource>? netMain = null; // Net main thread
+        private Tuple<Thread, CancellationTokenSource>? netReader = null; // Net reader thread
+        private readonly RandomNumberGenerator randomGen;
 
         public ProtocolMinecraft(TcpClient Client, int protocolVersion, IMinecraftComHandler handler, ForgeInfo forgeInfo)
         {
@@ -183,7 +183,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <summary>
         /// Read and decompress packets.
         /// </summary>
-        internal void PacketReader(object? o)
+        private void PacketReader(object? o)
         {
             CancellationToken cancelToken = (CancellationToken)o!;
             while (socketWrapper.IsConnected() && !cancelToken.IsCancellationRequested)
@@ -214,15 +214,13 @@ namespace CraftSharp.Protocol.Handlers
         /// <summary>
         /// Read the next packet from the network
         /// </summary>
-        /// <param name="packetId">will contain packet Id</param>
-        /// <param name="packetData">will contain raw packet Data</param>
         internal Tuple<int, Queue<byte>> ReadNextPacket()
         {
             int size = DataTypes.ReadNextVarIntRAW(socketWrapper); //Packet size
             Queue<byte> packetData = new(socketWrapper.ReadDataRAW(size)); //Packet contents
 
             //Handle packet decompression
-            if (compression_treshold >= 0)
+            if (compression_threshold >= 0)
             {
                 int sizeUncompressed = DataTypes.ReadNextVarInt(packetData);
                 if (sizeUncompressed != 0) // != 0 means compressed, let's decompress
@@ -241,7 +239,10 @@ namespace CraftSharp.Protocol.Handlers
             return new(packetId, packetData);
         }
 
-        static (ResourceLocation id, int numId, object? obj)[] ReadRegistryCodecArray(object[] entries)
+        /// <summary>
+        /// Read RegistryCodec as a single nbt. Used in versions lower than 1.20.5
+        /// </summary>
+        private static (ResourceLocation id, int numId, object? obj)[] ReadRegistryCodecArray(object[] entries)
         {
             return entries.Select(x =>
             {
@@ -249,10 +250,30 @@ namespace CraftSharp.Protocol.Handlers
 
                 var id = ResourceLocation.FromString((string)entry["name"]);
                 var numId = (int)entry["id"];
-                object? obj = entry.ContainsKey("element") ? entry["element"] : null;
+                object? obj = entry.TryGetValue("element", out var value) ? value : null;
 
                 return (id, numId, obj);
             }).ToArray();
+        }
+        
+        /// <summary>
+        /// Read one single registry from a tuple array. Used in 1.20.5+
+        /// </summary>
+        private static (ResourceLocation id, int numId, object? obj)[] ReadSingleRegistry(Queue<byte> packetData, bool useAnonymousNBT)
+        {
+            var entryCount = DataTypes.ReadNextVarInt(packetData);
+            var entryList = new (ResourceLocation, int, object?)[entryCount];
+
+            for (int i = 0; i < entryCount; i++)
+            {
+                var entryId = ResourceLocation.FromString(DataTypes.ReadNextString(packetData));
+                var entryHasObj = DataTypes.ReadNextBool(packetData);
+                var entryObj = entryHasObj ? DataTypes.ReadNextNbt(packetData, useAnonymousNBT) : null;
+
+                entryList[i] = (entryId, i, entryObj);
+            }
+
+            return entryList;
         }
 
         /// <summary>
@@ -278,7 +299,7 @@ namespace CraftSharp.Protocol.Handlers
                             // Set Compression
                             case 0x03:
                                 // MC 1.8+
-                                compression_treshold = DataTypes.ReadNextVarInt(packetData);
+                                compression_threshold = DataTypes.ReadNextVarInt(packetData);
                                 break;
 
                             // Login Plugin Request
@@ -321,11 +342,13 @@ namespace CraftSharp.Protocol.Handlers
 
                             case ConfigurationPacketTypesIn.RegistryData:
 
-                                if (protocolVersion <= MC_1_20_2_Version) // Different registries are wrapped in one nbt structure
+                                if (protocolVersion <= MC_1_20_4_Version) // Different registries are wrapped in one nbt structure
                                 {
                                     var registryCodec = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT).ToDictionary(
                                             x => ResourceLocation.FromString(x.Key), x => x.Value);
-
+                                    
+                                    Debug.Log($"Registry codec data: {string.Join(", ", registryCodec.Keys)}");
+                                    
                                     if (registryCodec.TryGetValue(ChatParser.CHAT_TYPE_ID, out object chatTypes))
                                     {
                                         var chatTypeListNbt = ((Dictionary<string, object>) chatTypes)["value"];
@@ -341,29 +364,32 @@ namespace CraftSharp.Protocol.Handlers
 
                                         World.StoreDimensionTypeList(dimensionList);
                                     }
+                                    
+                                    if (registryCodec.TryGetValue(World.WORLDGEN_BIOME_ID, out object worldgenBiomes))
+                                    {
+                                        var biomeListNbt = ((Dictionary<string, object>) worldgenBiomes)["value"];
+                                        var biomeList = ReadRegistryCodecArray((object[]) biomeListNbt);
+
+                                        // Read and store defined biomes 1.16.2 and above
+                                        World.StoreBiomeList(biomeList);
+                                    }
                                 }
                                 else // Different registries are sent in separate packets respectively
                                 {
                                     var registryId = ResourceLocation.FromString(DataTypes.ReadNextString(packetData));
-                                    var entryCount = DataTypes.ReadNextVarInt(packetData);
 
                                     if (registryId == ChatParser.CHAT_TYPE_ID)
                                     {
-                                        var chatTypeList = new (ResourceLocation, int, object?)[entryCount];
-
-                                        for (int i = 0; i < entryCount; i++)
-                                        {
-                                            var entryId = ResourceLocation.FromString(DataTypes.ReadNextString(packetData));
-                                            var entryHasObj = DataTypes.ReadNextBool(packetData);
-                                            var entryObj = entryHasObj ? DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT) : null;
-
-                                            chatTypeList[i] = (entryId, i, entryObj);
-                                        }
+                                        var chatTypeList = ReadSingleRegistry(packetData, dataTypes.UseAnonymousNBT);
+                                        
+                                        ChatParser.ReadChatType(chatTypeList);
                                     }
 
                                     if (registryId == World.DIMENSION_TYPE_ID)
                                     {
-
+                                        var dimensionList = ReadSingleRegistry(packetData, dataTypes.UseAnonymousNBT);
+                                        
+                                        World.StoreDimensionTypeList(dimensionList);
                                     }
                                 }
 
@@ -412,7 +438,7 @@ namespace CraftSharp.Protocol.Handlers
             return true;
         }
 
-        public void HandleResourcePackPacket(Queue<byte> packetData)
+        private void HandleResourcePackPacket(Queue<byte> packetData)
         {
             var uuid = Guid.Empty;
 
@@ -447,8 +473,7 @@ namespace CraftSharp.Protocol.Handlers
             if (currentState == CurrentState.Configuration)
             {
                 SendPacket(ConfigurationPacketTypesOut.ResourcePackResponse, acceptedResourcePackData); // Accepted
-                SendPacket(ConfigurationPacketTypesOut.ResourcePackResponse,
-                    loadedResourcePackData); // Successfully loaded
+                SendPacket(ConfigurationPacketTypesOut.ResourcePackResponse, loadedResourcePackData); // Successfully loaded
             }
             else
             {
@@ -575,7 +600,7 @@ namespace CraftSharp.Protocol.Handlers
                             }
                         }
 
-                        if (protocolVersion >= MC_1_15_Version && protocolVersion < MC_1_20_2_Version)
+                        if (protocolVersion is >= MC_1_15_Version and < MC_1_20_2_Version)
                             DataTypes.ReadNextLong(packetData);           // Hashed world seed - 1.15 and above
 
                         if (protocolVersion >= MC_1_16_2_Version)
@@ -667,7 +692,7 @@ namespace CraftSharp.Protocol.Handlers
                             //Hide system messages or xp bar messages?
                             messageType = DataTypes.ReadNextByte(packetData);
                             if ((messageType == 1 && !ProtocolSettings.DisplaySystemMessages)
-                                || (messageType == 2 && !ProtocolSettings.DisplayXPBarMessages))
+                                || (messageType == 2 && !ProtocolSettings.DisplayXpBarMessages))
                                 break;
 
                             if (protocolVersion >= MC_1_16_5_Version)
@@ -686,7 +711,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             messageType = DataTypes.ReadNextVarInt(packetData);
                             if ((messageType == 1 && !ProtocolSettings.DisplaySystemMessages)
-                                || (messageType == 2 && !ProtocolSettings.DisplayXPBarMessages))
+                                || (messageType == 2 && !ProtocolSettings.DisplayXpBarMessages))
                                 break;
 
                             Guid senderUUID = DataTypes.ReadNextUUID(packetData);
@@ -772,8 +797,7 @@ namespace CraftSharp.Protocol.Handlers
                                 messageTypeEnum = ChatParser.MessageType.CHAT;
                             }
                             if (targetName != null &&
-                                (messageTypeEnum == ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING ||
-                                    messageTypeEnum == ChatParser.MessageType.TEAM_MSG_COMMAND_OUTGOING))
+                                messageTypeEnum is ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING or ChatParser.MessageType.TEAM_MSG_COMMAND_OUTGOING)
                                 senderTeamName = Json.ParseJson(targetName).Properties["with"].DataArray[0]
                                     .Properties["text"].StringValue;
 
@@ -882,8 +906,7 @@ namespace CraftSharp.Protocol.Handlers
                                 .StringValue;
                             string? senderTeamName = null;
                             if (targetName != null &&
-                                (messageTypeEnum == ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING ||
-                                    messageTypeEnum == ChatParser.MessageType.TEAM_MSG_COMMAND_OUTGOING))
+                                messageTypeEnum is ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING or ChatParser.MessageType.TEAM_MSG_COMMAND_OUTGOING)
                                 senderTeamName = Json.ParseJson(targetName).Properties["with"].DataArray[0]
                                     .Properties["text"].StringValue;
 
@@ -915,7 +938,6 @@ namespace CraftSharp.Protocol.Handlers
                                         verifyResult = false;
                                     else
                                     {
-                                        verifyResult = false;
                                         verifyResult = player.VerifyMessage(message, senderUUID, player.ChatUuid,
                                             index, timestamp, salt, ref messageSignature,
                                             previousMessageSignatures);
@@ -974,7 +996,7 @@ namespace CraftSharp.Protocol.Handlers
                         bool isOverlay = DataTypes.ReadNextBool(packetData);
                         if (isOverlay)
                         {
-                            if (!ProtocolSettings.DisplayXPBarMessages)
+                            if (!ProtocolSettings.DisplayXpBarMessages)
                                 break;
                         }
                         else
@@ -1188,7 +1210,7 @@ namespace CraftSharp.Protocol.Handlers
                         // Teleport confirm packet
                         SendPacket(PacketTypesOut.TeleportConfirm, DataTypes.GetVarInt(teleportId));
                             
-                        if (protocolVersion >= MC_1_17_Version && protocolVersion < MC_1_19_4_Version)
+                        if (protocolVersion is >= MC_1_17_Version and < MC_1_19_4_Version)
                             DataTypes.ReadNextBool(packetData); // Dismount Vehicle    - 1.17 to 1.19.3
                     }
                     break;
@@ -1203,7 +1225,7 @@ namespace CraftSharp.Protocol.Handlers
                         {
                             ulong[]? verticalStripBitmask = null;
 
-                            if (protocolVersion == MC_1_17_Version || protocolVersion == MC_1_17_1_Version)
+                            if (protocolVersion is MC_1_17_Version or MC_1_17_1_Version)
                                 verticalStripBitmask = DataTypes.ReadNextULongArray(packetData); // Bit Mask Length  and  Primary Bit Mask
 
                             DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Heightmaps
@@ -1257,26 +1279,24 @@ namespace CraftSharp.Protocol.Handlers
                             locked = DataTypes.ReadNextBool(packetData);
                         }
 
-                        int iconCount = 0;
                         List<MapIcon> icons = new();
 
                         // 1.9 or later needs tracking position to be true to get the icons
                         if (trackingPosition)
                         {
-                            iconCount = DataTypes.ReadNextVarInt(packetData);
+                            var iconCount = DataTypes.ReadNextVarInt(packetData);
 
                             for (int i = 0; i < iconCount; i++)
                             {
-                                MapIcon mapIcon = new();
-
-                                // 1.13.2+
-                                mapIcon.Type = (MapIconType)DataTypes.ReadNextVarInt(packetData);
-
-                                mapIcon.X = DataTypes.ReadNextByte(packetData);
-                                mapIcon.Z = DataTypes.ReadNextByte(packetData);
-
-                                // 1.13.2+
-                                mapIcon.Direction = DataTypes.ReadNextByte(packetData);
+                                MapIcon mapIcon = new()
+                                {
+                                    // 1.13.2+
+                                    Type = (MapIconType)DataTypes.ReadNextVarInt(packetData),
+                                    X = DataTypes.ReadNextByte(packetData),
+                                    Z = DataTypes.ReadNextByte(packetData),
+                                    // 1.13.2+
+                                    Direction = DataTypes.ReadNextByte(packetData)
+                                };
 
                                 if (DataTypes.ReadNextBool(packetData)) // Has Display Name?
                                     mapIcon.DisplayName = ChatParser.ParseText(DataTypes.ReadNextString(packetData));
@@ -2094,7 +2114,7 @@ namespace CraftSharp.Protocol.Handlers
                         var objectiveType = -1;
                         var numberFormat = 0;
 
-                        if (mode == 0 || mode == 2)
+                        if (mode is 0 or 2)
                         {
                             objectiveValue = dataTypes.ReadNextChat(packetData);
                             objectiveType = DataTypes.ReadNextVarInt(packetData);
@@ -2258,9 +2278,9 @@ namespace CraftSharp.Protocol.Handlers
             //The inner packet
             var thePacket = DataTypes.ConcatBytes(DataTypes.GetVarInt(packetId), packetData.ToArray());
 
-            if (compression_treshold >= 0) //Compression enabled?
+            if (compression_threshold >= 0) //Compression enabled?
             {
-                thePacket = thePacket.Length >= compression_treshold
+                thePacket = thePacket.Length >= compression_threshold
                     ? DataTypes.ConcatBytes(DataTypes.GetVarInt(thePacket.Length), ZlibUtils.Compress(thePacket))
                     : DataTypes.ConcatBytes(DataTypes.GetVarInt(0), thePacket);
             }
@@ -3517,7 +3537,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             try
             {
-                if (animation == 0 || animation == 1)
+                if (animation is 0 or 1)
                 {
                     List<byte> packet = new();
                     packet.AddRange(DataTypes.GetVarInt(animation));
