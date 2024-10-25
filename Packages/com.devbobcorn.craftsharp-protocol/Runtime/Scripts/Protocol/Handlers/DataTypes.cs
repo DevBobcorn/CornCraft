@@ -784,7 +784,7 @@ namespace CraftSharp.Protocol.Handlers
                     case EntityMetaDataType.CatVariant: // Cat Variant
                         value = ReadNextVarInt(cache);
                         break;
-                    case EntityMetaDataType.FrogVariant: // Frog Varint
+                    case EntityMetaDataType.FrogVariant: // Frog Variant
                         value = ReadNextVarInt(cache);
                         break;
                     case EntityMetaDataType.GlobalPosition: // GlobalPos

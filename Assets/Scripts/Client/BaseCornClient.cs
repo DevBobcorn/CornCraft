@@ -7,6 +7,7 @@ using CraftSharp.Protocol;
 using CraftSharp.Rendering;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
+using UnityEngine.Serialization;
 
 namespace CraftSharp
 {
@@ -23,24 +24,24 @@ namespace CraftSharp
         [SerializeField] private EntityMaterialManager m_EntityMaterialManager;
         public ChunkRenderManager ChunkRenderManager => m_ChunkRenderManager;
         public EntityRenderManager EntityRenderManager => m_EntityRenderManager;
-        public BaseEnvironmentManager EnvironmentManager => m_EnvironmentManager;
+        protected BaseEnvironmentManager EnvironmentManager => m_EnvironmentManager;
         public ChunkMaterialManager ChunkMaterialManager => m_ChunkMaterialManager;
         public EntityMaterialManager EntityMaterialManager => m_EntityMaterialManager;
         
         // Player Fields
         [SerializeField] private PlayerController m_PlayerController;
         [SerializeField] private GameObject[] m_PlayerRenderPrefabs = { };
-        private int m_SelectedRenderPrefab;
-        public PlayerController PlayerController => m_PlayerController;
+        private int selectedRenderPrefab;
+        protected PlayerController PlayerController => m_PlayerController;
         [SerializeField] protected InteractionUpdater interactionUpdater;
 
         // Camera Fields
         [SerializeField] private GameObject[] m_CameraControllerPrefabs = { };
-        private CameraController m_CameraController;
-        private int m_SelectedCameraController = 0;
-        public CameraController CameraController => m_CameraController;
-        public Camera MainCamera;
-        public Camera SpriteCamera;
+        private CameraController cameraController;
+        private int selectedCameraController = 0;
+        public CameraController CameraController => cameraController;
+        [FormerlySerializedAs("MainCamera")] public Camera m_MainCamera;
+        [FormerlySerializedAs("SpriteCamera")] public Camera m_SpriteCamera;
 
         // UI Fields
         [SerializeField] protected ScreenControl m_ScreenControl;
@@ -52,19 +53,19 @@ namespace CraftSharp
         public bool InputPaused { get; private set; } = false;
         public void ToggleInputPause(bool enable)
         {
-            if (m_CameraController != null && m_PlayerController != null)
+            if (cameraController && m_PlayerController)
             {
                 if (enable)
                 {
                     m_PlayerController.EnableInput();
-                    m_CameraController.EnableCinemachineInput();
+                    cameraController.EnableCinemachineInput();
 
                     InputPaused = false;
                 }
                 else
                 {
                     m_PlayerController.DisableInput();
-                    m_CameraController.DisableCinemachineInput();
+                    cameraController.DisableCinemachineInput();
 
                     InputPaused = true;
                 }
@@ -73,82 +74,82 @@ namespace CraftSharp
 
         public void ToggleCameraZoom(bool enable)
         {
-            if (m_CameraController != null)
+            if (cameraController)
             {
                 if (enable)
                 {
-                    m_CameraController.EnableZoom();
+                    cameraController.EnableZoom();
                 }
                 else
                 {
-                    m_CameraController.DisableZoom();
+                    cameraController.DisableZoom();
                 }
             }
         }
 
-        public void SwitchFirstCameraController()
+        protected void SwitchFirstCameraController()
         {
             if (m_CameraControllerPrefabs.Length == 0) return;
 
-            m_SelectedCameraController = 0;
+            selectedCameraController = 0;
             SwitchCameraController(m_CameraControllerPrefabs[0]);
         }
 
-        public void SwitchCameraControllerBy(int indexOffset)
+        protected void SwitchCameraControllerBy(int indexOffset)
         {
             if (m_CameraControllerPrefabs.Length == 0) return;
 
-            var index = m_SelectedCameraController + indexOffset;
+            var index = selectedCameraController + indexOffset;
             while (index < 0) index += m_CameraControllerPrefabs.Length;
 
-            m_SelectedCameraController = index % m_CameraControllerPrefabs.Length;
-            SwitchCameraController(m_CameraControllerPrefabs[m_SelectedCameraController]);
+            selectedCameraController = index % m_CameraControllerPrefabs.Length;
+            SwitchCameraController(m_CameraControllerPrefabs[selectedCameraController]);
         }
 
         private void SwitchCameraController(GameObject controllerPrefab)
         {
-            var prevControllerObj = m_CameraController == null ? null : m_CameraController.gameObject;
+            var prevControllerObj = !cameraController ? null : cameraController.gameObject;
 
             // Destroy the old one
-            if (prevControllerObj != null)
+            if (prevControllerObj)
             {
                 Destroy(prevControllerObj);
             }
 
             var cameraControllerObj = GameObject.Instantiate(controllerPrefab);
-            m_CameraController = cameraControllerObj.GetComponent<CameraController>();
+            cameraController = cameraControllerObj.GetComponent<CameraController>();
 
             // Assign Cameras
-            m_CameraController.SetCameras(MainCamera, SpriteCamera);
+            cameraController.SetCameras(m_MainCamera, m_SpriteCamera);
 
             // Call player controller handler
-            m_PlayerController.HandleCameraControllerSwitch(m_CameraController);
+            m_PlayerController.HandleCameraControllerSwitch(cameraController);
 
             // Set camera controller for interaction updater
             interactionUpdater.Initialize(this, CameraController);
         }
 
-        public void SwitchFirstPlayerRender(Entity clientEntity)
+        protected void SwitchFirstPlayerRender(Entity clientEntity)
         {
             if (m_PlayerRenderPrefabs.Length == 0) return;
 
-            m_SelectedRenderPrefab = 0;
+            selectedRenderPrefab = 0;
             PlayerController.SwitchPlayerRenderFromPrefab(clientEntity, m_PlayerRenderPrefabs[0]);
         }
 
-        public void SwitchPlayerRenderBy(Entity clientEntity, int indexOffset)
+        protected void SwitchPlayerRenderBy(Entity clientEntity, int indexOffset)
         {
             if (m_PlayerRenderPrefabs.Length == 0) return;
 
-            var index = m_SelectedRenderPrefab + indexOffset;
+            var index = selectedRenderPrefab + indexOffset;
             while (index < 0) index += m_PlayerRenderPrefabs.Length;
 
-            m_SelectedRenderPrefab = index % m_PlayerRenderPrefabs.Length;
-            PlayerController.SwitchPlayerRenderFromPrefab(clientEntity, m_PlayerRenderPrefabs[m_SelectedRenderPrefab]);
+            selectedRenderPrefab = index % m_PlayerRenderPrefabs.Length;
+            PlayerController.SwitchPlayerRenderFromPrefab(clientEntity, m_PlayerRenderPrefabs[selectedRenderPrefab]);
         }
 
         public GameMode GameMode { get; protected set; } = GameMode.Survival;
-        public byte CurrentSlot { get; protected set; } = 0;
+        protected byte CurrentSlot { get; set; } = 0;
 
         public Vector3Int WorldOriginOffset { get; private set; } = Vector3Int.zero;
 
@@ -190,7 +191,7 @@ namespace CraftSharp
         public abstract Guid GetUserUuid();
         public abstract string GetUserUuidStr();
         public abstract string GetSessionID();
-        public abstract double GetServerTPS();
+        public abstract double GetServerTps();
         public abstract float GetTickMilSec();
         public abstract int GetPacketCount();
         // Retrieve gameplay info

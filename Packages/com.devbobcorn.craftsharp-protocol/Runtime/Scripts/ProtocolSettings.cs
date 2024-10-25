@@ -9,7 +9,7 @@ namespace CraftSharp
         public static string BrandInfo => $"CornCraft/{Version}";
 
         public static bool DisplaySystemMessages  { get; set; } =  true;
-        public static bool DisplayXPBarMessages   { get; set; } =  true;
+        public static bool DisplayXpBarMessages   { get; set; } =  true;
         public static bool MarkIllegallySignedMsg { get; set; } = false;
         public static bool MarkLegallySignedMsg   { get; set; } = false;
         public static bool MarkSystemMessage      { get; set; } = false;
@@ -25,12 +25,12 @@ namespace CraftSharp
         public static bool LoginWithSecureProfile { get; set; } = false;
 
         public static string Language { get; set; } = "en_us";
-        public static bool DebugMode { get; set; } = false;
+        public static bool DebugMode { get; set; } = true;
 
         // Custom app variables
-        public static CacheType SessionCaching = CacheType.Disk;
-        public static CacheType ProfileKeyCaching = CacheType.Disk;
-        public static bool ResolveSrvRecords = true;
+        public static readonly CacheType SessionCaching = CacheType.Disk;
+        public static readonly CacheType ProfileKeyCaching = CacheType.Disk;
+        public static readonly bool ResolveSrvRecords = true;
 
         // Proxy setup
         public static bool ProxyEnabledLogin { get; set; } = false;
