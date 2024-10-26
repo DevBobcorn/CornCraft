@@ -688,7 +688,7 @@ namespace CraftSharp.Protocol.Handlers
                         {
                             string message = DataTypes.ReadNextString(packetData);
 
-                            Guid senderUUID;
+                            Guid senderUuid;
                             //Hide system messages or xp bar messages?
                             messageType = DataTypes.ReadNextByte(packetData);
                             if ((messageType == 1 && !ProtocolSettings.DisplaySystemMessages)
@@ -696,10 +696,10 @@ namespace CraftSharp.Protocol.Handlers
                                 break;
 
                             if (protocolVersion >= MC_1_16_5_Version)
-                                senderUUID = DataTypes.ReadNextUUID(packetData);
-                            else senderUUID = Guid.Empty;
+                                senderUuid = DataTypes.ReadNextUUID(packetData);
+                            else senderUuid = Guid.Empty;
 
-                            handler.OnTextReceived(new(message, null, true, messageType, senderUUID));
+                            handler.OnTextReceived(new(message, null, true, messageType, senderUuid));
                         }
                         else if (protocolVersion == MC_1_19_Version) // 1.19
                         {
@@ -714,7 +714,7 @@ namespace CraftSharp.Protocol.Handlers
                                 || (messageType == 2 && !ProtocolSettings.DisplayXpBarMessages))
                                 break;
 
-                            Guid senderUUID = DataTypes.ReadNextUUID(packetData);
+                            Guid senderUuid = DataTypes.ReadNextUUID(packetData);
                             string senderDisplayName = ChatParser.ParseText(DataTypes.ReadNextString(packetData));
 
                             bool hasSenderTeamName = DataTypes.ReadNextBool(packetData);
@@ -731,16 +731,16 @@ namespace CraftSharp.Protocol.Handlers
                             bool verifyResult;
                             if (!isOnlineMode)
                                 verifyResult = false;
-                            else if (senderUUID == handler.GetUserUuid())
+                            else if (senderUuid == handler.GetUserUuid())
                                 verifyResult = true;
                             else
                             {
-                                PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
+                                PlayerInfo? player = handler.GetPlayerInfo(senderUuid);
                                 verifyResult = player != null && player.VerifyMessage(signedChat, timestamp, salt,
                                     ref messageSignature);
                             }
 
-                            ChatMessage chat = new(signedChat, true, messageType, senderUUID, unsignedChatContent,
+                            ChatMessage chat = new(signedChat, true, messageType, senderUuid, unsignedChatContent,
                                 senderDisplayName, senderTeamName, timestamp, messageSignature, verifyResult);
                             handler.OnTextReceived(chat);
                         }
@@ -750,7 +750,7 @@ namespace CraftSharp.Protocol.Handlers
                             byte[]? precedingSignature = DataTypes.ReadNextBool(packetData)
                                 ? DataTypes.ReadNextByteArray(packetData)
                                 : null;
-                            Guid senderUUID = DataTypes.ReadNextUUID(packetData);
+                            Guid senderUuid = DataTypes.ReadNextUUID(packetData);
                             byte[] headerSignature = DataTypes.ReadNextByteArray(packetData);
 
                             string signedChat = DataTypes.ReadNextString(packetData);
@@ -803,7 +803,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             if (string.IsNullOrWhiteSpace(senderDisplayName))
                             {
-                                PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
+                                PlayerInfo? player = handler.GetPlayerInfo(senderUuid);
                                 if (player != null && (player.DisplayName != null || player.Name != null) &&
                                     string.IsNullOrWhiteSpace(senderDisplayName))
                                 {
@@ -818,11 +818,11 @@ namespace CraftSharp.Protocol.Handlers
                             bool verifyResult;
                             if (!isOnlineMode)
                                 verifyResult = false;
-                            else if (senderUUID == handler.GetUserUuid())
+                            else if (senderUuid == handler.GetUserUuid())
                                 verifyResult = true;
                             else
                             {
-                                PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
+                                PlayerInfo? player = handler.GetPlayerInfo(senderUuid);
                                 if (player == null || !player.IsMessageChainLegal())
                                     verifyResult = false;
                                 else
@@ -835,7 +835,7 @@ namespace CraftSharp.Protocol.Handlers
                                 }
                             }
 
-                            ChatMessage chat = new(signedChat, false, chatTypeId, senderUUID, unsignedChatContent,
+                            ChatMessage chat = new(signedChat, false, chatTypeId, senderUuid, unsignedChatContent,
                                 senderDisplayName, senderTeamName, timestamp, headerSignature, verifyResult);
                             if (isOnlineMode && !chat.LacksSender())
                                 Acknowledge(chat);
@@ -846,7 +846,7 @@ namespace CraftSharp.Protocol.Handlers
                             // 1.19.3+
                             // Header section
                             // net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket#write
-                            Guid senderUUID = DataTypes.ReadNextUUID(packetData);
+                            Guid senderUuid = DataTypes.ReadNextUUID(packetData);
                             int index = DataTypes.ReadNextVarInt(packetData);
                             // Signature is fixed size of 256 bytes
                             byte[]? messageSignature = DataTypes.ReadNextBool(packetData)
@@ -865,6 +865,7 @@ namespace CraftSharp.Protocol.Handlers
                             int totalPreviousMessages = DataTypes.ReadNextVarInt(packetData);
                             Tuple<int, byte[]?>[] previousMessageSignatures =
                                 new Tuple<int, byte[]?>[totalPreviousMessages];
+
                             for (int i = 0; i < totalPreviousMessages; i++)
                             {
                                 // net.minecraft.network.message.MessageSignatureData.Indexed#fromBuf
@@ -878,7 +879,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             // Other
                             string? unsignedChatContent = DataTypes.ReadNextBool(packetData)
-                                ? DataTypes.ReadNextString(packetData)
+                                ? dataTypes.ReadNextChat(packetData)
                                 : null;
 
                             MessageFilterType filterType = (MessageFilterType)DataTypes.ReadNextVarInt(packetData);
@@ -889,9 +890,9 @@ namespace CraftSharp.Protocol.Handlers
                             // Network Target
                             // net.minecraft.network.message.MessageType.Serialized#write
                             int chatTypeId = DataTypes.ReadNextVarInt(packetData);
-                            string chatName = DataTypes.ReadNextString(packetData);
+                            string chatName = dataTypes.ReadNextChat(packetData);
                             string? targetName = DataTypes.ReadNextBool(packetData)
-                                ? DataTypes.ReadNextString(packetData)
+                                ? dataTypes.ReadNextChat(packetData)
                                 : null;
 
                             if (!ChatParser.MessageTypeRegistry.TryGetByNumId(chatTypeId, out ChatParser.MessageType messageTypeEnum))
@@ -899,24 +900,17 @@ namespace CraftSharp.Protocol.Handlers
                                 messageTypeEnum = ChatParser.MessageType.CHAT;
                             }
 
-                            Dictionary<string, Json.JSONData> chatInfo =
-                                Json.ParseJson(targetName ?? chatName).Properties;
-                            string senderDisplayName =
-                                (chatInfo.ContainsKey("insertion") ? chatInfo["insertion"] : chatInfo["text"])
-                                .StringValue;
-                            string? senderTeamName = null;
-                            if (targetName != null &&
-                                messageTypeEnum is ChatParser.MessageType.TEAM_MSG_COMMAND_INCOMING or ChatParser.MessageType.TEAM_MSG_COMMAND_OUTGOING)
-                                senderTeamName = Json.ParseJson(targetName).Properties["with"].DataArray[0]
-                                    .Properties["text"].StringValue;
+                            //var chatInfo = Json.ParseJson(targetName ?? chatName).Properties;
+                            var senderDisplayName = chatName;
+                            string? senderTeamName = targetName;
 
                             if (string.IsNullOrWhiteSpace(senderDisplayName))
                             {
-                                PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
+                                var player = handler.GetPlayerInfo(senderUuid);
                                 if (player != null && (player.DisplayName != null || player.Name != null) &&
                                     string.IsNullOrWhiteSpace(senderDisplayName))
                                 {
-                                    senderDisplayName = ChatParser.ParseText(player.DisplayName ?? player.Name);
+                                    senderDisplayName = player.DisplayName ?? player.Name;
                                     if (string.IsNullOrWhiteSpace(senderDisplayName))
                                         senderDisplayName = player.DisplayName ?? player.Name;
                                     else
@@ -929,23 +923,23 @@ namespace CraftSharp.Protocol.Handlers
                                 verifyResult = false;
                             else
                             {
-                                if (senderUUID == handler.GetUserUuid())
+                                if (senderUuid == handler.GetUserUuid())
                                     verifyResult = true;
                                 else
                                 {
-                                    PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
+                                    var player = handler.GetPlayerInfo(senderUuid);
                                     if (player == null || !player.IsMessageChainLegal())
                                         verifyResult = false;
                                     else
                                     {
-                                        verifyResult = player.VerifyMessage(message, senderUUID, player.ChatUuid,
+                                        verifyResult = player.VerifyMessage(message, senderUuid, player.ChatUuid,
                                             index, timestamp, salt, ref messageSignature,
                                             previousMessageSignatures);
                                     }
                                 }
                             }
 
-                            ChatMessage chat = new(message, false, chatTypeId, senderUUID, unsignedChatContent,
+                            ChatMessage chat = new(message, false, chatTypeId, senderUuid, unsignedChatContent,
                                 senderDisplayName, senderTeamName, timestamp, messageSignature, verifyResult);
                             lock (MessageSigningLock)
                                 Acknowledge(chat);
@@ -1082,7 +1076,7 @@ namespace CraftSharp.Protocol.Handlers
                         byte[]? precedingSignature = DataTypes.ReadNextBool(packetData)
                             ? DataTypes.ReadNextByteArray(packetData)
                             : null;
-                        Guid senderUUID = DataTypes.ReadNextUUID(packetData);
+                        Guid senderUuid = DataTypes.ReadNextUUID(packetData);
                         byte[] headerSignature = DataTypes.ReadNextByteArray(packetData);
                         byte[] bodyDigest = DataTypes.ReadNextByteArray(packetData);
 
@@ -1090,11 +1084,11 @@ namespace CraftSharp.Protocol.Handlers
 
                         if (!isOnlineMode)
                             verifyResult = false;
-                        else if (senderUUID == handler.GetUserUuid())
+                        else if (senderUuid == handler.GetUserUuid())
                             verifyResult = true;
                         else
                         {
-                            PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
+                            PlayerInfo? player = handler.GetPlayerInfo(senderUuid);
 
                             if (player == null || !player.IsMessageChainLegal())
                                 verifyResult = false;

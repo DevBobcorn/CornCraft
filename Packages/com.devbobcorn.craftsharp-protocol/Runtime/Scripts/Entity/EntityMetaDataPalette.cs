@@ -81,7 +81,7 @@ namespace CraftSharp
                     { 22, EntityMetaDataType.OptionalGlobalPosition },
                     { 23, EntityMetaDataType.PaintingVariant }
                 }),  // 1.19.3
-                <= ProtocolMinecraft.MC_1_20_Version   => new EntityMetadataPalette(new()
+                <= ProtocolMinecraft.MC_1_20_4_Version   => new EntityMetadataPalette(new()
                 {
                     { 0, EntityMetaDataType.Byte },
                     { 1, EntityMetaDataType.VarInt },
