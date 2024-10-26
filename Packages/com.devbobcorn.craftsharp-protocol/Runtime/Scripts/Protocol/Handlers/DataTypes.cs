@@ -662,7 +662,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             Dictionary<int, object?> data = new();
             byte key = ReadNextByte(cache);
-            byte terminteValue = (byte)0xff; // 1.9+
+            byte terminteValue = (byte) 0xff; // 1.9+
 
             while (key != terminteValue)
             {
@@ -713,11 +713,11 @@ namespace CraftSharp.Protocol.Handlers
                         value = ReadNextString(cache);
                         break;
                     case EntityMetaDataType.Chat: // Chat
-                        value = ReadNextString(cache);
+                        value = ReadNextChat(cache);
                         break;
                     case EntityMetaDataType.OptionalChat: // Optional Chat
                         if (ReadNextBool(cache))
-                            value = ReadNextString(cache);
+                            value = ReadNextChat(cache);
                         break;
                     case EntityMetaDataType.Slot: // Slot
                         value = ReadNextItemSlot(cache, itemPalette);
