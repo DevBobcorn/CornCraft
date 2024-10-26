@@ -173,7 +173,7 @@ namespace CraftSharp
         public override string GetUsername() => DUMMY_USERNAME!;
         public override Guid GetUserUuid() => uuid;
         public override string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
-        public override string GetSessionID() => string.Empty;
+        public override string GetSessionId() => string.Empty;
         public override double GetServerTps() => 20;
         public override int GetPacketCount() => 0;
         public override float GetTickMilSec() => 0.05F;
@@ -288,7 +288,7 @@ namespace CraftSharp
         /// Get a dictionary of online player names and their corresponding UUID
         /// </summary>
         /// <returns>Dictionay of online players, key is UUID, value is Player name</returns>
-        public override Dictionary<string, string> GetOnlinePlayersWithUUID()
+        public override Dictionary<string, string> GetOnlinePlayersWithUuid()
         {
             var uuid2Player = new Dictionary<string, string>();
             lock (onlinePlayers)
@@ -462,7 +462,7 @@ namespace CraftSharp
         public void DummyOnSetSlot(byte inventoryID, short slotID, ItemStack item, int stateId)
         {
             if (inventories.ContainsKey(inventoryID))
-                inventories[inventoryID].StateID = stateId;
+                inventories[inventoryID].StateId = stateId;
 
             // Handle inventoryID -2 - Add item to player inventory without animation
             if (inventoryID == 254)

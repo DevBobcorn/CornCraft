@@ -23,7 +23,7 @@ namespace CraftSharp.Rendering
 
                     // Apply random rotation
                     var meshTransform = itemMeshRenderer.transform;
-                    meshTransform.localEulerAngles = new(0F, (entity!.ID * 350F) % 360F, 0F);
+                    meshTransform.localEulerAngles = new(0F, (entity!.Id * 350F) % 360F, 0F);
 
                     meshTransform.localPosition = new(0.5F, 0F, -0.5F);
                 }

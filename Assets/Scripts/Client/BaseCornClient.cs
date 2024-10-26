@@ -190,7 +190,7 @@ namespace CraftSharp
         public abstract string GetUsername();
         public abstract Guid GetUserUuid();
         public abstract string GetUserUuidStr();
-        public abstract string GetSessionID();
+        public abstract string GetSessionId();
         public abstract double GetServerTps();
         public abstract float GetTickMilSec();
         public abstract int GetPacketCount();
@@ -206,7 +206,7 @@ namespace CraftSharp
         public abstract int GetOwnLatency();
         public abstract PlayerInfo? GetPlayerInfo(Guid uuid);
         public abstract string[] GetOnlinePlayers();
-        public abstract Dictionary<string, string> GetOnlinePlayersWithUUID();
+        public abstract Dictionary<string, string> GetOnlinePlayersWithUuid();
 
         #endregion
 

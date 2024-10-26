@@ -305,7 +305,7 @@ namespace CraftSharp.Protocol
 
         private static LoginResult MicrosoftLogin(Microsoft.LoginResponse msaResponse, out SessionToken session, ref string account)
         {
-            session = new SessionToken() { ClientID = Guid.NewGuid().ToString().Replace("-", "") };
+            session = new SessionToken() { ClientId = Guid.NewGuid().ToString().Replace("-", "") };
 
             try
             {
@@ -318,8 +318,8 @@ namespace CraftSharp.Protocol
                 {
                     var profile = MinecraftWithXbox.GetUserProfile(accessToken);
                     session.PlayerName = profile.UserName;
-                    session.PlayerID = profile.UUID;
-                    session.ID = accessToken;
+                    session.PlayerId = profile.UUID;
+                    session.Id = accessToken;
                     session.RefreshToken = msaResponse.RefreshToken;
                     // Correct the account email if doesn't match
                     account = msaResponse.Email;
@@ -345,7 +345,7 @@ namespace CraftSharp.Protocol
         /// <returns>Returns the status of the token (Valid, Invalid, etc.)</returns>
         public static LoginResult GetTokenValidation(SessionToken session)
         {
-            var payload = JwtPayloadDecode.GetPayload(session.ID);
+            var payload = JwtPayloadDecode.GetPayload(session.Id);
             var json = Json.ParseJson(payload);
             var expTimestamp = long.Parse(json.Properties["exp"].StringValue);
             var now = DateTime.Now;
@@ -374,7 +374,7 @@ namespace CraftSharp.Protocol
             try
             {
                 string result = "";
-                string json_request = "{ \"accessToken\": \"" + JsonEncode(currentsession.ID) + "\", \"clientToken\": \"" + JsonEncode(currentsession.ClientID) + "\", \"selectedProfile\": { \"id\": \"" + JsonEncode(currentsession.PlayerID) + "\", \"name\": \"" + JsonEncode(currentsession.PlayerName) + "\" } }";
+                string json_request = "{ \"accessToken\": \"" + JsonEncode(currentsession.Id) + "\", \"clientToken\": \"" + JsonEncode(currentsession.ClientId) + "\", \"selectedProfile\": { \"id\": \"" + JsonEncode(currentsession.PlayerId) + "\", \"name\": \"" + JsonEncode(currentsession.PlayerName) + "\" } }";
                 int code = DoHTTPSPost("authserver.mojang.com", "/refresh", json_request, ref result);
                 if (code == 200)
                 {
@@ -390,8 +390,8 @@ namespace CraftSharp.Protocol
                             && loginResponse.Properties["selectedProfile"].Properties.ContainsKey("id")
                             && loginResponse.Properties["selectedProfile"].Properties.ContainsKey("name"))
                         {
-                            session.ID = loginResponse.Properties["accessToken"].StringValue;
-                            session.PlayerID = loginResponse.Properties["selectedProfile"].Properties["id"].StringValue;
+                            session.Id = loginResponse.Properties["accessToken"].StringValue;
+                            session.PlayerId = loginResponse.Properties["selectedProfile"].Properties["id"].StringValue;
                             session.PlayerName = loginResponse.Properties["selectedProfile"].Properties["name"].StringValue;
                             return LoginResult.Success;
                         }

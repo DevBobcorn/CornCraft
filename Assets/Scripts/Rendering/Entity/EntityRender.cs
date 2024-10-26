@@ -182,7 +182,7 @@ namespace CraftSharp.Rendering
                 _visualTransform = transform;
             }
 
-            NumeralId = source.ID;
+            NumeralId = source.Id;
             UUID = source.UUID;
             Name = source.Name;
             CustomNameJson = source.CustomNameJson;
