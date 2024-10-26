@@ -173,7 +173,7 @@ namespace CraftSharp.UI
                 // Enter offline mode
                 CornApp.Notify(Translations.Get("mcc.offline"));
                 result = ProtocolHandler.LoginResult.Success;
-                session.PlayerID = "0";
+                session.PlayerId = "0";
                 session.PlayerName = account;
             }
             else
@@ -274,7 +274,7 @@ namespace CraftSharp.UI
                     if (playerKeyPair == null || playerKeyPair.NeedRefresh())
                     {
                         Debug.Log(Translations.Get("mcc.fetching_key"));
-                        playerKeyPair = KeyUtils.GetNewProfileKeys(session.ID);
+                        playerKeyPair = KeyUtils.GetNewProfileKeys(session.Id);
                         if (ProtocolSettings.ProfileKeyCaching != CacheType.None && playerKeyPair != null)
                         {
                             KeysCache.Store(accountLower, playerKeyPair);
@@ -283,7 +283,7 @@ namespace CraftSharp.UI
                 }
 
                 if (ProtocolSettings.DebugMode)
-                    Debug.Log(Translations.Get("debug.session_id", session.ID));
+                    Debug.Log(Translations.Get("debug.session_id", session.Id));
 
                 // Get server version
                 Debug.Log(Translations.Get("mcc.retrieve")); // Retrieve server information

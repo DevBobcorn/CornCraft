@@ -85,18 +85,18 @@ namespace CraftSharp.Rendering
         {
             // If the numeral id is occupied by an entity already,
             // destroy this entity first
-            if (entityRenders.ContainsKey(entity.ID))
+            if (entityRenders.ContainsKey(entity.Id))
             {
-                if (entityRenders[entity.ID] != null)
+                if (entityRenders[entity.Id] != null)
                 {
-                    entityRenders[entity.ID].Unload();
+                    entityRenders[entity.Id].Unload();
                 }
                 
-                entityRenders.Remove(entity.ID);
+                entityRenders.Remove(entity.Id);
 
-                if (nearbyEntities.ContainsKey(entity.ID))
+                if (nearbyEntities.ContainsKey(entity.Id))
                 {
-                    nearbyEntities.Remove(entity.ID);
+                    nearbyEntities.Remove(entity.Id);
                 }
             }
 
@@ -116,9 +116,9 @@ namespace CraftSharp.Rendering
                 var entityObj    = GameObject.Instantiate(entityPrefab);
                 var entityRender = entityObj!.GetComponent<EntityRender>();
 
-                entityRenders.Add(entity.ID, entityRender);
+                entityRenders.Add(entity.Id, entityRender);
 
-                entityObj.name = $"{entity.ID} {entity.Type}";
+                entityObj.name = $"{entity.Id} {entity.Type}";
                 entityObj.transform.parent = transform;
 
                 // Initialize the entity

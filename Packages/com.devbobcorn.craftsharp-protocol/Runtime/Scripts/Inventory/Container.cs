@@ -9,9 +9,9 @@ namespace CraftSharp.Inventory
     public class Container
     {
         /// <summary>
-        /// ID of the container on the server
+        /// Id of the container on the server
         /// </summary>
-        public int ID;
+        public int Id;
 
         /// <summary>
         /// Type of container
@@ -26,7 +26,7 @@ namespace CraftSharp.Inventory
         /// <summary>
         /// state of container
         /// </summary>
-        public int StateID;
+        public int StateId;
 
         /// <summary>
         /// Container Items
@@ -49,7 +49,7 @@ namespace CraftSharp.Inventory
         /// <param name="title">Container Title</param>
         public Container(int id, ContainerType type, string title)
         {
-            ID = id;
+            Id = id;
             Type = type;
             Title = title;
             Items = new Dictionary<int, ItemStack>();
@@ -64,7 +64,7 @@ namespace CraftSharp.Inventory
         /// <param name="items">Container Items (key: slot ID, value: item info)</param>
         public Container(int id, ContainerType type, string title, Dictionary<int, ItemStack> items)
         {
-            ID = id;
+            Id = id;
             Type = type;
             Title = title;
             Items = items;
@@ -78,7 +78,7 @@ namespace CraftSharp.Inventory
         /// <param name="title">Container Title</param>
         public Container(int id, int typeID, string title)
         {
-            ID = id;
+            Id = id;
             Type = GetContainerType(typeID);
             Title = title;
             Items = new Dictionary<int, ItemStack>();
@@ -90,7 +90,7 @@ namespace CraftSharp.Inventory
         /// <param name="type">Container Type</param>
         public Container(ContainerType type)
         {
-            ID = -1;
+            Id = -1;
             Type = type;
             Title = null;
             Items = new Dictionary<int, ItemStack>();
@@ -103,7 +103,7 @@ namespace CraftSharp.Inventory
         /// <param name="items">Container Items (key: slot ID, value: item info)</param>
         public Container(ContainerType type, Dictionary<int, ItemStack> items)
         {
-            ID = -1;
+            Id = -1;
             Type = type;
             Title = null;
             Items = items;

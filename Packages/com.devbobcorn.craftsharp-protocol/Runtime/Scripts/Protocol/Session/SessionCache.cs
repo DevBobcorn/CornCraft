@@ -164,7 +164,7 @@ namespace CraftSharp.Protocol.Session
                                         clientID
                                     ));
                                     if (ProtocolSettings.DebugMode)
-                                        Debug.Log(Translations.Get("cache.loaded", login, session.ID));
+                                        Debug.Log(Translations.Get("cache.loaded", login, session.Id));
                                     sessions[login] = session;
                                 }
                                 catch (InvalidDataException) { /* Not a valid session */ }
@@ -188,7 +188,7 @@ namespace CraftSharp.Protocol.Session
                         foreach (KeyValuePair<string, SessionToken> item in sessionsTemp)
                         {
                             if (ProtocolSettings.DebugMode)
-                                Debug.Log(Translations.Get("cache.loaded", item.Key, item.Value.ID));
+                                Debug.Log(Translations.Get("cache.loaded", item.Key, item.Value.Id));
                             sessions[item.Key] = item.Value;
                         }
                     }
@@ -223,7 +223,7 @@ namespace CraftSharp.Protocol.Session
                                     string login = keyValue[0].ToLower();
                                     SessionToken session = SessionToken.FromString(keyValue[1]);
                                     if (ProtocolSettings.DebugMode)
-                                        Debug.Log(Translations.Get("cache.loaded", login, session.ID));
+                                        Debug.Log(Translations.Get("cache.loaded", login, session.Id));
                                     sessions[login] = session;
                                 }
                                 catch (InvalidDataException e)

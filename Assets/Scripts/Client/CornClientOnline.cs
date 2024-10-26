@@ -101,8 +101,8 @@ namespace CraftSharp
         {
             var session = info.Session;
 
-            this.sessionId = session.ID;
-            if (!Guid.TryParse(session.PlayerID, out this.uuid))
+            this.sessionId = session.Id;
+            if (!Guid.TryParse(session.PlayerId, out this.uuid))
                 this.uuid = Guid.Empty;
             this.username = session.PlayerName;
             this.host = info.ServerIp;
@@ -487,7 +487,7 @@ namespace CraftSharp
         public override string GetUsername() => username!;
         public override Guid GetUserUuid() => uuid;
         public override string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
-        public override string GetSessionID() => sessionId!;
+        public override string GetSessionId() => sessionId!;
         public override double GetServerTps() => averageTPS;
         public override int GetPacketCount() => packetCount;
         public override float GetTickMilSec() => (float)(1D / averageTPS);
@@ -643,7 +643,7 @@ namespace CraftSharp
         /// Get a dictionary of online player names and their corresponding UUID
         /// </summary>
         /// <returns>Dictionay of online players, key is UUID, value is Player name</returns>
-        public override Dictionary<string, string> GetOnlinePlayersWithUUID()
+        public override Dictionary<string, string> GetOnlinePlayersWithUuid()
         {
             var uuid2Player = new Dictionary<string, string>();
             lock (onlinePlayers)
@@ -731,12 +731,12 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Send the Entity Action packet with the Specified ID
+        /// Send the Entity Action packet with the Specified Id
         /// </summary>
         /// <returns>TRUE if the item was successfully used</returns>
         public override bool SendEntityAction(EntityActionType entityAction)
         {
-            return InvokeOnNetMainThread(() => handler!.SendEntityAction(clientEntity.ID, (int)entityAction));
+            return InvokeOnNetMainThread(() => handler!.SendEntityAction(clientEntity.Id, (int)entityAction));
         }
 
         /// <summary>
@@ -778,9 +778,9 @@ namespace CraftSharp
         /// </summary>
         /// <param name="inventory">The container where the item is located</param>
         /// <param name="item">Items to be processed</param>
-        /// <param name="slotId">The ID of the slot of the item to be processed</param>
+        /// <param name="slotId">The Id of the slot of the item to be processed</param>
         /// <param name="curItem">The slot that was put down</param>
-        /// <param name="curId">The ID of the slot being put down</param>
+        /// <param name="curId">The Id of the slot being put down</param>
         /// <param name="changedSlots">Record changes</param>
         /// <returns>Whether to fully merge</returns>
         private static bool TryMergeSlot(Container inventory, ItemStack item, int slotId, ItemStack curItem, int curId, List<Tuple<short, ItemStack?>> changedSlots)
@@ -817,8 +817,8 @@ namespace CraftSharp
         /// </summary>
         /// <param name="inventory">The container where the item is located</param>
         /// <param name="item">Items to be processed</param>
-        /// <param name="slotId">The ID of the slot of the item to be processed</param>
-        /// <param name="newSlotId">ID of the new slot</param>
+        /// <param name="slotId">The Id of the slot of the item to be processed</param>
+        /// <param name="newSlotId">Id of the new slot</param>
         /// <param name="changedSlots">Record changes</param>
         private static void StoreInNewSlot(Container inventory, ItemStack item, int slotId, int newSlotId, List<Tuple<short, ItemStack?>> changedSlots)
         {
@@ -867,7 +867,7 @@ namespace CraftSharp
             if (inventories.ContainsKey(windowId) && inventories[windowId].Items.ContainsKey(slotId))
                 item = inventories[windowId].Items[slotId];
 
-            List<Tuple<short, ItemStack?>> changedSlots = new(); // List<Slot ID, Changed Items>
+            List<Tuple<short, ItemStack?>> changedSlots = new(); // List<Slot Id, Changed Items>
 
             // Update our inventory base on action type
             Container inventory = GetInventory(windowId)!;
@@ -1577,7 +1577,7 @@ namespace CraftSharp
                     break;
             }
 
-            return handler!.SendWindowAction(windowId, slotId, action, item, changedSlots, inventories[windowId].StateID);
+            return handler!.SendWindowAction(windowId, slotId, action, item, changedSlots, inventories[windowId].StateId);
         }
 
         /// <summary>
@@ -1601,13 +1601,13 @@ namespace CraftSharp
         /// <returns>TRUE if animation successfully done</returns>
         public bool DoAnimation(int animation)
         {
-            return InvokeOnNetMainThread(() => handler!.SendAnimation(animation, clientEntity.ID));
+            return InvokeOnNetMainThread(() => handler!.SendAnimation(animation, clientEntity.Id));
         }
 
         /// <summary>
         /// Close the specified inventory window
         /// </summary>
-        /// <param name="windowId">Window ID</param>
+        /// <param name="windowId">Window Id</param>
         /// <returns>TRUE if the window was successfully closed</returns>
         /// <remarks>Sending close window for inventory 0 can cause server to update our inventory if there are any item in the crafting area</remarks>
         public bool CloseInventory(int windowId)
@@ -1641,21 +1641,21 @@ namespace CraftSharp
         /// <summary>
         /// Interact with an entity
         /// </summary>
-        /// <param name="EntityID"></param>
+        /// <param name="entityId"></param>
         /// <param name="type">0: interact, 1: attack, 2: interact at</param>
         /// <param name="hand">Hand.MainHand or Hand.OffHand</param>
         /// <returns>TRUE if interaction succeeded</returns>
-        public bool InteractEntity(int entityID, int type, Hand hand = Hand.MainHand)
+        public bool InteractEntity(int entityId, int type, Hand hand = Hand.MainHand)
         {
             if (InvokeRequired)
-                return InvokeOnNetMainThread(() => InteractEntity(entityID, type, hand));
+                return InvokeOnNetMainThread(() => InteractEntity(entityId, type, hand));
 
-            if (EntityRenderManager.HasEntityRender(entityID))
+            if (EntityRenderManager.HasEntityRender(entityId))
             {
                 if (type == 0)
-                    return handler!.SendInteractEntity(entityID, type, (int)hand);
+                    return handler!.SendInteractEntity(entityId, type, (int)hand);
                 else
-                    return handler!.SendInteractEntity(entityID, type);
+                    return handler!.SendInteractEntity(entityId, type);
             }
             else return false;
         }
@@ -1971,12 +1971,12 @@ namespace CraftSharp
         /// <summary>
         /// Called tab complete suggestion is received
         /// </summary>
-        public void OnTabComplete(int completionStart, int completionLength, List<string> completeResults)
+        public void OnTabCompleteDone(int completionStart, int completionLength, string[] completeResults)
         {
-            if (completeResults.Count > 0)
+            if (completeResults.Length > 0)
             {
                 EventManager.Instance.BroadcastOnUnityThread<AutoCompletionEvent>(
-                        new(completionStart, completionLength, completeResults.ToArray()));
+                        new(completionStart, completionLength, completeResults));
             }
             else
             {
@@ -1988,14 +1988,14 @@ namespace CraftSharp
         /// When an inventory is opened
         /// </summary>
         /// <param name="inventory">The inventory</param>
-        /// <param name="inventoryID">Inventory ID</param>
-        public void OnInventoryOpen(int inventoryID, Container inventory)
+        /// <param name="inventoryId">Inventory Id</param>
+        public void OnInventoryOpen(int inventoryId, Container inventory)
         {
-            inventories[inventoryID] = inventory;
+            inventories[inventoryId] = inventory;
 
-            if (inventoryID != 0)
+            if (inventoryId != 0)
             {
-                Debug.Log(Translations.Get("extra.inventory_open", inventoryID, inventory.Title));
+                Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventory.Title));
                 Debug.Log(Translations.Get("extra.inventory_interact"));
             }
         }
@@ -2003,41 +2003,41 @@ namespace CraftSharp
         /// <summary>
         /// When an inventory is close
         /// </summary>
-        /// <param name="inventoryID">Inventory ID</param>
-        public void OnInventoryClose(int inventoryID)
+        /// <param name="inventoryId">Inventory Id</param>
+        public void OnInventoryClose(int inventoryId)
         {
-            if (inventories.ContainsKey(inventoryID))
+            if (inventories.ContainsKey(inventoryId))
             {
-                if (inventoryID == 0)
+                if (inventoryId == 0)
                     inventories[0].Items.Clear(); // Don't delete player inventory
                 else
-                    inventories.Remove(inventoryID);
+                    inventories.Remove(inventoryId);
             }
 
-            if (inventoryID != 0)
+            if (inventoryId != 0)
             {
-                Debug.Log(Translations.Get("extra.inventory_close", inventoryID));
+                Debug.Log(Translations.Get("extra.inventory_close", inventoryId));
             }
         }
 
         /// <summary>
         /// When received window items from server.
         /// </summary>
-        /// <param name="inventoryID">Inventory ID</param>
-        /// <param name="itemList">Item list, key = slot ID, value = Item information</param>
-        public void OnWindowItems(byte inventoryID, Dictionary<int, ItemStack> itemList, int stateId)
+        /// <param name="inventoryId">Inventory Id</param>
+        /// <param name="itemList">Item list, key = slot Id, value = Item information</param>
+        public void OnWindowItems(byte inventoryId, Dictionary<int, ItemStack> itemList, int stateId)
         {
-            if (inventories.ContainsKey(inventoryID))
+            if (inventories.ContainsKey(inventoryId))
             {
-                var container = inventories[inventoryID];
+                var container = inventories[inventoryId];
 
                 container.Items = itemList;
-                container.StateID = stateId;
+                container.StateId = stateId;
                 
                 Loom.QueueOnMainThread(() => {
                     foreach (var pair in itemList)
                     {
-                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryID, pair.Key, pair.Value));
+                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, pair.Key, pair.Value));
 
                         if (container.IsHotbar(pair.Key, out int hotbarSlot))
                         {
@@ -2051,21 +2051,21 @@ namespace CraftSharp
         /// <summary>
         /// When a slot is set inside window items
         /// </summary>
-        /// <param name="inventoryID">Window ID</param>
-        /// <param name="slotID">Slot ID</param>
+        /// <param name="inventoryId">Window Id</param>
+        /// <param name="slotId">Slot Id</param>
         /// <param name="item">Item (may be null for empty slot)</param>
-        public void OnSetSlot(byte inventoryID, short slotID, ItemStack item, int stateId)
+        public void OnSetSlot(byte inventoryId, short slotId, ItemStack item, int stateId)
         {
-            if (inventories.ContainsKey(inventoryID))
-                inventories[inventoryID].StateID = stateId;
+            if (inventories.ContainsKey(inventoryId))
+                inventories[inventoryId].StateId = stateId;
 
-            // Handle inventoryID -2 - Add item to player inventory without animation
-            if (inventoryID == 254)
-                inventoryID = 0;
+            // Handle inventoryId -2 - Add item to player inventory without animation
+            if (inventoryId == 254)
+                inventoryId = 0;
             // Handle cursor item
-            if (inventoryID == 255 && slotID == -1)
+            if (inventoryId == 255 && slotId == -1)
             {
-                //inventoryID = 0; // Prevent key not found for some bots relied to this event
+                //inventoryId = 0; // Prevent key not found for some bots relied to this event
                 if (inventories.ContainsKey(0))
                 {
                     if (item != null)
@@ -2076,21 +2076,21 @@ namespace CraftSharp
             }
             else
             {
-                if (inventories.ContainsKey(inventoryID))
+                if (inventories.ContainsKey(inventoryId))
                 {
-                    var container = inventories[inventoryID];
+                    var container = inventories[inventoryId];
                     
                     if (item == null || item.IsEmpty)
                     {
-                        if (container.Items.ContainsKey(slotID))
-                            container.Items.Remove(slotID);
+                        if (container.Items.ContainsKey(slotId))
+                            container.Items.Remove(slotId);
                     }
-                    else container.Items[slotID] = item;
+                    else container.Items[slotId] = item;
 
                     Loom.QueueOnMainThread(() => {
-                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryID, slotID, item));
+                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slotId, item));
 
-                        if (container.IsHotbar(slotID, out int hotbarSlot))
+                        if (container.IsHotbar(slotId, out int hotbarSlot))
                         {
                             EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
                             if (hotbarSlot == CurrentSlot) // Updating held item
@@ -2105,13 +2105,13 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Set client player's ID for later receiving player's own properties
+        /// Set client player's Id for later receiving player's own properties
         /// </summary>
-        /// <param name="entityID">Player Entity ID</param>
-        public void OnReceivePlayerEntityID(int entityID)
+        /// <param name="entityId">Player Entity Id</param>
+        public void OnReceivePlayerEntityId(int entityId)
         {
-            clientEntity.ID = entityID;
-            //Debug.Log($"Client entity id received: {entityID}");
+            clientEntity.Id = entityId;
+            //Debug.Log($"Client entity id received: {entityId}");
         }
 
         /// <summary>
@@ -2177,29 +2177,36 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called when an entity effects
+        /// Called when the Entity use effects
         /// </summary>
-        public void OnEntityEffect(int entityid, Effects effect, int amplifier, int duration, byte flags, bool hasFactorData, Dictionary<string, object>? factorCodec) { }
+        /// <param name="entityId">Entity Id</param>
+        /// <param name="effect">Effect Id</param>
+        /// <param name="amplifier">Effect amplifier</param>
+        /// <param name="duration">Effect duration</param>
+        /// <param name="flags">Effect flags</param>
+        /// <param name="hasFactorData">Has factor data</param>
+        /// <param name="factorCodec">FactorCodec</param>
+        public void OnEntityEffect(int entityId, Effects effect, int amplifier, int duration, byte flags, bool hasFactorData, Dictionary<string, object>? factorCodec) { }
 
         /// <summary>
         /// Called when a player spawns or enters the client's render distance
         /// </summary>
-        public void OnSpawnPlayer(int entityID, Guid uuid, Location location, byte Yaw, byte Pitch)
+        public void OnSpawnPlayer(int entityId, Guid uuid, Location location, byte Yaw, byte Pitch)
         {
             string? playerName = null;
             if (onlinePlayers.ContainsKey(uuid))
                 playerName = onlinePlayers[uuid].Name;
-            Entity playerEntity = new(entityID, EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID), location, uuid, playerName);
+            Entity playerEntity = new(entityId, EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID), location, uuid, playerName);
             OnSpawnEntity(playerEntity);
         }
 
         /// <summary>
         /// Called on Entity Equipment
         /// </summary>
-        /// <param name="entityid"> Entity ID</param>
-        /// <param name="slot"> Equipment slot. 0: main hand, 1: off hand, 2–5: armor slot (2: boots, 3: leggings, 4: chestplate, 5: helmet)</param>
-        /// <param name="item"> Item)</param>
-        public void OnEntityEquipment(int entityid, int slot, ItemStack item)
+        /// <param name="entityId">Entity Id</param>
+        /// <param name="slot">Equipment slot. 0: main hand, 1: off hand, 2–5: armor slot (2: boots, 3: leggings, 4: chestplate, 5: helmet)</param>
+        /// <param name="item">Item</param>
+        public void OnEntityEquipment(int entityId, int slot, ItemStack item)
         {
             // TODO
         }
@@ -2207,7 +2214,6 @@ namespace CraftSharp
         /// <summary>
         /// Called when the Game Mode has been updated for a player
         /// </summary>
-        /// <param name="playername">Player Name</param>
         /// <param name="uuid">Player UUID (Empty for initial gamemode on login)</param>
         /// <param name="gamemode">New Game Mode (0: Survival, 1: Creative, 2: Adventure, 3: Spectator).</param>
         public void OnGamemodeUpdate(Guid uuid, int gamemode)
@@ -2241,82 +2247,74 @@ namespace CraftSharp
         /// <summary>
         /// Called when entities dead/despawn.
         /// </summary>
-        public void OnDestroyEntities(int[] Entities)
+        public void OnDestroyEntities(int[] entities)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager.RemoveEntityRenders(Entities);
+                EntityRenderManager.RemoveEntityRenders(entities);
             });
         }
 
         /// <summary>
         /// Called when an entity's position changed within 8 block of its previous position.
         /// </summary>
-        /// <param name="EntityID">Entity ID</param>
-        /// <param name="Dx">Delta X</param>
-        /// <param name="Dy">Delta Y</param>
-        /// <param name="Dz">Delta Z</param>
+        /// <param name="entityId">Entity Id</param>
+        /// <param name="dx">Delta X</param>
+        /// <param name="dy">Delta Y</param>
+        /// <param name="dz">Delta Z</param>
         /// <param name="onGround">Whether the entity is grounded</param>
-        public void OnEntityPosition(int EntityID, double Dx, double Dy, double Dz, bool onGround)
+        public void OnEntityPosition(int entityId, double dx, double dy, double dz, bool onGround)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager.MoveEntityRender(EntityID, new(Dx, Dy, Dz));
+                EntityRenderManager.MoveEntityRender(entityId, new(dx, dy, dz));
             });
         }
 
         /// <summary>
         /// Called when an entity's yaw/pitch changed.
         /// </summary>
-        /// <param name="EntityID">Entity ID</param>
+        /// <param name="entityId">Entity Id</param>
         /// <param name="yaw">New yaw</param>
         /// <param name="pitch">New pitch</param>
         /// <param name="onGround">Whether the entity is grounded</param>
-        public void OnEntityRotation(int EntityID, byte yaw, byte pitch, bool onGround)
+        public void OnEntityRotation(int entityId, byte yaw, byte pitch, bool onGround)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager.RotateEntityRender(EntityID, yaw, pitch);
+                EntityRenderManager.RotateEntityRender(entityId, yaw, pitch);
             });
         }
 
         /// <summary>
         /// Called when an entity's head yaw changed.
         /// </summary>
-        /// <param name="EntityID">Entity ID</param>
+        /// <param name="entityId">Entity Id</param>
         /// <param name="headYaw">New head yaw</param>
-        public void OnEntityHeadLook(int EntityID, byte headYaw)
+        public void OnEntityHeadLook(int entityId, byte headYaw)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager.RotateEntityRenderHead(EntityID, headYaw);
+                EntityRenderManager.RotateEntityRenderHead(entityId, headYaw);
             });
         }
 
-        /// <summary>
-        /// Called when an entity moved over 8 block.
-        /// </summary>
-        /// <param name="EntityID"></param>
-        /// <param name="X">New X</param>
-        /// <param name="Y">New Y</param>
-        /// <param name="Z">New Z</param>
-        /// <param name="onGround"></param>
-        public void OnEntityTeleport(int EntityID, double X, double Y, double Z, bool onGround)
+        public void OnEntityTeleport(int entityId, double X, double Y, double Z, bool onGround)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager.TeleportEntityRender(EntityID, new(X, Y, Z));
+                EntityRenderManager.TeleportEntityRender(entityId, new(X, Y, Z));
             });
         }
 
         /// <summary>
         /// Called when received entity properties from server.
         /// </summary>
-        /// <param name="EntityID"></param>
+        /// <param name="entityId"></param>
         /// <param name="prop"></param>
-        public void OnEntityProperties(int EntityID, Dictionary<string, double> prop) { }
+        public void OnEntityProperties(int entityId, Dictionary<string, double> prop) { }
 
         /// <summary>
         /// Called when the status of an entity have been changed
         /// </summary>
-        /// <param name="entityID">Entity ID</param>
-        /// <param name="status">Status ID</param>
-        public void OnEntityStatus(int entityID, byte status) { }
+        /// <param name="entityId">Entity Id</param>
+        /// <param name="status">Status Id</param>
+        public void OnEntityStatus(int entityId, byte status) { }
 
         /// <summary>
         /// Called when server sent a Time Update packet.
@@ -2428,12 +2426,13 @@ namespace CraftSharp
                     PlayerActionHelper.GetItemActionType(newItem)));
         }
 
+        /// <summary>
         /// Called when an update of the map is sent by the server, take a look at https://wiki.vg/Protocol#Map_Data for more info on the fields
         /// Map format and colors: https://minecraft.fandom.com/wiki/Map_item_format
         /// </summary>
-        /// <param name="mapId">Map ID of the map being modified</param>
+        /// <param name="mapId">Map Id of the map being modified</param>
         /// <param name="scale">A scale of the Map, from 0 for a fully zoomed-in map (1 block per pixel) to 4 for a fully zoomed-out map (16 blocks per pixel)</param>
-        /// <param name="trackingposition">Specifies whether player and item frame icons are shown </param>
+        /// <param name="trackingPosition">Specifies whether player and item frame icons are shown </param>
         /// <param name="locked">True if the map has been locked in a cartography table </param>
         /// <param name="icons">A list of MapIcon objects of map icons, send only if trackingPosition is true</param>
         /// <param name="colsUpdated">Numbs of columns that were updated (map width) (NOTE: If it is 0, the next fields are not used/are set to default values of 0 and null respectively)</param>
@@ -2446,14 +2445,14 @@ namespace CraftSharp
         /// <summary>
         /// Received some Title from the server
         /// <param name="action"> 0 = set title, 1 = set subtitle, 3 = set action bar, 4 = set times and display, 4 = hide, 5 = reset</param>
-        /// <param name="titletext"> title text</param>
-        /// <param name="subtitletext"> suntitle text</param>
-        /// <param name="actionbartext"> action bar text</param>
-        /// <param name="fadein"> Fade In</param>
+        /// <param name="titleText"> title text</param>
+        /// <param name="subtitleText"> suntitle text</param>
+        /// <param name="actionbarText"> action bar text</param>
+        /// <param name="fadeIn"> Fade In</param>
         /// <param name="stay"> Stay</param>
-        /// <param name="fadeout"> Fade Out</param>
+        /// <param name="fadeOut"> Fade Out</param>
         /// <param name="json"> json text</param>
-        public void OnTitle(int action, string titletext, string subtitletext, string actionbartext, int fadein, int stay, int fadeout, string json) { }
+        public void OnTitle(int action, string titleText, string subtitleText, string actionbarText, int fadeIn, int stay, int fadeOut, string json) { }
 
         /// <summary>
         /// Called when coreboardObjective
@@ -2485,24 +2484,24 @@ namespace CraftSharp
         /// <summary>
         /// Called when the health of an entity changed
         /// </summary>
-        /// <param name="entityID">Entity ID</param>
+        /// <param name="entityId">Entity Id</param>
         /// <param name="health">The health of the entity</param>
-        public void OnEntityHealth(int entityID, float health)
+        public void OnEntityHealth(int entityId, float health)
         {
             Loom.QueueOnMainThread(() => {
-                EntityRenderManager.UpdateEntityHealth(entityID, health);
+                EntityRenderManager.UpdateEntityHealth(entityId, health);
             });
         }
 
         /// <summary>
         /// Called when the metadata of an entity changed
         /// </summary>
-        /// <param name="entityID">Entity ID</param>
+        /// <param name="entityId">Entity Id</param>
         /// <param name="metadata">The metadata of the entity</param>
-        public void OnEntityMetadata(int entityID, Dictionary<int, object?> metadata)
+        public void OnEntityMetadata(int entityId, Dictionary<int, object?> metadata)
         {
             Loom.QueueOnMainThread(() => {
-                var entity = EntityRenderManager.GetEntityRender(entityID);
+                var entity = EntityRenderManager.GetEntityRender(entityId);
 
                 if (entity != null)
                 {
@@ -2534,18 +2533,18 @@ namespace CraftSharp
         /// <summary>
         /// Called when tradeList is recieved after interacting with villager
         /// </summary>
-        /// <param name="windowID">Window ID</param>
+        /// <param name="windowId">Window Id</param>
         /// <param name="trades">List of trades.</param>
         /// <param name="villagerInfo">Contains Level, Experience, IsRegularVillager and CanRestock .</param>
-        public void OnTradeList(int windowID, List<VillagerTrade> trades, VillagerInfo villagerInfo) { }
+        public void OnTradeList(int windowId, List<VillagerTrade> trades, VillagerInfo villagerInfo) { }
 
         /// <summary>
         /// Called every player break block in gamemode 0
         /// </summary>
-        /// <param name="entityId">Player ID</param>
-        /// <param name="location">Block location</param>
+        /// <param name="entityId">Player Id</param>
+        /// <param name="blockLoc">Block location</param>
         /// <param name="stage">Destroy stage, maximum 255</param>
-        public void OnBlockBreakAnimation(int entityId, Location location, byte stage)
+        public void OnBlockBreakAnimation(int entityId, BlockLoc blockLoc, byte stage)
         {
             // TODO
         }
@@ -2553,9 +2552,9 @@ namespace CraftSharp
         /// <summary>
         /// Called every animations of the hit and place block
         /// </summary>
-        /// <param name="entityID">Player ID</param>
+        /// <param name="entityId">Player Id</param>
         /// <param name="animation">0 = LMB, 1 = RMB (RMB Corrent not work)</param>
-        public void OnEntityAnimation(int entityID, byte animation)
+        public void OnEntityAnimation(int entityId, byte animation)
         {
             // TODO
         }
@@ -2574,7 +2573,7 @@ namespace CraftSharp
         /// <summary>
         /// Called when a Synchronization sequence is recevied, this sequence need to be sent when breaking or placing blocks
         /// </summary>
-        /// <param name="sequenceId">Sequence ID</param>
+        /// <param name="sequenceId">Sequence Id</param>
         public void OnBlockChangeAck(int sequenceId)
         {
             this.sequenceId = sequenceId;
