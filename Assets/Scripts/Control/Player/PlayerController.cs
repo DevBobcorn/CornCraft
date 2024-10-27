@@ -101,7 +101,7 @@ namespace CraftSharp.Control
         /// </summary>
         public bool IsGrounded2Send { get; private set; }
 
-        public void SwitchPlayerRenderFromPrefab(Entity entity, GameObject renderPrefab)
+        public void SwitchPlayerRenderFromPrefab(EntityData entity, GameObject renderPrefab)
         {
             GameObject renderObj;
             if (renderPrefab.TryGetComponent(out Animator _)) // Model prefab, wrap it up
@@ -117,7 +117,7 @@ namespace CraftSharp.Control
             SwitchPlayerRender(entity, renderObj);
         }
 
-        private void SwitchPlayerRender(Entity entity, GameObject renderObj)
+        private void SwitchPlayerRender(EntityData entity, GameObject renderObj)
         {
             var prevRender = m_PlayerRender;
 
@@ -134,7 +134,7 @@ namespace CraftSharp.Control
             if (renderObj.TryGetComponent<EntityRender>(out m_PlayerRender))
             {
                 // Initialize head yaw to look forward
-                m_PlayerRender.HeadYaw.Value = Entity.GetHeadYawFromByte(127); // i.e. -90F
+                m_PlayerRender.HeadYaw.Value = EntityData.GetHeadYawFromByte(127); // i.e. -90F
                 m_PlayerRender.UUID = entity.UUID;
                 m_PlayerRender.transform.SetParent(transform, false);
 

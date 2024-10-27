@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainRigidbody: {fileID: 4643050124253007054}
-  _visualTransform: {fileID: 0}
+  _visualTransform: {fileID: 4243557724092460427}
 --- !u!114 &737679620444507336
 MonoBehaviour:
   m_ObjectHideFlags: 0

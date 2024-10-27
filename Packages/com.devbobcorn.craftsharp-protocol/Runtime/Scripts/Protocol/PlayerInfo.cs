@@ -23,10 +23,6 @@ namespace CraftSharp.Protocol
 
         public bool Listed = true;
 
-        // Entity info
-
-        public Entity? entity;
-
         // For message signature
 
         public int MessageIndex = -1;

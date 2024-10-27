@@ -398,7 +398,15 @@ namespace CraftSharp.Protocol
             if (nbt.Count == 1 && nbt.TryGetValue("", out object? rootMessage))
             {
                 // Nameless root tag
-                return (string)rootMessage;
+                //return (string)rootMessage;
+                if (rootMessage is string rootString)
+                {
+                    return rootString;
+                }
+                else
+                {
+                    return rootMessage is null ? "<null>" : rootMessage.ToString();
+                }
             }
 
             string message = string.Empty;

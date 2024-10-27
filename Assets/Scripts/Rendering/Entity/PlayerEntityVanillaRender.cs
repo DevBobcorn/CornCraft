@@ -9,7 +9,7 @@ namespace CraftSharp.Rendering
         [SerializeField] private Renderer[] playerSkinRenderers = { };
         [SerializeField] private Transform? leftArm, rightArm;
 
-        public override void Initialize(Entity entity, Vector3Int originOffset)
+        public override void Initialize(EntityData entity, Vector3Int originOffset)
         {
             base.Initialize(entity, originOffset);
         }

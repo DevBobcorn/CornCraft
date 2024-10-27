@@ -178,7 +178,7 @@ namespace CraftSharp.Protocol
         /// Called when an entity has spawned
         /// </summary>
         /// <param name="entity">Spawned entity</param>
-        void OnSpawnEntity(Entity entity);
+        void OnSpawnEntity(EntityData entity);
 
         /// <summary>
         /// Called when an entity has spawned
@@ -282,13 +282,6 @@ namespace CraftSharp.Protocol
         /// <param name="health"></param>
         /// <param name="food"></param>
         void OnUpdateHealth(float health, int food);
-
-        /// <summary>
-        /// Called when the health of an entity changed
-        /// </summary>
-        /// <param name="entityId">Entity Id</param>
-        /// <param name="health">The health of the entity</param>
-        void OnEntityHealth(int entityId, float health);
 
         /// <summary>
         /// Called when entity metadata or metadata changed.

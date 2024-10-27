@@ -16,6 +16,7 @@ using CraftSharp.Proxy;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
 using CraftSharp.Rendering;
+using UnityEditor.Graphs;
 
 namespace CraftSharp
 {
@@ -65,7 +66,7 @@ namespace CraftSharp
 
         #region Players and Entities
         private bool locationReceived = false;
-        private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
+        private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
         private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
@@ -103,7 +104,9 @@ namespace CraftSharp
 
             this.sessionId = session.Id;
             if (!Guid.TryParse(session.PlayerId, out this.uuid))
+            {
                 this.uuid = Guid.Empty;
+            }
             this.username = session.PlayerName;
             this.host = info.ServerIp;
             this.port = info.ServerPort;
@@ -133,6 +136,7 @@ namespace CraftSharp
                     // Update client entity name
                     clientEntity.Name = session.PlayerName;
                     clientEntity.UUID = uuid;
+                    Debug.Log($"Client uuid: {this.uuid}");
                     clientEntity.MaxHealth = 20F;
 
                     // Create player render
@@ -1704,7 +1708,46 @@ namespace CraftSharp
         /// <param name="dropEntireStack">Whether or not to drop the entire item stack</param>
         public override bool DropItem(bool dropEntireStack)
         {
-            return handler!.SendPlayerAction(dropEntireStack ? 3 : 4);
+            if (GameMode == GameMode.Spectator) return false;
+
+            var curItem = inventories[0].GetHotbarItem(CurrentSlot);
+            if (curItem == null || curItem.IsEmpty)
+            {
+                return false;
+            }
+
+            bool sent = handler!.SendPlayerAction(dropEntireStack ? 3 : 4);
+            if (sent) // Do update on client side
+            {
+                ItemStack? updatedItem;
+
+                if (dropEntireStack || curItem.Count <= 1)
+                {
+                    updatedItem = null; // Nothing left in slot
+                    //Debug.Log($"Dropped every {curItem.ItemType.ItemId} in hotbar slot {CurrentSlot}.");
+                }
+                else
+                {
+                    updatedItem = new ItemStack(curItem.ItemType, curItem.Count - 1, curItem.NBT);
+                    //Debug.Log($"Dropped a single {curItem.ItemType.ItemId} in hotbar slot {CurrentSlot}, {updatedItem.Count} left.");
+                }
+
+                int invSlot = inventories[0].GetFirstHotbarSlot() + CurrentSlot;
+                if (updatedItem is null)
+                {
+                    inventories[0].Items.Remove(invSlot);
+                }
+                else
+                {
+                    // Add or update slot item stack
+                    inventories[0].Items[invSlot] = updatedItem;
+                }
+
+                EventManager.Instance.Broadcast(new SlotUpdateEvent(0, invSlot, updatedItem));
+                EventManager.Instance.Broadcast(new HotbarUpdateEvent(CurrentSlot, updatedItem));
+            }
+
+            return sent;
         }
 
         /// <summary>
@@ -1712,6 +1755,8 @@ namespace CraftSharp
         /// </summary>
         public override bool SwapItemOnHands()
         {
+            if (GameMode == GameMode.Spectator) return false;
+
             return handler!.SendPlayerAction(6);
         }
 
@@ -1767,7 +1812,7 @@ namespace CraftSharp
         /// </summary>
         /// <param name="entity">Player to teleport to</param>
         /// Teleporting to other entityies is NOT implemented yet
-        public bool Spectate(Entity entity)
+        public bool Spectate(EntityData entity)
         {
             if (entity.Type.TypeId == EntityType.PLAYER_ID)
                 return SpectateByUUID(entity.UUID);
@@ -2039,6 +2084,8 @@ namespace CraftSharp
                     {
                         EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, pair.Key, pair.Value));
 
+                        //Debug.Log($"Set window item: [{inventoryId}]/[{pair.Key}] to {pair.Value?.ItemType.ItemId.ToString() ?? "AIR"}");
+
                         if (container.IsHotbar(pair.Key, out int hotbarSlot))
                         {
                             EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, pair.Value));
@@ -2090,6 +2137,8 @@ namespace CraftSharp
                     Loom.QueueOnMainThread(() => {
                         EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slotId, item));
 
+                        //Debug.Log($"Set inventory item: [{inventoryId}]/[{slotId}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
+
                         if (container.IsHotbar(slotId, out int hotbarSlot))
                         {
                             EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
@@ -2127,9 +2176,11 @@ namespace CraftSharp
             if (player.Name == username)
             {
                 // 1.19+ offline server is possible to return different uuid
+                // This will disable custom skin for client player
                 this.uuid = player.Uuid;
                 // Also update client entity uuid
                 clientEntity.UUID = uuid;
+                Debug.Log($"Updated client uuid: {this.uuid}");
             }
 
             lock (onlinePlayers)
@@ -2169,7 +2220,7 @@ namespace CraftSharp
         /// <summary>
         /// Called when an entity spawned
         /// </summary>
-        public void OnSpawnEntity(Entity entity)
+        public void OnSpawnEntity(EntityData entity)
         {
             Loom.QueueOnMainThread(() => {
                 EntityRenderManager.AddEntityRender(entity);
@@ -2196,7 +2247,7 @@ namespace CraftSharp
             string? playerName = null;
             if (onlinePlayers.ContainsKey(uuid))
                 playerName = onlinePlayers[uuid].Name;
-            Entity playerEntity = new(entityId, EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID), location, uuid, playerName);
+            EntityData playerEntity = new(entityId, EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID), location, uuid, playerName);
             OnSpawnEntity(playerEntity);
         }
 
@@ -2218,7 +2269,6 @@ namespace CraftSharp
         /// <param name="gamemode">New Game Mode (0: Survival, 1: Creative, 2: Adventure, 3: Spectator).</param>
         public void OnGamemodeUpdate(Guid uuid, int gamemode)
         {
-            
             if (uuid == Guid.Empty) // Initial gamemode on login
             {
                 Loom.QueueOnMainThread(() =>
@@ -2482,18 +2532,6 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called when the health of an entity changed
-        /// </summary>
-        /// <param name="entityId">Entity Id</param>
-        /// <param name="health">The health of the entity</param>
-        public void OnEntityHealth(int entityId, float health)
-        {
-            Loom.QueueOnMainThread(() => {
-                EntityRenderManager.UpdateEntityHealth(entityId, health);
-            });
-        }
-
-        /// <summary>
         /// Called when the metadata of an entity changed
         /// </summary>
         /// <param name="entityId">Entity Id</param>
@@ -2505,26 +2543,6 @@ namespace CraftSharp
 
                 if (entity != null)
                 {
-                    if (entity.Type!.ContainsItem && metadata.TryGetValue(7, out object? itemObj) && itemObj != null && itemObj.GetType() == typeof(ItemStack))
-                    {
-                        var item = (ItemStack?) itemObj;
-                        entity.Item.Value = item;
-                    }
-                    if (metadata.TryGetValue(6, out object? poseObj) && poseObj != null && poseObj.GetType() == typeof(int))
-                    {
-                        entity.Pose = (EntityPose)poseObj;
-                    }
-                    if (metadata.TryGetValue(2, out object? nameObj) && nameObj != null && nameObj.GetType() == typeof(string))
-                    {
-                        string name = nameObj.ToString()!;
-                        entity.CustomNameJson = name;
-                        entity.CustomName = ChatParser.ParseText(name);
-                    }
-                    if (metadata.TryGetValue(3, out object? nameVisableObj) && nameVisableObj != null && nameVisableObj.GetType() == typeof(bool))
-                    {
-                        entity.IsCustomNameVisible = bool.Parse(nameVisableObj.ToString()!);
-                    }
-
                     entity.UpdateMetadata(metadata);
                 }
             });

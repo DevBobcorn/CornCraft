@@ -19,12 +19,12 @@ namespace CraftSharp.Inventory
         public ContainerType Type;
 
         /// <summary>
-        /// title of container
+        /// Title of container
         /// </summary>
         public string? Title;
 
         /// <summary>
-        /// state of container
+        /// State of container
         /// </summary>
         public int StateId;
 
