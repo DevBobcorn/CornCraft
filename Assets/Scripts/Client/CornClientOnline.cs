@@ -16,7 +16,6 @@ using CraftSharp.Proxy;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
 using CraftSharp.Rendering;
-using UnityEditor.Graphs;
 
 namespace CraftSharp
 {
