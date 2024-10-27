@@ -159,6 +159,7 @@ namespace CraftSharp.Rendering
                     catch (Exception e)
                     {
                         Debug.LogWarning("Failed to parse player skin hash: " + e);
+                        Debug.Log(webRequest.downloadHandler.text);
                         req.Failed = true;
                     }
                     break;

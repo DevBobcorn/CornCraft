@@ -1901,7 +1901,7 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.SpawnLivingEntity:
                     {
-                        Entity entity = dataTypes.ReadNextEntity(packetData, EntityTypePalette.INSTANCE, true);
+                        EntityData entity = dataTypes.ReadNextEntity(packetData, EntityTypePalette.INSTANCE, true);
                         // packet before 1.15 has metadata at the end
                         // this is not handled in DataTypes.ReadNextEntity()
                         // we are simply ignoring leftover data in packet
@@ -2080,19 +2080,6 @@ namespace CraftSharp.Protocol.Handlers
                         var entityId = DataTypes.ReadNextVarInt(packetData);
                         var metadata = dataTypes.ReadNextMetadata(packetData,
                                 ItemPalette.INSTANCE, entityMetadataPalette);
-
-                        var healthField = protocolVersion switch
-                        {
-                            > MC_1_20_4_Version => throw new NotImplementedException(
-                                Translations.Get("exception.palette.healthfield")),
-                            // 1.17 and above
-                            >= MC_1_17_Version  => 9,
-                            // 1.14 and above
-                            _                   => 8,
-                        };
-
-                        if (metadata.TryGetValue(healthField, out object? healthObj) && healthObj != null && healthObj.GetType() == typeof(float))
-                            handler.OnEntityHealth(entityId, (float)healthObj);
                             
                         handler.OnEntityMetadata(entityId, metadata);
                     }
@@ -2664,11 +2651,10 @@ namespace CraftSharp.Protocol.Handlers
         /// <returns>True if ping was successful</returns>
         public static bool DoPing(string host, int port, ref string versionName, ref int protocol, ref ForgeInfo? forgeInfo)
         {
-            TcpClient tcp = ProxyHandler.newTcpClient(host, port);
+            var tcp = ProxyHandler.newTcpClient(host, port);
             tcp.ReceiveTimeout = 30000; // 30 seconds
             tcp.ReceiveBufferSize = 1024 * 1024;
-            SocketWrapper socketWrapper = new SocketWrapper(tcp);
-            DataTypes dataTypes = new DataTypes(MC_1_15_Version);
+            var socketWrapper = new SocketWrapper(tcp);
 
             byte[] packetId = DataTypes.GetVarInt(0);
             byte[] protocolVersion = DataTypes.GetVarInt(-1);
@@ -2687,7 +2673,7 @@ namespace CraftSharp.Protocol.Handlers
             int packetLength = DataTypes.ReadNextVarIntRAW(socketWrapper);
             if (packetLength > 0) // Read Response length
             {
-                Queue<byte> packetData = new Queue<byte>(socketWrapper.ReadDataRAW(packetLength));
+                Queue<byte> packetData = new(socketWrapper.ReadDataRAW(packetLength));
                 if (DataTypes.ReadNextVarInt(packetData) == 0x00) //Read Packet Id
                 {
                     string result = DataTypes.ReadNextString(packetData); //Get the Json data
@@ -2695,7 +2681,7 @@ namespace CraftSharp.Protocol.Handlers
                     if (ProtocolSettings.DebugMode)
                         Debug.Log(result);
 
-                    if (!String.IsNullOrEmpty(result) && result.StartsWith("{") && result.EndsWith("}"))
+                    if (!string.IsNullOrEmpty(result) && result.StartsWith("{") && result.EndsWith("}"))
                     {
                         Json.JSONData jsonData = Json.ParseJson(result);
                         if (jsonData.Type == Json.JSONData.DataType.Object && jsonData.Properties.ContainsKey("version"))

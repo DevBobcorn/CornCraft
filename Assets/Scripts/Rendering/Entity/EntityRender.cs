@@ -1,4 +1,5 @@
 #nullable enable
+using CraftSharp.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -107,7 +108,7 @@ namespace CraftSharp.Rendering
         /// Update entity metadata, validate control variables,
         /// then check for visual/material update
         /// </summary>
-        public void UpdateMetadata(Dictionary<int, object?> updatedMeta)
+        public virtual void UpdateMetadata(Dictionary<int, object?> updatedMeta)
         {
             // Create if not present
             Metadata ??= new();
@@ -115,6 +116,48 @@ namespace CraftSharp.Rendering
             foreach (var entry in updatedMeta)
             {
                 Metadata[entry.Key] = entry.Value;
+            }
+
+            // Update entity health
+            if (Type.MetaSlotByName.TryGetValue("data_health_id", out var metaSlot1)
+                && Type.MetaEntries[metaSlot1].DataType == EntityMetaDataType.Float)
+            {
+                if (Metadata.TryGetValue(metaSlot1, out var value) && value is float health)
+                {
+                    Health.Value = health;
+                    MaxHealth.Value = Mathf.Max(MaxHealth.Value, health);
+                }
+            }
+
+            // Update entity custom name
+            if (Type.MetaSlotByName.TryGetValue("data_custom_name", out var metaSlot2)
+                && Type.MetaEntries[metaSlot2].DataType == EntityMetaDataType.OptionalChat)
+            {
+                if (Metadata.TryGetValue(metaSlot2, out var value) && value is string customName)
+                {
+                    CustomNameJson = customName;
+                    CustomName = ChatParser.ParseText(customName);
+                }
+            }
+
+            // Update entity custom name
+            if (Type.MetaSlotByName.TryGetValue("data_custom_name_visible", out var metaSlot3)
+                && Type.MetaEntries[metaSlot3].DataType == EntityMetaDataType.Boolean)
+            {
+                if (Metadata.TryGetValue(metaSlot3, out var value) && value is bool customNameVisible)
+                {
+                    IsCustomNameVisible = customNameVisible;
+                }
+            }
+
+            // Update entity pose
+            if (Type.MetaSlotByName.TryGetValue("data_pose", out var metaSlot4)
+                && Type.MetaEntries[metaSlot4].DataType == EntityMetaDataType.Pose)
+            {
+                if (Metadata.TryGetValue(metaSlot4, out var value) && value is int pose)
+                {
+                    Pose = (EntityPose) pose;
+                }
             }
 
             // TODO: Update control variables
@@ -174,7 +217,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Initialize this entity render
         /// </summary>
-        public virtual void Initialize(Entity source, Vector3Int originOffset)
+        public virtual void Initialize(EntityData source, Vector3Int originOffset)
         {
             if (_visualTransform == null)
             {
@@ -185,24 +228,25 @@ namespace CraftSharp.Rendering
             NumeralId = source.Id;
             UUID = source.UUID;
             Name = source.Name;
-            CustomNameJson = source.CustomNameJson;
-            IsCustomNameVisible = source.IsCustomNameVisible;
-            CustomName = source.CustomName;
             type = source.Type;
-
             Position.Value = CoordConvert.MC2Unity(originOffset, source.Location);
             lastPosition = Position.Value;
             lastYaw = Yaw.Value = source.Yaw;
             lastHeadYaw = HeadYaw.Value = source.HeadYaw;
             lastPitch = Pitch.Value = source.Pitch;
-
             ObjectData = source.ObjectData;
             Health.Value = source.Health;
             MaxHealth.Value = source.MaxHealth;
-            Item.Value = source.Item;
-            Pose = source.Pose;
-            Metadata = source.Metadata;
-            Equipment = source.Equipment;
+
+            // Initialize other fields with default values
+            // These fields will be later assigned by metadata packets
+            CustomName = null;
+            CustomNameJson = null;
+            IsCustomNameVisible = true;
+            Item.Value = null;
+            Pose = EntityPose.Standing;
+            Metadata = null;
+            Equipment = null;
 
             UnityEngine.Random.InitState(NumeralId);
             _pseudoRandomOffset = UnityEngine.Random.Range(0F, 1F);
@@ -309,6 +353,8 @@ namespace CraftSharp.Rendering
 
         protected virtual void TurnIntoRagdoll()
         {
+            _turnedIntoRagdoll = true;
+
             // Create ragdoll in place
             if (ragdollPrefab != null)
             {
@@ -318,9 +364,9 @@ namespace CraftSharp.Rendering
 
                 // Assign own rotation and localScale to ragdoll object
                 var ragdoll = ragdollObj.GetComponentInChildren<EntityRagdoll>();
-                if (ragdoll != null)
+                if (ragdoll != null && _visualTransform != null)
                 {
-                    ragdollObj.transform.rotation = _visualTransform!.rotation;
+                    ragdollObj.transform.rotation = _visualTransform.rotation;
                     ragdoll.Visual.localScale = _visualTransform.localScale;
 
                     // Make it fly!
@@ -345,8 +391,6 @@ namespace CraftSharp.Rendering
             {
                 _visualTransform.gameObject.SetActive(false);
             }
-
-            _turnedIntoRagdoll = true;
         }
 
         public virtual void ManagedUpdate(float tickMilSec)

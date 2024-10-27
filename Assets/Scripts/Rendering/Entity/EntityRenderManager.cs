@@ -81,7 +81,7 @@ namespace CraftSharp.Rendering
         /// Create a new entity render from given entity data
         /// </summary>
         /// <param name="entity">Entity data</param>
-        public void AddEntityRender(Entity entity)
+        public void AddEntityRender(EntityData entity)
         {
             // If the numeral id is occupied by an entity already,
             // destroy this entity first
@@ -189,8 +189,8 @@ namespace CraftSharp.Rendering
         {
             if (entityRenders.ContainsKey(entityId))
             {
-                entityRenders[entityId].Yaw.Value = Entity.GetYawFromByte(yaw);
-                entityRenders[entityId].Pitch.Value = Entity.GetPitchFromByte(pitch);
+                entityRenders[entityId].Yaw.Value = EntityData.GetYawFromByte(yaw);
+                entityRenders[entityId].Pitch.Value = EntityData.GetPitchFromByte(pitch);
             }
         }
 
@@ -203,22 +203,7 @@ namespace CraftSharp.Rendering
         {
             if (entityRenders.ContainsKey(entityId))
             {
-                entityRenders[entityId].HeadYaw.Value = Entity.GetHeadYawFromByte(headYaw);
-            }
-        }
-
-        /// <summary>
-        /// Update the health value of a given entity
-        /// </summary>
-        /// <param name="entityId">Numeral id of the entity</param>
-        /// <param name="health">New health value</param>
-        public void UpdateEntityHealth(int entityId, float health)
-        {
-            if (entityRenders.ContainsKey(entityId))
-            {
-                entityRenders[entityId].Health.Value = health;
-                entityRenders[entityId].MaxHealth.Value = math.max(
-                        entityRenders[entityId].MaxHealth.Value, health);
+                entityRenders[entityId].HeadYaw.Value = EntityData.GetHeadYawFromByte(headYaw);
             }
         }
 

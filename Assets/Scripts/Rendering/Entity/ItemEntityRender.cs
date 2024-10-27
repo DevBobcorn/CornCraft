@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CraftSharp.Rendering
@@ -8,29 +9,41 @@ namespace CraftSharp.Rendering
         public MeshFilter? itemMeshFilter;
         public MeshRenderer? itemMeshRenderer;
 
-        public override void Initialize(Entity entity, Vector3Int originOffset)
+        private ItemStack? EntityItemStack;
+
+        public override void UpdateMetadata(Dictionary<int, object?> updatedMeta)
         {
-            base.Initialize(entity, originOffset);
-            
-            if (itemMeshFilter != null && itemMeshRenderer != null)
-            {
-                var result = ItemMeshBuilder.BuildItem(entity.Item);
+            base.UpdateMetadata(updatedMeta);
 
-                if (result != null) // If build suceeded
+            // Update entity item
+            if (Type.MetaSlotByName.TryGetValue("data_item", out var metaSlot1)
+                && Type.MetaEntries[metaSlot1].DataType == EntityMetaDataType.Slot)
+            {
+                if (Metadata!.TryGetValue(metaSlot1, out var value) && value is ItemStack item)
                 {
-                    itemMeshFilter.sharedMesh = result.Value.mesh;
-                    itemMeshRenderer.sharedMaterial = result.Value.material;
+                    EntityItemStack = item;
 
-                    // Apply random rotation
-                    var meshTransform = itemMeshRenderer.transform;
-                    meshTransform.localEulerAngles = new(0F, (entity!.Id * 350F) % 360F, 0F);
+                    if (itemMeshFilter != null && itemMeshRenderer != null)
+                    {
+                        var result = ItemMeshBuilder.BuildItem(item);
 
-                    meshTransform.localPosition = new(0.5F, 0F, -0.5F);
+                        if (result != null) // If build suceeded
+                        {
+                            itemMeshFilter.sharedMesh = result.Value.mesh;
+                            itemMeshRenderer.sharedMaterial = result.Value.material;
+
+                            // Apply random rotation
+                            var meshTransform = itemMeshRenderer.transform;
+                            meshTransform.localEulerAngles = new(0F, (NumeralId * 350F) % 360F, 0F);
+                            meshTransform.localScale = Vector3.one * 2F;
+                            meshTransform.localPosition = new(0F, 0.75F, 0F);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Item entity prefab components not assigned!");
+                    }
                 }
-            }
-            else
-            {
-                Debug.LogWarning("Item entity prefab components not assigned!");
             }
         }
     }

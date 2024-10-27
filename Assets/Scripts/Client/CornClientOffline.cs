@@ -31,7 +31,7 @@ namespace CraftSharp
         #nullable disable
 
         #region Players and Entities
-        private readonly Entity clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
+        private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private readonly Dictionary<int, Container> inventories = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         #endregion

@@ -129,7 +129,7 @@ namespace CraftSharp
             interactionUpdater.Initialize(this, CameraController);
         }
 
-        protected void SwitchFirstPlayerRender(Entity clientEntity)
+        protected void SwitchFirstPlayerRender(EntityData clientEntity)
         {
             if (m_PlayerRenderPrefabs.Length == 0) return;
 
@@ -137,7 +137,7 @@ namespace CraftSharp
             PlayerController.SwitchPlayerRenderFromPrefab(clientEntity, m_PlayerRenderPrefabs[0]);
         }
 
-        protected void SwitchPlayerRenderBy(Entity clientEntity, int indexOffset)
+        protected void SwitchPlayerRenderBy(EntityData clientEntity, int indexOffset)
         {
             if (m_PlayerRenderPrefabs.Length == 0) return;
 

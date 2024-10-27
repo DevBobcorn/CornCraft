@@ -610,7 +610,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="entityPalette">Mappings for converting entity type Ids to EntityType</param>
         /// <param name="living">TRUE for living entities (layout differs)</param>
         /// <returns>Entity information</returns>
-        public Entity ReadNextEntity(Queue<byte> cache, EntityTypePalette entityPalette, bool living)
+        public EntityData ReadNextEntity(Queue<byte> cache, EntityTypePalette entityPalette, bool living)
         {
             int entityID = ReadNextVarInt(cache);
             Guid entityUUID = ReadNextUUID(cache); // MC 1.8+
@@ -646,7 +646,7 @@ namespace CraftSharp.Protocol.Handlers
                     ? ReadNextVarInt(cache) : ReadNextInt(cache);
             }
 
-            return new Entity(entityID, entityType, new Location(entityX, entityY, entityZ), entityYaw, entityPitch, entityHeadYaw, data);
+            return new EntityData(entityID, entityType, new Location(entityX, entityY, entityZ), entityYaw, entityPitch, entityHeadYaw, data);
         }
 
         /// <summary>
