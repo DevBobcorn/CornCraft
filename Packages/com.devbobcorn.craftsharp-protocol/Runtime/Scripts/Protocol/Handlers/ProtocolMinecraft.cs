@@ -1866,8 +1866,10 @@ namespace CraftSharp.Protocol.Handlers
                         if (protocolVersion >= MC_1_20_2_Version)
                         {
                             if (entity.Type.TypeId == EntityType.PLAYER_ID)
+                            {
                                 handler.OnSpawnPlayer(entity.Id, entity.UUID, entity.Location, (byte)entity.Yaw, (byte)entity.Pitch);
-                            break;
+                                break;
+                            }
                         }
 
                         handler.OnSpawnEntity(entity);
