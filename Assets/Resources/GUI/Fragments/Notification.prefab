@@ -34,7 +34,6 @@ RectTransform:
   m_Children:
   - {fileID: 3149924699915583117}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -51,7 +50,7 @@ CanvasRenderer:
   m_CullTransparentMesh: 1
 --- !u!95 &3149924699021846704
 Animator:
-  serializedVersion: 4
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -68,7 +67,8 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!225 &3149924699021846705
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -125,7 +125,6 @@ RectTransform:
   m_Children:
   - {fileID: 3149924700129852700}
   m_Father: {fileID: 3149924699021846706}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 1}
@@ -201,7 +200,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3149924699915583117}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -238,8 +236,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Notification Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: f47272a035592cb4b892bebb51cf65fc, type: 2}
-  m_sharedMaterial: {fileID: -5249784268640490711, guid: f47272a035592cb4b892bebb51cf65fc, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1ca8d82fa0abe124fa88df17095227d4, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: fcbf48769b90f2e4497cb72bd856bc51, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

@@ -170,7 +170,9 @@ namespace CraftSharp.UI
 
             // Register callbacks
             chatCallback = (e) => {
-                chatContent.text += TMPConverter.MC2TMP(e.Message) + '\n';
+                var styledMessage = TMPConverter.MC2TMP(e.Message);
+
+                chatContent.text += styledMessage + '\n';
             };
 
             autoCompleteCallback = (e) => {

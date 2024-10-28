@@ -997,7 +997,7 @@ namespace CraftSharp.Protocol.Handlers
                                 break;
                         }
 
-                        handler.OnTextReceived(new(systemMessage, null, true, -1, Guid.Empty, true));
+                        handler.OnTextReceived(new(systemMessage, null, false, -1, Guid.Empty, true));
                     }
                     else
                     {
