@@ -285,11 +285,13 @@ namespace CraftSharp.UI
             }
 
             if (Keyboard.current.slashKey.wasPressedThisFrame)
-            {   // Open chat screen and input a slash
+            {
                 var chatScreen = game.ScreenControl.PushScreen<ChatScreen>();
-                chatScreen.SetChatMessage("/", 1);
+
+                // Input command prefix '/'
+                chatScreen.InputCommandPrefix();
             }
-            else if (Keyboard.current.tKey.wasPressedThisFrame) // Just open chat screen
+            else if (Keyboard.current.tKey.wasPressedThisFrame)
             {
                 game.ScreenControl.PushScreen<ChatScreen>();
             }

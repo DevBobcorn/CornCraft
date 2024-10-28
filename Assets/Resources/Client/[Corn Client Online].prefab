@@ -166,8 +166,8 @@ MonoBehaviour:
   m_CameraControllerPrefabs:
   - {fileID: 2501888192042564820, guid: eba8c79e53e1596418aed57cf1965833, type: 3}
   - {fileID: 2555420394471349852, guid: aa787a98e472e4f4184d8a4871eac7ef, type: 3}
-  MainCamera: {fileID: 950599429314168570}
-  SpriteCamera: {fileID: 8100344119672481982}
+  m_MainCamera: {fileID: 950599429314168570}
+  m_SpriteCamera: {fileID: 8100344119672481982}
   m_ScreenControl: {fileID: 7154458248677774323}
   m_UICamera: {fileID: 7810722889500657879}
 --- !u!114 &3678959941401076769
