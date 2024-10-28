@@ -52,13 +52,14 @@ Key                                                       | Action
 Like MCC, CornCraft adopts CDDL-1.0 as the license of its code repository, and this license applies to all source code except those mention their author and license or with specific license attached.
 
 Some other open-source projects/code examples are used in the project, which don't fall under CDDL-1.0 and use their own licenses. Here's a list of them:
-* [Welai Glow Sans](https://github.com/welai/glow-sans)
-* [Cascadia Code/Mono](https://github.com/microsoft/cascadia-code)
-* [Star Rail NPR Shader](https://github.com/stalomeow/StarRailNPRShader)
-* [Minecraft Data](https://github.com/PrismarineJS/minecraft-data)
+* [Welai Glow Sans](https://github.com/welai/glow-sans): Used as font for regular game UI
+* [Cascadia Code/Mono](https://github.com/microsoft/cascadia-code): Used as font for command/technical information
+* [Star Rail NPR Shader](https://github.com/stalomeow/StarRailNPRShader): Anime character shaders for custom player render
+* [Minecraft Data](https://github.com/PrismarineJS/minecraft-data): Protocol data for packet inspection
 
 More information about CDDL-1.0 can be found on MCC's [home page](https://github.com/MCCTeam/Minecraft-Console-Client), in the license section, and the full license can be reviewed [here](http://opensource.org/licenses/CDDL-1.0).
 
 ## > Screenshots
-![CornCraft020.png](https://s2.loli.net/2024/10/28/xFVCbJNwH6qAZ2E.png)
+![CornCraft022.png](https://s2.loli.net/2024/10/28/EdrTenuS1ZLw3RC.png)
 ![CornCraft021.png](https://s2.loli.net/2024/10/28/kas4ZD8cgrfb6xn.png)
+![CornCraft020.png](https://s2.loli.net/2024/10/28/xFVCbJNwH6qAZ2E.png)
