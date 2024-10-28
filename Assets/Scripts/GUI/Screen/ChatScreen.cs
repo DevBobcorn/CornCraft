@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
@@ -12,6 +11,7 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class ChatScreen : BaseScreen
     {
+        private static readonly string COMMAND_PREFIX = "/";
         private bool isActive = false;
 
         public override bool IsActive
@@ -35,20 +35,15 @@ namespace CraftSharp.UI
         }
 
         // UI controls and objects
-        [SerializeField] private CanvasGroup autoCompletePanelGroup;
         [SerializeField] private RectTransform chatScrollRectTransform;
-        [SerializeField] private TMP_InputField chatInput;
-        [SerializeField] private TMP_Text chatContent, autoCompleteOptions;
+        [SerializeField] private AutoCompletedInputField chatInput;
+        [SerializeField] private TMP_Text chatContent;
         private CanvasGroup screenGroup;
-        private TMP_InputField chatInputGhost;
 
         // Chat message data
-        private List<string> chatHistory = new();
-        private int chatIndex = 0, completionIndex = -1, completionStart = 0, completionLength = 0;
+        private readonly List<string> sentChatHistory = new();
+        private int chatIndex = 0;
         private string chatBuffer = string.Empty;
-        private bool completionsShown = false;
-        private string[] completionOptions = { };
-        private string confirmedPart = string.Empty;
 
         public override bool ReleaseCursor()
         {
@@ -60,56 +55,34 @@ namespace CraftSharp.UI
             return true;
         }
 
-        public void SetChatMessage(string message, int caretPos)
+        public void InputCommandPrefix()
         {
-            chatInput.text = message;
-            chatInput.caretPosition = caretPos;
+            chatInput.text = COMMAND_PREFIX;
+            chatInput.caretPosition = COMMAND_PREFIX.Length;
         }
 
-        private void ShowCompletions()
+        public void RefreshCompletions(string chatInputText)
         {
-            autoCompletePanelGroup.alpha = 1F;
-            autoCompletePanelGroup.interactable = true;
-            autoCompletePanelGroup.blocksRaycasts = true;
-            completionsShown = true;
-        }
-
-        private void HideCompletions()
-        {
-            autoCompletePanelGroup.alpha = 0F;
-            autoCompletePanelGroup.interactable = false;
-            autoCompletePanelGroup.blocksRaycasts = false;
-            completionsShown = false;
-            // Restart marker value...
-            completionIndex = -1;
-        }
-
-        public void OnChatInputChange(string message)
-        {
-            if (message.StartsWith("/") && message.Length > 1)
+            if (chatInputText.StartsWith(COMMAND_PREFIX) && chatInputText.Length > COMMAND_PREFIX.Length)
             {
                 string requestText;
-                if (chatInput.caretPosition > 0 && chatInput.caretPosition < message.Length)
-                    requestText = message[0..chatInput.caretPosition];
+                if (chatInput.caretPosition > 0 && chatInput.caretPosition < chatInputText.Length)
+                    requestText = chatInputText[0..chatInput.caretPosition];
                 else
-                    requestText = message;
-                
-                RequestAutoCompleteChat(requestText);
+                    requestText = chatInputText;
+
+                // Request command auto complete
+                var client = CornApp.CurrentClient;
+                if (client == null) return;
+
+                client.SendAutoCompleteRequest(requestText);
+
+                //Debug.Log($"Requesting auto completion: [{requestText}]");
             }
             else
-                HideCompletions();
-            
-            if (completionsShown)
             {
-                if (completionIndex >= 0 && completionIndex < completionOptions.Length)
-                {
-                    if (!(confirmedPart + completionOptions[completionIndex]).Contains(message))
-                    {   // User is typing something which is not in the completion list, so hide it...
-                        HideCompletions();
-                    }
-                }
+                chatInput.ClearCompletionOptions();
             }
-
         }
 
         public void SendChatMessage()
@@ -128,84 +101,56 @@ namespace CraftSharp.UI
             chatInput.text = string.Empty;
 
             // Remove the chat text from previous history if present
-            if (chatHistory.Contains(chat))
-                chatHistory.Remove(chat);
+            if (sentChatHistory.Contains(chat))
+                sentChatHistory.Remove(chat);
 
-            chatHistory.Add(chat);
-            chatIndex = chatHistory.Count;
-        }
-
-        public void RequestAutoCompleteChat(string message)
-        {
-            var client = CornApp.CurrentClient;
-            if (client == null) return;
-
-            client.SendAutoCompleteRequest(message);
+            sentChatHistory.Add(chat);
+            chatIndex = sentChatHistory.Count;
         }
 
         public void PrevChatMessage()
         {
-            if (chatHistory.Count > 0 && chatIndex - 1 >= 0)
+            if (sentChatHistory.Count > 0 && chatIndex - 1 >= 0)
             {
-                if (chatIndex == chatHistory.Count)
+                if (chatIndex == sentChatHistory.Count)
                 {   // Store to buffer...
                     chatBuffer = chatInput.text;
                 }
                 chatIndex--;
-                chatInput.text = chatHistory[chatIndex];
-                chatInput.caretPosition = chatHistory[chatIndex].Length;
+
+                // Don't notify before we set the caret position
+                chatInput.SetTextWithoutNotify(sentChatHistory[chatIndex]);
+                chatInput.caretPosition = sentChatHistory[chatIndex].Length;
+                chatInput.ClearCompletionOptions();
+
+                RefreshCompletions(sentChatHistory[chatIndex]);
             }
         }
 
         public void NextChatMessage()
         {
-            if (chatHistory.Count > 0 && chatIndex < chatHistory.Count)
+            if (sentChatHistory.Count > 0 && chatIndex < sentChatHistory.Count)
             {
                 chatIndex++;
-                if (chatIndex == chatHistory.Count)
+                if (chatIndex == sentChatHistory.Count)
                 {
-                    // Restore buffer...
-                    chatInput.text = chatBuffer;
+                    // Restore buffer... Don't notify before we set the caret position
+                    chatInput.SetTextWithoutNotify(chatBuffer);
                     chatInput.caretPosition = chatBuffer.Length;
+                    chatInput.ClearCompletionOptions();
+
+                    RefreshCompletions(chatBuffer);
                 }
                 else
                 {
-                    chatInput.text = chatHistory[chatIndex];
-                    chatInput.caretPosition = chatHistory[chatIndex].Length;
+                    // Don't notify before we set the caret position
+                    chatInput.SetTextWithoutNotify(sentChatHistory[chatIndex]);
+                    chatInput.caretPosition = sentChatHistory[chatIndex].Length;
+                    chatInput.ClearCompletionOptions();
+
+                    RefreshCompletions(sentChatHistory[chatIndex]);
                 }
             }
-        }
-
-        public void PrevCompletionOption()
-        {
-            if (completionIndex == -1)
-                completionIndex = 0; // Select first option
-            else
-                completionIndex = (completionIndex + completionOptions.Length - 1) % completionOptions.Length;
-            
-            RefreshCompletionOptions();
-        }
-
-        public void NextCompletionOption()
-        {
-            if (completionIndex == -1)
-                completionIndex = 0; // Select first option
-            else
-                completionIndex = (completionIndex + 1) % completionOptions.Length;
-            
-            RefreshCompletionOptions();
-        }
-
-        private void RefreshCompletionOptions()
-        {
-            StringBuilder str = new();
-            for (int i = 0;i < completionOptions.Length;i++)
-            {
-                str.Append(
-                    i == completionIndex ? $"<color=yellow>{completionOptions[i]}</color>" : completionOptions[i]
-                ).Append('\n');
-            }
-            autoCompleteOptions.text = str.ToString();
         }
 
         #nullable enable
@@ -220,19 +165,8 @@ namespace CraftSharp.UI
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
 
-            chatInput.onValueChanged.AddListener(this.OnChatInputChange);
-
-            var chatInputGhostObj = Instantiate(chatInput.gameObject, Vector3.zero, Quaternion.identity);
-            chatInputGhostObj.name = "Chat Input Ghost";
-            chatInputGhostObj.SetActive(false);
-            chatInputGhost = chatInputGhostObj.GetComponent<TMP_InputField>();
-
+            chatInput.onValueChanged.AddListener(this.RefreshCompletions);
             chatContent.text = string.Empty;
-
-            autoCompletePanelGroup.alpha = 0F;
-            autoCompletePanelGroup.interactable = false;
-            autoCompletePanelGroup.blocksRaycasts = false;
-            autoCompleteOptions.text = string.Empty; // Clear up at start
 
             // Register callbacks
             chatCallback = (e) => {
@@ -242,37 +176,23 @@ namespace CraftSharp.UI
             autoCompleteCallback = (e) => {
                 if (e.Options.Length > 0)
                 {   // Show at most 20 options
-                    completionOptions = e.Options.Length > 20 ? e.Options[..20] : e.Options;
-                    completionStart = e.Start;
-                    completionLength = e.Length;
-                    completionIndex = 0; // Select first option
-                    RefreshCompletionOptions();
-                    if (!completionsShown)
-                        ShowCompletions();
+                    var completionOptions = e.Options;
+                    var completionStart = e.Start;
+                    var completionLength = e.Length;
+                    var completionSelectedIndex = 0; // Select first option
 
-                    if (completionStart > 0)
-                    {   // Apply selected auto completion
-                        string original   = chatInput.text;
-                        string completion = completionOptions[completionIndex];
-                        confirmedPart     = completionStart <= original.Length ? original[..completionStart] : original.PadRight(completionStart, ' ');
+                    //Debug.Log($"Received completions: s{completionStart} l{completionLength} [{string.Join(", ", completionOptions)}]");
 
-                        // Update auto completion panel position...
-                        chatInputGhost.text = confirmedPart;
-                    }
-                    
-                    float caretPosX = chatInputGhost.textComponent.preferredWidth;
-                    // Offset a bit to make sure that the completion part is perfectly aligned with user input
-                    if (chatInputGhost.text.EndsWith(' '))
-                        caretPosX += chatInputGhost.textComponent.fontSize * 0.5F;
-                    
-                    autoCompletePanelGroup.GetComponent<RectTransform>().anchoredPosition = new(caretPosX, 0F);
+                    chatInput.SetCompletionOptions(completionOptions, completionSelectedIndex, completionStart, completionLength);
                 }
                 else // No option available
                 {
-                    if (completionsShown)
-                        HideCompletions();
+                    chatInput.ClearCompletionOptions();
                 }
             };
+
+            chatInput.m_OnUpArrowKeyNotConsumedByCompletionSelection.AddListener(PrevChatMessage);
+            chatInput.m_OnDownArrowKeyNotConsumedByCompletionSelection.AddListener(NextChatMessage);
 
             EventManager.Instance.Register(chatCallback);
             EventManager.Instance.Register(autoCompleteCallback);
@@ -307,63 +227,10 @@ namespace CraftSharp.UI
                     SendChatMessage();
                     chatInput.ActivateInputField();
                 }
-                if (Keyboard.current.upArrowKey.wasPressedThisFrame)
-                {
-                    if (completionsShown)
-                    {
-                        PrevCompletionOption();
-                        chatInput.caretPosition = chatInput.text.Length;
-                    }
-                    else
-                    {
-                        PrevChatMessage();
-                        chatInput.MoveTextEnd(false);
-                    }
-                    chatInput.ActivateInputField();
-                }
-                if (Keyboard.current.downArrowKey.wasPressedThisFrame)
-                {
-                    if (completionsShown)
-                    {
-                        NextCompletionOption();
-                        chatInput.caretPosition = chatInput.text.Length;
-                    }
-                    else
-                    {
-                        NextChatMessage();
-                        chatInput.MoveTextEnd(false);
-                    }
-                    chatInput.ActivateInputField();
-                }
-                if (Keyboard.current.leftArrowKey.wasPressedThisFrame || 
-                        Keyboard.current.rightArrowKey.wasPressedThisFrame)
-                {
-                    // Refresh complete after moving cursor position
-                    chatInput.onValueChanged.Invoke(chatInput.text);
-                }
+
                 if (Keyboard.current.tabKey.wasPressedThisFrame)
                 {
-                    if (completionsShown)
-                    {
-                        if (completionIndex >= 0 && completionIndex < completionOptions.Length && completionStart > 0)
-                        {   // Apply selected auto completion
-                            string original   = chatInput.text;
-                            string completion = completionOptions[completionIndex];
-                            //Debug.Log($"Completing \"{original}\" at {completionStart} with \"{completion}\". Length: {completionLength}");
-
-                            string basePart = completionStart <= original.Length ? original[..completionStart] : original.PadRight(completionStart, ' ');
-
-                            string textBehindCursor;
-
-                            if (chatInput.caretPosition < original.Length)
-                                textBehindCursor = original[chatInput.caretPosition..original.Length];
-                            else
-                                textBehindCursor = string.Empty;
-
-                            SetChatMessage(basePart + completion + textBehindCursor, (basePart + completion).Length);
-                            HideCompletions();
-                        }
-                    }
+                    chatInput.PerformCompletion(RefreshCompletions);
                 }
             }
         }
