@@ -2,7 +2,7 @@
 A Minecraft client implementation made with Unity.
 
 ## > About
-__CornCraft__ is a Unity version of Minecraft. It connects to vanilla servers(version 1.16.2 to 1.19.4) and provides basic graphical gameplay support. It is based on another open source project, [Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client), and makes heavy use of its cross-version Minecraft protocol implementation.
+__CornCraft__ is a Unity version of Minecraft. It connects to vanilla servers(version 1.16.2 to 1.20.4) and provides basic graphical gameplay support. It is based on another open source project, [Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client), and makes heavy use of its cross-version Minecraft protocol implementation.
 
 However, unlike MCC itself which runs on modern .NET, CornCraft is a Unity app/game and runs on Mono/IL2CPP backend, so a large part of the code from MCC has been refactored or rewritten to adapt to Unity's environment.
 
@@ -60,6 +60,5 @@ Some other open-source projects/code examples are used in the project, which don
 More information about CDDL-1.0 can be found on MCC's [home page](https://github.com/MCCTeam/Minecraft-Console-Client), in the license section, and the full license can be reviewed [here](http://opensource.org/licenses/CDDL-1.0).
 
 ## > Screenshots
-![Screenshot 1](https://s2.loli.net/2024/10/15/yNopOxURMAjWhdQ.png)
-![Screenshot 2](https://s2.loli.net/2022/10/24/pLfmGiEbBOqFzTZ.png)
-![Screenshot 3](https://s2.loli.net/2022/10/25/RSZK3FbOdHXkanm.png)
+![CornCraft020.png](https://s2.loli.net/2024/10/28/xFVCbJNwH6qAZ2E.png)
+![CornCraft021.png](https://s2.loli.net/2024/10/28/kas4ZD8cgrfb6xn.png)
