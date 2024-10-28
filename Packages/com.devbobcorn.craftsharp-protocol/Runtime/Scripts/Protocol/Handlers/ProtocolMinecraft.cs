@@ -1503,7 +1503,7 @@ namespace CraftSharp.Protocol.Handlers
                             var chunkX = DataTypes.ReadNextInt(packetData);
                             var chunkZ = DataTypes.ReadNextInt(packetData);
 
-                            handler.GetChunkRenderManager().UnloadChunkColumn(chunkZ, chunkX);
+                            handler.GetChunkRenderManager().UnloadChunkColumn(chunkX, chunkZ);
                         }
                     }
                     break;
