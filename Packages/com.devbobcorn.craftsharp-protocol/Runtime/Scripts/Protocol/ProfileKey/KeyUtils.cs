@@ -35,9 +35,8 @@ namespace CraftSharp.Protocol.ProfileKey
                     Debug.Log(response.Body.ToString());
                 }
 
-                string jsonString = response.Body;
-                Json.JSONData json = Json.ParseJson(jsonString);
-
+                Json.JSONData json = Json.ParseJson(response!.Body);
+                // Error here
                 PublicKey publicKey = new(pemKey: json.Properties["keyPair"].Properties["publicKey"].StringValue,
                     sig: json.Properties["publicKeySignature"].StringValue,
                     sigV2: json.Properties["publicKeySignatureV2"].StringValue);
@@ -50,8 +49,12 @@ namespace CraftSharp.Protocol.ProfileKey
             }
             catch (Exception e)
             {
-                int code = (response == null) ? 0 : response.StatusCode;
+                int code = response == null ? 0 : response.StatusCode;
                 Debug.LogError("Fetch profile key failed: HttpCode = " + code + ", Error = " + e.Message);
+                if (ProtocolSettings.DebugMode)
+                {
+                    Debug.LogError(e.StackTrace);
+                }
                 return null;
             }
         }

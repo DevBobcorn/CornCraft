@@ -1987,11 +1987,41 @@ namespace CraftSharp
             List<string> links = new();
             string messageText;
 
+            // Used for 1.19+ to mark: system message, legal / illegal signature
+            string color = string.Empty;
+
             if (message.isSignedChat)
             {
                 if (!ProtocolSettings.ShowIllegalSignedChat && !message.isSystemChat && !(bool)message.isSignatureLegal!)
                     return;
                 messageText = ChatParser.ParseSignedChat(message, links);
+
+                if (message.isSystemChat)
+                {
+                    if (ProtocolSettings.MarkSystemMessage)
+                        color = "§7▌§r";     // Background Gray
+                }
+                else
+                {
+                    if ((bool) message.isSignatureLegal!)
+                    {
+                        if (ProtocolSettings.ShowModifiedChat && message.unsignedContent != null)
+                        {
+                            if (ProtocolSettings.MarkModifiedMsg)
+                                color = "§6▌§r"; // Background Yellow
+                        }
+                        else
+                        {
+                            if (ProtocolSettings.MarkLegallySignedMsg)
+                                color = "§2▌§r"; // Background Green
+                        }
+                    }
+                    else
+                    {
+                        if (ProtocolSettings.MarkIllegallySignedMsg)
+                            color = "§4▌§r"; // Background Red
+                    }
+                }
             }
             else
             {
@@ -2001,7 +2031,7 @@ namespace CraftSharp
                     messageText = message.content;
             }
 
-            EventManager.Instance.BroadcastOnUnityThread<ChatMessageEvent>(new(messageText));
+            EventManager.Instance.BroadcastOnUnityThread<ChatMessageEvent>(new(color + messageText));
         }
 
         /// <summary>

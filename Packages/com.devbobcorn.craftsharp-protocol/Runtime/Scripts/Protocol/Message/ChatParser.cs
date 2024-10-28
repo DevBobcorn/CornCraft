@@ -110,15 +110,26 @@ namespace CraftSharp.Protocol
         /// <returns>Returns the translated text</returns>
         public static string ParseSignedChat(ChatMessage message, List<string>? links = null)
         {
-            string chatContent = ProtocolSettings.ShowModifiedChat && message.unsignedContent != null ? message.unsignedContent : message.content;
-            string content = message.isJson ? ParseText(chatContent, links) : chatContent;
-            string sender = message.displayName!;
+            string sender = message.isSenderJson ? ParseText(message.displayName!) : message.displayName!;
+            string content;
+            if (ProtocolSettings.ShowModifiedChat && message.unsignedContent != null)
+            {
+                content = ParseText(message.unsignedContent!);
+                if (string.IsNullOrEmpty(content))
+                    content = message.unsignedContent!;
+            }
+            else
+            {
+                content = message.isJson ? ParseText(message.content) : message.content;
+                if (string.IsNullOrEmpty(content))
+                    content = message.content!;
+            }
 
             string text;
             List<string> usingData = new();
 
             MessageType chatType;
-            if (message.isSystemChat)
+            if (message.chatTypeId == -1)
                 chatType = MessageType.RAW_MSG;
             else if (!MessageTypeRegistry.TryGetByNumId(message.chatTypeId, out chatType))
                 chatType = MessageType.CHAT;
@@ -168,34 +179,8 @@ namespace CraftSharp.Protocol
                 default:
                     goto case MessageType.CHAT;
             }
-            string color = string.Empty;
-            if (message.isSystemChat)
-            {
-                if (ProtocolSettings.MarkSystemMessage)
-                    color = "§z §r "; // Custom color code §z : Background Gray
-            }
-            else
-            {
-                if ((bool)message.isSignatureLegal!)
-                {
-                    if (ProtocolSettings.ShowModifiedChat && message.unsignedContent != null)
-                    {
-                        if (ProtocolSettings.MarkModifiedMsg)
-                            color = "§x §r "; // Custom color code §x : Background Yellow
-                    }
-                    else
-                    {
-                        if (ProtocolSettings.MarkLegallySignedMsg)
-                            color = "§y §r "; // Custom color code §y : Background Green
-                    }
-                }
-                else
-                {
-                    if (ProtocolSettings.MarkIllegallySignedMsg)
-                        color = "§w §r "; // Custom color code §w : Background Red
-                }
-            }
-            return color + text;
+
+            return text;
         }
 
         /// <summary>
