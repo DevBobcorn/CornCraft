@@ -129,12 +129,12 @@ namespace CraftSharp
                 yield break;
             }
 
-            // Load block/blockstate definitions...
+            // Load block/blockstate definitions
             var loadFlag = new DataLoadFlag();
             Task.Run(() => BlockStatePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
-            // Load item definitions...
+            // Load item definitions
             loadFlag.Finished = false;
             Task.Run(() => ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished)
@@ -160,7 +160,7 @@ namespace CraftSharp
             Task.Run(() => ParticleTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
-            // Load resource packs...
+            // Load resource packs
             var packManager = ResourcePackManager.Instance;
             packManager.ClearPacks();
 

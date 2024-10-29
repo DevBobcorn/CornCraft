@@ -27,6 +27,7 @@ namespace CraftSharp
         public Animator CrosshairAnimator;
         [SerializeField] private ChunkMaterialManager chunkMaterialManager;
         [SerializeField] private EntityMaterialManager entityMaterialManager;
+        [SerializeField] private Material particleMaterial;
 
         [SerializeField] private RectTransform inventory;
         [SerializeField] private GameObject inventoryItemPrefab;
@@ -35,6 +36,8 @@ namespace CraftSharp
         [SerializeField] private Viewer viewer;
 
         private bool loaded = false;
+
+        private List<Transform> billBoardTransforms = new();
 
         // Runs before a scene gets loaded
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -192,7 +195,7 @@ namespace CraftSharp
             {
                 var coord = pos + new float3(0.5F, altitude * 1.2F + 0.5F, 0.5F);
 
-                var modelObject = new GameObject(pair.Key == ItemModelPredicate.EMPTY ? name : $"[{itemNumId}] {name}{pair.Key}");
+                var modelObject = new GameObject(pair.Key == ItemModelPredicate.EMPTY ? name : $"{name}{pair.Key}");
                 modelObject.transform.parent = transform;
                 modelObject.transform.localPosition = coord;
 
@@ -289,33 +292,65 @@ namespace CraftSharp
             render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(itemModel.RenderType);
         }
 
+        public void TestBuildParticle(string name, Mesh[] meshes, Material material, float3 pos)
+        {
+            var particleTransforms = new List<Transform>();
+
+            for (int i = 0; i < meshes.Length; i++)
+            {
+                var coord = pos + new float3(0.5F, 0.5F + i, 0.5F);
+
+                var particleObject = new GameObject($"{name} Frame {i}");
+                particleObject.transform.parent = transform;
+                particleObject.transform.localPosition = coord;
+
+                var filter = particleObject.AddComponent<MeshFilter>();
+                filter.sharedMesh = meshes[i];
+
+                var render = particleObject.AddComponent<MeshRenderer>();
+                render.sharedMaterial = material;
+
+                var collider = particleObject.AddComponent<MeshCollider>();
+                collider.sharedMesh = meshes[i];
+
+                billBoardTransforms.Add(particleObject.transform);
+            }
+        }
+
         private IEnumerator DoBuild(string dataVersion, string resourceVersion, string[] resourceOverrides)
         {
-            // First load all possible Block States...
+            // Load block/blockstate definitions
             var loadFlag = new DataLoadFlag();
             Task.Run(() => BlockStatePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
-            // Then load all Items...
+            // Load item definitions
             loadFlag.Finished = false;
             Task.Run(() => ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
-            // Get resource pack manager...
-            var packManager = ResourcePackManager.Instance;
+            // Load particle definitions
+            loadFlag.Finished = false;
+            Task.Run(() => ParticleTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            while (!loadFlag.Finished) yield return null;
 
-            // Load resource packs...
+            // Load resource packs
+            var packManager = ResourcePackManager.Instance;
             packManager.ClearPacks();
+
             // First add base resources
             ResourcePack basePack = new($"vanilla-{resourceVersion}");
             packManager.AddPack(basePack);
+
             // Then append overrides
             foreach (var packName in resourceOverrides)
                 packManager.AddPack(new(packName));
+
             // Load valid packs...
             loadFlag.Finished = false;
             Task.Run(() => packManager.LoadPacks(loadFlag,
-                    (status) => Loom.QueueOnMainThread(() => InfoText.text = Translations.Get(status))));
+                    (status) => Loom.QueueOnMainThread(() =>
+                        InfoText.text = Translations.Get(status)), loadParticles: true));
             while (!loadFlag.Finished) yield return null;
 
             // Loading complete!
@@ -361,6 +396,23 @@ namespace CraftSharp
                 if (count >= start + limit)
                     break;
 
+            }
+
+            count = 0; width = 32;
+            var particleMaterialInstance = new Material(particleMaterial);
+            particleMaterialInstance.SetTexture("_BaseMap", packManager.GetParticleAtlas());
+
+            foreach (var pair in packManager.ParticleMeshesTable)
+            {
+                int index = count;
+
+                var particle = ParticleTypePalette.INSTANCE.GetById(pair.Key);
+                var meshes = packManager.ParticleMeshesTable[pair.Key];
+
+                TestBuildParticle($"Particle [{pair.Key}] {particle}", meshes, particleMaterialInstance,
+                        new((index % width) * 3F, 0F, -(index / width) * 5F - 5F));
+
+                count++;
             }
 
             InfoText.text = $"Meshes built in {Time.realtimeSinceStartup - startTime} second(s).";
@@ -474,6 +526,14 @@ namespace CraftSharp
 
         void Update()
         {
+            if (billBoardTransforms != null)
+            {
+                foreach (var t in billBoardTransforms)
+                {
+                    t.localEulerAngles = Camera.main.transform.localEulerAngles;
+                }
+            }
+
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 IsPaused = !IsPaused;

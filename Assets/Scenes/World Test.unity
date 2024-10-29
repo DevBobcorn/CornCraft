@@ -260,8 +260,8 @@ MonoBehaviour:
     Press ''F11'' to toggle full
     screen'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1ca8d82fa0abe124fa88df17095227d4, type: 2}
+  m_sharedMaterial: {fileID: -1950688326045491076, guid: 1ca8d82fa0abe124fa88df17095227d4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -880,6 +880,7 @@ MonoBehaviour:
   CrosshairAnimator: {fileID: 1488379972}
   chunkMaterialManager: {fileID: 964542882}
   entityMaterialManager: {fileID: 964542884}
+  particleMaterial: {fileID: 2100000, guid: 83b7fb793ffba8844a6bbd5d9880b2d6, type: 2}
   inventory: {fileID: 1323800610}
   inventoryItemPrefab: {fileID: 1333662668710857103, guid: 59a68f6be0f373746ad02f4f1bd71d93, type: 3}
   InventoryBuildList: 44000000c2010000e4000000e9000000e8000000290100004a010000a6010000e10000000001000004010000d2000000a0030000ae0100000e010000df020000440200005b0200003d02000084030000
@@ -1439,8 +1440,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: '<b>CornModel</b>: A <u>Minecraft</u> model loader for <u>Unity</u>'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1ca8d82fa0abe124fa88df17095227d4, type: 2}
+  m_sharedMaterial: {fileID: -1950688326045491076, guid: 1ca8d82fa0abe124fa88df17095227d4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2135,8 +2136,8 @@ MonoBehaviour:
 
     Lycoris [2022] lycoreco:sakana~'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9baf05edbcb5b8a4caaa1987e9d8cb2a, type: 2}
+  m_sharedMaterial: {fileID: -8751252669686695664, guid: 9baf05edbcb5b8a4caaa1987e9d8cb2a, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
