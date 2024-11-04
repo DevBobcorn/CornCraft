@@ -52,7 +52,14 @@ namespace CraftSharp.Rendering
         /// Entity position
         /// </summary>
         public readonly TrackedValue<Vector3> Position = new(Vector3.zero);
-        protected Vector3 lastPosition = Vector3.zero;
+        protected Vector3 lastTickPosition = Vector3.zero;
+
+        protected double currentTickStartMilSec = 0F;
+
+        /// <summary>
+        /// Entity velocity received from server
+        /// </summary>
+        private Vector3? receivedVelocity = null;
 
         /// <summary>
         /// Entity yaw
@@ -229,11 +236,21 @@ namespace CraftSharp.Rendering
             UUID = source.UUID;
             Name = source.Name;
             type = source.Type;
+
             Position.Value = CoordConvert.MC2Unity(originOffset, source.Location);
-            lastPosition = Position.Value;
+            lastTickPosition = Position.Value;
             lastYaw = Yaw.Value = source.Yaw;
             lastHeadYaw = HeadYaw.Value = source.HeadYaw;
             lastPitch = Pitch.Value = source.Pitch;
+
+            Position.OnValueUpdate += (prevVal, newVal) =>
+            {
+                lastTickPosition = prevVal;
+
+                // Reset lerp variable every timee we receive a new position
+                currentTickStartMilSec = Time.realtimeSinceStartupAsDouble * 1000D;
+            };
+
             ObjectData = source.ObjectData;
             Health.Value = source.Health;
             MaxHealth.Value = source.MaxHealth;
@@ -283,14 +300,42 @@ namespace CraftSharp.Rendering
             transform.position += posDelta;
         }
 
+        /// <summary>
+        /// Set entity velocity from server
+        /// </summary>
+        public virtual void SetReceivedVelocity(Vector3 velocity)
+        {
+            receivedVelocity = velocity;
+        }
+
         public virtual void UpdateTransform(float tickMilSec)
         {
+            //var currentTickMilSec = Time.realtimeSinceStartupAsDouble * 1000D - currentTickStartMilSec;
+
             // Update position
             if ((Position.Value - transform.position).sqrMagnitude > MOVE_THRESHOLD) // Treat as teleport
+            {
                 transform.position = Position.Value;
+            }
             else // Smoothly move to current position
+            {
                 transform.position = Vector3.SmoothDamp(transform.position, Position.Value,
-                        ref _visualMovementVelocity, tickMilSec);
+                        ref _visualMovementVelocity, tickMilSec / 1000F);
+
+                /*
+                if (currentTickMilSec >= tickMilSec)
+                {
+                    transform.position = Position.Value;
+                    //lastTickPosition = Position.Value;
+                }
+                else
+                {
+                    transform.position = Vector3.Lerp(lastTickPosition, Position.Value, (float) currentTickMilSec / tickMilSec);
+                }
+                */
+
+                //gameObject.name = $"XXX {(float) currentTickMilSec / tickMilSec:0.000} ({currentTickMilSec:0.00} / {tickMilSec:0.00})";
+            }
 
             // Update rotation
             var headYawDelta = Mathf.Abs(Mathf.DeltaAngle(lastHeadYaw, HeadYaw.Value));

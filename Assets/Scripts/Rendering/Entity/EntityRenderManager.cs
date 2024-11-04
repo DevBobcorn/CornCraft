@@ -167,6 +167,20 @@ namespace CraftSharp.Rendering
         }
 
         /// <summary>
+        /// Set velocity for an entity render to given value
+        /// </summary>
+        /// <param name="entityId">Numeral id of the entity to set velocity for</param>
+        /// <param name="delta">Location delta</param>
+        public void SetEntityRenderVelocity(int entityId, float3 velocity)
+        {
+            if (entityRenders.ContainsKey(entityId))
+            {
+                // Velocity value, world origin offset doesn't apply
+                entityRenders[entityId].SetReceivedVelocity(velocity.zyx);
+            }
+        }
+
+        /// <summary>
         /// Teleport an entity render to given location
         /// </summary>
         /// <param name="entityId">Numeral id of the entity to move</param>

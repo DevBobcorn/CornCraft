@@ -493,7 +493,7 @@ namespace CraftSharp
         public override string GetSessionId() => sessionId!;
         public override double GetServerTps() => averageTPS;
         public override int GetPacketCount() => packetCount;
-        public override float GetTickMilSec() => (float)(1D / averageTPS);
+        public override float GetTickMilSec() => (float)(1000D / averageTPS);
 
         /// <summary>
         /// Get current chunk render manager
@@ -2371,6 +2371,18 @@ namespace CraftSharp
         {
             Loom.QueueOnMainThread(() => {
                 EntityRenderManager.RotateEntityRenderHead(entityId, headYaw);
+            });
+        }
+
+        /// <summary>
+        /// Called when an entity's head yaw changed.
+        /// </summary>
+        /// <param name="entityId">Entity Id</param>
+        /// <param name="headYaw">New head yaw</param>
+        public void OnEntityHeadLook(int entityId, short vX, short vY, short vZ)
+        {
+            Loom.QueueOnMainThread(() => {
+                EntityRenderManager.SetEntityRenderVelocity(entityId, new(vX / 8000F, vY / 8000F, vZ / 8000F));
             });
         }
 
