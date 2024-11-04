@@ -176,7 +176,7 @@ namespace CraftSharp
         public override string GetSessionId() => string.Empty;
         public override double GetServerTps() => 20;
         public override int GetPacketCount() => 0;
-        public override float GetTickMilSec() => 0.05F;
+        public override float GetTickMilSec() => 50F;
 
         /// <summary>
         /// Get current chunk render manager
