@@ -530,6 +530,18 @@ namespace CraftSharp.UI
             HideAuthPanel();
         }
 
+        
+        private IEnumerator UpdateLoginMode(int selection)
+        {
+            // Workaround for UGUI EventSystem click event bug, if the option being clicked is above the login button,
+            // it'll trigger a null object exception every frame until the mouse pointer is moved out from the button area
+            loginButton.gameObject.SetActive(false);
+            yield return new WaitForSecondsRealtime(0.2F);
+            loginButton.gameObject.SetActive(true);
+
+            UpdateUsernamePlaceholder(selection);
+        }
+
         private IEnumerator EnterGame()
         {
             if (resourceLoaded && loginInfo is not null)
@@ -572,7 +584,7 @@ namespace CraftSharp.UI
             usernamePanel.alpha  = 0F; // Hide at start
             enterGamePanel.gameObject.SetActive(false);
             enterGamePanel.onClick.AddListener(() => StartCoroutine(EnterGame()));
-            loginDropDown.onValueChanged.AddListener(this.UpdateUsernamePlaceholder);
+            loginDropDown.onValueChanged.AddListener(selection => StartCoroutine(UpdateLoginMode(selection)));
 
             //Load cached sessions from disk if necessary
             if (ProtocolSettings.SessionCaching == CacheType.Disk)
