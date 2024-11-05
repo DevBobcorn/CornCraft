@@ -29,7 +29,7 @@ Material:
     - _DeltaAmount: 0.75
     - _FillAmount: 0.5
     m_Colors:
-    - _BarSize: {r: 700, g: 42, b: 0, a: 0}
+    - _BarSize: {r: 550, g: 42, b: 0, a: 0}
     - _BorderColor: {r: 1, g: 1, b: 1, a: 1}
     - _CornerRadii: {r: 5, g: 50, b: 5, a: 5}
     - _DeltaColor: {r: 1, g: 0.5, b: 0.5, a: 1}
