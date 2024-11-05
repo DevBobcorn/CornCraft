@@ -2,6 +2,8 @@
 {
     Properties
     {
+        _MainTex("Main Tex", 2D) = "white" {}
+
         _BorderColor ("Border Color", Color) = (1, 1, 1, 1)
         _BorderThickness ("Border Thickness", Float) = 5
 
@@ -52,6 +54,7 @@
             }
 
             CBUFFER_START(UnityPerMaterial)
+            float4 _MainTex_ST;
             half4 _BorderColor;
             half _BorderThickness;
             half4 _DeltaColor;
