@@ -1,3 +1,4 @@
+#if SHAPES_URP || SHAPES_HDRP
 using UnityEngine;
 
 namespace CraftSharp.UI
@@ -121,3 +122,4 @@ namespace CraftSharp.UI
         }
     }
 }
+#endif

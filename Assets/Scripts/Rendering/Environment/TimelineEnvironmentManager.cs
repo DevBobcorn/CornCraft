@@ -17,7 +17,9 @@ namespace CraftSharp.Rendering
 
         [SerializeField] private AnimeSunDirection? animeSunControl;
 
+#if ATMOSPHERIC_HEIGHT_FOG
         [SerializeField] AtmosphericHeightFog.HeightFogGlobal? fogGlobal;
+#endif
 
         private int ticks;
         private int lastRecTicks = int.MinValue;
@@ -29,6 +31,7 @@ namespace CraftSharp.Rendering
         {
             this.mainCamera = mainCamera;
 
+#if ATMOSPHERIC_HEIGHT_FOG
             if (fogGlobal != null)
             {
                 fogGlobal.mainCamera = mainCamera;
@@ -38,6 +41,7 @@ namespace CraftSharp.Rendering
                     fogGlobal.gameObject.SetActive(true);
                 }
             }
+#endif
         }
 
         public override void SetRain(bool raining)
@@ -115,6 +119,7 @@ namespace CraftSharp.Rendering
             {
                 transform.position = mainCamera.transform.position;
 
+#if ATMOSPHERIC_HEIGHT_FOG
                 if (fogGlobal != null)
                 {
                     fogGlobal.fogHeightStart = transform.position.y - 10F;
@@ -127,6 +132,8 @@ namespace CraftSharp.Rendering
                 {
                     fogGlobal.gameObject.SetActive(false);
                 }
+
+#endif
             }
         }
 
@@ -202,10 +209,12 @@ namespace CraftSharp.Rendering
                 animeSunControl.SetTime((float) playableTOD);
             }
 
+#if ATMOSPHERIC_HEIGHT_FOG
             if (fogGlobal != null)
             {
                 fogGlobal.timeOfDay = GetDayNightLerp((float) playableTOD);
             }
+#endif
 
             DynamicGI.UpdateEnvironment();
         }
