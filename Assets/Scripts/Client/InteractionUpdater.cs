@@ -185,9 +185,10 @@ namespace CraftSharp.Control
             DiggingBlockLoc = TargetBlockLoc;
             DiggingCoroutine = StartCoroutine(DigProgressCoroutine());
 
+            return;
+
             IEnumerator DigProgressCoroutine()
             {
-                Debug.Log($"Digging starting: {digTime}");
                 float timeElapsed = 0f;
 
                 while (timeElapsed < digTime)
@@ -200,7 +201,6 @@ namespace CraftSharp.Control
                 }
 
                 DiggingBlockLoc = null;
-                Debug.Log($"Digging finished: {digTime}");
                 onComplete.Invoke();
             }
         }

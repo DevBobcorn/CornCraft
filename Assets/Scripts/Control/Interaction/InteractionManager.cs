@@ -11,8 +11,10 @@ namespace CraftSharp.Control
         public static readonly InteractionManager INSTANCE = new();
 
         private static readonly Dictionary<int, BlockInteractionDefinition> blockInteractionTable = new();
+        private static readonly Dictionary<int, ResourceLocation> mineableInteractionTable = new();
 
         public Dictionary<int, BlockInteractionDefinition> BlockInteractionTable => blockInteractionTable;
+        public Dictionary<int, ResourceLocation> MineableInteractionTable => mineableInteractionTable;
 
         public void PrepareData(DataLoadFlag flag)
         {
@@ -33,14 +35,22 @@ namespace CraftSharp.Control
 
             var palette = BlockStatePalette.INSTANCE;
 
-            if (interactions.Properties.ContainsKey("special"))
+            PrepareSpecialData(interactions, palette);
+
+            PrepareMineableData(interactions, palette);
+
+            flag.Finished = true;
+        }
+
+        private void PrepareSpecialData(Json.JSONData interactions, BlockStatePalette palette)
+        {
+            if (interactions.Properties.TryGetValue("special", out var specialProperty))
             {
-                var entries = interactions.Properties["special"].Properties;
+                var entries = specialProperty.Properties;
 
-                foreach (var entry in entries) {
-                    string entryName = entry.Key;
-
-                    var entryCont = entry.Value.Properties;
+                foreach (var (entryName, value) in entries)
+                {
+                    var entryCont = value.Properties;
 
                     if (entryCont.ContainsKey("action") &&
                         entryCont.ContainsKey("hint") &&
@@ -55,9 +65,9 @@ namespace CraftSharp.Control
                         };
 
                         var iconType = InteractionIconType.Dialog;
-                        if (entryCont.ContainsKey("icon_type"))
+                        if (entryCont.TryGetValue("icon_type", out var type))
                         {
-                            iconType = entryCont["icon_type"].StringValue switch
+                            iconType = type.StringValue switch
                             {
                                 "interact"       => InteractionIconType.Dialog,
                                 "enter_location" => InteractionIconType.EnterLocation,
@@ -94,10 +104,32 @@ namespace CraftSharp.Control
                     }
                 }
             }
+        }
 
-            // TODO: Entity interactions
+        private void PrepareMineableData(Json.JSONData interactions, BlockStatePalette palette)
+        {
+            if (interactions.Properties.TryGetValue("mineable", out var mineableProperty))
+            {
+                var entries = mineableProperty.Properties;
 
-            flag.Finished = true;
+                foreach (var (entryName, value) in entries)
+                {
+                    var itemId = ResourceLocation.FromString(entryName);
+
+                    foreach (var type in value.DataArray)
+                    {
+                        var blockId = ResourceLocation.FromString(type.StringValue);
+
+                        if (palette.TryGetAllNumIds(blockId, out int[] stateIds))
+                        {
+                            foreach (var stateId in stateIds)
+                            {
+                                mineableInteractionTable.Add(stateId, itemId);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
