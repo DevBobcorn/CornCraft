@@ -60,12 +60,11 @@ MonoBehaviour:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: 9210576758712642591}
   - {fileID: -408358162207867921}
   - {fileID: 4449293429892402646}
   - {fileID: -403224962210285753}
   - {fileID: 7730839133161150533}
-  m_RendererFeatureMap: 1f2c8927c38ad27feffb77406a3855fad64d3716cd10bf3d47b7e282087567fa4558c25b3b75496b
+  m_RendererFeatureMap: effb77406a3855fad64d3716cd10bf3d47b7e282087567fa4558c25b3b75496b
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}

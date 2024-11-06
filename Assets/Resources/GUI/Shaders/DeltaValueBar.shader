@@ -2,7 +2,7 @@
 {
     Properties
     {
-        _MainTex("Main Tex", 2D) = "white" {}
+        _MainTex ("Main Tex", 2D) = "white" {}
 
         _BorderColor ("Border Color", Color) = (1, 1, 1, 1)
         _BorderThickness ("Border Thickness", Float) = 5
