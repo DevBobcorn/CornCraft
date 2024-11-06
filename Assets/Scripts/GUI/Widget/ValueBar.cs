@@ -1,8 +1,9 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CraftSharp.UI
 {
-    public class ValueBar : BaseValueBar, IAlphaListener
+    public partial class ValueBar : BaseValueBar, IAlphaListener
     {
         [SerializeField] private Color normalColor   = Color.white;
         [SerializeField] private Color reduceColor   = new(1F, 0.521F, 0.596F); // 255 133 152 #FF8598
@@ -15,17 +16,19 @@ namespace CraftSharp.UI
 
         [SerializeField] private bool horizontalBar = true;
 
-        private Shapes.Rectangle selfRect;
-        [SerializeField] private Shapes.Rectangle deltaFillRect, displayFillRect;
-
         [SerializeField] private float fullBarLength;
 
         private CanvasGroup[] parentCanvasGroups = { };
         private float selfAlpha = 1F;
 
+        partial void StartImplementation();
+        partial void UpdateAlphaImplementation(float alpha);
+        partial void UpdateValueImplementation();
+
         void Start()
         {
-            selfRect = GetComponent<Shapes.Rectangle>();
+            StartImplementation();
+
             parentCanvasGroups = GetComponentsInParent<CanvasGroup>(true);
 
             UpdateValue();
@@ -33,9 +36,7 @@ namespace CraftSharp.UI
 
         public void UpdateAlpha(float alpha)
         {
-            selfRect.Color = IAlphaListener.GetColorWithAlpha(selfRect.Color, alpha);
-            deltaFillRect.Color = IAlphaListener.GetColorWithAlpha(deltaFillRect.Color, alpha);
-            displayFillRect.Color = IAlphaListener.GetColorWithAlpha(displayFillRect.Color, alpha);
+            UpdateAlphaImplementation(alpha);
 
             if (barText != null)
             {
@@ -46,6 +47,56 @@ namespace CraftSharp.UI
         }
 
         protected override void UpdateValue()
+        {
+            UpdateValueImplementation();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+
+            if (parentCanvasGroups.Length > 0)
+            {
+                float updatedAlpha = 1F;
+
+                for (int i = 0; i < parentCanvasGroups.Length; i++)
+                {
+                    if ((!parentCanvasGroups[i].gameObject.activeSelf) || parentCanvasGroups[i].alpha == 0F)
+                    {
+                        updatedAlpha = 0F;
+                        break;
+                    }
+
+                    updatedAlpha *= parentCanvasGroups[i].alpha;
+                }
+
+                if (selfAlpha != updatedAlpha)
+                {
+                    UpdateAlpha(updatedAlpha);
+                }
+            }
+        }
+    }
+
+#if SHAPES_URP || SHAPES_HDRP
+    public partial class ValueBar
+    {
+        private Shapes.Rectangle selfRect;
+        [SerializeField] private Shapes.Rectangle deltaFillRect, displayFillRect;
+
+        partial void StartImplementation()
+        {
+            selfRect = GetComponent<Shapes.Rectangle>();
+        }
+
+        partial void UpdateAlphaImplementation(float alpha)
+        {
+            selfRect.Color = IAlphaListener.GetColorWithAlpha(selfRect.Color, alpha);
+            deltaFillRect.Color = IAlphaListener.GetColorWithAlpha(deltaFillRect.Color, alpha);
+            displayFillRect.Color = IAlphaListener.GetColorWithAlpha(displayFillRect.Color, alpha);
+        }
+
+        partial void UpdateValueImplementation()
         {
             if (displayValue > curValue) // Reduce visual fill
             {
@@ -93,31 +144,59 @@ namespace CraftSharp.UI
             else
                 displayFillRect.Color = IAlphaListener.GetColorWithAlpha(normalColor, selfAlpha);
         }
+    }
+#else
+    public partial class ValueBar
+    {
+        private static readonly int ValueColor = Shader.PropertyToID("_ValueColor");
+        private static readonly int DeltaColor = Shader.PropertyToID("_DeltaColor");
+        private static readonly int FillAmount = Shader.PropertyToID("_FillAmount");
+        private static readonly int DeltaAmount = Shader.PropertyToID("_DeltaAmount");
 
-        protected override void Update()
+        [SerializeField] private Image barImage;
+        private Material barMaterial;
+
+        partial void StartImplementation()
         {
-            base.Update();
+            barImage = GetComponentInChildren<Image>();
+            barMaterial = barImage.material;
+        }
 
-            if (parentCanvasGroups.Length > 0)
+        partial void UpdateAlphaImplementation(float alpha)
+        {
+            Color fillColor = barMaterial.GetColor(ValueColor);
+            barMaterial.SetColor(ValueColor, IAlphaListener.GetColorWithAlpha(fillColor, selfAlpha));
+        }
+
+        partial void UpdateValueImplementation()
+        {
+            if (displayValue > curValue) // Reducing fill
             {
-                float updatedAlpha = 1F;
-
-                for (int i = 0; i < parentCanvasGroups.Length; i++)
-                {
-                    if ((!parentCanvasGroups[i].gameObject.activeSelf) || parentCanvasGroups[i].alpha == 0F)
-                    {
-                        updatedAlpha = 0F;
-                        break;
-                    }
-
-                    updatedAlpha *= parentCanvasGroups[i].alpha;
-                }
-
-                if (selfAlpha != updatedAlpha)
-                {
-                    UpdateAlpha(updatedAlpha);
-                }
+                displayValue = Mathf.Max(displayValue - maxValue * Time.deltaTime, curValue);
+                barMaterial.SetColor(DeltaColor, IAlphaListener.GetColorWithAlpha(reduceColor, selfAlpha));
             }
+            else // Increasing fill
+            {
+                displayValue = Mathf.Min(displayValue + maxValue * Time.deltaTime, curValue);
+                barMaterial.SetColor(DeltaColor, IAlphaListener.GetColorWithAlpha(increaseColor, selfAlpha));
+            }
+
+            var currentFillAmount = curValue / maxValue;
+            barMaterial.SetFloat(FillAmount, currentFillAmount);
+
+            var currentDeltaAmount = displayValue / maxValue;
+            barMaterial.SetFloat(DeltaAmount, currentDeltaAmount);
+
+            float displayFraction = displayValue / maxValue;
+            Color currentColor = normalColor;
+
+            if (displayFraction < dangerThreshold)
+                currentColor = dangerColor;
+            else if (displayFraction < warningThreshold)
+                currentColor = warningColor;
+
+            barMaterial.SetColor(ValueColor, IAlphaListener.GetColorWithAlpha(currentColor, selfAlpha));
         }
     }
+#endif
 }
