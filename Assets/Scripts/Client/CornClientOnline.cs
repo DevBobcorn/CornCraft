@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
@@ -1674,31 +1675,74 @@ namespace CraftSharp
             return InvokeOnNetMainThread(() => handler!.SendPlayerBlockPlacement((int)hand, blockLoc, blockFace, sequenceId++));
         }
 
+        public record Tool(float Effectiveness)
+        {
+            public bool IsEffectiveAgainst(BlockState state) => true;
+
+            public float Effectiveness { get; } = Effectiveness;
+        }
+
         /// <summary>
         /// Attempt to dig a block at the specified location
         /// </summary>
         /// <param name="blockLoc">Location of block to dig</param>
+        /// <param name="blockFace">Block face</param>
+        /// <param name="status">Digging status</param>
         /// <param name="swingArms">Also perform the "arm swing" animation</param>
         /// <param name="lookAtBlock">Also look at the block before digging</param>
-        public override bool DigBlock(BlockLoc blockLoc, bool swingArms = true, bool lookAtBlock = true)
+        public override float DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status = DiggingStatus.Started, bool swingArms = true, bool lookAtBlock = true)
         {
             if (InvokeRequired)
-                return InvokeOnNetMainThread(() => DigBlock(blockLoc, swingArms, lookAtBlock));
+                return InvokeOnNetMainThread(() => DigBlock(blockLoc, blockFace, status, swingArms, lookAtBlock));
 
-            // TODO select best face from current player location
-            Direction blockFace = Direction.Down;
-
-            // Look at block before attempting to break it
-            if (lookAtBlock)
+            switch (status)
             {
-                UpdateLocation(GetCurrentLocation(), new Location(blockLoc.X, blockLoc.Y, blockLoc.Z));
+                case DiggingStatus.Started:
+                {
+                    bool isFloating = PlayerController.Status.Floating;
+                    bool isGrounded = PlayerController.Status.Grounded;
+
+                    Block block = ChunkRenderManager.GetBlock(blockLoc);
+                    float diggingTime = CalculateDiggingTime(new Tool(1.0f), block.State, isFloating, isGrounded);
+
+                    // Look at block before attempting to break it
+                    if (lookAtBlock)
+                    {
+                        UpdateLocation(GetCurrentLocation(), new Location(blockLoc.X, blockLoc.Y, blockLoc.Z));
+                    }
+
+                    return handler!.SendPlayerDigging(0, blockLoc, blockFace, sequenceId++) ? diggingTime : 0.0f;
+                }
+                case DiggingStatus.Cancelled:
+                {
+                    return handler!.SendPlayerDigging(1, blockLoc, blockFace, sequenceId++) ? 1.0f : 0.0f;
+                }
+                case DiggingStatus.Finished:
+                {
+                    return handler!.SendPlayerDigging(2, blockLoc, blockFace, sequenceId++) ? 1.0f : 0.0f;
+                }
+                default: return 0.0f;
             }
 
-            // Send dig start and dig end, will need to wait for server response to know dig result
-            // See https://wiki.vg/How_to_Write_a_Client#Digging for more details
-            return handler!.SendPlayerDigging(0, blockLoc, blockFace, sequenceId++)
-                && (!swingArms || DoAnimation((int)Hand.MainHand))
-                && handler.SendPlayerDigging(2, blockLoc, blockFace, sequenceId++);
+            float CalculateDiggingTime(Tool tool, BlockState state, bool underwater, bool onGround)
+            {
+                float mult = 1.0f;
+
+                if (tool.IsEffectiveAgainst(state))
+                    mult *= tool.Effectiveness;
+
+                if (underwater)
+                    mult /= 5;
+
+                if (!onGround)
+                    mult /= 5;
+
+                mult /= state.Hardness / 30f;
+
+                float hardness = state.Hardness;
+
+                return hardness > 0 ? 1f / mult : 0f;
+            }
         }
 
         /// <summary>

@@ -382,9 +382,9 @@ namespace CraftSharp
         /// <param name="blockLoc">Location of block to dig</param>
         /// <param name="swingArms">Also perform the "arm swing" animation</param>
         /// <param name="lookAtBlock">Also look at the block before digging</param>
-        public override bool DigBlock(BlockLoc blockLoc, bool swingArms = true, bool lookAtBlock = true)
+        public override float DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status = DiggingStatus.Started, bool swingArms = true, bool lookAtBlock = true)
         {
-            return false;
+            return default;
         }
 
         /// <summary>

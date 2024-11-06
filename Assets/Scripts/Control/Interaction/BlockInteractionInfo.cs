@@ -49,7 +49,7 @@ namespace CraftSharp.Control
                     client.PlaceBlock(location, Direction.Down);
                     break;
                 case BlockInteractionType.Break:
-                    client.DigBlock(location, true, false);
+                    client.DigBlock(location, Direction.Down, BaseCornClient.DiggingStatus.Started, true, false);
                     break;
             }
         }

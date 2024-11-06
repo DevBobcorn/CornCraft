@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,11 +17,15 @@ namespace CraftSharp.Control
         private GameObject blockSelectionFrame;
 
         public readonly Dictionary<BlockLoc, BlockInteractionInfo> blockInteractionInfos = new();
+        public Direction? TargetDirection = Direction.Down;
         public BlockLoc? TargetBlockLoc = null;
         private BaseCornClient client;
         private CameraController cameraController;
 
         private int nextNumeralID = 1;
+
+        private Coroutine DiggingCoroutine;
+        private BlockLoc? DiggingBlockLoc = null;
 
         private void UpdateBlockSelection(Ray? viewRay)
         {
@@ -35,6 +41,17 @@ namespace CraftSharp.Control
             {
                 castResultPos = viewHit.point;
                 castSurfaceDir = viewHit.normal;
+
+                TargetDirection = castSurfaceDir.Value switch
+                {
+                    { x: 0, y: 0, z: 1 } => Direction.North,
+                    { x: 0, y: 0, z: -1 } => Direction.South,
+                    { x: -1, y: 0, z: 0 } => Direction.West,
+                    { x: 1, y: 0, z: 0 } => Direction.East,
+                    { x: 0, y: 1, z: 0 } => Direction.Up,
+                    { x: 0, y: -1, z: 0 } => Direction.Down,
+                    _ => null
+                };
             }
             else
                 castResultPos = castSurfaceDir = null;
@@ -160,6 +177,34 @@ namespace CraftSharp.Control
             }
         }
 
+        private void StartDiggingProgress(float digTime, Action onComplete)
+        {
+            if (DiggingBlockLoc != null && DiggingBlockLoc != TargetBlockLoc)
+                StopCoroutine(DiggingCoroutine);
+
+            DiggingBlockLoc = TargetBlockLoc;
+            DiggingCoroutine = StartCoroutine(DigProgressCoroutine());
+
+            IEnumerator DigProgressCoroutine()
+            {
+                Debug.Log($"Digging starting: {digTime}");
+                float timeElapsed = 0f;
+
+                while (timeElapsed < digTime)
+                {
+                    if (DiggingBlockLoc == null) yield break;
+
+                    timeElapsed += Time.deltaTime;
+
+                    yield return null;
+                }
+
+                DiggingBlockLoc = null;
+                Debug.Log($"Digging finished: {digTime}");
+                onComplete.Invoke();
+            }
+        }
+
         private static bool PointOnGridEdge(float value)
         {
             var delta = value - Mathf.Floor(value);
@@ -183,9 +228,22 @@ namespace CraftSharp.Control
             {
                 // Update target block selection
                 UpdateBlockSelection(cameraController!.GetPointerRay());
+
+                // Handle digging
+                if (TargetBlockLoc != null && TargetDirection != null)
+                {
+                    var time = client.DigBlock(TargetBlockLoc.Value, TargetDirection.Value);
+
+                    if (time > 0)
+                    {
+                        StartDiggingProgress(time, () =>
+                            client.DigBlock(TargetBlockLoc.Value, TargetDirection.Value, BaseCornClient.DiggingStatus.Finished));
+                    }
+                }
             }
             else
             {
+                DiggingBlockLoc = null;
                 TargetBlockLoc = null;
 
                 if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)

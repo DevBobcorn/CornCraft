@@ -212,6 +212,8 @@ namespace CraftSharp
 
         #region Action methods: Perform an action on the Server
 
+        public enum DiggingStatus { Started, Cancelled, Finished }
+
         public abstract void TrySendChat(string text);
         public abstract bool SendRespawnPacket();
         public abstract bool SendEntityAction(EntityActionType entityAction);
@@ -220,7 +222,7 @@ namespace CraftSharp
         public abstract bool UseItemOnOffHand();
         public abstract bool DoWindowAction(int windowId, int slotId, WindowActionType action);
         public abstract bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, Hand hand = Hand.MainHand);
-        public abstract bool DigBlock(BlockLoc blockLoc, bool swingArms = true, bool lookAtBlock = true);
+        public abstract float DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status = DiggingStatus.Started, bool swingArms = true, bool lookAtBlock = true);
         public abstract bool DropItem(bool dropEntireStack);
         public abstract bool SwapItemOnHands();
         public abstract bool ChangeSlot(short slot);
