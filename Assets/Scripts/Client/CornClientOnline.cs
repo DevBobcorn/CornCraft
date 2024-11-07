@@ -1703,7 +1703,8 @@ namespace CraftSharp
                     bool isGrounded = PlayerController.Status.Grounded;
 
                     Block block = ChunkRenderManager.GetBlock(blockLoc);
-                    float diggingTime = CalculateDiggingTime(new Tool(1.0f), block.State, isFloating, isGrounded);
+                    ItemStack? curItem = inventories[0].GetHotbarItem(CurrentSlot);
+                    float diggingTime = CalculateDiggingTime(curItem?.ItemType, block, isFloating, isGrounded);
 
                     // Look at block before attempting to break it
                     if (lookAtBlock)
@@ -1724,24 +1725,51 @@ namespace CraftSharp
                 default: return 0.0f;
             }
 
-            float CalculateDiggingTime(Tool tool, BlockState state, bool underwater, bool onGround)
+            float CalculateDiggingTime(Item? item, Block block, bool underwater, bool onGround)
             {
+                var isBestTool =
+                    item != null &&
+                    InteractionManager.INSTANCE.MineableInteractionTable.TryGetValue(block.StateId, out var tool) &&
+                    tool switch
+                    {
+                        InteractionTool.Axe => item.ItemId.Path.Contains("axe"),
+                        InteractionTool.Hoe => item.ItemId.Path.Contains("hoe"),
+                        InteractionTool.Pickaxe => item.ItemId.Path.Contains("pickaxe"),
+                        InteractionTool.Shovel => item.ItemId.Path.Contains("shovel"),
+                        _ => false,
+                    };
+
+                ItemTier? tier = null;
+
+                // TODO: I don't known is hand break belongs to harvest?
+                var canHarvest =
+                    item is { TierLevel: not null } &&
+                    ItemTier.Tiers.TryGetValue(item.TierLevel.Value, out tier);
+
                 float mult = 1.0f;
 
-                if (tool.IsEffectiveAgainst(state))
-                    mult *= tool.Effectiveness;
+                if (isBestTool && tier != null)
+                {
+                    mult = tier.Speed;
 
-                if (underwater)
-                    mult /= 5;
+                    if (!canHarvest) mult = 1.0f;
+                }
+                else mult = 1.0f;
 
-                if (!onGround)
-                    mult /= 5;
+                if (underwater) mult /= 5.0f;
+                if (!onGround) mult /= 5.0f;
 
-                mult /= state.Hardness / 30f;
+                double damage = mult / block.State.Hardness;
 
-                float hardness = state.Hardness;
+                damage /= canHarvest ? 30.0 : 100.0;
 
-                return hardness > 0 ? 1f / mult : 0f;
+                // Instant breaking
+                if (damage > 1.0) return 0.0f;
+
+                float ticks = (float) Math.Ceiling(1.0f / damage);
+                float seconds = ticks / 20.0f;
+
+                return seconds;
             }
         }
 

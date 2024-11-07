@@ -120,5 +120,19 @@
         "minecraft:polished_blackstone_button"
       ]
     }
+  },
+  "diggable": {
+    "axe": [
+      "minecraft:oak_planks"
+    ],
+    "hoe": [
+      "minecraft:oak_leaves"
+    ],
+    "pickaxe": [
+      "minecraft:stone"
+    ],
+    "shovel": [
+      "minecraft:dirt"
+    ]
   }
 }

@@ -177,7 +177,7 @@ namespace CraftSharp.Control
             }
         }
 
-        private void StartDiggingProgress(float digTime, Action onComplete)
+        private void DiggingBlockInteraction(float digTime, Action onComplete)
         {
             if (DiggingBlockLoc != null && DiggingBlockLoc != TargetBlockLoc)
                 StopCoroutine(DiggingCoroutine);
@@ -203,6 +203,11 @@ namespace CraftSharp.Control
                 DiggingBlockLoc = null;
                 onComplete.Invoke();
             }
+        }
+
+        private void PlaceBlockInteraction()
+        {
+            
         }
 
         private static bool PointOnGridEdge(float value)
@@ -236,7 +241,7 @@ namespace CraftSharp.Control
 
                     if (time > 0)
                     {
-                        StartDiggingProgress(time, () =>
+                        DiggingBlockInteraction(time, () =>
                             client.DigBlock(TargetBlockLoc.Value, TargetDirection.Value, BaseCornClient.DiggingStatus.Finished));
                     }
                 }

@@ -11,10 +11,11 @@ namespace CraftSharp.Control
         public static readonly InteractionManager INSTANCE = new();
 
         private static readonly Dictionary<int, BlockInteractionDefinition> blockInteractionTable = new();
-        private static readonly Dictionary<int, ResourceLocation> mineableInteractionTable = new();
+
+        private static readonly Dictionary<int, InteractionTool> mineableInteractionTable = new();
 
         public Dictionary<int, BlockInteractionDefinition> BlockInteractionTable => blockInteractionTable;
-        public Dictionary<int, ResourceLocation> MineableInteractionTable => mineableInteractionTable;
+        public Dictionary<int, InteractionTool> MineableInteractionTable => mineableInteractionTable;
 
         public void PrepareData(DataLoadFlag flag)
         {
@@ -108,14 +109,12 @@ namespace CraftSharp.Control
 
         private void PrepareMineableData(Json.JSONData interactions, BlockStatePalette palette)
         {
-            if (interactions.Properties.TryGetValue("mineable", out var mineableProperty))
+            if (interactions.Properties.TryGetValue("diggable", out var mineableProperty))
             {
                 var entries = mineableProperty.Properties;
 
                 foreach (var (entryName, value) in entries)
                 {
-                    var itemId = ResourceLocation.FromString(entryName);
-
                     foreach (var type in value.DataArray)
                     {
                         var blockId = ResourceLocation.FromString(type.StringValue);
@@ -124,7 +123,14 @@ namespace CraftSharp.Control
                         {
                             foreach (var stateId in stateIds)
                             {
-                                mineableInteractionTable.Add(stateId, itemId);
+                                mineableInteractionTable.Add(stateId, entryName switch
+                                {
+                                    "axe" => InteractionTool.Axe,
+                                    "hoe" => InteractionTool.Hoe,
+                                    "pickaxe" => InteractionTool.Pickaxe,
+                                    "shovel" => InteractionTool.Shovel,
+                                    _ => InteractionTool.Default,
+                                });
                             }
                         }
                     }
