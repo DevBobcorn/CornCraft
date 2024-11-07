@@ -73,7 +73,7 @@ namespace CraftSharp.Rendering
 
             switch (actionType)
             {
-                case ItemActionType.MeleeWeaponSword:
+                case ItemActionType.Sword:
                     _currentItem = itemObj!.AddComponent<MeleeWeapon>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack);
                     // Use dummy material and mesh if failed to build for item
@@ -94,7 +94,7 @@ namespace CraftSharp.Rendering
 
                     itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
                     break;
-                case ItemActionType.RangedWeaponBow:
+                case ItemActionType.Bow:
                     _currentItem = itemObj!.AddComponent<UselessActionItem>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack);
                     // Use dummy material and mesh if failed to build for item

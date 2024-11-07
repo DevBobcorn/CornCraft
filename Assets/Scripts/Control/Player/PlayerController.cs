@@ -518,12 +518,12 @@ namespace CraftSharp.Control
         {
             if (Status!.AttackStatus.AttackCooldown <= 0F)
             {
-                if (CurrentActionType == ItemActionType.MeleeWeaponSword)
+                if (CurrentActionType == ItemActionType.Sword)
                 {
                     // TODO: Implement
                     return false;
                 }
-                else if (CurrentActionType == ItemActionType.RangedWeaponBow)
+                else if (CurrentActionType == ItemActionType.Bow)
                 {
                     // Specify attack data to use
                     Status.AttackStatus.CurrentChargedAttack = skillData;
