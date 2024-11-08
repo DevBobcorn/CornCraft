@@ -5253,14 +5253,14 @@
     "protocol_id": 661,
     "rarity": "common",
     "stack_limit": 1,
-    "action_type": "filled_bucket",
+    "action_type": "fluid_bucket",
     "edible": false
   },
   "minecraft:lava_bucket": {
     "protocol_id": 662,
     "rarity": "common",
     "stack_limit": 1,
-    "action_type": "filled_bucket",
+    "action_type": "fluid_bucket",
     "edible": false
   },
   "minecraft:minecart": {
@@ -5289,7 +5289,7 @@
     "protocol_id": 666,
     "rarity": "common",
     "stack_limit": 16,
-    "action_type": "projectile",
+    "action_type": "throwable_item",
     "edible": false
   },
   "minecraft:oak_boat": {
@@ -5317,28 +5317,28 @@
     "protocol_id": 670,
     "rarity": "common",
     "stack_limit": 1,
-    "action_type": "filled_bucket",
+    "action_type": "mob_bucket",
     "edible": false
   },
   "minecraft:salmon_bucket": {
     "protocol_id": 671,
     "rarity": "common",
     "stack_limit": 1,
-    "action_type": "filled_bucket",
+    "action_type": "mob_bucket",
     "edible": false
   },
   "minecraft:cod_bucket": {
     "protocol_id": 672,
     "rarity": "common",
     "stack_limit": 1,
-    "action_type": "filled_bucket",
+    "action_type": "mob_bucket",
     "edible": false
   },
   "minecraft:tropical_fish_bucket": {
     "protocol_id": 673,
     "rarity": "common",
     "stack_limit": 1,
-    "action_type": "filled_bucket",
+    "action_type": "mob_bucket",
     "edible": false
   },
   "minecraft:brick": {
@@ -5402,7 +5402,7 @@
     "protocol_id": 682,
     "rarity": "common",
     "stack_limit": 16,
-    "action_type": "projectile",
+    "action_type": "throwable_item",
     "edible": false
   },
   "minecraft:compass": {
@@ -5980,7 +5980,7 @@
     "protocol_id": 757,
     "rarity": "common",
     "stack_limit": 64,
-    "action_type": "none",
+    "action_type": "eye_of_ender",
     "edible": false
   },
   "minecraft:glistering_melon_slice": {
@@ -6442,7 +6442,7 @@
     "protocol_id": 823,
     "rarity": "uncommon",
     "stack_limit": 64,
-    "action_type": "projectile",
+    "action_type": "throwable_item",
     "edible": false
   },
   "minecraft:fire_charge": {
