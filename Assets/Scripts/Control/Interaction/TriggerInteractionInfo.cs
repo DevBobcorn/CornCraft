@@ -1,4 +1,6 @@
-﻿using CraftSharp.Protocol;
+﻿using System.Collections;
+using CraftSharp.Inventory;
+using CraftSharp.Protocol;
 
 namespace CraftSharp.Control
 {
@@ -41,7 +43,7 @@ namespace CraftSharp.Control
             return definition;
         }
 
-        public override void RunInteraction(BaseCornClient client)
+        public override IEnumerator RunInteraction(BaseCornClient client)
         {
             switch (definition.Type)
             {
@@ -49,9 +51,15 @@ namespace CraftSharp.Control
                     client.PlaceBlock(location, Direction.Down);
                     break;
                 case TriggerInteractionType.Break:
-                    client.DigBlock(location, Direction.Down, BaseCornClient.DiggingStatus.Started, true, false);
+                    client.DigBlock(location, Direction.Down);
+
+                    if (client is CornClientOnline clientOnline) clientOnline.DoAnimation((int)Hand.MainHand);
+
+                    client.DigBlock(location, Direction.Down, BaseCornClient.DiggingStatus.Finished);
                     break;
             }
+
+            yield return null;
         }
     }
 }

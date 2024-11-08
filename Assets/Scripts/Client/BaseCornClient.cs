@@ -222,7 +222,7 @@ namespace CraftSharp
         public abstract bool UseItemOnOffHand();
         public abstract bool DoWindowAction(int windowId, int slotId, WindowActionType action);
         public abstract bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, Hand hand = Hand.MainHand);
-        public abstract float DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status = DiggingStatus.Started, bool swingArms = true, bool lookAtBlock = true);
+        public abstract bool DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status = DiggingStatus.Started);
         public abstract bool DropItem(bool dropEntireStack);
         public abstract bool SwapItemOnHands();
         public abstract bool ChangeSlot(short slot);

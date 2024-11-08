@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,6 +15,9 @@ namespace CraftSharp.Control
         [SerializeField] private LayerMask blockSelectionLayer;
         [SerializeField] private GameObject blockSelectionFramePrefab;
 
+        private Action<ToolInteractionEvent>? toolInteractCallback;
+        private ToolInteractionInfo toolInteractInfo;
+
         private GameObject blockSelectionFrame;
 
         public readonly Dictionary<BlockLoc, TriggerInteractionInfo> blockInteractionInfos = new();
@@ -25,7 +29,6 @@ namespace CraftSharp.Control
         private int nextNumeralID = 1;
 
         private Coroutine DiggingCoroutine;
-        private BlockLoc? DiggingBlockLoc = null;
 
         private void UpdateBlockSelection(Ray? viewRay)
         {
@@ -177,40 +180,6 @@ namespace CraftSharp.Control
             }
         }
 
-        private void DiggingBlockInteraction(float digTime, Action onComplete)
-        {
-            if (DiggingBlockLoc != null && DiggingBlockLoc != TargetBlockLoc)
-                StopCoroutine(DiggingCoroutine);
-
-            Debug.Log($"Start a digging process takes {digTime}s");
-            DiggingBlockLoc = TargetBlockLoc;
-            DiggingCoroutine = StartCoroutine(DigProgressCoroutine());
-
-            return;
-
-            IEnumerator DigProgressCoroutine()
-            {
-                float timeElapsed = 0f;
-
-                while (timeElapsed < digTime)
-                {
-                    if (DiggingBlockLoc == null) yield break;
-
-                    timeElapsed += Time.deltaTime;
-
-                    yield return null;
-                }
-
-                DiggingBlockLoc = null;
-                onComplete.Invoke();
-            }
-        }
-
-        private void PlaceBlockInteraction()
-        {
-            
-        }
-
         private static bool PointOnGridEdge(float value)
         {
             var delta = value - Mathf.Floor(value);
@@ -228,6 +197,12 @@ namespace CraftSharp.Control
             this.cameraController = camController;
         }
 
+        void Start()
+        {
+            toolInteractCallback = (e) => toolInteractInfo = e.Info;
+            EventManager.Instance.Register(toolInteractCallback);
+        }
+
         void Update()
         {
             if (cameraController != null && cameraController.IsAiming)
@@ -238,18 +213,12 @@ namespace CraftSharp.Control
                 // Handle digging
                 if (TargetBlockLoc != null && TargetDirection != null)
                 {
-                    var time = client.DigBlock(TargetBlockLoc.Value, TargetDirection.Value);
-
-                    if (time > 0)
-                    {
-                        DiggingBlockInteraction(time, () =>
-                            client.DigBlock(TargetBlockLoc.Value, TargetDirection.Value, BaseCornClient.DiggingStatus.Finished));
-                    }
+                    StartCoroutine(toolInteractInfo.RunInteraction(client));
                 }
             }
             else
             {
-                DiggingBlockLoc = null;
+                toolInteractInfo.CancelInteraction();
                 TargetBlockLoc = null;
 
                 if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)

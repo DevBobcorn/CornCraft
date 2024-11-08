@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace CraftSharp.Control
 {
     public abstract class InteractionInfo
@@ -8,6 +10,6 @@ namespace CraftSharp.Control
 
         public abstract string[] GetParamTexts();
 
-        public abstract void RunInteraction(BaseCornClient client);
+        public abstract IEnumerator RunInteraction(BaseCornClient client);
     }
 }
