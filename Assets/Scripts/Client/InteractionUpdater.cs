@@ -18,6 +18,9 @@ namespace CraftSharp.Control
         private Action<ToolInteractionEvent>? toolInteractCallback;
         private ToolInteractionInfo? toolInteractInfo;
 
+        private Action<HeldItemChangeEvent>? heldItemCallback;
+        private Item? currentItem;
+
         private GameObject? blockSelectionFrame;
 
         public readonly Dictionary<BlockLoc, TriggerInteractionInfo> blockInteractionInfos = new();
@@ -25,6 +28,7 @@ namespace CraftSharp.Control
         public BlockLoc? TargetBlockLoc { get; private set; } = null;
         private BaseCornClient? client;
         private CameraController? cameraController;
+        private PlayerController? playerController;
 
         private int nextNumeralID = 1;
 
@@ -188,69 +192,87 @@ namespace CraftSharp.Control
             return PointOnGridEdge(point.x) || PointOnGridEdge(point.y) || PointOnGridEdge(point.z);
         }
 
-        private void StartDigging()
+        private void StartDiggingProcess()
         {
-            if (toolInteractInfo != null && client != null)
-            {
-                diggingCoroutine = StartCoroutine(toolInteractInfo.RunInteraction(client));
-            }
+            if (client is null || playerController is null || TargetBlockLoc is null || TargetDirection is null)
+                return;
+
+            var (isFloating, isGrounded)  = (playerController.Status.Floating, playerController.Status.Grounded);
+            var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
+
+            var bestTool = InteractionManager.INSTANCE.ToolInteractionTable.GetValueOrDefault(block.StateId);
+
+            toolInteractInfo = new ToolInteractionInfo(0, currentItem, block, TargetBlockLoc.Value, TargetDirection.Value, isFloating, isGrounded, bestTool);
+
+            EventManager.Instance.Broadcast(new ToolInteractionEvent(currentItem, block.State, toolInteractInfo));
+
+            if (diggingCoroutine != null) StopCoroutine(diggingCoroutine);
+
+            diggingCoroutine = StartCoroutine(toolInteractInfo.RunInteraction(client));
         }
 
-        private void StopDigging()
+        private void CancelDiggingProcess()
         {
+            if (toolInteractInfo != null)
+            {
+                toolInteractInfo.CancelInteraction();
+                toolInteractInfo = null;
+            }
+
             if (diggingCoroutine != null)
             {
                 StopCoroutine(diggingCoroutine);
-                toolInteractInfo?.CancelInteraction();
                 diggingCoroutine = null;
             }
-            lastBlockLoc = null;
         }
 
-        public void Initialize(BaseCornClient client, CameraController camController)
+        public void Initialize(BaseCornClient client, CameraController camController, PlayerController playerController)
         {
             this.client = client;
             this.cameraController = camController;
+            this.playerController = playerController;
         }
 
         void Start()
         {
-            toolInteractCallback = (e) => toolInteractInfo = e.Info;
-            EventManager.Instance.Register(toolInteractCallback);
+            heldItemCallback = e => currentItem = e.ItemStack?.ItemType;
+            EventManager.Instance.Register(heldItemCallback);
         }
 
         void Update()
         {
             if (cameraController != null && cameraController.IsAiming)
             {
-                // Update target block selection
                 UpdateBlockSelection(cameraController.GetPointerRay());
 
-                // Handle digging
-                if (TargetBlockLoc != null && TargetDirection != null && toolInteractInfo != null)
+                if (TargetBlockLoc != null && TargetDirection != null)
                 {
-                    if (toolInteractInfo.State == ToolInteractionState.Completed)
+                    if (toolInteractInfo != null)
                     {
-                        StopDigging();
-                        toolInteractInfo = null;
+                        if (TargetBlockLoc != lastBlockLoc)
+                        {
+                            CancelDiggingProcess();
+                            StartDiggingProcess();
+                        }
                     }
-                    else if (TargetBlockLoc != lastBlockLoc)
+                    else
                     {
-                        StopDigging();
-                        lastBlockLoc = TargetBlockLoc;
-                        StartDigging();
+                        StartDiggingProcess();
                     }
-                    else if (diggingCoroutine == null)
-                    {
-                        StartDigging();
-                    }
+
+                    lastBlockLoc = TargetBlockLoc;
                 }
-                else StopDigging();
+                else
+                {
+                    CancelDiggingProcess();
+                }
             }
             else
             {
-                StopDigging();
+                CancelDiggingProcess();
+
                 TargetBlockLoc = null;
+                lastBlockLoc = null;
 
                 if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
                 {
@@ -267,8 +289,8 @@ namespace CraftSharp.Control
 
         private void OnDestroy()
         {
-            if (toolInteractCallback is not null)
-                EventManager.Instance.Unregister(toolInteractCallback);
+            if (heldItemCallback is not null)
+                EventManager.Instance.Unregister(heldItemCallback);
         }
     }
 }

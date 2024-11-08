@@ -18,9 +18,10 @@ namespace CraftSharp.Control
         private readonly Block block;
         private readonly BlockLoc location;
         private readonly Direction direction;
+        // Null is for hand. Which is a fixed data.
         private readonly ToolInteractionDefinition? definition;
 
-        private float duration;
+        private readonly float duration;
 
         public ToolInteractionState State { get; private set; } = ToolInteractionState.InProgress;
 
@@ -86,32 +87,28 @@ namespace CraftSharp.Control
 
         public override IEnumerator RunInteraction(BaseCornClient client)
         {
-            if (definition?.Type is
-                ItemActionType.Axe or ItemActionType.Hoe or ItemActionType.Pickaxe or ItemActionType.Shovel)
+            client.DigBlock(location, direction);
+            float elapsedTime = 0.0f;
+
+            while (elapsedTime < duration)
             {
-                client.DigBlock(location, direction);
-                float elapsedTime = 0.0f;
-
-                while (elapsedTime < duration)
+                if (State == ToolInteractionState.Cancelled)
                 {
-                    if (State == ToolInteractionState.Cancelled)
-                    {
-                        client.DigBlock(location, direction, BaseCornClient.DiggingStatus.Cancelled);
-                        yield break;
-                    }
-                    if (State == ToolInteractionState.Paused)
-                    {
-                        yield return null;
-                        continue;
-                    }
-
-                    elapsedTime += Time.deltaTime;
+                    client.DigBlock(location, direction, BaseCornClient.DiggingStatus.Cancelled);
+                    yield break;
+                }
+                if (State == ToolInteractionState.Paused)
+                {
                     yield return null;
+                    continue;
                 }
 
-                client.DigBlock(location, direction, BaseCornClient.DiggingStatus.Finished);
-                State = ToolInteractionState.Completed;
+                elapsedTime += Time.deltaTime;
+                yield return null;
             }
+
+            client.DigBlock(location, direction, BaseCornClient.DiggingStatus.Finished);
+            State = ToolInteractionState.Completed;
         }
 
         public void CancelInteraction()

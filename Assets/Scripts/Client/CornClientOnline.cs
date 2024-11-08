@@ -1686,27 +1686,13 @@ namespace CraftSharp
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => DigBlock(blockLoc, blockFace, status));
 
-            switch (status)
+            return status switch
             {
-                case DiggingStatus.Started:
-                    var (isFloating, isGrounded) = (PlayerController.Status.Floating, PlayerController.Status.Grounded);
-                    var block = ChunkRenderManager.GetBlock(blockLoc);
-
-                    var bestTool = InteractionManager.INSTANCE.ToolInteractionTable[block.StateId];
-                    var item = inventories[0].GetHotbarItem(CurrentSlot);
-
-                    ToolInteractionInfo info = new(0, item?.ItemType, block, blockLoc, blockFace, isFloating, isGrounded, bestTool);
-
-                    EventManager.Instance.BroadcastOnUnityThread(new ToolInteractionEvent(info));
-
-                    return handler!.SendPlayerDigging(0, blockLoc, blockFace, sequenceId++);
-                case DiggingStatus.Cancelled:
-                    return handler!.SendPlayerDigging(1, blockLoc, blockFace, sequenceId++);
-                case DiggingStatus.Finished:
-                    return handler!.SendPlayerDigging(2, blockLoc, blockFace, sequenceId++);
-                default:
-                    return false;
-            }
+                DiggingStatus.Started => handler!.SendPlayerDigging(0, blockLoc, blockFace, sequenceId++),
+                DiggingStatus.Cancelled => handler!.SendPlayerDigging(1, blockLoc, blockFace, sequenceId++),
+                DiggingStatus.Finished => handler!.SendPlayerDigging(2, blockLoc, blockFace, sequenceId++),
+                _ => false
+            };
         }
 
         /// <summary>

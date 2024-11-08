@@ -32,7 +32,7 @@ namespace CraftSharp.UI
 
         private bool usingItemIcon = false;
 
-        public TriggerInteractionInfo interactionInfo;
+        public InteractionInfo interactionInfo;
 
         void Awake()
         {
@@ -104,8 +104,8 @@ namespace CraftSharp.UI
         {
             _optionAnimator.SetTrigger(EXECUTED); // Execution visual feedback
 
-            if (client == null) return;
-            interactionInfo?.RunInteraction(client);
+            if (client != null && interactionInfo != null)
+                StartCoroutine(interactionInfo.RunInteraction(client));
         }
 
         // Called by animator after hide animation ends...
