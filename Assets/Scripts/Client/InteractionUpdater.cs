@@ -13,29 +13,27 @@ namespace CraftSharp.Control
     public class InteractionUpdater : MonoBehaviour
     {
         [SerializeField] private LayerMask blockSelectionLayer;
-        [SerializeField] private GameObject blockSelectionFramePrefab;
+        [SerializeField] private GameObject? blockSelectionFramePrefab;
 
         private Action<ToolInteractionEvent>? toolInteractCallback;
-        private ToolInteractionInfo toolInteractInfo;
+        private ToolInteractionInfo? toolInteractInfo;
 
-        private GameObject blockSelectionFrame;
+        private GameObject? blockSelectionFrame;
 
         public readonly Dictionary<BlockLoc, TriggerInteractionInfo> blockInteractionInfos = new();
-        public Direction? TargetDirection = Direction.Down;
-        public BlockLoc? TargetBlockLoc = null;
-        private BaseCornClient client;
-        private CameraController cameraController;
+        public Direction? TargetDirection { get; private set; } = Direction.Down;
+        public BlockLoc? TargetBlockLoc { get; private set; } = null;
+        private BaseCornClient? client;
+        private CameraController? cameraController;
 
         private int nextNumeralID = 1;
 
-        private Coroutine DiggingCoroutine;
+        private Coroutine? diggingCoroutine;
+        private BlockLoc? lastBlockLoc;
 
         private void UpdateBlockSelection(Ray? viewRay)
         {
-            if (viewRay is null || client == null)
-            {
-                return;
-            }
+            if (viewRay is null || client == null) return;
             
             Vector3? castResultPos;
             Vector3? castSurfaceDir;
@@ -45,16 +43,15 @@ namespace CraftSharp.Control
                 castResultPos = viewHit.point;
                 castSurfaceDir = viewHit.normal;
 
-                TargetDirection = castSurfaceDir.Value switch
-                {
-                    { x: 0, y: 0, z: 1 } => Direction.North,
-                    { x: 0, y: 0, z: -1 } => Direction.South,
-                    { x: -1, y: 0, z: 0 } => Direction.West,
-                    { x: 1, y: 0, z: 0 } => Direction.East,
-                    { x: 0, y: 1, z: 0 } => Direction.Up,
-                    { x: 0, y: -1, z: 0 } => Direction.Down,
-                    _ => null
-                };
+                Vector3 normal = castSurfaceDir.Value.normalized;
+                (float absX, float absY, float absZ) = (Mathf.Abs(normal.x), Mathf.Abs(normal.y), Mathf.Abs(normal.z));
+
+                if (absX >= absY && absX >= absZ)
+                    TargetDirection = normal.x > 0 ? Direction.East : Direction.West;
+                else if (absY >= absX && absY >= absZ)
+                    TargetDirection = normal.y > 0 ? Direction.Up : Direction.Down;
+                else
+                    TargetDirection = normal.z > 0 ? Direction.North : Direction.South;
             }
             else
                 castResultPos = castSurfaceDir = null;
@@ -75,7 +72,7 @@ namespace CraftSharp.Control
                 {
                     blockSelectionFrame = GameObject.Instantiate(blockSelectionFramePrefab);
 
-                    blockSelectionFrame.transform.SetParent(transform, false);
+                    blockSelectionFrame!.transform.SetParent(transform, false);
                 }
                 else if (!blockSelectionFrame.activeSelf)
                 {
@@ -191,6 +188,25 @@ namespace CraftSharp.Control
             return PointOnGridEdge(point.x) || PointOnGridEdge(point.y) || PointOnGridEdge(point.z);
         }
 
+        private void StartDigging()
+        {
+            if (toolInteractInfo != null && client != null)
+            {
+                diggingCoroutine = StartCoroutine(toolInteractInfo.RunInteraction(client));
+            }
+        }
+
+        private void StopDigging()
+        {
+            if (diggingCoroutine != null)
+            {
+                StopCoroutine(diggingCoroutine);
+                toolInteractInfo?.CancelInteraction();
+                diggingCoroutine = null;
+            }
+            lastBlockLoc = null;
+        }
+
         public void Initialize(BaseCornClient client, CameraController camController)
         {
             this.client = client;
@@ -208,17 +224,32 @@ namespace CraftSharp.Control
             if (cameraController != null && cameraController.IsAiming)
             {
                 // Update target block selection
-                UpdateBlockSelection(cameraController!.GetPointerRay());
+                UpdateBlockSelection(cameraController.GetPointerRay());
 
                 // Handle digging
-                if (TargetBlockLoc != null && TargetDirection != null)
+                if (TargetBlockLoc != null && TargetDirection != null && toolInteractInfo != null)
                 {
-                    StartCoroutine(toolInteractInfo.RunInteraction(client));
+                    if (toolInteractInfo.State == ToolInteractionState.Completed)
+                    {
+                        StopDigging();
+                        toolInteractInfo = null;
+                    }
+                    else if (TargetBlockLoc != lastBlockLoc)
+                    {
+                        StopDigging();
+                        lastBlockLoc = TargetBlockLoc;
+                        StartDigging();
+                    }
+                    else if (diggingCoroutine == null)
+                    {
+                        StartDigging();
+                    }
                 }
+                else StopDigging();
             }
             else
             {
-                toolInteractInfo.CancelInteraction();
+                StopDigging();
                 TargetBlockLoc = null;
 
                 if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
@@ -232,6 +263,12 @@ namespace CraftSharp.Control
                 // Update player interactions
                 UpdateBlockInteractions(client.ChunkRenderManager);
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (toolInteractCallback is not null)
+                EventManager.Instance.Unregister(toolInteractCallback);
         }
     }
 }

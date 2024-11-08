@@ -31,7 +31,7 @@ namespace CraftSharp.Control
             location = loc;
             direction = dir;
             definition = def;
-            duration = CalculateDiggingTime(tool, block, floating, grounded);
+            duration = CalculateDiggingTime(tool, floating, grounded);
         }
 
         public override string GetHintKey()
@@ -44,7 +44,7 @@ namespace CraftSharp.Control
             return Array.Empty<string>();
         }
 
-        private float CalculateDiggingTime(Item? item, Block block, bool underwater, bool onGround)
+        private float CalculateDiggingTime(Item? item, bool underwater, bool onGround)
         {
             var isBestTool =
                 item != null &&
@@ -86,38 +86,31 @@ namespace CraftSharp.Control
 
         public override IEnumerator RunInteraction(BaseCornClient client)
         {
-            switch (definition?.Type)
+            if (definition?.Type is
+                ItemActionType.Axe or ItemActionType.Hoe or ItemActionType.Pickaxe or ItemActionType.Shovel)
             {
-                case ItemActionType.Axe:
-                case ItemActionType.Hoe:
-                case ItemActionType.Pickaxe:
-                case ItemActionType.Shovel:
-                    client.DigBlock(location, direction);
+                client.DigBlock(location, direction);
+                float elapsedTime = 0.0f;
 
-                    float elapsedTime = 0.0f;
-                    while (elapsedTime < duration)
+                while (elapsedTime < duration)
+                {
+                    if (State == ToolInteractionState.Cancelled)
                     {
-                        if (State == ToolInteractionState.Cancelled)
-                        {
-                            client.DigBlock(location, direction, BaseCornClient.DiggingStatus.Cancelled);
-                            yield break;
-                        }
-
-                        if (State == ToolInteractionState.Paused)
-                        {
-                            yield return null;
-                            continue;
-                        }
-
-                        elapsedTime += Time.deltaTime;
+                        client.DigBlock(location, direction, BaseCornClient.DiggingStatus.Cancelled);
+                        yield break;
+                    }
+                    if (State == ToolInteractionState.Paused)
+                    {
                         yield return null;
+                        continue;
                     }
 
-                    client.DigBlock(location, direction, BaseCornClient.DiggingStatus.Finished);
-                    State = ToolInteractionState.Completed;
-                    break;
-                default:
-                    yield break;
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+
+                client.DigBlock(location, direction, BaseCornClient.DiggingStatus.Finished);
+                State = ToolInteractionState.Completed;
             }
         }
 
