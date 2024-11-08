@@ -763,7 +763,7 @@ namespace CraftSharp.Control
             if (currentActionType == ItemActionType.Axe || currentActionType == ItemActionType.Pickaxe || currentActionType == ItemActionType.Shovel ||
                 currentActionType == ItemActionType.Hoe || currentActionType == ItemActionType.Sword)
             {
-                itemActionInfo += $"[{currentItemStack?.ItemType.TierLevel ?? TierLevel.Wood}]";
+                itemActionInfo += $"[{currentItemStack?.ItemType.TierType ?? TierType.Wood}]";
             }
             
             if (heldItemEdible)
