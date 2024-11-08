@@ -1,14 +1,14 @@
-using CraftSharp.Protocol;
+﻿using CraftSharp.Protocol;
 
 namespace CraftSharp.Control
 {
-    public class BlockInteractionInfo : InteractionInfo
+    public class TriggerInteractionInfo : InteractionInfo
     {
         private readonly BlockLoc location; // Location for calculating distance
         private readonly string[] paramTexts;
-        private readonly BlockInteractionDefinition definition;
+        private readonly TriggerInteractionDefinition definition;
 
-        public BlockInteractionInfo(int id, BlockLoc loc, ResourceLocation blockId, BlockInteractionDefinition def)
+        public TriggerInteractionInfo(int id, BlockLoc loc, ResourceLocation blockId, TriggerInteractionDefinition def)
         {
             Id = id;
             paramTexts = new string[] { ChatParser.TranslateString(blockId.GetTranslationKey("block")) };
@@ -16,12 +16,12 @@ namespace CraftSharp.Control
             definition = def;
         }
 
-        public override InteractionIconType GetIconType()
+        public InteractionIconType GetIconType()
         {
             return definition.IconType;
         }
 
-        public override ResourceLocation GetIconItemId()
+        public ResourceLocation GetIconItemId()
         {
             return definition.IconItemId;
         }
@@ -36,7 +36,7 @@ namespace CraftSharp.Control
             return paramTexts;
         }
 
-        public BlockInteractionDefinition GetDefinition()
+        public TriggerInteractionDefinition GetDefinition()
         {
             return definition;
         }
@@ -45,10 +45,10 @@ namespace CraftSharp.Control
         {
             switch (definition.Type)
             {
-                case BlockInteractionType.Interact:
+                case TriggerInteractionType.Interact:
                     client.PlaceBlock(location, Direction.Down);
                     break;
-                case BlockInteractionType.Break:
+                case TriggerInteractionType.Break:
                     client.DigBlock(location, Direction.Down, BaseCornClient.DiggingStatus.Started, true, false);
                     break;
             }

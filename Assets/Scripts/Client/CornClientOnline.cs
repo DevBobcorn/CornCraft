@@ -1675,13 +1675,6 @@ namespace CraftSharp
             return InvokeOnNetMainThread(() => handler!.SendPlayerBlockPlacement((int)hand, blockLoc, blockFace, sequenceId++));
         }
 
-        public record Tool(float Effectiveness)
-        {
-            public bool IsEffectiveAgainst(BlockState state) => true;
-
-            public float Effectiveness { get; } = Effectiveness;
-        }
-
         /// <summary>
         /// Attempt to dig a block at the specified location
         /// </summary>
@@ -1729,13 +1722,13 @@ namespace CraftSharp
             {
                 var isBestTool =
                     item != null &&
-                    InteractionManager.INSTANCE.MineableInteractionTable.TryGetValue(block.StateId, out var tool) &&
-                    tool switch
+                    InteractionManager.INSTANCE.ToolInteractionTable.TryGetValue(block.StateId, out var tool) &&
+                    tool.Type switch
                     {
-                        InteractionTool.Axe => item.ItemId.Path.Contains("axe"),
-                        InteractionTool.Hoe => item.ItemId.Path.Contains("hoe"),
-                        InteractionTool.Pickaxe => item.ItemId.Path.Contains("pickaxe"),
-                        InteractionTool.Shovel => item.ItemId.Path.Contains("shovel"),
+                        ItemActionType.Axe => item.ItemId.Path.Contains("axe"),
+                        ItemActionType.Hoe => item.ItemId.Path.Contains("hoe"),
+                        ItemActionType.Pickaxe => item.ItemId.Path.Contains("pickaxe"),
+                        ItemActionType.Shovel => item.ItemId.Path.Contains("shovel"),
                         _ => false,
                     };
 
@@ -1743,8 +1736,8 @@ namespace CraftSharp
 
                 // TODO: I don't known is hand break belongs to harvest?
                 var canHarvest =
-                    item is { TierLevel: not null } &&
-                    ItemTier.Tiers.TryGetValue(item.TierLevel.Value, out tier);
+                    item is { TierType: not null } &&
+                    ItemTier.Tiers.TryGetValue(item.TierType.Value, out tier);
 
                 float mult = 1.0f;
 

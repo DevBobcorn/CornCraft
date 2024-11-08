@@ -32,14 +32,14 @@ namespace CraftSharp.UI
 
         private bool usingItemIcon = false;
 
-        public InteractionInfo interactionInfo;
+        public TriggerInteractionInfo interactionInfo;
 
         void Awake()
         {
             _optionAnimator = GetComponent<Animator>();
         }
 
-        public void SetInfo(int id, InteractionInfo info)
+        public void SetInfo(int id, TriggerInteractionInfo info)
         {
             interactionKey = id;
             interactionInfo = info;

@@ -10,12 +10,13 @@ namespace CraftSharp.Control
     {
         public static readonly InteractionManager INSTANCE = new();
 
-        private static readonly Dictionary<int, BlockInteractionDefinition> blockInteractionTable = new();
+        private static readonly Dictionary<int, TriggerInteractionDefinition> blockInteractionTable = new();
 
-        private static readonly Dictionary<int, InteractionTool> mineableInteractionTable = new();
+        private static readonly Dictionary<int, ToolInteractionDefinition> toolInteractionTable = new();
 
-        public Dictionary<int, BlockInteractionDefinition> BlockInteractionTable => blockInteractionTable;
-        public Dictionary<int, InteractionTool> MineableInteractionTable => mineableInteractionTable;
+        public Dictionary<int, TriggerInteractionDefinition> BlockInteractionTable => blockInteractionTable;
+
+        public Dictionary<int, ToolInteractionDefinition> ToolInteractionTable => toolInteractionTable;
 
         public void PrepareData(DataLoadFlag flag)
         {
@@ -38,7 +39,7 @@ namespace CraftSharp.Control
 
             PrepareSpecialData(interactions, palette);
 
-            PrepareMineableData(interactions, palette);
+            PrepareToolData(interactions, palette);
 
             flag.Finished = true;
         }
@@ -60,9 +61,9 @@ namespace CraftSharp.Control
                     {
                         var interactionType = entryCont["action"].StringValue switch
                         {
-                            "interact" => BlockInteractionType.Interact,
-                            "break"    => BlockInteractionType.Break,
-                            _          => BlockInteractionType.Interact
+                            "interact" => TriggerInteractionType.Interact,
+                            "break"    => TriggerInteractionType.Break,
+                            _          => TriggerInteractionType.Interact
                         };
 
                         var iconType = InteractionIconType.Dialog;
@@ -107,7 +108,7 @@ namespace CraftSharp.Control
             }
         }
 
-        private void PrepareMineableData(Json.JSONData interactions, BlockStatePalette palette)
+        private void PrepareToolData(Json.JSONData interactions, BlockStatePalette palette)
         {
             if (interactions.Properties.TryGetValue("diggable", out var mineableProperty))
             {
@@ -115,6 +116,15 @@ namespace CraftSharp.Control
 
                 foreach (var (entryName, value) in entries)
                 {
+                    ItemActionType actionType = entryName switch
+                    {
+                        "axe" => ItemActionType.Axe,
+                        "hoe" => ItemActionType.Hoe,
+                        "pickaxe" => ItemActionType.Pickaxe,
+                        "shovel" => ItemActionType.Shovel,
+                        _ => ItemActionType.None,
+                    };
+
                     foreach (var type in value.DataArray)
                     {
                         var blockId = ResourceLocation.FromString(type.StringValue);
@@ -123,14 +133,8 @@ namespace CraftSharp.Control
                         {
                             foreach (var stateId in stateIds)
                             {
-                                mineableInteractionTable.Add(stateId, entryName switch
-                                {
-                                    "axe" => InteractionTool.Axe,
-                                    "hoe" => InteractionTool.Hoe,
-                                    "pickaxe" => InteractionTool.Pickaxe,
-                                    "shovel" => InteractionTool.Shovel,
-                                    _ => InteractionTool.Default,
-                                });
+                                toolInteractionTable.Add(stateId, new(actionType));
+                                Debug.Log($"Added {entryName} best tool for blockstate [{stateId}] {palette.GetByNumId(stateId)}");
                             }
                         }
                     }

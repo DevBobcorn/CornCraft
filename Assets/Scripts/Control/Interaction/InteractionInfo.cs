@@ -4,10 +4,6 @@ namespace CraftSharp.Control
     {
         public int Id { get; set; }
 
-        public abstract InteractionIconType GetIconType();
-
-        public abstract ResourceLocation GetIconItemId();
-
         public abstract string GetHintKey();
 
         public abstract string[] GetParamTexts();

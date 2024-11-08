@@ -16,7 +16,7 @@ namespace CraftSharp.Control
 
         private GameObject blockSelectionFrame;
 
-        public readonly Dictionary<BlockLoc, BlockInteractionInfo> blockInteractionInfos = new();
+        public readonly Dictionary<BlockLoc, TriggerInteractionInfo> blockInteractionInfos = new();
         public Direction? TargetDirection = Direction.Down;
         public BlockLoc? TargetBlockLoc = null;
         private BaseCornClient client;
@@ -127,7 +127,7 @@ namespace CraftSharp.Control
                         var block = chunksManager.GetBlock(blockLoc);
                         var stateId = block.StateId;
 
-                        if (table.TryGetValue(stateId, out BlockInteractionDefinition newDef))
+                        if (table.TryGetValue(stateId, out TriggerInteractionDefinition newDef))
                         {
                             if (blockInteractionInfos.ContainsKey(blockLoc))
                             {
@@ -157,23 +157,23 @@ namespace CraftSharp.Control
                     }
         }
 
-        private void AddBlockInteraction(BlockLoc location, ResourceLocation blockId, BlockInteractionDefinition def)
+        private void AddBlockInteraction(BlockLoc location, ResourceLocation blockId, TriggerInteractionDefinition def)
         {
-            var info = new BlockInteractionInfo(nextNumeralID, location, blockId, def);
+            var info = new TriggerInteractionInfo(nextNumeralID, location, blockId, def);
             blockInteractionInfos.Add(location, info);
 
             nextNumeralID++;
 
-            EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, info));
+            EventManager.Instance.Broadcast<TriggerInteractionAddEvent>(new(info.Id, info));
         }
 
         private void RemoveBlockInteraction(BlockLoc location)
         {
             if (blockInteractionInfos.ContainsKey(location))
             {
-                blockInteractionInfos.Remove(location, out BlockInteractionInfo info);
+                blockInteractionInfos.Remove(location, out TriggerInteractionInfo info);
                 
-                EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
+                EventManager.Instance.Broadcast<TriggerInteractionRemoveEvent>(new(info.Id));
             }
         }
 
@@ -182,6 +182,7 @@ namespace CraftSharp.Control
             if (DiggingBlockLoc != null && DiggingBlockLoc != TargetBlockLoc)
                 StopCoroutine(DiggingCoroutine);
 
+            Debug.Log($"Start a digging process takes {digTime}s");
             DiggingBlockLoc = TargetBlockLoc;
             DiggingCoroutine = StartCoroutine(DigProgressCoroutine());
 

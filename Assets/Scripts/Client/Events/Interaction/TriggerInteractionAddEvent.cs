@@ -3,12 +3,12 @@ using CraftSharp.Control;
 
 namespace CraftSharp.Event
 {
-    public record InteractionAddEvent : BaseEvent
+    public record TriggerInteractionAddEvent : BaseEvent
     {
         public int InteractionId;
-        public InteractionInfo Info { get; }
+        public TriggerInteractionInfo Info { get; }
 
-        public InteractionAddEvent(int id, InteractionInfo info)
+        public TriggerInteractionAddEvent(int id, TriggerInteractionInfo info)
         {
             InteractionId = id;
             Info = info;

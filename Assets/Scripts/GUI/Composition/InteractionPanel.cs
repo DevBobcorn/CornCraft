@@ -27,8 +27,8 @@ namespace CraftSharp.UI
 
         #nullable enable
 
-        private Action<InteractionAddEvent>?     addCallback;
-        private Action<InteractionRemoveEvent>?  removeCallback;
+        private Action<TriggerInteractionAddEvent>?     addCallback;
+        private Action<TriggerInteractionRemoveEvent>?  removeCallback;
 
         public delegate void ItemCountEventHandler(int newCount);
         public event ItemCountEventHandler? OnItemCountChange;
@@ -82,7 +82,7 @@ namespace CraftSharp.UI
                 EventManager.Instance.Unregister(removeCallback);
         }
 
-        public void AddInteractionOption(int id, InteractionInfo info)
+        public void AddInteractionOption(int id, TriggerInteractionInfo info)
         {
             var optionObj = GameObject.Instantiate(interactionOptionPrefab);
             var option = optionObj == null ? null : optionObj.GetComponent<InteractionOption>();
