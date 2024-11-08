@@ -3,13 +3,6 @@ using UnityEngine;
 
 namespace CraftSharp.Control
 {
-    public enum ItemActionType
-    {
-        None,
-        MeleeWeaponSword,
-        RangedWeaponBow,
-    }
-    
     public static class PlayerActionHelper
     {
         public static ItemActionType GetItemActionType(ItemStack? item)
@@ -20,18 +13,7 @@ namespace CraftSharp.Control
             }
             else
             {
-                if (item.ItemType.ItemId.Path.EndsWith("sword"))
-                {
-                    return ItemActionType.MeleeWeaponSword;
-                }
-                else if (item.ItemType.ItemId.Path.EndsWith("bow"))
-                {
-                    return ItemActionType.RangedWeaponBow;
-                }
-                else
-                {
-                    return ItemActionType.None;
-                }
+                return item.ItemType.ActionType;
             }
         }
     }

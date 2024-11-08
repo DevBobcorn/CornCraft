@@ -22,7 +22,7 @@ namespace CraftSharp.Control
         [SerializeField] public PlayerAttackStage[] Stages = { };
 
         [SerializeField] public AnimationClip? DummyAnimationClip;
-        [SerializeField] public ItemActionType SkillItemActionType = ItemActionType.MeleeWeaponSword;
+        [SerializeField] public ItemActionType SkillItemActionType = ItemActionType.Sword;
         [SerializeField] public PlayerSkillItemConfig? SkillItemConf;
 
         public int StageCount => Stages.Length;

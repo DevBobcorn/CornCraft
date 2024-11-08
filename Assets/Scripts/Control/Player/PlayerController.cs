@@ -17,7 +17,8 @@ namespace CraftSharp.Control
             Mount
         }
 
-        public ItemActionType CurrentActionType { get; private set; } = ItemActionType.None;
+        private ItemStack currentItemStack;
+        private ItemActionType currentActionType;
 
         // AbilityConfig & Skill Fields
         [SerializeField] private PlayerAbilityConfig m_AbilityConfig;
@@ -294,7 +295,8 @@ namespace CraftSharp.Control
                 OnCurrentItemChanged?.Invoke(e.ItemStack, e.ActionType, null);
                 // Exit attack state when active item is changed
                 Status!.Attacking = false;
-                CurrentActionType = e.ActionType;
+                currentItemStack = e.ItemStack;
+                currentActionType = e.ActionType;
             };
             EventManager.Instance.Register(heldItemCallback);
 
@@ -518,12 +520,12 @@ namespace CraftSharp.Control
         {
             if (Status!.AttackStatus.AttackCooldown <= 0F)
             {
-                if (CurrentActionType == ItemActionType.MeleeWeaponSword)
+                if (currentActionType == ItemActionType.Sword)
                 {
                     // TODO: Implement
                     return false;
                 }
-                else if (CurrentActionType == ItemActionType.RangedWeaponBow)
+                else if (currentActionType == ItemActionType.Bow)
                 {
                     // Specify attack data to use
                     Status.AttackStatus.CurrentChargedAttack = skillData;
@@ -753,11 +755,23 @@ namespace CraftSharp.Control
                 statusInfo = string.Empty;
             else
                 statusInfo = m_StatusUpdater!.Status.ToString();
-            
-            return $"ActionType:\t{CurrentActionType}\nState:\t{_currentState}\n{statusInfo}";
             */
 
-            return $"ActionType:\t{CurrentActionType}\nState:\t{_currentState}";
+            var heldItemEdible = currentItemStack?.ItemType.IsEdible ?? false;
+            string itemActionInfo = string.Empty;
+
+            if (currentActionType == ItemActionType.Axe || currentActionType == ItemActionType.Pickaxe || currentActionType == ItemActionType.Shovel ||
+                currentActionType == ItemActionType.Hoe || currentActionType == ItemActionType.Sword)
+            {
+                itemActionInfo += $"[{currentItemStack?.ItemType.TierType ?? TierType.Wood}]";
+            }
+            
+            if (heldItemEdible)
+            {
+                itemActionInfo += " (edible)";
+            }
+
+            return $"ActionType:\t{currentActionType}{itemActionInfo}\nState:\t{_currentState}";
         }
 
         // Misc methods from Kinematic Character Controller
