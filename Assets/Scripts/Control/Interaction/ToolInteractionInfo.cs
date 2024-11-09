@@ -18,26 +18,26 @@ namespace CraftSharp.Control
         private readonly Block block;
         private readonly BlockLoc location;
         private readonly Direction direction;
-        // Null is for hand. Which is a fixed data.
-        private readonly ToolInteractionDefinition? definition;
+        private readonly ToolInteraction? defination;
 
         private readonly float duration;
 
         public ToolInteractionState State { get; private set; } = ToolInteractionState.InProgress;
 
-        public ToolInteractionInfo(int id, Item? tool, Block target, BlockLoc loc, Direction dir, bool floating, bool grounded, ToolInteractionDefinition? def)
+        public ToolInteractionInfo(int id, Item? tool, Block target, BlockLoc loc, Direction dir,
+            bool floating, bool grounded, ToolInteraction? def)
         {
             Id = id;
             block = target; 
             location = loc;
             direction = dir;
-            definition = def;
+            defination = def;
             duration = CalculateDiggingTime(tool, floating, grounded);
         }
 
         public override string GetHintKey()
         {
-            return string.Empty;
+            return defination?.HintKey ?? string.Empty;
         }
 
         public override string[] GetParamTexts()
@@ -47,37 +47,32 @@ namespace CraftSharp.Control
 
         private float CalculateDiggingTime(Item? item, bool underwater, bool onGround)
         {
-            var isBestTool = item != null &&
-                             InteractionManager.INSTANCE.ToolInteractionTable.TryGetValue(block.StateId, out var tool) &&
-                             tool.Type == item.ActionType;
+            bool isBestTool = item?.ActionType is not null && defination?.ActionType == item.ActionType;
 
             ItemTier? tier = null;
 
-            // TODO: Check object is harvestable by hand. 
-            var canHarvestWithoutTool = true;
+            bool canHarvest = defination?.ActionType == ItemActionType.None && item?.TierType is null || // Use hand case
+                              item is { TierType: not null } &&
+                              ItemTier.Tiers.TryGetValue(item.TierType.Value, out tier); // Use tool case
 
-            var canHarvest = canHarvestWithoutTool && item?.TierType is null || // use hand case
-                             item is { TierType: not null } &&
-                             ItemTier.Tiers.TryGetValue(item.TierType.Value, out tier); // use tool case
-
-            float mult = 1.0f;
+            float multiplier = 1.0f;
 
             if (isBestTool && tier != null)
             {
-                mult = tier.Speed;
+                multiplier = tier.Speed;
 
-                if (!canHarvest) mult = 1.0f;
+                if (!canHarvest) multiplier = 1.0f;
                 // TODO: Tool toolEfficiency level: mult += efficiencyLevel ^ 2 + 1
             }
-            else mult = 1.0f;
+            else multiplier = 1.0f;
 
             // TODO: if haste or conduitPower: speedMultiplier *= 0.2 * max(hasteLevel, conduitPowerLevel) + 1
             // TODO: if miningFatigue: speedMultiplier *= 0.3 ^ min(miningFatigueLevel, 4)
 
-            if (underwater) mult /= 5.0f; // TODO: If not hasAquaAffinity
-            if (!onGround) mult /= 5.0f;
+            if (underwater) multiplier /= 5.0f; // TODO: If not hasAquaAffinity
+            if (!onGround) multiplier /= 5.0f;
 
-            double damage = mult / block.State.Hardness;
+            double damage = multiplier / block.State.Hardness;
 
             damage /= canHarvest ? 30.0 : 100.0;
 

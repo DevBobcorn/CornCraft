@@ -39,7 +39,7 @@ namespace CraftSharp.UI
             _optionAnimator = GetComponent<Animator>();
         }
 
-        public void SetInfo(int id, TriggerInteractionInfo info)
+        public void SetInfo(int id, ViewInteractionInfo info)
         {
             interactionKey = id;
             interactionInfo = info;

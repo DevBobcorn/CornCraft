@@ -10,18 +10,14 @@ namespace CraftSharp.Control
     {
         public static readonly InteractionManager INSTANCE = new();
 
-        private static readonly Dictionary<int, TriggerInteractionDefinition> blockInteractionTable = new();
+        private static readonly Dictionary<int, InteractionDefinition> interactionTable = new();
 
-        private static readonly Dictionary<int, ToolInteractionDefinition> toolInteractionTable = new();
-
-        public Dictionary<int, TriggerInteractionDefinition> BlockInteractionTable => blockInteractionTable;
-
-        public Dictionary<int, ToolInteractionDefinition> ToolInteractionTable => toolInteractionTable;
+        public Dictionary<int, InteractionDefinition> InteractionTable => interactionTable;
 
         public void PrepareData(DataLoadFlag flag)
         {
             // Block interactions
-            string interactionPath = PathHelper.GetExtraDataFile("block_interaction.json");
+            var interactionPath = PathHelper.GetExtraDataFile("block_interaction.json");
 
             if (!File.Exists(interactionPath))
             {
@@ -30,22 +26,13 @@ namespace CraftSharp.Control
                 flag.Failed = true;
                 return;
             }
-            
-            // Load block interaction definitions...
-            blockInteractionTable.Clear();
+
+            interactionTable.Clear();
+
             var interactions = Json.ParseJson(File.ReadAllText(interactionPath, Encoding.UTF8));
 
             var palette = BlockStatePalette.INSTANCE;
 
-            PrepareSpecialData(interactions, palette);
-
-            PrepareToolData(interactions, palette);
-
-            flag.Finished = true;
-        }
-
-        private void PrepareSpecialData(Json.JSONData interactions, BlockStatePalette palette)
-        {
             if (interactions.Properties.TryGetValue("special", out var specialProperty))
             {
                 var entries = specialProperty.Properties;
@@ -54,92 +41,82 @@ namespace CraftSharp.Control
                 {
                     var entryCont = value.Properties;
 
-                    if (entryCont.ContainsKey("action") &&
-                        entryCont.ContainsKey("hint") &&
-                        entryCont.ContainsKey("predicate") &&
-                        entryCont.ContainsKey("triggers"))
+                    if (entryCont.TryGetValue("action", out var action) &&
+                        entryCont.TryGetValue("triggers", out var triggers))
                     {
-                        var interactionType = entryCont["action"].StringValue switch
+                        var interactionType = action.StringValue switch
                         {
-                            "interact" => TriggerInteractionType.Interact,
-                            "break"    => TriggerInteractionType.Break,
-                            _          => TriggerInteractionType.Interact
+                            "interact" => InteractionType.Interact,
+                            "place"    => InteractionType.Place,
+                            "break"    => InteractionType.Break,
+                            _          => InteractionType.Interact
                         };
 
-                        var iconType = InteractionIconType.Dialog;
-                        if (entryCont.TryGetValue("icon_type", out var type))
-                        {
-                            iconType = type.StringValue switch
+                        // Tool interaction case
+                        ItemActionType? actionType = entryCont.TryGetValue("item_action", out var itemAction)
+                            ? itemAction.StringValue switch
+                            {
+                                "axe"     => ItemActionType.Axe,
+                                "hoe"     => ItemActionType.Hoe,
+                                "pickaxe" => ItemActionType.Pickaxe,
+                                "shovel"  => ItemActionType.Shovel,
+                                _         => ItemActionType.None,
+                            }
+                            : null; 
+
+                        // View interaction case
+                        InteractionIconType? iconType = entryCont.TryGetValue("icon_type", out var type)
+                            ? type.StringValue switch
                             {
                                 "interact"       => InteractionIconType.Dialog,
                                 "enter_location" => InteractionIconType.EnterLocation,
                                 "item_icon"      => InteractionIconType.ItemIcon,
                                 _                => InteractionIconType.Dialog
-                            };
-                        }
-                        
-                        var hint = entryCont["hint"].StringValue;
-                        var predicate = BlockStatePredicate.FromString(entryCont["predicate"].StringValue);
+                            }
+                            : null;
 
-                        var triggers = entryCont["triggers"].DataArray;
+                        var hintKey = entryCont.TryGetValue("hint", out var hint) ? hint.StringValue : null;
 
-                        foreach (var trigger in triggers)
+                        var predictor = entryCont.TryGetValue("predicate", out var predicate)
+                            ? BlockStatePredicate.FromString(predicate?.StringValue ?? string.Empty)
+                            : BlockStatePredicate.EMPTY;
+
+                        foreach (var trigger in triggers.DataArray)
                         {
                             var blockId = ResourceLocation.FromString(trigger.StringValue);
 
-                            if (palette.TryGetAllNumIds(blockId, out int[] stateIds, x => predicate.Check(x)))
+                            if (palette.TryGetAllNumIds(blockId, out var stateIds, x => predictor.Check(x)))
                             {
                                 foreach (var stateId in stateIds)
                                 {
-                                    blockInteractionTable.Add(stateId, new(interactionType, iconType, blockId, $"special/{entryName}", hint));
+                                    var inters = new List<Interaction>();
+
+                                    var tag = $"special/{entryName}";
+                                    hintKey ??= trigger.StringValue;
+
+                                    if (actionType is not null)
+                                        inters.Add(new ToolInteraction(actionType.Value, interactionType, hintKey, tag));
+                                    if (iconType is not null)
+                                        inters.Add(new ViewInteraction(iconType.Value, blockId, interactionType, hintKey, tag));
+
+                                    if (interactionTable.TryGetValue(stateId, out var definition))
+                                        definition.AddRange(inters);
+                                    else
+                                        interactionTable.Add(stateId, new(inters));
+
                                     //Debug.Log($"Added {entryName} interaction for blockstate [{stateId}] {palette.GetByNumId(stateId)}");
                                 }
                             }
-                            //else
+                            // else
                             //    Debug.LogWarning($"Unknown interactable block {blockId}");
                         }
-
                     }
-                    else
-                    {
-                        Debug.LogWarning($"Invalid special block interation definition: {entryName}");
-                    }
+                    // else
+                    //    Debug.LogWarning($"Invalid special block interation definition: {entryName}");
                 }
             }
-        }
 
-        private void PrepareToolData(Json.JSONData interactions, BlockStatePalette palette)
-        {
-            if (interactions.Properties.TryGetValue("diggable", out var mineableProperty))
-            {
-                var entries = mineableProperty.Properties;
-
-                foreach (var (entryName, value) in entries)
-                {
-                    ItemActionType actionType = entryName switch
-                    {
-                        "axe" => ItemActionType.Axe,
-                        "hoe" => ItemActionType.Hoe,
-                        "pickaxe" => ItemActionType.Pickaxe,
-                        "shovel" => ItemActionType.Shovel,
-                        _ => ItemActionType.None,
-                    };
-
-                    foreach (var type in value.DataArray)
-                    {
-                        var blockId = ResourceLocation.FromString(type.StringValue);
-
-                        if (palette.TryGetAllNumIds(blockId, out int[] stateIds))
-                        {
-                            foreach (var stateId in stateIds)
-                            {
-                                toolInteractionTable.Add(stateId, new(actionType));
-                                // Debug.Log($"Added {entryName} best tool for blockstate [{stateId}] {palette.GetByNumId(stateId)}");
-                            }
-                        }
-                    }
-                }
-            }
+            flag.Finished = true;
         }
     }
 }

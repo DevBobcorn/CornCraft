@@ -4,13 +4,13 @@ using CraftSharp.Protocol;
 
 namespace CraftSharp.Control
 {
-    public class TriggerInteractionInfo : InteractionInfo
+    public class ViewInteractionInfo : InteractionInfo
     {
         private readonly BlockLoc location; // Location for calculating distance
         private readonly string[] paramTexts;
-        private readonly TriggerInteractionDefinition definition;
+        private readonly ViewInteraction definition;
 
-        public TriggerInteractionInfo(int id, BlockLoc loc, ResourceLocation blockId, TriggerInteractionDefinition def)
+        public ViewInteractionInfo(int id, BlockLoc loc, ResourceLocation blockId, ViewInteraction def)
         {
             Id = id;
             paramTexts = new string[] { ChatParser.TranslateString(blockId.GetTranslationKey("block")) };
@@ -38,7 +38,7 @@ namespace CraftSharp.Control
             return paramTexts;
         }
 
-        public TriggerInteractionDefinition GetDefinition()
+        public ViewInteraction GetDefinition()
         {
             return definition;
         }
@@ -47,10 +47,10 @@ namespace CraftSharp.Control
         {
             switch (definition.Type)
             {
-                case TriggerInteractionType.Interact:
+                case InteractionType.Interact:
                     client.PlaceBlock(location, Direction.Down);
                     break;
-                case TriggerInteractionType.Break:
+                case InteractionType.Break:
                     client.DigBlock(location, Direction.Down);
 
                     if (client is CornClientOnline clientOnline) clientOnline.DoAnimation((int)Hand.MainHand);

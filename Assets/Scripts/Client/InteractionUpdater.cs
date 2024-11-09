@@ -23,7 +23,7 @@ namespace CraftSharp.Control
 
         private GameObject? blockSelectionFrame;
 
-        public readonly Dictionary<BlockLoc, TriggerInteractionInfo> blockInteractionInfos = new();
+        public readonly Dictionary<BlockLoc, ViewInteractionInfo> blockInteractionInfos = new();
         public Direction? TargetDirection { get; private set; } = Direction.Down;
         public BlockLoc? TargetBlockLoc { get; private set; } = null;
         private BaseCornClient? client;
@@ -103,7 +103,7 @@ namespace CraftSharp.Control
         private void UpdateBlockInteractions(ChunkRenderManager chunksManager)
         {
             var playerBlockLoc = client!.GetCurrentLocation().GetBlockLoc();
-            var table = InteractionManager.INSTANCE.BlockInteractionTable;
+            var table = InteractionManager.INSTANCE.InteractionTable;
 
             // Remove expired interactions
             var blockLocs = blockInteractionInfos.Keys.ToArray();
@@ -131,22 +131,25 @@ namespace CraftSharp.Control
                         var block = chunksManager.GetBlock(blockLoc);
                         var stateId = block.StateId;
 
-                        if (table.TryGetValue(stateId, out TriggerInteractionDefinition newDef))
+                        if (table.TryGetValue(stateId, out InteractionDefinition? newDefinition))
                         {
-                            if (blockInteractionInfos.ContainsKey(blockLoc))
+                            var newInteraction = newDefinition?.Get<ViewInteraction>();
+                            if (newInteraction is null) continue;
+
+                            if (blockInteractionInfos.TryGetValue(blockLoc, out ViewInteractionInfo? interaction))
                             {
-                                var prevDef = blockInteractionInfos[blockLoc].GetDefinition();
-                                if (prevDef.Identifier != newDef.Identifier) // Update this interaction
+                                var prevInteraction = interaction.GetDefinition();
+                                if (prevInteraction != newInteraction) // Update this interaction
                                 {
                                     RemoveBlockInteraction(blockLoc);
-                                    AddBlockInteraction(blockLoc, block.BlockId, newDef);
+                                    AddBlockInteraction(blockLoc, block.BlockId, newInteraction);
                                     //Debug.Log($"Upd: [{blockLoc}] {prevDef.Identifier} => {newDef.Identifier}");
                                 }
                                 // Otherwise leave it unchanged
                             }
                             else // Add this interaction
                             {
-                                AddBlockInteraction(blockLoc, block.BlockId, newDef);
+                                AddBlockInteraction(blockLoc, block.BlockId, newInteraction);
                                 //Debug.Log($"Add: [{blockLoc}] {newDef.Identifier}");
                             }
                         }
@@ -161,23 +164,23 @@ namespace CraftSharp.Control
                     }
         }
 
-        private void AddBlockInteraction(BlockLoc location, ResourceLocation blockId, TriggerInteractionDefinition def)
+        private void AddBlockInteraction(BlockLoc location, ResourceLocation blockId, ViewInteraction def)
         {
-            var info = new TriggerInteractionInfo(nextNumeralID, location, blockId, def);
+            var info = new ViewInteractionInfo(nextNumeralID, location, blockId, def);
             blockInteractionInfos.Add(location, info);
 
             nextNumeralID++;
 
-            EventManager.Instance.Broadcast<TriggerInteractionAddEvent>(new(info.Id, info));
+            EventManager.Instance.Broadcast<ViewInteractionAddEvent>(new(info.Id, info));
         }
 
         private void RemoveBlockInteraction(BlockLoc location)
         {
             if (blockInteractionInfos.ContainsKey(location))
             {
-                blockInteractionInfos.Remove(location, out TriggerInteractionInfo info);
+                blockInteractionInfos.Remove(location, out ViewInteractionInfo info);
                 
-                EventManager.Instance.Broadcast<TriggerInteractionRemoveEvent>(new(info.Id));
+                EventManager.Instance.Broadcast<ViewInteractionRemoveEvent>(new(info.Id));
             }
         }
 
@@ -200,9 +203,12 @@ namespace CraftSharp.Control
             var (isFloating, isGrounded)  = (playerController.Status.Floating, playerController.Status.Grounded);
             var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
 
-            var bestTool = InteractionManager.INSTANCE.ToolInteractionTable.GetValueOrDefault(block.StateId);
+            var definition = InteractionManager.INSTANCE.InteractionTable
+                .GetValueOrDefault(block.StateId)?
+                .Get<ToolInteraction>();
 
-            toolInteractInfo = new ToolInteractionInfo(0, currentItem, block, TargetBlockLoc.Value, TargetDirection.Value, isFloating, isGrounded, bestTool);
+            toolInteractInfo = new ToolInteractionInfo(0, currentItem, block, TargetBlockLoc.Value,
+                TargetDirection.Value, isFloating, isGrounded, definition);
 
             EventManager.Instance.Broadcast(new ToolInteractionEvent(currentItem, block.State, toolInteractInfo));
 
@@ -249,7 +255,15 @@ namespace CraftSharp.Control
                 {
                     if (toolInteractInfo != null)
                     {
-                        if (TargetBlockLoc != lastBlockLoc)
+                        if (toolInteractInfo.State == ToolInteractionState.Completed)
+                        {
+                            toolInteractInfo = null;
+                            diggingCoroutine = null;
+
+                            if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
+                                blockSelectionFrame.SetActive(false);
+                        }
+                        else if (TargetBlockLoc != lastBlockLoc)
                         {
                             CancelDiggingProcess();
                             StartDiggingProcess();
@@ -275,9 +289,7 @@ namespace CraftSharp.Control
                 lastBlockLoc = null;
 
                 if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
-                {
                     blockSelectionFrame.SetActive(false);
-                }
             }
 
             if (client != null)
