@@ -76,10 +76,10 @@ namespace CraftSharp.Rendering
         /// </summary>
         private readonly PriorityQueue<ChunkRender> chunkRendersToBeBuilt = new();
         private readonly HashSet<ChunkRender> chunkRendersToBeBuiltAsSet = new();
-        private readonly List<ChunkRender> chunkRendersBeingBuilt = new();
+        private readonly HashSet<ChunkRender> chunkRendersBeingBuilt = new(BUILD_COUNT_LIMIT);
 
         private readonly HashSet<int3> lightUpdateRequests = new();
-        private readonly HashSet<int3> lightUpdateChecklist = new();
+        private readonly HashSet<int3> lightUpdateUnfinished = new();
 
         private BaseCornClient client;
         private ChunkRenderBuilder builder;
@@ -120,7 +120,7 @@ namespace CraftSharp.Rendering
 
         public string GetDebugInfo()
         {
-            return $"Unfinished Light Updates: {lightUpdateChecklist.Count}\nQueued Chunks: {chunkRendersToBeBuiltAsSet.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Data Build Time Avg: {dataBuildTimeSum / 200F:0.00} ms\n- Vert Build Time Avg: {vertexBuildTimeSum / 200F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
+            return $"Unfinished Light Updates: {lightUpdateUnfinished.Count}\nQueued Chunks: {chunkRendersToBeBuiltAsSet.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Data Build Time Avg: {dataBuildTimeSum / 200F:0.00} ms\n- Vert Build Time Avg: {vertexBuildTimeSum / 200F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
         }
 
         #region Chunk render access
@@ -205,15 +205,13 @@ namespace CraftSharp.Rendering
             {
                 return renderColumns[chunkCoord];
             }
-                
+            
             // This ChunkRenderColumn doesn't currently exist...
             Profiler.BeginSample("Create chunk render object");
 
             // Get one from pool
             var column = chunkRenderColumnPool.Get();
-
-            column.ChunkX = chunkX;
-            column.ChunkZ = chunkZ;
+            column.ColumnPos = new(chunkX, chunkZ);
 
             var columnObj = column.gameObject;
             columnObj.name = $"Column [{chunkX}, {chunkZ}]";
@@ -274,9 +272,9 @@ namespace CraftSharp.Rendering
 
             Loom.QueueOnMainThread(() =>
             {
-                QueueChunkBuildAfterLightUpdate(chunkPos.x, chunkPos.y, chunkPos.z);
+                lightUpdateUnfinished.Remove(chunkPos);
 
-                lightUpdateChecklist.Remove(chunkPos);
+                QueueChunkBuildAfterLightUpdate(chunkPos.x, chunkPos.y, chunkPos.z);
             });
         }
 
@@ -366,7 +364,7 @@ namespace CraftSharp.Rendering
         private void AddLightUpdateRequest(int3 chunkPos)
         {
             lightUpdateRequests.Add(chunkPos);
-            lightUpdateChecklist.Add(chunkPos);
+            lightUpdateUnfinished.Add(chunkPos); // null if task is not created yet
         }
 
         /// <summary>
@@ -626,6 +624,11 @@ namespace CraftSharp.Rendering
 
         private void QueueChunkRenderBuild(ChunkRender chunkRender)
         {
+            if (chunkRendersBeingBuilt.Contains(chunkRender))
+            {
+                chunkRender.TokenSource?.Cancel();
+            }
+
             if (!chunkRendersToBeBuiltAsSet.Contains(chunkRender))
             {
                 chunkRendersToBeBuilt.Enqueue(chunkRender);
@@ -637,7 +640,26 @@ namespace CraftSharp.Rendering
         private void QueueChunkRenderBuildIfNotEmpty(ChunkRender chunkRender)
         {
             if (chunkRender != null) // Not empty(air) chunk
+            {
                 QueueChunkRenderBuild(chunkRender);
+            }
+        }
+
+        /// <summary>
+        /// Queue a chunk mesh rebuild after light update
+        /// </summary>
+        public void QueueChunkBuildAfterLightUpdate(int chunkX, int chunkYIndex, int chunkZ)
+        {
+            var column = GetChunkRenderColumn(chunkX, chunkZ);
+            if (column != null) // Queue this chunk to rebuild list...
+            {   // Create the chunk render object if not present (previously empty)
+                var chunk = column.GetOrCreateChunkRender(chunkYIndex, chunkRenderPool);
+
+                // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
+                QueueChunkRenderBuildIfNotEmpty(chunk);
+
+                //Debug.Log($"Queued chunk [{chunkX}, {chunkYIndex}, {chunkZ}] after light update");
+            }
         }
 
         public void BuildChunkRender(ChunkRender chunkRender)
@@ -730,7 +752,9 @@ namespace CraftSharp.Rendering
                     if (chunkRender != null)
                     {
                         if (buildResult == ChunkBuildResult.Cancelled)
+                        {
                             chunkRender.State = ChunkBuildState.Cancelled;
+                        }
 
                         chunkRendersBeingBuilt.Remove(chunkRender);
                     }
@@ -801,7 +825,7 @@ namespace CraftSharp.Rendering
                 chunkRender.TokenSource?.Cancel();
             }
             chunkRendersBeingBuilt.Clear();
-            lightUpdateChecklist.Clear();
+            lightUpdateUnfinished.Clear();
 
             // Clear all chunk columns in world
             var chunkCoords = renderColumns.Keys.ToArray();
@@ -867,21 +891,6 @@ namespace CraftSharp.Rendering
             
             if (blockLoc.DistanceSquared(client!.GetCurrentLocation().GetBlockLoc()) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)
                 terrainColliderDirty = true; // Terrain collider needs to be updated
-        }
-
-        /// <summary>
-        /// Queue a chunk mesh rebuild after light update
-        /// </summary>
-        public void QueueChunkBuildAfterLightUpdate(int chunkX, int chunkYIndex, int chunkZ)
-        {
-            var column = GetChunkRenderColumn(chunkX, chunkZ);
-            if (column != null) // Queue this chunk to rebuild list...
-            {   // Create the chunk render object if not present (previously empty)
-                var chunk = column.GetOrCreateChunkRender(chunkYIndex, chunkRenderPool);
-
-                // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
-                QueueChunkRenderBuildIfNotEmpty(chunk);
-            }
         }
 
         public void InitializeTerrainCollider(BlockLoc playerBlockLoc, Action callback = null)
@@ -958,21 +967,24 @@ namespace CraftSharp.Rendering
             // Don't build world until biomes are received and registered
             if (!World.BiomesInitialized) return;
 
-            int newCount = BUILD_COUNT_LIMIT - chunkRendersBeingBuilt.Count;
-
             // Build chunks in queue...
             Profiler.BeginSample("Start chunk render build(/light update) tasks");
+
+            int newCount = 6; // Count quota for light updates
+
             // Start light update tasks
             while (newCount > 0 && lightUpdateRequests.Count > 0)
             {
-                var cp = lightUpdateRequests.First();
-                lightUpdateRequests.Remove(cp);
+                var chunkPos = lightUpdateRequests.First();
+                lightUpdateRequests.Remove(chunkPos);
+
+                //Debug.Log($"Queued light update for chunk [{chunkPos.x}, {chunkPos.y}, {chunkPos.z}]");
 
                 Task.Run(() =>
                 {
                     try
                     {
-                        RecalculateBlockLight(cp);
+                        RecalculateBlockLight(chunkPos);
                     }
                     catch (Exception e)
                     {
@@ -982,13 +994,31 @@ namespace CraftSharp.Rendering
                 newCount--;
             }
 
+            newCount = BUILD_COUNT_LIMIT - chunkRendersBeingBuilt.Count; // Count quota for chunk builds
+
             // Make sure no null element in hashset
             chunkRendersToBeBuiltAsSet.Remove(null);
 
             // Start chunk building tasks...
             while (newCount > 0 && chunkRendersToBeBuiltAsSet.Count > 0)
             {
-                var nextChunk = chunkRendersToBeBuilt.Dequeue();
+                var nextChunk = chunkRendersToBeBuilt.Peek();
+                var chunkPos = nextChunk.ChunkPos;
+
+                // If lighting data of any neighbor of this chunk is dirty, don't build it
+                if (   lightUpdateUnfinished.Contains(chunkPos)
+                    || lightUpdateUnfinished.Contains(new(chunkPos.x - 1, chunkPos.y,     chunkPos.z    ))
+                    || lightUpdateUnfinished.Contains(new(chunkPos.x + 1, chunkPos.y,     chunkPos.z    ))
+                    || lightUpdateUnfinished.Contains(new(chunkPos.x,     chunkPos.y,     chunkPos.z - 1))
+                    || lightUpdateUnfinished.Contains(new(chunkPos.x,     chunkPos.y,     chunkPos.z + 1))
+                    || lightUpdateUnfinished.Contains(new(chunkPos.x,     chunkPos.y - 1, chunkPos.z    ))
+                    || lightUpdateUnfinished.Contains(new(chunkPos.x,     chunkPos.y + 1, chunkPos.z    ))
+                    )
+                {
+                    break; // We can't easily skip this chunk, so just stop building chunks for a while
+                }
+
+                chunkRendersToBeBuilt.Dequeue(); // Remove the one peeked
 
                 if (nextChunk == null || GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ) == null)
                 {   // Chunk is unloaded while waiting in the queue, ignore it...

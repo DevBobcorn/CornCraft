@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace CraftSharp.Rendering
 {
@@ -29,13 +30,36 @@ namespace CraftSharp.Rendering
             _                        => 0
         };
 
-        public int ChunkX, ChunkZ;
         /// <summary>
-        /// Non-negative value marking the position of this chunk in the chunk column from bottom to top.
+        /// Chunk x coordinate in Minecraft space
+        /// </summary>
+        public int ChunkX { get; private set; }
+
+        /// <summary>
+        /// Chunk z coordinate in Minecraft space
+        /// </summary>
+        public int ChunkZ { get; private set; }
+
+        /// <summary>
+        /// Non-negative chunk y coordinate marking the index of this chunk in the chunk column from bottom to top.
         /// <br/>
         /// This value always starts from 0, and is unaffected by y-offset value.
         /// </summary>
-        public int ChunkYIndex;
+        public int ChunkYIndex { get; private set; }
+
+        private int3 chunkPos;
+        public int3 ChunkPos
+        {
+            get => chunkPos;
+            set
+            {
+                chunkPos = value;
+                ChunkX = chunkPos.x;
+                ChunkYIndex = chunkPos.y;
+                ChunkZ = chunkPos.z;
+            }
+        }
+
         public ChunkBuildState State = ChunkBuildState.Pending;
 
         public CancellationTokenSource TokenSource = null;

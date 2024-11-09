@@ -2,12 +2,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.Profiling;
+using Unity.Mathematics;
 
 namespace CraftSharp.Rendering
 {
     public class ChunkRenderColumn : MonoBehaviour
     {
-        public int ChunkX, ChunkZ;
+        /// <summary>
+        /// Chunk x coordinate in Minecraft space
+        /// </summary>
+        public int ChunkX { get; private set; }
+
+        /// <summary>
+        /// Chunk z coordinate in Minecraft space
+        /// </summary>
+        public int ChunkZ { get; private set; }
+
+        private int2 columnPos;
+        public int2 ColumnPos
+        {
+            get => columnPos;
+            set
+            {
+                columnPos = value;
+                ChunkX = columnPos.x;
+                ChunkZ = columnPos.y;
+            }
+        }
 
         private readonly Dictionary<int, ChunkRender> chunks = new();
 
@@ -53,10 +74,7 @@ namespace CraftSharp.Rendering
 
                 // Get one from pool
                 var chunk = pool.Get();
-
-                chunk.ChunkX = this.ChunkX;
-                chunk.ChunkZ = this.ChunkZ;
-                chunk.ChunkYIndex = chunkYIndex;
+                chunk.ChunkPos = new int3(this.ChunkX, chunkYIndex, this.ChunkZ);
 
                 var chunkObj = chunk.gameObject;
                 chunkObj.name = $"Chunk [{chunkYIndex}]";
@@ -65,7 +83,7 @@ namespace CraftSharp.Rendering
                 chunkObj.transform.parent = this.transform;
                 chunkObj.transform.localPosition = new(0F, chunkYIndex * Chunk.SIZE + World.GetDimensionType().minY, 0F);
 
-                chunkObj.hideFlags = HideFlags.HideAndDontSave;
+                //chunkObj.hideFlags = HideFlags.HideAndDontSave;
                 
                 chunks.Add(chunkYIndex, chunk);
 
@@ -85,7 +103,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         /// <param name="chunksBeingBuilt"></param>
         /// <param name="chunks2Build"></param>
-        public void Unload(List<ChunkRender> chunksBeingBuilt, HashSet<ChunkRender> chunks2BuildAsSet, PriorityQueue<ChunkRender> chunks2Build, IObjectPool<ChunkRender> pool)
+        public void Unload(HashSet<ChunkRender> chunksBeingBuilt, HashSet<ChunkRender> chunks2BuildAsSet, PriorityQueue<ChunkRender> chunks2Build, IObjectPool<ChunkRender> pool)
         {
             // Unload this chunk column...
             foreach (int i in chunks.Keys)
