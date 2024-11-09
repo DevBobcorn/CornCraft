@@ -47,17 +47,18 @@ namespace CraftSharp.Control
 
         private float CalculateDiggingTime(Item? item, bool underwater, bool onGround)
         {
-            var isBestTool =
-                item != null &&
-                InteractionManager.INSTANCE.ToolInteractionTable.TryGetValue(block.StateId, out var tool) &&
-                tool.Type == item.ActionType;
+            var isBestTool = item != null &&
+                             InteractionManager.INSTANCE.ToolInteractionTable.TryGetValue(block.StateId, out var tool) &&
+                             tool.Type == item.ActionType;
 
             ItemTier? tier = null;
 
-            // TODO: I don't known is hand break belongs to harvest?
-            var canHarvest =
-                item is { TierType: not null } &&
-                ItemTier.Tiers.TryGetValue(item.TierType.Value, out tier);
+            // TODO: Check object is harvestable by hand. 
+            var canHarvestWithoutTool = true;
+
+            var canHarvest = canHarvestWithoutTool && item?.TierType is null || // use hand case
+                             item is { TierType: not null } &&
+                             ItemTier.Tiers.TryGetValue(item.TierType.Value, out tier); // use tool case
 
             float mult = 1.0f;
 
@@ -66,10 +67,14 @@ namespace CraftSharp.Control
                 mult = tier.Speed;
 
                 if (!canHarvest) mult = 1.0f;
+                // TODO: Tool toolEfficiency level: mult += efficiencyLevel ^ 2 + 1
             }
             else mult = 1.0f;
 
-            if (underwater) mult /= 5.0f;
+            // TODO: if haste or conduitPower: speedMultiplier *= 0.2 * max(hasteLevel, conduitPowerLevel) + 1
+            // TODO: if miningFatigue: speedMultiplier *= 0.3 ^ min(miningFatigueLevel, 4)
+
+            if (underwater) mult /= 5.0f; // TODO: If not hasAquaAffinity
             if (!onGround) mult /= 5.0f;
 
             double damage = mult / block.State.Hardness;

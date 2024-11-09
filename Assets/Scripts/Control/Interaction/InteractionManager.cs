@@ -134,7 +134,7 @@ namespace CraftSharp.Control
                             foreach (var stateId in stateIds)
                             {
                                 toolInteractionTable.Add(stateId, new(actionType));
-                                Debug.Log($"Added {entryName} best tool for blockstate [{stateId}] {palette.GetByNumId(stateId)}");
+                                // Debug.Log($"Added {entryName} best tool for blockstate [{stateId}] {palette.GetByNumId(stateId)}");
                             }
                         }
                     }
