@@ -39,43 +39,45 @@ namespace CraftSharp.UI
             _optionAnimator = GetComponent<Animator>();
         }
 
-        public void SetInfo(int id, ViewInteractionInfo info)
+        public void SetInfo(int id, InteractionInfo info)
         {
             interactionKey = id;
             interactionInfo = info;
 
-            var paramTexts = info.GetParamTexts();
-            var hintText = Translations.Get(info.GetHintKey(), paramTexts);
+            var paramTexts = info.ParamTexts;
+            var hintText = Translations.Get(info.HintKey, paramTexts);
 
             usingItemIcon = false;
             HideItemIcon();
 
-            switch (info.GetIconType())
+            if (info is ViewInteractionInfo viewInfo)
             {
-                case InteractionIconType.Dialog:
-                    optionIconImage.overrideSprite = null;
-                    usingItemIcon = false;
-                    break;
-                case InteractionIconType.EnterLocation:
-                    optionIconImage.overrideSprite = enterLocationSprite;
-                    usingItemIcon = false;
-                    break;
-                case InteractionIconType.Ride:
-                    optionIconImage.overrideSprite = rideSprite;
-                    
-                    break;
-                case InteractionIconType.ItemIcon:
-                    optionIconImage.overrideSprite = itemIconSprite;
-                    // Set up item mesh
-                    UpdateItemMesh(info.GetIconItemId());
-                    // Display item mesh
-                    usingItemIcon = true;
-                    ShowItemIcon();
-                    break;
+                switch (viewInfo.IconType)
+                {
+                    case InteractionIconType.Dialog:
+                        optionIconImage.overrideSprite = null;
+                        usingItemIcon = false;
+                        break;
+                    case InteractionIconType.EnterLocation:
+                        optionIconImage.overrideSprite = enterLocationSprite;
+                        usingItemIcon = false;
+                        break;
+                    case InteractionIconType.Ride:
+                        optionIconImage.overrideSprite = rideSprite;
+                        break;
+                    case InteractionIconType.ItemIcon:
+                        optionIconImage.overrideSprite = itemIconSprite;
+                        // Set up item mesh
+                        UpdateItemMesh(viewInfo.IconItemId);
+                        // Display item mesh
+                        usingItemIcon = true;
+                        ShowItemIcon();
+                        break;
+                }
             }
 
             optionHintText.text = hintText;
-            gameObject.name = info.GetHintKey();
+            gameObject.name = info.HintKey;
         }
 
         public void ShowItemIcon()
@@ -105,7 +107,7 @@ namespace CraftSharp.UI
             _optionAnimator.SetTrigger(EXECUTED); // Execution visual feedback
 
             if (client != null && interactionInfo != null)
-                StartCoroutine(interactionInfo.RunInteraction(client));
+                interactionInfo.RunInteraction(client).MoveNext();
         }
 
         // Called by animator after hide animation ends...

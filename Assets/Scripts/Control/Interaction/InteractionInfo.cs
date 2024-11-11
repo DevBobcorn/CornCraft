@@ -2,14 +2,14 @@ using System.Collections;
 
 namespace CraftSharp.Control
 {
-    public abstract class InteractionInfo
+    public interface InteractionInfo
     {
         public int Id { get; set; }
 
-        public abstract string GetHintKey();
+        public string HintKey { get; }
 
-        public abstract string[] GetParamTexts();
+        public string[] ParamTexts { get; }
 
-        public abstract IEnumerator RunInteraction(BaseCornClient client);
+        public IEnumerator RunInteraction(BaseCornClient client);
     }
 }

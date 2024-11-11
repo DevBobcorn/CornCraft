@@ -13,45 +13,54 @@ namespace CraftSharp.Control
         Paused
     }
 
-    public class ToolInteractionInfo : InteractionInfo
+    public abstract class ToolInteractionInfo : InteractionInfo
     {
-        private readonly Block block;
-        private readonly BlockLoc location;
-        private readonly Direction direction;
-        private readonly ToolInteraction? defination;
+        protected readonly BlockLoc location;
+        protected readonly Direction direction;
+        protected readonly ToolInteraction? definition;
 
-        private readonly float duration;
+        public int Id { get; set; }
 
-        public ToolInteractionState State { get; private set; } = ToolInteractionState.InProgress;
+        public string[] ParamTexts { get; } = Array.Empty<string>();
 
-        public ToolInteractionInfo(int id, Item? tool, Block target, BlockLoc loc, Direction dir,
-            bool floating, bool grounded, ToolInteraction? def)
+        public float Progress { get; set; } = 0.0f;
+
+        public string HintKey => definition?.HintKey ?? string.Empty;
+
+        public BlockLoc Location => location;
+
+        public ToolInteractionState State { get; protected set; } = ToolInteractionState.InProgress;
+
+        protected ToolInteractionInfo(int id, BlockLoc loc, Direction dir, ToolInteraction? def)
         {
             Id = id;
-            block = target; 
             location = loc;
             direction = dir;
-            defination = def;
-            duration = CalculateDiggingTime(tool, floating, grounded);
+            definition = def;
         }
 
-        public override string GetHintKey()
+        public abstract IEnumerator RunInteraction(BaseCornClient client);
+    }
+
+    public class LocalToolInteractionInfo : ToolInteractionInfo
+    {
+        private readonly float duration;
+
+        public LocalToolInteractionInfo(int id, BlockLoc loc, Direction dir, Item? tool, float hardness,
+            bool floating, bool grounded, ToolInteraction? def)
+            : base(id, loc, dir, def)
         {
-            return defination?.HintKey ?? string.Empty;
+            Id = id;
+            duration = CalculateDiggingTime(tool, hardness, floating, grounded);
         }
 
-        public override string[] GetParamTexts()
+        private float CalculateDiggingTime(Item? item, float hardness, bool underwater, bool onGround)
         {
-            return Array.Empty<string>();
-        }
-
-        private float CalculateDiggingTime(Item? item, bool underwater, bool onGround)
-        {
-            bool isBestTool = item?.ActionType is not null && defination?.ActionType == item.ActionType;
+            bool isBestTool = item?.ActionType is not null && definition?.ActionType == item.ActionType;
 
             ItemTier? tier = null;
 
-            bool canHarvest = defination?.ActionType == ItemActionType.None && item?.TierType is null || // Use hand case
+            bool canHarvest = definition?.ActionType == ItemActionType.None && item?.TierType is null || // Use hand case
                               item is { TierType: not null } &&
                               ItemTier.Tiers.TryGetValue(item.TierType.Value, out tier); // Use tool case
 
@@ -72,7 +81,7 @@ namespace CraftSharp.Control
             if (underwater) multiplier /= 5.0f; // TODO: If not hasAquaAffinity
             if (!onGround) multiplier /= 5.0f;
 
-            double damage = multiplier / block.State.Hardness;
+            double damage = multiplier / hardness;
 
             damage /= canHarvest ? 30.0 : 100.0;
 
@@ -94,9 +103,10 @@ namespace CraftSharp.Control
             {
                 if (State == ToolInteractionState.Cancelled)
                 {
-                    client.DigBlock(location, direction, BaseCornClient.DiggingStatus.Cancelled);
+                    client.DigBlock(location, direction, DiggingStatus.Cancelled);
                     yield break;
                 }
+
                 if (State == ToolInteractionState.Paused)
                 {
                     yield return null;
@@ -104,10 +114,11 @@ namespace CraftSharp.Control
                 }
 
                 elapsedTime += Time.deltaTime;
+                Progress = elapsedTime / duration;
                 yield return null;
             }
 
-            client.DigBlock(location, direction, BaseCornClient.DiggingStatus.Finished);
+            client.DigBlock(location, direction, DiggingStatus.Finished);
             State = ToolInteractionState.Completed;
         }
 
@@ -127,6 +138,21 @@ namespace CraftSharp.Control
         {
             if (State == ToolInteractionState.Paused)
                 State = ToolInteractionState.InProgress;
+        }
+    }
+
+    public class GhostToolInteractionInfo : ToolInteractionInfo
+    {
+        public GhostToolInteractionInfo(int id, BlockLoc loc, Direction dir, ToolInteraction? def)
+            : base(id, loc, dir, def) { }
+
+        public override IEnumerator RunInteraction(BaseCornClient client)
+        {
+            while (Progress < 1.0f)
+            {
+                // Wait for server updates on Progress
+                yield return null;
+            }
         }
     }
 }

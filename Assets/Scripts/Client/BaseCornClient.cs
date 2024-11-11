@@ -212,8 +212,6 @@ namespace CraftSharp
 
         #region Action methods: Perform an action on the Server
 
-        public enum DiggingStatus { Started, Cancelled, Finished }
-
         public abstract void TrySendChat(string text);
         public abstract bool SendRespawnPacket();
         public abstract bool SendEntityAction(EntityActionType entityAction);

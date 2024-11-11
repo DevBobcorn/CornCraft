@@ -2599,7 +2599,10 @@ namespace CraftSharp
         /// <param name="stage">Destroy stage, maximum 255</param>
         public void OnBlockBreakAnimation(int entityId, BlockLoc blockLoc, byte stage)
         {
-            // TODO
+            var block = ChunkRenderManager.GetBlock(blockLoc);
+            var status = stage < 9 ? DiggingStatus.Started : DiggingStatus.Finished;
+
+            EventManager.Instance.BroadcastOnUnityThread<ToolInteractionEvent>(new(entityId, block, blockLoc, status, stage / 9.0f));
         }
 
         /// <summary>

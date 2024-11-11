@@ -7,59 +7,47 @@ namespace CraftSharp.Control
     public class ViewInteractionInfo : InteractionInfo
     {
         private readonly BlockLoc location; // Location for calculating distance
-        private readonly string[] paramTexts;
-        private readonly ViewInteraction definition;
+
+        public int Id { get; set; }
+        public string[] ParamTexts { get; }
+        public ViewInteraction Definition { get; }
+
+        public string HintKey => Definition.HintKey;
+
+        public InteractionIconType IconType => Definition.IconType;
+
+        public ResourceLocation IconItemId => Definition.IconItemId;
 
         public ViewInteractionInfo(int id, BlockLoc loc, ResourceLocation blockId, ViewInteraction def)
         {
             Id = id;
-            paramTexts = new string[] { ChatParser.TranslateString(blockId.GetTranslationKey("block")) };
+            ParamTexts = new string[] { ChatParser.TranslateString(blockId.GetTranslationKey("block")) };
             location = loc;
-            definition = def;
+            Definition = def;
         }
 
-        public InteractionIconType GetIconType()
+        public IEnumerator RunInteraction(BaseCornClient client)
         {
-            return definition.IconType;
-        }
-
-        public ResourceLocation GetIconItemId()
-        {
-            return definition.IconItemId;
-        }
-
-        public override string GetHintKey()
-        {
-            return definition.HintKey;
-        }
-
-        public override string[] GetParamTexts()
-        {
-            return paramTexts;
-        }
-
-        public ViewInteraction GetDefinition()
-        {
-            return definition;
-        }
-
-        public override IEnumerator RunInteraction(BaseCornClient client)
-        {
-            switch (definition.Type)
+            switch (Definition.Type)
             {
                 case InteractionType.Interact:
+                {
                     client.PlaceBlock(location, Direction.Down);
-                    break;
+
+                    yield break;
+                }
                 case InteractionType.Break:
+                {
                     client.DigBlock(location, Direction.Down);
 
-                    if (client is CornClientOnline clientOnline) clientOnline.DoAnimation((int)Hand.MainHand);
+                    if (client is CornClientOnline clientOnline)
+                        clientOnline.DoAnimation((int)Hand.MainHand);
 
-                    client.DigBlock(location, Direction.Down, BaseCornClient.DiggingStatus.Finished);
-                    break;
+                    client.DigBlock(location, Direction.Down, DiggingStatus.Finished);
+
+                    yield break;
+                }
             }
-
-            yield return null;
         }
     }
 }
