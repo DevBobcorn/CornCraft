@@ -8,11 +8,9 @@ namespace CraftSharp.Control
     {
         private readonly BlockLoc location; // Location for calculating distance
 
-        public int Id { get; set; }
-        public string[] ParamTexts { get; }
         public ViewInteraction Definition { get; }
 
-        public string HintKey => Definition.HintKey;
+        public new string HintKey => Definition.HintKey;
 
         public InteractionIconType IconType => Definition.IconType;
 
@@ -26,7 +24,7 @@ namespace CraftSharp.Control
             Definition = def;
         }
 
-        public IEnumerator RunInteraction(BaseCornClient client)
+        protected override IEnumerator RunInteraction(BaseCornClient client)
         {
             switch (Definition.Type)
             {

@@ -19,13 +19,9 @@ namespace CraftSharp.Control
         protected readonly Direction direction;
         protected readonly ToolInteraction? definition;
 
-        public int Id { get; set; }
-
-        public string[] ParamTexts { get; } = Array.Empty<string>();
-
         public float Progress { get; set; } = 0.0f;
 
-        public string HintKey => definition?.HintKey ?? string.Empty;
+        public new string HintKey => definition?.HintKey ?? string.Empty;
 
         public BlockLoc Location => location;
 
@@ -38,8 +34,6 @@ namespace CraftSharp.Control
             direction = dir;
             definition = def;
         }
-
-        public abstract IEnumerator RunInteraction(BaseCornClient client);
     }
 
     public class LocalToolInteractionInfo : ToolInteractionInfo
@@ -94,7 +88,7 @@ namespace CraftSharp.Control
             return seconds;
         }
 
-        public override IEnumerator RunInteraction(BaseCornClient client)
+        protected override IEnumerator RunInteraction(BaseCornClient client)
         {
             client.DigBlock(location, direction);
             float elapsedTime = 0.0f;
@@ -146,7 +140,7 @@ namespace CraftSharp.Control
         public GhostToolInteractionInfo(int id, BlockLoc loc, Direction dir, ToolInteraction? def)
             : base(id, loc, dir, def) { }
 
-        public override IEnumerator RunInteraction(BaseCornClient client)
+        protected override IEnumerator RunInteraction(BaseCornClient client)
         {
             while (Progress < 1.0f)
             {

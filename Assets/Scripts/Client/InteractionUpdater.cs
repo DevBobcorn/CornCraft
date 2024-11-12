@@ -173,9 +173,13 @@ namespace CraftSharp.Control
                     // Update the interactions
                     if (client is null) return;
 
-                    foreach (var interactionInfo in blockInteractionInfos[blockLoc].OfType<ToolInteractionInfo>())
-                        if (!interactionInfo.RunInteraction(client).MoveNext())
+                    foreach (var info in blockInteractionInfos[blockLoc].OfType<ToolInteractionInfo>().ToList())
+                    {
+                        if (!info.UpdateInteraction(client))
+                        {
                             RemoveBlockInteraction<ToolInteractionInfo>(blockLoc);
+                        }
+                    }
                 }
             }
 

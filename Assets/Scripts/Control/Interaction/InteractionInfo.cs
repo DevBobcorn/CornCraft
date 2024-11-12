@@ -1,15 +1,25 @@
+#nullable enable
+using System;
 using System.Collections;
 
 namespace CraftSharp.Control
 {
-    public interface InteractionInfo
+    public abstract class InteractionInfo
     {
-        public int Id { get; set; }
+        public int Id { get; protected set; }
 
-        public string HintKey { get; }
+        public string HintKey { get; protected set; } = string.Empty;
 
-        public string[] ParamTexts { get; }
+        public string[] ParamTexts { get; protected set; } = Array.Empty<string>();
 
-        public IEnumerator RunInteraction(BaseCornClient client);
+        private IEnumerator? interactionEnumerator;
+
+        public bool UpdateInteraction(BaseCornClient client)
+        {
+            interactionEnumerator ??= RunInteraction(client);
+            return interactionEnumerator.MoveNext();
+        }
+
+        protected abstract IEnumerator RunInteraction(BaseCornClient client);
     }
 }

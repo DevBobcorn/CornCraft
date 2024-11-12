@@ -107,7 +107,7 @@ namespace CraftSharp.UI
             _optionAnimator.SetTrigger(EXECUTED); // Execution visual feedback
 
             if (client != null && interactionInfo != null)
-                interactionInfo.RunInteraction(client).MoveNext();
+                interactionInfo.UpdateInteraction(client);
         }
 
         // Called by animator after hide animation ends...
