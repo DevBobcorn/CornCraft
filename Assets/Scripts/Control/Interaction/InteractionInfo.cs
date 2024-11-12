@@ -8,9 +8,9 @@ namespace CraftSharp.Control
     {
         public int Id { get; protected set; }
 
-        public string HintKey { get; protected set; } = string.Empty;
+        public virtual string HintKey { get; protected set; } = string.Empty;
 
-        public string[] ParamTexts { get; protected set; } = Array.Empty<string>();
+        public virtual string[] ParamTexts { get; protected set; } = Array.Empty<string>();
 
         private IEnumerator? interactionEnumerator;
 

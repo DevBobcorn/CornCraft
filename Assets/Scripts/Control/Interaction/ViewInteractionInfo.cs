@@ -4,13 +4,13 @@ using CraftSharp.Protocol;
 
 namespace CraftSharp.Control
 {
-    public class ViewInteractionInfo : InteractionInfo
+    public sealed class ViewInteractionInfo : InteractionInfo
     {
         private readonly BlockLoc location; // Location for calculating distance
 
         public ViewInteraction Definition { get; }
 
-        public new string HintKey => Definition.HintKey;
+        public override string HintKey => Definition.HintKey;
 
         public InteractionIconType IconType => Definition.IconType;
 

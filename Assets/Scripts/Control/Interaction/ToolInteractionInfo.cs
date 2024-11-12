@@ -21,7 +21,7 @@ namespace CraftSharp.Control
 
         public float Progress { get; set; } = 0.0f;
 
-        public new string HintKey => definition?.HintKey ?? string.Empty;
+        public override string HintKey => definition?.HintKey ?? string.Empty;
 
         public BlockLoc Location => location;
 
@@ -36,7 +36,7 @@ namespace CraftSharp.Control
         }
     }
 
-    public class LocalToolInteractionInfo : ToolInteractionInfo
+    public sealed class LocalToolInteractionInfo : ToolInteractionInfo
     {
         private readonly float duration;
 
@@ -135,7 +135,7 @@ namespace CraftSharp.Control
         }
     }
 
-    public class GhostToolInteractionInfo : ToolInteractionInfo
+    public sealed class GhostToolInteractionInfo : ToolInteractionInfo
     {
         public GhostToolInteractionInfo(int id, BlockLoc loc, Direction dir, ToolInteraction? def)
             : base(id, loc, dir, def) { }
