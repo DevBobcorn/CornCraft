@@ -1,3 +1,6 @@
+#nullable enable
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,47 +10,93 @@ using CraftSharp.Rendering;
 
 namespace CraftSharp.Control
 {
+    public class InteractionId
+    {
+        private readonly BitArray usage = new(int.MaxValue);
+        private int currentId = 0;
+
+        public int AllocateID()
+        {
+            while (currentId < usage.Length)
+            {
+                if (!usage[currentId])
+                {
+                    usage[currentId] = true;
+                    return currentId++;
+                }
+
+                currentId++;
+            }
+
+            return -1;
+        }
+
+        public void ReleaseID(int id)
+        {
+            if (id >= 0 && id < usage.Length)
+                usage[id] = false;
+        }
+    }
+
     public class InteractionUpdater : MonoBehaviour
     {
+        public const int BLOCK_INTERACTION_RADIUS = 3;
+        public const float BLOCK_INTERACTION_RADIUS_SQR = 9.0f; // BLOCK_INTERACTION_RADIUS ^ 2
+        public const float BLOCK_INTERACTION_RADIUS_SQR_PLUS = 12.25f; // (BLOCK_INTERACTION_RADIUS + 0.5f) ^ 2
+        
+        private static readonly List<BlockLoc> validOffsets = ComputeOffsets();
+
+        private static List<BlockLoc> ComputeOffsets()
+        {
+            var offsets = new List<BlockLoc>();
+            for (int x = -BLOCK_INTERACTION_RADIUS; x <= BLOCK_INTERACTION_RADIUS; x++)
+                for (int y = -BLOCK_INTERACTION_RADIUS; y <= BLOCK_INTERACTION_RADIUS; y++)
+                    for (int z = -BLOCK_INTERACTION_RADIUS; z <= BLOCK_INTERACTION_RADIUS; z++)
+                        if (x * x + y * y + z * z <= BLOCK_INTERACTION_RADIUS_SQR)
+                            offsets.Add(new BlockLoc(x, y, z));
+            return offsets;
+        }
+
         [SerializeField] private LayerMask blockSelectionLayer;
-        [SerializeField] private GameObject blockSelectionFramePrefab;
+        [SerializeField] private GameObject? blockSelectionFramePrefab;
 
-        private GameObject blockSelectionFrame;
+        private GameObject? blockSelectionFrame;
 
-        public readonly Dictionary<BlockLoc, BlockInteractionInfo> blockInteractionInfos = new();
-        public BlockLoc? TargetBlockLoc = null;
-        private BaseCornClient client;
-        private CameraController cameraController;
+        private BaseCornClient? client;
+        private CameraController? cameraController;
+        private PlayerController? playerController;
 
-        private int nextNumeralID = 1;
+        private Action<HeldItemChangeEvent>? heldItemCallback;
+        private Action<ToolInteractionEvent>? toolInteractionCallback;
+
+        private Dictionary<BlockLoc, List<InteractionInfo>> blockInteractionInfos = new();
+
+        private InteractionId interactionId = new();
+
+        private LocalToolInteractionInfo? lastInteractionInfo;
+        private Item? currentItem;
+
+        public Direction? TargetDirection { get; private set; } = Direction.Down;
+        public BlockLoc? TargetBlockLoc { get; private set; } = null;
 
         private void UpdateBlockSelection(Ray? viewRay)
         {
-            if (viewRay is null || client == null)
-            {
-                return;
-            }
-            
-            Vector3? castResultPos;
-            Vector3? castSurfaceDir;
-            
+            if (viewRay is null || client == null) return;
+
             if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out RaycastHit viewHit, 10F, blockSelectionLayer))
             {
-                castResultPos = viewHit.point;
-                castSurfaceDir = viewHit.normal;
-            }
-            else
-                castResultPos = castSurfaceDir = null;
+                Vector3 normal = viewHit.normal.normalized;
+                TargetDirection = GetDirectionFromNormal(normal);
 
-            if (castResultPos is not null && castSurfaceDir is not null)
-            {
-                Vector3 offseted = PointOnCubeSurface(castResultPos.Value) ?
-                        castResultPos.Value - castSurfaceDir.Value * 0.5F : castResultPos.Value;
+                Vector3 offseted = PointOnCubeSurface(viewHit.point)
+                    ? viewHit.point - normal * 0.5f
+                    : viewHit.point;
 
-                int unityX = Mathf.FloorToInt(offseted.x);
-                int unityY = Mathf.FloorToInt(offseted.y);
-                int unityZ = Mathf.FloorToInt(offseted.z);
-                var unityBlockPos = new Vector3(unityX, unityY, unityZ);
+                Vector3 unityBlockPos = new Vector3(
+                    Mathf.FloorToInt(offseted.x),
+                    Mathf.FloorToInt(offseted.y),
+                    Mathf.FloorToInt(offseted.z)
+                );
 
                 TargetBlockLoc = CoordConvert.Unity2MC(client.WorldOriginOffset, unityBlockPos).GetBlockLoc();
 
@@ -55,7 +104,7 @@ namespace CraftSharp.Control
                 {
                     blockSelectionFrame = GameObject.Instantiate(blockSelectionFramePrefab);
 
-                    blockSelectionFrame.transform.SetParent(transform, false);
+                    blockSelectionFrame!.transform.SetParent(transform, false);
                 }
                 else if (!blockSelectionFrame.activeSelf)
                 {
@@ -73,132 +122,270 @@ namespace CraftSharp.Control
                     blockSelectionFrame.SetActive(false);
                 }
             }
-        }
+            
+            static Direction GetDirectionFromNormal(Vector3 normal)
+            {
+                float absX = Mathf.Abs(normal.x);
+                float absY = Mathf.Abs(normal.y);
+                float absZ = Mathf.Abs(normal.z);
 
-        public const int BLOCK_INTERACTION_RADIUS = 3;
-        public const float BLOCK_INTERACTION_RADIUS_SQR = BLOCK_INTERACTION_RADIUS * BLOCK_INTERACTION_RADIUS;
-        public const float BLOCK_INTERACTION_RADIUS_SQR_PLUS = (BLOCK_INTERACTION_RADIUS + 0.5F) * (BLOCK_INTERACTION_RADIUS + 0.5F);
+                if (absX >= absY && absX >= absZ)
+                    return normal.x > 0 ? Direction.East : Direction.West;
+                if (absY >= absX && absY >= absZ)
+                    return normal.y > 0 ? Direction.Up : Direction.Down;
+
+                return normal.z > 0 ? Direction.North : Direction.South;
+            }
+
+            static bool PointOnCubeSurface(Vector3 point)
+            {
+                Vector3 delta = new Vector3(
+                    point.x - Mathf.Floor(point.x),
+                    point.y - Mathf.Floor(point.y),
+                    point.z - Mathf.Floor(point.z)
+                );
+
+                return delta.x is < 0.01f or > 0.99f ||
+                       delta.y is < 0.01f or > 0.99f ||
+                       delta.z is < 0.01f or > 0.99f;
+            }
+        }
 
         private void UpdateBlockInteractions(ChunkRenderManager chunksManager)
         {
             var playerBlockLoc = client!.GetCurrentLocation().GetBlockLoc();
-            var table = InteractionManager.INSTANCE.BlockInteractionTable;
+            var table = InteractionManager.INSTANCE.InteractionTable;
 
-            // Remove expired interactions
-            var blockLocs = blockInteractionInfos.Keys.ToArray();
-            foreach (var blockLoc in blockLocs)
+            foreach (var blockLoc in blockInteractionInfos.Keys.ToList())
             {
-                var sqrDist = playerBlockLoc.SqrDistanceTo(blockLoc);
-
-                if (sqrDist > BLOCK_INTERACTION_RADIUS_SQR_PLUS)
+                if (playerBlockLoc.SqrDistanceTo(blockLoc) > BLOCK_INTERACTION_RADIUS_SQR_PLUS)
                 {
-                    RemoveBlockInteraction(blockLoc); // Remove this one for being too far from the player
+                    RemoveBlockInteraction<ViewInteractionInfo>(blockLoc, info =>
+                    {
+                        if (info is ViewInteractionInfo viewInfo)
+                            EventManager.Instance.Broadcast<ViewInteractionRemoveEvent>(new(viewInfo.Id));
+                    });
+                    RemoveBlockInteraction<ToolInteractionInfo>(blockLoc);
                     //Debug.Log($"Rem: [{blockLoc}]");
-                    continue;
+                }
+                else
+                {
+                    // Update the interactions
+                    if (client is null) return;
+
+                    foreach (var info in blockInteractionInfos[blockLoc].OfType<ToolInteractionInfo>().ToList())
+                    {
+                        if (!info.UpdateInteraction(client))
+                        {
+                            RemoveBlockInteraction<ToolInteractionInfo>(blockLoc);
+                        }
+                    }
                 }
             }
 
-            // Append new available interactions
-            for (int x = -BLOCK_INTERACTION_RADIUS;x <= BLOCK_INTERACTION_RADIUS;x++)
-                for (int y = -BLOCK_INTERACTION_RADIUS;y <= BLOCK_INTERACTION_RADIUS;y++)
-                    for (int z = -BLOCK_INTERACTION_RADIUS;z <= BLOCK_INTERACTION_RADIUS;z++)
-                    {
-                        if (x * x + y * y + z * z > BLOCK_INTERACTION_RADIUS_SQR)
-                            continue;
-                        
-                        var blockLoc = playerBlockLoc + new BlockLoc(x, y, z);
-                        var block = chunksManager.GetBlock(blockLoc);
-                        var stateId = block.StateId;
-
-                        if (table.TryGetValue(stateId, out BlockInteractionDefinition newDef))
-                        {
-                            if (blockInteractionInfos.ContainsKey(blockLoc))
-                            {
-                                var prevDef = blockInteractionInfos[blockLoc].GetDefinition();
-                                if (prevDef.Identifier != newDef.Identifier) // Update this interaction
-                                {
-                                    RemoveBlockInteraction(blockLoc);
-                                    AddBlockInteraction(blockLoc, block.BlockId, newDef);
-                                    //Debug.Log($"Upd: [{blockLoc}] {prevDef.Identifier} => {newDef.Identifier}");
-                                }
-                                // Otherwise leave it unchanged
-                            }
-                            else // Add this interaction
-                            {
-                                AddBlockInteraction(blockLoc, block.BlockId, newDef);
-                                //Debug.Log($"Add: [{blockLoc}] {newDef.Identifier}");
-                            }
-                        }
-                        else
-                        {
-                            if (blockInteractionInfos.ContainsKey(blockLoc))
-                            {
-                                RemoveBlockInteraction(blockLoc); // Remove this one for interaction no longer available
-                                //Debug.Log($"Rem: [{blockLoc}]");
-                            }
-                        }
-                    }
-        }
-
-        private void AddBlockInteraction(BlockLoc location, ResourceLocation blockId, BlockInteractionDefinition def)
-        {
-            var info = new BlockInteractionInfo(nextNumeralID, location, blockId, def);
-            blockInteractionInfos.Add(location, info);
-
-            nextNumeralID++;
-
-            EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, info));
-        }
-
-        private void RemoveBlockInteraction(BlockLoc location)
-        {
-            if (blockInteractionInfos.ContainsKey(location))
+            // Append new available view interactions
+            foreach (var offset in validOffsets)
             {
-                blockInteractionInfos.Remove(location, out BlockInteractionInfo info);
-                
-                EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
+                var blockLoc = playerBlockLoc + offset;
+                var block = chunksManager.GetBlock(blockLoc);
+
+                if (table.TryGetValue(block.StateId, out InteractionDefinition? newInteractionDefinition))
+                {
+                    var newDefinition = newInteractionDefinition?.Get<ViewInteraction>();
+                    if (newDefinition is null) continue;
+
+                    var prevInfo = GetBlockInteraction<ViewInteractionInfo>(blockLoc)?.FirstOrDefault();
+                    var newInfo = new ViewInteractionInfo(interactionId.AllocateID(), blockLoc, block.BlockId, newDefinition);
+                    if (prevInfo is not null)
+                    {
+                        var prevDefinition = prevInfo.Definition;
+                        if (prevDefinition != newDefinition) // Update this interaction
+                        {
+                            RemoveBlockInteraction<ViewInteractionInfo>(blockLoc, info =>
+                            {
+                                if (info is ViewInteractionInfo viewInfo)
+                                    EventManager.Instance.Broadcast<ViewInteractionRemoveEvent>(new(viewInfo.Id));
+                            });
+                            AddBlockInteraction(blockLoc, newInfo, info =>
+                            {
+                                if (info is ViewInteractionInfo viewInfo)
+                                    EventManager.Instance.Broadcast<ViewInteractionAddEvent>(new(viewInfo.Id, viewInfo));
+                            });
+                            //Debug.Log($"Upd: [{blockLoc}] {prevDefinition.Identifier} => {newDefinition.Identifier}");
+                        }
+                        // Otherwise leave it unchanged
+                    }
+                    else // Add this interaction
+                    {
+                        AddBlockInteraction(blockLoc, newInfo, info =>
+                        {
+                            if (info is ViewInteractionInfo viewInfo)
+                                EventManager.Instance.Broadcast<ViewInteractionAddEvent>(new(viewInfo.Id, viewInfo));
+                        });
+                        //Debug.Log($"Add: [{blockLoc}] {newDefinition.Identifier}");
+                    }
+                }
+                else
+                {
+                    if (blockInteractionInfos.ContainsKey(blockLoc))
+                    {
+                        RemoveBlockInteraction<ViewInteractionInfo>(blockLoc, info =>
+                        {
+                            if (info is ViewInteractionInfo viewInfo)
+                                EventManager.Instance.Broadcast<ViewInteractionRemoveEvent>(new(viewInfo.Id));
+                        });
+                        //Debug.Log($"Rem: [{blockLoc}]");
+                    }
+                }
             }
         }
 
-        private static bool PointOnGridEdge(float value)
+        private void AddBlockInteraction(BlockLoc location, InteractionInfo info, Action<InteractionInfo>? onCreated = null)
         {
-            var delta = value - Mathf.Floor(value);
-            return delta < 0.01F || delta > 0.99F;
+            if (!blockInteractionInfos.TryGetValue(location, out List<InteractionInfo>? interactionInfos))
+            {
+                interactionInfos = new List<InteractionInfo>();
+                blockInteractionInfos[location] = interactionInfos;
+            }
+
+            interactionInfos.Add(info);
+
+            onCreated?.Invoke(info);
         }
 
-        private static bool PointOnCubeSurface(Vector3 point)
+        private IEnumerable<T>? GetBlockInteraction<T>(BlockLoc location) where T : InteractionInfo
         {
-            return PointOnGridEdge(point.x) || PointOnGridEdge(point.y) || PointOnGridEdge(point.z);
+            return blockInteractionInfos.TryGetValue(location, out List<InteractionInfo> interactionInfos)
+                ? interactionInfos.OfType<T>()
+                : null;
         }
 
-        public void Initialize(BaseCornClient client, CameraController camController)
+        private void RemoveBlockInteraction<T>(BlockLoc location, Action<InteractionInfo>? onRemoved = null) where T : InteractionInfo
+        {
+            if (blockInteractionInfos.TryGetValue(location, out List<InteractionInfo> interactionInfos))
+            {
+                interactionInfos.RemoveAll(interactionInfo =>
+                {
+                    if (interactionInfo is not T matchedInfo) return false;
+
+                    interactionId.ReleaseID(matchedInfo.Id);
+
+                    onRemoved?.Invoke(matchedInfo);
+
+                    return true;
+                });
+
+                if (!interactionInfos.Any()) blockInteractionInfos.Remove(location);
+            }
+        }
+
+        public void Initialize(BaseCornClient client, CameraController camController, PlayerController playerController)
         {
             this.client = client;
             this.cameraController = camController;
+            this.playerController = playerController;
+        }
+
+        void Start()
+        {
+            heldItemCallback = e => currentItem = e.ItemStack?.ItemType;
+            EventManager.Instance.Register(heldItemCallback);
+            toolInteractionCallback = e =>
+            {
+                // Must keep only one at a time.
+                var interactionInfo = GetBlockInteraction<GhostToolInteractionInfo>(e.Location)?.FirstOrDefault();
+
+                if (interactionInfo is not null)
+                {
+                    // Update the process
+                    interactionInfo.Progress = e.Progress;
+                }
+                else
+                {
+                    interactionInfo = new GhostToolInteractionInfo(interactionId.AllocateID(), e.Location, Direction.Down, null);
+
+                    AddBlockInteraction(e.Location, interactionInfo);
+                }
+            };
+            EventManager.Instance.Register(toolInteractionCallback);
         }
 
         void Update()
         {
             if (cameraController != null && cameraController.IsAiming)
             {
-                // Update target block selection
-                UpdateBlockSelection(cameraController!.GetPointerRay());
+                UpdateBlockSelection(cameraController.GetPointerRay());
+
+                if (TargetBlockLoc is not null && TargetDirection is not null &&
+                    playerController is not null && client is not null)
+                {
+                    var info = GetBlockInteraction<LocalToolInteractionInfo>(TargetBlockLoc.Value)?.FirstOrDefault();
+                    var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
+                    var status = playerController.Status;
+                    if (info is not null)
+                    {
+                        if (info.State == ToolInteractionState.Completed)
+                        {
+                            lastInteractionInfo = null;
+
+                            if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
+                                blockSelectionFrame.SetActive(false);
+                        }
+                        else if (TargetBlockLoc != lastInteractionInfo?.Location)
+                        {
+                            lastInteractionInfo?.CancelInteraction();
+                            StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status);
+                        }
+                    }
+                    else
+                    {
+                        StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status);
+                    }
+                }
+                else
+                {
+                    lastInteractionInfo?.CancelInteraction();
+                    lastInteractionInfo = null;
+                }
             }
             else
             {
+                lastInteractionInfo?.CancelInteraction();
+                lastInteractionInfo = null;
                 TargetBlockLoc = null;
 
                 if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
-                {
                     blockSelectionFrame.SetActive(false);
-                }
             }
 
+            return;
+
+            void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)
+            {
+                var definition = InteractionManager.INSTANCE.InteractionTable
+                    .GetValueOrDefault(block.StateId)?
+                    .Get<ToolInteraction>();
+
+                lastInteractionInfo = new LocalToolInteractionInfo(interactionId.AllocateID(), blockLoc, direction,
+                    currentItem, block.State.Hardness, status.Floating, status.Grounded, definition);
+
+                AddBlockInteraction(blockLoc, lastInteractionInfo);
+            }
+        }
+
+        private void LateUpdate()
+        {
             if (client != null)
             {
-                // Update player interactions
+                // Update block interactions
                 UpdateBlockInteractions(client.ChunkRenderManager);
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (heldItemCallback is not null)
+                EventManager.Instance.Unregister(heldItemCallback);
         }
     }
 }

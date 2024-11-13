@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
@@ -1678,27 +1679,20 @@ namespace CraftSharp
         /// Attempt to dig a block at the specified location
         /// </summary>
         /// <param name="blockLoc">Location of block to dig</param>
-        /// <param name="swingArms">Also perform the "arm swing" animation</param>
-        /// <param name="lookAtBlock">Also look at the block before digging</param>
-        public override bool DigBlock(BlockLoc blockLoc, bool swingArms = true, bool lookAtBlock = true)
+        /// <param name="blockFace">Block face</param>
+        /// <param name="status">Digging status</param>
+        public override bool DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status = DiggingStatus.Started)
         {
             if (InvokeRequired)
-                return InvokeOnNetMainThread(() => DigBlock(blockLoc, swingArms, lookAtBlock));
+                return InvokeOnNetMainThread(() => DigBlock(blockLoc, blockFace, status));
 
-            // TODO select best face from current player location
-            Direction blockFace = Direction.Down;
-
-            // Look at block before attempting to break it
-            if (lookAtBlock)
+            return status switch
             {
-                UpdateLocation(GetCurrentLocation(), new Location(blockLoc.X, blockLoc.Y, blockLoc.Z));
-            }
-
-            // Send dig start and dig end, will need to wait for server response to know dig result
-            // See https://wiki.vg/How_to_Write_a_Client#Digging for more details
-            return handler!.SendPlayerDigging(0, blockLoc, blockFace, sequenceId++)
-                && (!swingArms || DoAnimation((int)Hand.MainHand))
-                && handler.SendPlayerDigging(2, blockLoc, blockFace, sequenceId++);
+                DiggingStatus.Started => handler!.SendPlayerDigging(0, blockLoc, blockFace, sequenceId++),
+                DiggingStatus.Cancelled => handler!.SendPlayerDigging(1, blockLoc, blockFace, sequenceId++),
+                DiggingStatus.Finished => handler!.SendPlayerDigging(2, blockLoc, blockFace, sequenceId++),
+                _ => false
+            };
         }
 
         /// <summary>
@@ -2605,7 +2599,10 @@ namespace CraftSharp
         /// <param name="stage">Destroy stage, maximum 255</param>
         public void OnBlockBreakAnimation(int entityId, BlockLoc blockLoc, byte stage)
         {
-            // TODO
+            var block = ChunkRenderManager.GetBlock(blockLoc);
+            var status = stage < 9 ? DiggingStatus.Started : DiggingStatus.Finished;
+
+            EventManager.Instance.BroadcastOnUnityThread<ToolInteractionEvent>(new(entityId, block, blockLoc, status, stage / 9.0f));
         }
 
         /// <summary>

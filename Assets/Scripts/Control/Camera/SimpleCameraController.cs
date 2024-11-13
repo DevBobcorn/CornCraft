@@ -85,6 +85,15 @@ namespace CraftSharp.Control
                 _framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
                 _framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
             }
+
+            if (Mouse.current.leftButton.isPressed)
+            {
+                ToggleAimingCamera(true);
+            }
+            else if (Mouse.current.leftButton.wasReleasedThisFrame)
+            {
+                ToggleAimingCamera(false);
+            }
         }
 
         public override void SetTarget(Transform target)

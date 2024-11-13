@@ -1,12 +1,12 @@
-#nullable enable
+﻿#nullable enable
 
 namespace CraftSharp.Event
 {
-    public record InteractionRemoveEvent : BaseEvent
+    public record ViewInteractionRemoveEvent : BaseEvent
     {
         public int InteractionId { get; }
 
-        public InteractionRemoveEvent(int id)
+        public ViewInteractionRemoveEvent(int id)
         {
             InteractionId = id;
         }
