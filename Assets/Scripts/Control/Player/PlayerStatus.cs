@@ -83,6 +83,7 @@ namespace CraftSharp.Control
         public float BarrierDistance   = 0F;
         public float WallDistance      = 0F;
 
+        public float UserInputYaw     = 0F;
         public float TargetVisualYaw  = 0F;
         public float CurrentVisualYaw = 0F;
 

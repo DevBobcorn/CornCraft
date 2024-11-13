@@ -27,8 +27,7 @@ namespace CraftSharp.Control
             if (attackStatus.StageTime < rangedAttack.SetupTime || inputData.Attack.ChargedAttack.IsPressed())
             {
                 // Align player orientation with camera view (which is set as the target value)
-                info.CurrentVisualYaw = Mathf.MoveTowardsAngle(Mathf.LerpAngle(info.CurrentVisualYaw,
-                            info.TargetVisualYaw, 0.2F), info.TargetVisualYaw, ability.TurnSpeed * interval);
+                info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, 10F * interval);
 
                 // Update moving status
                 bool prevMoving = info.Moving;
@@ -45,7 +44,7 @@ namespace CraftSharp.Control
                 Vector3 moveVelocity;
 
                 // Use target orientation to calculate actual movement direction, taking ground shape into consideration
-                if (info.Moving)
+                if (info.Moving && info.UserInputYaw is > -30 and < 30) // If input direction is roughly forward
                 {
                     moveVelocity = motor.GetDirectionTangentToSurface(player.GetTargetOrientation() * Vector3.forward, motor.GroundingStatus.GroundNormal) * moveSpeed;
                 }

@@ -595,6 +595,7 @@ namespace CraftSharp.Control
             if (horInput != Vector2.zero)
             {
                 var userInputYaw = GetYawFromVector2(horInput);
+                status.UserInputYaw = userInputYaw;
                 status.TargetVisualYaw = m_CameraController!.GetYaw() + userInputYaw;
             }
 
