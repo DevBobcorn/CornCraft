@@ -312,7 +312,7 @@ namespace CraftSharp.Control
 
         void Update()
         {
-            if (cameraController != null && cameraController.IsAiming)
+            if (cameraController != null && cameraController.IsAimingOrLocked)
             {
                 UpdateBlockSelection(cameraController.GetPointerRay());
 

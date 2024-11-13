@@ -23,8 +23,6 @@ namespace CraftSharp.Control
         protected CameraInfo cameraInfo = new();
         public Camera RenderCamera => renderCamera;
 
-        private bool zoomDisabled = false;
-
         public void SetCameras(Camera mainCamera, Camera spriteCamera)
         {
             renderCamera = mainCamera;
@@ -66,7 +64,15 @@ namespace CraftSharp.Control
 
         // Flag variables
         protected bool initialized = false;
-        public bool IsAiming { get; protected set; } = false;
+        public bool IsAiming { get; private set; } = false;
+        public bool AimingLocked { get; private set; } = false;
+
+        private bool zoomDisabled = false;
+
+        public bool IsAimingOrLocked
+        {
+            get => IsAiming || AimingLocked;
+        }
 
         public virtual Ray? GetPointerRay()
         {
@@ -89,10 +95,50 @@ namespace CraftSharp.Control
         /// </summary>
         public abstract void TeleportByDelta(Vector3 posDelta);
 
-        public virtual void ToggleAimingCamera(bool enable)
+        protected virtual void EnableAimingCamera()
         {
-            EnsureInitialized();
+
+        }
+
+        protected virtual void DisableAimingCamera()
+        {
+
+        }
+
+        public void UseAimingCamera(bool enable)
+        {
+            var wasAimingOrLocked = IsAimingOrLocked;
             IsAiming = enable;
+
+            if (wasAimingOrLocked != IsAimingOrLocked)
+            {
+                if (IsAimingOrLocked)
+                {
+                    EnableAimingCamera();
+                }
+                else
+                {
+                    DisableAimingCamera();
+                }
+            }
+        }
+
+        public void UseAimingLock(bool enable)
+        {
+            var wasAimingOrLocked = IsAimingOrLocked;
+            AimingLocked = enable;
+
+            if (wasAimingOrLocked != IsAimingOrLocked)
+            {
+                if (IsAimingOrLocked)
+                {
+                    EnableAimingCamera();
+                }
+                else
+                {
+                    DisableAimingCamera();
+                }
+            }
         }
 
         public virtual Vector3 GetTargetViewportPos(Vector3 offset)
@@ -128,7 +174,7 @@ namespace CraftSharp.Control
 
         public virtual string GetDebugInfo()
         {
-            return $"Aiming: {IsAiming}\nCamYaw: {GetYaw()}";
+            return $"Aiming: {IsAimingOrLocked}\nCamYaw: {GetYaw()}";
         }
     }
 }

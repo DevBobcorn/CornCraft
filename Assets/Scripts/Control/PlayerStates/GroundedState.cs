@@ -287,6 +287,7 @@ namespace CraftSharp.Control
 
         private Action<InputAction.CallbackContext>? chargedAttackCallback;
         private Action<InputAction.CallbackContext>? normalAttackCallback;
+        private Action<InputAction.CallbackContext>? toggleAimingLockCallback;
         private Action<InputAction.CallbackContext>? jumpRequestCallback;
         private Action<InputAction.CallbackContext>? walkToggleRequestCallback;
         private Action<InputAction.CallbackContext>? sprintRequestCallback;
@@ -310,6 +311,11 @@ namespace CraftSharp.Control
             player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>
             {
                 player.TryStartNormalAttack();
+            };
+
+            player.Actions.Attack.ToggleAimingLock.performed += toggleAimingLockCallback = (context) =>
+            {
+                player.ToggleAimingLock();
             };
 
             player.Actions.Gameplay.Jump.performed += jumpRequestCallback = (context) =>
@@ -360,8 +366,10 @@ namespace CraftSharp.Control
             // Unregister input action events
             player.Actions.Attack.ChargedAttack.performed -= chargedAttackCallback;
             player.Actions.Attack.NormalAttack.performed -= normalAttackCallback;
+            player.Actions.Attack.ToggleAimingLock.performed -= toggleAimingLockCallback;
             player.Actions.Gameplay.Jump.performed -= jumpRequestCallback;
             player.Actions.Gameplay.WalkToggle.performed -= walkToggleRequestCallback;
+            player.Actions.Gameplay.Sprint.performed -= sprintRequestCallback;
 
             // Ungrounded, go to falling state
             if (nextState == PlayerStates.AIRBORNE && !info.Grounded && !_jumpConfirmed)

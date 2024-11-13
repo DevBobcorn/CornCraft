@@ -26,9 +26,6 @@ namespace CraftSharp.Control
             // Stay in this state if attack button is still pressed or the initiation phase is not yet complete
             if (attackStatus.StageTime < rangedAttack.SetupTime || inputData.Attack.ChargedAttack.IsPressed())
             {
-                // Align player orientation with camera view (which is set as the target value)
-                info.CurrentVisualYaw = Mathf.LerpAngle(info.CurrentVisualYaw, info.TargetVisualYaw, 10F * interval);
-
                 // Update moving status
                 bool prevMoving = info.Moving;
                 info.Moving = inputData.Gameplay.Movement.IsPressed();
@@ -44,7 +41,7 @@ namespace CraftSharp.Control
                 Vector3 moveVelocity;
 
                 // Use target orientation to calculate actual movement direction, taking ground shape into consideration
-                if (info.Moving && info.UserInputYaw is > -30 and < 30) // If input direction is roughly forward
+                if (info.Moving)
                 {
                     moveVelocity = motor.GetDirectionTangentToSurface(player.GetTargetOrientation() * Vector3.forward, motor.GroundingStatus.GroundNormal) * moveSpeed;
                 }
@@ -116,7 +113,7 @@ namespace CraftSharp.Control
 
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInOffhand);
 
-            player.StartAiming();
+            player.UseAimingCamera(true);
         }
 
         public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
@@ -128,7 +125,7 @@ namespace CraftSharp.Control
 
             player.ChangeItemState(PlayerController.CurrentItemState.Mount);
 
-            player.StopAiming();
+            player.UseAimingCamera(false);
         }
 
         public override string ToString() => "RangedAim";

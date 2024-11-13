@@ -57,7 +57,7 @@ namespace CraftSharp.Control
             spriteRenderCamera!.fieldOfView = fov;
 
             // Aiming is not enabled by default
-            ToggleAimingCamera(false);
+            virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
         }
 
         void Update()
@@ -125,27 +125,26 @@ namespace CraftSharp.Control
             return base.GetTargetViewportPos(offset);
         }
 
-        public override void ToggleAimingCamera(bool enable)
+        protected override void EnableAimingCamera()
         {
             EnsureInitialized();
-            IsAiming = enable;
 
-            if (enable)
-            {
-                _aimingPOV!.m_HorizontalAxis.Value = _followPOV!.m_HorizontalAxis.Value;
-                _aimingPOV!.m_VerticalAxis.Value = _followPOV!.m_VerticalAxis.Value;
+            _aimingPOV!.m_HorizontalAxis.Value = _followPOV!.m_HorizontalAxis.Value;
+            _aimingPOV!.m_VerticalAxis.Value = _followPOV!.m_VerticalAxis.Value;
 
-                virtualCameraAim!.MoveToTopOfPrioritySubqueue();
-                EventManager.Instance.Broadcast(new CameraAimingEvent(true));
-            }
-            else
-            {
-                _followPOV!.m_HorizontalAxis.Value = _aimingPOV!.m_HorizontalAxis.Value;
-                _followPOV!.m_VerticalAxis.Value = _aimingPOV!.m_VerticalAxis.Value;
+            virtualCameraAim!.MoveToTopOfPrioritySubqueue();
+            EventManager.Instance.Broadcast(new CameraAimingEvent(true));
+        }
 
-                virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
-                EventManager.Instance.Broadcast(new CameraAimingEvent(false));
-            }
+        protected override void DisableAimingCamera()
+        {
+            EnsureInitialized();
+
+            _followPOV!.m_HorizontalAxis.Value = _aimingPOV!.m_HorizontalAxis.Value;
+            _followPOV!.m_VerticalAxis.Value = _aimingPOV!.m_VerticalAxis.Value;
+
+            virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
+            EventManager.Instance.Broadcast(new CameraAimingEvent(false));
         }
 
         public override void SetYaw(float yaw)
@@ -164,7 +163,7 @@ namespace CraftSharp.Control
 
         public override float GetYaw()
         {
-            if (IsAiming)
+            if (IsAimingOrLocked)
             {
                 return _aimingPOV!.m_HorizontalAxis.Value;
             }
@@ -172,6 +171,6 @@ namespace CraftSharp.Control
             return _followPOV!.m_HorizontalAxis.Value;
         }
 
-        private bool IsFixed() => IsAiming;
+        private bool IsFixed() => IsAimingOrLocked;
     }
 }

@@ -54,7 +54,7 @@
                     "name": "WalkToggle",
                     "type": "Button",
                     "id": "dcc660b9-db49-4350-a3aa-27dbb29a5426",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -181,7 +181,7 @@
                     "name": "Charged Attack",
                     "type": "Button",
                     "id": "d21ca125-d9bd-458e-878a-dfae28aeff81",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -190,10 +190,19 @@
                     "name": "Normal Attack",
                     "type": "Button",
                     "id": "77b7b4f5-a482-448b-88d4-4cb1a80d1fe7",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Toggle Aiming Lock",
+                    "type": "Button",
+                    "id": "1474cae9-3f49-4ce7-9765-41ca4b5b0f9b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -216,6 +225,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Normal Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "172370bb-c7a4-4cff-85d7-890bef1cdc1b",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Toggle Aiming Lock",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -540,22 +540,36 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public void StartAiming()
+        public void UseAimingCamera(bool enable)
         {
             if (m_CameraController != null)
             {
                 // Align target visual yaw with camera, immediately
-                Status!.TargetVisualYaw = m_CameraController.GetYaw();
+                if (enable) Status!.TargetVisualYaw = m_CameraController.GetYaw();
 
-                m_CameraController.ToggleAimingCamera(true);
+                m_CameraController.UseAimingCamera(enable);
             }
         }
 
-        public void StopAiming()
+        public void UseAimingLock(bool enable)
         {
             if (m_CameraController != null)
             {
-                m_CameraController.ToggleAimingCamera(false);
+                // Align target visual yaw with camera, immediately
+                if (enable) Status!.TargetVisualYaw = m_CameraController.GetYaw();
+
+                m_CameraController.UseAimingLock(enable);
+            }
+        }
+
+        public void ToggleAimingLock()
+        {
+            if (m_CameraController != null)
+            {
+                // Align target visual yaw with camera, immediately
+                if (!m_CameraController.AimingLocked) Status!.TargetVisualYaw = m_CameraController.GetYaw();
+
+                m_CameraController.UseAimingLock(!m_CameraController.AimingLocked);
             }
         }
 
@@ -595,14 +609,21 @@ namespace CraftSharp.Control
             if (horInput != Vector2.zero)
             {
                 var userInputYaw = GetYawFromVector2(horInput);
-                status.UserInputYaw = userInputYaw;
                 status.TargetVisualYaw = m_CameraController!.GetYaw() + userInputYaw;
             }
 
             // Update target visual yaw if aiming
-            if (m_CameraController != null && m_CameraController.IsAiming)
+            if (m_CameraController != null && m_CameraController.IsAimingOrLocked)
             {
                 status.TargetVisualYaw = m_CameraController!.GetYaw();
+
+                // Align player orientation with camera view (which is set as the target value)
+                status.CurrentVisualYaw = Mathf.LerpAngle(status.CurrentVisualYaw, status.TargetVisualYaw, 10F * deltaTime);
+
+                if (horInput != Vector2.zero && GetYawFromVector2(horInput) is not (> -30 and < 30)) // If input direction is roughly forward
+                {
+                    m_PlayerActions.Gameplay.Movement.Reset();
+                }
             }
 
             // Update player status (in water, grounded, etc)
@@ -764,7 +785,7 @@ namespace CraftSharp.Control
                 itemActionInfo += " (edible)";
             }
 
-            return $"ActionType: <color=#39C5BB>{currentActionType}{itemActionInfo}</color>\nState: {_currentState}\n{statusInfo}";
+            return $"ActionType: {currentActionType}{itemActionInfo}\nState: {_currentState}\n{statusInfo}";
         }
 
         // Misc methods from Kinematic Character Controller

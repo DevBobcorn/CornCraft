@@ -79,11 +79,9 @@ namespace CraftSharp.Control
         public float CenterDownDist = 0F;
         public float BarrierHeight  = 0F;
         public float LiquidDist     = 0F;
-        public float BarrierYawAngle   = 0F;
-        public float BarrierDistance   = 0F;
-        public float WallDistance      = 0F;
-
-        public float UserInputYaw     = 0F;
+        public float BarrierYawAngle  = 0F;
+        public float BarrierDistance  = 0F;
+        public float WallDistance     = 0F;
         public float TargetVisualYaw  = 0F;
         public float CurrentVisualYaw = 0F;
 

@@ -78,7 +78,7 @@ namespace CraftSharp.Control
                     ""name"": ""WalkToggle"",
                     ""type"": ""Button"",
                     ""id"": ""dcc660b9-db49-4350-a3aa-27dbb29a5426"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -205,7 +205,7 @@ namespace CraftSharp.Control
                     ""name"": ""Charged Attack"",
                     ""type"": ""Button"",
                     ""id"": ""d21ca125-d9bd-458e-878a-dfae28aeff81"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -214,10 +214,19 @@ namespace CraftSharp.Control
                     ""name"": ""Normal Attack"",
                     ""type"": ""Button"",
                     ""id"": ""77b7b4f5-a482-448b-88d4-4cb1a80d1fe7"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Toggle Aiming Lock"",
+                    ""type"": ""Button"",
+                    ""id"": ""1474cae9-3f49-4ce7-9765-41ca4b5b0f9b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -242,6 +251,17 @@ namespace CraftSharp.Control
                     ""action"": ""Normal Attack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""172370bb-c7a4-4cff-85d7-890bef1cdc1b"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Toggle Aiming Lock"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -260,6 +280,7 @@ namespace CraftSharp.Control
             m_Attack = asset.FindActionMap("Attack", throwIfNotFound: true);
             m_Attack_ChargedAttack = m_Attack.FindAction("Charged Attack", throwIfNotFound: true);
             m_Attack_NormalAttack = m_Attack.FindAction("Normal Attack", throwIfNotFound: true);
+            m_Attack_ToggleAimingLock = m_Attack.FindAction("Toggle Aiming Lock", throwIfNotFound: true);
         }
 
         ~@PlayerActions()
@@ -415,12 +436,14 @@ namespace CraftSharp.Control
         private List<IAttackActions> m_AttackActionsCallbackInterfaces = new List<IAttackActions>();
         private readonly InputAction m_Attack_ChargedAttack;
         private readonly InputAction m_Attack_NormalAttack;
+        private readonly InputAction m_Attack_ToggleAimingLock;
         public struct AttackActions
         {
             private @PlayerActions m_Wrapper;
             public AttackActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
             public InputAction @ChargedAttack => m_Wrapper.m_Attack_ChargedAttack;
             public InputAction @NormalAttack => m_Wrapper.m_Attack_NormalAttack;
+            public InputAction @ToggleAimingLock => m_Wrapper.m_Attack_ToggleAimingLock;
             public InputActionMap Get() { return m_Wrapper.m_Attack; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -436,6 +459,9 @@ namespace CraftSharp.Control
                 @NormalAttack.started += instance.OnNormalAttack;
                 @NormalAttack.performed += instance.OnNormalAttack;
                 @NormalAttack.canceled += instance.OnNormalAttack;
+                @ToggleAimingLock.started += instance.OnToggleAimingLock;
+                @ToggleAimingLock.performed += instance.OnToggleAimingLock;
+                @ToggleAimingLock.canceled += instance.OnToggleAimingLock;
             }
 
             private void UnregisterCallbacks(IAttackActions instance)
@@ -446,6 +472,9 @@ namespace CraftSharp.Control
                 @NormalAttack.started -= instance.OnNormalAttack;
                 @NormalAttack.performed -= instance.OnNormalAttack;
                 @NormalAttack.canceled -= instance.OnNormalAttack;
+                @ToggleAimingLock.started -= instance.OnToggleAimingLock;
+                @ToggleAimingLock.performed -= instance.OnToggleAimingLock;
+                @ToggleAimingLock.canceled -= instance.OnToggleAimingLock;
             }
 
             public void RemoveCallbacks(IAttackActions instance)
@@ -476,6 +505,7 @@ namespace CraftSharp.Control
         {
             void OnChargedAttack(InputAction.CallbackContext context);
             void OnNormalAttack(InputAction.CallbackContext context);
+            void OnToggleAimingLock(InputAction.CallbackContext context);
         }
     }
 }
