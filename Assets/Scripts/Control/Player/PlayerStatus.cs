@@ -61,6 +61,9 @@ namespace CraftSharp.Control
         /// </summary>
         public float GravityScale = 0F;
 
+        /// <summary>
+        /// Attacking or digging (which is "attacking" a block)
+        /// </summary>
         public bool Attacking = false;
         public AttackStatus AttackStatus = new();
 

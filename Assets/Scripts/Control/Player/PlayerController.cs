@@ -488,27 +488,20 @@ namespace CraftSharp.Control
             _currentState.OnEnter(prevState, m_StatusUpdater!.Status, Motor, this);
         }
 
-        public void AttachVisualFX(GameObject fxObj)
+        public void StartDigging()
         {
-            if (m_PlayerRender != null)
-            {
-                fxObj.transform.SetParent(m_PlayerRender.VisualTransform);
-            }
-            else
-            {
-                Debug.LogWarning("Trying to attach vfx object to empty player render!");
-            }
+            ChangeToState(PlayerStates.DIGGING_AIM);
         }
 
-        public bool TryStartNormalAttack(IPlayerState attackState, PlayerStagedSkill skillData)
+        public bool TryStartNormalAttack()
         {
             if (Status!.AttackStatus.AttackCooldown <= 0F)
             {
                 // Specify attack data to use
-                Status.AttackStatus.CurrentStagedAttack = skillData;
+                Status.AttackStatus.CurrentStagedAttack = AbilityConfig.MeleeSwordAttack_Staged;
 
                 // Update player state
-                ChangeToState(attackState);
+                ChangeToState(PlayerStates.MELEE);
                 
                 return false;
             }
@@ -516,29 +509,34 @@ namespace CraftSharp.Control
             return false;
         }
 
-        public bool TryStartChargedAttack(IPlayerState attackState, PlayerChargedSkill skillData)
+        public bool TryStartChargedAttackOrDigging()
         {
-            if (Status!.AttackStatus.AttackCooldown <= 0F)
+            if (currentActionType == ItemActionType.Sword)
             {
-                if (currentActionType == ItemActionType.Sword)
+                if (Status!.AttackStatus.AttackCooldown <= 0F)
                 {
                     // TODO: Implement
                     return false;
                 }
-                else if (currentActionType == ItemActionType.Bow)
+            }
+            else if (currentActionType == ItemActionType.Bow)
+            {
+                if (Status!.AttackStatus.AttackCooldown <= 0F)
                 {
                     // Specify attack data to use
-                    Status.AttackStatus.CurrentChargedAttack = skillData;
+                    Status.AttackStatus.CurrentChargedAttack = AbilityConfig.RangedBowAttack_Charged;
 
                     // Update player state
-                    ChangeToState(attackState);
+                    ChangeToState(PlayerStates.RANGED_AIM);
 
                     return true;
                 }
-                
-                return false;
             }
-            
+            else // Check digging block
+            {
+                ChangeToState(PlayerStates.DIGGING_AIM);
+            }
+                
             return false;
         }
 
@@ -748,14 +746,12 @@ namespace CraftSharp.Control
 
         public string GetDebugInfo()
         {
-            /*
             string statusInfo;
 
             if (m_StatusUpdater!.Status.Spectating)
                 statusInfo = string.Empty;
             else
                 statusInfo = m_StatusUpdater!.Status.ToString();
-            */
 
             var heldItemEdible = currentItemStack?.ItemType.IsEdible ?? false;
             string itemActionInfo = string.Empty;
@@ -771,7 +767,7 @@ namespace CraftSharp.Control
                 itemActionInfo += " (edible)";
             }
 
-            return $"ActionType:\t{currentActionType}{itemActionInfo}\nState:\t{_currentState}";
+            return $"ActionType:\t{currentActionType}{itemActionInfo}\nState:\t{_currentState}\n{statusInfo}";
         }
 
         // Misc methods from Kinematic Character Controller

@@ -85,15 +85,6 @@ namespace CraftSharp.Control
                 _framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
                 _framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
             }
-
-            if (Mouse.current.leftButton.isPressed)
-            {
-                ToggleAimingCamera(true);
-            }
-            else if (Mouse.current.leftButton.wasReleasedThisFrame)
-            {
-                ToggleAimingCamera(false);
-            }
         }
 
         public override void SetTarget(Transform target)
@@ -146,6 +137,8 @@ namespace CraftSharp.Control
 
                 virtualCameraAim!.MoveToTopOfPrioritySubqueue();
                 EventManager.Instance.Broadcast(new CrosshairEvent(true));
+
+                Debug.Log("Enabled aiming camera");
             }
             else
             {
@@ -166,6 +159,7 @@ namespace CraftSharp.Control
             else
             {
                 _followPOV.m_HorizontalAxis.Value = yaw;
+                _aimingPOV!.m_HorizontalAxis.Value = yaw;
                 _setYawRequest = null;
             }
         }

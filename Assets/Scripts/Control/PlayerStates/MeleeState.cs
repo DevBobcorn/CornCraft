@@ -137,7 +137,7 @@ namespace CraftSharp.Control
             player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
             {
                 // TODO: Get the right data according to weapon type
-                player.TryStartChargedAttack(PlayerStates.RANGED_AIM, player.AbilityConfig.RangedBowAttack_Charged);
+                player.TryStartChargedAttackOrDigging();
             };
 
             player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>

@@ -304,14 +304,12 @@ namespace CraftSharp.Control
             // Register input action events
             player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
             {
-                // TODO: Get the right data according to weapon type
-                player.TryStartChargedAttack(PlayerStates.RANGED_AIM, player.AbilityConfig.RangedBowAttack_Charged);
+                player.TryStartChargedAttackOrDigging();
             };
 
             player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>
             {
-                // TODO: Get the right data according to weapon type
-                player.TryStartNormalAttack(PlayerStates.MELEE, player.AbilityConfig.MeleeSwordAttack_Staged);
+                player.TryStartNormalAttack();
             };
 
             player.Actions.Gameplay.Jump.performed += jumpRequestCallback = (context) =>

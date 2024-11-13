@@ -1,11 +1,14 @@
-#nullable enable
+﻿#nullable enable
 using KinematicCharacterController;
 using UnityEngine;
 
 namespace CraftSharp.Control
 {
-    public class RangedAimState : IPlayerState
+    public class DiggingAimState : IPlayerState
     {
+        private const float DIGGING_SETUP_TIME = 0.5F;
+        private const float DIGGING_IDLE_TIMEEOUT = -0.1F;
+
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             var ability = player.AbilityConfig;
@@ -14,17 +17,9 @@ namespace CraftSharp.Control
             info.Gliding = false;
 
             var attackStatus = info.AttackStatus;
-            var rangedAttack = attackStatus.CurrentChargedAttack;
-
-            if (rangedAttack == null) // Ranged attack data is not assigned, stop it
-            {
-                info.Attacking = false;
-                attackStatus.AttackStage = -1;
-                return;
-            }
 
             // Stay in this state if attack button is still pressed or the initiation phase is not yet complete
-            if (attackStatus.StageTime < rangedAttack.SetupTime || inputData.Attack.ChargedAttack.IsPressed())
+            if (attackStatus.StageTime < DIGGING_SETUP_TIME || inputData.Attack.ChargedAttack.IsPressed())
             {
                 // Update moving status
                 bool prevMoving = info.Moving;
@@ -57,12 +52,12 @@ namespace CraftSharp.Control
                 // Reset cooldown
                 attackStatus.AttackCooldown = 0F;
             }
-            else // Charging state ends
+            else // Digging state ends
             {
                 // Idle timeout
                 attackStatus.AttackCooldown -= interval;
 
-                if (attackStatus.AttackCooldown < rangedAttack.IdleTimeout) // Timed out, exit state
+                if (attackStatus.AttackCooldown < DIGGING_IDLE_TIMEEOUT) // Timed out, exit state
                 {
                     // Attack timed out, exit
                     info.Attacking = false;
@@ -84,32 +79,22 @@ namespace CraftSharp.Control
         {
             if (!info.Attacking)
                 return true;
-            
-            if (info.Spectating || info.Floating || !info.Grounded)
+
+            if (info.Spectating)
                 return true;
-            
+
             return false;
         }
 
         public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
+            // Digging also use this attacking flag
             info.Attacking = true;
 
             var attackStatus = info.AttackStatus;
-            var rangedAttack = attackStatus.CurrentChargedAttack;
-
-            if (rangedAttack == null) // Ranged attack data is not assigned, stop it
-            {
-                info.Attacking = false;
-                attackStatus.AttackStage = -1;
-                return;
-            }
 
             attackStatus.AttackStage = 0;
             attackStatus.StageTime = 0F;
-
-            player.OverrideStateAnimation(rangedAttack.DummyAnimationClip!, rangedAttack.DrawWeapon!);
-            player.StartCrossFadeState(PlayerAbilityConfig.SKILL, 0.01F);
 
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInOffhand);
 
@@ -118,6 +103,7 @@ namespace CraftSharp.Control
 
         public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
+            // Digging also use this attacking flag
             info.Attacking = false;
 
             var attackStatus = info.AttackStatus;
@@ -128,6 +114,6 @@ namespace CraftSharp.Control
             player.StopAiming();
         }
 
-        public override string ToString() => "RangedAim";
+        public override string ToString() => "DiggingAim";
     }
 }
