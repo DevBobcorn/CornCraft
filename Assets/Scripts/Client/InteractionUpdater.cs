@@ -69,9 +69,9 @@ namespace CraftSharp.Control
         private Action<HeldItemChangeEvent>? heldItemCallback;
         private Action<ToolInteractionEvent>? toolInteractionCallback;
 
-        private Dictionary<BlockLoc, List<InteractionInfo>> blockInteractionInfos = new();
+        private readonly Dictionary<BlockLoc, List<InteractionInfo>> blockInteractionInfos = new();
 
-        private InteractionId interactionId = new();
+        private readonly InteractionId interactionId = new();
 
         private LocalToolInteractionInfo? lastInteractionInfo;
         private Item? currentItem;
@@ -92,7 +92,7 @@ namespace CraftSharp.Control
                     ? viewHit.point - normal * 0.5f
                     : viewHit.point;
 
-                Vector3 unityBlockPos = new Vector3(
+                Vector3 unityBlockPos = new(
                     Mathf.FloorToInt(offseted.x),
                     Mathf.FloorToInt(offseted.y),
                     Mathf.FloorToInt(offseted.z)
@@ -139,7 +139,7 @@ namespace CraftSharp.Control
 
             static bool PointOnCubeSurface(Vector3 point)
             {
-                Vector3 delta = new Vector3(
+                Vector3 delta = new(
                     point.x - Mathf.Floor(point.x),
                     point.y - Mathf.Floor(point.y),
                     point.z - Mathf.Floor(point.z)
@@ -171,7 +171,7 @@ namespace CraftSharp.Control
                 else
                 {
                     // Update the interactions
-                    if (client is null) return;
+                    if (client == null) return;
 
                     foreach (var info in blockInteractionInfos[blockLoc].OfType<ToolInteractionInfo>().ToList())
                     {
@@ -310,6 +310,18 @@ namespace CraftSharp.Control
             EventManager.Instance.Register(toolInteractionCallback);
         }
 
+        private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)
+        {
+            var definition = InteractionManager.INSTANCE.InteractionTable
+                .GetValueOrDefault(block.StateId)?
+                .Get<ToolInteraction>();
+
+            lastInteractionInfo = new LocalToolInteractionInfo(interactionId.AllocateID(), blockLoc, direction,
+                currentItem, block.State.Hardness, status.Floating, status.Grounded, definition);
+
+            AddBlockInteraction(blockLoc, lastInteractionInfo);
+        }
+
         void Update()
         {
             if (cameraController != null && cameraController.IsAimingOrLocked)
@@ -317,7 +329,7 @@ namespace CraftSharp.Control
                 UpdateBlockSelection(cameraController.GetPointerRay());
 
                 if (TargetBlockLoc is not null && TargetDirection is not null &&
-                    playerController is not null && client is not null)
+                    playerController != null && client != null && playerController.CurrentState is DiggingAimState)
                 {
                     var info = GetBlockInteraction<LocalToolInteractionInfo>(TargetBlockLoc.Value)?.FirstOrDefault();
                     var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
@@ -356,20 +368,6 @@ namespace CraftSharp.Control
 
                 if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
                     blockSelectionFrame.SetActive(false);
-            }
-
-            return;
-
-            void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)
-            {
-                var definition = InteractionManager.INSTANCE.InteractionTable
-                    .GetValueOrDefault(block.StateId)?
-                    .Get<ToolInteraction>();
-
-                lastInteractionInfo = new LocalToolInteractionInfo(interactionId.AllocateID(), blockLoc, direction,
-                    currentItem, block.State.Hardness, status.Floating, status.Grounded, definition);
-
-                AddBlockInteraction(blockLoc, lastInteractionInfo);
             }
         }
 

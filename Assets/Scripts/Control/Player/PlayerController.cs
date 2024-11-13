@@ -75,6 +75,8 @@ namespace CraftSharp.Control
         private IPlayerState? _currentState = PlayerStates.GROUNDED;
         private IPlayerState? _pendingState = null;
 
+        public IPlayerState? CurrentState => _currentState;
+
         #nullable disable
 
         // Values for sending over to the server. Should only be set

@@ -1,8 +1,8 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Cinemachine;
 
 using CraftSharp.Event;
-using UnityEngine.InputSystem;
 
 namespace CraftSharp.Control
 {
@@ -58,6 +58,7 @@ namespace CraftSharp.Control
 
             // Aiming is not enabled by default
             virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
+            EventManager.Instance.Broadcast(new CameraAimingEvent(false));
         }
 
         void Update()
@@ -85,6 +86,28 @@ namespace CraftSharp.Control
                 _framingTransposer!.m_TrackedObjectOffset = new(0F, Mathf.Max(cameraYOffsetClip, Mathf.Lerp(cameraYOffsetNear, cameraYOffsetFar, cameraInfo.CurrentScale)), 0F);
                 _framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
             }
+        }
+
+        protected override void EnableAimingCamera()
+        {
+            EnsureInitialized();
+
+            _aimingPOV!.m_HorizontalAxis.Value = _followPOV!.m_HorizontalAxis.Value;
+            _aimingPOV!.m_VerticalAxis.Value = _followPOV!.m_VerticalAxis.Value;
+
+            virtualCameraAim!.MoveToTopOfPrioritySubqueue();
+            EventManager.Instance.Broadcast(new CameraAimingEvent(true));
+        }
+
+        protected override void DisableAimingCamera()
+        {
+            EnsureInitialized();
+
+            _followPOV!.m_HorizontalAxis.Value = _aimingPOV!.m_HorizontalAxis.Value;
+            _followPOV!.m_VerticalAxis.Value = _aimingPOV!.m_VerticalAxis.Value;
+
+            virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
+            EventManager.Instance.Broadcast(new CameraAimingEvent(false));
         }
 
         public override void SetTarget(Transform target)
@@ -123,28 +146,6 @@ namespace CraftSharp.Control
             }
             
             return base.GetTargetViewportPos(offset);
-        }
-
-        protected override void EnableAimingCamera()
-        {
-            EnsureInitialized();
-
-            _aimingPOV!.m_HorizontalAxis.Value = _followPOV!.m_HorizontalAxis.Value;
-            _aimingPOV!.m_VerticalAxis.Value = _followPOV!.m_VerticalAxis.Value;
-
-            virtualCameraAim!.MoveToTopOfPrioritySubqueue();
-            EventManager.Instance.Broadcast(new CameraAimingEvent(true));
-        }
-
-        protected override void DisableAimingCamera()
-        {
-            EnsureInitialized();
-
-            _followPOV!.m_HorizontalAxis.Value = _aimingPOV!.m_HorizontalAxis.Value;
-            _followPOV!.m_VerticalAxis.Value = _aimingPOV!.m_VerticalAxis.Value;
-
-            virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
-            EventManager.Instance.Broadcast(new CameraAimingEvent(false));
         }
 
         public override void SetYaw(float yaw)

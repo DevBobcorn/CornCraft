@@ -564,7 +564,7 @@ namespace CraftSharp
                 {
                     var targetBlockLoc = interactionUpdater.TargetBlockLoc.Value;
                     var targetBlock = ChunkRenderManager.GetBlock(targetBlockLoc);
-                    targetInfo = $"Target BlockLoc:\t{targetBlockLoc}\nTarget Block:\t{targetBlock.State}";
+                    targetInfo = $"Target: {targetBlockLoc} {targetBlock.State}";
                 }
                 else
                 {

@@ -212,6 +212,11 @@ namespace CraftSharp.UI
                 {
                     modePanelAnimator.SetBool(SHOW_HASH, false);
                     modePanelShown = false;
+                    // Show crosshair (if should be shown)
+                    if (game.CameraController != null && game.CameraController.IsAimingOrLocked)
+                    {
+                        crosshairAnimator.SetBool(SHOW_HASH, true);
+                    }
 
                     if (selectedMode != (int) game.GameMode) // Commit switch request
                     {

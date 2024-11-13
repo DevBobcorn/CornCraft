@@ -1,6 +1,8 @@
 using UnityEngine;
-using Cinemachine;
 using UnityEngine.InputSystem;
+using Cinemachine;
+
+using CraftSharp.Event;
 
 namespace CraftSharp.Control
 {
@@ -49,6 +51,7 @@ namespace CraftSharp.Control
 
             // Aiming is not enabled by default
             UseAimingCamera(false);
+            EventManager.Instance.Broadcast(new CameraAimingEvent(false));
         }
 
         void Update()
@@ -70,6 +73,20 @@ namespace CraftSharp.Control
                 cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, Time.deltaTime * zoomSmoothFactor);
                 _framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
             }
+        }
+
+        protected override void EnableAimingCamera()
+        {
+            EnsureInitialized();
+
+            EventManager.Instance.Broadcast(new CameraAimingEvent(true));
+        }
+
+        protected override void DisableAimingCamera()
+        {
+            EnsureInitialized();
+
+            EventManager.Instance.Broadcast(new CameraAimingEvent(false));
         }
 
         public override void SetTarget(Transform target)

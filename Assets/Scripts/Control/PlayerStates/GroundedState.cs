@@ -382,7 +382,7 @@ namespace CraftSharp.Control
             _jumpConfirmed = false;
 
             // Disable aiming lock if next state is not applicable
-            if (nextState is not DiggingAimState || nextState is not RangedAimState)
+            if (nextState is not DiggingAimState && nextState is not RangedAimState && nextState is not ForceMoveState)
             {
                 player.UseAimingLock(false);
             }
