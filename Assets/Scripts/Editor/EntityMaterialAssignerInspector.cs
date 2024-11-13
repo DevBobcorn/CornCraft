@@ -12,9 +12,6 @@ namespace CraftSharp.Rendering.Editor
         {
             var assigner = target as EntityMaterialAssigner;
 
-            // Draw all material groups
-            //EditorGUILayout.LabelField("MEOW");
-
             // Draw all renderers
             if (GUILayout.Button("Initialize"))
             {

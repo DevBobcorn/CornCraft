@@ -5,7 +5,7 @@ namespace DMTimeArea
 {
     public class ResManager
     {
-        public static readonly string ASSET_PATH = "Assets/Scripts/Control/EditorResources";
+        public static readonly string ASSET_PATH = "Assets/Scripts/Editor/EditorResources";
 
         public static GUIContent playContent = EditorGUIUtility.IconContent("Animation.Play", "|Play the Current active Shot.");
         public static GUIContent recordContent = EditorGUIUtility.IconContent("Animation.Record", "|Enable/disable keyframe recording mode.");
