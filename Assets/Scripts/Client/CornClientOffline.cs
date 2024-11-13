@@ -96,7 +96,7 @@ namespace CraftSharp
 
             if (!EntityTypePalette.INSTANCE.CheckId(EntityType.PLAYER_ID))
             {
-                // Entity type not present, fake it
+                // Entity type not present, create a dummy one for player
                 EntityTypePalette.INSTANCE.InjectEntityType(2077, EntityType.PLAYER_ID);
             }
 

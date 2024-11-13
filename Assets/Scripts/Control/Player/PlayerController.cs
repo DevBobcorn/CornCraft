@@ -598,6 +598,12 @@ namespace CraftSharp.Control
                 status.TargetVisualYaw = m_CameraController!.GetYaw() + userInputYaw;
             }
 
+            // Update target visual yaw if aiming
+            if (m_CameraController != null && m_CameraController.IsAiming)
+            {
+                status.TargetVisualYaw = m_CameraController!.GetYaw();
+            }
+
             // Update player status (in water, grounded, etc)
             UpdatePlayerStatus();
 
@@ -646,7 +652,6 @@ namespace CraftSharp.Control
                 EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, m_AbilityConfig!.MaxStamina));
             }
             
-
             // Handle root motion
             if (UseRootMotion)
             {
@@ -678,15 +683,6 @@ namespace CraftSharp.Control
                 // Update client player data
                 MCYaw2Send = Status!.CurrentVisualYaw - 90F; // Coordinate system conversion
                 Pitch2Send = 0F;
-            }
-
-            if (m_CameraController != null)
-            {
-                if (m_CameraController.IsAiming)
-                {
-                    // Align target visual yaw with camera, immediately
-                    Status!.TargetVisualYaw = m_CameraController.GetYaw();
-                }
             }
 
             // Reset root motion deltas
@@ -767,7 +763,7 @@ namespace CraftSharp.Control
                 itemActionInfo += " (edible)";
             }
 
-            return $"ActionType:\t{currentActionType}{itemActionInfo}\nState:\t{_currentState}\n{statusInfo}";
+            return $"ActionType: <color=#39C5BB>{currentActionType}{itemActionInfo}</color>\nState: {_currentState}\n{statusInfo}";
         }
 
         // Misc methods from Kinematic Character Controller

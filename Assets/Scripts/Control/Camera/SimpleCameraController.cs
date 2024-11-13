@@ -136,9 +136,7 @@ namespace CraftSharp.Control
                 _aimingPOV!.m_VerticalAxis.Value = _followPOV!.m_VerticalAxis.Value;
 
                 virtualCameraAim!.MoveToTopOfPrioritySubqueue();
-                EventManager.Instance.Broadcast(new CrosshairEvent(true));
-
-                Debug.Log("Enabled aiming camera");
+                EventManager.Instance.Broadcast(new CameraAimingEvent(true));
             }
             else
             {
@@ -146,7 +144,7 @@ namespace CraftSharp.Control
                 _followPOV!.m_VerticalAxis.Value = _aimingPOV!.m_VerticalAxis.Value;
 
                 virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
-                EventManager.Instance.Broadcast(new CrosshairEvent(false));
+                EventManager.Instance.Broadcast(new CameraAimingEvent(false));
             }
         }
 

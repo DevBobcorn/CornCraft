@@ -76,7 +76,7 @@ namespace CraftSharp.UI
             // Initialize controls...
             staminaBarAnimator = staminaBar.GetComponent<Animator>();
 
-            crosshairCallback = (e) => crosshairAnimator.SetBool(SHOW_HASH, e.Show);
+            cameraAimCallback = (e) => crosshairAnimator.SetBool(SHOW_HASH, e.Aiming);
 
             gameModeCallback = (e) => {
                 var showStatus = e.GameMode switch {
@@ -116,7 +116,7 @@ namespace CraftSharp.UI
                 }
             };
 
-            EventManager.Instance.Register(crosshairCallback);
+            EventManager.Instance.Register(cameraAimCallback);
             EventManager.Instance.Register(gameModeCallback);
             EventManager.Instance.Register(healthCallback);
             EventManager.Instance.Register(staminaCallback);
@@ -146,7 +146,7 @@ namespace CraftSharp.UI
 
         #nullable enable
 
-        private Action<CrosshairEvent>?         crosshairCallback;
+        private Action<CameraAimingEvent>?      cameraAimCallback;
         private Action<GameModeUpdateEvent>?    gameModeCallback;
         private Action<HealthUpdateEvent>?      healthCallback;
         private Action<StaminaUpdateEvent>?     staminaCallback;
@@ -155,8 +155,8 @@ namespace CraftSharp.UI
 
         void OnDestroy()
         {
-            if (crosshairCallback is not null)
-                EventManager.Instance.Unregister(crosshairCallback);
+            if (cameraAimCallback is not null)
+                EventManager.Instance.Unregister(cameraAimCallback);
             
             if (gameModeCallback is not null)
                 EventManager.Instance.Unregister(gameModeCallback);
@@ -325,11 +325,8 @@ namespace CraftSharp.UI
             if (game.CameraController != null)
             {
                 // Update stamina bar position
-                var targetPosition = game.UICamera.ViewportToWorldPoint(
+                var newPos = game.UICamera.ViewportToWorldPoint(
                         game.CameraController.GetTargetViewportPos(STAMINA_TARGET_OFFSET));
-
-                var newPos = Vector3.Lerp(
-                        staminaBar.transform.position, targetPosition, Time.deltaTime * 10F);
 
                 // Don't modify z coordinate
                 staminaBar.transform.position = new Vector3(newPos.x, newPos.y, staminaBar.transform.position.z);

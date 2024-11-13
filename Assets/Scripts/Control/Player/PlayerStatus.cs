@@ -90,11 +90,11 @@ namespace CraftSharp.Control
 
         public override string ToString()
         {
-            var moveInfo = $"Moving:\t{Moving}\t{CenterDownDist:0.000}\t{LiquidDist:0.000}\nSprinting:\t{Sprinting}\nYaw:\t{CurrentVisualYaw:0.00} -> {TargetVisualYaw:0.00} ({YawDeltaAbs:0.00})";
-            var envInfo = $"\nBarrier Yaw Angle:\t{BarrierYawAngle:0.00}\tDist:\t{BarrierDistance:0.00} ({WallDistance:0.00})\tHgt:{BarrierHeight:0.00}\nGravity Scale:\t{GravityScale:0.00}";
+            var moveInfo = $"Moving: {Moving} {CenterDownDist:0.000} {LiquidDist:0.000}\nSprinting: {Sprinting}\nYaw: {CurrentVisualYaw:0.00} -> {TargetVisualYaw:0.00} ({YawDeltaAbs:0.00})";
+            var envInfo = $"\nBarrier Yaw Angle: {BarrierYawAngle:0.00} Dist:\t{BarrierDistance:0.00} ({WallDistance:0.00}) Hgt:{BarrierHeight:0.00}\nGravity Scale: {GravityScale:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             
-            return $"InLiquid:\t{InLiquid}\nFloating:\t{Floating}\nGrounded:\t{Grounded}\nClinging:\t{Clinging}\n{envInfo}\n{moveInfo}\n{atkInfo}";
+            return $"InLiquid: {InLiquid}\nFloating: {Floating}\nGrounded: {Grounded}\nClinging: {Clinging}\n{envInfo}\n{moveInfo}\n{atkInfo}";
         }
     }
 }

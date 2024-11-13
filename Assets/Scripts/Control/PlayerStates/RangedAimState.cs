@@ -26,6 +26,10 @@ namespace CraftSharp.Control
             // Stay in this state if attack button is still pressed or the initiation phase is not yet complete
             if (attackStatus.StageTime < rangedAttack.SetupTime || inputData.Attack.ChargedAttack.IsPressed())
             {
+                // Align player orientation with camera view (which is set as the target value)
+                info.CurrentVisualYaw = Mathf.MoveTowardsAngle(Mathf.LerpAngle(info.CurrentVisualYaw,
+                            info.TargetVisualYaw, 0.2F), info.TargetVisualYaw, ability.TurnSpeed * interval);
+
                 // Update moving status
                 bool prevMoving = info.Moving;
                 info.Moving = inputData.Gameplay.Movement.IsPressed();
