@@ -34,6 +34,7 @@ Key                                                       | Action
 <kbd>Left Ctrl</kbd>                                      | Toggle Walk/Rush Mode
 <kbd>Mouse Scroll</kbd>                                   | Select Hotbar Slot
 <kbd>F</kbd>                                              | Swap Items on Hands
+<kbd>R</kbd>                                              | Toggle Camera Focus Lock (In grounded state)
 <kbd>X</kbd>                                              | Perform Interaction
 <kbd>F3</kbd>                                             | Toggle Debug Info
 <kbd>F3</kbd> + <kbd>F4</kbd> (Hold)                      | Show Game Mode Switch
