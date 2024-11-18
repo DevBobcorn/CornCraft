@@ -13,14 +13,13 @@ namespace CraftSharp.Rendering
     {
         private static readonly float3 ITEM_CENTER = new(-0.5F, -0.5F, -0.5F);
 
-        private static readonly Dictionary<ResourceLocation,
-                (Mesh mesh, Material material, Dictionary<DisplayPosition, float3x3> transforms)> DEFAULT_MESH_CACHE = new();
+        private static readonly Dictionary<ResourceLocation, Mesh> DEFAULT_MESH_CACHE = new();
         
         private static readonly List<Mesh> UNCACHED_ITEM_MESHES = new();
 
         public static void ClearMeshCache()
         {
-            foreach ((var mesh, _, _) in DEFAULT_MESH_CACHE.Values)
+            foreach (var mesh in DEFAULT_MESH_CACHE.Values)
             {
                 Object.Destroy(mesh);
             }
@@ -42,7 +41,7 @@ namespace CraftSharp.Rendering
         /// Build item mesh, material and transforms from given item stack.
         /// </summary>
         public static (Mesh mesh, Material material, Dictionary<DisplayPosition, float3x3> transforms)?
-                BuildItem(ItemStack? itemStack)
+                BuildItem(ItemStack? itemStack, bool useInventoryMaterial)
         {
             if (itemStack is null) return null;
 
@@ -52,15 +51,18 @@ namespace CraftSharp.Rendering
             // Use mesh cache if possible
             var shouldUseCache = itemStack.NBT is null || NBTDontAffectMesh(itemStack.NBT);
 
-            if (shouldUseCache && DEFAULT_MESH_CACHE.ContainsKey(itemId))
-            {
-                return DEFAULT_MESH_CACHE[itemId];
-            }
-
             var itemNumId = ItemPalette.INSTANCE.GetNumIdById(itemId);
             packManager.ItemModelTable.TryGetValue(itemNumId, out ItemModel? itemModel);
 
             if (itemModel is null) return null;
+
+            var material = CornApp.CurrentClient!.ChunkMaterialManager
+                .GetAtlasMaterial(itemModel.RenderType, useInventoryMaterial);
+
+            if (shouldUseCache && DEFAULT_MESH_CACHE.ContainsKey(itemId))
+            {
+                return (DEFAULT_MESH_CACHE[itemId], material, itemModel.Geometry.DisplayTransforms);
+            }
 
             // Make and set mesh...
             float3[] colors;
@@ -76,12 +78,11 @@ namespace CraftSharp.Rendering
 
             var mesh = BuildItemMesh(itemGeometry, colors);
 
-            var material = CornApp.CurrentClient!.ChunkMaterialManager.GetAtlasMaterial(itemModel.RenderType);
-
             // Store in cache if applicable
             if (shouldUseCache)
             {
-                return DEFAULT_MESH_CACHE[itemId] = (mesh, material, itemGeometry.DisplayTransforms);
+                DEFAULT_MESH_CACHE[itemId] = mesh;
+                return (mesh, material, itemGeometry.DisplayTransforms);
             }
             else
             {

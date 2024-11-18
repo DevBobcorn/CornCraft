@@ -289,7 +289,7 @@ namespace CraftSharp
             }
 
             filter.sharedMesh = itemMesh;
-            render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(itemModel.RenderType);
+            render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(itemModel.RenderType, true);
         }
 
         public void TestBuildParticle(string name, Mesh[] meshes, Material material, float3 pos)

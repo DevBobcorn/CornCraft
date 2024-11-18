@@ -70,7 +70,7 @@ namespace CraftSharp.UI
 
         private void UpdateItemMesh()
         {
-            var result = ItemMeshBuilder.BuildItem(itemStack);
+            var result = ItemMeshBuilder.BuildItem(itemStack, true);
 
             if (result != null) // If build suceeded
             {
