@@ -59,8 +59,6 @@ namespace CraftSharp
                 var filter = modelObject.AddComponent<MeshFilter>();
                 var render = modelObject.AddComponent<MeshRenderer>();
 
-                var collider = modelObject.AddComponent<MeshCollider>();
-
                 int vertexCount = geometry.GetVertexCount(cullFlags);
                 int fluidVertexCount = 0;
 
@@ -162,8 +160,7 @@ namespace CraftSharp
                 Mesh.ApplyAndDisposeWritableMeshData(meshDataArr, mesh);
                 // Recalculate mesh normals
                 mesh.RecalculateNormals();
-                filter.sharedMesh   = mesh;
-                collider.sharedMesh = mesh;
+                filter.sharedMesh = mesh;
 
                 if (state.InWater)
                 {
@@ -175,6 +172,16 @@ namespace CraftSharp
                 }
                 else
                     render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(stateModel.RenderType);
+                
+                // Add shape colliders
+                foreach (var aabb in state.Shape.AABBs)
+                {
+                    var col = modelObject.AddComponent<BoxCollider>();
+
+                    // Don't forget to swap x and z
+                    col.size = new(aabb.SizeZ, aabb.SizeY, aabb.SizeX);
+                    col.center = new(aabb.CenterZ, aabb.CenterY, aabb.CenterX);
+                }
 
                 altitude += 1;
             }
@@ -361,7 +368,7 @@ namespace CraftSharp
 
             float startTime = Time.realtimeSinceStartup;
 
-            int start = 0, limit = 4096;
+            int start = 0, limit = 16000;
             int count = 0, width = 64;
             foreach (var pair in packManager.StateModelTable)
             {
