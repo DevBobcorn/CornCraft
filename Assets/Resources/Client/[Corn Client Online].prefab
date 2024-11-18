@@ -993,7 +993,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 1
+  m_Intensity: 1.5
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -1200,11 +1200,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1381132419633998272, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_Size
-      value: 1
+      value: 0.99997914
       objectReference: {fileID: 0}
     - target: {fileID: 1381132419633998272, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1390908519293674853, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1560,7 +1560,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8891369720582889607, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000061035156
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9060429323168380509, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_AnchorMax.x
