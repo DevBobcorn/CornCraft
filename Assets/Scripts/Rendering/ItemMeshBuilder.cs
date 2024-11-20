@@ -160,7 +160,8 @@ namespace CraftSharp.Rendering
 
             Mesh.ApplyAndDisposeWritableMeshData(meshDataArr, mesh);
 
-            // Recalculate mesh normals
+            // Recalculate mesh bounds and normals
+            mesh.RecalculateBounds();
             mesh.RecalculateNormals();
 
             return mesh;

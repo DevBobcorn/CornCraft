@@ -36,8 +36,6 @@ namespace CraftSharp
 
         [SerializeField] private Viewer viewer;
 
-        [SerializeField] private BlockSelectionBox selectionBox;
-
         private bool loaded = false;
 
         private List<Transform> billBoardTransforms = new();
@@ -53,7 +51,7 @@ namespace CraftSharp
             int altitude = 0;
             foreach (var geometry in stateModel.Geometries)
             {
-                var coord = pos + new float3(0F, -altitude * 1.2F, 0F);
+                var coord = pos + new float3(0F, -altitude * 1.25F, 0F);
 
                 var modelObject = new GameObject(name);
                 modelObject.transform.parent = transform;
@@ -186,6 +184,10 @@ namespace CraftSharp
                     col.center = new(aabb.CenterZ, aabb.CenterY, aabb.CenterX);
                 }
 
+                // Add shape holder
+                var shapeHolder = modelObject.AddComponent<BlockShapeHolder>();
+                shapeHolder.Shape = state.Shape;
+
                 altitude += 1;
             }
         }
@@ -203,7 +205,7 @@ namespace CraftSharp
             int altitude = 0;
             foreach (var pair in buildDict)
             {
-                var coord = pos + new float3(0.5F, altitude * 1.2F + 0.5F, 0.5F);
+                var coord = pos + new float3(0.5F, altitude * 1.25F + 0.5F, 0.5F);
 
                 var modelObject = new GameObject(pair.Key == ItemModelPredicate.EMPTY ? name : $"{name}{pair.Key}");
                 modelObject.transform.parent = transform;
@@ -371,7 +373,7 @@ namespace CraftSharp
 
             float startTime = Time.realtimeSinceStartup;
 
-            int start = 0, limit = 16000;
+            int start = 0, limit = 4096;
             int count = 0, width = 64;
             foreach (var pair in packManager.StateModelTable)
             {
@@ -380,7 +382,7 @@ namespace CraftSharp
                 {
                     var state = BlockStatePalette.INSTANCE.GetByNumId(pair.Key);
 
-                    TestBuildState($"Block [{pair.Key}] {state}", pair.Key, state, pair.Value, 0b111111, world, new((index % width) * 1.2F, 0, (index / width) * 1.2F));
+                    TestBuildState($"Block [{pair.Key}] {state}", pair.Key, state, pair.Value, 0b111111, world, new((index % width) * 1.5F, 0, (index / width) * 1.5F));
                 }
 
                 count++;
@@ -408,6 +410,8 @@ namespace CraftSharp
 
             }
 
+            /*
+
             count = 0; width = 32;
             var particleMaterialInstance = new Material(particleMaterial);
             particleMaterialInstance.SetTexture("_BaseMap", packManager.GetParticleAtlas());
@@ -424,6 +428,8 @@ namespace CraftSharp
 
                 count++;
             }
+
+            */
 
             InfoText.text = $"Meshes built in {Time.realtimeSinceStartup - startTime} second(s).";
         }

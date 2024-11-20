@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
+using CraftSharp.Control;
 
 namespace CraftSharp
 {
@@ -10,6 +11,7 @@ namespace CraftSharp
         public float sensitivityY = 5F;
         public float moveSpeed = 5F;
         [SerializeField] private TMP_Text viewerText;
+        [SerializeField] private BlockSelectionBox selectionBox;
 
         void Update()
         {
@@ -64,13 +66,28 @@ namespace CraftSharp
                 var viewRay = Camera.main.ViewportPointToRay(new(0.5F, 0.5F, 0F));
 
                 RaycastHit viewHit;
-                string blockStateInfo;
+                string hitObjectInfo;
                 if (Physics.Raycast(viewRay.origin, viewRay.direction, out viewHit, 10F))
-                    blockStateInfo = viewHit.collider.gameObject.name;
-                else
-                    blockStateInfo = string.Empty;
+                {
+                    hitObjectInfo = viewHit.collider.gameObject.name;
 
-                viewerText.text = $"FPS: {(int)(1 / Time.unscaledDeltaTime)}\n{blockStateInfo}";
+                    if (viewHit.collider.gameObject.TryGetComponent<BlockShapeHolder>(out var shapeHolder))
+                    {
+                        selectionBox.UpdateShape(shapeHolder.Shape);
+                        selectionBox.transform.position = viewHit.transform.position;
+                    }
+                    else
+                    {
+                        selectionBox.ClearShape();
+                    }
+                }
+                else
+                {
+                    hitObjectInfo = string.Empty;
+                    selectionBox.ClearShape();
+                }
+
+                viewerText.text = $"FPS: {Mathf.RoundToInt(1 / Time.unscaledDeltaTime)}\n{hitObjectInfo}";
             }
         }
     }
