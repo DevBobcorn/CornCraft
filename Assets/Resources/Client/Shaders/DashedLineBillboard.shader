@@ -6,11 +6,11 @@ Shader "Unlit/Dashed Line Billboard"
     Properties
     {
         _MainTex ("Texture Image", 2D) = "white" {}
-        _ScaleX ("Scale X", Float) = 1.0
-        _ScaleY ("Scale Y", Float) = 1.0
+        _Line_Width ("Line Width", Float) = 0.03
+        _Line_Length ("Line Length", Float) = 1.00
 
         _DashFrequency ("Dash Frequency", Float) = 10
-        _DashCapTilt ("Dash Cap Tilt", Float) = 0.01
+        _DashCapTilt ("Dash Cap Tilt", Float) = 0.05
         _DashOffset ("Dash Offset", Float) = 0
 
         // 0 for X, 1 for Y, other values for Z
@@ -32,8 +32,8 @@ Shader "Unlit/Dashed Line Billboard"
  
             // User-specified uniforms          
             uniform sampler2D _MainTex;      
-            uniform float _ScaleX;
-            uniform float _ScaleY;
+            uniform float _Line_Width;
+            uniform float _Line_Length;
            
             float4 _MainTex_ST;
 
@@ -103,7 +103,7 @@ Shader "Unlit/Dashed Line Billboard"
                 }
  
                 // The position of the vertex after the rotation
-                float4 newPos = float4(mul(rotMatrix, input.vertex * float4(_ScaleX, _ScaleY, 0, 0)), 1);
+                float4 newPos = float4(mul(rotMatrix, input.vertex * float4(_Line_Width, _Line_Length, 0, 0)), 1);
  
                 // The model matrix without the rotation and scale
                 float4x4 matrix_M_noRot = unity_ObjectToWorld;
@@ -144,7 +144,7 @@ Shader "Unlit/Dashed Line Billboard"
                 fixed4 col = tex2D(_MainTex, input.tex.xy);  
 
                 // Clip segments
-                col.a *= sin((input.tex.y + input.tex.x * _DashCapTilt + _DashOffset) * _DashFrequency);
+                col.a *= sin((input.tex.y + input.tex.x * _DashCapTilt + _DashOffset) * _DashFrequency * _Line_Length);
 
 
                 clip(col.a);

@@ -60,7 +60,7 @@ namespace CraftSharp.Control
         [SerializeField] private LayerMask blockSelectionLayer;
         [SerializeField] private GameObject? blockSelectionFramePrefab;
 
-        private GameObject? blockSelectionFrame;
+        private BlockSelectionBox? blockSelectionBox;
 
         private BaseCornClient? client;
         private CameraController? cameraController;
@@ -99,27 +99,26 @@ namespace CraftSharp.Control
                 );
 
                 TargetBlockLoc = CoordConvert.Unity2MC(client.WorldOriginOffset, unityBlockPos).GetBlockLoc();
+                var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
 
-                if (blockSelectionFrame == null)
+                if (blockSelectionBox == null)
                 {
-                    blockSelectionFrame = GameObject.Instantiate(blockSelectionFramePrefab);
+                    blockSelectionBox = GameObject.Instantiate(blockSelectionFramePrefab)!.GetComponent<BlockSelectionBox>();
 
-                    blockSelectionFrame!.transform.SetParent(transform, false);
-                }
-                else if (!blockSelectionFrame.activeSelf)
-                {
-                    blockSelectionFrame.SetActive(true);
+                    blockSelectionBox!.transform.SetParent(transform, false);
                 }
 
-                blockSelectionFrame.transform.position = unityBlockPos;
+                blockSelectionBox.UpdateShape(block.State.Shape);
+
+                blockSelectionBox.transform.position = unityBlockPos;
             }
             else
             {
                 TargetBlockLoc = null;
 
-                if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
+                if (blockSelectionBox != null)
                 {
-                    blockSelectionFrame.SetActive(false);
+                    blockSelectionBox.ClearShape();
                 }
             }
             
@@ -340,8 +339,10 @@ namespace CraftSharp.Control
                         {
                             lastInteractionInfo = null;
 
-                            if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
-                                blockSelectionFrame.SetActive(false);
+                            if (blockSelectionBox != null)
+                            {
+                                blockSelectionBox.ClearShape();
+                            }
                         }
                         else if (TargetBlockLoc != lastInteractionInfo?.Location)
                         {
@@ -366,8 +367,10 @@ namespace CraftSharp.Control
                 lastInteractionInfo = null;
                 TargetBlockLoc = null;
 
-                if (blockSelectionFrame != null && blockSelectionFrame.activeSelf)
-                    blockSelectionFrame.SetActive(false);
+                if (blockSelectionBox != null)
+                {
+                    blockSelectionBox.ClearShape();
+                }
             }
         }
 

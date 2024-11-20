@@ -16,6 +16,7 @@ using CraftSharp.Resource;
 using CraftSharp.Rendering;
 using UnityEngine.InputSystem;
 using CraftSharp.Resource.BedrockEntity;
+using CraftSharp.Control;
 
 namespace CraftSharp
 {
@@ -34,6 +35,8 @@ namespace CraftSharp
         public int[] InventoryBuildList = { };
 
         [SerializeField] private Viewer viewer;
+
+        [SerializeField] private BlockSelectionBox selectionBox;
 
         private bool loaded = false;
 
