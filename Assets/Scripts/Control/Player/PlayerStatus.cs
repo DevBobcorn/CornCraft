@@ -83,6 +83,7 @@ namespace CraftSharp.Control
         public float BarrierDistance  = 0F;
         public float WallDistance     = 0F;
         public float TargetVisualYaw  = 0F;
+        public float MovementInputYaw = 0F;
         public float CurrentVisualYaw = 0F;
 
         public float YawDeltaAbs => Mathf.Abs(Mathf.DeltaAngle(TargetVisualYaw, CurrentVisualYaw));

@@ -449,7 +449,7 @@ namespace CraftSharp.Control
             }
             else
             {
-                var forwardDir = GetTargetOrientation() * Vector3.forward;
+                var forwardDir = GetMovementOrientation() * Vector3.forward;
                 var offset = forwardDir * barrierDist + barrierHeight * Motor.CharacterUp;
 
                 StartForceMoveOperation("Climb over barrier (Direct)",
@@ -553,6 +553,16 @@ namespace CraftSharp.Control
             }
         }
 
+        public bool IsUsingAimingCamera()
+        {
+            if (m_CameraController != null)
+            {
+                return m_CameraController.IsAimingOrLocked;
+            }
+
+            return false;
+        }
+
         public void UseAimingLock(bool enable)
         {
             if (m_CameraController != null)
@@ -583,10 +593,10 @@ namespace CraftSharp.Control
             return Quaternion.LookRotation(forward, upward);
         }
 
-        public Quaternion GetTargetOrientation()
+        public Quaternion GetMovementOrientation()
         {
             var upward = m_InitialUpward;
-            var forward = Quaternion.AngleAxis(Status!.TargetVisualYaw, upward) * m_InitialForward;
+            var forward = Quaternion.AngleAxis(Status!.MovementInputYaw, upward) * m_InitialForward;
 
             return Quaternion.LookRotation(forward, upward);
         }
@@ -598,7 +608,7 @@ namespace CraftSharp.Control
         {
             if (!Status!.EntityDisabled)
             {
-                m_StatusUpdater!.UpdatePlayerStatus(Motor, GetTargetOrientation());
+                m_StatusUpdater!.UpdatePlayerStatus(Motor, GetMovementOrientation());
             }
         }
 
@@ -612,6 +622,7 @@ namespace CraftSharp.Control
             {
                 var userInputYaw = GetYawFromVector2(horInput);
                 status.TargetVisualYaw = m_CameraController!.GetYaw() + userInputYaw;
+                status.MovementInputYaw = status.TargetVisualYaw;
             }
 
             // Update target visual yaw if aiming
@@ -621,11 +632,6 @@ namespace CraftSharp.Control
 
                 // Align player orientation with camera view (which is set as the target value)
                 status.CurrentVisualYaw = Mathf.LerpAngle(status.CurrentVisualYaw, status.TargetVisualYaw, 10F * deltaTime);
-
-                if (horInput != Vector2.zero && GetYawFromVector2(horInput) is not (> -30 and < 30)) // If input direction is roughly forward
-                {
-                    m_PlayerActions.Gameplay.Movement.Reset();
-                }
             }
 
             // Update player status (in water, grounded, etc)

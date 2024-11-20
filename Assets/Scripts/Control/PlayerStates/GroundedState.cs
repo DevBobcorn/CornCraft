@@ -206,7 +206,7 @@ namespace CraftSharp.Control
                             info.TargetVisualYaw, 0.2F), info.TargetVisualYaw, ability.TurnSpeed * interval);
                     
                     // Use target orientation to calculate actual movement direction, taking ground shape into consideration
-                    moveVelocity = motor.GetDirectionTangentToSurface(player.GetTargetOrientation() * Vector3.forward, motor.GroundingStatus.GroundNormal) * moveSpeed;
+                    moveVelocity = motor.GetDirectionTangentToSurface(player.GetMovementOrientation() * Vector3.forward, motor.GroundingStatus.GroundNormal) * moveSpeed;
 
                     // Smooth movement (if accelerating)
                     if (moveVelocity.sqrMagnitude > currentVelocity.sqrMagnitude)
@@ -332,6 +332,12 @@ namespace CraftSharp.Control
 
             player.Actions.Gameplay.Sprint.performed += sprintRequestCallback = (context) =>
             {
+                if (player.IsUsingAimingCamera() && Mathf.Abs(
+                    Mathf.DeltaAngle(info.CurrentVisualYaw, info.MovementInputYaw)) > 30F)
+                {
+                    return; // Aiming and not moving forward
+                }
+
                 // Set sprint flag
                 _sprintRequested = true;
             };

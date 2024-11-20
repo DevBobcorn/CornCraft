@@ -43,7 +43,7 @@ namespace CraftSharp.Control
                 // Use target orientation to calculate actual movement direction, taking ground shape into consideration
                 if (info.Moving)
                 {
-                    moveVelocity = motor.GetDirectionTangentToSurface(player.GetTargetOrientation() * Vector3.forward, motor.GroundingStatus.GroundNormal) * moveSpeed;
+                    moveVelocity = motor.GetDirectionTangentToSurface(player.GetMovementOrientation() * Vector3.forward, motor.GroundingStatus.GroundNormal) * moveSpeed;
                 }
                 else // Idle
                 {

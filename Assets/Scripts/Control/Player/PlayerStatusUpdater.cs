@@ -22,9 +22,9 @@ namespace CraftSharp.Control
         // Barrier/wall distance check
         private const float BARRIER_RAYCAST_LENGTH =  2.0F;
 
-        [SerializeField] public LayerMask SolidLayer;
-        [SerializeField] public LayerMask LiquidSurfaceLayer;
-        [SerializeField] public LayerMask LiquidVolumeLayer;
+        public LayerMask SolidLayer;
+        public LayerMask LiquidSurfaceLayer;
+        public LayerMask LiquidVolumeLayer;
 
         public PlayerStatus Status = new();
 
