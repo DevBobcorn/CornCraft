@@ -4,7 +4,7 @@ namespace CraftSharp.Control
 {
     public class BlockSelectionBox : MonoBehaviour
     {
-        public const int MAX_AABB_COUNT = 10;
+        public const int MAX_AABB_COUNT = 64;
 
         [SerializeField] private Material lineMaterial;
         [SerializeField] private Mesh lineMesh;
@@ -15,42 +15,7 @@ namespace CraftSharp.Control
         private BlockShape? currentBlockShape;
 #nullable disable
         private int currentBoxCount = 0;
-
-        private bool rendererInitialized = false;
-
-        private void EnsureRenderersInitialized()
-        {
-            if (!rendererInitialized)
-            {
-                InitializeRenderers();
-            }
-        }
-
-        private void InitializeRenderers()
-        {
-            if (rendererInitialized)
-            {
-                return;
-            }
-
-            rendererInitialized = true;
-
-            for (int i = 0; i < MAX_AABB_COUNT; i++)
-            {
-                for (int j = 0; j < 12; j++)
-                {
-                    var lineObj = new GameObject($"Line {i} #{j}");
-                    lineObj.transform.SetParent(transform, false);
-
-                    lineMeshRenderers[i * 12 + j] = lineObj.AddComponent<MeshRenderer>();
-                    var lineMeshFilter = lineObj.AddComponent<MeshFilter>();
-                    lineMeshFilter.sharedMesh = lineMesh;
-                    lineMeshRenderers[i * 12 + j].sharedMaterial = lineMaterial;
-
-                    lineMeshRenderers[i * 12 + j].enabled = false;
-                }
-            }
-        }
+        private int createdBoxCount = 0;
 
         private static MaterialPropertyBlock GetLengthPropertyBlock(int axis, float length)
         {
@@ -66,14 +31,32 @@ namespace CraftSharp.Control
             if (currentBlockShape == blockShape) return;
             currentBlockShape = blockShape;
 
-            EnsureRenderersInitialized();
-
             var aabbs = blockShape.AABBs;
+
+            var displayedBoxCount = Mathf.Min(aabbs.Length, MAX_AABB_COUNT);
 
             int i = 0;
 
-            for (; i < Mathf.Min(aabbs.Length, MAX_AABB_COUNT); i++)
+            for (; i < displayedBoxCount; i++)
             {
+                if (i == createdBoxCount) // Create new boxes if not created yet
+                {
+                    for (int j = 0; j < 12; j++)
+                    {
+                        var lineObj = new GameObject($"Box #{i} - {j}");
+                        lineObj.transform.SetParent(transform, false);
+
+                        lineMeshRenderers[i * 12 + j] = lineObj.AddComponent<MeshRenderer>();
+                        var lineMeshFilter = lineObj.AddComponent<MeshFilter>();
+                        lineMeshFilter.sharedMesh = lineMesh;
+                        lineMeshRenderers[i * 12 + j].sharedMaterial = lineMaterial;
+
+                        lineMeshRenderers[i * 12 + j].gameObject.SetActive(false);
+                    }
+
+                    createdBoxCount = i + 1;
+                }
+
                 var aabb = aabbs[i];
 
                 // Swap X and Z
@@ -118,15 +101,15 @@ namespace CraftSharp.Control
 
                 for (int j = 0; j < 12; j++)
                 {
-                    lineMeshRenderers[i * 12 + j].enabled = true;
+                    lineMeshRenderers[i * 12 + j].gameObject.SetActive(true);
                 }
             }
 
-            for (; i < currentBoxCount; i++)
+            for (; i < currentBoxCount; i++) // Hide unused boxes, but don't destroy them
             {
                 for (int j = 0; j < 12; j++)
                 {
-                    lineMeshRenderers[i * 12 + j].enabled = false;
+                    lineMeshRenderers[i * 12 + j].gameObject.SetActive(false);
                 }
             }
 
@@ -138,11 +121,9 @@ namespace CraftSharp.Control
             if (currentBlockShape is null) return;
             currentBlockShape = null;
 
-            EnsureRenderersInitialized();
-
             for (int i = 0; i < currentBoxCount * 12; i++)
             {
-                lineMeshRenderers[i].enabled = false;
+                lineMeshRenderers[i].gameObject.SetActive(false);
             }
 
             currentBoxCount = 0;
