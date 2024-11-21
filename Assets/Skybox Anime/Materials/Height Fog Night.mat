@@ -108,7 +108,7 @@ Material:
     - _FogCat: 1
     - _FogColorDuo: 0
     - _FogDistanceEnd: 300
-    - _FogDistanceFalloff: 1
+    - _FogDistanceFalloff: 4
     - _FogDistanceStart: 0
     - _FogHeightEnd: 564
     - _FogHeightFalloff: 1
@@ -135,7 +135,7 @@ Material:
     - _ReceiveShadows: 1
     - _SkyboxCat: 1
     - _SkyboxFogBottom: 0.5
-    - _SkyboxFogFalloff: 8
+    - _SkyboxFogFalloff: 5
     - _SkyboxFogFill: 0
     - _SkyboxFogHeight: 2
     - _SkyboxFogIntensity: 1
