@@ -108,7 +108,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   latencyText: {fileID: 7576224444866451340}
-  packetsText: {fileID: 0}
   debugText: {fileID: 7576224444482164971}
   modeText: {fileID: 4956838166664496595}
   modePanelAnimator: {fileID: 1911438305985044268}

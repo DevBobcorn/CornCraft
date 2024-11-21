@@ -14,8 +14,6 @@ namespace CraftSharp.UI
         [SerializeField] [Range(0.1F, 1F)] private float warningThreshold = 0.3F;
         [SerializeField] [Range(0.1F, 1F)] private float dangerThreshold  = 0.1F;
 
-        [SerializeField] private float fullBarLength;
-
         private static readonly int ValueColor = Shader.PropertyToID("_ValueColor");
         private static readonly int DeltaColor = Shader.PropertyToID("_DeltaColor");
         private static readonly int FillAmount = Shader.PropertyToID("_FillAmount");
@@ -29,10 +27,18 @@ namespace CraftSharp.UI
 
         void Start()
         {
-            barImage = GetComponentInChildren<Image>();
+            if (barImage == null)
+            {
+                barImage = GetComponentInChildren<Image>();
+            }
+            
             // Create a material instance for each bar
             barMaterial = new Material(barImage.material);
             barImage.material = barMaterial;
+
+            var barImageRect = barImage.GetComponent<RectTransform>();
+
+            barMaterial.SetVector("_BarSize", new(barImageRect.rect.width, barImageRect.rect.height, 0F, 0F));
 
             parentCanvasGroups = GetComponentsInParent<CanvasGroup>(true);
 
