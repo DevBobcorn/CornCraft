@@ -258,6 +258,7 @@ namespace CraftSharp.Rendering
                             {
                                 var renderType = modelTable[stateId].RenderType;
                                 int layerIndex = ChunkRender.TypeIndex(renderType);
+                                var aoIntensity = 0.2F;
 
                                 var datFormat = BlockGeometry.ExtraVertexData.Light;
                                 if (renderType == RenderType.FOLIAGE)
@@ -267,6 +268,8 @@ namespace CraftSharp.Rendering
                                 else if (renderType == RenderType.PLANTS || renderType == RenderType.TALL_PLANTS)
                                 {
                                     datFormat = BlockGeometry.ExtraVertexData.Light_CrossNormal;
+
+                                    aoIntensity = 0.15F;
                                 }
 
                                 var models = modelTable[stateId].Geometries;
@@ -303,12 +306,12 @@ namespace CraftSharp.Rendering
                                 if (state.NoCollision)
                                 {
                                     models[chosen].Build(visualBuffer[layerIndex], ref vertOffset[layerIndex],
-                                           posOffset , cullFlags, aoMask, 0.2F, lights, color, datFormat);
+                                           posOffset , cullFlags, aoMask, aoIntensity, lights, color, datFormat);
                                 }
                                 else
                                 {
                                     models[chosen].BuildWithCollider(visualBuffer[layerIndex], ref vertOffset[layerIndex], colliderVerts,
-                                            ref colliderVertOffset, posOffset, cullFlags, aoMask, 0.2F, lights, color, datFormat);
+                                            ref colliderVertOffset, posOffset, cullFlags, aoMask, aoIntensity, lights, color, datFormat);
                                 }
                             }
                         }
