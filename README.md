@@ -2,11 +2,13 @@
 A Minecraft client implementation made with Unity.
 
 ## > About
-__CornCraft__ is a Unity version of Minecraft. It connects to vanilla servers(version 1.16.2 to 1.20.4) and provides basic graphical gameplay support. It is based on another open source project, [Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client), and makes heavy use of its cross-version Minecraft protocol implementation.
+__CornCraft__ is a Unity version of Minecraft. It connects to vanilla/plugin servers(version 1.16.2 to 1.20.4) and provides basic graphical gameplay support.
 
-However, unlike MCC itself which runs on modern .NET, CornCraft is a Unity app/game and runs on Mono/IL2CPP backend, so a large part of the code from MCC has been refactored or rewritten to adapt to Unity's environment.
+This project does not mean to be a Minecraft "clone", but rather an attempt to recreate the game in a somewhat different way, with the overall look and feel distinct from the original one.
 
-__*Important!*__ It is __NOT__ recommended to join a public/commercial server with CornCraft, and CornCraft is __NOT__ responsible for server banning due to using this client! The best and safest way to play with this client, at least for now, is to set up a server by yourself or with your friends.
+It is based on another open source project, [Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client), and incorporates this project as a foundation for cross-version networking with Minecraft servers. However, due to different runtime backends(Mono for Unity vs .NET for MCC) and other major parity issues regarding input and rendering, it is not an option to directly use MCC code as a library despite the fact that they're both in C#, and a number of tweaks and rewrites were needed for everything to work fine in this new framework. Currently there's no pre-built binaries available yet because some core features are still missing, but feel free to give it a try in the editor!
+
+__*Important!*__ It is __NOT__ recommended to join a public/commercial server with CornCraft, and CornCraft is __NOT__ responsible for server banning due to using this client! The best and safest way to play with this client, at least for now, is to set up a local server and play it with your friends.
 
 The code CornCraft uses to parse vanilla resource packs is also open source as a Unity package called [CraftSharp-Resource](https://github.com/DevBobcorn/CraftSharp-Resource). Check it out if you want to make a Minecraft structure viewer, map editor or something like that with Unity.
 
@@ -58,9 +60,9 @@ Some other open-source projects/code examples are used in the project, which don
 * [Star Rail NPR Shader](https://github.com/stalomeow/StarRailNPRShader): Anime character shaders for custom player render
 * [Minecraft Data](https://github.com/PrismarineJS/minecraft-data): Protocol data for packet inspection
 
-More information about CDDL-1.0 can be found on MCC's [home page](https://github.com/MCCTeam/Minecraft-Console-Client), in the license section, and the full license can be reviewed [here](http://opensource.org/licenses/CDDL-1.0).
+More information about CDDL-1.0 can be found on MCC's [home page](https://github.com/MCCTeam/Minecraft-Console-Client), in the license section, and the full license can be viewed [here](http://opensource.org/licenses/CDDL-1.0).
 
 ## > Screenshots
-![CornCraft022.png](https://s2.loli.net/2024/10/28/EdrTenuS1ZLw3RC.png)
+![CornCraft023.png](https://s2.loli.net/2024/11/21/1FfCQGPeIHslMdA.png)
 ![CornCraft021.png](https://s2.loli.net/2024/10/28/kas4ZD8cgrfb6xn.png)
 ![CornCraft020.png](https://s2.loli.net/2024/10/28/xFVCbJNwH6qAZ2E.png)
