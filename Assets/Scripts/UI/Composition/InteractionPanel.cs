@@ -102,7 +102,9 @@ namespace CraftSharp.UI
                     SetSelected(0); // Select the only available option
                 }
                 else if (selectedIndex < 0 || selectedIndex >= interactionOptions.Count)
+                {
                     SetSelected(0); // There's at least 1 option available after adding
+                }
                 
                 scrollHint.SetBool(SHOW_HASH, interactionOptions.Count > 1); // Show or hide scroll hint
             }
