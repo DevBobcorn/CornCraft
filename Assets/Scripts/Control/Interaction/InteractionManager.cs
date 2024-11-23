@@ -53,7 +53,7 @@ namespace CraftSharp.Control
                         };
 
                         // Tool interaction case
-                        ItemActionType? actionType = entryCont.TryGetValue("item_action", out var itemAction)
+                        ItemActionType? itemActionType = entryCont.TryGetValue("item_action", out var itemAction)
                             ? itemAction.StringValue switch
                             {
                                 "axe"     => ItemActionType.Axe,
@@ -64,16 +64,17 @@ namespace CraftSharp.Control
                             }
                             : null; 
 
-                        // View interaction case
-                        InteractionIconType? iconType = entryCont.TryGetValue("icon_type", out var type)
+                        // View interaction icon case
+                        InteractionIconType iconType = entryCont.TryGetValue("icon_type", out var type)
                             ? type.StringValue switch
                             {
                                 "interact"       => InteractionIconType.Dialog,
                                 "enter_location" => InteractionIconType.EnterLocation,
                                 "item_icon"      => InteractionIconType.ItemIcon,
+
                                 _                => InteractionIconType.Dialog
                             }
-                            : null;
+                            : InteractionIconType.Dialog;
 
                         var hintKey = entryCont.TryGetValue("hint", out var hint) ? hint.StringValue : null;
 
@@ -94,15 +95,23 @@ namespace CraftSharp.Control
                                     var tag = $"special/{entryName}";
                                     hintKey ??= trigger.StringValue;
 
-                                    if (actionType is not null)
-                                        inters.Add(new ToolInteraction(actionType.Value, interactionType, hintKey, tag));
-                                    if (iconType is not null)
-                                        inters.Add(new ViewInteraction(iconType.Value, blockId, interactionType, hintKey, tag));
+                                    if (itemActionType is not null)
+                                    {
+                                        inters.Add(new ToolInteraction(itemActionType.Value, interactionType, hintKey, tag));
+                                    }
+                                    else
+                                    {
+                                        inters.Add(new ViewInteraction(iconType, blockId, interactionType, hintKey, tag));
+                                    }
 
                                     if (interactionTable.TryGetValue(stateId, out var definition))
+                                    {
                                         definition.AddRange(inters);
+                                    }
                                     else
+                                    {
                                         interactionTable.Add(stateId, new(inters));
+                                    }
 
                                     //Debug.Log($"Added {entryName} interaction for blockstate [{stateId}] {palette.GetByNumId(stateId)}");
                                 }

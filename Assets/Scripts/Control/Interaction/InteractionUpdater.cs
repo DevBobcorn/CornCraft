@@ -190,15 +190,16 @@ namespace CraftSharp.Control
 
                 if (table.TryGetValue(block.StateId, out InteractionDefinition? newInteractionDefinition))
                 {
-                    var newDefinition = newInteractionDefinition?.Get<ViewInteraction>();
-                    if (newDefinition is null) continue;
+                    var newViewInteraction = newInteractionDefinition?.Get<ViewInteraction>();
+                    if (newViewInteraction is null) continue;
 
                     var prevInfo = GetBlockInteraction<ViewInteractionInfo>(blockLoc)?.FirstOrDefault();
-                    var newInfo = new ViewInteractionInfo(interactionId.AllocateID(), blockLoc, block.BlockId, newDefinition);
+                    var newInfo = new ViewInteractionInfo(interactionId.AllocateID(), blockLoc, block.BlockId, newViewInteraction);
+
                     if (prevInfo is not null)
                     {
                         var prevDefinition = prevInfo.Definition;
-                        if (prevDefinition != newDefinition) // Update this interaction
+                        if (prevDefinition != newViewInteraction) // Update this interaction
                         {
                             RemoveBlockInteraction<ViewInteractionInfo>(blockLoc, info =>
                             {
