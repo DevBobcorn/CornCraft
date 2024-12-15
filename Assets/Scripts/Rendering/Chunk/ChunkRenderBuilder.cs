@@ -53,7 +53,6 @@ namespace CraftSharp.Rendering
 
                 var blocs = data.Blocks;
                 var light = data.Light;
-                var allao = data.AO;
                 var allcolor = data.Color;
 
                 int getCullFlags(int x, int y, int z, Block self, BlockNeighborCheck check)
@@ -127,13 +126,15 @@ namespace CraftSharp.Rendering
                     return result.Select(x => x / 8F).ToArray();
                 }
 
+                var stateTable = BlockStatePalette.INSTANCE;
+
                 int getNeighborCastAOMask(int x, int y, int z)
                 {
                     int result = 0;
 
                     for (int y_ = 0; y_ < 3; y_++) for (int z_ = 0; z_ < 3; z_++) for (int x_ = 0; x_ < 3; x_++)
                     {
-                        if (allao[x + x_ - 1, y + y_ - 1, z + z_ - 1])
+                        if (stateTable.GetByNumId(blocs[x + x_ - 1, y + y_ - 1, z + z_ - 1].StateId).AmbientOcclusionSolid)
                         {
                             result |= 1 << (y_ * 9 + z_ * 3 + x_);
                         }

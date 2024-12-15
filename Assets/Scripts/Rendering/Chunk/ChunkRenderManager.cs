@@ -420,14 +420,6 @@ namespace CraftSharp.Rendering
         }
 
         /// <summary>
-        /// Check if the block at specified location causes ambient occlusion
-        /// </summary>
-        public bool GetAmbientOcclusion(BlockLoc blockLoc)
-        {
-            return world.GetAmbientOcclusion(blockLoc);
-        }
-
-        /// <summary>
         /// Check if the given location is occupied by a block entity
         /// </summary>
         /// <param name="blockLoc">Location of the block entity</param>
