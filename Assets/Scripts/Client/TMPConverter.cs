@@ -59,7 +59,7 @@ namespace CraftSharp
         {
             var processed = new StringBuilder();
             
-            Stack<char> fieldColors = new Stack<char>();
+            Stack<char> fieldColors = new();
 
             // lineColor: Color used outside of bracket fields
             // curColor:  Color used to print next character
@@ -177,6 +177,8 @@ namespace CraftSharp
                             // Switch to the color of this out bracket field
                             text2append += GetTMPColorTag(fieldColors.Peek());
                         }
+
+                        processed.Append(text2append);
                     }
                     else // Then we're not in any bracket fields now, use line color
                     {
@@ -195,7 +197,9 @@ namespace CraftSharp
                             curColor = lineColor;
                         }
                         else
+                        {
                             processed.Append(text2append);
+                        }
                     }
 
                     lastColor = curColor;

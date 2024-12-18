@@ -1,4 +1,4 @@
-namespace CraftSharp.Inventory
+﻿namespace CraftSharp.Inventory
 {
     /// <summary>
     /// Represents a Minecraft effects
