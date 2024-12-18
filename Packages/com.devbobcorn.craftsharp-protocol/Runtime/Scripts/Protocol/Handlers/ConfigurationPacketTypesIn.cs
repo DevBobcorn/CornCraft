@@ -2,17 +2,24 @@ namespace CraftSharp.Protocol.Handlers
 {
     public enum ConfigurationPacketTypesIn
     {
-        PluginMessage,
+        CookieRequest,
+        CustomReportDetails,
         Disconnect,
+        FeatureFlags,
         FinishConfiguration,
         KeepAlive,
+        KnownDataPacks,
         Ping,
+        PluginMessage,
         RegistryData,
-        ResourcePack,
         RemoveResourcePack,
-        FeatureFlags,
+        ResetChat,
+        ResourcePack,
+        ServerLinks,
+        StoreCookie,
+        Transfer,
         UpdateTags,
-
+        
         Unknown
     }
 }

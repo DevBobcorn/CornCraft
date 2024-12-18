@@ -49,11 +49,11 @@ namespace CraftSharp.Protocol.ProfileKey
                 keys.Add(login, playerKeyPair);
             }
 
-            if (ProtocolSettings.ProfileKeyCaching == CacheType.Disk && updatetimer.Enabled == true)
+            if (ProtocolSettings.ProfileKeyCaching == ProtocolSettings.CacheType.Disk && updatetimer.Enabled == true)
             {
                 pendingadds.Add(new KeyValuePair<string, PlayerKeyPair>(login, playerKeyPair));
             }
-            else if (ProtocolSettings.ProfileKeyCaching == CacheType.Disk)
+            else if (ProtocolSettings.ProfileKeyCaching == ProtocolSettings.CacheType.Disk)
             {
                 SaveToDisk();
             }

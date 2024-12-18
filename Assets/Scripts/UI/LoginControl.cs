@@ -178,7 +178,7 @@ namespace CraftSharp.UI
             }
             else
             {   // Validate cached session or login new session.
-                if (ProtocolSettings.SessionCaching != CacheType.None && SessionCache.Contains(accountLower))
+                if (ProtocolSettings.SessionCaching != ProtocolSettings.CacheType.None && SessionCache.Contains(accountLower))
                 {
                     session = SessionCache.Get(accountLower);
                     result = ProtocolHandler.GetTokenValidation(session);
@@ -250,20 +250,20 @@ namespace CraftSharp.UI
                     yield break;
                 }
 
-                if (ProtocolSettings.SessionCaching != CacheType.None)
+                if (ProtocolSettings.SessionCaching != ProtocolSettings.CacheType.None)
                     SessionCache.Store(accountLower, session);
 
                 if (microsoftLogin && ProtocolSettings.LoginWithSecureProfile)
                 {
                     // Load cached profile key from disk if necessary
-                    if (ProtocolSettings.ProfileKeyCaching == CacheType.Disk)
+                    if (ProtocolSettings.ProfileKeyCaching == ProtocolSettings.CacheType.Disk)
                     {
                         var cacheKeyLoaded = KeysCache.InitializeDiskCache();
                         if (ProtocolSettings.DebugMode)
                             Debug.Log(Translations.Get(cacheKeyLoaded ? "debug.keys_cache_ok" : "debug.keys_cache_fail"));
                     }
 
-                    if (ProtocolSettings.ProfileKeyCaching != CacheType.None && KeysCache.Contains(accountLower))
+                    if (ProtocolSettings.ProfileKeyCaching != ProtocolSettings.CacheType.None && KeysCache.Contains(accountLower))
                     {
                         playerKeyPair = KeysCache.Get(accountLower);
                         Debug.Log(playerKeyPair.NeedRefresh()
@@ -275,7 +275,7 @@ namespace CraftSharp.UI
                     {
                         Debug.Log(Translations.Get("mcc.fetching_key"));
                         playerKeyPair = KeyUtils.GetNewProfileKeys(session.Id);
-                        if (ProtocolSettings.ProfileKeyCaching != CacheType.None && playerKeyPair != null)
+                        if (ProtocolSettings.ProfileKeyCaching != ProtocolSettings.CacheType.None && playerKeyPair != null)
                         {
                             KeysCache.Store(accountLower, playerKeyPair);
                         }
@@ -587,7 +587,7 @@ namespace CraftSharp.UI
             loginDropDown.onValueChanged.AddListener(selection => StartCoroutine(UpdateLoginMode(selection)));
 
             //Load cached sessions from disk if necessary
-            if (ProtocolSettings.SessionCaching == CacheType.Disk)
+            if (ProtocolSettings.SessionCaching == ProtocolSettings.CacheType.Disk)
             {
                 var cacheLoaded = SessionCache.InitializeDiskCache();
                 if (ProtocolSettings.DebugMode)

@@ -8,7 +8,9 @@ namespace CraftSharp.Protocol.Handlers
         KeepAlive,
         Pong,
         ResourcePackResponse,
-
+        CookieResponse,
+        KnownDataPacks,
+        
         Unknown
     }
 }

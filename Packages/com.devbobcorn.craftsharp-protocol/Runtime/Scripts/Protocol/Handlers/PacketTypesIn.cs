@@ -29,9 +29,12 @@
         CloseWindow,                //
         CollectItem,                //
         CombatEvent,                //
+        CookieRequest,              // Added in 1.20.6
         CraftRecipeResponse,        //
+        CustomReportDetails,        // Added in 1.21 (Not used)
         DamageEvent,                // Added in 1.19.4
         DeathCombatEvent,           //
+        DebugSample,                // Added in 1.20.6
         DeclareCommands,            //
         DeclareRecipes,             //
         DestroyEntities,            //
@@ -83,6 +86,7 @@
         PlayerPositionAndLook,      //
         PluginMessage,              //
         ProfilelessChatMessage,     // Added in 1.19.3
+        ProjectilePower,            // Added in 1.20.6
         RemoveEntityEffect,         //
         RemoveResourcePack,         // Added in 1.20.3
         ResetScore,                 // Added in 1.20.3
@@ -92,6 +96,7 @@
         SelectAdvancementTab,       //
         ServerData,                 // Added in 1.19
         ServerDifficulty,           //
+        ServerLinks,                // Added in 1.21 (Not used)
         SetCompression,             // For 1.8 or below
         SetCooldown,                //
         SetDisplayChatPreview,      // Added in 1.19
@@ -115,6 +120,7 @@
         StartConfiguration,         // Added in 1.20.2
         Statistics,                 //
         StopSound,                  //
+        StoreCookie,                // Added in 1.20.6
         SystemChat,                 // Added in 1.19
         TabComplete,                //
         Tags,                       //
@@ -122,6 +128,7 @@
         TimeUpdate,                 //
         Title,                      //
         TradeList,                  //
+        Transfer,                   // Added in 1.20.6
         Unknown,                    // For old version packet that have been removed and not used by mcc 
         UnloadChunk,                //
         UnlockRecipes,              //

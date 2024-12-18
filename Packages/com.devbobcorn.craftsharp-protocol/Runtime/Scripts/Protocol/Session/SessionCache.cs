@@ -26,10 +26,10 @@ namespace CraftSharp.Protocol.Session
         );
 
         private static FileMonitor? cachemonitor;
-        private static Dictionary<string, SessionToken> sessions = new Dictionary<string, SessionToken>();
-        private static Timer updatetimer = new Timer(100);
-        private static List<KeyValuePair<string, SessionToken>> pendingadds = new List<KeyValuePair<string, SessionToken>>();
-        private static BinaryFormatter formatter = new BinaryFormatter();
+        private static readonly Dictionary<string, SessionToken> sessions = new();
+        private static readonly Timer updatetimer = new(100);
+        private static readonly List<KeyValuePair<string, SessionToken>> pendingadds = new();
+        private static readonly BinaryFormatter formatter = new();
 
         /// <summary>
         /// Retrieve whether SessionCache contains a session for the given login.
@@ -57,11 +57,11 @@ namespace CraftSharp.Protocol.Session
                 sessions.Add(login, session);
             }
 
-            if (ProtocolSettings.SessionCaching == CacheType.Disk && updatetimer.Enabled == true)
+            if (ProtocolSettings.SessionCaching == ProtocolSettings.CacheType.Disk && updatetimer.Enabled == true)
             {
                 pendingadds.Add(new KeyValuePair<string, SessionToken>(login, session));
             }
-            else if (ProtocolSettings.SessionCaching == CacheType.Disk)
+            else if (ProtocolSettings.SessionCaching == ProtocolSettings.CacheType.Disk)
             {
                 SaveToDisk();
             }
@@ -131,7 +131,7 @@ namespace CraftSharp.Protocol.Session
             if (File.Exists(SessionCacheFileMinecraft))
             {
                 if (ProtocolSettings.DebugMode) Debug.Log(Translations.Get("cache.loading", Path.GetFileName(SessionCacheFileMinecraft)));
-                Json.JSONData mcSession = new Json.JSONData(Json.JSONData.DataType.String);
+                Json.JSONData mcSession = new(Json.JSONData.DataType.String);
                 try
                 {
                     mcSession = Json.ParseJson(File.ReadAllText(SessionCacheFileMinecraft));
@@ -141,12 +141,11 @@ namespace CraftSharp.Protocol.Session
                     && mcSession.Properties.ContainsKey("clientToken")
                     && mcSession.Properties.ContainsKey("authenticationDatabase"))
                 {
-                    Guid temp;
                     string clientID = mcSession.Properties["clientToken"].StringValue.Replace("-", "");
                     Dictionary<string, Json.JSONData> sessionItems = mcSession.Properties["authenticationDatabase"].Properties;
                     foreach (string key in sessionItems.Keys)
                     {
-                        if (Guid.TryParseExact(key, "N", out temp))
+                        if (Guid.TryParseExact(key, "N", out Guid _))
                         {
                             Dictionary<string, Json.JSONData> sessionItem = sessionItems[key].Properties;
                             if (sessionItem.ContainsKey("displayName")
@@ -157,7 +156,7 @@ namespace CraftSharp.Protocol.Session
                                 string login = sessionItem["username"].StringValue.ToLower();
                                 try
                                 {
-                                    SessionToken session = SessionToken.FromString(String.Join(",",
+                                    SessionToken session = SessionToken.FromString(string.Join(",",
                                         sessionItem["accessToken"].StringValue,
                                         sessionItem["displayName"].StringValue,
                                         sessionItem["uuid"].StringValue.Replace("-", ""),
@@ -182,15 +181,16 @@ namespace CraftSharp.Protocol.Session
 
                 try
                 {
-                    using (FileStream fs = new FileStream(PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + SessionCacheFileSerialized, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using FileStream fs = new(PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + SessionCacheFileSerialized, FileMode.Open, FileAccess.Read, FileShare.Read);
+#pragma warning disable SYSLIB0011 // BinaryFormatter.Deserialize() is obsolete
+                    // Possible risk of information disclosure or remote code execution. The impact of this vulnerability is limited to the user side only.
+                    Dictionary<string, SessionToken> sessionsTemp = (Dictionary<string, SessionToken>)formatter.Deserialize(fs);
+#pragma warning restore SYSLIB0011 // BinaryFormatter.Deserialize() is obsolete
+                    foreach (KeyValuePair<string, SessionToken> item in sessionsTemp)
                     {
-                        Dictionary<string, SessionToken> sessionsTemp = (Dictionary<string, SessionToken>)formatter.Deserialize(fs);
-                        foreach (KeyValuePair<string, SessionToken> item in sessionsTemp)
-                        {
-                            if (ProtocolSettings.DebugMode)
-                                Debug.Log(Translations.Get("cache.loaded", item.Key, item.Value.Id));
-                            sessions[item.Key] = item.Value;
-                        }
+                        if (ProtocolSettings.DebugMode)
+                            Debug.Log(Translations.Get("cache.loaded", item.Key, item.Value.Id));
+                        sessions[item.Key] = item.Value;
                     }
                 }
                 catch (IOException ex)
@@ -256,9 +256,11 @@ namespace CraftSharp.Protocol.Session
             if (ProtocolSettings.DebugMode)
                 Debug.Log(Translations.Get("cache.saving"));
 
-            List<string> sessionCacheLines = new List<string>();
-            sessionCacheLines.Add("# Generated by CornClient " + ProtocolSettings.Version + " - Edit at own risk!");
-            sessionCacheLines.Add("# Login=SessionID,PlayerName,UUID,ClientID");
+            List<string> sessionCacheLines = new()
+            {
+                "# Generated by MCC v" + ProtocolSettings.Version + " - Keep it secret & Edit at own risk!",
+                "# Login=SessionID,PlayerName,UUID,ClientID,RefreshToken,ServerIDhash,ServerPublicKey"
+            };
             foreach (KeyValuePair<string, SessionToken> entry in sessions)
                 sessionCacheLines.Add(entry.Key + '=' + entry.Value.ToString());
 
