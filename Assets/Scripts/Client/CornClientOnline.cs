@@ -17,6 +17,7 @@ using CraftSharp.Proxy;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
 using CraftSharp.Rendering;
+using CraftSharp.Protocol.Session;
 
 namespace CraftSharp
 {
@@ -32,7 +33,14 @@ namespace CraftSharp
         private string? username;
         private Guid uuid;
         private string? sessionId;
+        private string accountLower = string.Empty;
         private PlayerKeyPair? playerKeyPair;
+
+        // Cookies
+        private Dictionary<string, byte[]> Cookies { get; set; } = new();
+        public void GetCookie(string key, out byte[]? data) => Cookies.TryGetValue(key, out data);
+        public void SetCookie(string key, byte[] data) => Cookies[key] = data;
+        public void DeleteCookie(string key) => Cookies.Remove(key, out var data);
         #endregion
 
         #region Thread and Chat Control
@@ -57,8 +65,9 @@ namespace CraftSharp
         private double sampleSum = 0;
         private int packetCount = 0;
         
-        TcpClient? tcpClient;
+        TcpClient? client;
         IMinecraftCom? handler;
+        SessionToken? _sessionToken;
         Tuple<Thread, CancellationTokenSource>? timeoutdetector = null;
         #endregion
 
@@ -112,31 +121,34 @@ namespace CraftSharp
             this.port = info.ServerPort;
             this.protocolVersion = info.ProtocolVersion;
             this.playerKeyPair = info.Player;
+            this.accountLower = info.AccountLower;
+
+            _sessionToken = session;
 
             // Start up client
             try
             {
                 // Setup tcp client
-                tcpClient = ProxyHandler.newTcpClient(host, port);
-                tcpClient.ReceiveBufferSize = 1024 * 1024;
-                tcpClient.ReceiveTimeout = 30000; // 30 seconds
+                client = ProxyHandler.NewTcpClient(host, port);
+                client.ReceiveBufferSize = 1024 * 1024;
+                client.ReceiveTimeout = 30000; // 30 seconds
 
                 // Create handler
-                handler = ProtocolHandler.GetProtocolHandler(tcpClient, info.ProtocolVersion, info.ForgeInfo, this);
+                handler = ProtocolHandler.GetProtocolHandler(client, info.ProtocolVersion, info.ForgeInfo, this);
 
                 // Start update loop
                 timeoutdetector = Tuple.Create(new Thread(new ParameterizedThreadStart(TimeoutDetector)), new CancellationTokenSource());
                 timeoutdetector.Item1.Name = "Connection Timeout Detector";
                 timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
 
-                if (handler.Login(this.playerKeyPair, session, info.AccountLower)) // Login
+                if (handler.Login(playerKeyPair, session, accountLower)) // Login
                 {
                     // Update entity type for dummy client entity
                     clientEntity.Type = EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID);
                     // Update client entity name
                     clientEntity.Name = session.PlayerName;
                     clientEntity.UUID = uuid;
-                    Debug.Log($"Client uuid: {this.uuid}");
+                    Debug.Log($"Client uuid: {uuid}");
                     clientEntity.MaxHealth = 20F;
 
                     // Create player render
@@ -154,9 +166,9 @@ namespace CraftSharp
             }
             catch (Exception e)
             {
-                tcpClient = ProxyHandler.newTcpClient(host, port);
-                tcpClient.ReceiveBufferSize = 1024 * 1024;
-                tcpClient.ReceiveTimeout = 30000; // 30 seconds
+                client = ProxyHandler.NewTcpClient(host, port);
+                client.ReceiveBufferSize = 1024 * 1024;
+                client.ReceiveTimeout = 30000; // 30 seconds
 
                 Debug.LogError(Translations.Get("error.connect", e.Message));
                 Debug.LogError(e.StackTrace);
@@ -302,6 +314,56 @@ namespace CraftSharp
             packetCount = pc;
         }
 
+        public void Transfer(string newHost, int newPort)
+        {
+            try
+            {
+                Debug.Log($"Initiating a transfer to: {host}:{port}");
+
+                // Clear world data
+                ChunkRenderManager.ClearChunksData();
+                EntityRenderManager.ClearEntityRenders();
+
+                // Close existing connection
+                client.Close();
+
+                // Establish new connection
+                client = ProxyHandler.NewTcpClient(newHost, newPort);
+                client.ReceiveBufferSize = 1024 * 1024;
+                client.ReceiveTimeout = 30000; // 30 seconds
+
+                // Reinitialize the protocol handler
+                handler = ProtocolHandler.GetProtocolHandler(client, protocolVersion, null, this);
+                Debug.Log($"Connected to {host}:{port}");
+
+                // Retry login process
+                if (handler.Login(playerKeyPair, _sessionToken, accountLower))
+                {
+                    // TODO: Prepare client scene
+
+                    Debug.Log("Successfully transferred connection and logged in.");
+                }
+                else
+                {
+                    Debug.LogError("Failed to login to the new host.");
+                    throw new Exception("Login failed after transfer.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Transfer to {newHost}:{newPort} failed: {ex.Message}");
+
+                // Handle reconnection attempts
+                if (timeoutdetector != null)
+                {
+                    timeoutdetector.Item2.Cancel();
+                    timeoutdetector = null;
+                }
+
+                throw new Exception("Transfer failed.");
+            }
+        }
+
         #region Disconnect logic
 
         /// <summary>
@@ -362,8 +424,8 @@ namespace CraftSharp
             timeoutdetector?.Item2.Cancel();
             timeoutdetector = null;
 
-            tcpClient?.Close();
-            tcpClient = null;
+            client?.Close();
+            client = null;
             
             Loom.QueueOnMainThread(() => {
                 // Clear item mesh cache
@@ -382,6 +444,7 @@ namespace CraftSharp
             Loom.QueueOnMainThread(() => {
                 // Clear world data
                 ChunkRenderManager.ClearChunksData();
+                EntityRenderManager.ClearEntityRenders();
             });
 
             switch (reason)
@@ -1887,7 +1950,9 @@ namespace CraftSharp
 
             ClearTasks();
 
+            // Clear world data
             ChunkRenderManager.ClearChunksData();
+            EntityRenderManager.ClearEntityRenders();
 
             //if (!keepAttr)
             {
@@ -1899,7 +1964,7 @@ namespace CraftSharp
                 PlayerController.DisablePhysics();
 
                 ChunkRenderManager.ReloadChunksRender();
-                EntityRenderManager.ReloadEntityRenders();
+                EntityRenderManager.ClearEntityRenders();
             });
         }
 

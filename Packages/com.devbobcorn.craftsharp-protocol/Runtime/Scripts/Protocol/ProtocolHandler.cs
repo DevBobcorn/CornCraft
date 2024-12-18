@@ -152,64 +152,34 @@ namespace CraftSharp.Protocol
         {
             if (MCVersion.Contains('.'))
             {
-                switch (MCVersion.Split(' ')[0].Trim())
+                return MCVersion.Split(' ')[0].Trim() switch
                 {
-                    case "1.16":
-                    case "1.16.0":
-                        return 735;
-                    case "1.16.1":
-                        return 736;
-                    case "1.16.2":
-                        return 751;
-                    case "1.16.3":
-                        return 753;
-                    case "1.16.4":
-                    case "1.16.5":
-                        return 754;
-                    case "1.17":
-                    case "1.17.0":
-                        return 755;
-                    case "1.17.1":
-                        return 756;
-                    case "1.18":
-                    case "1.18.0":
-                    case "1.18.1":
-                        return 757;
-                    case "1.18.2":
-                        return 758;
-                    case "1.19":
-                    case "1.19.0":
-                        return 759;
-                    case "1.19.1":
-                    case "1.19.2":
-                        return 760;
-                    case "1.19.3":
-                        return 761;
-                    case "1.19.4":
-                        return 762;
-                    case "1.20":
-                    case "1.20.1":
-                        return 763;
-                    case "1.20.2":
-                        return 764;
-                    case "1.20.3":
-                    case "1.20.4":
-                        return 765;
-                    case "1.20.5":
-                    case "1.20.6":
-                        return 766;
-                    case "1.21":
-                    case "1.21.1":
-                        return 767;
-                    default:
-                        return 0;
-                }
+                    "1.16" or "1.16.0" => 735,
+                    "1.16.1" => 736,
+                    "1.16.2" => 751,
+                    "1.16.3" => 753,
+                    "1.16.4" or "1.16.5" => 754,
+                    "1.17" or "1.17.0" => 755,
+                    "1.17.1" => 756,
+                    "1.18" or "1.18.0" or "1.18.1" => 757,
+                    "1.18.2" => 758,
+                    "1.19" or "1.19.0" => 759,
+                    "1.19.1" or "1.19.2" => 760,
+                    "1.19.3" => 761,
+                    "1.19.4" => 762,
+                    "1.20" or "1.20.1" => 763,
+                    "1.20.2" => 764,
+                    "1.20.3" or "1.20.4" => 765,
+                    "1.20.5" or "1.20.6" => 766,
+                    "1.21" or "1.21.1" => 767,
+                    _ => 0,
+                };
             }
             else
             {
                 try
                 {
-                    return Int32.Parse(MCVersion);
+                    return int.Parse(MCVersion);
                 }
                 catch
                 {
@@ -234,11 +204,8 @@ namespace CraftSharp.Protocol
                 [763] = "1.20",
                 [764] = "1.20.2",
                 [765] = "1.20.3",
-
-                /*
                 [766] = "1.20.5",
                 [767] = "1.21"
-                */
         };
 
         /// <summary>

@@ -9,14 +9,14 @@ namespace CraftSharp.Protocol.Session
     [Serializable]
     public class SessionToken
     {
-        private static readonly Regex JwtRegex = new Regex("^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+$");
+        private static readonly Regex JwtRegex = new("^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+$");
 
         public string Id { get; set; }
         public string PlayerName { get; set; }
         public string PlayerId { get; set; }
         public string ClientId { get; set; }
         public string RefreshToken { get; set; }
-        public string ServerIdhash { get; set; }
+        public string ServerIdHash { get; set; }
         public byte[]? ServerPublicKey { get; set; }
 
         public Task<bool>? SessionPreCheckTask = null;
@@ -28,17 +28,16 @@ namespace CraftSharp.Protocol.Session
             PlayerId = string.Empty;
             ClientId = string.Empty;
             RefreshToken = string.Empty;
-            ServerIdhash = string.Empty;
+            ServerIdHash = string.Empty;
             ServerPublicKey = null;
         }
 
         public bool SessionPreCheck()
         {
-            if (this.Id == string.Empty || this.PlayerId == string.Empty || this.ServerPublicKey == null)
+            if (Id == string.Empty || PlayerId == string.Empty || ServerPublicKey == null)
                 return false;
-            if (Crypto.CryptoHandler.ClientAESPrivateKey == null)
-                Crypto.CryptoHandler.ClientAESPrivateKey = Crypto.CryptoHandler.GenerateAESPrivateKey();
-            string serverHash = Crypto.CryptoHandler.GetServerHash(ServerIdhash, ServerPublicKey, Crypto.CryptoHandler.ClientAESPrivateKey);
+            Crypto.CryptoHandler.ClientAESPrivateKey ??= Crypto.CryptoHandler.GenerateAESPrivateKey();
+            string serverHash = Crypto.CryptoHandler.GetServerHash(ServerIdHash, ServerPublicKey, Crypto.CryptoHandler.ClientAESPrivateKey);
             if (ProtocolHandler.SessionCheck(PlayerId, Id, serverHash))
                 return true;
             return false;
@@ -46,7 +45,7 @@ namespace CraftSharp.Protocol.Session
 
         public override string ToString()
         {
-            return String.Join(",", Id, PlayerName, PlayerId, ClientId, RefreshToken, ServerIdhash, 
+            return string.Join(",", Id, PlayerName, PlayerId, ClientId, RefreshToken, ServerIdHash,
                 (ServerPublicKey == null) ? string.Empty : Convert.ToBase64String(ServerPublicKey));
         }
 
@@ -56,20 +55,22 @@ namespace CraftSharp.Protocol.Session
             if (fields.Length < 4)
                 throw new InvalidDataException("Invalid string format");
 
-            SessionToken session = new SessionToken();
-            session.Id = fields[0];
-            session.PlayerName = fields[1];
-            session.PlayerId = fields[2];
-            session.ClientId = fields[3];
+            SessionToken session = new()
+            {
+                Id = fields[0],
+                PlayerName = fields[1],
+                PlayerId = fields[2],
+                ClientId = fields[3]
+            };
             // Backward compatible with old session file without refresh token field
             if (fields.Length > 4)
                 session.RefreshToken = fields[4];
             else
                 session.RefreshToken = string.Empty;
             if (fields.Length > 5)
-                session.ServerIdhash = fields[5];
+                session.ServerIdHash = fields[5];
             else
-                session.ServerIdhash = string.Empty;
+                session.ServerIdHash = string.Empty;
             if (fields.Length > 6)
             {
                 try
@@ -83,20 +84,17 @@ namespace CraftSharp.Protocol.Session
             }
             else
                 session.ServerPublicKey = null;
-
-            Guid temp;
             if (!JwtRegex.IsMatch(session.Id))
-                throw new InvalidDataException("Invalid session Id");
+                throw new InvalidDataException("Invalid session ID");
             if (!PlayerInfo.IsValidName(session.PlayerName))
                 throw new InvalidDataException("Invalid player name");
-            if (!Guid.TryParseExact(session.PlayerId, "N", out temp))
-                throw new InvalidDataException("Invalid player Id");
-            if (!Guid.TryParseExact(session.ClientId, "N", out temp))
-                throw new InvalidDataException("Invalid client Id");
+            if (!Guid.TryParseExact(session.PlayerId, "N", out _))
+                throw new InvalidDataException("Invalid player ID");
+            if (!Guid.TryParseExact(session.ClientId, "N", out _))
+                throw new InvalidDataException("Invalid client ID");
             // No validation on refresh token because it is custom format token (not Jwt)
 
             return session;
         }
-
     }
 }

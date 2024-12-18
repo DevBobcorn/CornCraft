@@ -2517,7 +2517,7 @@ namespace CraftSharp.Protocol.Handlers
 
                 bool needCheckSession = true;
                 if (session.ServerPublicKey != null && session.SessionPreCheckTask != null
-                        && serverIdhash == session.ServerIdhash &&
+                        && serverIdhash == session.ServerIdHash &&
                         Enumerable.SequenceEqual(serverPublicKey, session.ServerPublicKey))
                 {
                     session.SessionPreCheckTask.Wait();
@@ -2531,7 +2531,7 @@ namespace CraftSharp.Protocol.Handlers
 
                     if (ProtocolHandler.SessionCheck(uuid, sessionId, serverHash))
                     {
-                        session.ServerIdhash = serverIdhash;
+                        session.ServerIdHash = serverIdhash;
                         session.ServerPublicKey = serverPublicKey;
                         SessionCache.Store(accountLower, session);
                     }
@@ -2654,7 +2654,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <returns>True if ping was successful</returns>
         public static bool DoPing(string host, int port, ref string versionName, ref int protocol, ref ForgeInfo? forgeInfo)
         {
-            var tcp = ProxyHandler.newTcpClient(host, port);
+            var tcp = ProxyHandler.NewTcpClient(host, port);
             tcp.ReceiveTimeout = 30000; // 30 seconds
             tcp.ReceiveBufferSize = 1024 * 1024;
             var socketWrapper = new SocketWrapper(tcp);

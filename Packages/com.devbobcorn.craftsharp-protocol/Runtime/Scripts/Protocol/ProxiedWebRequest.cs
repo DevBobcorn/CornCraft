@@ -112,7 +112,7 @@ namespace CraftSharp.Protocol
             Response response = Response.Empty();
             AutoTimeout.Perform(() =>
             {
-                TcpClient client = ProxyHandler.newTcpClient(host, port, true);
+                TcpClient client = ProxyHandler.NewTcpClient(host, port, true);
                 Stream stream;
                 if (isSecure)
                 {

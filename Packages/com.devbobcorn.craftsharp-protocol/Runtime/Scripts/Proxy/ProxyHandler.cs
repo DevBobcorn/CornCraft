@@ -14,7 +14,7 @@ namespace CraftSharp.Proxy
     {
         public enum Type { HTTP, SOCKS4, SOCKS4a, SOCKS5 };
 
-        private static ProxyClientFactory factory = new ProxyClientFactory();
+        private static readonly ProxyClientFactory factory = new();
         private static IProxyClient proxy;
         private static bool proxy_ok = false;
 
@@ -25,7 +25,7 @@ namespace CraftSharp.Proxy
         /// <param name="port">Target port</param>
         /// <param name="login">True if the purpose is logging in to a Minecraft account</param>
 
-        public static TcpClient newTcpClient(string host, int port, bool login = false)
+        public static TcpClient NewTcpClient(string host, int port, bool login = false)
         {
             try
             {

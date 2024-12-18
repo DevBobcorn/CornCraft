@@ -1,5 +1,4 @@
 using CraftSharp.Proxy;
-using CraftSharp.Protocol.Session;
 
 namespace CraftSharp
 {
