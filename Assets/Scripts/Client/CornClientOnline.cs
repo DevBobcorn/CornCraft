@@ -322,7 +322,10 @@ namespace CraftSharp
 
                 // Clear world data
                 ChunkRenderManager.ClearChunksData();
-                EntityRenderManager.ReloadEntityRenders();
+                
+                Loom.QueueOnMainThread(() => {
+                    EntityRenderManager.ReloadEntityRenders();
+                });
 
                 // Close existing connection
                 client.Close();

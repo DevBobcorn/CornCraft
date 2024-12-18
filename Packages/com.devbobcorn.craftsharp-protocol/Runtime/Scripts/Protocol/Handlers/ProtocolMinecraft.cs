@@ -311,6 +311,14 @@ namespace CraftSharp.Protocol.Handlers
                                 var understood = pForge.HandleLoginPluginRequest(channel, packetData, ref responseData);
                                 SendLoginPluginResponse(messageId, understood, responseData.ToArray());
                                 return understood;
+                            
+                            // Cookie Request
+                            case 0x05:
+                                var cookieName = DataTypes.ReadNextString(packetData);
+                                var cookieData = null as byte[];
+                                handler.GetCookie(cookieName, out cookieData);
+                                SendCookieResponse(cookieName, cookieData);
+                                break;
 
                             // Ignore other packets at this stage
                             default:
@@ -323,6 +331,13 @@ namespace CraftSharp.Protocol.Handlers
                     case CurrentState.Configuration:
                         switch (packetPalette.GetIncomingConfigurationTypeById(packetId))
                         {
+                            case ConfigurationPacketTypesIn.CookieRequest:
+                                var cookieName = DataTypes.ReadNextString(packetData);
+                                var cookieData = null as byte[];
+                                handler.GetCookie(cookieName, out cookieData);
+                                SendCookieResponse(cookieName, cookieData);
+                                break;
+                            
                             case ConfigurationPacketTypesIn.Disconnect:
                                 handler.OnConnectionLost(DisconnectReason.InGameKick,
                                     dataTypes.ReadNextChat(packetData));
@@ -403,6 +418,34 @@ namespace CraftSharp.Protocol.Handlers
 
                             case ConfigurationPacketTypesIn.ResourcePack:
                                 HandleResourcePackPacket(packetData);
+                                break;
+                            
+                            case ConfigurationPacketTypesIn.StoreCookie:
+                                var name = DataTypes.ReadNextString(packetData);
+                                var data = DataTypes.ReadNextByteArray(packetData);
+                                handler.SetCookie(name, data);
+                                break;
+                            
+                            case ConfigurationPacketTypesIn.Transfer:
+                                var host = DataTypes.ReadNextString(packetData);
+                                var port = DataTypes.ReadNextVarInt(packetData);
+                                    
+                                handler.Transfer(host, port);
+                                break;
+                            
+                            case ConfigurationPacketTypesIn.KnownDataPacks:
+                                var knownPacksCount = DataTypes.ReadNextVarInt(packetData);
+                                List<(string, string, string)> knownDataPacks = new();
+                                
+                                for (var i = 0; i < knownPacksCount; i++)
+                                {
+                                    var nameSpace = DataTypes.ReadNextString(packetData);
+                                    var id = DataTypes.ReadNextString(packetData);
+                                    var version = DataTypes.ReadNextString(packetData);
+                                    knownDataPacks.Add((nameSpace, id, version));
+                                }
+
+                                SendKnownDataPacks(knownDataPacks);
                                 break;
 
                             // Ignore other packets at this stage
@@ -3837,6 +3880,90 @@ namespace CraftSharp.Protocol.Handlers
                 List<byte> packet = new();
                 packet.AddRange(DataTypes.GetString(itemName.Length > 50 ? itemName[..50] : itemName));
                 SendPacket(PacketTypesOut.NameItem, packet);
+                return true;
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
+            catch (System.IO.IOException)
+            {
+                return false;
+            }
+            catch (ObjectDisposedException)
+            {
+                return false;
+            }
+        }
+
+        public bool SendCookieResponse(string name, byte[]? data)
+        {
+            try
+            {
+                var packet = new List<byte>();
+                var hasPayload = data is not null;
+                packet.AddRange(DataTypes.GetString(name)); // Identifier
+                packet.AddRange(DataTypes.GetBool(hasPayload)); // Has payload
+                
+                if (hasPayload)
+                    packet.AddRange(DataTypes.GetArray(data!)); // Payload Data Array Size + Data Array
+
+                switch (currentState)
+                {
+                    case CurrentState.Login:
+                        SendPacket(0x04, packet);
+                        break;
+
+                    case CurrentState.Configuration:
+                        SendPacket(ConfigurationPacketTypesOut.CookieResponse, packet);
+                        break;
+
+                    case CurrentState.Play:
+                        SendPacket(PacketTypesOut.CookieResponse, packet);
+                        break;
+                }
+                
+                handler.DeleteCookie(name);
+                return true;
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
+            catch (System.IO.IOException)
+            {
+                return false;
+            }
+            catch (ObjectDisposedException)
+            {
+                return false;
+            }
+        }
+
+        public bool SendKnownDataPacks(List<(string, string, string)> knownDataPacks)
+        {
+            try
+            {
+                var packet = new List<byte>();
+                packet.AddRange(DataTypes.GetVarInt(knownDataPacks.Count)); // Known Packs Count
+                foreach (var dataPack in knownDataPacks)
+                {
+                    packet.AddRange(DataTypes.GetString(dataPack.Item1));
+                    packet.AddRange(DataTypes.GetString(dataPack.Item2));
+                    packet.AddRange(DataTypes.GetString(dataPack.Item3));
+                }
+
+                switch (currentState)
+                {
+                    case CurrentState.Configuration: 
+                        SendPacket(ConfigurationPacketTypesOut.KnownDataPacks, packet);
+                        break;
+                    
+                    case CurrentState.Play:
+                        SendPacket(PacketTypesOut.KnownDataPacks, packet);
+                        break;
+                }
+                
                 return true;
             }
             catch (SocketException)
