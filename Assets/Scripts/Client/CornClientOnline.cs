@@ -322,7 +322,7 @@ namespace CraftSharp
 
                 // Clear world data
                 ChunkRenderManager.ClearChunksData();
-                EntityRenderManager.ClearEntityRenders();
+                EntityRenderManager.ReloadEntityRenders();
 
                 // Close existing connection
                 client.Close();
@@ -444,7 +444,7 @@ namespace CraftSharp
             Loom.QueueOnMainThread(() => {
                 // Clear world data
                 ChunkRenderManager.ClearChunksData();
-                EntityRenderManager.ClearEntityRenders();
+                EntityRenderManager.ReloadEntityRenders();
             });
 
             switch (reason)
@@ -1952,7 +1952,6 @@ namespace CraftSharp
 
             // Clear world data
             ChunkRenderManager.ClearChunksData();
-            EntityRenderManager.ClearEntityRenders();
 
             //if (!keepAttr)
             {
@@ -1964,7 +1963,7 @@ namespace CraftSharp
                 PlayerController.DisablePhysics();
 
                 ChunkRenderManager.ReloadChunksRender();
-                EntityRenderManager.ClearEntityRenders();
+                EntityRenderManager.ReloadEntityRenders();
             });
         }
 

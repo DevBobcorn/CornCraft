@@ -224,7 +224,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Unload all entity renders in the world
         /// </summary>
-        public void ClearEntityRenders()
+        public void ReloadEntityRenders()
         {
             var ids = entityRenders.Keys.ToArray();
             foreach (var id in ids)

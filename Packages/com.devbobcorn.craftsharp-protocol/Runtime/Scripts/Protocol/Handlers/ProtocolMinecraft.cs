@@ -343,7 +343,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             case ConfigurationPacketTypesIn.RegistryData:
 
-                                if (protocolVersion <= MC_1_20_4_Version) // Different registries are wrapped in one nbt structure
+                                if (protocolVersion < MC_1_20_6_Version) // Different registries are wrapped in one nbt structure
                                 {
                                     var registryCodec = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT).ToDictionary(
                                             x => ResourceLocation.FromString(x.Key), x => x.Value);
@@ -573,10 +573,10 @@ namespace CraftSharp.Protocol.Handlers
                                     dimensionType = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
                                 else
                                     DataTypes.ReadNextString(packetData);
-                                this.currentDimension = 0;
+                                currentDimension = 0;
                             }
                             else
-                                this.currentDimension = DataTypes.ReadNextInt(packetData);
+                                currentDimension = DataTypes.ReadNextInt(packetData);
 
                             if (protocolVersion >= MC_1_16_Version)
                             {
@@ -586,7 +586,7 @@ namespace CraftSharp.Protocol.Handlers
                                 if (protocolVersion >= MC_1_16_2_Version && protocolVersion <= MC_1_18_2_Version)
                                 {
                                     // Store the received dimension type with received dimension id
-                                    World.StoreOneDimensionType(dimensionId, dimensionType!);
+                                    World.StoreOneDimensionType(dimensionId, World.GetNextDimensionTypeNumIdCandidate(), dimensionType!);
 
                                     World.SetDimensionType(dimensionId);
                                     World.SetDimensionId(dimensionId);
@@ -644,7 +644,12 @@ namespace CraftSharp.Protocol.Handlers
                         else
                         {
                             DataTypes.ReadNextBool(packetData);                           // Do limited crafting
-                            var dimensionTypeName = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
+                            
+                            // Dimension Type (string bellow 1.20.6, VarInt for 1.20.6+)
+                            var dimensionTypeName = protocolVersion < MC_1_20_6_Version
+                                ? DataTypes.ReadNextString(packetData) // < 1.20.6
+                                : World.GetDimensionTypeIdByNumId(DataTypes.ReadNextInt(packetData)).ToString();
+
                             var dimensionName = DataTypes.ReadNextString(packetData);     // Dimension Name (World Name) - 1.16 and above
                             
                             var dimensionTypeId = ResourceLocation.FromString(dimensionTypeName);
@@ -666,6 +671,9 @@ namespace CraftSharp.Protocol.Handlers
                             }
 
                             DataTypes.ReadNextVarInt(packetData); // Portal Cooldown
+
+                            if (protocolVersion >= MC_1_20_6_Version)
+                                DataTypes.ReadNextBool(packetData); // Enforoces Secure Chat
                         }
                     }
                     break;
@@ -1108,15 +1116,16 @@ namespace CraftSharp.Protocol.Handlers
                         string? dimensionTypeNameRespawn = null;
                         Dictionary<string, object>? dimensionTypeRespawn = null;
 
-                        // MC 1.16+
+                        if (protocolVersion >= MC_1_20_6_Version)
+                            dimensionTypeNameRespawn = World.GetDimensionTypeIdByNumId(DataTypes.ReadNextInt(packetData)).ToString();
                         if (protocolVersion >= MC_1_19_Version)
                             dimensionTypeNameRespawn = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
                         else if (protocolVersion >= MC_1_16_2_Version)
                             dimensionTypeRespawn = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
-                        else
+                        else // MC 1.16+
                             DataTypes.ReadNextString(packetData);
                             
-                        this.currentDimension = 0;
+                        currentDimension = 0;
 
                         var dimensionName = DataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
                         var dimensionId = ResourceLocation.FromString(dimensionName);
@@ -1124,7 +1133,7 @@ namespace CraftSharp.Protocol.Handlers
                         if (protocolVersion >= MC_1_16_2_Version && protocolVersion <= MC_1_18_2_Version)
                         {
                             // Store the received dimension type with received dimension id
-                            World.StoreOneDimensionType(dimensionId, dimensionTypeRespawn!);
+                            World.StoreOneDimensionType(dimensionId, World.GetNextDimensionTypeNumIdCandidate(), dimensionTypeRespawn!);
 
                             World.SetDimensionType(dimensionId);
                             World.SetDimensionId(dimensionId);
@@ -1952,7 +1961,7 @@ namespace CraftSharp.Protocol.Handlers
                             var hasFactorData = false;
                             Dictionary<string, object>? factorCodec = null;
 
-                            if (protocolVersion >= MC_1_19_Version)
+                            if (protocolVersion >= MC_1_19_Version && protocolVersion < MC_1_20_6_Version)
                             {
                                 hasFactorData = DataTypes.ReadNextBool(packetData);
                                 if (hasFactorData)
@@ -2039,10 +2048,41 @@ namespace CraftSharp.Protocol.Handlers
                             ? DataTypes.ReadNextVarInt(packetData)
                             : DataTypes.ReadNextInt(packetData);
 
+                        var attributeDictionary = new Dictionary<int, string>
+                        {
+                            { 0, "generic.armor" },
+                            { 1, "generic.armor_toughness" },
+                            { 2, "generic.attack_damage" },
+                            { 3, "generic.attack_knockback" },
+                            { 4, "generic.attack_speed" },
+                            { 5, "generic.block_break_speed" },
+                            { 6, "generic.block_interaction_range" },
+                            { 7, "generic.entity_interaction_range" },
+                            { 8, "generic.fall_damage_multiplier" },
+                            { 9, "generic.flying_speed" },
+                            { 10, "generic.follow_range" },
+                            { 11, "generic.gravity" },
+                            { 12, "generic.jump_strength" },
+                            { 13, "generic.knockback_resistance" },
+                            { 14, "generic.luck" },
+                            { 15, "generic.max_absorption" },
+                            { 16, "generic.max_health" },
+                            { 17, "generic.movement_speed" },
+                            { 18, "generic.safe_fall_distance" },
+                            { 19, "generic.scale" },
+                            { 20, "zombie.spawn_reinforcements" },
+                            { 21, "generic.step_height" },
+                            { 22, "generic.submerged_mining_speed" },
+                            { 23, "generic.sweeping_damage_ratio" },
+                            { 24, "generic.water_movement_efficiency" }
+                        };
+
                         Dictionary<string, double> keys = new();
                         for (int i = 0; i < NumberOfProperties; i++)
                         {
-                            var propertyKey = DataTypes.ReadNextString(packetData);
+                            var propertyKey = protocolVersion < MC_1_20_6_Version
+                                ? DataTypes.ReadNextString(packetData) 
+                                : attributeDictionary[DataTypes.ReadNextVarInt(packetData)];
                             var propertyValue = DataTypes.ReadNextDouble(packetData);
 
                             List<double> op0 = new();
@@ -2469,8 +2509,15 @@ namespace CraftSharp.Protocol.Handlers
                             var serverId = DataTypes.ReadNextString(packetData);
                             var serverPublicKey = DataTypes.ReadNextByteArray(packetData);
                             var token = DataTypes.ReadNextByteArray(packetData);
-                            return StartEncryption(accountLower, handler.GetUserUuidStr(), handler.GetSessionId(), token, serverId,
-                                serverPublicKey, playerKeyPair, session);
+
+                            var shouldAuthenticate = false;
+
+                            if (protocolVersion >= MC_1_20_6_Version)
+                                shouldAuthenticate = DataTypes.ReadNextBool(packetData);
+
+                            return StartEncryption(accountLower, handler.GetUserUuidStr(),
+                                handler.GetSessionId(), token, serverId, serverPublicKey,
+                                playerKeyPair, session, shouldAuthenticate);
                         }
 
                     // Login successful
@@ -2504,7 +2551,8 @@ namespace CraftSharp.Protocol.Handlers
         /// Start network encryption. Automatically called by Login() if the server requests encryption.
         /// </summary>
         /// <returns>True if encryption was successful</returns>
-        private bool StartEncryption(string accountLower, string uuid, string sessionId, byte[] token, string serverIdhash, byte[] serverPublicKey, PlayerKeyPair? playerKeyPair, SessionToken session)
+        private bool StartEncryption(string accountLower, string uuid, string sessionId, byte[] token, string serverIdhash,
+                byte[] serverPublicKey, PlayerKeyPair? playerKeyPair, SessionToken session, bool shouldAuthenticate)
         {
             RSACryptoServiceProvider RSAService = CryptoHandler.DecodeRSAPublicKey(serverPublicKey);
             byte[] secretKey = CryptoHandler.ClientAESPrivateKey ?? CryptoHandler.GenerateAESPrivateKey();
@@ -2524,6 +2572,10 @@ namespace CraftSharp.Protocol.Handlers
                     if (session.SessionPreCheckTask.Result) // PreCheck Successed
                         needCheckSession = false;
                 }
+
+                // 1.20.6+
+                if (shouldAuthenticate)
+                    needCheckSession = true;
 
                 if (needCheckSession)
                 {
@@ -2615,6 +2667,10 @@ namespace CraftSharp.Protocol.Handlers
                                 }
                             }
 
+                            // Strict Error Handling (Ignored)
+                            if (protocolVersion >= MC_1_20_6_Version)
+                                DataTypes.ReadNextBool(packetData);
+
                             currentState = protocolVersion < MC_1_20_2_Version
                                 ? CurrentState.Play
                                 : CurrentState.Configuration;
@@ -2626,7 +2682,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             if (!pForge.CompleteForgeHandshake())
                             {
-                        Debug.Log(Translations.Get("error.forge_encrypt"));
+                                Debug.Log(Translations.Get("error.forge_encrypt"));
                                 return false;
                             }
 
@@ -2833,13 +2889,21 @@ namespace CraftSharp.Protocol.Handlers
         /// <returns>True if properly sent</returns>
         public bool SendChatCommand(string command, PlayerKeyPair? playerKeyPair)
         {
-            if (String.IsNullOrEmpty(command))
+            if (string.IsNullOrEmpty(command))
                 return true;
 
             command = Regex.Replace(command, @"\s+", " ");
             command = Regex.Replace(command, @"\s$", string.Empty);
 
             //Debug.Log("chat command = " + command);
+
+            if (protocolVersion >= MC_1_20_6_Version && !isOnlineMode)
+            {
+                List<byte> fields = new();
+                fields.AddRange(DataTypes.GetString(command));
+                SendPacket(PacketTypesOut.ChatCommand, fields);
+                return true;
+            }
 
             try
             {
@@ -2918,7 +2982,7 @@ namespace CraftSharp.Protocol.Handlers
                         fields.AddRange(bitset_1_19_3);
                     }
 
-                    SendPacket(PacketTypesOut.ChatCommand, fields);
+                    SendPacket(protocolVersion < MC_1_20_6_Version ? PacketTypesOut.ChatCommand : PacketTypesOut.SignedChatCommand, fields);
                 }
 
                 return true;
