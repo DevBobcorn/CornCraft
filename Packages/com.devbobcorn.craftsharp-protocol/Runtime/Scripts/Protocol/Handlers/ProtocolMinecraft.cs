@@ -30,10 +30,7 @@ namespace CraftSharp.Protocol.Handlers
     /// </remarks>
     public class ProtocolMinecraft : IMinecraftCom
     {
-        public const int MC_1_15_Version   = 573;
-        public const int MC_1_15_2_Version = 578;
-        public const int MC_1_16_Version   = 735;
-        public const int MC_1_16_1_Version = 736;
+
         public const int MC_1_16_2_Version = 751;
         public const int MC_1_16_3_Version = 753;
         public const int MC_1_16_5_Version = 754;
@@ -557,44 +554,40 @@ namespace CraftSharp.Protocol.Handlers
                         int playerEntityId = DataTypes.ReadNextInt(packetData);
                         handler.OnReceivePlayerEntityId(playerEntityId);
 
-                        if (protocolVersion >= MC_1_16_2_Version)
-                            DataTypes.ReadNextBool(packetData);                       // Is hardcore - 1.16.2 and above
+                        DataTypes.ReadNextBool(packetData);                       // Is hardcore - 1.16.2 and above
 
                         if (protocolVersion < MC_1_20_2_Version)
                             handler.OnGamemodeUpdate(Guid.Empty, DataTypes.ReadNextByte(packetData));
 
-                        if (protocolVersion >= MC_1_16_Version)
+                        if (protocolVersion < MC_1_20_2_Version)
+                            DataTypes.ReadNextByte(packetData);                   // Previous Gamemode - 1.16 and above
+                        
+                        int worldCount = DataTypes.ReadNextVarInt(packetData);    // Dimension Count (World Count) - 1.16 and above
+                        for (int i = 0; i < worldCount; i++)
+                            DataTypes.ReadNextString(packetData);                 // Dimension Names (World Names) - 1.16 and above
+
+                        if (protocolVersion < MC_1_20_2_Version)
                         {
-                            if (protocolVersion < MC_1_20_2_Version)
-                                DataTypes.ReadNextByte(packetData);                   // Previous Gamemode - 1.16 and above
-                            
-                            int worldCount = DataTypes.ReadNextVarInt(packetData);    // Dimension Count (World Count) - 1.16 and above
-                            for (int i = 0; i < worldCount; i++)
-                                DataTypes.ReadNextString(packetData);                 // Dimension Names (World Names) - 1.16 and above
+                            // Registry Codec (Dimension Codec) - 1.16 and above
+                            var registryCodec = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT).ToDictionary(
+                                        x => ResourceLocation.FromString(x.Key), x => x.Value);
 
-                            if (protocolVersion < MC_1_20_2_Version)
+                            if (registryCodec.TryGetValue(World.DIMENSION_TYPE_ID, out object dimensionTypes))
                             {
-                                // Registry Codec (Dimension Codec) - 1.16 and above
-                                var registryCodec = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT).ToDictionary(
-                                            x => ResourceLocation.FromString(x.Key), x => x.Value);
+                                var dimensionListNbt = ((Dictionary<string, object>) dimensionTypes)["value"];
+                                var dimensionList = ReadRegistryCodecArray((object[]) dimensionListNbt);
 
-                                if (registryCodec.TryGetValue(World.DIMENSION_TYPE_ID, out object dimensionTypes))
-                                {
-                                    var dimensionListNbt = ((Dictionary<string, object>) dimensionTypes)["value"];
-                                    var dimensionList = ReadRegistryCodecArray((object[]) dimensionListNbt);
+                                // Read and store defined dimensions 1.16.2 and above
+                                World.StoreDimensionTypeList(dimensionList);
+                            }
 
-                                    // Read and store defined dimensions 1.16.2 and above
-                                    World.StoreDimensionTypeList(dimensionList);
-                                }
+                            if (registryCodec.TryGetValue(World.WORLDGEN_BIOME_ID, out object worldgenBiomes))
+                            {
+                                var biomeListNbt = ((Dictionary<string, object>) worldgenBiomes)["value"];
+                                var biomeList = ReadRegistryCodecArray((object[]) biomeListNbt);
 
-                                if (registryCodec.TryGetValue(World.WORLDGEN_BIOME_ID, out object worldgenBiomes))
-                                {
-                                    var biomeListNbt = ((Dictionary<string, object>) worldgenBiomes)["value"];
-                                    var biomeList = ReadRegistryCodecArray((object[]) biomeListNbt);
-
-                                    // Read and store defined biomes 1.16.2 and above
-                                    World.StoreBiomeList(biomeList);
-                                }
+                                // Read and store defined biomes 1.16.2 and above
+                                World.StoreBiomeList(biomeList);
                             }
                         }
 
@@ -603,57 +596,40 @@ namespace CraftSharp.Protocol.Handlers
                             // Current dimension
                             //   String: 1.19 and above
                             //   NBT Tag Compound: [1.16.2 to 1.18.2]
-                            //   String identifier: 1.16 and 1.16.1
-                            //   varInt: [1.9.1 to 1.15.2]
-                            //   byte: below 1.9.1
                             string? dimensionTypeName = null;
                             Dictionary<string, object>? dimensionType = null;
-                            if (protocolVersion >= MC_1_16_Version)
-                            {
-                                if (protocolVersion >= MC_1_19_Version)
-                                    dimensionTypeName = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
-                                else if (protocolVersion >= MC_1_16_2_Version)
-                                    dimensionType = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
-                                else
-                                    DataTypes.ReadNextString(packetData);
-                                currentDimension = 0;
-                            }
+                            
+                            if (protocolVersion >= MC_1_19_Version)
+                                dimensionTypeName = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
                             else
-                                currentDimension = DataTypes.ReadNextInt(packetData);
+                                dimensionType = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
 
-                            if (protocolVersion >= MC_1_16_Version)
+                            currentDimension = 0;
+
+                            string dimensionName = DataTypes.ReadNextString(packetData); // Dimension Id (World Id) - 1.16 and above
+                            var dimensionId = ResourceLocation.FromString(dimensionName);
+
+                            if (protocolVersion <= MC_1_18_2_Version)
                             {
-                                string dimensionName = DataTypes.ReadNextString(packetData); // Dimension Id (World Id) - 1.16 and above
-                                var dimensionId = ResourceLocation.FromString(dimensionName);
+                                // Store the received dimension type with received dimension id
+                                World.StoreOneDimensionType(dimensionId, World.GetNextDimensionTypeNumIdCandidate(), dimensionType!);
 
-                                if (protocolVersion >= MC_1_16_2_Version && protocolVersion <= MC_1_18_2_Version)
-                                {
-                                    // Store the received dimension type with received dimension id
-                                    World.StoreOneDimensionType(dimensionId, World.GetNextDimensionTypeNumIdCandidate(), dimensionType!);
+                                World.SetDimensionType(dimensionId);
+                                World.SetDimensionId(dimensionId);
+                            }
+                            else if (protocolVersion >= MC_1_19_Version)
+                            {
+                                var dimensionTypeId = ResourceLocation.FromString(dimensionTypeName!);
 
-                                    World.SetDimensionType(dimensionId);
-                                    World.SetDimensionId(dimensionId);
-                                }
-                                else if (protocolVersion >= MC_1_19_Version)
-                                {
-                                    var dimensionTypeId = ResourceLocation.FromString(dimensionTypeName!);
-
-                                    World.SetDimensionType(dimensionTypeId);
-                                    World.SetDimensionId(dimensionId);
-                                }
+                                World.SetDimensionType(dimensionTypeId);
+                                World.SetDimensionId(dimensionId);
                             }
                         }
 
-                        if (protocolVersion is >= MC_1_15_Version and < MC_1_20_2_Version)
+                        if (protocolVersion < MC_1_20_2_Version)
                             DataTypes.ReadNextLong(packetData);           // Hashed world seed - 1.15 and above
 
-                        if (protocolVersion >= MC_1_16_2_Version)
-                            DataTypes.ReadNextVarInt(packetData);         // Max Players - 1.16.2 and above
-                        else
-                            DataTypes.ReadNextByte(packetData);           // Max Players - 1.16.1 and below
-
-                        if (protocolVersion < MC_1_16_Version)
-                            DataTypes.SkipNextString(packetData);         // Level Type - 1.15 and below
+                        DataTypes.ReadNextVarInt(packetData);             // Max Players - 1.16.2 and above
                             
                         DataTypes.ReadNextVarInt(packetData);             // View distance - 1.14 and above
                             
@@ -662,16 +638,13 @@ namespace CraftSharp.Protocol.Handlers
                             
                         DataTypes.ReadNextBool(packetData);               // Reduced debug info - 1.8 and above
 
-                        if (protocolVersion >= MC_1_15_Version)
-                            DataTypes.ReadNextBool(packetData);           // Enable respawn screen - 1.15 and above
+                        DataTypes.ReadNextBool(packetData);               // Enable respawn screen - 1.15 and above
 
                         if (protocolVersion < MC_1_20_2_Version)
                         {
-                            if (protocolVersion >= MC_1_16_Version)
-                            {
-                                DataTypes.ReadNextBool(packetData);           // Is Debug - 1.16 and above
-                                DataTypes.ReadNextBool(packetData);           // Is Flat - 1.16 and above
-                            }
+                            DataTypes.ReadNextBool(packetData);           // Is Debug - 1.16 and above
+                            DataTypes.ReadNextBool(packetData);           // Is Flat - 1.16 and above
+
                             if (protocolVersion >= MC_1_19_Version)
                             {
                                 if (DataTypes.ReadNextBool(packetData))       // Has death location
@@ -1163,17 +1136,15 @@ namespace CraftSharp.Protocol.Handlers
                             dimensionTypeNameRespawn = World.GetDimensionTypeIdByNumId(DataTypes.ReadNextInt(packetData)).ToString();
                         if (protocolVersion >= MC_1_19_Version)
                             dimensionTypeNameRespawn = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
-                        else if (protocolVersion >= MC_1_16_2_Version)
+                        else // 1.16.2+
                             dimensionTypeRespawn = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
-                        else // MC 1.16+
-                            DataTypes.ReadNextString(packetData);
                             
                         currentDimension = 0;
 
                         var dimensionName = DataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
                         var dimensionId = ResourceLocation.FromString(dimensionName);
 
-                        if (protocolVersion >= MC_1_16_2_Version && protocolVersion <= MC_1_18_2_Version)
+                        if (protocolVersion <= MC_1_18_2_Version)
                         {
                             // Store the received dimension type with received dimension id
                             World.StoreOneDimensionType(dimensionId, World.GetNextDimensionTypeNumIdCandidate(), dimensionTypeRespawn!);
@@ -1279,14 +1250,12 @@ namespace CraftSharp.Protocol.Handlers
                         else
                         {
                             var chunksContinuous = DataTypes.ReadNextBool(packetData);
-                            if (protocolVersion >= MC_1_16_Version && protocolVersion <= MC_1_16_1_Version)
-                                DataTypes.ReadNextBool(packetData); // Ignore old data - 1.16 to 1.16.1 only
 
                             var chunkMask = (ushort)DataTypes.ReadNextVarInt(packetData);
 
                             DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT);  // Heightmaps - 1.14 and above
 
-                            pTerrain.ProcessChunkColumnData16(chunkX, chunkZ, chunkMask, 0, false, chunksContinuous, currentDimension, packetData);
+                            pTerrain.ProcessChunkColumnData16(chunkX, chunkZ, chunkMask, chunksContinuous, packetData);
                         }
                     }
                     break;
@@ -1932,26 +1901,17 @@ namespace CraftSharp.Protocol.Handlers
                 case PacketTypesIn.EntityEquipment:
                     {
                         var entityId = DataTypes.ReadNextVarInt(packetData);
-                        if (protocolVersion >= MC_1_16_Version)
-                        {
-                            bool hasNext;
-                            do
-                            {
-                                var bitsData = DataTypes.ReadNextByte(packetData);
-                                //  Top bit set if another entry follows, and otherwise unset if this is the last item in the array
-                                hasNext = bitsData >> 7 == 1;
-                                var slot2 = bitsData >> 1;
-                                var item = dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
-                                handler.OnEntityEquipment(entityId, slot2, item!);
-                            } while (hasNext);
-                        }
-                        else
-                        {
-                            var slot2 = DataTypes.ReadNextVarInt(packetData);
 
-                            ItemStack? item = dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
+                        bool hasNext;
+                        do
+                        {
+                            var bitsData = DataTypes.ReadNextByte(packetData);
+                            //  Top bit set if another entry follows, and otherwise unset if this is the last item in the array
+                            hasNext = bitsData >> 7 == 1;
+                            var slot2 = bitsData >> 1;
+                            var item = dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
                             handler.OnEntityEquipment(entityId, slot2, item!);
-                        }
+                        } while (hasNext);
                     }
                     break;
                 case PacketTypesIn.SpawnLivingEntity:
@@ -2329,6 +2289,8 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.BlockBreakAnimation:
                     {
+                        Debug.Log("Block break animation");
+
                         var playerId = DataTypes.ReadNextVarInt(packetData);
                         var blockLoc = DataTypes.ReadNextBlockLoc(packetData);
                         var stage = DataTypes.ReadNextByte(packetData);
@@ -2342,14 +2304,14 @@ namespace CraftSharp.Protocol.Handlers
                         handler.OnEntityAnimation(playerId, animation);
                     }
                     break;
-                case PacketTypesIn.OpenSignEditor:
-                    var signLocation = DataTypes.ReadNextBlockLoc(packetData);
-                    var isFrontText = true;
+                case PacketTypesIn.OpenSignEditor: // TODO: Use
+                    {
+                        var signLocation = DataTypes.ReadNextBlockLoc(packetData);
+                        var isFrontText = true;
 
-                    if (protocolVersion >= MC_1_20_Version)
-                        isFrontText = DataTypes.ReadNextBool(packetData);
-
-                    // TODO: Use
+                        if (protocolVersion >= MC_1_20_Version)
+                            isFrontText = DataTypes.ReadNextBool(packetData);
+                    }
                     break;
                 case PacketTypesIn.SetTickingState:
                     DataTypes.ReadNextFloat(packetData);
@@ -2691,9 +2653,7 @@ namespace CraftSharp.Protocol.Handlers
                     //Login successful
                     case 0x02:
                         {
-                            var uuidReceived = protocolVersion >= MC_1_16_Version
-                                ? DataTypes.ReadNextUUID(packetData)
-                                : Guid.Parse(DataTypes.ReadNextString(packetData));
+                            var uuidReceived = DataTypes.ReadNextUUID(packetData);
                             var userName = DataTypes.ReadNextString(packetData);
                             Tuple<string, string, string>[]? playerProperty = null;
                             if (protocolVersion >= MC_1_19_Version)
@@ -3352,8 +3312,7 @@ namespace CraftSharp.Protocol.Handlers
                 // Is player Sneaking (Only 1.16 and above)
                 // Currently hardcoded to false
                 // TODO: Update to reflect the real player state
-                if (protocolVersion >= MC_1_16_Version)
-                    fields.AddRange(DataTypes.GetBool(false));
+                fields.AddRange(DataTypes.GetBool(false));
 
                 SendPacket(PacketTypesOut.InteractEntity, fields);
                 return true;
@@ -3378,8 +3337,7 @@ namespace CraftSharp.Protocol.Handlers
                 // Is player Sneaking (Only 1.16 and above)
                 // Currently hardcoded to false
                 // TODO: Update to reflect the real player state
-                if (protocolVersion >= MC_1_16_Version)
-                    fields.AddRange(DataTypes.GetBool(false));
+                fields.AddRange(DataTypes.GetBool(false));
                 SendPacket(PacketTypesOut.InteractEntity, fields);
                 return true;
             }
@@ -3399,8 +3357,7 @@ namespace CraftSharp.Protocol.Handlers
                 // Is player Sneaking (Only 1.16 and above)
                 // Currently hardcoded to false
                 // TODO: Update to reflect the real player state
-                if (protocolVersion >= MC_1_16_Version)
-                    fields.AddRange(DataTypes.GetBool(false));
+                fields.AddRange(DataTypes.GetBool(false));
                 SendPacket(PacketTypesOut.InteractEntity, fields);
                 return true;
             }

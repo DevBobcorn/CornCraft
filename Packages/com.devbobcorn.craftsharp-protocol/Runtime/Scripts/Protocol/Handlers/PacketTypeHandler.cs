@@ -50,7 +50,6 @@ namespace CraftSharp.Protocol.Handlers
             {
                 > ProtocolMinecraft.MC_1_21_Version => throw new NotImplementedException(Translations.Get("exception.palette.packet")),
 
-                <= ProtocolMinecraft.MC_1_16_1_Version => new PacketPalette116(),
                 <= ProtocolMinecraft.MC_1_16_5_Version => new PacketPalette1162(),
                 <= ProtocolMinecraft.MC_1_17_1_Version => new PacketPalette117(),
                 <= ProtocolMinecraft.MC_1_18_2_Version => new PacketPalette118(),

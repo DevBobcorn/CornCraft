@@ -12,9 +12,9 @@ namespace CraftSharp.Protocol.Handlers
     /// </summary>
     class ProtocolTerrain
     {
-        private int protocolVersion;
-        private DataTypes dataTypes;
-        private IMinecraftComHandler handler;
+        private readonly int protocolVersion;
+        private readonly DataTypes dataTypes;
+        private readonly IMinecraftComHandler handler;
 
         /// <summary>
         /// Initialize a new Terrain Decoder
@@ -357,32 +357,24 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="chunkX">Chunk X location</param>
         /// <param name="chunkZ">Chunk Z location</param>
         /// <param name="chunkMask">Chunk mask for reading data</param>
-        /// <param name="chunkMask2">Chunk mask for some additional 1.7 metadata</param>
-        /// <param name="hasSkyLight">Contains skylight info</param>
         /// <param name="chunksContinuous">Are the chunk continuous</param>
-        /// <param name="currentDimension">Current dimension type (0 = overworld)</param>
         /// <param name="cache">Cache for reading chunk data</param>
         /// <returns>true if successfully loaded</returns>
-        public bool ProcessChunkColumnData16(int chunkX, int chunkZ, ushort chunkMask, ushort chunkMask2, bool hasSkyLight, bool chunksContinuous, int currentDimension, Queue<byte> cache)
+        public bool ProcessChunkColumnData16(int chunkX, int chunkZ, ushort chunkMask, bool chunksContinuous, Queue<byte> cache)
         {
             var chunksManager = handler.GetChunkRenderManager();
 
             int biomesLength = 0;
                                 
-            if (protocolVersion >= ProtocolMinecraft.MC_1_16_2_Version && chunksContinuous)
+            if (chunksContinuous)
                 biomesLength = DataTypes.ReadNextVarInt(cache); // Biomes length - 1.16.2 and above
             
             short[] biomes = new short[biomesLength];
 
-            if (protocolVersion >= ProtocolMinecraft.MC_1_15_Version && chunksContinuous)
+            if (chunksContinuous) // 1.15 and above
             {
-                if (protocolVersion >= ProtocolMinecraft.MC_1_16_2_Version)
-                {
-                    for (int i = 0; i < biomesLength; i++) // Biomes - 1.16.2 and above
-                        biomes[i] = (short) DataTypes.ReadNextVarInt(cache);
-                }
-                else
-                    DataTypes.ReadData(1024 * 4, cache); // Biomes - 1.15 and above
+                for (int i = 0; i < biomesLength; i++) // Biomes - 1.16.2 and above
+                    biomes[i] = (short) DataTypes.ReadNextVarInt(cache);
             }
 
             int dataSize = DataTypes.ReadNextVarInt(cache);
@@ -428,7 +420,7 @@ namespace CraftSharp.Protocol.Handlers
                         // Block IDs are packed in the array of 64-bits integers
                         ulong[] dataArray = DataTypes.ReadNextULongArray(cache);
 
-                        Chunk chunk = new Chunk();
+                        Chunk chunk = new();
 
                         if (dataArray.Length > 0)
                         {
@@ -451,30 +443,13 @@ namespace CraftSharp.Protocol.Handlers
 
                                         if ((startOffset + bitsPerBlock) > 64)
                                         {
-                                            if (protocolVersion >= ProtocolMinecraft.MC_1_16_Version)
-                                            {
-                                                // In MC 1.16+, padding is applied to prevent overlapping between Longs:
-                                                // [      LONG INTEGER      ][      LONG INTEGER      ]
-                                                // [Block][Block][Block]XXXXX[Block][Block][Block]XXXXX
+                                            // In MC 1.16+, padding is applied to prevent overlapping between Longs:
+                                            // [      LONG INTEGER      ][      LONG INTEGER      ]
+                                            // [Block][Block][Block]XXXXX[Block][Block][Block]XXXXX
 
-                                                // When overlapping, move forward to the beginning of the next Long
-                                                startOffset = 0;
-                                                longIndex++;
-                                            }
-                                            else
-                                            {
-                                                // In MC 1.15 and lower, block IDs can overlap between Longs:
-                                                // [      LONG INTEGER      ][      LONG INTEGER      ]
-                                                // [Block][Block][Block][Blo  ck][Block][Block][Block][
-
-                                                // Detect when we reached the next Long or switch to overlap mode
-                                                if (startOffset >= 64)
-                                                {
-                                                    startOffset -= 64;
-                                                    longIndex++;
-                                                }
-                                                else overlap = true;
-                                            }
+                                            // When overlapping, move forward to the beginning of the next Long
+                                            startOffset = 0;
+                                            longIndex++;
                                         }
 
                                         // Extract Block ID

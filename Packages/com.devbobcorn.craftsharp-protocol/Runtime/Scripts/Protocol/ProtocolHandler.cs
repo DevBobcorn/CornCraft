@@ -154,16 +154,14 @@ namespace CraftSharp.Protocol
             {
                 return MCVersion.Split(' ')[0].Trim() switch
                 {
-                    "1.16" or "1.16.0" => 735,
-                    "1.16.1" => 736,
                     "1.16.2" => 751,
                     "1.16.3" => 753,
                     "1.16.4" or "1.16.5" => 754,
-                    "1.17" or "1.17.0" => 755,
+                    "1.17" => 755,
                     "1.17.1" => 756,
-                    "1.18" or "1.18.0" or "1.18.1" => 757,
+                    "1.18" or "1.18.1" => 757,
                     "1.18.2" => 758,
-                    "1.19" or "1.19.0" => 759,
+                    "1.19" => 759,
                     "1.19.1" or "1.19.2" => 760,
                     "1.19.3" => 761,
                     "1.19.4" => 762,
@@ -410,17 +408,19 @@ namespace CraftSharp.Protocol
         /// <returns>HTTP Status code</returns>
         private static int DoHTTPSGet(string host, string endpoint, string cookies, ref string result)
         {
-            List<String> http_request = new List<string>();
-            http_request.Add("GET " + endpoint + " HTTP/1.1");
-            http_request.Add("Cookie: " + cookies);
-            http_request.Add("Cache-Control: no-cache");
-            http_request.Add("Pragma: no-cache");
-            http_request.Add("Host: " + host);
-            http_request.Add("User-Agent: Java/1.6.0_27");
-            http_request.Add("Accept-Charset: ISO-8859-1,UTF-8;q=0.7,*;q=0.7");
-            http_request.Add("Connection: close");
-            http_request.Add("");
-            http_request.Add("");
+            List<string> http_request = new()
+            {
+                "GET " + endpoint + " HTTP/1.1",
+                "Cookie: " + cookies,
+                "Cache-Control: no-cache",
+                "Pragma: no-cache",
+                "Host: " + host,
+                "User-Agent: Java/1.6.0_27",
+                "Accept-Charset: ISO-8859-1,UTF-8;q=0.7,*;q=0.7",
+                "Connection: close",
+                "",
+                ""
+            };
             return DoHTTPSRequest(http_request, host, ref result);
         }
 
@@ -434,15 +434,17 @@ namespace CraftSharp.Protocol
         /// <returns>HTTP Status code</returns>
         private static int DoHTTPSPost(string host, string endpoint, string request, ref string result)
         {
-            List<String> http_request = new List<string>();
-            http_request.Add("POST " + endpoint + " HTTP/1.1");
-            http_request.Add("Host: " + host);
-            http_request.Add("User-Agent: CornCraft/" + ProtocolSettings.Version);
-            http_request.Add("Content-Type: application/json");
-            http_request.Add("Content-Length: " + Encoding.ASCII.GetBytes(request).Length);
-            http_request.Add("Connection: close");
-            http_request.Add("");
-            http_request.Add(request);
+            List<string> http_request = new()
+            {
+                "POST " + endpoint + " HTTP/1.1",
+                "Host: " + host,
+                "User-Agent: CornCraft/" + ProtocolSettings.Version,
+                "Content-Type: application/json",
+                "Content-Length: " + Encoding.ASCII.GetBytes(request).Length,
+                "Connection: close",
+                "",
+                request
+            };
             return DoHTTPSRequest(http_request, host, ref result);
         }
 
@@ -457,7 +459,7 @@ namespace CraftSharp.Protocol
         /// <returns>HTTP Status code</returns>
         private static int DoHTTPSRequest(List<string> headers, string host, ref string result)
         {
-            int str2int(string str)
+            static int str2int(string str)
             {
                 try
                 {
@@ -480,24 +482,24 @@ namespace CraftSharp.Protocol
                         Debug.Log(Translations.Get("debug.request", host));
 
                     //TcpClient client = ProxyHandler.newTcpClient(host, 443, true);
-                    TcpClient client = new TcpClient(host, 443);
-                    SslStream stream = new SslStream(client.GetStream());
+                    TcpClient client = new(host, 443);
+                    SslStream stream = new(client.GetStream());
                     stream.AuthenticateAsClient(host, null, SslProtocols.Tls12, true); // Enable TLS 1.2. Hotfix for #1780
 
                     stream.Write(Encoding.ASCII.GetBytes(String.Join("\r\n", headers.ToArray())));
-                    System.IO.StreamReader sr = new System.IO.StreamReader(stream);
+                    System.IO.StreamReader sr = new(stream);
                     string raw_result = sr.ReadToEnd();
 
                     if (raw_result.StartsWith("HTTP/1.1"))
                     {
-                        postResult = raw_result.Substring(raw_result.IndexOf("\r\n\r\n") + 4);
+                        postResult = raw_result[(raw_result.IndexOf("\r\n\r\n") + 4)..];
                         statusCode = str2int(raw_result.Split(' ')[1]);
                     }
                     else statusCode = 520; // Web server is returning an unknown error
                 }
                 catch (Exception e)
                 {
-                    if (!(e is System.Threading.ThreadAbortException))
+                    if (e is not System.Threading.ThreadAbortException)
                     {
                         exception = e;
                     }
@@ -519,7 +521,7 @@ namespace CraftSharp.Protocol
         /// <returns>Encoded text</returns>
         private static string JsonEncode(string text)
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
 
             foreach (char c in text)
             {
@@ -546,7 +548,7 @@ namespace CraftSharp.Protocol
         public static DateTime UnixTimeStampToDateTime(long unixTimeStamp)
         {
             // Unix timestamp is seconds past epoch
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            DateTime dateTime = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             dateTime = dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
             return dateTime;
         }

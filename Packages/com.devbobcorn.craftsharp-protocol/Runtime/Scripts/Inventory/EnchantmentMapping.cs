@@ -8,7 +8,7 @@ namespace CraftSharp.Inventory
 {
     public class EnchantmentMapping
     {
-        #pragma warning disable format // @formatter:off
+#pragma warning disable format // @formatter:off
 
         // 1.16 - 1.18
         private static readonly Dictionary<short, Enchantments> enchantmentMappings116 = new()
@@ -152,7 +152,7 @@ namespace CraftSharp.Inventory
         {
             var map = protocolVersion switch
             {
-                >= ProtocolMinecraft.MC_1_16_Version and < ProtocolMinecraft.MC_1_19_Version => enchantmentMappings116,
+                < ProtocolMinecraft.MC_1_19_Version => enchantmentMappings116,
                 >= ProtocolMinecraft.MC_1_19_Version and < ProtocolMinecraft.MC_1_21_Version => enchantmentMappings119,
                 _ => enchantmentMappings
             };

@@ -865,14 +865,11 @@ namespace CraftSharp.Protocol.Handlers
                         ReadNextVarInt(cache); // Block State (minecraft:block)
                     break;
                 case 11:
-                    // 1.13 - 1.14.4
-                    if (protocolVersion < ProtocolMinecraft.MC_1_15_Version)
-                        ReadDustParticle(cache);
+                    // 1.13 - 1.14.4, ignore
                     break;
                 case 14:
                     // 1.15 - 1.16.5 and 1.18 - 1.19.4
-                    if ((protocolVersion >= ProtocolMinecraft.MC_1_15_Version && protocolVersion < ProtocolMinecraft.MC_1_17_Version)
-                        || protocolVersion > ProtocolMinecraft.MC_1_17_1_Version)
+                    if (protocolVersion < ProtocolMinecraft.MC_1_17_Version || protocolVersion > ProtocolMinecraft.MC_1_17_1_Version)
                         ReadDustParticle(cache);
                     break;
                 case 15:
@@ -890,7 +887,7 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case 23:
                     // 1.15 - 1.16.5
-                    if (protocolVersion >= ProtocolMinecraft.MC_1_15_Version && protocolVersion < ProtocolMinecraft.MC_1_17_Version)
+                    if (protocolVersion < ProtocolMinecraft.MC_1_17_Version)
                         ReadNextVarInt(cache); // Block State (minecraft:falling_dust)
                     break;
                 case 24:
@@ -906,9 +903,7 @@ namespace CraftSharp.Protocol.Handlers
                         ReadNextVarInt(cache); // Block State (minecraft:falling_dust)
                     break;
                 case 27:
-                    // 1.13 - 1.14.4
-                    if (protocolVersion < ProtocolMinecraft.MC_1_15_Version)
-                        ReadNextItemSlot(cache, itemPalette); // Item (minecraft:item)
+                    // 1.13 - 1.14.4, ignore
                     break;
                 case 30:
                     if (protocolVersion >= ProtocolMinecraft.MC_1_19_3_Version)
@@ -916,7 +911,7 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case 32:
                     // 1.15 - 1.16.5
-                    if (protocolVersion >= ProtocolMinecraft.MC_1_15_Version && protocolVersion < ProtocolMinecraft.MC_1_17_Version)
+                    if (protocolVersion < ProtocolMinecraft.MC_1_17_Version)
                         ReadNextItemSlot(cache, itemPalette); // Item (minecraft:item)
                     break;
                 case 36:
