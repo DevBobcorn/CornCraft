@@ -14,6 +14,9 @@ namespace CraftSharp.UI
         [SerializeField] [Range(0.1F, 1F)] private float warningThreshold = 0.3F;
         [SerializeField] [Range(0.1F, 1F)] private float dangerThreshold  = 0.1F;
 
+        [SerializeField] private Vector4 cornerRadius = Vector4.zero;
+
+        private static readonly int BorderColor = Shader.PropertyToID("_BorderColor");
         private static readonly int ValueColor = Shader.PropertyToID("_ValueColor");
         private static readonly int DeltaColor = Shader.PropertyToID("_DeltaColor");
         private static readonly int FillAmount = Shader.PropertyToID("_FillAmount");
@@ -40,15 +43,27 @@ namespace CraftSharp.UI
 
             barMaterial.SetVector("_BarSize", new(barImageRect.rect.width, barImageRect.rect.height, 0F, 0F));
 
+            barMaterial.SetVector("_CornerRadii", cornerRadius);
+
             parentCanvasGroups = GetComponentsInParent<CanvasGroup>(true);
+
+            UpdateValue();
+        }
+
+        public void UpdateCurValueWithoutAnimation(float newValue)
+        {
+            curValue = displayValue = newValue;
 
             UpdateValue();
         }
 
         public void UpdateAlpha(float alpha)
         {
-            Color fillColor = barMaterial.GetColor(ValueColor);
-            barMaterial.SetColor(ValueColor, IAlphaListener.GetColorWithAlpha(fillColor, selfAlpha));
+            Color valueColor = barMaterial.GetColor(ValueColor);
+            barMaterial.SetColor(ValueColor, IAlphaListener.GetColorWithAlpha(valueColor, selfAlpha));
+
+            Color borderColor = barMaterial.GetColor(BorderColor);
+            barMaterial.SetColor(BorderColor, IAlphaListener.GetColorWithAlpha(borderColor, selfAlpha));
 
             if (barText != null)
             {

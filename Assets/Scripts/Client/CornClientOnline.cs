@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
@@ -560,6 +559,7 @@ namespace CraftSharp
         public override string GetSessionId() => sessionId!;
         public override double GetServerTps() => averageTPS;
         public override int GetPacketCount() => packetCount;
+        public override int GetClientEntityId() => clientEntity.Id;
         public override float GetTickMilSec() => (float)(1000D / averageTPS);
 
         /// <summary>
@@ -1850,7 +1850,7 @@ namespace CraftSharp
         /// <param name="line1">text one</param>
         /// <param name="line2">text two</param>
         /// <param name="line3">text three</param>
-        /// <param name="line4">text1 four</param>
+        /// <param name="line4">text four</param>
         public bool UpdateSign(Location location, string line1, string line2, string line3, string line4)
         {
             // TODO Open sign editor first https://wiki.vg/Protocol#Open_Sign_Editor
@@ -2659,7 +2659,7 @@ namespace CraftSharp
         public void OnTradeList(int windowId, List<VillagerTrade> trades, VillagerInfo villagerInfo) { }
 
         /// <summary>
-        /// Called every player break block in gamemode 0
+        /// Called when another player break block in gamemode 0
         /// </summary>
         /// <param name="entityId">Player Id</param>
         /// <param name="blockLoc">Block location</param>
@@ -2669,11 +2669,11 @@ namespace CraftSharp
             var block = ChunkRenderManager.GetBlock(blockLoc);
             var status = stage < 9 ? DiggingStatus.Started : DiggingStatus.Finished;
 
-            EventManager.Instance.BroadcastOnUnityThread<ToolInteractionEvent>(new(entityId, block, blockLoc, status, stage / 9.0f));
+            EventManager.Instance.BroadcastOnUnityThread<ToolInteractionEvent>(new(entityId, block, blockLoc, status, stage / 10F));
         }
 
         /// <summary>
-        /// Called every animations of the hit and place block
+        /// Called when animation of breaking and placing block is played
         /// </summary>
         /// <param name="entityId">Player Id</param>
         /// <param name="animation">0 = LMB, 1 = RMB (RMB Corrent not work)</param>
@@ -2683,7 +2683,7 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called every time rain(snow) starts or stops
+        /// Called when rain(snow) starts or stops
         /// </summary>
         /// <param name="begin">true if the rain is starting</param>
         public void OnRainChange(bool begin)

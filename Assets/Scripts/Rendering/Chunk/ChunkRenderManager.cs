@@ -927,6 +927,10 @@ namespace CraftSharp.Rendering
             });
         }
 
+        private Block? AIR_BLOCK_INSTANCE = null;
+
+        private Action<ToolInteractionEvent> toolInteractionCallback;
+
         void Awake()
         {
             // Create Unity object pools on awake
@@ -952,6 +956,25 @@ namespace CraftSharp.Rendering
                 layer = LayerMask.NameToLayer(LIQUID_SURFACE_LAYER_NAME)
             };
             liquidCollider = liquidColliderObj.AddComponent<MeshCollider>();
+
+            toolInteractionCallback = (e) =>
+            {
+                if (e.Status == Control.DiggingStatus.Finished)
+                {
+                    AIR_BLOCK_INSTANCE ??= new Block(0);
+
+                    // Predict block digging result
+                    SetBlock(e.Location, AIR_BLOCK_INSTANCE.Value); // Get air block
+                }
+            };
+
+            EventManager.Instance.Register(toolInteractionCallback);
+        }
+
+        void OnDestroy()
+        {
+            if (toolInteractionCallback is not null)
+                EventManager.Instance.Unregister(toolInteractionCallback);
         }
 
         void FixedUpdate()

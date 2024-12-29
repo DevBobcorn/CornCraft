@@ -33,9 +33,9 @@ Material:
     - _DeltaAmount: 1
     - _FillAmount: 1
     m_Colors:
-    - _BarSize: {r: 550, g: 42, b: 0, a: 0}
+    - _BarSize: {r: 300, g: 100, b: 0, a: 0}
     - _BorderColor: {r: 1, g: 1, b: 1, a: 1}
-    - _CornerRadii: {r: 5, g: 50, b: 5, a: 5}
+    - _CornerRadii: {r: 0, g: 0, b: 0, a: 0}
     - _DeltaColor: {r: 0.23529412, g: 0.89411765, b: 0, a: 1}
     - _ValueColor: {r: 0.235289, g: 0.89411765, b: 0, a: 0.0058048368}
   m_BuildTextureStacks: []

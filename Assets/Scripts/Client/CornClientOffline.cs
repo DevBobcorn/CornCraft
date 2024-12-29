@@ -176,6 +176,7 @@ namespace CraftSharp
         public override string GetSessionId() => string.Empty;
         public override double GetServerTps() => 20;
         public override int GetPacketCount() => 0;
+        public override int GetClientEntityId() => clientEntity.Id;
         public override float GetTickMilSec() => 50F;
 
         /// <summary>

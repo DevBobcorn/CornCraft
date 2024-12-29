@@ -20,11 +20,13 @@ namespace CraftSharp.UI
         [SerializeField] private Animator modePanelAnimator, crosshairAnimator, statusPanelAnimator;
         [SerializeField] private Button[] modeButtons = new Button[4];
         [SerializeField] private ValueBar healthBar;
+        [SerializeField] private ValueBar destroyBar;
         [SerializeField] private RingValueBar staminaBar;
         [SerializeField] private InteractionPanel interactionPanel;
         [SerializeField] private InventoryHotbar inventoryHotbar;
         [SerializeField] private Animator screenAnimator;
 
+        private Animator destroyBarAnimator;
         private Animator staminaBarAnimator;
 
         private bool isActive = false, debugInfo = true;
@@ -74,11 +76,15 @@ namespace CraftSharp.UI
         protected override void Initialize()
         {
             // Initialize controls...
+            destroyBarAnimator = destroyBar.GetComponent<Animator>();
             staminaBarAnimator = staminaBar.GetComponent<Animator>();
+
+            destroyBar.MaxValue = 1F; // Destroy value should be 0 to 1
 
             cameraAimCallback = (e) => crosshairAnimator.SetBool(SHOW_HASH, e.Aiming);
 
-            gameModeCallback = (e) => {
+            gameModeCallback = (e) =>
+            {
                 var showStatus = e.GameMode switch {
                     GameMode.Survival   => true,
                     GameMode.Creative   => false,
@@ -91,14 +97,38 @@ namespace CraftSharp.UI
                 statusPanelAnimator.SetBool(SHOW_HASH, showStatus);
             };
 
-            healthCallback = (e) => {
+            healthCallback = (e) =>
+            {
                 if (e.UpdateMaxHealth)
                     healthBar.MaxValue = e.Health * HEALTH_MULTIPLIER;
 
                 healthBar.CurValue = e.Health * HEALTH_MULTIPLIER;
             };
 
-            staminaCallback = (e) => {
+            toolInteractionCallback = (e) =>
+            {
+                var curValue = Mathf.Clamp01(e.Progress);
+                if (curValue < destroyBar.CurValue)
+                {
+                    destroyBar.UpdateCurValueWithoutAnimation(curValue);
+                }
+                else
+                {
+                    destroyBar.CurValue = curValue;
+                }
+
+                if (destroyBar.CurValue >= 1F || destroyBar.CurValue <= 0F) // Interaction progress is complete
+                {
+                    destroyBarAnimator.SetBool(SHOW_HASH, false);
+                }
+                else
+                {
+                    destroyBarAnimator.SetBool(SHOW_HASH, true);
+                }
+            };
+
+            staminaCallback = (e) =>
+            {
                 staminaBar.CurValue = e.Stamina;
 
                 if (staminaBar.MaxValue != e.MaxStamina)
@@ -119,6 +149,7 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(cameraAimCallback);
             EventManager.Instance.Register(gameModeCallback);
             EventManager.Instance.Register(healthCallback);
+            EventManager.Instance.Register(toolInteractionCallback);
             EventManager.Instance.Register(staminaCallback);
 
             // Initialize controls
@@ -149,6 +180,7 @@ namespace CraftSharp.UI
         private Action<CameraAimingEvent>?      cameraAimCallback;
         private Action<GameModeUpdateEvent>?    gameModeCallback;
         private Action<HealthUpdateEvent>?      healthCallback;
+        private Action<ToolInteractionEvent>?   toolInteractionCallback;
         private Action<StaminaUpdateEvent>?     staminaCallback;
 
         #nullable disable
@@ -163,7 +195,10 @@ namespace CraftSharp.UI
             
             if (healthCallback is not null)
                 EventManager.Instance.Unregister(healthCallback);
-            
+
+            if (toolInteractionCallback is not null)
+                EventManager.Instance.Unregister(toolInteractionCallback);
+
             if (staminaCallback is not null)
                 EventManager.Instance.Unregister(staminaCallback);
         }

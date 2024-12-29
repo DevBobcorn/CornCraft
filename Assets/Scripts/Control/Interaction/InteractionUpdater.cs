@@ -103,7 +103,7 @@ namespace CraftSharp.Control
 
                 if (blockSelectionBox == null)
                 {
-                    blockSelectionBox = GameObject.Instantiate(blockSelectionFramePrefab)!.GetComponent<BlockSelectionBox>();
+                    blockSelectionBox = Instantiate(blockSelectionFramePrefab)!.GetComponent<BlockSelectionBox>();
 
                     blockSelectionBox!.transform.SetParent(transform, false);
                 }
@@ -177,6 +177,8 @@ namespace CraftSharp.Control
                         if (!info.UpdateInteraction(client))
                         {
                             RemoveBlockInteraction<ToolInteractionInfo>(blockLoc);
+
+                            Debug.Log($"Removed tool interaction at {blockLoc}");
                         }
                     }
                 }
@@ -293,18 +295,12 @@ namespace CraftSharp.Control
             toolInteractionCallback = e =>
             {
                 // Must keep only one at a time.
-                var interactionInfo = GetBlockInteraction<GhostToolInteractionInfo>(e.Location)?.FirstOrDefault();
+                var toolInteractionInfo = GetBlockInteraction<ToolInteractionInfo>(e.Location)?.FirstOrDefault();
 
-                if (interactionInfo is not null)
+                if (toolInteractionInfo != null)
                 {
                     // Update the process
-                    interactionInfo.Progress = e.Progress;
-                }
-                else
-                {
-                    interactionInfo = new GhostToolInteractionInfo(interactionId.AllocateID(), e.Location, Direction.Down, null);
-
-                    AddBlockInteraction(e.Location, interactionInfo);
+                    toolInteractionInfo.Progress = e.Progress;
                 }
             };
             EventManager.Instance.Register(toolInteractionCallback);

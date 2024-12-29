@@ -194,6 +194,7 @@ namespace CraftSharp
         public abstract double GetServerTps();
         public abstract float GetTickMilSec();
         public abstract int GetPacketCount();
+        public abstract int GetClientEntityId();
         // Retrieve gameplay info
         public abstract IChunkRenderManager GetChunkRenderManager();
         

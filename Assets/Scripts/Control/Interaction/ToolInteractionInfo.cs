@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using CraftSharp.Event;
 
 namespace CraftSharp.Control
 {
@@ -19,7 +20,7 @@ namespace CraftSharp.Control
         protected readonly Direction direction;
         protected readonly ToolInteraction? definition;
 
-        public float Progress { get; set; } = 0.0f;
+        public float Progress { get; set; } = 0F;
 
         public override string HintKey => definition?.HintKey ?? string.Empty;
 
@@ -58,45 +59,50 @@ namespace CraftSharp.Control
                               item is { TierType: not null } &&
                               ItemTier.Tiers.TryGetValue(item.TierType.Value, out tier); // Use tool case
 
-            float multiplier = 1.0f;
+            float multiplier = 1F;
 
             if (isBestTool && tier != null)
             {
                 multiplier = tier.Speed;
 
-                if (!canHarvest) multiplier = 1.0f;
+                if (!canHarvest) multiplier = 1F;
                 // TODO: Tool toolEfficiency level: mult += efficiencyLevel ^ 2 + 1
             }
-            else multiplier = 1.0f;
+            else multiplier = 1F;
 
             // TODO: if haste or conduitPower: speedMultiplier *= 0.2 * max(hasteLevel, conduitPowerLevel) + 1
             // TODO: if miningFatigue: speedMultiplier *= 0.3 ^ min(miningFatigueLevel, 4)
 
-            if (underwater) multiplier /= 5.0f; // TODO: If not hasAquaAffinity
-            if (!onGround) multiplier /= 5.0f;
+            if (underwater) multiplier /= 5F; // TODO: If not hasAquaAffinity
+            if (!onGround) multiplier /= 5F;
 
             double damage = multiplier / hardness;
 
-            damage /= canHarvest ? 30.0 : 100.0;
+            damage /= canHarvest ? 30D : 100D;
 
             // Instant breaking
-            if (damage > 1.0) return 0.0f;
+            if (damage > 1D) return 0F;
 
-            float ticks = (float) Math.Ceiling(1.0f / damage);
-            float seconds = ticks / 20.0f;
+            float ticks = (float) Math.Ceiling(1F / damage);
+            float seconds = ticks / 20F;
 
             return seconds;
         }
 
         protected override IEnumerator RunInteraction(BaseCornClient client)
         {
+            var clientEntityId = client.GetClientEntityId();
+            var targetBlock = client.GetChunkRenderManager().GetBlock(location);
+
             client.DigBlock(location, direction);
-            float elapsedTime = 0.0f;
+            float elapsedTime = 0F;
 
             while (elapsedTime < duration)
             {
                 if (State == ToolInteractionState.Cancelled)
                 {
+                    EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
+
                     client.DigBlock(location, direction, DiggingStatus.Cancelled);
                     yield break;
                 }
@@ -109,8 +115,17 @@ namespace CraftSharp.Control
 
                 elapsedTime += Time.deltaTime;
                 Progress = elapsedTime / duration;
+
+                EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Started, Progress));
+
+                Debug.Log($"{GetHashCode()} Destroy progress: {elapsedTime:0.0} / {duration:0.0}");
+
                 yield return null;
             }
+
+            //Debug.Log($"{GetHashCode()} Digging completed");
+
+            EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Finished, 1F));
 
             client.DigBlock(location, direction, DiggingStatus.Finished);
             State = ToolInteractionState.Completed;
@@ -132,21 +147,6 @@ namespace CraftSharp.Control
         {
             if (State == ToolInteractionState.Paused)
                 State = ToolInteractionState.InProgress;
-        }
-    }
-
-    public sealed class GhostToolInteractionInfo : ToolInteractionInfo
-    {
-        public GhostToolInteractionInfo(int id, BlockLoc loc, Direction dir, ToolInteraction? def)
-            : base(id, loc, dir, def) { }
-
-        protected override IEnumerator RunInteraction(BaseCornClient client)
-        {
-            while (Progress < 1.0f)
-            {
-                // Wait for server updates on Progress
-                yield return null;
-            }
         }
     }
 }

@@ -1027,7 +1027,7 @@ namespace CraftSharp.Protocol.Handlers
                     else
                     {
                         var msgType = DataTypes.ReadNextVarInt(packetData);
-                        if ((msgType == 1 && !ProtocolSettings.DisplaySystemMessages))
+                        if (msgType == 1 && !ProtocolSettings.DisplaySystemMessages)
                             break;
                         handler.OnTextReceived(new(systemMessage, null, true, msgType, Guid.Empty, true));
                     }
@@ -1040,9 +1040,11 @@ namespace CraftSharp.Protocol.Handlers
                     var targetName_ = DataTypes.ReadNextBool(packetData)
                         ? dataTypes.ReadNextChat(packetData)
                         : null;
-                    ChatMessage profilelessChat = new(message_, targetName_ ?? messageName, true, messageType_,
-                        Guid.Empty, true);
-                    profilelessChat.isSenderJson = true;
+                    ChatMessage profilelessChat = new(message_, targetName_ ?? messageName,
+                        true, messageType_, Guid.Empty, true)
+                    {
+                        isSenderJson = true
+                    };
                     handler.OnTextReceived(profilelessChat);
                     break;
                 case PacketTypesIn.CombatEvent:
@@ -1999,9 +2001,9 @@ namespace CraftSharp.Protocol.Handlers
                         var deltaZ = Convert.ToDouble(DataTypes.ReadNextShort(packetData));
 
                         var onGround = DataTypes.ReadNextBool(packetData);
-                        deltaX = deltaX / (128 * 32);
-                        deltaY = deltaY / (128 * 32);
-                        deltaZ = deltaZ / (128 * 32);
+                        deltaX /= (128 * 32);
+                        deltaY /= (128 * 32);
+                        deltaZ /= (128 * 32);
 
                         handler.OnEntityPosition(entityId, deltaX, deltaY, deltaZ, onGround);
                     }
@@ -2017,9 +2019,9 @@ namespace CraftSharp.Protocol.Handlers
                         var yaw = DataTypes.ReadNextByte(packetData);
                         var pitch = DataTypes.ReadNextByte(packetData);
                         var onGround = DataTypes.ReadNextBool(packetData);
-                        deltaX = deltaX / (128 * 32);
-                        deltaY = deltaY / (128 * 32);
-                        deltaZ = deltaZ / (128 * 32);
+                        deltaX /= (128 * 32);
+                        deltaY /= (128 * 32);
+                        deltaZ /= (128 * 32);
 
                         handler.OnEntityPosition(entityId, deltaX, deltaY, deltaZ, onGround);
                         handler.OnEntityRotation(entityId, yaw, pitch, onGround);
@@ -2289,8 +2291,6 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.BlockBreakAnimation:
                     {
-                        Debug.Log("Block break animation");
-
                         var playerId = DataTypes.ReadNextVarInt(packetData);
                         var blockLoc = DataTypes.ReadNextBlockLoc(packetData);
                         var stage = DataTypes.ReadNextByte(packetData);
@@ -3724,13 +3724,13 @@ namespace CraftSharp.Protocol.Handlers
             try
             {
                 if (line1.Length > 23)
-                    line1 = line1.Substring(0, 23);
+                    line1 = line1[..23];
                 if (line2.Length > 23)
-                    line2 = line1.Substring(0, 23);
+                    line2 = line1[..23];
                 if (line3.Length > 23)
-                    line3 = line1.Substring(0, 23);
+                    line3 = line1[..23];
                 if (line4.Length > 23)
-                    line4 = line1.Substring(0, 23);
+                    line4 = line1[..23];
 
                 List<byte> packet = new();
                 packet.AddRange(DataTypes.GetLocation(sign));
@@ -3750,8 +3750,10 @@ namespace CraftSharp.Protocol.Handlers
         {
             try
             {
-                List<byte> packet = new();
-                packet.Add(windowId);
+                List<byte> packet = new()
+                {
+                    windowId
+                };
                 packet.AddRange(DataTypes.GetShort(actionId));
                 packet.Add(accepted ? (byte)1 : (byte)0);
                 SendPacket(PacketTypesOut.WindowConfirmation, packet);

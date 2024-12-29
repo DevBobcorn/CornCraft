@@ -134,7 +134,7 @@ MonoBehaviour:
   dangerColor: {r: 1, g: 0, b: 0, a: 1}
   warningThreshold: 0.3
   dangerThreshold: 0.1
-  fullBarLength: 0
+  cornerRadius: {x: 5, y: 25, z: 5, w: 5}
   barImage: {fileID: 7394360974756411018}
 --- !u!1 &5131017270638001394
 GameObject:
