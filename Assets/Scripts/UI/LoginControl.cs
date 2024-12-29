@@ -546,6 +546,8 @@ namespace CraftSharp.UI
         {
             if (resourceLoaded && loginInfo is not null)
             {
+                enterGamePanel.gameObject.SetActive(false); // Disable this panel after click
+
                 celestiaBridge.EnterPortal();
 
                 yield return new WaitForSecondsRealtime(2F);
