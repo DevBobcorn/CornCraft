@@ -123,7 +123,17 @@ namespace CraftSharp.Control
                 yield return null;
             }
 
-            //Debug.Log($"{GetHashCode()} Digging completed");
+            if (State == ToolInteractionState.Cancelled)
+            {
+                Debug.Log($"{GetHashCode()} at {location} Digging cancelled");
+
+                EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
+
+                client.DigBlock(location, direction, DiggingStatus.Cancelled);
+                yield break;
+            }
+
+            //Debug.Log($"{GetHashCode()} at {location} Digging completed");
 
             EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Finished, 1F));
 
@@ -133,8 +143,7 @@ namespace CraftSharp.Control
 
         public void CancelInteraction()
         {
-            if (State == ToolInteractionState.InProgress)
-                State = ToolInteractionState.Cancelled;
+            State = ToolInteractionState.Cancelled;
         }
 
         public void PauseInteraction()

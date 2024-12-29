@@ -52,7 +52,8 @@ namespace CraftSharp.UI
 
         public void UpdateCurValueWithoutAnimation(float newValue)
         {
-            curValue = displayValue = newValue;
+            displayValue = newValue;
+            CurValue = newValue;
 
             UpdateValue();
         }
@@ -101,6 +102,10 @@ namespace CraftSharp.UI
                 currentColor = warningColor;
 
             barMaterial.SetColor(ValueColor, IAlphaListener.GetColorWithAlpha(currentColor, selfAlpha));
+
+            Color borderColor = barMaterial.GetColor(BorderColor);
+
+            barMaterial.SetColor(BorderColor, IAlphaListener.GetColorWithAlpha(borderColor, selfAlpha));
         }
 
         protected override void Update()

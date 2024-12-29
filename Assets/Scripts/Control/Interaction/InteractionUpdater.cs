@@ -73,7 +73,7 @@ namespace CraftSharp.Control
 
         private readonly InteractionId interactionId = new();
 
-        private LocalToolInteractionInfo? lastInteractionInfo;
+        private LocalToolInteractionInfo? lastToolInteractionInfo;
         private Item? currentItem;
 
         public Direction? TargetDirection { get; private set; } = Direction.Down;
@@ -178,7 +178,7 @@ namespace CraftSharp.Control
                         {
                             RemoveBlockInteraction<ToolInteractionInfo>(blockLoc);
 
-                            Debug.Log($"Removed tool interaction at {blockLoc}");
+                            //Debug.Log($"Removed tool interaction at {blockLoc}");
                         }
                     }
                 }
@@ -311,11 +311,13 @@ namespace CraftSharp.Control
             var definition = InteractionManager.INSTANCE.InteractionTable
                 .GetValueOrDefault(block.StateId)?
                 .Get<ToolInteraction>();
+            
+            lastToolInteractionInfo?.CancelInteraction();
 
-            lastInteractionInfo = new LocalToolInteractionInfo(interactionId.AllocateID(), blockLoc, direction,
+            lastToolInteractionInfo = new LocalToolInteractionInfo(interactionId.AllocateID(), blockLoc, direction,
                 currentItem, block.State.Hardness, status.Floating, status.Grounded, definition);
 
-            AddBlockInteraction(blockLoc, lastInteractionInfo);
+            AddBlockInteraction(blockLoc, lastToolInteractionInfo);
         }
 
         void Update()
@@ -327,24 +329,14 @@ namespace CraftSharp.Control
                 if (TargetBlockLoc is not null && TargetDirection is not null &&
                     playerController != null && client != null && playerController.CurrentState is DiggingAimState)
                 {
-                    var info = GetBlockInteraction<LocalToolInteractionInfo>(TargetBlockLoc.Value)?.FirstOrDefault();
+                    var curToolInteractionInfo = GetBlockInteraction<LocalToolInteractionInfo>(TargetBlockLoc.Value)?.FirstOrDefault();
                     var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
                     var status = playerController.Status;
-                    if (info is not null)
+                    if (curToolInteractionInfo is not null)
                     {
-                        if (info.State == ToolInteractionState.Completed)
+                        if (curToolInteractionInfo.State == ToolInteractionState.Completed)
                         {
-                            lastInteractionInfo = null;
-
-                            if (blockSelectionBox != null)
-                            {
-                                blockSelectionBox.ClearShape();
-                            }
-                        }
-                        else if (TargetBlockLoc != lastInteractionInfo?.Location)
-                        {
-                            lastInteractionInfo?.CancelInteraction();
-                            StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status);
+                            lastToolInteractionInfo = null;
                         }
                     }
                     else
@@ -354,14 +346,14 @@ namespace CraftSharp.Control
                 }
                 else
                 {
-                    lastInteractionInfo?.CancelInteraction();
-                    lastInteractionInfo = null;
+                    lastToolInteractionInfo?.CancelInteraction();
+                    lastToolInteractionInfo = null;
                 }
             }
             else
             {
-                lastInteractionInfo?.CancelInteraction();
-                lastInteractionInfo = null;
+                lastToolInteractionInfo?.CancelInteraction();
+                lastToolInteractionInfo = null;
                 TargetBlockLoc = null;
 
                 if (blockSelectionBox != null)

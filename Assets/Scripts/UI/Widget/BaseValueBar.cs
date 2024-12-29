@@ -19,7 +19,9 @@ namespace CraftSharp.UI
                 displayValue = oldFract * maxValue; // new max value
 
                 if (barText != null)
+                {
                     barText.text = string.Format(textFormat, displayValue, maxValue);
+                }
             }
         }
 
@@ -36,7 +38,9 @@ namespace CraftSharp.UI
                     curValue = value;
                 
                 if (barText != null)
+                {
                     barText.text = string.Format(textFormat, displayValue, maxValue);
+                }
             }
         }
     
@@ -50,9 +54,10 @@ namespace CraftSharp.UI
                 UpdateValue();
 
                 // Update bar text
-                
                 if (barText != null)
-                    barText.text = $"{(int)displayValue}/{(int)maxValue}";
+                {
+                    barText.text = string.Format(textFormat, displayValue, maxValue);
+                }
             }
         }
     }

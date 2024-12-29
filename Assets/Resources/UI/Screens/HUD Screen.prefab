@@ -876,7 +876,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7067358770415480787, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -80
       objectReference: {fileID: 0}
     - target: {fileID: 7067358770415480787, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -894,9 +894,6 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4614877748361275339, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 3228965638026276995}
     - targetCorrespondingSourceObject: {fileID: 4614877748361275339, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 477498348568546025}
@@ -922,27 +919,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4614877748361275339, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
   m_PrefabInstance: {fileID: 2365486868477421175}
   m_PrefabAsset: {fileID: 0}
---- !u!95 &3228965638026276995
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6978524549757206972}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 1df435a39d953c941b7a66447d7441de, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!225 &477498348568546025
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -952,8 +928,8 @@ CanvasGroup:
   m_GameObject: {fileID: 6978524549757206972}
   m_Enabled: 1
   m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
 --- !u!1001 &4291728675326833314
 PrefabInstance:

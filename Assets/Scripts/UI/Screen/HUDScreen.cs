@@ -26,7 +26,7 @@ namespace CraftSharp.UI
         [SerializeField] private InventoryHotbar inventoryHotbar;
         [SerializeField] private Animator screenAnimator;
 
-        private Animator destroyBarAnimator;
+        private CanvasGroup destroyBarCanvasGroup;
         private Animator staminaBarAnimator;
 
         private bool isActive = false, debugInfo = true;
@@ -76,10 +76,12 @@ namespace CraftSharp.UI
         protected override void Initialize()
         {
             // Initialize controls...
-            destroyBarAnimator = destroyBar.GetComponent<Animator>();
+            destroyBarCanvasGroup = destroyBar.GetComponent<CanvasGroup>();
             staminaBarAnimator = staminaBar.GetComponent<Animator>();
 
+            destroyBar.CurValue = 0F;
             destroyBar.MaxValue = 1F; // Destroy value should be 0 to 1
+            destroyBarCanvasGroup.alpha = 0F; // Hidden by default
 
             cameraAimCallback = (e) => crosshairAnimator.SetBool(SHOW_HASH, e.Aiming);
 
@@ -119,11 +121,11 @@ namespace CraftSharp.UI
 
                 if (destroyBar.CurValue >= 1F || destroyBar.CurValue <= 0F) // Interaction progress is complete
                 {
-                    destroyBarAnimator.SetBool(SHOW_HASH, false);
+                    destroyBarCanvasGroup.alpha = 0F;
                 }
                 else
                 {
-                    destroyBarAnimator.SetBool(SHOW_HASH, true);
+                    destroyBarCanvasGroup.alpha = 1F;
                 }
             };
 
