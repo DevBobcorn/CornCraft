@@ -52,6 +52,11 @@ namespace CraftSharp.Control
 
         private float CalculateDiggingTime(Item? item, float hardness, bool underwater, bool onGround)
         {
+            if (hardness <= 0F) // Bedrock or something, takes forever to break
+            {
+                return float.PositiveInfinity;
+            }
+
             bool isBestTool = item?.ActionType is not null && definition?.ActionType == item.ActionType;
 
             ItemTier? tier = null;
