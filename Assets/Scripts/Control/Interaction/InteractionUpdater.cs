@@ -177,8 +177,6 @@ namespace CraftSharp.Control
                         if (!info.UpdateInteraction(client))
                         {
                             RemoveBlockInteraction<ToolInteractionInfo>(blockLoc);
-
-                            //Debug.Log($"Removed tool interaction at {blockLoc}");
                         }
                     }
                 }
@@ -258,8 +256,7 @@ namespace CraftSharp.Control
         private IEnumerable<T>? GetBlockInteraction<T>(BlockLoc location) where T : InteractionInfo
         {
             return blockInteractionInfos.TryGetValue(location, out List<InteractionInfo> interactionInfos)
-                ? interactionInfos.OfType<T>()
-                : null;
+                ? interactionInfos.OfType<T>() : null;
         }
 
         private void RemoveBlockInteraction<T>(BlockLoc location, Action<InteractionInfo>? onRemoved = null) where T : InteractionInfo
@@ -316,6 +313,8 @@ namespace CraftSharp.Control
 
             lastToolInteractionInfo = new LocalToolInteractionInfo(interactionId.AllocateID(), blockLoc, direction,
                 currentItem, block.State.Hardness, status.Floating, status.Grounded, definition);
+            
+            //Debug.Log($"Created {lastToolInteractionInfo.GetHashCode()} at {blockLoc}");
 
             AddBlockInteraction(blockLoc, lastToolInteractionInfo);
         }
@@ -339,7 +338,7 @@ namespace CraftSharp.Control
                             lastToolInteractionInfo = null;
                         }
                     }
-                    else
+                    else if (!block.State.NoSolidMesh)
                     {
                         StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status);
                     }

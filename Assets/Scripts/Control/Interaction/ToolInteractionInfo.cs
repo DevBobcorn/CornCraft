@@ -138,6 +138,8 @@ namespace CraftSharp.Control
                 yield break;
             }
 
+            //Debug.Log($"{GetHashCode()} Complete at {location}");
+
             EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Finished, 1F));
 
             // Takes 30 to 40 milsecs to send, don't wait for it
