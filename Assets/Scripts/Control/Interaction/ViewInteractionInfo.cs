@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Threading.Tasks;
 using CraftSharp.Inventory;
 using CraftSharp.Protocol;
 
@@ -36,12 +37,14 @@ namespace CraftSharp.Control
                 }
                 case InteractionType.Break:
                 {
-                    client.DigBlock(location, Direction.Down);
+                    // Takes 30 to 40 milsecs to send, don't wait for it
+                    Task.Run(() => client.DigBlock(location, Direction.Down, DiggingStatus.Started));
 
                     if (client is CornClientOnline clientOnline)
                         clientOnline.DoAnimation((int)Hand.MainHand);
 
-                    client.DigBlock(location, Direction.Down, DiggingStatus.Finished);
+                    // Takes 30 to 40 milsecs to send, don't wait for it
+                    Task.Run(() => client.DigBlock(location, Direction.Down, DiggingStatus.Finished));
 
                     yield break;
                 }

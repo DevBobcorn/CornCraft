@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using CraftSharp.Event;
 
@@ -94,7 +95,9 @@ namespace CraftSharp.Control
             var clientEntityId = client.GetClientEntityId();
             var targetBlock = client.GetChunkRenderManager().GetBlock(location);
 
-            client.DigBlock(location, direction);
+            // Takes 30 to 40 milsecs to send, don't wait for it
+            Task.Run(() => client.DigBlock(location, direction, DiggingStatus.Started));
+
             float elapsedTime = 0F;
 
             while (elapsedTime < duration)
@@ -103,7 +106,9 @@ namespace CraftSharp.Control
                 {
                     EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
 
-                    client.DigBlock(location, direction, DiggingStatus.Cancelled);
+                    // Takes 30 to 40 milsecs to send, don't wait for it
+                    Task.Run(() => client.DigBlock(location, direction, DiggingStatus.Cancelled));
+
                     yield break;
                 }
 
@@ -118,26 +123,25 @@ namespace CraftSharp.Control
 
                 EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Started, Progress));
 
-                Debug.Log($"{GetHashCode()} Destroy progress: {elapsedTime:0.0} / {duration:0.0}");
+                //Debug.Log($"{GetHashCode()} Destroy progress: {elapsedTime:0.0} / {duration:0.0}");
 
                 yield return null;
             }
 
             if (State == ToolInteractionState.Cancelled)
             {
-                Debug.Log($"{GetHashCode()} at {location} Digging cancelled");
-
                 EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
 
-                client.DigBlock(location, direction, DiggingStatus.Cancelled);
+                // Takes 30 to 40 milsecs to send, don't wait for it
+                Task.Run(() => client.DigBlock(location, direction, DiggingStatus.Cancelled));
+
                 yield break;
             }
 
-            //Debug.Log($"{GetHashCode()} at {location} Digging completed");
-
             EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Finished, 1F));
 
-            client.DigBlock(location, direction, DiggingStatus.Finished);
+            // Takes 30 to 40 milsecs to send, don't wait for it
+            Task.Run(() => client.DigBlock(location, direction, DiggingStatus.Finished));
             State = ToolInteractionState.Completed;
         }
 
