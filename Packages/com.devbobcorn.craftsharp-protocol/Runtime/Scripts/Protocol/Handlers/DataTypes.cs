@@ -667,8 +667,7 @@ namespace CraftSharp.Protocol.Handlers
             while (key != terminteValue)
             {
                 int typeId = ReadNextVarInt(cache); // 1.9+
-                
-                
+
                 EntityMetaDataType type;
                 try
                 {
@@ -838,170 +837,25 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="itemPalette"></param>
         public ParticleExtraData ReadParticleData(Queue<byte> cache, ItemPalette itemPalette)
         {
-            var particleID = ReadNextVarInt(cache);
+            var particleNumId = ReadNextVarInt(cache);
+            var particleType = ParticleTypePalette.INSTANCE.GetByNumId(particleNumId);
 
-            // Reference:
-            // 1.19.3 - https://wiki.vg/index.php?title=Data_types&oldid=17986
-            // 1.18 - https://wiki.vg/index.php?title=Data_types&oldid=17180
-            // 1.17 - https://wiki.vg/index.php?title=Data_types&oldid=16740
-            // 1.15 - https://wiki.vg/index.php?title=Data_types&oldid=15338
-            // 1.13 - https://wiki.vg/index.php?title=Data_types&oldid=14271
-
-            switch (particleID)
+            return particleType.ExtraDataType switch
             {
-                case 1:
-                    // 1.20.6+
-                    if (protocolVersion >= ProtocolMinecraft.MC_1_20_6_Version)
-                        return ReadBlockParticle(cache); // BlockState (minecraft:block)
-                    break;
-                case 2:
-                    // 1.18+
-                    if (protocolVersion > ProtocolMinecraft.MC_1_17_1_Version)
-                        return ReadBlockParticle(cache); // Block state (minecraft:block before 1.20.6, minecraft:block_marker in 1.20.6+)
-                    break;
-                case 3:
-                    if (protocolVersion is (< ProtocolMinecraft.MC_1_17_Version
-                        or > ProtocolMinecraft.MC_1_17_1_Version)
-                        and < ProtocolMinecraft.MC_1_20_6_Version)
-                        return ReadBlockParticle(cache); // Block State (minecraft:block before 1.18, minecraft:block_marker after 1.18 up to 1.20.6)
-                    break;
-                case 4:
-                    // 1.17 - 1.17.1
-                    if (protocolVersion is ProtocolMinecraft.MC_1_17_Version
-                        or ProtocolMinecraft.MC_1_17_1_Version)
-                        return ReadBlockParticle(cache); // Block state (minecraft:block)
-                    break;
-                case 13:
-                    // 1.20.6+
-                    return ReadDustParticle(cache); // minecraft:dust
-                case 14:
-                    switch (protocolVersion)
-                    {
-                        // 1.15 - 1.16.5 and 1.18 - 1.20.4
-                        case < ProtocolMinecraft.MC_1_17_Version
-                            or > ProtocolMinecraft.MC_1_17_1_Version
-                            and < ProtocolMinecraft.MC_1_20_6_Version:
-                            return ReadDustParticle(cache);
-                        // 1.20.6+
-                        case >= ProtocolMinecraft.MC_1_20_6_Version:
-                            return ReadDustColorTransitionParticle(cache);
-                    }
-                    break;
-                case 15:
-                    switch (protocolVersion)
-                    {
-                        // 1.17 - 1.17.1
-                        case ProtocolMinecraft.MC_1_17_Version
-                            or ProtocolMinecraft.MC_1_17_1_Version:
-                            return ReadDustParticle(cache);
-                        // 1.18 - 1.20.4
-                        case > ProtocolMinecraft.MC_1_17_1_Version
-                            and < ProtocolMinecraft.MC_1_20_6_Version:
-                            return ReadDustColorTransitionParticle(cache);
-                    }
-                    break;
-                case 16:
-                    // 1.17 - 1.17.1
-                    if (protocolVersion is ProtocolMinecraft.MC_1_17_Version
-                        or ProtocolMinecraft.MC_1_17_1_Version)
-                        return ReadDustColorTransitionParticle(cache);
-                    break;
-                case 20:
-                    // 1.20.6+
-                    if (protocolVersion >= ProtocolMinecraft.MC_1_20_6_Version)
-                        return ReadEntityEffectParticle(cache); // minecraft:entity_effect
-                    break;
-                case 23:
-                    // 1.15 - 1.16.5
-                    if (protocolVersion < ProtocolMinecraft.MC_1_17_Version)
-                        return ReadBlockParticle(cache); // Block State (minecraft:falling_dust)
-                    break;
-                case 24:
-                    // 1.18 - 1.19.3
-                    if (protocolVersion is > ProtocolMinecraft.MC_1_17_1_Version
-                        and < ProtocolMinecraft.MC_1_19_3_Version)
-                        return ReadBlockParticle(cache); // Block State (minecraft:falling_dust)
-                    break;
-                case 25:
-                    // 1.17 - 1.17.1 and 1.19.3 - 1.20.4
-                    if (protocolVersion is ProtocolMinecraft.MC_1_17_Version
-                        or ProtocolMinecraft.MC_1_17_1_Version
-                        or (>= ProtocolMinecraft.MC_1_19_3_Version and < ProtocolMinecraft.MC_1_20_6_Version))
-                        return ReadBlockParticle(cache); // Block State (minecraft:falling_dust)
-                    break;
-                case 28:
-                    // 1.20.6+
-                    if (protocolVersion >= ProtocolMinecraft.MC_1_20_6_Version)
-                        return ReadBlockParticle(cache); // minecraft:falling_dust (BlockState)
-                    break;
-                case 30:
-                    // 1.19.3 - 1.20.4
-                    if (protocolVersion is >= ProtocolMinecraft.MC_1_19_3_Version
-                        and < ProtocolMinecraft.MC_1_20_6_Version)
-                        return ReadSculkChargeParticle(cache); // Roll (minecraft:sculk_charge)
-                    break;
-                case 32:
-                    // 1.15 - 1.16.5
-                    if (protocolVersion < ProtocolMinecraft.MC_1_17_Version)
-                        return ReadItemParticle(cache, itemPalette); // Item (minecraft:item)
-                    break;
-                case 35:
-                    // 1.20.6+
-                    if (protocolVersion >= ProtocolMinecraft.MC_1_20_6_Version)
-                        return ReadSculkChargeParticle(cache); // minecraft:sculk_charge (Roll)
-                    break;
-                case 36:
-                    switch (protocolVersion)
-                    {
-                        // 1.17 - 1.17.1
-                        case ProtocolMinecraft.MC_1_17_Version
-                            or ProtocolMinecraft.MC_1_17_1_Version:
-                            return ReadItemParticle(cache, itemPalette); // Item (minecraft:item)
-                        // 1.18 - 1.19.2
-                        case > ProtocolMinecraft.MC_1_17_1_Version
-                            and < ProtocolMinecraft.MC_1_19_3_Version:
-                            return ReadVibrationParticleV1(cache, oldFormat: false); // minecraft:vibration
-                    }
-                    break;
-                case 37:
-                    // 1.17 - 1.17.1
-                    if (protocolVersion is ProtocolMinecraft.MC_1_17_Version
-                        or ProtocolMinecraft.MC_1_17_1_Version)
-                        return ReadVibrationParticleV1(cache, oldFormat: true); // minecraft:vibration
-                    break;
-                case 39:
-                    // 1.19.3 - 1.20.4
-                    if (protocolVersion is >= ProtocolMinecraft.MC_1_19_3_Version and < ProtocolMinecraft.MC_1_20_6_Version)
-                        return ReadItemParticle(cache, itemPalette); // Item (minecraft:item)
-                    break;
-                case 40:
-                    // 1.19.3 - 1.20.4
-                    if (protocolVersion >= ProtocolMinecraft.MC_1_19_3_Version)
-                        return ReadVibrationParticleV2(cache, oldFormat: true); // minecraft:vibration
-                    break;
-                case 44:
-                    // 1.20.6+
-                    if (protocolVersion >= ProtocolMinecraft.MC_1_20_6_Version)
-                        return ReadItemParticle(cache, itemPalette); // minecraft:item (Item)
-                    break;
-                case 45:
-                    // 1.21+
-                    if(protocolVersion >= ProtocolMinecraft.MC_1_21_Version)
-                        return ReadVibrationParticleV2(cache, oldFormat: false); // minecraft:vibration
-                    break;
-                case 99:
-                    // 1.20.6+
-                    if (protocolVersion >= ProtocolMinecraft.MC_1_20_6_Version)
-                        return ReadShriekParticle(cache); // minecraft:shriek (Delay)
-                    break;
-                case 105:
-                    // 1.20.6+
-                    if (protocolVersion >= ProtocolMinecraft.MC_1_20_6_Version)
-                        return ReadBlockParticle(cache); // minecraft:dust_pillar (BlockState)
-                    break;
-            }
+                ParticleExtraDataType.None                => ParticleExtraData.Empty,
+                ParticleExtraDataType.Block               => ReadBlockParticle(cache),
+                ParticleExtraDataType.Dust                => ReadDustParticle(cache),
+                ParticleExtraDataType.DustColorTransition => ReadDustColorTransitionParticle(cache),
+                ParticleExtraDataType.EntityEffect        => ReadEntityEffectParticle(cache),
+                ParticleExtraDataType.SculkCharge         => ReadSculkChargeParticle(cache),
+                ParticleExtraDataType.Item                => ReadItemParticle(cache, itemPalette),
+                ParticleExtraDataType.Vibration           => ReadVibrationParticle(cache, hasOrigin: true,  hasEyeHeight: false, useTypeId: true),
+                ParticleExtraDataType.VibrationV2         => ReadVibrationParticle(cache, hasOrigin: false, hasEyeHeight: true,  useTypeId: false),
+                ParticleExtraDataType.VibrationV3         => ReadVibrationParticle(cache, hasOrigin: false, hasEyeHeight: true,  useTypeId: false),
+                ParticleExtraDataType.Shriek              => ReadShriekParticle(cache),
 
-            return ParticleExtraData.Empty;
+                _                                         => ParticleExtraData.Empty,
+            };
         }
 
         private BlockParticleExtraData ReadBlockParticle(Queue<byte> cache)
@@ -1063,88 +917,60 @@ namespace CraftSharp.Protocol.Handlers
         }
 
         /// <summary>
-        /// Data for 'minecraft:vibration' particle in 1.17 - 1.19.2
+        /// For version 1.17 - 1.20.4, type ids('minecraft:block' and 'minecraft:entity')
+        /// are used. For 1.20.5+, the numeral ids of these types are sent instead.
         /// <br/>
-        /// Old format for version 1.17 - 1.17.1, new format for version 1.18 - 1.19.2
+        /// During version 1.17 - 1.18.2, there's also an 'origin' field of Location type
+        /// sent before destination data. For 1.19+, an 'eye height' field is included for
+        /// 'minecraft:entity' position source type, following the entity id field.
         /// </summary>
-        private VibrationParticleExtraDataV1 ReadVibrationParticleV1(Queue<byte> cache, bool oldFormat)
+        private VibrationParticleExtraData ReadVibrationParticle(Queue<byte> cache, bool hasOrigin, bool hasEyeHeight, bool useTypeId)
         {
-            Location origin, destination;
-            int ticks;
-
-            if (oldFormat) // 1.17 - 1.17.1
+            if (hasOrigin) // 1.17 - 1.18.2
             {
-                var ox = (float) ReadNextDouble(cache); // Origin X
-                var oy = (float) ReadNextDouble(cache); // Origin Y
-                var oz = (float) ReadNextDouble(cache); // Origin Z
-                var dx = (float) ReadNextDouble(cache); // Destination X
-                var dy = (float) ReadNextDouble(cache); // Destination Y
-                var dz = (float) ReadNextDouble(cache); // Destination Z
-
-                origin = new(ox, oy, oz);
-                destination = new(dx, dy, dz);
-                
-                ticks = ReadNextInt(cache); // Ticks
+                // Ignore it
+                ReadNextLocation(cache); // Origin location
             }
-            else // 1.18 - 1.19.2
-            {
-                origin = ReadNextLocation(cache); // Origin (Starting Position)
-                destination = ReadNextLocation(cache); // Desitination (Ending Position)
-                ticks = ReadNextVarInt(cache); // Ticks
-            }
-            
-            return new VibrationParticleExtraDataV1(origin, destination, ticks);
-        }
 
-        /// <summary>
-        /// Data for 'minecraft:vibration' particle in 1.19.3+
-        /// <br/>
-        /// Old format for version 1.19.3 - 1.20.4, new format for version 1.21+
-        /// </summary>
-        private VibrationParticleExtraDataV2 ReadVibrationParticleV2(Queue<byte> cache, bool oldFormat)
-        {
-            bool useBlockPos;
+            bool useBlockPos; // Use a bool here since only 2 types are defined
 
-            if (oldFormat) // 1.19.3 - 1.20.4
+            if (useTypeId) // 1.17 - 1.20.4
             {
-                var positionSourceType = ReadNextString(cache);
-                useBlockPos = positionSourceType switch
+                var positionSourceTypeId = ReadNextString(cache); // Position source type
+                useBlockPos = positionSourceTypeId switch
                 {
                     "minecraft:block"  => true,
-                    "block"            => true,
                     "minecraft:entity" => false,
-                    "entity"           => false,
 
-                    _                  => throw new InvalidDataException($"Unknown position source type: {positionSourceType}")
+                    _                  => throw new InvalidDataException($"Unknown position source type id: {positionSourceTypeId}")
                 };
             }
-            else // 1.21+
+            else // 1.20.5+
             {
-                var positionSourceType = ReadNextVarInt(cache); // Position Source Type, 0 for 'minecraft:block', 1 for 'minecraft:entity'
-
-                useBlockPos = positionSourceType switch
+                var positionSourceTypeNumId = ReadNextVarInt(cache); // Position source type's numeral id
+                useBlockPos = positionSourceTypeNumId switch
                 {
                     0 => true,
                     1 => false,
 
-                    _ => throw new InvalidDataException($"Unknown position source type: {positionSourceType}")
+                    _ => throw new InvalidDataException($"Unknown position source type num id: {positionSourceTypeNumId}")
                 };
             }
 
-            if (useBlockPos)
+            if (useBlockPos) // minecraft:block
             {
                 var loc = ReadNextLocation(cache);
                 var ticks = ReadNextVarInt(cache);
 
-                return new VibrationParticleExtraDataV2(loc, ticks);
+                return new VibrationParticleExtraData(loc, ticks);
             }
-            else
+            else // minecraft:entity (Not really used)
             {
                 var entityId = ReadNextVarInt(cache);
-                var eyeHeight = ReadNextFloat(cache);
+                var eyeHeight = hasEyeHeight ? ReadNextFloat(cache) : 0F;
                 var ticks = ReadNextVarInt(cache);
 
-                return new VibrationParticleExtraDataV2(entityId, eyeHeight, ticks);
+                return new VibrationParticleExtraData(entityId, eyeHeight, ticks);
             }
         }
 

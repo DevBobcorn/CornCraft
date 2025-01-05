@@ -133,7 +133,7 @@ namespace CraftSharp.Rendering
             {
                 var particleState = particleStates[i];
                 var particleTransform = particleTransforms[i];
-                if (particleState.lifeTime > 0)
+                if (particleState.LifeTime > 0)
                 {
                     ParticleUpdate(i, particleTransform, particleStates[i]);
                     ParticlePhysicsUpdate(i, particleTransform, particleState);
@@ -178,7 +178,7 @@ namespace CraftSharp.Rendering
 
         protected virtual void ParticlePhysicsUpdate(int idx, ParticleTransform particleTransform, ParticleStateData particleState)
         {
-            particleTransform.position += particleState.velocity * Time.deltaTime;
+            particleTransform.position += particleState.Velocity * Time.deltaTime;
         }
 
         public Mesh BuildMesh()

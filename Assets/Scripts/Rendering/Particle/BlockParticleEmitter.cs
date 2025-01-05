@@ -77,9 +77,9 @@ namespace CraftSharp.Rendering
 
         protected override void ParticleUpdate(int idx, ParticleTransform particleTransform, ParticleStateData particleState)
         {
-            particleState.velocity.y -= 14f * Time.deltaTime;
+            particleState.Velocity.y -= 14f * Time.deltaTime;
 
-            particleState.lifeTime -= 1 * Time.deltaTime;
+            particleState.LifeTime -= 1 * Time.deltaTime;
         }
 
         protected override void ParticlePhysicsUpdate(int idx, ParticleTransform particleTransform, ParticleStateData particleState)
@@ -92,7 +92,7 @@ namespace CraftSharp.Rendering
             }
             
             var pPos = particleTransform.position;
-            var velocity = particleState.velocity;
+            var velocity = particleState.Velocity;
 
             var posDelta = velocity * Time.deltaTime;
             var oldPosDelta = posDelta;
@@ -119,7 +119,7 @@ namespace CraftSharp.Rendering
                 if (velocity.z * sign <= 0)
                     velocity.z = 0;
 
-                particleState.velocity = velocity;
+                particleState.Velocity = velocity;
             }
             
             particleTransform.position += posDelta;

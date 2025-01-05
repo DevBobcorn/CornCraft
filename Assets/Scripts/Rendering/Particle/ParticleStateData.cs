@@ -4,9 +4,8 @@ namespace CraftSharp.Rendering
 {
     public class ParticleStateData
     {
-        public Vector3 velocity;
-        public float lifeTime;
-
-        public 
+        public Vector3 Velocity;
+        public float LifeTime;
+        public ParticleExtraData ExtraData;
     }
 }
