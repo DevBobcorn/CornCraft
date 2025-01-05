@@ -849,9 +849,9 @@ namespace CraftSharp.Protocol.Handlers
                 ParticleExtraDataType.EntityEffect        => ReadEntityEffectParticle(cache),
                 ParticleExtraDataType.SculkCharge         => ReadSculkChargeParticle(cache),
                 ParticleExtraDataType.Item                => ReadItemParticle(cache, itemPalette),
-                ParticleExtraDataType.Vibration           => ReadVibrationParticle(cache, hasOrigin: true,  hasEyeHeight: false, useTypeId: true),
-                ParticleExtraDataType.VibrationV2         => ReadVibrationParticle(cache, hasOrigin: false, hasEyeHeight: true,  useTypeId: false),
-                ParticleExtraDataType.VibrationV3         => ReadVibrationParticle(cache, hasOrigin: false, hasEyeHeight: true,  useTypeId: false),
+                ParticleExtraDataType.Vibration           => ReadVibrationParticle(cache, hasOrigin: true,  hasEyeHeight: false, useTypeId: true ), // 1.17 - 1.18.2
+                ParticleExtraDataType.VibrationV2         => ReadVibrationParticle(cache, hasOrigin: false, hasEyeHeight: true,  useTypeId: true ), // 1.19 - 1.20.4
+                ParticleExtraDataType.VibrationV3         => ReadVibrationParticle(cache, hasOrigin: false, hasEyeHeight: true,  useTypeId: false), // 1.20.5+
                 ParticleExtraDataType.Shriek              => ReadShriekParticle(cache),
 
                 _                                         => ParticleExtraData.Empty,
