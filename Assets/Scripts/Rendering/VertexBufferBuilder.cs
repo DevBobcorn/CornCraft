@@ -13,7 +13,7 @@ namespace CraftSharp.Demo
         public static Mesh BuildMesh(VertexBuffer visualBuffer)
         {
             int vertexCount = visualBuffer.vert.Length;
-            int triIdxCount = (vertexCount / 2) * 3;
+            int triIdxCount = vertexCount / 2 * 3;
 
             var meshDataArr = Mesh.AllocateWritableMeshData(1);
             var meshData = meshDataArr[0];

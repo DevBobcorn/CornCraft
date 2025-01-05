@@ -103,7 +103,7 @@ namespace CraftSharp.Rendering
             uint vertexOffset = 0;
             itemGeometry.Build(visualBuffer, ref vertexOffset, ITEM_CENTER, colors);
 
-            int triIdxCount = (vertexCount / 2) * 3;
+            int triIdxCount = vertexCount / 2 * 3;
 
             var meshDataArr = Mesh.AllocateWritableMeshData(1);
             var meshData = meshDataArr[0];

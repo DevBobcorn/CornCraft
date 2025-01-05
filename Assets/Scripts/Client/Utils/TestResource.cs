@@ -84,7 +84,7 @@ namespace CraftSharp
                 var color = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, BlockLoc.Zero, state);
                 geometry.Build(visualBuffer, ref vertexOffset, float3.zero, cullFlags, 0, 0F, DUMMY_BLOCK_VERT_LIGHT, color);
 
-                int triIdxCount = (vertexCount / 2) * 3;
+                int triIdxCount = vertexCount / 2 * 3;
 
                 var meshDataArr = Mesh.AllocateWritableMeshData(1);
                 var meshData = meshDataArr[0];
