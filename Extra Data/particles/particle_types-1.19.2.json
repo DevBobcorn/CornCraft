@@ -169,7 +169,7 @@
   "minecraft:vibration": {
     "protocol_id": 40,
     "render_always": true,
-    "extra_data": "vibration_v2"
+    "extra_data": "vibration"
   },
   "minecraft:item_slime": {
     "protocol_id": 41,
