@@ -3,11 +3,8 @@ using UnityEngine;
 
 namespace CraftSharp.Rendering
 {
-    public class BlockParticleRender : ParticleRender
+    public class BlockParticleRender : ParticleRender<BlockParticleExtraData>
     {
-        private static readonly float _padding = 0.3F;
-        private static readonly float _step = 0.2F;
-        
         private static readonly System.Random _random = new();
         private ChunkRenderManager _chunkRenderManager;
         private ChunkMaterialManager _chunkMaterialManager;
@@ -53,36 +50,34 @@ namespace CraftSharp.Rendering
             return 1F;
         }
 
-        protected override void ParticleStart(int idx, ParticleTransform particleTransform, ParticleStateData particleState)
+        protected override void ParticleStart(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraData> particleState)
         {
-            /*
-            var isLeaves = blockCode == BlockMetaDatabase.BuiltinBlockCode.Leaves;
-            particleState.lifeTime = isLeaves ? _random.Next(30, 100) / 100f : _random.Next(15, 70) / 100f;
+            var isLeaves = false; // TODO: Check with block tag
 
-            particleTransform.scale = Vector3.one * (_random.Next(50, 150) / 100f);
+            particleState.LifeTime = isLeaves ? _random.Next(30, 100) / 100F : _random.Next(15, 70) / 100F;
+
+            particleTransform.Scale = Vector3.one * (_random.Next(50, 150) / 100F);
             
             var ofs = new Vector3(_random.Next(-100, 100), _random.Next(-100, 100), _random.Next(-100, 100)).normalized;
-            particleTransform.position += ofs * 0.3f;
+            particleTransform.Position += ofs * 0.3F;
 
             var dot = Vector3.Dot(ofs, Vector3.up);
             
-            var acc = dot * 0.4f + 0.4f;
-            var acc2 = dot > 0.8f ? dot * 0.8f : 0;
+            var acc = dot * 0.4F + 0.4F;
+            var acc2 = dot > 0.8F ? dot * 0.8F : 0;
             
-            particleState.velocity = ofs * ((Mathf.Clamp(Mathf.Abs(ofs.y), 0f, 0.5f) + 
-                                             (isLeaves ? 0.5f : 1 )) * 
-                                            (0.5f + _random.Next(1, 150) / 100f) + (isLeaves ? 0 : acc + acc2 ));
-            */
+            particleState.Velocity = ofs * ((Mathf.Clamp(Mathf.Abs(ofs.y), 0F, 0.5F) + (isLeaves ? 0.5F : 1F)) * 
+                                            (0.5F + _random.Next(1, 150) / 100F) + (isLeaves ? 0F : acc + acc2));
         }
 
-        protected override void ParticleUpdate(int idx, ParticleTransform particleTransform, ParticleStateData particleState)
+        protected override void ParticleUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraData> particleState)
         {
             particleState.Velocity.y -= 14f * Time.deltaTime;
 
             particleState.LifeTime -= 1 * Time.deltaTime;
         }
 
-        protected override void ParticlePhysicsUpdate(int idx, ParticleTransform particleTransform, ParticleStateData particleState)
+        protected override void ParticlePhysicsUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraData> particleState)
         {
             if (_chunkRenderManager == null)
             {
@@ -91,7 +86,6 @@ namespace CraftSharp.Rendering
                 return;
             }
             
-            var pPos = particleTransform.position;
             var velocity = particleState.Velocity;
 
             var posDelta = velocity * Time.deltaTime;
@@ -122,7 +116,7 @@ namespace CraftSharp.Rendering
                 particleState.Velocity = velocity;
             }
             
-            particleTransform.position += posDelta;
+            particleTransform.Position += posDelta;
         }
 
         protected override void StartUp()

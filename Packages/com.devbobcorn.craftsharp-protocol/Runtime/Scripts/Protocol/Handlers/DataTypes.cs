@@ -840,7 +840,7 @@ namespace CraftSharp.Protocol.Handlers
             var particleNumId = ReadNextVarInt(cache);
             var particleType = ParticleTypePalette.INSTANCE.GetByNumId(particleNumId);
 
-            return particleType.ExtraDataType switch
+            return particleType.OptionType switch
             {
                 ParticleExtraDataType.None                => ParticleExtraData.Empty,
                 ParticleExtraDataType.Block               => ReadBlockParticle(cache),
@@ -849,9 +849,10 @@ namespace CraftSharp.Protocol.Handlers
                 ParticleExtraDataType.EntityEffect        => ReadEntityEffectParticle(cache),
                 ParticleExtraDataType.SculkCharge         => ReadSculkChargeParticle(cache),
                 ParticleExtraDataType.Item                => ReadItemParticle(cache, itemPalette),
-                ParticleExtraDataType.Vibration           => ReadVibrationParticle(cache, hasOrigin: true,  hasEyeHeight: false, useTypeId: true ), // 1.17 - 1.18.2
-                ParticleExtraDataType.VibrationV2         => ReadVibrationParticle(cache, hasOrigin: false, hasEyeHeight: true,  useTypeId: true ), // 1.19 - 1.20.4
-                ParticleExtraDataType.VibrationV3         => ReadVibrationParticle(cache, hasOrigin: false, hasEyeHeight: true,  useTypeId: false), // 1.20.5+
+                ParticleExtraDataType.Vibration           => ReadVibrationParticle(cache,
+                        hasOrigin:    protocolVersion <= ProtocolMinecraft.MC_1_18_2_Version,
+                        hasEyeHeight: protocolVersion >= ProtocolMinecraft.MC_1_19_2_Version,
+                        useTypeId:    protocolVersion <= ProtocolMinecraft.MC_1_20_4_Version),
                 ParticleExtraDataType.Shriek              => ReadShriekParticle(cache),
 
                 _                                         => ParticleExtraData.Empty,
@@ -861,8 +862,9 @@ namespace CraftSharp.Protocol.Handlers
         private BlockParticleExtraData ReadBlockParticle(Queue<byte> cache)
         {
             var stateId = ReadNextVarInt(cache);
+            var state = BlockStatePalette.INSTANCE.GetByNumId(stateId);
 
-            return new BlockParticleExtraData(stateId);
+            return new BlockParticleExtraData(stateId, state);
         }
 
         private DustParticleExtraData ReadDustParticle(Queue<byte> cache)

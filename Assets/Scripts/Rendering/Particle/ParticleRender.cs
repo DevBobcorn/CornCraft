@@ -7,14 +7,14 @@ using CraftSharp.Resource;
 namespace CraftSharp.Rendering
 {
     [ExecuteAlways]
-    public abstract class ParticleRender : MonoBehaviour
+    public abstract class ParticleRender<T> : MonoBehaviour where T : ParticleExtraData
     {
         protected Mesh finalMesh;
         protected Material material;
 
         protected ParticleTransform[] particleTransforms;
         protected Matrix4x4[] particleTransformMats;
-        protected ParticleStateData[] particleStates;
+        protected ParticleStateData<T>[] particleStates;
         
         protected ParticleRenderOptions options;
         
@@ -40,12 +40,12 @@ namespace CraftSharp.Rendering
             
             particleTransformMats = new Matrix4x4[maxParticles];
             particleTransforms = new ParticleTransform[maxParticles];
-            particleStates = new ParticleStateData[maxParticles];
+            particleStates = new ParticleStateData<T>[maxParticles];
 
             for (int i = 0; i < maxParticles; ++i)
             {
                 particleTransforms[i] = new ParticleTransform();
-                particleStates[i] = new ParticleStateData();
+                particleStates[i] = new ParticleStateData<T>();
             }
         }
 
@@ -107,13 +107,13 @@ namespace CraftSharp.Rendering
             for (int i = 0; i < len; ++i)
             {
                 var particleTransform = particleTransforms[i];
-                particleTransform.position = transform.position;
+                particleTransform.Position = transform.position;
                 ParticleStart(i, particleTransform, particleStates[i]);
 
                 particleTransformMats[i] = particleTransform.GetTransformMatrix4x4(rootPos, cameraPos, cameraUp);
 
                 var bounds = meshRenderer.bounds;
-                bounds.Encapsulate((particleTransform.position - transform.position) * 1.5F);
+                bounds.Encapsulate((particleTransform.Position - transform.position) * 1.5F);
                 meshRenderer.bounds = bounds;
             }
             material.SetMatrixArray(MatArrayProp, particleTransformMats);
@@ -141,7 +141,7 @@ namespace CraftSharp.Rendering
                     particleTransformMats[i] = particleTransform.GetTransformMatrix4x4(rootPos, cameraPos, cameraUp);
 
                     var bounds = meshRenderer.bounds;
-                    bounds.Encapsulate(particleTransform.position - transform.position);
+                    bounds.Encapsulate(particleTransform.Position - transform.position);
                     meshRenderer.bounds = bounds;
                 }
                 else
@@ -166,19 +166,19 @@ namespace CraftSharp.Rendering
             meshRenderer.enabled = false;
         }
 
-        protected virtual void ParticleStart(int idx, ParticleTransform particleTransform, ParticleStateData particleState)
+        protected virtual void ParticleStart(int idx, ParticleTransform particleTransform, ParticleStateData<T> particleState)
         {
             
         }
 
-        protected virtual void ParticleUpdate(int idx, ParticleTransform particleTransform, ParticleStateData particleState)
+        protected virtual void ParticleUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<T> particleState)
         {
             
         }
 
-        protected virtual void ParticlePhysicsUpdate(int idx, ParticleTransform particleTransform, ParticleStateData particleState)
+        protected virtual void ParticlePhysicsUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<T> particleState)
         {
-            particleTransform.position += particleState.Velocity * Time.deltaTime;
+            particleTransform.Position += particleState.Velocity * Time.deltaTime;
         }
 
         public Mesh BuildMesh()
