@@ -844,8 +844,10 @@ namespace CraftSharp.Protocol.Handlers
             {
                 ParticleExtraDataType.None                => ParticleExtraData.Empty,
                 ParticleExtraDataType.Block               => ReadBlockParticle(cache),
-                ParticleExtraDataType.Dust                => ReadDustParticle(cache),
-                ParticleExtraDataType.DustColorTransition => ReadDustColorTransitionParticle(cache),
+                ParticleExtraDataType.Dust                => ReadDustParticle(cache,
+                        useFloats:    true /* TODO: false for 1.21.4+ */),
+                ParticleExtraDataType.DustColorTransition => ReadDustColorTransitionParticle(cache,
+                        useFloats:    true /* TODO: false for 1.21.4+ */),
                 ParticleExtraDataType.EntityEffect        => ReadEntityEffectParticle(cache),
                 ParticleExtraDataType.SculkCharge         => ReadSculkChargeParticle(cache),
                 ParticleExtraDataType.Item                => ReadItemParticle(cache, itemPalette),
@@ -867,32 +869,63 @@ namespace CraftSharp.Protocol.Handlers
             return new BlockParticleExtraData(stateId, state);
         }
 
-        private DustParticleExtraData ReadDustParticle(Queue<byte> cache)
+        private DustParticleExtraData ReadDustParticle(Queue<byte> cache, bool useFloats)
         {
-            var r = ReadNextFloat(cache); // Red
-            var g = ReadNextFloat(cache); // Green
-            var b = ReadNextFloat(cache); // Blue
-            var s = ReadNextFloat(cache); // Scale
+            Color32 color;
 
-            return new DustParticleExtraData(new(r, g, b), s);
+            if (useFloats)
+            {
+                var r = ReadNextFloat(cache); // Red
+                var g = ReadNextFloat(cache); // Green
+                var b = ReadNextFloat(cache); // Blue
+                color = new Color32((byte) (r * 255), (byte) (g * 255), (byte) (b * 255), 255);
+            }
+            else
+            {
+                var rgb = ReadNextInt(cache); // 0xRRGGBB
+                color = new Color32((byte) ((rgb & 0xFF0000) >> 16), (byte) ((rgb & 0xFF00) >> 8), (byte) (rgb & 0xFF), 255);
+            }
+
+            var scale = ReadNextFloat(cache); // Scale
+
+            return new DustParticleExtraData(color, scale);
         }
 
-        private DustColorTransitionParticleExtraData ReadDustColorTransitionParticle(Queue<byte> cache)
+        private DustColorTransitionParticleExtraData ReadDustColorTransitionParticle(Queue<byte> cache, bool useFloats)
         {
-            var fr = ReadNextFloat(cache); // From red
-            var fg = ReadNextFloat(cache); // From green
-            var fb = ReadNextFloat(cache); // From blue
-            var s  = ReadNextFloat(cache); // Scale
-            var tr = ReadNextFloat(cache); // To red
-            var tg = ReadNextFloat(cache); // To green
-            var tb = ReadNextFloat(cache); // To Blue
+            Color32 colorFrom, colorTo;
+            float scale;
 
-            return new DustColorTransitionParticleExtraData(new(fr, fg, fb), new(tr, tg, tb), s);
+            if (useFloats)
+            {
+                var fr = ReadNextFloat(cache); // From red
+                var fg = ReadNextFloat(cache); // From green
+                var fb = ReadNextFloat(cache); // From blue
+                scale  = ReadNextFloat(cache); // Scale
+                var tr = ReadNextFloat(cache); // To red
+                var tg = ReadNextFloat(cache); // To green
+                var tb = ReadNextFloat(cache); // To Blue
+
+                colorFrom = new Color32((byte) (fr * 255), (byte) (fg * 255), (byte) (fb * 255), 255);
+                colorTo   = new Color32((byte) (tr * 255), (byte) (tg * 255), (byte) (tb * 255), 255);
+            }
+            else
+            {
+                var rgbFrom = ReadNextInt(cache); // 0xRRGGBB
+                var rgbT = ReadNextInt(cache); // 0xRRGGBB
+                scale  = ReadNextFloat(cache); // Scale
+
+                colorFrom = new Color32((byte) ((rgbFrom & 0xFF0000) >> 16), (byte) ((rgbFrom & 0xFF00) >> 8), (byte) (rgbFrom & 0xFF), 255);
+                colorTo   = new Color32((byte) ((rgbT & 0xFF0000) >> 16), (byte) ((rgbT & 0xFF00) >> 8), (byte) (rgbT & 0xFF), 255);
+            }
+
+            return new DustColorTransitionParticleExtraData(colorFrom, colorTo, scale);
         }
 
         private EntityEffectParticleExtraData ReadEntityEffectParticle(Queue<byte> cache)
         {
-            var color = ReadNextInt(cache);
+            var argb = ReadNextInt(cache); // 0xAARRGGGBB
+            var color = new Color32((byte) ((argb & 0xFF0000) >> 16), (byte) ((argb & 0xFF00) >> 8), (byte) (argb & 0xFF), (byte) (argb >> 24));
 
             return new EntityEffectParticleExtraData(color);
         }
