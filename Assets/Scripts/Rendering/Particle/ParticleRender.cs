@@ -6,164 +6,159 @@ using CraftSharp.Resource;
 
 namespace CraftSharp.Rendering
 {
-    [ExecuteAlways]
     public abstract class ParticleRender<T> : MonoBehaviour where T : ParticleExtraData
     {
         protected Mesh finalMesh;
         protected Material material;
 
         protected ParticleTransform[] particleTransforms;
-        protected Matrix4x4[] particleTransformMats;
+        protected Vector4[] particleTransformPos;
         protected ParticleStateData<T>[] particleStates;
         
-        protected ParticleRenderOptions options;
+        protected readonly ParticleRenderOptions options;
         
-        private static readonly int MatArrayProp = Shader.PropertyToID("_M_MatArray");
+        protected static readonly int PosArrayProp = Shader.PropertyToID("_PosArray");
 
         protected MeshRenderer meshRenderer;
         protected MeshFilter meshFilter;
 
-        protected float lastingTime;
-        protected int maxParticles;
+        public int ActiveParticles => activeParticles;
 
-        private bool hidden;
-        private static readonly int MAIN_TEX = Shader.PropertyToID("_MainTex");
-
-        private Transform cameraTransform;
-        private static readonly int ENV_LIGHT = Shader.PropertyToID("_EnvLight");
+        private int activeParticles = 0;
+        private bool simulating;
 
         protected ParticleRender(ParticleRenderOptions options)
         {
             this.options = options;
-            lastingTime = options.MaxParticles;
-            maxParticles = options.MaxParticles;
             
-            particleTransformMats = new Matrix4x4[maxParticles];
-            particleTransforms = new ParticleTransform[maxParticles];
-            particleStates = new ParticleStateData<T>[maxParticles];
+            particleTransformPos = new Vector4[options.MaxParticles];
+            particleTransforms = new ParticleTransform[options.MaxParticles];
+            particleStates = new ParticleStateData<T>[options.MaxParticles];
 
-            for (int i = 0; i < maxParticles; ++i)
+            for (int i = 0; i < options.MaxParticles; ++i)
             {
                 particleTransforms[i] = new ParticleTransform();
                 particleStates[i] = new ParticleStateData<T>();
             }
         }
 
-        private void Awake()
-        {
-            var shader = Shader.Find("B2nd/Block2nd_Particle_New");
-            if (shader == null)
-            {
-                Debug.LogWarning("Particle Shader not Found");
-                shader = Shader.Find("Standard");
-            }
-            material = new Material(shader);
-            material.SetMatrixArray(MatArrayProp, particleTransformMats);
-
-            meshRenderer = GetComponent<MeshRenderer>();
-            meshFilter = GetComponent<MeshFilter>();
-
-            meshRenderer.sharedMaterial = material;
-            meshRenderer.allowOcclusionWhenDynamic = false;
-
-            cameraTransform = Camera.main.transform;
-        }
-
         private void Start()
         {
-            BuildMesh();
-            meshFilter.sharedMesh = finalMesh;
-
-            if (options.PlayOnAwake)
-            {
-                Play();
-            }
+            InitializeMeshAndMaterial();
             
-            StartUp();
+            StartSimulate();
         }
 
-        protected virtual void StartUp()
-        {
-            
-        }
-        
-        public void SetEnvLight(float skyLight, float blockLight)
-        {
-            material.SetVector(ENV_LIGHT, new Vector4(skyLight, blockLight));
-        }
+        protected abstract void InitializeMeshAndMaterial();
 
-        private void PlayStart()
+        private void StartSimulate()
         {
-            if (cameraTransform == null)
+            simulating = true;
+
+            if (material != null)
             {
-                cameraTransform = Camera.main.transform;
+                var len = particleTransforms.Length;
+                for (int i = 0; i < len; i++)
+                {
+                    var particleTransform = particleTransforms[i];
+                    //particleTransform.Position = Vector3.zero;
+                    ParticleStart(i, particleTransform, particleStates[i]);
+
+                    particleTransformPos[i] = particleTransform.Position;
+
+                    var bounds = meshRenderer.bounds;
+                    bounds.Encapsulate(particleTransform.Position * 1.5F);
+                    meshRenderer.bounds = bounds;
+                }
+                material.SetVectorArray(PosArrayProp, particleTransformPos);
             }
 
-            var cameraPos = cameraTransform.position == null ? Vector3.zero : cameraTransform.position;
-            var cameraUp = cameraTransform.up == null ? Vector3.up : cameraTransform.up;
-            
-            var rootPos = transform.position;
-            var len = particleTransforms.Length;
-            for (int i = 0; i < len; ++i)
-            {
-                var particleTransform = particleTransforms[i];
-                particleTransform.Position = transform.position;
-                ParticleStart(i, particleTransform, particleStates[i]);
+            meshRenderer.enabled = true;
+        }
 
-                particleTransformMats[i] = particleTransform.GetTransformMatrix4x4(rootPos, cameraPos, cameraUp);
+        private void StopSimulate()
+        {
+            simulating = false;
+            meshRenderer.enabled = false;
 
-                var bounds = meshRenderer.bounds;
-                bounds.Encapsulate((particleTransform.Position - transform.position) * 1.5F);
-                meshRenderer.bounds = bounds;
-            }
-            material.SetMatrixArray(MatArrayProp, particleTransformMats);
+            gameObject.name = $"[No active particle]";
         }
 
         private void Update()
         {
-            if (hidden) return;
+            if (!simulating) return;
 
-            var cameraPos = cameraTransform.position == null ? Vector3.zero : cameraTransform.position;
-            var cameraUp = cameraTransform.up == null ? Vector3.up : cameraTransform.up;
-            
             var len = particleTransforms.Length;
-            var deadParticlesCount = 0;
-            var rootPos = transform.position;
-            for (int i = 0; i < len; ++i)
+
+            for (int i = 0; i < len; i++)
             {
                 var particleState = particleStates[i];
                 var particleTransform = particleTransforms[i];
+
                 if (particleState.LifeTime > 0)
                 {
                     ParticleUpdate(i, particleTransform, particleStates[i]);
                     ParticlePhysicsUpdate(i, particleTransform, particleState);
 
-                    particleTransformMats[i] = particleTransform.GetTransformMatrix4x4(rootPos, cameraPos, cameraUp);
+                    particleTransformPos[i] = particleTransform.Position;
 
                     var bounds = meshRenderer.bounds;
-                    bounds.Encapsulate(particleTransform.Position - transform.position);
+                    bounds.Encapsulate(particleTransform.Position);
                     meshRenderer.bounds = bounds;
+
+                    if (particleState.LifeTime <= 0) {
+                        activeParticles--;
+                    }
                 }
                 else
                 {
-                    deadParticlesCount++;
-                    particleTransformMats[i] = Matrix4x4.zero;
+                    //particleTransformMats[i] = Matrix4x4.zero;
+                }
+            }
+
+            if (material != null)
+            {
+                material.SetVectorArray(PosArrayProp, particleTransformPos);
+
+                Debug.Log(string.Join(',', particleTransformPos));
+            }
+
+            if (activeParticles <= 0)
+            {
+                StopSimulate();
+            }
+
+            gameObject.name = $"[Simulating {activeParticles} particles]";
+        }
+
+        public virtual void AddParticle(Vector3 initPos, T extraData)
+        {
+            for (int i = 0; i < particleStates.Length; i++)
+            {
+                if (particleStates[i].LifeTime <= 0F) // This particle is dead, use this slot
+                {
+                    var particleTransform = particleTransforms[i];
+
+                    particleTransform.Position = initPos;
+                    particleTransformPos[i] = particleTransform.Position;
+
+                    
+                    particleTransform.Scale = Vector3.one;
+
+                    particleStates[i].ExtraData = extraData;
+                    particleStates[i].LifeTime = options.Duration;
+
+                    activeParticles++;
+
+                    if (!simulating)
+                    {
+                        StartSimulate();
+                    }
+
+                    break;
                 }
             }
             
-            material.SetMatrixArray(MatArrayProp, particleTransformMats);
-
-            lastingTime -= Time.deltaTime;
-            if (lastingTime <= 0 || deadParticlesCount >= maxParticles)
-            {
-                Hide();
-            }
-        }
-
-        private void Hide()
-        {
-            hidden = true;
-            meshRenderer.enabled = false;
         }
 
         protected virtual void ParticleStart(int idx, ParticleTransform particleTransform, ParticleStateData<T> particleState)
@@ -183,12 +178,9 @@ namespace CraftSharp.Rendering
 
         public Mesh BuildMesh()
         {
-            var singleParticleBuffer = GetSingleParticleBuffer();
-
-            int singleParticleVertexCount = singleParticleBuffer.vert.Length;
             int particleCount = options.MaxParticles;
 
-            int vertexCount = singleParticleVertexCount * particleCount;
+            int vertexCount = 4 * particleCount;
             int triIdxCount = vertexCount / 2 * 3;
 
             var visualBuffer = new VertexBuffer(vertexCount);
@@ -196,20 +188,19 @@ namespace CraftSharp.Rendering
 
             for (int i = 0; i < particleCount; ++i)
             {
-                vertOffset = i * singleParticleVertexCount;
+                vertOffset = i * 4;
 
-                var colorMultiplier = GetColorMultiplier(i);
-                var particleOffset = GetUvOffset(i);
+                visualBuffer.vert[vertOffset + 0] = new float3(0.1F, -.1F, 0F);
+                visualBuffer.vert[vertOffset + 1] = new float3(0.1F, 0.1F, 0F);
+                visualBuffer.vert[vertOffset + 2] = new float3(-.1F, -.1F, 0F);
+                visualBuffer.vert[vertOffset + 3] = new float3(-.1F, 0.1F, 0F);
 
-                for (int j = 0; j < singleParticleVertexCount; j++)
-                {
-                    visualBuffer.vert[vertOffset + j] = singleParticleBuffer.vert[j];
-                    visualBuffer.txuv[vertOffset + j] = singleParticleBuffer.txuv[j];
-                    // Get original tint * color multiplier
-                    visualBuffer.tint[vertOffset + j] = singleParticleBuffer.tint[j] * colorMultiplier;
-                    // This channel is used in a different way than it is for block shaders
-                    visualBuffer.uvan[vertOffset + j] = new(i, particleOffset.x, particleOffset.y, 0F);
-                }
+                // This channel is used in a different way than it is for block shaders
+                visualBuffer.uvan[vertOffset + 0] = new(i, 0F/*particleOffset.x*/, 0F/*particleOffset.y*/, 0F);
+                visualBuffer.uvan[vertOffset + 1] = new(i, 0F/*particleOffset.x*/, 0F/*particleOffset.y*/, 0F);
+                visualBuffer.uvan[vertOffset + 2] = new(i, 0F/*particleOffset.x*/, 0F/*particleOffset.y*/, 0F);
+                visualBuffer.uvan[vertOffset + 3] = new(i, 0F/*particleOffset.x*/, 0F/*particleOffset.y*/, 0F);
+                
             }
 
             var meshDataArr = Mesh.AllocateWritableMeshData(1);
@@ -254,52 +245,26 @@ namespace CraftSharp.Rendering
                 triIndices[ti + 5] = vi + 3U;
             }
 
-            var bounds = new Bounds(new Vector3(0.5F, 0.5F, 0.5F), new Vector3(1F, 1F, 1F));
+            //var bounds = new Bounds(new Vector3(0.5F, 0.5F, 0.5F), new Vector3(1F, 1F, 1F));
 
             meshData.subMeshCount = 1;
             meshData.SetSubMesh(0, new SubMeshDescriptor(0, triIdxCount)
             {
-                bounds = bounds,
+                //bounds = bounds,
                 vertexCount = vertexCount
             }, MeshUpdateFlags.DontRecalculateBounds);
 
             // Create and assign mesh
-            var mesh = new Mesh { bounds = bounds };
+            var mesh = new Mesh { /* bounds = bounds*/ };
             Mesh.ApplyAndDisposeWritableMeshData(meshDataArr, mesh);
-            // Recalculate mesh normals
-            mesh.RecalculateNormals();
-            // Recalculate mesh bounds
-            mesh.RecalculateBounds();
 
             return mesh;
         }
-
-        protected virtual Vector2 GetUvOffset(int idx)
-        {
-            return Vector2.zero;
-        }
-
-        protected virtual float GetColorMultiplier(int idx)
-        {
-            return 0;
-        }
-
-        protected abstract int GetSingleParticleVertexCount();
-        
-        protected abstract VertexBuffer GetSingleParticleBuffer();
         
         private void OnDestroy()
         {
             DestroyImmediate(finalMesh, true);
             DestroyImmediate(material, true);
-        }
-
-        public void Play()
-        {
-            hidden = false;
-            meshRenderer.enabled = true;
-            
-            PlayStart();
         }
     }
 }

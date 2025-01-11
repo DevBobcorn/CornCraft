@@ -19,11 +19,11 @@ namespace CraftSharp.Rendering
         private readonly Dictionary<RenderType, Material> inventoryMaterials = new();
         private Material defaultAtlasMaterial;
 
-        private bool atlasInitialized = false;
+        private bool atlasMaterialsInitialized = false;
 
         public Material GetAtlasMaterial(RenderType renderType, bool getInventoryVariant = false)
         {
-            EnsureAtlasInitialized();
+            EnsureAtlasMaterialsInitialized();
 
             if (getInventoryVariant)
             {
@@ -33,9 +33,9 @@ namespace CraftSharp.Rendering
             return atlasMaterials.GetValueOrDefault(renderType, defaultAtlasMaterial);
         }
 
-        public void EnsureAtlasInitialized()
+        public void EnsureAtlasMaterialsInitialized()
         {
-            if (!atlasInitialized) Initialize();
+            if (!atlasMaterialsInitialized) Initialize();
         }
 
         private void Initialize()
@@ -114,7 +114,7 @@ namespace CraftSharp.Rendering
             inventoryMaterials.Add(RenderType.PLANTS, inventoryCutout);
             inventoryMaterials.Add(RenderType.TALL_PLANTS, inventoryCutout);
 
-            atlasInitialized = true;
+            atlasMaterialsInitialized = true;
         }
     }
 }

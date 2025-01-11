@@ -16,7 +16,6 @@ using CraftSharp.Resource;
 using CraftSharp.Rendering;
 using UnityEngine.InputSystem;
 using CraftSharp.Resource.BedrockEntity;
-using CraftSharp.Control;
 
 namespace CraftSharp
 {
@@ -38,7 +37,8 @@ namespace CraftSharp
 
         private bool loaded = false;
 
-        private List<Transform> billBoardTransforms = new();
+        private BlockParticleRender tempTest;
+        private readonly List<Transform> billBoardTransforms = new();
 
         // Runs before a scene gets loaded
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -329,6 +329,15 @@ namespace CraftSharp
             }
         }
 
+        public void TestBlockParticle()
+        {
+            var particleRenderObj = new GameObject("Block Particle");
+
+            var particleRender = particleRenderObj.AddComponent<BlockParticleRender>();
+
+            tempTest = particleRender;
+        }
+
         private IEnumerator DoBuild(string dataVersion, string resourceVersion, string[] resourceOverrides)
         {
             // Load block/blockstate definitions
@@ -373,7 +382,7 @@ namespace CraftSharp
 
             float startTime = Time.realtimeSinceStartup;
 
-            int start = 0, limit = 4096;
+            int start = 0, limit = 0;
             int count = 0, width = 64;
             foreach (var pair in packManager.StateModelTable)
             {
@@ -430,6 +439,8 @@ namespace CraftSharp
             }
 
             */
+
+            TestBlockParticle();
 
             InfoText.text = $"Meshes built in {Time.realtimeSinceStartup - startTime} second(s).";
         }
@@ -542,6 +553,14 @@ namespace CraftSharp
 
         void Update()
         {
+            if (tempTest != null && tempTest.ActiveParticles < 10)
+            {
+                var stateId = 4;
+                var state = BlockStatePalette.INSTANCE.GetByNumId(stateId);
+
+                tempTest.AddParticle(new Vector3(10, 5, 20) + UnityEngine.Random.insideUnitSphere, new BlockParticleExtraData(stateId, state));
+            }
+
             if (billBoardTransforms != null)
             {
                 foreach (var t in billBoardTransforms)
