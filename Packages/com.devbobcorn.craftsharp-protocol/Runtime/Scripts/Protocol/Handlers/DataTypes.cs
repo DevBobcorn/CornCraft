@@ -864,9 +864,8 @@ namespace CraftSharp.Protocol.Handlers
         private BlockParticleExtraData ReadBlockParticle(Queue<byte> cache)
         {
             var stateId = ReadNextVarInt(cache);
-            var state = BlockStatePalette.INSTANCE.GetByNumId(stateId);
 
-            return new BlockParticleExtraData(stateId, state);
+            return new BlockParticleExtraData(stateId);
         }
 
         private DustParticleExtraData ReadDustParticle(Queue<byte> cache, bool useFloats)

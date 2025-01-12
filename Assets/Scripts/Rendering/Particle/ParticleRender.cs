@@ -14,7 +14,7 @@ namespace CraftSharp.Rendering
         protected readonly ParticleTransform[] particleTransforms;
         protected readonly Vector4[] particleTransformPos; // X, Y, Z, Scale
         protected readonly Vector4[] particleTransformCol; // R, G, B, Light
-        protected readonly Vector4[] particleTransformTex; // U1, V1, U2, V2
+        protected readonly Vector4[] particleTransformTex; // (U, V, Z, Size) * 2
         protected readonly ParticleStateData<T>[] particleStates;
         
         protected readonly ParticleRenderOptions options;
@@ -37,7 +37,7 @@ namespace CraftSharp.Rendering
             
             particleTransformPos = new Vector4[options.MaxParticles];
             particleTransformCol = new Vector4[options.MaxParticles];
-            particleTransformTex = new Vector4[options.MaxParticles];
+            particleTransformTex = new Vector4[options.MaxParticles * 4];
 
             particleTransforms = new ParticleTransform[options.MaxParticles];
             particleStates = new ParticleStateData<T>[options.MaxParticles];
@@ -113,6 +113,7 @@ namespace CraftSharp.Rendering
             {
                 material.SetVectorArray(PosArrayProp, particleTransformPos);
                 material.SetVectorArray(ColArrayProp, particleTransformCol);
+                material.SetVectorArray(TexArrayProp, particleTransformTex);
 
                 //Debug.Log(string.Join(',', particleTransformData));
             }
@@ -134,13 +135,12 @@ namespace CraftSharp.Rendering
                     var particleTransform = particleTransforms[i];
 
                     particleTransform.Position = initPos;
+                    particleStates[i].ExtraData = extraData;
+                    particleStates[i].LifeTime = options.Duration;
 
                     ParticleStart(i, particleTransform, particleStates[i]);
 
                     particleTransformPos[i] = particleTransform.GetAsVector4();
-
-                    particleStates[i].ExtraData = extraData;
-                    particleStates[i].LifeTime = options.Duration;
 
                     activeParticles++;
 
@@ -192,11 +192,10 @@ namespace CraftSharp.Rendering
                 visualBuffer.vert[vertOffset + 3] = new float3(-.1F, 0.1F, 0F);
 
                 // This channel is used in a different way than it is for block shaders
-                visualBuffer.uvan[vertOffset + 0] = new(i, 0F/*particleOffset.x*/, 0F/*particleOffset.y*/, 0F);
-                visualBuffer.uvan[vertOffset + 1] = new(i, 0F/*particleOffset.x*/, 0F/*particleOffset.y*/, 0F);
-                visualBuffer.uvan[vertOffset + 2] = new(i, 0F/*particleOffset.x*/, 0F/*particleOffset.y*/, 0F);
-                visualBuffer.uvan[vertOffset + 3] = new(i, 0F/*particleOffset.x*/, 0F/*particleOffset.y*/, 0F);
-                
+                visualBuffer.uvan[vertOffset + 0] = new(i,  i << 2,      0F, 0F);
+                visualBuffer.uvan[vertOffset + 1] = new(i, (i << 2) | 1, 0F, 0F);
+                visualBuffer.uvan[vertOffset + 2] = new(i, (i << 2) | 2, 0F, 0F);
+                visualBuffer.uvan[vertOffset + 3] = new(i, (i << 2) | 3, 0F, 0F);
             }
 
             var meshDataArr = Mesh.AllocateWritableMeshData(1);
@@ -241,8 +240,6 @@ namespace CraftSharp.Rendering
                 triIndices[ti + 5] = vi + 3U;
             }
 
-            //var bounds = new Bounds(new Vector3(0.5F, 0.5F, 0.5F), new Vector3(1F, 1F, 1F));
-
             meshData.subMeshCount = 1;
             meshData.SetSubMesh(0, new SubMeshDescriptor(0, triIdxCount)
             {
@@ -251,7 +248,7 @@ namespace CraftSharp.Rendering
             }, MeshUpdateFlags.DontRecalculateBounds);
 
             // Create and assign mesh
-            var mesh = new Mesh { /* bounds = bounds*/ };
+            var mesh = new Mesh();
             Mesh.ApplyAndDisposeWritableMeshData(meshDataArr, mesh);
 
             return mesh;

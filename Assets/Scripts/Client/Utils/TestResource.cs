@@ -553,12 +553,11 @@ namespace CraftSharp
 
         void Update()
         {
-            if (tempTest != null && tempTest.ActiveParticles < 10)
+            if (tempTest != null && tempTest.ActiveParticles < 64)
             {
-                var stateId = 4;
-                var state = BlockStatePalette.INSTANCE.GetByNumId(stateId);
+                var stateId = (int) (UnityEngine.Random.value * 500) + 100;
 
-                tempTest.AddParticle(new Vector3(10, 5, 20) + UnityEngine.Random.insideUnitSphere, new BlockParticleExtraData(stateId, state));
+                tempTest.AddParticle(UnityEngine.Random.insideUnitSphere + Vector3.up, new BlockParticleExtraData(stateId));
             }
 
             if (billBoardTransforms != null)
