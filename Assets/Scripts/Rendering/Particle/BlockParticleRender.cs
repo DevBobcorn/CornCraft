@@ -16,8 +16,9 @@ namespace CraftSharp.Rendering
             var isLeaves = false; // TODO: Check with block tag
 
             particleState.LifeTime = isLeaves ? random.Next(30, 100) / 100F : random.Next(15, 70) / 100F;
+            particleTransform.Scale = random.Next(50, 150) / 100F;
 
-            particleTransform.Scale = Vector3.one * (random.Next(50, 150) / 100F);
+            particleTransformCol[idx] = new Vector4((float) random.NextDouble(), (float) random.NextDouble(), (float) random.NextDouble(), 1F);
             
             var ofs = new Vector3(random.Next(-100, 100), random.Next(-100, 100), random.Next(-100, 100)).normalized;
             particleTransform.Position += ofs * 3F; // * 0.3F;
@@ -33,9 +34,9 @@ namespace CraftSharp.Rendering
 
         protected override void ParticleUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraData> particleState)
         {
-            particleState.Velocity.y -= 14f * Time.deltaTime;
+            particleState.Velocity.y -= 14F * Time.deltaTime;
 
-            particleState.LifeTime -= 1 * Time.deltaTime;
+            particleState.LifeTime -= 1F * Time.deltaTime;
         }
 
         protected override void ParticlePhysicsUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraData> particleState)

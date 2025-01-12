@@ -11,13 +11,17 @@ namespace CraftSharp.Rendering
         protected Mesh finalMesh;
         protected Material material;
 
-        protected ParticleTransform[] particleTransforms;
-        protected Vector4[] particleTransformPos;
-        protected ParticleStateData<T>[] particleStates;
+        protected readonly ParticleTransform[] particleTransforms;
+        protected readonly Vector4[] particleTransformPos; // X, Y, Z, Scale
+        protected readonly Vector4[] particleTransformCol; // R, G, B, Light
+        protected readonly Vector4[] particleTransformTex; // U1, V1, U2, V2
+        protected readonly ParticleStateData<T>[] particleStates;
         
         protected readonly ParticleRenderOptions options;
         
         protected static readonly int PosArrayProp = Shader.PropertyToID("_PosArray");
+        protected static readonly int ColArrayProp = Shader.PropertyToID("_ColArray");
+        protected static readonly int TexArrayProp = Shader.PropertyToID("_TexArray");
 
         protected MeshRenderer meshRenderer;
         protected MeshFilter meshFilter;
@@ -32,6 +36,9 @@ namespace CraftSharp.Rendering
             this.options = options;
             
             particleTransformPos = new Vector4[options.MaxParticles];
+            particleTransformCol = new Vector4[options.MaxParticles];
+            particleTransformTex = new Vector4[options.MaxParticles];
+
             particleTransforms = new ParticleTransform[options.MaxParticles];
             particleStates = new ParticleStateData<T>[options.MaxParticles];
 
@@ -57,19 +64,6 @@ namespace CraftSharp.Rendering
 
             if (material != null)
             {
-                var len = particleTransforms.Length;
-                for (int i = 0; i < len; i++)
-                {
-                    var particleTransform = particleTransforms[i];
-                    //particleTransform.Position = Vector3.zero;
-                    ParticleStart(i, particleTransform, particleStates[i]);
-
-                    particleTransformPos[i] = particleTransform.Position;
-
-                    var bounds = meshRenderer.bounds;
-                    bounds.Encapsulate(particleTransform.Position * 1.5F);
-                    meshRenderer.bounds = bounds;
-                }
                 material.SetVectorArray(PosArrayProp, particleTransformPos);
             }
 
@@ -100,7 +94,7 @@ namespace CraftSharp.Rendering
                     ParticleUpdate(i, particleTransform, particleStates[i]);
                     ParticlePhysicsUpdate(i, particleTransform, particleState);
 
-                    particleTransformPos[i] = particleTransform.Position;
+                    particleTransformPos[i] = particleTransform.GetAsVector4();
 
                     var bounds = meshRenderer.bounds;
                     bounds.Encapsulate(particleTransform.Position);
@@ -108,19 +102,19 @@ namespace CraftSharp.Rendering
 
                     if (particleState.LifeTime <= 0) {
                         activeParticles--;
+
+                        particleTransform.Scale = 0F;
+                        particleTransformPos[i].w = 0F;
                     }
-                }
-                else
-                {
-                    //particleTransformMats[i] = Matrix4x4.zero;
                 }
             }
 
             if (material != null)
             {
                 material.SetVectorArray(PosArrayProp, particleTransformPos);
+                material.SetVectorArray(ColArrayProp, particleTransformCol);
 
-                Debug.Log(string.Join(',', particleTransformPos));
+                //Debug.Log(string.Join(',', particleTransformData));
             }
 
             if (activeParticles <= 0)
@@ -140,10 +134,10 @@ namespace CraftSharp.Rendering
                     var particleTransform = particleTransforms[i];
 
                     particleTransform.Position = initPos;
-                    particleTransformPos[i] = particleTransform.Position;
 
-                    
-                    particleTransform.Scale = Vector3.one;
+                    ParticleStart(i, particleTransform, particleStates[i]);
+
+                    particleTransformPos[i] = particleTransform.GetAsVector4();
 
                     particleStates[i].ExtraData = extraData;
                     particleStates[i].LifeTime = options.Duration;
@@ -155,8 +149,10 @@ namespace CraftSharp.Rendering
                         StartSimulate();
                     }
 
+                    Debug.Log($"Add particle #{i} at {initPos}");
                     break;
                 }
+                
             }
             
         }

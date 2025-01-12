@@ -6,16 +6,12 @@ namespace CraftSharp.Rendering
     public class ParticleTransform
     {
         public Vector3 Position;
-        public Vector3 Scale = Vector3.one;
+        public float Scale = 0F;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Matrix4x4 GetTransformMatrix4x4(Vector3 cameraPos, Vector3 cameraUp)
+        public Vector4 GetAsVector4()
         {
-            var dir = cameraPos - Position;
-            
-            return Matrix4x4.Translate(Position) * 
-                   Matrix4x4.Scale(Scale) * 
-                   Matrix4x4.Rotate(Quaternion.LookRotation(dir, cameraUp));
+            return new Vector4(Position.x, Position.y, Position.z, Scale);
         }
     }
 }
