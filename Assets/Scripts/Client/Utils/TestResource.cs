@@ -192,7 +192,7 @@ namespace CraftSharp
             }
         }
 
-        public void TestBuildItem(string name, int itemNumId, ItemStack itemStack, ItemModel itemModel, float3 pos)
+        public void TestBuildItem(string name, ItemStack itemStack, ItemModel itemModel, float3 pos)
         {
             // Gather all geometries of this model
             Dictionary<ItemModelPredicate, ItemGeometry> buildDict = new()
@@ -409,7 +409,7 @@ namespace CraftSharp
                     var item = ItemPalette.INSTANCE.GetByNumId(pair.Key);
                     var itemStack = new ItemStack(item, 1, null);
 
-                    TestBuildItem($"Item [{pair.Key}] {item}", pair.Key, itemStack, pair.Value, new(-(index % width) * 1.5F - 1.5F, 0F, (index / width) * 1.5F));
+                    TestBuildItem($"Item [{pair.Key}] {item}", itemStack, pair.Value, new(-(index % width) * 1.5F - 1.5F, 0F, (index / width) * 1.5F));
                 }
 
                 count++;
@@ -555,7 +555,7 @@ namespace CraftSharp
         {
             if (tempTest != null && tempTest.ActiveParticles < 64)
             {
-                var stateId = (int) (UnityEngine.Random.value * 500) + 100;
+                var stateId = tempTest.ActiveParticles;
 
                 tempTest.AddParticle(UnityEngine.Random.insideUnitSphere + Vector3.up, new BlockParticleExtraData(stateId));
             }

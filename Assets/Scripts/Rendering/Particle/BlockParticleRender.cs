@@ -25,10 +25,10 @@ namespace CraftSharp.Rendering
             var uvs = ResourcePackManager.Instance.GetParticleUVs(particleState.ExtraData.BlockStateId);
 
             // Assign particle texture uvs (U, V, Z) * 4
-            particleTransformTex[ idx << 2]      = new Vector4(uvs[0].x, uvs[0].y, uvs[0].z, 0F);
+            particleTransformTex[ idx << 2]      = new Vector4(uvs[3].x, uvs[3].y, uvs[3].z, 0F);
             particleTransformTex[(idx << 2) | 1] = new Vector4(uvs[1].x, uvs[1].y, uvs[1].z, 0F);
             particleTransformTex[(idx << 2) | 2] = new Vector4(uvs[2].x, uvs[2].y, uvs[2].z, 0F);
-            particleTransformTex[(idx << 2) | 3] = new Vector4(uvs[3].x, uvs[3].y, uvs[3].z, 0F);
+            particleTransformTex[(idx << 2) | 3] = new Vector4(uvs[0].x, uvs[0].y, uvs[0].z, 0F);
 
             Debug.Log($"Tex: {particleTransformTex[ idx << 2]} {particleTransformTex[(idx << 2) | 1]} {particleTransformTex[(idx << 2) | 2]} {particleTransformTex[(idx << 2) | 3]}");
             
