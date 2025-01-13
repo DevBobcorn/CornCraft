@@ -22,7 +22,12 @@ namespace CraftSharp.Rendering
             // Assign particle color
             particleTransformCol[idx] = new Vector4((float) random.NextDouble(), (float) random.NextDouble(), (float) random.NextDouble(), 1F);
 
-            var uvs = ResourcePackManager.Instance.GetParticleUVs(particleState.ExtraData.BlockStateId);
+            float xOfs = random.Next(0, 14) / 16F;
+            float yOfs = random.Next(0, 14) / 16F;
+            var part = new Vector4(xOfs, yOfs, 0.125F + xOfs, 0.125F + yOfs);
+            //var part = new Vector4(0, 0, 1, 1);
+
+            var uvs = ResourcePackManager.Instance.GetParticleUVs(particleState.ExtraData.BlockStateId, part);
 
             // Assign particle texture uvs (U, V, Z) * 4
             particleTransformTex[ idx << 2]      = new Vector4(uvs[3].x, uvs[3].y, uvs[3].z, 0F);

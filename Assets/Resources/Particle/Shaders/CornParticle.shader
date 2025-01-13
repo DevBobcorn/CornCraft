@@ -78,8 +78,11 @@ Shader "CornShader/Unlit/BlockParticle"
 
 				if (_PosArray[index].w < 0.01) discard;
 
-				fixed4 color = /*_ColArray[index] */ UNITY_SAMPLE_TEX2DARRAY(_BaseMap, i.uv);
-				//float4 color = float4(i.uv, 1);
+				fixed4 color = UNITY_SAMPLE_TEX2DARRAY(_BaseMap, i.uv);
+
+				if (color.a < 0.5) discard;
+
+				//color *= _ColArray[index];
 
 				return fixed4(color.xyz, 1);
 			}
