@@ -122,43 +122,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!21 &127836021
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Rect Transparent (instance)
-  m_Shader: {fileID: 4800000, guid: 616a25aec4b286744b9fa8a7c081c531, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 1
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs: []
-    m_Ints: []
-    m_Floats:
-    - _ColorMask: 9
-    - _StencilComp: 3
-    - _StencilID: 2
-    - _StencilOp: 0
-    - _StencilOpPass: 1
-    - _StencilReadMask: 255
-    - _StencilWriteMask: 255
-    - _ZOffsetFactor: 0
-    - _ZOffsetUnits: 0
-    - _ZTest: 4
-    m_Colors: []
-  m_BuildTextureStacks: []
 --- !u!1 &131827502
 GameObject:
   m_ObjectHideFlags: 0
@@ -970,7 +933,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2793229115509245285, guid: d8f74920f114d73499877941e22d3246, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.00024414062
+      value: -0.00018310547
       objectReference: {fileID: 0}
     - target: {fileID: 2938030721269321279, guid: d8f74920f114d73499877941e22d3246, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1066,7 +1029,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4470890243102342235, guid: d8f74920f114d73499877941e22d3246, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00018310547
+      value: 0.00024414062
       objectReference: {fileID: 0}
     - target: {fileID: 5358760102842383617, guid: d8f74920f114d73499877941e22d3246, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1196,6 +1159,10 @@ PrefabInstance:
       propertyPath: m_EnvironmentManager
       value: 
       objectReference: {fileID: 1045736195}
+    - target: {fileID: 8048076013993793429, guid: d8f74920f114d73499877941e22d3246, type: 3}
+      propertyPath: m_PlayerRenderPrefabs.Array.data[1]
+      value: 
+      objectReference: {fileID: 100096, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
     - target: {fileID: 8569789871152698359, guid: d8f74920f114d73499877941e22d3246, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1252,7 +1219,10 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8887254657024432659, guid: d8f74920f114d73499877941e22d3246, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 9071645713649108203, guid: d8f74920f114d73499877941e22d3246, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 1172028606151940328, guid: d8f74920f114d73499877941e22d3246, type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: d8f74920f114d73499877941e22d3246, type: 3}

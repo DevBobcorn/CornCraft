@@ -20,9 +20,6 @@ namespace CraftSharp.Control
 
     public abstract class PlayerActionItem : MonoBehaviour
     {
-        [SerializeField] public Vector3 slotPosition = Vector3.zero;
-        [SerializeField] public Vector3 slotEularAngles = Vector3.zero;
-
         public abstract void StartAction();
         public abstract void EndAction();
     }

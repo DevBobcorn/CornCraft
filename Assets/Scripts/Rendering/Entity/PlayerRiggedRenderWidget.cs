@@ -11,13 +11,13 @@ namespace CraftSharp.Rendering
     [RequireComponent(typeof (Animator))]
     public class PlayerRiggedRenderWidget : MonoBehaviour
     {
-        private Transform? _mainHandRef;
-        private Transform? _offHandRef;
         private Transform? _spineRef;
 
         public Vector3 m_VisualOffset = new(0F, 0.1F, 0F);
         public Vector3 m_CameraRefPos = new(0F, 1.2F, 0F);
         public Vector2 m_ClimbOverOffset = new(0F, 0F);
+
+        public bool m_UseAuxOffhandTransform = false;
 
         private Transform? _mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
         private Transform? _offHandSlot; // A slot fixed to offHandRef transform (as a child)
@@ -30,7 +30,6 @@ namespace CraftSharp.Rendering
         {
             transform.localPosition = m_VisualOffset;
 
-            this._mainHandRef = mainHandRef;
             // Create main hand slot transform
             var mainHandSlotObj = new GameObject("Main Hand Slot");
             _mainHandSlot = mainHandSlotObj.transform;
@@ -39,16 +38,27 @@ namespace CraftSharp.Rendering
             _mainHandSlot.localPosition = Vector3.zero;
             _mainHandSlot.localEulerAngles = Vector3.zero;
 
-            this._offHandRef = offHandRef;
             // Create off hand slot transform
             var offHandSlotObj = new GameObject("Off Hand Slot");
             _offHandSlot = offHandSlotObj.transform;
-            _offHandSlot.SetParent(offHandRef);
+
+            if (m_UseAuxOffhandTransform) {
+                // Use an extra aux transform to fix hand orientation
+                var auxObj = new GameObject("Aux");
+                var auxRef = auxObj.transform;
+                auxRef.SetParent(offHandRef);
+                auxRef.SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(0F, 0F, 180F));
+
+                _offHandSlot.SetParent(auxRef);
+            } else {
+                _offHandSlot.SetParent(offHandRef);
+            }
+
             // Initialize position and rotation
             _offHandSlot.localPosition = Vector3.zero;
             _offHandSlot.localEulerAngles = Vector3.zero;
 
-            this._spineRef = spineRef;
+            _spineRef = spineRef;
 
             // Create weapon mount slot transform
             var itemMountPivotObj = new GameObject("Item Mount Pivot");
@@ -79,20 +89,23 @@ namespace CraftSharp.Rendering
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummySwordItemMesh!, psi.DummyItemMaterial!, new());
 
-                    _currentItem.slotEularAngles = new(135F, 90F, -20F);
-                    _currentItem.slotPosition = new(0F, 0.2F, -0.25F);
+                    _itemMountSlot!.localEulerAngles = psi.SwordMountEularAngles;
+                    _itemMountSlot!.localPosition = psi.SwordMountPosition;
 
-                    _mainHandSlot!.localPosition = new(0F, -0.1F, 0.05F);
-                    _mainHandSlot.localEulerAngles = new(-135F, 0F, 45F);
+                    _mainHandSlot!.localEulerAngles = psi.SwordMainHandEularAngles;
+                    _mainHandSlot!.localPosition = psi.SwordMainHandPosition;
 
+                    /*
                     var trailObj = GameObject.Instantiate(psi.SwordTrailPrefab);
                     trailObj.transform.parent = itemObj.transform;
                     trailObj.transform.localPosition = new(0.5F, 0.65F, 0.65F);
 
                     var sword = _currentItem as MeleeWeapon;
                     sword!.SlashTrail = trailObj.GetComponent<TrailRenderer>();
+                    */
 
-                    itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
+                    itemObj.transform.localScale = psi.SwordLocalScale;
+
                     break;
                 case ItemActionType.Bow:
                     _currentItem = itemObj!.AddComponent<UselessActionItem>();
@@ -100,24 +113,16 @@ namespace CraftSharp.Rendering
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummyBowItemMesh!, psi.DummyItemMaterial!, new());
 
-                    _currentItem.slotEularAngles = new(-40F, 90F, 20F);
-                    _currentItem.slotPosition = new(0F, -0.4F, -0.4F);
+                    _itemMountSlot!.localEulerAngles = psi.BowMountEularAngles;
+                    _itemMountSlot!.localPosition = psi.BowMountPosition;
                     
-                    _offHandSlot!.localPosition = new(-0.21F, 0.12F, 0.38F);
-                    _offHandSlot.localEulerAngles = new(5F, -150F, 115F);
-
-                    itemObj.transform.localScale = new(0.6F, 0.6F, 0.6F);
+                    _offHandSlot!.localEulerAngles = psi.BowOffHandEularAngles;
+                    _offHandSlot!.localPosition = psi.BowOffHandPosition;
+                    
+                    itemObj.transform.localScale = psi.BowLocalScale;
                     break;
                 default:
-                    _currentItem = itemObj!.AddComponent<UselessActionItem>();
-                    meshData = ItemMeshBuilder.BuildItem(itemStack, false);
-                    // Use dummy material and mesh if failed to build for item
-                    meshData ??= (psi.DummySwordItemMesh!, psi.DummyItemMaterial!, new());
-
-                    _currentItem.slotEularAngles = new(0F, 90F, 0F);
-                    _currentItem.slotPosition = new(0F, 0F, -0.5F);
-
-                    itemObj.transform.localScale = new(0.5F, 0.5F, 0.5F);
+                    // No visual
                     break;
             }
 
@@ -130,11 +135,8 @@ namespace CraftSharp.Rendering
                 renderer.sharedMaterial = meshData.Value.material;
             }
 
-            // Set weapon slot position and rotation
+            // Set weapon mount pivot position
             _itemMountPivot!.localPosition = new(0F, 1.3F, 0F);
-
-            _itemMountSlot!.localPosition = _currentItem.slotPosition;
-            _itemMountSlot!.localEulerAngles = _currentItem.slotEularAngles;
 
             // Mount weapon on start
             MoveItemToWidgetSlot(_itemMountSlot!);

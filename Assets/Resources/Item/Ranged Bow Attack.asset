@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IdleTimeout: -0.1
   SetupTime: 0.5
-  DrawWeapon: {fileID: -203655887218126122, guid: 6777970e44a839c4e86aa5ab5e2ff10b, type: 3}
+  DrawWeapon: {fileID: 7400000, guid: 52fde589e0a138b4580e2e184218d5ce, type: 2}
   DummyAnimationClip: {fileID: 7400000, guid: 1698def8346f10e46866626916c35924, type: 2}
