@@ -46,6 +46,8 @@ namespace CraftSharp
 
         private static readonly float[] DUMMY_BLOCK_VERT_LIGHT = Enumerable.Repeat(0F, 8).ToArray();
 
+        private static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
+
         public void TestBuildState(string name, int stateId, BlockState state, BlockStateModel stateModel, int cullFlags, World world, float3 pos)
         {
             int altitude = 0;
@@ -556,8 +558,9 @@ namespace CraftSharp
             if (tempTest != null && tempTest.ActiveParticles < 64)
             {
                 var stateId = tempTest.ActiveParticles;
+                var typeId = ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID);
 
-                tempTest.AddParticle(UnityEngine.Random.insideUnitSphere + Vector3.up, new BlockParticleExtraData(stateId));
+                tempTest.AddParticle(UnityEngine.Random.insideUnitSphere + Vector3.up, typeId, new BlockParticleExtraData(stateId));
             }
 
             if (billBoardTransforms != null)

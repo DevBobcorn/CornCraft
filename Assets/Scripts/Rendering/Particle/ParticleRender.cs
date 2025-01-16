@@ -6,7 +6,14 @@ using CraftSharp.Resource;
 
 namespace CraftSharp.Rendering
 {
-    public abstract class ParticleRender<T> : MonoBehaviour where T : ParticleExtraData
+    public interface IParticleRender
+    {
+        public void AddParticle(Vector3 initPos, int typeNumId, ParticleExtraData extraData);
+
+        public void AddParticles(Vector3 initPos, int typeNumId, ParticleExtraData extraData, int count);
+    }
+
+    public abstract class ParticleRender<T> : MonoBehaviour, IParticleRender where T : ParticleExtraData
     {
         protected Mesh finalMesh;
         protected Material material;
@@ -126,13 +133,42 @@ namespace CraftSharp.Rendering
             gameObject.name = $"[Simulating {activeParticles} particles]";
         }
 
-        public virtual void AddParticle(Vector3 initPos, T extraData)
+        public virtual void AddParticle(Vector3 initPos, int typeNumId, ParticleExtraData extraData)
+        {
+            if (extraData is T specificExtraData)
+            {
+                AddParticle(initPos, typeNumId, specificExtraData);
+            }
+            else
+            {
+                Debug.LogError($"Particle extra data type doesn't match: Expected {typeof (T)}, got {extraData.GetType()}");
+            }
+        }
+
+        public virtual void AddParticles(Vector3 initPos, int typeNumId, ParticleExtraData extraData, int count)
+        {
+            if (extraData is T specificExtraData)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    AddParticle(initPos, typeNumId, specificExtraData);
+                }
+            }
+            else
+            {
+                Debug.LogError($"Particle extra data type doesn't match: Expected {typeof (T)}, got {extraData.GetType()}");
+            }
+        }
+
+        public virtual void AddParticle(Vector3 initPos, int typeNumId, T extraData)
         {
             for (int i = 0; i < particleStates.Length; i++)
             {
                 if (particleStates[i].LifeTime <= 0F) // This particle is dead, use this slot
                 {
                     var particleTransform = particleTransforms[i];
+
+                    particleStates[i].TypeNumId = typeNumId;
 
                     particleTransform.Position = initPos;
                     particleStates[i].ExtraData = extraData;
@@ -149,7 +185,7 @@ namespace CraftSharp.Rendering
                         StartSimulate();
                     }
 
-                    Debug.Log($"Add particle #{i} at {initPos}");
+                    //Debug.Log($"Add particle #{i} at {initPos}");
                     break;
                 }
                 
@@ -172,7 +208,7 @@ namespace CraftSharp.Rendering
             particleTransform.Position += particleState.Velocity * Time.deltaTime;
         }
 
-        public Mesh BuildMesh()
+        protected Mesh BuildMesh()
         {
             int particleCount = options.MaxParticles;
 

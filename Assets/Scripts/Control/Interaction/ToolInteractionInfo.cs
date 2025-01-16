@@ -21,6 +21,8 @@ namespace CraftSharp.Control
         protected readonly Direction direction;
         protected readonly ToolInteraction? definition;
 
+        protected static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
+
         public float Progress { get; set; } = 0F;
 
         public override string HintKey => definition?.HintKey ?? string.Empty;
@@ -146,6 +148,9 @@ namespace CraftSharp.Control
             //Debug.Log($"{GetHashCode()} Complete at {location}");
 
             EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Finished, 1F));
+
+            EventManager.Instance.Broadcast(new ParticlesEvent(CoordConvert.MC2Unity(client.WorldOriginOffset, location.ToCenterLocation()),
+                    ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraData(targetBlock.StateId), 16));
 
             // Takes 30 to 40 milsecs to send, don't wait for it
             Task.Run(() => client.DigBlock(location, direction, DiggingStatus.Finished));

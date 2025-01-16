@@ -840,7 +840,7 @@ namespace CraftSharp.Protocol.Handlers
             var particleNumId = ReadNextVarInt(cache);
             var particleType = ParticleTypePalette.INSTANCE.GetByNumId(particleNumId);
 
-            return particleType.OptionType switch
+            return particleType.ExtraDataType switch
             {
                 ParticleExtraDataType.None                => ParticleExtraData.Empty,
                 ParticleExtraDataType.Block               => ReadBlockParticle(cache),

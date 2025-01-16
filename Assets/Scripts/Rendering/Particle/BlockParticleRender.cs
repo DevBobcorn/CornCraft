@@ -35,7 +35,7 @@ namespace CraftSharp.Rendering
             particleTransformTex[(idx << 2) | 2] = new Vector4(uvs[2].x, uvs[2].y, uvs[2].z, 0F);
             particleTransformTex[(idx << 2) | 3] = new Vector4(uvs[0].x, uvs[0].y, uvs[0].z, 0F);
 
-            Debug.Log($"Tex: {particleTransformTex[ idx << 2]} {particleTransformTex[(idx << 2) | 1]} {particleTransformTex[(idx << 2) | 2]} {particleTransformTex[(idx << 2) | 3]}");
+            //Debug.Log($"Tex: {particleTransformTex[ idx << 2]} {particleTransformTex[(idx << 2) | 1]} {particleTransformTex[(idx << 2) | 2]} {particleTransformTex[(idx << 2) | 3]}");
             
             var ofs = new Vector3(random.Next(-100, 100), random.Next(-100, 100), random.Next(-100, 100)).normalized;
             particleTransform.Position += ofs * 3F; // * 0.3F;
