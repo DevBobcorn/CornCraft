@@ -51,11 +51,9 @@ namespace CraftSharp.Rendering
 
         protected override void ParticleUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraData> particleState)
         {
-            particleState.Velocity.y -= 14F * Time.unscaledDeltaTime;
+            particleState.Velocity.y -= 14F * Time.deltaTime;
 
-            particleState.LifeTime -= 1F * Time.unscaledDeltaTime;
-
-            //Debug.Log($"Life {idx}: {particleState.LifeTime}");
+            particleState.LifeTime -= 1F * Time.deltaTime;
         }
 
         protected override void ParticlePhysicsUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraData> particleState)
