@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -14,8 +15,8 @@ using TMPro;
 using CraftSharp.Molang.Runtime;
 using CraftSharp.Resource;
 using CraftSharp.Rendering;
-using UnityEngine.InputSystem;
 using CraftSharp.Resource.BedrockEntity;
+using CraftSharp.Event;
 
 namespace CraftSharp
 {
@@ -36,8 +37,6 @@ namespace CraftSharp
         [SerializeField] private Viewer viewer;
 
         private bool loaded = false;
-
-        private BlockParticleRender tempTest;
         private readonly List<Transform> billBoardTransforms = new();
 
         // Runs before a scene gets loaded
@@ -331,15 +330,6 @@ namespace CraftSharp
             }
         }
 
-        public void TestBlockParticle()
-        {
-            var particleRenderObj = new GameObject("Block Particle");
-
-            var particleRender = particleRenderObj.AddComponent<BlockParticleRender>();
-
-            tempTest = particleRender;
-        }
-
         private IEnumerator DoBuild(string dataVersion, string resourceVersion, string[] resourceOverrides)
         {
             // Load block/blockstate definitions
@@ -441,8 +431,6 @@ namespace CraftSharp
             }
 
             */
-
-            TestBlockParticle();
 
             InfoText.text = $"Meshes built in {Time.realtimeSinceStartup - startTime} second(s).";
         }
@@ -555,12 +543,12 @@ namespace CraftSharp
 
         void Update()
         {
-            if (tempTest != null && tempTest.ActiveParticles < 64)
+            if (ResourcePackManager.Instance.Loaded && UnityEngine.Random.Range(0, 4) == 0)
             {
-                var stateId = tempTest.ActiveParticles;
+                var stateId = UnityEngine.Random.Range(0, 20);
                 var typeId = ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID);
 
-                tempTest.AddParticle(UnityEngine.Random.insideUnitSphere + Vector3.up, typeId, new BlockParticleExtraData(stateId));
+                EventManager.Instance.Broadcast(new ParticlesEvent(Vector3.up, typeId, new BlockParticleExtraData(stateId), 1));
             }
 
             if (billBoardTransforms != null)

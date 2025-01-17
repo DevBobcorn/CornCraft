@@ -8,7 +8,9 @@ namespace CraftSharp.Rendering
 {
     public interface IParticleRender
     {
-        public void AddParticle(Vector3 initPos, int typeNumId, ParticleExtraData extraData);
+        public void Initialize();
+
+        public void ManagedUpdate();
 
         public void AddParticles(Vector3 initPos, int typeNumId, ParticleExtraData extraData, int count);
     }
@@ -56,11 +58,14 @@ namespace CraftSharp.Rendering
             }
         }
 
-        private void Start()
+        public virtual void Initialize()
         {
             InitializeMeshAndMaterial();
-            
-            StartSimulate();
+        }
+
+        public virtual void HandleResourceLoad()
+        {
+            InitializeMeshAndMaterial();
         }
 
         protected abstract void InitializeMeshAndMaterial();
@@ -85,7 +90,7 @@ namespace CraftSharp.Rendering
             gameObject.name = $"[No active particle]";
         }
 
-        private void Update()
+        public virtual void ManagedUpdate()
         {
             if (!simulating) return;
 
@@ -131,18 +136,6 @@ namespace CraftSharp.Rendering
             }
 
             gameObject.name = $"[Simulating {activeParticles} particles]";
-        }
-
-        public virtual void AddParticle(Vector3 initPos, int typeNumId, ParticleExtraData extraData)
-        {
-            if (extraData is T specificExtraData)
-            {
-                AddParticle(initPos, typeNumId, specificExtraData);
-            }
-            else
-            {
-                Debug.LogError($"Particle extra data type doesn't match: Expected {typeof (T)}, got {extraData.GetType()}");
-            }
         }
 
         public virtual void AddParticles(Vector3 initPos, int typeNumId, ParticleExtraData extraData, int count)

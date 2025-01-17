@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace CraftSharp.Rendering
 {
+    [RequireComponent(typeof (MeshRenderer))]
+    [RequireComponent(typeof (MeshFilter))]
     public class BlockParticleRender : ParticleRender<BlockParticleExtraData>
     {
         private static readonly System.Random random = new();
@@ -38,7 +40,7 @@ namespace CraftSharp.Rendering
             //Debug.Log($"Tex: {particleTransformTex[ idx << 2]} {particleTransformTex[(idx << 2) | 1]} {particleTransformTex[(idx << 2) | 2]} {particleTransformTex[(idx << 2) | 3]}");
             
             var ofs = new Vector3(random.Next(-100, 100), random.Next(-100, 100), random.Next(-100, 100)).normalized;
-            particleTransform.Position += ofs * 3F; // * 0.3F;
+            particleTransform.Position += ofs * 0.3F;
 
             var dot = Vector3.Dot(ofs, Vector3.up);
             
@@ -93,8 +95,8 @@ namespace CraftSharp.Rendering
 
         protected override void InitializeMeshAndMaterial()
         {
-            meshRenderer = gameObject.AddComponent<MeshRenderer>();
-            meshFilter = gameObject.AddComponent<MeshFilter>();
+            meshRenderer = gameObject.GetComponent<MeshRenderer>();
+            meshFilter = gameObject.GetComponent<MeshFilter>();
 
             material = new Material(Shader.Find("CornShader/Unlit/BlockParticle"))
             {

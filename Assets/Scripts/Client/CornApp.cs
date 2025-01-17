@@ -162,6 +162,7 @@ namespace CraftSharp
 
             // Load resource packs
             var packManager = ResourcePackManager.Instance;
+
             packManager.ClearPacks();
 
             // Download base pack if not present (Check pack.mcmeta because the folder is present even if only language files are downloaded)

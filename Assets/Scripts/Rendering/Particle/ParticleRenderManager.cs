@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using CraftSharp.Event;
+using CraftSharp.Resource;
 
 namespace CraftSharp.Rendering
 {
@@ -10,13 +11,25 @@ namespace CraftSharp.Rendering
     {
         private readonly Dictionary<ParticleExtraDataType, IParticleRender> particleRenders = new();
 
-        #nullable enable
+        private bool initialized = false;
 
-        private Action<ParticleEvent>? particleCallback;
+        #nullable enable
 
         private Action<ParticlesEvent>? particlesCallback;
 
         #nullable disable
+
+        private void EnsureInitialized()
+        {
+            if (initialized || !ResourcePackManager.Instance.Loaded) return;
+
+            initialized = true;
+
+            foreach (var render in particleRenders.Values)
+            {
+                render.Initialize();
+            }
+        }
 
         void Start()
         {
@@ -25,16 +38,12 @@ namespace CraftSharp.Rendering
             var blockParticleRender = blockParticleRenderObj.AddComponent<BlockParticleRender>();
             particleRenders.Add(ParticleExtraDataType.Block, blockParticleRender);
 
-            particleCallback = (e) => {
-                var particleType = ParticleTypePalette.INSTANCE.GetByNumId(e.TypeNumId);
+            
 
-                if (particleRenders.TryGetValue(particleType.ExtraDataType, out IParticleRender render))
-                {
-                    render.AddParticle(e.Position, e.TypeNumId, e.ExtraData);
-                }
-            };
+            particlesCallback = (e) =>
+            {
+                if (!initialized || !ResourcePackManager.Instance.Loaded) return;
 
-            particlesCallback = (e) => {
                 var particleType = ParticleTypePalette.INSTANCE.GetByNumId(e.TypeNumId);
 
                 if (particleRenders.TryGetValue(particleType.ExtraDataType, out IParticleRender render))
@@ -43,18 +52,25 @@ namespace CraftSharp.Rendering
                 }
             };
 
-            EventManager.Instance.Register(particleCallback);
             EventManager.Instance.Register(particlesCallback);
+        }
+
+        void Update()
+        {
+            EnsureInitialized();
+
+            if (!initialized) return;
+
+            foreach (var render in particleRenders.Values)
+            {
+                render.ManagedUpdate();
+            }
         }
 
         void OnDestroy()
         {
-            if (particleCallback is not null)
-                EventManager.Instance.Unregister(particleCallback);
-            
             if (particlesCallback is not null)
                 EventManager.Instance.Unregister(particlesCallback);
-            
         }
     }
 }
