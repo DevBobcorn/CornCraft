@@ -53,39 +53,39 @@ Material:
         m_Offset: {x: 0.55, y: 0.6}
     m_Ints: []
     m_Floats:
-    - _IrradianceMapG_maxAngleRange: 0.325326
-    - _IrradianceMapR_maxAngleRange: 0.39822984
+    - _IrradianceMapG_maxAngleRange: 0.3124639
+    - _IrradianceMapR_maxAngleRange: 0.39974836
     - _MoonMaskRadius: 5.49
     - _MoonRadius: 2.15
     - _Moon_color_intensity: 1.39
     - _NoiseSpeed: 0.079
-    - _SunAdditionIntensity: 0.24291599
+    - _SunAdditionIntensity: 0.24957424
     - _SunInnerBoundary: 0
-    - _SunOuterBoundary: 2.3272743
+    - _SunOuterBoundary: 2.3502252
     - _SunRadius: 8.3
-    - _SunScattering: 0.31580028
+    - _SunScattering: 0.31874785
     - _disk_power_999: 450
     - _galaxy_INT: 0.2
     - _galaxy_intensity: 0
     - _mainColorMoonGatherFactor: 0.74
-    - _mainColorSunGatherFactor: 2.8667095
-    - _starColorIntensity: 0.0034612902
+    - _mainColorSunGatherFactor: 2.9518125
+    - _starColorIntensity: 0.045758907
     - _starIntensityLinearDamping: 0.557
-    - _sun_color_intensity: 0.958563
-    - _sun_disk_power_999: 258.98816
+    - _sun_color_intensity: 1.01774
+    - _sun_disk_power_999: 307.8871
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _MoonDirection: {r: -0.5, g: -0.8236391, b: 0.2676166, a: 0}
+    - _MoonDirection: {r: -0.49999997, g: -0.6900893, b: -0.52323693, a: 0}
     - _MoonScatteringColor: {r: 0.13389996, g: 0.36446565, b: 0.5566038, a: 1}
     - _Moon_color: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 1}
     - _StarColorLut_ST: {r: 0.5, g: 1, b: 0, a: 0}
-    - _SunAdditionColor: {r: 0.7680394, g: 0.9551798, b: 0.9720098, a: 1}
-    - _SunDirection: {r: 0.5, g: 0.8236391, b: -0.26761657, a: 0}
-    - _downPartSkyColor: {r: 0.6289839, g: 0.8501433, b: 0.9530474, a: 1}
-    - _downPartSunColor: {r: 0.9249886, g: 0.95472777, b: 0.92598164, a: 1}
-    - _sun_color: {r: 1, g: 0.9753758, b: 0.9507515, a: 1}
+    - _SunAdditionColor: {r: 0.7552059, g: 0.9541104, b: 0.98163486, a: 1}
+    - _SunDirection: {r: 0.4999999, g: 0.6900892, b: 0.5232371, a: 0}
+    - _downPartSkyColor: {r: 0.67979693, g: 0.8720389, b: 0.95809877, a: 1}
+    - _downPartSunColor: {r: 0.92223907, g: 0.96558946, b: 0.9652915, a: 1}
+    - _sun_color: {r: 1, g: 0.9871397, b: 0.97427946, a: 1}
     - _sun_color_Scat: {r: 0.2830189, g: 0.2830189, b: 0.2830189, a: 1}
     - _sun_dir: {r: -0.02403209, g: -0.9968847, b: -0.07512238, a: 0}
-    - _upPartSkyColor: {r: 0.41570258, g: 0.66892153, b: 0.96921563, a: 1}
-    - _upPartSunColor: {r: 1, g: 0.988229, b: 0.9205981, a: 1}
+    - _upPartSkyColor: {r: 0.42318878, g: 0.67533827, b: 0.9820491, a: 1}
+    - _upPartSunColor: {r: 1, g: 0.9882249, b: 0.91998136, a: 1}
   m_BuildTextureStacks: []
