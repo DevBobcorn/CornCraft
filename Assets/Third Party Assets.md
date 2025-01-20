@@ -10,6 +10,6 @@ Here's a list of the assets:
 
 Also, there are some free assets included in the repo just for convenience. It is recommended that you claim these assets from Asset Store so as to get updates and avoid potential licensing issues. Below is a list of them:
 
-- [**Unity-Chan! Model**](https://assetstore.unity.com/packages/3d/characters/unity-chan-model-18705): Default player render model. Original BiRP materials are updated for rendering with URP. This asset is licensed under [UCL](https://unity-chan.com/contents/license_en/).
+- [**Unity-Chan! Model**](https://assetstore.unity.com/packages/3d/characters/unity-chan-model-18705): Default rigged player render model. Original BiRP materials are updated for rendering with URP. This asset is licensed under [UCL](https://unity-chan.com/contents/license_en/).
 
 - [**Kinematic Character Controller**](https://assetstore.unity.com/packages/tools/physics/kinematic-character-controller-99131): Code base for creating custom player controllers used in the project.
