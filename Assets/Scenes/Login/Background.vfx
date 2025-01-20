@@ -20,7 +20,7 @@ MonoBehaviour:
     x: 770
     y: -435
     width: 1704
-    height: 1757
+    height: 1758
 --- !u!114 &114350483966674976
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2326,7 +2326,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEditor.VFX.Position, Unity.VisualEffectGraph.Editor,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"position":{"x":-20.0,"y":-5.0,"z":10.0}}'
+      m_SerializableObject: '{"position":{"x":-25.0,"y":-5.0,"z":20.0}}'
     m_Space: 0
   m_Property:
     name: A
@@ -2496,7 +2496,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEditor.VFX.Position, Unity.VisualEffectGraph.Editor,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"position":{"x":25.0,"y":25.0,"z":30.0}}'
+      m_SerializableObject: '{"position":{"x":30.0,"y":25.0,"z":40.0}}'
     m_Space: 0
   m_Property:
     name: B
