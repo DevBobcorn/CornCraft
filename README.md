@@ -1,3 +1,5 @@
+English | [简体中文](README.zh-CN.md)
+
 # CornCraft
 A Minecraft client implementation made with Unity.
 
