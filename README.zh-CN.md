@@ -4,13 +4,13 @@
 使用Unity开发的Minecraft客户端。
 
 ## > 关于
-__CornCraft__ 是一个Unity版的MC，可连接到原版的游戏服务器（支持1.16.2到1.20.4之间所有正式版）并提供基础的游玩功能。
+**CornCraft**是一个Unity版的MC，可连接到原版的游戏服务器（支持1.16.2到1.20.4之间所有正式版）并提供基础的游玩功能。
 
 本项目并非意在成为一个“复刻版Minecraft”，而是希望尝试用一种不同的方式重新构想这个游戏，使玩家获得与原版不太一样的游戏体验。
 
 本项目的协议实现基于另一个开源项目[Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client)，并入了其部分代码作为项目中通信系统的基础，以实现跨MC版本的网络通信。然而，由于C#代码后端的差异（MCC使用新版.NET，Unity还在用古早的Mono）以及运行平台的诸多差异，MCC中的许多代码修改或者重写后才能在本项目中使用。暂时本项目还没有构建好的发行版，但可在编辑器中游玩体验。
 
-__*重要提示！*__ __不__ 推荐使用CornCraft加入公开服/商业服，并且CornCraft __不__ 对使用此客户端造成的封号负责。目前仍建议自建服务端使用。
+***重要提示！*** **不**推荐使用CornCraft加入公开服/商业服，并且CornCraft**不**对使用此客户端造成的封号负责。目前仍建议自建服务端使用。
 
 CornCraft用来解析原版资源包的代码已独立成一个package并开源到此处：[CraftSharp-Resource](https://github.com/DevBobcorn/CraftSharp-Resource)，如果你想要使用Unity开发结构查看器或者地图编辑工具的话可以参考一下。
 

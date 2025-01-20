@@ -4,13 +4,13 @@ English | [简体中文](README.zh-CN.md)
 A Minecraft client implementation made with Unity.
 
 ## > About
-__CornCraft__ is a Unity version of Minecraft. It connects to vanilla/plugin servers(version 1.16.2 to 1.20.4) and provides basic graphical gameplay support.
+**CornCraft** is a Unity version of Minecraft. It connects to vanilla/plugin servers(version 1.16.2 to 1.20.4) and provides basic graphical gameplay support.
 
 This project does not mean to be a Minecraft "clone", but rather an attempt to recreate the game in a somewhat different way, with the overall look and feel distinct from the original one.
 
 The protocol implementation is based on another open source project, [Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client), by incorporating code from this project as a foundation for cross-version networking with Minecraft servers. However, due to different runtime backends(Mono for Unity vs .NET for MCC) and other major parity issues regarding input and rendering, it is not an option to directly use MCC code as a library despite the fact that they're both in C#, and a number of tweaks and rewrites were needed for everything to work fine in this new framework. Currently there's no pre-built binaries available yet because some core features are still missing, but feel free to give it a try in the editor!
 
-__*Important!*__ It is __NOT__ recommended to join a public/commercial server with CornCraft, and CornCraft is __NOT__ responsible for server banning due to using this client! The best and safest way to play with this client, at least for now, is to set up a local server and play it with your friends.
+***Important!*** It is **NOT** recommended to join a public/commercial server with CornCraft, and CornCraft is **NOT** responsible for server banning due to using this client! The best and safest way to play with this client, at least for now, is to set up a local server and play it with your friends.
 
 The code CornCraft uses to parse vanilla resource packs is also open source as a Unity package called [CraftSharp-Resource](https://github.com/DevBobcorn/CraftSharp-Resource). Check it out if you want to make a Minecraft structure viewer, map editor or something like that with Unity.
 
