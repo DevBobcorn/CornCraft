@@ -159,7 +159,7 @@ namespace CraftSharp.Rendering
                     catch (Exception e)
                     {
                         Debug.LogWarning("Failed to parse player skin hash: " + e);
-                        Debug.Log(webRequest.downloadHandler.text);
+                        //Debug.Log(webRequest.downloadHandler.text);
                         req.Failed = true;
                     }
                     break;
@@ -231,6 +231,65 @@ namespace CraftSharp.Rendering
                 {
                     var tex = new Texture2D(2, 2) { filterMode = FilterMode.Point };
                     tex.LoadImage(File.ReadAllBytes(skinPath));
+
+                    if (tex.height < tex.width) // Classic single layer skin, convert it to double layer format
+                    {
+                        // Double the height
+                        var convertedTex = new Texture2D(tex.width, tex.height << 1) { filterMode = FilterMode.Point };
+
+                        var armWidth = tex.width * (texInfo.SlimModel ? 3 : 4) / 64; // 3px or 4px
+                        var legWidth = tex.width * 4 / 64;      // 4px
+                        var limbThickness = tex.width * 4 / 64; // 4px
+                        var limbHeight = tex.width * 12 / 64;   // 12px
+
+                        var armSrcX = (tex.width >> 1) + (tex.width >> 3);
+                        
+                        void copyMirrored(int srcX, int srcY, int dstX, int dstY, int width, int height)
+                        {
+                            for (int x = 0; x < width; x++)
+                            {
+                                for (int y = 0; y < height; y++)
+                                {
+                                    convertedTex.SetPixel(dstX + x, dstY + y, tex.GetPixel(srcX + width - 1 - x, srcY + y));
+                                }
+                            }
+                        };
+
+                        // Copy original parts and fill expanded area with tranparency
+                        for (int y = 0; y < tex.height; y++)
+                        {
+                            for (int x = 0; x < tex.width; x++)
+                            {
+                                convertedTex.SetPixel(x, y, Color.clear);
+
+                                if (x >= (tex.width >> 1) && y >= (tex.height >> 1)) // Discard outer layer for player head since it's a single layer skin
+                                {
+                                    convertedTex.SetPixel(x, y + tex.height, Color.clear);
+                                }
+                                else
+                                {
+                                    convertedTex.SetPixel(x, y + tex.height, tex.GetPixel(x, y));
+                                }
+                            }
+                        }
+
+                        // Copy left leg to right leg
+                        copyMirrored(0, 0, tex.width >> 2, 0, limbThickness + legWidth + limbThickness, limbHeight); // Left + Front + Right
+                        copyMirrored(limbThickness, limbHeight, (tex.width >> 2) + limbThickness, limbHeight, legWidth, limbThickness); // Top
+                        copyMirrored(limbThickness + legWidth, limbHeight, (tex.width >> 2) + limbThickness + legWidth, limbHeight, legWidth, limbThickness); // Bottom
+                        copyMirrored(limbThickness + legWidth + limbThickness, 0, (tex.width >> 2) + limbThickness + legWidth + limbThickness, 0, legWidth, limbHeight); // Back
+
+                        // Copy left arm to right arm
+                        copyMirrored(armSrcX, 0, tex.width >> 1, 0, limbThickness + armWidth + limbThickness, limbHeight); // Left + Front + Right
+                        copyMirrored(armSrcX + limbThickness, limbHeight, (tex.width >> 1) + limbThickness, limbHeight, armWidth, limbThickness); // Top
+                        copyMirrored(armSrcX + limbThickness + armWidth, limbHeight, (tex.width >> 1) + limbThickness + armWidth, limbHeight, armWidth, limbThickness); // Bottom
+                        copyMirrored(armSrcX + limbThickness + armWidth + limbThickness, 0, (tex.width >> 1) + limbThickness + armWidth + limbThickness, 0, armWidth, limbHeight); // Back
+
+                        // Apply changes to the new texture
+                        convertedTex.Apply();
+
+                        tex = convertedTex;
+                    }
 
                     callback.Invoke(tex);
                 }
