@@ -35,6 +35,8 @@ namespace CraftSharp.Rendering
         /// </summary>
         public readonly Dictionary<EntityRenderType, Dictionary<ResourceLocation,
                 Material>> EntityMaterials = InitializeTables();
+        
+        public readonly Dictionary<ResourceLocation, bool> SkinModels = new();
 
         /// <summary>
         /// Map a material to an instance in the global entity material table.
@@ -82,7 +84,7 @@ namespace CraftSharp.Rendering
             
             if (textureId.Namespace == "skin")
             {
-                StartCoroutine(ApplyPlayerSkin(Guid.Parse(textureId.Path), callback));
+                StartCoroutine(ApplyPlayerSkin(textureId, callback));
             }
             else
             {
@@ -191,8 +193,9 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public IEnumerator ApplyPlayerSkin(Guid playerUUID, Action<Texture2D> callback)
+        public IEnumerator ApplyPlayerSkin(ResourceLocation textureId, Action<Texture2D> callback)
         {
+            var playerUUID = Guid.Parse(textureId.Path);
             var cachePath = PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + "Cached" + Path.DirectorySeparatorChar + "skins";
 
             if (!Directory.Exists(cachePath))
@@ -219,6 +222,8 @@ namespace CraftSharp.Rendering
 
             if (!texInfo.Failed)
             {
+                SkinModels[textureId] = texInfo.SlimModel;
+
                 var skinFileName = texInfo.SkinUrl[texInfo.SkinUrl.LastIndexOf('/')..] + ".png";
                 var skinPath = cachePath + Path.DirectorySeparatorChar + skinFileName;
 

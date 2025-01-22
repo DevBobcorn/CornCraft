@@ -12,7 +12,6 @@ namespace CraftSharp.Rendering
         [SerializeField] private GameObject? defaultPrefab;
 
         [SerializeField] private GameObject? serverPlayerPrefab;
-        [SerializeField] private GameObject? serverSlimPlayerPrefab;
 
         [SerializeField] private GameObject? skeletonPrefab;
         [SerializeField] private GameObject? witherSkeletonPrefab;
@@ -104,7 +103,7 @@ namespace CraftSharp.Rendering
 
             if (entity.Type.TypeId == EntityType.PLAYER_ID) // TODO Apply right model
             {
-                entityPrefab = serverSlimPlayerPrefab;
+                entityPrefab = serverPlayerPrefab;
             }
             else
             {
@@ -123,12 +122,6 @@ namespace CraftSharp.Rendering
 
                 // Initialize the entity
                 entityRender.Initialize(entity, _worldOriginOffset);
-
-                // Initialize materials (This requires metadata to be present)
-                if (entityObj.TryGetComponent(out EntityMaterialAssigner materialControl))
-                {
-                    materialControl.InitializeMaterials(entity.Type, entityRender.GetControlVariables(), entity.Metadata);
-                }
             }
         }
 

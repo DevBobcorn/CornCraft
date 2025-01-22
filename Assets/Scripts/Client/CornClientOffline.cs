@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -10,6 +9,7 @@ using CraftSharp.Protocol;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
 using CraftSharp.Rendering;
+using CraftSharp.Protocol.Message;
 
 namespace CraftSharp
 {
@@ -21,7 +21,7 @@ namespace CraftSharp
         #region Login Information
         public static readonly int DUMMY_PROTOCOL_VERSION = ProtocolHandler.GetMinSupported();
         public static readonly string DUMMY_USERNAME = "dummy_user";
-        private Guid uuid = Guid.Empty;
+        private Guid uuid = new("069a79f4-44e9-4726-a5be-fca90e38aaf5");
         #endregion
 
         #region Dummy Client Control
@@ -31,6 +31,7 @@ namespace CraftSharp
         #nullable disable
 
         #region Players and Entities
+        private bool locationReceived = false;
         private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private readonly Dictionary<int, Container> inventories = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
@@ -58,36 +59,8 @@ namespace CraftSharp
             // Set up environment manager
             EnvironmentManager.SetCamera(m_MainCamera);
 
-            // Post initialization
-            StartCoroutine(PostInitialization());
-        }
-
-        private IEnumerator PostInitialization()
-        {
-            yield return new WaitForEndOfFrame();
-
-            GameMode = GameMode.Creative;
-            EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
-
-            // Initialize inventory (requires mc data loaded first)
-            try
-            {
-                DummyOnInventoryOpen(0, new Container(ContainerType.PlayerInventory));
-                DummyOnSetSlot(0, 36, new ItemStack(ItemPalette.INSTANCE.GetById(new("diamond_sword")), 1), 0);
-                DummyOnSetSlot(0, 37, new ItemStack(ItemPalette.INSTANCE.GetById(new("bow")), 1), 0);
-            }
-            catch
-            {
-
-            }
-
-            // Create player render
-            SwitchFirstPlayerRender(clientEntity);
-            // Create camera controller
-            SwitchFirstCameraController();
-
-            // Update camera yaw
-            CameraController.SetYaw(0F);
+            // Freeze player controller until terrain is ready
+            PlayerController.DisablePhysics();
         }
 
         public override bool StartClient(StartLoginInfo info)
@@ -106,6 +79,11 @@ namespace CraftSharp
             clientEntity.Name = session.PlayerName;
             clientEntity.UUID = uuid;
             clientEntity.MaxHealth = 20F;
+
+            // Create player render
+            SwitchFirstPlayerRender(clientEntity);
+            // Create camera controller
+            SwitchFirstCameraController();
 
             return true; // Client successfully started
         }
@@ -231,7 +209,26 @@ namespace CraftSharp
 
             if (withDebugInfo)
             {
-                return baseString + $"\nLoc: {GetCurrentLocation()}\n{PlayerController.GetDebugInfo()}" +
+                // Light debugging
+                var playerBlockLoc = GetCurrentLocation().GetBlockLoc();
+
+                var dimensionId = ChunkRenderManager.GetDimensionId();
+                var biomeId = ChunkRenderManager.GetBiome(playerBlockLoc).BiomeId;
+
+                // Ray casting debugging
+                string targetInfo;
+                if (interactionUpdater.TargetBlockLoc is not null)
+                {
+                    var targetBlockLoc = interactionUpdater.TargetBlockLoc.Value;
+                    var targetBlock = ChunkRenderManager.GetBlock(targetBlockLoc);
+                    targetInfo = $"Target: {targetBlockLoc} {targetBlock.State}";
+                }
+                else
+                {
+                    targetInfo = string.Empty;
+                }
+
+                return baseString + $"\nLoc: {GetCurrentLocation()}\n{PlayerController.GetDebugInfo()}\nDimension: {dimensionId}\nBiome: {biomeId}\n{targetInfo}\nWorld Origin Offset: {WorldOriginOffset}" +
                         $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTps():0.0}";
             }
             
@@ -304,7 +301,9 @@ namespace CraftSharp
 
         #endregion
 
-        #region Action methods: Perform an action on the Server
+        #region Action methods (Dummy): Perform an action on the server
+
+        public event Action<string>? OnDummySendChat;
 
         /// <summary>
         /// Allows the user to send chat messages, commands, and leave the server.
@@ -313,7 +312,7 @@ namespace CraftSharp
         {
             if (string.IsNullOrWhiteSpace(text)) return;
             
-            Debug.Log($"Sending chat: {text}");
+            OnDummySendChat?.Invoke(text);
         }
 
         /// <summary>
@@ -422,7 +421,54 @@ namespace CraftSharp
 
         #endregion
 
-        #region Dummy data updates
+        #region Event handlers (Dummy): Handle an event occurred on the server
+
+        public void DummyInitializeBiomes((ResourceLocation id, int numId, object? obj)[] biomeList)
+        {
+            World.StoreBiomeList(biomeList);
+        }
+
+        public void DummyUpdateLocation(Location location, float yaw, float pitch)
+        {
+            if (!locationReceived) // On entering world or respawning
+            {
+                locationReceived = true;
+
+                // Update player location
+                PlayerController.SetLocationFromServer(location, mcYaw: yaw);
+                // Force refresh environment collider
+                ChunkRenderManager.InitializeTerrainCollider(location.GetBlockLoc(), () =>
+                        {
+                            PlayerController.EnablePhysics();
+                        });
+                // Update camera yaw (convert to Unity yaw)
+                CameraController.SetYaw(yaw + 90F);
+            }
+            else
+            {
+                // Force refresh environment collider
+                ChunkRenderManager.RebuildTerrainCollider(location.GetBlockLoc());
+                // Then update player location
+                PlayerController.SetLocationFromServer(location, reset: true, mcYaw: yaw);
+                //Debug.Log($"Updated to {location} offset: {offset.magnitude}");
+            }
+        }
+    
+        /// <summary>
+        /// Received chat/system message from the server
+        /// </summary>
+        /// <param name="message">Message received</param>
+        public void DummyOnTextReceived(ChatMessage message)
+        {
+            string messageText;
+
+            if (message.isJson)
+                messageText = ChatParser.ParseText(message.content);
+            else
+                messageText = message.content;
+            
+            EventManager.Instance.BroadcastOnUnityThread<ChatMessageEvent>(new(messageText));
+        }
 
         /// <summary>
         /// Called when held item change
@@ -507,6 +553,24 @@ namespace CraftSharp
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Called when the Game Mode has been updated for a player
+        /// </summary>
+        /// <param name="uuid">Player UUID (Empty for initial gamemode on login)</param>
+        /// <param name="gamemode">New Game Mode (0: Survival, 1: Creative, 2: Adventure, 3: Spectator).</param>
+        public void DummyOnGamemodeUpdate(Guid uuid, int gamemode)
+        {
+            GameMode = (GameMode) gamemode;
+
+            EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
+
+            if (uuid != Guid.Empty)
+            {
+                CornApp.Notify(Translations.Get("gameplay.control.update_gamemode",
+                        ChatParser.TranslateString($"gameMode.{GameMode.GetIdentifier()}")), Notification.Type.Success);
             }
         }
 

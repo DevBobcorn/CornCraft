@@ -615,11 +615,6 @@ namespace CraftSharp
             {
                 // Light debugging
                 var playerBlockLoc = GetCurrentLocation().GetBlockLoc();
-                //var block = ChunkRenderManager.GetBlock(playerBlockLoc);
-                //var lightEmission = block.State.LightEmissionLevel;
-                //var lightBlockage = block.State.LightBlockageLevel;
-                //var lightValue = ChunkRenderManager.GetBlockLight(playerBlockLoc);
-                //var lightInfo = $"Emission: {lightEmission}\tBlockage: {lightBlockage}\nLight Value: {lightValue}";
 
                 var dimensionId = ChunkRenderManager.GetDimensionId();
                 var biomeId = ChunkRenderManager.GetBiome(playerBlockLoc).BiomeId;
@@ -728,7 +723,7 @@ namespace CraftSharp
 
         #endregion
 
-        #region Action methods: Perform an action on the Server
+        #region Action methods: Perform an action on the server
 
         public void SetCanSendMessage(bool canSendMessage)
         {
@@ -1894,7 +1889,7 @@ namespace CraftSharp
         }
         #endregion
 
-        #region Event handlers: An event occurs on the Server
+        #region Event handlers: Handle an event occurred on the server
         /// <summary>
         /// Called when a network packet received or sent
         /// </summary>

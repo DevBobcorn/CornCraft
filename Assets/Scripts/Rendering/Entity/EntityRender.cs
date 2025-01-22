@@ -269,6 +269,12 @@ namespace CraftSharp.Rendering
             _pseudoRandomOffset = UnityEngine.Random.Range(0F, 1F);
 
             _visualTransform.eulerAngles = new(0F, lastYaw, 0F);
+
+            // Initialize materials (This requires metadata to be present)
+            if (TryGetComponent(out EntityMaterialAssigner materialControl))
+            {
+                materialControl.InitializeMaterials(source.Type, GetControlVariables(), source.Metadata, HandleMaterialUpdate);
+            }
         }
 
         /// <summary>
@@ -396,6 +402,16 @@ namespace CraftSharp.Rendering
 
         public virtual void UpdateAnimation(float tickMilSec) { }
 
+        protected virtual void HandleMaterialUpdate(EntityMaterialManager matManager, ResourceLocation textureId, Material updatedMaterial)
+        {
+
+        }
+
+        protected virtual void HandleRagdollMaterialUpdate(EntityMaterialAssigner ragdollMaterialControl, EntityMaterialManager matManager, ResourceLocation textureId, Material updatedMaterial)
+        {
+
+        }
+
         protected virtual void TurnIntoRagdoll()
         {
             _turnedIntoRagdoll = true;
@@ -426,15 +442,18 @@ namespace CraftSharp.Rendering
                     // Initialize ragdoll materials using own metadata
                     if (ragdoll.gameObject.TryGetComponent(out EntityMaterialAssigner materialControl))
                     {
-                        materialControl.InitializeMaterials(type, GetControlVariables(), Metadata);
+                        materialControl.InitializeMaterials(type, GetControlVariables(), Metadata, (matManager, texId, mat) =>
+                        {
+                            HandleRagdollMaterialUpdate(materialControl, matManager, texId, mat);
+                        });
                     }
                 }
-            }
 
-            // Hide own visual
-            if (_visualTransform != null)
-            {
-                _visualTransform.gameObject.SetActive(false);
+                // Hide own visual
+                if (_visualTransform != null)
+                {
+                    _visualTransform.gameObject.SetActive(false);
+                }
             }
         }
 

@@ -141,12 +141,6 @@ namespace CraftSharp.Control
                 m_PlayerRender.UUID = entity.UUID;
                 m_PlayerRender.transform.SetParent(transform, false);
 
-                // Initialize materials (This requires metadata to be present)
-                if (renderObj.TryGetComponent(out EntityMaterialAssigner materialControl))
-                {
-                    materialControl.InitializeMaterials(entity.Type, m_PlayerRender.GetControlVariables(), entity.Metadata);
-                }
-
                 // Destroy these colliders, so that they won't affect our movement
                 foreach (var collider in m_PlayerRender.GetComponentsInChildren<Collider>())
                 {
@@ -774,10 +768,10 @@ namespace CraftSharp.Control
         {
             string statusInfo;
 
-            if (m_StatusUpdater!.Status.Spectating)
+            if (Status.Spectating)
                 statusInfo = string.Empty;
             else
-                statusInfo = m_StatusUpdater!.Status.ToString();
+                statusInfo = Status.ToString();
 
             var heldItemEdible = currentItemStack?.ItemType.IsEdible ?? false;
             string itemActionInfo = string.Empty;

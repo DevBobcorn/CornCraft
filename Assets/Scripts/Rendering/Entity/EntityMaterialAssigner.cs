@@ -237,7 +237,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public void InitializeMaterials(EntityType entityType, Dictionary<string, string>? variables, Dictionary<int, object?>? metadata)
+        public void InitializeMaterials(EntityType entityType, Dictionary<string, string>? variables, Dictionary<int, object?>? metadata, Action<EntityMaterialManager, ResourceLocation, Material> callbackForEach)
         {
             var client = CornApp.CurrentClient!;
             var matManager = client.EntityMaterialManager;
@@ -275,6 +275,8 @@ namespace CraftSharp.Rendering
                         matInstance.SetTexture(matManager.EnityDissolveMaterialTextureName, texture);
                         matInstance.SetColor(matManager.EnityDissolveMaterialColorName, matManager.EntityBaseColor);
                         AssignMaterialToRenderer(entry.Renderers, matInstance);
+
+                        callbackForEach?.Invoke(matManager, textureId, matInstance);
                     });
                 }
                 else
@@ -282,6 +284,8 @@ namespace CraftSharp.Rendering
                     matManager.ApplyMaterial(entry.RenderType, textureId, entry.DefaultMaterial, matInstance =>
                     {
                         AssignMaterialToRenderer(entry.Renderers, matInstance);
+
+                        callbackForEach?.Invoke(matManager, textureId, matInstance);
                     });
                 }
             }
