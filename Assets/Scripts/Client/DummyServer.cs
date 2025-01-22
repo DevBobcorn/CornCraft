@@ -15,8 +15,7 @@ namespace CraftSharp
 
         public GameObject placeHolderGround;
 
-        // Dummy server-side handlers
-        private Action<string> dummyChatHandler;
+        private bool _dataLoaded = false;
 
         private void DummyHandleCommand(string text)
         {
@@ -67,9 +66,9 @@ namespace CraftSharp
                     }
                 };
 
-                var dataLoaded = BlockStatePalette.INSTANCE.CheckNumId(1);
+                _dataLoaded = BlockStatePalette.INSTANCE.CheckNumId(1);
 
-                if (dataLoaded)
+                if (_dataLoaded)
                 {
                     placeHolderGround.SetActive(false);
 
@@ -127,11 +126,11 @@ namespace CraftSharp
                     placeHolderGround.SetActive(true);
                 }
 
-                StartCoroutine(DeferredInitialization(dataLoaded));
+                StartCoroutine(DeferredInitialization());
             }
         }
 
-        private IEnumerator DeferredInitialization(bool dataLoaded)
+        private IEnumerator DeferredInitialization()
         {
             yield return new WaitForEndOfFrame();
 
@@ -156,7 +155,8 @@ namespace CraftSharp
             });
 
             // Send initial location and yaw
-            client.DummyUpdateLocation(new Location(0, dataLoaded ? 16 : 0, 0), 0, 0);
+            var startLocation = new Location(0, _dataLoaded ? 16 : 0, 0);
+            client.DummyUpdateLocation(startLocation, 0, 0, _dataLoaded);
 
             // Send initial gamemode (initialization, use empty UUID)
             client.DummyOnGamemodeUpdate(Guid.Empty, (int) GameMode.Creative);
@@ -164,7 +164,7 @@ namespace CraftSharp
             // Send initial inventory
             client.DummyOnInventoryOpen(0, new Container(ContainerType.PlayerInventory));
 
-            if (dataLoaded)
+            if (_dataLoaded)
             {
                 client.DummyOnSetSlot(0, 36, new ItemStack(ItemPalette.INSTANCE.GetById(new("diamond_sword")), 1), 0);
                 client.DummyOnSetSlot(0, 37, new ItemStack(ItemPalette.INSTANCE.GetById(new("bow")), 1), 0);
@@ -178,7 +178,7 @@ namespace CraftSharp
                 if (client.GetPosition().y < -100)
                 {
                     // Reset player position
-                    client.DummyUpdateLocation(new Location(0, 16, 0), 0, 0);
+                    client.DummyUpdateLocation(new Location(0, 16, 0), 0, 0, _dataLoaded);
                 }
             }
         }

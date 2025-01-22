@@ -139,7 +139,7 @@ namespace CraftSharp.Rendering
                                 req.SkinUrl = skinEntry.Properties["url"].StringValue;
 
                                 found = true;
-                                playerUUID2TextureInfo.Add(playerUUID, req);
+                                playerUUID2TextureInfo[playerUUID] = req;
                                 
                                 if (skinEntry.Properties.TryGetValue("metadata", out Json.JSONData metaEntry))
                                 {

@@ -37,19 +37,16 @@ namespace CraftSharp
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         #endregion
 
-        void Awake() // In case where the client wasn't properly assigned before
+        void Start()
         {
-            if (CornApp.CurrentClient == null)
+            if (CornApp.CurrentClient == null) // In case where the client wasn't properly assigned before
             {
                 CornApp.SetCurrentClient(this);
 
                 // Start up by self since it's not started from login screen
                 StartClient(new(false, new(), null, "dummy", 0, DUMMY_PROTOCOL_VERSION, null, "dummy_player"));
             }
-        }
 
-        void Start()
-        {
             // Set up screen control
             ScreenControl.SetClient(this);
             
@@ -428,7 +425,7 @@ namespace CraftSharp
             World.StoreBiomeList(biomeList);
         }
 
-        public void DummyUpdateLocation(Location location, float yaw, float pitch)
+        public void DummyUpdateLocation(Location location, float yaw, float pitch, bool useTerrain)
         {
             if (!locationReceived) // On entering world or respawning
             {
@@ -436,11 +433,20 @@ namespace CraftSharp
 
                 // Update player location
                 PlayerController.SetLocationFromServer(location, mcYaw: yaw);
-                // Force refresh environment collider
-                ChunkRenderManager.InitializeTerrainCollider(location.GetBlockLoc(), () =>
-                        {
-                            PlayerController.EnablePhysics();
-                        });
+
+                if (useTerrain)
+                {
+                    // Force refresh environment collider
+                    ChunkRenderManager.InitializeTerrainCollider(location.GetBlockLoc(), () =>
+                            {
+                                PlayerController.EnablePhysics();
+                            });
+                }
+                else
+                {
+                    PlayerController.EnablePhysics();
+                }
+
                 // Update camera yaw (convert to Unity yaw)
                 CameraController.SetYaw(yaw + 90F);
             }
