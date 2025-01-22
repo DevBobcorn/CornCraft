@@ -5,8 +5,8 @@
       <author>Blockbench user</author>
       <authoring_tool>Blockbench</authoring_tool>
     </contributor>
-    <created>2022-10-08T09:41:16.888Z</created>
-    <modified>2022-10-08T09:41:16.888Z</modified>
+    <created>2025-01-22T12:37:04.211Z</created>
+    <modified>2025-01-22T12:37:04.211Z</modified>
     <unit name="meter" meter="1.0"/>
     <up_axis>Y_UP</up_axis>
   </asset>
@@ -41,7 +41,7 @@
   </library_effects>
   <library_images>
     <image id="Image_0" name="Image_0">
-      <init_from>defo.png</init_from>
+      <init_from>defo_skin.png</init_from>
     </image>
   </library_images>
   <library_materials>
@@ -73,7 +73,7 @@
           </technique_common>
         </source>
         <source id="ea377bfe-5eeb-9ea2-98a9-b823b54d26f5-mesh-map-0">
-          <float_array id="ea377bfe-5eeb-9ea2-98a9-b823b54d26f5-mesh-map-0-array" count="48">0.5 0.1875 0.4375 0.1875 0.4375 0 0.5 0 0.375 0.1875 0.4375 0.1875 0.4375 0 0.375 0 0.375 0.1875 0.3125 0.1875 0.3125 0 0.375 0 0.25 0.1875 0.3125 0.1875 0.3125 0 0.25 0 0.3125 0.25 0.375 0.25 0.375 0.1875 0.3125 0.1875 0.375 0.25 0.4375 0.25 0.4375 0.1875 0.375 0.1875</float_array>
+          <float_array id="ea377bfe-5eeb-9ea2-98a9-b823b54d26f5-mesh-map-0-array" count="48">0.4375 0.1875 0.5 0.1875 0.5 0 0.4375 0 0.375 0.1875 0.4375 0.1875 0.4375 0 0.375 0 0.3125 0.1875 0.375 0.1875 0.375 0 0.3125 0 0.25 0.1875 0.3125 0.1875 0.3125 0 0.25 0 0.3125 0.25 0.375 0.25 0.375 0.1875 0.3125 0.1875 0.375 0.25 0.4375 0.25 0.4375 0.1875 0.375 0.1875</float_array>
           <technique_common>
             <accessor source="#ea377bfe-5eeb-9ea2-98a9-b823b54d26f5-mesh-map-0-array" count="24" stride="2">
               <param name="S" type="float"/>
@@ -503,7 +503,7 @@
           </technique_common>
         </source>
         <source id="ed33e8d7-eb81-c8a9-0e8b-1d3d7059d478-mesh-map-0">
-          <float_array id="ed33e8d7-eb81-c8a9-0e8b-1d3d7059d478-mesh-map-0-array" count="48">0.25 0.1875 0.1875 0.1875 0.1875 0 0.25 0 0.125 0.1875 0.1875 0.1875 0.1875 0 0.125 0 0.125 0.1875 0.0625 0.1875 0.0625 0 0.125 0 0 0.1875 0.0625 0.1875 0.0625 0 0 0 0.0625 0.25 0.125 0.25 0.125 0.1875 0.0625 0.1875 0.125 0.25 0.1875 0.25 0.1875 0.1875 0.125 0.1875</float_array>
+          <float_array id="ed33e8d7-eb81-c8a9-0e8b-1d3d7059d478-mesh-map-0-array" count="48">0.1875 0.1875 0.25 0.1875 0.25 0 0.1875 0 0.125 0.1875 0.1875 0.1875 0.1875 0 0.125 0 0.0625 0.1875 0.125 0.1875 0.125 0 0.0625 0 0 0.1875 0.0625 0.1875 0.0625 0 0 0 0.0625 0.25 0.125 0.25 0.125 0.1875 0.0625 0.1875 0.125 0.25 0.1875 0.25 0.1875 0.1875 0.125 0.1875</float_array>
           <technique_common>
             <accessor source="#ed33e8d7-eb81-c8a9-0e8b-1d3d7059d478-mesh-map-0-array" count="24" stride="2">
               <param name="S" type="float"/>
