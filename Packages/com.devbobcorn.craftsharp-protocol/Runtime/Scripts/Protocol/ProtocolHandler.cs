@@ -132,27 +132,27 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Get a protocol handler for the specified Minecraft version
         /// </summary>
-        /// <param name="Client">Tcp Client connected to the server</param>
-        /// <param name="ProtocolVersion">Protocol version to handle</param>
-        /// <param name="Handler">Handler with the appropriate callbacks</param>
+        /// <param name="client">Tcp Client connected to the server</param>
+        /// <param name="protocolVersion">Protocol version to handle</param>
+        /// <param name="handler">Handler with the appropriate callbacks</param>
         /// <returns></returns>
-        public static IMinecraftCom GetProtocolHandler(TcpClient Client, int ProtocolVersion, ForgeInfo forgeInfo, IMinecraftComHandler Handler)
+        public static IMinecraftCom GetProtocolHandler(TcpClient client, int protocolVersion, ForgeInfo forgeInfo, IMinecraftComHandler handler)
         {
-            if (IsProtocolSupported(ProtocolVersion))
-                return new ProtocolMinecraft(Client, ProtocolVersion, Handler, forgeInfo);
-            throw new NotSupportedException(Translations.Get("exception.version_unsupport", ProtocolVersion));
+            if (IsProtocolSupported(protocolVersion))
+                return new ProtocolMinecraft(client, protocolVersion, handler, forgeInfo);
+            throw new NotSupportedException(Translations.Get("exception.version_unsupport", protocolVersion));
         }
 
         /// <summary>
         /// Convert a human-readable Minecraft version number to network protocol version number
         /// </summary>
-        /// <param name="MCVersion">The Minecraft version number</param>
+        /// <param name="mcVersion">The Minecraft version number</param>
         /// <returns>The protocol version number or 0 if could not determine protocol version: error, unknown, not supported</returns>
-        public static int MCVer2ProtocolVersion(string MCVersion)
+        public static int MCVer2ProtocolVersion(string mcVersion)
         {
-            if (MCVersion.Contains('.'))
+            if (mcVersion.Contains('.'))
             {
-                return MCVersion.Split(' ')[0].Trim() switch
+                return mcVersion.Split(' ')[0].Trim() switch
                 {
                     "1.16.2" => 751,
                     "1.16.3" => 753,
@@ -177,7 +177,7 @@ namespace CraftSharp.Protocol
             {
                 try
                 {
-                    return int.Parse(MCVersion);
+                    return int.Parse(mcVersion);
                 }
                 catch
                 {

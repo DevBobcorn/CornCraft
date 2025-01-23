@@ -477,6 +477,48 @@ namespace CraftSharp
         }
 
         /// <summary>
+        /// Dummy method for receiving chunk data from dummy server
+        /// </summary>
+        public void DummyOnChunkData(int chunkX, int chunkZ, int chunkMask, int chunkColumnSize, ushort[][] blockStateIds, byte[] skyLight, byte[] blockLight)
+        {
+            var chunksManager = ChunkRenderManager;
+
+            for (int chunkYIndex = 0, curIndex = 0; chunkYIndex < chunkColumnSize; chunkYIndex++)
+            {
+                if ((chunkMask & (1 << chunkYIndex)) != 0) // Chunk is not empty
+                {
+                    var chunk = new Chunk();
+
+                    for (int blockY = 0; blockY < 16; blockY++)
+                        for (int blockZ = 0; blockZ < 16; blockZ++)
+                            for (int blockX = 0; blockX < 16; blockX++)
+                            {
+                                var block = new Block(blockStateIds[curIndex][(blockY << 8) | (blockZ << 4) | blockX]);
+                                chunk.SetWithoutCheck(blockX, blockY, blockZ, block);
+                            }
+                    
+
+                    chunksManager.StoreChunk(chunkX, chunkYIndex, chunkZ, chunkColumnSize, chunk);
+
+                    curIndex++;
+                }
+            }
+
+            // Set light data and mark as loaded
+            var c = chunksManager.GetChunkColumn(chunkX, chunkZ);
+            c.SetLights(skyLight, blockLight);
+            c.FullyLoaded = true;
+        }
+
+        /// <summary>
+        /// Dummy method for receiving chunk unload action from dummy server
+        /// </summary>
+        public void DummyOnChunkUnload(int chunkX, int chunkZ)
+        {
+            ChunkRenderManager.UnloadChunkColumn(chunkX, chunkZ);
+        }
+
+        /// <summary>
         /// Called when held item change
         /// </summary>
         /// <param name="slot"> item slot</param>

@@ -15,6 +15,14 @@ namespace CraftSharp
 
         public GameObject placeHolderGround;
 
+        private int lastPlayerChunkX;
+        private int lastPlayerChunkZ;
+
+        /// <summary>
+        /// Records coordinates of chunks which has been sent to client
+        /// </summary>
+        private readonly HashSet<Vector2Int> _sentChunks = new();
+
         private bool _dataLoaded = false;
 
         private void DummyHandleCommand(string text)
@@ -47,11 +55,77 @@ namespace CraftSharp
             client.DummyOnTextReceived(new ChatMessage($"§cInvalid command: {text}", "DUMMY SERVER", false, 0, Guid.Empty, true));
         }
 
+        private void DummySendInitialTerrainData()
+        {
+            if (client == null || !_dataLoaded) return;
+
+            var chunkHeight = World.GetDimensionType().height;
+            var chunkColumnSize = Mathf.CeilToInt(chunkHeight / (float) Chunk.SIZE);
+
+            // Only one chunk in the column is not empty
+            var minChunkYIndex = -Mathf.FloorToInt(World.GetDimensionType().minY / 16F);
+            var chunkMask = 1 << minChunkYIndex;
+            var emptyLight = new byte[4096 * (chunkColumnSize + 2)];
+            var columnA = new ushort[1][] { new ushort[4096] }; // 4096 * 1
+            var columnB = new ushort[1][] { new ushort[4096] }; // 4096 * 1
+
+            Array.Fill(columnA[0], (ushort) 1); // Fill with stone
+            Array.Fill(columnB[0], (ushort) 2, 0, 256 * 15); // Fill with granite, except top layer
+
+            for (int chunkX = -5; chunkX < 5; chunkX++)
+                for (int chunkZ = -5; chunkZ < 5; chunkZ++)
+                {
+                    client.DummyOnChunkData(chunkX, chunkZ, chunkMask, chunkColumnSize, (chunkX + chunkZ) % 2 == 0 ? columnA : columnB, emptyLight, emptyLight);
+
+                    // Record sent chunks
+                    _sentChunks.Add(new Vector2Int(chunkX, chunkZ));
+                }
+        }
+
+        private void DummySendTerrainDataUpdate(int clientChunkX, int clientChunkZ)
+        {
+            if (client == null || !_dataLoaded) return;
+
+            var chunkHeight = World.GetDimensionType().height;
+            var chunkColumnSize = Mathf.CeilToInt(chunkHeight / (float) Chunk.SIZE);
+
+            // Unload chunks that are too far from client player
+            _sentChunks.RemoveWhere(coord =>
+            {
+                bool remove = Mathf.Abs(coord.x - clientChunkX) > 6 || Mathf.Abs(coord.y - clientChunkZ) > 6;
+
+                if (remove) client.DummyOnChunkUnload(coord.x, coord.y);
+
+                return remove;
+            });
+
+            // Only one chunk in the column is not empty
+            var minChunkYIndex = -Mathf.FloorToInt(World.GetDimensionType().minY / 16F);
+            var chunkMask = 1 << minChunkYIndex;
+            var emptyLight = new byte[4096 * (chunkColumnSize + 2)];
+            var columnA = new ushort[1][] { new ushort[4096] }; // 4096 * 1
+            var columnB = new ushort[1][] { new ushort[4096] }; // 4096 * 1
+
+            Array.Fill(columnA[0], (ushort) 1); // Fill with stone
+            Array.Fill(columnB[0], (ushort) 2, 0, 256 * 15); // Fill with granite, except top layer
+
+            // Sent chunk data near the client player
+            for (int chunkX = clientChunkX - 5; chunkX <= clientChunkX + 5; chunkX++)
+                for (int chunkZ = clientChunkZ - 5; chunkZ <= clientChunkZ + 5; chunkZ++)
+                {
+                    var coord = new Vector2Int(chunkX, chunkZ);
+
+                    if (_sentChunks.Contains(coord)) continue;
+
+                    client.DummyOnChunkData(chunkX, chunkZ, chunkMask, chunkColumnSize, (chunkX + chunkZ) % 2 == 0 ? columnA : columnB, emptyLight, emptyLight);
+
+                    // Record sent chunks
+                    _sentChunks.Add(coord);
+                }
+        }
+
         void Start()
         {
-            // TODO: Load a world save
-
-            
             if (client != null)
             {
                 client.OnDummySendChat += text =>
@@ -62,7 +136,7 @@ namespace CraftSharp
                     }
                     else
                     {
-                        client.DummyOnTextReceived(new ChatMessage($"{client.GetUsername()}: {text}", "DUMMY CLIENT", false, 0, client.GetUserUuid(), false));
+                        client.DummyOnTextReceived(new ChatMessage($"{client.GetUsername()}: {text}", client.GetUsername(), false, 0, client.GetUserUuid(), false));
                     }
                 };
 
@@ -72,53 +146,8 @@ namespace CraftSharp
                 {
                     placeHolderGround.SetActive(false);
 
-                    // Fill in chunk data
-                    var chunksManager = client.ChunkRenderManager;
-                    var chunkHeight = World.GetDimensionType().height;
-                    var minChunkYOffset = -Mathf.FloorToInt(World.GetDimensionType().minY / 16F);
-                    var chunkColumnSize = Mathf.CeilToInt(chunkHeight / (float) Chunk.SIZE);
-
-                    var blockA = new Block(1); // stone
-                    var blockB = new Block(2); // granite
-                    var chunkA = new Chunk();
-                    var chunkB = new Chunk();
-
-                    var emptyLight = new byte[4096 * (chunkColumnSize + 2)];
-
-                    for (int x = 0; x < Chunk.SIZE; x++)
-                        for (int y = 0; y < Chunk.SIZE; y++)
-                            for (int z = 0; z < Chunk.SIZE; z++)
-                            {
-                                chunkA.SetWithoutCheck(x, y, z, blockA);
-                            }
-                    
-                    for (int x = 0; x < Chunk.SIZE; x++)
-                        for (int y = 0; y < Chunk.SIZE - 1; y++)
-                            for (int z = 0; z < Chunk.SIZE; z++)
-                            {
-                                chunkB.SetWithoutCheck(x, y, z, blockB);
-                            }
-                    
-                    for (int chunkX = -5; chunkX < 5; chunkX++)
-                        for (int chunkZ = -5; chunkZ < 5; chunkZ++)
-                        {
-                            if (chunkX == -5 || chunkZ == -5 || chunkX == 4 || chunkZ == 4)
-                            {
-                                // Pad with empty chunks
-                                chunksManager.StoreChunk(chunkX, minChunkYOffset, chunkZ, chunkColumnSize, null);
-                            }
-                            else
-                            {
-                                // Fill chunk at height 0~15 in the column
-                                chunksManager.StoreChunk(chunkX, minChunkYOffset, chunkZ, chunkColumnSize, (chunkX + chunkZ) % 2 == 0 ? chunkA : chunkB);
-                            }
-                            
-
-                            // Set light data and mark as loaded
-                            var c = chunksManager.GetChunkColumn(chunkX, chunkZ);
-                            c.SetLights(emptyLight, emptyLight);
-                            c.FullyLoaded = true;
-                        }
+                    // Send initial terrain data
+                    DummySendInitialTerrainData();
                 }
                 else
                 {
@@ -158,6 +187,9 @@ namespace CraftSharp
             var startLocation = new Location(0, _dataLoaded ? 16 : 0, 0);
             client.DummyUpdateLocation(startLocation, 0, 0, _dataLoaded);
 
+            lastPlayerChunkX = 0;
+            lastPlayerChunkZ = 0;
+
             // Send initial gamemode (initialization, use empty UUID)
             client.DummyOnGamemodeUpdate(Guid.Empty, (int) GameMode.Creative);
 
@@ -171,7 +203,10 @@ namespace CraftSharp
             }
         }
 
-        void Update()
+        /// <summary>
+        /// TODO: Maybe use a thread to do the update
+        /// </summary>
+        void FixedUpdate()
         {
             if (client != null)
             {
@@ -179,6 +214,20 @@ namespace CraftSharp
                 {
                     // Reset player position
                     client.DummyUpdateLocation(new Location(0, 16, 0), 0, 0, _dataLoaded);
+
+                    // Don't reset reset last position so as to trigger terrain data update
+                }
+
+                var currentLoc = client.GetCurrentLocation().GetBlockLoc();
+                var currentChunkX = currentLoc.GetChunkX();
+                var currentChunkZ = currentLoc.GetChunkZ();
+
+                if (currentChunkX != lastPlayerChunkX || currentChunkZ != lastPlayerChunkZ)
+                {
+                    lastPlayerChunkX = currentChunkX;
+                    lastPlayerChunkZ = currentChunkZ;
+
+                    DummySendTerrainDataUpdate(currentChunkX, currentChunkZ);
                 }
             }
         }
