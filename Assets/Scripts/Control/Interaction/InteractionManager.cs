@@ -14,6 +14,8 @@ namespace CraftSharp.Control
 
         public Dictionary<int, InteractionDefinition> InteractionTable => interactionTable;
 
+        public InteractionDefinition? DefaultHarvestInteraction;
+
         public void PrepareData(DataLoadFlag flag)
         {
             // Block interactions
@@ -52,7 +54,7 @@ namespace CraftSharp.Control
                             _          => InteractionType.Interact
                         };
 
-                        // Tool interaction case
+                        // Harvest interaction case
                         ItemActionType? itemActionType = entryCont.TryGetValue("item_action", out var itemAction)
                             ? itemAction.StringValue switch
                             {
@@ -97,7 +99,7 @@ namespace CraftSharp.Control
 
                                     if (itemActionType is not null)
                                     {
-                                        inters.Add(new ToolInteraction(itemActionType.Value, interactionType, hintKey, tag));
+                                        inters.Add(new HarvestInteraction(itemActionType.Value, interactionType, hintKey, tag));
                                     }
                                     else
                                     {

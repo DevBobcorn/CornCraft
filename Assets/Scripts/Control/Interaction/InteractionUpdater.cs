@@ -67,13 +67,13 @@ namespace CraftSharp.Control
         private PlayerController? playerController;
 
         private Action<HeldItemChangeEvent>? heldItemCallback;
-        private Action<ToolInteractionUpdateEvent>? toolInteractionUpdateCallback;
+        private Action<HarvestInteractionUpdateEvent>? harvestInteractionUpdateCallback;
 
         private readonly Dictionary<BlockLoc, List<InteractionInfo>> blockInteractionInfos = new();
 
         private readonly InteractionId interactionId = new();
 
-        private LocalToolInteractionInfo? lastToolInteractionInfo;
+        private LocalHarvestInteractionInfo? lastHarvestInteractionInfo;
         private Item? currentItem;
 
         public Direction? TargetDirection { get; private set; } = Direction.Down;
@@ -168,14 +168,14 @@ namespace CraftSharp.Control
                     //Debug.Log($"Rem: [{blockLoc}]");
                 }
 
-                // Update tool interactions (these are not bound by interaction radius)
+                // Update harvest interactions (these are not bound by interaction radius)
                 if (blockInteractionInfos.TryGetValue(blockLoc, out var infos)) // Check if the entry is still present
                 {
-                    foreach (var info in infos.OfType<ToolInteractionInfo>().ToList()) // ToList because collection may change
+                    foreach (var info in infos.OfType<HarvestInteractionInfo>().ToList()) // ToList because collection may change
                     {
                         if (!info.UpdateInteraction(client))
                         {
-                            RemoveBlockInteraction<ToolInteractionInfo>(blockLoc);
+                            RemoveBlockInteraction<HarvestInteractionInfo>(blockLoc);
                         }
                     }
                 }
@@ -284,38 +284,44 @@ namespace CraftSharp.Control
         {
             heldItemCallback = e => currentItem = e.ItemStack?.ItemType;
             EventManager.Instance.Register(heldItemCallback);
-            toolInteractionUpdateCallback = e =>
+            harvestInteractionUpdateCallback = e =>
             {
                 // Must keep only one at a time.
-                var toolInteractionInfo = GetBlockInteraction<ToolInteractionInfo>(e.Location)?.FirstOrDefault();
+                var harvestInteractionInfo = GetBlockInteraction<HarvestInteractionInfo>(e.Location)?.FirstOrDefault();
 
-                if (toolInteractionInfo is not null)
+                if (harvestInteractionInfo is not null)
                 {
                     // Update the process
-                    toolInteractionInfo.Progress = e.Progress;
+                    harvestInteractionInfo.Progress = e.Progress;
                 }
             };
-            EventManager.Instance.Register(toolInteractionUpdateCallback);
+            EventManager.Instance.Register(harvestInteractionUpdateCallback);
         }
 
         private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)
         {
             var definition = InteractionManager.INSTANCE.InteractionTable
                 .GetValueOrDefault(block.StateId)?
-                .Get<ToolInteraction>();
+                .Get<HarvestInteraction>();
             
-            if (lastToolInteractionInfo is not null)
+            if (definition is null)
             {
-                lastToolInteractionInfo.CancelInteraction();
-                EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastToolInteractionInfo.Id));
+                Debug.LogWarning($"Harvest interaction for {block.State} is not registered.");
+                return;
+            }
+            
+            if (lastHarvestInteractionInfo is not null)
+            {
+                lastHarvestInteractionInfo.CancelInteraction();
+                EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastHarvestInteractionInfo.Id));
             }
 
-            lastToolInteractionInfo = new LocalToolInteractionInfo(interactionId.AllocateID(), blockLoc, direction,
+            lastHarvestInteractionInfo = new LocalHarvestInteractionInfo(interactionId.AllocateID(), blockLoc, direction,
                 currentItem, block.State.Hardness, status.Floating, status.Grounded, definition);
             
-            //Debug.Log($"Created {lastToolInteractionInfo.GetHashCode()} at {blockLoc}");
+            //Debug.Log($"Created {lastHarvestInteractionInfo.GetHashCode()} at {blockLoc}");
 
-            AddBlockInteraction(blockLoc, lastToolInteractionInfo, info =>
+            AddBlockInteraction(blockLoc, lastHarvestInteractionInfo, info =>
             {
                 EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, true, info));
             });
@@ -330,14 +336,14 @@ namespace CraftSharp.Control
                 if (TargetBlockLoc is not null && TargetDirection is not null &&
                     playerController != null && client != null && playerController.CurrentState is DiggingAimState)
                 {
-                    var curToolInteractionInfo = GetBlockInteraction<LocalToolInteractionInfo>(TargetBlockLoc.Value)?.FirstOrDefault();
+                    var curHarvestInteractionInfo = GetBlockInteraction<LocalHarvestInteractionInfo>(TargetBlockLoc.Value)?.FirstOrDefault();
                     var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
                     var status = playerController.Status;
-                    if (curToolInteractionInfo is not null)
+                    if (curHarvestInteractionInfo is not null)
                     {
-                        if (curToolInteractionInfo.State == ToolInteractionState.Completed)
+                        if (curHarvestInteractionInfo.State == HarvestInteractionState.Completed)
                         {
-                            lastToolInteractionInfo = null;
+                            lastHarvestInteractionInfo = null;
                         }
                     }
                     else if (!block.State.NoSolidMesh)
@@ -347,23 +353,23 @@ namespace CraftSharp.Control
                 }
                 else
                 {
-                    if (lastToolInteractionInfo is not null)
+                    if (lastHarvestInteractionInfo is not null)
                     {
-                        lastToolInteractionInfo.CancelInteraction();
-                        EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastToolInteractionInfo.Id));
+                        lastHarvestInteractionInfo.CancelInteraction();
+                        EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastHarvestInteractionInfo.Id));
                         
-                        lastToolInteractionInfo = null;
+                        lastHarvestInteractionInfo = null;
                     }
                 }
             }
             else
             {
-                if (lastToolInteractionInfo is not null)
+                if (lastHarvestInteractionInfo is not null)
                 {
-                    lastToolInteractionInfo.CancelInteraction();
-                    EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastToolInteractionInfo.Id));
+                    lastHarvestInteractionInfo.CancelInteraction();
+                    EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastHarvestInteractionInfo.Id));
                     
-                    lastToolInteractionInfo = null;
+                    lastHarvestInteractionInfo = null;
                 }
                 
                 TargetBlockLoc = null;

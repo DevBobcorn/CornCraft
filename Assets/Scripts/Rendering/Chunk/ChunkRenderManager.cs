@@ -929,7 +929,7 @@ namespace CraftSharp.Rendering
 
         private Block? AIR_BLOCK_INSTANCE = null;
 
-        private Action<ToolInteractionUpdateEvent> toolInteractionCallback;
+        private Action<HarvestInteractionUpdateEvent> toolInteractionCallback;
 
         void Awake()
         {

@@ -29,7 +29,7 @@ namespace CraftSharp.UI
 
         private Action<InteractionAddEvent>? addCallback;
         private Action<InteractionRemoveEvent>? removeCallback;
-        private Action<ToolInteractionUpdateEvent>? toolInteractionCallback;
+        private Action<HarvestInteractionUpdateEvent>? toolInteractionCallback;
 
         public delegate void ItemCountEventHandler(int newCount);
         public event ItemCountEventHandler? OnItemCountChange;

@@ -3,11 +3,12 @@ using System;
 using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
+
 using CraftSharp.Event;
 
 namespace CraftSharp.Control
 {
-    public enum ToolInteractionState
+    public enum HarvestInteractionState
     {
         InProgress,
         Cancelled,
@@ -15,11 +16,11 @@ namespace CraftSharp.Control
         Paused
     }
 
-    public abstract class ToolInteractionInfo : InteractionInfo
+    public abstract class HarvestInteractionInfo : InteractionInfo
     {
         protected readonly BlockLoc location;
         protected readonly Direction direction;
-        protected readonly ToolInteraction? definition;
+        protected readonly HarvestInteraction? definition;
 
         protected static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
 
@@ -39,9 +40,9 @@ namespace CraftSharp.Control
 
         public BlockLoc Location => location;
 
-        public ToolInteractionState State { get; protected set; } = ToolInteractionState.InProgress;
+        public HarvestInteractionState State { get; protected set; } = HarvestInteractionState.InProgress;
 
-        protected ToolInteractionInfo(int id, BlockLoc loc, Direction dir, ToolInteraction? def)
+        protected HarvestInteractionInfo(int id, BlockLoc loc, Direction dir, HarvestInteraction? def)
         {
             Id = id;
             location = loc;
@@ -52,12 +53,12 @@ namespace CraftSharp.Control
         }
     }
 
-    public sealed class LocalToolInteractionInfo : ToolInteractionInfo
+    public sealed class LocalHarvestInteractionInfo : HarvestInteractionInfo
     {
         private readonly float duration;
 
-        public LocalToolInteractionInfo(int id, BlockLoc loc, Direction dir, Item? tool, float hardness,
-            bool floating, bool grounded, ToolInteraction? def)
+        public LocalHarvestInteractionInfo(int id, BlockLoc loc, Direction dir, Item? tool, float hardness,
+            bool floating, bool grounded, HarvestInteraction? def)
             : base(id, loc, dir, def)
         {
             Id = id;
@@ -121,9 +122,9 @@ namespace CraftSharp.Control
 
             while (elapsedTime < duration)
             {
-                if (State == ToolInteractionState.Cancelled)
+                if (State == HarvestInteractionState.Cancelled)
                 {
-                    EventManager.Instance.Broadcast(new ToolInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
+                    EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
 
                     // Takes 30 to 40 milsecs to send, don't wait for it
                     Task.Run(() => client.DigBlock(location, direction, DiggingStatus.Cancelled));
@@ -131,7 +132,7 @@ namespace CraftSharp.Control
                     yield break;
                 }
 
-                if (State == ToolInteractionState.Paused)
+                if (State == HarvestInteractionState.Paused)
                 {
                     yield return null;
                     continue;
@@ -140,16 +141,16 @@ namespace CraftSharp.Control
                 elapsedTime += Time.deltaTime;
                 Progress = elapsedTime / duration;
 
-                EventManager.Instance.Broadcast(new ToolInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Started, Progress));
+                EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Started, Progress));
 
                 //Debug.Log($"{GetHashCode()} Destroy progress: {elapsedTime:0.0} / {duration:0.0}");
 
                 yield return null;
             }
 
-            if (State == ToolInteractionState.Cancelled)
+            if (State == HarvestInteractionState.Cancelled)
             {
-                EventManager.Instance.Broadcast(new ToolInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
+                EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
 
                 // Takes 30 to 40 milsecs to send, don't wait for it
                 Task.Run(() => client.DigBlock(location, direction, DiggingStatus.Cancelled));
@@ -159,31 +160,31 @@ namespace CraftSharp.Control
 
             //Debug.Log($"{GetHashCode()} Complete at {location}");
 
-            EventManager.Instance.Broadcast(new ToolInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Finished, 1F));
+            EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Finished, 1F));
 
             EventManager.Instance.Broadcast(new ParticlesEvent(CoordConvert.MC2Unity(client.WorldOriginOffset, location.ToCenterLocation()),
                     ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraData(targetBlock.StateId), 16));
 
             // Takes 30 to 40 milsecs to send, don't wait for it
             Task.Run(() => client.DigBlock(location, direction, DiggingStatus.Finished));
-            State = ToolInteractionState.Completed;
+            State = HarvestInteractionState.Completed;
         }
 
         public void CancelInteraction()
         {
-            State = ToolInteractionState.Cancelled;
+            State = HarvestInteractionState.Cancelled;
         }
 
         public void PauseInteraction()
         {
-            if (State == ToolInteractionState.InProgress)
-                State = ToolInteractionState.Paused;
+            if (State == HarvestInteractionState.InProgress)
+                State = HarvestInteractionState.Paused;
         }
 
         public void ResumeInteraction()
         {
-            if (State == ToolInteractionState.Paused)
-                State = ToolInteractionState.InProgress;
+            if (State == HarvestInteractionState.Paused)
+                State = HarvestInteractionState.InProgress;
         }
     }
 }

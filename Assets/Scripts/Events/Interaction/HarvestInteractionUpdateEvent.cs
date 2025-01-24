@@ -3,7 +3,7 @@ using CraftSharp.Control;
 
 namespace CraftSharp.Event
 {
-    public record ToolInteractionUpdateEvent : BaseEvent
+    public record HarvestInteractionUpdateEvent : BaseEvent
     {
         public int InteractionId { get; }
 
@@ -13,7 +13,7 @@ namespace CraftSharp.Event
         public DiggingStatus Status { get; }
         public float Progress { get; }  // 0 - 1
 
-        public ToolInteractionUpdateEvent(int id, int entityId, Block block, BlockLoc location, DiggingStatus status, float progress)
+        public HarvestInteractionUpdateEvent(int id, int entityId, Block block, BlockLoc location, DiggingStatus status, float progress)
         {
             InteractionId = id;
             

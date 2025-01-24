@@ -45,7 +45,7 @@ namespace CraftSharp.Control
         string Tag)
         : Interaction(Type, HintKey, Tag);
 
-    public record ToolInteraction(
+    public record HarvestInteraction(
         ItemActionType ActionType,
         InteractionType Type,
         string HintKey,
