@@ -67,7 +67,7 @@ namespace CraftSharp.Control
         private PlayerController? playerController;
 
         private Action<HeldItemChangeEvent>? heldItemCallback;
-        private Action<ToolInteractionEvent>? toolInteractionCallback;
+        private Action<ToolInteractionUpdateEvent>? toolInteractionUpdateCallback;
 
         private readonly Dictionary<BlockLoc, List<InteractionInfo>> blockInteractionInfos = new();
 
@@ -155,24 +155,23 @@ namespace CraftSharp.Control
             var playerBlockLoc = client!.GetCurrentLocation().GetBlockLoc();
             var table = InteractionManager.INSTANCE.InteractionTable;
 
-            foreach (var blockLoc in blockInteractionInfos.Keys.ToList())
+            if (client == null) return;
+
+            foreach (var blockLoc in blockInteractionInfos.Keys.ToList()) // ToList because collection may change
             {
                 if (playerBlockLoc.SqrDistanceTo(blockLoc) > BLOCK_INTERACTION_RADIUS_SQR_PLUS)
                 {
                     RemoveBlockInteraction<ViewInteractionInfo>(blockLoc, info =>
                     {
-                        if (info is ViewInteractionInfo viewInfo)
-                            EventManager.Instance.Broadcast<ViewInteractionRemoveEvent>(new(viewInfo.Id));
+                        EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                     });
-                    RemoveBlockInteraction<ToolInteractionInfo>(blockLoc);
                     //Debug.Log($"Rem: [{blockLoc}]");
                 }
-                else
-                {
-                    // Update the interactions
-                    if (client == null) return;
 
-                    foreach (var info in blockInteractionInfos[blockLoc].OfType<ToolInteractionInfo>().ToList())
+                // Update tool interactions (these are not bound by interaction radius)
+                if (blockInteractionInfos.TryGetValue(blockLoc, out var infos)) // Check if the entry is still present
+                {
+                    foreach (var info in infos.OfType<ToolInteractionInfo>().ToList()) // ToList because collection may change
                     {
                         if (!info.UpdateInteraction(client))
                         {
@@ -203,13 +202,11 @@ namespace CraftSharp.Control
                         {
                             RemoveBlockInteraction<ViewInteractionInfo>(blockLoc, info =>
                             {
-                                if (info is ViewInteractionInfo viewInfo)
-                                    EventManager.Instance.Broadcast<ViewInteractionRemoveEvent>(new(viewInfo.Id));
+                                EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                             });
                             AddBlockInteraction(blockLoc, newInfo, info =>
                             {
-                                if (info is ViewInteractionInfo viewInfo)
-                                    EventManager.Instance.Broadcast<ViewInteractionAddEvent>(new(viewInfo.Id, viewInfo));
+                                EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, false, info));
                             });
                             //Debug.Log($"Upd: [{blockLoc}] {prevDefinition.Identifier} => {newDefinition.Identifier}");
                         }
@@ -219,8 +216,7 @@ namespace CraftSharp.Control
                     {
                         AddBlockInteraction(blockLoc, newInfo, info =>
                         {
-                            if (info is ViewInteractionInfo viewInfo)
-                                EventManager.Instance.Broadcast<ViewInteractionAddEvent>(new(viewInfo.Id, viewInfo));
+                            EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, false, info));
                         });
                         //Debug.Log($"Add: [{blockLoc}] {newDefinition.Identifier}");
                     }
@@ -231,8 +227,7 @@ namespace CraftSharp.Control
                     {
                         RemoveBlockInteraction<ViewInteractionInfo>(blockLoc, info =>
                         {
-                            if (info is ViewInteractionInfo viewInfo)
-                                EventManager.Instance.Broadcast<ViewInteractionRemoveEvent>(new(viewInfo.Id));
+                            EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                         });
                         //Debug.Log($"Rem: [{blockLoc}]");
                     }
@@ -240,7 +235,7 @@ namespace CraftSharp.Control
             }
         }
 
-        private void AddBlockInteraction(BlockLoc location, InteractionInfo info, Action<InteractionInfo>? onCreated = null)
+        private void AddBlockInteraction<T>(BlockLoc location, T info, Action<T>? onCreated = null) where T : InteractionInfo
         {
             if (!blockInteractionInfos.TryGetValue(location, out List<InteractionInfo>? interactionInfos))
             {
@@ -259,7 +254,7 @@ namespace CraftSharp.Control
                 ? interactionInfos.OfType<T>() : null;
         }
 
-        private void RemoveBlockInteraction<T>(BlockLoc location, Action<InteractionInfo>? onRemoved = null) where T : InteractionInfo
+        private void RemoveBlockInteraction<T>(BlockLoc location, Action<T>? onRemoved = null) where T : InteractionInfo
         {
             if (blockInteractionInfos.TryGetValue(location, out List<InteractionInfo> interactionInfos))
             {
@@ -289,18 +284,18 @@ namespace CraftSharp.Control
         {
             heldItemCallback = e => currentItem = e.ItemStack?.ItemType;
             EventManager.Instance.Register(heldItemCallback);
-            toolInteractionCallback = e =>
+            toolInteractionUpdateCallback = e =>
             {
                 // Must keep only one at a time.
                 var toolInteractionInfo = GetBlockInteraction<ToolInteractionInfo>(e.Location)?.FirstOrDefault();
 
-                if (toolInteractionInfo != null)
+                if (toolInteractionInfo is not null)
                 {
                     // Update the process
                     toolInteractionInfo.Progress = e.Progress;
                 }
             };
-            EventManager.Instance.Register(toolInteractionCallback);
+            EventManager.Instance.Register(toolInteractionUpdateCallback);
         }
 
         private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)
@@ -309,14 +304,21 @@ namespace CraftSharp.Control
                 .GetValueOrDefault(block.StateId)?
                 .Get<ToolInteraction>();
             
-            lastToolInteractionInfo?.CancelInteraction();
+            if (lastToolInteractionInfo is not null)
+            {
+                lastToolInteractionInfo.CancelInteraction();
+                EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastToolInteractionInfo.Id));
+            }
 
             lastToolInteractionInfo = new LocalToolInteractionInfo(interactionId.AllocateID(), blockLoc, direction,
                 currentItem, block.State.Hardness, status.Floating, status.Grounded, definition);
             
             //Debug.Log($"Created {lastToolInteractionInfo.GetHashCode()} at {blockLoc}");
 
-            AddBlockInteraction(blockLoc, lastToolInteractionInfo);
+            AddBlockInteraction(blockLoc, lastToolInteractionInfo, info =>
+            {
+                EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, true, info));
+            });
         }
 
         void Update()
@@ -345,14 +347,25 @@ namespace CraftSharp.Control
                 }
                 else
                 {
-                    lastToolInteractionInfo?.CancelInteraction();
-                    lastToolInteractionInfo = null;
+                    if (lastToolInteractionInfo is not null)
+                    {
+                        lastToolInteractionInfo.CancelInteraction();
+                        EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastToolInteractionInfo.Id));
+                        
+                        lastToolInteractionInfo = null;
+                    }
                 }
             }
             else
             {
-                lastToolInteractionInfo?.CancelInteraction();
-                lastToolInteractionInfo = null;
+                if (lastToolInteractionInfo is not null)
+                {
+                    lastToolInteractionInfo.CancelInteraction();
+                    EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastToolInteractionInfo.Id));
+                    
+                    lastToolInteractionInfo = null;
+                }
+                
                 TargetBlockLoc = null;
 
                 if (blockSelectionBox != null)

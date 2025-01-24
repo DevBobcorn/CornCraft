@@ -121,6 +121,11 @@ gameplay.interaction.open_door=开门
 gameplay.interaction.close_door=关门
 gameplay.interaction.pull_lever=拉动拉杆
 gameplay.interaction.push_button=按下按钮
+gameplay.interaction.default_harvest=破坏 {0}
+gameplay.interaction.axe_harvest=破坏 {0}
+gameplay.interaction.hoe_harvest=破坏 {0}
+gameplay.interaction.pickaxe_harvest=破坏 {0}
+gameplay.interaction.shovel_harvest=破坏 {0}
 
 [login]
 login.server_name_invalid=服务器名称或地址无效！

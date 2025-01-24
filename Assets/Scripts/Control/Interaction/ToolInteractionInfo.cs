@@ -23,7 +23,17 @@ namespace CraftSharp.Control
 
         protected static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
 
-        public float Progress { get; set; } = 0F;
+        private float progress = 0F;
+
+        public float Progress
+        {
+            get => progress;
+            set
+            {
+                progress = Mathf.Clamp01(value);
+                ParamTexts = new string[] { $"{progress * 100:0}%" };
+            }
+        }
 
         public override string HintKey => definition?.HintKey ?? string.Empty;
 
@@ -37,6 +47,8 @@ namespace CraftSharp.Control
             location = loc;
             direction = dir;
             definition = def;
+
+            ParamTexts = new string[] { string.Empty };
         }
     }
 
@@ -111,7 +123,7 @@ namespace CraftSharp.Control
             {
                 if (State == ToolInteractionState.Cancelled)
                 {
-                    EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
+                    EventManager.Instance.Broadcast(new ToolInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
 
                     // Takes 30 to 40 milsecs to send, don't wait for it
                     Task.Run(() => client.DigBlock(location, direction, DiggingStatus.Cancelled));
@@ -128,7 +140,7 @@ namespace CraftSharp.Control
                 elapsedTime += Time.deltaTime;
                 Progress = elapsedTime / duration;
 
-                EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Started, Progress));
+                EventManager.Instance.Broadcast(new ToolInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Started, Progress));
 
                 //Debug.Log($"{GetHashCode()} Destroy progress: {elapsedTime:0.0} / {duration:0.0}");
 
@@ -137,7 +149,7 @@ namespace CraftSharp.Control
 
             if (State == ToolInteractionState.Cancelled)
             {
-                EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
+                EventManager.Instance.Broadcast(new ToolInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Cancelled, 0F));
 
                 // Takes 30 to 40 milsecs to send, don't wait for it
                 Task.Run(() => client.DigBlock(location, direction, DiggingStatus.Cancelled));
@@ -147,7 +159,7 @@ namespace CraftSharp.Control
 
             //Debug.Log($"{GetHashCode()} Complete at {location}");
 
-            EventManager.Instance.Broadcast(new ToolInteractionEvent(clientEntityId, targetBlock, location, DiggingStatus.Finished, 1F));
+            EventManager.Instance.Broadcast(new ToolInteractionUpdateEvent(Id, clientEntityId, targetBlock, location, DiggingStatus.Finished, 1F));
 
             EventManager.Instance.Broadcast(new ParticlesEvent(CoordConvert.MC2Unity(client.WorldOriginOffset, location.ToCenterLocation()),
                     ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraData(targetBlock.StateId), 16));

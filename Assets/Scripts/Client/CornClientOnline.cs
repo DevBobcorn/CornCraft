@@ -2663,8 +2663,6 @@ namespace CraftSharp
         {
             var block = ChunkRenderManager.GetBlock(blockLoc);
             var status = stage < 9 ? DiggingStatus.Started : DiggingStatus.Finished;
-
-            EventManager.Instance.BroadcastOnUnityThread<ToolInteractionEvent>(new(entityId, block, blockLoc, status, stage / 10F));
         }
 
         /// <summary>

@@ -20,13 +20,11 @@ namespace CraftSharp.UI
         [SerializeField] private Animator modePanelAnimator, crosshairAnimator, statusPanelAnimator;
         [SerializeField] private Button[] modeButtons = new Button[4];
         [SerializeField] private ValueBar healthBar;
-        [SerializeField] private ValueBar destroyBar;
         [SerializeField] private RingValueBar staminaBar;
         [SerializeField] private InteractionPanel interactionPanel;
         [SerializeField] private InventoryHotbar inventoryHotbar;
         [SerializeField] private Animator screenAnimator;
 
-        private CanvasGroup destroyBarCanvasGroup;
         private Animator staminaBarAnimator;
 
         private bool isActive = false, debugInfo = true;
@@ -76,12 +74,7 @@ namespace CraftSharp.UI
         protected override void Initialize()
         {
             // Initialize controls...
-            destroyBarCanvasGroup = destroyBar.GetComponent<CanvasGroup>();
             staminaBarAnimator = staminaBar.GetComponent<Animator>();
-
-            destroyBar.CurValue = 0F;
-            destroyBar.MaxValue = 1F; // Destroy value should be 0 to 1
-            destroyBarCanvasGroup.alpha = 0F; // Hidden by default
 
             cameraAimCallback = (e) => crosshairAnimator.SetBool(SHOW_HASH, e.Aiming);
 
@@ -107,28 +100,6 @@ namespace CraftSharp.UI
                 healthBar.CurValue = e.Health * HEALTH_MULTIPLIER;
             };
 
-            toolInteractionCallback = (e) =>
-            {
-                var curValue = Mathf.Clamp01(e.Progress);
-                if (curValue < destroyBar.CurValue)
-                {
-                    destroyBar.UpdateCurValueWithoutAnimation(curValue);
-                }
-                else
-                {
-                    destroyBar.CurValue = curValue;
-                }
-
-                if (destroyBar.CurValue >= 1F || destroyBar.CurValue <= 0F) // Interaction progress is complete
-                {
-                    destroyBarCanvasGroup.alpha = 0F;
-                }
-                else
-                {
-                    destroyBarCanvasGroup.alpha = 1F;
-                }
-            };
-
             staminaCallback = (e) =>
             {
                 staminaBar.CurValue = e.Stamina;
@@ -151,7 +122,6 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(cameraAimCallback);
             EventManager.Instance.Register(gameModeCallback);
             EventManager.Instance.Register(healthCallback);
-            EventManager.Instance.Register(toolInteractionCallback);
             EventManager.Instance.Register(staminaCallback);
 
             // Initialize controls
@@ -182,7 +152,6 @@ namespace CraftSharp.UI
         private Action<CameraAimingEvent>?      cameraAimCallback;
         private Action<GameModeUpdateEvent>?    gameModeCallback;
         private Action<HealthUpdateEvent>?      healthCallback;
-        private Action<ToolInteractionEvent>?   toolInteractionCallback;
         private Action<StaminaUpdateEvent>?     staminaCallback;
 
         #nullable disable
@@ -197,9 +166,6 @@ namespace CraftSharp.UI
             
             if (healthCallback is not null)
                 EventManager.Instance.Unregister(healthCallback);
-
-            if (toolInteractionCallback is not null)
-                EventManager.Instance.Unregister(toolInteractionCallback);
 
             if (staminaCallback is not null)
                 EventManager.Instance.Unregister(staminaCallback);

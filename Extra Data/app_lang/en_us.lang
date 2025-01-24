@@ -121,6 +121,11 @@ gameplay.interaction.open_door=Open door
 gameplay.interaction.close_door=Close door
 gameplay.interaction.pull_lever=Pull lever
 gameplay.interaction.push_button=Push button
+gameplay.interaction.default_harvest=Break {0}
+gameplay.interaction.axe_harvest=Break {0}
+gameplay.interaction.hoe_harvest=Break {0}
+gameplay.interaction.pickaxe_harvest=Break {0}
+gameplay.interaction.shovel_harvest=Break {0}
 
 [login]
 login.server_name_invalid=Failed to parse server name or address!

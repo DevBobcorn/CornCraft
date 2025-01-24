@@ -39,9 +39,13 @@ namespace CraftSharp.UI
             _optionAnimator = GetComponent<Animator>();
         }
 
-        public void SetInfo(int id, InteractionInfo info)
+        public void SetId(int id)
         {
             interactionKey = id;
+        }
+
+        public void SetInfo(InteractionInfo info)
+        {
             interactionInfo = info;
 
             var paramTexts = info.ParamTexts;
@@ -78,6 +82,14 @@ namespace CraftSharp.UI
 
             optionHintText.text = hintText;
             gameObject.name = info.HintKey;
+        }
+
+        public void UpdateInfoText()
+        {
+            var hintText = Translations.Get(interactionInfo.HintKey, interactionInfo.ParamTexts);
+
+            optionHintText.text = hintText;
+            gameObject.name = interactionInfo.HintKey;
         }
 
         public void ShowItemIcon()

@@ -27,8 +27,9 @@ namespace CraftSharp.UI
 
         #nullable enable
 
-        private Action<ViewInteractionAddEvent>?     addCallback;
-        private Action<ViewInteractionRemoveEvent>?  removeCallback;
+        private Action<InteractionAddEvent>? addCallback;
+        private Action<InteractionRemoveEvent>? removeCallback;
+        private Action<ToolInteractionUpdateEvent>? toolInteractionCallback;
 
         public delegate void ItemCountEventHandler(int newCount);
         public event ItemCountEventHandler? OnItemCountChange;
@@ -45,16 +46,31 @@ namespace CraftSharp.UI
 
             // Events
             addCallback = (e) => {
-                AddInteractionOption(e.InteractionId, e.Info);
+                AddInteractionOption(e.InteractionId, e.AddAndSelect, e.Info);
             };
 
             removeCallback = (e) => {
                 RemoveInteractionOption(e.InteractionId);
             };
 
+            toolInteractionCallback = (e) =>
+            {
+                var curValue = Mathf.Clamp01(e.Progress);
+                
+                for (int i = 0;i < interactionOptions.Count;i++)
+                {
+                    if (interactionOptions[i].InteractionId == e.InteractionId)
+                    {
+                        interactionOptions[i].UpdateInfoText();
+
+                        break;
+                    }
+                }
+            };
+
             EventManager.Instance.Register(addCallback);
             EventManager.Instance.Register(removeCallback);
-
+            EventManager.Instance.Register(toolInteractionCallback);
         }
 
         public void ShowItemIcons()
@@ -80,32 +96,45 @@ namespace CraftSharp.UI
             
             if (removeCallback is not null)
                 EventManager.Instance.Unregister(removeCallback);
+            
+            if (toolInteractionCallback is not null)
+                EventManager.Instance.Unregister(toolInteractionCallback);
         }
 
-        public void AddInteractionOption(int id, ViewInteractionInfo info)
+        public void AddInteractionOption(int id, bool addAndSelect, InteractionInfo info)
         {
             var optionObj = GameObject.Instantiate(interactionOptionPrefab);
             var option = optionObj == null ? null : optionObj.GetComponent<InteractionOption>();
 
             if (option != null)
             {
-                option.SetInfo(id, info);
-                interactionOptions.Add(option);
+                option.SetId(id);
+                option.SetInfo(info);
+                
 
                 optionObj.transform.SetParent(container, false);
                 optionObj.transform.localScale = Vector3.one;
-                optionObj.transform.SetAsLastSibling();
 
-                if (interactionOptions.Count == 1)
+                if (addAndSelect) // Add this one to top of the list, and select it
                 {
+                    interactionOptions.Insert(0, option); // Prepend to list
+                    optionObj.transform.SetAsFirstSibling();
+
                     selectedIndex = 0;
-                    SetSelected(0); // Select the only available option
+                    SetSelected(0); // Select the first option
                 }
-                else if (selectedIndex < 0 || selectedIndex >= interactionOptions.Count)
+                else // Add this one to bottom of the list
                 {
-                    SetSelected(0); // There's at least 1 option available after adding
+                    interactionOptions.Add(option); // Append to list
+                    optionObj.transform.SetAsLastSibling();
+
+                    if (interactionOptions.Count == 1 || selectedIndex < 0 || selectedIndex >= interactionOptions.Count)
+                    {
+                        selectedIndex = 0;
+                        SetSelected(0); // Select the first option
+                    }
                 }
-                
+
                 scrollHint.SetBool(SHOW_HASH, interactionOptions.Count > 1); // Show or hide scroll hint
             }
             else

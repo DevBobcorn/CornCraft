@@ -2,11 +2,11 @@
 
 namespace CraftSharp.Event
 {
-    public record ViewInteractionRemoveEvent : BaseEvent
+    public record InteractionRemoveEvent : BaseEvent
     {
         public int InteractionId { get; }
 
-        public ViewInteractionRemoveEvent(int id)
+        public InteractionRemoveEvent(int id)
         {
             InteractionId = id;
         }
