@@ -206,7 +206,7 @@ namespace CraftSharp.Control
                             });
                             AddBlockInteraction(blockLoc, newInfo, info =>
                             {
-                                EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, false, info));
+                                EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, false, false, info));
                             });
                             //Debug.Log($"Upd: [{blockLoc}] {prevDefinition.Identifier} => {newDefinition.Identifier}");
                         }
@@ -216,7 +216,7 @@ namespace CraftSharp.Control
                     {
                         AddBlockInteraction(blockLoc, newInfo, info =>
                         {
-                            EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, false, info));
+                            EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, false, false, info));
                         });
                         //Debug.Log($"Add: [{blockLoc}] {newDefinition.Identifier}");
                     }
@@ -323,7 +323,7 @@ namespace CraftSharp.Control
 
             AddBlockInteraction(blockLoc, lastHarvestInteractionInfo, info =>
             {
-                EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, true, info));
+                EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, true, true, info));
             });
         }
 

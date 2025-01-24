@@ -7,12 +7,14 @@ namespace CraftSharp.Event
     {
         public int InteractionId { get; }
         public bool AddAndSelect { get; }
+        public bool UseProgress { get; }
         public InteractionInfo Info { get; }
 
-        public InteractionAddEvent(int id, bool addAndSelect, InteractionInfo info)
+        public InteractionAddEvent(int id, bool addAndSelect, bool useProgress, InteractionInfo info)
         {
             InteractionId = id;
             AddAndSelect = addAndSelect;
+            UseProgress = useProgress;
             Info = info;
         }
     }

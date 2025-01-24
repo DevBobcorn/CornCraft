@@ -14,6 +14,7 @@ namespace CraftSharp.UI
         private static readonly int SHOW_HASH = Animator.StringToHash("Show");
 
         [SerializeField] private GameObject interactionOptionPrefab;
+        [SerializeField] private GameObject interactionProgressOptionPrefab;
         [SerializeField] private RectTransform container;
 
         private Animator scrollHint;
@@ -29,7 +30,7 @@ namespace CraftSharp.UI
 
         private Action<InteractionAddEvent>? addCallback;
         private Action<InteractionRemoveEvent>? removeCallback;
-        private Action<HarvestInteractionUpdateEvent>? toolInteractionCallback;
+        private Action<HarvestInteractionUpdateEvent>? harvestInteractionUpdateCallback;
 
         public delegate void ItemCountEventHandler(int newCount);
         public event ItemCountEventHandler? OnItemCountChange;
@@ -46,14 +47,14 @@ namespace CraftSharp.UI
 
             // Events
             addCallback = (e) => {
-                AddInteractionOption(e.InteractionId, e.AddAndSelect, e.Info);
+                AddInteractionOption(e.InteractionId, e.UseProgress, e.AddAndSelect, e.Info);
             };
 
             removeCallback = (e) => {
                 RemoveInteractionOption(e.InteractionId);
             };
 
-            toolInteractionCallback = (e) =>
+            harvestInteractionUpdateCallback = (e) =>
             {
                 var curValue = Mathf.Clamp01(e.Progress);
                 
@@ -63,6 +64,11 @@ namespace CraftSharp.UI
                     {
                         interactionOptions[i].UpdateInfoText();
 
+                        if (interactionOptions[i] is InteractionProgressOption progressOption)
+                        {
+                            progressOption.UpdateProgress(e.Progress);
+                        }
+
                         break;
                     }
                 }
@@ -70,7 +76,7 @@ namespace CraftSharp.UI
 
             EventManager.Instance.Register(addCallback);
             EventManager.Instance.Register(removeCallback);
-            EventManager.Instance.Register(toolInteractionCallback);
+            EventManager.Instance.Register(harvestInteractionUpdateCallback);
         }
 
         public void ShowItemIcons()
@@ -97,13 +103,13 @@ namespace CraftSharp.UI
             if (removeCallback is not null)
                 EventManager.Instance.Unregister(removeCallback);
             
-            if (toolInteractionCallback is not null)
-                EventManager.Instance.Unregister(toolInteractionCallback);
+            if (harvestInteractionUpdateCallback is not null)
+                EventManager.Instance.Unregister(harvestInteractionUpdateCallback);
         }
 
-        public void AddInteractionOption(int id, bool addAndSelect, InteractionInfo info)
+        public void AddInteractionOption(int id, bool addAndSelect, bool useProgress, InteractionInfo info)
         {
-            var optionObj = GameObject.Instantiate(interactionOptionPrefab);
+            var optionObj = Instantiate(useProgress ? interactionProgressOptionPrefab : interactionOptionPrefab);
             var option = optionObj == null ? null : optionObj.GetComponent<InteractionOption>();
 
             if (option != null)
@@ -122,6 +128,8 @@ namespace CraftSharp.UI
 
                     selectedIndex = 0;
                     SetSelected(0); // Select the first option
+
+                    option.UpdateKeyHintText("LMB");
                 }
                 else // Add this one to bottom of the list
                 {
@@ -133,6 +141,8 @@ namespace CraftSharp.UI
                         selectedIndex = 0;
                         SetSelected(0); // Select the first option
                     }
+
+                    option.UpdateKeyHintText("X");
                 }
 
                 scrollHint.SetBool(SHOW_HASH, interactionOptions.Count > 1); // Show or hide scroll hint

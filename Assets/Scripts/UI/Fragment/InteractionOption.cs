@@ -23,6 +23,7 @@ namespace CraftSharp.UI
         [SerializeField] private Sprite rideSprite;
         [SerializeField] private Sprite itemIconSprite;
         [SerializeField] private TMP_Text optionHintText;
+        [SerializeField] private TMP_Text keyHintText;
         [SerializeField] private MeshFilter itemIconMeshFilter;
         [SerializeField] private MeshRenderer itemIconMeshRenderer;
 
@@ -90,6 +91,11 @@ namespace CraftSharp.UI
 
             optionHintText.text = hintText;
             gameObject.name = interactionInfo.HintKey;
+        }
+
+        public void UpdateKeyHintText(string keyHint)
+        {
+            keyHintText.text = keyHint;
         }
 
         public void ShowItemIcon()
