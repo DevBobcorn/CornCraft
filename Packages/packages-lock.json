@@ -7,7 +7,7 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.6"
       },
-      "hash": "cfdefc722dc980d79e1175cd12676fbbc9224fe2"
+      "hash": "5466aca09d385406eeb65dfe7a2c6e00af23277e"
     },
     "com.devbobcorn.craftsharp-protocol": {
       "version": "file:com.devbobcorn.craftsharp-protocol",
