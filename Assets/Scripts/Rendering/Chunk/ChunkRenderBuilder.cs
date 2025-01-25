@@ -34,6 +34,32 @@ namespace CraftSharp.Rendering
             return l >> 16;
         }
 
+        public static float3 GetBlockOffset(OffsetType offsetType, int chunkX, int chunkZ, int blocX, int blocY, int blocZ)
+        {
+            if (offsetType == OffsetType.XZ) // Apply random offset on horizontal directions
+            {
+                var oSeed = GetSeedForCoords((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
+                var ox = (((oSeed & 15L)      / 15.0F) - 0.5F) * 0.5F; // -0.25F to 0.25F
+                var oz = (((oSeed >> 8 & 15L) / 15.0F) - 0.5F) * 0.5F; // -0.25F to 0.25F
+                
+                return new float3(blocZ + oz, blocY, blocX + ox); // Swap x and z
+
+            }
+            else if (offsetType == OffsetType.XYZ) // Apply random offset on all directions
+            {
+                var oSeed = GetSeedForCoords((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
+                var ox = (((oSeed & 15L)      / 15.0F) - 0.5F) * 0.5F; // -0.25F to 0.25F
+                var oz = (((oSeed >> 8 & 15L) / 15.0F) - 0.5F) * 0.5F; // -0.25F to 0.25F
+                var oy = (((oSeed >> 4 & 15L) / 15.0F) - 1.0F) * 0.2F; //  -0.2F to    0F
+
+                return new float3(blocZ + oz, blocY + oy, blocX + ox); // Swap x and z
+            }
+            else
+            {
+                return new float3(blocZ, blocY, blocX); // Swap x and z
+            }
+        }
+
         public ChunkBuildResult Build(ChunkBuildData data, ChunkRender chunkRender)
         {
             try
@@ -279,30 +305,7 @@ namespace CraftSharp.Rendering
                                 var lights = getCornerLights(x, y, z);
                                 var aoMask = getNeighborCastAOMask(x, y, z);
 
-                                var offsetType = modelTable[stateId].OffsetType;
-                                float3 posOffset;
-                                if (offsetType == OffsetType.XZ) // Apply random offset on horizontal directions
-                                {
-                                    var oSeed = GetSeedForCoords((chunkRender.ChunkX << 4) + blocX, 0, (chunkRender.ChunkZ << 4) + blocZ);
-                                    var ox = (((oSeed & 15L)      / 15.0F) - 0.5F) * 0.5F; // -0.25F to 0.25F
-                                    var oz = (((oSeed >> 8 & 15L) / 15.0F) - 0.5F) * 0.5F; // -0.25F to 0.25F
-                                    
-                                    posOffset = new float3(blocZ + oz, blocY, blocX + ox); // Swap x and z
-
-                                }
-                                else if (offsetType == OffsetType.XYZ) // Apply random offset on all directions
-                                {
-                                    var oSeed = GetSeedForCoords((chunkRender.ChunkX << 4) + blocX, 0, (chunkRender.ChunkZ << 4) + blocZ);
-                                    var ox = (((oSeed & 15L)      / 15.0F) - 0.5F) * 0.5F; // -0.25F to 0.25F
-                                    var oz = (((oSeed >> 8 & 15L) / 15.0F) - 0.5F) * 0.5F; // -0.25F to 0.25F
-                                    var oy = (((oSeed >> 4 & 15L) / 15.0F) - 1.0F) * 0.2F; //  -0.2F to    0F
-
-                                    posOffset = new float3(blocZ + oz, blocY + oy, blocX + ox); // Swap x and z
-                                }
-                                else
-                                {
-                                    posOffset = new float3(blocZ, blocY, blocX); // Swap x and z
-                                }
+                                float3 posOffset = GetBlockOffset(modelTable[stateId].OffsetType, chunkRender.ChunkX, chunkRender.ChunkZ, blocX, blocY, blocZ);
 
                                 if (state.NoCollision)
                                 {

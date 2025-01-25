@@ -19,7 +19,7 @@ namespace CraftSharp.Control
         [SerializeField] [Range(0F, 20F)] protected float zoomSmoothFactor = 4.0F;
         [SerializeField] [Range(0F,  2F)] protected float zoomSensitivity = 0.5F;
 
-        protected static readonly Vector3 VIEWPORT_CENTER    = new(0.5F,  0.5F, 0F);
+        protected static readonly Vector3 VIEWPORT_CENTER = new(0.5F,  0.5F, 0F);
         protected CameraInfo cameraInfo = new();
         public Camera RenderCamera => renderCamera;
 
@@ -145,6 +145,13 @@ namespace CraftSharp.Control
                 return pos;
             }
             return VIEWPORT_CENTER;
+        }
+
+        public virtual Vector3 GetPointViewportPos(Vector3 point)
+        {
+            var pos = renderCamera.WorldToViewportPoint(point);
+            pos.z = 0F;
+            return pos;
         }
 
         public virtual Transform GetTransform()

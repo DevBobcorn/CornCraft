@@ -119,7 +119,6 @@ MonoBehaviour:
   - {fileID: 1911438305756624724}
   - {fileID: 1911438307271628101}
   healthBar: {fileID: 8021177808931229521}
-  destroyBar: {fileID: 0}
   staminaBar: {fileID: 7597801883631828757}
   interactionPanel: {fileID: 6129123592338504208}
   inventoryHotbar: {fileID: 5854284655586894102}
@@ -1385,10 +1384,6 @@ PrefabInstance:
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7249426671494894652, guid: 64cc96bcd0e11144aaeab133b3071ec6, type: 3}
-      propertyPath: m_RootOrder
-      value: -1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7249426671494894652, guid: 64cc96bcd0e11144aaeab133b3071ec6, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0.5
       objectReference: {fileID: 0}
@@ -1463,10 +1458,6 @@ PrefabInstance:
     - target: {fileID: 7249426671494894653, guid: 64cc96bcd0e11144aaeab133b3071ec6, type: 3}
       propertyPath: m_Name
       value: Interaction Panel
-      objectReference: {fileID: 0}
-    - target: {fileID: 7249426671761368325, guid: 64cc96bcd0e11144aaeab133b3071ec6, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7249426672461787743, guid: 64cc96bcd0e11144aaeab133b3071ec6, type: 3}
       propertyPath: m_AnchorMax.x

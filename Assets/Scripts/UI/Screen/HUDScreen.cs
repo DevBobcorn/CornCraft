@@ -332,12 +332,18 @@ namespace CraftSharp.UI
             
             if (game.CameraController != null)
             {
+                var originOffset = game.WorldOriginOffset;
+                var uiCamera = game.UICamera;
+                var camControl = game.CameraController;
+                
                 // Update stamina bar position
-                var newPos = game.UICamera.ViewportToWorldPoint(
-                        game.CameraController.GetTargetViewportPos(STAMINA_TARGET_OFFSET));
+                var newPos = uiCamera.ViewportToWorldPoint(camControl.GetTargetViewportPos(STAMINA_TARGET_OFFSET));
 
                 // Don't modify z coordinate
                 staminaBar.transform.position = new Vector3(newPos.x, newPos.y, staminaBar.transform.position.z);
+
+                // Update interaction target hint
+                interactionPanel.UpdateInteractionTargetHint(originOffset, uiCamera, camControl);
             }
         }
     }

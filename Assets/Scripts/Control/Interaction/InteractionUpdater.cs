@@ -161,7 +161,7 @@ namespace CraftSharp.Control
             {
                 if (playerBlockLoc.SqrDistanceTo(blockLoc) > BLOCK_INTERACTION_RADIUS_SQR_PLUS)
                 {
-                    RemoveBlockInteraction<ViewInteractionInfo>(blockLoc, info =>
+                    RemoveBlockInteraction<BlockViewInteractionInfo>(blockLoc, info =>
                     {
                         EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                     });
@@ -192,15 +192,15 @@ namespace CraftSharp.Control
                     var newViewInteraction = newInteractionDefinition?.Get<ViewInteraction>();
                     if (newViewInteraction is null) continue;
 
-                    var prevInfo = GetBlockInteraction<ViewInteractionInfo>(blockLoc)?.FirstOrDefault();
-                    var newInfo = new ViewInteractionInfo(interactionId.AllocateID(), blockLoc, block.BlockId, newViewInteraction);
+                    var prevInfo = GetBlockInteraction<BlockViewInteractionInfo>(blockLoc)?.FirstOrDefault();
+                    var newInfo = new BlockViewInteractionInfo(interactionId.AllocateID(), block, blockLoc, block.BlockId, newViewInteraction);
 
                     if (prevInfo is not null)
                     {
                         var prevDefinition = prevInfo.Definition;
                         if (prevDefinition != newViewInteraction) // Update this interaction
                         {
-                            RemoveBlockInteraction<ViewInteractionInfo>(blockLoc, info =>
+                            RemoveBlockInteraction<BlockViewInteractionInfo>(blockLoc, info =>
                             {
                                 EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                             });
@@ -225,7 +225,7 @@ namespace CraftSharp.Control
                 {
                     if (blockInteractionInfos.ContainsKey(blockLoc))
                     {
-                        RemoveBlockInteraction<ViewInteractionInfo>(blockLoc, info =>
+                        RemoveBlockInteraction<BlockViewInteractionInfo>(blockLoc, info =>
                         {
                             EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                         });
@@ -316,7 +316,7 @@ namespace CraftSharp.Control
                 EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastHarvestInteractionInfo.Id));
             }
 
-            lastHarvestInteractionInfo = new LocalHarvestInteractionInfo(interactionId.AllocateID(), blockLoc, direction,
+            lastHarvestInteractionInfo = new LocalHarvestInteractionInfo(interactionId.AllocateID(), block, blockLoc, direction,
                 currentItem, block.State.Hardness, status.Floating, status.Grounded, definition);
             
             //Debug.Log($"Created {lastHarvestInteractionInfo.GetHashCode()} at {blockLoc}");

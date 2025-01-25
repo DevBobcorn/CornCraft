@@ -5,10 +5,8 @@ using CraftSharp.Protocol;
 
 namespace CraftSharp.Control
 {
-    public sealed class ViewInteractionInfo : InteractionInfo
+    public sealed class BlockViewInteractionInfo : BlockInteractionInfo
     {
-        private readonly BlockLoc location; // Location for calculating distance
-
         public ViewInteraction Definition { get; }
 
         public override string HintKey => Definition.HintKey;
@@ -17,11 +15,9 @@ namespace CraftSharp.Control
 
         public ResourceLocation IconItemId => Definition.IconItemId;
 
-        public ViewInteractionInfo(int id, BlockLoc loc, ResourceLocation blockId, ViewInteraction def)
+        public BlockViewInteractionInfo(int id, Block block, BlockLoc loc, ResourceLocation blockId, ViewInteraction def) : base(id, block, loc)
         {
-            Id = id;
             ParamTexts = new string[] { ChatParser.TranslateString(blockId.GetTranslationKey("block")) };
-            location = loc;
             Definition = def;
         }
 
@@ -31,20 +27,20 @@ namespace CraftSharp.Control
             {
                 case InteractionType.Interact:
                 {
-                    client.PlaceBlock(location, Direction.Down);
+                    client.PlaceBlock(blockLoc, Direction.Down);
 
                     yield break;
                 }
                 case InteractionType.Break:
                 {
                     // Takes 30 to 40 milsecs to send, don't wait for it
-                    Task.Run(() => client.DigBlock(location, Direction.Down, DiggingStatus.Started));
+                    Task.Run(() => client.DigBlock(blockLoc, Direction.Down, DiggingStatus.Started));
 
                     if (client is CornClientOnline clientOnline)
-                        clientOnline.DoAnimation((int)Hand.MainHand);
+                        clientOnline.DoAnimation((int) Hand.MainHand);
 
                     // Takes 30 to 40 milsecs to send, don't wait for it
-                    Task.Run(() => client.DigBlock(location, Direction.Down, DiggingStatus.Finished));
+                    Task.Run(() => client.DigBlock(blockLoc, Direction.Down, DiggingStatus.Finished));
 
                     yield break;
                 }

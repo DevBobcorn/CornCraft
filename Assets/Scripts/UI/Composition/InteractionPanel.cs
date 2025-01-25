@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 using CraftSharp.Event;
 using CraftSharp.Control;
+using CraftSharp.Resource;
+using CraftSharp.Rendering;
 
 namespace CraftSharp.UI
 {
@@ -16,6 +18,8 @@ namespace CraftSharp.UI
         [SerializeField] private GameObject interactionOptionPrefab;
         [SerializeField] private GameObject interactionProgressOptionPrefab;
         [SerializeField] private RectTransform container;
+        [SerializeField] private LineRenderer iteractionTargetHintLine;
+        [SerializeField] private RectTransform iteractionTargetHint;
 
         private Animator scrollHint;
         private ScrollRect scrollRect;
@@ -46,11 +50,13 @@ namespace CraftSharp.UI
             scrollHint.SetBool(SHOW_HASH, false);
 
             // Events
-            addCallback = (e) => {
+            addCallback = (e) =>
+            {
                 AddInteractionOption(e.InteractionId, e.UseProgress, e.AddAndSelect, e.Info);
             };
 
-            removeCallback = (e) => {
+            removeCallback = (e) =>
+            {
                 RemoveInteractionOption(e.InteractionId);
             };
 
@@ -169,7 +175,7 @@ namespace CraftSharp.UI
 
         public void RemoveInteractionOption(int id)
         {
-            for (int i = 0;i < interactionOptions.Count;i++)
+            for (int i = 0; i < interactionOptions.Count; i++)
             {
                 if (interactionOptions[i].InteractionId == id)
                 {
@@ -195,6 +201,40 @@ namespace CraftSharp.UI
             OnItemCountChange?.Invoke(interactionOptions.Count);
         }
 
+        public void UpdateInteractionTargetHint(Vector3Int originOffset, Camera uiCamera, CameraController camControl)
+        {
+            if (selectedIndex > 0 || selectedIndex < interactionOptions.Count)
+            {
+                var selectedOption = interactionOptions[selectedIndex];
+
+                if (selectedOption.interactionInfo is BlockInteractionInfo blockInfo)
+                {
+                    var blockLoc = blockInfo.BlockLoc;
+                    var worldPoint = CoordConvert.MC2Unity(originOffset, (blockLoc.X >> 4) << 4, (blockLoc.Y >> 4) << 4, (blockLoc.Z >> 4) << 4);
+
+                    var offsetType = ResourcePackManager.Instance.StateModelTable[blockInfo.Block.StateId].OffsetType;
+                    var pointOffset = (Vector3) ChunkRenderBuilder.GetBlockOffset(offsetType,
+                        blockLoc.X >> 4, blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Y & 0xF, blockLoc.Z & 0xF) + Vector3.one * 0.5F;
+
+                    // Update interaction hint position
+                    var newPos = uiCamera.ViewportToWorldPoint(camControl.GetPointViewportPos(worldPoint + pointOffset));
+
+                    // Don't modify z coordinate
+                    iteractionTargetHint.position = new Vector3(newPos.x, newPos.y, iteractionTargetHint.position.z);
+                    iteractionTargetHintLine.SetPosition(0, iteractionTargetHint.position);
+                    iteractionTargetHintLine.SetPosition(1, selectedOption.KeyHintTransform.position);
+
+                    iteractionTargetHint.gameObject.SetActive(true);
+                    iteractionTargetHintLine.gameObject.SetActive(true);
+
+                    return;
+                }
+            }
+
+            iteractionTargetHint.gameObject.SetActive(false);
+            iteractionTargetHintLine.gameObject.SetActive(false);
+        }
+
         public void SelectPrevOption()
         {
             SetSelected(Mathf.Clamp(selectedIndex - 1, 0, interactionOptions.Count - 1));
@@ -209,13 +249,17 @@ namespace CraftSharp.UI
         {
             selectedIndex = selIndex;
 
-            var scrollPos = 1F - (float)selectedIndex / (float)(interactionOptions.Count - 1);
+            var scrollPos = 1F - selectedIndex / (float) (interactionOptions.Count - 1);
 
             if (scrollRect != null)
+            {
                 scrollRect.verticalScrollbar.value = scrollPos;
+            }
 
-            for (int i = 0;i < interactionOptions.Count;i++)
+            for (int i = 0; i < interactionOptions.Count; i++)
+            {
                 interactionOptions[i].SetSelected(i == selIndex);
+            }
         }
     }
 }

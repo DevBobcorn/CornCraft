@@ -27,6 +27,8 @@ namespace CraftSharp.UI
         [SerializeField] private MeshFilter itemIconMeshFilter;
         [SerializeField] private MeshRenderer itemIconMeshRenderer;
 
+        public Transform KeyHintTransform => keyHintText.transform;
+
         private Animator _optionAnimator;
         private int interactionKey;
         public int InteractionId => interactionKey;
@@ -55,7 +57,7 @@ namespace CraftSharp.UI
             usingItemIcon = false;
             HideItemIcon();
 
-            if (info is ViewInteractionInfo viewInfo)
+            if (info is BlockViewInteractionInfo viewInfo)
             {
                 switch (viewInfo.IconType)
                 {
