@@ -55,7 +55,7 @@ namespace CraftSharp.UI
             // Events
             addCallback = (e) =>
             {
-                AddInteractionOption(e.InteractionId, e.UseProgress, e.AddAndSelect, e.Info);
+                AddInteractionOption(e.InteractionId, e.AddAndSelect, e.UseProgress, e.Info);
             };
 
             removeCallback = (e) =>
@@ -158,7 +158,6 @@ namespace CraftSharp.UI
             {
                 option.SetId(id);
                 option.SetInfo(info);
-                
 
                 optionObj.transform.SetParent(container, false);
                 optionObj.transform.localScale = Vector3.one;
@@ -170,8 +169,6 @@ namespace CraftSharp.UI
 
                     selectedIndex = 0;
                     SetSelected(0); // Select the first option
-
-                    option.UpdateKeyHintText("LMB");
                 }
                 else // Add this one to bottom of the list
                 {
@@ -183,7 +180,14 @@ namespace CraftSharp.UI
                         selectedIndex = 0;
                         SetSelected(0); // Select the first option
                     }
+                }
 
+                if (useProgress)
+                {
+                    option.UpdateKeyHintText("LMB");
+                }
+                else
+                {
                     option.UpdateKeyHintText("X");
                 }
 
@@ -205,7 +209,7 @@ namespace CraftSharp.UI
             if (selectedIndex >= 0 && selectedIndex < interactionOptions.Count)
             {
                 var targetOption = interactionOptions[selectedIndex];
-                targetOption.Execute(CornApp.CurrentClient);
+                targetOption.Execute();
             }
         }
 

@@ -68,6 +68,7 @@ namespace CraftSharp.Control
         private PlayerController? playerController;
 
         private Action<HeldItemChangeEvent>? heldItemCallback;
+        private Action<ViewInteractionExecutionEvent>? viewInteractionExecutionEvent;
         private Action<HarvestInteractionUpdateEvent>? harvestInteractionUpdateCallback;
 
         private readonly Dictionary<int, InteractionInfo> interactionInfos = new();
@@ -195,7 +196,7 @@ namespace CraftSharp.Control
             {
                 if (lastHarvestInteractionInfo.Location != TargetBlockLoc || !lastHarvestInteractionInfo.UpdateInteraction(client))
                 {
-                    RemoveInteraction(lastHarvestInteractionInfo.Id, info =>
+                    RemoveInteraction<HarvestInteractionInfo>(lastHarvestInteractionInfo.Id, info =>
                     {
                         EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                     });
@@ -234,7 +235,8 @@ namespace CraftSharp.Control
                             });
                             AddBlockViewInteractionAt(blockLoc, newInfo, info =>
                             {
-                                EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, false, false, info));
+                                // Select this new item if it is at target location
+                                EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, TargetBlockLoc == blockLoc, false, info));
                             });
                             //Debug.Log($"Upd: [{blockLoc}] {prevDefinition.Identifier} => {newDefinition.Identifier}");
                         }
@@ -244,7 +246,8 @@ namespace CraftSharp.Control
                     {
                         AddBlockViewInteractionAt(blockLoc, newInfo, info =>
                         {
-                            EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, false, false, info));
+                            // Select this new item if it is at target location
+                            EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, TargetBlockLoc == blockLoc, false, info));
                         });
                         //Debug.Log($"Add: [{blockLoc}] {newDefinition.Identifier}");
                     }
@@ -272,16 +275,15 @@ namespace CraftSharp.Control
 
         private void AddBlockViewInteractionAt(BlockLoc location, BlockViewInteractionInfo info, Action<BlockViewInteractionInfo>? onCreated = null)
         {
-            if (!blockViewInteractionInfos.TryGetValue(location, out var infos))
+            if (!blockViewInteractionInfos.TryGetValue(location, out var infosAtLoc))
             {
-                infos = new List<BlockViewInteractionInfo>();
-                blockViewInteractionInfos[location] = infos;
+                infosAtLoc = new List<BlockViewInteractionInfo>();
+                blockViewInteractionInfos[location] = infosAtLoc;
             }
 
-            interactionInfos.Add(info.Id, info);
-            infos.Add(info);
+            infosAtLoc.Add(info);
 
-            onCreated?.Invoke(info);
+            AddInteraction(info.Id, info, onCreated);
         }
 
         private T? GetInteraction<T>(int id) where T : InteractionInfo
@@ -294,32 +296,29 @@ namespace CraftSharp.Control
             return blockViewInteractionInfos.TryGetValue(location, out var infos) ? infos : null;
         }
 
-        private void RemoveInteraction(int id, Action<InteractionInfo>? onRemoved = null)
+        private void RemoveInteraction<T>(int id, Action<T>? onRemoved = null) where T : InteractionInfo
         {
             if (interactionInfos.Remove(id, out var removedInfo))
             {
                 interactionId.ReleaseID(removedInfo.Id);
-                onRemoved?.Invoke(removedInfo);
+                onRemoved?.Invoke((T) removedInfo);
             }
         }
 
         private void RemoveBlockViewInteractionsAt(BlockLoc location, Action<BlockViewInteractionInfo>? onEachRemoved = null)
         {
-            if (blockViewInteractionInfos.TryGetValue(location, out var infos))
+            if (blockViewInteractionInfos.TryGetValue(location, out var infosAtLoc))
             {
-                infos.RemoveAll(interactionInfo =>
+                infosAtLoc.RemoveAll(interactionInfo =>
                 {
                     if (interactionInfo is not BlockViewInteractionInfo matchedInfo) return false;
 
-                    interactionInfos.Remove(matchedInfo.Id);
-
-                    interactionId.ReleaseID(matchedInfo.Id);
-                    onEachRemoved?.Invoke(matchedInfo);
+                    RemoveInteraction(matchedInfo.Id, onEachRemoved);
 
                     return true;
                 });
 
-                if (!infos.Any()) blockViewInteractionInfos.Remove(location);
+                if (!infosAtLoc.Any()) blockViewInteractionInfos.Remove(location);
             }
         }
 
@@ -334,6 +333,7 @@ namespace CraftSharp.Control
         {
             heldItemCallback = e => currentItem = e.ItemStack?.ItemType;
             EventManager.Instance.Register(heldItemCallback);
+
             harvestInteractionUpdateCallback = e =>
             {
                 var harvestInteractionInfo = GetInteraction<HarvestInteractionInfo>(e.InteractionId);
@@ -344,6 +344,23 @@ namespace CraftSharp.Control
                 }
             };
             EventManager.Instance.Register(harvestInteractionUpdateCallback);
+
+            viewInteractionExecutionEvent = e =>
+            {
+                var viewInteractionInfo = GetInteraction<InteractionInfo>(e.InteractionId);
+
+                if (viewInteractionInfo != null && client != null)
+                {
+                    viewInteractionInfo.UpdateInteraction(client);
+
+                    // Remove it immediately after execution TODO: Maybe check the result?
+                    RemoveInteraction<InteractionInfo>(e.InteractionId, info =>
+                    {
+                        EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
+                    });
+                }
+            };
+            EventManager.Instance.Register(viewInteractionExecutionEvent);
         }
 
         private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)

@@ -1,5 +1,4 @@
-﻿#nullable enable
-using CraftSharp.Control;
+﻿using CraftSharp.Control;
 
 namespace CraftSharp.Event
 {
@@ -7,17 +6,15 @@ namespace CraftSharp.Event
     {
         public int InteractionId { get; }
 
-        public int EntityId { get; }
         public Block Block { get; }
         public BlockLoc Location { get; }
         public DiggingStatus Status { get; }
         public float Progress { get; }  // 0 - 1
 
-        public HarvestInteractionUpdateEvent(int id, int entityId, Block block, BlockLoc location, DiggingStatus status, float progress)
+        public HarvestInteractionUpdateEvent(int id, Block block, BlockLoc location, DiggingStatus status, float progress)
         {
             InteractionId = id;
             
-            EntityId = entityId;
             Block = block;
             Location = location;
             Status = status;

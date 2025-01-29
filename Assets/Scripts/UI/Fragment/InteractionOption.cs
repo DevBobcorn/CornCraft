@@ -122,13 +122,13 @@ namespace CraftSharp.UI
             _optionAnimator.SetBool(EXPIRED, true);
         }
 
-        public void Execute(BaseCornClient client)
+        public void Execute()
         {
             _optionAnimator.SetTrigger(EXECUTED); // Execution visual feedback
 
-            if (client != null && interactionInfo != null)
+            if (interactionInfo != null)
             {
-                interactionInfo.UpdateInteraction(client);
+                EventManager.Instance.Broadcast(new ViewInteractionExecutionEvent(interactionInfo.Id));
             }
         }
 

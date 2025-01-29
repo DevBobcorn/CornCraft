@@ -107,8 +107,6 @@ namespace CraftSharp.Control
 
         protected override IEnumerator RunInteraction(BaseCornClient client)
         {
-            var clientEntityId = client.GetClientEntityId();
-
             // Takes 30 to 40 milsecs to send, don't wait for it
             Task.Run(() => client.DigBlock(blockLoc, direction, DiggingStatus.Started));
 
@@ -118,7 +116,7 @@ namespace CraftSharp.Control
             {
                 if (State == HarvestInteractionState.Cancelled)
                 {
-                    EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, clientEntityId, block, blockLoc, DiggingStatus.Cancelled, 0F));
+                    EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, block, blockLoc, DiggingStatus.Cancelled, 0F));
 
                     // Takes 30 to 40 milsecs to send, don't wait for it
                     Task.Run(() => client.DigBlock(blockLoc, direction, DiggingStatus.Cancelled));
@@ -135,7 +133,7 @@ namespace CraftSharp.Control
                 elapsedTime += Time.deltaTime;
                 Progress = elapsedTime / duration;
 
-                EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, clientEntityId, block, blockLoc, DiggingStatus.Started, Progress));
+                EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, block, blockLoc, DiggingStatus.Started, Progress));
 
                 //Debug.Log($"{GetHashCode()} Destroy progress: {elapsedTime:0.0} / {duration:0.0}");
 
@@ -144,7 +142,7 @@ namespace CraftSharp.Control
 
             if (State == HarvestInteractionState.Cancelled)
             {
-                EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, clientEntityId, block, blockLoc, DiggingStatus.Cancelled, 0F));
+                EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, block, blockLoc, DiggingStatus.Cancelled, 0F));
 
                 // Takes 30 to 40 milsecs to send, don't wait for it
                 Task.Run(() => client.DigBlock(blockLoc, direction, DiggingStatus.Cancelled));
@@ -154,7 +152,7 @@ namespace CraftSharp.Control
 
             //Debug.Log($"{GetHashCode()} Complete at {location}");
 
-            EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, clientEntityId, block, blockLoc, DiggingStatus.Finished, 1F));
+            EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, block, blockLoc, DiggingStatus.Finished, 1F));
 
             EventManager.Instance.Broadcast(new ParticlesEvent(CoordConvert.MC2Unity(client.WorldOriginOffset, blockLoc.ToCenterLocation()),
                     ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraData(block.StateId), 16));
