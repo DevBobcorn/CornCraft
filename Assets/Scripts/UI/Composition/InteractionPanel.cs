@@ -14,12 +14,14 @@ namespace CraftSharp.UI
     public class InteractionPanel : MonoBehaviour
     {
         private static readonly int SHOW_HASH = Animator.StringToHash("Show");
+        private static readonly int HIDE_HASH = Animator.StringToHash("Hide");
 
         [SerializeField] private GameObject interactionOptionPrefab;
         [SerializeField] private GameObject interactionProgressOptionPrefab;
         [SerializeField] private RectTransform container;
         [SerializeField] private LineRenderer iteractionTargetHintLine;
         [SerializeField] private RectTransform iteractionTargetHint;
+        [SerializeField] private Animator interactionTargetAnimator;
 
         private Animator scrollHint;
         private ScrollRect scrollRect;
@@ -35,6 +37,7 @@ namespace CraftSharp.UI
         private Action<InteractionAddEvent>? addCallback;
         private Action<InteractionRemoveEvent>? removeCallback;
         private Action<HarvestInteractionUpdateEvent>? harvestInteractionUpdateCallback;
+        private Action<TargetBlockLocChangeEvent>? targetBlockLocChangeEvent;
 
         public delegate void ItemCountEventHandler(int newCount);
         public event ItemCountEventHandler? OnItemCountChange;
@@ -80,9 +83,39 @@ namespace CraftSharp.UI
                 }
             };
 
+            targetBlockLocChangeEvent = (e) =>
+            {
+                if (e.BlockLoc != null)
+                {
+                    if (selectedIndex >= 0 && selectedIndex < interactionOptions.Count)
+                    {
+                        var selectedOption = interactionOptions[selectedIndex];
+
+                        if (selectedOption.interactionInfo is BlockInteractionInfo blockInfo)
+                        {
+                            if (blockInfo.BlockLoc == e.BlockLoc)
+                            {
+                                return; // Selected interaction is also on the block, don't update
+                            }
+                        }
+                    }
+
+                    for (int i = 0; i < interactionOptions.Count; i++)
+                    {
+                        if (interactionOptions[i].interactionInfo is BlockInteractionInfo blockInfo
+                                && blockInfo.BlockLoc == e.BlockLoc) {
+                            
+                            SetSelected(i); // Select this option
+                            break;
+                        }
+                    }
+                }
+            };
+
             EventManager.Instance.Register(addCallback);
             EventManager.Instance.Register(removeCallback);
             EventManager.Instance.Register(harvestInteractionUpdateCallback);
+            EventManager.Instance.Register(targetBlockLocChangeEvent);
         }
 
         public void ShowItemIcons()
@@ -111,6 +144,9 @@ namespace CraftSharp.UI
             
             if (harvestInteractionUpdateCallback is not null)
                 EventManager.Instance.Unregister(harvestInteractionUpdateCallback);
+            
+            if (targetBlockLocChangeEvent is not null)
+                EventManager.Instance.Unregister(targetBlockLocChangeEvent);
         }
 
         public void AddInteractionOption(int id, bool addAndSelect, bool useProgress, InteractionInfo info)
@@ -199,6 +235,13 @@ namespace CraftSharp.UI
 
             scrollHint.SetBool(SHOW_HASH, interactionOptions.Count > 1); // Show or hide scroll hint
             OnItemCountChange?.Invoke(interactionOptions.Count);
+
+            if (interactionOptions.Count <= 0)
+            {
+                interactionTargetAnimator.ResetTrigger(SHOW_HASH);
+                interactionTargetAnimator.ResetTrigger(HIDE_HASH);
+                interactionTargetAnimator.SetTrigger(HIDE_HASH);
+            }
         }
 
         public void UpdateInteractionTargetHint(Vector3Int originOffset, Camera uiCamera, CameraController camControl)
@@ -224,15 +267,9 @@ namespace CraftSharp.UI
                     iteractionTargetHintLine.SetPosition(0, iteractionTargetHint.position);
                     iteractionTargetHintLine.SetPosition(1, selectedOption.KeyHintTransform.position);
 
-                    iteractionTargetHint.gameObject.SetActive(true);
-                    iteractionTargetHintLine.gameObject.SetActive(true);
-
                     return;
                 }
             }
-
-            iteractionTargetHint.gameObject.SetActive(false);
-            iteractionTargetHintLine.gameObject.SetActive(false);
         }
 
         public void SelectPrevOption()
@@ -259,6 +296,21 @@ namespace CraftSharp.UI
             for (int i = 0; i < interactionOptions.Count; i++)
             {
                 interactionOptions[i].SetSelected(i == selIndex);
+            }
+
+            if (selectedIndex >= 0 && selectedIndex < interactionOptions.Count &&
+                    interactionOptions[selectedIndex].interactionInfo is BlockInteractionInfo)
+            {
+                // Fade in interaction hint
+                interactionTargetAnimator.ResetTrigger(SHOW_HASH);
+                interactionTargetAnimator.ResetTrigger(HIDE_HASH);
+                interactionTargetAnimator.SetTrigger(SHOW_HASH);
+            }
+            else
+            {
+                interactionTargetAnimator.ResetTrigger(SHOW_HASH);
+                interactionTargetAnimator.ResetTrigger(HIDE_HASH);
+                interactionTargetAnimator.SetTrigger(HIDE_HASH);
             }
         }
     }

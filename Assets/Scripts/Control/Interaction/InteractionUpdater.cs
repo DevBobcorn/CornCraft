@@ -40,6 +40,7 @@ namespace CraftSharp.Control
 
     public class InteractionUpdater : MonoBehaviour
     {
+        public const int MAX_TARGET_DISTANCE = 8;
         public const int BLOCK_INTERACTION_RADIUS = 3;
         public const float BLOCK_INTERACTION_RADIUS_SQR = 9.0f; // BLOCK_INTERACTION_RADIUS ^ 2
         public const float BLOCK_INTERACTION_RADIUS_SQR_PLUS = 12.25f; // (BLOCK_INTERACTION_RADIUS + 0.5f) ^ 2
@@ -69,7 +70,8 @@ namespace CraftSharp.Control
         private Action<HeldItemChangeEvent>? heldItemCallback;
         private Action<HarvestInteractionUpdateEvent>? harvestInteractionUpdateCallback;
 
-        private readonly Dictionary<BlockLoc, List<InteractionInfo>> blockInteractionInfos = new();
+        private readonly Dictionary<int, InteractionInfo> interactionInfos = new();
+        private readonly Dictionary<BlockLoc, List<BlockViewInteractionInfo>> blockViewInteractionInfos = new();
 
         private readonly InteractionId interactionId = new();
 
@@ -83,7 +85,7 @@ namespace CraftSharp.Control
         {
             if (viewRay is null || client == null) return;
 
-            if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out RaycastHit viewHit, 10F, blockSelectionLayer))
+            if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out RaycastHit viewHit, MAX_TARGET_DISTANCE, blockSelectionLayer))
             {
                 Vector3 normal = viewHit.normal.normalized;
                 TargetDirection = GetDirectionFromNormal(normal);
@@ -98,24 +100,39 @@ namespace CraftSharp.Control
                     Mathf.FloorToInt(offseted.z)
                 );
 
-                TargetBlockLoc = CoordConvert.Unity2MC(client.WorldOriginOffset, unityBlockPos).GetBlockLoc();
-                var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
+                var newTargetLoc = CoordConvert.Unity2MC(client.WorldOriginOffset, unityBlockPos).GetBlockLoc();
+                var block = client.ChunkRenderManager.GetBlock(newTargetLoc);
 
+                // Create selection box if not present
                 if (blockSelectionBox == null)
                 {
                     blockSelectionBox = Instantiate(blockSelectionFramePrefab)!.GetComponent<BlockSelectionBox>();
-
                     blockSelectionBox!.transform.SetParent(transform, false);
                 }
 
-                blockSelectionBox.UpdateShape(block.State.Shape);
+                // Update target location if changed
+                if (TargetBlockLoc != newTargetLoc)
+                {
+                    TargetBlockLoc = newTargetLoc;
+                    blockSelectionBox.transform.position = unityBlockPos;
 
-                blockSelectionBox.transform.position = unityBlockPos;
+                    EventManager.Instance.Broadcast(new TargetBlockLocChangeEvent(newTargetLoc));
+                }
+
+                // Update shape even if target location is not changed (the block itself may change)
+                blockSelectionBox.UpdateShape(block.State.Shape);
             }
             else
             {
-                TargetBlockLoc = null;
+                // Update target location if changed
+                if (TargetBlockLoc != null)
+                {
+                    TargetBlockLoc = null;
 
+                    EventManager.Instance.Broadcast(new TargetBlockLocChangeEvent(null));
+                }
+
+                // Clear shape if selection box is created
                 if (blockSelectionBox != null)
                 {
                     blockSelectionBox.ClearShape();
@@ -157,34 +174,45 @@ namespace CraftSharp.Control
 
             if (client == null) return;
 
-            foreach (var blockLoc in blockInteractionInfos.Keys.ToList()) // ToList because collection may change
+            foreach (var blockLoc in blockViewInteractionInfos.Keys.ToList()) // ToList because collection may change
             {
+                // Remove view interactions which are too far from player
                 if (playerBlockLoc.SqrDistanceTo(blockLoc) > BLOCK_INTERACTION_RADIUS_SQR_PLUS)
                 {
-                    RemoveBlockInteraction<BlockViewInteractionInfo>(blockLoc, info =>
+                    if (blockLoc != TargetBlockLoc) // Make an exception for target location
                     {
-                        EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
-                    });
-                    //Debug.Log($"Rem: [{blockLoc}]");
-                }
-
-                // Update harvest interactions (these are not bound by interaction radius)
-                if (blockInteractionInfos.TryGetValue(blockLoc, out var infos)) // Check if the entry is still present
-                {
-                    foreach (var info in infos.OfType<HarvestInteractionInfo>().ToList()) // ToList because collection may change
-                    {
-                        if (!info.UpdateInteraction(client))
+                        RemoveBlockViewInteractionsAt(blockLoc, info =>
                         {
-                            RemoveBlockInteraction<HarvestInteractionInfo>(blockLoc);
-                        }
+                            EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
+                        });
+                        //Debug.Log($"Rem: [{blockLoc}]");
                     }
                 }
             }
 
-            // Append new available view interactions
-            foreach (var offset in validOffsets)
+            // Update harvest interactions (these are not bound by interaction radius)
+            if (lastHarvestInteractionInfo != null)
             {
-                var blockLoc = playerBlockLoc + offset;
+                if (lastHarvestInteractionInfo.Location != TargetBlockLoc || !lastHarvestInteractionInfo.UpdateInteraction(client))
+                {
+                    RemoveInteraction(lastHarvestInteractionInfo.Id, info =>
+                    {
+                        EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
+                    });
+
+                    lastHarvestInteractionInfo = null;
+                }
+            }
+
+            var availableBlockLocs = validOffsets.Select(offset => offset + playerBlockLoc);
+            if (TargetBlockLoc != null)
+            {
+                availableBlockLocs = availableBlockLocs.Append(TargetBlockLoc.Value);
+            }
+
+            // Append new available view interactions
+            foreach (var blockLoc in availableBlockLocs)
+            {
                 var block = chunksManager.GetBlock(blockLoc);
 
                 if (table.TryGetValue(block.StateId, out InteractionDefinition? newInteractionDefinition))
@@ -192,7 +220,7 @@ namespace CraftSharp.Control
                     var newViewInteraction = newInteractionDefinition?.Get<ViewInteraction>();
                     if (newViewInteraction is null) continue;
 
-                    var prevInfo = GetBlockInteraction<BlockViewInteractionInfo>(blockLoc)?.FirstOrDefault();
+                    var prevInfo = GetBlockViewInteractionsAt(blockLoc)?.FirstOrDefault();
                     var newInfo = new BlockViewInteractionInfo(interactionId.AllocateID(), block, blockLoc, block.BlockId, newViewInteraction);
 
                     if (prevInfo is not null)
@@ -200,11 +228,11 @@ namespace CraftSharp.Control
                         var prevDefinition = prevInfo.Definition;
                         if (prevDefinition != newViewInteraction) // Update this interaction
                         {
-                            RemoveBlockInteraction<BlockViewInteractionInfo>(blockLoc, info =>
+                            RemoveBlockViewInteractionsAt(blockLoc, info =>
                             {
                                 EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                             });
-                            AddBlockInteraction(blockLoc, newInfo, info =>
+                            AddBlockViewInteractionAt(blockLoc, newInfo, info =>
                             {
                                 EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, false, false, info));
                             });
@@ -214,7 +242,7 @@ namespace CraftSharp.Control
                     }
                     else // Add this interaction
                     {
-                        AddBlockInteraction(blockLoc, newInfo, info =>
+                        AddBlockViewInteractionAt(blockLoc, newInfo, info =>
                         {
                             EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, false, false, info));
                         });
@@ -223,9 +251,9 @@ namespace CraftSharp.Control
                 }
                 else
                 {
-                    if (blockInteractionInfos.ContainsKey(blockLoc))
+                    if (blockViewInteractionInfos.ContainsKey(blockLoc))
                     {
-                        RemoveBlockInteraction<BlockViewInteractionInfo>(blockLoc, info =>
+                        RemoveBlockViewInteractionsAt(blockLoc, info =>
                         {
                             EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                         });
@@ -235,41 +263,63 @@ namespace CraftSharp.Control
             }
         }
 
-        private void AddBlockInteraction<T>(BlockLoc location, T info, Action<T>? onCreated = null) where T : InteractionInfo
+        private void AddInteraction<T>(int id, T info, Action<T>? onCreated = null) where T : InteractionInfo
         {
-            if (!blockInteractionInfos.TryGetValue(location, out List<InteractionInfo>? interactionInfos))
-            {
-                interactionInfos = new List<InteractionInfo>();
-                blockInteractionInfos[location] = interactionInfos;
-            }
-
-            interactionInfos.Add(info);
+            interactionInfos.Add(id, info);
 
             onCreated?.Invoke(info);
         }
 
-        private IEnumerable<T>? GetBlockInteraction<T>(BlockLoc location) where T : InteractionInfo
+        private void AddBlockViewInteractionAt(BlockLoc location, BlockViewInteractionInfo info, Action<BlockViewInteractionInfo>? onCreated = null)
         {
-            return blockInteractionInfos.TryGetValue(location, out List<InteractionInfo> interactionInfos)
-                ? interactionInfos.OfType<T>() : null;
+            if (!blockViewInteractionInfos.TryGetValue(location, out var infos))
+            {
+                infos = new List<BlockViewInteractionInfo>();
+                blockViewInteractionInfos[location] = infos;
+            }
+
+            interactionInfos.Add(info.Id, info);
+            infos.Add(info);
+
+            onCreated?.Invoke(info);
         }
 
-        private void RemoveBlockInteraction<T>(BlockLoc location, Action<T>? onRemoved = null) where T : InteractionInfo
+        private T? GetInteraction<T>(int id) where T : InteractionInfo
         {
-            if (blockInteractionInfos.TryGetValue(location, out List<InteractionInfo> interactionInfos))
+            return interactionInfos.TryGetValue(id, out var interactionInfo) ? (T) interactionInfo : null;
+        }
+
+        private IEnumerable<BlockViewInteractionInfo>? GetBlockViewInteractionsAt(BlockLoc location)
+        {
+            return blockViewInteractionInfos.TryGetValue(location, out var infos) ? infos : null;
+        }
+
+        private void RemoveInteraction(int id, Action<InteractionInfo>? onRemoved = null)
+        {
+            if (interactionInfos.Remove(id, out var removedInfo))
             {
-                interactionInfos.RemoveAll(interactionInfo =>
+                interactionId.ReleaseID(removedInfo.Id);
+                onRemoved?.Invoke(removedInfo);
+            }
+        }
+
+        private void RemoveBlockViewInteractionsAt(BlockLoc location, Action<BlockViewInteractionInfo>? onEachRemoved = null)
+        {
+            if (blockViewInteractionInfos.TryGetValue(location, out var infos))
+            {
+                infos.RemoveAll(interactionInfo =>
                 {
-                    if (interactionInfo is not T matchedInfo) return false;
+                    if (interactionInfo is not BlockViewInteractionInfo matchedInfo) return false;
+
+                    interactionInfos.Remove(matchedInfo.Id);
 
                     interactionId.ReleaseID(matchedInfo.Id);
-
-                    onRemoved?.Invoke(matchedInfo);
+                    onEachRemoved?.Invoke(matchedInfo);
 
                     return true;
                 });
 
-                if (!interactionInfos.Any()) blockInteractionInfos.Remove(location);
+                if (!infos.Any()) blockViewInteractionInfos.Remove(location);
             }
         }
 
@@ -286,9 +336,7 @@ namespace CraftSharp.Control
             EventManager.Instance.Register(heldItemCallback);
             harvestInteractionUpdateCallback = e =>
             {
-                // Must keep only one at a time.
-                var harvestInteractionInfo = GetBlockInteraction<HarvestInteractionInfo>(e.Location)?.FirstOrDefault();
-
+                var harvestInteractionInfo = GetInteraction<HarvestInteractionInfo>(e.InteractionId);
                 if (harvestInteractionInfo is not null)
                 {
                     // Update the process
@@ -321,7 +369,7 @@ namespace CraftSharp.Control
             
             //Debug.Log($"Created {lastHarvestInteractionInfo.GetHashCode()} at {blockLoc}");
 
-            AddBlockInteraction(blockLoc, lastHarvestInteractionInfo, info =>
+            AddInteraction(lastHarvestInteractionInfo.Id, lastHarvestInteractionInfo, info =>
             {
                 EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, true, true, info));
             });
@@ -336,12 +384,11 @@ namespace CraftSharp.Control
                 if (TargetBlockLoc is not null && TargetDirection is not null &&
                     playerController != null && client != null && playerController.CurrentState is DiggingAimState)
                 {
-                    var curHarvestInteractionInfo = GetBlockInteraction<LocalHarvestInteractionInfo>(TargetBlockLoc.Value)?.FirstOrDefault();
                     var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
                     var status = playerController.Status;
-                    if (curHarvestInteractionInfo is not null)
+                    if (lastHarvestInteractionInfo is not null)
                     {
-                        if (curHarvestInteractionInfo.State == HarvestInteractionState.Completed)
+                        if (lastHarvestInteractionInfo.State == HarvestInteractionState.Completed)
                         {
                             lastHarvestInteractionInfo = null;
                         }
