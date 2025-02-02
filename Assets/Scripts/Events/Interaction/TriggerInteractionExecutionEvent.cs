@@ -1,10 +1,10 @@
 namespace CraftSharp.Event
 {
-    public record ViewInteractionExecutionEvent : BaseEvent
+    public record TriggerInteractionExecutionEvent : BaseEvent
     {
         public int InteractionId { get; }
 
-        public ViewInteractionExecutionEvent(int id)
+        public TriggerInteractionExecutionEvent(int id)
         {
             InteractionId = id;
         }

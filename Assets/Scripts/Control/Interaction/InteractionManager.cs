@@ -66,7 +66,7 @@ namespace CraftSharp.Control
                             }
                             : null; 
 
-                        // View interaction icon case
+                        // Trigger interaction icon case
                         InteractionIconType iconType = entryCont.TryGetValue("icon_type", out var type)
                             ? type.StringValue switch
                             {
@@ -103,7 +103,7 @@ namespace CraftSharp.Control
                                     }
                                     else
                                     {
-                                        inters.Add(new ViewInteraction(iconType, blockId, interactionType, hintKey, tag));
+                                        inters.Add(new TriggerInteraction(iconType, blockId, interactionType, hintKey, tag));
                                     }
 
                                     if (interactionTable.TryGetValue(stateId, out var definition))

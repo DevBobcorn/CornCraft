@@ -57,7 +57,7 @@ namespace CraftSharp.UI
             usingItemIcon = false;
             HideItemIcon();
 
-            if (info is BlockViewInteractionInfo viewInfo)
+            if (info is BlockTriggerInteractionInfo viewInfo)
             {
                 switch (viewInfo.IconType)
                 {
@@ -128,7 +128,7 @@ namespace CraftSharp.UI
 
             if (interactionInfo != null)
             {
-                EventManager.Instance.Broadcast(new ViewInteractionExecutionEvent(interactionInfo.Id));
+                EventManager.Instance.Broadcast(new TriggerInteractionExecutionEvent(interactionInfo.Id));
             }
         }
 

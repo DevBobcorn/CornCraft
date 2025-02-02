@@ -68,11 +68,11 @@ namespace CraftSharp.Control
         private PlayerController? playerController;
 
         private Action<HeldItemChangeEvent>? heldItemCallback;
-        private Action<ViewInteractionExecutionEvent>? viewInteractionExecutionEvent;
+        private Action<TriggerInteractionExecutionEvent>? triggerInteractionExecutionEvent;
         private Action<HarvestInteractionUpdateEvent>? harvestInteractionUpdateCallback;
 
         private readonly Dictionary<int, InteractionInfo> interactionInfos = new();
-        private readonly Dictionary<BlockLoc, List<BlockViewInteractionInfo>> blockViewInteractionInfos = new();
+        private readonly Dictionary<BlockLoc, List<BlockTriggerInteractionInfo>> blockTriggerInteractionInfos = new();
 
         private readonly InteractionId interactionId = new();
 
@@ -175,14 +175,14 @@ namespace CraftSharp.Control
 
             if (client == null) return;
 
-            foreach (var blockLoc in blockViewInteractionInfos.Keys.ToList()) // ToList because collection may change
+            foreach (var blockLoc in blockTriggerInteractionInfos.Keys.ToList()) // ToList because collection may change
             {
-                // Remove view interactions which are too far from player
+                // Remove trigger interactions which are too far from player
                 if (playerBlockLoc.SqrDistanceTo(blockLoc) > BLOCK_INTERACTION_RADIUS_SQR_PLUS)
                 {
                     if (blockLoc != TargetBlockLoc) // Make an exception for target location
                     {
-                        RemoveBlockViewInteractionsAt(blockLoc, info =>
+                        RemoveBlockTriggerInteractionsAt(blockLoc, info =>
                         {
                             EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                         });
@@ -211,29 +211,29 @@ namespace CraftSharp.Control
                 availableBlockLocs = availableBlockLocs.Append(TargetBlockLoc.Value);
             }
 
-            // Append new available view interactions
+            // Append new available trigger interactions
             foreach (var blockLoc in availableBlockLocs)
             {
                 var block = chunksManager.GetBlock(blockLoc);
 
                 if (table.TryGetValue(block.StateId, out InteractionDefinition? newInteractionDefinition))
                 {
-                    var newViewInteraction = newInteractionDefinition?.Get<ViewInteraction>();
-                    if (newViewInteraction is null) continue;
+                    var newTriggerInteraction = newInteractionDefinition?.Get<TriggerInteraction>();
+                    if (newTriggerInteraction is null) continue;
 
-                    var prevInfo = GetBlockViewInteractionsAt(blockLoc)?.FirstOrDefault();
-                    var newInfo = new BlockViewInteractionInfo(interactionId.AllocateID(), block, blockLoc, block.BlockId, newViewInteraction);
+                    var prevInfo = GetBlockTriggerInteractionsAt(blockLoc)?.FirstOrDefault();
+                    var newInfo = new BlockTriggerInteractionInfo(interactionId.AllocateID(), block, blockLoc, block.BlockId, newTriggerInteraction);
 
                     if (prevInfo is not null)
                     {
                         var prevDefinition = prevInfo.Definition;
-                        if (prevDefinition != newViewInteraction) // Update this interaction
+                        if (prevDefinition != newTriggerInteraction) // Update this interaction
                         {
-                            RemoveBlockViewInteractionsAt(blockLoc, info =>
+                            RemoveBlockTriggerInteractionsAt(blockLoc, info =>
                             {
                                 EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                             });
-                            AddBlockViewInteractionAt(blockLoc, newInfo, info =>
+                            AddBlockTriggerInteractionAt(blockLoc, newInfo, info =>
                             {
                                 // Select this new item if it is at target location
                                 EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, TargetBlockLoc == blockLoc, false, info));
@@ -244,7 +244,7 @@ namespace CraftSharp.Control
                     }
                     else // Add this interaction
                     {
-                        AddBlockViewInteractionAt(blockLoc, newInfo, info =>
+                        AddBlockTriggerInteractionAt(blockLoc, newInfo, info =>
                         {
                             // Select this new item if it is at target location
                             EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, TargetBlockLoc == blockLoc, false, info));
@@ -254,9 +254,9 @@ namespace CraftSharp.Control
                 }
                 else
                 {
-                    if (blockViewInteractionInfos.ContainsKey(blockLoc))
+                    if (blockTriggerInteractionInfos.ContainsKey(blockLoc))
                     {
-                        RemoveBlockViewInteractionsAt(blockLoc, info =>
+                        RemoveBlockTriggerInteractionsAt(blockLoc, info =>
                         {
                             EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                         });
@@ -273,12 +273,12 @@ namespace CraftSharp.Control
             onCreated?.Invoke(info);
         }
 
-        private void AddBlockViewInteractionAt(BlockLoc location, BlockViewInteractionInfo info, Action<BlockViewInteractionInfo>? onCreated = null)
+        private void AddBlockTriggerInteractionAt(BlockLoc location, BlockTriggerInteractionInfo info, Action<BlockTriggerInteractionInfo>? onCreated = null)
         {
-            if (!blockViewInteractionInfos.TryGetValue(location, out var infosAtLoc))
+            if (!blockTriggerInteractionInfos.TryGetValue(location, out var infosAtLoc))
             {
-                infosAtLoc = new List<BlockViewInteractionInfo>();
-                blockViewInteractionInfos[location] = infosAtLoc;
+                infosAtLoc = new List<BlockTriggerInteractionInfo>();
+                blockTriggerInteractionInfos[location] = infosAtLoc;
             }
 
             infosAtLoc.Add(info);
@@ -291,9 +291,9 @@ namespace CraftSharp.Control
             return interactionInfos.TryGetValue(id, out var interactionInfo) ? (T) interactionInfo : null;
         }
 
-        private IEnumerable<BlockViewInteractionInfo>? GetBlockViewInteractionsAt(BlockLoc location)
+        private IEnumerable<BlockTriggerInteractionInfo>? GetBlockTriggerInteractionsAt(BlockLoc location)
         {
-            return blockViewInteractionInfos.TryGetValue(location, out var infos) ? infos : null;
+            return blockTriggerInteractionInfos.TryGetValue(location, out var infos) ? infos : null;
         }
 
         private void RemoveInteraction<T>(int id, Action<T>? onRemoved = null) where T : InteractionInfo
@@ -305,20 +305,20 @@ namespace CraftSharp.Control
             }
         }
 
-        private void RemoveBlockViewInteractionsAt(BlockLoc location, Action<BlockViewInteractionInfo>? onEachRemoved = null)
+        private void RemoveBlockTriggerInteractionsAt(BlockLoc location, Action<BlockTriggerInteractionInfo>? onEachRemoved = null)
         {
-            if (blockViewInteractionInfos.TryGetValue(location, out var infosAtLoc))
+            if (blockTriggerInteractionInfos.TryGetValue(location, out var infosAtLoc))
             {
                 infosAtLoc.RemoveAll(interactionInfo =>
                 {
-                    if (interactionInfo is not BlockViewInteractionInfo matchedInfo) return false;
+                    if (interactionInfo is not BlockTriggerInteractionInfo matchedInfo) return false;
 
                     RemoveInteraction(matchedInfo.Id, onEachRemoved);
 
                     return true;
                 });
 
-                if (!infosAtLoc.Any()) blockViewInteractionInfos.Remove(location);
+                if (!infosAtLoc.Any()) blockTriggerInteractionInfos.Remove(location);
             }
         }
 
@@ -345,13 +345,13 @@ namespace CraftSharp.Control
             };
             EventManager.Instance.Register(harvestInteractionUpdateCallback);
 
-            viewInteractionExecutionEvent = e =>
+            triggerInteractionExecutionEvent = e =>
             {
-                var viewInteractionInfo = GetInteraction<InteractionInfo>(e.InteractionId);
+                var triggerInteractionInfo = GetInteraction<InteractionInfo>(e.InteractionId);
 
-                if (viewInteractionInfo != null && client != null)
+                if (triggerInteractionInfo != null && client != null)
                 {
-                    viewInteractionInfo.UpdateInteraction(client);
+                    triggerInteractionInfo.UpdateInteraction(client);
 
                     // Remove it immediately after execution TODO: Maybe check the result?
                     RemoveInteraction<InteractionInfo>(e.InteractionId, info =>
@@ -360,7 +360,7 @@ namespace CraftSharp.Control
                     });
                 }
             };
-            EventManager.Instance.Register(viewInteractionExecutionEvent);
+            EventManager.Instance.Register(triggerInteractionExecutionEvent);
         }
 
         private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)

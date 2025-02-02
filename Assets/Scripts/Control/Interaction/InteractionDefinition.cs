@@ -27,7 +27,7 @@ namespace CraftSharp.Control
         public string Tag { get; } = Tag;
     }
 
-    public record ViewInteraction(
+    public record TriggerInteraction(
         InteractionIconType IconType,
         ResourceLocation IconItemId,
         InteractionType Type,
@@ -38,12 +38,6 @@ namespace CraftSharp.Control
         public InteractionIconType IconType { get; } = IconType;
         public ResourceLocation IconItemId { get; } = IconItemId;
     }
-
-    public record TriggerInteraction(
-        InteractionType Type,
-        string HintKey,
-        string Tag)
-        : Interaction(Type, HintKey, Tag);
 
     public record HarvestInteraction(
         ItemActionType ActionType,

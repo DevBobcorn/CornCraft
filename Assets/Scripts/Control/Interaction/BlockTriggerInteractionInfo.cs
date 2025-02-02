@@ -5,9 +5,9 @@ using CraftSharp.Protocol;
 
 namespace CraftSharp.Control
 {
-    public sealed class BlockViewInteractionInfo : BlockInteractionInfo
+    public sealed class BlockTriggerInteractionInfo : BlockInteractionInfo
     {
-        public ViewInteraction Definition { get; }
+        public TriggerInteraction Definition { get; }
 
         public override string HintKey => Definition.HintKey;
 
@@ -15,7 +15,7 @@ namespace CraftSharp.Control
 
         public ResourceLocation IconItemId => Definition.IconItemId;
 
-        public BlockViewInteractionInfo(int id, Block block, BlockLoc loc, ResourceLocation blockId, ViewInteraction def) : base(id, block, loc)
+        public BlockTriggerInteractionInfo(int id, Block block, BlockLoc loc, ResourceLocation blockId, TriggerInteraction def) : base(id, block, loc)
         {
             ParamTexts = new string[] { ChatParser.TranslateString(blockId.GetTranslationKey("block")) };
             Definition = def;
