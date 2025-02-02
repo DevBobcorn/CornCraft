@@ -308,21 +308,37 @@ namespace CraftSharp.Protocol.Handlers
             int blockEntityCount = DataTypes.ReadNextVarInt(cache);
             if (blockEntityCount > 0)
             {
-                for (int i = 0; i < blockEntityCount; i++) {
-                    var packedXZ = DataTypes.ReadNextByte(cache);
-                    var y = DataTypes.ReadNextShort(cache);
-                    var ttt = DataTypes.ReadNextVarInt(cache);
-                    var tag = DataTypes.ReadNextNbt(cache, dataTypes.UseAnonymousNBT);
-                    int x = (chunkX << 4) + (packedXZ >> 4);
-                    int z = (chunkZ << 4) + (packedXZ & 15);
-                    // Output block entity data
-                    var blockLoc = new BlockLoc(x, y, z);
+                for (int i = 0; i < blockEntityCount; i++)
+                {
+                    if (protocolVersion <= ProtocolMinecraft.MC_1_17_1_Version) // 1.17 - 1.17.1
+                    {
+                        var tag = DataTypes.ReadNextNbt(cache, dataTypes.UseAnonymousNBT);
+                        // Output block entity data
+                        var blockLoc = new BlockLoc((int) tag["x"], (int) tag["y"], (int) tag["z"]);
+                        var typeId = ResourceLocation.FromString((string) tag["id"]);
+                        var type = BlockEntityTypePalette.INSTANCE.GetById(typeId);
+                        //UnityEngine.Debug.Log($"Chunk16 [{blockLoc}] {Json.Object2Json(tag)}");
+                        Loom.QueueOnMainThread(() => {
+                            chunksManager.AddBlockEntityRender(blockLoc, type, tag);
+                        });
+                    }
+                    else
+                    {
+                        var packedXZ = DataTypes.ReadNextByte(cache);
+                        var y = DataTypes.ReadNextShort(cache);
+                        var ttt = DataTypes.ReadNextVarInt(cache);
+                        var tag = DataTypes.ReadNextNbt(cache, dataTypes.UseAnonymousNBT);
+                        int x = (chunkX << 4) + (packedXZ >> 4);
+                        int z = (chunkZ << 4) + (packedXZ & 15);
+                        // Output block entity data
+                        var blockLoc = new BlockLoc(x, y, z);
 
-                    var type = BlockEntityTypePalette.INSTANCE.GetByNumId(ttt);
-                    //UnityEngine.Debug.Log($"Chunk17 [{blockLoc}] {Json.Object2Json(tag)}");
-                    Loom.QueueOnMainThread(() => {
-                        chunksManager.AddBlockEntityRender(blockLoc, type, tag);
-                    });
+                        var type = BlockEntityTypePalette.INSTANCE.GetByNumId(ttt);
+                        //UnityEngine.Debug.Log($"Chunk17 [{blockLoc}] {Json.Object2Json(tag)}");
+                        Loom.QueueOnMainThread(() => {
+                            chunksManager.AddBlockEntityRender(blockLoc, type, tag);
+                        });
+                    }
                 }
             }
             
@@ -330,7 +346,10 @@ namespace CraftSharp.Protocol.Handlers
             var skyLight   = new byte[4096 * (chunkColumnSize + 2)];
             var blockLight = new byte[4096 * (chunkColumnSize + 2)];
 
-            ReadChunkColumnLightData17(ref skyLight, ref blockLight, cache);
+            if (protocolVersion > ProtocolMinecraft.MC_1_17_1_Version) // 1.17-1.17.1 doesn't send light data here
+            {
+                ReadChunkColumnLightData17(ref skyLight, ref blockLight, cache);
+            }
 
             // All data in packet should be parsed now, with nothing left
 
