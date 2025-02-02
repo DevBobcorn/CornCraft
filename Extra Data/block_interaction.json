@@ -1134,6 +1134,22 @@
         "minecraft:warped_button",
         "minecraft:polished_blackstone_button"
       ]
+    },
+    "craft": {
+      "action": "interact",
+      "hint": "gameplay.interaction.craft",
+      "triggers": [
+        "minecraft:crafting_table"
+      ]
+    },
+    "smelt": {
+      "action": "interact",
+      "hint": "gameplay.interaction.smelt",
+      "triggers": [
+        "minecraft:furnace",
+        "minecraft:blast_furnace",
+        "minecraft:smoker"
+      ]
     }
   }
 }

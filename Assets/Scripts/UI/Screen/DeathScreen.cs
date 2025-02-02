@@ -9,11 +9,11 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class DeathScreen : BaseScreen
     {
-        private bool isActive = false;
-
         // UI controls and objects
         [SerializeField] private Button respawnButton, quitButton;
         private CanvasGroup screenGroup;
+
+        private bool isActive = false;
 
         public override bool IsActive
         {

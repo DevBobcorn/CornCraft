@@ -1797,8 +1797,15 @@ namespace CraftSharp
                     inventories[0].Items[invSlot] = updatedItem;
                 }
 
-                EventManager.Instance.Broadcast(new SlotUpdateEvent(0, invSlot, updatedItem));
-                EventManager.Instance.Broadcast(new HotbarUpdateEvent(CurrentSlot, updatedItem));
+                // Starting from 1.17, the server no longer send a packet to
+                // update this dropped slot, so we do it manually here.
+                if (protocolVersion >= ProtocolMinecraft.MC_1_17_1_Version)
+                {
+                    EventManager.Instance.Broadcast(new SlotUpdateEvent(0, invSlot, updatedItem));
+                    EventManager.Instance.Broadcast(new HotbarUpdateEvent(CurrentSlot, updatedItem));
+                    EventManager.Instance.Broadcast(new HeldItemChangeEvent(
+                                        CurrentSlot, updatedItem, PlayerActionHelper.GetItemActionType(updatedItem)));
+                }
             }
 
             return sent;
@@ -2167,13 +2174,20 @@ namespace CraftSharp
                 Loom.QueueOnMainThread(() => {
                     foreach (var pair in itemList)
                     {
-                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, pair.Key, pair.Value));
+                        var item = pair.Value;
 
-                        //Debug.Log($"Set window item: [{inventoryId}]/[{pair.Key}] to {pair.Value?.ItemType.ItemId.ToString() ?? "AIR"}");
+                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, pair.Key, item));
+
+                        //Debug.Log($"Set window item: [{inventoryId}]/[{pair.Key}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
 
                         if (container.IsHotbar(pair.Key, out int hotbarSlot))
                         {
-                            EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, pair.Value));
+                            EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
+                            if (hotbarSlot == CurrentSlot) // Updating held item
+                            {
+                                EventManager.Instance.Broadcast(new HeldItemChangeEvent(
+                                        CurrentSlot, item, PlayerActionHelper.GetItemActionType(item)));
+                            }
                         }
                     }
                 });

@@ -47,12 +47,12 @@ namespace CraftSharp.UI
                 {
                     transitionCooldown = transitionTime;
                     // Show 3d items
-                    interactionPanel.ShowItemIcons();
+                    interactionPanel.ShowItemIconsAndTargetHint();
                 }
                 else
                 {
                     // Hide 3d items
-                    interactionPanel.HideItemIcons();
+                    interactionPanel.HideItemIconsAndTargetHint();
                 }
             }
 

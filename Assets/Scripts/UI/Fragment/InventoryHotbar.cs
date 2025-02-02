@@ -50,14 +50,14 @@ namespace CraftSharp.UI
             offhandItemSlot.SetKeyHint("F");
 
             hotbarUpdateCallback = (e) => {
-                if (e.HotbarSlot == HOTBAR_LENGTH)
+                if (e.HotbarSlot == HOTBAR_LENGTH) // Update offhand slot
                 {
                     offhandItemSlot.UpdateItemStack(e.ItemStack);
                     var offhandIsEmpty = e.ItemStack?.IsEmpty ?? true;
 
                     hotbarAnimator.SetBool(SHOW_HASH, !offhandIsEmpty);
                 }
-                else if (e.HotbarSlot >= 0 && e.HotbarSlot < HOTBAR_LENGTH)
+                else if (e.HotbarSlot >= 0 && e.HotbarSlot < HOTBAR_LENGTH) // Update hotbar slot
                 {
                     itemSlots[e.HotbarSlot].UpdateItemStack(e.ItemStack);
                 }

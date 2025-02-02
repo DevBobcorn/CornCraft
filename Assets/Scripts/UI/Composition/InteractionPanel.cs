@@ -118,20 +118,52 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(targetBlockLocChangeEvent);
         }
 
-        public void ShowItemIcons()
+        public void ShowItemIconsAndTargetHint()
         {
             foreach (var option in interactionOptions)
             {
                 option.ShowItemIcon();
             }
+
+            UpdateTargetHintVisibility();
         }
 
-        public void HideItemIcons()
+        public void HideItemIconsAndTargetHint()
         {
             foreach (var option in interactionOptions)
             {
                 option.HideItemIcon();
             }
+
+            HideTargetHint();
+        }
+
+        private void UpdateTargetHintVisibility()
+        {
+            if (selectedIndex >= 0 && selectedIndex < interactionOptions.Count &&
+                    interactionOptions[selectedIndex].interactionInfo is BlockInteractionInfo)
+            {
+                // Fade in interaction hint
+                ShowTargetHint();
+            }
+            else
+            {
+                HideTargetHint();
+            }
+        }
+
+        private void ShowTargetHint()
+        {
+            interactionTargetAnimator.ResetTrigger(SHOW_HASH);
+            interactionTargetAnimator.ResetTrigger(HIDE_HASH);
+            interactionTargetAnimator.SetTrigger(SHOW_HASH);
+        }
+
+        private void HideTargetHint()
+        {
+            interactionTargetAnimator.ResetTrigger(SHOW_HASH);
+            interactionTargetAnimator.ResetTrigger(HIDE_HASH);
+            interactionTargetAnimator.SetTrigger(HIDE_HASH);
         }
 
         void OnDestroy()
@@ -302,20 +334,7 @@ namespace CraftSharp.UI
                 interactionOptions[i].SetSelected(i == selIndex);
             }
 
-            if (selectedIndex >= 0 && selectedIndex < interactionOptions.Count &&
-                    interactionOptions[selectedIndex].interactionInfo is BlockInteractionInfo)
-            {
-                // Fade in interaction hint
-                interactionTargetAnimator.ResetTrigger(SHOW_HASH);
-                interactionTargetAnimator.ResetTrigger(HIDE_HASH);
-                interactionTargetAnimator.SetTrigger(SHOW_HASH);
-            }
-            else
-            {
-                interactionTargetAnimator.ResetTrigger(SHOW_HASH);
-                interactionTargetAnimator.ResetTrigger(HIDE_HASH);
-                interactionTargetAnimator.SetTrigger(HIDE_HASH);
-            }
+            UpdateTargetHintVisibility();
         }
     }
 }
