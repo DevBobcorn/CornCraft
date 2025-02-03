@@ -129,6 +129,17 @@ gameplay.interaction.hoe_harvest=破坏 {0}
 gameplay.interaction.pickaxe_harvest=破坏 {0}
 gameplay.interaction.shovel_harvest=破坏 {0}
 
+[keybinding]
+keybinding.mouse.lmb=左键
+keybinding.mouse.rmb=右键
+keybinding.keyboard.lctrl=左Ctrl
+keybinding.keyboard.rctrl=右Ctrl
+keybinding.keyboard.lshift=左Shift
+keybinding.keyboard.rshift=右Shift
+keybinding.keyboard.lalt=左Alt
+keybinding.keyboard.ralt=右Alt
+keybinding.keyboard.enter=回车
+
 [login]
 login.server_name_invalid=服务器名称或地址无效！
 login.link_copied=链接已复制到剪切板

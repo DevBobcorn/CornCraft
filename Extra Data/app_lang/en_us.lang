@@ -129,6 +129,17 @@ gameplay.interaction.hoe_harvest=Break {0}
 gameplay.interaction.pickaxe_harvest=Break {0}
 gameplay.interaction.shovel_harvest=Break {0}
 
+[keybinding]
+keybinding.mouse.lmb=LMB
+keybinding.mouse.rmb=RMB
+keybinding.keyboard.lctrl=L Ctrl
+keybinding.keyboard.rctrl=R Ctrl
+keybinding.keyboard.lshift=L Shift
+keybinding.keyboard.rshift=R Shift
+keybinding.keyboard.lalt=L Alt
+keybinding.keyboard.ralt=R Alt
+keybinding.keyboard.enter=Enter
+
 [login]
 login.server_name_invalid=Failed to parse server name or address!
 login.link_copied=Link copied to clipboard

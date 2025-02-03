@@ -216,7 +216,7 @@ namespace CraftSharp.UI
 
                 if (useProgress)
                 {
-                    option.UpdateKeyHintText("LMB");
+                    option.UpdateKeyHintText("keybinding.mouse.lmb");
                 }
                 else
                 {
