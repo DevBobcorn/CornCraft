@@ -220,6 +220,11 @@ namespace CraftSharp
         public abstract bool UseItemOnMainHand();
         public abstract bool UseItemOnOffHand();
         public abstract bool DoWindowAction(int windowId, int slotId, WindowActionType action);
+        public abstract bool DoCreativeGive(int slot, Item itemType, int count, Dictionary<string, object>? nbt = null);
+        public abstract bool DoAnimation(int animation);
+        public abstract bool CloseInventory(int windowId);
+        public abstract bool ClearInventories();
+        public abstract bool InteractEntity(int entityId, int type, Hand hand = Hand.MainHand);
         public abstract bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, Hand hand = Hand.MainHand);
         public abstract bool DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status);
         public abstract bool DropItem(bool dropEntireStack);

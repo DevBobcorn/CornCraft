@@ -1654,7 +1654,7 @@ namespace CraftSharp
         /// <param name="count">Item count</param>
         /// <param name="nbt">Item NBT</param>
         /// <returns>TRUE if item given successfully</returns>
-        public bool DoCreativeGive(int slot, Item itemType, int count, Dictionary<string, object>? nbt = null)
+        public override bool DoCreativeGive(int slot, Item itemType, int count, Dictionary<string, object>? nbt = null)
         {
             return InvokeOnNetMainThread(() => handler!.SendCreativeInventoryAction(slot, itemType, count, nbt));
         }
@@ -1664,7 +1664,7 @@ namespace CraftSharp
         /// </summary>
         /// <param name="animation">0 for left arm, 1 for right arm</param>
         /// <returns>TRUE if animation successfully done</returns>
-        public bool DoAnimation(int animation)
+        public override bool DoAnimation(int animation)
         {
             return InvokeOnNetMainThread(() => handler!.SendAnimation(animation, clientEntity.Id));
         }
@@ -1675,7 +1675,7 @@ namespace CraftSharp
         /// <param name="windowId">Window Id</param>
         /// <returns>TRUE if the window was successfully closed</returns>
         /// <remarks>Sending close window for inventory 0 can cause server to update our inventory if there are any item in the crafting area</remarks>
-        public bool CloseInventory(int windowId)
+        public override bool CloseInventory(int windowId)
         {
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => CloseInventory(windowId));
@@ -1693,7 +1693,7 @@ namespace CraftSharp
         /// Clean all inventory
         /// </summary>
         /// <returns>TRUE if the successfully cleared</returns>
-        public bool ClearInventories()
+        public override bool ClearInventories()
         {
             if (InvokeRequired)
                 return InvokeOnNetMainThread<bool>(ClearInventories);
@@ -1710,7 +1710,7 @@ namespace CraftSharp
         /// <param name="type">0: interact, 1: attack, 2: interact at</param>
         /// <param name="hand">Hand.MainHand or Hand.OffHand</param>
         /// <returns>TRUE if interaction succeeded</returns>
-        public bool InteractEntity(int entityId, int type, Hand hand = Hand.MainHand)
+        public override bool InteractEntity(int entityId, int type, Hand hand = Hand.MainHand)
         {
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => InteractEntity(entityId, type, hand));
@@ -2133,7 +2133,16 @@ namespace CraftSharp
             if (inventoryId != 0)
             {
                 Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventory.Title));
-                Debug.Log(Translations.Get("extra.inventory_interact"));
+                //Debug.Log(Translations.Get("extra.inventory_interact"));
+
+                Loom.QueueOnMainThread(() => {
+                    // Set inventory id before opening the screen
+                    ScreenControl.SetScreenData<InventoryScreen>(screen =>
+                    {
+                        screen.SetActiveInventory(inventory);
+                    });
+                    ScreenControl.PushScreen<InventoryScreen>();
+                });
             }
         }
 

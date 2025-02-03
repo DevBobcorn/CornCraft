@@ -363,6 +363,62 @@ namespace CraftSharp
         }
 
         /// <summary>
+        /// Give Creative Mode items into regular/survival Player Inventory
+        /// </summary>
+        /// <remarks>(obviously) requires to be in creative mode</remarks>
+        /// <param name="slot">Destination inventory slot</param>
+        /// <param name="itemType">Item type</param>
+        /// <param name="count">Item count</param>
+        /// <param name="nbt">Item NBT</param>
+        /// <returns>TRUE if item given successfully</returns>
+        public override bool DoCreativeGive(int slot, Item itemType, int count, Dictionary<string, object>? nbt = null)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Plays animation (Player arm swing)
+        /// </summary>
+        /// <param name="animation">0 for left arm, 1 for right arm</param>
+        /// <returns>TRUE if animation successfully done</returns>
+        public override bool DoAnimation(int animation)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Close the specified inventory window
+        /// </summary>
+        /// <param name="windowId">Window Id</param>
+        /// <returns>TRUE if the window was successfully closed</returns>
+        /// <remarks>Sending close window for inventory 0 can cause server to update our inventory if there are any item in the crafting area</remarks>
+        public override bool CloseInventory(int windowId)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Clean all inventory
+        /// </summary>
+        /// <returns>TRUE if the successfully cleared</returns>
+        public override bool ClearInventories()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Interact with an entity
+        /// </summary>
+        /// <param name="entityId"></param>
+        /// <param name="type">0: interact, 1: attack, 2: interact at</param>
+        /// <param name="hand">Hand.MainHand or Hand.OffHand</param>
+        /// <returns>TRUE if interaction succeeded</returns>
+        public override bool InteractEntity(int entityId, int type, Hand hand = Hand.MainHand)
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Place the block at hand in the Minecraft world
         /// </summary>
         /// <param name="blockLoc">Location to place block to</param>

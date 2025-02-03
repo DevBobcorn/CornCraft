@@ -10,6 +10,7 @@ namespace CraftSharp.UI
         private readonly Stack<BaseScreen> screenStack = new();
 
         [SerializeField] private ChatScreen m_ChatScreen;
+        [SerializeField] private InventoryScreen m_InventoryScreen;
         [SerializeField] private DeathScreen m_DeathScreen;
         [SerializeField] private HUDScreen m_HUDScreen;
         [SerializeField] private PacketScreen m_PacketScreen;
@@ -26,12 +27,13 @@ namespace CraftSharp.UI
             this.client = client;
 
             // Initialize screens
-            screenRegistry.Add(typeof (ChatScreen),    m_ChatScreen);
-            screenRegistry.Add(typeof (DeathScreen),   m_DeathScreen);
-            screenRegistry.Add(typeof (HUDScreen),     m_HUDScreen);
-            screenRegistry.Add(typeof (PacketScreen),  m_PacketScreen);
-            screenRegistry.Add(typeof (LoadingScreen), m_LoadingScreen);
-            screenRegistry.Add(typeof (PauseScreen),   m_PauseScreen);
+            screenRegistry.Add(typeof (ChatScreen),      m_ChatScreen);
+            screenRegistry.Add(typeof (InventoryScreen), m_InventoryScreen);
+            screenRegistry.Add(typeof (DeathScreen),     m_DeathScreen);
+            screenRegistry.Add(typeof (HUDScreen),       m_HUDScreen);
+            screenRegistry.Add(typeof (PacketScreen),    m_PacketScreen);
+            screenRegistry.Add(typeof (LoadingScreen),   m_LoadingScreen);
+            screenRegistry.Add(typeof (PauseScreen),     m_PauseScreen);
 
             // Push HUD Screen on start, before pushing Loading Screen
             PushScreen<HUDScreen>();
@@ -66,6 +68,21 @@ namespace CraftSharp.UI
                 Debug.LogWarning($"Screen type [{typeof (T)}] is not registered!");
 
                 return null;
+            }
+        }
+
+        public void SetScreenData<T>(Action<T> callback) where T : BaseScreen
+        {
+            if (screenRegistry.ContainsKey(typeof (T)))
+            {
+                var screen = screenRegistry[typeof (T)];
+                screen.EnsureInitialized();
+
+                callback.Invoke((T) screen);
+            }
+            else
+            {
+                Debug.LogWarning($"Screen type [{typeof (T)}] is not registered!");
             }
         }
 

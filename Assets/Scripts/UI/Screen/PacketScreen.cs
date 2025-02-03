@@ -71,7 +71,7 @@ namespace CraftSharp.UI
             return true;
         }
 
-        public void Back2Game()
+        private void CloseScreen()
         {
             var client = CornApp.CurrentClient;
             if (client == null) return;
@@ -288,7 +288,7 @@ namespace CraftSharp.UI
             // Escape key cannot be used here, otherwise it will push pause screen back after poping it
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
-                Back2Game();
+                CloseScreen();
             }
         }
     }

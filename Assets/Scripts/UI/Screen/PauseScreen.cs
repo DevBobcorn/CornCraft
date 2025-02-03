@@ -35,7 +35,7 @@ namespace CraftSharp.UI
             return true;
         }
 
-        public void Back2Game()
+        private void CloseScreen()
         {
             var client = CornApp.CurrentClient;
             if (client == null) return;
@@ -43,7 +43,7 @@ namespace CraftSharp.UI
             client.ScreenControl.TryPopScreen();
         }
 
-        public void QuitGame()
+        private void QuitToLogin()
         {
             var client = CornApp.CurrentClient;
             if (client == null) return;
@@ -54,8 +54,8 @@ namespace CraftSharp.UI
         protected override void Initialize()
         {
             // Initialize controls and add listeners
-            resumeButton.onClick.AddListener(this.Back2Game);
-            quitButton.onClick.AddListener(this.QuitGame);
+            resumeButton.onClick.AddListener(CloseScreen);
+            quitButton.onClick.AddListener(QuitToLogin);
         }
 
         public override void UpdateScreen()
@@ -63,7 +63,7 @@ namespace CraftSharp.UI
             // Escape key cannot be used here, otherwise it will push pause screen back after poping it
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
-                Back2Game();
+                CloseScreen();
             }
         }
     }
