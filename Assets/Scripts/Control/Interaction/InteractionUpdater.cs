@@ -291,34 +291,53 @@ namespace CraftSharp.Control
             return interactionInfos.TryGetValue(id, out var interactionInfo) ? (T) interactionInfo : null;
         }
 
-        private IEnumerable<BlockTriggerInteractionInfo>? GetBlockTriggerInteractionsAt(BlockLoc location)
+        private IEnumerable<BlockTriggerInteractionInfo>? GetBlockTriggerInteractionsAt(BlockLoc blockLoc)
         {
-            return blockTriggerInteractionInfos.TryGetValue(location, out var infos) ? infos : null;
+            return blockTriggerInteractionInfos.TryGetValue(blockLoc, out var infos) ? infos : null;
         }
 
         private void RemoveInteraction<T>(int id, Action<T>? onRemoved = null) where T : InteractionInfo
         {
             if (interactionInfos.Remove(id, out var removedInfo))
             {
-                interactionId.ReleaseID(removedInfo.Id);
+                interactionId.ReleaseID(id);
                 onRemoved?.Invoke((T) removedInfo);
             }
         }
 
-        private void RemoveBlockTriggerInteractionsAt(BlockLoc location, Action<BlockTriggerInteractionInfo>? onEachRemoved = null)
+        private void RemoveBlockTriggerInteractionAt(BlockLoc blockLoc, int id, Action<BlockTriggerInteractionInfo>? onRemoved = null)
         {
-            if (blockTriggerInteractionInfos.TryGetValue(location, out var infosAtLoc))
+            if (blockTriggerInteractionInfos.TryGetValue(blockLoc, out var infosAtLoc))
+            {
+                infosAtLoc.RemoveAll(interactionInfo => // Only up to 1 interaction will be removed
+                {
+                    if (interactionInfo.Id == id)
+                    {
+                        RemoveInteraction(id, onRemoved);
+
+                        return true;
+                    }
+                    return false;
+                });
+
+                // Remove this entry if no interaction left at this location
+                if (!infosAtLoc.Any()) blockTriggerInteractionInfos.Remove(blockLoc);
+            }
+        }
+
+        private void RemoveBlockTriggerInteractionsAt(BlockLoc blockLoc, Action<BlockTriggerInteractionInfo>? onEachRemoved = null)
+        {
+            if (blockTriggerInteractionInfos.TryGetValue(blockLoc, out var infosAtLoc))
             {
                 infosAtLoc.RemoveAll(interactionInfo =>
                 {
-                    if (interactionInfo is not BlockTriggerInteractionInfo matchedInfo) return false;
-
-                    RemoveInteraction(matchedInfo.Id, onEachRemoved);
+                    RemoveInteraction(interactionInfo.Id, onEachRemoved);
 
                     return true;
                 });
 
-                if (!infosAtLoc.Any()) blockTriggerInteractionInfos.Remove(location);
+                // Remove this entry
+                blockTriggerInteractionInfos.Remove(blockLoc);
             }
         }
 
@@ -357,6 +376,13 @@ namespace CraftSharp.Control
                     RemoveInteraction<InteractionInfo>(e.InteractionId, info =>
                     {
                         EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
+
+                        // Check block trigger interaction removal
+                        if (info is BlockTriggerInteractionInfo blockInfo)
+                        {
+                            var blockLoc = blockInfo.BlockLoc;
+                            RemoveBlockTriggerInteractionAt(blockLoc, info.Id);
+                        }
                     });
                 }
             };
