@@ -7652,105 +7652,273 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 0
-      localHash: 0
-      globalHash: 0
-      clothType: 0
+      initVersion: 1
+      localHash: 19789
+      globalHash: -275186674
+      clothType: 1
       clothTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 1899175877039799803}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       normalAdjustmentTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 1899175877039799803}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       customSkinningBoneRecords: []
-      clothSetupDataList: []
+      clothSetupDataList:
+      - setupType: 1
+        vertexCount: 0
+        hasSkinnedMesh: 0
+        hasBoneWeight: 0
+        skinRootBoneIndex: 0
+        renderTransformIndex: 4
+        skinBoneCount: 4
+        transformCount: 5
+        useTransformCount: 5
+        useTransformIndexArray: 0000000001000000020000000300000004000000
+        transformArray:
+        - {fileID: 400120}
+        - {fileID: 400216}
+        - {fileID: 400118}
+        - {fileID: 400174}
+        - {fileID: 1899175877039799803}
+        transformPositions:
+        - x: 0.07303412
+          y: 0.835836
+          z: 0.0845895
+        - x: 0.07517799
+          y: 0.7281995
+          z: 0.07526368
+        - x: -0.07303399
+          y: 0.8358363
+          z: 0.08458946
+        - x: -0.07517763
+          y: 0.7281992
+          z: 0.07526368
+        - x: 0
+          y: 0
+          z: 0
+        transformRotations:
+        - value:
+            x: 0.51634413
+            y: 0.48310322
+            z: 0.5258621
+            w: 0.47272512
+        - value:
+            x: 0.48265123
+            y: -0.5159375
+            z: 0.4731691
+            w: -0.52627677
+        - value:
+            x: 0.5258614
+            y: 0.472726
+            z: 0.5163444
+            w: 0.48310295
+        - value:
+            x: 0.5262764
+            y: 0.47316954
+            z: 0.5159379
+            w: 0.4826508
+        - value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        transformLocalPositions:
+        - x: -0.14191027
+          y: 3.7508402e-17
+          z: 3.2530684e-17
+        - x: -0.1029153
+          y: 1.935459e-17
+          z: 3.6886607e-17
+        - x: -0.14191042
+          y: -5.1481587e-17
+          z: -6.520502e-17
+        - x: -0.10291584
+          y: 7.566685e-18
+          z: -7.4712223e-17
+        - x: 0
+          y: 0
+          z: 0
+        transformLocalRotations:
+        - value:
+            x: -0.002221635
+            y: -0.033948217
+            z: 0.021046568
+            w: 0.9991995
+        - value:
+            x: -0.00000019811638
+            y: 0.0008595022
+            z: 0.99999964
+            w: 0.0000004702604
+        - value:
+            x: 0.0022216337
+            y: 0.033948284
+            z: 0.021045804
+            w: 0.9991995
+        - value:
+            x: 0.00085945585
+            y: 0
+            z: -0
+            w: 0.99999964
+        - value:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        transformScales:
+        - x: 1.0499998
+          y: 1.0499997
+          z: 1.0499998
+        - x: 1.0500001
+          y: 1.0499998
+          z: 1.0500001
+        - x: 1.0499998
+          y: 1.0499997
+          z: 1.05
+        - x: 1.0499998
+          y: 1.0499995
+          z: 1.0499998
+        - x: 1.05
+          y: 1.05
+          z: 1.05
+        initRenderLocalToWorld:
+          c0:
+            x: 1.05
+            y: 0
+            z: 0
+            w: 0
+          c1:
+            x: 0
+            y: 1.05
+            z: 0
+            w: 0
+          c2:
+            x: 0
+            y: 0
+            z: 1.05
+            w: 0
+          c3:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        initRenderWorldtoLocal:
+          c0:
+            x: 0.95238096
+            y: 0
+            z: -0
+            w: -0
+          c1:
+            x: 0
+            y: 0.95238096
+            z: -0
+            w: -0
+          c2:
+            x: 0
+            y: 0
+            z: 0.95238096
+            w: -0
+          c3:
+            x: 0
+            y: 0
+            z: -0
+            w: 1
+        initRenderRotation:
+          value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        initRenderScale:
+          x: 1.05
+          y: 1.05
+          z: 1.05
     selectionData:
       positions:
-      - x: 0.0695563
-        y: 0.79603434
+      - x: 0.06955631
+        y: 0.7960343
         z: 0.08056143
       - x: 0.07159808
         y: 0.69352335
         z: 0.0716797
       - x: -0.06955618
-        y: 0.7960345
-        z: 0.080561385
+        y: 0.7960346
+        z: 0.08056139
       - x: -0.07159775
         y: 0.69352305
         z: 0.0716797
@@ -7759,7 +7927,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 1
       - Value: 2
-      maxConnectionDistance: 0.10291576
+      maxConnectionDistance: 0.102915816
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -8199,134 +8367,502 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 0
-      localHash: 0
-      globalHash: 0
-      clothType: 0
+      initVersion: 1
+      localHash: 32349
+      globalHash: 1807251042
+      clothType: 1
       clothTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 4502685062445142709}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       normalAdjustmentTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 4502685062445142709}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       customSkinningBoneRecords: []
-      clothSetupDataList: []
+      clothSetupDataList:
+      - setupType: 1
+        vertexCount: 0
+        hasSkinnedMesh: 0
+        hasBoneWeight: 0
+        skinRootBoneIndex: 0
+        renderTransformIndex: 14
+        skinBoneCount: 14
+        transformCount: 15
+        useTransformCount: 15
+        useTransformIndexArray: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e000000
+        transformArray:
+        - {fileID: 400088}
+        - {fileID: 400172}
+        - {fileID: 400188}
+        - {fileID: 400158}
+        - {fileID: 400092}
+        - {fileID: 400054}
+        - {fileID: 400314}
+        - {fileID: 400212}
+        - {fileID: 400034}
+        - {fileID: 400040}
+        - {fileID: 400292}
+        - {fileID: 400272}
+        - {fileID: 400296}
+        - {fileID: 400126}
+        - {fileID: 4502685062445142709}
+        transformPositions:
+        - x: 0.065194614
+          y: 1.3885086
+          z: -0.093119435
+        - x: 0.0880909
+          y: 1.2723013
+          z: -0.1214141
+        - x: 0.11523205
+          y: 1.1353179
+          z: -0.15396526
+        - x: 0.14728135
+          y: 1.0027163
+          z: -0.18011354
+        - x: 0.17127092
+          y: 0.86177635
+          z: -0.20042482
+        - x: 0.16712348
+          y: 0.70859593
+          z: -0.20398228
+        - x: 0.15829293
+          y: 0.5464649
+          z: -0.19708687
+        - x: -0.06519456
+          y: 1.3885108
+          z: -0.093119405
+        - x: -0.0880898
+          y: 1.2723014
+          z: -0.12141418
+        - x: -0.11523071
+          y: 1.1353222
+          z: -0.15396543
+        - x: -0.14728045
+          y: 1.002716
+          z: -0.18011408
+        - x: -0.1712689
+          y: 0.86177605
+          z: -0.20042522
+        - x: -0.16712186
+          y: 0.70859593
+          z: -0.20398252
+        - x: -0.15829156
+          y: 0.54646426
+          z: -0.19708692
+        - x: 0
+          y: 0
+          z: 0
+        transformRotations:
+        - value:
+            x: -0.3821018
+            y: -0.5949776
+            z: 0.4899111
+            w: 0.5098894
+        - value:
+            x: -0.38341728
+            y: -0.59413064
+            z: 0.49157903
+            w: 0.5082815
+        - value:
+            x: -0.3828478
+            y: -0.5944979
+            z: 0.51179874
+            w: 0.4879161
+        - value:
+            x: -0.41689566
+            y: -0.5711377
+            z: 0.50682014
+            w: 0.49308577
+        - value:
+            x: -0.5009637
+            y: -0.4990348
+            z: 0.48727348
+            w: 0.5124109
+        - value:
+            x: -0.5236176
+            y: -0.47521046
+            z: 0.4969987
+            w: 0.5029838
+        - value:
+            x: -0.5236176
+            y: -0.47521046
+            z: 0.4969987
+            w: 0.5029838
+        - value:
+            x: -0.48990875
+            y: -0.5098917
+            z: 0.3821063
+            w: 0.5949747
+        - value:
+            x: -0.49157822
+            y: -0.50828236
+            z: 0.3834141
+            w: 0.5941327
+        - value:
+            x: -0.5117986
+            y: -0.48791626
+            z: 0.38284996
+            w: 0.5944964
+        - value:
+            x: -0.5068185
+            y: -0.49308744
+            z: 0.4168981
+            w: 0.5711358
+        - value:
+            x: -0.48727438
+            y: -0.51240987
+            z: 0.5009633
+            w: 0.49903503
+        - value:
+            x: -0.49699906
+            y: -0.50298315
+            z: 0.52361757
+            w: 0.47521022
+        - value:
+            x: -0.49699906
+            y: -0.50298315
+            z: 0.52361757
+            w: 0.47521022
+        - value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        transformLocalPositions:
+        - x: -0.033491675
+          y: -0.07271498
+          z: -0.058596842
+        - x: -0.11597514
+          y: 6.217249e-17
+          z: -2.5535128e-17
+        - x: -0.13656151
+          y: 1.110223e-16
+          z: -5.5511148e-18
+        - x: -0.13228849
+          y: -1.1324275e-16
+          z: -1.1268764e-16
+        - x: -0.13752584
+          y: 1.1990408e-16
+          z: -3.1086245e-17
+        - x: -0.14597888
+          y: 2.1649348e-17
+          z: 2.7131074e-17
+        - x: -0.15477823
+          y: 7.5495166e-17
+          z: -6.383782e-18
+        - x: -0.03154395
+          y: -0.06754832
+          z: 0.06546028
+        - x: -0.11597685
+          y: 9.7699626e-17
+          z: 1.7208457e-17
+        - x: -0.13655789
+          y: -2.184919e-15
+          z: 3.2862602e-16
+        - x: -0.13229257
+          y: 3.7747583e-17
+          z: -1.0880185e-16
+        - x: -0.13752587
+          y: -4.6629366e-17
+          z: -6.106227e-17
+        - x: -0.1459784
+          y: -4.6629366e-17
+          z: -2.4528989e-17
+        - x: -0.15477863
+          y: 6.883383e-17
+          z: 1.2212453e-17
+        - x: 0
+          y: 0
+          z: 0
+        transformLocalRotations:
+        - value:
+            x: 0.1008327
+            y: 0.026525343
+            z: 0.9770472
+            w: 0.18576309
+        - value:
+            x: 0.00012215874
+            y: -0.00051764084
+            z: 0.0027444
+            w: 0.9999961
+        - value:
+            x: 0.004313685
+            y: -0.020318924
+            z: 0.019809484
+            w: 0.999588
+        - value:
+            x: -0.0056373896
+            y: 0.03380287
+            z: 0.024109717
+            w: 0.9991218
+        - value:
+            x: -0.008016839
+            y: 0.09734642
+            z: 0.058641255
+            w: 0.99348915
+        - value:
+            x: 0.00013144138
+            y: 0.013670122
+            z: 0.032817103
+            w: 0.9993679
+        - value:
+            x: 0
+            y: -0
+            z: -0
+            w: 1
+        - value:
+            x: -0.0931137
+            y: 0.017067054
+            z: 0.97876835
+            w: 0.1817996
+        - value:
+            x: -0.00012399502
+            y: 0.00052538066
+            z: 0.00273948
+            w: 0.9999961
+        - value:
+            x: -0.0043129246
+            y: 0.02031516
+            z: 0.019814534
+            w: 0.99958795
+        - value:
+            x: 0.0056376243
+            y: -0.03380472
+            z: 0.02410864
+            w: 0.9991217
+        - value:
+            x: 0.008016311
+            y: -0.09734142
+            z: 0.058641404
+            w: 0.9934896
+        - value:
+            x: -0.00013146584
+            y: -0.013670889
+            z: 0.032817043
+            w: 0.9993679
+        - value:
+            x: 0
+            y: -0
+            z: -0
+            w: 1
+        - value:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        transformScales:
+        - x: 1.0500019
+          y: 1.0500021
+          z: 1.0500022
+        - x: 1.0500023
+          y: 1.0500023
+          z: 1.0500025
+        - x: 1.0500017
+          y: 1.0500021
+          z: 1.0500023
+        - x: 1.0500015
+          y: 1.0500017
+          z: 1.0500021
+        - x: 1.0500014
+          y: 1.0500015
+          z: 1.0500017
+        - x: 1.0500023
+          y: 1.0500017
+          z: 1.0500026
+        - x: 1.0500023
+          y: 1.0500017
+          z: 1.0500026
+        - x: 1.0500022
+          y: 1.0500021
+          z: 1.0500022
+        - x: 1.0500021
+          y: 1.050002
+          z: 1.0500021
+        - x: 1.0500021
+          y: 1.0500021
+          z: 1.0500022
+        - x: 1.0500022
+          y: 1.050002
+          z: 1.0500023
+        - x: 1.050002
+          y: 1.050002
+          z: 1.0500022
+        - x: 1.0500027
+          y: 1.0500023
+          z: 1.0500032
+        - x: 1.0500027
+          y: 1.0500023
+          z: 1.0500032
+        - x: 1.05
+          y: 1.05
+          z: 1.05
+        initRenderLocalToWorld:
+          c0:
+            x: 1.05
+            y: 0
+            z: 0
+            w: 0
+          c1:
+            x: 0
+            y: 1.05
+            z: 0
+            w: 0
+          c2:
+            x: 0
+            y: 0
+            z: 1.05
+            w: 0
+          c3:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        initRenderWorldtoLocal:
+          c0:
+            x: 0.95238096
+            y: 0
+            z: -0
+            w: -0
+          c1:
+            x: 0
+            y: 0.95238096
+            z: -0
+            w: -0
+          c2:
+            x: 0
+            y: 0
+            z: 0.95238096
+            w: -0
+          c3:
+            x: 0
+            y: 0
+            z: -0
+            w: 1
+        initRenderRotation:
+          value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        initRenderScale:
+          x: 1.05
+          y: 1.05
+          z: 1.05
     selectionData:
       positions:
       - x: 0.06209011
-        y: 1.322389
-        z: -0.08868517
-      - x: 0.083896086
+        y: 1.3223891
+        z: -0.08868518
+      - x: 0.08389609
         y: 1.2117156
         z: -0.11563248
       - x: 0.10974481
         y: 1.0812552
         z: -0.14663358
-      - x: 0.14026794
+      - x: 0.14026795
         y: 0.9549679
         z: -0.1715367
       - x: 0.16311516
         y: 0.8207394
         z: -0.19088078
       - x: 0.15916522
-        y: 0.6748533
+        y: 0.67485327
         z: -0.19426884
-      - x: 0.15075517
+      - x: 0.15075518
         y: 0.5204428
         z: -0.18770178
       - x: -0.062090058
-        y: 1.3223912
-        z: -0.088685155
-      - x: -0.08389504
-        y: 1.2117156
-        z: -0.11563256
-      - x: -0.10974353
-        y: 1.0812591
-        z: -0.14663373
+        y: 1.3223913
+        z: -0.08868515
+      - x: -0.08389505
+        y: 1.2117157
+        z: -0.11563255
+      - x: -0.109743536
+        y: 1.0812593
+        z: -0.14663374
       - x: -0.1402671
         y: 0.95496756
-        z: -0.1715372
-      - x: -0.16311322
+        z: -0.17153722
+      - x: -0.16311324
         y: 0.8207391
         z: -0.19088116
       - x: -0.15916367
-        y: 0.6748533
+        y: 0.67485327
         z: -0.19426906
       - x: -0.15075387
         y: 0.5204422
@@ -8346,7 +8882,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.15477937
+      maxConnectionDistance: 0.15477931
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -8782,114 +9318,322 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 0
-      localHash: 0
-      globalHash: 0
-      clothType: 0
+      initVersion: 1
+      localHash: 73305
+      globalHash: -596960886
+      clothType: 10
       clothTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 4862890038342001217}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       normalAdjustmentTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 4862890038342001217}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       customSkinningBoneRecords: []
-      clothSetupDataList: []
+      clothSetupDataList:
+      - setupType: 2
+        vertexCount: 0
+        hasSkinnedMesh: 0
+        hasBoneWeight: 0
+        skinRootBoneIndex: 0
+        renderTransformIndex: 6
+        skinBoneCount: 6
+        transformCount: 7
+        useTransformCount: 7
+        useTransformIndexArray: 00000000010000000200000003000000040000000500000006000000
+        transformArray:
+        - {fileID: 400024}
+        - {fileID: 400008}
+        - {fileID: 400064}
+        - {fileID: 400016}
+        - {fileID: 400050}
+        - {fileID: 400072}
+        - {fileID: 4862890038342001217}
+        transformPositions:
+        - x: 0.044389192
+          y: 1.5649298
+          z: 0.050048362
+        - x: 0.07446855
+          y: 1.621861
+          z: -0.011839933
+        - x: 0.13590695
+          y: 1.5922613
+          z: -0.14410962
+        - x: -0.044389315
+          y: 1.5649331
+          z: 0.050048385
+        - x: -0.07446884
+          y: 1.6218594
+          z: -0.011839972
+        - x: -0.1359076
+          y: 1.5922563
+          z: -0.14410976
+        - x: 0
+          y: 0
+          z: 0
+        transformRotations:
+        - value:
+            x: 0.11235133
+            y: -0.69812405
+            z: -0.42546877
+            w: 0.56477994
+        - value:
+            x: -0.4931848
+            y: -0.50672364
+            z: -0.6705638
+            w: 0.22437522
+        - value:
+            x: 1.0000002
+            y: 0.00000017881393
+            z: -0.000000059604645
+            w: 0.00000017881393
+        - value:
+            x: 0.42546943
+            y: -0.5647794
+            z: -0.11232874
+            w: 0.6981276
+        - value:
+            x: 0.67057025
+            y: -0.22435609
+            z: 0.49319372
+            w: 0.506715
+        - value:
+            x: 0.03300327
+            y: 0.6165481
+            z: 0.05225046
+            w: -0.7848881
+        - value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        transformLocalPositions:
+        - x: -0.18103224
+          y: 0.08604571
+          z: -0.04305515
+        - x: -0.08505593
+          y: -1.0880185e-16
+          z: -1.2434498e-16
+        - x: -0.14172885
+          y: -9.7699626e-17
+          z: -6.7279734e-17
+        - x: -0.17970763
+          y: 0.08956378
+          z: 0.041412033
+        - x: -0.08505328
+          y: -1.6764368e-16
+          z: 1.1990408e-16
+        - x: -0.14172979
+          y: -4.4408918e-17
+          z: 2.8865798e-16
+        - x: 0
+          y: 0
+          z: 0
+        transformLocalRotations:
+        - value:
+            x: -0.12178339
+            y: -0.20300739
+            z: 0.30530372
+            w: 0.92235917
+        - value:
+            x: -0.55629134
+            y: -0.41471907
+            z: 0.11797892
+            w: 0.71037245
+        - value:
+            x: 0.22437504
+            y: 0.670564
+            z: -0.50672334
+            w: -0.4931849
+        - value:
+            x: 0.08809389
+            y: 0.23000443
+            z: 0.29465634
+            w: 0.92331743
+        - value:
+            x: 0.5562991
+            y: 0.41471618
+            z: 0.11796325
+            w: 0.71037066
+        - value:
+            x: 0.858846
+            y: 0.1550803
+            z: -0.007265332
+            w: -0.4881402
+        - value:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        transformScales:
+        - x: 1.0500021
+          y: 1.0500022
+          z: 1.0500025
+        - x: 1.0500017
+          y: 1.0500019
+          z: 1.0500017
+        - x: 1.0500027
+          y: 1.0500011
+          z: 1.0500013
+        - x: 1.0500021
+          y: 1.0500023
+          z: 1.0500026
+        - x: 1.0500021
+          y: 1.050002
+          z: 1.0500019
+        - x: 1.050002
+          y: 1.0500017
+          z: 1.0500025
+        - x: 1.05
+          y: 1.05
+          z: 1.05
+        initRenderLocalToWorld:
+          c0:
+            x: 1.05
+            y: 0
+            z: 0
+            w: 0
+          c1:
+            x: 0
+            y: 1.05
+            z: 0
+            w: 0
+          c2:
+            x: 0
+            y: 0
+            z: 1.05
+            w: 0
+          c3:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        initRenderWorldtoLocal:
+          c0:
+            x: 0.95238096
+            y: 0
+            z: -0
+            w: -0
+          c1:
+            x: 0
+            y: 0.95238096
+            z: -0
+            w: -0
+          c2:
+            x: 0
+            y: 0
+            z: 0.95238096
+            w: -0
+          c3:
+            x: 0
+            y: 0
+            z: -0
+            w: 1
+        initRenderRotation:
+          value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        initRenderScale:
+          x: 1.05
+          y: 1.05
+          z: 1.05
     selectionData:
       positions:
-      - x: 0.042275418
+      - x: 0.04227542
         y: 1.4904094
         z: 0.047665108
-      - x: 0.07092243
+      - x: 0.070922434
         y: 1.5446295
-        z: -0.011276126
-      - x: 0.12943518
+        z: -0.011276127
+      - x: 0.1294352
         y: 1.5164393
-        z: -0.13724725
+        z: -0.13724726
       - x: -0.042275537
-        y: 1.4904124
-        z: 0.047665127
-      - x: -0.0709227
-        y: 1.5446281
-        z: -0.011276163
+        y: 1.4904125
+        z: 0.04766513
+      - x: -0.07092271
+        y: 1.544628
+        z: -0.011276164
       - x: -0.12943582
         y: 1.5164346
-        z: -0.1372474
+        z: -0.13724738
       attributes:
       - Value: 1
       - Value: 2
@@ -8897,7 +9641,7 @@ MonoBehaviour:
       - Value: 1
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.14173007
+      maxConnectionDistance: 0.14173004
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -9333,108 +10077,276 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 0
-      localHash: 0
-      globalHash: 0
-      clothType: 0
+      initVersion: 1
+      localHash: 19789
+      globalHash: 840881765
+      clothType: 1
       clothTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 2564937622261997554}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       normalAdjustmentTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 2564937622261997554}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       customSkinningBoneRecords: []
-      clothSetupDataList: []
+      clothSetupDataList:
+      - setupType: 1
+        vertexCount: 0
+        hasSkinnedMesh: 0
+        hasBoneWeight: 0
+        skinRootBoneIndex: 0
+        renderTransformIndex: 4
+        skinBoneCount: 4
+        transformCount: 5
+        useTransformCount: 5
+        useTransformIndexArray: 0000000001000000020000000300000004000000
+        transformArray:
+        - {fileID: 400108}
+        - {fileID: 400328}
+        - {fileID: 400318}
+        - {fileID: 400264}
+        - {fileID: 2564937622261997554}
+        transformPositions:
+        - x: 0.0047858707
+          y: 1.5038493
+          z: 0.08218997
+        - x: 0.012920234
+          y: 1.442406
+          z: 0.10487103
+        - x: -0.0022028475
+          y: 1.5037097
+          z: 0.08263127
+        - x: -0.00096413237
+          y: 1.4146845
+          z: 0.10291526
+        - x: 0
+          y: 0
+          z: 0
+        transformRotations:
+        - value:
+            x: 0.4435115
+            y: 0.67259294
+            z: 0.34736657
+            w: 0.4798467
+        - value:
+            x: 0.42885178
+            y: 0.64406985
+            z: 0.3809001
+            w: 0.50613815
+        - value:
+            x: 0.39627585
+            y: 0.5374235
+            z: 0.47997504
+            w: 0.5690042
+        - value:
+            x: 0.40299976
+            y: 0.59886205
+            z: 0.52702665
+            w: 0.44855168
+        - value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        transformLocalPositions:
+        - x: -0.118646674
+          y: 0.109952554
+          z: -0.007276585
+        - x: -0.062838286
+          y: -0.00004745255
+          z: -0.0014896186
+        - x: -0.118353106
+          y: 0.11062721
+          z: -0.0006468265
+        - x: -0.08693589
+          y: -0.00055593316
+          z: -0.002243447
+        - x: 0
+          y: 0
+          z: 0
+        transformLocalRotations:
+        - value:
+            x: -0.11370098
+            y: 0.97812754
+            z: -0.16029842
+            w: -0.0681406
+        - value:
+            x: -0.051157355
+            y: -0.01140533
+            z: 0.009748385
+            w: 0.9985779
+        - value:
+            x: -0.04601018
+            y: 0.9977064
+            z: 0.038900446
+            w: -0.03085172
+        - value:
+            x: 0.055760637
+            y: 0.11511083
+            z: 0.06385369
+            w: 0.98972875
+        - value:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        transformScales:
+        - x: 1.0500019
+          y: 1.0500021
+          z: 1.0500027
+        - x: 1.050001
+          y: 1.0500016
+          z: 1.050002
+        - x: 1.0500016
+          y: 1.0500015
+          z: 1.0500026
+        - x: 1.0500019
+          y: 1.050002
+          z: 1.0500027
+        - x: 1.05
+          y: 1.05
+          z: 1.05
+        initRenderLocalToWorld:
+          c0:
+            x: 1.05
+            y: 0
+            z: 0
+            w: 0
+          c1:
+            x: 0
+            y: 1.05
+            z: 0
+            w: 0
+          c2:
+            x: 0
+            y: 0
+            z: 1.05
+            w: 0
+          c3:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        initRenderWorldtoLocal:
+          c0:
+            x: 0.95238096
+            y: 0
+            z: -0
+            w: -0
+          c1:
+            x: 0
+            y: 0.95238096
+            z: -0
+            w: -0
+          c2:
+            x: 0
+            y: 0
+            z: 0.95238096
+            w: -0
+          c3:
+            x: 0
+            y: 0
+            z: -0
+            w: 1
+        initRenderRotation:
+          value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        initRenderScale:
+          x: 1.05
+          y: 1.05
+          z: 1.05
     selectionData:
       positions:
       - x: 0.0045579723
         y: 1.4322374
-        z: 0.07827616
+        z: 0.078276165
       - x: 0.012304985
-        y: 1.3737202
-        z: 0.099877164
+        y: 1.37372
+        z: 0.09987717
       - x: -0.00209795
-        y: 1.4321043
+        y: 1.4321045
         z: 0.078696445
       - x: -0.0009182213
-        y: 1.3473185
-        z: 0.098014526
+        y: 1.3473186
+        z: 0.09801453
       attributes:
       - Value: 1
       - Value: 2
@@ -9915,114 +10827,282 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 0
-      localHash: 0
-      globalHash: 0
-      clothType: 0
+      initVersion: 1
+      localHash: 19789
+      globalHash: -1088910662
+      clothType: 1
       clothTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 8242200818242608340}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       normalAdjustmentTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 8242200818242608340}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       customSkinningBoneRecords: []
-      clothSetupDataList: []
+      clothSetupDataList:
+      - setupType: 1
+        vertexCount: 0
+        hasSkinnedMesh: 0
+        hasBoneWeight: 0
+        skinRootBoneIndex: 0
+        renderTransformIndex: 4
+        skinBoneCount: 4
+        transformCount: 5
+        useTransformCount: 5
+        useTransformIndexArray: 0000000001000000020000000300000004000000
+        transformArray:
+        - {fileID: 400176}
+        - {fileID: 400238}
+        - {fileID: 400136}
+        - {fileID: 400138}
+        - {fileID: 8242200818242608340}
+        transformPositions:
+        - x: 0.072890505
+          y: 0.83573526
+          z: -0.06810347
+        - x: 0.06922505
+          y: 0.6432713
+          z: -0.06729852
+        - x: -0.07289036
+          y: 0.8357351
+          z: -0.06810345
+        - x: -0.069224596
+          y: 0.64327085
+          z: -0.0672985
+        - x: 0
+          y: 0
+          z: 0
+        transformRotations:
+        - value:
+            x: 0.4995125
+            y: -0.51120406
+            z: -0.49818778
+            w: 0.49088365
+        - value:
+            x: 0.4995125
+            y: -0.51120406
+            z: -0.49818778
+            w: 0.49088365
+        - value:
+            x: -0.49625093
+            y: -0.5036818
+            z: 0.5057926
+            w: 0.4941798
+        - value:
+            x: -0.49625093
+            y: -0.5036818
+            z: 0.5057926
+            w: 0.4941798
+        - value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        transformLocalPositions:
+        - x: 0.14993037
+          y: -0.000000002250124
+          z: -0.000000010045328
+        - x: 0.18333384
+          y: 0.00000003325184
+          z: 0.00000005255228
+        - x: -0.14993033
+          y: 5.49367e-17
+          z: 7.480034e-17
+        - x: -0.18333411
+          y: 4.013332e-17
+          z: -2.5364335e-17
+        - x: 0
+          y: 0
+          z: 0
+        transformLocalRotations:
+        - value:
+            x: 0.005350928
+            y: -0.061189618
+            z: 0.12227407
+            w: 0.9905939
+        - value:
+            x: 0
+            y: -0
+            z: -0
+            w: 1
+        - value:
+            x: -0.005350928
+            y: -0.062506996
+            z: 0.121605895
+            w: 0.9905939
+        - value:
+            x: 0
+            y: -0
+            z: -0
+            w: 1
+        - value:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        transformScales:
+        - x: 1.0499997
+          y: 1.0499997
+          z: 1.0499998
+        - x: 1.0499997
+          y: 1.0499997
+          z: 1.0499998
+        - x: 1.05
+          y: 1.0499997
+          z: 1.0499996
+        - x: 1.05
+          y: 1.0499997
+          z: 1.0499996
+        - x: 1.05
+          y: 1.05
+          z: 1.05
+        initRenderLocalToWorld:
+          c0:
+            x: 1.05
+            y: 0
+            z: 0
+            w: 0
+          c1:
+            x: 0
+            y: 1.05
+            z: 0
+            w: 0
+          c2:
+            x: 0
+            y: 0
+            z: 1.05
+            w: 0
+          c3:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        initRenderWorldtoLocal:
+          c0:
+            x: 0.95238096
+            y: 0
+            z: -0
+            w: -0
+          c1:
+            x: 0
+            y: 0.95238096
+            z: -0
+            w: -0
+          c2:
+            x: 0
+            y: 0
+            z: 0.95238096
+            w: -0
+          c3:
+            x: 0
+            y: 0
+            z: -0
+            w: 1
+        initRenderRotation:
+          value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        initRenderScale:
+          x: 1.05
+          y: 1.05
+          z: 1.05
     selectionData:
       positions:
-      - x: 0.06941953
+      - x: 0.069419526
         y: 0.7959384
         z: -0.06486045
-      - x: 0.065928616
-        y: 0.6126393
+      - x: 0.06592862
+        y: 0.61263937
         z: -0.06409383
       - x: -0.06941939
-        y: 0.79593813
-        z: -0.06486042
-      - x: -0.06592819
-        y: 0.61263895
+        y: 0.7959382
+        z: -0.064860426
+      - x: -0.06592818
+        y: 0.6126389
         z: -0.06409381
       attributes:
       - Value: 1
       - Value: 2
       - Value: 1
       - Value: 2
-      maxConnectionDistance: 0.18333404
+      maxConnectionDistance: 0.18333416
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -10458,113 +11538,321 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 0
-      localHash: 0
-      globalHash: 0
-      clothType: 0
+      initVersion: 1
+      localHash: 22301
+      globalHash: -1379784011
+      clothType: 1
       clothTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 8126433522886487358}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       normalAdjustmentTransformRecord:
-        transform: {fileID: 0}
+        transform: {fileID: 8126433522886487358}
         localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 1}
         position: {x: 0, y: 0, z: 0}
-        rotation: {x: 0, y: 0, z: 0, w: 0}
-        scale: {x: 0, y: 0, z: 0}
+        rotation: {x: -0, y: -0, z: -0, w: 1}
+        scale: {x: 1.05, y: 1.05, z: 1.05}
         localToWorldMatrix:
-          e00: 0
+          e00: 1.05
           e01: 0
           e02: 0
           e03: 0
           e10: 0
-          e11: 0
+          e11: 1.05
           e12: 0
           e13: 0
           e20: 0
           e21: 0
-          e22: 0
+          e22: 1.05
           e23: 0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
         worldToLocalMatrix:
-          e00: 0
+          e00: 0.95238096
           e01: 0
           e02: 0
-          e03: 0
+          e03: -0
           e10: 0
-          e11: 0
+          e11: 0.95238096
           e12: 0
-          e13: 0
+          e13: -0
           e20: 0
           e21: 0
-          e22: 0
-          e23: 0
+          e22: 0.95238096
+          e23: -0
           e30: 0
           e31: 0
           e32: 0
-          e33: 0
+          e33: 1
       customSkinningBoneRecords: []
-      clothSetupDataList: []
+      clothSetupDataList:
+      - setupType: 1
+        vertexCount: 0
+        hasSkinnedMesh: 0
+        hasBoneWeight: 0
+        skinRootBoneIndex: 0
+        renderTransformIndex: 6
+        skinBoneCount: 6
+        transformCount: 7
+        useTransformCount: 7
+        useTransformIndexArray: 00000000010000000200000003000000040000000500000006000000
+        transformArray:
+        - {fileID: 400140}
+        - {fileID: 400246}
+        - {fileID: 400184}
+        - {fileID: 400196}
+        - {fileID: 400030}
+        - {fileID: 400190}
+        - {fileID: 8126433522886487358}
+        transformPositions:
+        - x: 0.09034412
+          y: 1.4768033
+          z: 0.054612838
+        - x: 0.11392311
+          y: 1.4064846
+          z: 0.040469203
+        - x: 0.13045332
+          y: 1.3352524
+          z: 0.02746743
+        - x: -0.09034427
+          y: 1.4768035
+          z: 0.05461279
+        - x: -0.11392349
+          y: 1.4064857
+          z: 0.04046911
+        - x: -0.13045338
+          y: 1.3352563
+          z: 0.027467398
+        - x: 0
+          y: 0
+          z: 0
+        transformRotations:
+        - value:
+            x: 0.4651116
+            y: 0.532608
+            z: 0.61030686
+            w: 0.35710722
+        - value:
+            x: 0.4868167
+            y: 0.5128447
+            z: 0.5901459
+            w: 0.38952276
+        - value:
+            x: -1.0000002
+            y: -0.00000017881393
+            z: 0.00000011920929
+            w: -0.00000017881393
+        - value:
+            x: 0.61030847
+            y: 0.35710463
+            z: 0.46511042
+            w: 0.5326091
+        - value:
+            x: 0.59014785
+            y: 0.38951987
+            z: 0.48681724
+            w: 0.5128442
+        - value:
+            x: 0.1399382
+            y: 0.19483116
+            z: 0.58054036
+            w: 0.7780946
+        - value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        transformLocalPositions:
+        - x: -0.09799041
+          y: 0.07704446
+          z: -0.0877954
+        - x: -0.07190759
+          y: 1.5543122e-17
+          z: 2.8607092e-17
+        - x: -0.07073497
+          y: 3.330669e-17
+          z: -1.1213252e-16
+        - x: -0.09528863
+          y: 0.084203795
+          z: 0.08411823
+        - x: -0.07190698
+          y: -3.593991e-18
+          z: -4.7696836e-17
+        - x: -0.07073235
+          y: 5.4780847e-17
+          z: -8.082631e-17
+        - x: 0
+          y: 0
+          z: 0
+        transformLocalRotations:
+        - value:
+            x: 0.1631833
+            y: 0.97231275
+            z: -0.025657691
+            w: -0.16529022
+        - value:
+            x: -0.008649557
+            y: -0.0469462
+            z: -0.0062305992
+            w: 0.9988406
+        - value:
+            x: -0.3895228
+            y: 0.5901459
+            z: -0.51284444
+            w: -0.48681676
+        - value:
+            x: 0.15654893
+            y: 0.97501314
+            z: -0.017381625
+            w: 0.15665177
+        - value:
+            x: 0.008649987
+            y: 0.046947528
+            z: -0.0062286453
+            w: 0.9988405
+        - value:
+            x: -0.518709
+            y: 0.071315005
+            z: -0.14153358
+            w: 0.84013295
+        - value:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        transformScales:
+        - x: 1.0500022
+          y: 1.0500022
+          z: 1.0500028
+        - x: 1.0500019
+          y: 1.0500019
+          z: 1.0500025
+        - x: 1.0500028
+          y: 1.0500011
+          z: 1.0500013
+        - x: 1.0500021
+          y: 1.0500019
+          z: 1.0500027
+        - x: 1.0500016
+          y: 1.0500013
+          z: 1.0500022
+        - x: 1.0500022
+          y: 1.0500027
+          z: 1.0500021
+        - x: 1.05
+          y: 1.05
+          z: 1.05
+        initRenderLocalToWorld:
+          c0:
+            x: 1.05
+            y: 0
+            z: 0
+            w: 0
+          c1:
+            x: 0
+            y: 1.05
+            z: 0
+            w: 0
+          c2:
+            x: 0
+            y: 0
+            z: 1.05
+            w: 0
+          c3:
+            x: 0
+            y: 0
+            z: 0
+            w: 1
+        initRenderWorldtoLocal:
+          c0:
+            x: 0.95238096
+            y: 0
+            z: -0
+            w: -0
+          c1:
+            x: 0
+            y: 0.95238096
+            z: -0
+            w: -0
+          c2:
+            x: 0
+            y: 0
+            z: 0.95238096
+            w: -0
+          c3:
+            x: 0
+            y: 0
+            z: -0
+            w: 1
+        initRenderRotation:
+          value:
+            x: -0
+            y: -0
+            z: -0
+            w: 1
+        initRenderScale:
+          x: 1.05
+          y: 1.05
+          z: 1.05
     selectionData:
       positions:
       - x: 0.086042024
-        y: 1.4064792
-        z: 0.052012224
+        y: 1.4064794
+        z: 0.052012227
       - x: 0.1084982
         y: 1.3395091
         z: 0.0385421
-      - x: 0.12424125
+      - x: 0.124241255
         y: 1.2716689
-        z: 0.026159458
-      - x: -0.08604216
+        z: 0.026159456
+      - x: -0.086042166
         y: 1.4064796
         z: 0.05201218
-      - x: -0.10849856
+      - x: -0.108498566
         y: 1.3395102
         z: 0.03854201
       - x: -0.124241315
-        y: 1.2716726
+        y: 1.2716727
         z: 0.026159426
       attributes:
       - Value: 1
@@ -10573,7 +11861,7 @@ MonoBehaviour:
       - Value: 1
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.07190772
+      maxConnectionDistance: 0.07190783
       userEdit: 0
     preBuildData:
       enabled: 0

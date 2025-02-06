@@ -25,7 +25,6 @@ namespace CraftSharp.Rendering
 
         protected override void HandleMaterialUpdate(EntityMaterialManager matManager, ResourceLocation textureId, Material updatedMaterial)
         {
-
             if (matManager.SkinModels.TryGetValue(textureId, out bool slimModel))
             {
                 Debug.Log($"Player {textureId} Slim model: {slimModel}");

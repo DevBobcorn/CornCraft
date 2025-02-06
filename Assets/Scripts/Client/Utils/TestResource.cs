@@ -411,8 +411,6 @@ namespace CraftSharp
 
             }
 
-            /*
-
             count = 0; width = 32;
             var particleMaterialInstance = new Material(particleMaterial);
             particleMaterialInstance.SetTexture("_BaseMap", packManager.GetParticleAtlas());
@@ -429,8 +427,6 @@ namespace CraftSharp
 
                 count++;
             }
-
-            */
 
             InfoText.text = $"Meshes built in {Time.realtimeSinceStartup - startTime} second(s).";
         }
@@ -518,7 +514,7 @@ namespace CraftSharp
                 StartCoroutine(DoBuild(dataVersion, resVersion, overrides));
             }
 
-            //StartCoroutine(DoEntityBuild());
+            StartCoroutine(DoEntityBuild());
 
             IsPaused = false;
         }

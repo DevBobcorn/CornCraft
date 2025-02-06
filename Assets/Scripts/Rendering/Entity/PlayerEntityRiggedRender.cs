@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using CraftSharp.Control;
 
@@ -15,6 +16,9 @@ namespace CraftSharp.Rendering
         private static readonly int ATTACKING_HASH = Animator.StringToHash("Attacking");
 
         private PlayerRiggedRenderWidget playerRenderWidget;
+
+        [SerializeField] private GameObject[] slimModelObjects = { };
+        [SerializeField] private GameObject[] regularModelObjects = { };
 
         public override void Initialize(EntityData entity, Vector3Int originOffset)
         {
@@ -90,14 +94,12 @@ namespace CraftSharp.Rendering
         }
 
         #nullable enable
-
         public void InitializeActiveItem(ItemStack? itemStack, ItemActionType actionType)
         {
             // Initialize player active item
             var renderWidget = _visualTransform!.GetComponent<PlayerRiggedRenderWidget>();
             renderWidget.UpdateActiveItem(itemStack, actionType);
         }
-
         #nullable disable
 
         public override void UpdateAnimator(PlayerStatus info)
@@ -115,5 +117,28 @@ namespace CraftSharp.Rendering
             // Update animator widget
             playerRenderWidget.ManagedUpdate();
         }
+
+        public void SetSlimModel(bool slimModel)
+        {
+            foreach (var model in slimModelObjects)
+            {
+                model.SetActive(slimModel);
+            }
+
+            foreach (var model in regularModelObjects)
+            {
+                model.SetActive(!slimModel);
+            }
+        }
+
+        #nullable enable
+        public override Dictionary<string, string>? GetControlVariables()
+        {
+            return new Dictionary<string, string>()
+            {
+                ["player_skin"] = $"skin:{UUID}"
+            };
+        }
+        #nullable disable
     }
 }
