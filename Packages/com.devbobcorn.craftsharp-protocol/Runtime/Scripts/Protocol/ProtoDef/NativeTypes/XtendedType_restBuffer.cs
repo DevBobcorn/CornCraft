@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System.Collections.Generic;
 using CraftSharp.Protocol.Handlers;
-using ProtocolSharp.CraftSharp.Protocol.ProtoDef;
 
 namespace CraftSharp.Protocol.ProtoDef.NativeTypes
 {

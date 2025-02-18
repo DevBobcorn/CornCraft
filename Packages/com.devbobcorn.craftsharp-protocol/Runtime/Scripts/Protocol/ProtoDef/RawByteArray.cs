@@ -1,6 +1,6 @@
 ﻿using CraftSharp.Protocol.Handlers;
 
-namespace ProtocolSharp.CraftSharp.Protocol.ProtoDef
+namespace CraftSharp.Protocol.ProtoDef
 {
     public class RawByteArray
     {
