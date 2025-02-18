@@ -1,13 +1,12 @@
 {
   "dependencies": {
     "com.devbobcorn.craftsharp": {
-      "version": "https://github.com/DevBobcorn/CraftSharp.git",
+      "version": "file:com.devbobcorn.craftsharp",
       "depth": 0,
-      "source": "git",
+      "source": "embedded",
       "dependencies": {
         "com.unity.mathematics": "1.2.6"
-      },
-      "hash": "5466aca09d385406eeb65dfe7a2c6e00af23277e"
+      }
     },
     "com.devbobcorn.craftsharp-protocol": {
       "version": "file:com.devbobcorn.craftsharp-protocol",
@@ -19,14 +18,13 @@
       }
     },
     "com.devbobcorn.craftsharp-resource": {
-      "version": "https://github.com/DevBobcorn/CraftSharp-Resource.git",
+      "version": "file:com.devbobcorn.craftsharp-resource",
       "depth": 0,
-      "source": "git",
+      "source": "embedded",
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
         "com.devbobcorn.craftsharp": "4.7.0"
-      },
-      "hash": "c1ebd52b446f7d35aae8997ebf8e7b7805d4ef96"
+      }
     },
     "com.stalomeow.star-rail-npr-shader": {
       "version": "https://github.com/stalomeow/StarRailNPRShader.git",
