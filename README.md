@@ -1,10 +1,10 @@
 English | [简体中文](README.zh-CN.md)
 
 # CornCraft
-A Minecraft client implementation made with Unity.
+A Minecraft **Java Edition** client implementation made with Unity.
 
 ## > About
-**CornCraft** is a Unity version of Minecraft. It connects to vanilla/plugin servers(version 1.16.2 to 1.20.4) and provides basic graphical gameplay support.
+**CornCraft** is a Unity version of Minecraft. It connects to Java Edition servers(version 1.16.2 to 1.20.4) and provides basic graphical gameplay support.
 
 This project does not mean to be a Minecraft "clone", but rather an attempt to recreate the game in a somewhat different way, with the overall look and feel distinct from the original one.
 
@@ -22,14 +22,14 @@ When setting up a server for CornCraft, it is recommended to set the <code>allow
 For <code>1.19.1</code> or higher servers, it is also necessary to set <code>enforce-secure-profile</code> to <code>false</code> so that CornCraft can log in correctly.
 
 ## > Building & Running
-The project is made and tested with Unity 2022.3.50f1, so it is recommended to use this version(or newer) of Unity to build this game.
+The project is made and tested with Unity 2022.3.50f1, so it is recommended to use this(or newer) version of Unity to build this game.
 
 **Some third-party assets are not included in this repo**, for more information please see [here](./Assets/Third%20Party%20Assets.md).
 
-Resource files will now be automatically downloaded if they're not present, so manual downloading is no longer necessary.
+Vanilla resource files will now be automatically downloaded if not present, and manual preparation is no longer necessary.
 
 ## > Controls
-Most basic controls in CornCraft are similar to vanilla Java Edition. They're hard-coded for now, but will be configurable in the future. Here's a list of currently supported actions:
+Most basic controls in CornCraft are similar to vanilla Java Edition. These are hard-coded for now, but will be configurable in the future. Here's a list of currently supported actions:
 Key                                                       | Action
 ---                                                       | :---:
 <kbd>W</kbd> / <kbd>A</kbd> / <kbd>S</kbd> / <kbd>D</kbd> | Move Horizontally
@@ -54,7 +54,7 @@ Key                                                       | Action
 <kbd>Esc</kbd>                                            | Pause Game
 
 ## > License
-Like MCC, CornCraft adopts CDDL-1.0 as the license of its code repository, and this license applies to all source code except those mention their author and license or with specific license attached.
+Like MCC, CornCraft adopts CDDL-1.0 as the license of its code repository, and this license applies to all source code except those mentioning their license or with custom license attached.
 
 Some other open-source projects/code examples are used in the project, which don't fall under CDDL-1.0 and use their own licenses. Here's a list of them:
 * [Welai Glow Sans](https://github.com/welai/glow-sans): Used as font for regular game UI
