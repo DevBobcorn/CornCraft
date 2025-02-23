@@ -268,7 +268,7 @@ namespace CraftSharp
             // Wait till everything's ready
             op.completed += (operation) =>
             {
-                Client = Component.FindObjectOfType<BaseCornClient>();
+                Client = Component.FindFirstObjectByType<BaseCornClient>();
                 fullyLoaded = true;
             };
 

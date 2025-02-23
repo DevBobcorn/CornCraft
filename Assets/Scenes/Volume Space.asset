@@ -26,7 +26,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c62a9a166e71eac40a2f371bab721d2b, type: 3}
   m_Name: CustomBloom
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   Intensity:
     m_OverrideState: 1
     m_Value: 1.4

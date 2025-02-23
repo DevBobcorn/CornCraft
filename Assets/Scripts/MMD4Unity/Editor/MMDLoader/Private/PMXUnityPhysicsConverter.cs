@@ -127,10 +127,10 @@ namespace MMD
         /// <param name='rigidbody'>PMX用剛体データ</param>
         /// <param name='index'>剛体インデックス</param>
         /// <param name='name'>Path as rigidbody file name</param>
-        PhysicMaterial CreatePhysicMaterial(PMXFormat.Rigidbody[] rigidbodys, uint index)
+        PhysicsMaterial CreatePhysicMaterial(PMXFormat.Rigidbody[] rigidbodys, uint index)
         {
             PMXFormat.Rigidbody rigidbody = rigidbodys[index];
-            PhysicMaterial material = new PhysicMaterial(format_.meta_header.name + "_r_" + rigidbody.name);
+            PhysicsMaterial material = new PhysicsMaterial(format_.meta_header.name + "_r_" + rigidbody.name);
             material.bounciness = rigidbody.recoil;
             material.staticFriction = rigidbody.friction;
             material.dynamicFriction = rigidbody.friction;
@@ -232,8 +232,8 @@ namespace MMD
             if (null != rigidbody) {
                 //減衰値は平均を取る
                 float totMass = rigidbody.mass + pmx_rigidbody.weight;
-                rigidbody.drag = (rigidbody.drag * rigidbody.mass + pmx_rigidbody.position_dim * pmx_rigidbody.weight) / totMass;
-                rigidbody.angularDrag = (rigidbody.angularDrag * rigidbody.mass + pmx_rigidbody.rotation_dim * pmx_rigidbody.weight) / totMass;
+                rigidbody.linearDamping = (rigidbody.linearDamping * rigidbody.mass + pmx_rigidbody.position_dim * pmx_rigidbody.weight) / totMass;
+                rigidbody.angularDamping = (rigidbody.angularDamping * rigidbody.mass + pmx_rigidbody.rotation_dim * pmx_rigidbody.weight) / totMass;
                 //既にRigidbodyが付与されているなら
                 //質量は合算する
                 rigidbody.mass = totMass;
@@ -243,8 +243,8 @@ namespace MMD
                 rigidbody = target.AddComponent<Rigidbody>();
                 rigidbody.isKinematic = (PMXFormat.Rigidbody.OperationType.Static == pmx_rigidbody.operation_type);
                 rigidbody.mass = Mathf.Max(float.Epsilon, pmx_rigidbody.weight);
-                rigidbody.drag = pmx_rigidbody.position_dim;
-                rigidbody.angularDrag = pmx_rigidbody.rotation_dim;
+                rigidbody.linearDamping = pmx_rigidbody.position_dim;
+                rigidbody.angularDamping = pmx_rigidbody.rotation_dim;
             }
         }
 
