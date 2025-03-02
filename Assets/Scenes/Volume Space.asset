@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Volume Space
   m_EditorClassIdentifier: 
   components:
-  - {fileID: 7710119564034091856}
---- !u!114 &7710119564034091856
+  - {fileID: 4585019424139999289}
+--- !u!114 &4585019424139999289
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -23,40 +23,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c62a9a166e71eac40a2f371bab721d2b, type: 3}
-  m_Name: CustomBloom
+  m_Script: {fileID: 11500000, guid: 0b2db86121404754db890f4c8dfe81b2, type: 3}
+  m_Name: Bloom
   m_EditorClassIdentifier: 
-  active: 0
-  Intensity:
+  active: 1
+  skipIterations:
+    m_OverrideState: 0
+    m_Value: 1
+  threshold:
     m_OverrideState: 1
-    m_Value: 1.4
-  Threshold:
+    m_Value: 0.6
+  intensity:
     m_OverrideState: 1
-    m_Value: 0.7
-  Tint:
+    m_Value: 1
+  scatter:
+    m_OverrideState: 1
+    m_Value: 0.9
+  clamp:
+    m_OverrideState: 0
+    m_Value: 65472
+  tint:
     m_OverrideState: 0
     m_Value: {r: 1, g: 1, b: 1, a: 1}
-  MipDownCount:
+  highQualityFiltering:
     m_OverrideState: 0
-    m_Value: 2
-  CharactersOnly:
-    m_OverrideState: 1
     m_Value: 0
-  BlurFirstRTWidth:
+  downscale:
     m_OverrideState: 0
-    m_Value: 310
-  BlurFirstRTHeight:
-    m_OverrideState: 0
-    m_Value: 174
-  KernelSize1:
-    m_OverrideState: 0
-    m_Value: 4
-  KernelSize2:
-    m_OverrideState: 0
-    m_Value: 4
-  KernelSize3:
+    m_Value: 0
+  maxIterations:
     m_OverrideState: 0
     m_Value: 6
-  KernelSize4:
+  dirtTexture:
     m_OverrideState: 0
-    m_Value: 14
+    m_Value: {fileID: 0}
+    dimension: 1
+  dirtIntensity:
+    m_OverrideState: 0
+    m_Value: 0
