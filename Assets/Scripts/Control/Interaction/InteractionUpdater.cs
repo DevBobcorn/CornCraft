@@ -81,6 +81,8 @@ namespace CraftSharp.Control
 
         public Direction? TargetDirection { get; private set; } = Direction.Down;
         public BlockLoc? TargetBlockLoc { get; private set; } = null;
+        
+        private float diggingStartCooldown = 0F;
 
         private void UpdateBlockSelection(Ray? viewRay)
         {
@@ -376,7 +378,7 @@ namespace CraftSharp.Control
             EventManager.Instance.Register(triggerInteractionExecutionEvent);
         }
 
-        private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)
+        private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status, bool creativeMode)
         {
             var definition = InteractionManager.INSTANCE.InteractionTable
                 .GetValueOrDefault(block.StateId)?
@@ -395,7 +397,7 @@ namespace CraftSharp.Control
             }
 
             lastHarvestInteractionInfo = new LocalHarvestInteractionInfo(interactionId.AllocateID(), block, blockLoc, direction,
-                currentItem, block.State.Hardness, status.Floating, status.Grounded, definition);
+                currentItem, block.State.Hardness, status.Floating, status.Grounded, definition, creativeMode);
             
             //Debug.Log($"Created {lastHarvestInteractionInfo.GetHashCode()} at {blockLoc}");
 
@@ -407,6 +409,8 @@ namespace CraftSharp.Control
 
         void Update()
         {
+            diggingStartCooldown -= Time.deltaTime;
+
             if (cameraController != null && cameraController.IsAimingOrLocked)
             {
                 UpdateBlockSelection(cameraController.GetPointerRay());
@@ -425,7 +429,21 @@ namespace CraftSharp.Control
                     }
                     else if (!block.State.NoSolidMesh)
                     {
-                        StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status);
+                        if (client.GameMode == GameMode.Creative)
+                        {
+                            if (diggingStartCooldown <= -0.3F) // 0.3s cooldown in Creative Mode
+                            {
+                                StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status, true);
+
+                                diggingStartCooldown = 0F;
+                            }
+                        }
+                        else
+                        {
+                            StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status, false);
+
+                            diggingStartCooldown = 0F;
+                        }
                     }
                 }
                 else

@@ -55,13 +55,18 @@ namespace CraftSharp.Control
         private readonly float duration;
 
         public LocalHarvestInteractionInfo(int id, Block block, BlockLoc loc, Direction dir, Item? tool, float hardness,
-            bool floating, bool grounded, HarvestInteraction? def) : base(id, block, loc, dir, def)
+            bool floating, bool grounded, HarvestInteraction? def, bool creativeMode) : base(id, block, loc, dir, def)
         {
-            duration = CalculateDiggingTime(tool, hardness, floating, grounded);
+            duration = CalculateDiggingTime(tool, hardness, floating, grounded, creativeMode);
         }
 
-        private float CalculateDiggingTime(Item? item, float hardness, bool underwater, bool onGround)
+        private float CalculateDiggingTime(Item? item, float hardness, bool underwater, bool onGround, bool creativeMode)
         {
+            if (creativeMode)
+            {
+                return 0F;
+            }
+
             if (hardness <= 0F) // Bedrock or something, takes forever to break
             {
                 return float.PositiveInfinity;
