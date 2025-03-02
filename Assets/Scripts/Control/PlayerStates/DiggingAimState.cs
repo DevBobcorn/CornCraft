@@ -65,6 +65,12 @@ namespace CraftSharp.Control
                 }
             }
 
+            if (!motor.GroundingStatus.FoundAnyGround)
+            {
+                // Apply fake gravity
+                currentVelocity = - motor.CharacterUp * 5F;
+            }
+
             // Restore stamina
             info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
         }

@@ -243,14 +243,7 @@ namespace CraftSharp.Control
                 if (!motor.GroundingStatus.FoundAnyGround)
                 {
                     // Apply fake gravity
-                    if (info.Moving)
-                    {
-                        moveVelocity -= motor.CharacterUp * 5F;
-                    }
-                    else
-                    {
-                        moveVelocity -= motor.CharacterUp;
-                    }
+                    moveVelocity -= motor.CharacterUp * 5F;
                 }
             }
 
