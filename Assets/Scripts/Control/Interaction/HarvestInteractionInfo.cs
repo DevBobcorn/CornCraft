@@ -21,8 +21,6 @@ namespace CraftSharp.Control
         protected readonly Direction direction;
         protected readonly HarvestInteraction? definition;
 
-        protected static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
-
         private float progress = 0F;
 
         public float Progress
@@ -160,7 +158,7 @@ namespace CraftSharp.Control
             EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, block, blockLoc, DiggingStatus.Finished, 1F));
 
             EventManager.Instance.Broadcast(new ParticlesEvent(CoordConvert.MC2Unity(client.WorldOriginOffset, blockLoc.ToCenterLocation()),
-                    ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraData(block.StateId), 16));
+                    ParticleTypePalette.INSTANCE.GetNumIdById(InteractionUpdater.BLOCK_PARTICLE_ID), new BlockParticleExtraData(block.StateId), 16));
 
             // Takes 30 to 40 milsecs to send, don't wait for it
             Task.Run(() => client.DigBlock(blockLoc, direction, DiggingStatus.Finished));

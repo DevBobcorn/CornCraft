@@ -2,7 +2,7 @@
     "name": "PlayerActions",
     "maps": [
         {
-            "name": "Gameplay",
+            "name": "Locomotion",
             "id": "061c6e34-947b-49bb-95b3-5cfcb05c31fb",
             "actions": [
                 {
@@ -174,7 +174,7 @@
             ]
         },
         {
-            "name": "Attack",
+            "name": "Interaction",
             "id": "ca5a69e5-ea48-4b4c-b4a1-e9aec27e156a",
             "actions": [
                 {
@@ -190,6 +190,24 @@
                     "name": "Normal Attack",
                     "type": "Button",
                     "id": "77b7b4f5-a482-448b-88d4-4cb1a80d1fe7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Use Charged Item",
+                    "type": "Button",
+                    "id": "810d3f19-ea08-4a10-9502-6431b1e87b80",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Use Normal Item",
+                    "type": "Button",
+                    "id": "54f41810-a18e-4275-8dfc-0862e2bf9c95",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -225,6 +243,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Normal Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "811551c6-5850-4061-9d70-9f8fe528898a",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "Hold(duration=0.2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Use Charged Item",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "00c586c9-4845-4eed-b2e9-784e498ce7b1",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "Tap(duration=0.2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Use Normal Item",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

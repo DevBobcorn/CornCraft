@@ -16,7 +16,7 @@ namespace CraftSharp.Control
 
             Vector3 moveVelocity = Vector3.zero;
 
-            if (inputData.Gameplay.Movement.IsPressed())
+            if (inputData.Locomotion.Movement.IsPressed())
             {
                 info.Moving = true;
 
@@ -34,9 +34,9 @@ namespace CraftSharp.Control
             }
 
             // Check vertical movement...
-            if (inputData.Gameplay.Ascend.IsPressed())
+            if (inputData.Locomotion.Ascend.IsPressed())
                 moveVelocity += ability.WalkSpeed * 3F * motor.CharacterUp;
-            else if (inputData.Gameplay.Descend.IsPressed())
+            else if (inputData.Locomotion.Descend.IsPressed())
                 moveVelocity -= ability.WalkSpeed * 3F * motor.CharacterUp;
 
             currentVelocity = moveVelocity;

@@ -73,7 +73,7 @@ namespace CraftSharp.Control
             {
                 // Update moving status
                 bool prevMoving = info.Moving;
-                info.Moving = inputData.Gameplay.Movement.IsPressed();
+                info.Moving = inputData.Locomotion.Movement.IsPressed();
 
                 // Animation mirror randomation
                 if (info.Moving != prevMoving)
@@ -84,7 +84,7 @@ namespace CraftSharp.Control
                 // Check vertical movement...
                 float distToAfloat = PlayerStatusUpdater.FLOATING_DIST_THERSHOLD - 0.2F - info.LiquidDist;
 
-                if (inputData.Gameplay.Ascend.IsPressed())
+                if (inputData.Locomotion.Ascend.IsPressed())
                 {
                     if (distToAfloat > 0F) // Underwater
                     {
@@ -106,7 +106,7 @@ namespace CraftSharp.Control
                         
                     }
                 }
-                else if (inputData.Gameplay.Descend.IsPressed())
+                else if (inputData.Locomotion.Descend.IsPressed())
                 {
                     if (!info.Grounded)
                     {

@@ -7,6 +7,8 @@ using UnityEngine;
 
 using CraftSharp.Event;
 using CraftSharp.Rendering;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace CraftSharp.Control
 {
@@ -40,6 +42,7 @@ namespace CraftSharp.Control
 
     public class InteractionUpdater : MonoBehaviour
     {
+        public static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
         public const int MAX_TARGET_DISTANCE = 8;
         public const int BLOCK_INTERACTION_RADIUS = 3;
         public const float BLOCK_INTERACTION_RADIUS_SQR = 9.0f; // BLOCK_INTERACTION_RADIUS ^ 2
@@ -83,6 +86,7 @@ namespace CraftSharp.Control
         public BlockLoc? TargetBlockLoc { get; private set; } = null;
         
         private float diggingStartCooldown = 0F;
+        private float useItemCooldown = 0F;
 
         private void UpdateBlockSelection(Ray? viewRay)
         {
@@ -149,11 +153,11 @@ namespace CraftSharp.Control
                 float absZ = Mathf.Abs(normal.z);
 
                 if (absX >= absY && absX >= absZ)
-                    return normal.x > 0 ? Direction.East : Direction.West;
+                    return normal.x > 0 ? Direction.South : Direction.North;
                 if (absY >= absX && absY >= absZ)
                     return normal.y > 0 ? Direction.Up : Direction.Down;
 
-                return normal.z > 0 ? Direction.North : Direction.South;
+                return normal.z > 0 ? Direction.East : Direction.West;
             }
 
             static bool PointOnCubeSurface(Vector3 point)
@@ -307,26 +311,6 @@ namespace CraftSharp.Control
             }
         }
 
-        private void RemoveBlockTriggerInteractionAt(BlockLoc blockLoc, int id, Action<BlockTriggerInteractionInfo>? onRemoved = null)
-        {
-            if (blockTriggerInteractionInfos.TryGetValue(blockLoc, out var infosAtLoc))
-            {
-                infosAtLoc.RemoveAll(interactionInfo => // Only up to 1 interaction will be removed
-                {
-                    if (interactionInfo.Id == id)
-                    {
-                        RemoveInteraction(id, onRemoved);
-
-                        return true;
-                    }
-                    return false;
-                });
-
-                // Remove this entry if no interaction left at this location
-                if (!infosAtLoc.Any()) blockTriggerInteractionInfos.Remove(blockLoc);
-            }
-        }
-
         private void RemoveBlockTriggerInteractionsAt(BlockLoc blockLoc, Action<BlockTriggerInteractionInfo>? onEachRemoved = null)
         {
             if (blockTriggerInteractionInfos.TryGetValue(blockLoc, out var infosAtLoc))
@@ -343,11 +327,134 @@ namespace CraftSharp.Control
             }
         }
 
+        private static BlockLoc GetPlaceBlockLoc(BlockLoc targetLoc, Direction targetDir)
+        {
+            return targetDir switch
+            {
+                Direction.Down  => targetLoc.Down(),
+                Direction.Up    => targetLoc.Up(),
+                Direction.South => targetLoc.South(),
+                Direction.North => targetLoc.North(),
+                Direction.East  => targetLoc.East(),
+                Direction.West  => targetLoc.West(),
+                _               => throw new InvalidDataException($"Invalid direction {targetDir}"),
+            };
+        }
+
         public void Initialize(BaseCornClient client, CameraController camController, PlayerController playerController)
         {
             this.client = client;
             this.cameraController = camController;
             this.playerController = playerController;
+
+            playerController.Actions.Interaction.ChargedAttack.performed += _ =>
+            {
+                var currentActionType = playerController.CurrentActionType;
+                var status = playerController.Status;
+
+                if (currentActionType == ItemActionType.Sword)
+                {
+                    if (status.AttackStatus.AttackCooldown <= 0F)
+                    {
+                        // TODO: Implement
+                    }
+                }
+                else if (currentActionType == ItemActionType.Bow)
+                {
+                    if (status.AttackStatus.AttackCooldown <= 0F)
+                    {
+                        // Specify attack data to use
+                        status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
+
+                        // Update player state
+                        playerController.ChangeToState(PlayerStates.RANGED_AIM);
+                    }
+                }
+                else // Check digging block
+                {
+                    playerController.ChangeToState(PlayerStates.DIGGING_AIM);
+                }
+            };
+
+            playerController.Actions.Interaction.NormalAttack.performed += _ =>
+            {
+                var currentActionType = playerController.CurrentActionType;
+                var status = playerController.Status;
+
+                if (TargetBlockLoc is not null && TargetDirection is not null &&
+                    client.GameMode == GameMode.Creative)
+                {
+                    var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
+
+                    EventManager.Instance.Broadcast(new ParticlesEvent(CoordConvert.MC2Unity(client.WorldOriginOffset, TargetBlockLoc.Value.ToCenterLocation()),
+                            ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraData(block.StateId), 16));
+                    
+                    // Creative Mode instabreak
+                    Task.Run(() => {
+                        client.DigBlock(TargetBlockLoc.Value, TargetDirection.Value, DiggingStatus.Started);
+                        client.DigBlock(TargetBlockLoc.Value, TargetDirection.Value, DiggingStatus.Finished);
+                    });
+                }
+                else if (currentActionType == ItemActionType.Sword)
+                {
+                    if (status.AttackStatus.AttackCooldown <= 0F)
+                    {
+                        // Specify attack data to use
+                        status.AttackStatus.CurrentStagedAttack = playerController.AbilityConfig.MeleeSwordAttack_Staged;
+
+                        // Update player state
+                        playerController.ChangeToState(PlayerStates.MELEE);
+                    }
+                }
+            };
+
+            playerController.Actions.Interaction.UseChargedItem.performed += _ =>
+            {
+                var currentActionType = playerController.CurrentActionType;
+                var status = playerController.Status;
+
+                if (useItemCooldown < -0.3F)
+                {
+                    if (currentActionType == ItemActionType.Bow)
+                    {
+                        if (status.AttackStatus.AttackCooldown <= 0F)
+                        {
+                            // Specify attack data to use
+                            status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
+
+                            // Update player state
+                            playerController.ChangeToState(PlayerStates.RANGED_AIM);
+                        }
+                    }
+
+                    useItemCooldown = 0F;
+                }
+            };
+
+            playerController.Actions.Interaction.UseNormalItem.performed += _ =>
+            {
+                var currentActionType = playerController.CurrentActionType;
+                var status = playerController.Status;
+
+                if (useItemCooldown < -0.3F)
+                {
+                    if (TargetBlockLoc is not null && TargetDirection is not null &&
+                        playerController.CurrentActionType == ItemActionType.Block)
+                    {
+                        var placeBlockLoc = GetPlaceBlockLoc(TargetBlockLoc.Value, TargetDirection.Value);
+
+                        Debug.Log($"Placing block at {placeBlockLoc} ({TargetBlockLoc.Value} to {TargetDirection})");
+
+                        client.PlaceBlock(placeBlockLoc, TargetDirection.Value, Inventory.Hand.MainHand);
+                    }
+                    else
+                    {
+                        client.UseItemOnMainHand();
+                    }
+                    
+                    useItemCooldown = 0F;
+                }
+            };
         }
 
         void Start()
@@ -410,6 +517,7 @@ namespace CraftSharp.Control
         void Update()
         {
             diggingStartCooldown -= Time.deltaTime;
+            useItemCooldown -= Time.deltaTime;
 
             if (cameraController != null && cameraController.IsAimingOrLocked)
             {

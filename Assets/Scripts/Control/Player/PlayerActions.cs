@@ -90,7 +90,7 @@ namespace CraftSharp.Control
     ""name"": ""PlayerActions"",
     ""maps"": [
         {
-            ""name"": ""Gameplay"",
+            ""name"": ""Locomotion"",
             ""id"": ""061c6e34-947b-49bb-95b3-5cfcb05c31fb"",
             ""actions"": [
                 {
@@ -262,7 +262,7 @@ namespace CraftSharp.Control
             ]
         },
         {
-            ""name"": ""Attack"",
+            ""name"": ""Interaction"",
             ""id"": ""ca5a69e5-ea48-4b4c-b4a1-e9aec27e156a"",
             ""actions"": [
                 {
@@ -278,6 +278,24 @@ namespace CraftSharp.Control
                     ""name"": ""Normal Attack"",
                     ""type"": ""Button"",
                     ""id"": ""77b7b4f5-a482-448b-88d4-4cb1a80d1fe7"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Use Charged Item"",
+                    ""type"": ""Button"",
+                    ""id"": ""810d3f19-ea08-4a10-9502-6431b1e87b80"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Use Normal Item"",
+                    ""type"": ""Button"",
+                    ""id"": ""54f41810-a18e-4275-8dfc-0862e2bf9c95"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -318,6 +336,28 @@ namespace CraftSharp.Control
                 },
                 {
                     ""name"": """",
+                    ""id"": ""811551c6-5850-4061-9d70-9f8fe528898a"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": ""Hold(duration=0.2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Use Charged Item"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""00c586c9-4845-4eed-b2e9-784e498ce7b1"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": ""Tap(duration=0.2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Use Normal Item"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""172370bb-c7a4-4cff-85d7-890bef1cdc1b"",
                     ""path"": ""<Keyboard>/r"",
                     ""interactions"": """",
@@ -332,25 +372,27 @@ namespace CraftSharp.Control
     ],
     ""controlSchemes"": []
 }");
-            // Gameplay
-            m_Gameplay = asset.FindActionMap("Gameplay", throwIfNotFound: true);
-            m_Gameplay_Movement = m_Gameplay.FindAction("Movement", throwIfNotFound: true);
-            m_Gameplay_Jump = m_Gameplay.FindAction("Jump", throwIfNotFound: true);
-            m_Gameplay_Descend = m_Gameplay.FindAction("Descend", throwIfNotFound: true);
-            m_Gameplay_Ascend = m_Gameplay.FindAction("Ascend", throwIfNotFound: true);
-            m_Gameplay_Sprint = m_Gameplay.FindAction("Sprint", throwIfNotFound: true);
-            m_Gameplay_WalkToggle = m_Gameplay.FindAction("WalkToggle", throwIfNotFound: true);
-            // Attack
-            m_Attack = asset.FindActionMap("Attack", throwIfNotFound: true);
-            m_Attack_ChargedAttack = m_Attack.FindAction("Charged Attack", throwIfNotFound: true);
-            m_Attack_NormalAttack = m_Attack.FindAction("Normal Attack", throwIfNotFound: true);
-            m_Attack_ToggleAimingLock = m_Attack.FindAction("Toggle Aiming Lock", throwIfNotFound: true);
+            // Locomotion
+            m_Locomotion = asset.FindActionMap("Locomotion", throwIfNotFound: true);
+            m_Locomotion_Movement = m_Locomotion.FindAction("Movement", throwIfNotFound: true);
+            m_Locomotion_Jump = m_Locomotion.FindAction("Jump", throwIfNotFound: true);
+            m_Locomotion_Descend = m_Locomotion.FindAction("Descend", throwIfNotFound: true);
+            m_Locomotion_Ascend = m_Locomotion.FindAction("Ascend", throwIfNotFound: true);
+            m_Locomotion_Sprint = m_Locomotion.FindAction("Sprint", throwIfNotFound: true);
+            m_Locomotion_WalkToggle = m_Locomotion.FindAction("WalkToggle", throwIfNotFound: true);
+            // Interaction
+            m_Interaction = asset.FindActionMap("Interaction", throwIfNotFound: true);
+            m_Interaction_ChargedAttack = m_Interaction.FindAction("Charged Attack", throwIfNotFound: true);
+            m_Interaction_NormalAttack = m_Interaction.FindAction("Normal Attack", throwIfNotFound: true);
+            m_Interaction_UseChargedItem = m_Interaction.FindAction("Use Charged Item", throwIfNotFound: true);
+            m_Interaction_UseNormalItem = m_Interaction.FindAction("Use Normal Item", throwIfNotFound: true);
+            m_Interaction_ToggleAimingLock = m_Interaction.FindAction("Toggle Aiming Lock", throwIfNotFound: true);
         }
 
         ~@PlayerActions()
         {
-            UnityEngine.Debug.Assert(!m_Gameplay.enabled, "This will cause a leak and performance issues, PlayerActions.Gameplay.Disable() has not been called.");
-            UnityEngine.Debug.Assert(!m_Attack.enabled, "This will cause a leak and performance issues, PlayerActions.Attack.Disable() has not been called.");
+            UnityEngine.Debug.Assert(!m_Locomotion.enabled, "This will cause a leak and performance issues, PlayerActions.Locomotion.Disable() has not been called.");
+            UnityEngine.Debug.Assert(!m_Interaction.enabled, "This will cause a leak and performance issues, PlayerActions.Interaction.Disable() has not been called.");
         }
 
         /// <summary>
@@ -423,54 +465,54 @@ namespace CraftSharp.Control
             return asset.FindBinding(bindingMask, out action);
         }
 
-        // Gameplay
-        private readonly InputActionMap m_Gameplay;
-        private List<IGameplayActions> m_GameplayActionsCallbackInterfaces = new List<IGameplayActions>();
-        private readonly InputAction m_Gameplay_Movement;
-        private readonly InputAction m_Gameplay_Jump;
-        private readonly InputAction m_Gameplay_Descend;
-        private readonly InputAction m_Gameplay_Ascend;
-        private readonly InputAction m_Gameplay_Sprint;
-        private readonly InputAction m_Gameplay_WalkToggle;
+        // Locomotion
+        private readonly InputActionMap m_Locomotion;
+        private List<ILocomotionActions> m_LocomotionActionsCallbackInterfaces = new List<ILocomotionActions>();
+        private readonly InputAction m_Locomotion_Movement;
+        private readonly InputAction m_Locomotion_Jump;
+        private readonly InputAction m_Locomotion_Descend;
+        private readonly InputAction m_Locomotion_Ascend;
+        private readonly InputAction m_Locomotion_Sprint;
+        private readonly InputAction m_Locomotion_WalkToggle;
         /// <summary>
-        /// Provides access to input actions defined in input action map "Gameplay".
+        /// Provides access to input actions defined in input action map "Locomotion".
         /// </summary>
-        public struct GameplayActions
+        public struct LocomotionActions
         {
             private @PlayerActions m_Wrapper;
 
             /// <summary>
             /// Construct a new instance of the input action map wrapper class.
             /// </summary>
-            public GameplayActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
+            public LocomotionActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
             /// <summary>
-            /// Provides access to the underlying input action "Gameplay/Movement".
+            /// Provides access to the underlying input action "Locomotion/Movement".
             /// </summary>
-            public InputAction @Movement => m_Wrapper.m_Gameplay_Movement;
+            public InputAction @Movement => m_Wrapper.m_Locomotion_Movement;
             /// <summary>
-            /// Provides access to the underlying input action "Gameplay/Jump".
+            /// Provides access to the underlying input action "Locomotion/Jump".
             /// </summary>
-            public InputAction @Jump => m_Wrapper.m_Gameplay_Jump;
+            public InputAction @Jump => m_Wrapper.m_Locomotion_Jump;
             /// <summary>
-            /// Provides access to the underlying input action "Gameplay/Descend".
+            /// Provides access to the underlying input action "Locomotion/Descend".
             /// </summary>
-            public InputAction @Descend => m_Wrapper.m_Gameplay_Descend;
+            public InputAction @Descend => m_Wrapper.m_Locomotion_Descend;
             /// <summary>
-            /// Provides access to the underlying input action "Gameplay/Ascend".
+            /// Provides access to the underlying input action "Locomotion/Ascend".
             /// </summary>
-            public InputAction @Ascend => m_Wrapper.m_Gameplay_Ascend;
+            public InputAction @Ascend => m_Wrapper.m_Locomotion_Ascend;
             /// <summary>
-            /// Provides access to the underlying input action "Gameplay/Sprint".
+            /// Provides access to the underlying input action "Locomotion/Sprint".
             /// </summary>
-            public InputAction @Sprint => m_Wrapper.m_Gameplay_Sprint;
+            public InputAction @Sprint => m_Wrapper.m_Locomotion_Sprint;
             /// <summary>
-            /// Provides access to the underlying input action "Gameplay/WalkToggle".
+            /// Provides access to the underlying input action "Locomotion/WalkToggle".
             /// </summary>
-            public InputAction @WalkToggle => m_Wrapper.m_Gameplay_WalkToggle;
+            public InputAction @WalkToggle => m_Wrapper.m_Locomotion_WalkToggle;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
-            public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
+            public InputActionMap Get() { return m_Wrapper.m_Locomotion; }
             /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
             public void Enable() { Get().Enable(); }
             /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
@@ -478,9 +520,9 @@ namespace CraftSharp.Control
             /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
             public bool enabled => Get().enabled;
             /// <summary>
-            /// Implicitly converts an <see ref="GameplayActions" /> to an <see ref="InputActionMap" /> instance.
+            /// Implicitly converts an <see ref="LocomotionActions" /> to an <see ref="InputActionMap" /> instance.
             /// </summary>
-            public static implicit operator InputActionMap(GameplayActions set) { return set.Get(); }
+            public static implicit operator InputActionMap(LocomotionActions set) { return set.Get(); }
             /// <summary>
             /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
             /// </summary>
@@ -488,11 +530,11 @@ namespace CraftSharp.Control
             /// <remarks>
             /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
             /// </remarks>
-            /// <seealso cref="GameplayActions" />
-            public void AddCallbacks(IGameplayActions instance)
+            /// <seealso cref="LocomotionActions" />
+            public void AddCallbacks(ILocomotionActions instance)
             {
-                if (instance == null || m_Wrapper.m_GameplayActionsCallbackInterfaces.Contains(instance)) return;
-                m_Wrapper.m_GameplayActionsCallbackInterfaces.Add(instance);
+                if (instance == null || m_Wrapper.m_LocomotionActionsCallbackInterfaces.Contains(instance)) return;
+                m_Wrapper.m_LocomotionActionsCallbackInterfaces.Add(instance);
                 @Movement.started += instance.OnMovement;
                 @Movement.performed += instance.OnMovement;
                 @Movement.canceled += instance.OnMovement;
@@ -519,8 +561,8 @@ namespace CraftSharp.Control
             /// <remarks>
             /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
             /// </remarks>
-            /// <seealso cref="GameplayActions" />
-            private void UnregisterCallbacks(IGameplayActions instance)
+            /// <seealso cref="LocomotionActions" />
+            private void UnregisterCallbacks(ILocomotionActions instance)
             {
                 @Movement.started -= instance.OnMovement;
                 @Movement.performed -= instance.OnMovement;
@@ -543,12 +585,12 @@ namespace CraftSharp.Control
             }
 
             /// <summary>
-            /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="GameplayActions.UnregisterCallbacks(IGameplayActions)" />.
+            /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="LocomotionActions.UnregisterCallbacks(ILocomotionActions)" />.
             /// </summary>
-            /// <seealso cref="GameplayActions.UnregisterCallbacks(IGameplayActions)" />
-            public void RemoveCallbacks(IGameplayActions instance)
+            /// <seealso cref="LocomotionActions.UnregisterCallbacks(ILocomotionActions)" />
+            public void RemoveCallbacks(ILocomotionActions instance)
             {
-                if (m_Wrapper.m_GameplayActionsCallbackInterfaces.Remove(instance))
+                if (m_Wrapper.m_LocomotionActionsCallbackInterfaces.Remove(instance))
                     UnregisterCallbacks(instance);
             }
 
@@ -558,55 +600,65 @@ namespace CraftSharp.Control
             /// <remarks>
             /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
             /// </remarks>
-            /// <seealso cref="GameplayActions.AddCallbacks(IGameplayActions)" />
-            /// <seealso cref="GameplayActions.RemoveCallbacks(IGameplayActions)" />
-            /// <seealso cref="GameplayActions.UnregisterCallbacks(IGameplayActions)" />
-            public void SetCallbacks(IGameplayActions instance)
+            /// <seealso cref="LocomotionActions.AddCallbacks(ILocomotionActions)" />
+            /// <seealso cref="LocomotionActions.RemoveCallbacks(ILocomotionActions)" />
+            /// <seealso cref="LocomotionActions.UnregisterCallbacks(ILocomotionActions)" />
+            public void SetCallbacks(ILocomotionActions instance)
             {
-                foreach (var item in m_Wrapper.m_GameplayActionsCallbackInterfaces)
+                foreach (var item in m_Wrapper.m_LocomotionActionsCallbackInterfaces)
                     UnregisterCallbacks(item);
-                m_Wrapper.m_GameplayActionsCallbackInterfaces.Clear();
+                m_Wrapper.m_LocomotionActionsCallbackInterfaces.Clear();
                 AddCallbacks(instance);
             }
         }
         /// <summary>
-        /// Provides a new <see cref="GameplayActions" /> instance referencing this action map.
+        /// Provides a new <see cref="LocomotionActions" /> instance referencing this action map.
         /// </summary>
-        public GameplayActions @Gameplay => new GameplayActions(this);
+        public LocomotionActions @Locomotion => new LocomotionActions(this);
 
-        // Attack
-        private readonly InputActionMap m_Attack;
-        private List<IAttackActions> m_AttackActionsCallbackInterfaces = new List<IAttackActions>();
-        private readonly InputAction m_Attack_ChargedAttack;
-        private readonly InputAction m_Attack_NormalAttack;
-        private readonly InputAction m_Attack_ToggleAimingLock;
+        // Interaction
+        private readonly InputActionMap m_Interaction;
+        private List<IInteractionActions> m_InteractionActionsCallbackInterfaces = new List<IInteractionActions>();
+        private readonly InputAction m_Interaction_ChargedAttack;
+        private readonly InputAction m_Interaction_NormalAttack;
+        private readonly InputAction m_Interaction_UseChargedItem;
+        private readonly InputAction m_Interaction_UseNormalItem;
+        private readonly InputAction m_Interaction_ToggleAimingLock;
         /// <summary>
-        /// Provides access to input actions defined in input action map "Attack".
+        /// Provides access to input actions defined in input action map "Interaction".
         /// </summary>
-        public struct AttackActions
+        public struct InteractionActions
         {
             private @PlayerActions m_Wrapper;
 
             /// <summary>
             /// Construct a new instance of the input action map wrapper class.
             /// </summary>
-            public AttackActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
+            public InteractionActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
             /// <summary>
-            /// Provides access to the underlying input action "Attack/ChargedAttack".
+            /// Provides access to the underlying input action "Interaction/ChargedAttack".
             /// </summary>
-            public InputAction @ChargedAttack => m_Wrapper.m_Attack_ChargedAttack;
+            public InputAction @ChargedAttack => m_Wrapper.m_Interaction_ChargedAttack;
             /// <summary>
-            /// Provides access to the underlying input action "Attack/NormalAttack".
+            /// Provides access to the underlying input action "Interaction/NormalAttack".
             /// </summary>
-            public InputAction @NormalAttack => m_Wrapper.m_Attack_NormalAttack;
+            public InputAction @NormalAttack => m_Wrapper.m_Interaction_NormalAttack;
             /// <summary>
-            /// Provides access to the underlying input action "Attack/ToggleAimingLock".
+            /// Provides access to the underlying input action "Interaction/UseChargedItem".
             /// </summary>
-            public InputAction @ToggleAimingLock => m_Wrapper.m_Attack_ToggleAimingLock;
+            public InputAction @UseChargedItem => m_Wrapper.m_Interaction_UseChargedItem;
+            /// <summary>
+            /// Provides access to the underlying input action "Interaction/UseNormalItem".
+            /// </summary>
+            public InputAction @UseNormalItem => m_Wrapper.m_Interaction_UseNormalItem;
+            /// <summary>
+            /// Provides access to the underlying input action "Interaction/ToggleAimingLock".
+            /// </summary>
+            public InputAction @ToggleAimingLock => m_Wrapper.m_Interaction_ToggleAimingLock;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
-            public InputActionMap Get() { return m_Wrapper.m_Attack; }
+            public InputActionMap Get() { return m_Wrapper.m_Interaction; }
             /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
             public void Enable() { Get().Enable(); }
             /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
@@ -614,9 +666,9 @@ namespace CraftSharp.Control
             /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
             public bool enabled => Get().enabled;
             /// <summary>
-            /// Implicitly converts an <see ref="AttackActions" /> to an <see ref="InputActionMap" /> instance.
+            /// Implicitly converts an <see ref="InteractionActions" /> to an <see ref="InputActionMap" /> instance.
             /// </summary>
-            public static implicit operator InputActionMap(AttackActions set) { return set.Get(); }
+            public static implicit operator InputActionMap(InteractionActions set) { return set.Get(); }
             /// <summary>
             /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
             /// </summary>
@@ -624,17 +676,23 @@ namespace CraftSharp.Control
             /// <remarks>
             /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
             /// </remarks>
-            /// <seealso cref="AttackActions" />
-            public void AddCallbacks(IAttackActions instance)
+            /// <seealso cref="InteractionActions" />
+            public void AddCallbacks(IInteractionActions instance)
             {
-                if (instance == null || m_Wrapper.m_AttackActionsCallbackInterfaces.Contains(instance)) return;
-                m_Wrapper.m_AttackActionsCallbackInterfaces.Add(instance);
+                if (instance == null || m_Wrapper.m_InteractionActionsCallbackInterfaces.Contains(instance)) return;
+                m_Wrapper.m_InteractionActionsCallbackInterfaces.Add(instance);
                 @ChargedAttack.started += instance.OnChargedAttack;
                 @ChargedAttack.performed += instance.OnChargedAttack;
                 @ChargedAttack.canceled += instance.OnChargedAttack;
                 @NormalAttack.started += instance.OnNormalAttack;
                 @NormalAttack.performed += instance.OnNormalAttack;
                 @NormalAttack.canceled += instance.OnNormalAttack;
+                @UseChargedItem.started += instance.OnUseChargedItem;
+                @UseChargedItem.performed += instance.OnUseChargedItem;
+                @UseChargedItem.canceled += instance.OnUseChargedItem;
+                @UseNormalItem.started += instance.OnUseNormalItem;
+                @UseNormalItem.performed += instance.OnUseNormalItem;
+                @UseNormalItem.canceled += instance.OnUseNormalItem;
                 @ToggleAimingLock.started += instance.OnToggleAimingLock;
                 @ToggleAimingLock.performed += instance.OnToggleAimingLock;
                 @ToggleAimingLock.canceled += instance.OnToggleAimingLock;
@@ -646,8 +704,8 @@ namespace CraftSharp.Control
             /// <remarks>
             /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
             /// </remarks>
-            /// <seealso cref="AttackActions" />
-            private void UnregisterCallbacks(IAttackActions instance)
+            /// <seealso cref="InteractionActions" />
+            private void UnregisterCallbacks(IInteractionActions instance)
             {
                 @ChargedAttack.started -= instance.OnChargedAttack;
                 @ChargedAttack.performed -= instance.OnChargedAttack;
@@ -655,18 +713,24 @@ namespace CraftSharp.Control
                 @NormalAttack.started -= instance.OnNormalAttack;
                 @NormalAttack.performed -= instance.OnNormalAttack;
                 @NormalAttack.canceled -= instance.OnNormalAttack;
+                @UseChargedItem.started -= instance.OnUseChargedItem;
+                @UseChargedItem.performed -= instance.OnUseChargedItem;
+                @UseChargedItem.canceled -= instance.OnUseChargedItem;
+                @UseNormalItem.started -= instance.OnUseNormalItem;
+                @UseNormalItem.performed -= instance.OnUseNormalItem;
+                @UseNormalItem.canceled -= instance.OnUseNormalItem;
                 @ToggleAimingLock.started -= instance.OnToggleAimingLock;
                 @ToggleAimingLock.performed -= instance.OnToggleAimingLock;
                 @ToggleAimingLock.canceled -= instance.OnToggleAimingLock;
             }
 
             /// <summary>
-            /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="AttackActions.UnregisterCallbacks(IAttackActions)" />.
+            /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="InteractionActions.UnregisterCallbacks(IInteractionActions)" />.
             /// </summary>
-            /// <seealso cref="AttackActions.UnregisterCallbacks(IAttackActions)" />
-            public void RemoveCallbacks(IAttackActions instance)
+            /// <seealso cref="InteractionActions.UnregisterCallbacks(IInteractionActions)" />
+            public void RemoveCallbacks(IInteractionActions instance)
             {
-                if (m_Wrapper.m_AttackActionsCallbackInterfaces.Remove(instance))
+                if (m_Wrapper.m_InteractionActionsCallbackInterfaces.Remove(instance))
                     UnregisterCallbacks(instance);
             }
 
@@ -676,27 +740,27 @@ namespace CraftSharp.Control
             /// <remarks>
             /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
             /// </remarks>
-            /// <seealso cref="AttackActions.AddCallbacks(IAttackActions)" />
-            /// <seealso cref="AttackActions.RemoveCallbacks(IAttackActions)" />
-            /// <seealso cref="AttackActions.UnregisterCallbacks(IAttackActions)" />
-            public void SetCallbacks(IAttackActions instance)
+            /// <seealso cref="InteractionActions.AddCallbacks(IInteractionActions)" />
+            /// <seealso cref="InteractionActions.RemoveCallbacks(IInteractionActions)" />
+            /// <seealso cref="InteractionActions.UnregisterCallbacks(IInteractionActions)" />
+            public void SetCallbacks(IInteractionActions instance)
             {
-                foreach (var item in m_Wrapper.m_AttackActionsCallbackInterfaces)
+                foreach (var item in m_Wrapper.m_InteractionActionsCallbackInterfaces)
                     UnregisterCallbacks(item);
-                m_Wrapper.m_AttackActionsCallbackInterfaces.Clear();
+                m_Wrapper.m_InteractionActionsCallbackInterfaces.Clear();
                 AddCallbacks(instance);
             }
         }
         /// <summary>
-        /// Provides a new <see cref="AttackActions" /> instance referencing this action map.
+        /// Provides a new <see cref="InteractionActions" /> instance referencing this action map.
         /// </summary>
-        public AttackActions @Attack => new AttackActions(this);
+        public InteractionActions @Interaction => new InteractionActions(this);
         /// <summary>
-        /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Gameplay" which allows adding and removing callbacks.
+        /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Locomotion" which allows adding and removing callbacks.
         /// </summary>
-        /// <seealso cref="GameplayActions.AddCallbacks(IGameplayActions)" />
-        /// <seealso cref="GameplayActions.RemoveCallbacks(IGameplayActions)" />
-        public interface IGameplayActions
+        /// <seealso cref="LocomotionActions.AddCallbacks(ILocomotionActions)" />
+        /// <seealso cref="LocomotionActions.RemoveCallbacks(ILocomotionActions)" />
+        public interface ILocomotionActions
         {
             /// <summary>
             /// Method invoked when associated input action "Movement" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
@@ -742,11 +806,11 @@ namespace CraftSharp.Control
             void OnWalkToggle(InputAction.CallbackContext context);
         }
         /// <summary>
-        /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Attack" which allows adding and removing callbacks.
+        /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Interaction" which allows adding and removing callbacks.
         /// </summary>
-        /// <seealso cref="AttackActions.AddCallbacks(IAttackActions)" />
-        /// <seealso cref="AttackActions.RemoveCallbacks(IAttackActions)" />
-        public interface IAttackActions
+        /// <seealso cref="InteractionActions.AddCallbacks(IInteractionActions)" />
+        /// <seealso cref="InteractionActions.RemoveCallbacks(IInteractionActions)" />
+        public interface IInteractionActions
         {
             /// <summary>
             /// Method invoked when associated input action "Charged Attack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
@@ -762,6 +826,20 @@ namespace CraftSharp.Control
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnNormalAttack(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Use Charged Item" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnUseChargedItem(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Use Normal Item" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnUseNormalItem(InputAction.CallbackContext context);
             /// <summary>
             /// Method invoked when associated input action "Toggle Aiming Lock" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>

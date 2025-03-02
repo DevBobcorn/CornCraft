@@ -19,6 +19,7 @@ namespace CraftSharp.Control
 
         private ItemStack currentItemStack;
         private ItemActionType currentActionType;
+        public ItemActionType CurrentActionType => currentActionType;
 
         // AbilityConfig & Skill Fields
         [SerializeField] private PlayerAbilityConfig m_AbilityConfig;
@@ -30,7 +31,7 @@ namespace CraftSharp.Control
         // Status Fields
         [SerializeField] private PlayerStatusUpdater m_StatusUpdater;
         public PlayerStatus Status => m_StatusUpdater == null ? null : m_StatusUpdater.Status;
-        private bool _usingAnimator = false;
+        private bool usingAnimator = false;
 
         /// <summary>
         /// Whether player root motion should be applied.
@@ -72,10 +73,10 @@ namespace CraftSharp.Control
 
         #nullable enable
 
-        private IPlayerState? _currentState = PlayerStates.GROUNDED;
-        private IPlayerState? _pendingState = null;
+        private IPlayerState? currentState = PlayerStates.GROUNDED;
+        private IPlayerState? pendingState = null;
 
-        public IPlayerState? CurrentState => _currentState;
+        public IPlayerState? CurrentState => currentState;
 
         #nullable disable
 
@@ -177,7 +178,7 @@ namespace CraftSharp.Control
                     riggedRender.InitializeActiveItem(activeItem,
                             PlayerActionHelper.GetItemActionType(activeItem));
                     // Set animator flag
-                    _usingAnimator = true;
+                    usingAnimator = true;
                 }
                 else // Player render is vanilla/entity render
                 {
@@ -189,7 +190,7 @@ namespace CraftSharp.Control
                         m_PlayerRender.UpdateAnimation(0.05F);
                     };
                     // Reset animator flag
-                    _usingAnimator = false;
+                    usingAnimator = false;
                 }
                 // Setup camera ref and use it
                 m_CameraRef = m_PlayerRender.SetupCameraRef();
@@ -202,7 +203,7 @@ namespace CraftSharp.Control
                 // Use own transform
                 m_CameraRef = transform;
                 // Reset animator flag
-                _usingAnimator = false;
+                usingAnimator = false;
             }
 
             if (m_CameraController != null)
@@ -298,7 +299,7 @@ namespace CraftSharp.Control
 
             // Initialize player state (idle on start)
             Status.Grounded = true;
-            _currentState.OnEnter(PlayerStates.PRE_INIT, Status, Motor, this);
+            currentState.OnEnter(PlayerStates.PRE_INIT, Status, Motor, this);
         }
 
         void OnDestroy()
@@ -388,7 +389,7 @@ namespace CraftSharp.Control
 
         public void ClimbOverBarrier(float barrierDist, float barrierHeight, bool walkUp, bool fromLiquid)
         {
-            if (_usingAnimator && !walkUp)
+            if (usingAnimator && !walkUp)
             {
                 Vector2 extraOffset;
 
@@ -434,7 +435,7 @@ namespace CraftSharp.Control
                                     },
                                     update: (interval, curTime, inputData, info, motor, player) =>
                                     {
-                                        info.Moving = inputData.Gameplay.Movement.IsPressed();
+                                        info.Moving = inputData.Locomotion.Movement.IsPressed();
                                         // Terminate force move action if almost finished and player is eager to move
                                         return info.Moving;
                                     }
@@ -455,7 +456,7 @@ namespace CraftSharp.Control
                                     },
                                     update: (interval, curTime, inputData, info, motor, player) =>
                                     {
-                                        info.Moving = inputData.Gameplay.Movement.IsPressed();
+                                        info.Moving = inputData.Locomotion.Movement.IsPressed();
                                         // Don't terminate till the time ends
                                         return false;
                                     }
@@ -467,73 +468,21 @@ namespace CraftSharp.Control
         public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)
         {
             // Set it as pending state, this will be set as active state upon next logical update
-            _pendingState = new ForceMoveState(name, ops);
+            pendingState = new ForceMoveState(name, ops);
         }
 
-        private void ChangeToState(IPlayerState state)
+        public void ChangeToState(IPlayerState state)
         {
-            var prevState = _currentState;
+            var prevState = currentState;
 
             //Debug.Log($"Exit state [{_currentState}]");
-            _currentState.OnExit(state, m_StatusUpdater!.Status, Motor, this);
+            currentState.OnExit(state, m_StatusUpdater!.Status, Motor, this);
 
             // Exit previous state and enter this state
-            _currentState = state;
+            currentState = state;
             
             //Debug.Log($"Enter state [{_currentState}]");
-            _currentState.OnEnter(prevState, m_StatusUpdater!.Status, Motor, this);
-        }
-
-        public void StartDigging()
-        {
-            ChangeToState(PlayerStates.DIGGING_AIM);
-        }
-
-        public bool TryStartNormalAttack()
-        {
-            if (Status!.AttackStatus.AttackCooldown <= 0F)
-            {
-                // Specify attack data to use
-                Status.AttackStatus.CurrentStagedAttack = AbilityConfig.MeleeSwordAttack_Staged;
-
-                // Update player state
-                ChangeToState(PlayerStates.MELEE);
-                
-                return false;
-            }
-            
-            return false;
-        }
-
-        public bool TryStartChargedAttackOrDigging()
-        {
-            if (currentActionType == ItemActionType.Sword)
-            {
-                if (Status!.AttackStatus.AttackCooldown <= 0F)
-                {
-                    // TODO: Implement
-                    return false;
-                }
-            }
-            else if (currentActionType == ItemActionType.Bow)
-            {
-                if (Status!.AttackStatus.AttackCooldown <= 0F)
-                {
-                    // Specify attack data to use
-                    Status.AttackStatus.CurrentChargedAttack = AbilityConfig.RangedBowAttack_Charged;
-
-                    // Update player state
-                    ChangeToState(PlayerStates.RANGED_AIM);
-
-                    return true;
-                }
-            }
-            else // Check digging block
-            {
-                ChangeToState(PlayerStates.DIGGING_AIM);
-            }
-                
-            return false;
+            currentState.OnEnter(prevState, m_StatusUpdater!.Status, Motor, this);
         }
 
         public void UseAimingCamera(bool enable)
@@ -611,7 +560,7 @@ namespace CraftSharp.Control
             var status = m_StatusUpdater!.Status;
 
             // Update target player visual yaw before updating player status
-            var horInput = m_PlayerActions!.Gameplay.Movement.ReadValue<Vector2>();
+            var horInput = m_PlayerActions!.Locomotion.Movement.ReadValue<Vector2>();
             if (horInput != Vector2.zero)
             {
                 var userInputYaw = GetYawFromVector2(horInput);
@@ -632,17 +581,17 @@ namespace CraftSharp.Control
             UpdatePlayerStatus();
 
             // Update current player state
-            if (_pendingState != null) // Change to pending state if present
+            if (pendingState != null) // Change to pending state if present
             {
-                ChangeToState(_pendingState);
-                _pendingState = null;
+                ChangeToState(pendingState);
+                pendingState = null;
             }
-            else if (_currentState.ShouldExit(m_PlayerActions!, status))
+            else if (currentState.ShouldExit(m_PlayerActions!, status))
             {
                 // Try to exit current state and enter another one
                 foreach (var state in PlayerStates.STATES)
                 {
-                    if (state != _currentState && state.ShouldEnter(m_PlayerActions!, status))
+                    if (state != currentState && state.ShouldEnter(m_PlayerActions!, status))
                     {
                         ChangeToState(state);
                         break;
@@ -650,7 +599,7 @@ namespace CraftSharp.Control
                 }
             }
 
-            _currentState.UpdateBeforeMotor(deltaTime, m_PlayerActions!, status, Motor, this);
+            currentState.UpdateBeforeMotor(deltaTime, m_PlayerActions!, status, Motor, this);
         }
 
         public void UpdateRotation(ref Quaternion currentRotation, float deltaTime)
@@ -668,7 +617,7 @@ namespace CraftSharp.Control
             float prevStamina = status.StaminaLeft;
             
             // Update player physics and transform using updated current state
-            _currentState.UpdateMain(ref currentVelocity, deltaTime, m_PlayerActions!, status, Motor, this);
+            currentState.UpdateMain(ref currentVelocity, deltaTime, m_PlayerActions!, status, Motor, this);
 
             // Broadcast current stamina if changed
             if (prevStamina != status.StaminaLeft)
@@ -787,7 +736,7 @@ namespace CraftSharp.Control
                 itemActionInfo += " (edible)";
             }
 
-            return $"ActionType: {currentActionType}{itemActionInfo}\nState: {_currentState}\n{statusInfo}";
+            return $"ActionType: {currentActionType}{itemActionInfo}\nState: {currentState}\n{statusInfo}";
         }
 
         // Misc methods from Kinematic Character Controller
@@ -803,7 +752,7 @@ namespace CraftSharp.Control
             {
                 return true;
             }
-            return !m_StatusUpdater.Status.Spectating && !_currentState.IgnoreCollision();
+            return !m_StatusUpdater.Status.Spectating && !currentState.IgnoreCollision();
         }
 
         public void OnGroundHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport)

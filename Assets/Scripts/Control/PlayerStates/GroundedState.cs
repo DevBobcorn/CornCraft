@@ -131,7 +131,7 @@ namespace CraftSharp.Control
             {
                 // Update moving status
                 bool prevMoving = info.Moving;
-                info.Moving = inputData.Gameplay.Movement.IsPressed();
+                info.Moving = inputData.Locomotion.Movement.IsPressed();
 
                 // Animation mirror randomation
                 if (info.Moving != prevMoving)
@@ -156,7 +156,7 @@ namespace CraftSharp.Control
                     // Continue sprinting check
                     if (info.Sprinting && _timeSinceSprintStart >= SPRINT_START_TIME && !_sprintContinues)
                     {
-                        if (inputData.Gameplay.Sprint.IsPressed())
+                        if (inputData.Locomotion.Sprint.IsPressed())
                         {
                             _sprintContinues = true;
                         }
@@ -278,8 +278,6 @@ namespace CraftSharp.Control
             return false;
         }
 
-        private Action<InputAction.CallbackContext>? chargedAttackCallback;
-        private Action<InputAction.CallbackContext>? normalAttackCallback;
         private Action<InputAction.CallbackContext>? toggleAimingLockCallback;
         private Action<InputAction.CallbackContext>? jumpRequestCallback;
         private Action<InputAction.CallbackContext>? walkToggleRequestCallback;
@@ -295,35 +293,24 @@ namespace CraftSharp.Control
             _walkToggleRequested = false;
             _sprintRequested = false;
 
-            // Register input action events
-            player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
-            {
-                player.TryStartChargedAttackOrDigging();
-            };
-
-            player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>
-            {
-                player.TryStartNormalAttack();
-            };
-
-            player.Actions.Attack.ToggleAimingLock.performed += toggleAimingLockCallback = (context) =>
+            player.Actions.Interaction.ToggleAimingLock.performed += toggleAimingLockCallback = (context) =>
             {
                 player.ToggleAimingLock();
             };
 
-            player.Actions.Gameplay.Jump.performed += jumpRequestCallback = (context) =>
+            player.Actions.Locomotion.Jump.performed += jumpRequestCallback = (context) =>
             {
                 // Set jump flag
                 _jumpRequested = true;
             };
 
-            player.Actions.Gameplay.WalkToggle.performed += walkToggleRequestCallback = (context) =>
+            player.Actions.Locomotion.WalkToggle.performed += walkToggleRequestCallback = (context) =>
             {
                 // Set walk toggle flag
                 _walkToggleRequested = true;
             };
 
-            player.Actions.Gameplay.Sprint.performed += sprintRequestCallback = (context) =>
+            player.Actions.Locomotion.Sprint.performed += sprintRequestCallback = (context) =>
             {
                 if (player.IsUsingAimingCamera() && Mathf.Abs(
                     Mathf.DeltaAngle(info.CurrentVisualYaw, info.MovementInputYaw)) > 30F)
@@ -363,12 +350,10 @@ namespace CraftSharp.Control
             info.Sprinting = false;
 
             // Unregister input action events
-            player.Actions.Attack.ChargedAttack.performed -= chargedAttackCallback;
-            player.Actions.Attack.NormalAttack.performed -= normalAttackCallback;
-            player.Actions.Attack.ToggleAimingLock.performed -= toggleAimingLockCallback;
-            player.Actions.Gameplay.Jump.performed -= jumpRequestCallback;
-            player.Actions.Gameplay.WalkToggle.performed -= walkToggleRequestCallback;
-            player.Actions.Gameplay.Sprint.performed -= sprintRequestCallback;
+            player.Actions.Interaction.ToggleAimingLock.performed -= toggleAimingLockCallback;
+            player.Actions.Locomotion.Jump.performed -= jumpRequestCallback;
+            player.Actions.Locomotion.WalkToggle.performed -= walkToggleRequestCallback;
+            player.Actions.Locomotion.Sprint.performed -= sprintRequestCallback;
 
             // Ungrounded, go to falling state
             if (nextState == PlayerStates.AIRBORNE && !info.Grounded && !_jumpConfirmed)

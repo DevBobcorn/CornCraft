@@ -48,7 +48,7 @@ namespace CraftSharp.Control
             }
 
             // Update moving status before exit, for smooth transition into other states
-            info.Moving = inputData.Gameplay.Movement.IsPressed();
+            info.Moving = inputData.Locomotion.Movement.IsPressed();
 
             // Movement velocity update
             Vector3 moveVelocity;
@@ -126,7 +126,7 @@ namespace CraftSharp.Control
             _glideToggleRequested = false;
 
             // Register input action events
-            player.Actions.Gameplay.Jump.performed += glideToggleRequestCallback = (context) =>
+            player.Actions.Locomotion.Jump.performed += glideToggleRequestCallback = (context) =>
             {
                 _glideToggleRequested = true;
             };
@@ -135,7 +135,7 @@ namespace CraftSharp.Control
         public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             // Unregister input action events
-            player.Actions.Gameplay.Jump.performed -= glideToggleRequestCallback;
+            player.Actions.Locomotion.Jump.performed -= glideToggleRequestCallback;
         }
 
         public override string ToString() => "Airborne";

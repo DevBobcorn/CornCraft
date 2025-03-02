@@ -1,8 +1,6 @@
 #nullable enable
-using System;
 using KinematicCharacterController;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace CraftSharp.Control
 {
@@ -11,7 +9,7 @@ namespace CraftSharp.Control
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Sprinting = false;
-            info.Moving = inputData.Gameplay.Movement.IsPressed();
+            info.Moving = inputData.Locomotion.Movement.IsPressed();
 
             info.Grounded = true; // Force grounded
             currentVelocity = Vector3.zero; // Cancel move
@@ -55,7 +53,7 @@ namespace CraftSharp.Control
             }
             else if (attackStatus.AttackCooldown <= 0F && meleeAttack.StageCount > 0) // Attack available
             {
-                if (inputData.Gameplay.Movement.IsPressed()) // Start moving, exit attack state
+                if (inputData.Locomotion.Movement.IsPressed()) // Start moving, exit attack state
                 {
                     info.Attacking = false;
                     attackStatus.AttackStage = -1;
@@ -63,7 +61,7 @@ namespace CraftSharp.Control
             }
         }
 
-        private void StartMeleeStage(PlayerStagedSkill meleeAttack, AttackStatus attackStatus, int stage, PlayerController player)
+        public void StartMeleeStage(PlayerStagedSkill meleeAttack, AttackStatus attackStatus, int stage, PlayerController player)
         {
             attackStatus.AttackStage = stage;
 
@@ -77,20 +75,6 @@ namespace CraftSharp.Control
 
             player.OverrideStateAnimation(meleeAttack.DummyAnimationClip!, stageData.AnimationClip!);
             player.StartCrossFadeState(PlayerAbilityConfig.SKILL, 0F);
-            //player.TurnToAttackTarget();
-
-            if (stageData.VisualFXPrefab != null)
-            {
-                /*
-                var fxObj = GameObject.Instantiate(stageData.VisualFXPrefab);
-                // Disable loop for all particle components
-                foreach (var c in fxObj.GetComponentsInChildren<ParticleSystem>())
-                {
-                    // Main module? c.loop = false;
-                }
-                player.AttachVisualFX(fxObj!);
-                */
-            }
         }
 
         public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
@@ -109,9 +93,6 @@ namespace CraftSharp.Control
             
             return false;
         }
-
-        private Action<InputAction.CallbackContext>? chargedAttackCallback;
-        private Action<InputAction.CallbackContext>? normalAttackCallback;
 
         public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
@@ -132,24 +113,6 @@ namespace CraftSharp.Control
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInMainHand);
             player.UseRootMotion = true;
             player.IgnoreAnimatorScale = false;
-
-            // Register input action events
-            player.Actions.Attack.ChargedAttack.performed += chargedAttackCallback = (context) =>
-            {
-                // TODO: Get the right data according to weapon type
-                player.TryStartChargedAttackOrDigging();
-            };
-
-            player.Actions.Attack.NormalAttack.performed += normalAttackCallback = (context) =>
-            {
-                if (attackStatus.AttackCooldown <= 0F && meleeAttack.StageCount > 0) // Attack available
-                {
-                    info.Attacking = true;
-                    var nextStage = (attackStatus.AttackStage + 1) % meleeAttack.StageCount;
-
-                    StartMeleeStage(meleeAttack, attackStatus, nextStage, player);
-                }
-            };
         }
 
         public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
@@ -167,10 +130,6 @@ namespace CraftSharp.Control
 
             player.ChangeItemState(PlayerController.CurrentItemState.Mount);
             player.UseRootMotion = false;
-
-            // Unregister input action events
-            player.Actions.Attack.ChargedAttack.performed -= chargedAttackCallback;
-            player.Actions.Attack.NormalAttack.performed -= normalAttackCallback;
         }
 
         public override string ToString() => "Melee";
