@@ -80,15 +80,18 @@ namespace CraftSharp.Control
 
                         var hintKey = entryCont.TryGetValue("hint", out var hint) ? hint.StringValue : null;
 
-                        var predictor = entryCont.TryGetValue("predicate", out var predicate)
-                            ? BlockStatePredicate.FromString(predicate?.StringValue ?? string.Empty)
+                        var predicate = entryCont.TryGetValue("predicate", out var predicateData)
+                            ? BlockStatePredicate.FromString(predicateData?.StringValue ?? string.Empty)
                             : BlockStatePredicate.EMPTY;
+                        
+                        var reusable = entryCont.TryGetValue("reusable", out var reusableData)
+                            && bool.Parse(reusableData?.StringValue); // false if not specified
 
                         foreach (var trigger in triggers.DataArray)
                         {
                             var blockId = ResourceLocation.FromString(trigger.StringValue);
 
-                            if (palette.TryGetAllNumIds(blockId, out var stateIds, x => predictor.Check(x)))
+                            if (palette.TryGetAllNumIds(blockId, out var stateIds, x => predicate.Check(x)))
                             {
                                 foreach (var stateId in stateIds)
                                 {
@@ -103,7 +106,7 @@ namespace CraftSharp.Control
                                     }
                                     else
                                     {
-                                        inters.Add(new TriggerInteraction(iconType, blockId, interactionType, hintKey, tag));
+                                        inters.Add(new TriggerInteraction(iconType, blockId, reusable, interactionType, hintKey, tag));
                                     }
 
                                     if (interactionTable.TryGetValue(stateId, out var definition))

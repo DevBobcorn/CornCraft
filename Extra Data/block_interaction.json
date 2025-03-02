@@ -1042,6 +1042,7 @@
       "hint": "gameplay.interaction.go_to_bed",
       "predicate": "occupied=false,part=head",
       "icon_type": "enter_location",
+      "reusable": true,
       "triggers": [
         "minecraft:white_bed",
         "minecraft:orange_bed",
@@ -1119,6 +1120,7 @@
       "action": "interact",
       "hint": "gameplay.interaction.push_button",
       "predicate": "powered=false",
+      "reusable": true,
       "triggers": [
         "minecraft:stone_button",
         "minecraft:oak_button",
@@ -1138,6 +1140,7 @@
     "craft": {
       "action": "interact",
       "hint": "gameplay.interaction.craft",
+      "reusable": true,
       "triggers": [
         "minecraft:crafting_table"
       ]
@@ -1145,6 +1148,7 @@
     "smelt": {
       "action": "interact",
       "hint": "gameplay.interaction.smelt",
+      "reusable": true,
       "triggers": [
         "minecraft:furnace",
         "minecraft:blast_furnace",

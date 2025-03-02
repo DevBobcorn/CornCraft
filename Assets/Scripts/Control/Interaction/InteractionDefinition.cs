@@ -30,6 +30,7 @@ namespace CraftSharp.Control
     public record TriggerInteraction(
         InteractionIconType IconType,
         ResourceLocation IconItemId,
+        bool Reusable,
         InteractionType Type,
         string HintKey,
         string Tag)
@@ -37,6 +38,7 @@ namespace CraftSharp.Control
     {
         public InteractionIconType IconType { get; } = IconType;
         public ResourceLocation IconItemId { get; } = IconItemId;
+        public bool Reusable { get; } = Reusable;
     }
 
     public record HarvestInteraction(

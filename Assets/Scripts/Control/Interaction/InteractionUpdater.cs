@@ -371,19 +371,6 @@ namespace CraftSharp.Control
                 if (triggerInteractionInfo != null && client != null)
                 {
                     triggerInteractionInfo.UpdateInteraction(client);
-
-                    // Remove it immediately after execution TODO: Maybe check the result?
-                    RemoveInteraction<InteractionInfo>(e.InteractionId, info =>
-                    {
-                        EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
-
-                        // Check block trigger interaction removal
-                        if (info is BlockTriggerInteractionInfo blockInfo)
-                        {
-                            var blockLoc = blockInfo.BlockLoc;
-                            RemoveBlockTriggerInteractionAt(blockLoc, info.Id);
-                        }
-                    });
                 }
             };
             EventManager.Instance.Register(triggerInteractionExecutionEvent);

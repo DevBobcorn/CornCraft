@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using CraftSharp.Inventory;
 using CraftSharp.Protocol;
+using UnityEngine;
 
 namespace CraftSharp.Control
 {
@@ -23,25 +24,37 @@ namespace CraftSharp.Control
 
         protected override IEnumerator RunInteraction(BaseCornClient client)
         {
-            switch (Definition.Type)
+            while (true)
             {
-                case InteractionType.Interact:
+                switch (Definition.Type)
                 {
-                    client.PlaceBlock(blockLoc, Direction.Down);
+                    case InteractionType.Interact:
+                    {
+                        client.PlaceBlock(blockLoc, Direction.Down);
 
-                    yield break;
+                        break;
+                    }
+                    case InteractionType.Break:
+                    {
+                        // Takes 30 to 40 milsecs to send, don't wait for it
+                        Task.Run(() => client.DigBlock(blockLoc, Direction.Down, DiggingStatus.Started));
+
+                        if (client is CornClientOnline clientOnline)
+                            clientOnline.DoAnimation((int) Hand.MainHand);
+
+                        // Takes 30 to 40 milsecs to send, don't wait for it
+                        Task.Run(() => client.DigBlock(blockLoc, Direction.Down, DiggingStatus.Finished));
+
+                        break;
+                    }
                 }
-                case InteractionType.Break:
+
+                if (Definition.Reusable) // Don't terminate execution
                 {
-                    // Takes 30 to 40 milsecs to send, don't wait for it
-                    Task.Run(() => client.DigBlock(blockLoc, Direction.Down, DiggingStatus.Started));
-
-                    if (client is CornClientOnline clientOnline)
-                        clientOnline.DoAnimation((int) Hand.MainHand);
-
-                    // Takes 30 to 40 milsecs to send, don't wait for it
-                    Task.Run(() => client.DigBlock(blockLoc, Direction.Down, DiggingStatus.Finished));
-
+                    yield return null;
+                }
+                else // Terminate execution
+                {
                     yield break;
                 }
             }
