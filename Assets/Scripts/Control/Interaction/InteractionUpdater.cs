@@ -95,7 +95,11 @@ namespace CraftSharp.Control
         {
             if (viewRay is null || client == null) return;
 
-            if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out RaycastHit viewHit, MAX_TARGET_DISTANCE, blockSelectionLayer))
+            if (placeBlockCooldown > PLACE_BLOCK_COOLDOWN) // Ongoing block placement cooldown
+            {
+                // Don't update block selection block location
+            }
+            else if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out RaycastHit viewHit, MAX_TARGET_DISTANCE, blockSelectionLayer))
             {
                 Vector3 normal = viewHit.normal.normalized;
                 TargetDirection = GetDirectionFromNormal(normal);
@@ -175,6 +179,23 @@ namespace CraftSharp.Control
                        delta.y is < 0.01f or > 0.99f ||
                        delta.z is < 0.01f or > 0.99f;
             }
+        }
+
+        private void UpdateBlockSelectionTo(BlockLoc newTargetLoc)
+        {
+            if (client == null) return;
+
+            // Create selection box if not present
+            if (blockSelectionBox == null)
+            {
+                blockSelectionBox = Instantiate(blockSelectionFramePrefab)!.GetComponent<BlockSelectionBox>();
+                blockSelectionBox!.transform.SetParent(transform, false);
+            }
+            
+            TargetBlockLoc = newTargetLoc;
+            blockSelectionBox.transform.position = CoordConvert.MC2Unity(client.WorldOriginOffset, newTargetLoc.ToLocation());
+
+            EventManager.Instance.Broadcast(new TargetBlockLocChangeEvent(newTargetLoc));
         }
 
         private void UpdateBlockInteractions(ChunkRenderManager chunksManager)
@@ -369,11 +390,13 @@ namespace CraftSharp.Control
             });
         }
 
-        private static void PlaceBlock(BaseCornClient client, BlockLoc targetBlockLoc, Direction targetDirection)
+        private static BlockLoc PlaceBlock(BaseCornClient client, BlockLoc targetBlockLoc, Direction targetDirection)
         {
             var placeBlockLoc = GetPlaceBlockLoc(targetBlockLoc, targetDirection);
 
             client.PlaceBlock(placeBlockLoc, targetDirection, Inventory.Hand.MainHand);
+
+            return placeBlockLoc;
         }
 
         public void Initialize(BaseCornClient client, CameraController camController, PlayerController playerController)
@@ -472,9 +495,11 @@ namespace CraftSharp.Control
                     {
                         if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
                         {
-                            PlaceBlock(client, TargetBlockLoc.Value, TargetDirection.Value);
+                            var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, TargetDirection.Value);
 
                             placeBlockCooldown = 0F;
+
+                            UpdateBlockSelectionTo(placeLoc);
                         }
                     }
                 }
@@ -593,9 +618,11 @@ namespace CraftSharp.Control
                     {
                         if (placeBlockCooldown <= PLACE_BLOCK_COOLDOWN) // Cooldown for placing block
                         {
-                            PlaceBlock(client, TargetBlockLoc.Value, TargetDirection.Value);
+                            var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, TargetDirection.Value);
 
                             placeBlockCooldown = 0F;
+
+                            UpdateBlockSelectionTo(placeLoc);
                         }
                     }
                 }
