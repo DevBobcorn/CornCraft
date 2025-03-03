@@ -6,8 +6,7 @@ namespace CraftSharp.Control
 {
     public class DiggingAimState : IPlayerState
     {
-        private const float DIGGING_SETUP_TIME = 0.5F;
-        private const float DIGGING_IDLE_TIMEEOUT = -0.001F;
+        private const float DIGGING_IDLE_TIMEOUT = 0F;
 
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
@@ -19,7 +18,7 @@ namespace CraftSharp.Control
             var attackStatus = info.AttackStatus;
 
             // Stay in this state if attack button is still pressed or the initiation phase is not yet complete
-            if (attackStatus.StageTime < DIGGING_SETUP_TIME || inputData.Interaction.ChargedAttack.IsPressed())
+            if (inputData.Interaction.ChargedAttack.IsPressed())
             {
                 // Update moving status
                 bool prevMoving = info.Moving;
@@ -57,7 +56,7 @@ namespace CraftSharp.Control
                 // Idle timeout
                 attackStatus.AttackCooldown -= interval;
 
-                if (attackStatus.AttackCooldown < DIGGING_IDLE_TIMEEOUT) // Timed out, exit state
+                if (attackStatus.AttackCooldown < DIGGING_IDLE_TIMEOUT) // Timed out, exit state
                 {
                     // Attack timed out, exit
                     info.Attacking = false;

@@ -45,8 +45,11 @@ namespace CraftSharp.Control
         public static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
         public const int MAX_TARGET_DISTANCE = 8;
         public const int BLOCK_INTERACTION_RADIUS = 3;
-        public const float BLOCK_INTERACTION_RADIUS_SQR = 9.0f; // BLOCK_INTERACTION_RADIUS ^ 2
-        public const float BLOCK_INTERACTION_RADIUS_SQR_PLUS = 12.25f; // (BLOCK_INTERACTION_RADIUS + 0.5f) ^ 2
+        public const float BLOCK_INTERACTION_RADIUS_SQR = 9.0F; // BLOCK_INTERACTION_RADIUS ^ 2
+        public const float BLOCK_INTERACTION_RADIUS_SQR_PLUS = 12.25F; // (BLOCK_INTERACTION_RADIUS + 0.5f) ^ 2
+
+        public const float INSTA_BREAK_COOLDOWN = -0.3F;
+        public const float PLACE_BLOCK_COOLDOWN = -0.2F;
         
         private static readonly List<BlockLoc> validOffsets = ComputeOffsets();
 
@@ -85,8 +88,8 @@ namespace CraftSharp.Control
         public Direction? TargetDirection { get; private set; } = Direction.Down;
         public BlockLoc? TargetBlockLoc { get; private set; } = null;
         
-        private float diggingStartCooldown = 0F;
-        private float useItemCooldown = 0F;
+        private float instaBreakCooldown = 0F;
+        private float placeBlockCooldown = 0F;
 
         private void UpdateBlockSelection(Ray? viewRay)
         {
@@ -341,6 +344,38 @@ namespace CraftSharp.Control
             };
         }
 
+        private void AbortDiggingBlock()
+        {
+            if (lastHarvestInteractionInfo is not null)
+            {
+                lastHarvestInteractionInfo.CancelInteraction();
+                EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastHarvestInteractionInfo.Id));
+                
+                lastHarvestInteractionInfo = null;
+            }
+        }
+
+        private static void CreativeInstaBreak(BaseCornClient client, BlockLoc targetBlockLoc, Direction targetDirection)
+        {
+            var block = client.ChunkRenderManager.GetBlock(targetBlockLoc);
+
+            EventManager.Instance.Broadcast(new ParticlesEvent(CoordConvert.MC2Unity(client.WorldOriginOffset, targetBlockLoc.ToCenterLocation()),
+                    ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraData(block.StateId), 16));
+            
+            // Send digging packets
+            Task.Run(() => {
+                client.DigBlock(targetBlockLoc, targetDirection, DiggingStatus.Started);
+                client.DigBlock(targetBlockLoc, targetDirection, DiggingStatus.Finished);
+            });
+        }
+
+        private static void PlaceBlock(BaseCornClient client, BlockLoc targetBlockLoc, Direction targetDirection)
+        {
+            var placeBlockLoc = GetPlaceBlockLoc(targetBlockLoc, targetDirection);
+
+            client.PlaceBlock(placeBlockLoc, targetDirection, Inventory.Hand.MainHand);
+        }
+
         public void Initialize(BaseCornClient client, CameraController camController, PlayerController playerController)
         {
             this.client = client;
@@ -372,7 +407,11 @@ namespace CraftSharp.Control
                 }
                 else // Check digging block
                 {
-                    playerController.ChangeToState(PlayerStates.DIGGING_AIM);
+                    if (TargetBlockLoc is not null && TargetDirection is not null &&
+                        client.GameMode != GameMode.Creative)
+                    {
+                        playerController.ChangeToState(PlayerStates.DIGGING_AIM);
+                    }
                 }
             };
 
@@ -384,16 +423,12 @@ namespace CraftSharp.Control
                 if (TargetBlockLoc is not null && TargetDirection is not null &&
                     client.GameMode == GameMode.Creative)
                 {
-                    var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
+                    if (instaBreakCooldown < INSTA_BREAK_COOLDOWN)
+                    {
+                        CreativeInstaBreak(client, TargetBlockLoc.Value, TargetDirection.Value);
 
-                    EventManager.Instance.Broadcast(new ParticlesEvent(CoordConvert.MC2Unity(client.WorldOriginOffset, TargetBlockLoc.Value.ToCenterLocation()),
-                            ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraData(block.StateId), 16));
-                    
-                    // Creative Mode instabreak
-                    Task.Run(() => {
-                        client.DigBlock(TargetBlockLoc.Value, TargetDirection.Value, DiggingStatus.Started);
-                        client.DigBlock(TargetBlockLoc.Value, TargetDirection.Value, DiggingStatus.Finished);
-                    });
+                        instaBreakCooldown = 0F;
+                    }
                 }
                 else if (currentActionType == ItemActionType.Sword)
                 {
@@ -413,21 +448,16 @@ namespace CraftSharp.Control
                 var currentActionType = playerController.CurrentActionType;
                 var status = playerController.Status;
 
-                if (useItemCooldown < -0.3F)
+                if (currentActionType == ItemActionType.Bow)
                 {
-                    if (currentActionType == ItemActionType.Bow)
+                    if (status.AttackStatus.AttackCooldown <= 0F)
                     {
-                        if (status.AttackStatus.AttackCooldown <= 0F)
-                        {
-                            // Specify attack data to use
-                            status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
+                        // Specify attack data to use
+                        status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
 
-                            // Update player state
-                            playerController.ChangeToState(PlayerStates.RANGED_AIM);
-                        }
+                        // Update player state
+                        playerController.ChangeToState(PlayerStates.RANGED_AIM);
                     }
-
-                    useItemCooldown = 0F;
                 }
             };
 
@@ -436,23 +466,21 @@ namespace CraftSharp.Control
                 var currentActionType = playerController.CurrentActionType;
                 var status = playerController.Status;
 
-                if (useItemCooldown < -0.3F)
+                if (playerController.CurrentActionType == ItemActionType.Block)
                 {
-                    if (TargetBlockLoc is not null && TargetDirection is not null &&
-                        playerController.CurrentActionType == ItemActionType.Block)
+                    if (TargetBlockLoc is not null && TargetDirection is not null)
                     {
-                        var placeBlockLoc = GetPlaceBlockLoc(TargetBlockLoc.Value, TargetDirection.Value);
+                        if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
+                        {
+                            PlaceBlock(client, TargetBlockLoc.Value, TargetDirection.Value);
 
-                        Debug.Log($"Placing block at {placeBlockLoc} ({TargetBlockLoc.Value} to {TargetDirection})");
-
-                        client.PlaceBlock(placeBlockLoc, TargetDirection.Value, Inventory.Hand.MainHand);
+                            placeBlockCooldown = 0F;
+                        }
                     }
-                    else
-                    {
-                        client.UseItemOnMainHand();
-                    }
-                    
-                    useItemCooldown = 0F;
+                }
+                else
+                {
+                    client.UseItemOnMainHand();
                 }
             };
         }
@@ -485,7 +513,7 @@ namespace CraftSharp.Control
             EventManager.Instance.Register(triggerInteractionExecutionEvent);
         }
 
-        private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status, bool creativeMode)
+        private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)
         {
             var definition = InteractionManager.INSTANCE.InteractionTable
                 .GetValueOrDefault(block.StateId)?
@@ -497,14 +525,11 @@ namespace CraftSharp.Control
                 return;
             }
             
-            if (lastHarvestInteractionInfo is not null)
-            {
-                lastHarvestInteractionInfo.CancelInteraction();
-                EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastHarvestInteractionInfo.Id));
-            }
+            // Abort previous digging interaction
+            AbortDiggingBlock();
 
             lastHarvestInteractionInfo = new LocalHarvestInteractionInfo(interactionId.AllocateID(), block, blockLoc, direction,
-                currentItem, block.State.Hardness, status.Floating, status.Grounded, definition, creativeMode);
+                currentItem, block.State.Hardness, status.Floating, status.Grounded, definition);
             
             //Debug.Log($"Created {lastHarvestInteractionInfo.GetHashCode()} at {blockLoc}");
 
@@ -516,64 +541,73 @@ namespace CraftSharp.Control
 
         void Update()
         {
-            diggingStartCooldown -= Time.deltaTime;
-            useItemCooldown -= Time.deltaTime;
+            instaBreakCooldown -= Time.deltaTime;
+            placeBlockCooldown -= Time.deltaTime;
 
             if (cameraController != null && cameraController.IsAimingOrLocked)
             {
                 UpdateBlockSelection(cameraController.GetPointerRay());
 
                 if (TargetBlockLoc is not null && TargetDirection is not null &&
-                    playerController != null && client != null && playerController.CurrentState is DiggingAimState)
+                    playerController != null && client != null)
                 {
                     var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
                     var status = playerController.Status;
-                    if (lastHarvestInteractionInfo is not null)
-                    {
-                        if (lastHarvestInteractionInfo.State == HarvestInteractionState.Completed)
-                        {
-                            lastHarvestInteractionInfo = null;
-                        }
-                    }
-                    else if (!block.State.NoSolidMesh)
-                    {
-                        if (client.GameMode == GameMode.Creative)
-                        {
-                            if (diggingStartCooldown <= -0.3F) // 0.3s cooldown in Creative Mode
-                            {
-                                StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status, true);
 
-                                diggingStartCooldown = 0F;
+                    if (playerController.CurrentState is DiggingAimState) // Digging right now (without Creative Mode insta-break)
+                    {
+                        if (lastHarvestInteractionInfo is not null)
+                        {
+                            // Remove if digging interaction is completed
+                            if (lastHarvestInteractionInfo.State == HarvestInteractionState.Completed)
+                            {
+                                lastHarvestInteractionInfo = null;
                             }
                         }
-                        else
+                        else if (!block.State.NoSolidMesh) // Start regular digging process
                         {
-                            StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status, false);
+                            StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status);
+                        }
+                    }
+                    else
+                    {
+                        // Not in digging state, abort
+                        AbortDiggingBlock();
+                    }
+                    
+                    // Check continuous insta-break
+                    if (client.GameMode == GameMode.Creative &&
+                             playerController.Actions.Interaction.NormalAttack.IsPressed())
+                    {
+                        if (instaBreakCooldown <= INSTA_BREAK_COOLDOWN) // Cooldown for Creative Mode insta-break
+                        {
+                            CreativeInstaBreak(client, TargetBlockLoc.Value, TargetDirection.Value);
 
-                            diggingStartCooldown = 0F;
+                            instaBreakCooldown = 0F;
+                        }
+                    }
+                    
+                    // Check continuous block placement
+                    if (playerController.CurrentActionType == ItemActionType.Block &&
+                             playerController.Actions.Interaction.UseNormalItem.IsPressed())
+                    {
+                        if (placeBlockCooldown <= PLACE_BLOCK_COOLDOWN) // Cooldown for placing block
+                        {
+                            PlaceBlock(client, TargetBlockLoc.Value, TargetDirection.Value);
+
+                            placeBlockCooldown = 0F;
                         }
                     }
                 }
                 else
                 {
-                    if (lastHarvestInteractionInfo is not null)
-                    {
-                        lastHarvestInteractionInfo.CancelInteraction();
-                        EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastHarvestInteractionInfo.Id));
-                        
-                        lastHarvestInteractionInfo = null;
-                    }
+                    // Target is gone, abort digging
+                    AbortDiggingBlock();
                 }
             }
-            else
+            else // Not aiming, clear digging status
             {
-                if (lastHarvestInteractionInfo is not null)
-                {
-                    lastHarvestInteractionInfo.CancelInteraction();
-                    EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastHarvestInteractionInfo.Id));
-                    
-                    lastHarvestInteractionInfo = null;
-                }
+                AbortDiggingBlock();
                 
                 TargetBlockLoc = null;
 
