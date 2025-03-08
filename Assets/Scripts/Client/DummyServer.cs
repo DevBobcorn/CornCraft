@@ -21,9 +21,9 @@ namespace CraftSharp
         /// <summary>
         /// Records coordinates of chunks which has been sent to client
         /// </summary>
-        private readonly HashSet<Vector2Int> _sentChunks = new();
+        private readonly HashSet<Vector2Int> sentChunks = new();
 
-        private bool _dataLoaded = false;
+        private bool dataLoaded = false;
 
         private void DummyHandleCommand(string text)
         {
@@ -57,7 +57,7 @@ namespace CraftSharp
 
         private void DummySendInitialTerrainData()
         {
-            if (client == null || !_dataLoaded) return;
+            if (client == null || !dataLoaded) return;
 
             var chunkHeight = World.GetDimensionType().height;
             var chunkColumnSize = Mathf.CeilToInt(chunkHeight / (float) Chunk.SIZE);
@@ -78,19 +78,19 @@ namespace CraftSharp
                     client.DummyOnChunkData(chunkX, chunkZ, chunkMask, chunkColumnSize, (chunkX + chunkZ) % 2 == 0 ? columnA : columnB, emptyLight, emptyLight);
 
                     // Record sent chunks
-                    _sentChunks.Add(new Vector2Int(chunkX, chunkZ));
+                    sentChunks.Add(new Vector2Int(chunkX, chunkZ));
                 }
         }
 
         private void DummySendTerrainDataUpdate(int clientChunkX, int clientChunkZ)
         {
-            if (client == null || !_dataLoaded) return;
+            if (client == null || !dataLoaded) return;
 
             var chunkHeight = World.GetDimensionType().height;
             var chunkColumnSize = Mathf.CeilToInt(chunkHeight / (float) Chunk.SIZE);
 
             // Unload chunks that are too far from client player
-            _sentChunks.RemoveWhere(coord =>
+            sentChunks.RemoveWhere(coord =>
             {
                 bool remove = Mathf.Abs(coord.x - clientChunkX) > 6 || Mathf.Abs(coord.y - clientChunkZ) > 6;
 
@@ -115,12 +115,12 @@ namespace CraftSharp
                 {
                     var coord = new Vector2Int(chunkX, chunkZ);
 
-                    if (_sentChunks.Contains(coord)) continue;
+                    if (sentChunks.Contains(coord)) continue;
 
                     client.DummyOnChunkData(chunkX, chunkZ, chunkMask, chunkColumnSize, (chunkX + chunkZ) % 2 == 0 ? columnA : columnB, emptyLight, emptyLight);
 
                     // Record sent chunks
-                    _sentChunks.Add(coord);
+                    sentChunks.Add(coord);
                 }
         }
 
@@ -140,9 +140,9 @@ namespace CraftSharp
                     }
                 };
 
-                _dataLoaded = BlockStatePalette.INSTANCE.CheckNumId(1);
+                dataLoaded = BlockStatePalette.INSTANCE.CheckNumId(1);
 
-                if (_dataLoaded)
+                if (dataLoaded)
                 {
                     placeHolderGround.SetActive(false);
 
@@ -184,8 +184,8 @@ namespace CraftSharp
             });
 
             // Send initial location and yaw
-            var startLocation = new Location(0, _dataLoaded ? 16 : 0, 0);
-            client.DummyUpdateLocation(startLocation, 0, 0, _dataLoaded);
+            var startLocation = new Location(0, dataLoaded ? 16 : 0, 0);
+            client.DummyUpdateLocation(startLocation, 0, 0, dataLoaded);
 
             lastPlayerChunkX = 0;
             lastPlayerChunkZ = 0;
@@ -196,7 +196,7 @@ namespace CraftSharp
             // Send initial inventory
             client.DummyOnInventoryOpen(0, new Container(ContainerType.PlayerInventory));
 
-            if (_dataLoaded)
+            if (dataLoaded)
             {
                 client.DummyOnSetSlot(0, 36, new ItemStack(ItemPalette.INSTANCE.GetById(new("diamond_sword")), 1), 0);
                 client.DummyOnSetSlot(0, 37, new ItemStack(ItemPalette.INSTANCE.GetById(new("bow")), 1), 0);
@@ -213,7 +213,7 @@ namespace CraftSharp
                 if (client.GetPosition().y < -100)
                 {
                     // Reset player position
-                    client.DummyUpdateLocation(new Location(0, 16, 0), 0, 0, _dataLoaded);
+                    client.DummyUpdateLocation(new Location(0, 16, 0), 0, 0, dataLoaded);
 
                     // Don't reset reset last position so as to trigger terrain data update
                 }
