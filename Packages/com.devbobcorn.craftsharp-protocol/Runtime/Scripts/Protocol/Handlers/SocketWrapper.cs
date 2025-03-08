@@ -7,9 +7,9 @@ namespace CraftSharp.Protocol.Handlers
     /// <summary>
     /// Wrapper for handling unencrypted & encrypted socket
     /// </summary>
-    class SocketWrapper
+    public class SocketWrapper
     {
-        TcpClient c;
+        readonly TcpClient c;
         IAesStream s;
         bool encrypted = false;
 
@@ -19,7 +19,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="client">TcpClient connected to the server</param>
         public SocketWrapper(TcpClient client)
         {
-            this.c = client;
+            c = client;
         }
 
         /// <summary>
@@ -49,8 +49,8 @@ namespace CraftSharp.Protocol.Handlers
         {
             if (encrypted)
                 throw new InvalidOperationException("Stream is already encrypted!?");
-            this.s = CryptoHandler.GetAesStream(c.GetStream(), secretKey);
-            this.encrypted = true;
+            s = CryptoHandler.GetAesStream(c.GetStream(), secretKey);
+            encrypted = true;
         }
 
         /// <summary>
@@ -62,10 +62,9 @@ namespace CraftSharp.Protocol.Handlers
             while (read < offset)
             {
                 if (encrypted)
-                {
                     read += s.Read(buffer, start + read, offset - read);
-                }
-                else read += c.Client.Receive(buffer, start + read, offset - read, f);
+                else
+                    read += c.Client.Receive(buffer, start + read, offset - read, f);
             }
         }
 

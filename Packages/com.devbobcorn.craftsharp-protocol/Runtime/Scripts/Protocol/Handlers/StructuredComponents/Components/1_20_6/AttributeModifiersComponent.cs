@@ -1,0 +1,46 @@
+using System;
+using System.Collections.Generic;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Components.Subcomponents;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Components.Subcomponents._1_20_6;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
+
+namespace CraftSharp.Protocol.Handlers.StructuredComponents.Components._1_20_6
+{
+    public class AttributeModifiersComponent : StructuredComponent
+    {
+        public int NumberOfAttributes { get; set; }
+        public List<AttributeSubComponent> Attributes { get; set; } = new();
+        public bool ShowInTooltip { get; set; }
+
+        public AttributeModifiersComponent(DataTypes dataTypes, ItemPalette itemPalette, SubComponentRegistry subComponentRegistry) 
+            : base(dataTypes, itemPalette, subComponentRegistry)
+        {
+
+        }
+        
+        public override void Parse(Queue<byte> data)
+        {
+            NumberOfAttributes = DataTypes.ReadNextVarInt(data);
+
+            for (var i = 0; i < NumberOfAttributes; i++)
+                Attributes.Add((AttributeSubComponent)SubComponentRegistry.ParseSubComponent(SubComponents.Attribute, data));
+
+            ShowInTooltip = DataTypes.ReadNextBool(data);
+        }
+
+        public override Queue<byte> Serialize()
+        {
+            var data = new List<byte>();
+            data.AddRange(DataTypes.GetVarInt(NumberOfAttributes));
+            
+            if(Attributes.Count != NumberOfAttributes)
+                throw new ArgumentNullException($"Can not serialize a AttributeModifiersComponent when the Attributes count != NumberOfAttributes!");
+            
+            foreach (var attribute in Attributes)
+                data.AddRange(attribute.Serialize());
+            
+            data.AddRange(DataTypes.GetBool(ShowInTooltip));
+            return new Queue<byte>(data);
+        }
+    }
+}

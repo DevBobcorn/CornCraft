@@ -6,12 +6,6 @@ using UnityEngine;
 
 namespace CraftSharp
 {
-    /// <summary>
-    /// Allows to localize MinecraftClient in different languages
-    /// </summary>
-    /// <remarks>
-    /// By ORelio (c) 2015-2018 - CDDL 1.0
-    /// </remarks>
     public static class Translations
     {
         private static Dictionary<string, string> translations;

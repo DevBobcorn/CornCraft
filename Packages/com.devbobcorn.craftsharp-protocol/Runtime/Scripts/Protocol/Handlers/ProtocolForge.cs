@@ -371,7 +371,7 @@ namespace CraftSharp.Protocol.Handlers
                             // [ Config Name ][ String ]
                             // [ Config Data ][  ....  ] // Remaining packet data (1)
                             //
-                            // [1] Config data may containt a standard Minecraft string readable with DataTypes.readNextString()
+                            // [1] Config data may containt a standard Minecraft string readable with DataTypes.ReadNextString()
                             // We're ignoring this packet in MCC
 
                             if (ProtocolSettings.DebugMode)
