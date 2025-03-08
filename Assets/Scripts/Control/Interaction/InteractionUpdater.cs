@@ -87,6 +87,7 @@ namespace CraftSharp.Control
 
         public Direction? TargetDirection { get; private set; } = Direction.Down;
         public BlockLoc? TargetBlockLoc { get; private set; } = null;
+        public Location? TargetExactLoc { get; private set; } = null;
         
         private float instaBreakCooldown = 0F;
         private float placeBlockCooldown = 0F;
@@ -114,8 +115,9 @@ namespace CraftSharp.Control
                     Mathf.FloorToInt(offseted.z)
                 );
 
-                var newTargetLoc = CoordConvert.Unity2MC(client.WorldOriginOffset, unityBlockPos).GetBlockLoc();
-                var block = client.ChunkRenderManager.GetBlock(newTargetLoc);
+                TargetExactLoc = CoordConvert.Unity2MC(client.WorldOriginOffset, viewHit.point);
+                var newBlockLoc = CoordConvert.Unity2MC(client.WorldOriginOffset, unityBlockPos).GetBlockLoc();
+                var block = client.ChunkRenderManager.GetBlock(newBlockLoc);
 
                 // Create selection box if not present
                 if (blockSelectionBox == null)
@@ -125,12 +127,12 @@ namespace CraftSharp.Control
                 }
 
                 // Update target location if changed
-                if (TargetBlockLoc != newTargetLoc)
+                if (TargetBlockLoc != newBlockLoc)
                 {
-                    TargetBlockLoc = newTargetLoc;
+                    TargetBlockLoc = newBlockLoc;
                     blockSelectionBox.transform.position = unityBlockPos;
 
-                    EventManager.Instance.Broadcast(new TargetBlockLocChangeEvent(newTargetLoc));
+                    EventManager.Instance.Broadcast(new TargetBlockLocChangeEvent(newBlockLoc));
                 }
 
                 // Update shape even if target location is not changed (the block itself may change)
@@ -142,6 +144,7 @@ namespace CraftSharp.Control
                 if (TargetBlockLoc != null)
                 {
                     TargetBlockLoc = null;
+                    TargetExactLoc = null;
 
                     EventManager.Instance.Broadcast(new TargetBlockLocChangeEvent(null));
                 }
@@ -181,7 +184,7 @@ namespace CraftSharp.Control
             }
         }
 
-        private void UpdateBlockSelectionTo(BlockLoc newTargetLoc)
+        private void UpdateBlockSelectionTo(BlockLoc newBlockLoc)
         {
             if (client == null) return;
 
@@ -192,10 +195,10 @@ namespace CraftSharp.Control
                 blockSelectionBox!.transform.SetParent(transform, false);
             }
             
-            TargetBlockLoc = newTargetLoc;
-            blockSelectionBox.transform.position = CoordConvert.MC2Unity(client.WorldOriginOffset, newTargetLoc.ToLocation());
+            TargetBlockLoc = newBlockLoc;
+            blockSelectionBox.transform.position = CoordConvert.MC2Unity(client.WorldOriginOffset, newBlockLoc.ToLocation());
 
-            EventManager.Instance.Broadcast(new TargetBlockLocChangeEvent(newTargetLoc));
+            EventManager.Instance.Broadcast(new TargetBlockLocChangeEvent(newBlockLoc));
         }
 
         private void UpdateBlockInteractions(ChunkRenderManager chunksManager)
@@ -390,11 +393,14 @@ namespace CraftSharp.Control
             });
         }
 
-        private static BlockLoc PlaceBlock(BaseCornClient client, BlockLoc targetBlockLoc, Direction targetDirection)
+        private static BlockLoc PlaceBlock(BaseCornClient client, BlockLoc targetBlockLoc, Location targetExactLoc, Direction targetDirection)
         {
             var placeBlockLoc = GetPlaceBlockLoc(targetBlockLoc, targetDirection);
+            var inBlockLoc = targetExactLoc - placeBlockLoc.ToLocation();
 
-            client.PlaceBlock(placeBlockLoc, targetDirection, Inventory.Hand.MainHand);
+            Debug.Log($"In block: {inBlockLoc}");
+
+            client.PlaceBlock(targetBlockLoc, targetDirection, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, Inventory.Hand.MainHand);
 
             return placeBlockLoc;
         }
@@ -491,11 +497,11 @@ namespace CraftSharp.Control
 
                 if (playerController.CurrentActionType == ItemActionType.Block)
                 {
-                    if (TargetBlockLoc is not null && TargetDirection is not null)
+                    if (TargetBlockLoc is not null && TargetDirection is not null && TargetExactLoc is not null)
                     {
                         if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
                         {
-                            var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, TargetDirection.Value);
+                            var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
 
                             placeBlockCooldown = 0F;
 
@@ -573,7 +579,7 @@ namespace CraftSharp.Control
             {
                 UpdateBlockSelection(cameraController.GetPointerRay());
 
-                if (TargetBlockLoc is not null && TargetDirection is not null &&
+                if (TargetBlockLoc is not null && TargetDirection is not null && TargetExactLoc is not null &&
                     playerController != null && client != null)
                 {
                     var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
@@ -618,7 +624,7 @@ namespace CraftSharp.Control
                     {
                         if (placeBlockCooldown <= PLACE_BLOCK_COOLDOWN) // Cooldown for placing block
                         {
-                            var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, TargetDirection.Value);
+                            var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
 
                             placeBlockCooldown = 0F;
 

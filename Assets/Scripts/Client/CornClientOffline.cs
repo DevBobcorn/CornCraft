@@ -425,7 +425,7 @@ namespace CraftSharp
         /// <param name="blockLoc">Location to place block to</param>
         /// <param name="blockFace">Block face (e.g. Direction.Down when clicking on the block below to place this block)</param>
         /// <returns>TRUE if successfully placed</returns>
-        public override bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, Hand hand = Hand.MainHand)
+        public override bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, float x, float y, float z, Hand hand = Hand.MainHand)
         {
             return false;
         }

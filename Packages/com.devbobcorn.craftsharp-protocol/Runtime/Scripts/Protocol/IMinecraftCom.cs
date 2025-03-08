@@ -208,7 +208,7 @@ namespace CraftSharp.Protocol
         /// <param name="face">Block face</param>
         /// <param name="sequenceId">Sequence ID (use for synchronization)</param>
         /// <returns>True if packet was successfully sent</returns>
-        bool SendPlayerBlockPlacement(int hand, BlockLoc blockLoc, Direction face, int sequenceId);
+        bool SendPlayerBlockPlacement(int hand, BlockLoc blockLoc,  float x, float y, float z, Direction face, int sequenceId);
 
         /// <summary>
         /// Send player blog digging packet to the server. This packet needs to be called at least twice: Once to begin digging, then a second time to finish digging

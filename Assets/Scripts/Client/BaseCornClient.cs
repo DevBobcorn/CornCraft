@@ -225,7 +225,7 @@ namespace CraftSharp
         public abstract bool CloseInventory(int windowId);
         public abstract bool ClearInventories();
         public abstract bool InteractEntity(int entityId, int type, Hand hand = Hand.MainHand);
-        public abstract bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, Hand hand = Hand.MainHand);
+        public abstract bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, float x, float y, float z, Hand hand = Hand.MainHand);
         public abstract bool DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status);
         public abstract bool DropItem(bool dropEntireStack);
         public abstract bool SwapItemOnHands();

@@ -3432,7 +3432,7 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool SendPlayerBlockPlacement(int hand, BlockLoc location, Direction face, int sequenceId)
+        public bool SendPlayerBlockPlacement(int hand, BlockLoc location, float x, float y, float z, Direction face, int sequenceId)
         {
             try
             {
@@ -3440,9 +3440,9 @@ namespace CraftSharp.Protocol.Handlers
                 packet.AddRange(DataTypes.GetVarInt(hand));
                 packet.AddRange(DataTypes.GetBlockLoc(location));
                 packet.AddRange(DataTypes.GetVarInt(dataTypes.GetBlockFace(face)));
-                packet.AddRange(DataTypes.GetFloat(0.5f)); // cursorX
-                packet.AddRange(DataTypes.GetFloat(0.5f)); // cursorY
-                packet.AddRange(DataTypes.GetFloat(0.5f)); // cursorZ
+                packet.AddRange(DataTypes.GetFloat(x)); // cursorX
+                packet.AddRange(DataTypes.GetFloat(y)); // cursorY
+                packet.AddRange(DataTypes.GetFloat(z)); // cursorZ
                 packet.Add(0); // insideBlock = false;
                 if (protocolVersion >= MC_1_19_Version)
                     packet.AddRange(DataTypes.GetVarInt(sequenceId));

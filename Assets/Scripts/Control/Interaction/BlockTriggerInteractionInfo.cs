@@ -29,7 +29,8 @@ namespace CraftSharp.Control
                 {
                     case InteractionType.Interact:
                     {
-                        client.PlaceBlock(blockLoc, Direction.Down);
+                        // TODO: Check interact location
+                        client.PlaceBlock(blockLoc, Direction.Down, 0.5F, 0.5F, 0.5F);
 
                         break;
                     }
