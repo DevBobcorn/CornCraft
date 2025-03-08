@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using CraftSharp.Inventory;
 using CraftSharp.Protocol;
-using UnityEngine;
 
 namespace CraftSharp.Control
 {

@@ -2103,7 +2103,7 @@ namespace CraftSharp.Protocol.Handlers
                             List<double> op2 = new();
 
                             var NumberOfModifiers = DataTypes.ReadNextVarInt(packetData);
-                            for (int j = 0; j < NumberOfModifiers; j++)
+                            for (var j = 0; j < NumberOfModifiers; j++)
                             {
                                 DataTypes.ReadNextUUID(packetData);
                                 var amount = DataTypes.ReadNextDouble(packetData);

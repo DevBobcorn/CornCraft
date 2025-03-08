@@ -7,6 +7,8 @@ using System.IO.Compression;
 using UnityEngine;
 
 using CraftSharp.Inventory;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
+using CraftSharp.Protocol.Handlers.StructuredComponents;
 
 namespace CraftSharp.Protocol.Handlers
 {
@@ -587,21 +589,57 @@ namespace CraftSharp.Protocol.Handlers
         /// <returns>The item that was read or NULL for an empty slot</returns>
         public ItemStack? ReadNextItemSlot(Queue<byte> cache, ItemPalette itemPalette)
         {
-            // MC 1.13.2 and greater
-            bool itemPresent = ReadNextBool(cache);
-            if (itemPresent)
+            if (protocolVersion >= ProtocolMinecraft.MC_1_20_6_Version)
             {
-                int itemID = ReadNextVarInt(cache);
+                var strcturedComponentsToAdd = new List<StructuredComponent>();
+
+                var itemCount = ReadNextVarInt(cache);
+
+                if (itemCount <= 0) return null;
                 
-                if (itemID == -1)
+                var itemId = ReadNextVarInt(cache);
+                var item = new ItemStack(itemPalette.GetByNumId(itemId), itemCount, null);
+                    
+                var numberOfComponentsToAdd = ReadNextVarInt(cache);
+                var numberofComponentsToRemove = ReadNextVarInt(cache);
+
+                for (var i = 0; i < numberOfComponentsToAdd; i++)
+                {
+                    var componentTypeId = ReadNextVarInt(cache);
+
+                    var strcuturedComponentHandler = new StructuredComponentsHandler(protocolVersion, this, itemPalette);
+                    strcturedComponentsToAdd.Add(strcuturedComponentHandler.Parse(componentTypeId, cache));
+                }
+
+                for (var i = 0; i < numberofComponentsToRemove; i++)
+                {
+                    // TODO: Check what this does exactly
+                    ReadNextVarInt(cache); // The type of component to remove
+                }
+                    
+                // TODO: Wire up the strctured components in the Item class (extract info, update fields, etc..)
+                // Use strcturedComponentsToAdd
+                // Look at: https://wiki.vg/index.php?title=Slot_Data&oldid=19350#Structured_components
+                
+                return item;
+            }
+            else // MC 1.13.2 and greater
+            {
+                var itemPresent = ReadNextBool(cache);
+
+                if (!itemPresent)
                     return null;
-                
-                Item type = itemPalette.GetByNumId(itemID);
-                byte itemCount = ReadNextByte(cache);
-                Dictionary<string, object> nbt = ReadNextNbt(cache, UseAnonymousNBT);
+
+                var itemId = ReadNextVarInt(cache);
+
+                if (itemId == -1)
+                    return null;
+
+                var type = itemPalette.GetByNumId(itemId);
+                var itemCount = ReadNextByte(cache);
+                var nbt = ReadNextNbt(cache, UseAnonymousNBT);
                 return new ItemStack(type, itemCount, nbt);
             }
-            else return null;
         }
 
         /// <summary>
