@@ -290,8 +290,12 @@ namespace CraftSharp.Control
             heldItemCallback = (e) =>
             {
                 OnCurrentItemChanged?.Invoke(e.ItemStack, e.ActionType, null);
-                // Exit attack state when active item is changed
-                Status!.Attacking = false;
+                // Exit attack state when active item action type is changed.
+                // Ignore this if previous held item doesn't do anything(bare hand)
+                if (currentActionType != ItemActionType.None && currentActionType != e.ActionType)
+                {
+                    Status!.Attacking = false;
+                }
                 currentItemStack = e.ItemStack;
                 currentActionType = e.ActionType;
             };
