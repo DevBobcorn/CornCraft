@@ -398,8 +398,6 @@ namespace CraftSharp.Control
             var placeBlockLoc = GetPlaceBlockLoc(targetBlockLoc, targetDirection);
             var inBlockLoc = targetExactLoc - placeBlockLoc.ToLocation();
 
-            Debug.Log($"In block: {inBlockLoc}");
-
             client.PlaceBlock(targetBlockLoc, targetDirection, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, Inventory.Hand.MainHand);
 
             return placeBlockLoc;
@@ -409,111 +407,120 @@ namespace CraftSharp.Control
         {
             this.client = client;
             this.cameraController = camController;
-            this.playerController = playerController;
 
-            playerController.Actions.Interaction.ChargedAttack.performed += _ =>
+            if (this.playerController != playerController)
             {
-                var currentActionType = playerController.CurrentActionType;
-                var status = playerController.Status;
+                this.playerController = playerController;
 
-                if (currentActionType == ItemActionType.Sword)
+
+                playerController.Actions.Interaction.ChargedAttack.performed += _ =>
                 {
-                    if (status.AttackStatus.AttackCooldown <= 0F)
+                    var currentActionType = playerController.CurrentActionType;
+                    var status = playerController.Status;
+
+                    if (currentActionType == ItemActionType.Sword)
                     {
-                        // TODO: Implement
-                    }
-                }
-                else if (currentActionType == ItemActionType.Bow)
-                {
-                    if (status.AttackStatus.AttackCooldown <= 0F)
-                    {
-                        // Specify attack data to use
-                        status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
-
-                        // Update player state
-                        playerController.ChangeToState(PlayerStates.RANGED_AIM);
-                    }
-                }
-                else // Check digging block
-                {
-                    if (TargetBlockLoc is not null && TargetDirection is not null &&
-                        client.GameMode != GameMode.Creative)
-                    {
-                        playerController.ChangeToState(PlayerStates.DIGGING_AIM);
-                    }
-                }
-            };
-
-            playerController.Actions.Interaction.NormalAttack.performed += _ =>
-            {
-                var currentActionType = playerController.CurrentActionType;
-                var status = playerController.Status;
-
-                if (TargetBlockLoc is not null && TargetDirection is not null &&
-                    client.GameMode == GameMode.Creative)
-                {
-                    if (instaBreakCooldown < INSTA_BREAK_COOLDOWN)
-                    {
-                        CreativeInstaBreak(client, TargetBlockLoc.Value, TargetDirection.Value);
-
-                        instaBreakCooldown = 0F;
-                    }
-                }
-                else if (currentActionType == ItemActionType.Sword)
-                {
-                    if (status.AttackStatus.AttackCooldown <= 0F)
-                    {
-                        // Specify attack data to use
-                        status.AttackStatus.CurrentStagedAttack = playerController.AbilityConfig.MeleeSwordAttack_Staged;
-
-                        // Update player state
-                        playerController.ChangeToState(PlayerStates.MELEE);
-                    }
-                }
-            };
-
-            playerController.Actions.Interaction.UseChargedItem.performed += _ =>
-            {
-                var currentActionType = playerController.CurrentActionType;
-                var status = playerController.Status;
-
-                if (currentActionType == ItemActionType.Bow)
-                {
-                    if (status.AttackStatus.AttackCooldown <= 0F)
-                    {
-                        // Specify attack data to use
-                        status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
-
-                        // Update player state
-                        playerController.ChangeToState(PlayerStates.RANGED_AIM);
-                    }
-                }
-            };
-
-            playerController.Actions.Interaction.UseNormalItem.performed += _ =>
-            {
-                var currentActionType = playerController.CurrentActionType;
-                var status = playerController.Status;
-
-                if (playerController.CurrentActionType == ItemActionType.Block)
-                {
-                    if (TargetBlockLoc is not null && TargetDirection is not null && TargetExactLoc is not null)
-                    {
-                        if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
+                        if (status.AttackStatus.AttackCooldown <= 0F)
                         {
-                            var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
-
-                            placeBlockCooldown = 0F;
-
-                            UpdateBlockSelectionTo(placeLoc);
+                            // TODO: Implement
                         }
                     }
-                }
-                else
+                    else if (currentActionType == ItemActionType.Bow)
+                    {
+                        if (status.AttackStatus.AttackCooldown <= 0F)
+                        {
+                            // Specify attack data to use
+                            status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
+
+                            // Update player state
+                            playerController.ChangeToState(PlayerStates.RANGED_AIM);
+                        }
+                    }
+                    else // Check digging block
+                    {
+                        if (TargetBlockLoc is not null && TargetDirection is not null &&
+                            client.GameMode != GameMode.Creative)
+                        {
+                            playerController.ChangeToState(PlayerStates.DIGGING_AIM);
+                        }
+                    }
+                };
+
+                playerController.Actions.Interaction.NormalAttack.performed += _ =>
                 {
-                    client.UseItemOnMainHand();
-                }
-            };
+                    var currentActionType = playerController.CurrentActionType;
+                    var status = playerController.Status;
+
+                    if (TargetBlockLoc is not null && TargetDirection is not null &&
+                        client.GameMode == GameMode.Creative)
+                    {
+                        if (instaBreakCooldown < INSTA_BREAK_COOLDOWN)
+                        {
+                            CreativeInstaBreak(client, TargetBlockLoc.Value, TargetDirection.Value);
+
+                            instaBreakCooldown = 0F;
+                        }
+                    }
+                    else if (currentActionType == ItemActionType.Sword)
+                    {
+                        if (status.AttackStatus.AttackCooldown <= 0F)
+                        {
+                            // Specify attack data to use
+                            status.AttackStatus.CurrentStagedAttack = playerController.AbilityConfig.MeleeSwordAttack_Staged;
+
+                            // Update player state
+                            playerController.ChangeToState(PlayerStates.MELEE);
+                        }
+                    }
+                };
+
+                playerController.Actions.Interaction.UseChargedItem.performed += _ =>
+                {
+                    var currentActionType = playerController.CurrentActionType;
+                    var status = playerController.Status;
+
+                    if (currentActionType == ItemActionType.Bow)
+                    {
+                        if (status.AttackStatus.AttackCooldown <= 0F)
+                        {
+                            // Specify attack data to use
+                            status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
+
+                            // Update player state
+                            playerController.ChangeToState(PlayerStates.RANGED_AIM);
+                        }
+                    }
+                };
+
+                playerController.Actions.Interaction.UseNormalItem.performed += _ =>
+                {
+                    var currentActionType = playerController.CurrentActionType;
+                    var status = playerController.Status;
+
+                    if (TargetBlockLoc is not null && TargetDirection is not null && TargetExactLoc is not null)
+                    {
+                        if (blockTriggerInteractionInfos.ContainsKey(TargetBlockLoc.Value)) // Check if target block is interactable
+                        {
+                            // Interact with target block
+                            PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
+                        }
+                        else if (playerController.CurrentActionType == ItemActionType.Block) // Check if holding a block item
+                        {
+                            if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
+                            {
+                                var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
+
+                                placeBlockCooldown = 0F;
+                                UpdateBlockSelectionTo(placeLoc);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        client.UseItemOnMainHand();
+                    }
+                };
+            }
         }
 
         void Start()
@@ -620,14 +627,14 @@ namespace CraftSharp.Control
                     
                     // Check continuous block placement
                     if (playerController.CurrentActionType == ItemActionType.Block &&
-                             playerController.Actions.Interaction.UseNormalItem.IsPressed())
+                        playerController.Actions.Interaction.UseNormalItem.IsPressed() &&
+                        !blockTriggerInteractionInfos.ContainsKey(TargetBlockLoc.Value))
                     {
                         if (placeBlockCooldown <= PLACE_BLOCK_COOLDOWN) // Cooldown for placing block
                         {
                             var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
 
                             placeBlockCooldown = 0F;
-
                             UpdateBlockSelectionTo(placeLoc);
                         }
                     }
