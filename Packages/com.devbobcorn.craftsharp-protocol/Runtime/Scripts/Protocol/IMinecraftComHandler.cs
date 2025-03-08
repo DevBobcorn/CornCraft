@@ -266,6 +266,15 @@ namespace CraftSharp.Protocol
         void OnTimeUpdate(long worldAge, long timeOfDay);
 
         /// <summary>
+        /// When received window properties from server.
+        /// 
+        /// </summary>
+        /// <param name="inventoryId">Inventory Id</param>
+        /// <param name="propertyId">Property Id</param>
+        /// <param name="propertyValue">Property Value</param>
+        public void OnWindowProperties(byte inventoryId, short propertyId, short propertyValue);
+
+        /// <summary>
         /// Called when inventory items have been received
         /// </summary>
         /// <param name="inventoryId">Inventory Id</param>

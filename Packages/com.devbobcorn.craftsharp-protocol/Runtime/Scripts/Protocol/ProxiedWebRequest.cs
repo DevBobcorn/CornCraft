@@ -117,7 +117,8 @@ namespace CraftSharp.Protocol
                 if (isSecure)
                 {
                     stream = new SslStream(client.GetStream());
-                    ((SslStream)stream).AuthenticateAsClient(host, null, SslProtocols.Tls12, true); // Enable TLS 1.2. Hotfix for #1774
+                    // Todo: Add switch for revocation mode
+                    ((SslStream)stream).AuthenticateAsClient(host, null, SslProtocols.Tls12, false); // Enable TLS 1.2. Hotfix for #1774
                 }
                 else
                 {

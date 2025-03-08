@@ -78,6 +78,9 @@ namespace CraftSharp
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
         private int foodSaturation, level, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
+        #nullable enable
+        private EnchantmentData? lastEnchantment = null;
+        #nullable disable
         private readonly object movementLock = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         #endregion
@@ -2164,6 +2167,73 @@ namespace CraftSharp
             if (inventoryId != 0)
             {
                 Debug.Log(Translations.Get("extra.inventory_close", inventoryId));
+            }
+        }
+
+        /// <summary>
+        /// When received window properties from server.
+        /// Used for Furnaces, Enchanting Table, Beacon, Brewing stand, Stone cutter, Loom and Lectern
+        /// More info about: https://wiki.vg/Protocol#Set_Container_Property
+        /// </summary>
+        /// <param name="inventoryID">Inventory ID</param>
+        /// <param name="propertyId">Property ID</param>
+        /// <param name="propertyValue">Property Value</param>
+        public void OnWindowProperties(byte inventoryID, short propertyId, short propertyValue)
+        {
+            if (!inventories.ContainsKey(inventoryID))
+                return;
+
+            Container inventory = inventories[inventoryID];
+
+            if (inventory.Properties.ContainsKey(propertyId))
+                inventory.Properties.Remove(propertyId);
+
+            inventory.Properties.Add(propertyId, propertyValue);
+
+            if (inventory.Type == ContainerType.Enchantment)
+            {
+                // We got the last property for enchantment
+                if (propertyId == 9 && propertyValue != -1)
+                {
+                    var topEnchantmentLevelRequirement = inventory.Properties[0];
+                    var middleEnchantmentLevelRequirement = inventory.Properties[1];
+                    var bottomEnchantmentLevelRequirement = inventory.Properties[2];
+
+                    var topEnchantment = EnchantmentMapping.GetEnchantmentById(
+                        GetProtocolVersion(),
+                        inventory.Properties[4]);
+
+                    var middleEnchantment = EnchantmentMapping.GetEnchantmentById(
+                        GetProtocolVersion(),
+                        inventory.Properties[5]);
+
+                    var bottomEnchantment = EnchantmentMapping.GetEnchantmentById(
+                        GetProtocolVersion(),
+                        inventory.Properties[6]);
+
+                    var topEnchantmentLevel = inventory.Properties[7];
+                    var middleEnchantmentLevel = inventory.Properties[8];
+                    var bottomEnchantmentLevel = inventory.Properties[9];
+
+                    lastEnchantment = new()
+                    {
+                        TopEnchantment = topEnchantment,
+                        MiddleEnchantment = middleEnchantment,
+                        BottomEnchantment = bottomEnchantment,
+
+                        Seed = inventory.Properties[3],
+
+                        TopEnchantmentLevel = topEnchantmentLevel,
+                        MiddleEnchantmentLevel = middleEnchantmentLevel,
+                        BottomEnchantmentLevel = bottomEnchantmentLevel,
+
+                        TopEnchantmentLevelRequirement = topEnchantmentLevelRequirement,
+                        MiddleEnchantmentLevelRequirement = middleEnchantmentLevelRequirement,
+                        BottomEnchantmentLevelRequirement = bottomEnchantmentLevelRequirement
+                    };
+
+                    // TODO: Broadcast enchanment event
+                }
             }
         }
 

@@ -34,12 +34,11 @@ namespace CraftSharp.Inventory
         public Dictionary<int, ItemStack> Items;
 
         /// <summary>
-        /// Create an empty container
+        /// Container Properties
+        /// Used for Furnaces, Enchanting Table, Beacon, Brewing stand, Stone cutter, Loom and Lectern
+        /// More info about: https://wiki.vg/Protocol#Set_Container_Property
         /// </summary>
-        public Container()
-        {
-            Items = new Dictionary<int, ItemStack>();
-        }
+        public Dictionary<int, short> Properties;
 
         /// <summary>
         /// Create an empty container with ID, Type and Title
@@ -53,6 +52,7 @@ namespace CraftSharp.Inventory
             Type = type;
             Title = title;
             Items = new Dictionary<int, ItemStack>();
+            Properties = new Dictionary<int, short>();
         }
 
         /// <summary>
@@ -68,20 +68,22 @@ namespace CraftSharp.Inventory
             Type = type;
             Title = title;
             Items = items;
+            Properties = new Dictionary<int, short>();
         }
 
         /// <summary>
-        /// Create an empty container with ID, Type and Title
+        /// Create an empty container with Id, Type and Title
         /// </summary>
-        /// <param name="id">Container ID</param>
-        /// <param name="typeID">Container Type</param>
+        /// <param name="id">Container Id</param>
+        /// <param name="typeId">Container Type</param>
         /// <param name="title">Container Title</param>
-        public Container(int id, int typeID, string title)
+        public Container(int id, int typeId, string title)
         {
             Id = id;
-            Type = GetContainerType(typeID);
+            Type = GetContainerType(typeId);
             Title = title;
             Items = new Dictionary<int, ItemStack>();
+            Properties = new Dictionary<int, short>();
         }
 
         /// <summary>
@@ -94,6 +96,7 @@ namespace CraftSharp.Inventory
             Type = type;
             Title = null;
             Items = new Dictionary<int, ItemStack>();
+            Properties = new Dictionary<int, short>();
         }
 
         /// <summary>
@@ -107,6 +110,7 @@ namespace CraftSharp.Inventory
             Type = type;
             Title = null;
             Items = items;
+            Properties = new Dictionary<int, short>();
         }
 
         /// <summary>

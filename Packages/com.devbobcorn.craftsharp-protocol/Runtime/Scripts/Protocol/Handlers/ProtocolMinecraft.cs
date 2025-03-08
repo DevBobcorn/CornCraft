@@ -1850,6 +1850,14 @@ namespace CraftSharp.Protocol.Handlers
                         handler.OnWindowItems(windowId, inventorySlots, stateId);
                     }
                     break;
+                case PacketTypesIn.WindowProperty:
+                    {
+                        var containerId = DataTypes.ReadNextByte(packetData);
+                        var propertyId = DataTypes.ReadNextShort(packetData);
+                        var propertyValue = DataTypes.ReadNextShort(packetData);
+                        handler.OnWindowProperties(containerId, propertyId, propertyValue);
+                    }
+                    break;
                 case PacketTypesIn.SetSlot:
                     {
                         var windowId = DataTypes.ReadNextByte(packetData);

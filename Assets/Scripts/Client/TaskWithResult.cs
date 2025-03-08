@@ -85,6 +85,9 @@ namespace CraftSharp
             catch (Exception e)
             {
                 exception = e;
+
+                // Attempt to un-swallow the stack trace for the exception by throwing as soon as possible
+                throw; 
             }
 
             // Mark task as complete and release wait event
