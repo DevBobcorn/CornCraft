@@ -1062,6 +1062,32 @@
         "minecraft:black_bed"
       ]
     },
+    "go_to_bed_hidden": {
+      "action": "interact",
+      "hint": "gameplay.interaction.go_to_bed",
+      "predicate": "occupied=false,part=foot",
+      "icon_type": "enter_location",
+      "reusable": true,
+      "show_in_list": false,
+      "triggers": [
+        "minecraft:white_bed",
+        "minecraft:orange_bed",
+        "minecraft:magenta_bed",
+        "minecraft:light_blue_bed",
+        "minecraft:yellow_bed",
+        "minecraft:lime_bed",
+        "minecraft:pink_bed",
+        "minecraft:gray_bed",
+        "minecraft:light_gray_bed",
+        "minecraft:cyan_bed",
+        "minecraft:purple_bed",
+        "minecraft:blue_bed",
+        "minecraft:brown_bed",
+        "minecraft:green_bed",
+        "minecraft:red_bed",
+        "minecraft:black_bed"
+      ]
+    },
     "open_door": {
       "action": "interact",
       "hint": "gameplay.interaction.open_door",
@@ -1081,11 +1107,51 @@
         "minecraft:warped_door"
       ]
     },
+    "open_door_hidden": {
+      "action": "interact",
+      "hint": "gameplay.interaction.open_door",
+      "predicate": "open=false,half=upper",
+      "icon_type": "enter_location",
+      "show_in_list": false,
+      "triggers": [
+        "minecraft:oak_door",
+        "minecraft:spruce_door",
+        "minecraft:birch_door",
+        "minecraft:jungle_door",
+        "minecraft:acacia_door",
+        "minecraft:dark_oak_door",
+        "minecraft:mangrove_door",
+        "minecraft:cherry_door",
+        "minecraft:bamboo_door",
+        "minecraft:crimson_door",
+        "minecraft:warped_door"
+      ]
+    },
     "close_door": {
       "action": "interact",
       "hint": "gameplay.interaction.close_door",
       "predicate": "open=true,half=lower",
       "icon_type": "dialog",
+      "triggers": [
+        "minecraft:oak_door",
+        "minecraft:spruce_door",
+        "minecraft:birch_door",
+        "minecraft:jungle_door",
+        "minecraft:acacia_door",
+        "minecraft:dark_oak_door",
+        "minecraft:mangrove_door",
+        "minecraft:cherry_door",
+        "minecraft:bamboo_door",
+        "minecraft:crimson_door",
+        "minecraft:warped_door"
+      ]
+    },
+    "close_door_hidden": {
+      "action": "interact",
+      "hint": "gameplay.interaction.close_door",
+      "predicate": "open=true,half=upper",
+      "icon_type": "dialog",
+      "show_in_list": false,
       "triggers": [
         "minecraft:oak_door",
         "minecraft:spruce_door",

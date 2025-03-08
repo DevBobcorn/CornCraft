@@ -501,8 +501,13 @@ namespace CraftSharp.Control
                     {
                         if (blockTriggerInteractionInfos.ContainsKey(TargetBlockLoc.Value)) // Check if target block is interactable
                         {
-                            // Interact with target block
-                            PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
+                            if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
+                            {
+                                placeBlockCooldown = 0F;
+
+                                // Interact with target block
+                                PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
+                            }
                         }
                         else if (playerController.CurrentActionType == ItemActionType.Block) // Check if holding a block item
                         {

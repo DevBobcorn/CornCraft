@@ -55,6 +55,11 @@ namespace CraftSharp.UI
             // Events
             addCallback = (e) =>
             {
+                if (e.Info is BlockTriggerInteractionInfo triggerInfo && !triggerInfo.Definition.ShowInList)
+                {
+                    return;
+                }
+
                 AddInteractionOption(e.InteractionId, e.AddAndSelect, e.UseProgress, e.Info);
             };
 

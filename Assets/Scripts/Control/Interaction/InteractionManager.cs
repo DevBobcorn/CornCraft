@@ -86,6 +86,9 @@ namespace CraftSharp.Control
                         
                         var reusable = entryCont.TryGetValue("reusable", out var reusableData)
                             && bool.Parse(reusableData?.StringValue); // false if not specified
+                        
+                        var showInList = !entryCont.TryGetValue("show_in_list", out var showInListData)
+                            || bool.Parse(showInListData?.StringValue); // true if not specified
 
                         foreach (var trigger in triggers.DataArray)
                         {
@@ -102,11 +105,11 @@ namespace CraftSharp.Control
 
                                     if (itemActionType is not null)
                                     {
-                                        inters.Add(new HarvestInteraction(itemActionType.Value, interactionType, hintKey, tag));
+                                        inters.Add(new HarvestInteraction(itemActionType.Value, interactionType, hintKey, tag, showInList));
                                     }
                                     else
                                     {
-                                        inters.Add(new TriggerInteraction(iconType, blockId, reusable, interactionType, hintKey, tag));
+                                        inters.Add(new TriggerInteraction(iconType, blockId, reusable, interactionType, hintKey, tag, showInList));
                                     }
 
                                     if (interactionTable.TryGetValue(stateId, out var definition))

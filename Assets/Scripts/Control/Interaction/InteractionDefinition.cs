@@ -20,11 +20,12 @@ namespace CraftSharp.Control
         ItemIcon
     }
 
-    public abstract record Interaction(InteractionType Type, string HintKey, string Tag)
+    public abstract record Interaction(InteractionType Type, string HintKey, string Tag, bool ShowInList)
     {
         public InteractionType Type { get; } = Type;
         public string HintKey { get; } = HintKey;
         public string Tag { get; } = Tag;
+        public bool ShowInList { get; } = ShowInList;
     }
 
     public record TriggerInteraction(
@@ -33,8 +34,9 @@ namespace CraftSharp.Control
         bool Reusable,
         InteractionType Type,
         string HintKey,
-        string Tag)
-        : Interaction(Type, HintKey, Tag)
+        string Tag,
+        bool ShowInList)
+        : Interaction(Type, HintKey, Tag, ShowInList)
     {
         public InteractionIconType IconType { get; } = IconType;
         public ResourceLocation IconItemId { get; } = IconItemId;
@@ -45,8 +47,9 @@ namespace CraftSharp.Control
         ItemActionType ActionType,
         InteractionType Type,
         string HintKey,
-        string Tag)
-        : Interaction(Type, HintKey, Tag)
+        string Tag,
+        bool ShowInList)
+        : Interaction(Type, HintKey, Tag, ShowInList)
     {
         public ItemActionType ActionType { get; } = ActionType;
     }
