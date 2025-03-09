@@ -90,7 +90,7 @@ namespace CraftSharp.UI
                 }
 
                 var target = item.Value.transform;
-                target.eulerAngles = camController.GetEularAngles();
+                target.eulerAngles = camController.GetEulerAngles();
                 var dist = (camController.GetPosition() - target.position).magnitude;
                 var scale = UIScaleCurve.Evaluate(dist);
                 // Countervail entity render scale (support uniform scale only)

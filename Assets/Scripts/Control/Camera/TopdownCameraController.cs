@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Cinemachine;
+using Unity.Cinemachine;
 
 using CraftSharp.Event;
 
@@ -12,21 +12,19 @@ namespace CraftSharp.Control
         [SerializeField] private float cameraZOffsetFar  =   30F;
         
         // Virtual camera and camera components
-        private CinemachineVirtualCamera _virtualCameraFollow;
-        private CinemachineFramingTransposer _framingTransposer;
-        private CinemachinePOV _followPOV;
+        [SerializeField] private CinemachineCamera virtualCameraFollow;
+        private CinemachinePositionComposer _positionComposer;
+        private CinemachinePanTilt _followPOV;
 
-        private float? _setYawRequest = null;
+        private float? _setYawRequest;
 
         public override void EnsureInitialized()
         {
             if (!initialized)
             {
                 // Get virtual and render cameras
-                var followObj = transform.Find("Follow Virtual");
-                _virtualCameraFollow = followObj.GetComponent<CinemachineVirtualCamera>();
-                _followPOV = _virtualCameraFollow!.GetCinemachineComponent<CinemachinePOV>();
-                _framingTransposer = _virtualCameraFollow.GetCinemachineComponent<CinemachineFramingTransposer>();
+                _followPOV = (CinemachinePanTilt) virtualCameraFollow!.GetCinemachineComponent(CinemachineCore.Stage.Aim);
+                _positionComposer = (CinemachinePositionComposer) virtualCameraFollow.GetCinemachineComponent(CinemachineCore.Stage.Body);
 
                 initialized = true;
             }
@@ -37,7 +35,7 @@ namespace CraftSharp.Control
             EnsureInitialized();
 
             // Activate virtual camera
-            _virtualCameraFollow!.MoveToTopOfPrioritySubqueue();
+            virtualCameraFollow!.Prioritize();
 
             // Enable Cinemachine input
             EnableCinemachineInput();
@@ -47,7 +45,7 @@ namespace CraftSharp.Control
             cameraInfo.CurrentScale = cameraInfo.TargetScale - 0.2F;
 
             // Make sure sprite camera uses same fov as main camera
-            spriteRenderCamera!.fieldOfView = _virtualCameraFollow.m_Lens.FieldOfView;
+            spriteRenderCamera!.fieldOfView = virtualCameraFollow.Lens.FieldOfView;
 
             // Aiming is not enabled by default
             UseAimingCamera(false);
@@ -68,10 +66,10 @@ namespace CraftSharp.Control
                 cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - mouseScroll * zoomSensitivity);
             }
             
-            if (cameraInfo.TargetScale != cameraInfo.CurrentScale)
+            if (!Mathf.Approximately(cameraInfo.TargetScale, cameraInfo.CurrentScale))
             {
                 cameraInfo.CurrentScale = Mathf.Lerp(cameraInfo.CurrentScale, cameraInfo.TargetScale, Time.deltaTime * zoomSmoothFactor);
-                _framingTransposer!.m_CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
+                _positionComposer!.CameraDistance = Mathf.Lerp(cameraZOffsetNear, cameraZOffsetFar, cameraInfo.CurrentScale);
             }
         }
 
@@ -92,43 +90,43 @@ namespace CraftSharp.Control
         public override void SetTarget(Transform target)
         {
             EnsureInitialized();
-            _virtualCameraFollow!.Follow = target;
+            virtualCameraFollow!.Follow = target;
         }
 
         public override Transform GetTarget()
         {
-            if (_virtualCameraFollow == null)
+            if (!virtualCameraFollow)
             {
                 return null;
             }
 
-            return _virtualCameraFollow.Follow;
+            return virtualCameraFollow.Follow;
         }
 
         public override void TeleportByDelta(Vector3 posDelta)
         {
-            if (_virtualCameraFollow != null)
+            if (virtualCameraFollow)
             {
-                _virtualCameraFollow.OnTargetObjectWarped(_virtualCameraFollow.Follow, posDelta);
+                virtualCameraFollow.OnTargetObjectWarped(virtualCameraFollow.Follow, posDelta);
             }
         }
 
         public override void SetYaw(float yaw)
         {
-            if (_followPOV == null)
+            if (!_followPOV)
             {
                 _setYawRequest = yaw;
             }
             else
             {
-                _followPOV.m_HorizontalAxis.Value = yaw;
+                _followPOV.PanAxis.Value = yaw;
                 _setYawRequest = null;
             }
         }
 
         public override float GetYaw()
         {
-            return _followPOV!.m_HorizontalAxis.Value;
+            return _followPOV!.PanAxis.Value;
         }
     }
 }

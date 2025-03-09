@@ -1,5 +1,5 @@
 using UnityEngine;
-using Cinemachine;
+using Unity.Cinemachine;
 
 namespace CraftSharp.Control
 {
@@ -29,9 +29,9 @@ namespace CraftSharp.Control
             spriteRenderCamera = spriteCamera;
         }
 
-        public virtual void EnableCinemachineInput()
+        public void EnableCinemachineInput()
         {
-            foreach (var input in GetComponentsInChildren<CinemachineInputProvider>())
+            foreach (var input in GetComponentsInChildren<CinemachineInputAxisController>())
             {
                 input.enabled = true;
             }
@@ -42,9 +42,9 @@ namespace CraftSharp.Control
             }
         }
 
-        public virtual void DisableCinemachineInput()
+        public void DisableCinemachineInput()
         {
-            foreach (var input in GetComponentsInChildren<CinemachineInputProvider>())
+            foreach (var input in GetComponentsInChildren<CinemachineInputAxisController>())
             {
                 input.enabled = false;
             }
@@ -52,31 +52,28 @@ namespace CraftSharp.Control
             EnableZoom();
         }
 
-        public virtual void EnableZoom()
+        public void EnableZoom()
         {
             zoomDisabled = false;
         }
 
-        public virtual void DisableZoom()
+        public void DisableZoom()
         {
             zoomDisabled = true;
         }
 
         // Flag variables
         protected bool initialized = false;
-        public bool IsAiming { get; private set; } = false;
-        public bool AimingLocked { get; private set; } = false;
+        public bool IsAiming { get; private set; }
+        public bool AimingLocked { get; private set; }
 
-        private bool zoomDisabled = false;
+        private bool zoomDisabled;
 
-        public bool IsAimingOrLocked
-        {
-            get => IsAiming || AimingLocked;
-        }
+        public bool IsAimingOrLocked => IsAiming || AimingLocked;
 
         public virtual Ray? GetPointerRay()
         {
-            if (renderCamera != null)
+            if (renderCamera)
             {
                 return renderCamera.ViewportPointToRay(VIEWPORT_CENTER);
             }
@@ -138,7 +135,7 @@ namespace CraftSharp.Control
         public virtual Vector3 GetTargetViewportPos(Vector3 offset)
         {
             var target = GetTarget();
-            if (target != null)
+            if (target)
             {
                 var pos = renderCamera.WorldToViewportPoint(target.TransformPoint(offset));
                 pos.z = 0F;
@@ -147,14 +144,14 @@ namespace CraftSharp.Control
             return VIEWPORT_CENTER;
         }
 
-        public virtual Vector3 GetPointViewportPos(Vector3 point)
+        public Vector3 GetPointViewportPos(Vector3 point)
         {
             var pos = renderCamera.WorldToViewportPoint(point);
             pos.z = 0F;
             return pos;
         }
 
-        public virtual Transform GetTransform()
+        public Transform GetTransform()
         {
             return renderCamera.transform;
         }
@@ -168,7 +165,7 @@ namespace CraftSharp.Control
             return GetTransform().position;
         }
 
-        public virtual Vector3 GetEularAngles()
+        public virtual Vector3 GetEulerAngles()
         {
             return GetTransform().eulerAngles;
         }
