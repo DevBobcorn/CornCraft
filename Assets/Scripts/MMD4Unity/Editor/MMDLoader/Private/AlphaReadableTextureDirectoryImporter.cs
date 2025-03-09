@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-using UnityEditor;
-using System.Collections.Generic;
-    
+﻿using UnityEditor;
+
 public class AlphaReadableTextureDirectoryImporter : AssetPostprocessor {
 
     /// <summary>

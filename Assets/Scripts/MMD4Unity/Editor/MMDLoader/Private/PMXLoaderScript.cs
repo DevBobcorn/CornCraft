@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using UnityEditor;
-using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using MMD.PMX;
@@ -13,7 +11,7 @@ public partial class PMXLoaderScript {
     /// <param name='file_path'>PMDファイルのパス</param>
     /// <returns>ヘッダー</returns>
     public static PMXFormat.Header GetHeader(string file_path) {
-        PMXLoaderScript loader = new PMXLoaderScript();
+        var loader = new PMXLoaderScript();
         return loader.GetHeader_(file_path);
     }
 
@@ -23,7 +21,7 @@ public partial class PMXLoaderScript {
     /// <param name='file_path'>PMDファイルのパス</param>
     /// <returns>内部形式データ</returns>
     public static PMXFormat Import(string file_path) {
-        PMXLoaderScript loader = new PMXLoaderScript();
+        var loader = new PMXLoaderScript();
         return loader.Import_(file_path);
     }
 
@@ -37,8 +35,8 @@ public partial class PMXLoaderScript {
 
     private PMXFormat.Header GetHeader_(string file_path) {
         PMXFormat.Header result;
-        using (FileStream stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
-        using (BinaryReader bin = new BinaryReader(stream)) {
+        using (var stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
+        using (var bin = new BinaryReader(stream)) {
             file_path_ = null;
             binary_reader_ = bin;
             result = ReadHeader();
@@ -47,8 +45,8 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat Import_(string file_path) {
-        using (FileStream stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
-        using (BinaryReader bin = new BinaryReader(stream)) {
+        using (var stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
+        using (var bin = new BinaryReader(stream)) {
             file_path_ = file_path;
             binary_reader_ = bin;
             Read();
@@ -57,6 +55,8 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat Read() {
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
         format_ = new PMXFormat();
         format_.meta_header = CreateMetaHeader();
         format_.header = ReadHeader();
@@ -73,16 +73,20 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat.MetaHeader CreateMetaHeader() {
-        PMXFormat.MetaHeader result = new PMXFormat.MetaHeader();
-        result.path = file_path_;
-        result.name = Path.GetFileNameWithoutExtension(file_path_); // .pmxを抜かす
-        result.folder = Path.GetDirectoryName(file_path_); // PMDが格納されているフォルダ
+        var result = new PMXFormat.MetaHeader
+        {
+            path = file_path_,
+            name = Path.GetFileNameWithoutExtension(file_path_), // .pmxを抜かす
+            folder = Path.GetDirectoryName(file_path_) // PMDが格納されているフォルダ
+        };
         return result;
     }
     
     private PMXFormat.Header ReadHeader() {
-        PMXFormat.Header result = new PMXFormat.Header();
-        result.magic = binary_reader_.ReadBytes(4);
+        var result = new PMXFormat.Header
+        {
+            magic = binary_reader_.ReadBytes(4)
+        };
         if (Encoding.ASCII.GetString(result.magic) != "PMX ") {
             throw new System.FormatException();
         }
@@ -107,7 +111,7 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat.VertexList ReadVertexList() {
-        PMXFormat.VertexList result = new PMXFormat.VertexList();
+        var result = new PMXFormat.VertexList();
         uint vert_count = binary_reader_.ReadUInt32();
         result.vertex = new PMXFormat.Vertex[vert_count];
         for (uint i = 0, i_max = (uint)result.vertex.Length; i < i_max; ++i) {
@@ -117,53 +121,62 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat.Vertex ReadVertex() {
-        PMXFormat.Vertex result = new PMXFormat.Vertex();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.Vertex();
         result.pos = ReadSinglesToVector3(binary_reader_);
         result.normal_vec = ReadSinglesToVector3(binary_reader_);
         result.uv = ReadSinglesToVector2(binary_reader_);
         result.add_uv = new Vector4[format_.header.additionalUV];
+
         for (int i = 0; i < format_.header.additionalUV; i++) {
             result.add_uv[i] = ReadSinglesToVector4(binary_reader_);
         }
         PMXFormat.Vertex.WeightMethod weight_method = (PMXFormat.Vertex.WeightMethod)binary_reader_.ReadByte();
         switch(weight_method) {
-        case PMXFormat.Vertex.WeightMethod.BDEF1:
-            result.bone_weight = ReadBoneWeightBDEF1();
-            break;
-        case PMXFormat.Vertex.WeightMethod.BDEF2:
-            result.bone_weight = ReadBoneWeightBDEF2();
-            break;
-        case PMXFormat.Vertex.WeightMethod.BDEF4:
-            result.bone_weight = ReadBoneWeightBDEF4();
-            break;
-        case PMXFormat.Vertex.WeightMethod.SDEF:
-            result.bone_weight = ReadBoneWeightSDEF();
-            break;
-        case PMXFormat.Vertex.WeightMethod.QDEF:
-            result.bone_weight = ReadBoneWeightQDEF();
-            break;
-        default:
-            result.bone_weight = null;
-            throw new System.FormatException();
+            case PMXFormat.Vertex.WeightMethod.BDEF1:
+                result.bone_weight = ReadBoneWeightBDEF1();
+                break;
+            case PMXFormat.Vertex.WeightMethod.BDEF2:
+                result.bone_weight = ReadBoneWeightBDEF2();
+                break;
+            case PMXFormat.Vertex.WeightMethod.BDEF4:
+                result.bone_weight = ReadBoneWeightBDEF4();
+                break;
+            case PMXFormat.Vertex.WeightMethod.SDEF:
+                result.bone_weight = ReadBoneWeightSDEF();
+                break;
+            case PMXFormat.Vertex.WeightMethod.QDEF:
+                result.bone_weight = ReadBoneWeightQDEF();
+                break;
+            default:
+                result.bone_weight = null;
+                throw new System.FormatException();
         }
         result.edge_magnification = binary_reader_.ReadSingle();
         return result;
     }
 
     private PMXFormat.BoneWeight ReadBoneWeightBDEF1() {
-        PMXFormat.BDEF1 result = new PMXFormat.BDEF1();
-        result.bone1_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize);
+        var result = new PMXFormat.BDEF1
+        {
+            bone1_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize)
+        };
         return result;
     }
     private PMXFormat.BoneWeight ReadBoneWeightBDEF2() {
-        PMXFormat.BDEF2 result = new PMXFormat.BDEF2();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.BDEF2();
         result.bone1_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize);
         result.bone2_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize);
         result.bone1_weight = binary_reader_.ReadSingle();
         return result;
     }
     private PMXFormat.BoneWeight ReadBoneWeightBDEF4() {
-        PMXFormat.BDEF4 result = new PMXFormat.BDEF4();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.BDEF4();
         result.bone1_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize);
         result.bone2_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize);
         result.bone3_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize);
@@ -175,7 +188,9 @@ public partial class PMXLoaderScript {
         return result;
     }
     private PMXFormat.BoneWeight ReadBoneWeightSDEF() {
-        PMXFormat.SDEF result = new PMXFormat.SDEF();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.SDEF();
         result.bone1_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize);
         result.bone2_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize);
         result.bone1_weight = binary_reader_.ReadSingle();
@@ -185,7 +200,9 @@ public partial class PMXLoaderScript {
         return result;
     }
     private PMXFormat.BoneWeight ReadBoneWeightQDEF() {
-        PMXFormat.BDEF4 result = new PMXFormat.BDEF4();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.BDEF4();
         result.bone1_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize);
         result.bone2_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize);
         result.bone3_ref = CastIntRead(binary_reader_, format_.header.boneIndexSize);
@@ -198,7 +215,7 @@ public partial class PMXLoaderScript {
     }
     
     private PMXFormat.FaceVertexList ReadFaceVertexList() {
-        PMXFormat.FaceVertexList result = new PMXFormat.FaceVertexList();
+        var result = new PMXFormat.FaceVertexList();
         uint face_vert_count = binary_reader_.ReadUInt32();
         result.face_vert_index = new uint[face_vert_count];
         for (uint i = 0, i_max = (uint)result.face_vert_index.Length; i < i_max; ++i) {
@@ -208,21 +225,21 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat.TextureList ReadTextureList() {
-        PMXFormat.TextureList result = new PMXFormat.TextureList();
+        var result = new PMXFormat.TextureList();
         uint texture_file_count = binary_reader_.ReadUInt32();
         result.texture_file = new string[texture_file_count];
         for (uint i = 0, i_max = (uint)result.texture_file.Length; i < i_max; ++i) {
             result.texture_file[i] = ReadString();
             //"./"開始なら削除する
             if (('.' == result.texture_file[i][0]) && (1 == result.texture_file[i].IndexOfAny(new[]{'/', '\\'}, 1, 1))) {
-                result.texture_file[i] = result.texture_file[i].Substring(2);
+                result.texture_file[i] = result.texture_file[i][2..];
             }
         }
         return result;
     }
 
     private PMXFormat.MaterialList ReadMaterialList() {
-        PMXFormat.MaterialList result = new PMXFormat.MaterialList();
+        var result = new PMXFormat.MaterialList();
         uint material_count = binary_reader_.ReadUInt32();
         result.material = new PMXFormat.Material[material_count];
         for (uint i = 0, i_max = (uint)result.material.Length; i < i_max; ++i) {
@@ -232,7 +249,9 @@ public partial class PMXLoaderScript {
     }
     
     private PMXFormat.Material ReadMaterial() {
-        PMXFormat.Material result = new PMXFormat.Material();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.Material();
         result.name = ReadString();
         result.english_name = ReadString();
         result.diffuse_color = ReadSinglesToColor(binary_reader_); // dr, dg, db, da // 減衰色
@@ -254,7 +273,7 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat.BoneList ReadBoneList() {
-        PMXFormat.BoneList result = new PMXFormat.BoneList();
+        var result = new PMXFormat.BoneList();
         uint bone_count = binary_reader_.ReadUInt32();
         result.bone = new PMXFormat.Bone[bone_count];
         for (uint i = 0, i_max = (uint)result.bone.Length; i < i_max; ++i) {
@@ -264,7 +283,9 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat.Bone ReadBone() {
-        PMXFormat.Bone result = new PMXFormat.Bone();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.Bone();
         result.bone_name = ReadString();
         result.bone_english_name = ReadString();
         result.bone_position = ReadSinglesToVector3(binary_reader_);
@@ -300,7 +321,9 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat.IK_Data ReadIkData() {
-        PMXFormat.IK_Data result = new PMXFormat.IK_Data();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.IK_Data();
         result.ik_bone_index = CastIntRead(binary_reader_, format_.header.boneIndexSize);
         result.iterations = binary_reader_.ReadUInt32();
         result.limit_angle = binary_reader_.ReadSingle();
@@ -313,7 +336,9 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat.IK_Link ReadIkLink() {
-        PMXFormat.IK_Link result = new PMXFormat.IK_Link();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.IK_Link();
         result.target_bone_index = CastIntRead(binary_reader_, format_.header.boneIndexSize);
         result.angle_limit = binary_reader_.ReadByte();
         if (result.angle_limit == 1) {
@@ -324,7 +349,7 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat.MorphList ReadMorphList() {
-        PMXFormat.MorphList result = new PMXFormat.MorphList();
+        var result = new PMXFormat.MorphList();
         uint morph_count = binary_reader_.ReadUInt32();
         result.morph_data = new PMXFormat.MorphData[morph_count];
         for (uint i = 0, i_max = (uint)result.morph_data.Length; i < i_max; ++i) {
@@ -334,7 +359,9 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat.MorphData ReadMorphData() {
-        PMXFormat.MorphData result = new PMXFormat.MorphData();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.MorphData();
         result.morph_name = ReadString();
         result.morph_english_name = ReadString();
         result.handle_panel = (PMXFormat.MorphData.Panel)binary_reader_.ReadByte();
@@ -373,32 +400,42 @@ public partial class PMXLoaderScript {
         return result;
     }
     private PMXFormat.MorphOffset ReadGroupMorphOffset() {
-        PMXFormat.GroupMorphOffset result = new PMXFormat.GroupMorphOffset();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.GroupMorphOffset();
         result.morph_index = CastIntRead(binary_reader_, format_.header.morphIndexSize);
         result.morph_rate = binary_reader_.ReadSingle();
         return result;
     }
     private PMXFormat.MorphOffset ReadVertexMorphOffset() {
-        PMXFormat.VertexMorphOffset result = new PMXFormat.VertexMorphOffset();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.VertexMorphOffset();
         result.vertex_index = CastIntRead(binary_reader_, format_.header.vertexIndexSize);
         result.position_offset = ReadSinglesToVector3(binary_reader_);
         return result;
     }
     private PMXFormat.MorphOffset ReadBoneMorphOffset() {
-        PMXFormat.BoneMorphOffset result = new PMXFormat.BoneMorphOffset();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.BoneMorphOffset();
         result.bone_index = CastIntRead(binary_reader_, format_.header.boneIndexSize);
         result.move_value = ReadSinglesToVector3(binary_reader_);
         result.rotate_value = ReadSinglesToQuaternion(binary_reader_);
         return result;
     }
     private PMXFormat.MorphOffset ReadUVMorphOffset() {
-        PMXFormat.UVMorphOffset result = new PMXFormat.UVMorphOffset();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.UVMorphOffset();
         result.vertex_index = CastIntRead(binary_reader_, format_.header.vertexIndexSize);
         result.uv_offset = ReadSinglesToVector4(binary_reader_);
         return result;
     }
     private PMXFormat.MorphOffset ReadMaterialMorphOffset() {
-        PMXFormat.MaterialMorphOffset result = new PMXFormat.MaterialMorphOffset();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.MaterialMorphOffset();
         result.material_index = CastIntRead(binary_reader_, format_.header.materialIndexSize);
         result.offset_method = (PMXFormat.MaterialMorphOffset.OffsetMethod)binary_reader_.ReadByte();
         result.diffuse = ReadSinglesToColor(binary_reader_);
@@ -413,7 +450,9 @@ public partial class PMXLoaderScript {
         return result;
     }
     private PMXFormat.MorphOffset ReadImpulseMorphOffset() {
-        PMXFormat.ImpulseMorphOffset result = new PMXFormat.ImpulseMorphOffset();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.ImpulseMorphOffset();
         result.rigidbody_index = CastIntRead(binary_reader_, format_.header.morphIndexSize);
         result.local_flag = binary_reader_.ReadByte();
         result.move_velocity = ReadSinglesToVector3(binary_reader_);
@@ -422,7 +461,7 @@ public partial class PMXLoaderScript {
     }
 
     private PMXFormat.DisplayFrameList ReadDisplayFrameList() {
-        PMXFormat.DisplayFrameList result = new PMXFormat.DisplayFrameList();
+        var result = new PMXFormat.DisplayFrameList();
         uint display_frame_count = binary_reader_.ReadUInt32();
         result.display_frame = new PMXFormat.DisplayFrame[display_frame_count];
         for (uint i = 0, i_max = (uint)result.display_frame.Length; i < i_max; ++i) {
@@ -433,7 +472,9 @@ public partial class PMXLoaderScript {
 
                 
     private PMXFormat.DisplayFrame ReadDisplayFrame() {
-        PMXFormat.DisplayFrame result = new PMXFormat.DisplayFrame();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.DisplayFrame();
         result.display_name = ReadString();
         result.display_english_name = ReadString();
         result.special_frame_flag = binary_reader_.ReadByte();
@@ -446,15 +487,17 @@ public partial class PMXLoaderScript {
     }
     
     private PMXFormat.DisplayElement ReadDisplayElement() {
-        PMXFormat.DisplayElement result = new PMXFormat.DisplayElement();
-        result.element_target = binary_reader_.ReadByte();
+        var result = new PMXFormat.DisplayElement
+        {
+            element_target = binary_reader_.ReadByte()
+        };
         PMXFormat.Header.IndexSize element_target_index_size = ((result.element_target == 0) ? format_.header.boneIndexSize : format_.header.morphIndexSize);
         result.element_target_index = CastIntRead(binary_reader_, element_target_index_size);
         return result;
     }
     
     private PMXFormat.RigidbodyList ReadRigidbodyList() {
-        PMXFormat.RigidbodyList result = new PMXFormat.RigidbodyList();
+        var result = new PMXFormat.RigidbodyList();
         uint rigidbody_count = binary_reader_.ReadUInt32();
         result.rigidbody = new PMXFormat.Rigidbody[rigidbody_count];
         for (uint i = 0, i_max = (uint)result.rigidbody.Length; i < i_max; ++i) {
@@ -464,7 +507,9 @@ public partial class PMXLoaderScript {
     }
     
     private PMXFormat.Rigidbody ReadRigidbody() {
-        PMXFormat.Rigidbody result = new PMXFormat.Rigidbody();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.Rigidbody();
         result.name = ReadString();
         result.english_name = ReadString();
         result.rel_bone_index = CastIntRead(binary_reader_, format_.header.boneIndexSize);
@@ -484,7 +529,7 @@ public partial class PMXLoaderScript {
     }
     
     private PMXFormat.RigidbodyJointList ReadRigidbodyJointList() {
-        PMXFormat.RigidbodyJointList result = new PMXFormat.RigidbodyJointList();
+        var result = new PMXFormat.RigidbodyJointList();
         uint joint_count = binary_reader_.ReadUInt32();
         result.joint = new PMXFormat.Joint[joint_count];
         for (uint i = 0, i_max = (uint)result.joint.Length; i < i_max; ++i) {
@@ -494,26 +539,28 @@ public partial class PMXLoaderScript {
     }
     
     private PMXFormat.Joint ReadJoint() {
-        PMXFormat.Joint result = new PMXFormat.Joint();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new PMXFormat.Joint();
         result.name = ReadString();
         result.english_name = ReadString();
         result.operation_type = (PMXFormat.Joint.OperationType)binary_reader_.ReadByte();
         switch (result.operation_type) {
-        case PMXFormat.Joint.OperationType.Spring6DOF:
-            result.rigidbody_a = CastIntRead(binary_reader_, format_.header.rigidbodyIndexSize);
-            result.rigidbody_b = CastIntRead(binary_reader_, format_.header.rigidbodyIndexSize);
-            result.position = ReadSinglesToVector3(binary_reader_);
-            result.rotation = ReadSinglesToVector3(binary_reader_);
-            result.constrain_pos_lower = ReadSinglesToVector3(binary_reader_);
-            result.constrain_pos_upper = ReadSinglesToVector3(binary_reader_);
-            result.constrain_rot_lower = ReadSinglesToVector3(binary_reader_);
-            result.constrain_rot_upper = ReadSinglesToVector3(binary_reader_);
-            result.spring_position = ReadSinglesToVector3(binary_reader_);
-            result.spring_rotation = ReadSinglesToVector3(binary_reader_);
-            break;
-        default:
-            //empty.
-            break;
+            case PMXFormat.Joint.OperationType.Spring6DOF:
+                result.rigidbody_a = CastIntRead(binary_reader_, format_.header.rigidbodyIndexSize);
+                result.rigidbody_b = CastIntRead(binary_reader_, format_.header.rigidbodyIndexSize);
+                result.position = ReadSinglesToVector3(binary_reader_);
+                result.rotation = ReadSinglesToVector3(binary_reader_);
+                result.constrain_pos_lower = ReadSinglesToVector3(binary_reader_);
+                result.constrain_pos_upper = ReadSinglesToVector3(binary_reader_);
+                result.constrain_rot_lower = ReadSinglesToVector3(binary_reader_);
+                result.constrain_rot_upper = ReadSinglesToVector3(binary_reader_);
+                result.spring_position = ReadSinglesToVector3(binary_reader_);
+                result.spring_rotation = ReadSinglesToVector3(binary_reader_);
+                break;
+            default:
+                //empty.
+                break;
         }
         return result;
     }
@@ -536,27 +583,28 @@ public partial class PMXLoaderScript {
         return result;
     }
 
-    private uint CastIntRead(BinaryReader bin, PMXFormat.Header.IndexSize index_size)
+    private static uint CastIntRead(BinaryReader bin, PMXFormat.Header.IndexSize index_size)
     {
-        uint result = 0;
-        switch(index_size) {
-        case PMXFormat.Header.IndexSize.Byte1:
-            result = (uint)binary_reader_.ReadByte();
-            if (byte.MaxValue == result) {
-                result = uint.MaxValue;
-            }
-            break;
-        case PMXFormat.Header.IndexSize.Byte2:
-            result = (uint)binary_reader_.ReadUInt16();
-            if (ushort.MaxValue == result) {
-                result = uint.MaxValue;
-            }
-            break;
-        case PMXFormat.Header.IndexSize.Byte4:
-            result = binary_reader_.ReadUInt32();
-            break;
-        default:
-            throw new System.ArgumentOutOfRangeException();
+        uint result;
+
+        switch (index_size) {
+            case PMXFormat.Header.IndexSize.Byte1:
+                result = bin.ReadByte();
+                if (byte.MaxValue == result) {
+                    result = uint.MaxValue;
+                }
+                break;
+            case PMXFormat.Header.IndexSize.Byte2:
+                result = bin.ReadUInt16();
+                if (ushort.MaxValue == result) {
+                    result = uint.MaxValue;
+                }
+                break;
+            case PMXFormat.Header.IndexSize.Byte4:
+                result = bin.ReadUInt32();
+                break;
+            default:
+                throw new System.ArgumentOutOfRangeException();
         }
         return result;
     }
@@ -631,8 +679,8 @@ public partial class PMXLoaderScript {
         return new Quaternion(result[0], result[1], result[2], result[3]);
     }
     
-    string                        file_path_;
+    string                      file_path_;
     BinaryReader                binary_reader_;
-    PMXFormat                    format_;
-    PMXFormat.Header.StringCode    string_code_;
+    PMXFormat                   format_;
+    PMXFormat.Header.StringCode string_code_;
 }

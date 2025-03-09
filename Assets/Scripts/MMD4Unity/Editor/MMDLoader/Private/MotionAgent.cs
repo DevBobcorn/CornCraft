@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
 using System.IO;
 
 namespace MMD {
@@ -86,8 +85,8 @@ namespace MMD {
             }
             return result;
         }}
-        string                    file_path_;
+        readonly string         file_path_;
         VMD.VMDFormat.Header    header_;
-        VMD.VMDFormat            format_;
+        VMD.VMDFormat           format_;
     }
 }

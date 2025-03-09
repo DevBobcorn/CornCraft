@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using UnityEditor.Animations;
-using System.Runtime.InteropServices;
-using System.Linq;
 
 namespace MMD {
     
@@ -54,8 +52,7 @@ namespace MMD {
             visualObj = converter.CreateGameObject(pmx_format, physics_type, animation_type, use_ik, use_leg_d_bones, scale);
 
             // Assign animator controller
-            var player_animator = visualObj.GetComponent<Animator>();
-            if (player_animator != null)
+            if (visualObj.TryGetComponent<Animator>(out var player_animator))
             {
                 player_animator.runtimeAnimatorController = player_anim_controller;
             }
@@ -118,8 +115,8 @@ namespace MMD {
             }
             return result;
         }}
-        
-        string                  file_path_;
+
+        readonly string         file_path_;
         PMX.PMXFormat.Header    header_;
     }
 }

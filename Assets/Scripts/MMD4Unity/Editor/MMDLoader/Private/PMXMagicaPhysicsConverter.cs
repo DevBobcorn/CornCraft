@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -78,11 +77,10 @@ namespace MMD
         /// <returns>Magica Clothes用剛体ゲームオブジェクト</returns>
         GameObject ConvertRigid(uint rigidIndex, PMXFormat.Rigidbody rigidbody, bool isClothOrHair, ref Dictionary<uint, ColliderComponent> colliders)
         {
-            GameObject result = new GameObject("r_" + rigidbody.name);
+            var result = new GameObject("r_" + rigidbody.name);
             
             //位置・回転の設定
-            result.transform.position = rigidbody.collider_position * scale_;
-            result.transform.rotation = Quaternion.Euler(rigidbody.collider_rotation * Mathf.Rad2Deg);
+            result.transform.SetPositionAndRotation(rigidbody.collider_position * scale_, Quaternion.Euler(rigidbody.collider_rotation * Mathf.Rad2Deg));
             
             if (!isClothOrHair) // Apply collider if not cloth/hair
             {
@@ -111,9 +109,7 @@ namespace MMD
             result.transform.parent = root;
             
             //位置・回転の設定
-            result.transform.localPosition = rigidbody.collider_position * scale;
-            result.transform.localRotation = Quaternion.Euler(rigidbody.collider_rotation * Mathf.Rad2Deg);
-
+            result.transform.SetLocalPositionAndRotation(rigidbody.collider_position * scale, Quaternion.Euler(rigidbody.collider_rotation * Mathf.Rad2Deg));
             result.transform.SetParent(parent, true);
 
             // Colliderの設定
@@ -220,7 +216,7 @@ namespace MMD
             return result;
         }
 
-        private bool doColliderStripping = true;
+        private readonly bool doColliderStripping = true;
 
         void CreateMagicaClothes(GameObject[] rigid_game_objs, Dictionary<uint, uint> clothIndicies,
                 Dictionary<uint, ColliderComponent> generatedColliders, Transform physics_root_transform)
@@ -277,7 +273,7 @@ namespace MMD
                 }
             }
 
-            Regex reg = new Regex(@"(.*)_[0-9]+$");
+            var reg = new Regex(@"(.*)_[0-9]+$");
 
             // Create magica components for these root bones
             while (clothRootBones.Count > 0)
@@ -371,35 +367,6 @@ namespace MMD
                 game_object.transform.SetParent(physics_root_transform);
                 game_object.transform.localPosition = Vector3.zero;
             }
-        }
-
-        /// <summary>
-        /// 非衝突剛体の設定
-        /// </summary>
-        /// <returns>非衝突剛体のリスト(Group index => indicies of rigidbodies in this group)</returns>
-        List<int>[] SettingIgnoreRigidGroups()
-        {
-            // 非衝突グループ用リストの初期化
-            const int MaxGroup = 16;    // グループの最大数
-            List<int>[] result = new List<int>[MaxGroup];
-            for (int i = 0, i_max = MaxGroup; i < i_max; ++i) {
-                result[i] = new List<int>();
-            }
-
-            // それぞれの剛体が所属している非衝突グループを追加していく
-            for (int i = 0, i_max = format_.rigidbody_list.rigidbody.Length; i < i_max; ++i) {
-                result[format_.rigidbody_list.rigidbody[i].group_index].Add(i);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// グループターゲットの取得
-        /// </summary>
-        /// <returns>グループターゲット</returns>
-        int[] GetRigidbodyGroupTargets()
-        {
-            return format_.rigidbody_list.rigidbody.Select(x=>(int)x.ignore_collision_group).ToArray();
         }
     }
 }

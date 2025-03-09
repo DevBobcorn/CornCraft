@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using UnityEditor;
-using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.IO;
@@ -25,7 +23,7 @@ public class VMDLoaderScript {
     /// <param name='file_path'>VMDファイルのパス</param>
     /// <returns>内部形式データ</returns>
     public static VMDFormat Import(string file_path) {
-        VMDLoaderScript loader = new VMDLoaderScript();
+        var loader = new VMDLoaderScript();
         return loader.Import_(file_path);
     }
 
@@ -39,8 +37,8 @@ public class VMDLoaderScript {
 
     private VMDFormat.Header GetHeader_(string file_path) {
         VMDFormat.Header result;
-        using (FileStream stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
-        using (BinaryReader bin = new BinaryReader(stream)) {
+        using (var stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
+        using (var bin = new BinaryReader(stream)) {
             file_path_ = null;
             binary_reader_ = bin;
             result = ReadHeader();
@@ -49,8 +47,8 @@ public class VMDLoaderScript {
     }
 
     private VMDFormat Import_(string file_path) {
-        using (FileStream stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
-        using (BinaryReader bin = new BinaryReader(stream)) {
+        using (var stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
+        using (var bin = new BinaryReader(stream)) {
             file_path_ = file_path;
             binary_reader_ = bin;
             Read();
@@ -97,17 +95,21 @@ public class VMDLoaderScript {
     }
 
     public VMDFormat.Header ReadHeader() {
-        VMDFormat.Header result = new VMDFormat.Header();
-        result.vmd_header = ConvertByteToString(binary_reader_.ReadBytes(30), "");
-        result.vmd_model_name = ConvertByteToString(binary_reader_.ReadBytes(20), "");
+        var result = new VMDFormat.Header
+        {
+            vmd_header = ConvertByteToString(binary_reader_.ReadBytes(30), ""),
+            vmd_model_name = ConvertByteToString(binary_reader_.ReadBytes(20), "")
+        };
         return result;
     }
     
     private VMDFormat.MotionList ReadMotionList() {
-        VMDFormat.MotionList result = new VMDFormat.MotionList();
-        result.motion_count = binary_reader_.ReadUInt32();
-        result.motion = new Dictionary<string, List<VMDFormat.Motion>>();
-        
+        var result = new VMDFormat.MotionList
+        {
+            motion_count = binary_reader_.ReadUInt32(),
+            motion = new Dictionary<string, List<VMDFormat.Motion>>()
+        };
+
         // 一度バッファに貯めてソートする
         VMDFormat.Motion[] buf = new VMDFormat.Motion[result.motion_count];
         for (int i = 0; i < result.motion_count; i++) {
@@ -135,7 +137,9 @@ public class VMDLoaderScript {
     }
     
     private VMDFormat.Motion ReadMotion() {
-        VMDFormat.Motion result = new VMDFormat.Motion();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new VMDFormat.Motion();
         result.bone_name = ConvertByteToString(binary_reader_.ReadBytes(15), "");
         result.frame_no = binary_reader_.ReadUInt32();
         result.location = ReadSinglesToVector3(binary_reader_);
@@ -148,10 +152,12 @@ public class VMDLoaderScript {
     /// 表情リスト
     /// </summary>
     private VMDFormat.SkinList ReadSkinList() {
-        VMDFormat.SkinList result = new VMDFormat.SkinList();
-        result.skin_count = binary_reader_.ReadUInt32();
-        result.skin = new Dictionary<string, List<VMDFormat.SkinData>>();
-        
+        var result = new VMDFormat.SkinList
+        {
+            skin_count = binary_reader_.ReadUInt32(),
+            skin = new Dictionary<string, List<VMDFormat.SkinData>>()
+        };
+
         // 一度バッファに貯めてソートする
         VMDFormat.SkinData[] buf = new VMDFormat.SkinData[result.skin_count];
         for (int i = 0; i < result.skin_count; i++) {
@@ -182,7 +188,9 @@ public class VMDLoaderScript {
     }
     
     private VMDFormat.SkinData ReadSkinData() {
-        VMDFormat.SkinData result = new VMDFormat.SkinData();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new VMDFormat.SkinData();
         result.skin_name = ConvertByteToString(binary_reader_.ReadBytes(15), "");
         result.frame_no = binary_reader_.ReadUInt32();
         result.weight = binary_reader_.ReadSingle();
@@ -190,8 +198,10 @@ public class VMDLoaderScript {
     }
     
     private VMDFormat.CameraList ReadCameraList() {
-        VMDFormat.CameraList result = new VMDFormat.CameraList();
-        result.camera_count = binary_reader_.ReadUInt32();
+        var result = new VMDFormat.CameraList
+        {
+            camera_count = binary_reader_.ReadUInt32()
+        };
         result.camera = new VMDFormat.CameraData[result.camera_count];
         for (int i = 0; i < result.camera_count; i++) {
             result.camera[i] = ReadCameraData();
@@ -201,7 +211,9 @@ public class VMDLoaderScript {
     }
     
     private VMDFormat.CameraData ReadCameraData() {
-        VMDFormat.CameraData result = new VMDFormat.CameraData();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new VMDFormat.CameraData();
         result.frame_no = binary_reader_.ReadUInt32();
         result.length = binary_reader_.ReadSingle();
         result.location = ReadSinglesToVector3(binary_reader_);
@@ -213,8 +225,10 @@ public class VMDLoaderScript {
     }
     
     private VMDFormat.LightList ReadLightList() {
-        VMDFormat.LightList result = new VMDFormat.LightList();
-        result.light_count = binary_reader_.ReadUInt32();
+        var result = new VMDFormat.LightList
+        {
+            light_count = binary_reader_.ReadUInt32()
+        };
         result.light = new VMDFormat.LightData[result.light_count];
         for (int i = 0; i < result.light_count; i++) {
             result.light[i] = ReadLightData();
@@ -225,7 +239,9 @@ public class VMDLoaderScript {
     }
     
     private VMDFormat.LightData ReadLightData() {
-        VMDFormat.LightData result = new VMDFormat.LightData();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new VMDFormat.LightData();
         result.frame_no = binary_reader_.ReadUInt32();
         result.rgb = ReadSinglesToColor(binary_reader_, 1);
         result.location = ReadSinglesToVector3(binary_reader_);
@@ -233,8 +249,10 @@ public class VMDLoaderScript {
     }
     
     private VMDFormat.SelfShadowList ReadSelfShadowList() {
-        VMDFormat.SelfShadowList result = new VMDFormat.SelfShadowList();
-        result.self_shadow_count = binary_reader_.ReadUInt32();
+        var result = new VMDFormat.SelfShadowList
+        {
+            self_shadow_count = binary_reader_.ReadUInt32()
+        };
         result.self_shadow = new VMDFormat.SelfShadowData[result.self_shadow_count];
         for (int i = 0; i < result.self_shadow_count; i++) {
             result.self_shadow[i] = ReadSelfShadowData();
@@ -245,7 +263,9 @@ public class VMDLoaderScript {
     }
     
     private VMDFormat.SelfShadowData ReadSelfShadowData() {
-        VMDFormat.SelfShadowData result = new VMDFormat.SelfShadowData();
+        // Simplfied object initialization shouldn't be used here because it may
+        // alter the order of evaluation of right-side expressions
+        var result = new VMDFormat.SelfShadowData();
         result.frame_no = binary_reader_.ReadUInt32();
         result.mode = binary_reader_.ReadByte();
         result.distance = binary_reader_.ReadSingle();

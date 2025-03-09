@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -26,8 +25,8 @@ namespace MMD
             GlobalizeRigidbody(joints, physics_root_transform);
 
             // 非衝突グループ
-            List<int>[] ignoreGroups = SettingIgnoreRigidGroups(rigids);
-            int[] groupTarget = GetRigidbodyGroupTargets(rigids);
+            List<int>[] ignoreGroups = SettingIgnoreRigidGroups();
+            int[] groupTarget = GetRigidbodyGroupTargets();
 
             MMDEngine engine_ = root_game_object_.GetComponent<MMDEngine>();
 
@@ -62,13 +61,12 @@ namespace MMD
         /// <param name='rigidbody'>PMX用剛体データ</param>
         GameObject ConvertRigidbody(PMXFormat.Rigidbody rigidbody)
         {
-            GameObject result = new GameObject("r_" + rigidbody.name);
+            var result = new GameObject("r_" + rigidbody.name);
             //result.AddComponent<Rigidbody>();    // 1つのゲームオブジェクトに複数の剛体が付く事が有るので本体にはrigidbodyを適用しない
             
             //位置・回転の設定
-            result.transform.position = rigidbody.collider_position * scale_;
-            result.transform.rotation = Quaternion.Euler(rigidbody.collider_rotation * Mathf.Rad2Deg);
-            
+            result.transform.SetPositionAndRotation(rigidbody.collider_position * scale_, Quaternion.Euler(rigidbody.collider_rotation * Mathf.Rad2Deg));
+
             // Colliderの設定
             switch (rigidbody.shape_type) {
             case PMXFormat.Rigidbody.ShapeType.Sphere:
@@ -105,7 +103,7 @@ namespace MMD
         void EntryBoxCollider(PMXFormat.Rigidbody rigidbody, GameObject obj)
         {
             BoxCollider collider = obj.AddComponent<BoxCollider>();
-            collider.size = rigidbody.shape_size * 2.0f * scale_;
+            collider.size = 2.0f * scale_ * rigidbody.shape_size;
         }
 
         /// <summary>
@@ -130,11 +128,13 @@ namespace MMD
         PhysicsMaterial CreatePhysicMaterial(PMXFormat.Rigidbody[] rigidbodys, uint index)
         {
             PMXFormat.Rigidbody rigidbody = rigidbodys[index];
-            PhysicsMaterial material = new PhysicsMaterial(format_.meta_header.name + "_r_" + rigidbody.name);
-            material.bounciness = rigidbody.recoil;
-            material.staticFriction = rigidbody.friction;
-            material.dynamicFriction = rigidbody.friction;
-            
+            var material = new PhysicsMaterial(format_.meta_header.name + "_r_" + rigidbody.name)
+            {
+                bounciness = rigidbody.recoil,
+                staticFriction = rigidbody.friction,
+                dynamicFriction = rigidbody.friction
+            };
+
             string name = GetFilePathString(rigidbody.name);
             string file_name = format_.meta_header.folder + "/Physics/" + index.ToString() + "_" + name + ".asset";
             AssetDatabase.CreateAsset(material, file_name);
@@ -228,8 +228,7 @@ namespace MMD
         /// <param name='targetBone'>設定対象のゲームオブジェクト</param>
         void UnityRigidbodySetting(PMXFormat.Rigidbody pmx_rigidbody, GameObject target)
         {
-            Rigidbody rigidbody = target.GetComponent<Rigidbody>();
-            if (null != rigidbody) {
+            if (target.TryGetComponent<Rigidbody>(out var rigidbody)) {
                 //減衰値は平均を取る
                 float totMass = rigidbody.mass + pmx_rigidbody.weight;
                 rigidbody.linearDamping = (rigidbody.linearDamping * rigidbody.mass + pmx_rigidbody.position_dim * pmx_rigidbody.weight) / totMass;
@@ -270,17 +269,15 @@ namespace MMD
         /// <param name='rigids'>剛体のゲームオブジェクト</param>
         GameObject[] SetupConfigurableJoint(GameObject[] rigids)
         {
-            List<GameObject> result_list = new List<GameObject>();
+            var result_list = new List<GameObject>();
             foreach (PMXFormat.Joint joint in format_.rigidbody_joint_list.joint) {
                 //相互接続する剛体の取得
                 Transform transform_a = rigids[joint.rigidbody_a].transform;
-                Rigidbody rigidbody_a = transform_a.GetComponent<Rigidbody>();
-                if (null == rigidbody_a) {
+                if (!transform_a.TryGetComponent<Rigidbody>(out var rigidbody_a)) {
                     rigidbody_a = transform_a.parent.GetComponent<Rigidbody>();
                 }
                 Transform transform_b = rigids[joint.rigidbody_b].transform;
-                Rigidbody rigidbody_b = transform_b.GetComponent<Rigidbody>();
-                if (null == rigidbody_b) {
+                if (!transform_b.TryGetComponent<Rigidbody>(out var rigidbody_b)) {
                     rigidbody_b = transform_b.parent.GetComponent<Rigidbody>();
                 }
                 if (rigidbody_a != rigidbody_b) {
@@ -343,12 +340,16 @@ namespace MMD
                 conf.angularXMotion = ConfigurableJointMotion.Limited;
                 float hlim = Mathf.Max(-joint.constrain_rot_lower.x, -joint.constrain_rot_upper.x); //回転方向が逆なので負数
                 float llim = Mathf.Min(-joint.constrain_rot_lower.x, -joint.constrain_rot_upper.x);
-                SoftJointLimit jhlim = new SoftJointLimit();
-                jhlim.limit = Mathf.Clamp(hlim * Mathf.Rad2Deg, -180.0f, 180.0f);
+                var jhlim = new SoftJointLimit
+                {
+                    limit = Mathf.Clamp(hlim * Mathf.Rad2Deg, -180.0f, 180.0f)
+                };
                 conf.highAngularXLimit = jhlim;
 
-                SoftJointLimit jllim = new SoftJointLimit();
-                jllim.limit = Mathf.Clamp(llim * Mathf.Rad2Deg, -180.0f, 180.0f);
+                var jllim = new SoftJointLimit
+                {
+                    limit = Mathf.Clamp(llim * Mathf.Rad2Deg, -180.0f, 180.0f)
+                };
                 conf.lowAngularXLimit = jllim;
             }
 
@@ -358,8 +359,10 @@ namespace MMD
                 // 値がマイナスだとエラーが出るので注意
                 conf.angularYMotion = ConfigurableJointMotion.Limited;
                 float lim = Mathf.Min(Mathf.Abs(joint.constrain_rot_lower.y), Mathf.Abs(joint.constrain_rot_upper.y));//絶対値の小さい方
-                jlim = new SoftJointLimit();
-                jlim.limit = lim * Mathf.Clamp(Mathf.Rad2Deg, 0.0f, 180.0f);
+                jlim = new SoftJointLimit
+                {
+                    limit = lim * Mathf.Clamp(Mathf.Rad2Deg, 0.0f, 180.0f)
+                };
                 conf.angularYLimit = jlim;
             }
 
@@ -368,8 +371,10 @@ namespace MMD
             } else {
                 conf.angularZMotion = ConfigurableJointMotion.Limited;
                 float lim = Mathf.Min(Mathf.Abs(-joint.constrain_rot_lower.z), Mathf.Abs(-joint.constrain_rot_upper.z));//絶対値の小さい方//回転方向が逆なので負数
-                jlim = new SoftJointLimit();
-                jlim.limit = Mathf.Clamp(lim * Mathf.Rad2Deg, 0.0f, 180.0f);
+                jlim = new SoftJointLimit
+                {
+                    limit = Mathf.Clamp(lim * Mathf.Rad2Deg, 0.0f, 180.0f)
+                };
                 conf.angularZLimit = jlim;
             }
         }
@@ -385,30 +390,40 @@ namespace MMD
 
             // Position
             if (joint.spring_position.x != 0.0f) {
-                drive = new JointDrive();
-                drive.positionSpring = joint.spring_position.x * scale_;
+                drive = new JointDrive
+                {
+                    positionSpring = joint.spring_position.x * scale_
+                };
                 conf.xDrive = drive;
             }
             if (joint.spring_position.y != 0.0f) {
-                drive = new JointDrive();
-                drive.positionSpring = joint.spring_position.y * scale_;
+                drive = new JointDrive
+                {
+                    positionSpring = joint.spring_position.y * scale_
+                };
                 conf.yDrive = drive;
             }
             if (joint.spring_position.z != 0.0f) {
-                drive = new JointDrive();
-                drive.positionSpring = joint.spring_position.z * scale_;
+                drive = new JointDrive
+                {
+                    positionSpring = joint.spring_position.z * scale_
+                };
                 conf.zDrive = drive;
             }
 
             // Angular
             if (joint.spring_rotation.x != 0.0f) {
-                drive = new JointDrive();
-                drive.positionSpring = joint.spring_rotation.x;
+                drive = new JointDrive
+                {
+                    positionSpring = joint.spring_rotation.x
+                };
                 conf.angularXDrive = drive;
             }
             if (joint.spring_rotation.y != 0.0f || joint.spring_rotation.z != 0.0f) {
-                drive = new JointDrive();
-                drive.positionSpring = (joint.spring_rotation.y + joint.spring_rotation.z) * 0.5f;
+                drive = new JointDrive
+                {
+                    positionSpring = (joint.spring_rotation.y + joint.spring_rotation.z) * 0.5f
+                };
                 conf.angularYZDrive = drive;
             }
 
@@ -426,7 +441,7 @@ namespace MMD
 
             if ((null != joints) && (0 < joints.Length)) {
                 // PhysicsManagerに移動前の状態を覚えさせる(幾つか重複しているので重複は削除)
-                physics_manager.connect_bone_list = joints.Select(x=>x.gameObject)
+                physics_manager.connect_bone_list = joints /* .Select(x => x.gameObject) */
                         .Distinct()
                         .Select(x=>new PhysicsManager.ConnectBone(x, x.transform.parent.gameObject))
                         .ToArray();
@@ -443,8 +458,7 @@ namespace MMD
         /// 非衝突剛体の設定
         /// </summary>
         /// <returns>非衝突剛体のリスト</returns>
-        /// <param name='rigids'>剛体のゲームオブジェクト</param>
-        List<int>[] SettingIgnoreRigidGroups(GameObject[] rigids)
+        List<int>[] SettingIgnoreRigidGroups()
         {
             // 非衝突グループ用リストの初期化
             const int MaxGroup = 16;    // グループの最大数
@@ -464,8 +478,7 @@ namespace MMD
         /// グループターゲットの取得
         /// </summary>
         /// <returns>グループターゲット</returns>
-        /// <param name='rigids'>剛体のゲームオブジェクト</param>
-        int[] GetRigidbodyGroupTargets(GameObject[] rigids)
+        int[] GetRigidbodyGroupTargets()
         {
             return format_.rigidbody_list.rigidbody.Select(x=>(int)x.ignore_collision_group).ToArray();
         }

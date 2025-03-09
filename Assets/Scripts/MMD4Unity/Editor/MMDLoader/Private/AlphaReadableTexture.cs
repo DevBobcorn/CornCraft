@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
 using System.Linq;
 
 public class AlphaReadableTexture : System.IDisposable {
@@ -122,8 +121,8 @@ public class AlphaReadableTexture : System.IDisposable {
         }
     }
     
-    private Texture2D[]    textures_;                //読み込み可能テクスチャ
-    private string[]    texture_path_list_;        //解析するテクスチャリスト
-    private string        current_directory_;        //カレントディレクトリ
-    private string        temporary_directory_;    //解析作業用ディレクトリ
+    private readonly Texture2D[] textures_;                //読み込み可能テクスチャ
+    private readonly string[] texture_path_list_;        //解析するテクスチャリスト
+    private readonly string current_directory_;        //カレントディレクトリ
+    private readonly string temporary_directory_;    //解析作業用ディレクトリ
 }

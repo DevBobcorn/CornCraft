@@ -202,19 +202,21 @@ namespace MMD
             uint plane_start = 0;
             //マテリアル単位のMeshCreationInfo.Packを作成する
             return Enumerable.Range(0, format.material_list.material.Length)
-                            .Select(x=>{
-                                        MeshCreationInfo.Pack pack = new MeshCreationInfo.Pack();
-                                        pack.material_index = (uint)x;
-                                        uint plane_count = format.material_list.material[x].face_vert_count;
-                                        pack.plane_indices = format.face_vertex_list.face_vert_index.Skip((int)plane_start)
-                                                                                                            .Take((int)plane_count)
-                                                                                                            .ToArray();
-                                        pack.vertices = pack.plane_indices.Distinct() //重複削除
-                                                                            .ToArray();
-                                        plane_start += plane_count;
-                                        return pack;
-                                    })
-                            .ToArray();
+                .Select(x=>
+                {
+                    var pack = new MeshCreationInfo.Pack
+                    {
+                        material_index = (uint)x
+                    };
+                    uint plane_count = format.material_list.material[x].face_vert_count;
+                    pack.plane_indices = format.face_vertex_list.face_vert_index.Skip((int)plane_start)
+                        .Take((int)plane_count).ToArray();
+                    pack.vertices = pack.plane_indices.Distinct() //重複削除
+                                                        .ToArray();
+                    plane_start += plane_count;
+                    return pack;
+                })
+                .ToArray();
         }
 
         /// <summary>
@@ -230,23 +232,27 @@ namespace MMD
             //頂点数の多い順に並べる(メッシュ分割アルゴリズム上、後半に行く程頂点数が少ない方が敷き詰め効率が良い)
             System.Array.Sort(packs, (x,y)=>y.vertices.Length - x.vertices.Length);
             
-            List<MeshCreationInfo> result = new List<MeshCreationInfo>();
+            var result = new List<MeshCreationInfo>();
             do {
                 uint vertex_sum = 0;
-                MeshCreationInfo info = new MeshCreationInfo();
-                //マテリアルパック作成
-                info.value = Enumerable.Range(0, packs.Length)
-                                        .Where(x=>null!=packs[x]) //有効なマテリアルに絞る
-                                        .Where(x=>{    //採用しても頂点数が限界を超えないなら
-                                                    vertex_sum += (uint)packs[x].vertices.Length;
-                                                    return vertex_sum < c_max_vertex_count_in_mesh;
-                                                })
-                                        .Select(x=>{    //マテリアルの採用と無効化
-                                                    var pack = packs[x];
-                                                    packs[x] = null;
-                                                    return pack;
-                                                })
-                                        .ToArray();
+                var info = new MeshCreationInfo
+                {
+                    //マテリアルパック作成
+                    value = Enumerable.Range(0, packs.Length)
+                        .Where(x => null != packs[x]) //有効なマテリアルに絞る
+                        .Where(x =>
+                        {   //採用しても頂点数が限界を超えないなら
+                            vertex_sum += (uint)packs[x].vertices.Length;
+                            return vertex_sum < c_max_vertex_count_in_mesh;
+                        })
+                        .Select(x =>
+                        {   //マテリアルの採用と無効化
+                            var pack = packs[x];
+                            packs[x] = null;
+                            return pack;
+                        })
+                        .ToArray()
+                };
                 //マテリアルインデックスに並べる(メッシュの選定が終わったので見易い様に並びを戻す)
                 System.Array.Sort(info.value, (x,y)=>((x.material_index>y.material_index)? 1: (x.material_index<y.material_index)? -1: 0));
                 //総頂点作成
@@ -274,7 +280,7 @@ namespace MMD
             MeshCreationInfo.Pack[] result = packs;
             if (packs.Any(x=>c_max_vertex_count_in_mesh<=x.vertices.Length)) {
                 //1メッシュに収まらないマテリアルが有るなら
-                List<MeshCreationInfo.Pack> result_list = new List<MeshCreationInfo.Pack>();
+                var result_list = new List<MeshCreationInfo.Pack>();
                 foreach (var pack in packs) {
                     if (c_max_vertex_count_in_mesh <= pack.vertices.Length) {
                         //1メッシュに収まらないなら
@@ -301,7 +307,7 @@ namespace MMD
         /// <param name='creation_infos'>メッシュ作成情報のマテリアルパック</param>
         static List<MeshCreationInfo.Pack> SplitSubMesh(MeshCreationInfo.Pack pack)
         {
-            List<MeshCreationInfo.Pack> result = new List<MeshCreationInfo.Pack>();
+            var result = new List<MeshCreationInfo.Pack>();
             //1メッシュに収まらないなら
             uint plane_end = (uint)pack.plane_indices.Length;
             uint plane_start = 0;
@@ -329,7 +335,7 @@ namespace MMD
                     }
                 }
                 //分離分を戻り値の追加
-                MeshCreationInfo.Pack result_pack = new MeshCreationInfo.Pack();;
+                var result_pack = new MeshCreationInfo.Pack();;
                 result_pack.material_index = pack.material_index;
                 result_pack.plane_indices = pack.plane_indices.Skip((int)plane_start)    //面頂点インデックス取り出し(先頭)
                                                                 .Take((int)plane_count)    //面頂点インデックス取り出し(末尾)
@@ -401,7 +407,7 @@ namespace MMD
         static BoneWeight ConvertBoneWeight(PMXFormat.BoneWeight bone_weight)
         {
             //HACK: 取り敢えずボーンウェイトタイプを考えずにBDEFx系として登録する
-            BoneWeight result = new BoneWeight();
+            var result = new BoneWeight();
             switch (bone_weight.method) {
             case PMXFormat.Vertex.WeightMethod.BDEF1: goto case PMXFormat.Vertex.WeightMethod.BDEF4;
             case PMXFormat.Vertex.WeightMethod.BDEF2: goto case PMXFormat.Vertex.WeightMethod.BDEF4;
@@ -570,10 +576,7 @@ namespace MMD
             Texture2D[] textures = GetTextureList();
             Vector2[][] uvs = GetUvList();
             bool[] result = Enumerable.Range(0, format_.material_list.material.Length)
-                    .Select(x=>((null != textures[x])
-                            ? IsTransparentByTextureAlphaWithUv(textures[x], uvs[x])
-                            : false
-                    ))
+                    .Select(x => (null != textures[x]) && IsTransparentByTextureAlphaWithUv(textures[x], uvs[x]))
                     .ToArray();
             return result;
         }
@@ -729,21 +732,21 @@ namespace MMD
                 }
 
                 //重心
-                Vector2 center = new Vector2((uv1.x + uv2.x + uv3.x) / 3.0f, (uv1.y + uv2.y + uv3.y) / 3.0f);
+                var center = new Vector2((uv1.x + uv2.x + uv3.x) / 3.0f, (uv1.y + uv2.y + uv3.y) / 3.0f);
                 if (texture.GetPixelBilinear(center.x, center.y).a < c_threshold) {
                     break;
                 }
 
                 //辺中央
-                Vector2 uv12 = new Vector2((uv1.x + uv2.x) / 2.0f, (uv1.y + uv2.y) / 2.0f);
+                var uv12 = new Vector2((uv1.x + uv2.x) / 2.0f, (uv1.y + uv2.y) / 2.0f);
                 if (texture.GetPixelBilinear(uv12.x, uv12.y).a < c_threshold) {
                     break;
                 }
-                Vector2 uv23 = new Vector2((uv2.x + uv3.x) / 2.0f, (uv2.y + uv3.y) / 2.0f);
+                var uv23 = new Vector2((uv2.x + uv3.x) / 2.0f, (uv2.y + uv3.y) / 2.0f);
                 if (texture.GetPixelBilinear(uv23.x, uv23.y).a < c_threshold) {
                     break;
                 }
-                Vector2 uv31 = new Vector2((uv3.x + uv1.x) / 2.0f, (uv3.y + uv1.y) / 2.0f);
+                var uv31 = new Vector2((uv3.x + uv1.x) / 2.0f, (uv3.y + uv1.y) / 2.0f);
                 if (texture.GetPixelBilinear(uv31.x, uv31.y).a < c_threshold) {
                     break;
                 }
@@ -827,7 +830,7 @@ namespace MMD
         protected void CreateMorph(Mesh[] mesh, Material[][] materials, GameObject[] bones, SkinnedMeshRenderer[] renderers, MeshCreationInfo[] creation_info)
         {
             //表情ルートを生成してルートの子供に付ける
-            GameObject expression_root = new GameObject("Expression");
+            var expression_root = new GameObject("Expression");
             Transform expression_root_transform = expression_root.transform;
             expression_root_transform.parent = root_game_object_.transform;
 
@@ -881,7 +884,7 @@ namespace MMD
                                         .ToArray();
             
             //インデックス逆引き用辞書の作成
-            Dictionary<uint, uint> index_reverse_dictionary = new Dictionary<uint, uint>();
+            var index_reverse_dictionary = new Dictionary<uint, uint>();
             for (uint i = 0, i_max = (uint)indices.Length; i < i_max; ++i) {
                 index_reverse_dictionary.Add((uint)indices[i], i);
             }
@@ -929,22 +932,26 @@ namespace MMD
             original_indices.Sort(); //ソート
             int[] indices = original_indices.Select(x=>(int)x).ToArray();
             BoneMorph.BoneMorphParameter[] source = indices.Where(x=>x<format_.bone_list.bone.Length)
-                                                            .Select(x=>{  //インデックスを用いて、元データをパック
-                                                                    PMXFormat.Bone y = format_.bone_list.bone[x];
-                                                                    BoneMorph.BoneMorphParameter result = new BoneMorph.BoneMorphParameter();
-                                                                    result.position = y.bone_position;
-                                                                    if (y.parent_bone_index < (uint)format_.bone_list.bone.Length) {
-                                                                        //親が居たらローカル座標化
-                                                                        result.position -= format_.bone_list.bone[y.parent_bone_index].bone_position;
-                                                                    }
-                                                                    result.position *= scale_;
-                                                                    result.rotation = Quaternion.identity;
-                                                                    return result;
-                                                                })
-                                                            .ToArray();
+                .Select(x =>
+                {  //インデックスを用いて、元データをパック
+                    PMXFormat.Bone y = format_.bone_list.bone[x];
+                    var result = new BoneMorph.BoneMorphParameter
+                    {
+                        position = y.bone_position
+                    };
+                    if (y.parent_bone_index < (uint)format_.bone_list.bone.Length)
+                    {
+                        //親が居たらローカル座標化
+                        result.position -= format_.bone_list.bone[y.parent_bone_index].bone_position;
+                    }
+                    result.position *= scale_;
+                    result.rotation = Quaternion.identity;
+                    return result;
+                })
+                .ToArray();
             
             //インデックス逆引き用辞書の作成
-            Dictionary<uint, uint> index_reverse_dictionary = new Dictionary<uint, uint>();
+            var index_reverse_dictionary = new Dictionary<uint, uint>();
             for (uint i = 0, i_max = (uint)indices.Length; i < i_max; ++i) {
                 index_reverse_dictionary.Add((uint)indices[i], i);
             }
@@ -973,14 +980,16 @@ namespace MMD
             result.indices = data.morph_offset.Select(x=>((PMXFormat.BoneMorphOffset)x).bone_index) //インデックスを取り出し
                                                 .Select(x=>(int)index_reverse_dictionary[x]) //逆変換を掛ける
                                                 .ToArray();
-            result.values = data.morph_offset.Select(x=>{
-                                                        PMXFormat.BoneMorphOffset y = (PMXFormat.BoneMorphOffset)x;
-                                                        BoneMorph.BoneMorphParameter param = new BoneMorph.BoneMorphParameter();
-                                                        param.position = y.move_value * scale_;
-                                                        param.rotation = y.rotate_value;
-                                                        return param;
-                                                    })
-                                            .ToArray();
+            result.values = data.morph_offset.Select(x =>
+                {
+                    var y = (PMXFormat.BoneMorphOffset) x;
+                    return new BoneMorph.BoneMorphParameter
+                    {
+                        position = y.move_value * scale_,
+                        rotation = y.rotate_value
+                    };
+                })
+                .ToArray();
             return result;
         }
 
@@ -1003,7 +1012,7 @@ namespace MMD
                                     .ToArray();
             
             //インデックス逆引き用辞書の作成
-            Dictionary<uint, uint> index_reverse_dictionary = new Dictionary<uint, uint>();
+            var index_reverse_dictionary = new Dictionary<uint, uint>();
             for (uint i = 0, i_max = (uint)indices.Length; i < i_max; ++i) {
                 index_reverse_dictionary.Add((uint)indices[i], i);
             }
@@ -1018,8 +1027,10 @@ namespace MMD
             int invalid_vertex_index = format_.vertex_list.vertex.Length;
             MorphManager.VertexMorphPack.Meshes[] multi_indices = new MorphManager.VertexMorphPack.Meshes[creation_info.Length];
             for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
-                multi_indices[i] = new MorphManager.VertexMorphPack.Meshes();
-                multi_indices[i].indices = new int[indices.Length];
+                multi_indices[i] = new MorphManager.VertexMorphPack.Meshes
+                {
+                    indices = new int[indices.Length]
+                };
                 for (int k = 0, k_max = indices.Length; k < k_max; ++k) {
                     if (creation_info[i].reassign_dictionary.ContainsKey((uint)indices[k])) {
                         //このメッシュで有効なら
@@ -1063,15 +1074,15 @@ namespace MMD
         {
             for (int morph_type_index = 0, morph_type_index_max = 1 + format_.header.additionalUV; morph_type_index < morph_type_index_max; ++morph_type_index) {
                 //モーフタイプ
-                PMXFormat.MorphData.MorphType morph_type;
-                switch (morph_type_index) {
-                case 0:    morph_type = PMXFormat.MorphData.MorphType.Uv;    break;
-                case 1:    morph_type = PMXFormat.MorphData.MorphType.Adduv1;    break;
-                case 2:    morph_type = PMXFormat.MorphData.MorphType.Adduv2;    break;
-                case 3:    morph_type = PMXFormat.MorphData.MorphType.Adduv3;    break;
-                case 4:    morph_type = PMXFormat.MorphData.MorphType.Adduv4;    break;
-                default:    throw new System.ArgumentOutOfRangeException();
-                }
+                var morph_type = morph_type_index switch
+                {
+                    0 => PMXFormat.MorphData.MorphType.Uv,
+                    1 => PMXFormat.MorphData.MorphType.Adduv1,
+                    2 => PMXFormat.MorphData.MorphType.Adduv2,
+                    3 => PMXFormat.MorphData.MorphType.Adduv3,
+                    4 => PMXFormat.MorphData.MorphType.Adduv4,
+                    _ => throw new System.ArgumentOutOfRangeException(),
+                };
 
                 //インデックスと元データの作成
                 List<uint> original_indices = format_.morph_list.morph_data.Where(x=>(morph_type == x.morph_type)) //該当モーフに絞る
@@ -1094,7 +1105,7 @@ namespace MMD
                 }
     
                 //インデックス逆引き用辞書の作成
-                Dictionary<uint, uint> index_reverse_dictionary = new Dictionary<uint, uint>();
+                var index_reverse_dictionary = new Dictionary<uint, uint>();
                 for (uint i = 0, i_max = (uint)indices.Length; i < i_max; ++i) {
                     index_reverse_dictionary.Add((uint)indices[i], i);
                 }
@@ -1109,8 +1120,10 @@ namespace MMD
                 int invalid_vertex_index = format_.vertex_list.vertex.Length;
                 MorphManager.UvMorphPack.Meshes[] multi_indices = new MorphManager.UvMorphPack.Meshes[creation_info.Length];
                 for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
-                    multi_indices[i] = new MorphManager.UvMorphPack.Meshes();
-                    multi_indices[i].indices = new int[indices.Length];
+                    multi_indices[i] = new MorphManager.UvMorphPack.Meshes
+                    {
+                        indices = new int[indices.Length]
+                    };
                     for (int k = 0, k_max = indices.Length; k < k_max; ++k) {
                         if (creation_info[i].reassign_dictionary.ContainsKey((uint)indices[k])) {
                             //このメッシュで有効なら
@@ -1169,40 +1182,41 @@ namespace MMD
             }
             int[] indices = original_indices.Select(x=>(int)x).ToArray();
             MaterialMorph.MaterialMorphParameter[] source = indices.Where(x=>x<format_.material_list.material.Length)
-                    .Select(x=>{  //インデックスを用いて、元データをパック
-                            MaterialMorph.MaterialMorphParameter result = new MaterialMorph.MaterialMorphParameter();
-                            if (0 <= x) {
-                                //-1(全材質対象)で無いなら
-                                //元データを取得
-                                PMXFormat.Material y = format_.material_list.material[x];
-                                result.color = y.diffuse_color;
-                                result.specular = new Color(y.specular_color.r, y.specular_color.g, y.specular_color.b, y.specularity);
-                                result.ambient = y.ambient_color;
-                                result.outline_color = y.edge_color;
-                                result.outline_width = y.edge_size;
-                                result.texture_color = Color.white;
-                                result.sphere_color = Color.white;
-                                result.toon_color = Color.white;
-                            } else {
-                                //-1(全材質対象)なら
-                                //適当にでっち上げる
-                                result = MaterialMorph.MaterialMorphParameter.zero;
-                            }
-                            return result;
-                        })
+                    .Select(x=>
+                    {  //インデックスを用いて、元データをパック
+                        var result = new MaterialMorph.MaterialMorphParameter();
+                        if (0 <= x) {
+                            //-1(全材質対象)で無いなら
+                            //元データを取得
+                            PMXFormat.Material y = format_.material_list.material[x];
+                            result.color = y.diffuse_color;
+                            result.specular = new Color(y.specular_color.r, y.specular_color.g, y.specular_color.b, y.specularity);
+                            result.ambient = y.ambient_color;
+                            result.outline_color = y.edge_color;
+                            result.outline_width = y.edge_size;
+                            result.texture_color = Color.white;
+                            result.sphere_color = Color.white;
+                            result.toon_color = Color.white;
+                        } else {
+                            //-1(全材質対象)なら
+                            //適当にでっち上げる
+                            result = MaterialMorph.MaterialMorphParameter.zero;
+                        }
+                        return result;
+                    })
                     .ToArray();
             
             //インデックス逆引き用辞書の作成
-            Dictionary<uint, uint> index_reverse_dictionary = new Dictionary<uint, uint>();
+            var index_reverse_dictionary = new Dictionary<uint, uint>();
             for (uint i = 0, i_max = (uint)indices.Length; i < i_max; ++i) {
                 index_reverse_dictionary.Add((uint)indices[i], i);
             }
 
             //個別モーフスクリプトの作成
             MaterialMorph[] script = Enumerable.Range(0, format_.morph_list.morph_data.Length)
-                                                .Where(x=>PMXFormat.MorphData.MorphType.Material == format_.morph_list.morph_data[x].morph_type) //該当モーフに絞る
-                                                .Select(x=>AssignMaterialMorph(morphs[x], format_.morph_list.morph_data[x], index_reverse_dictionary))
-                                                .ToArray();
+                .Where(x => PMXFormat.MorphData.MorphType.Material == format_.morph_list.morph_data[x].morph_type) //該当モーフに絞る
+                .Select(x => AssignMaterialMorph(morphs[x], format_.morph_list.morph_data[x], index_reverse_dictionary))
+                .ToArray();
             
             //材質リアサイン辞書の作成
             Dictionary<uint, uint>[] material_reassign_dictionary = new Dictionary<uint, uint>[creation_info.Length + 1];
@@ -1222,8 +1236,10 @@ namespace MMD
             int invalid_material_index = format_.material_list.material.Length;
             MorphManager.MaterialMorphPack.Meshes[] multi_indices = new MorphManager.MaterialMorphPack.Meshes[creation_info.Length];
             for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
-                multi_indices[i] = new MorphManager.MaterialMorphPack.Meshes();
-                multi_indices[i].indices = new int[indices.Length];
+                multi_indices[i] = new MorphManager.MaterialMorphPack.Meshes
+                {
+                    indices = new int[indices.Length]
+                };
                 for (int k = 0, k_max = indices.Length; k < k_max; ++k) {
                     if (material_reassign_dictionary[i].ContainsKey((uint)indices[k])) {
                         //この材質で有効なら
@@ -1255,16 +1271,17 @@ namespace MMD
                                                 .ToArray();
             result.values = data.morph_offset.Select(x=>{
                         PMXFormat.MaterialMorphOffset y = (PMXFormat.MaterialMorphOffset)x;
-                        MaterialMorph.MaterialMorphParameter param = new MaterialMorph.MaterialMorphParameter();
-                        param.color = y.diffuse;
-                        param.specular = new Color(y.specular.r, y.specular.g, y.specular.b, y.specularity);
-                        param.ambient = y.ambient;
-                        param.outline_color = y.edge_color;
-                        param.outline_width = y.edge_size;
-                        param.texture_color = y.texture_coefficient;
-                        param.sphere_color = y.sphere_texture_coefficient;
-                        param.toon_color = y.toon_texture_coefficient;
-                        return param;
+                        return new MaterialMorph.MaterialMorphParameter
+                        {
+                            color = y.diffuse,
+                            specular = new Color(y.specular.r, y.specular.g, y.specular.b, y.specularity),
+                            ambient = y.ambient,
+                            outline_color = y.edge_color,
+                            outline_width = y.edge_size,
+                            texture_color = y.texture_coefficient,
+                            sphere_color = y.sphere_texture_coefficient,
+                            toon_color = y.toon_texture_coefficient
+                        };
                     })
                     .ToArray();
             result.operation = data.morph_offset.Select(x=>(MaterialMorph.OperationType)((PMXFormat.MaterialMorphOffset)x).offset_method)
@@ -1321,9 +1338,9 @@ namespace MMD
                 bone.AddComponent<BoneController>();
             }
             BoneController[] result = Enumerable.Range(0, format_.bone_list.bone.Length)
-                                                .OrderBy(x=>(int)(PMXFormat.Bone.Flag.PhysicsTransform & format_.bone_list.bone[x].bone_flag)) //物理後変形を後方へ
-                                                .ThenBy(x=>format_.bone_list.bone[x].transform_level) //変形階層で安定ソート
-                                                .Select(x=>ConvertBoneController(format_.bone_list.bone[x], x, bones)) //ConvertIk()を呼び出す
+                                                .OrderBy(x => (int)(PMXFormat.Bone.Flag.PhysicsTransform & format_.bone_list.bone[x].bone_flag)) //物理後変形を後方へ
+                                                .ThenBy(x => format_.bone_list.bone[x].transform_level) //変形階層で安定ソート
+                                                .Select(x => ConvertBoneController(format_.bone_list.bone[x], x, bones)) //ConvertIk()を呼び出す
                                                 .ToArray();
             return result;
         }
