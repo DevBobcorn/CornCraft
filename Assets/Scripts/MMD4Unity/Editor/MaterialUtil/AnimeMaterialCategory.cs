@@ -1,6 +1,6 @@
 namespace MMD
 {
-    public enum FernMaterialCategory
+    public enum AnimeMaterialCategory
     {
         Body,     // Body
         Face,     // Face

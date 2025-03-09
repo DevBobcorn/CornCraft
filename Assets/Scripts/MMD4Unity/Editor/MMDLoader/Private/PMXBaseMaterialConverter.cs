@@ -1,6 +1,5 @@
 using UnityEngine;
 using MMD.PMX;
-using UnityEngine.Rendering;
 
 namespace MMD
 {

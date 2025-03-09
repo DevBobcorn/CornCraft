@@ -4,20 +4,20 @@ using MMD.PMX;
 
 namespace MMD
 {
-    public class PMXFernMaterialConverter : PMXBaseMaterialConverter
+    public class PMXAnimeMaterialConverter : PMXBaseMaterialConverter
     {
-        public PMXFernMaterialConverter(GameObject root_game_object, PMXFormat format, float scale)
+        public PMXAnimeMaterialConverter(GameObject root_game_object, PMXFormat format, float scale)
                 : base(root_game_object, format, scale)
         {
             // Something else to do here...
 
         }
 
-        public Color32 HAIR_DIFFUSE_HIGH = new Color32(255, 255, 255, 255);
-        public Color32 HAIR_DIFFUSE_DARK = new Color32(255, 200, 180, 255);
+        public Color32 HAIR_DIFFUSE_HIGH = new(255, 255, 255, 255);
+        public Color32 HAIR_DIFFUSE_DARK = new(255, 200, 180, 255);
 
-        public Color32 SKIN_DIFFUSE_HIGH = new Color32(255, 255, 255, 255);
-        public Color32 SKIN_DIFFUSE_DARK = new Color32(255, 200, 180, 255);
+        public Color32 SKIN_DIFFUSE_HIGH = new(255, 255, 255, 255);
+        public Color32 SKIN_DIFFUSE_DARK = new(255, 200, 180, 255);
 
         /// <summary>
         /// マテリアルをUnity用に変換する
@@ -38,24 +38,24 @@ namespace MMD
             }
 
             // Guess material type from name
-            var materialType = FernMaterialUtilFunctions.GuessMMDMaterialCategory(material.name);
+            var materialType = AnimeMaterialUtilFunctions.GuessMMDMaterialCategory(material.name);
             
             //マテリアルに設定
-            string shader_path = FernMaterialUtilFunctions.GetShaderPath(materialType);
+            string shader_path = AnimeMaterialUtilFunctions.GetShaderPath(materialType);
             Material result = new(Shader.Find(shader_path));
             // シェーダに依って値が有ったり無かったりするが、設定してもエラーに為らない様なので全部設定
             // TODO: result.SetColor("_BaseColor", material.diffuse_color);
             result.SetColor("_BaseColor", Color.white);
 
             if (is_transparent) {
-                FernMaterialUtilFunctions.SetRenderType(result, FernMaterialRenderType.Cutout);
+                AnimeMaterialUtilFunctions.SetRenderType(result, AnimeMaterialRenderType.Cutout);
             } else {
-                FernMaterialUtilFunctions.SetRenderType(result, FernMaterialRenderType.Opaque);
+                AnimeMaterialUtilFunctions.SetRenderType(result, AnimeMaterialRenderType.Opaque);
             }
 
             switch (materialType)
             {
-                case FernMaterialCategory.Face:
+                case AnimeMaterialCategory.Face:
                     result.SetFloat("_enum_diffuse", 4); // Standard Diffuse => SDFFaceShading
                     result.SetFloat("_CELLThreshold", 0.3F);
                     result.SetFloat("_CELLSmoothing", 0.1F);

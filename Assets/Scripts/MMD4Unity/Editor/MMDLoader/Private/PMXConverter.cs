@@ -505,7 +505,7 @@ namespace MMD
             bool[] is_transparent_by_material_morph = IsTransparentByMaterialMorph(); //材質モーフ
             bool[] is_transparent_by_texture_alpha = IsTransparentByTextureAlpha(); //テクスチャのアルファ値(UV考慮済み)
 
-            PMXBaseMaterialConverter materialConv = new PMXFernMaterialConverter(root_game_object_, mats_owner, scale_);
+            PMXBaseMaterialConverter materialConv = new PMXAnimeMaterialConverter(root_game_object_, mats_owner, scale_);
             
             return Enumerable.Range(0, mats_owner.material_list.material.Length)
                     .Select(x=>new {

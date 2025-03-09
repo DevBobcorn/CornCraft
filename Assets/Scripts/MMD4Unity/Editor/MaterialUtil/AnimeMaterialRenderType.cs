@@ -1,6 +1,6 @@
 namespace MMD
 {
-    public enum FernMaterialRenderType
+    public enum AnimeMaterialRenderType
     {
         Opaque = 0,      // Opaque
         Translucent = 1, // Translucent

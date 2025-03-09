@@ -4,22 +4,22 @@ using UnityEngine.Rendering;
 
 namespace MMD
 {
-    public static class FernMaterialUtilFunctions
+    public static class AnimeMaterialUtilFunctions
     {
-        public static FernMaterialCategory GuessMMDMaterialCategory(string materialName)
+        public static AnimeMaterialCategory GuessMMDMaterialCategory(string materialName)
         {
-            var materialType = FernMaterialCategory.Unknown;
+            var materialType = AnimeMaterialCategory.Unknown;
 
             if (materialName.Contains("衣") || materialName.Contains("裙") || materialName.Contains("裤") ||
                     materialName.Contains("带") || materialName.Contains("花") || materialName.Contains("饰") ||
                     materialName.Contains("飾") || materialName.Contains("袖") || materialName.Contains("靴") ||
                     materialName.Contains("鞋") || materialName.Contains("袜") || materialName.Contains("套"))
             {
-                materialType = FernMaterialCategory.Clothes;
+                materialType = AnimeMaterialCategory.Clothes;
             }
             else if (materialName.Contains("脸") || materialName.Contains("顔") || materialName.Contains("颜"))
             {
-                materialType = FernMaterialCategory.Face;
+                materialType = AnimeMaterialCategory.Face;
             }
             else if (materialName.Contains("白目") || materialName.Contains("眼白") ||
                     materialName.Contains("睫") || materialName.Contains("眉") || materialName.Contains("二重") ||
@@ -27,20 +27,20 @@ namespace MMD
                     materialName.Contains("牙") || materialName.Contains("齿") || materialName.Contains("歯"))
             {
                 //materialType = FernMaterialCategory.Face;
-                materialType = FernMaterialCategory.Body;
+                materialType = AnimeMaterialCategory.Body;
             }
             else if (materialName.Contains("目") || materialName.Contains("眼") || materialName.Contains("瞳"))
             {
                 // Use face material type for now
-                materialType = FernMaterialCategory.Eye;
+                materialType = AnimeMaterialCategory.Eye;
             }
             else if (materialName.Contains("发") || materialName.Contains("髪"))
             {
-                materialType = FernMaterialCategory.Hair;
+                materialType = AnimeMaterialCategory.Hair;
             }
             else if (materialName.Contains("体") || materialName.Contains("肌") || materialName.Contains("肤"))
             {
-                materialType = FernMaterialCategory.Body;
+                materialType = AnimeMaterialCategory.Body;
             }
 
             return materialType;
@@ -50,24 +50,24 @@ namespace MMD
         /// Fernシェーダーパスの取得
         /// </summary>
         /// <returns>Fernシェーダーパス</returns>
-        public static string GetShaderPath(FernMaterialCategory type)
+        public static string GetShaderPath(AnimeMaterialCategory type)
         {
             string result = "FernRender/URP/FERNNPR";
 
             result += type switch
             {
-                FernMaterialCategory.Face => "Face",
-                FernMaterialCategory.Hair => "Hair",
-                FernMaterialCategory.Eye  => "Eye",
+                AnimeMaterialCategory.Face => "Face",
+                AnimeMaterialCategory.Hair => "Hair",
+                AnimeMaterialCategory.Eye  => "Eye",
                 _                         => "Standard",
             };
             return result;
         }
 
         // See LWGUI.Helper.SetSurfaceType()
-		public static void SetRenderType(Material mat, FernMaterialRenderType renderType)
+		public static void SetRenderType(Material mat, AnimeMaterialRenderType renderType)
 		{
-            if (renderType != FernMaterialRenderType.Unknown)
+            if (renderType != AnimeMaterialRenderType.Unknown)
             {
                 mat.SetFloat("_Surface", (int) renderType);
             }
@@ -76,7 +76,7 @@ namespace MMD
                 return; // Leave other things unchanged
             }
 
-            if (renderType == FernMaterialRenderType.Opaque) // Opaque
+            if (renderType == AnimeMaterialRenderType.Opaque) // Opaque
             {
                 mat.renderQueue = (int) RenderQueue.Geometry;
                 mat.SetOverrideTag("RenderType", "Opaque");
@@ -86,7 +86,7 @@ namespace MMD
                 mat.DisableKeyword("_ALPHABLEND_ON");
                 mat.DisableKeyword("_ALPHATEST_ON");
             }
-            else if (renderType == FernMaterialRenderType.Translucent) // Transparent
+            else if (renderType == AnimeMaterialRenderType.Translucent) // Transparent
             {
                 mat.renderQueue = (int) RenderQueue.Transparent;
                 mat.SetOverrideTag("RenderType", "Transparent");
@@ -96,7 +96,7 @@ namespace MMD
                 mat.EnableKeyword("_ALPHABLEND_ON");
                 mat.DisableKeyword("_ALPHATEST_ON");
             }
-            else if (renderType == FernMaterialRenderType.Cutout) // Clip
+            else if (renderType == AnimeMaterialRenderType.Cutout) // Clip
             {
                 mat.renderQueue = (int) RenderQueue.AlphaTest;
                 mat.SetOverrideTag("RenderType", "TransparentCutout");
@@ -119,15 +119,15 @@ namespace MMD
             }
 		}
     
-        public static FernMaterialRenderType GetRenderType(Material mat)
+        public static AnimeMaterialRenderType GetRenderType(Material mat)
         {
             return mat.GetTag("RenderType", true, "Unknown") switch
             {
-                "Opaque"            => FernMaterialRenderType.Opaque,
-                "TransparentCutout" => FernMaterialRenderType.Cutout,
-                "Transparent"       => FernMaterialRenderType.Translucent,
+                "Opaque"            => AnimeMaterialRenderType.Opaque,
+                "TransparentCutout" => AnimeMaterialRenderType.Cutout,
+                "Transparent"       => AnimeMaterialRenderType.Translucent,
 
-                _                   => FernMaterialRenderType.Unknown
+                _                   => AnimeMaterialRenderType.Unknown
             };
         }
     }
