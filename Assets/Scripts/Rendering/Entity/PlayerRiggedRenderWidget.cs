@@ -89,10 +89,10 @@ namespace CraftSharp.Rendering
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummySwordItemMesh!, psi.DummyItemMaterial!, new());
 
-                    _itemMountSlot!.localEulerAngles = psi.SwordMountEularAngles;
+                    _itemMountSlot!.localEulerAngles = psi.SwordMountEulerAngles;
                     _itemMountSlot!.localPosition = psi.SwordMountPosition;
 
-                    _mainHandSlot!.localEulerAngles = psi.SwordMainHandEularAngles;
+                    _mainHandSlot!.localEulerAngles = psi.SwordMainHandEulerAngles;
                     _mainHandSlot!.localPosition = psi.SwordMainHandPosition;
 
                     /*
@@ -113,10 +113,10 @@ namespace CraftSharp.Rendering
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummyBowItemMesh!, psi.DummyItemMaterial!, new());
 
-                    _itemMountSlot!.localEulerAngles = psi.BowMountEularAngles;
+                    _itemMountSlot!.localEulerAngles = psi.BowMountEulerAngles;
                     _itemMountSlot!.localPosition = psi.BowMountPosition;
                     
-                    _offHandSlot!.localEulerAngles = psi.BowOffHandEularAngles;
+                    _offHandSlot!.localEulerAngles = psi.BowOffHandEulerAngles;
                     _offHandSlot!.localPosition = psi.BowOffHandPosition;
                     
                     itemObj.transform.localScale = psi.BowLocalScale;

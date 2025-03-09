@@ -159,7 +159,7 @@ namespace CraftSharp.Rendering
                     {
                         boneTransform.SetParent(boneObjects[bone.ParentName].transform, false);
                         boneTransform.localPosition = (bone.Pivot - geometry.Bones[bone.ParentName].Pivot) / 16F;
-                        boneTransform.localRotation = Rotations.RotationFromEularsXYZ(bone.Rotation);
+                        boneTransform.localRotation = Rotations.RotationFromEulersXYZ(bone.Rotation);
                     }
                     else
                     {
@@ -169,7 +169,7 @@ namespace CraftSharp.Rendering
                 else // Root bone
                 {
                     boneTransform.localPosition = bone.Pivot / 16F;
-                    boneTransform.localRotation = Rotations.RotationFromEularsXYZ(bone.Rotation);
+                    boneTransform.localRotation = Rotations.RotationFromEulersXYZ(bone.Rotation);
                 }
             }
         
@@ -271,7 +271,7 @@ namespace CraftSharp.Rendering
             {
                 var converted = rot.Value.zyx;
                 converted.x = -converted.x;
-                boneTransform.localRotation = Rotations.RotationFromEularsXYZ(converted);
+                boneTransform.localRotation = Rotations.RotationFromEulersXYZ(converted);
             }
         }
     }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CraftSharp.Rendering
 {
@@ -17,19 +18,19 @@ namespace CraftSharp.Rendering
         public Vector3 SwordLocalScale = new(0.5F, 0.5F, 0.5F);
         [Header("Sword Mount")]
         public Vector3 SwordMountPosition;
-        public Vector3 SwordMountEularAngles;
+        public Vector3 SwordMountEulerAngles;
         [Header("Sword Weld (Mainhand)")]
         public Vector3 SwordMainHandPosition;
-        public Vector3 SwordMainHandEularAngles;
+        public Vector3 SwordMainHandEulerAngles;
 
         // Bow ============================================
         [Header("Bow")]
         public Vector3 BowLocalScale = new(0.5F, 0.5F, 0.5F);
         [Header("Bow Mount")]
         public Vector3 BowMountPosition;
-        public Vector3 BowMountEularAngles;
+        public Vector3 BowMountEulerAngles;
         [Header("Bow Weld (Offhand)")]
         public Vector3 BowOffHandPosition;
-        public Vector3 BowOffHandEularAngles;
+        public Vector3 BowOffHandEulerAngles;
     }
 }

@@ -18,11 +18,11 @@ MonoBehaviour:
   SwordTrailPrefab: {fileID: 8749675225872338033, guid: 8c0e367f6013712429a3a0623672b56d, type: 3}
   SwordLocalScale: {x: 0.5, y: 0.5, z: 0.5}
   SwordMountPosition: {x: 0, y: -0.5, z: -0.3}
-  SwordMountEularAngles: {x: 135, y: 90, z: 0}
+  SwordMountEulerAngles: {x: 135, y: 90, z: 0}
   SwordMainHandPosition: {x: -0.05, y: 0.15, z: 0.03}
-  SwordMainHandEularAngles: {x: -60, y: 90, z: 20}
+  SwordMainHandEulerAngles: {x: -60, y: 90, z: 20}
   BowLocalScale: {x: 0.6, y: 0.6, z: 0.6}
   BowMountPosition: {x: 0, y: -0.5, z: -0.3}
-  BowMountEularAngles: {x: 0, y: 90, z: 0}
+  BowMountEulerAngles: {x: 0, y: 90, z: 0}
   BowOffHandPosition: {x: -0.06, y: -0.06, z: 0.07}
-  BowOffHandEularAngles: {x: -20, y: 300, z: 0}
+  BowOffHandEulerAngles: {x: -20, y: 300, z: 0}

@@ -11,7 +11,7 @@ namespace CraftSharp.Control
         protected Camera renderCamera;
 
         /// <summary>
-        /// Camera used for rendering sprites, without post processing.
+        /// Camera used for rendering sprites, without post-processing.
         /// The clear depth flag of this camera should be set to false
         /// </summary>
         protected Camera spriteRenderCamera;
