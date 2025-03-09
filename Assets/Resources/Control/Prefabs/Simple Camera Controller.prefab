@@ -229,7 +229,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   zoomSmoothFactor: 10
-  zoomSensitivity: 0.0015
+  zoomSensitivity: 0.05
   nearFov: 55
   farFov: 65
   cameraZOffsetNear: 0.8
