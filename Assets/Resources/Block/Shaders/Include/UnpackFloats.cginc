@@ -8,7 +8,7 @@ void UnpackExtraVertData_float(float Packed, float3 MeshNormal, out float VertLi
     // Get vertex light value
     VertLight = vertLight / 17.0;
 
-    if (vertNormalIndex == 0x3F)
+    if (vertNormalIndex == (int) 0x3F)
     {
         // All 6 bits are set, use mesh vertex normal
         VertNormal = MeshNormal;

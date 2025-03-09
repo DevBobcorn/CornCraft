@@ -119,6 +119,9 @@
         },
         {
             "m_Id": "e330577f08034818bdfcc1bca2af869f"
+        },
+        {
+            "m_Id": "2b03e700aea14bc4864cb2311c0933e4"
         }
     ],
     "m_GroupDatas": [
@@ -179,7 +182,7 @@
             },
             "m_InputSlot": {
                 "m_Node": {
-                    "m_Id": "0e2bb0053c8b4353969637634589911c"
+                    "m_Id": "2b03e700aea14bc4864cb2311c0933e4"
                 },
                 "m_SlotId": 0
             }
@@ -194,6 +197,20 @@
             "m_InputSlot": {
                 "m_Node": {
                     "m_Id": "94b4e872c7ad4890968aa978afe07026"
+                },
+                "m_SlotId": 0
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "2b03e700aea14bc4864cb2311c0933e4"
+                },
+                "m_SlotId": 1
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "0e2bb0053c8b4353969637634589911c"
                 },
                 "m_SlotId": 0
             }
@@ -763,6 +780,7 @@
     "m_SourceType": 1,
     "m_FunctionName": "GetHexCoords_TilePos",
     "m_FunctionSource": "",
+    "m_FunctionSourceUsePragmas": true,
     "m_FunctionBody": "float a = Pos.y - (1.0/sqrt(3)) * Pos.x;\r\nfloat b = (2.0/sqrt(3)) * Pos.x;\r\nfloat s = 0 - a - b;\r\n\r\nTilePos = floor((float3(a, b, s) * Scale) / Size);"
 }
 
@@ -899,6 +917,9 @@
     "m_AlphaClip": true,
     "m_CastShadows": true,
     "m_ReceiveShadows": true,
+    "m_DisableTint": false,
+    "m_AdditionalMotionVectorMode": 0,
+    "m_AlembicMotionVectors": false,
     "m_SupportsLODCrossFade": false,
     "m_CustomEditorGUI": "",
     "m_SupportVFX": false
@@ -1146,6 +1167,44 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.AbsoluteNode",
+    "m_ObjectId": "2b03e700aea14bc4864cb2311c0933e4",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "Absolute",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": -155.20001220703126,
+            "y": -52.79998779296875,
+            "width": 128.0,
+            "height": 93.5999755859375
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "49ffc7a50f5f4812862752f7d9e159be"
+        },
+        {
+            "m_Id": "680e9a51e3d84be5b5f0122fb9da604c"
+        }
+    ],
+    "synonyms": [
+        "positive"
+    ],
+    "m_Precision": 0,
+    "m_PreviewExpanded": false,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    }
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "2c958e3247ea44dcb101c97f6b8967e3",
     "m_Id": 0,
@@ -1317,6 +1376,7 @@
     "m_SourceType": 1,
     "m_FunctionName": "IsPixelOnEdge",
     "m_FunctionSource": "",
+    "m_FunctionSourceUsePragmas": true,
     "m_FunctionBody": "Edge = false;\n\nif (\n   (InTilePos.x < Width) || (InTilePos.x > 1-Width)\n|| (InTilePos.y < Width) || (InTilePos.y > 1-Width) \n|| (InTilePos.z < Width) || (InTilePos.z > 1-Width) \n)\n{\n\tEdge = true;\n}"
 }
 
@@ -1459,6 +1519,7 @@
     "m_SourceType": 1,
     "m_FunctionName": "GetHexCoords_InTilePos",
     "m_FunctionSource": "",
+    "m_FunctionSourceUsePragmas": true,
     "m_FunctionBody": "float a = Pos.y - (1.0/sqrt(3)) * Pos.x;\r\nfloat b = (2.0/sqrt(3)) * Pos.x;\r\nfloat s = 0 - a - b;\r\n\nInTilePos = abs(float3(a, b, s) * Scale % Size);"
 }
 
@@ -1536,6 +1597,30 @@
     "m_SlotType": 0,
     "m_Hidden": false,
     "m_ShaderOutputName": "False",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
+    "m_ObjectId": "49ffc7a50f5f4812862752f7d9e159be",
+    "m_Id": 0,
+    "m_DisplayName": "In",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "In",
     "m_StageCapability": 3,
     "m_Value": {
         "x": 0.0,
@@ -2044,6 +2129,30 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
+    "m_ObjectId": "680e9a51e3d84be5b5f0122fb9da604c",
+    "m_Id": 1,
+    "m_DisplayName": "Out",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    }
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.BranchNode",
     "m_ObjectId": "76080aa6d7ee40aa89ebd5b6c6b157e1",
     "m_Group": {
@@ -2440,8 +2549,8 @@
     "m_ObjectId": "96a07ce313a1482f8fe21446f6f9d1cb",
     "m_Title": "Get Centered Pixel Screen Pos",
     "m_Position": {
-        "x": -1567.0,
-        "y": -613.0
+        "x": -1567.199951171875,
+        "y": -613.5999755859375
     }
 }
 
@@ -2745,6 +2854,7 @@
     "m_SourceType": 1,
     "m_FunctionName": "DistToCenter",
     "m_FunctionSource": "",
+    "m_FunctionSourceUsePragmas": true,
     "m_FunctionBody": "Distance = abs(TilePos.x) + abs(TilePos.y) + abs(TilePos.z);"
 }
 
@@ -2921,6 +3031,7 @@
     "m_SourceType": 1,
     "m_FunctionName": "GetRenderScale",
     "m_FunctionSource": "",
+    "m_FunctionSourceUsePragmas": true,
     "m_FunctionBody": "RenderScale = _ScreenSize.x / _ScreenParams.x;"
 }
 

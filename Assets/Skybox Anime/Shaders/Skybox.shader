@@ -176,7 +176,7 @@ Shader "AnimeSkybox/Skybox"
             v2f vert(appdata v)
             {
                 v2f o = (v2f)0;
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(v.vertex);
+                VertexPositionInputs vertexInput = GetVertexPositionInputs(v.vertex.xyz);
                 o.positionWS.xyz = vertexInput.positionWS;
                 float3 _worldPos = mul(UNITY_MATRIX_M, float4(v.vertex.xyz, 1.0)).xyz;
                 float3 NormalizeWorldPos = normalize(_worldPos);

@@ -122,8 +122,8 @@ Shader "AnimeSkybox/Cloud"
                 float3 SunDirection = clamp((dot(normalize(i.positionWS), LightDirection.xyz)), 0, 1);
                 SunDirection = pow(SunDirection, 2);
 
-                float3 CloudColorAB = lerp(_CloudColorA, _CloudColorB, SunDirection.x);
-                float3 CloudColorCD = lerp(_CloudColorC, _CloudColorD, SunDirection.x);
+                float3 CloudColorAB = lerp(_CloudColorA.rgb, _CloudColorB.rgb, SunDirection.x);
+                float3 CloudColorCD = lerp(_CloudColorC.rgb, _CloudColorD.rgb, SunDirection.x);
 
                 float4 Noise = tex2D(_NoiseMap, i.noiseuv);
             
