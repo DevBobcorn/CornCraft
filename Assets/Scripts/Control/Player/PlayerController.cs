@@ -268,11 +268,17 @@ namespace CraftSharp.Control
 
         #nullable disable
 
+        void Awake()
+        {
+            if (m_PlayerActions == null)
+            {
+                m_PlayerActions = new PlayerActions();
+                m_PlayerActions.Enable();
+            }
+        }
+
         void Start()
         {
-            m_PlayerActions = new PlayerActions();
-            m_PlayerActions.Enable();
-
             Motor.CharacterController = this;
 
             // Set stamina to max value

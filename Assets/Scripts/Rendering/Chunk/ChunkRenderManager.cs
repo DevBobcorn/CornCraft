@@ -980,7 +980,7 @@ namespace CraftSharp.Rendering
         void FixedUpdate()
         {
             // Don't build world until biomes are received and registered
-            if (!World.BiomesInitialized) return;
+            if (!World.BiomesInitialized || !client) return;
 
             // Build chunks in queue...
             Profiler.BeginSample("Start chunk render build(/light update) tasks");
