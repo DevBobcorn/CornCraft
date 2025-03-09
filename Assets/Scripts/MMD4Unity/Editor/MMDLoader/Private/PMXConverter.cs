@@ -65,29 +65,6 @@ namespace MMD
             GameObject[] bones = CreateBones();                                            // ボーンの生成・設定
             SkinnedMeshRenderer[] renderers = BuildingBindpose(mesh, materials, bones);    // バインドポーズの作成
             CreateMorph(mesh, materials, bones, renderers, creation_info);                 // モーフの生成・設定
-            
-            // Fern NPR Face SDF helper script assigning
-            List<int> faceMaterialIndices = new();
-            for (int meshIndex = 0; meshIndex < materials.Length; meshIndex++)
-            {
-                for (int matIndex = 0; matIndex < materials[meshIndex].Length; matIndex++)
-                {
-                    var mat = materials[meshIndex][matIndex];
-                    if (mat.shader.name.EndsWith("FERNNPRFace"))
-                    {
-                        faceMaterialIndices.Add(matIndex);
-                    }
-                }
-
-                if (faceMaterialIndices.Count > 0)
-                {
-                    var helper = renderers[meshIndex].gameObject.AddComponent<ShadingUtils.MeshSDFFaceAxisFix>();
-                    helper.targetMaterialIndices = faceMaterialIndices.ToArray();
-
-                    // Clear up for next iteration
-                    faceMaterialIndices.Clear();
-                }
-            }
 
             // BoneController・IKの登録(use_ik_を使った判定はEntryBoneController()の中で行う)
             {
