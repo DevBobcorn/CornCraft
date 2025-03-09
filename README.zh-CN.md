@@ -22,7 +22,7 @@ CornCraft用来解析原版资源包的代码已独立成一个package并开源�
 对于<code>1.19.1</code>及更高版本的服务器，还需将<code>enforce-secure-profile</code>设置为<code>false</code>以使CornCraft正确登录（Unity里面系统自带的RSA库好像是被阉割了？暂时用不了）。
 
 ## > 构建与运行
-本项目使用Unity 2022.3.50f1开发测试，建议用此版本或更新的版本打开项目。
+本项目使用Unity 6000.0.39f1开发测试，建议用此版本或更新的版本打开项目。
 
 **部分第三方资源没有包含在此仓库中**，更多信息请参考[这里](./Assets/Third%20Party%20Assets.zh-CN.md)。
 
