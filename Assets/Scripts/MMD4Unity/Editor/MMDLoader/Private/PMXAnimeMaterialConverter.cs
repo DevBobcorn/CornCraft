@@ -56,34 +56,41 @@ namespace MMD
             switch (materialType)
             {
                 case AnimeMaterialCategory.Face:
+                    /*
                     result.SetFloat("_enum_diffuse", 4); // Standard Diffuse => SDFFaceShading
                     result.SetFloat("_CELLThreshold", 0.3F);
                     result.SetFloat("_CELLSmoothing", 0.1F);
                     result.SetColor("_HighColor", SKIN_DIFFUSE_HIGH);
                     result.SetColor("_DarkColor", SKIN_DIFFUSE_DARK);
                     result.SetFloat("_enum_specular", 0); // Standard Specular => None
+                    */
                     // Setup face SDF parameters
                     Texture2D faceSDFTex = (Texture2D) AssetDatabase.LoadAssetAtPath(
-                            $"{format_.meta_header.folder}/FaceSDF.png", typeof (Texture2D));
-                    result.SetTexture("_SDFFaceTex", faceSDFTex);
+                            $"{format_.meta_header.folder}/W_140_Girl_FaceMap_00.png", typeof (Texture2D));
+                    result.SetTexture("_FaceMap", faceSDFTex);
+                    /*
                     result.SetFloat("_SDFFaceArea", 95F);
                     result.SetFloat("_SDFShadingSoftness", 0.1F);
+                    */
                     // Turn off shadow receiving
-                    result.SetFloat("_RECEIVE_SHADOWS_OFF", 0F);
+                    //result.SetFloat("_RECEIVE_SHADOWS_OFF", 0F);
                     break;
 
                 default:
+                    /*
                     result.SetFloat("_enum_diffuse", 0); // Standard Diffuse => CelShading
                     result.SetFloat("_CELLThreshold", 0.3F);
                     result.SetFloat("_CELLSmoothing", 0.1F);
                     result.SetColor("_HighColor", SKIN_DIFFUSE_HIGH);
                     result.SetColor("_DarkColor", SKIN_DIFFUSE_DARK);
                     result.SetFloat("_enum_specular", 0); // Standard Specular => None
+                    */
                     break;
             }
 
-            result.SetFloat("_Smoothness", 0F);
+            //result.SetFloat("_Smoothness", 0F);
             // エッジ
+            /*
             const float c_default_scale = 0.07f; //0.085fの時にMMDと一致する様にしているので、それ以外なら補正
 
             if (material.edge_size > 0F)
@@ -94,8 +101,10 @@ namespace MMD
                 result.SetFloat("_OutlineWidth", material.edge_size / c_default_scale);
                 result.SetColor("_OutlineColor", material.edge_color);
             }
+            */
 
             // スフィアテクスチャ
+            /*
             if (material.sphere_texture_index < format_.texture_list.texture_file.Length) {
                 string sphere_texture_file_name = format_.texture_list.texture_file[material.sphere_texture_index];
                 string path = format_.meta_header.folder + "/" + sphere_texture_file_name;
@@ -118,12 +127,13 @@ namespace MMD
                     break;
                 }
             }
+            */
             // テクスチャが空でなければ登録
             if (null != main_texture) {
                 //result.mainTexture = main_texture;
                 //result.mainTextureScale = new Vector2(1, -1);
-                result.SetTexture("_BaseMap", main_texture);
-                result.SetTextureScale("_BaseMap", new Vector2(1, -1));
+                result.SetTexture("_MainTex", main_texture);
+                result.SetTextureScale("_MainTex", new Vector2(1, -1));
             }
             
             return result;

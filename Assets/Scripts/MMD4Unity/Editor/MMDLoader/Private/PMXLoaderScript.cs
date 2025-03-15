@@ -133,7 +133,7 @@ public partial class PMXLoaderScript {
             result.add_uv[i] = ReadSinglesToVector4(binary_reader_);
         }
         PMXFormat.Vertex.WeightMethod weight_method = (PMXFormat.Vertex.WeightMethod)binary_reader_.ReadByte();
-        switch(weight_method) {
+        switch (weight_method) {
             case PMXFormat.Vertex.WeightMethod.BDEF1:
                 result.bone_weight = ReadBoneWeightBDEF1();
                 break;
@@ -369,32 +369,32 @@ public partial class PMXLoaderScript {
         uint morph_offset_count = binary_reader_.ReadUInt32();
         result.morph_offset = new PMXFormat.MorphOffset[morph_offset_count];
         for (uint i = 0, i_max = (uint)result.morph_offset.Length; i < i_max; ++i) {
-            switch(result.morph_type) {
-            case PMXFormat.MorphData.MorphType.Group:
-            case PMXFormat.MorphData.MorphType.Flip:
-                result.morph_offset[i] = ReadGroupMorphOffset();
-                break;
-            case PMXFormat.MorphData.MorphType.Vertex:
-                result.morph_offset[i] = ReadVertexMorphOffset();
-                break;
-            case PMXFormat.MorphData.MorphType.Bone:
-                result.morph_offset[i] = ReadBoneMorphOffset();
-                break;
-            case PMXFormat.MorphData.MorphType.Uv:
-            case PMXFormat.MorphData.MorphType.Adduv1:
-            case PMXFormat.MorphData.MorphType.Adduv2:
-            case PMXFormat.MorphData.MorphType.Adduv3:
-            case PMXFormat.MorphData.MorphType.Adduv4:
-                result.morph_offset[i] = ReadUVMorphOffset();
-                break;
-            case PMXFormat.MorphData.MorphType.Material:
-                result.morph_offset[i] = ReadMaterialMorphOffset();
-                break;
-            case PMXFormat.MorphData.MorphType.Impulse:
-                result.morph_offset[i] = ReadImpulseMorphOffset();
-                break;
-            default:
-                throw new System.FormatException();
+            switch (result.morph_type) {
+                case PMXFormat.MorphData.MorphType.Group:
+                case PMXFormat.MorphData.MorphType.Flip:
+                    result.morph_offset[i] = ReadGroupMorphOffset();
+                    break;
+                case PMXFormat.MorphData.MorphType.Vertex:
+                    result.morph_offset[i] = ReadVertexMorphOffset();
+                    break;
+                case PMXFormat.MorphData.MorphType.Bone:
+                    result.morph_offset[i] = ReadBoneMorphOffset();
+                    break;
+                case PMXFormat.MorphData.MorphType.Uv:
+                case PMXFormat.MorphData.MorphType.Adduv1:
+                case PMXFormat.MorphData.MorphType.Adduv2:
+                case PMXFormat.MorphData.MorphType.Adduv3:
+                case PMXFormat.MorphData.MorphType.Adduv4:
+                    result.morph_offset[i] = ReadUVMorphOffset();
+                    break;
+                case PMXFormat.MorphData.MorphType.Material:
+                    result.morph_offset[i] = ReadMaterialMorphOffset();
+                    break;
+                case PMXFormat.MorphData.MorphType.Impulse:
+                    result.morph_offset[i] = ReadImpulseMorphOffset();
+                    break;
+                default:
+                    throw new System.FormatException();
             }
         }
         return result;

@@ -47,24 +47,27 @@ namespace MMD
         }
 
         /// <summary>
-        /// Fernシェーダーパスの取得
+        /// シェーダーパスの取得
         /// </summary>
-        /// <returns>Fernシェーダーパス</returns>
+        /// <returns>シェーダーパス</returns>
         public static string GetShaderPath(AnimeMaterialCategory type)
         {
-            string result = "FernRender/URP/FERNNPR";
+            string result = "Honkai Star Rail/Character/";
 
             result += type switch
             {
+                AnimeMaterialCategory.Body => "Body",
+                AnimeMaterialCategory.BodyTransparent => "Body (Transparent)",
                 AnimeMaterialCategory.Face => "Face",
                 AnimeMaterialCategory.Hair => "Hair",
-                AnimeMaterialCategory.Eye  => "Eye",
-                _                         => "Standard",
+                //AnimeMaterialCategory.Eye  => "Eye",
+                AnimeMaterialCategory.Eye  => "Face", // Eye base doesn't use a separate shader
+
+                _                          => "Body",
             };
             return result;
         }
 
-        // See LWGUI.Helper.SetSurfaceType()
 		public static void SetRenderType(Material mat, AnimeMaterialRenderType renderType)
 		{
             if (renderType != AnimeMaterialRenderType.Unknown)
@@ -79,7 +82,7 @@ namespace MMD
             if (renderType == AnimeMaterialRenderType.Opaque) // Opaque
             {
                 mat.renderQueue = (int) RenderQueue.Geometry;
-                mat.SetOverrideTag("RenderType", "Opaque");
+                //mat.SetOverrideTag("RenderType", "Opaque");
                 mat.SetInt("_SrcBlend", (int) BlendMode.One);
                 mat.SetInt("_DstBlend", (int) BlendMode.Zero);
                 mat.SetFloat("_ZWrite", 1);
@@ -89,7 +92,7 @@ namespace MMD
             else if (renderType == AnimeMaterialRenderType.Translucent) // Transparent
             {
                 mat.renderQueue = (int) RenderQueue.Transparent;
-                mat.SetOverrideTag("RenderType", "Transparent");
+                //mat.SetOverrideTag("RenderType", "Transparent");
                 mat.SetInt("_SrcBlend", (int) BlendMode.SrcAlpha);
                 mat.SetInt("_DstBlend", (int) BlendMode.OneMinusSrcAlpha);
                 mat.SetFloat("_ZWrite", 0);
@@ -99,7 +102,7 @@ namespace MMD
             else if (renderType == AnimeMaterialRenderType.Cutout) // Clip
             {
                 mat.renderQueue = (int) RenderQueue.AlphaTest;
-                mat.SetOverrideTag("RenderType", "TransparentCutout");
+                //mat.SetOverrideTag("RenderType", "TransparentCutout");
                 mat.SetInt("_SrcBlend", (int) BlendMode.One);
                 mat.SetInt("_DstBlend", (int) BlendMode.Zero);
                 mat.SetFloat("_ZWrite", 1);
@@ -111,24 +114,13 @@ namespace MMD
             {
                 mat.renderQueue += (int)mat.GetFloat("_QueueOffset");
             }
-            
+            /*
             if (mat.HasProperty("_DepthPrePass"))
             {
                 mat.SetShaderPassEnabled("SRPDefaultUnlit", mat.GetFloat("_DepthPrePass")>0);
                 mat.SetShaderPassEnabled("ShadowCaster", mat.GetFloat("_CasterShadow")>0);
             }
+            */
 		}
-    
-        public static AnimeMaterialRenderType GetRenderType(Material mat)
-        {
-            return mat.GetTag("RenderType", true, "Unknown") switch
-            {
-                "Opaque"            => AnimeMaterialRenderType.Opaque,
-                "TransparentCutout" => AnimeMaterialRenderType.Cutout,
-                "Transparent"       => AnimeMaterialRenderType.Translucent,
-
-                _                   => AnimeMaterialRenderType.Unknown
-            };
-        }
     }
 }
