@@ -86,13 +86,6 @@ namespace MMD
                 }
                 else
                 {
-                    EditorGUILayout.LabelField("Initialize Physics (KKS)", EditorStyles.boldLabel);
-
-                    if (GUILayout.Button("Regenerate Physics for Outfit"))
-                    {
-                        RegenOutfitPhysicsForKKS(target);
-                    }
-
                     EditorGUILayout.LabelField("Initialize Physics (HSR)", EditorStyles.boldLabel);
 
                     if (GUILayout.Button("Regenerate Physics for Outfit"))
@@ -138,12 +131,12 @@ namespace MMD
             }
         }
 
-        private static List<Transform> GetBoneRoots(Transform armature, string rootPrefix)
+        private static List<Transform> GetBoneRoots(Transform armature, string rootPrefixLower)
         {
             List<Transform> roots = new();
 
             BoneSearch(armature, x => {
-                if (x.name.StartsWith(rootPrefix))
+                if (x.name.ToLower().StartsWith(rootPrefixLower))
                 {
                     roots.Add(x);
                     return false; // Don't search its children
@@ -168,37 +161,6 @@ namespace MMD
             {
                 cloth.SerializeData.colliderCollisionConstraint.colliderList = colliders;
             }
-        }
-
-        private static void RegenOutfitPhysicsForKKS(GameObject target)
-        {
-            var armatureRoot = target.transform.Find("Armature");
-            var physicsRoot = target.transform.Find("Physics");
-
-            if (physicsRoot == null)
-            {
-                physicsRoot = new GameObject("Physics").transform;
-                physicsRoot.SetParent(target.transform);
-                physicsRoot.localPosition = Vector3.zero;
-            }
-            else
-            {
-                // Clear previously generated clothes
-                foreach (Transform transform in physicsRoot)
-                {
-                    DestroyImmediate(transform.gameObject);
-                }
-            }
-
-            // Hair physics
-            var hairRoots = GetBoneRoots(armatureRoot, "cf_J_hair");
-            AddCloth(physicsRoot, "Hair", hairRoots);
-
-            // Skirt physics
-            var skirtRoots = GetBoneRoots(armatureRoot, "cf_j_sk_");
-            AddCloth(physicsRoot, "Skirt", skirtRoots);
-
-            AssetDatabase.Refresh();
         }
 
         private static void RegenOutfitPhysicsForHSR(GameObject target)
@@ -258,7 +220,7 @@ namespace MMD
             }
 
             // Hair physics
-            var hairRoots = GetBoneRoots(armatureRoot, "Hair");
+            var hairRoots = GetBoneRoots(armatureRoot, "hair");
             AddCloth(physicsRoot, "Hair", hairRoots, getCollidersByMask(0b00011));
 
             // Skirt physics
@@ -266,7 +228,7 @@ namespace MMD
             AddCloth(physicsRoot, "Skirt", skirtRoots, getCollidersByMask(0b11101));
 
             // Ribbon physics
-            var ribbonRoots = GetBoneRoots(armatureRoot, "Ribbon");
+            var ribbonRoots = GetBoneRoots(armatureRoot, "ribbon");
             AddCloth(physicsRoot, "Ribbon", ribbonRoots, getCollidersByMask(0b11101));
 
             AssetDatabase.Refresh();
