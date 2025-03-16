@@ -39,6 +39,13 @@ namespace MMD
 
             // Guess material type from name
             var materialType = AnimeMaterialUtilFunctions.GuessMMDMaterialCategory(material.name);
+            if (is_transparent)
+            {
+                if (materialType == AnimeMaterialCategory.Body)
+                {
+                    materialType = AnimeMaterialCategory.BodyTransparent;
+                }
+            }
             
             //マテリアルに設定
             string shader_path = AnimeMaterialUtilFunctions.GetShaderPath(materialType);
@@ -47,9 +54,14 @@ namespace MMD
             // TODO: result.SetColor("_BaseColor", material.diffuse_color);
             result.SetColor("_BaseColor", Color.white);
 
-            if (is_transparent) {
+
+
+            if (is_transparent)
+            {
                 AnimeMaterialUtilFunctions.SetRenderType(result, AnimeMaterialRenderType.Cutout);
-            } else {
+            }
+            else
+            {
                 AnimeMaterialUtilFunctions.SetRenderType(result, AnimeMaterialRenderType.Opaque);
             }
 
@@ -133,7 +145,7 @@ namespace MMD
                 //result.mainTexture = main_texture;
                 //result.mainTextureScale = new Vector2(1, -1);
                 result.SetTexture("_MainTex", main_texture);
-                result.SetTextureScale("_MainTex", new Vector2(1, -1));
+                result.SetVector("_Maps_ST", new Vector4(1, -1, 0, 0));
             }
             
             return result;
