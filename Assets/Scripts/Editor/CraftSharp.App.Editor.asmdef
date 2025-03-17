@@ -13,7 +13,8 @@
         "GUID:825ad574da7360d4e8aea558f272972e",
         "GUID:1e15dd200af47584f8ef99674010de7f",
         "Skybox.Anime",
-        "Skybox.Simple"
+        "Skybox.Simple",
+        "HSR.NPRShader.Runtime"
     ],
     "includePlatforms": [
         "Editor"
