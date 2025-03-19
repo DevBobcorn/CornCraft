@@ -6,7 +6,7 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents.Core
 {
     public abstract class SubComponentRegistry
     {
-        private readonly Dictionary<string, Type> _subComponentParsers = new();
+        private readonly Dictionary<ResourceLocation, Type> _subComponentParsers = new();
 
         private readonly DataTypes dataTypes;
 
@@ -17,15 +17,19 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents.Core
 
         protected void RegisterSubComponent<T>(string name) where T : SubComponent
         {
-            if(_subComponentParsers.TryGetValue(name, out _)) 
+            var id = ResourceLocation.FromString(name);
+            
+            if(_subComponentParsers.TryGetValue(id, out _)) 
                 throw new Exception($"Sub component {name} already registered!");
 
-            _subComponentParsers.Add(name, typeof(T));
+            _subComponentParsers.Add(id, typeof(T));
         }
 
         public SubComponent ParseSubComponent(string name, Queue<byte> data)
         {
-            if(!_subComponentParsers.TryGetValue(name, out var subComponentParserType)) 
+            var id = ResourceLocation.FromString(name);
+            
+            if(!_subComponentParsers.TryGetValue(id, out var subComponentParserType)) 
                 throw new Exception($"Sub component {name} not registered!");
 
             var instance=  Activator.CreateInstance(subComponentParserType, dataTypes, this) as SubComponent ??
