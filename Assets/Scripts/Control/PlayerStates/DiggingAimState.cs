@@ -6,8 +6,6 @@ namespace CraftSharp.Control
 {
     public class DiggingAimState : IPlayerState
     {
-        private const float DIGGING_IDLE_TIMEOUT = 0F;
-
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             var ability = player.AbilityConfig;
@@ -56,12 +54,8 @@ namespace CraftSharp.Control
                 // Idle timeout
                 attackStatus.AttackCooldown -= interval;
 
-                if (attackStatus.AttackCooldown < DIGGING_IDLE_TIMEOUT) // Timed out, exit state
-                {
-                    // Attack timed out, exit
-                    info.Attacking = false;
-                    attackStatus.AttackStage = -1;
-                }
+                info.Attacking = false;
+                attackStatus.AttackStage = -1;
             }
 
             if (!motor.GroundingStatus.FoundAnyGround)

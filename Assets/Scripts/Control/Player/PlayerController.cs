@@ -17,10 +17,6 @@ namespace CraftSharp.Control
             Mount
         }
 
-        private ItemStack currentItemStack;
-        private ItemActionType currentActionType;
-        public ItemActionType CurrentActionType => currentActionType;
-
         // AbilityConfig & Skill Fields
         [SerializeField] private PlayerAbilityConfig m_AbilityConfig;
         [SerializeField] private PlayerSkillItemConfig m_SkillItemConfig;
@@ -30,7 +26,7 @@ namespace CraftSharp.Control
 
         // Status Fields
         [SerializeField] private PlayerStatusUpdater m_StatusUpdater;
-        public PlayerStatus Status => m_StatusUpdater == null ? null : m_StatusUpdater.Status;
+        public PlayerStatus Status => m_StatusUpdater ? m_StatusUpdater.Status : null;
         private bool usingAnimator = false;
 
         /// <summary>
@@ -135,7 +131,7 @@ namespace CraftSharp.Control
             OnPlayerUpdate = null;
             
             // Update controller's player render
-            if (renderObj.TryGetComponent<EntityRender>(out m_PlayerRender))
+            if (renderObj.TryGetComponent(out m_PlayerRender))
             {
                 // Initialize head yaw to look forward
                 m_PlayerRender.HeadYaw.Value = EntityData.GetHeadYawFromByte(127); // i.e. -90F
@@ -230,14 +226,20 @@ namespace CraftSharp.Control
         #nullable enable
 
         private Action<GameModeUpdateEvent>? gameModeCallback;
-        private Action<HeldItemChangeEvent>? heldItemCallback;
 
         public delegate void ItemStateEventHandler(CurrentItemState weaponState);
         public event ItemStateEventHandler? OnItemStateChanged;
-        public void ChangeItemState(CurrentItemState itemState) => OnItemStateChanged?.Invoke(itemState);
+        public void ChangeItemState(CurrentItemState itemState)
+        {
+            OnItemStateChanged?.Invoke(itemState);
+        }
 
         public delegate void ItemStackEventHandler(ItemStack? item, ItemActionType actionType, PlayerSkillItemConfig? config);
         public event ItemStackEventHandler? OnCurrentItemChanged;
+        public void ChangeCurrentItem(ItemStack? currentItem, ItemActionType actionType)
+        {
+            OnCurrentItemChanged?.Invoke(currentItem, actionType, SkillItemConfig);
+        }
 
         public delegate void CrossFadeStateEventHandler(string stateName, float time, int layer, float timeOffset);
         public event CrossFadeStateEventHandler? OnCrossFadeState;
@@ -292,21 +294,6 @@ namespace CraftSharp.Control
             gameModeCallback = (e) => SetGameMode(e.GameMode);
             EventManager.Instance.Register(gameModeCallback);
 
-            // Register hotbar item event for updating item visuals
-            heldItemCallback = (e) =>
-            {
-                OnCurrentItemChanged?.Invoke(e.ItemStack, e.ActionType, null);
-                // Exit attack state when active item action type is changed.
-                // Ignore this if previous held item doesn't do anything(bare hand)
-                if (currentActionType != ItemActionType.None && currentActionType != e.ActionType)
-                {
-                    Status!.Attacking = false;
-                }
-                currentItemStack = e.ItemStack;
-                currentActionType = e.ActionType;
-            };
-            EventManager.Instance.Register(heldItemCallback);
-
             // Initialize player state (idle on start)
             Status.Grounded = true;
             currentState.OnEnter(PlayerStates.PRE_INIT, Status, Motor, this);
@@ -318,9 +305,6 @@ namespace CraftSharp.Control
 
             if (gameModeCallback is not null)
                 EventManager.Instance.Unregister(gameModeCallback);
-            
-            if (heldItemCallback is not null)
-                EventManager.Instance.Unregister(heldItemCallback);
         }
 
         protected void SetGameMode(GameMode gameMode)
@@ -557,7 +541,7 @@ namespace CraftSharp.Control
         /// <summary>
         /// Update player status
         /// </summary>
-        public void UpdatePlayerStatus()
+        private void UpdatePlayerStatus()
         {
             if (!Status!.EntityDisabled)
             {
@@ -732,21 +716,7 @@ namespace CraftSharp.Control
             else
                 statusInfo = Status.ToString();
 
-            var heldItemEdible = currentItemStack?.ItemType.IsEdible ?? false;
-            string itemActionInfo = string.Empty;
-
-            if (currentActionType == ItemActionType.Axe || currentActionType == ItemActionType.Pickaxe || currentActionType == ItemActionType.Shovel ||
-                currentActionType == ItemActionType.Hoe || currentActionType == ItemActionType.Sword)
-            {
-                itemActionInfo += $"[{currentItemStack?.ItemType.TierType ?? TierType.Wood}]";
-            }
-            
-            if (heldItemEdible)
-            {
-                itemActionInfo += " (edible)";
-            }
-
-            return $"ActionType: {currentActionType}{itemActionInfo}\nState: {currentState}\n{statusInfo}";
+            return $"State: {currentState}\n{statusInfo}";
         }
 
         // Misc methods from Kinematic Character Controller

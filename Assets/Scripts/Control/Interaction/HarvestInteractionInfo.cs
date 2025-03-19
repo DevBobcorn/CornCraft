@@ -52,19 +52,20 @@ namespace CraftSharp.Control
     {
         private readonly float duration;
 
-        public LocalHarvestInteractionInfo(int id, Block block, BlockLoc loc, Direction dir, Item? tool, float hardness,
+        public LocalHarvestInteractionInfo(int id, Block block, BlockLoc loc, Direction dir, ItemStack? tool, float hardness,
             bool floating, bool grounded, HarvestInteraction? def) : base(id, block, loc, dir, def)
         {
             duration = CalculateDiggingTime(tool, hardness, floating, grounded);
         }
 
-        private float CalculateDiggingTime(Item? item, float hardness, bool underwater, bool onGround)
+        private float CalculateDiggingTime(ItemStack? itemStack, float hardness, bool underwater, bool onGround)
         {
             if (hardness <= 0F) // Bedrock or something, takes forever to break
             {
                 return float.PositiveInfinity;
             }
 
+            var item = itemStack?.ItemType;
             bool isBestTool = item?.ActionType is not null && definition?.ActionType == item.ActionType;
 
             ItemTier? tier = null;
@@ -73,7 +74,7 @@ namespace CraftSharp.Control
                               item is { TierType: not null } &&
                               ItemTier.Tiers.TryGetValue(item.TierType.Value, out tier); // Use tool case
 
-            float multiplier = 1F;
+            float multiplier;
 
             if (isBestTool && tier != null)
             {
@@ -82,7 +83,10 @@ namespace CraftSharp.Control
                 if (!canHarvest) multiplier = 1F;
                 // TODO: Tool toolEfficiency level: mult += efficiencyLevel ^ 2 + 1
             }
-            else multiplier = 1F;
+            else
+            {
+                multiplier = 1F;
+            }
 
             // TODO: if haste or conduitPower: speedMultiplier *= 0.2 * max(hasteLevel, conduitPowerLevel) + 1
             // TODO: if miningFatigue: speedMultiplier *= 0.3 ^ min(miningFatigueLevel, 4)

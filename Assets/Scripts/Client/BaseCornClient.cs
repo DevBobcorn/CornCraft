@@ -126,7 +126,7 @@ namespace CraftSharp
             m_PlayerController.HandleCameraControllerSwitch(cameraController);
 
             // Set camera controller for interaction updater
-            interactionUpdater.Initialize(this, CameraController, PlayerController);
+            interactionUpdater.SetControllers(this, CameraController, PlayerController);
         }
 
         protected void SwitchFirstPlayerRender(EntityData clientEntity)

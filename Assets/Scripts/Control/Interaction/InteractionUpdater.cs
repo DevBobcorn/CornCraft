@@ -73,7 +73,7 @@ namespace CraftSharp.Control
         private CameraController? cameraController;
         private PlayerController? playerController;
 
-        private Action<HeldItemChangeEvent>? heldItemCallback;
+        private Action<HeldItemChangeEvent>? heldItemChangeCallback;
         private Action<TriggerInteractionExecutionEvent>? triggerInteractionExecutionEvent;
         private Action<HarvestInteractionUpdateEvent>? harvestInteractionUpdateCallback;
 
@@ -83,7 +83,8 @@ namespace CraftSharp.Control
         private readonly InteractionId interactionId = new();
 
         private LocalHarvestInteractionInfo? lastHarvestInteractionInfo;
-        private Item? currentItem;
+        private ItemStack? currentItemStack;
+        private ItemActionType currentActionType = ItemActionType.None;
 
         public Direction? TargetDirection { get; private set; } = Direction.Down;
         public BlockLoc? TargetBlockLoc { get; private set; } = null;
@@ -368,7 +369,7 @@ namespace CraftSharp.Control
             };
         }
 
-        private void AbortDiggingBlock()
+        private void AbortDiggingBlockIfPresent()
         {
             if (lastHarvestInteractionInfo is not null)
             {
@@ -403,19 +404,17 @@ namespace CraftSharp.Control
             return placeBlockLoc;
         }
 
-        public void Initialize(BaseCornClient client, CameraController camController, PlayerController playerController)
+        public void SetControllers(BaseCornClient client, CameraController cameraController, PlayerController playerController)
         {
             this.client = client;
-            this.cameraController = camController;
+            this.cameraController = cameraController;
 
             if (this.playerController != playerController)
             {
                 this.playerController = playerController;
 
-
                 playerController.Actions.Interaction.ChargedAttack.performed += _ =>
                 {
-                    var currentActionType = playerController.CurrentActionType;
                     var status = playerController.Status;
 
                     if (currentActionType == ItemActionType.Sword)
@@ -448,7 +447,6 @@ namespace CraftSharp.Control
 
                 playerController.Actions.Interaction.NormalAttack.performed += _ =>
                 {
-                    var currentActionType = playerController.CurrentActionType;
                     var status = playerController.Status;
 
                     if (TargetBlockLoc is not null && TargetDirection is not null &&
@@ -465,18 +463,25 @@ namespace CraftSharp.Control
                     {
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
-                            // Specify attack data to use
-                            status.AttackStatus.CurrentStagedAttack = playerController.AbilityConfig.MeleeSwordAttack_Staged;
+                            if (playerController.CurrentState != PlayerStates.MELEE)
+                            {
+                                // Specify attack data to use
+                                status.AttackStatus.CurrentStagedAttack = playerController.AbilityConfig.MeleeSwordAttack_Staged;
 
-                            // Update player state
-                            playerController.ChangeToState(PlayerStates.MELEE);
+                                // Update player state
+                                playerController.ChangeToState(PlayerStates.MELEE);
+                            }
+                            else if (playerController.CurrentState is MeleeState melee &&
+                                    playerController.Status.AttackStatus.AttackCooldown <= 0F)
+                            {
+                                melee.SetNextAttackFlag();
+                            }
                         }
                     }
                 };
 
                 playerController.Actions.Interaction.UseChargedItem.performed += _ =>
                 {
-                    var currentActionType = playerController.CurrentActionType;
                     var status = playerController.Status;
 
                     if (currentActionType == ItemActionType.Bow)
@@ -494,7 +499,6 @@ namespace CraftSharp.Control
 
                 playerController.Actions.Interaction.UseNormalItem.performed += _ =>
                 {
-                    var currentActionType = playerController.CurrentActionType;
                     var status = playerController.Status;
 
                     if (TargetBlockLoc is not null && TargetDirection is not null && TargetExactLoc is not null)
@@ -509,7 +513,7 @@ namespace CraftSharp.Control
                                 PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
                             }
                         }
-                        else if (playerController.CurrentActionType == ItemActionType.Block) // Check if holding a block item
+                        else if (currentActionType == ItemActionType.Block) // Check if holding a block item
                         {
                             if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
                             {
@@ -528,10 +532,24 @@ namespace CraftSharp.Control
             }
         }
 
-        void Start()
+        private void Start()
         {
-            heldItemCallback = e => currentItem = e.ItemStack?.ItemType;
-            EventManager.Instance.Register(heldItemCallback);
+            heldItemChangeCallback = e =>
+            {
+                if (playerController)
+                {
+                    // Exit attack state when active item action type is changed
+                    if (currentActionType != e.ActionType)
+                    {
+                        playerController.Status!.Attacking = false;
+                    }
+                    playerController.ChangeCurrentItem(e.ItemStack, e.ActionType);
+                }
+
+                currentItemStack = e.ItemStack;
+                currentActionType = e.ActionType;
+            };
+            EventManager.Instance.Register(heldItemChangeCallback);
 
             harvestInteractionUpdateCallback = e =>
             {
@@ -569,10 +587,10 @@ namespace CraftSharp.Control
             }
             
             // Abort previous digging interaction
-            AbortDiggingBlock();
+            AbortDiggingBlockIfPresent();
 
             lastHarvestInteractionInfo = new LocalHarvestInteractionInfo(interactionId.AllocateID(), block, blockLoc, direction,
-                currentItem, block.State.Hardness, status.Floating, status.Grounded, definition);
+                currentItemStack, block.State.Hardness, status.Floating, status.Grounded, definition);
             
             //Debug.Log($"Created {lastHarvestInteractionInfo.GetHashCode()} at {blockLoc}");
 
@@ -582,7 +600,7 @@ namespace CraftSharp.Control
             });
         }
 
-        void Update()
+        private void Update()
         {
             instaBreakCooldown -= Time.deltaTime;
             placeBlockCooldown -= Time.deltaTime;
@@ -615,7 +633,7 @@ namespace CraftSharp.Control
                     else
                     {
                         // Not in digging state, abort
-                        AbortDiggingBlock();
+                        AbortDiggingBlockIfPresent();
                     }
                     
                     // Check continuous insta-break
@@ -631,7 +649,7 @@ namespace CraftSharp.Control
                     }
                     
                     // Check continuous block placement
-                    if (playerController.CurrentActionType == ItemActionType.Block &&
+                    if (currentActionType == ItemActionType.Block &&
                         playerController.Actions.Interaction.UseNormalItem.IsPressed() &&
                         !blockTriggerInteractionInfos.ContainsKey(TargetBlockLoc.Value))
                     {
@@ -647,12 +665,12 @@ namespace CraftSharp.Control
                 else
                 {
                     // Target is gone, abort digging
-                    AbortDiggingBlock();
+                    AbortDiggingBlockIfPresent();
                 }
             }
             else // Not aiming, clear digging status
             {
-                AbortDiggingBlock();
+                AbortDiggingBlockIfPresent();
                 
                 TargetBlockLoc = null;
 
@@ -674,8 +692,14 @@ namespace CraftSharp.Control
 
         private void OnDestroy()
         {
-            if (heldItemCallback is not null)
-                EventManager.Instance.Unregister(heldItemCallback);
+            if (heldItemChangeCallback is not null)
+                EventManager.Instance.Unregister(heldItemChangeCallback);
+            
+            if (triggerInteractionExecutionEvent is not null)
+                EventManager.Instance.Unregister(triggerInteractionExecutionEvent);
+            
+            if (harvestInteractionUpdateCallback is not null)
+                EventManager.Instance.Unregister(harvestInteractionUpdateCallback);
         }
     }
 }

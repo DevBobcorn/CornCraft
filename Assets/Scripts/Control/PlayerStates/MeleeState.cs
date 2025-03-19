@@ -6,6 +6,8 @@ namespace CraftSharp.Control
 {
     public class MeleeState : IPlayerState
     {
+        private bool _nextAttackFlag = false;
+
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Sprinting = false;
@@ -58,10 +60,16 @@ namespace CraftSharp.Control
                     info.Attacking = false;
                     attackStatus.AttackStage = -1;
                 }
+
+                if (_nextAttackFlag)
+                {
+                    _nextAttackFlag = false;
+                    StartMeleeStage(meleeAttack, attackStatus, (attackStatus.AttackStage + 1) % meleeAttack.StageCount, player);
+                }
             }
         }
 
-        public void StartMeleeStage(PlayerStagedSkill meleeAttack, AttackStatus attackStatus, int stage, PlayerController player)
+        private static void StartMeleeStage(PlayerStagedSkill meleeAttack, AttackStatus attackStatus, int stage, PlayerController player)
         {
             attackStatus.AttackStage = stage;
 
@@ -75,6 +83,11 @@ namespace CraftSharp.Control
 
             player.OverrideStateAnimation(meleeAttack.DummyAnimationClip!, stageData.AnimationClip!);
             player.StartCrossFadeState(PlayerAbilityConfig.SKILL, 0F);
+        }
+
+        public void SetNextAttackFlag()
+        {
+            _nextAttackFlag = true;
         }
 
         public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
@@ -97,6 +110,7 @@ namespace CraftSharp.Control
         public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Attacking = true;
+            _nextAttackFlag = false;
 
             var attackStatus = info.AttackStatus;
             var meleeAttack = attackStatus.CurrentStagedAttack;
@@ -118,6 +132,7 @@ namespace CraftSharp.Control
         public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Attacking = false;
+            _nextAttackFlag = false;
 
             var attackStatus = info.AttackStatus;
             attackStatus.AttackCooldown = 0F;
