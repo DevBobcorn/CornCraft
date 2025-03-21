@@ -12,9 +12,8 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class HUDScreen : BaseScreen
     {
-        private const int MAX_CHAT_MESSAGES = 5;
         private const float HEALTH_MULTIPLIER = 1F;
-        private static readonly Vector3 STAMINA_TARGET_OFFSET = new(0, -0.5f, 0f);
+        private static readonly Vector3 STAMINA_TARGET_OFFSET = new(0, -0.5F, 0F);
 
         // UI controls and objects
         [SerializeField] private TMP_Text latencyText, debugText, modeText;
