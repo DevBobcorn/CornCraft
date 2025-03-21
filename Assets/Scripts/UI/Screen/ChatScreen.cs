@@ -128,7 +128,7 @@ namespace CraftSharp.UI
             }
         }
 
-        public void NextChatMessage()
+        private void NextChatMessage()
         {
             if (sentChatHistory.Count > 0 && chatIndex < sentChatHistory.Count)
             {
