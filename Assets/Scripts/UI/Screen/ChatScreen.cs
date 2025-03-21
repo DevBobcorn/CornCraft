@@ -11,8 +11,9 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class ChatScreen : BaseScreen
     {
-        private static readonly string COMMAND_PREFIX = "/";
-        private bool isActive = false;
+        private const int MAX_CHAT_MESSAGES = 100;
+        private const string COMMAND_PREFIX = "/";
+        private bool isActive;
 
         public override bool IsActive
         {
@@ -29,20 +30,20 @@ namespace CraftSharp.UI
                 }
             }
 
-            get {
-                return isActive;
-            }
+            get => isActive;
         }
 
         // UI controls and objects
         [SerializeField] private RectTransform chatScrollRectTransform;
         [SerializeField] private AutoCompletedInputField chatInput;
-        [SerializeField] private TMP_Text chatContent;
+        [SerializeField] private RectTransform chatContentPanel;
+        [SerializeField] private GameObject chatMessagePrefab;
         private CanvasGroup screenGroup;
+        private readonly Queue<TMP_Text> chatMessages = new();
 
         // Chat message data
         private readonly List<string> sentChatHistory = new();
-        private int chatIndex = 0;
+        private int chatIndex;
         private string chatBuffer = string.Empty;
 
         public override bool ReleaseCursor()
@@ -61,7 +62,7 @@ namespace CraftSharp.UI
             chatInput.caretPosition = COMMAND_PREFIX.Length;
         }
 
-        public void RefreshCompletions(string chatInputText)
+        private void RefreshCompletions(string chatInputText)
         {
             if (chatInputText.StartsWith(COMMAND_PREFIX) && chatInputText.Length > COMMAND_PREFIX.Length)
             {
@@ -73,7 +74,7 @@ namespace CraftSharp.UI
 
                 // Request command auto complete
                 var client = CornApp.CurrentClient;
-                if (client == null) return;
+                if (!client) return;
 
                 client.SendAutoCompleteRequest(requestText);
 
@@ -85,7 +86,7 @@ namespace CraftSharp.UI
             }
         }
 
-        public void SendChatMessage()
+        private void SendChatMessage()
         {
             if (chatInput.text.Trim() == string.Empty)
                 return;
@@ -93,7 +94,7 @@ namespace CraftSharp.UI
             string chat = chatInput.text;
             // Send if client exists...
             var client = CornApp.CurrentClient;
-            if (client != null)
+            if (client)
             {
                 client.TrySendChat(chat);
             }
@@ -108,7 +109,7 @@ namespace CraftSharp.UI
             chatIndex = sentChatHistory.Count;
         }
 
-        public void PrevChatMessage()
+        private void PrevChatMessage()
         {
             if (sentChatHistory.Count > 0 && chatIndex - 1 >= 0)
             {
@@ -165,17 +166,37 @@ namespace CraftSharp.UI
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
 
+            if (chatMessages.Count > 0)
+            {
+                foreach (var chatMessage in chatMessages)
+                {
+                    Destroy(chatMessage.gameObject);
+                }
+                chatMessages.Clear();
+            }
+
             chatInput.onValueChanged.AddListener(this.RefreshCompletions);
-            chatContent.text = string.Empty;
 
             // Register callbacks
-            chatCallback = (e) => {
+            chatCallback = (e) =>
+            {
                 var styledMessage = TMPConverter.MC2TMP(e.Message);
+                var chatMessageObj = Instantiate(chatMessagePrefab, chatContentPanel);
+                
+                var chatMessage = chatMessageObj.GetComponent<TMP_Text>();
+                chatMessage.text = styledMessage;
+                
+                chatMessages.Enqueue(chatMessage);
 
-                chatContent.text += styledMessage + '\n';
+                while (chatMessages.Count > MAX_CHAT_MESSAGES)
+                {
+                    // Dequeue and destroy
+                    Destroy(chatMessages.Dequeue().gameObject);
+                }
             };
 
-            autoCompleteCallback = (e) => {
+            autoCompleteCallback = (e) =>
+            {
                 if (e.Options.Length > 0)
                 {   // Show at most 20 options
                     var completionOptions = e.Options;
@@ -200,7 +221,7 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(autoCompleteCallback);
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (chatCallback is not null)
                 EventManager.Instance.Unregister(chatCallback);
@@ -215,7 +236,7 @@ namespace CraftSharp.UI
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 var client = CornApp.CurrentClient;
-                if (client != null)
+                if (client)
                 {
                     client.ScreenControl.TryPopScreen();
                 }
