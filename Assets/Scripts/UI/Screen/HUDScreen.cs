@@ -12,6 +12,7 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class HUDScreen : BaseScreen
     {
+        private const int MAX_CHAT_MESSAGES = 5;
         private const float HEALTH_MULTIPLIER = 1F;
         private static readonly Vector3 STAMINA_TARGET_OFFSET = new(0, -0.5f, 0f);
 
@@ -33,6 +34,8 @@ namespace CraftSharp.UI
         private int  selectedMode    = 0;
         private int displayedLatency = 0;
 
+        [SerializeField] private RectTransform chatContentPanel;
+        [SerializeField] private GameObject chatMessagePreviewPrefab;
         [SerializeField] [Range(0.1F, 1F)] private float transitionTime = 0.1F;
         private float transitionCooldown = 0F;
 
@@ -119,10 +122,21 @@ namespace CraftSharp.UI
                 }
             };
 
+            // Register callbacks
+            chatMessageCallback = (e) =>
+            {
+                var styledMessage = TMPConverter.MC2TMP(e.Message);
+                var chatMessageObj = Instantiate(chatMessagePreviewPrefab, chatContentPanel);
+                
+                var chatMessage = chatMessageObj.GetComponent<TMP_Text>();
+                chatMessage.text = styledMessage;
+            };
+
             EventManager.Instance.Register(cameraAimCallback);
             EventManager.Instance.Register(gameModeCallback);
             EventManager.Instance.Register(healthCallback);
             EventManager.Instance.Register(staminaCallback);
+            EventManager.Instance.Register(chatMessageCallback);
 
             // Initialize controls
             var game = CornApp.CurrentClient;
@@ -153,6 +167,7 @@ namespace CraftSharp.UI
         private Action<GameModeUpdateEvent>?    gameModeCallback;
         private Action<HealthUpdateEvent>?      healthCallback;
         private Action<StaminaUpdateEvent>?     staminaCallback;
+        private Action<ChatMessageEvent>?       chatMessageCallback;
 
         #nullable disable
 
@@ -169,6 +184,9 @@ namespace CraftSharp.UI
 
             if (staminaCallback is not null)
                 EventManager.Instance.Unregister(staminaCallback);
+            
+            if (chatMessageCallback is not null)
+                EventManager.Instance.Unregister(chatMessageCallback);
         }
 
         public override void UpdateScreen()

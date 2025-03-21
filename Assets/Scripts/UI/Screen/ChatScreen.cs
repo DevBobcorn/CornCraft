@@ -34,7 +34,6 @@ namespace CraftSharp.UI
         }
 
         // UI controls and objects
-        [SerializeField] private RectTransform chatScrollRectTransform;
         [SerializeField] private AutoCompletedInputField chatInput;
         [SerializeField] private RectTransform chatContentPanel;
         [SerializeField] private GameObject chatMessagePrefab;
@@ -156,7 +155,7 @@ namespace CraftSharp.UI
 
         #nullable enable
 
-        private Action<ChatMessageEvent>? chatCallback;
+        private Action<ChatMessageEvent>? chatMessageCallback;
         private Action<AutoCompletionEvent>? autoCompleteCallback;
 
         #nullable disable
@@ -178,7 +177,7 @@ namespace CraftSharp.UI
             chatInput.onValueChanged.AddListener(this.RefreshCompletions);
 
             // Register callbacks
-            chatCallback = (e) =>
+            chatMessageCallback = (e) =>
             {
                 var styledMessage = TMPConverter.MC2TMP(e.Message);
                 var chatMessageObj = Instantiate(chatMessagePrefab, chatContentPanel);
@@ -217,14 +216,14 @@ namespace CraftSharp.UI
             chatInput.m_OnUpArrowKeyNotConsumedByCompletionSelection.AddListener(PrevChatMessage);
             chatInput.m_OnDownArrowKeyNotConsumedByCompletionSelection.AddListener(NextChatMessage);
 
-            EventManager.Instance.Register(chatCallback);
+            EventManager.Instance.Register(chatMessageCallback);
             EventManager.Instance.Register(autoCompleteCallback);
         }
 
         private void OnDestroy()
         {
-            if (chatCallback is not null)
-                EventManager.Instance.Unregister(chatCallback);
+            if (chatMessageCallback is not null)
+                EventManager.Instance.Unregister(chatMessageCallback);
             
             if (autoCompleteCallback is not null)
                 EventManager.Instance.Unregister(autoCompleteCallback);
