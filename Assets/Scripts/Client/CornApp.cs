@@ -26,7 +26,7 @@ namespace CraftSharp
         private const int EDITOR_FPS_LIMIT = 60;
 
         public const string CORN_CRAFT_BUILTIN_FILE_NAME = "CornCraftBuiltin";
-        public const int    CORN_CRAFT_BUILTIN_VERSION = 16;
+        public const int    CORN_CRAFT_BUILTIN_VERSION = 17;
         private const string VANILLAFIX_FILE_NAME = "VanillaFix";
         private const int    VANILLAFIX_VERSION = 1;
 
@@ -142,7 +142,7 @@ namespace CraftSharp
 
             // Load interaction definitions AFTER block/blockstate definitions are loaded
             loadFlag.Finished = false;
-            Task.Run(() => InteractionManager.INSTANCE.PrepareData(loadFlag));
+            Task.Run(() => InteractionManager.PrepareData(loadFlag));
             while (!loadFlag.Finished) yield return null;
 
             // Load entity definitions
