@@ -49,6 +49,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -133,6 +136,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -219,6 +225,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -362,15 +371,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97f9c4390573ed643b136abb835f0e17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SolidLayer:
+  TerrainBoxColliderLayer:
     serializedVersion: 2
     m_Bits: 64
-  LiquidSurfaceLayer:
+  LiquidBoxColliderLayer:
     serializedVersion: 2
     m_Bits: 16384
-  LiquidVolumeLayer:
-    serializedVersion: 2
-    m_Bits: 32768
 --- !u!136 &6493157887190711041
 CapsuleCollider:
   m_ObjectHideFlags: 8
