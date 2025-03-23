@@ -76,13 +76,7 @@ namespace CraftSharp.Control
 
         public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
-            if (!info.Attacking)
-                return true;
-
-            if (info.Spectating)
-                return true;
-
-            return false;
+            return !info.Attacking || info.Spectating;
         }
 
         public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)

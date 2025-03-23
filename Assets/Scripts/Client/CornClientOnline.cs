@@ -2014,12 +2014,12 @@ namespace CraftSharp
                         // Update player location
                         PlayerController.SetLocationFromServer(location, mcYaw: yaw);
                         // Force refresh environment collider
-                        ChunkRenderManager.InitializeTerrainCollider(location.GetBlockLoc(), () =>
-                                {
-                                    // Pop loading screen
-                                    ScreenControl.SetLoadingScreen(false);
-                                    PlayerController.EnablePhysics();
-                                });
+                        ChunkRenderManager.InitializeBoxTerrainCollider(location.GetBlockLoc(), () =>
+                        {
+                            // Pop loading screen
+                            ScreenControl.SetLoadingScreen(false);
+                            PlayerController.EnablePhysics();
+                        });
                         // Update camera yaw (convert to Unity yaw)
                         CameraController.SetYaw(yaw + 90F);
                     });
@@ -2034,7 +2034,7 @@ namespace CraftSharp
                         }
 
                         // Force refresh environment collider
-                        ChunkRenderManager.RebuildTerrainCollider(location.GetBlockLoc());
+                        ChunkRenderManager.RebuildTerrainBoxCollider(location.GetBlockLoc());
                         // Then update player location
                         PlayerController.SetLocationFromServer(location, reset: true, mcYaw: yaw);
                         //Debug.Log($"Updated to {location} offset: {offset.magnitude}");

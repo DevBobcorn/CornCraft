@@ -16,9 +16,9 @@ namespace CraftSharp.Rendering
 {
     public class ChunkRenderManager : MonoBehaviour, IChunkRenderManager
     {
-        private const string MOVEMENT_LAYER_NAME = "Movement";
-        private const string INTERACTION_LAYER_NAME = "Interaction";
-        private const string LIQUID_SURFACE_LAYER_NAME = "LiquidSurface"; 
+        private const string TERRAIN_BOX_COLLIDER_LAYER_NAME = "TerrainBoxCollider";
+        private const string TERRAIN_MESH_COLLIDER_LAYER_NAME = "TerrainMeshCollider";
+        private const string LIQUID_BOX_COLLIDER_LAYER_NAME = "LiquidBoxCollider";
 
         [SerializeField] private Transform blockEntityParent;
 
@@ -85,7 +85,7 @@ namespace CraftSharp.Rendering
         private ChunkRenderBuilder builder;
 
         // Terrain collider for movement
-        private GameObject solidColliderGameObject, liquidColliderGameObject;
+        private GameObject terrainBoxColliderGameObject, liquidBoxColliderGameObject;
         private readonly Dictionary<BlockLoc, BoxCollider[]> colliderList = new();
 
         public void SetClient(BaseCornClient curClient) => client = curClient;
@@ -109,9 +109,9 @@ namespace CraftSharp.Rendering
             }
 
             // Update collider positions and force flush collider transform changes
-            foreach (var boxCollider in solidColliderGameObject.GetComponents<BoxCollider>())
+            foreach (var boxCollider in terrainBoxColliderGameObject.GetComponents<BoxCollider>())
                 boxCollider.center += posDelta;
-            foreach (var boxCollider in liquidColliderGameObject.GetComponents<BoxCollider>())
+            foreach (var boxCollider in liquidBoxColliderGameObject.GetComponents<BoxCollider>())
                 boxCollider.center += posDelta;
 
             Physics.SyncTransforms();
@@ -138,7 +138,7 @@ namespace CraftSharp.Rendering
             // Create a new chunk render object...
             var chunkObj = new GameObject("Chunk [Pooled]")
             {
-                layer = LayerMask.NameToLayer(INTERACTION_LAYER_NAME)
+                layer = LayerMask.NameToLayer(TERRAIN_MESH_COLLIDER_LAYER_NAME)
             };
             ChunkRender newChunk = chunkObj.AddComponent<ChunkRender>();
             
@@ -613,7 +613,7 @@ namespace CraftSharp.Rendering
 
         private void QueueChunkRenderBuildIfNotEmpty(ChunkRender chunkRender)
         {
-            if (chunkRender != null) // Not empty(air) chunk
+            if (chunkRender) // Not empty(air) chunk
             {
                 QueueChunkRenderBuild(chunkRender);
             }
@@ -865,11 +865,11 @@ namespace CraftSharp.Rendering
             if (blockLoc.DistanceSquared(client!.GetCurrentLocation().GetBlockLoc()) <=
                 ChunkRenderBuilder.MOVEMENT_RADIUS_SQR_PLUS)
             {
-                RebuildTerrainColliderAt(blockLoc);
+                RebuildTerrainBoxColliderAt(blockLoc);
             }
         }
 
-        public void InitializeTerrainCollider(BlockLoc playerBlockLoc, Action callback = null)
+        public void InitializeBoxTerrainCollider(BlockLoc playerBlockLoc, Action callback = null)
         {
             Task.Run(async () =>
             {
@@ -888,23 +888,19 @@ namespace CraftSharp.Rendering
                     delayCount--;
                 }
 
-                // Update player liquid state
-                var inLiquid = GetBlock(playerBlockLoc).State.InLiquid;
-                EventManager.Instance.Broadcast(new PlayerLiquidEvent(inLiquid));
-
                 Loom.QueueOnMainThread(() =>
                 {
-                    foreach (var boxCollider in solidColliderGameObject.GetComponents<BoxCollider>())
+                    foreach (var boxCollider in terrainBoxColliderGameObject.GetComponents<BoxCollider>())
                     {
                         Destroy(boxCollider);
                     }
-                    foreach (var boxCollider in liquidColliderGameObject.GetComponents<BoxCollider>())
+                    foreach (var boxCollider in liquidBoxColliderGameObject.GetComponents<BoxCollider>())
                     {
                         Destroy(boxCollider);
                     }
                     colliderList.Clear();
 
-                    builder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, solidColliderGameObject!, liquidColliderGameObject!, colliderList);
+                    builder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, terrainBoxColliderGameObject!, liquidBoxColliderGameObject!, colliderList);
 
                     // Set last player location
                     lastPlayerBlockLoc = playerBlockLoc;
@@ -914,14 +910,14 @@ namespace CraftSharp.Rendering
             });
         }
 
-        public void RebuildTerrainCollider(BlockLoc playerBlockLoc)
+        public void RebuildTerrainBoxCollider(BlockLoc playerBlockLoc)
         {
-            builder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, solidColliderGameObject, liquidColliderGameObject, colliderList);
+            builder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, terrainBoxColliderGameObject, liquidBoxColliderGameObject, colliderList);
         }
         
-        public void RebuildTerrainColliderAt(BlockLoc blockLoc)
+        public void RebuildTerrainBoxColliderAt(BlockLoc blockLoc)
         {
-            builder.BuildTerrainColliderBoxesAt(world, blockLoc, _worldOriginOffset, solidColliderGameObject, liquidColliderGameObject, colliderList);
+            builder.BuildTerrainColliderBoxesAt(world, blockLoc, _worldOriginOffset, terrainBoxColliderGameObject, liquidBoxColliderGameObject, colliderList);
         }
 
         private Block? AIR_BLOCK_INSTANCE;
@@ -942,14 +938,14 @@ namespace CraftSharp.Rendering
             var modelTable = ResourcePackManager.Instance.StateModelTable;
             builder = new(modelTable);
 
-            solidColliderGameObject = new GameObject("Movement Collider")
+            terrainBoxColliderGameObject = new GameObject("Terrain Box Collider")
             {
-                layer = LayerMask.NameToLayer(MOVEMENT_LAYER_NAME)
+                layer = LayerMask.NameToLayer(TERRAIN_BOX_COLLIDER_LAYER_NAME)
             };
 
-            liquidColliderGameObject = new GameObject("Liquid Collider")
+            liquidBoxColliderGameObject = new GameObject("Liquid Box Collider")
             {
-                layer = LayerMask.NameToLayer(LIQUID_SURFACE_LAYER_NAME)
+                layer = LayerMask.NameToLayer(LIQUID_BOX_COLLIDER_LAYER_NAME)
             };
 
             toolInteractionCallback = e =>
@@ -1100,14 +1096,7 @@ namespace CraftSharp.Rendering
             {
                 if (lastPlayerBlockLoc.Value != playerBlockLoc)
                 {
-                    RebuildTerrainCollider(playerBlockLoc);
-                    // Update player liquid state
-                    var inLiquid = GetBlock(playerBlockLoc).State.InLiquid;
-                    var prevInLiquid = GetBlock(lastPlayerBlockLoc.Value).State.InLiquid;
-                    if (prevInLiquid != inLiquid) // Player liquid state changed, broadcast this change
-                    {
-                        EventManager.Instance.Broadcast(new PlayerLiquidEvent(inLiquid));
-                    }
+                    RebuildTerrainBoxCollider(playerBlockLoc);
                     // Update last location only if it is used
                     lastPlayerBlockLoc = playerBlockLoc; 
                 }

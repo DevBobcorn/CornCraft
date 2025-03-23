@@ -101,18 +101,12 @@ namespace CraftSharp.Control
 
         public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
         {
-            if (!info.Spectating && !info.Grounded && !info.Clinging && !info.Floating)
-                return true;
-            
-            return false;
+            return !info.Spectating && !info.Grounded && !info.Clinging && !info.Floating;
         }
 
         public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
-            if (info.Spectating || info.Grounded || info.Clinging || info.Floating)
-                return true;
-            
-            return false;
+            return info.Spectating || info.Grounded || info.Clinging || info.Floating;
         }
 
         private Action<InputAction.CallbackContext>? glideToggleRequestCallback;

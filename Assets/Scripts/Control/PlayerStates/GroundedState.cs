@@ -13,6 +13,8 @@ namespace CraftSharp.Control
         private const float THRESHOLD_CLIMB_1M = 1.1F;
         private const float THRESHOLD_WALK_UP  = 0.6F;
         private const float THRESHOLD_CLIMB_UP = 0.4F;
+        
+        private const float THRESHOLD_LIQUID_SINK = -0.6F;
 
         private const float SPRINT_START_TIME = 0.9F;
 
@@ -156,14 +158,7 @@ namespace CraftSharp.Control
                     // Continue sprinting check
                     if (info.Sprinting && _timeSinceSprintStart >= SPRINT_START_TIME && !_sprintContinues)
                     {
-                        if (inputData.Locomotion.Sprint.IsPressed())
-                        {
-                            _sprintContinues = true;
-                        }
-                        else
-                        {
-                            _sprintContinues = false;
-                        }
+                        _sprintContinues = inputData.Locomotion.Sprint.IsPressed();
                     }
 
                     if (sprintStarting || _sprintContinues)
@@ -171,14 +166,7 @@ namespace CraftSharp.Control
                         info.Sprinting = true;
                         _timeSinceSprintStart += interval;
 
-                        if (info.Moving)
-                        {
-                            moveSpeed = ability.SprintSpeed;
-                        }
-                        else
-                        {
-                            moveSpeed = Mathf.Lerp(ability.SprintSpeed, 0.4F * ability.SprintSpeed, _timeSinceSprintStart / SPRINT_START_TIME);
-                        }
+                        moveSpeed = info.Moving ? ability.SprintSpeed : Mathf.Lerp(ability.SprintSpeed, 0.4F * ability.SprintSpeed, _timeSinceSprintStart / SPRINT_START_TIME);
                     }
                     else
                     {
@@ -240,7 +228,7 @@ namespace CraftSharp.Control
                 }
 
                 // Workaround: Used when fake grounded status is active (to avoid airborne state when moving off a block)
-                if (!motor.GroundingStatus.FoundAnyGround)
+                if (!motor.GroundingStatus.FoundAnyGround && (!info.InLiquid || info.LiquidDist > THRESHOLD_LIQUID_SINK))
                 {
                     // Apply fake gravity
                     moveVelocity -= motor.CharacterUp * 5F;
@@ -264,18 +252,12 @@ namespace CraftSharp.Control
 
         public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
         {
-            if (!info.Spectating && info.Grounded && !info.Clinging && !info.Floating)
-                return true;
-            
-            return false;
+            return !info.Spectating && info.Grounded && !info.Clinging && !info.Floating;
         }
 
         public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
-            if (info.Spectating || !info.Grounded || info.Clinging || info.Floating)
-                return true;
-            
-            return false;
+            return info.Spectating || !info.Grounded || info.Clinging || info.Floating;
         }
 
         private Action<InputAction.CallbackContext>? toggleAimingLockCallback;

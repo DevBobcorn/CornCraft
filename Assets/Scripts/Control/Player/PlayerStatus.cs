@@ -65,7 +65,7 @@ namespace CraftSharp.Control
         /// Attacking or digging (which is "attacking" a block)
         /// </summary>
         public bool Attacking = false;
-        public AttackStatus AttackStatus = new();
+        public readonly AttackStatus AttackStatus = new();
 
         public bool Spectating = false;
         public bool WalkMode   = false;
@@ -90,7 +90,7 @@ namespace CraftSharp.Control
 
         public override string ToString()
         {
-            var moveInfo = $"Moving: {Moving} {CenterDownDist:0.000} {LiquidDist:0.000}\nSprinting: {Sprinting}\nYaw: {CurrentVisualYaw:0.00} -> {TargetVisualYaw:0.00} ({YawDeltaAbs:0.00})";
+            var moveInfo = $"Moving: {Moving} CenterDownDist: {CenterDownDist:0.000} LiquidDist: {LiquidDist:0.000}\nSprinting: {Sprinting}\nYaw: {CurrentVisualYaw:0.00} -> {TargetVisualYaw:0.00} ({YawDeltaAbs:0.00})";
             var envInfo = $"\nBarrier Yaw Angle: {BarrierYawAngle:0.00} Dist:\t{BarrierDistance:0.00} ({WallDistance:0.00}) Hgt:{BarrierHeight:0.00}\nGravity Scale: {GravityScale:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             

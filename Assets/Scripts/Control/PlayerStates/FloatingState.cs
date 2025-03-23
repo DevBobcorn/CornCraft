@@ -82,7 +82,7 @@ namespace CraftSharp.Control
                 }
 
                 // Check vertical movement...
-                float distToAfloat = PlayerStatusUpdater.FLOATING_DIST_THERSHOLD - 0.2F - info.LiquidDist;
+                float distToAfloat = PlayerStatusUpdater.FLOATING_DIST_THRESHOLD - 0.2F - info.LiquidDist;
 
                 if (inputData.Locomotion.Ascend.IsPressed())
                 {
@@ -141,18 +141,12 @@ namespace CraftSharp.Control
 
         public bool ShouldEnter(PlayerActions inputData, PlayerStatus info)
         {
-            if (!info.Spectating && info.Floating)
-                return true;
-            
-            return false;
+            return !info.Spectating && info.Floating;
         }
 
         public bool ShouldExit(PlayerActions inputData, PlayerStatus info)
         {
-            if (info.Spectating || !info.Floating)
-                return true;
-            
-            return false;
+            return info.Spectating || !info.Floating;
         }
 
         public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)

@@ -494,10 +494,10 @@ namespace CraftSharp
                 if (useTerrain)
                 {
                     // Force refresh environment collider
-                    ChunkRenderManager.InitializeTerrainCollider(location.GetBlockLoc(), () =>
-                            {
-                                PlayerController.EnablePhysics();
-                            });
+                    ChunkRenderManager.InitializeBoxTerrainCollider(location.GetBlockLoc(), () =>
+                    {
+                        PlayerController.EnablePhysics();
+                    });
                 }
                 else
                 {
@@ -510,7 +510,7 @@ namespace CraftSharp
             else
             {
                 // Force refresh environment collider
-                ChunkRenderManager.RebuildTerrainCollider(location.GetBlockLoc());
+                ChunkRenderManager.RebuildTerrainBoxCollider(location.GetBlockLoc());
                 // Then update player location
                 PlayerController.SetLocationFromServer(location, reset: true, mcYaw: yaw);
                 //Debug.Log($"Updated to {location} offset: {offset.magnitude}");

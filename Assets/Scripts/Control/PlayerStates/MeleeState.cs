@@ -101,10 +101,7 @@ namespace CraftSharp.Control
             if (!info.Attacking)
                 return true;
             
-            if (info.Spectating || info.Floating || !info.Grounded)
-                return true;
-            
-            return false;
+            return info.Spectating || info.Floating || !info.Grounded;
         }
 
         public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
@@ -115,7 +112,7 @@ namespace CraftSharp.Control
             var attackStatus = info.AttackStatus;
             var meleeAttack = attackStatus.CurrentStagedAttack;
 
-            if (meleeAttack == null) // Melee attack data is not assigned, stop it
+            if (!meleeAttack) // Melee attack data is not assigned, stop it
             {
                 info.Attacking = false;
                 attackStatus.AttackStage = -1;

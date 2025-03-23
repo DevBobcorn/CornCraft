@@ -8,38 +8,38 @@ namespace CraftSharp.Control
 {
     public class PlayerStatusUpdater : MonoBehaviour
     {
+        private const string TERRAIN_BOX_COLLIDER_LAYER_NAME = "TerrainBoxCollider";
+        private const string LIQUID_BOX_COLLIDER_LAYER_NAME = "LiquidBoxCollider";
+        private const string LIQUID_MESH_COLLIDER_LAYER_NAME = "LiquidMeshCollider";
+        
         // Ground distance check
         private const float GROUND_RAYCAST_START   = 2.5F;
         private const float GROUND_RAYCAST_DIST    = 5.0F;
 
         // Liquid status and distance check
-        private const float LIQUID_RAYCAST_START   = 2.0F; // Liquid raycast goes downward from top of player
-        private const float LIQUID_RAYCAST_DIST    = 5.0F;
-        
-        private bool _useServerLiquidCheck = false;
-        public const float FLOATING_DIST_THERSHOLD = -0.5F;
+        private const float LIQUID_RAYCAST_START   =  2.0F; // Liquid raycast goes downward from top of player
+        private const float LIQUID_RAYCAST_DIST    =  5.0F;
+        public const float FLOATING_DIST_THRESHOLD = -0.5F;
 
         // Barrier/wall distance check
         private const float BARRIER_RAYCAST_LENGTH =  2.0F;
 
-        public LayerMask SolidLayer;
-        public LayerMask LiquidSurfaceLayer;
-        public LayerMask LiquidVolumeLayer;
-
-        public PlayerStatus Status = new();
+        public readonly PlayerStatus Status = new();
 
         public void UpdatePlayerStatus(KinematicCharacterMotor motor, Quaternion targetOrientation)
         {
             var frontDirNormalized = targetOrientation * Vector3.forward;
+            var terrainBoxColliderLayer = 1 << LayerMask.NameToLayer(TERRAIN_BOX_COLLIDER_LAYER_NAME);
+            var liquidBoxColliderLayer = 1 << LayerMask.NameToLayer(LIQUID_BOX_COLLIDER_LAYER_NAME);
+            var liquidMeshColliderLayer = 1 << LayerMask.NameToLayer(LIQUID_MESH_COLLIDER_LAYER_NAME);
 
             // Grounded state update
-            bool groundCheck = motor.GroundingStatus.FoundAnyGround;
-            //Status.GroundedCheck = groundCheck;
-
+            var groundCheck = motor.GroundingStatus.FoundAnyGround;
             var rayCenter = transform.position + GROUND_RAYCAST_START * motor.CharacterUp;
 
             // > Cast a ray downward from above the player
-            if (Physics.Raycast(rayCenter, -motor.CharacterUp, out RaycastHit centerDownHit, GROUND_RAYCAST_DIST, SolidLayer, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(rayCenter, -motor.CharacterUp, out RaycastHit centerDownHit,
+                GROUND_RAYCAST_DIST, terrainBoxColliderLayer, QueryTriggerInteraction.Ignore))
                 Status.CenterDownDist = centerDownHit.distance - GROUND_RAYCAST_START;
             else
                 Status.CenterDownDist = GROUND_RAYCAST_DIST - GROUND_RAYCAST_START;
@@ -47,11 +47,12 @@ namespace CraftSharp.Control
             Debug.DrawRay(rayCenter, motor.CharacterUp * -GROUND_RAYCAST_DIST, Color.cyan);
 
             // Perform barrier check and wall check
-            var barrierCheckRayHeight = 0.1F;
+            const float barrierCheckRayHeight = 0.1F;
             var barrierCheckRayOrigin = transform.position + barrierCheckRayHeight * motor.CharacterUp;
 
             // > Cast a ray forward from feet height
-            if (Physics.Raycast(barrierCheckRayOrigin, frontDirNormalized, out RaycastHit barrierForwardHit, BARRIER_RAYCAST_LENGTH, SolidLayer, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(barrierCheckRayOrigin, frontDirNormalized, out RaycastHit barrierForwardHit, 
+                BARRIER_RAYCAST_LENGTH, terrainBoxColliderLayer, QueryTriggerInteraction.Ignore))
             {
                 Status.BarrierYawAngle = Vector3.Angle(frontDirNormalized, -barrierForwardHit.normal);
                 Status.BarrierDistance = barrierForwardHit.distance;
@@ -59,7 +60,8 @@ namespace CraftSharp.Control
                 // > Cast another ray downward in front of the player
                 var rayFront = rayCenter + frontDirNormalized * (barrierForwardHit.distance + 0.1F);
 
-                if (Physics.Raycast(rayFront, -motor.CharacterUp, out RaycastHit barrierDownwardHit, GROUND_RAYCAST_DIST, SolidLayer, QueryTriggerInteraction.Ignore))
+                if (Physics.Raycast(rayFront, -motor.CharacterUp, out RaycastHit barrierDownwardHit, 
+                    GROUND_RAYCAST_DIST, terrainBoxColliderLayer, QueryTriggerInteraction.Ignore))
                     Status.BarrierHeight = GROUND_RAYCAST_START - barrierDownwardHit.distance;
                 else
                     Status.BarrierHeight = GROUND_RAYCAST_START - GROUND_RAYCAST_DIST;
@@ -71,15 +73,11 @@ namespace CraftSharp.Control
                 var wallCheckRayOrigin = transform.position + wallCheckRayHeight * motor.CharacterUp;
 
                 // > Cast another ray forward from head height
-                if (Physics.Raycast(wallCheckRayOrigin, frontDirNormalized, out RaycastHit wallForwardHit, BARRIER_RAYCAST_LENGTH, SolidLayer, QueryTriggerInteraction.Ignore))
-                {
-                    Status.WallDistance = wallForwardHit.distance;
-                }
-                else
-                {
+                Status.WallDistance = Physics.Raycast(wallCheckRayOrigin, frontDirNormalized,out RaycastHit wallForwardHit, 
+                    BARRIER_RAYCAST_LENGTH, terrainBoxColliderLayer, QueryTriggerInteraction.Ignore) ?
+                    wallForwardHit.distance :
                     // Should be enough space for player to climb over, use an arbitrary value that's big enough
-                    Status.WallDistance = BARRIER_RAYCAST_LENGTH;
-                }
+                    BARRIER_RAYCAST_LENGTH;
             }
             else // No barrier
             {
@@ -94,38 +92,21 @@ namespace CraftSharp.Control
 
             Debug.DrawRay(barrierCheckRayOrigin, frontDirNormalized, Color.blue);
 
-            // Perform water volume check, if not using water check from server
-            if (!_useServerLiquidCheck)
-            {
-                // In liquid state update
-                var capsule = GetComponent<CapsuleCollider>();
-                if (Physics.CheckBox(transform.position + capsule.center, new Vector3(capsule.radius, capsule.height / 2f, capsule.radius), motor.transform.rotation, LiquidVolumeLayer, QueryTriggerInteraction.Collide))
-                {
-                    Status.InLiquid = true;
-                }
-                else
-                {
-                    Status.InLiquid = false;
-                }
-            }
-
-            if (Status.InLiquid) // In liquid
-            {
-                // Perform floating check
-                Status.Floating = Status.LiquidDist <= FLOATING_DIST_THERSHOLD;
-            }
-            else // In air or on ground
-            {
-                // Reset floating flag, we are not even in liquid
-                Status.Floating = false;
-            }
+            // In liquid state update
+            Status.InLiquid = Physics.CheckBox(transform.position + motor.CharacterUp * 0.25F,
+                new Vector3(0.25F, 0.25F, 0.25F), motor.transform.rotation, liquidBoxColliderLayer,
+                QueryTriggerInteraction.Collide);
 
             if (Status.Grounded) // Grounded in last update
             {
                 // Workaround: Extra check to make sure the player is just walking on some bumped surface and happen to leave the ground
-                if (!groundCheck && Status.CenterDownDist > 1.25F)
+                if (!groundCheck && Status.CenterDownDist > 1.25F && !Status.InLiquid)
                 {
                     Status.Grounded = false;
+                }
+                else
+                {
+                    Status.Grounded = groundCheck;
                 }
             }
             else // Not grounded in last update
@@ -136,7 +117,12 @@ namespace CraftSharp.Control
             // Cast a ray downwards again, but check liquid layer this time
             if (Status.InLiquid)
             {
-                if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, LIQUID_RAYCAST_DIST, LiquidSurfaceLayer | LiquidVolumeLayer, QueryTriggerInteraction.Collide))
+                // Perform floating check
+                Status.Floating = Status is { LiquidDist: <= FLOATING_DIST_THRESHOLD, Grounded: false };
+                
+                if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit,
+                    LIQUID_RAYCAST_DIST, liquidBoxColliderLayer | liquidMeshColliderLayer,
+                    QueryTriggerInteraction.Collide))
                 {
                     Status.LiquidDist = centerDownHit.distance - LIQUID_RAYCAST_START;
                 }
@@ -145,29 +131,11 @@ namespace CraftSharp.Control
                     Status.LiquidDist = -LIQUID_RAYCAST_DIST;
                 }
             }
-            else // Not in water
+            else // Not in liquid
             {
+                // Reset floating flag and liquid distance
+                Status.Floating = false;
                 Status.LiquidDist = 0F;
-            }
-        }
-
-        private Action<PlayerLiquidEvent>? serverLiquidCallback;
-
-        void Start()
-        {
-            serverLiquidCallback = (e) => {
-                Status.InLiquid = e.Enter;
-                _useServerLiquidCheck = true;
-            };
-
-            EventManager.Instance.Register(serverLiquidCallback);
-        }
-
-        void OnDestroy()
-        {
-            if (serverLiquidCallback is not null)
-            {
-                EventManager.Instance.Unregister(serverLiquidCallback);
             }
         }
     }

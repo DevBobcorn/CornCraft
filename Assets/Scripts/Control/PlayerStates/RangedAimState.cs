@@ -16,7 +16,7 @@ namespace CraftSharp.Control
             var attackStatus = info.AttackStatus;
             var rangedAttack = attackStatus.CurrentChargedAttack;
 
-            if (rangedAttack == null) // Ranged attack data is not assigned, stop it
+            if (!rangedAttack) // Ranged attack data is not assigned, stop it
             {
                 info.Attacking = false;
                 attackStatus.AttackStage = -1;
@@ -30,7 +30,7 @@ namespace CraftSharp.Control
                 bool prevMoving = info.Moving;
                 info.Moving = inputData.Locomotion.Movement.IsPressed();
 
-                // Animation mirror randomation
+                // Animation mirror randomization
                 if (info.Moving != prevMoving)
                 {
                     player.RandomizeMirroredFlag();
@@ -85,10 +85,7 @@ namespace CraftSharp.Control
             if (!info.Attacking)
                 return true;
             
-            if (info.Spectating || info.Floating || !info.Grounded)
-                return true;
-            
-            return false;
+            return info.Spectating || info.Floating || !info.Grounded;
         }
 
         public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
@@ -98,7 +95,7 @@ namespace CraftSharp.Control
             var attackStatus = info.AttackStatus;
             var rangedAttack = attackStatus.CurrentChargedAttack;
 
-            if (rangedAttack == null) // Ranged attack data is not assigned, stop it
+            if (!rangedAttack) // Ranged attack data is not assigned, stop it
             {
                 info.Attacking = false;
                 attackStatus.AttackStage = -1;

@@ -39,8 +39,8 @@ namespace CraftSharp.Rendering
         private readonly Dictionary<int, EntityRender> entityRenders = new();
         
         // Squared distance range of a entity to be considered as "near" the player
-        private const float NEARBY_THERESHOLD_INNER =  81F; //  9 *  9
-        private const float NEARBY_THERESHOLD_OUTER = 100F; // 10 * 10
+        private const float NEARBY_THRESHOLD_INNER =  81F; //  9 *  9
+        private const float NEARBY_THRESHOLD_OUTER = 100F; // 10 * 10
 
         /// <summary>
         /// A dictionary storing entities near the player
@@ -332,14 +332,14 @@ namespace CraftSharp.Rendering
                 int entityId = render.NumeralId;
                 bool inNearbyDict = nearbyEntities.ContainsKey(entityId);
 
-                if (dist < NEARBY_THERESHOLD_INNER) // Add entity to dictionary
+                if (dist < NEARBY_THRESHOLD_INNER) // Add entity to dictionary
                 {
                     if (inNearbyDict)
                         nearbyEntities[entityId] = dist;
                     else
                         nearbyEntities.Add(entityId, dist);
                 }
-                else if (dist > NEARBY_THERESHOLD_OUTER) // Remove entity from dictionary
+                else if (dist > NEARBY_THRESHOLD_OUTER) // Remove entity from dictionary
                 {
                     if (inNearbyDict)
                         nearbyEntities.Remove(entityId);
