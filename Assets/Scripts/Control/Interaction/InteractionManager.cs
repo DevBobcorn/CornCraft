@@ -10,13 +10,9 @@ namespace CraftSharp.Control
     {
         public static readonly InteractionManager INSTANCE = new();
 
-        private static readonly Dictionary<int, InteractionDefinition> interactionTable = new();
+        public static Dictionary<int, InteractionDefinition> InteractionTable { get; } = new();
 
-        public Dictionary<int, InteractionDefinition> InteractionTable => interactionTable;
-
-        public InteractionDefinition? DefaultHarvestInteraction;
-
-        public void PrepareData(DataLoadFlag flag)
+        public static void PrepareData(DataLoadFlag flag)
         {
             // Block interactions
             var interactionPath = PathHelper.GetExtraDataFile("block_interaction.json");
@@ -29,7 +25,7 @@ namespace CraftSharp.Control
                 return;
             }
 
-            interactionTable.Clear();
+            InteractionTable.Clear();
 
             var interactions = Json.ParseJson(File.ReadAllText(interactionPath, Encoding.UTF8));
 
@@ -85,10 +81,10 @@ namespace CraftSharp.Control
                             : BlockStatePredicate.EMPTY;
                         
                         var reusable = entryCont.TryGetValue("reusable", out var reusableData)
-                            && bool.Parse(reusableData?.StringValue); // false if not specified
+                            && bool.Parse(reusableData?.StringValue!); // false if not specified
                         
                         var showInList = !entryCont.TryGetValue("show_in_list", out var showInListData)
-                            || bool.Parse(showInListData?.StringValue); // true if not specified
+                            || bool.Parse(showInListData?.StringValue!); // true if not specified
 
                         foreach (var trigger in triggers.DataArray)
                         {
@@ -112,13 +108,13 @@ namespace CraftSharp.Control
                                         inters.Add(new TriggerInteraction(iconType, blockId, reusable, interactionType, hintKey, tag, showInList));
                                     }
 
-                                    if (interactionTable.TryGetValue(stateId, out var definition))
+                                    if (InteractionTable.TryGetValue(stateId, out var definition))
                                     {
                                         definition.AddRange(inters);
                                     }
                                     else
                                     {
-                                        interactionTable.Add(stateId, new(inters));
+                                        InteractionTable.Add(stateId, new(inters));
                                     }
 
                                     //Debug.Log($"Added {entryName} interaction for blockstate [{stateId}] {palette.GetByNumId(stateId)}");

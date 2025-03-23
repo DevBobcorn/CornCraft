@@ -294,11 +294,11 @@ namespace CraftSharp.UI
                 if (selectedOption.interactionInfo is BlockInteractionInfo blockInfo)
                 {
                     var blockLoc = blockInfo.BlockLoc;
-                    var worldPoint = CoordConvert.MC2Unity(originOffset, (blockLoc.X >> 4) << 4, (blockLoc.Y >> 4) << 4, (blockLoc.Z >> 4) << 4);
+                    var worldPoint = CoordConvert.MC2Unity(originOffset, blockLoc.ToLocation());
 
                     var offsetType = ResourcePackManager.Instance.StateModelTable[blockInfo.Block.StateId].OffsetType;
-                    var pointOffset = (Vector3) ChunkRenderBuilder.GetBlockOffset(offsetType,
-                        blockLoc.X >> 4, blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Y & 0xF, blockLoc.Z & 0xF) + Vector3.one * 0.5F;
+                    var pointOffset = (Vector3) ChunkRenderBuilder.GetBlockOffsetInBlock(offsetType,
+                        blockLoc.X >> 4, blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF) + Vector3.one * 0.5F;
 
                     // Update interaction hint position
                     var newPos = uiCamera.ViewportToWorldPoint(camControl.GetPointViewportPos(worldPoint + pointOffset));

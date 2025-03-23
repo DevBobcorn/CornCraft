@@ -16,9 +16,9 @@ namespace CraftSharp.Rendering
 {
     public class ChunkRenderManager : MonoBehaviour, IChunkRenderManager
     {
-        public const string MOVEMENT_LAYER_NAME = "Movement";
-        public const string INTERACTION_LAYER_NAME = "Interaction";
-        public const string LIQUID_SURFACE_LAYER_NAME = "LiquidSurface";
+        private const string MOVEMENT_LAYER_NAME = "Movement";
+        private const string INTERACTION_LAYER_NAME = "Interaction";
+        private const string LIQUID_SURFACE_LAYER_NAME = "LiquidSurface"; 
 
         [SerializeField] private Transform blockEntityParent;
 
@@ -45,8 +45,8 @@ namespace CraftSharp.Rendering
         private readonly Dictionary<BlockLoc, BlockEntityRender> blockEntityRenders = new();
 
         // Squared distance range of a block entity to be considered as "near" the player
-        private const float NEARBY_THERESHOLD_INNER =  81F; //  9 *  9
-        private const float NEARBY_THERESHOLD_OUTER = 100F; // 10 * 10
+        private const float NEARBY_THRESHOLD_INNER =  81F; //  9 *  9
+        private const float NEARBY_THRESHOLD_OUTER = 100F; // 10 * 10
 
         /// <summary>
         /// A dictionary storing block entities near the player
@@ -85,9 +85,10 @@ namespace CraftSharp.Rendering
         private ChunkRenderBuilder builder;
 
         // Terrain collider for movement
-        private MeshCollider movementCollider, liquidCollider;
+        private GameObject solidColliderGameObject, liquidColliderGameObject;
+        private readonly Dictionary<BlockLoc, BoxCollider[]> colliderList = new();
 
-        public void SetClient(BaseCornClient client) => this.client = client;
+        public void SetClient(BaseCornClient curClient) => client = curClient;
 
         private Vector3Int _worldOriginOffset = Vector3Int.zero;
 
@@ -108,13 +109,15 @@ namespace CraftSharp.Rendering
             }
 
             // Update collider positions and force flush collider transform changes
-            movementCollider.transform.position += posDelta;
-            liquidCollider.transform.position += posDelta;
+            foreach (var boxCollider in solidColliderGameObject.GetComponents<BoxCollider>())
+                boxCollider.center += posDelta;
+            foreach (var boxCollider in liquidColliderGameObject.GetComponents<BoxCollider>())
+                boxCollider.center += posDelta;
 
             Physics.SyncTransforms();
         }
 
-        private static int dataBuildTimeSum = 0, vertexBuildTimeSum = 0;
+        private static int dataBuildTimeSum, vertexBuildTimeSum;
         private static readonly Queue<int> dataBuildTimeRecord = new(Enumerable.Repeat(0, 200));
         private static readonly Queue<int> vertexBuildTimeRecord = new(Enumerable.Repeat(0, 200));
 
@@ -133,7 +136,7 @@ namespace CraftSharp.Rendering
         private static ChunkRender CreateNewChunkRender()
         {
             // Create a new chunk render object...
-            var chunkObj = new GameObject($"Chunk [Pooled]")
+            var chunkObj = new GameObject("Chunk [Pooled]")
             {
                 layer = LayerMask.NameToLayer(INTERACTION_LAYER_NAME)
             };
@@ -150,7 +153,7 @@ namespace CraftSharp.Rendering
             // Unparent and hide this ChunkRender
             chunk.transform.parent = null;
             var chunkObj = chunk.gameObject;
-            chunkObj.name = $"Chunk [Pooled]";
+            chunkObj.name = "Chunk [Pooled]";
             chunkObj.SetActive(false);
 
             var meshFilter = chunkObj.GetComponent<MeshFilter>();
@@ -164,7 +167,7 @@ namespace CraftSharp.Rendering
         private static ChunkRenderColumn CreateNewChunkRenderColumn()
         {
             // Create this chunk column...
-            var columnObj = new GameObject($"Column [Pooled]");
+            var columnObj = new GameObject("Column [Pooled]");
             ChunkRenderColumn newColumn = columnObj.AddComponent<ChunkRenderColumn>();
 
             return newColumn;
@@ -176,7 +179,7 @@ namespace CraftSharp.Rendering
         private static void OnReleaseChunkRenderColumn(ChunkRenderColumn column)
         {
             var columnObj = column.gameObject;
-            columnObj.name = $"Column [Pooled]";
+            columnObj.name = "Column [Pooled]";
         }
 
         /// <summary>
@@ -186,12 +189,7 @@ namespace CraftSharp.Rendering
         {
             int2 chunkCoord = new(chunkX, chunkZ);
 
-            if (renderColumns.ContainsKey(chunkCoord))
-            {
-                return renderColumns[chunkCoord];
-            }
-
-            return null;
+            return renderColumns.GetValueOrDefault(chunkCoord);
         }
 
         /// <summary>
@@ -201,9 +199,9 @@ namespace CraftSharp.Rendering
         {
             int2 chunkCoord = new(chunkX, chunkZ);
 
-            if (renderColumns.ContainsKey(chunkCoord))
+            if (renderColumns.TryGetValue(chunkCoord, out var renderColumn))
             {
-                return renderColumns[chunkCoord];
+                return renderColumn;
             }
             
             // This ChunkRenderColumn doesn't currently exist...
@@ -217,7 +215,7 @@ namespace CraftSharp.Rendering
             columnObj.name = $"Column [{chunkX}, {chunkZ}]";
 
             // Set its parent to world transform...
-            columnObj.transform.parent = this.transform;
+            columnObj.transform.parent = transform;
             columnObj.transform.localPosition = CoordConvert.MC2Unity(_worldOriginOffset, chunkX * Chunk.SIZE, 0F, chunkZ * Chunk.SIZE);
 
             renderColumns.Add(chunkCoord, column);
@@ -230,14 +228,11 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Get existing ChunkRender, returns null if not present
         /// </summary>
-        public ChunkRender GetChunkRender(int chunkX, int chunkY, int chunkZ)
+        private ChunkRender GetChunkRender(int chunkX, int chunkY, int chunkZ)
         {
             var column = GetChunkRenderColumn(chunkX, chunkZ);
 
-            if (column == null)
-                return null;
-
-            return column.GetChunkRender(chunkY);
+            return column ? column.GetChunkRender(chunkY) : null;
         }
         #endregion
 
@@ -286,7 +281,7 @@ namespace CraftSharp.Rendering
         public void SetBlock(BlockLoc blockLoc, Block block)
         {
             var column = GetChunkColumn(blockLoc);
-            bool shouldRecalcLight = false;
+            bool shouldRecalculateLight = false;
 
             if (column != null)
             {
@@ -295,8 +290,8 @@ namespace CraftSharp.Rendering
                 if (chunk == null)
                     column[blockLoc.GetChunkYIndex(column.MinimumY)] = chunk = new Chunk();
                 chunk[blockLoc.GetChunkBlockX(), blockLoc.GetChunkBlockY(), blockLoc.GetChunkBlockZ()] = block;
-                // Update ambient occulsion and light data cache
-                shouldRecalcLight = column.UpdateCachedBlockData(blockLoc, block.State);
+                // Update ambient occlusion and light data cache
+                shouldRecalculateLight = column.UpdateCachedBlockData(blockLoc, block.State);
             }
 
             // Block render is considered separately even if chunk data is not present
@@ -306,12 +301,12 @@ namespace CraftSharp.Rendering
                 // Auto-create block entity if present
                 if (BlockEntityTypePalette.INSTANCE.GetBlockEntityForBlock(block.BlockId, out BlockEntityType blockEntityType))
                 {
-                    AddBlockEntityRender(blockLoc, blockEntityType, null);
+                    AddBlockEntityRender(blockLoc, blockEntityType);
                 }
 
-                if (shouldRecalcLight)
+                if (shouldRecalculateLight)
                 {
-                    var cp = new int3(blockLoc.GetChunkX(), blockLoc.GetChunkYIndex(column.MinimumY), blockLoc.GetChunkZ());
+                    var cp = new int3(blockLoc.GetChunkX(), blockLoc.GetChunkYIndex(column!.MinimumY), blockLoc.GetChunkZ());
 
                     // Calculate neighbor chunks which might be affected by this light update
                     int px = blockLoc.GetChunkBlockX();
@@ -401,7 +396,7 @@ namespace CraftSharp.Rendering
             return world.GetBiome(blockLoc);
         }
 
-        public ResourceLocation GetDimensionId()
+        public static ResourceLocation GetDimensionId()
         {
             return World.GetDimensionId();
         }
@@ -436,52 +431,42 @@ namespace CraftSharp.Rendering
         /// <returns>Block entity render at the location. Null if not present</returns>
         public BlockEntityRender GetBlockEntityRender(BlockLoc blockLoc)
         {
-            if (blockEntityRenders.ContainsKey(blockLoc))
-                return blockEntityRenders[blockLoc];
-            
-            return null;
+            return blockEntityRenders.GetValueOrDefault(blockLoc);
         }
 
         /// <summary>
         /// Add a new block entity render to the world
         /// </summary>
+        /// <param name="blockLoc">Location of the block entity</param>
+        /// <param name="blockEntityType">Type of the block entity</param>
         /// <param name="tags">Pass in null if auto-creating this block entity</param>
         public void AddBlockEntityRender(BlockLoc blockLoc, BlockEntityType blockEntityType, Dictionary<string, object> tags = null)
         {
             // If the location is occupied by a block entity already
-            if (blockEntityRenders.ContainsKey(blockLoc))
+            if (blockEntityRenders.TryGetValue(blockLoc, out var prevBlockEntity))
             {
-                var prevBlockEntity = blockEntityRenders[blockLoc];
                 if (prevBlockEntity.Type == blockEntityType) // Auto-created, keep it but replace data tags
                 {
-                    if (tags == null) // Auto-creating a block entity while it is already created
-                    {
-                        prevBlockEntity.BlockEntityTags = new();
-                    }
-                    else // Update block entity data tags
-                    {
-                        prevBlockEntity.BlockEntityTags = tags;
-                        // TODO: Update render with updated data tags
-                    }
+                    // Update block entity data tags
+                    // Auto-creating a block entity while it is already created
+                    prevBlockEntity.BlockEntityTags = tags ?? new();
+                    // TODO: Update render with updated data tags
                     return;
                 }
-                else // Previously another type of block entity, remove it
-                {
-                    RemoveBlockEntityRender(blockLoc);
-                }
+                // Remove it otherwise
+                RemoveBlockEntityRender(blockLoc);
             }
 
             GameObject blockEntityPrefab = GetPrefabForType(blockEntityType.TypeId);
 
-            if (blockEntityPrefab != null)
+            if (blockEntityPrefab)
             {
-                var blockEntityObj = GameObject.Instantiate(blockEntityPrefab);
+                var blockEntityObj = Instantiate(blockEntityPrefab, blockEntityParent, true);
                 var blockEntityRender = blockEntityObj!.GetComponent<BlockEntityRender>();
 
                 blockEntityRenders.Add(blockLoc, blockEntityRender);
 
                 blockEntityObj.name = $"[{blockLoc}] {blockEntityType}";
-                blockEntityObj.transform.parent = blockEntityParent;
                 blockEntityObj.transform.localPosition = CoordConvert.MC2Unity(_worldOriginOffset, blockLoc.ToCenterLocation());
 
                 // Initialize the entity
@@ -510,9 +495,9 @@ namespace CraftSharp.Rendering
         #region Chunk updating
         private const int CHUNK_CENTER = Chunk.SIZE >> 1;
         private const int MASK_CYCLE_LENGTH = 64; // Must be power of 2
-        private int updateTargetMask = 0;
+        private int updateTargetMask;
 
-        private void UpdateBuildPriority(Location currentBlockLoc, ChunkRender chunk, int offsetY)
+        private static void UpdateBuildPriority(Location currentBlockLoc, ChunkRender chunk, int offsetY)
         {   // Get this chunk's build priority based on its current distance to the player,
             // a smaller value means a higher priority...
             chunk.Priority = (int)(
@@ -528,7 +513,6 @@ namespace CraftSharp.Rendering
         {
             var playerLoc = client!.GetCurrentLocation();
             var blockLoc = playerLoc.GetBlockLoc();
-            ChunkRenderColumn columnRender;
 
             int viewDist = ProtocolSettings.MCSettings.RenderDistance;
             int viewDistSqr = viewDist * viewDist;
@@ -548,11 +532,12 @@ namespace CraftSharp.Rendering
                     if (world.IsChunkColumnLoaded(chunkX, chunkZ))
                     {
                         var column = GetChunkRenderColumn(chunkX, chunkZ);
-                        if (column == null)
-                        {   // Chunks data is ready, but chunk render column is not
+                        if (!column)
+                        {
+                            // Chunks data is ready, but chunk render column is not
                             //int chunkMask = world[chunkX, chunkZ]!.ChunkMask;
                             // Create it and add the whole column to render list...
-                            columnRender = GetOrCreateChunkRenderColumn(chunkX, chunkZ);
+                            var columnRender = GetOrCreateChunkRenderColumn(chunkX, chunkZ);
                             for (int chunkY = 0;chunkY < chunkColumnSize;chunkY++)
                             {
                                 // Create chunk renders and queue them...
@@ -569,16 +554,13 @@ namespace CraftSharp.Rendering
                         }
                         else
                         {
-                            foreach (var chunk in column.GetChunkRenders().Values)
+                            foreach (var chunk in column.GetChunkRenders().Values.Where(chunk => chunk.State == ChunkBuildState.Delayed))
                             {
-                                if (chunk.State == ChunkBuildState.Delayed)
-                                {
-                                    //var inView = renderCamera.ChunkInViewport(chunkX, chunk.ChunkYIndex, chunkZ, offsetY);
+                                //var inView = renderCamera.ChunkInViewport(chunkX, chunk.ChunkYIndex, chunkZ, offsetY);
 
-                                    // Queue delayed or cancelled chunk builds...
-                                    UpdateBuildPriority(playerLoc, chunk, offsetY);
-                                    QueueChunkRenderBuild(chunk);
-                                }
+                                // Queue delayed or cancelled chunk builds...
+                                UpdateBuildPriority(playerLoc, chunk, offsetY);
+                                QueueChunkRenderBuild(chunk);
                             }
                         }
                     }
@@ -643,7 +625,7 @@ namespace CraftSharp.Rendering
         public void QueueChunkBuildAfterLightUpdate(int chunkX, int chunkYIndex, int chunkZ)
         {
             var column = GetChunkRenderColumn(chunkX, chunkZ);
-            if (column != null) // Queue this chunk to rebuild list...
+            if (column) // Queue this chunk to rebuild list...
             {   // Create the chunk render object if not present (previously empty)
                 var chunk = column.GetOrCreateChunkRender(chunkYIndex, chunkRenderPool);
 
@@ -654,7 +636,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public void BuildChunkRender(ChunkRender chunkRender)
+        private void BuildChunkRender(ChunkRender chunkRender)
         {
             int chunkX = chunkRender.ChunkX, chunkZ = chunkRender.ChunkZ, chunkYIndex = chunkRender.ChunkYIndex;
             var chunkColumnData = GetChunkColumn(chunkX, chunkZ);
@@ -755,9 +737,8 @@ namespace CraftSharp.Rendering
             }, chunkRender.TokenSource.Token);
         }
 
-        public const int BUILD_COUNT_LIMIT = 6;
-        private BlockLoc? lastPlayerBlockLoc = null;
-        private bool terrainColliderDirty = true;
+        private const int BUILD_COUNT_LIMIT = 6;
+        private BlockLoc? lastPlayerBlockLoc;
 
         /// <summary>
         /// Unload a chunk column, invoked from network thread
@@ -853,7 +834,7 @@ namespace CraftSharp.Rendering
             var column = GetChunkRenderColumn(chunkX, chunkZ);
             int chunkYIndex = blockLoc.GetChunkYIndex(World.GetDimensionType().minY);
 
-            if (column != null) // Queue this chunk to rebuild list...
+            if (column) // Queue this chunk to rebuild list...
             {
                 // Create the chunk render object if not present (previously empty)
                 var chunk = column.GetOrCreateChunkRender(chunkYIndex, chunkRenderPool);
@@ -861,11 +842,11 @@ namespace CraftSharp.Rendering
                 // Queue the chunk. Priority is left as 0(highest), so that changes can be seen instantly
                 QueueChunkRenderBuild(chunk);
 
-                if (blockLoc.GetChunkBlockY() == 0 && (chunkYIndex - 1) >= 0) // In the bottom layer of this chunk
+                if (blockLoc.GetChunkBlockY() == 0 && chunkYIndex - 1 >= 0) // In the bottom layer of this chunk
                 {   // Queue the chunk below, if it isn't empty
                     QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkYIndex - 1));
                 }
-                else if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1 && ((chunkYIndex + 1) * Chunk.SIZE) < World.GetDimensionType().height) // In the top layer of this chunk
+                else if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1 && (chunkYIndex + 1) * Chunk.SIZE < World.GetDimensionType().height) // In the top layer of this chunk
                 {   // Queue the chunk above, if it isn't empty
                     QueueChunkRenderBuildIfNotEmpty(column.GetChunkRender(chunkYIndex + 1));
                 }
@@ -880,15 +861,16 @@ namespace CraftSharp.Rendering
                 QueueChunkRenderBuildIfNotEmpty(GetChunkRender(chunkX, chunkYIndex, chunkZ - 1));
             else if (blockLoc.GetChunkBlockZ() == Chunk.SIZE - 1)
                 QueueChunkRenderBuildIfNotEmpty(GetChunkRender(chunkX, chunkYIndex, chunkZ + 1));
-            
-            if (blockLoc.DistanceSquared(client!.GetCurrentLocation().GetBlockLoc()) <= ChunkRenderBuilder.MOVEMENT_RADIUS_SQR)
-                terrainColliderDirty = true; // Terrain collider needs to be updated
+
+            if (blockLoc.DistanceSquared(client!.GetCurrentLocation().GetBlockLoc()) <=
+                ChunkRenderBuilder.MOVEMENT_RADIUS_SQR_PLUS)
+            {
+                RebuildTerrainColliderAt(blockLoc);
+            }
         }
 
         public void InitializeTerrainCollider(BlockLoc playerBlockLoc, Action callback = null)
         {
-            terrainColliderDirty = false;
-
             Task.Run(async () =>
             {
                 // Wait for old data to be cleared up
@@ -910,54 +892,67 @@ namespace CraftSharp.Rendering
                 var inLiquid = GetBlock(playerBlockLoc).State.InLiquid;
                 EventManager.Instance.Broadcast(new PlayerLiquidEvent(inLiquid));
 
-                builder!.BuildTerrainCollider(world, playerBlockLoc, _worldOriginOffset, movementCollider!, liquidCollider!, callback);
+                Loom.QueueOnMainThread(() =>
+                {
+                    foreach (var boxCollider in solidColliderGameObject.GetComponents<BoxCollider>())
+                    {
+                        Destroy(boxCollider);
+                    }
+                    foreach (var boxCollider in liquidColliderGameObject.GetComponents<BoxCollider>())
+                    {
+                        Destroy(boxCollider);
+                    }
+                    colliderList.Clear();
 
-                // Set last player location
-                lastPlayerBlockLoc = playerBlockLoc;
+                    builder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, solidColliderGameObject!, liquidColliderGameObject!, colliderList);
+
+                    // Set last player location
+                    lastPlayerBlockLoc = playerBlockLoc;
+                
+                    callback?.Invoke();
+                });
             });
         }
 
         public void RebuildTerrainCollider(BlockLoc playerBlockLoc)
         {
-            terrainColliderDirty = false;
-
-            Task.Run(() =>
-            {
-                builder!.BuildTerrainCollider(world, playerBlockLoc, _worldOriginOffset, movementCollider!, liquidCollider!, null);
-            });
+            builder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, solidColliderGameObject, liquidColliderGameObject, colliderList);
+        }
+        
+        public void RebuildTerrainColliderAt(BlockLoc blockLoc)
+        {
+            builder.BuildTerrainColliderBoxesAt(world, blockLoc, _worldOriginOffset, solidColliderGameObject, liquidColliderGameObject, colliderList);
         }
 
-        private Block? AIR_BLOCK_INSTANCE = null;
+        private Block? AIR_BLOCK_INSTANCE;
 
         private Action<HarvestInteractionUpdateEvent> toolInteractionCallback;
 
-        void Awake()
+        private void Awake()
         {
             // Create Unity object pools on awake
             chunkRenderPool = new(CreateNewChunkRender, null, OnReleaseChunkRender, null, false, 5000);
             chunkRenderColumnPool = new(CreateNewChunkRenderColumn, null, OnReleaseChunkRenderColumn, null, false, 500);
         }
 
-        void Start()
+        private void Start()
         {
             client = CornApp.CurrentClient;
 
             var modelTable = ResourcePackManager.Instance.StateModelTable;
             builder = new(modelTable);
 
-            var movementColliderObj = new GameObject("Movement Collider")
+            solidColliderGameObject = new GameObject("Movement Collider")
             {
                 layer = LayerMask.NameToLayer(MOVEMENT_LAYER_NAME)
             };
-            movementCollider = movementColliderObj.AddComponent<MeshCollider>();
 
-            var liquidColliderObj = new GameObject("Liquid Collider")
+            liquidColliderGameObject = new GameObject("Liquid Collider")
             {
                 layer = LayerMask.NameToLayer(LIQUID_SURFACE_LAYER_NAME)
             };
-            liquidCollider = liquidColliderObj.AddComponent<MeshCollider>();
 
-            toolInteractionCallback = (e) =>
+            toolInteractionCallback = e =>
             {
                 if (e.Status == Control.DiggingStatus.Finished)
                 {
@@ -971,13 +966,13 @@ namespace CraftSharp.Rendering
             EventManager.Instance.Register(toolInteractionCallback);
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (toolInteractionCallback is not null)
                 EventManager.Instance.Unregister(toolInteractionCallback);
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             // Don't build world until biomes are received and registered
             if (!World.BiomesInitialized || !client) return;
@@ -1035,9 +1030,9 @@ namespace CraftSharp.Rendering
 
                 chunkRendersToBeBuilt.Dequeue(); // Remove the one peeked
 
-                if (nextChunk == null || GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ) == null)
-                {   // Chunk is unloaded while waiting in the queue, ignore it...
-                    continue;
+                if (!nextChunk || !GetChunkRenderColumn(nextChunk.ChunkX, nextChunk.ChunkZ))
+                {
+                    // Chunk is unloaded while waiting in the queue, ignore it...
                 }
                 else
                 {
@@ -1066,20 +1061,15 @@ namespace CraftSharp.Rendering
             updateTargetMask = (updateTargetMask + 1) % MASK_CYCLE_LENGTH;
         }
 
-        void Update()
+        private void Update()
         {
-            var client = CornApp.CurrentClient;
-
-            if (client == null) // Game is not ready, cancel update
+            if (!client) // Game is not ready, cancel update
                 return;
             
             var playerBlockLoc = client.GetCurrentLocation().GetBlockLoc();
 
-            foreach (var pair in blockEntityRenders)
+            foreach (var (blockLoc, render) in blockEntityRenders)
             {
-                var blockLoc = pair.Key;
-                var render = pair.Value;
-
                 // Call managed update
                 render.ManagedUpdate(client.GetTickMilSec());
 
@@ -1087,14 +1077,14 @@ namespace CraftSharp.Rendering
                 float dist = (float) blockLoc.DistanceSquared(playerBlockLoc);
                 bool inNearbyDict = nearbyBlockEntities.ContainsKey(blockLoc);
 
-                if (dist < NEARBY_THERESHOLD_INNER) // Add entity to dictionary
+                if (dist < NEARBY_THRESHOLD_INNER) // Add entity to dictionary
                 {
                     if (inNearbyDict)
                         nearbyBlockEntities[blockLoc] = dist;
                     else
                         nearbyBlockEntities.Add(blockLoc, dist);
                 }
-                else if (dist > NEARBY_THERESHOLD_OUTER) // Remove entity from dictionary
+                else if (dist > NEARBY_THRESHOLD_OUTER) // Remove entity from dictionary
                 {
                     if (inNearbyDict)
                         nearbyBlockEntities.Remove(blockLoc);
@@ -1108,7 +1098,7 @@ namespace CraftSharp.Rendering
 
             if (lastPlayerBlockLoc != null) // Updating location, update terrain collider if necessary
             {
-                if (terrainColliderDirty || lastPlayerBlockLoc.Value != playerBlockLoc)
+                if (lastPlayerBlockLoc.Value != playerBlockLoc)
                 {
                     RebuildTerrainCollider(playerBlockLoc);
                     // Update player liquid state

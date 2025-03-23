@@ -47,16 +47,21 @@ namespace CraftSharp
 
         private static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
 
-        public void TestBuildState(string name, int stateId, BlockState state, BlockStateModel stateModel, int cullFlags, World world, float3 pos)
+        public void TestBuildState(string stateName, int stateId, BlockState state, BlockStateModel stateModel, int cullFlags, World world, float3 pos)
         {
             int altitude = 0;
             foreach (var geometry in stateModel.Geometries)
             {
                 var coord = pos + new float3(0F, -altitude * 1.25F, 0F);
 
-                var modelObject = new GameObject(name);
-                modelObject.transform.parent = transform;
-                modelObject.transform.localPosition = coord;
+                var modelObject = new GameObject(stateName)
+                {
+                    transform =
+                    {
+                        parent = transform,
+                        localPosition = coord
+                    }
+                };
 
                 var filter = modelObject.AddComponent<MeshFilter>();
                 var render = modelObject.AddComponent<MeshRenderer>();
@@ -119,7 +124,7 @@ namespace CraftSharp
                 // Set face data
                 var triIndices = meshData.GetIndexData<uint>();
                 uint vi = 0; int ti = 0;
-                for (;vi < vertexCount;vi += 4U, ti += 6)
+                for (; vi < vertexCount; vi += 4U, ti += 6)
                 {
                     triIndices[ti]     = vi;
                     triIndices[ti + 1] = vi + 3U;
@@ -133,7 +138,7 @@ namespace CraftSharp
 
                 if (state.InWater || state.InLava)
                 {
-                    int fluidTriIdxCount = (fluidVertexCount / 2) * 3;
+                    int fluidTriIdxCount = fluidVertexCount / 2 * 3;
 
                     meshData.subMeshCount = 2;
                     meshData.SetSubMesh(0, new SubMeshDescriptor(0, fluidTriIdxCount)
@@ -193,7 +198,7 @@ namespace CraftSharp
             }
         }
 
-        public void TestBuildItem(string name, ItemStack itemStack, ItemModel itemModel, float3 pos)
+        public void TestBuildItem(string itemName, ItemStack itemStack, ItemModel itemModel, float3 pos)
         {
             // Gather all geometries of this model
             Dictionary<ItemModelPredicate, ItemGeometry> buildDict = new()
@@ -208,28 +213,24 @@ namespace CraftSharp
             {
                 var coord = pos + new float3(0.5F, altitude * 1.25F + 0.5F, 0.5F);
 
-                var modelObject = new GameObject(pair.Key == ItemModelPredicate.EMPTY ? name : $"{name}{pair.Key}");
-                modelObject.transform.parent = transform;
-                modelObject.transform.localPosition = coord;
+                var modelObject = new GameObject(pair.Key == ItemModelPredicate.EMPTY ? itemName : $"{itemName}{pair.Key}")
+                    {
+                        transform =
+                        {
+                            parent = transform,
+                            localPosition = coord
+                        }
+                    };
 
                 var filter = modelObject.AddComponent<MeshFilter>();
                 var render = modelObject.AddComponent<MeshRenderer>();
                 var collider = modelObject.AddComponent<MeshCollider>();
 
-                float3[] colors;
-
                 var tintFunc = ItemPalette.INSTANCE.GetTintRule(itemStack.ItemType.ItemId);
-                if (tintFunc is null)
-                {
-                    // Use high-constrast colors for troubleshooting and debugging
-                    //colors = new float3[]{ new(1F, 0F, 0F), new(0F, 1F, 0F), new(0F, 0F, 1F) };
-                    // Or use white colors to make sure models with mis-tagged tinted faces still look right
-                    colors = new float3[] { new(1F, 1F, 1F), new(1F, 1F, 1F), new(1F, 1F, 1F) };
-                }
-                else
-                {
-                    colors = tintFunc.Invoke(itemStack);
-                }
+                // Use high-contrast colors for troubleshooting and debugging
+                //colors = new float3[]{ new(1F, 0F, 0F), new(0F, 1F, 0F), new(0F, 0F, 1F) };
+                // Or use white colors to make sure models with mis-tagged tinted faces still look right
+                var colors = tintFunc is null ? new float3[] { new(1F, 1F, 1F), new(1F, 1F, 1F), new(1F, 1F, 1F) } : tintFunc.Invoke(itemStack);
 
                 var itemMesh = ItemMeshBuilder.BuildItemMesh(pair.Value, colors);
 
@@ -241,10 +242,10 @@ namespace CraftSharp
             }
         }
 
-        public void TestBuildInventoryItem(string name, ItemStack itemStack, ItemModel itemModel)
+        public void TestBuildInventoryItem(string itemName, ItemStack itemStack, ItemModel itemModel)
         {
-            var invItemObj = GameObject.Instantiate(inventoryItemPrefab);
-            invItemObj.name = name;
+            var invItemObj = Instantiate(inventoryItemPrefab);
+            invItemObj.name = itemName;
             invItemObj.GetComponent<RectTransform>().SetParent(inventory, false);
 
             var filter = invItemObj.GetComponentInChildren<MeshFilter>();
@@ -253,20 +254,11 @@ namespace CraftSharp
             var render = modelObject.GetComponent<MeshRenderer>();
             var itemGeometry = itemModel.Geometry;
 
-            float3[] colors;
-
             var tintFunc = ItemPalette.INSTANCE.GetTintRule(itemStack.ItemType.ItemId);
-            if (tintFunc is null)
-            {
-                // Use high-constrast colors for troubleshooting and debugging
-                //colors = new float3[]{ new(1F, 0F, 0F), new(0F, 1F, 0F), new(0F, 0F, 1F) };
-                // Or use white colors to make sure models with mis-tagged tinted faces still look right
-                colors = new float3[] { new(1F, 1F, 1F), new(1F, 1F, 1F), new(1F, 1F, 1F) };
-            }
-            else
-            {
-                colors = tintFunc.Invoke(itemStack);
-            }
+            // Use high-contrast colors for troubleshooting and debugging
+            //colors = new float3[]{ new(1F, 0F, 0F), new(0F, 1F, 0F), new(0F, 0F, 1F) };
+            // Or use white colors to make sure models with mis-tagged tinted faces still look right
+            var colors = tintFunc is null ? new float3[] { new(1F, 1F, 1F), new(1F, 1F, 1F), new(1F, 1F, 1F) } : tintFunc.Invoke(itemStack);
 
             var itemMesh = ItemMeshBuilder.BuildItemMesh(itemGeometry, colors);
 
@@ -305,7 +297,7 @@ namespace CraftSharp
             render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(itemModel.RenderType, true);
         }
 
-        public void TestBuildParticle(string name, Mesh[] meshes, Material material, float3 pos)
+        public void TestBuildParticle(string particleName, Mesh[] meshes, Material material, float3 pos)
         {
             var particleTransforms = new List<Transform>();
 
@@ -313,9 +305,14 @@ namespace CraftSharp
             {
                 var coord = pos + new float3(0.5F, 0.5F + i, 0.5F);
 
-                var particleObject = new GameObject($"{name} Frame {i}");
-                particleObject.transform.parent = transform;
-                particleObject.transform.localPosition = coord;
+                var particleObject = new GameObject($"{particleName} Frame {i}")
+                {
+                    transform =
+                    {
+                        parent = transform,
+                        localPosition = coord
+                    }
+                };
 
                 var filter = particleObject.AddComponent<MeshFilter>();
                 filter.sharedMesh = meshes[i];
@@ -362,7 +359,7 @@ namespace CraftSharp
             // Load valid packs...
             loadFlag.Finished = false;
             Task.Run(() => packManager.LoadPacks(loadFlag,
-                    (status) => Loom.QueueOnMainThread(() =>
+                    status => Loom.QueueOnMainThread(() =>
                         InfoText.text = Translations.Get(status)), loadParticles: true));
             while (!loadFlag.Finished) yield return null;
 
@@ -374,7 +371,8 @@ namespace CraftSharp
 
             float startTime = Time.realtimeSinceStartup;
 
-            int start = 0, limit = 0;
+            const int start = 0;
+            const int limit = 0;
             int count = 0, width = 64;
             foreach (var pair in packManager.StateModelTable)
             {
@@ -462,7 +460,7 @@ namespace CraftSharp
                     (status) => Loom.QueueOnMainThread(() => InfoText.text = Translations.Get(status))));
             
             var testmentObj = new GameObject("[Entity Testment]");
-            int entityPerRow = 10;
+            const int entityPerRow = 10;
             int index = 0;
             foreach (var pair in entityResManager.EntityRenderDefinitions)
             {
@@ -491,18 +489,19 @@ namespace CraftSharp
             }
         }
 
-        void Start()
+        private void Start()
         {
-            var overrides = new string[] { "vanilla_fix"/*, "3D Default 1.16.2+ v1.6.0"*/ };
-            string resVersion = "1.16.5", dataVersion = "1.16.5";
+            var overrides = new[] { "vanilla_fix"/*, "3D Default 1.16.2+ v1.6.0"*/ };
+            const string resVersion = "1.16.5";
+            const string dataVersion = "1.16.5";
 
             if (!Directory.Exists(PathHelper.GetPackDirectoryNamed($"vanilla-{resVersion}"))) // Prepare resources first
             {
                 Debug.Log($"Resources for {resVersion} not present. Downloading...");
 
                 StartCoroutine(ResourceDownloader.DownloadResource(resVersion,
-                        (status) => Loom.QueueOnMainThread(() => InfoText.text = Translations.Get(status)), () => { },
-                        (succeeded) => {
+                        status => Loom.QueueOnMainThread(() => InfoText.text = Translations.Get(status)), () => { },
+                        succeeded => {
                             if (succeeded) // Resources ready, do build
                                 StartCoroutine(DoBuild(dataVersion, resVersion, overrides));
                             else // Failed to download resources
@@ -530,14 +529,14 @@ namespace CraftSharp
                 // Update crosshair visibility
                 CrosshairAnimator.SetBool("Show", !value);
                 // Update viewer
-                if (viewer != null)
+                if (viewer)
                 {
                     viewer.enabled = !IsPaused;
                 }
             }
         }
 
-        void Update()
+        private void Update()
         {
             if (ResourcePackManager.Instance.Loaded && UnityEngine.Random.Range(0, 4) == 0)
             {

@@ -68,7 +68,7 @@ namespace CraftSharp.Rendering
 
         public void UpdateCollider(Mesh colliderMesh)
         {
-            if (InteractionCollider == null)
+            if (!InteractionCollider)
             {
                 InteractionCollider = gameObject.AddComponent<MeshCollider>();
             }
@@ -77,7 +77,7 @@ namespace CraftSharp.Rendering
 
         public void ClearCollider()
         {
-            if (InteractionCollider != null)
+            if (InteractionCollider)
             {
                 // Set this to make sure the empty mesh is no longer used by the collider, which will raise errors
                 // See https://forum.unity.com/threads/when-assigning-mesh-collider-errors-about-doesnt-have-read-write-enabled.1248541/

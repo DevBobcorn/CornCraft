@@ -43,13 +43,13 @@ namespace CraftSharp.Control
     public class InteractionUpdater : MonoBehaviour
     {
         public static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
-        public const int MAX_TARGET_DISTANCE = 8;
-        public const int BLOCK_INTERACTION_RADIUS = 3;
-        public const float BLOCK_INTERACTION_RADIUS_SQR = 9.0F; // BLOCK_INTERACTION_RADIUS ^ 2
-        public const float BLOCK_INTERACTION_RADIUS_SQR_PLUS = 12.25F; // (BLOCK_INTERACTION_RADIUS + 0.5f) ^ 2
+        private const int MAX_TARGET_DISTANCE = 8;
+        private const int BLOCK_INTERACTION_RADIUS = 3;
+        private const float BLOCK_INTERACTION_RADIUS_SQR = BLOCK_INTERACTION_RADIUS * BLOCK_INTERACTION_RADIUS; // BLOCK_INTERACTION_RADIUS ^ 2
+        private const float BLOCK_INTERACTION_RADIUS_SQR_PLUS = (BLOCK_INTERACTION_RADIUS + 0.5F) * (BLOCK_INTERACTION_RADIUS + 0.5F); // (BLOCK_INTERACTION_RADIUS + 0.5f) ^ 2
 
-        public const float INSTA_BREAK_COOLDOWN = -0.3F;
-        public const float PLACE_BLOCK_COOLDOWN = -0.2F;
+        private const float INSTA_BREAK_COOLDOWN = -0.3F;
+        private const float PLACE_BLOCK_COOLDOWN = -0.2F;
         
         private static readonly List<BlockLoc> validOffsets = ComputeOffsets();
 
@@ -86,22 +86,23 @@ namespace CraftSharp.Control
         private ItemStack? currentItemStack;
         private ItemActionType currentActionType = ItemActionType.None;
 
-        public Direction? TargetDirection { get; private set; } = Direction.Down;
-        public BlockLoc? TargetBlockLoc { get; private set; } = null;
-        public Location? TargetExactLoc { get; private set; } = null;
+        public Direction? TargetDirection { get; private set; }
+        public BlockLoc? TargetBlockLoc { get; private set; }
+        public Location? TargetExactLoc { get; private set; }
         
-        private float instaBreakCooldown = 0F;
-        private float placeBlockCooldown = 0F;
+        private float instaBreakCooldown;
+        private float placeBlockCooldown;
 
         private void UpdateBlockSelection(Ray? viewRay)
         {
-            if (viewRay is null || client == null) return;
+            if (viewRay is null || !client) return;
 
             if (placeBlockCooldown > PLACE_BLOCK_COOLDOWN) // Ongoing block placement cooldown
             {
                 // Don't update block selection block location
+                
             }
-            else if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out RaycastHit viewHit, MAX_TARGET_DISTANCE, blockSelectionLayer))
+            else if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out RaycastHit viewHit, MAX_TARGET_DISTANCE, blockSelectionLayer, QueryTriggerInteraction.Collide))
             {
                 Vector3 normal = viewHit.normal.normalized;
                 TargetDirection = GetDirectionFromNormal(normal);
@@ -121,7 +122,7 @@ namespace CraftSharp.Control
                 var block = client.ChunkRenderManager.GetBlock(newBlockLoc);
 
                 // Create selection box if not present
-                if (blockSelectionBox == null)
+                if (!blockSelectionBox)
                 {
                     blockSelectionBox = Instantiate(blockSelectionFramePrefab)!.GetComponent<BlockSelectionBox>();
                     blockSelectionBox!.transform.SetParent(transform, false);
@@ -151,7 +152,7 @@ namespace CraftSharp.Control
                 }
 
                 // Clear shape if selection box is created
-                if (blockSelectionBox != null)
+                if (blockSelectionBox)
                 {
                     blockSelectionBox.ClearShape();
                 }
@@ -187,10 +188,10 @@ namespace CraftSharp.Control
 
         private void UpdateBlockSelectionTo(BlockLoc newBlockLoc)
         {
-            if (client == null) return;
+            if (!client) return;
 
             // Create selection box if not present
-            if (blockSelectionBox == null)
+            if (!blockSelectionBox)
             {
                 blockSelectionBox = Instantiate(blockSelectionFramePrefab)!.GetComponent<BlockSelectionBox>();
                 blockSelectionBox!.transform.SetParent(transform, false);
@@ -205,24 +206,19 @@ namespace CraftSharp.Control
         private void UpdateBlockInteractions(ChunkRenderManager chunksManager)
         {
             var playerBlockLoc = client!.GetCurrentLocation().GetBlockLoc();
-            var table = InteractionManager.INSTANCE.InteractionTable;
+            var table = InteractionManager.InteractionTable;
 
-            if (client == null) return;
+            if (!client) return;
 
-            foreach (var blockLoc in blockTriggerInteractionInfos.Keys.ToList()) // ToList because collection may change
+            foreach (var blockLoc in blockTriggerInteractionInfos.Keys.ToList()
+                         .Where(blockLoc => playerBlockLoc.SqrDistanceTo(blockLoc) > BLOCK_INTERACTION_RADIUS_SQR_PLUS)
+                         .Where(blockLoc => blockLoc != TargetBlockLoc))
             {
-                // Remove trigger interactions which are too far from player
-                if (playerBlockLoc.SqrDistanceTo(blockLoc) > BLOCK_INTERACTION_RADIUS_SQR_PLUS)
+                RemoveBlockTriggerInteractionsAt(blockLoc, info =>
                 {
-                    if (blockLoc != TargetBlockLoc) // Make an exception for target location
-                    {
-                        RemoveBlockTriggerInteractionsAt(blockLoc, info =>
-                        {
-                            EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
-                        });
-                        //Debug.Log($"Rem: [{blockLoc}]");
-                    }
-                }
+                    EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
+                });
+                //Debug.Log($"Rem: [{blockLoc}]");
             }
 
             // Update harvest interactions (these are not bound by interaction radius)
@@ -327,7 +323,7 @@ namespace CraftSharp.Control
 
         private IEnumerable<BlockTriggerInteractionInfo>? GetBlockTriggerInteractionsAt(BlockLoc blockLoc)
         {
-            return blockTriggerInteractionInfos.TryGetValue(blockLoc, out var infos) ? infos : null;
+            return blockTriggerInteractionInfos.GetValueOrDefault(blockLoc);
         }
 
         private void RemoveInteraction<T>(int id, Action<T>? onRemoved = null) where T : InteractionInfo
@@ -404,18 +400,18 @@ namespace CraftSharp.Control
             return placeBlockLoc;
         }
 
-        public void SetControllers(BaseCornClient client, CameraController cameraController, PlayerController playerController)
+        public void SetControllers(BaseCornClient curClient, CameraController curCameraController, PlayerController curPlayerController)
         {
-            this.client = client;
-            this.cameraController = cameraController;
+            client = curClient;
+            cameraController = curCameraController;
 
-            if (this.playerController != playerController)
+            if (playerController != curPlayerController)
             {
-                this.playerController = playerController;
+                playerController = curPlayerController;
 
-                playerController.Actions.Interaction.ChargedAttack.performed += _ =>
+                curPlayerController.Actions.Interaction.ChargedAttack.performed += _ =>
                 {
-                    var status = playerController.Status;
+                    var status = curPlayerController.Status;
 
                     if (currentActionType == ItemActionType.Sword)
                     {
@@ -429,32 +425,32 @@ namespace CraftSharp.Control
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
                             // Specify attack data to use
-                            status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
+                            status.AttackStatus.CurrentChargedAttack = curPlayerController.AbilityConfig.RangedBowAttack_Charged;
 
                             // Update player state
-                            playerController.ChangeToState(PlayerStates.RANGED_AIM);
+                            curPlayerController.ChangeToState(PlayerStates.RANGED_AIM);
                         }
                     }
                     else // Check digging block
                     {
                         if (TargetBlockLoc is not null && TargetDirection is not null &&
-                            client.GameMode != GameMode.Creative)
+                            curClient.GameMode != GameMode.Creative)
                         {
-                            playerController.ChangeToState(PlayerStates.DIGGING_AIM);
+                            curPlayerController.ChangeToState(PlayerStates.DIGGING_AIM);
                         }
                     }
                 };
 
-                playerController.Actions.Interaction.NormalAttack.performed += _ =>
+                curPlayerController.Actions.Interaction.NormalAttack.performed += _ =>
                 {
-                    var status = playerController.Status;
+                    var status = curPlayerController.Status;
 
                     if (TargetBlockLoc is not null && TargetDirection is not null &&
-                        client.GameMode == GameMode.Creative)
+                        curClient.GameMode == GameMode.Creative)
                     {
                         if (instaBreakCooldown < INSTA_BREAK_COOLDOWN)
                         {
-                            CreativeInstaBreak(client, TargetBlockLoc.Value, TargetDirection.Value);
+                            CreativeInstaBreak(curClient, TargetBlockLoc.Value, TargetDirection.Value);
 
                             instaBreakCooldown = 0F;
                         }
@@ -463,16 +459,16 @@ namespace CraftSharp.Control
                     {
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
-                            if (playerController.CurrentState != PlayerStates.MELEE)
+                            if (curPlayerController.CurrentState != PlayerStates.MELEE)
                             {
                                 // Specify attack data to use
-                                status.AttackStatus.CurrentStagedAttack = playerController.AbilityConfig.MeleeSwordAttack_Staged;
+                                status.AttackStatus.CurrentStagedAttack = curPlayerController.AbilityConfig.MeleeSwordAttack_Staged;
 
                                 // Update player state
-                                playerController.ChangeToState(PlayerStates.MELEE);
+                                curPlayerController.ChangeToState(PlayerStates.MELEE);
                             }
-                            else if (playerController.CurrentState is MeleeState melee &&
-                                    playerController.Status.AttackStatus.AttackCooldown <= 0F)
+                            else if (curPlayerController.CurrentState is MeleeState melee &&
+                                    curPlayerController.Status.AttackStatus.AttackCooldown <= 0F)
                             {
                                 melee.SetNextAttackFlag();
                             }
@@ -480,27 +476,25 @@ namespace CraftSharp.Control
                     }
                 };
 
-                playerController.Actions.Interaction.UseChargedItem.performed += _ =>
+                curPlayerController.Actions.Interaction.UseChargedItem.performed += _ =>
                 {
-                    var status = playerController.Status;
+                    var status = curPlayerController.Status;
 
                     if (currentActionType == ItemActionType.Bow)
                     {
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
                             // Specify attack data to use
-                            status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
+                            status.AttackStatus.CurrentChargedAttack = curPlayerController.AbilityConfig.RangedBowAttack_Charged;
 
                             // Update player state
-                            playerController.ChangeToState(PlayerStates.RANGED_AIM);
+                            curPlayerController.ChangeToState(PlayerStates.RANGED_AIM);
                         }
                     }
                 };
 
-                playerController.Actions.Interaction.UseNormalItem.performed += _ =>
+                curPlayerController.Actions.Interaction.UseNormalItem.performed += _ =>
                 {
-                    var status = playerController.Status;
-
                     if (TargetBlockLoc is not null && TargetDirection is not null && TargetExactLoc is not null)
                     {
                         if (blockTriggerInteractionInfos.ContainsKey(TargetBlockLoc.Value)) // Check if target block is interactable
@@ -510,14 +504,14 @@ namespace CraftSharp.Control
                                 placeBlockCooldown = 0F;
 
                                 // Interact with target block
-                                PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
+                                PlaceBlock(curClient, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
                             }
                         }
                         else if (currentActionType == ItemActionType.Block) // Check if holding a block item
                         {
                             if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
                             {
-                                var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
+                                var placeLoc = PlaceBlock(curClient, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
 
                                 placeBlockCooldown = 0F;
                                 UpdateBlockSelectionTo(placeLoc);
@@ -526,7 +520,7 @@ namespace CraftSharp.Control
                     }
                     else
                     {
-                        client.UseItemOnMainHand();
+                        curClient.UseItemOnMainHand();
                     }
                 };
             }
@@ -566,7 +560,7 @@ namespace CraftSharp.Control
             {
                 var triggerInteractionInfo = GetInteraction<InteractionInfo>(e.InteractionId);
 
-                if (triggerInteractionInfo != null && client != null)
+                if (triggerInteractionInfo != null && client)
                 {
                     triggerInteractionInfo.UpdateInteraction(client);
                 }
@@ -576,7 +570,7 @@ namespace CraftSharp.Control
 
         private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)
         {
-            var definition = InteractionManager.INSTANCE.InteractionTable
+            var definition = InteractionManager.InteractionTable
                 .GetValueOrDefault(block.StateId)?
                 .Get<HarvestInteraction>();
             
@@ -605,12 +599,12 @@ namespace CraftSharp.Control
             instaBreakCooldown -= Time.deltaTime;
             placeBlockCooldown -= Time.deltaTime;
 
-            if (cameraController != null && cameraController.IsAimingOrLocked)
+            if (cameraController && cameraController.IsAimingOrLocked)
             {
                 UpdateBlockSelection(cameraController.GetPointerRay());
 
                 if (TargetBlockLoc is not null && TargetDirection is not null && TargetExactLoc is not null &&
-                    playerController != null && client != null)
+                    playerController && client)
                 {
                     var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
                     var status = playerController.Status;
@@ -674,7 +668,7 @@ namespace CraftSharp.Control
                 
                 TargetBlockLoc = null;
 
-                if (blockSelectionBox != null)
+                if (blockSelectionBox)
                 {
                     blockSelectionBox.ClearShape();
                 }
@@ -683,7 +677,7 @@ namespace CraftSharp.Control
 
         private void LateUpdate()
         {
-            if (client != null)
+            if (client)
             {
                 // Update block interactions
                 UpdateBlockInteractions(client.ChunkRenderManager);

@@ -39,7 +39,7 @@ namespace CraftSharp.Control
             var rayCenter = transform.position + GROUND_RAYCAST_START * motor.CharacterUp;
 
             // > Cast a ray downward from above the player
-            if (Physics.Raycast(rayCenter, -motor.CharacterUp, out RaycastHit centerDownHit, GROUND_RAYCAST_DIST, SolidLayer))
+            if (Physics.Raycast(rayCenter, -motor.CharacterUp, out RaycastHit centerDownHit, GROUND_RAYCAST_DIST, SolidLayer, QueryTriggerInteraction.Ignore))
                 Status.CenterDownDist = centerDownHit.distance - GROUND_RAYCAST_START;
             else
                 Status.CenterDownDist = GROUND_RAYCAST_DIST - GROUND_RAYCAST_START;
@@ -51,7 +51,7 @@ namespace CraftSharp.Control
             var barrierCheckRayOrigin = transform.position + barrierCheckRayHeight * motor.CharacterUp;
 
             // > Cast a ray forward from feet height
-            if (Physics.Raycast(barrierCheckRayOrigin, frontDirNormalized, out RaycastHit barrierForwardHit, BARRIER_RAYCAST_LENGTH, SolidLayer))
+            if (Physics.Raycast(barrierCheckRayOrigin, frontDirNormalized, out RaycastHit barrierForwardHit, BARRIER_RAYCAST_LENGTH, SolidLayer, QueryTriggerInteraction.Ignore))
             {
                 Status.BarrierYawAngle = Vector3.Angle(frontDirNormalized, -barrierForwardHit.normal);
                 Status.BarrierDistance = barrierForwardHit.distance;
@@ -59,7 +59,7 @@ namespace CraftSharp.Control
                 // > Cast another ray downward in front of the player
                 var rayFront = rayCenter + frontDirNormalized * (barrierForwardHit.distance + 0.1F);
 
-                if (Physics.Raycast(rayFront, -motor.CharacterUp, out RaycastHit barrierDownwardHit, GROUND_RAYCAST_DIST, SolidLayer))
+                if (Physics.Raycast(rayFront, -motor.CharacterUp, out RaycastHit barrierDownwardHit, GROUND_RAYCAST_DIST, SolidLayer, QueryTriggerInteraction.Ignore))
                     Status.BarrierHeight = GROUND_RAYCAST_START - barrierDownwardHit.distance;
                 else
                     Status.BarrierHeight = GROUND_RAYCAST_START - GROUND_RAYCAST_DIST;
@@ -71,7 +71,7 @@ namespace CraftSharp.Control
                 var wallCheckRayOrigin = transform.position + wallCheckRayHeight * motor.CharacterUp;
 
                 // > Cast another ray forward from head height
-                if (Physics.Raycast(wallCheckRayOrigin, frontDirNormalized, out RaycastHit wallForwardHit, BARRIER_RAYCAST_LENGTH, SolidLayer))
+                if (Physics.Raycast(wallCheckRayOrigin, frontDirNormalized, out RaycastHit wallForwardHit, BARRIER_RAYCAST_LENGTH, SolidLayer, QueryTriggerInteraction.Ignore))
                 {
                     Status.WallDistance = wallForwardHit.distance;
                 }
@@ -136,7 +136,7 @@ namespace CraftSharp.Control
             // Cast a ray downwards again, but check liquid layer this time
             if (Status.InLiquid)
             {
-                if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, LIQUID_RAYCAST_DIST, LiquidSurfaceLayer | LiquidVolumeLayer))
+                if (Physics.Raycast(rayCenter, -transform.up, out centerDownHit, LIQUID_RAYCAST_DIST, LiquidSurfaceLayer | LiquidVolumeLayer, QueryTriggerInteraction.Collide))
                 {
                     Status.LiquidDist = centerDownHit.distance - LIQUID_RAYCAST_START;
                 }
