@@ -20,8 +20,8 @@ namespace CraftSharp
 
         #region Login Information
         public static readonly int DUMMY_PROTOCOL_VERSION = ProtocolHandler.GetMinSupported();
-        public static readonly string DUMMY_USERNAME = "dummy_user";
-        private Guid uuid = new("069a79f4-44e9-4726-a5be-fca90e38aaf5");
+        public const string DUMMY_USERNAME = "dummy_user";
+        private static readonly Guid LOCAL_UUID = new("069a79f4-44e9-4726-a5be-fca90e38aaf5");
         #endregion
 
         #region Dummy Client Control
@@ -44,11 +44,15 @@ namespace CraftSharp
                 CornApp.SetCurrentClient(this);
 
                 // Start up by self since it's not started from login screen
-                StartClient(new(false, new(), null, "dummy", 0, DUMMY_PROTOCOL_VERSION, null, "dummy_player"));
+                StartClient(new(false, new(), null, "dummy", 
+                    0, DUMMY_PROTOCOL_VERSION, null, "dummy_player"));
             }
 
             // Set up screen control
             ScreenControl.SetClient(this);
+            
+            onlinePlayers.Add(LOCAL_UUID, new PlayerInfo(LOCAL_UUID, DUMMY_USERNAME, null,
+                    (int) GameMode, 0, DUMMY_USERNAME, null, null, null));
             
             // Setup chunk render manager
             ChunkRenderManager.SetClient(this);
@@ -74,7 +78,7 @@ namespace CraftSharp
             clientEntity.Type = EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID);
             // Update client entity name
             clientEntity.Name = session.PlayerName;
-            clientEntity.UUID = uuid;
+            clientEntity.UUID = LOCAL_UUID;
             clientEntity.MaxHealth = 20F;
 
             // Create player render
@@ -145,9 +149,9 @@ namespace CraftSharp
         public override string GetServerHost() => string.Empty;
         public override int GetServerPort() => 0;
         public override int GetProtocolVersion() => DUMMY_PROTOCOL_VERSION;
-        public override string GetUsername() => DUMMY_USERNAME!;
-        public override Guid GetUserUuid() => uuid;
-        public override string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
+        public override string GetUsername() => DUMMY_USERNAME;
+        public override Guid GetUserUuid() => LOCAL_UUID;
+        public override string GetUserUuidStr() => LOCAL_UUID.ToString().Replace("-", string.Empty);
         public override string GetSessionId() => string.Empty;
         public override double GetServerTps() => 20;
         public override int GetPacketCount() => 0;
@@ -167,9 +171,7 @@ namespace CraftSharp
         /// </summary>
         public override Container? GetInventory(int inventoryId)
         {
-            if (inventories.ContainsKey(inventoryId))
-                return inventories[inventoryId];
-            return null;
+            return inventories.GetValueOrDefault(inventoryId);
         }
 
         /// <summary>
@@ -247,7 +249,7 @@ namespace CraftSharp
         /// <summary>
         /// Get latency for current player
         /// </summary>
-        public override int GetOwnLatency() => onlinePlayers.ContainsKey(uuid) ? onlinePlayers[uuid].Ping : 0;
+        public override int GetOwnLatency() => onlinePlayers.ContainsKey(LOCAL_UUID) ? onlinePlayers[LOCAL_UUID].Ping : 0;
 
         /// <summary>
         /// Get player info from uuid
@@ -255,13 +257,7 @@ namespace CraftSharp
         /// <param name="uuid">Player's UUID</param>
         public override PlayerInfo? GetPlayerInfo(Guid uuid)
         {
-            lock (onlinePlayers)
-            {
-                if (onlinePlayers.ContainsKey(uuid))
-                    return onlinePlayers[uuid];
-                else
-                    return null;
-            }
+            return onlinePlayers.GetValueOrDefault(uuid);
         }
         
         /// <summary>
@@ -270,29 +266,24 @@ namespace CraftSharp
         /// <returns>Online player names</returns>
         public override string[] GetOnlinePlayers()
         {
-            lock (onlinePlayers)
-            {
-                string[] playerNames = new string[onlinePlayers.Count];
-                int idx = 0;
-                foreach (var player in onlinePlayers)
-                    playerNames[idx++] = player.Value.Name;
-                return playerNames;
-            }
+            string[] playerNames = new string[onlinePlayers.Count];
+            int idx = 0;
+            foreach (var player in onlinePlayers)
+                playerNames[idx++] = player.Value.Name;
+            return playerNames;
         }
 
         /// <summary>
         /// Get a dictionary of online player names and their corresponding UUID
         /// </summary>
-        /// <returns>Dictionay of online players, key is UUID, value is Player name</returns>
+        /// <returns>Dictionary of online players, key is UUID, value is Player name</returns>
         public override Dictionary<string, string> GetOnlinePlayersWithUuid()
         {
             var uuid2Player = new Dictionary<string, string>();
-            lock (onlinePlayers)
+            
+            foreach (Guid key in onlinePlayers.Keys)
             {
-                foreach (Guid key in onlinePlayers.Keys)
-                {
-                    uuid2Player.Add(key.ToString(), onlinePlayers[key].Name);
-                }
+                uuid2Player.Add(key.ToString(), onlinePlayers[key].Name);
             }
             return uuid2Player;
         }
@@ -380,9 +371,9 @@ namespace CraftSharp
         /// <summary>
         /// Plays animation (Player arm swing)
         /// </summary>
-        /// <param name="animation">0 for left arm, 1 for right arm</param>
+        /// <param name="playerAnimation">0 for left arm, 1 for right arm</param>
         /// <returns>TRUE if animation successfully done</returns>
-        public override bool DoAnimation(int animation)
+        public override bool DoAnimation(int playerAnimation)
         {
             return false;
         }
@@ -424,6 +415,10 @@ namespace CraftSharp
         /// </summary>
         /// <param name="blockLoc">Location to place block to</param>
         /// <param name="blockFace">Block face (e.g. Direction.Down when clicking on the block below to place this block)</param>
+        /// <param name="x">Block x</param>
+        /// <param name="y">Block y</param>
+        /// <param name="z">Block z</param>
+        /// <param name="hand">Hand to use</param>
         /// <returns>TRUE if successfully placed</returns>
         public override bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, float x, float y, float z, Hand hand = Hand.MainHand)
         {
@@ -436,7 +431,7 @@ namespace CraftSharp
         /// <param name="blockLoc">Location of block to dig</param>
         /// <param name="blockFace">Block face</param>
         /// <param name="status">Digging status</param>
-        public override bool DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status = DiggingStatus.Started)
+        public override bool DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status)
         {
             return false;
         }
@@ -611,10 +606,11 @@ namespace CraftSharp
         /// <param name="inventoryID">Window ID</param>
         /// <param name="slotID">Slot ID</param>
         /// <param name="item">Item (may be null for empty slot)</param>
-        public void DummyOnSetSlot(byte inventoryID, short slotID, ItemStack item, int stateId)
+        /// <param name="stateId">State Id</param>
+        public void DummyOnSetSlot(byte inventoryID, short slotID, ItemStack? item, int stateId)
         {
-            if (inventories.ContainsKey(inventoryID))
-                inventories[inventoryID].StateId = stateId;
+            if (inventories.TryGetValue(inventoryID, out var inventory))
+                inventory.StateId = stateId;
 
             // Handle inventoryID -2 - Add item to player inventory without animation
             if (inventoryID == 254)
@@ -634,20 +630,18 @@ namespace CraftSharp
             }
             else
             {
-                if (inventories.ContainsKey(inventoryID))
+                if (inventories.TryGetValue(inventoryID, out var inventory2))
                 {
-                    var container = inventories[inventoryID];
-                    
                     if (item == null || item.IsEmpty)
                     {
-                        if (container.Items.ContainsKey(slotID))
-                            container.Items.Remove(slotID);
+                        if (inventory2.Items.ContainsKey(slotID))
+                            inventory2.Items.Remove(slotID);
                     }
-                    else container.Items[slotID] = item;
+                    else inventory2.Items[slotID] = item;
 
                     EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryID, slotID, item));
 
-                    if (container.IsHotbar(slotID, out int hotbarSlot)) // The updated slot is in the hotbar
+                    if (inventory2.IsHotbar(slotID, out int hotbarSlot)) // The updated slot is in the hotbar
                     {
                         EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
 

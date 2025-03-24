@@ -22,7 +22,7 @@ namespace CraftSharp
 {
     public class TestResource : MonoBehaviour
     {
-        private static readonly byte[] FLUID_HEIGHTS = new byte[] { 15, 15, 15, 15, 15, 15, 15, 15, 15 };
+        private static readonly byte[] FLUID_HEIGHTS = { 15, 15, 15, 15, 15, 15, 15, 15, 15 };
 
         public TMP_Text InfoText;
         public Animator CrosshairAnimator;
@@ -36,7 +36,7 @@ namespace CraftSharp
 
         [SerializeField] private Viewer viewer;
 
-        private bool loaded = false;
+        private bool loaded;
         private readonly List<Transform> billBoardTransforms = new();
 
         // Runs before a scene gets loaded
@@ -46,8 +46,10 @@ namespace CraftSharp
         private static readonly float[] DUMMY_BLOCK_VERT_LIGHT = Enumerable.Repeat(0F, 8).ToArray();
 
         private static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
+        private static readonly int BASE_MAP_NAME = Shader.PropertyToID("_BaseMap");
+        private static readonly int SHOW_NAME = Animator.StringToHash("Show");
 
-        public void TestBuildState(string stateName, int stateId, BlockState state, BlockStateModel stateModel, int cullFlags, World world, float3 pos)
+        private void TestBuildState(string stateName, int stateId, BlockState state, BlockStateModel stateModel, int cullFlags, World world, float3 pos)
         {
             int altitude = 0;
             foreach (var geometry in stateModel.Geometries)
@@ -198,7 +200,7 @@ namespace CraftSharp
             }
         }
 
-        public void TestBuildItem(string itemName, ItemStack itemStack, ItemModel itemModel, float3 pos)
+        private void TestBuildItem(string itemName, ItemStack itemStack, ItemModel itemModel, float3 pos)
         {
             // Gather all geometries of this model
             Dictionary<ItemModelPredicate, ItemGeometry> buildDict = new()
@@ -224,7 +226,7 @@ namespace CraftSharp
 
                 var filter = modelObject.AddComponent<MeshFilter>();
                 var render = modelObject.AddComponent<MeshRenderer>();
-                var collider = modelObject.AddComponent<MeshCollider>();
+                var meshCollider = modelObject.AddComponent<MeshCollider>();
 
                 var tintFunc = ItemPalette.INSTANCE.GetTintRule(itemStack.ItemType.ItemId);
                 // Use high-contrast colors for troubleshooting and debugging
@@ -235,14 +237,14 @@ namespace CraftSharp
                 var itemMesh = ItemMeshBuilder.BuildItemMesh(pair.Value, colors);
 
                 filter.sharedMesh = itemMesh;
-                collider.sharedMesh = itemMesh;
+                meshCollider.sharedMesh = itemMesh;
                 render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(itemModel.RenderType);
 
                 altitude += 1;
             }
         }
 
-        public void TestBuildInventoryItem(string itemName, ItemStack itemStack, ItemModel itemModel)
+        private void TestBuildInventoryItem(string itemName, ItemStack itemStack, ItemModel itemModel)
         {
             var invItemObj = Instantiate(inventoryItemPrefab);
             invItemObj.name = itemName;
@@ -297,10 +299,8 @@ namespace CraftSharp
             render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(itemModel.RenderType, true);
         }
 
-        public void TestBuildParticle(string particleName, Mesh[] meshes, Material material, float3 pos)
+        private void TestBuildParticle(string particleName, Mesh[] meshes, Material material, float3 pos)
         {
-            var particleTransforms = new List<Transform>();
-
             for (int i = 0; i < meshes.Length; i++)
             {
                 var coord = pos + new float3(0.5F, 0.5F + i, 0.5F);
@@ -320,8 +320,8 @@ namespace CraftSharp
                 var render = particleObject.AddComponent<MeshRenderer>();
                 render.sharedMaterial = material;
 
-                var collider = particleObject.AddComponent<MeshCollider>();
-                collider.sharedMesh = meshes[i];
+                var meshCollider = particleObject.AddComponent<MeshCollider>();
+                meshCollider.sharedMesh = meshes[i];
 
                 billBoardTransforms.Add(particleObject.transform);
             }
@@ -381,7 +381,8 @@ namespace CraftSharp
                 {
                     var state = BlockStatePalette.INSTANCE.GetByNumId(pair.Key);
 
-                    TestBuildState($"Block [{pair.Key}] {state}", pair.Key, state, pair.Value, 0b111111, world, new((index % width) * 1.5F, 0, (index / width) * 1.5F));
+                    TestBuildState($"Block [{pair.Key}] {state}", pair.Key, state, pair.Value, 0b111111, world,
+                        new(index % width * 1.5F, 0, index / width * 1.5F));
                 }
 
                 count++;
@@ -399,7 +400,7 @@ namespace CraftSharp
                     var item = ItemPalette.INSTANCE.GetByNumId(pair.Key);
                     var itemStack = new ItemStack(item, 1, null);
 
-                    TestBuildItem($"Item [{pair.Key}] {item}", itemStack, pair.Value, new(-(index % width) * 1.5F - 1.5F, 0F, (index / width) * 1.5F));
+                    TestBuildItem($"Item [{pair.Key}] {item}", itemStack, pair.Value, new(-(index % width) * 1.5F - 1.5F, 0F, index / width * 1.5F));
                 }
 
                 count++;
@@ -411,7 +412,7 @@ namespace CraftSharp
 
             count = 0; width = 32;
             var particleMaterialInstance = new Material(particleMaterial);
-            particleMaterialInstance.SetTexture("_BaseMap", packManager.GetParticleAtlas());
+            particleMaterialInstance.SetTexture(BASE_MAP_NAME, packManager.GetParticleAtlas());
 
             foreach (var pair in packManager.ParticleMeshesTable)
             {
@@ -527,7 +528,7 @@ namespace CraftSharp
                 // Update cursor lock
                 Cursor.lockState = value ? CursorLockMode.None : CursorLockMode.Locked;
                 // Update crosshair visibility
-                CrosshairAnimator.SetBool("Show", !value);
+                CrosshairAnimator.SetBool(SHOW_NAME, !value);
                 // Update viewer
                 if (viewer)
                 {

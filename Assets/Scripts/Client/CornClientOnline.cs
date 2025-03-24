@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -36,10 +37,10 @@ namespace CraftSharp
         private PlayerKeyPair? playerKeyPair;
 
         // Cookies
-        private Dictionary<string, byte[]> Cookies { get; set; } = new();
+        private Dictionary<string, byte[]> Cookies { get; } = new();
         public void GetCookie(string key, out byte[]? data) => Cookies.TryGetValue(key, out data);
         public void SetCookie(string key, byte[] data) => Cookies[key] = data;
-        public void DeleteCookie(string key) => Cookies.Remove(key, out var data);
+        public void DeleteCookie(string key) => Cookies.Remove(key, out _);
         #endregion
 
         #region Thread and Chat Control
@@ -113,17 +114,17 @@ namespace CraftSharp
         {
             var session = info.Session;
 
-            this.sessionId = session.Id;
-            if (!Guid.TryParse(session.PlayerId, out this.uuid))
+            sessionId = session.Id;
+            if (!Guid.TryParse(session.PlayerId, out uuid))
             {
-                this.uuid = Guid.Empty;
+                uuid = Guid.Empty;
             }
-            this.username = session.PlayerName;
-            this.host = info.ServerIp;
-            this.port = info.ServerPort;
-            this.protocolVersion = info.ProtocolVersion;
-            this.playerKeyPair = info.Player;
-            this.accountLower = info.AccountLower;
+            username = session.PlayerName;
+            host = info.ServerIp;
+            port = info.ServerPort;
+            protocolVersion = info.ProtocolVersion;
+            playerKeyPair = info.Player;
+            accountLower = info.AccountLower;
 
             _sessionToken = session;
 
@@ -132,18 +133,18 @@ namespace CraftSharp
             {
                 // Setup tcp client
                 client = ProxyHandler.NewTcpClient(host, port);
-                client.ReceiveBufferSize = 1024 * 1024;
+                client!.ReceiveBufferSize = 1024 * 1024;
                 client.ReceiveTimeout = 30000; // 30 seconds
 
                 // Create handler
                 handler = ProtocolHandler.GetProtocolHandler(client, info.ProtocolVersion, info.ForgeInfo, this);
 
                 // Start update loop
-                timeoutdetector = Tuple.Create(new Thread(new ParameterizedThreadStart(TimeoutDetector)), new CancellationTokenSource());
+                timeoutdetector = Tuple.Create(new Thread(TimeoutDetector), new CancellationTokenSource());
                 timeoutdetector.Item1.Name = "Connection Timeout Detector";
                 timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
 
-                if (handler.Login(playerKeyPair, session, accountLower)) // Login
+                if (handler!.Login(playerKeyPair, session, accountLower)) // Login
                 {
                     // Update entity type for dummy client entity
                     clientEntity.Type = EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID);
@@ -160,16 +161,13 @@ namespace CraftSharp
 
                     return true; // Client successfully started
                 }
-                else
-                {
-                    Debug.LogError(Translations.Get("error.login_failed"));
-                    Disconnect();
-                }
+                Debug.LogError(Translations.Get("error.login_failed"));
+                Disconnect();
             }
             catch (Exception e)
             {
                 client = ProxyHandler.NewTcpClient(host, port);
-                client.ReceiveBufferSize = 1024 * 1024;
+                client!.ReceiveBufferSize = 1024 * 1024;
                 client.ReceiveTimeout = 30000; // 30 seconds
 
                 Debug.LogError(Translations.Get("error.connect", e.Message));
@@ -330,11 +328,11 @@ namespace CraftSharp
                 });
 
                 // Close existing connection
-                client.Close();
+                client!.Close();
 
                 // Establish new connection
                 client = ProxyHandler.NewTcpClient(newHost, newPort);
-                client.ReceiveBufferSize = 1024 * 1024;
+                client!.ReceiveBufferSize = 1024 * 1024;
                 client.ReceiveTimeout = 30000; // 30 seconds
 
                 // Reinitialize the protocol handler
@@ -342,10 +340,9 @@ namespace CraftSharp
                 Debug.Log($"Connected to {host}:{port}");
 
                 // Retry login process
-                if (handler.Login(playerKeyPair, _sessionToken, accountLower))
+                if (handler!.Login(playerKeyPair, _sessionToken!, accountLower))
                 {
                     // TODO: Prepare client scene
-
                     Debug.Log("Successfully transferred connection and logged in.");
                 }
                 else
@@ -381,7 +378,7 @@ namespace CraftSharp
 
             do
             {
-                for (int i = 0;i < 30;i++) // 15 seconds in total
+                for (int i = 0; i < 30; i++) // 15 seconds in total
                 {
                     Thread.Sleep(TimeSpan.FromSeconds(0.5));
 
@@ -457,15 +454,12 @@ namespace CraftSharp
                 case DisconnectReason.ConnectionLost:
                     Debug.Log(Translations.Get("mcc.disconnect.lost"));
                     break;
-
                 case DisconnectReason.InGameKick:
                     Debug.Log(Translations.Get("mcc.disconnect.server") + message);
                     break;
-
                 case DisconnectReason.LoginRejected:
                     Debug.Log(Translations.Get("mcc.disconnect.login") + message);
                     break;
-
                 case DisconnectReason.UserLogout:
                     throw new InvalidOperationException(Translations.Get("exception.user_logout"));
             }
@@ -482,8 +476,8 @@ namespace CraftSharp
         /// </summary>
         /// <param name="task">Task to run with any type or return value</param>
         /// <returns>Any result returned from task, result type is inferred from the task</returns>
-        /// <example>bool result = InvokeOnNetMainThread(methodThatReturnsAbool);</example>
-        /// <example>bool result = InvokeOnNetMainThread(() => methodThatReturnsAbool(argument));</example>
+        /// <example>bool result = InvokeOnNetMainThread(methodThatReturnsABool);</example>
+        /// <example>bool result = InvokeOnNetMainThread(() => methodThatReturnsABool(argument));</example>
         /// <example>int result = InvokeOnNetMainThread(() => { yourCode(); return 42; });</example>
         /// <typeparam name="T">Type of the return value</typeparam>
         public T InvokeOnNetMainThread<T>(Func<T> task)
@@ -518,7 +512,7 @@ namespace CraftSharp
         /// <summary>
         /// Clear all tasks
         /// </summary>
-        public void ClearTasks()
+        private void ClearTasks()
         {
             lock (threadTasksLock)
             {
@@ -644,51 +638,36 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Get max length for chat messages
-        /// </summary>
-        /// <returns>Max length, in characters</returns>
-        public int GetMaxChatMessageLength()
-        {
-            return handler!.GetMaxChatMessageLength();
-        }
-
-        /// <summary>
-        /// Get a list of disallowed characters in chat
-        /// </summary>
-        /// <returns>An array of disallowed characters</returns>
-        public static char[] GetDisallowedChatCharacters()
-        {
-            return new char[] { (char)167, (char)127 }; // Minecraft color code and ASCII code DEL
-        }
-
-        /// <summary>
         /// Get all players latency
         /// </summary>
         public override Dictionary<string, int> GetPlayersLatency()
         {
-            Dictionary<string, int> playersLatency = new();
-            foreach (var player in onlinePlayers)
-                playersLatency.Add(player.Value.Name, player.Value.Ping);
-            return playersLatency;
+            lock (onlinePlayers)
+            {
+                return onlinePlayers.ToDictionary(player => player.Value.Name, player => player.Value.Ping);
+            }
         }
 
         /// <summary>
         /// Get latency for current player
         /// </summary>
-        public override int GetOwnLatency() => onlinePlayers.ContainsKey(uuid) ? onlinePlayers[uuid].Ping : 0;
+        public override int GetOwnLatency()
+        {
+            lock (onlinePlayers)
+            {
+                return onlinePlayers.TryGetValue(uuid, out var selfPlayer) ? selfPlayer.Ping : 0;
+            }
+        }
 
         /// <summary>
         /// Get player info from uuid
         /// </summary>
-        /// <param name="uuid">Player's UUID</param>
-        public override PlayerInfo? GetPlayerInfo(Guid uuid)
+        /// <param name="targetUUID">Player's UUID</param>
+        public override PlayerInfo? GetPlayerInfo(Guid targetUUID)
         {
             lock (onlinePlayers)
             {
-                if (onlinePlayers.ContainsKey(uuid))
-                    return onlinePlayers[uuid];
-                else
-                    return null;
+                return onlinePlayers.GetValueOrDefault(targetUUID);
             }
         }
         
@@ -711,7 +690,7 @@ namespace CraftSharp
         /// <summary>
         /// Get a dictionary of online player names and their corresponding UUID
         /// </summary>
-        /// <returns>Dictionay of online players, key is UUID, value is Player name</returns>
+        /// <returns>Dictionary of online players, key is UUID, value is Player name</returns>
         public override Dictionary<string, string> GetOnlinePlayersWithUuid()
         {
             var uuid2Player = new Dictionary<string, string>();
@@ -729,9 +708,12 @@ namespace CraftSharp
 
         #region Action methods: Perform an action on the server
 
-        public void SetCanSendMessage(bool canSendMessage)
+        public void SetCanSendMessage(bool canSend)
         {
-            this.canSendMessage = canSendMessage;
+            lock (chatQueue)
+            {
+                canSendMessage = canSend;
+            }
         }
 
         /// <summary>
@@ -761,28 +743,25 @@ namespace CraftSharp
 
             lock (chatQueue)
             {
-                if (text.Length > maxLength) //Message is too long?
+                if (text.Length > maxLength) // Message is too long?
                 {
                     if (text[0] == '/')
                     {
-                        //Send the first 100/256 chars of the command
+                        // Send the first 100/256 chars of the command
                         text = text[..maxLength];
-                        chatQueue.Enqueue(text);
                     }
                     else
                     {
-                        //Split the message into several messages
+                        // Split the message into several messages
                         while (text.Length > maxLength)
                         {
                             chatQueue.Enqueue(text[..maxLength]);
                             text = text[maxLength..];
                         }
-                        chatQueue.Enqueue(text);
                     }
                 }
-                else
-                    chatQueue.Enqueue(text);
-                
+
+                chatQueue.Enqueue(text);
                 TrySendMessageToServer();
             }
         }
@@ -793,10 +772,7 @@ namespace CraftSharp
         /// <returns>True if packet successfully sent</returns>
         public override bool SendRespawnPacket()
         {
-            if (InvokeRequired)
-                return InvokeOnNetMainThread<bool>(SendRespawnPacket);
-
-            return handler!.SendRespawnPacket();
+            return InvokeRequired ? InvokeOnNetMainThread(SendRespawnPacket) : handler!.SendRespawnPacket();
         }
 
         /// <summary>
@@ -855,7 +831,7 @@ namespace CraftSharp
         private static bool TryMergeSlot(Container inventory, ItemStack item, int slotId, ItemStack curItem, int curId, List<Tuple<short, ItemStack?>> changedSlots)
         {
             int spaceLeft = curItem.ItemType.StackLimit - curItem.Count;
-            if (curItem.ItemType == item!.ItemType && spaceLeft > 0)
+            if (curItem.ItemType == item.ItemType && spaceLeft > 0)
             {
                 // Put item on that stack
                 if (item.Count <= spaceLeft)
@@ -902,7 +878,7 @@ namespace CraftSharp
         private static readonly HashSet<ResourceLocation> BEACON_FUEL_ITEM_IDS = new()
         {
             new ResourceLocation("iron_ingot"), new ResourceLocation("gold_ingot"),
-            new ResourceLocation("emarald"),    new ResourceLocation("diamond"),
+            new ResourceLocation("emerald"),    new ResourceLocation("diamond"),
             new ResourceLocation("netherite_ingot")
         };
 
@@ -939,660 +915,694 @@ namespace CraftSharp
             List<Tuple<short, ItemStack?>> changedSlots = new(); // List<Slot Id, Changed Items>
 
             // Update our inventory base on action type
-            Container inventory = GetInventory(windowId)!;
+            Container? inventory = GetInventory(windowId);
             Container playerInventory = GetInventory(0)!;
-            switch (action)
+            if (inventory != null)
             {
-                case WindowActionType.LeftClick:
-                    // Check if cursor have item (slot -1)
-                    if (playerInventory.Items.ContainsKey(-1))
-                    {
-                        // When item on cursor and clicking slot 0, nothing will happen
-                        if (slotId == 0) break;
-
-                        // Check target slot also have item?
-                        if (inventory.Items.ContainsKey(slotId))
+                switch (action)
+                {
+                    case WindowActionType.LeftClick:
+                        // Check if cursor have item (slot -1)
+                        if (playerInventory.Items.ContainsKey(-1))
                         {
-                            // Check if both item are the same?
-                            if (inventory.Items[slotId].ItemType == playerInventory.Items[-1].ItemType)
-                            {
-                                int maxCount = inventory.Items[slotId].ItemType.StackLimit;
-                                // Check item stacking
-                                if ((inventory.Items[slotId].Count + playerInventory.Items[-1].Count) <= maxCount)
-                                {
-                                    // Put cursor item to target
-                                    inventory.Items[slotId].Count += playerInventory.Items[-1].Count;
-                                    playerInventory.Items.Remove(-1);
-                                }
-                                else
-                                {
-                                    // Leave some item on cursor
-                                    playerInventory.Items[-1].Count -= (maxCount - inventory.Items[slotId].Count);
-                                    inventory.Items[slotId].Count = maxCount;
-                                }
-                            }
-                            else
-                            {
-                                // Swap two items
-                                (inventory.Items[slotId], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slotId]);
-                            }
-                        }
-                        else
-                        {
-                            // Put cursor item to target
-                            inventory.Items[slotId] = playerInventory.Items[-1];
-                            playerInventory.Items.Remove(-1);
-                        }
-
-                        changedSlots.Add(inventory.Items.TryGetValue(slotId, out var inventoryItem)
-                            ? new Tuple<short, ItemStack?>((short)slotId, inventoryItem)
-                            : new Tuple<short, ItemStack?>((short)slotId, null));
-                    }
-                    else
-                    {
-                        // Check target slot have item?
-                        if (inventory.Items.ContainsKey(slotId))
-                        {
-                            // When taking item from slot 0, server will update us
+                            // When item on cursor and clicking slot 0, nothing will happen
                             if (slotId == 0) break;
 
-                            // Put target slot item to cursor
-                            playerInventory.Items[-1] = inventory.Items[slotId];
-                            inventory.Items.Remove(slotId);
-
-                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, null));
-                        }
-                    }
-                    break;
-                case WindowActionType.RightClick:
-                    // Check if cursor have item (slot -1)
-                    if (playerInventory.Items.ContainsKey(-1))
-                    {
-                        // When item on cursor and clicking slot 0, nothing will happen
-                        if (slotId == 0) break;
-
-                        // Check target slot have item?
-                        if (inventory.Items.ContainsKey(slotId))
-                        {
-                            // Check if both item are the same?
-                            if (inventory.Items[slotId].ItemType == playerInventory.Items[-1].ItemType)
+                            // Check target slot also have item?
+                            if (inventory.Items.ContainsKey(slotId))
                             {
-                                // Check item stacking
-                                if (inventory.Items[slotId].Count < inventory.Items[slotId].ItemType.StackLimit)
+                                // Check if both item are the same?
+                                if (inventory.Items[slotId].ItemType == playerInventory.Items[-1].ItemType)
                                 {
-                                    // Drop 1 item count from cursor
-                                    playerInventory.Items[-1].Count--;
-                                    inventory.Items[slotId].Count++;
+                                    int maxCount = inventory.Items[slotId].ItemType.StackLimit;
+                                    // Check item stacking
+                                    if ((inventory.Items[slotId].Count + playerInventory.Items[-1].Count) <= maxCount)
+                                    {
+                                        // Put cursor item to target
+                                        inventory.Items[slotId].Count += playerInventory.Items[-1].Count;
+                                        playerInventory.Items.Remove(-1);
+                                    }
+                                    else
+                                    {
+                                        // Leave some item on cursor
+                                        playerInventory.Items[-1].Count -= (maxCount - inventory.Items[slotId].Count);
+                                        inventory.Items[slotId].Count = maxCount;
+                                    }
+                                }
+                                else
+                                {
+                                    // Swap two items
+                                    (inventory.Items[slotId], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slotId]);
                                 }
                             }
                             else
                             {
-                                // Swap two items
-                                (inventory.Items[slotId], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slotId]);
+                                // Put cursor item to target
+                                inventory.Items[slotId] = playerInventory.Items[-1];
+                                playerInventory.Items.Remove(-1);
+                            }
+
+                            changedSlots.Add(inventory.Items.TryGetValue(slotId, out var inventoryItem)
+                                ? new Tuple<short, ItemStack?>((short)slotId, inventoryItem)
+                                : new Tuple<short, ItemStack?>((short)slotId, null));
+                        }
+                        else
+                        {
+                            // Check target slot have item?
+                            if (inventory.Items.ContainsKey(slotId))
+                            {
+                                // When taking item from slot 0, server will update us
+                                if (slotId == 0) break;
+
+                                // Put target slot item to cursor
+                                playerInventory.Items[-1] = inventory.Items[slotId];
+                                inventory.Items.Remove(slotId);
+
+                                changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, null));
+                            }
+                        }
+                        break;
+                    case WindowActionType.RightClick:
+                        // Check if cursor have item (slot -1)
+                        if (playerInventory.Items.ContainsKey(-1))
+                        {
+                            // When item on cursor and clicking slot 0, nothing will happen
+                            if (slotId == 0) break;
+
+                            // Check target slot have item?
+                            if (inventory.Items.ContainsKey(slotId))
+                            {
+                                // Check if both item are the same?
+                                if (inventory.Items[slotId].ItemType == playerInventory.Items[-1].ItemType)
+                                {
+                                    // Check item stacking
+                                    if (inventory.Items[slotId].Count < inventory.Items[slotId].ItemType.StackLimit)
+                                    {
+                                        // Drop 1 item count from cursor
+                                        playerInventory.Items[-1].Count--;
+                                        inventory.Items[slotId].Count++;
+                                    }
+                                }
+                                else
+                                {
+                                    // Swap two items
+                                    (inventory.Items[slotId], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slotId]);
+                                }
+                            }
+                            else
+                            {
+                                // Drop 1 item count from cursor
+                                var itemTmp = playerInventory.Items[-1];
+                                ItemStack itemClone = new(itemTmp.ItemType, 1, itemTmp.NBT);
+                                inventory.Items[slotId] = itemClone;
+                                playerInventory.Items[-1].Count--;
                             }
                         }
                         else
                         {
-                            // Drop 1 item count from cursor
-                            var itemTmp = playerInventory.Items[-1];
-                            ItemStack itemClone = new(itemTmp.ItemType, 1, itemTmp.NBT);
-                            inventory.Items[slotId] = itemClone;
-                            playerInventory.Items[-1].Count--;
-                        }
-                    }
-                    else
-                    {
-                        // Check target slot have item?
-                        if (inventory.Items.ContainsKey(slotId))
-                        {
-                            if (slotId == 0)
+                            // Check target slot have item?
+                            if (inventory.Items.ContainsKey(slotId))
                             {
-                                // no matter how many item in slot 0, only 1 will be taken out
-                                // Also server will update us
-                                break;
-                            }
-                            if (inventory.Items[slotId].Count == 1)
-                            {
-                                // Only 1 item count. Put it to cursor
-                                playerInventory.Items[-1] = inventory.Items[slotId];
-                                inventory.Items.Remove(slotId);
-                            }
-                            else
-                            {
-                                // Take half of the item stack to cursor
-                                if (inventory.Items[slotId].Count % 2 == 0)
+                                if (slotId == 0)
                                 {
-                                    // Can be evenly divided
-                                    var itemTmp = inventory.Items[slotId];
-                                    playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, itemTmp.Count / 2, itemTmp.NBT);
-                                    inventory.Items[slotId].Count = itemTmp.Count / 2;
+                                    // no matter how many item in slot 0, only 1 will be taken out
+                                    // Also server will update us
+                                    break;
+                                }
+                                if (inventory.Items[slotId].Count == 1)
+                                {
+                                    // Only 1 item count. Put it to cursor
+                                    playerInventory.Items[-1] = inventory.Items[slotId];
+                                    inventory.Items.Remove(slotId);
                                 }
                                 else
                                 {
-                                    // Cannot be evenly divided. item count on cursor is always larger than item on inventory
-                                    var itemTmp = inventory.Items[slotId];
-                                    playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, (itemTmp.Count + 1) / 2, itemTmp.NBT);
-                                    inventory.Items[slotId].Count = (itemTmp.Count - 1) / 2;
-                                }
-                            }
-                        }
-                    }
-                    if (inventory.Items.ContainsKey(slotId))
-                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
-                    else
-                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, null));
-                    break;
-                case WindowActionType.ShiftClick:
-                case WindowActionType.ShiftRightClick:
-                    if (slotId == 0) break;
-                    if (item != null)
-                    {
-                        /* Target slot have item */
-
-                        bool lower2upper = false, upper2backpack = false, backpack2hotbar = false; // mutual exclusion
-                        bool hotbarFirst = true; // Used when upper2backpack = true
-                        int upperStartSlot = 9;
-                        int upperEndSlot = 35;
-                        int lowerStartSlot = 36;
-
-                        switch (inventory.Type)
-                        {
-                            case ContainerType.PlayerInventory:
-                                if (slotId >= 0 && slotId <= 8 || slotId == 45)
-                                {
-                                    if (slotId != 0)
-                                        hotbarFirst = false;
-                                    upper2backpack = true;
-                                    lowerStartSlot = 9;
-                                }
-                                else if (item != null && false /* Check if wearable */)
-                                {
-                                    lower2upper = true;
-                                    // upperStartSlot = ?;
-                                    // upperEndSlot = ?;
-                                    // Todo: Distinguish the type of equipment
-                                }
-                                else
-                                {
-                                    if (slotId >= 9 && slotId <= 35)
+                                    // Take half of the item stack to cursor
+                                    if (inventory.Items[slotId].Count % 2 == 0)
                                     {
-                                        backpack2hotbar = true;
+                                        // Can be evenly divided
+                                        var itemTmp = inventory.Items[slotId];
+                                        playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, itemTmp.Count / 2, itemTmp.NBT);
+                                        inventory.Items[slotId].Count = itemTmp.Count / 2;
+                                    }
+                                    else
+                                    {
+                                        // Cannot be evenly divided. item count on cursor is always larger than item on inventory
+                                        var itemTmp = inventory.Items[slotId];
+                                        playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, (itemTmp.Count + 1) / 2, itemTmp.NBT);
+                                        inventory.Items[slotId].Count = (itemTmp.Count - 1) / 2;
+                                    }
+                                }
+                            }
+                        }
+
+                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId,
+                            inventory.Items.GetValueOrDefault(slotId)));
+                        break;
+                    case WindowActionType.ShiftClick:
+                    case WindowActionType.ShiftRightClick:
+                        if (slotId == 0) break;
+                        if (item != null)
+                        {
+                            /* Target slot have item */
+
+                            bool lower2upper = false, upper2backpack = false, backpack2hotbar = false; // mutual exclusion
+                            bool hotbarFirst = true; // Used when upper2backpack = true
+                            int upperStartSlot = 9;
+                            int upperEndSlot = 35;
+                            int lowerStartSlot = 36;
+
+                            switch (inventory.Type)
+                            {
+                                case ContainerType.PlayerInventory:
+                                    if (slotId is >= 0 and <= 8 or 45)
+                                    {
+                                        //if (slotId != 0)
+                                            hotbarFirst = false;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 9;
+                                    }
+                                    /* // Check if wearable
+                                    else if (item != null && false)
+                                    {
+                                        lower2upper = true;
+                                        // upperStartSlot = ?;
+                                        // upperEndSlot = ?;
+                                        // Todo: Distinguish the type of equipment
+                                    } */
+                                    else
+                                    {
+                                        if (slotId is >= 9 and <= 35)
+                                        {
+                                            backpack2hotbar = true;
+                                            lowerStartSlot = 36;
+                                        }
+                                        else
+                                        {
+                                            lower2upper = true;
+                                            upperStartSlot = 9;
+                                            upperEndSlot = 35;
+                                        }
+                                    }
+                                    break;
+                                case ContainerType.Generic_9x1:
+                                    if (slotId is >= 0 and <= 8)
+                                    {
+                                        upper2backpack = true;
+                                        lowerStartSlot = 9;
+                                    }
+                                    else
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 8;
+                                    }
+                                    break;
+                                case ContainerType.Generic_9x2:
+                                    if (slotId is >= 0 and <= 17)
+                                    {
+                                        upper2backpack = true;
+                                        lowerStartSlot = 18;
+                                    }
+                                    else
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 17;
+                                    }
+                                    break;
+                                case ContainerType.Generic_9x3:
+                                case ContainerType.ShulkerBox:
+                                    if (slotId is >= 0 and <= 26)
+                                    {
+                                        upper2backpack = true;
+                                        lowerStartSlot = 27;
+                                    }
+                                    else
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 26;
+                                    }
+                                    break;
+                                case ContainerType.Generic_9x4:
+                                    if (slotId is >= 0 and <= 35)
+                                    {
+                                        upper2backpack = true;
                                         lowerStartSlot = 36;
                                     }
                                     else
                                     {
                                         lower2upper = true;
-                                        upperStartSlot = 9;
+                                        upperStartSlot = 0;
                                         upperEndSlot = 35;
                                     }
-                                }
-                                break;
-                            case ContainerType.Generic_9x1:
-                                if (slotId >= 0 && slotId <= 8)
-                                {
-                                    upper2backpack = true;
-                                    lowerStartSlot = 9;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 8;
-                                }
-                                break;
-                            case ContainerType.Generic_9x2:
-                                if (slotId >= 0 && slotId <= 17)
-                                {
-                                    upper2backpack = true;
-                                    lowerStartSlot = 18;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 17;
-                                }
-                                break;
-                            case ContainerType.Generic_9x3:
-                            case ContainerType.ShulkerBox:
-                                if (slotId >= 0 && slotId <= 26)
-                                {
-                                    upper2backpack = true;
-                                    lowerStartSlot = 27;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 26;
-                                }
-                                break;
-                            case ContainerType.Generic_9x4:
-                                if (slotId >= 0 && slotId <= 35)
-                                {
-                                    upper2backpack = true;
-                                    lowerStartSlot = 36;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 35;
-                                }
-                                break;
-                            case ContainerType.Generic_9x5:
-                                if (slotId >= 0 && slotId <= 44)
-                                {
-                                    upper2backpack = true;
-                                    lowerStartSlot = 45;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 44;
-                                }
-                                break;
-                            case ContainerType.Generic_9x6:
-                                if (slotId >= 0 && slotId <= 53)
-                                {
-                                    upper2backpack = true;
-                                    lowerStartSlot = 54;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 53;
-                                }
-                                break;
-                            case ContainerType.Generic_3x3:
-                                if (slotId >= 0 && slotId <= 8)
-                                {
-                                    upper2backpack = true;
-                                    lowerStartSlot = 9;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 8;
-                                }
-                                break;
-                            case ContainerType.Anvil:
-                                if (slotId >= 0 && slotId <= 2)
-                                {
-                                    if (slotId >= 0 && slotId <= 1)
-                                        hotbarFirst = false;
-                                    upper2backpack = true;
-                                    lowerStartSlot = 3;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 1;
-                                }
-                                break;
-                            case ContainerType.Beacon:
-                                if (slotId == 0)
-                                {
-                                    hotbarFirst = false;
-                                    upper2backpack = true;
-                                    lowerStartSlot = 1;
-                                }
-                                else if (item != null && item.Count == 1 && BEACON_FUEL_ITEM_IDS
-                                             .Contains(item.ItemType.ItemId) && !inventory.Items.ContainsKey(0))
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 0;
-                                }
-                                else
-                                {
-                                    if (slotId >= 1 && slotId <= 27)
+                                    break;
+                                case ContainerType.Generic_9x5:
+                                    if (slotId is >= 0 and <= 44)
                                     {
-                                        backpack2hotbar = true;
-                                        lowerStartSlot = 28;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 45;
+                                    }
+                                    else
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 44;
+                                    }
+                                    break;
+                                case ContainerType.Generic_9x6:
+                                    if (slotId is >= 0 and <= 53)
+                                    {
+                                        upper2backpack = true;
+                                        lowerStartSlot = 54;
+                                    }
+                                    else
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 53;
+                                    }
+                                    break;
+                                case ContainerType.Generic_3x3:
+                                    if (slotId is >= 0 and <= 8)
+                                    {
+                                        upper2backpack = true;
+                                        lowerStartSlot = 9;
+                                    }
+                                    else
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 8;
+                                    }
+                                    break;
+                                case ContainerType.Anvil:
+                                    if (slotId is >= 0 and <= 2)
+                                    {
+                                        if (slotId is >= 0 and <= 1)
+                                            hotbarFirst = false;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 3;
+                                    }
+                                    else
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 1;
+                                    }
+                                    break;
+                                case ContainerType.Beacon:
+                                    /*if (slotId == 0)
+                                    {
+                                        hotbarFirst = false;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 1;
+                                    }
+                                    else */
+                                    if (item is { Count: 1 } && BEACON_FUEL_ITEM_IDS
+                                        .Contains(item.ItemType.ItemId) && !inventory.Items.ContainsKey(0))
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 0;
+                                    }
+                                    else
+                                    {
+                                        if (slotId is >= 1 and <= 27)
+                                        {
+                                            backpack2hotbar = true;
+                                            lowerStartSlot = 28;
+                                        }
+                                        else
+                                        {
+                                            lower2upper = true;
+                                            upperStartSlot = 1;
+                                            upperEndSlot = 27;
+                                        }
+                                    }
+                                    break;
+                                case ContainerType.BlastFurnace:
+                                case ContainerType.Furnace:
+                                case ContainerType.Smoker:
+                                    if (slotId is >= 0 and <= 2)
+                                    {
+                                        if (slotId is >= 0 and <= 1)
+                                            hotbarFirst = false;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 3;
+                                    }
+                                    /* // Check if it can be burned
+                                    else if (item != null && false)
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 0;
+                                    } */
+                                    else
+                                    {
+                                        if (slotId is >= 3 and <= 29)
+                                        {
+                                            backpack2hotbar = true;
+                                            lowerStartSlot = 30;
+                                        }
+                                        else
+                                        {
+                                            lower2upper = true;
+                                            upperStartSlot = 3;
+                                            upperEndSlot = 29;
+                                        }
+                                    }
+                                    break;
+                                case ContainerType.BrewingStand:
+                                    if (slotId is >= 0 and <= 3)
+                                    {
+                                        upper2backpack = true;
+                                        lowerStartSlot = 5;
+                                    }
+                                    else if (item.ItemType.ItemId == BREWING_STAND_FUEL_ITEM_ID)
+                                    {
+                                        lower2upper = true;
+                                        if (!inventory.Items.ContainsKey(4) || inventory.Items[4].Count < 64)
+                                            upperStartSlot = upperEndSlot = 4;
+                                        else
+                                            upperStartSlot = upperEndSlot = 3;
+                                    }
+                                    /* // Check if it can be used for alchemy
+                                    else if (false)
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = upperEndSlot = 3;
+                                    }
+                                    */
+                                    else if (BREWING_STAND_BOTTLE_ITEM_IDS.Contains(item.ItemType.ItemId))
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 2;
+                                    }
+                                    else
+                                    {
+                                        if (slotId is >= 5 and <= 31)
+                                        {
+                                            backpack2hotbar = true;
+                                            lowerStartSlot = 32;
+                                        }
+                                        else
+                                        {
+                                            lower2upper = true;
+                                            upperStartSlot = 5;
+                                            upperEndSlot = 31;
+                                        }
+                                    }
+                                    break;
+                                case ContainerType.Crafting:
+                                    if (slotId is >= 0 and <= 9)
+                                    {
+                                        //if (slotId is >= 1 and <= 9)
+                                            hotbarFirst = false;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 10;
                                     }
                                     else
                                     {
                                         lower2upper = true;
                                         upperStartSlot = 1;
-                                        upperEndSlot = 27;
+                                        upperEndSlot = 9;
                                     }
-                                }
-                                break;
-                            case ContainerType.BlastFurnace:
-                            case ContainerType.Furnace:
-                            case ContainerType.Smoker:
-                                if (slotId >= 0 && slotId <= 2)
-                                {
-                                    if (slotId >= 0 && slotId <= 1)
-                                        hotbarFirst = false;
-                                    upper2backpack = true;
-                                    lowerStartSlot = 3;
-                                }
-                                else if (item != null && false /* Check if it can be burned */)
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 0;
-                                }
-                                else
-                                {
-                                    if (slotId >= 3 && slotId <= 29)
+                                    break;
+                                case ContainerType.Enchantment:
+                                    if (slotId is >= 0 and <= 1)
                                     {
-                                        backpack2hotbar = true;
-                                        lowerStartSlot = 30;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 5;
+                                    }
+                                    else if (item.ItemType.ItemId == ENCHANTING_TABLE_FUEL_ITEM_ID)
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = upperEndSlot = 1;
                                     }
                                     else
                                     {
                                         lower2upper = true;
-                                        upperStartSlot = 3;
-                                        upperEndSlot = 29;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 0;
                                     }
-                                }
-                                break;
-                            case ContainerType.BrewingStand:
-                                if (slotId >= 0 && slotId <= 3)
-                                {
-                                    upper2backpack = true;
-                                    lowerStartSlot = 5;
-                                }
-                                else if (item != null && item.ItemType.ItemId == BREWING_STAND_FUEL_ITEM_ID)
-                                {
-                                    lower2upper = true;
-                                    if (!inventory.Items.ContainsKey(4) || inventory.Items[4].Count < 64)
-                                        upperStartSlot = upperEndSlot = 4;
-                                    else
-                                        upperStartSlot = upperEndSlot = 3;
-                                }
-                                else if (item != null && false /* Check if it can be used for alchemy */)
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = upperEndSlot = 3;
-                                }
-                                else if (item != null && BREWING_STAND_BOTTLE_ITEM_IDS.Contains(item.ItemType.ItemId))
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 2;
-                                }
-                                else
-                                {
-                                    if (slotId >= 5 && slotId <= 31)
+                                    break;
+                                case ContainerType.Grindstone:
+                                    if (slotId is >= 0 and <= 2)
                                     {
-                                        backpack2hotbar = true;
-                                        lowerStartSlot = 32;
+                                        if (slotId <= 1)
+                                            hotbarFirst = false;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 3;
+                                    }
+                                    /* // Check for availability for grinding
+                                    else if (false)
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 1;
+                                    } */
+                                    else
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 1;
+                                    }
+                                    break;
+                                case ContainerType.Hopper:
+                                    if (slotId is >= 0 and <= 4)
+                                    {
+                                        upper2backpack = true;
+                                        lowerStartSlot = 5;
                                     }
                                     else
                                     {
                                         lower2upper = true;
-                                        upperStartSlot = 5;
-                                        upperEndSlot = 31;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 4;
                                     }
-                                }
-                                break;
-                            case ContainerType.Crafting:
-                                if (slotId >= 0 && slotId <= 9)
-                                {
-                                    if (slotId >= 1 && slotId <= 9)
-                                        hotbarFirst = false;
-                                    upper2backpack = true;
-                                    lowerStartSlot = 10;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 1;
-                                    upperEndSlot = 9;
-                                }
-                                break;
-                            case ContainerType.Enchantment:
-                                if (slotId >= 0 && slotId <= 1)
-                                {
-                                    upper2backpack = true;
-                                    lowerStartSlot = 5;
-                                }
-                                else if (item != null && item.ItemType.ItemId == ENCHANTING_TABLE_FUEL_ITEM_ID)
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = upperEndSlot = 1;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 0;
-                                }
-                                break;
-                            case ContainerType.Grindstone:
-                                if (slotId >= 0 && slotId <= 2)
-                                {
-                                    if (slotId >= 0 && slotId <= 1)
-                                        hotbarFirst = false;
-                                    upper2backpack = true;
-                                    lowerStartSlot = 3;
-                                }
-                                else if (item != null && false /* Check */)
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 1;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 1;
-                                }
-                                break;
-                            case ContainerType.Hopper:
-                                if (slotId >= 0 && slotId <= 4)
-                                {
-                                    upper2backpack = true;
-                                    lowerStartSlot = 5;
-                                }
-                                else
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 4;
-                                }
-                                break;
-                            case ContainerType.Lectern:
-                                return false;
-                            // break;
-                            case ContainerType.Loom:
-                                if (slotId >= 0 && slotId <= 3)
-                                {
-                                    if (slotId >= 0 && slotId <= 5)
-                                        hotbarFirst = false;
-                                    upper2backpack = true;
-                                    lowerStartSlot = 4;
-                                }
-                                else if (item != null && false /* Check for availability for staining */)
-                                {
-                                    lower2upper = true;
-                                    // upperStartSlot = ?;
-                                    // upperEndSlot = ?;
-                                }
-                                else
-                                {
-                                    if (slotId >= 4 && slotId <= 30)
+                                    break;
+                                case ContainerType.Lectern:
+                                    return false;
+                                    // break;
+                                case ContainerType.Loom:
+                                    if (slotId is >= 0 and <= 3)
                                     {
-                                        backpack2hotbar = true;
-                                        lowerStartSlot = 31;
+                                        //if (slotId is >= 0 and <= 5)
+                                            hotbarFirst = false;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 4;
+                                    }
+                                    /* // Check for availability for staining
+                                    else if (false)
+                                    {
+                                        lower2upper = true;
+                                        // upperStartSlot = ?;
+                                        // upperEndSlot = ?;
+                                    } */
+                                    else
+                                    {
+                                        if (slotId is >= 4 and <= 30)
+                                        {
+                                            backpack2hotbar = true;
+                                            lowerStartSlot = 31;
+                                        }
+                                        else
+                                        {
+                                            lower2upper = true;
+                                            upperStartSlot = 4;
+                                            upperEndSlot = 30;
+                                        }
+                                    }
+                                    break;
+                                case ContainerType.Merchant:
+                                    if (slotId is >= 0 and <= 2)
+                                    {
+                                        if (slotId <= 1)
+                                            hotbarFirst = false;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 3;
+                                    }
+                                    /* // Check for availability for trading
+                                    else if (false)
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 1;
+                                    } */
+                                    else
+                                    {
+                                        if (slotId is >= 3 and <= 29)
+                                        {
+                                            backpack2hotbar = true;
+                                            lowerStartSlot = 30;
+                                        }
+                                        else
+                                        {
+                                            lower2upper = true;
+                                            upperStartSlot = 3;
+                                            upperEndSlot = 29;
+                                        }
+                                    }
+                                    break;
+                                case ContainerType.Cartography:
+                                    if (slotId is >= 0 and <= 2)
+                                    {
+                                        if (slotId <= 1)
+                                            hotbarFirst = false;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 3;
+                                    }
+                                    else if (item.ItemType.ItemId == CARTOGRAPHY_TABLE_FILLED_ITEM_ID)
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = upperEndSlot = 0;
+                                    }
+                                    else if (CARTOGRAPHY_TABLE_EMPTY_ITEM_IDS.Contains(item.ItemType.ItemId))
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = upperEndSlot = 1;
                                     }
                                     else
                                     {
-                                        lower2upper = true;
-                                        upperStartSlot = 4;
-                                        upperEndSlot = 30;
+                                        if (slotId is >= 3 and <= 29)
+                                        {
+                                            backpack2hotbar = true;
+                                            lowerStartSlot = 30;
+                                        }
+                                        else
+                                        {
+                                            lower2upper = true;
+                                            upperStartSlot = 3;
+                                            upperEndSlot = 29;
+                                        }
                                     }
-                                }
-                                break;
-                            case ContainerType.Merchant:
-                                if (slotId >= 0 && slotId <= 2)
-                                {
-                                    if (slotId >= 0 && slotId <= 1)
-                                        hotbarFirst = false;
-                                    upper2backpack = true;
-                                    lowerStartSlot = 3;
-                                }
-                                else if (item != null && false /* Check if it is available for trading */)
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 1;
-                                }
-                                else
-                                {
-                                    if (slotId >= 3 && slotId <= 29)
+                                    break;
+                                case ContainerType.Stonecutter:
+                                    if (slotId is >= 0 and <= 1)
                                     {
-                                        backpack2hotbar = true;
-                                        lowerStartSlot = 30;
+                                        //if (slotId == 0)
+                                        //    hotbarFirst = false;
+                                        upper2backpack = true;
+                                        lowerStartSlot = 2;
                                     }
+                                    /* // Check if it is available for stone cutting
+                                    else if (false)
+                                    {
+                                        lower2upper = true;
+                                        upperStartSlot = 0;
+                                        upperEndSlot = 0;
+                                    } */
                                     else
                                     {
-                                        lower2upper = true;
-                                        upperStartSlot = 3;
-                                        upperEndSlot = 29;
+                                        if (slotId is >= 2 and <= 28)
+                                        {
+                                            backpack2hotbar = true;
+                                            lowerStartSlot = 29;
+                                        }
+                                        else
+                                        {
+                                            lower2upper = true;
+                                            upperStartSlot = 2;
+                                            upperEndSlot = 28;
+                                        }
                                     }
-                                }
-                                break;
-                            case ContainerType.Cartography:
-                                if (slotId >= 0 && slotId <= 2)
-                                {
-                                    if (slotId >= 0 && slotId <= 1)
-                                        hotbarFirst = false;
-                                    upper2backpack = true;
-                                    lowerStartSlot = 3;
-                                }
-                                else if (item != null && item.ItemType.ItemId == CARTOGRAPHY_TABLE_FILLED_ITEM_ID)
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = upperEndSlot = 0;
-                                }
-                                else if (item != null && CARTOGRAPHY_TABLE_EMPTY_ITEM_IDS.Contains(item.ItemType.ItemId))
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = upperEndSlot = 1;
-                                }
-                                else
-                                {
-                                    if (slotId >= 3 && slotId <= 29)
-                                    {
-                                        backpack2hotbar = true;
-                                        lowerStartSlot = 30;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 3;
-                                        upperEndSlot = 29;
-                                    }
-                                }
-                                break;
-                            case ContainerType.Stonecutter:
-                                if (slotId >= 0 && slotId <= 1)
-                                {
-                                    if (slotId == 0)
-                                        hotbarFirst = false;
-                                    upper2backpack = true;
-                                    lowerStartSlot = 2;
-                                }
-                                else if (item != null && false /* Check if it is available for stone cutteing */)
-                                {
-                                    lower2upper = true;
-                                    upperStartSlot = 0;
-                                    upperEndSlot = 0;
-                                }
-                                else
-                                {
-                                    if (slotId >= 2 && slotId <= 28)
-                                    {
-                                        backpack2hotbar = true;
-                                        lowerStartSlot = 29;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 2;
-                                        upperEndSlot = 28;
-                                    }
-                                }
-                                break;
-                            // TODO: Define more container type here
-                            default:
-                                return false;
-                        }
+                                    break;
+                                // TODO: Define more container type here
+                                default:
+                                    return false;
+                            }
 
-                        // Cursor have item or not doesn't matter
-                        // If hotbar already have same item, will put on it first until every stack are full
-                        // If no more same item , will put on the first empty slot (smaller slot id)
-                        // If inventory full, item will not move
-                        int itemCount = inventory.Items[slotId].Count;
-                        if (lower2upper)
-                        {
-                            int firstEmptySlot = -1;
-                            for (int i = upperStartSlot; i <= upperEndSlot; ++i)
-                            {
-                                if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
-                                {
-                                    if (TryMergeSlot(inventory, item!, slotId, curItem, i, changedSlots))
-                                        break;
-                                }
-                                else if (firstEmptySlot == -1)
-                                    firstEmptySlot = i;
-                            }
-                            if (item!.Count > 0)
-                            {
-                                if (firstEmptySlot != -1)
-                                    StoreInNewSlot(inventory, item, slotId, firstEmptySlot, changedSlots);
-                                else if (item.Count != itemCount)
-                                    changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
-                            }
-                        }
-                        else if (upper2backpack)
-                        {
-                            int hotbarEnd = lowerStartSlot + 4 * 9 - 1;
-                            if (hotbarFirst)
-                            {
-                                int lastEmptySlot = -1;
-                                for (int i = hotbarEnd; i >= lowerStartSlot; --i)
-                                {
-                                    if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
-                                    {
-                                        if (TryMergeSlot(inventory, item!, slotId, curItem, i, changedSlots))
-                                            break;
-                                    }
-                                    else if (lastEmptySlot == -1)
-                                        lastEmptySlot = i;
-                                }
-                                if (item!.Count > 0)
-                                {
-                                    if (lastEmptySlot != -1)
-                                        StoreInNewSlot(inventory, item, slotId, lastEmptySlot, changedSlots);
-                                    else if (item.Count != itemCount)
-                                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
-                                }
-                            }
-                            else
+                            // Cursor have item or not doesn't matter
+                            // If hotbar already have same item, will put on it first until every stack are full
+                            // If no more same item , will put on the first empty slot (smaller slot id)
+                            // If inventory full, item will not move
+                            int itemCount = inventory.Items[slotId].Count;
+                            if (lower2upper)
                             {
                                 int firstEmptySlot = -1;
-                                for (int i = lowerStartSlot; i <= hotbarEnd; ++i)
+                                for (int i = upperStartSlot; i <= upperEndSlot; ++i)
                                 {
                                     if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
                                     {
-                                        if (TryMergeSlot(inventory, item!, slotId, curItem, i, changedSlots))
+                                        if (TryMergeSlot(inventory, item, slotId, curItem, i, changedSlots))
                                             break;
                                     }
                                     else if (firstEmptySlot == -1)
                                         firstEmptySlot = i;
                                 }
-                                if (item!.Count > 0)
+                                if (item.Count > 0)
+                                {
+                                    if (firstEmptySlot != -1)
+                                        StoreInNewSlot(inventory, item, slotId, firstEmptySlot, changedSlots);
+                                    else if (item.Count != itemCount)
+                                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
+                                }
+                            }
+                            else if (upper2backpack)
+                            {
+                                int hotbarEnd = lowerStartSlot + 4 * 9 - 1;
+                                if (hotbarFirst)
+                                {
+                                    int lastEmptySlot = -1;
+                                    for (int i = hotbarEnd; i >= lowerStartSlot; --i)
+                                    {
+                                        if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
+                                        {
+                                            if (TryMergeSlot(inventory, item, slotId, curItem, i, changedSlots))
+                                                break;
+                                        }
+                                        else if (lastEmptySlot == -1)
+                                            lastEmptySlot = i;
+                                    }
+                                    if (item.Count > 0)
+                                    {
+                                        if (lastEmptySlot != -1)
+                                            StoreInNewSlot(inventory, item, slotId, lastEmptySlot, changedSlots);
+                                        else if (item.Count != itemCount)
+                                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
+                                    }
+                                }
+                                else
+                                {
+                                    int firstEmptySlot = -1;
+                                    for (int i = lowerStartSlot; i <= hotbarEnd; ++i)
+                                    {
+                                        if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
+                                        {
+                                            if (TryMergeSlot(inventory, item, slotId, curItem, i, changedSlots))
+                                                break;
+                                        }
+                                        else if (firstEmptySlot == -1)
+                                            firstEmptySlot = i;
+                                    }
+                                    if (item.Count > 0)
+                                    {
+                                        if (firstEmptySlot != -1)
+                                            StoreInNewSlot(inventory, item, slotId, firstEmptySlot, changedSlots);
+                                        else if (item.Count != itemCount)
+                                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
+                                    }
+                                }
+                            }
+                            else if (backpack2hotbar)
+                            {
+                                int hotbarEnd = lowerStartSlot + 1 * 9 - 1;
+
+                                int firstEmptySlot = -1;
+                                for (int i = lowerStartSlot; i <= hotbarEnd; ++i)
+                                {
+                                    if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
+                                    {
+                                        if (TryMergeSlot(inventory, item, slotId, curItem, i, changedSlots))
+                                            break;
+                                    }
+                                    else if (firstEmptySlot == -1)
+                                        firstEmptySlot = i;
+                                }
+                                if (item.Count > 0)
                                 {
                                     if (firstEmptySlot != -1)
                                         StoreInNewSlot(inventory, item, slotId, firstEmptySlot, changedSlots);
@@ -1601,49 +1611,27 @@ namespace CraftSharp
                                 }
                             }
                         }
-                        else if (backpack2hotbar)
+                        break;
+                    case WindowActionType.DropItem:
+                        if (inventory.Items.ContainsKey(slotId))
                         {
-                            int hotbarEnd = lowerStartSlot + 1 * 9 - 1;
-
-                            int firstEmptySlot = -1;
-                            for (int i = lowerStartSlot; i <= hotbarEnd; ++i)
-                            {
-                                if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
-                                {
-                                    if (TryMergeSlot(inventory, item!, slotId, curItem, i, changedSlots))
-                                        break;
-                                }
-                                else if (firstEmptySlot == -1)
-                                    firstEmptySlot = i;
-                            }
-                            if (item!.Count > 0)
-                            {
-                                if (firstEmptySlot != -1)
-                                    StoreInNewSlot(inventory, item, slotId, firstEmptySlot, changedSlots);
-                                else if (item.Count != itemCount)
-                                    changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
-                            }
+                            inventory.Items[slotId].Count--;
+                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
                         }
-                    }
-                    break;
-                case WindowActionType.DropItem:
-                    if (inventory.Items.ContainsKey(slotId))
-                    {
-                        inventory.Items[slotId].Count--;
-                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
-                    }
 
-                    if (inventory.Items[slotId].Count <= 0)
-                    {
+                        if (inventory.Items[slotId].Count <= 0)
+                        {
+                            inventory.Items.Remove(slotId);
+                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, null));
+                        }
+
+                        break;
+                    case WindowActionType.DropItemStack:
                         inventory.Items.Remove(slotId);
                         changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, null));
-                    }
+                        break;
+                }
 
-                    break;
-                case WindowActionType.DropItemStack:
-                    inventory.Items.Remove(slotId);
-                    changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, null));
-                    break;
             }
 
             return handler!.SendWindowAction(windowId, slotId, action, item, changedSlots, inventories[windowId].StateId);
@@ -1666,11 +1654,11 @@ namespace CraftSharp
         /// <summary>
         /// Plays animation (Player arm swing)
         /// </summary>
-        /// <param name="animation">0 for left arm, 1 for right arm</param>
+        /// <param name="playerAnimation">0 for left arm, 1 for right arm</param>
         /// <returns>TRUE if animation successfully done</returns>
-        public override bool DoAnimation(int animation)
+        public override bool DoAnimation(int playerAnimation)
         {
-            return InvokeOnNetMainThread(() => handler!.SendAnimation(animation, clientEntity.Id));
+            return InvokeOnNetMainThread(() => handler!.SendAnimation(playerAnimation, clientEntity.Id));
         }
 
         /// <summary>
@@ -1734,6 +1722,10 @@ namespace CraftSharp
         /// </summary>
         /// <param name="blockLoc">Location to place block to</param>
         /// <param name="blockFace">Block face (e.g. Direction.Down when clicking on the block below to place this block)</param>
+        /// <param name="x">Block x</param>
+        /// <param name="y">Block y</param>
+        /// <param name="z">Block z</param>
+        /// <param name="hand">Hand to use</param>
         /// <returns>TRUE if successfully placed</returns>
         public override bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, float x, float y, float z, Hand hand = Hand.MainHand)
         {
@@ -1746,7 +1738,7 @@ namespace CraftSharp
         /// <param name="blockLoc">Location of block to dig</param>
         /// <param name="blockFace">Block face</param>
         /// <param name="status">Digging status</param>
-        public override bool DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status = DiggingStatus.Started)
+        public override bool DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status)
         {
             if (InvokeRequired)
                 return InvokeOnNetMainThread(() => DigBlock(blockLoc, blockFace, status));
@@ -2092,10 +2084,7 @@ namespace CraftSharp
             }
             else
             {
-                if (message.isJson)
-                    messageText = ChatParser.ParseText(message.content, links);
-                else
-                    messageText = message.content;
+                messageText = message.isJson ? ChatParser.ParseText(message.content, links) : message.content;
             }
 
             EventManager.Instance.BroadcastOnUnityThread<ChatMessageEvent>(new(color + messageText));
@@ -2180,10 +2169,8 @@ namespace CraftSharp
         /// <param name="propertyValue">Property Value</param>
         public void OnWindowProperties(byte inventoryID, short propertyId, short propertyValue)
         {
-            if (!inventories.ContainsKey(inventoryID))
+            if (!inventories.TryGetValue(inventoryID, out var inventory))
                 return;
-
-            Container inventory = inventories[inventoryID];
 
             if (inventory.Properties.ContainsKey(propertyId))
                 inventory.Properties.Remove(propertyId);
@@ -2232,7 +2219,7 @@ namespace CraftSharp
                         BottomEnchantmentLevelRequirement = bottomEnchantmentLevelRequirement
                     };
 
-                    // TODO: Broadcast enchanment event
+                    // TODO: Broadcast enchantment event
                 }
             }
         }
@@ -2242,31 +2229,28 @@ namespace CraftSharp
         /// </summary>
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="itemList">Item list, key = slot Id, value = Item information</param>
+        /// <param name="stateId">State Id of inventory</param>
         public void OnWindowItems(byte inventoryId, Dictionary<int, ItemStack> itemList, int stateId)
         {
-            if (inventories.ContainsKey(inventoryId))
+            if (inventories.TryGetValue(inventoryId, out var container))
             {
-                var container = inventories[inventoryId];
-
                 container.Items = itemList;
                 container.StateId = stateId;
                 
                 Loom.QueueOnMainThread(() => {
-                    foreach (var pair in itemList)
+                    foreach (var (slotId, itemStack) in itemList)
                     {
-                        var item = pair.Value;
-
-                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, pair.Key, item));
+                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slotId, itemStack));
 
                         //Debug.Log($"Set window item: [{inventoryId}]/[{pair.Key}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
 
-                        if (container.IsHotbar(pair.Key, out int hotbarSlot))
+                        if (container.IsHotbar(slotId, out int hotbarSlot))
                         {
-                            EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
+                            EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, itemStack));
                             if (hotbarSlot == CurrentSlot) // Updating held item
                             {
                                 EventManager.Instance.Broadcast(new HeldItemChangeEvent(
-                                        CurrentSlot, item, PlayerActionHelper.GetItemActionType(item)));
+                                        CurrentSlot, itemStack, PlayerActionHelper.GetItemActionType(itemStack)));
                             }
                         }
                     }
@@ -2280,10 +2264,11 @@ namespace CraftSharp
         /// <param name="inventoryId">Window Id</param>
         /// <param name="slotId">Slot Id</param>
         /// <param name="item">Item (may be null for empty slot)</param>
-        public void OnSetSlot(byte inventoryId, short slotId, ItemStack item, int stateId)
+        /// <param name="stateId">State Id</param>
+        public void OnSetSlot(byte inventoryId, short slotId, ItemStack? item, int stateId)
         {
-            if (inventories.ContainsKey(inventoryId))
-                inventories[inventoryId].StateId = stateId;
+            if (inventories.TryGetValue(inventoryId, out var inventory))
+                inventory.StateId = stateId;
 
             // Handle inventoryId -2 - Add item to player inventory without animation
             if (inventoryId == 254)
@@ -2302,23 +2287,21 @@ namespace CraftSharp
             }
             else
             {
-                if (inventories.ContainsKey(inventoryId))
+                if (inventories.TryGetValue(inventoryId, out var inventory2))
                 {
-                    var container = inventories[inventoryId];
-                    
                     if (item == null || item.IsEmpty)
                     {
-                        if (container.Items.ContainsKey(slotId))
-                            container.Items.Remove(slotId);
+                        if (inventory2.Items.ContainsKey(slotId))
+                            inventory2.Items.Remove(slotId);
                     }
-                    else container.Items[slotId] = item;
+                    else inventory2.Items[slotId] = item;
 
                     Loom.QueueOnMainThread(() => {
                         EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slotId, item));
 
                         //Debug.Log($"Set inventory item: [{inventoryId}]/[{slotId}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
 
-                        if (container.IsHotbar(slotId, out int hotbarSlot))
+                        if (inventory2.IsHotbar(slotId, out int hotbarSlot))
                         {
                             EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
                             if (hotbarSlot == CurrentSlot) // Updating held item
@@ -2371,17 +2354,17 @@ namespace CraftSharp
         /// <summary>
         /// Triggered when a player has left the game
         /// </summary>
-        /// <param name="uuid">UUID of the player</param>
-        public void OnPlayerLeave(Guid uuid)
+        /// <param name="playerUUID">UUID of the player</param>
+        public void OnPlayerLeave(Guid playerUUID)
         {
-            string? username = null;
+            //string? username = null;
 
             lock (onlinePlayers)
             {
-                if (onlinePlayers.ContainsKey(uuid))
+                if (onlinePlayers.ContainsKey(playerUUID))
                 {
-                    username = onlinePlayers[uuid].Name;
-                    onlinePlayers.Remove(uuid);
+                    //username = onlinePlayers[playerUUID].Name;
+                    onlinePlayers.Remove(playerUUID);
                 }
             }
         }
@@ -2421,12 +2404,15 @@ namespace CraftSharp
         /// <summary>
         /// Called when a player spawns or enters the client's render distance
         /// </summary>
-        public void OnSpawnPlayer(int entityId, Guid uuid, Location location, byte Yaw, byte Pitch)
+        public void OnSpawnPlayer(int entityId, Guid playerUUID, Location location, byte Yaw, byte Pitch)
         {
             string? playerName = null;
-            if (onlinePlayers.ContainsKey(uuid))
-                playerName = onlinePlayers[uuid].Name;
-            EntityData playerEntity = new(entityId, EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID), location, uuid, playerName);
+            lock (onlinePlayers)
+            {
+                if (onlinePlayers.TryGetValue(playerUUID, out var player))
+                    playerName = player.Name;
+            }
+            EntityData playerEntity = new(entityId, EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID), location, playerUUID, playerName);
             OnSpawnEntity(playerEntity);
         }
 
@@ -2444,11 +2430,11 @@ namespace CraftSharp
         /// <summary>
         /// Called when the Game Mode has been updated for a player
         /// </summary>
-        /// <param name="uuid">Player UUID (Empty for initial gamemode on login)</param>
+        /// <param name="playerUUID">Player UUID (Empty for initial gamemode on login)</param>
         /// <param name="gamemode">New Game Mode (0: Survival, 1: Creative, 2: Adventure, 3: Spectator).</param>
-        public void OnGamemodeUpdate(Guid uuid, int gamemode)
+        public void OnGamemodeUpdate(Guid playerUUID, int gamemode)
         {
-            if (uuid == Guid.Empty) // Initial gamemode on login
+            if (playerUUID == Guid.Empty) // Initial gamemode on login
             {
                 Loom.QueueOnMainThread(() =>
                 {
@@ -2456,19 +2442,25 @@ namespace CraftSharp
                     EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
                 });
             }
-            else if (onlinePlayers.ContainsKey(uuid)) // Further regular gamemode change events
+            else
             {
-                string playerName = onlinePlayers[uuid].Name;
-                if (playerName == this.username)
+                lock (onlinePlayers)
                 {
-                    Loom.QueueOnMainThread(() =>
+                    if (onlinePlayers.TryGetValue(playerUUID, out var player)) // Further regular gamemode change events
                     {
-                        GameMode = (GameMode) gamemode;
-                        EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
+                        string playerName = player.Name;
+                        if (playerName == username)
+                        {
+                            Loom.QueueOnMainThread(() =>
+                            {
+                                GameMode = (GameMode) gamemode;
+                                EventManager.Instance.Broadcast<GameModeUpdateEvent>(new(GameMode));
 
-                        CornApp.Notify(Translations.Get("gameplay.control.update_gamemode",
-                                ChatParser.TranslateString($"gameMode.{GameMode.GetIdentifier()}")), Notification.Type.Success);
-                    });
+                                CornApp.Notify(Translations.Get("gameplay.control.update_gamemode",
+                                    ChatParser.TranslateString($"gameMode.{GameMode.GetIdentifier()}")), Notification.Type.Success);
+                            });
+                        }
+                    }
                 }
             }
         }
@@ -2528,8 +2520,10 @@ namespace CraftSharp
         /// Called when an entity's head yaw changed.
         /// </summary>
         /// <param name="entityId">Entity Id</param>
-        /// <param name="headYaw">New head yaw</param>
-        public void OnEntityHeadLook(int entityId, short vX, short vY, short vZ)
+        /// <param name="vX">New x velocity</param>
+        /// <param name="vY">New y velocity</param>
+        /// <param name="vZ">New z velocity</param>
+        public void OnEntityVelocity(int entityId, short vX, short vY, short vZ)
         {
             Loom.QueueOnMainThread(() => {
                 EntityRenderManager.SetEntityRenderVelocity(entityId, new(vX / 8000F, vY / 8000F, vZ / 8000F));
@@ -2579,7 +2573,7 @@ namespace CraftSharp
                 double tps = tickDiff / (currentTime - lastTime).TotalSeconds;
                 lastAge = worldAge;
                 lastTime = currentTime;
-                if (tps <= 20 && tps > 0)
+                if (tps is <= 20 and > 0)
                 {
                     // calculate average tps
                     if (tpsSamples.Count >= maxSamples)
@@ -2605,6 +2599,7 @@ namespace CraftSharp
         /// Called when client player's health changed, e.g. getting attack
         /// </summary>
         /// <param name="health">Player current health</param>
+        /// <param name="food">Player current hunger</param>
         public void OnUpdateHealth(float health, int food)
         {
             bool updateMaxHealth = clientEntity.MaxHealth < health;
@@ -2623,11 +2618,11 @@ namespace CraftSharp
         /// Called when experience updates
         /// </summary>
         /// <param name="expBar">Between 0 and 1</param>
-        /// <param name="level">Level</param>
-        /// <param name="totalExp">Total Experience</param>
-        public void OnSetExperience(float expBar, int level, int totalExp)
+        /// <param name="expLevel">Experience level</param>
+        /// <param name="totalExp">Total experience</param>
+        public void OnSetExperience(float expBar, int expLevel, int totalExp)
         {
-            this.level = level;
+            level = expLevel;
             totalExperience = totalExp;
         }
 
@@ -2642,14 +2637,16 @@ namespace CraftSharp
         /// <summary>
         /// Called when Latency is updated
         /// </summary>
-        /// <param name="uuid">player uuid</param>
+        /// <param name="playerUUID">player uuid</param>
         /// <param name="latency">Latency</param>
-        public void OnLatencyUpdate(Guid uuid, int latency)
+        public void OnLatencyUpdate(Guid playerUUID, int latency)
         {
-            if (onlinePlayers.ContainsKey(uuid))
+            lock (onlinePlayers)
             {
-                var player = onlinePlayers[uuid];
-                player.Ping = latency;
+                if (onlinePlayers.TryGetValue(playerUUID, out var player))
+                {
+                    player.Ping = latency;
+                }   
             }
         }
 
@@ -2693,6 +2690,7 @@ namespace CraftSharp
         /// <param name="stay"> Stay</param>
         /// <param name="fadeOut"> Fade Out</param>
         /// <param name="json"> json text</param>
+        /// </summary>
         public void OnTitle(int action, string titleText, string subtitleText, string actionbarText, int fadeIn, int stay, int fadeOut, string json) { }
 
         /// <summary>
@@ -2700,12 +2698,12 @@ namespace CraftSharp
         /// </summary>
         /// <param name="objectivename">objective name</param>
         /// <param name="mode">0 to create the scoreboard. 1 to remove the scoreboard. 2 to update the display text.</param>
-        /// <param name="objectivevalue">Only if mode is 0 or 2. The text to be displayed for the score</param>
+        /// <param name="objectiveValue">Only if mode is 0 or 2. The text to be displayed for the score</param>
         /// <param name="type">Only if mode is 0 or 2. 0 = "integer", 1 = "hearts".</param>
-        public void OnScoreboardObjective(string objectivename, byte mode, string objectivevalue, int type)
+        public void OnScoreboardObjective(string objectivename, byte mode, string objectiveValue, int type)
         {
-            string json = objectivevalue;
-            objectivevalue = ChatParser.ParseText(objectivevalue);
+            //string json = objectiveValue;
+            //objectiveValue = ChatParser.ParseText(objectiveValue);
         }
 
         /// <summary>
@@ -2740,7 +2738,7 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called when tradeList is recieved after interacting with villager
+        /// Called when tradeList is received after interacting with villager
         /// </summary>
         /// <param name="windowId">Window Id</param>
         /// <param name="trades">List of trades.</param>
@@ -2763,8 +2761,8 @@ namespace CraftSharp
         /// Called when animation of breaking and placing block is played
         /// </summary>
         /// <param name="entityId">Player Id</param>
-        /// <param name="animation">0 = LMB, 1 = RMB (RMB Corrent not work)</param>
-        public void OnEntityAnimation(int entityId, byte animation)
+        /// <param name="entityAnimation">0 = LMB, 1 = RMB (RMB Currently not working)</param>
+        public void OnEntityAnimation(int entityId, byte entityAnimation)
         {
             // TODO
         }
@@ -2781,18 +2779,18 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called when a Synchronization sequence is recevied, this sequence need to be sent when breaking or placing blocks
+        /// Called when a Synchronization sequence is received, this sequence need to be sent when breaking or placing blocks
         /// </summary>
-        /// <param name="sequenceId">Sequence Id</param>
-        public void OnBlockChangeAck(int sequenceId)
+        /// <param name="newSequenceId">Sequence Id</param>
+        public void OnBlockChangeAck(int newSequenceId)
         {
-            this.sequenceId = sequenceId;
+            this.sequenceId = newSequenceId;
         }
 
         /// <summary>
         /// Called when the protocol handler receives server data
         /// </summary>
-        /// <param name="hasMotd">Indicates if the server has a motd message</param>
+        /// <param name="hasMotd">Indicates if the server has a MOTD message</param>
         /// <param name="motd">Server MOTD message</param>
         /// <param name="hasIcon">Indicates if the server has a an icon</param>
         /// <param name="iconBase64">Server icon in Base 64 format</param>
@@ -2808,10 +2806,10 @@ namespace CraftSharp
         /// <summary>
         /// Called when the protocol handler receives "Login Success" packet
         /// </summary>
-        /// <param name="uuid">The player's UUID received from the server</param>
+        /// <param name="playerUUID">The player's UUID received from the server</param>
         /// <param name="userName">The player's DUMMY_USERNAME received from the server</param>
-        /// <param name="playerProperty">Tuple<Name, Value, Signature(empty if there is no signature)></param>
-        public void OnLoginSuccess(Guid uuid, string userName, Tuple<string, string, string>[]? playerProperty) { }
+        /// <param name="playerProperty">Tuple(Name, Value, Signature(empty if there is no signature))</param>
+        public void OnLoginSuccess(Guid playerUUID, string userName, Tuple<string, string, string>[]? playerProperty) { }
 
         #endregion
     }

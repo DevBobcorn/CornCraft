@@ -23,7 +23,7 @@ namespace CraftSharp
             ExportProtocol("765", new PacketPalette1204(), false);
         }
 
-        public static Dictionary<V, K> GetReversed<K, V>(IDictionary<K, V> dict)
+        private static Dictionary<V, K> GetReversed<K, V>(IDictionary<K, V> dict)
         {
             var inverseDict = new Dictionary<V, K>();
             foreach (var kvp in dict)
@@ -64,9 +64,8 @@ namespace CraftSharp
                     var nameInBrackets = $"[PacketTypesIn.{Enum.GetName(typeof (PacketTypesIn), typeCs)}]";
                     string packetId = string.Empty;
 
-                    if (revLookup.ContainsKey(typeCs))
+                    if (revLookup.TryGetValue(typeCs, out var numId))
                     {
-                        var numId = revLookup[typeCs];
                         packetId = "packet_" + num2Id.GetValueOrDefault(numId);
                     }
 
@@ -82,9 +81,8 @@ namespace CraftSharp
                     var nameInBrackets = $"[PacketTypesOut.{Enum.GetName (typeof(PacketTypesOut), typeCs)}]";
                     string packetId = string.Empty;
 
-                    if (revLookup.ContainsKey(typeCs))
+                    if (revLookup.TryGetValue(typeCs, out var numId))
                     {
-                        var numId = revLookup[typeCs];
                         packetId = "packet_" + num2Id.GetValueOrDefault(numId);
                     }
 

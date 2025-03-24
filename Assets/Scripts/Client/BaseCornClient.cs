@@ -37,9 +37,9 @@ namespace CraftSharp
 
         // Camera Fields
         [SerializeField] private GameObject[] m_CameraControllerPrefabs = { };
-        private CameraController cameraController;
         private int selectedCameraController = 0;
-        public CameraController CameraController => cameraController;
+        public CameraController CameraController { get; private set; }
+
         [FormerlySerializedAs("MainCamera")] public Camera m_MainCamera;
         [FormerlySerializedAs("SpriteCamera")] public Camera m_SpriteCamera;
 
@@ -53,19 +53,19 @@ namespace CraftSharp
         public bool InputPaused { get; private set; } = false;
         public void ToggleInputPause(bool enable)
         {
-            if (cameraController && m_PlayerController)
+            if (CameraController && m_PlayerController)
             {
                 if (enable)
                 {
                     m_PlayerController.EnableInput();
-                    cameraController.EnableCinemachineInput();
+                    CameraController.EnableCinemachineInput();
 
                     InputPaused = false;
                 }
                 else
                 {
                     m_PlayerController.DisableInput();
-                    cameraController.DisableCinemachineInput();
+                    CameraController.DisableCinemachineInput();
 
                     InputPaused = true;
                 }
@@ -74,15 +74,15 @@ namespace CraftSharp
 
         public void ToggleCameraZoom(bool enable)
         {
-            if (cameraController)
+            if (CameraController)
             {
                 if (enable)
                 {
-                    cameraController.EnableZoom();
+                    CameraController.EnableZoom();
                 }
                 else
                 {
-                    cameraController.DisableZoom();
+                    CameraController.DisableZoom();
                 }
             }
         }
@@ -108,7 +108,7 @@ namespace CraftSharp
 
         private void SwitchCameraController(GameObject controllerPrefab)
         {
-            var prevControllerObj = !cameraController ? null : cameraController.gameObject;
+            var prevControllerObj = !CameraController ? null : CameraController.gameObject;
 
             // Destroy the old one
             if (prevControllerObj)
@@ -117,13 +117,13 @@ namespace CraftSharp
             }
 
             var cameraControllerObj = GameObject.Instantiate(controllerPrefab);
-            cameraController = cameraControllerObj.GetComponent<CameraController>();
+            CameraController = cameraControllerObj.GetComponent<CameraController>();
 
             // Assign Cameras
-            cameraController.SetCameras(m_MainCamera, m_SpriteCamera);
+            CameraController.SetCameras(m_MainCamera, m_SpriteCamera);
 
             // Call player controller handler
-            m_PlayerController.HandleCameraControllerSwitch(cameraController);
+            m_PlayerController.HandleCameraControllerSwitch(CameraController);
 
             // Set camera controller for interaction updater
             interactionUpdater.SetControllers(this, CameraController, PlayerController);
@@ -221,7 +221,7 @@ namespace CraftSharp
         public abstract bool UseItemOnOffHand();
         public abstract bool DoWindowAction(int windowId, int slotId, WindowActionType action);
         public abstract bool DoCreativeGive(int slot, Item itemType, int count, Dictionary<string, object>? nbt = null);
-        public abstract bool DoAnimation(int animation);
+        public abstract bool DoAnimation(int playerAnimation);
         public abstract bool CloseInventory(int windowId);
         public abstract bool ClearInventories();
         public abstract bool InteractEntity(int entityId, int type, Hand hand = Hand.MainHand);

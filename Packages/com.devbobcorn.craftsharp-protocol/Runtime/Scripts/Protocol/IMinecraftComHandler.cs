@@ -27,11 +27,11 @@ namespace CraftSharp.Protocol
         string GetSessionId();
         string[] GetOnlinePlayers();
         Dictionary<string, string> GetOnlinePlayersWithUuid();
-        PlayerInfo? GetPlayerInfo(Guid uuid);
+        PlayerInfo? GetPlayerInfo(Guid targetUUID);
         Location GetCurrentLocation();
         IChunkRenderManager GetChunkRenderManager();
 
-        public void SetCanSendMessage(bool canSendMessage);
+        public void SetCanSendMessage(bool canSend);
 
         void GetCookie(string key, out byte[]? data);
         void SetCookie(string key, byte[] data);
@@ -86,8 +86,8 @@ namespace CraftSharp.Protocol
         /// Will be called every animations of the hit and place block
         /// </summary>
         /// <param name="entityId">Player Id</param>
-        /// <param name="animation">0 = LMB, 1 = RMB (RMB Corrent not work)</param>
-        void OnEntityAnimation(int entityId, byte animation);
+        /// <param name="entityAnimation">0 = LMB, 1 = RMB (RMB Corrent not work)</param>
+        void OnEntityAnimation(int entityId, byte entityAnimation);
 
         /// <summary>
         /// Will be called every player break block in gamemode 0
@@ -152,8 +152,8 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Called when a player has left the game
         /// </summary>
-        /// <param name="uuid">UUID of the player</param>
-        void OnPlayerLeave(Guid uuid);
+        /// <param name="playerUUID">UUID of the player</param>
+        void OnPlayerLeave(Guid playerUUID);
 
         /// <summary>
         /// Called when a player has been killed by another entity
@@ -198,11 +198,11 @@ namespace CraftSharp.Protocol
         /// Called when a player spawns or enters the client's render distance
         /// </summary>
         /// <param name="entityId">Entity Id</param>
-        /// <param name="uuid">Entity UUID</param>
+        /// <param name="playerUUID">Entity UUID</param>
         /// <param name="location">Entity location</param>
         /// <param name="yaw">Player head yaw</param>
         /// <param name="pitch">Player head pitch</param>
-        void OnSpawnPlayer(int entityId, Guid uuid, Location location, byte yaw, byte pitch);
+        void OnSpawnPlayer(int entityId, Guid playerUUID, Location location, byte yaw, byte pitch);
 
         /// <summary>
         /// Called when entities have despawned
@@ -316,24 +316,24 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Called when a player's game mode has changed
         /// </summary>
-        /// <param name="uuid">Affected player's UUID</param>
+        /// <param name="playerUUID">Affected player's UUID</param>
         /// <param name="gamemode">New game mode</param>
-        void OnGamemodeUpdate(Guid uuid, int gamemode);
+        void OnGamemodeUpdate(Guid playerUUID, int gamemode);
 
         /// <summary>
         /// Called when a player's latency has changed
         /// </summary>
-        /// <param name="uuid">Affected player's UUID</param>
+        /// <param name="playerUUID">Affected player's UUID</param>
         /// <param name="latency">latency</param>
-        void OnLatencyUpdate(Guid uuid, int latency);
+        void OnLatencyUpdate(Guid playerUUID, int latency);
 
         /// <summary>
         /// Called when Experience bar is updated
         /// </summary>
         /// <param name="Experiencebar">Experience bar level</param>
-        /// <param name="Level">Player Level</param>
+        /// <param name="expLevel">Player Level</param>
         /// <param name="TotalExperience">Total experience</param>
-        void OnSetExperience(float Experiencebar, int Level, int TotalExperience);
+        void OnSetExperience(float Experiencebar, int expLevel, int TotalExperience);
 
         /// <summary>
         /// Called when client need to change slot.
@@ -381,9 +381,9 @@ namespace CraftSharp.Protocol
         /// </summary>
         /// <param name="objectivename">Objective name</param>
         /// <param name="mode">0 to create the scoreboard. 1 to remove the scoreboard. 2 to update the display text.</param>
-        /// <param name="objectivevalue">Only if mode is 0 or 2. The text to be displayed for the score</param>
+        /// <param name="objectiveValue">Only if mode is 0 or 2. The text to be displayed for the score</param>
         /// <param name="type">Only if mode is 0 or 2. 0 = "integer", 1 = "hearts".</param>
-        void OnScoreboardObjective(string objectivename, byte mode, string objectivevalue, int type);
+        void OnScoreboardObjective(string objectivename, byte mode, string objectiveValue, int type);
 
         /// <summary>
         /// Called when DisplayScoreboard
@@ -412,10 +412,10 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// This method is called when the protocol handler receives "Login Success" packet
         /// </summary>
-        /// <param name="uuid">The player's UUID received from the server</param>
+        /// <param name="playerUUID">The player's UUID received from the server</param>
         /// <param name="userName">The player's username received from the server</param>
         /// <param name="playerProperty">Tuple<Name, Value, Signature(empty if there is no signature)></param>
-        public void OnLoginSuccess(Guid uuid, string userName, Tuple<string, string, string>[]? playerProperty);
+        public void OnLoginSuccess(Guid playerUUID, string userName, Tuple<string, string, string>[]? playerProperty);
 
     }
 }

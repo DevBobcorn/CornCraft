@@ -27,8 +27,8 @@ namespace CraftSharp
 
         public const string CORN_CRAFT_BUILTIN_FILE_NAME = "CornCraftBuiltin";
         public const int    CORN_CRAFT_BUILTIN_VERSION = 17;
-        private const string VANILLAFIX_FILE_NAME = "VanillaFix";
-        private const int    VANILLAFIX_VERSION = 1;
+        private const string VANILLA_FIX_FILE_NAME = "VanillaFix";
+        private const int    VANILLA_FIX_VERSION = 1;
 
         public BaseCornClient? Client { get; private set; }
 
@@ -41,20 +41,19 @@ namespace CraftSharp
             get
             {
                 if (instance)
-                    return instance!;
+                    return instance;
                 
                 var magic = new GameObject("Corn Craft");
-                GameObject.DontDestroyOnLoad(magic);
+                DontDestroyOnLoad(magic);
                 return instance = magic.AddComponent<CornApp>();
             }
         }
 
-        private int parserProtocol = 0;
-        public int ParserProtocol => parserProtocol;
+        public int ParserProtocol { get; private set; }
 
         private void LoadProtocolParser(int version)
         {
-            parserProtocol = version;
+            ParserProtocol = version;
 
             PacketDefTypeHandlerBase.ResetLoadedTypes();
 
@@ -172,7 +171,7 @@ namespace CraftSharp
                 var downloadSucceeded = false;
                 yield return StartCoroutine(ResourceDownloader.DownloadResource(resourceVersion,
                         updateStatus, () => { },
-                        (succeeded) => downloadSucceeded = succeeded));
+                        succeeded => downloadSucceeded = succeeded));
                 
                 if (!downloadSucceeded)
                 {
@@ -186,8 +185,8 @@ namespace CraftSharp
             // Generate vanilla_fix or check update
             var vanillaFixDir = PathHelper.GetPackDirectoryNamed("vanilla_fix");
             yield return StartCoroutine(BuiltinResourceHelper.ReadyBuiltinResource(
-                    VANILLAFIX_FILE_NAME, VANILLAFIX_VERSION, vanillaFixDir,
-                    (status) => { }, () => { }, (succeed) => { }));
+                    VANILLA_FIX_FILE_NAME, VANILLA_FIX_VERSION, vanillaFixDir,
+                    _ => { }, () => { }, _ => { }));
 
             // First add base resources
             ResourcePack basePack = new($"vanilla-{resourceVersion}");
@@ -210,7 +209,7 @@ namespace CraftSharp
                 try {
                     // Set up thread locale for testing resource loading with different locales
                     //System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("fr-FR");
-                    packManager.LoadPacks(loadFlag, (status) =>
+                    packManager.LoadPacks(loadFlag, status =>
                         Loom.QueueOnMainThread(() => updateStatus(status)), true);
                 } catch (Exception e) {
                     Debug.Log($"Error loading resources: {e}");
@@ -231,7 +230,7 @@ namespace CraftSharp
                 yield return StartCoroutine(ResourceDownloader.DownloadLanguageJson(
                         resourceVersion, ProtocolSettings.Language, updateStatus,
                         () => { },
-                        (langJsonDownloaded) => {
+                        langJsonDownloaded => {
                             if (!langJsonDownloaded)
                                 startUpFlag.Failed = true;
                         }
@@ -249,7 +248,6 @@ namespace CraftSharp
                 Notify(Translations.Get("resource.error.resource_load_failure"), Notification.Type.Error);
                 updateStatus("login.login_failed");
                 startUpFlag.Failed = true;
-                yield break;
             }
         }
 
@@ -266,9 +264,9 @@ namespace CraftSharp
             var fullyLoaded = false;
 
             // Wait till everything's ready
-            op.completed += (operation) =>
+            op.completed += _ =>
             {
-                Client = Component.FindFirstObjectByType<BaseCornClient>();
+                Client = FindFirstObjectByType<BaseCornClient>();
                 fullyLoaded = true;
             };
 

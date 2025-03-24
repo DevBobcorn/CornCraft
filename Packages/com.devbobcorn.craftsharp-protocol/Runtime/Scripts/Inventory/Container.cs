@@ -11,17 +11,17 @@ namespace CraftSharp.Inventory
         /// <summary>
         /// Id of the container on the server
         /// </summary>
-        public int Id;
+        public readonly int Id;
 
         /// <summary>
         /// Type of container
         /// </summary>
-        public ContainerType Type;
+        public readonly ContainerType Type;
 
         /// <summary>
         /// Title of container
         /// </summary>
-        public string? Title;
+        public readonly string? Title;
 
         /// <summary>
         /// State of container
@@ -38,7 +38,7 @@ namespace CraftSharp.Inventory
         /// Used for Furnaces, Enchanting Table, Beacon, Brewing stand, Stone cutter, Loom and Lectern
         /// More info about: https://wiki.vg/Protocol#Set_Container_Property
         /// </summary>
-        public Dictionary<int, short> Properties;
+        public readonly Dictionary<int, short> Properties;
 
         /// <summary>
         /// Create an empty container with ID, Type and Title
@@ -158,13 +158,10 @@ namespace CraftSharp.Inventory
         public int[] SearchItem(Item itemType)
         {
             List<int> result = new List<int>();
-            if (Items != null)
+            foreach (var item in Items)
             {
-                foreach (var item in Items)
-                {
-                    if (item.Value.ItemType == itemType)
-                        result.Add(item.Key);
-                }
+                if (item.Value.ItemType == itemType)
+                    result.Add(item.Key);
             }
             return result.ToArray();
         }
@@ -174,7 +171,7 @@ namespace CraftSharp.Inventory
         /// </summary>
         /// <returns>An array of slot ID</returns>
         /// <remarks>Also depending on the container type, some empty slots cannot be used e.g. armor slots. This might cause issues.</remarks>
-        public int[] GetEmpytSlots()
+        public int[] GetEmptySlots()
         {
             List<int> result = new List<int>();
             for (int i = 0; i < Type.SlotCount(); i++)
@@ -212,16 +209,14 @@ namespace CraftSharp.Inventory
         {
             int hotbarStart = GetFirstHotbarSlot();
 
-            if ((slotId >= hotbarStart) && (slotId <= hotbarStart + 9))
+            if (slotId >= hotbarStart && slotId <= hotbarStart + 9)
             {
                 hotbar = slotId - hotbarStart;
                 return true;
             }
-            else
-            {
-                hotbar = -1;
-                return false;
-            }
+            
+            hotbar = -1;
+            return false;
         }
 
         /// <summary>
@@ -231,13 +226,13 @@ namespace CraftSharp.Inventory
         /// <returns>True if given slot ID is a hotbar slot</returns>
         public ItemStack? GetHotbarItem(short slot)
         {
-            if (slot >= 0 && slot < 9)
+            if (slot is >= 0 and < 9)
             {
                 var slotInContainer = slot + GetFirstHotbarSlot();
 
-                if (Items.ContainsKey(slotInContainer))
+                if (Items.TryGetValue(slotInContainer, out var item))
                 {
-                    return Items[slotInContainer];
+                    return item;
                 }
             }
 

@@ -8,7 +8,7 @@ namespace CraftSharp
         Spectator = 3
     }
 
-    static class GameModeExtension
+    internal static class GameModeExtension
     {
         public static string GetIdentifier(this GameMode gameMode)
         {
