@@ -80,7 +80,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        void Start()
+        private void Start()
         {
             playableDirector = GetComponent<PlayableDirector>();
             SetPlayableSpeed(4D / 1200D);
@@ -97,7 +97,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        void Update()
+        private void Update()
         {
             if (simulate) // Simulate time passing
             {

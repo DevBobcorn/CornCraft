@@ -9,7 +9,7 @@ namespace CraftSharp.Rendering
         [SerializeField] protected Transform? _visualTransform;
         public Transform Visual => _visualTransform!;
 
-        void Start()
+        private void Start()
         {
             if (mainRigidbody == null)
             {

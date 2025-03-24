@@ -170,7 +170,7 @@ namespace CraftSharp.UI
 
         #nullable disable
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (cameraAimCallback is not null)
                 EventManager.Instance.Unregister(cameraAimCallback);

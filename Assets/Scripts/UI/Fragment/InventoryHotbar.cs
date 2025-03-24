@@ -87,7 +87,7 @@ namespace CraftSharp.UI
             selfAlpha = alpha;
         }
 
-        void Update()
+        private void Update()
         {
             if (parentCanvasGroups.Length > 0)
             {
@@ -111,7 +111,7 @@ namespace CraftSharp.UI
             }
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (hotbarUpdateCallback is not null)
                 EventManager.Instance.Unregister(hotbarUpdateCallback);

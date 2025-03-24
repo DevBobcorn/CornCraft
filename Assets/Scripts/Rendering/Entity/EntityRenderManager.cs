@@ -277,7 +277,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        void Start()
+        private void Start()
         {
             // Clear loaded things
             entityPrefabs.Clear();
@@ -315,7 +315,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        void Update()
+        private void Update()
         {
             var client = CornApp.CurrentClient;
 

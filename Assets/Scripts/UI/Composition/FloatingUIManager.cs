@@ -46,7 +46,7 @@ namespace CraftSharp.UI
             }
         }
 
-        void Update()
+        private void Update()
         {
             var client = CornApp.CurrentClient;
             if (client == null) return;

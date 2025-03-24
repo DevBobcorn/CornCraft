@@ -59,7 +59,7 @@ namespace CraftSharp
             portalFragment.EnablePortalEmission();
         }
 
-        void Update()
+        private void Update()
         {
             if (enterSignalReceived)
             {

@@ -8,6 +8,5 @@ namespace CraftSharp.Event
         {
             GameMode = gamemode;
         }
-
     }
 }

@@ -112,7 +112,7 @@ namespace CraftSharp.UI
             ClearPacketPreview();
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (packetCallback is not null)
             {

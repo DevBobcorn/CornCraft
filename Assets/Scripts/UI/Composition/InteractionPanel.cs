@@ -44,7 +44,7 @@ namespace CraftSharp.UI
 
         #nullable disable
 
-        void Start()
+        private void Start()
         {
             // Initialize controls
             scrollHint = transform.Find("Scroll Hint").GetComponent<Animator>();
@@ -171,7 +171,7 @@ namespace CraftSharp.UI
             interactionTargetAnimator.SetTrigger(HIDE_HASH);
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (addCallback is not null)
                 EventManager.Instance.Unregister(addCallback);

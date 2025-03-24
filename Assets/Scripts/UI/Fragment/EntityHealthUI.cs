@@ -20,7 +20,7 @@ namespace CraftSharp.UI
             }
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             // Unregister events for previous entity
             if (entityRender != null)

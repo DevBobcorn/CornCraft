@@ -160,7 +160,7 @@ namespace CraftSharp.UI
             }
         }
 
-        void Update()
+        private void Update()
         {
             if (screenStack.Count > 0)
             {

@@ -40,7 +40,7 @@ namespace CraftSharp.Rendering
             return created;
         }
 
-        void Start()
+        private void Start()
         {
             // Disable HSR render control
             StarRailCharacterRenderingController hsr;
@@ -81,7 +81,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        void Update()
+        private void Update()
         {
             if( m_bUseTime )
             {

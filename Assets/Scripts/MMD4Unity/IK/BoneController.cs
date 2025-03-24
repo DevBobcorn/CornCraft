@@ -29,7 +29,7 @@ public class BoneController : MonoBehaviour
     /// <summary>
     /// 初回更新前処理
     /// </summary>
-    void Start()
+    private void Start()
     {
         if (null != ik_solver) {
             ik_solver = transform.GetComponent<CCDIKSolver>();

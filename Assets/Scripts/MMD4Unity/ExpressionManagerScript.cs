@@ -53,7 +53,7 @@ public class ExpressionManagerScript : MonoBehaviour
             composite[i] = Vector3.zero;
     }
 
-    void Start()
+    private void Start()
     {
         Init();
     }

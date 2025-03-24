@@ -59,7 +59,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        void Start()
+        private void Start()
         {
             SetTime(startTime);
 
@@ -79,7 +79,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        void Update()
+        private void Update()
         {
             if (simulate) // Simulate time passing
             {

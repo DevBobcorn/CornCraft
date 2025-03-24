@@ -16,7 +16,7 @@ namespace CraftSharp.UI
 
         private Action<NotificationEvent>? showCallback;
 
-        void Start()
+        private void Start()
         {
             showCallback = (e) => {
                 // Make a new notification here...
@@ -44,7 +44,7 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(showCallback);
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (showCallback is not null)
                 EventManager.Instance.Unregister(showCallback);

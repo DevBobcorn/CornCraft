@@ -30,7 +30,7 @@ namespace CraftSharp.Control
             }
         }
 
-        void Start()
+        private void Start()
         {
             EnsureInitialized();
 
@@ -52,7 +52,7 @@ namespace CraftSharp.Control
             EventManager.Instance.Broadcast(new CameraAimingEvent(false));
         }
 
-        void Update()
+        private void Update()
         {
             if (_setYawRequest != null)
             {

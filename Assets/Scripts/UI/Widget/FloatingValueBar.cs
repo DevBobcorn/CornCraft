@@ -16,7 +16,7 @@ namespace CraftSharp.UI
         [SerializeField] private SpriteRenderer displayFillRenderer, deltaFillRenderer;
         private Transform displayTransform, deltaTransform;
 
-        void Start()
+        private void Start()
         {
             displayTransform = displayFillRenderer!.transform;
             deltaTransform = deltaFillRenderer!.transform;

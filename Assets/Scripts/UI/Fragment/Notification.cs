@@ -44,12 +44,12 @@ namespace CraftSharp.UI
             Destroy(gameObject);
         }
 
-        void Awake()
+        private void Awake()
         {
             anim = GetComponent<Animator>();
         }
 
-        void Update()
+        private void Update()
         {
             timeLeft -= Time.deltaTime;
 

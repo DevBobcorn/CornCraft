@@ -31,7 +31,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        void Start()
+        private void Start()
         {
             var blockParticleRenderObj = new GameObject("Block Particle Render");
             blockParticleRenderObj.transform.SetParent(transform);
@@ -55,7 +55,7 @@ namespace CraftSharp.Rendering
             EventManager.Instance.Register(particlesCallback);
         }
 
-        void Update()
+        private void Update()
         {
             EnsureInitialized();
 
@@ -67,7 +67,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (particlesCallback is not null)
                 EventManager.Instance.Unregister(particlesCallback);

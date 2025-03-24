@@ -16,7 +16,7 @@ namespace CraftSharp.UI
 
         [SerializeField] private Image backgroundImage, fillImage;
 
-        void Start()
+        private void Start()
         {
             backgroundImage!.transform.rotation = Quaternion.AngleAxis(fullBarDegree / 2F, Vector3.back);
             fillImage!.transform.rotation = Quaternion.AngleAxis(fullBarDegree / 2F, Vector3.back);

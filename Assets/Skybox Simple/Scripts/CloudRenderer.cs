@@ -46,7 +46,7 @@ namespace BoatAttackSkybox
             DrawClouds(camera);
         }
         
-        void Update()
+        private void Update()
         {
             var viewerPos = viewerTransform.position;
             viewerPos.y = 0F;

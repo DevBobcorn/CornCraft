@@ -13,7 +13,7 @@ namespace AnimeSkybox
         public string sunDirectionPropertyName = "_SunDirection"; // 模拟太阳方向在Skybox材质上的属性名称
         public string moonDirectionPropertyName = "_MoonDirection"; // 模拟月亮方向在Skybox材质上的属性名称
 
-        void Start()
+        private void Start()
         {
             if (targetMaterial == null)
             {
@@ -22,7 +22,7 @@ namespace AnimeSkybox
             }
         }
 
-        void Update()
+        private void Update()
         {
             Matrix4x4 LtoW = moon.transform.localToWorldMatrix;
             targetMaterial.SetMatrix("LToW",LtoW);

@@ -105,7 +105,7 @@ public class MorphManager : MonoBehaviour
     /// <summary>
     /// 初回更新前処理
     /// </summary>
-    void Start()
+    private void Start()
     {
         //メッシュ
         renderer_shared_mesh_ = mesh.Select(x=>{

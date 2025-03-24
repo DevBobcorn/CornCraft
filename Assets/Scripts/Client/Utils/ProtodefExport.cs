@@ -18,7 +18,7 @@ namespace CraftSharp
             Formatting = Formatting.Indented,
         };
 
-        void Start()
+        private void Start()
         {
             ExportProtocol("765", new PacketPalette1204(), false);
         }

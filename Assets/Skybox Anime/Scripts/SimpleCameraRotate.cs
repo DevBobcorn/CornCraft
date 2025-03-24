@@ -9,14 +9,14 @@ namespace AnimeSkybox
         private float rotationX = 0.0f;
         private float rotationY = 0.0f;
 
-        void Start()
+        private void Start()
         {
             Vector3 rot = transform.localRotation.eulerAngles;
             rotationX = rot.x;
             rotationY = rot.y;
         }
 
-        void Update()
+        private void Update()
         {
             if (Mouse.current.leftButton.isPressed)
             {

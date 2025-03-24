@@ -30,7 +30,7 @@ namespace CraftSharp.UI
         // Use null for empty items
         private ItemStack? itemStack = null;
 
-        void Awake()
+        private void Awake()
         {
             _slotAnimator = GetComponent<Animator>();
             _slotImage = GetComponent<Image>();

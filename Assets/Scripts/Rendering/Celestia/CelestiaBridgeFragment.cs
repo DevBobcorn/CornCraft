@@ -141,7 +141,7 @@ namespace CraftSharp
             return (newBlockObj, renderer.material);
         }
 
-        public virtual void Update()
+        protected virtual void Update()
         {
             foreach (var (block, riseSpeed, target) in bridgeBlocks)
             {

@@ -37,7 +37,7 @@ namespace CraftSharp
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         #endregion
 
-        void Start()
+        private void Start()
         {
             if (CornApp.CurrentClient == null) // In case where the client wasn't properly assigned before
             {
@@ -85,7 +85,7 @@ namespace CraftSharp
             return true; // Client successfully started
         }
 
-        void Update()
+        private void Update()
         {
             if (Keyboard.current.f5Key.isPressed)
             {

@@ -28,7 +28,7 @@ namespace CraftSharp.UI
         private CanvasGroup[] parentCanvasGroups = { };
         private float selfAlpha = 1F;
 
-        void Start()
+        private void Start()
         {
             if (barImage == null)
             {

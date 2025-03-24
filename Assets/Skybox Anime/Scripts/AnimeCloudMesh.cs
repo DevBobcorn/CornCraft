@@ -15,7 +15,7 @@ namespace AnimeSkybox
         [SerializeField] private float minSize = 80F;
         [SerializeField] private float maxSize = 120F;
 
-        void Start()
+        private void Start()
         {
             MeshFilter meshFilter = GetComponent<MeshFilter>();
             meshFilter.sharedMesh = CloudMeshBuilder.BuildCloudMesh(cloudSprites, cloudQuadCount, maxFadeDelay,

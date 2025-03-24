@@ -86,7 +86,7 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(healthCallback);
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (healthCallback is not null)
             {

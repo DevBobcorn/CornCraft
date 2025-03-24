@@ -124,7 +124,7 @@ namespace CraftSharp
                 }
         }
 
-        void Start()
+        private void Start()
         {
             if (client != null)
             {
@@ -206,7 +206,7 @@ namespace CraftSharp
         /// <summary>
         /// TODO: Maybe use a thread to do the update
         /// </summary>
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             if (client != null)
             {

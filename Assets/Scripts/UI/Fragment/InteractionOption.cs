@@ -37,7 +37,7 @@ namespace CraftSharp.UI
 
         public InteractionInfo interactionInfo;
 
-        void Awake()
+        private void Awake()
         {
             _optionAnimator = GetComponent<Animator>();
         }
