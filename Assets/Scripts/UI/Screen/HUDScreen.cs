@@ -30,7 +30,7 @@ namespace CraftSharp.UI
         private bool isActive = false, debugInfo = true;
 
         private bool modePanelShown  = false;
-        private int  selectedMode    = 0;
+        private int selectedMode     = 0;
         private int displayedLatency = 0;
 
         [SerializeField] private RectTransform chatContentPanel;
@@ -58,9 +58,7 @@ namespace CraftSharp.UI
                 }
             }
 
-            get {
-                return isActive;
-            }
+            get => isActive;
         }
 
         public override bool ReleaseCursor()
@@ -68,7 +66,7 @@ namespace CraftSharp.UI
             return false;
         }
 
-        public override bool ShouldPauseInput()
+        public override bool ShouldPauseControllerInput()
         {
             return false;
         }
@@ -78,9 +76,9 @@ namespace CraftSharp.UI
             // Initialize controls...
             staminaBarAnimator = staminaBar.GetComponent<Animator>();
 
-            cameraAimCallback = (e) => crosshairAnimator.SetBool(SHOW_HASH, e.Aiming);
+            cameraAimCallback = e => crosshairAnimator.SetBool(SHOW_HASH, e.Aiming);
 
-            gameModeCallback = (e) =>
+            gameModeCallback = e =>
             {
                 var showStatus = e.GameMode switch {
                     GameMode.Survival   => true,
@@ -94,7 +92,7 @@ namespace CraftSharp.UI
                 statusPanelAnimator.SetBool(SHOW_HASH, showStatus);
             };
 
-            healthCallback = (e) =>
+            healthCallback = e =>
             {
                 if (e.UpdateMaxHealth)
                     healthBar.MaxValue = e.Health * HEALTH_MULTIPLIER;
@@ -102,27 +100,21 @@ namespace CraftSharp.UI
                 healthBar.CurValue = e.Health * HEALTH_MULTIPLIER;
             };
 
-            staminaCallback = (e) =>
+            staminaCallback = e =>
             {
                 staminaBar.CurValue = e.Stamina;
 
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
                 if (staminaBar.MaxValue != e.MaxStamina)
                 {
                     staminaBar.MaxValue = e.MaxStamina;
                 }
 
-                if (e.Stamina >= e.MaxStamina) // Stamina is full
-                {
-                    staminaBarAnimator.SetBool(SHOW_HASH, false);
-                }
-                else
-                {
-                    staminaBarAnimator.SetBool(SHOW_HASH, true);
-                }
+                staminaBarAnimator.SetBool(SHOW_HASH, e.Stamina < e.MaxStamina); // Stamina is full
             };
 
             // Register callbacks
-            chatMessageCallback = (e) =>
+            chatMessageCallback = e =>
             {
                 var styledMessage = TMPConverter.MC2TMP(e.Message);
                 var chatMessageObj = Instantiate(chatMessagePreviewPrefab, chatContentPanel);
@@ -139,21 +131,12 @@ namespace CraftSharp.UI
 
             // Initialize controls
             var game = CornApp.CurrentClient;
-            if (game != null)
+            if (game)
             {
                 interactionPanel.OnItemCountChange += newCount =>
                 {
-                    // Disable camera zoom if there're more than 1 interaction options
-                    if (newCount > 1)
-                    {
-                        //scrollInput.action.Enable();
-                        game.ToggleCameraZoom(false);
-                    }
-                    else
-                    {
-                        //scrollInput.action.Disable();
-                        game.ToggleCameraZoom(true);
-                    }
+                    // Disable camera zoom if there are more than 1 interaction options
+                    game.SetCameraZoomEnabled(newCount <= 1);
                 };
 
                 crosshairAnimator.SetBool(SHOW_HASH, false);
@@ -197,7 +180,7 @@ namespace CraftSharp.UI
             }
             
             var game = CornApp.CurrentClient;
-            if (game == null) return;
+            if (!game) return;
 
             if (Keyboard.current.f3Key.isPressed)
             {
@@ -233,7 +216,7 @@ namespace CraftSharp.UI
                     modePanelAnimator.SetBool(SHOW_HASH, false);
                     modePanelShown = false;
                     // Show crosshair (if should be shown)
-                    if (game.CameraController != null && game.CameraController.IsAimingOrLocked)
+                    if (game.CameraController && game.CameraController.IsAimingOrLocked)
                     {
                         crosshairAnimator.SetBool(SHOW_HASH, true);
                     }
@@ -262,7 +245,7 @@ namespace CraftSharp.UI
             var mouseScroll = Mouse.current.scroll.value.y;
             if (mouseScroll != 0F && !Keyboard.current.shiftKey.IsPressed())
             {
-                if (interactionPanel != null && interactionPanel.ShouldConsumeMouseScroll) // Interaction option selection
+                if (interactionPanel && interactionPanel.ShouldConsumeMouseScroll) // Interaction option selection
                 {
                     if (mouseScroll < 0F)
                         interactionPanel.SelectNextOption();

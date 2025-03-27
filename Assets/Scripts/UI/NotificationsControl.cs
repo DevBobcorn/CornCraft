@@ -18,9 +18,10 @@ namespace CraftSharp.UI
 
         private void Start()
         {
-            showCallback = (e) => {
+            showCallback = e =>
+            {
                 // Make a new notification here...
-                var notificationObj = GameObject.Instantiate(notificationPrefab);
+                var notificationObj = Instantiate(notificationPrefab);
                 notificationObj!.transform.SetParent(container, false);
                 notificationObj!.transform.localScale = Vector3.one;
                 

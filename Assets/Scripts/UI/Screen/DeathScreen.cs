@@ -24,9 +24,7 @@ namespace CraftSharp.UI
                 screenGroup.interactable   = value;
             }
 
-            get {
-                return isActive;
-            }
+            get => isActive;
         }
 
         public override bool ReleaseCursor()
@@ -34,23 +32,23 @@ namespace CraftSharp.UI
             return true;
         }
 
-        public override bool ShouldPauseInput()
+        public override bool ShouldPauseControllerInput()
         {
             return true;
         }
 
-        public void Respawn()
+        private static void Respawn()
         {
             var client = CornApp.CurrentClient;
-            if (client == null) return;
+            if (!client) return;
 
             client.SendRespawnPacket();
         }
 
-        public void QuitGame()
+        private static void QuitGame()
         {
             var client = CornApp.CurrentClient;
-            if (client == null) return;
+            if (!client) return;
 
             client.Disconnect();
         }
@@ -66,18 +64,18 @@ namespace CraftSharp.UI
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
 
-            respawnButton.onClick.AddListener(this.Respawn);
-            quitButton.onClick.AddListener(this.QuitGame);
+            respawnButton.onClick.AddListener(Respawn);
+            quitButton.onClick.AddListener(QuitGame);
 
-            healthCallback = (e) => {
+            healthCallback = e => {
                 var client = CornApp.CurrentClient;
-                if (client == null) return;
+                if (!client) return;
 
-                if (e.Health <= 0F && !this.isActive)
+                if (e.Health <= 0F && !isActive)
                 {
                     client.ScreenControl.PushScreen<DeathScreen>();
                 }
-                else if (e.Health > 0F && this.isActive) // Hide death screen
+                else if (e.Health > 0F && isActive) // Hide death screen
                 {
                     client.ScreenControl.TryPopScreen();
                 }

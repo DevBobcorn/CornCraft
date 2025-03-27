@@ -50,29 +50,30 @@ namespace CraftSharp
         public Camera UICamera => m_UICamera;
         #endregion
 
-        public bool InputPaused { get; private set; } = false;
-        public void ToggleInputPause(bool enable)
+        public bool ControllerInputPaused { get; private set; } = false;
+        
+        public void SetControllerInputPaused(bool pause)
         {
             if (CameraController && m_PlayerController)
             {
-                if (enable)
-                {
-                    m_PlayerController.EnableInput();
-                    CameraController.EnableCinemachineInput();
-
-                    InputPaused = false;
-                }
-                else
+                if (pause)
                 {
                     m_PlayerController.DisableInput();
                     CameraController.DisableCinemachineInput();
 
-                    InputPaused = true;
+                    ControllerInputPaused = true;
+                }
+                else
+                {
+                    m_PlayerController.EnableInput();
+                    CameraController.EnableCinemachineInput();
+
+                    ControllerInputPaused = false;
                 }
             }
         }
 
-        public void ToggleCameraZoom(bool enable)
+        public void SetCameraZoomEnabled(bool enable)
         {
             if (CameraController)
             {
@@ -87,7 +88,7 @@ namespace CraftSharp
             }
         }
 
-        protected void SwitchFirstCameraController()
+        protected void SwitchToFirstCameraController()
         {
             if (m_CameraControllerPrefabs.Length == 0) return;
 
@@ -129,7 +130,7 @@ namespace CraftSharp
             interactionUpdater.SetControllers(this, CameraController, PlayerController);
         }
 
-        protected void SwitchFirstPlayerRender(EntityData clientEntity)
+        protected void SwitchToFirstPlayerRender(EntityData clientEntity)
         {
             if (m_PlayerRenderPrefabs.Length == 0) return;
 
@@ -153,7 +154,7 @@ namespace CraftSharp
 
         public Vector3Int WorldOriginOffset { get; private set; } = Vector3Int.zero;
 
-        protected virtual void SetWorldOriginOffset(Vector3Int offset)
+        protected void SetWorldOriginOffset(Vector3Int offset)
         {
             var delta = offset - WorldOriginOffset;
             var posDelta = CoordConvert.GetPosDelta(delta);

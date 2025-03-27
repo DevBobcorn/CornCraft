@@ -21,11 +21,9 @@ namespace CraftSharp.UI
             backgroundImage!.transform.rotation = Quaternion.AngleAxis(fullBarDegree / 2F, Vector3.back);
             fillImage!.transform.rotation = Quaternion.AngleAxis(fullBarDegree / 2F, Vector3.back);
 
-            float displayFrac = displayValue / maxValue;
             backgroundImage.fillAmount = fullBarDegree / 360F;
 
             UpdateValue();
-
         }
 
         protected override void UpdateValue()
@@ -34,14 +32,14 @@ namespace CraftSharp.UI
             displayValue = Mathf.MoveTowards(displayValue, curValue, maxValue * Time.deltaTime);
             
             // Then update visuals
-            float displayFrac = displayValue / maxValue;
-            float displayDegree = displayFrac * fullBarDegree / 360F;
+            float displayFraction = displayValue / maxValue;
+            float displayDegree = displayFraction * fullBarDegree / 360F;
             
             fillImage!.fillAmount = displayDegree;
 
-            if (displayFrac < dangerThreshold)
+            if (displayFraction < dangerThreshold)
                 fillImage!.color = dangerColor;
-            else if (displayFrac < warningThreshold)
+            else if (displayFraction < warningThreshold)
                 fillImage!.color = warningColor;
             else
                 fillImage!.color = normalColor;

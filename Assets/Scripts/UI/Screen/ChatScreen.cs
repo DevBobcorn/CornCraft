@@ -50,7 +50,7 @@ namespace CraftSharp.UI
             return true;
         }
 
-        public override bool ShouldPauseInput()
+        public override bool ShouldPauseControllerInput()
         {
             return true;
         }
@@ -67,7 +67,7 @@ namespace CraftSharp.UI
             {
                 string requestText;
                 if (chatInput.caretPosition > 0 && chatInput.caretPosition < chatInputText.Length)
-                    requestText = chatInputText[0..chatInput.caretPosition];
+                    requestText = chatInputText[..chatInput.caretPosition];
                 else
                     requestText = chatInputText;
 
@@ -174,10 +174,10 @@ namespace CraftSharp.UI
                 chatMessages.Clear();
             }
 
-            chatInput.onValueChanged.AddListener(this.RefreshCompletions);
+            chatInput.onValueChanged.AddListener(RefreshCompletions);
 
             // Register callbacks
-            chatMessageCallback = (e) =>
+            chatMessageCallback = e =>
             {
                 var styledMessage = TMPConverter.MC2TMP(e.Message);
                 var chatMessageObj = Instantiate(chatMessagePrefab, chatContentPanel);
@@ -194,7 +194,7 @@ namespace CraftSharp.UI
                 }
             };
 
-            autoCompleteCallback = (e) =>
+            autoCompleteCallback = e =>
             {
                 if (e.Options.Length > 0)
                 {   // Show at most 20 options

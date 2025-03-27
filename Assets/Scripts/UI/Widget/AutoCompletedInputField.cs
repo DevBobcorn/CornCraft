@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -92,14 +90,11 @@ namespace CraftSharp.UI
 
                     //Debug.Log($"Completing \"{original}\" at {completionStart} with \"{completion}\". Length: {completionLength}");
 
-                    string basePart = completionStart <= original.Length ? original[..completionStart] : original.PadRight(completionStart, ' ');
+                    var basePart = completionStart <= original.Length ?
+                        original[..completionStart] : original.PadRight(completionStart, ' ');
 
-                    string textBehindCursor;
-
-                    if (caretPosition < original.Length)
-                        textBehindCursor = original[caretPosition..original.Length];
-                    else
-                        textBehindCursor = string.Empty;
+                    var textBehindCursor =
+                        caretPosition < original.Length ? original[caretPosition..original.Length] : string.Empty;
 
                     // Set input field text
                     text = basePart + completion + textBehindCursor;
@@ -177,7 +172,7 @@ namespace CraftSharp.UI
         {
             base.Start();
 
-            onValueChanged.AddListener(this.OnChatInputChange);
+            onValueChanged.AddListener(OnChatInputChange);
 
             autoCompleteCanvasGroup.alpha = 0F;
             autoCompleteCanvasGroup.interactable = false;

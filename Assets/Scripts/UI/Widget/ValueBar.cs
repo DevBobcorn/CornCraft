@@ -5,6 +5,14 @@ namespace CraftSharp.UI
 {
     public class ValueBar : BaseValueBar, IAlphaListener
     {
+        private static readonly int BORDER_COLOR = Shader.PropertyToID("_BorderColor");
+        private static readonly int VALUE_COLOR  = Shader.PropertyToID("_ValueColor");
+        private static readonly int DELTA_COLOR  = Shader.PropertyToID("_DeltaColor");
+        private static readonly int FILL_AMOUNT  = Shader.PropertyToID("_FillAmount");
+        private static readonly int DELTA_AMOUNT = Shader.PropertyToID("_DeltaAmount");
+        private static readonly int BAR_SIZE     = Shader.PropertyToID("_BarSize");
+        private static readonly int CORNER_RADII = Shader.PropertyToID("_CornerRadii");
+        
         [SerializeField] private Color normalColor   = Color.white;
         [SerializeField] private Color reduceColor   = new(1F, 0.521F, 0.596F); // 255 133 152 #FF8598
         [SerializeField] private Color increaseColor = new(0.815F, 1F, 0.372F); // 208 255 095 #D0FF5F
@@ -15,12 +23,6 @@ namespace CraftSharp.UI
         [SerializeField] [Range(0.1F, 1F)] private float dangerThreshold  = 0.1F;
 
         [SerializeField] private Vector4 cornerRadius = Vector4.zero;
-
-        private static readonly int BorderColor = Shader.PropertyToID("_BorderColor");
-        private static readonly int ValueColor = Shader.PropertyToID("_ValueColor");
-        private static readonly int DeltaColor = Shader.PropertyToID("_DeltaColor");
-        private static readonly int FillAmount = Shader.PropertyToID("_FillAmount");
-        private static readonly int DeltaAmount = Shader.PropertyToID("_DeltaAmount");
 
         [SerializeField] private Image barImage;
         private Material barMaterial;
@@ -41,9 +43,9 @@ namespace CraftSharp.UI
 
             var barImageRect = barImage.GetComponent<RectTransform>();
 
-            barMaterial.SetVector("_BarSize", new(barImageRect.rect.width, barImageRect.rect.height, 0F, 0F));
-
-            barMaterial.SetVector("_CornerRadii", cornerRadius);
+            barMaterial.SetVector(BAR_SIZE, new(
+                barImageRect.rect.width, barImageRect.rect.height, 0F, 0F));
+            barMaterial.SetVector(CORNER_RADII, cornerRadius);
 
             parentCanvasGroups = GetComponentsInParent<CanvasGroup>(true);
 
@@ -60,11 +62,11 @@ namespace CraftSharp.UI
 
         public void UpdateAlpha(float alpha)
         {
-            Color valueColor = barMaterial.GetColor(ValueColor);
-            barMaterial.SetColor(ValueColor, IAlphaListener.GetColorWithAlpha(valueColor, selfAlpha));
+            Color valueColor = barMaterial.GetColor(VALUE_COLOR);
+            barMaterial.SetColor(VALUE_COLOR, IAlphaListener.GetColorWithAlpha(valueColor, selfAlpha));
 
-            Color borderColor = barMaterial.GetColor(BorderColor);
-            barMaterial.SetColor(BorderColor, IAlphaListener.GetColorWithAlpha(borderColor, selfAlpha));
+            Color borderColor = barMaterial.GetColor(BORDER_COLOR);
+            barMaterial.SetColor(BORDER_COLOR, IAlphaListener.GetColorWithAlpha(borderColor, selfAlpha));
 
             if (barText != null)
             {
@@ -79,19 +81,19 @@ namespace CraftSharp.UI
             if (displayValue > curValue) // Reducing fill
             {
                 displayValue = Mathf.Max(displayValue - maxValue * Time.deltaTime, curValue);
-                barMaterial.SetColor(DeltaColor, IAlphaListener.GetColorWithAlpha(reduceColor, selfAlpha));
+                barMaterial.SetColor(DELTA_COLOR, IAlphaListener.GetColorWithAlpha(reduceColor, selfAlpha));
             }
             else // Increasing fill
             {
                 displayValue = Mathf.Min(displayValue + maxValue * Time.deltaTime, curValue);
-                barMaterial.SetColor(DeltaColor, IAlphaListener.GetColorWithAlpha(increaseColor, selfAlpha));
+                barMaterial.SetColor(DELTA_COLOR, IAlphaListener.GetColorWithAlpha(increaseColor, selfAlpha));
             }
 
             var currentFillAmount = curValue / maxValue;
-            barMaterial.SetFloat(FillAmount, currentFillAmount);
+            barMaterial.SetFloat(FILL_AMOUNT, currentFillAmount);
 
             var currentDeltaAmount = displayValue / maxValue;
-            barMaterial.SetFloat(DeltaAmount, currentDeltaAmount);
+            barMaterial.SetFloat(DELTA_AMOUNT, currentDeltaAmount);
 
             float displayFraction = displayValue / maxValue;
             Color currentColor = normalColor;
@@ -101,11 +103,11 @@ namespace CraftSharp.UI
             else if (displayFraction < warningThreshold)
                 currentColor = warningColor;
 
-            barMaterial.SetColor(ValueColor, IAlphaListener.GetColorWithAlpha(currentColor, selfAlpha));
+            barMaterial.SetColor(VALUE_COLOR, IAlphaListener.GetColorWithAlpha(currentColor, selfAlpha));
 
-            Color borderColor = barMaterial.GetColor(BorderColor);
+            Color borderColor = barMaterial.GetColor(BORDER_COLOR);
 
-            barMaterial.SetColor(BorderColor, IAlphaListener.GetColorWithAlpha(borderColor, selfAlpha));
+            barMaterial.SetColor(BORDER_COLOR, IAlphaListener.GetColorWithAlpha(borderColor, selfAlpha));
         }
 
         protected override void Update()
@@ -116,18 +118,18 @@ namespace CraftSharp.UI
             {
                 float updatedAlpha = 1F;
 
-                for (int i = 0; i < parentCanvasGroups.Length; i++)
+                foreach (var t in parentCanvasGroups)
                 {
-                    if ((!parentCanvasGroups[i].gameObject.activeSelf) || parentCanvasGroups[i].alpha == 0F)
+                    if (!t.gameObject.activeSelf || t.alpha == 0F)
                     {
                         updatedAlpha = 0F;
                         break;
                     }
 
-                    updatedAlpha *= parentCanvasGroups[i].alpha;
+                    updatedAlpha *= t.alpha;
                 }
 
-                if (selfAlpha != updatedAlpha)
+                if (!Mathf.Approximately(selfAlpha, updatedAlpha))
                 {
                     UpdateAlpha(updatedAlpha);
                 }

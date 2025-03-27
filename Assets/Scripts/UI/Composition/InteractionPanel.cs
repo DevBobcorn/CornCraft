@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,8 +20,8 @@ namespace CraftSharp.UI
         [SerializeField] private GameObject interactionOptionPrefab;
         [SerializeField] private GameObject interactionProgressOptionPrefab;
         [SerializeField] private RectTransform container;
-        [SerializeField] private LineRenderer iteractionTargetHintLine;
-        [SerializeField] private RectTransform iteractionTargetHint;
+        [SerializeField] private LineRenderer interactionTargetHintLine;
+        [SerializeField] private RectTransform interactionTargetHint;
         [SerializeField] private Animator interactionTargetAnimator;
 
         private Animator scrollHint;
@@ -53,7 +54,7 @@ namespace CraftSharp.UI
             scrollHint.SetBool(SHOW_HASH, false);
 
             // Events
-            addCallback = (e) =>
+            addCallback = e =>
             {
                 if (e.Info is BlockTriggerInteractionInfo triggerInfo && !triggerInfo.Definition.ShowInList)
                 {
@@ -63,28 +64,26 @@ namespace CraftSharp.UI
                 AddInteractionOption(e.InteractionId, e.AddAndSelect, e.UseProgress, e.Info);
             };
 
-            removeCallback = (e) =>
+            removeCallback = e =>
             {
                 RemoveInteractionOption(e.InteractionId);
             };
 
-            harvestInteractionUpdateCallback = (e) =>
+            harvestInteractionUpdateCallback = e =>
             {
                 var curValue = Mathf.Clamp01(e.Progress);
-                
-                for (int i = 0;i < interactionOptions.Count;i++)
+
+                foreach (var t in interactionOptions
+                         .Where(t => t.InteractionId == e.InteractionId))
                 {
-                    if (interactionOptions[i].InteractionId == e.InteractionId)
+                    t.UpdateInfoText();
+
+                    if (t is InteractionProgressOption progressOption)
                     {
-                        interactionOptions[i].UpdateInfoText();
-
-                        if (interactionOptions[i] is InteractionProgressOption progressOption)
-                        {
-                            progressOption.UpdateProgress(e.Progress);
-                        }
-
-                        break;
+                        progressOption.UpdateProgress(curValue);
                     }
+
+                    break;
                 }
             };
 
@@ -189,9 +188,9 @@ namespace CraftSharp.UI
         public void AddInteractionOption(int id, bool addAndSelect, bool useProgress, InteractionInfo info)
         {
             var optionObj = Instantiate(useProgress ? interactionProgressOptionPrefab : interactionOptionPrefab);
-            var option = optionObj == null ? null : optionObj.GetComponent<InteractionOption>();
+            var option = !optionObj ? null : optionObj.GetComponent<InteractionOption>();
 
-            if (option != null)
+            if (option)
             {
                 option.SetId(id);
                 option.SetInfo(info);
@@ -219,14 +218,7 @@ namespace CraftSharp.UI
                     }
                 }
 
-                if (useProgress)
-                {
-                    option.UpdateKeyHintText("keybinding.mouse.lmb");
-                }
-                else
-                {
-                    option.UpdateKeyHintText("X");
-                }
+                option.UpdateKeyHintText(useProgress ? "keybinding.mouse.lmb" : "X");
 
                 scrollHint.SetBool(SHOW_HASH, interactionOptions.Count > 1); // Show or hide scroll hint
             }
@@ -234,7 +226,7 @@ namespace CraftSharp.UI
             {
                 Debug.LogWarning("Interaction option prefab is not valid");
 
-                if (optionObj != null)
+                if (optionObj)
                     Destroy(optionObj);
             }
 
@@ -304,11 +296,9 @@ namespace CraftSharp.UI
                     var newPos = uiCamera.ViewportToWorldPoint(camControl.GetPointViewportPos(worldPoint + pointOffset));
 
                     // Don't modify z coordinate
-                    iteractionTargetHint.position = new Vector3(newPos.x, newPos.y, iteractionTargetHint.position.z);
-                    iteractionTargetHintLine.SetPosition(0, iteractionTargetHint.position);
-                    iteractionTargetHintLine.SetPosition(1, selectedOption.KeyHintTransform.position);
-
-                    return;
+                    interactionTargetHint.position = new Vector3(newPos.x, newPos.y, interactionTargetHint.position.z);
+                    interactionTargetHintLine.SetPosition(0, interactionTargetHint.position);
+                    interactionTargetHintLine.SetPosition(1, selectedOption.KeyHintTransform.position);
                 }
             }
         }
@@ -329,7 +319,7 @@ namespace CraftSharp.UI
 
             var scrollPos = 1F - selectedIndex / (float) (interactionOptions.Count - 1);
 
-            if (scrollRect != null)
+            if (scrollRect)
             {
                 scrollRect.verticalScrollbar.value = scrollPos;
             }

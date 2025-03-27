@@ -501,8 +501,8 @@ MonoBehaviour:
   interactionOptionPrefab: {fileID: 1328062481274081314, guid: bd0fec777eb3ab746b1a6d82a512ae60, type: 3}
   interactionProgressOptionPrefab: {fileID: 1328062481274081314, guid: c3a4838a9c5dd10438adb28f2ce08244, type: 3}
   container: {fileID: 7249426673302096163}
-  iteractionTargetHintLine: {fileID: 42052686271837245}
-  iteractionTargetHint: {fileID: 5146976625472477992}
+  interactionTargetHintLine: {fileID: 42052686271837245}
+  interactionTargetHint: {fileID: 5146976625472477992}
   interactionTargetAnimator: {fileID: 9126661879079145198}
 --- !u!1 &7249426671761368325
 GameObject:

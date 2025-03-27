@@ -13,14 +13,13 @@ namespace CraftSharp.UI
 
         public void AddForEntity(int entityId, EntityRender render)
         {
-            if (render != null && !entityFloatingUIs.ContainsKey(entityId))
+            if (render && !entityFloatingUIs.ContainsKey(entityId))
             {
                 var infoTagPrefab = render.FloatingInfoPrefab;
-                if (infoTagPrefab == null) return;
+                if (!infoTagPrefab) return;
 
                 // Make a new floating UI here...
-                var fUIObj = Instantiate(infoTagPrefab);
-                fUIObj.transform.SetParent(render.InfoAnchor, false);
+                var fUIObj = Instantiate(infoTagPrefab, render.InfoAnchor, false);
 
                 var fUI = fUIObj.GetComponent<FloatingUI>();
                 fUI.SetInfo(render);
@@ -35,7 +34,7 @@ namespace CraftSharp.UI
             {
                 var target = entityFloatingUIs[entityId];
 
-                if (target != null) // Delay removal
+                if (target) // Delay removal
                 {
                     target.Destroy(() => entityFloatingUIs.Remove(entityId));
                 }
@@ -49,30 +48,30 @@ namespace CraftSharp.UI
         private void Update()
         {
             var client = CornApp.CurrentClient;
-            if (client == null) return;
+            if (!client) return;
             
             var entityManager = client.EntityRenderManager;
             var validTagOwners = entityManager.GetNearbyEntities().Keys.ToList();
 
-            if (validTagOwners is not null && validTagOwners.Any())
+            if (validTagOwners.Any())
             {
-                var tagOwners = entityFloatingUIs.Keys.ToArray();
+                var prevTagOwners = entityFloatingUIs.Keys.ToArray();
 
-                for (int i = 0;i < tagOwners.Length;i++)
+                foreach (var entityId in prevTagOwners)
                 {
-                    if (!validTagOwners.Contains(tagOwners[i])) // Remove this tag
-                        RemoveForEntity(tagOwners[i]);
+                    if (!validTagOwners.Contains(entityId)) // Remove this tag
+                        RemoveForEntity(entityId);
 
-                    validTagOwners.Remove(tagOwners[i]);
+                    validTagOwners.Remove(entityId);
                 }
 
-                for (int i = 0;i < validTagOwners.Count;i++)
+                foreach (var entityId in validTagOwners)
                 {
-                    var render = entityManager.GetEntityRender(validTagOwners[i]);
+                    var render = entityManager.GetEntityRender(entityId);
 
-                    if (render != null && render.FloatingInfoPrefab != null)
+                    if (render && render.FloatingInfoPrefab)
                     {
-                        AddForEntity(validTagOwners[i], render);
+                        AddForEntity(entityId, render);
                         //Debug.Log($"Adding floating UI for #{validTagOwners[i]}");
                     }
                 }
@@ -83,7 +82,7 @@ namespace CraftSharp.UI
 
             foreach (var item in entityFloatingUIs)
             {
-                if (item.Value == null)
+                if (!item.Value)
                 {
                     nullKeyList.Add(item.Key);
                     continue;

@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Pool;
 using UnityEngine.UI;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using TMPro;
 
@@ -24,7 +22,7 @@ namespace CraftSharp.UI
 
         private static readonly JsonSerializerSettings SERIALIZER_SETTINGS = new()
         {
-            Formatting = Formatting.Indented,
+            Formatting = Formatting.Indented
         };
 
         [SerializeField] private GameObject packetItemPrefab;
@@ -56,9 +54,7 @@ namespace CraftSharp.UI
                 screenAnimator.SetBool(SHOW_HASH, isActive);
             }
 
-            get {
-                return isActive;
-            }
+            get => isActive;
         }
 
         public override bool ReleaseCursor()
@@ -66,7 +62,7 @@ namespace CraftSharp.UI
             return true;
         }
 
-        public override bool ShouldPauseInput()
+        public override bool ShouldPauseControllerInput()
         {
             return true;
         }
@@ -122,8 +118,7 @@ namespace CraftSharp.UI
 
         private PacketItem CreateNewPacketItem()
         {
-            var packetItemObj = GameObject.Instantiate(packetItemPrefab);
-            packetItemObj.transform.SetParent(packetListTransform, false);
+            var packetItemObj = Instantiate(packetItemPrefab, packetListTransform, false);
 
             return packetItemObj.GetComponent<PacketItem>();
         }
@@ -144,8 +139,9 @@ namespace CraftSharp.UI
             if (packetPalette is null)
             {
                 var client = CornApp.CurrentClient;
+                if (!client) return;
+                
                 var protocolVersion = client.GetProtocolVersion();
-
                 Debug.Log($"Protocol version: {protocolVersion}");
 
                 // Create packet palette for interpreting packets
@@ -235,14 +231,14 @@ namespace CraftSharp.UI
                     while ((pInt & -128) != 0)
                     {
                         byteQueue.Enqueue((byte) (pInt & 127 | 128));
-                        pInt = (int) (((uint) pInt) >> 7);
+                        pInt = (int) ((uint) pInt >> 7);
                     }
                     byteQueue.Enqueue((byte) pInt);
 
                     // And append all packet content bytes
-                    for (int i = 0; i < packetItem.PacketBytes.Length; i++)
+                    foreach (var b in packetItem.PacketBytes)
                     {
-                        byteQueue.Enqueue(packetItem.PacketBytes[i]);
+                        byteQueue.Enqueue(b);
                     }
 
                     // Use the handler to read the packet
@@ -270,7 +266,7 @@ namespace CraftSharp.UI
 
         private void ClearPacketPreview()
         {
-            if (inspectedPacketItem != null)
+            if (inspectedPacketItem)
             {
                 inspectedPacketItem.DeselectPacket();
 

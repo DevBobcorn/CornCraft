@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace CraftSharp.UI
@@ -22,9 +23,9 @@ namespace CraftSharp.UI
         /// <summary>
         /// Should be called on client start
         /// </summary>
-        public void SetClient(BaseCornClient client)
+        public void SetClient(BaseCornClient curClient)
         {
-            this.client = client;
+            client = curClient;
 
             // Initialize screens
             screenRegistry.Add(typeof (ChatScreen),      m_ChatScreen);
@@ -46,7 +47,7 @@ namespace CraftSharp.UI
                 var screen = screenRegistry[typeof (T)];
                 screen.EnsureInitialized();
 
-                // Deactive previous top screen if present
+                // Deactivate previous top screen if present
                 if (screenStack.Count > 0)
                 {
                     screenStack.Peek().IsActive = false;
@@ -63,12 +64,9 @@ namespace CraftSharp.UI
 
                 return (T) screen;
             }
-            else
-            {
-                Debug.LogWarning($"Screen type [{typeof (T)}] is not registered!");
+            Debug.LogWarning($"Screen type [{typeof (T)}] is not registered!");
 
-                return null;
-            }
+            return null;
         }
 
         public void SetScreenData<T>(Action<T> callback) where T : BaseScreen
@@ -91,7 +89,7 @@ namespace CraftSharp.UI
             if (screenStack.Count <= 0)
                 Debug.LogError("Trying to pop an already empty screen stack!");
 
-            // Deactive and pop previous top screen
+            // Deactivate and pop previous top screen
             BaseScreen screen2Pop = screenStack.Peek();
 
             screen2Pop.IsActive = false;
@@ -104,35 +102,19 @@ namespace CraftSharp.UI
             UpdateScreenStates();
         }
 
-        // Called before exiting the main scene
-        public void ClearScreens()
-        {
-            screenStack.Clear();
-        }
-
         private void UpdateScreenStates()
         {
             // Get States
-            bool releaseCursor = (screenStack.Count > 0) && screenStack.Peek().ReleaseCursor();
-            bool shouldPauseInput = false;
-            foreach (var w in screenStack)
-            {
-                shouldPauseInput = shouldPauseInput || w.ShouldPauseInput();
-            }
-            
+            bool releaseCursor = screenStack.Count > 0 && screenStack.Peek().ReleaseCursor();
+            bool pauseControllerInput = screenStack.Aggregate(false,
+                (current, w) => current || w.ShouldPauseControllerInput());
+
             //Debug.Log($"In window stack: {string.Join(' ', screenStack)}");
 
             // Update States
-            if (client!.InputPaused != shouldPauseInput)
+            if (client!.ControllerInputPaused != pauseControllerInput)
             {
-                if (shouldPauseInput)
-                {
-                    client.ToggleInputPause(false);
-                }
-                else
-                {
-                    client.ToggleInputPause(true);
-                }
+                client.SetControllerInputPaused(pauseControllerInput);
             }
 
             Cursor.lockState = releaseCursor ? CursorLockMode.None : CursorLockMode.Locked;

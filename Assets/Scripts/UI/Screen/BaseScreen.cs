@@ -9,12 +9,12 @@ namespace CraftSharp.UI
         public abstract bool IsActive { get; set; }
 
         public abstract bool ReleaseCursor();
-        public abstract bool ShouldPauseInput();
+        public abstract bool ShouldPauseControllerInput();
 
         protected bool initialized;
         protected abstract void Initialize();
 
-        public virtual void EnsureInitialized()
+        public void EnsureInitialized()
         {
             if (!initialized)
             {

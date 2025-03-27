@@ -155,9 +155,9 @@ namespace CraftSharp
                     clientEntity.MaxHealth = 20F;
 
                     // Create player render
-                    SwitchFirstPlayerRender(clientEntity);
+                    SwitchToFirstPlayerRender(clientEntity);
                     // Create camera controller
-                    SwitchFirstCameraController();
+                    SwitchToFirstCameraController();
 
                     return true; // Client successfully started
                 }

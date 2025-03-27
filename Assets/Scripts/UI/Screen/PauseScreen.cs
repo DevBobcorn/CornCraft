@@ -20,9 +20,7 @@ namespace CraftSharp.UI
                 screenAnimator.SetBool(SHOW_HASH, isActive);
             }
 
-            get {
-                return isActive;
-            }
+            get => isActive;
         }
 
         public override bool ReleaseCursor()
@@ -30,7 +28,7 @@ namespace CraftSharp.UI
             return true;
         }
 
-        public override bool ShouldPauseInput()
+        public override bool ShouldPauseControllerInput()
         {
             return true;
         }

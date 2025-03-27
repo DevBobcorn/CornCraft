@@ -22,7 +22,6 @@ namespace CraftSharp.UI
             deltaTransform = deltaFillRenderer!.transform;
 
             UpdateValue();
-
         }
 
         protected override void UpdateValue()
@@ -35,10 +34,12 @@ namespace CraftSharp.UI
                 var deltaValue = displayValue - curValue;
 
                 displayTransform!.localScale = new(curValue / maxValue, 1F, 1F);
-                displayTransform!.localPosition = new((curValue / 2F) / maxValue - 0.5F, 0F, 0F);
+                displayTransform!.localPosition = new(curValue / 2 / maxValue - 0.5F, 0F, 0F);
 
                 deltaTransform!.localScale = new(deltaValue / maxValue, 1F, 1F);
-                deltaTransform!.localPosition = new((curValue + (deltaValue / 2F)) / maxValue - 0.5F, 0F, 0F);
+                deltaTransform!.localPosition = new((curValue + deltaValue / 2F) / maxValue - 0.5F, 0F, 0F);
+
+                deltaFillRenderer!.color = reduceColor;
             }
             else // Increase visual fill
             {
@@ -48,10 +49,12 @@ namespace CraftSharp.UI
                 var deltaValue = curValue - displayValue;
 
                 displayTransform!.localScale = new(displayValue / maxValue, 1F, 1F);
-                displayTransform!.localPosition = new((displayValue / 2F) / maxValue - 0.5F, 0F, 0F);
+                displayTransform!.localPosition = new(displayValue / 2F / maxValue - 0.5F, 0F, 0F);
 
                 deltaTransform!.localScale = new(deltaValue / maxValue, 1F, 1F);
-                deltaTransform!.localPosition = new((displayValue + (deltaValue / 2F)) / maxValue - 0.5F, 0F, 0F);
+                deltaTransform!.localPosition = new((displayValue + deltaValue / 2F) / maxValue - 0.5F, 0F, 0F);
+                
+                deltaFillRenderer!.color = increaseColor;
             }
 
             float displayFrac = displayValue / maxValue;

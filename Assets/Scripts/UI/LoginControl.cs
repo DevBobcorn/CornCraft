@@ -242,7 +242,7 @@ namespace CraftSharp.UI
             // Proceed to target server
             if (result == ProtocolHandler.LoginResult.Success)
             {
-                if (!ParseServerIP(serverText, out var host, out var port))
+                if (!ParseServerIP(serverText, out var host, out var port) || host is null)
                 {
                     CornApp.Notify(Translations.Get("login.server_name_invalid"), Notification.Type.Warning);
                     preparingGame = false;
@@ -250,10 +250,10 @@ namespace CraftSharp.UI
                     yield break;
                 }
 
-                if (ProtocolSettings.SessionCaching != ProtocolSettings.CacheType.None)
+                if (ProtocolSettings.SessionCaching != ProtocolSettings.CacheType.None && session is not null)
                     SessionCache.Store(accountLower, session);
 
-                if (microsoftLogin && ProtocolSettings.LoginWithSecureProfile)
+                if (microsoftLogin && ProtocolSettings.LoginWithSecureProfile && session is not null)
                 {
                     // Load cached profile key from disk if necessary
                     if (ProtocolSettings.ProfileKeyCaching == ProtocolSettings.CacheType.Disk)
@@ -282,7 +282,7 @@ namespace CraftSharp.UI
                     }
                 }
 
-                if (ProtocolSettings.DebugMode)
+                if (ProtocolSettings.DebugMode && session is not null)
                     Debug.Log(Translations.Get("debug.session_id", session.Id));
 
                 // Get server version
@@ -296,6 +296,7 @@ namespace CraftSharp.UI
 
                 bool pingResult = false;
                 var pingTask = Task.Run(() => {
+                    // ReSharper disable once AccessToModifiedClosure
                     pingResult = ProtocolHandler.GetServerInfo(host, port, ref receivedVersionName, ref protocolVersion, ref forgeInfo);
                 });
 
@@ -308,12 +309,10 @@ namespace CraftSharp.UI
                     loadStateInfoText.text = Translations.Get("login.login_failed");
                     yield break;
                 }
-                else
-                {
-                    CornApp.Notify(Translations.Get("mcc.server_protocol", receivedVersionName, protocolVersion));
-                }
+                
+                CornApp.Notify(Translations.Get("mcc.server_protocol", receivedVersionName, protocolVersion));
 
-                if (protocolVersion != 0) // Load corresponding data
+                if (protocolVersion != 0 && session is not null) // Load corresponding data
                 {
                     if (ProtocolHandler.IsProtocolSupported(protocolVersion))
                     {
@@ -393,8 +392,8 @@ namespace CraftSharp.UI
             loginInfo = info;
 
             var resLoadFlag = new DataLoadFlag();
-            yield return StartCoroutine(CornApp.Instance.PrepareDataAndResource(info.ProtocolVersion, resLoadFlag,
-                    (status) => loadStateInfoText.text = Translations.Get(status)));
+            yield return StartCoroutine(CornApp.Instance.PrepareDataAndResource(info.ProtocolVersion,
+                resLoadFlag, status => loadStateInfoText.text = Translations.Get(status)));
             
             if (resLoadFlag.Failed)
             {
@@ -456,7 +455,7 @@ namespace CraftSharp.UI
         private void UpdateUsernamePanel(string message)
         {
             shownNames = cachedNames.Where(
-                    (login) => login != message && login.Contains(message)).ToArray();
+                    login => login != message && login.Contains(message)).ToArray();
 
             RefreshUsernames();
         }
@@ -554,9 +553,8 @@ namespace CraftSharp.UI
 
                 // We cannot directly use StartCoroutine to call StartLogin here, which will stop running when
                 // this scene is unloaded and LoginControl object is destroyed
-                CornApp.Instance.StartLoginCoroutine(loginInfo,
-                        (succeeded) => preparingGame = false,
-                        (status) => loadStateInfoText.text = Translations.Get(status));
+                CornApp.Instance.StartLoginCoroutine(loginInfo, _ => preparingGame = false,
+                        status => loadStateInfoText.text = Translations.Get(status));
             }
         }
 
@@ -577,7 +575,7 @@ namespace CraftSharp.UI
             var extraDataDir = PathHelper.GetExtraDataDirectory();
             var builtinResLoad = BuiltinResourceHelper.ReadyBuiltinResource(
                     CornApp.CORN_CRAFT_BUILTIN_FILE_NAME, CornApp.CORN_CRAFT_BUILTIN_VERSION, extraDataDir,
-                    (status) => { }, () => { }, (succeed) => { });
+                    _ => { }, () => { }, _ => { });
             
             while (builtinResLoad.MoveNext()) { /* Do nothing */ }
             
@@ -614,23 +612,23 @@ namespace CraftSharp.UI
             // Add listeners
             localhostButton.onClick.AddListener(() => serverInput.text = LOCALHOST_ADDRESS);
 
-            usernameInput.onValueChanged.AddListener(this.UpdateUsernamePanel);
-            usernameInput.onSelect.AddListener(this.UpdateUsernamePanel);
-            usernameInput.onEndEdit.AddListener(this.HideUsernamePanel);
+            usernameInput.onValueChanged.AddListener(UpdateUsernamePanel);
+            usernameInput.onSelect.AddListener(UpdateUsernamePanel);
+            usernameInput.onEndEdit.AddListener(HideUsernamePanel);
 
-            localGameButton.onClick.AddListener(this.TryConnectDummyServer);
+            localGameButton.onClick.AddListener(TryConnectDummyServer);
             quitButton.onClick.AddListener(QuitGame);
 
-            loginButton.onClick.AddListener(this.TryConnectServer);
-            authLinkButton.onClick.AddListener(this.CopyAuthLink);
-            authCancelButton.onClick.AddListener(this.CancelAuth);
-            authConfirmButton.onClick.AddListener(this.ConfirmAuth);
-            authCodeInput.GetComponentInChildren<Button>().onClick.AddListener(this.PasteAuthCode);
+            loginButton.onClick.AddListener(TryConnectServer);
+            authLinkButton.onClick.AddListener(CopyAuthLink);
+            authCancelButton.onClick.AddListener(CancelAuth);
+            authConfirmButton.onClick.AddListener(ConfirmAuth);
+            authCodeInput.GetComponentInChildren<Button>().onClick.AddListener(PasteAuthCode);
 
-            loginCloseButton.onClick.AddListener(this.HideLoginPanel);
-            loginPanelButton.onClick.AddListener(this.ShowLoginPanel);
+            loginCloseButton.onClick.AddListener(HideLoginPanel);
+            loginPanelButton.onClick.AddListener(ShowLoginPanel);
             // Cancel auth, not just hide panel (so basically this button is totally the same as authCancelButton)...
-            authCloseButton.onClick.AddListener(this.CancelAuth);
+            authCloseButton.onClick.AddListener(CancelAuth);
 
             // Used for testing MC format code parsing
             // loadStateInfoText.text = StringConvert.MC2TMP("Hello world §a[§a§a-1, §a1 §6[Bl§b[HHH]ah] Hello §c[Color RE§rD]  §a1§r] (blah)");
