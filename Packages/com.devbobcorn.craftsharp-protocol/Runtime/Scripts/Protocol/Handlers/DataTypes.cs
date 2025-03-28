@@ -782,7 +782,7 @@ namespace CraftSharp.Protocol.Handlers
                     case EntityMetaDataType.Direction: // Direction (VarInt)
                         value = ReadNextVarInt(cache);
                         break;
-                    case EntityMetaDataType.OptionalUuid: // Optional UUID
+                    case EntityMetaDataType.OptionalUUID: // Optional UUID
                         if (ReadNextBool(cache))
                         {
                             value = ReadNextUUID(cache);

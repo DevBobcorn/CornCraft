@@ -32,16 +32,16 @@ namespace CraftSharp
                 switch (text[10..])
                 {
                     case "creative":
-                        client.DummyOnGamemodeUpdate(client.GetUserUuid(), (int) GameMode.Creative);
+                        client.DummyOnGamemodeUpdate(client.GetUserUUID(), (int) GameMode.Creative);
                         break;
                     case "survival":
-                        client.DummyOnGamemodeUpdate(client.GetUserUuid(), (int) GameMode.Survival);
+                        client.DummyOnGamemodeUpdate(client.GetUserUUID(), (int) GameMode.Survival);
                         break;
                     case "adventure":
-                        client.DummyOnGamemodeUpdate(client.GetUserUuid(), (int) GameMode.Adventure);
+                        client.DummyOnGamemodeUpdate(client.GetUserUUID(), (int) GameMode.Adventure);
                         break;
                     case "spectator":
-                        client.DummyOnGamemodeUpdate(client.GetUserUuid(), (int) GameMode.Spectator);
+                        client.DummyOnGamemodeUpdate(client.GetUserUUID(), (int) GameMode.Spectator);
                         break;
                     
                     default:
@@ -136,7 +136,7 @@ namespace CraftSharp
                     }
                     else
                     {
-                        client.DummyOnTextReceived(new ChatMessage($"{client.GetUsername()}: {text}", client.GetUsername(), false, 0, client.GetUserUuid(), false));
+                        client.DummyOnTextReceived(new ChatMessage($"{client.GetUsername()}: {text}", client.GetUsername(), false, 0, client.GetUserUUID(), false));
                     }
                 };
 
@@ -164,7 +164,7 @@ namespace CraftSharp
             yield return new WaitForEndOfFrame();
 
             // Initialize dummy biome
-            client.DummyInitializeBiomes(new (ResourceLocation id, int numId, object obj)[]
+            CornClientOffline.DummyInitializeBiomes(new (ResourceLocation id, int numId, object obj)[]
             {
                 (
                     new ResourceLocation("plains"), 0,
@@ -198,8 +198,8 @@ namespace CraftSharp
 
             if (dataLoaded)
             {
-                client.DummyOnSetSlot(0, 36, new ItemStack(ItemPalette.INSTANCE.GetById(new("diamond_sword")), 1), 0);
-                client.DummyOnSetSlot(0, 37, new ItemStack(ItemPalette.INSTANCE.GetById(new("bow")), 1), 0);
+                client.DummyOnInventorySlot(0, 36, new ItemStack(ItemPalette.INSTANCE.GetById(new("diamond_sword")), 1), 0);
+                client.DummyOnInventorySlot(0, 37, new ItemStack(ItemPalette.INSTANCE.GetById(new("bow")), 1), 0);
             }
         }
 

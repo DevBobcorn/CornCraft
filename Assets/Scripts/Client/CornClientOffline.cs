@@ -24,10 +24,6 @@ namespace CraftSharp
         private static readonly Guid LOCAL_UUID = new("069a79f4-44e9-4726-a5be-fca90e38aaf5");
         #endregion
 
-        #region Dummy Client Control
-
-        #endregion
-
         #nullable disable
 
         #region Players and Entities
@@ -108,7 +104,7 @@ namespace CraftSharp
                 }
             }
 
-            if (PlayerController != null)
+            if (PlayerController)
             {
                 if (Keyboard.current.f6Key.wasPressedThisFrame) // Select previous
                 {
@@ -150,12 +146,16 @@ namespace CraftSharp
         public override int GetServerPort() => 0;
         public override int GetProtocolVersion() => DUMMY_PROTOCOL_VERSION;
         public override string GetUsername() => DUMMY_USERNAME;
-        public override Guid GetUserUuid() => LOCAL_UUID;
-        public override string GetUserUuidStr() => LOCAL_UUID.ToString().Replace("-", string.Empty);
+        public override Guid GetUserUUID() => LOCAL_UUID;
+        public override string GetUserUUIDStr() => LOCAL_UUID.ToString().Replace("-", string.Empty);
         public override string GetSessionId() => string.Empty;
-        public override double GetServerTps() => 20;
+        public override double GetLatestServerTps() => 20;
+        public override double GetServerAverageTps() => 20;
         public override int GetPacketCount() => 0;
         public override int GetClientEntityId() => clientEntity.Id;
+        public override double GetClientFoodSaturation() => 10;
+        public override double GetClientExperienceLevel() => 42;
+        public override double GetClientTotalExperience() => 10;
         public override float GetTickMilSec() => 50F;
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace CraftSharp
                 }
 
                 return baseString + $"\nLoc: {GetCurrentLocation()}\n{PlayerController.GetDebugInfo()}\nDimension: {dimensionId}\nBiome: {biomeId}\n{targetInfo}\nWorld Origin Offset: {WorldOriginOffset}" +
-                        $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTps():0.0}";
+                        $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetLatestServerTps():0.0} (Avg: {GetServerAverageTps():0.0})";
             }
             
             return baseString;
@@ -277,7 +277,7 @@ namespace CraftSharp
         /// Get a dictionary of online player names and their corresponding UUID
         /// </summary>
         /// <returns>Dictionary of online players, key is UUID, value is Player name</returns>
-        public override Dictionary<string, string> GetOnlinePlayersWithUuid()
+        public override Dictionary<string, string> GetOnlinePlayersWithUUID()
         {
             var uuid2Player = new Dictionary<string, string>();
             
@@ -346,10 +346,10 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Click a slot in the specified window
+        /// Click a slot in the specified inventory
         /// </summary>
         /// <returns>TRUE if the slot was successfully clicked</returns>
-        public override bool DoWindowAction(int windowId, int slotId, WindowActionType action)
+        public override bool DoInventoryAction(int inventoryId, int slot, InventoryActionType action)
         {
             return false;
         }
@@ -379,12 +379,12 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Close the specified inventory window
+        /// Close the specified inventory
         /// </summary>
-        /// <param name="windowId">Window Id</param>
-        /// <returns>TRUE if the window was successfully closed</returns>
-        /// <remarks>Sending close window for inventory 0 can cause server to update our inventory if there are any item in the crafting area</remarks>
-        public override bool CloseInventory(int windowId)
+        /// <param name="inventoryId">Inventory Id</param>
+        /// <returns>TRUE if the inventory was successfully closed</returns>
+        /// <remarks>Sending close inventory for inventory 0 can cause server to update our inventory if there are any item in the crafting area</remarks>
+        public override bool CloseInventory(int inventoryId)
         {
             return false;
         }
@@ -458,7 +458,7 @@ namespace CraftSharp
         /// </summary>
         /// <param name="slot">Slot to activate (0 to 8)</param>
         /// <returns>TRUE if the slot was changed</returns>
-        public override bool ChangeSlot(short slot)
+        public override bool ChangeHotbarSlot(short slot)
         {
             if (slot < 0 || slot > 8)
                 return false;
@@ -472,7 +472,7 @@ namespace CraftSharp
 
         #region Event handlers (Dummy): Handle an event occurred on the server
 
-        public void DummyInitializeBiomes((ResourceLocation id, int numId, object? obj)[] biomeList)
+        public static void DummyInitializeBiomes((ResourceLocation id, int numId, object? obj)[] biomeList)
         {
             World.StoreBiomeList(biomeList);
         }
@@ -518,12 +518,7 @@ namespace CraftSharp
         /// <param name="message">Message received</param>
         public void DummyOnTextReceived(ChatMessage message)
         {
-            string messageText;
-
-            if (message.isJson)
-                messageText = ChatParser.ParseText(message.content);
-            else
-                messageText = message.content;
+            var messageText = message.isJson ? ChatParser.ParseText(message.content) : message.content;
             
             EventManager.Instance.BroadcastOnUnityThread<ChatMessageEvent>(new(messageText));
         }
@@ -557,7 +552,7 @@ namespace CraftSharp
             }
 
             // Set light data and mark as loaded
-            var c = chunksManager.GetChunkColumn(chunkX, chunkZ);
+            var c = chunksManager.GetChunkColumn(chunkX, chunkZ)!;
             c.SetLights(skyLight, blockLight);
             c.FullyLoaded = true;
         }
@@ -573,7 +568,7 @@ namespace CraftSharp
         /// <summary>
         /// Called when held item change
         /// </summary>
-        /// <param name="slot"> item slot</param>
+        /// <param name="slot">Item slot</param>
         public void DummyOnHeldItemChange(byte slot)
         {
             CurrentSlot = slot;
@@ -585,39 +580,39 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// When an inventory is opened
+        /// Called when an inventory is opened
         /// </summary>
         /// <param name="inventory">The inventory</param>
-        /// <param name="inventoryID">Inventory ID</param>
-        public void DummyOnInventoryOpen(int inventoryID, Container inventory)
+        /// <param name="inventoryId">Inventory Id</param>
+        public void DummyOnInventoryOpen(int inventoryId, Container inventory)
         {
-            inventories[inventoryID] = inventory;
+            inventories[inventoryId] = inventory;
 
-            if (inventoryID != 0)
+            if (inventoryId != 0)
             {
-                Debug.Log(Translations.Get("extra.inventory_open", inventoryID, inventory.Title));
+                Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventory.Title));
                 Debug.Log(Translations.Get("extra.inventory_interact"));
             }
         }
 
         /// <summary>
-        /// When a slot is set inside window items
+        /// Called when a single slot has been updated inside an inventory
         /// </summary>
-        /// <param name="inventoryID">Window ID</param>
-        /// <param name="slotID">Slot ID</param>
+        /// <param name="inventoryId">Inventory Id</param>
+        /// <param name="slot">Item slot</param>
         /// <param name="item">Item (may be null for empty slot)</param>
         /// <param name="stateId">State Id</param>
-        public void DummyOnSetSlot(byte inventoryID, short slotID, ItemStack? item, int stateId)
+        public void DummyOnInventorySlot(byte inventoryId, short slot, ItemStack? item, int stateId)
         {
-            if (inventories.TryGetValue(inventoryID, out var inventory))
+            if (inventories.TryGetValue(inventoryId, out var inventory))
                 inventory.StateId = stateId;
 
-            // Handle inventoryID -2 - Add item to player inventory without animation
-            if (inventoryID == 254)
-                inventoryID = 0;
+            // Handle inventoryId -2 - Add item to player inventory without animation
+            if (inventoryId == 254)
+                inventoryId = 0;
             
             // Handle cursor item
-            if (inventoryID == 255 && slotID == -1)
+            if (inventoryId == 255 && slot == -1)
             {
                 //inventoryID = 0; // Prevent key not found for some bots relied to this event
                 if (inventories.ContainsKey(0))
@@ -630,18 +625,18 @@ namespace CraftSharp
             }
             else
             {
-                if (inventories.TryGetValue(inventoryID, out var inventory2))
+                if (inventories.TryGetValue(inventoryId, out var inventory2))
                 {
                     if (item == null || item.IsEmpty)
                     {
-                        if (inventory2.Items.ContainsKey(slotID))
-                            inventory2.Items.Remove(slotID);
+                        if (inventory2.Items.ContainsKey(slot))
+                            inventory2.Items.Remove(slot);
                     }
-                    else inventory2.Items[slotID] = item;
+                    else inventory2.Items[slot] = item;
 
-                    EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryID, slotID, item));
+                    EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slot, item));
 
-                    if (inventory2.IsHotbar(slotID, out int hotbarSlot)) // The updated slot is in the hotbar
+                    if (inventory2.IsHotbar(slot, out int hotbarSlot)) // The updated slot is in the hotbar
                     {
                         EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
 

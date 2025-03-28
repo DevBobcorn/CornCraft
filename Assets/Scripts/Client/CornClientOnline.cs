@@ -64,11 +64,11 @@ namespace CraftSharp
         private readonly List<double> tpsSamples = new(maxSamples);
         private double sampleSum = 0;
         private int packetCount = 0;
-        
-        TcpClient? client;
-        IMinecraftCom? handler;
-        SessionToken? _sessionToken;
-        Tuple<Thread, CancellationTokenSource>? timeoutdetector = null;
+
+        private TcpClient? client;
+        private IMinecraftCom? handler;
+        private SessionToken? _sessionToken;
+        private Tuple<Thread, CancellationTokenSource>? timeoutDetector = null;
         #endregion
 
         #nullable disable
@@ -77,11 +77,9 @@ namespace CraftSharp
         private bool locationReceived = false;
         private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
-        private int foodSaturation, level, totalExperience;
+        private int foodSaturation, experienceLevel, totalExperience;
         private readonly Dictionary<int, Container> inventories = new();
-        #nullable enable
-        private EnchantmentData? lastEnchantment = null;
-        #nullable disable
+
         private readonly object movementLock = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         #endregion
@@ -140,9 +138,9 @@ namespace CraftSharp
                 handler = ProtocolHandler.GetProtocolHandler(client, info.ProtocolVersion, info.ForgeInfo, this);
 
                 // Start update loop
-                timeoutdetector = Tuple.Create(new Thread(TimeoutDetector), new CancellationTokenSource());
-                timeoutdetector.Item1.Name = "Connection Timeout Detector";
-                timeoutdetector.Item1.Start(timeoutdetector.Item2.Token);
+                timeoutDetector = Tuple.Create(new Thread(TimeoutDetector), new CancellationTokenSource());
+                timeoutDetector.Item1.Name = "Connection Timeout Detector";
+                timeoutDetector.Item1.Start(timeoutDetector.Item2.Token);
 
                 if (handler!.Login(playerKeyPair, session, accountLower)) // Login
                 {
@@ -231,7 +229,7 @@ namespace CraftSharp
                 SetWorldOriginOffset(updatedOffset);
             }
 
-            if (PlayerController != null)
+            if (PlayerController)
             {
                 if (Keyboard.current.f6Key.wasPressedThisFrame) // Select previous
                 {
@@ -356,10 +354,10 @@ namespace CraftSharp
                 Debug.LogError($"Transfer to {newHost}:{newPort} failed: {ex.Message}");
 
                 // Handle reconnection attempts
-                if (timeoutdetector != null)
+                if (timeoutDetector != null)
                 {
-                    timeoutdetector.Item2.Cancel();
-                    timeoutdetector = null;
+                    timeoutDetector.Item2.Cancel();
+                    timeoutDetector = null;
                 }
 
                 throw new Exception("Transfer failed.");
@@ -423,8 +421,8 @@ namespace CraftSharp
             handler?.Dispose();
             handler = null;
 
-            timeoutdetector?.Item2.Cancel();
-            timeoutdetector = null;
+            timeoutDetector?.Item2.Cancel();
+            timeoutDetector = null;
 
             client?.Close();
             client = null;
@@ -486,15 +484,13 @@ namespace CraftSharp
             {
                 return task();
             }
-            else
+
+            TaskWithResult<T> taskWithResult = new(task);
+            lock (threadTasksLock)
             {
-                TaskWithResult<T> taskWithResult = new(task);
-                lock (threadTasksLock)
-                {
-                    threadTasks.Enqueue(taskWithResult.ExecuteSynchronously);
-                }
-                return taskWithResult.WaitGetResult();
+                threadTasks.Enqueue(taskWithResult.ExecuteSynchronously);
             }
+            return taskWithResult.WaitGetResult();
         }
 
         /// <summary>
@@ -524,7 +520,7 @@ namespace CraftSharp
         /// Check if running on a different thread and InvokeOnNetMainThread is required
         /// </summary>
         /// <returns>True if calling thread is not the main thread</returns>
-        public bool InvokeRequired
+        private bool InvokeRequired
         {
             get
             {
@@ -533,11 +529,9 @@ namespace CraftSharp
                 {
                     return handler.GetNetMainThreadId() != callingThreadId;
                 }
-                else
-                {
-                    // net main thread not yet ready
-                    return false;
-                }
+
+                // net main thread not yet ready
+                return false;
             }
         }
 
@@ -551,12 +545,17 @@ namespace CraftSharp
         public override int GetServerPort() => port;
         public override int GetProtocolVersion() => protocolVersion;
         public override string GetUsername() => username!;
-        public override Guid GetUserUuid() => uuid;
-        public override string GetUserUuidStr() => uuid.ToString().Replace("-", string.Empty);
+        public override Guid GetUserUUID() => uuid;
+        public override string GetUserUUIDStr() => uuid.ToString().Replace("-", string.Empty);
         public override string GetSessionId() => sessionId!;
-        public override double GetServerTps() => averageTPS;
+        public override double GetServerAverageTps() => averageTPS;
+        public override double GetLatestServerTps() => serverTPS;
         public override int GetPacketCount() => packetCount;
         public override int GetClientEntityId() => clientEntity.Id;
+        public override double GetClientFoodSaturation() => foodSaturation;
+        public override double GetClientExperienceLevel() => experienceLevel;
+        public override double GetClientTotalExperience() => totalExperience;
+
         public override float GetTickMilSec() => (float)(1000D / averageTPS);
 
         /// <summary>
@@ -631,7 +630,7 @@ namespace CraftSharp
                 }
 
                 return baseString + $"\nLoc: {GetCurrentLocation()}\n{PlayerController.GetDebugInfo()}\nDimension: {dimensionId}\nBiome: {biomeId}\n{targetInfo}\nWorld Origin Offset: {WorldOriginOffset}" +
-                        $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetServerTps():0.0}";
+                        $"\n{ChunkRenderManager.GetDebugInfo()}\n{EntityRenderManager.GetDebugInfo()}\nServer TPS: {GetLatestServerTps():0.0} (Avg: {GetServerAverageTps():0.0})";
             }
             
             return baseString;
@@ -691,7 +690,7 @@ namespace CraftSharp
         /// Get a dictionary of online player names and their corresponding UUID
         /// </summary>
         /// <returns>Dictionary of online players, key is UUID, value is Player name</returns>
-        public override Dictionary<string, string> GetOnlinePlayersWithUuid()
+        public override Dictionary<string, string> GetOnlinePlayersWithUUID()
         {
             var uuid2Player = new Dictionary<string, string>();
             lock (onlinePlayers)
@@ -823,12 +822,12 @@ namespace CraftSharp
         /// </summary>
         /// <param name="inventory">The container where the item is located</param>
         /// <param name="item">Items to be processed</param>
-        /// <param name="slotId">The Id of the slot of the item to be processed</param>
+        /// <param name="slot">The item slot to be processed</param>
         /// <param name="curItem">The slot that was put down</param>
-        /// <param name="curId">The Id of the slot being put down</param>
+        /// <param name="curSlot">The item slot being put down</param>
         /// <param name="changedSlots">Record changes</param>
         /// <returns>Whether to fully merge</returns>
-        private static bool TryMergeSlot(Container inventory, ItemStack item, int slotId, ItemStack curItem, int curId, List<Tuple<short, ItemStack?>> changedSlots)
+        private static bool TryMergeSlot(Container inventory, ItemStack item, int slot, ItemStack curItem, int curSlot, List<Tuple<short, ItemStack?>> changedSlots)
         {
             int spaceLeft = curItem.ItemType.StackLimit - curItem.Count;
             if (curItem.ItemType == item.ItemType && spaceLeft > 0)
@@ -840,19 +839,17 @@ namespace CraftSharp
                     item.Count = 0;
                     curItem.Count += item.Count;
 
-                    changedSlots.Add(new Tuple<short, ItemStack?>((short)curId, curItem));
-                    changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, null));
+                    changedSlots.Add(new Tuple<short, ItemStack?>((short)curSlot, curItem));
+                    changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
 
-                    inventory.Items.Remove(slotId);
+                    inventory.Items.Remove(slot);
                     return true;
                 }
-                else
-                {
-                    item.Count -= spaceLeft;
-                    curItem.Count += spaceLeft;
 
-                    changedSlots.Add(new Tuple<short, ItemStack?>((short)curId, curItem));
-                }
+                item.Count -= spaceLeft;
+                curItem.Count += spaceLeft;
+
+                changedSlots.Add(new Tuple<short, ItemStack?>((short)curSlot, curItem));
             }
             return false;
         }
@@ -862,17 +859,17 @@ namespace CraftSharp
         /// </summary>
         /// <param name="inventory">The container where the item is located</param>
         /// <param name="item">Items to be processed</param>
-        /// <param name="slotId">The Id of the slot of the item to be processed</param>
-        /// <param name="newSlotId">Id of the new slot</param>
+        /// <param name="slot">The item slot to be processed</param>
+        /// <param name="newSlot">New item slot</param>
         /// <param name="changedSlots">Record changes</param>
-        private static void StoreInNewSlot(Container inventory, ItemStack item, int slotId, int newSlotId, List<Tuple<short, ItemStack?>> changedSlots)
+        private static void StoreInNewSlot(Container inventory, ItemStack item, int slot, int newSlot, List<Tuple<short, ItemStack?>> changedSlots)
         {
             ItemStack newItem = new(item.ItemType, item.Count, item.NBT);
-            inventory.Items[newSlotId] = newItem;
-            inventory.Items.Remove(slotId);
+            inventory.Items[newSlot] = newItem;
+            inventory.Items.Remove(slot);
 
-            changedSlots.Add(new Tuple<short, ItemStack?>((short)newSlotId, newItem));
-            changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, null));
+            changedSlots.Add(new Tuple<short, ItemStack?>((short)newSlot, newItem));
+            changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
         }
 
         private static readonly HashSet<ResourceLocation> BEACON_FUEL_ITEM_IDS = new()
@@ -900,113 +897,113 @@ namespace CraftSharp
         private static readonly ResourceLocation CARTOGRAPHY_TABLE_FILLED_ITEM_ID = new("filled_map");
 
         /// <summary>
-        /// Click a slot in the specified window
+        /// Click a slot in the specified inventory
         /// </summary>
         /// <returns>TRUE if the slot was successfully clicked</returns>
-        public override bool DoWindowAction(int windowId, int slotId, WindowActionType action)
+        public override bool DoInventoryAction(int inventoryId, int slot, InventoryActionType action)
         {
             if (InvokeRequired)
-                return InvokeOnNetMainThread(() => DoWindowAction(windowId, slotId, action));
+                return InvokeOnNetMainThread(() => DoInventoryAction(inventoryId, slot, action));
 
             ItemStack? item = null;
-            if (inventories.ContainsKey(windowId) && inventories[windowId].Items.ContainsKey(slotId))
-                item = inventories[windowId].Items[slotId];
+            if (inventories.ContainsKey(inventoryId) && inventories[inventoryId].Items.ContainsKey(slot))
+                item = inventories[inventoryId].Items[slot];
 
             List<Tuple<short, ItemStack?>> changedSlots = new(); // List<Slot Id, Changed Items>
 
             // Update our inventory base on action type
-            Container? inventory = GetInventory(windowId);
+            Container? inventory = GetInventory(inventoryId);
             Container playerInventory = GetInventory(0)!;
             if (inventory != null)
             {
                 switch (action)
                 {
-                    case WindowActionType.LeftClick:
+                    case InventoryActionType.LeftClick:
                         // Check if cursor have item (slot -1)
                         if (playerInventory.Items.ContainsKey(-1))
                         {
                             // When item on cursor and clicking slot 0, nothing will happen
-                            if (slotId == 0) break;
+                            if (slot == 0) break;
 
                             // Check target slot also have item?
-                            if (inventory.Items.ContainsKey(slotId))
+                            if (inventory.Items.ContainsKey(slot))
                             {
                                 // Check if both item are the same?
-                                if (inventory.Items[slotId].ItemType == playerInventory.Items[-1].ItemType)
+                                if (inventory.Items[slot].ItemType == playerInventory.Items[-1].ItemType)
                                 {
-                                    int maxCount = inventory.Items[slotId].ItemType.StackLimit;
+                                    int maxCount = inventory.Items[slot].ItemType.StackLimit;
                                     // Check item stacking
-                                    if ((inventory.Items[slotId].Count + playerInventory.Items[-1].Count) <= maxCount)
+                                    if (inventory.Items[slot].Count + playerInventory.Items[-1].Count <= maxCount)
                                     {
                                         // Put cursor item to target
-                                        inventory.Items[slotId].Count += playerInventory.Items[-1].Count;
+                                        inventory.Items[slot].Count += playerInventory.Items[-1].Count;
                                         playerInventory.Items.Remove(-1);
                                     }
                                     else
                                     {
                                         // Leave some item on cursor
-                                        playerInventory.Items[-1].Count -= (maxCount - inventory.Items[slotId].Count);
-                                        inventory.Items[slotId].Count = maxCount;
+                                        playerInventory.Items[-1].Count -= maxCount - inventory.Items[slot].Count;
+                                        inventory.Items[slot].Count = maxCount;
                                     }
                                 }
                                 else
                                 {
                                     // Swap two items
-                                    (inventory.Items[slotId], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slotId]);
+                                    (inventory.Items[slot], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slot]);
                                 }
                             }
                             else
                             {
                                 // Put cursor item to target
-                                inventory.Items[slotId] = playerInventory.Items[-1];
+                                inventory.Items[slot] = playerInventory.Items[-1];
                                 playerInventory.Items.Remove(-1);
                             }
 
-                            changedSlots.Add(inventory.Items.TryGetValue(slotId, out var inventoryItem)
-                                ? new Tuple<short, ItemStack?>((short)slotId, inventoryItem)
-                                : new Tuple<short, ItemStack?>((short)slotId, null));
+                            changedSlots.Add(inventory.Items.TryGetValue(slot, out var inventoryItem)
+                                ? new Tuple<short, ItemStack?>((short)slot, inventoryItem)
+                                : new Tuple<short, ItemStack?>((short)slot, null));
                         }
                         else
                         {
                             // Check target slot have item?
-                            if (inventory.Items.ContainsKey(slotId))
+                            if (inventory.Items.ContainsKey(slot))
                             {
                                 // When taking item from slot 0, server will update us
-                                if (slotId == 0) break;
+                                if (slot == 0) break;
 
                                 // Put target slot item to cursor
-                                playerInventory.Items[-1] = inventory.Items[slotId];
-                                inventory.Items.Remove(slotId);
+                                playerInventory.Items[-1] = inventory.Items[slot];
+                                inventory.Items.Remove(slot);
 
-                                changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, null));
+                                changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
                             }
                         }
                         break;
-                    case WindowActionType.RightClick:
+                    case InventoryActionType.RightClick:
                         // Check if cursor have item (slot -1)
                         if (playerInventory.Items.ContainsKey(-1))
                         {
                             // When item on cursor and clicking slot 0, nothing will happen
-                            if (slotId == 0) break;
+                            if (slot == 0) break;
 
                             // Check target slot have item?
-                            if (inventory.Items.ContainsKey(slotId))
+                            if (inventory.Items.ContainsKey(slot))
                             {
                                 // Check if both item are the same?
-                                if (inventory.Items[slotId].ItemType == playerInventory.Items[-1].ItemType)
+                                if (inventory.Items[slot].ItemType == playerInventory.Items[-1].ItemType)
                                 {
                                     // Check item stacking
-                                    if (inventory.Items[slotId].Count < inventory.Items[slotId].ItemType.StackLimit)
+                                    if (inventory.Items[slot].Count < inventory.Items[slot].ItemType.StackLimit)
                                     {
                                         // Drop 1 item count from cursor
                                         playerInventory.Items[-1].Count--;
-                                        inventory.Items[slotId].Count++;
+                                        inventory.Items[slot].Count++;
                                     }
                                 }
                                 else
                                 {
                                     // Swap two items
-                                    (inventory.Items[slotId], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slotId]);
+                                    (inventory.Items[slot], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slot]);
                                 }
                             }
                             else
@@ -1014,54 +1011,54 @@ namespace CraftSharp
                                 // Drop 1 item count from cursor
                                 var itemTmp = playerInventory.Items[-1];
                                 ItemStack itemClone = new(itemTmp.ItemType, 1, itemTmp.NBT);
-                                inventory.Items[slotId] = itemClone;
+                                inventory.Items[slot] = itemClone;
                                 playerInventory.Items[-1].Count--;
                             }
                         }
                         else
                         {
                             // Check target slot have item?
-                            if (inventory.Items.ContainsKey(slotId))
+                            if (inventory.Items.ContainsKey(slot))
                             {
-                                if (slotId == 0)
+                                if (slot == 0)
                                 {
                                     // no matter how many item in slot 0, only 1 will be taken out
                                     // Also server will update us
                                     break;
                                 }
-                                if (inventory.Items[slotId].Count == 1)
+                                if (inventory.Items[slot].Count == 1)
                                 {
                                     // Only 1 item count. Put it to cursor
-                                    playerInventory.Items[-1] = inventory.Items[slotId];
-                                    inventory.Items.Remove(slotId);
+                                    playerInventory.Items[-1] = inventory.Items[slot];
+                                    inventory.Items.Remove(slot);
                                 }
                                 else
                                 {
                                     // Take half of the item stack to cursor
-                                    if (inventory.Items[slotId].Count % 2 == 0)
+                                    if (inventory.Items[slot].Count % 2 == 0)
                                     {
                                         // Can be evenly divided
-                                        var itemTmp = inventory.Items[slotId];
+                                        var itemTmp = inventory.Items[slot];
                                         playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, itemTmp.Count / 2, itemTmp.NBT);
-                                        inventory.Items[slotId].Count = itemTmp.Count / 2;
+                                        inventory.Items[slot].Count = itemTmp.Count / 2;
                                     }
                                     else
                                     {
                                         // Cannot be evenly divided. item count on cursor is always larger than item on inventory
-                                        var itemTmp = inventory.Items[slotId];
+                                        var itemTmp = inventory.Items[slot];
                                         playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, (itemTmp.Count + 1) / 2, itemTmp.NBT);
-                                        inventory.Items[slotId].Count = (itemTmp.Count - 1) / 2;
+                                        inventory.Items[slot].Count = (itemTmp.Count - 1) / 2;
                                     }
                                 }
                             }
                         }
 
-                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId,
-                            inventory.Items.GetValueOrDefault(slotId)));
+                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slot,
+                            inventory.Items.GetValueOrDefault(slot)));
                         break;
-                    case WindowActionType.ShiftClick:
-                    case WindowActionType.ShiftRightClick:
-                        if (slotId == 0) break;
+                    case InventoryActionType.ShiftClick:
+                    case InventoryActionType.ShiftRightClick:
+                        if (slot == 0) break;
                         if (item != null)
                         {
                             /* Target slot have item */
@@ -1075,9 +1072,9 @@ namespace CraftSharp
                             switch (inventory.Type)
                             {
                                 case ContainerType.PlayerInventory:
-                                    if (slotId is >= 0 and <= 8 or 45)
+                                    if (slot is >= 0 and <= 8 or 45)
                                     {
-                                        //if (slotId != 0)
+                                        //if (slot != 0)
                                             hotbarFirst = false;
                                         upper2backpack = true;
                                         lowerStartSlot = 9;
@@ -1092,7 +1089,7 @@ namespace CraftSharp
                                     } */
                                     else
                                     {
-                                        if (slotId is >= 9 and <= 35)
+                                        if (slot is >= 9 and <= 35)
                                         {
                                             backpack2hotbar = true;
                                             lowerStartSlot = 36;
@@ -1106,7 +1103,7 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Generic_9x1:
-                                    if (slotId is >= 0 and <= 8)
+                                    if (slot is >= 0 and <= 8)
                                     {
                                         upper2backpack = true;
                                         lowerStartSlot = 9;
@@ -1119,7 +1116,7 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Generic_9x2:
-                                    if (slotId is >= 0 and <= 17)
+                                    if (slot is >= 0 and <= 17)
                                     {
                                         upper2backpack = true;
                                         lowerStartSlot = 18;
@@ -1133,7 +1130,7 @@ namespace CraftSharp
                                     break;
                                 case ContainerType.Generic_9x3:
                                 case ContainerType.ShulkerBox:
-                                    if (slotId is >= 0 and <= 26)
+                                    if (slot is >= 0 and <= 26)
                                     {
                                         upper2backpack = true;
                                         lowerStartSlot = 27;
@@ -1146,7 +1143,7 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Generic_9x4:
-                                    if (slotId is >= 0 and <= 35)
+                                    if (slot is >= 0 and <= 35)
                                     {
                                         upper2backpack = true;
                                         lowerStartSlot = 36;
@@ -1159,7 +1156,7 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Generic_9x5:
-                                    if (slotId is >= 0 and <= 44)
+                                    if (slot is >= 0 and <= 44)
                                     {
                                         upper2backpack = true;
                                         lowerStartSlot = 45;
@@ -1172,7 +1169,7 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Generic_9x6:
-                                    if (slotId is >= 0 and <= 53)
+                                    if (slot is >= 0 and <= 53)
                                     {
                                         upper2backpack = true;
                                         lowerStartSlot = 54;
@@ -1185,7 +1182,7 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Generic_3x3:
-                                    if (slotId is >= 0 and <= 8)
+                                    if (slot is >= 0 and <= 8)
                                     {
                                         upper2backpack = true;
                                         lowerStartSlot = 9;
@@ -1198,9 +1195,9 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Anvil:
-                                    if (slotId is >= 0 and <= 2)
+                                    if (slot is >= 0 and <= 2)
                                     {
-                                        if (slotId is >= 0 and <= 1)
+                                        if (slot is >= 0 and <= 1)
                                             hotbarFirst = false;
                                         upper2backpack = true;
                                         lowerStartSlot = 3;
@@ -1213,7 +1210,7 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Beacon:
-                                    /*if (slotId == 0)
+                                    /*if (slot == 0)
                                     {
                                         hotbarFirst = false;
                                         upper2backpack = true;
@@ -1229,7 +1226,7 @@ namespace CraftSharp
                                     }
                                     else
                                     {
-                                        if (slotId is >= 1 and <= 27)
+                                        if (slot is >= 1 and <= 27)
                                         {
                                             backpack2hotbar = true;
                                             lowerStartSlot = 28;
@@ -1245,9 +1242,9 @@ namespace CraftSharp
                                 case ContainerType.BlastFurnace:
                                 case ContainerType.Furnace:
                                 case ContainerType.Smoker:
-                                    if (slotId is >= 0 and <= 2)
+                                    if (slot is >= 0 and <= 2)
                                     {
-                                        if (slotId is >= 0 and <= 1)
+                                        if (slot is >= 0 and <= 1)
                                             hotbarFirst = false;
                                         upper2backpack = true;
                                         lowerStartSlot = 3;
@@ -1261,7 +1258,7 @@ namespace CraftSharp
                                     } */
                                     else
                                     {
-                                        if (slotId is >= 3 and <= 29)
+                                        if (slot is >= 3 and <= 29)
                                         {
                                             backpack2hotbar = true;
                                             lowerStartSlot = 30;
@@ -1275,7 +1272,7 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.BrewingStand:
-                                    if (slotId is >= 0 and <= 3)
+                                    if (slot is >= 0 and <= 3)
                                     {
                                         upper2backpack = true;
                                         lowerStartSlot = 5;
@@ -1303,7 +1300,7 @@ namespace CraftSharp
                                     }
                                     else
                                     {
-                                        if (slotId is >= 5 and <= 31)
+                                        if (slot is >= 5 and <= 31)
                                         {
                                             backpack2hotbar = true;
                                             lowerStartSlot = 32;
@@ -1317,9 +1314,9 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Crafting:
-                                    if (slotId is >= 0 and <= 9)
+                                    if (slot is >= 0 and <= 9)
                                     {
-                                        //if (slotId is >= 1 and <= 9)
+                                        //if (slot is >= 1 and <= 9)
                                             hotbarFirst = false;
                                         upper2backpack = true;
                                         lowerStartSlot = 10;
@@ -1332,7 +1329,7 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Enchantment:
-                                    if (slotId is >= 0 and <= 1)
+                                    if (slot is >= 0 and <= 1)
                                     {
                                         upper2backpack = true;
                                         lowerStartSlot = 5;
@@ -1350,9 +1347,9 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Grindstone:
-                                    if (slotId is >= 0 and <= 2)
+                                    if (slot is >= 0 and <= 2)
                                     {
-                                        if (slotId <= 1)
+                                        if (slot <= 1)
                                             hotbarFirst = false;
                                         upper2backpack = true;
                                         lowerStartSlot = 3;
@@ -1372,7 +1369,7 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Hopper:
-                                    if (slotId is >= 0 and <= 4)
+                                    if (slot is >= 0 and <= 4)
                                     {
                                         upper2backpack = true;
                                         lowerStartSlot = 5;
@@ -1388,9 +1385,9 @@ namespace CraftSharp
                                     return false;
                                     // break;
                                 case ContainerType.Loom:
-                                    if (slotId is >= 0 and <= 3)
+                                    if (slot is >= 0 and <= 3)
                                     {
-                                        //if (slotId is >= 0 and <= 5)
+                                        //if (slot is >= 0 and <= 5)
                                             hotbarFirst = false;
                                         upper2backpack = true;
                                         lowerStartSlot = 4;
@@ -1404,7 +1401,7 @@ namespace CraftSharp
                                     } */
                                     else
                                     {
-                                        if (slotId is >= 4 and <= 30)
+                                        if (slot is >= 4 and <= 30)
                                         {
                                             backpack2hotbar = true;
                                             lowerStartSlot = 31;
@@ -1418,9 +1415,9 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Merchant:
-                                    if (slotId is >= 0 and <= 2)
+                                    if (slot is >= 0 and <= 2)
                                     {
-                                        if (slotId <= 1)
+                                        if (slot <= 1)
                                             hotbarFirst = false;
                                         upper2backpack = true;
                                         lowerStartSlot = 3;
@@ -1434,7 +1431,7 @@ namespace CraftSharp
                                     } */
                                     else
                                     {
-                                        if (slotId is >= 3 and <= 29)
+                                        if (slot is >= 3 and <= 29)
                                         {
                                             backpack2hotbar = true;
                                             lowerStartSlot = 30;
@@ -1448,9 +1445,9 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Cartography:
-                                    if (slotId is >= 0 and <= 2)
+                                    if (slot is >= 0 and <= 2)
                                     {
-                                        if (slotId <= 1)
+                                        if (slot <= 1)
                                             hotbarFirst = false;
                                         upper2backpack = true;
                                         lowerStartSlot = 3;
@@ -1467,7 +1464,7 @@ namespace CraftSharp
                                     }
                                     else
                                     {
-                                        if (slotId is >= 3 and <= 29)
+                                        if (slot is >= 3 and <= 29)
                                         {
                                             backpack2hotbar = true;
                                             lowerStartSlot = 30;
@@ -1481,9 +1478,9 @@ namespace CraftSharp
                                     }
                                     break;
                                 case ContainerType.Stonecutter:
-                                    if (slotId is >= 0 and <= 1)
+                                    if (slot is >= 0 and <= 1)
                                     {
-                                        //if (slotId == 0)
+                                        //if (slot == 0)
                                         //    hotbarFirst = false;
                                         upper2backpack = true;
                                         lowerStartSlot = 2;
@@ -1497,7 +1494,7 @@ namespace CraftSharp
                                     } */
                                     else
                                     {
-                                        if (slotId is >= 2 and <= 28)
+                                        if (slot is >= 2 and <= 28)
                                         {
                                             backpack2hotbar = true;
                                             lowerStartSlot = 29;
@@ -1519,7 +1516,7 @@ namespace CraftSharp
                             // If hotbar already have same item, will put on it first until every stack are full
                             // If no more same item , will put on the first empty slot (smaller slot id)
                             // If inventory full, item will not move
-                            int itemCount = inventory.Items[slotId].Count;
+                            int itemCount = inventory.Items[slot].Count;
                             if (lower2upper)
                             {
                                 int firstEmptySlot = -1;
@@ -1527,7 +1524,7 @@ namespace CraftSharp
                                 {
                                     if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
                                     {
-                                        if (TryMergeSlot(inventory, item, slotId, curItem, i, changedSlots))
+                                        if (TryMergeSlot(inventory, item, slot, curItem, i, changedSlots))
                                             break;
                                     }
                                     else if (firstEmptySlot == -1)
@@ -1536,9 +1533,9 @@ namespace CraftSharp
                                 if (item.Count > 0)
                                 {
                                     if (firstEmptySlot != -1)
-                                        StoreInNewSlot(inventory, item, slotId, firstEmptySlot, changedSlots);
+                                        StoreInNewSlot(inventory, item, slot, firstEmptySlot, changedSlots);
                                     else if (item.Count != itemCount)
-                                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
+                                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, inventory.Items[slot]));
                                 }
                             }
                             else if (upper2backpack)
@@ -1551,7 +1548,7 @@ namespace CraftSharp
                                     {
                                         if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
                                         {
-                                            if (TryMergeSlot(inventory, item, slotId, curItem, i, changedSlots))
+                                            if (TryMergeSlot(inventory, item, slot, curItem, i, changedSlots))
                                                 break;
                                         }
                                         else if (lastEmptySlot == -1)
@@ -1560,9 +1557,9 @@ namespace CraftSharp
                                     if (item.Count > 0)
                                     {
                                         if (lastEmptySlot != -1)
-                                            StoreInNewSlot(inventory, item, slotId, lastEmptySlot, changedSlots);
+                                            StoreInNewSlot(inventory, item, slot, lastEmptySlot, changedSlots);
                                         else if (item.Count != itemCount)
-                                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
+                                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, inventory.Items[slot]));
                                     }
                                 }
                                 else
@@ -1572,7 +1569,7 @@ namespace CraftSharp
                                     {
                                         if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
                                         {
-                                            if (TryMergeSlot(inventory, item, slotId, curItem, i, changedSlots))
+                                            if (TryMergeSlot(inventory, item, slot, curItem, i, changedSlots))
                                                 break;
                                         }
                                         else if (firstEmptySlot == -1)
@@ -1581,9 +1578,9 @@ namespace CraftSharp
                                     if (item.Count > 0)
                                     {
                                         if (firstEmptySlot != -1)
-                                            StoreInNewSlot(inventory, item, slotId, firstEmptySlot, changedSlots);
+                                            StoreInNewSlot(inventory, item, slot, firstEmptySlot, changedSlots);
                                         else if (item.Count != itemCount)
-                                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
+                                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, inventory.Items[slot]));
                                     }
                                 }
                             }
@@ -1596,7 +1593,7 @@ namespace CraftSharp
                                 {
                                     if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
                                     {
-                                        if (TryMergeSlot(inventory, item, slotId, curItem, i, changedSlots))
+                                        if (TryMergeSlot(inventory, item, slot, curItem, i, changedSlots))
                                             break;
                                     }
                                     else if (firstEmptySlot == -1)
@@ -1605,36 +1602,38 @@ namespace CraftSharp
                                 if (item.Count > 0)
                                 {
                                     if (firstEmptySlot != -1)
-                                        StoreInNewSlot(inventory, item, slotId, firstEmptySlot, changedSlots);
+                                        StoreInNewSlot(inventory, item, slot, firstEmptySlot, changedSlots);
                                     else if (item.Count != itemCount)
-                                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
+                                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, inventory.Items[slot]));
                                 }
                             }
                         }
                         break;
-                    case WindowActionType.DropItem:
-                        if (inventory.Items.ContainsKey(slotId))
+                    case InventoryActionType.DropItem:
+                        if (inventory.Items.ContainsKey(slot))
                         {
-                            inventory.Items[slotId].Count--;
-                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, inventory.Items[slotId]));
+                            inventory.Items[slot].Count--;
+                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, inventory.Items[slot]));
                         }
 
-                        if (inventory.Items[slotId].Count <= 0)
+                        if (inventory.Items[slot].Count <= 0)
                         {
-                            inventory.Items.Remove(slotId);
-                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, null));
+                            inventory.Items.Remove(slot);
+                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
                         }
 
                         break;
-                    case WindowActionType.DropItemStack:
-                        inventory.Items.Remove(slotId);
-                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slotId, null));
+                    case InventoryActionType.DropItemStack:
+                        inventory.Items.Remove(slot);
+                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
+                        break;
+                    default:
+                        Debug.Log($"Inventory action not handled: {action}");
                         break;
                 }
-
             }
 
-            return handler!.SendWindowAction(windowId, slotId, action, item, changedSlots, inventories[windowId].StateId);
+            return handler!.SendInventoryAction(inventoryId, slot, action, item, changedSlots, inventories[inventoryId].StateId);
         }
 
         /// <summary>
@@ -1662,21 +1661,21 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Close the specified inventory window
+        /// Close the specified inventory
         /// </summary>
-        /// <param name="windowId">Window Id</param>
-        /// <returns>TRUE if the window was successfully closed</returns>
-        /// <remarks>Sending close window for inventory 0 can cause server to update our inventory if there are any item in the crafting area</remarks>
-        public override bool CloseInventory(int windowId)
+        /// <param name="inventoryId">Inventory Id</param>
+        /// <returns>TRUE if the inventory was successfully closed</returns>
+        /// <remarks>Sending close inventory for inventory 0 can cause server to update our inventory if there are any item in the crafting area</remarks>
+        public override bool CloseInventory(int inventoryId)
         {
             if (InvokeRequired)
-                return InvokeOnNetMainThread(() => CloseInventory(windowId));
+                return InvokeOnNetMainThread(() => CloseInventory(inventoryId));
 
-            if (inventories.ContainsKey(windowId))
+            if (inventories.ContainsKey(inventoryId))
             {
-                if (windowId != 0)
-                    inventories.Remove(windowId);
-                return handler!.SendCloseWindow(windowId);
+                if (inventoryId != 0)
+                    inventories.Remove(inventoryId);
+                return handler!.SendCloseInventory(inventoryId);
             }
             return false;
         }
@@ -1688,7 +1687,7 @@ namespace CraftSharp
         public override bool ClearInventories()
         {
             if (InvokeRequired)
-                return InvokeOnNetMainThread<bool>(ClearInventories);
+                return InvokeOnNetMainThread(ClearInventories);
 
             inventories.Clear();
             inventories[0] = new Container(0, ContainerType.PlayerInventory, "Player Inventory");
@@ -1709,12 +1708,12 @@ namespace CraftSharp
 
             if (EntityRenderManager.HasEntityRender(entityId))
             {
-                if (type == 0)
-                    return handler!.SendInteractEntity(entityId, type, (int)hand);
-                else
-                    return handler!.SendInteractEntity(entityId, type);
+                return type == 0 ?
+                    handler!.SendInteractEntity(entityId, type, (int) hand) :
+                    handler!.SendInteractEntity(entityId, type);
             }
-            else return false;
+
+            return false;
         }
 
         /// <summary>
@@ -1812,9 +1811,7 @@ namespace CraftSharp
         /// </summary>
         public override bool SwapItemOnHands()
         {
-            if (GameMode == GameMode.Spectator) return false;
-
-            return handler!.SendPlayerAction(6);
+            return GameMode != GameMode.Spectator && handler!.SendPlayerAction(6);
         }
 
         /// <summary>
@@ -1822,13 +1819,13 @@ namespace CraftSharp
         /// </summary>
         /// <param name="slot">Slot to activate (0 to 8)</param>
         /// <returns>TRUE if the slot was changed</returns>
-        public override bool ChangeSlot(short slot)
+        public override bool ChangeHotbarSlot(short slot)
         {
-            if (slot < 0 || slot > 8)
+            if (slot is < 0 or > 8)
                 return false;
 
             if (InvokeRequired)
-                return InvokeOnNetMainThread(() => ChangeSlot(slot));
+                return InvokeOnNetMainThread(() => ChangeHotbarSlot(slot));
             
             // There won't be confirmation from the server
             // Simply set it on the client side
@@ -1858,7 +1855,7 @@ namespace CraftSharp
         /// <summary>
         /// Select villager trade
         /// </summary>
-        /// <param name="selectedSlot">The slot of the trade, starts at 0.</param>
+        /// <param name="selectedSlot">The slot of the trade, starts at 0</param>
         public bool SelectTrade(int selectedSlot)
         {
             return InvokeOnNetMainThread(() => handler!.SelectTrade(selectedSlot));
@@ -1868,25 +1865,23 @@ namespace CraftSharp
         /// Teleport to player in spectator mode
         /// </summary>
         /// <param name="entity">Player to teleport to</param>
-        /// Teleporting to other entityies is NOT implemented yet
+        /// Teleporting to other entities is NOT implemented yet
         public bool Spectate(EntityData entity)
         {
-            if (entity.Type.TypeId == EntityType.PLAYER_ID)
-                return SpectateByUUID(entity.UUID);
-            return false;
+            return entity.Type.TypeId == EntityType.PLAYER_ID && SpectateByUUID(entity.UUID);
         }
 
         /// <summary>
         /// Teleport to player/entity in spectator mode
         /// </summary>
         /// <param name="UUID">UUID of player/entity to teleport to</param>
-        public bool SpectateByUUID(Guid UUID)
+        private bool SpectateByUUID(Guid UUID)
         {
-            if(GameMode == GameMode.Spectator)
+            if (GameMode == GameMode.Spectator)
             {
-                if(InvokeRequired)
-                    return InvokeOnNetMainThread(() => SpectateByUUID(UUID));
-                return handler!.SendSpectate(UUID);
+                return InvokeRequired ?
+                    InvokeOnNetMainThread(() => SpectateByUUID(UUID)) :
+                    handler!.SendSpectate(UUID);
             }
             return false;
         }
@@ -2036,7 +2031,7 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Received chat/system message from the server
+        /// Called when received chat/system message from the server
         /// </summary>
         /// <param name="message">Message received</param>
         public void OnTextReceived(ChatMessage message)
@@ -2091,7 +2086,7 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Received a connection keep-alive from the server
+        /// Called when received a connection keep-alive from the server
         /// </summary>
         public void OnServerKeepAlive()
         {
@@ -2099,7 +2094,7 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called tab complete suggestion is received
+        /// Called when tab complete suggestion is received
         /// </summary>
         public void OnTabCompleteDone(int completionStart, int completionLength, string[] completeResults)
         {
@@ -2115,7 +2110,7 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// When an inventory is opened
+        /// Called when an inventory is opened
         /// </summary>
         /// <param name="inventory">The inventory</param>
         /// <param name="inventoryId">Inventory Id</param>
@@ -2140,7 +2135,7 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// When an inventory is close
+        /// Called when an inventory is closed
         /// </summary>
         /// <param name="inventoryId">Inventory Id</param>
         public void OnInventoryClose(int inventoryId)
@@ -2164,12 +2159,12 @@ namespace CraftSharp
         /// Used for Furnaces, Enchanting Table, Beacon, Brewing stand, Stone cutter, Loom and Lectern
         /// More info about: https://wiki.vg/Protocol#Set_Container_Property
         /// </summary>
-        /// <param name="inventoryID">Inventory ID</param>
-        /// <param name="propertyId">Property ID</param>
+        /// <param name="inventoryId">Inventory Id</param>
+        /// <param name="propertyId">Property Id</param>
         /// <param name="propertyValue">Property Value</param>
-        public void OnWindowProperties(byte inventoryID, short propertyId, short propertyValue)
+        public void OnInventoryProperties(byte inventoryId, short propertyId, short propertyValue)
         {
-            if (!inventories.TryGetValue(inventoryID, out var inventory))
+            if (!inventories.TryGetValue(inventoryId, out var inventory))
                 return;
 
             if (inventory.Properties.ContainsKey(propertyId))
@@ -2202,7 +2197,7 @@ namespace CraftSharp
                     var middleEnchantmentLevel = inventory.Properties[8];
                     var bottomEnchantmentLevel = inventory.Properties[9];
 
-                    lastEnchantment = new()
+                    var lastEnchantment = new EnchantmentData
                     {
                         TopEnchantment = topEnchantment,
                         MiddleEnchantment = middleEnchantment,
@@ -2225,12 +2220,12 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// When received window items from server.
+        /// When received inventory items from server
         /// </summary>
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="itemList">Item list, key = slot Id, value = Item information</param>
         /// <param name="stateId">State Id of inventory</param>
-        public void OnWindowItems(byte inventoryId, Dictionary<int, ItemStack> itemList, int stateId)
+        public void OnInventoryItems(byte inventoryId, Dictionary<int, ItemStack> itemList, int stateId)
         {
             if (inventories.TryGetValue(inventoryId, out var container))
             {
@@ -2238,13 +2233,13 @@ namespace CraftSharp
                 container.StateId = stateId;
                 
                 Loom.QueueOnMainThread(() => {
-                    foreach (var (slotId, itemStack) in itemList)
+                    foreach (var (slot, itemStack) in itemList)
                     {
-                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slotId, itemStack));
+                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slot, itemStack));
 
-                        //Debug.Log($"Set window item: [{inventoryId}]/[{pair.Key}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
+                        //Debug.Log($"Set inventory item: [{inventoryId}]/[{pair.Key}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
 
-                        if (container.IsHotbar(slotId, out int hotbarSlot))
+                        if (container.IsHotbar(slot, out int hotbarSlot))
                         {
                             EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, itemStack));
                             if (hotbarSlot == CurrentSlot) // Updating held item
@@ -2259,13 +2254,13 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// When a slot is set inside window items
+        /// Called when a single slot has been updated inside an inventory
         /// </summary>
-        /// <param name="inventoryId">Window Id</param>
-        /// <param name="slotId">Slot Id</param>
+        /// <param name="inventoryId">Inventory Id</param>
+        /// <param name="slot">Item slot</param>
         /// <param name="item">Item (may be null for empty slot)</param>
         /// <param name="stateId">State Id</param>
-        public void OnSetSlot(byte inventoryId, short slotId, ItemStack? item, int stateId)
+        public void OnInventorySlot(byte inventoryId, short slot, ItemStack? item, int stateId)
         {
             if (inventories.TryGetValue(inventoryId, out var inventory))
                 inventory.StateId = stateId;
@@ -2274,7 +2269,7 @@ namespace CraftSharp
             if (inventoryId == 254)
                 inventoryId = 0;
             // Handle cursor item
-            if (inventoryId == 255 && slotId == -1)
+            if (inventoryId == 255 && slot == -1)
             {
                 //inventoryId = 0; // Prevent key not found for some bots relied to this event
                 if (inventories.ContainsKey(0))
@@ -2291,17 +2286,17 @@ namespace CraftSharp
                 {
                     if (item == null || item.IsEmpty)
                     {
-                        if (inventory2.Items.ContainsKey(slotId))
-                            inventory2.Items.Remove(slotId);
+                        if (inventory2.Items.ContainsKey(slot))
+                            inventory2.Items.Remove(slot);
                     }
-                    else inventory2.Items[slotId] = item;
+                    else inventory2.Items[slot] = item;
 
                     Loom.QueueOnMainThread(() => {
-                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slotId, item));
+                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slot, item));
 
-                        //Debug.Log($"Set inventory item: [{inventoryId}]/[{slotId}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
+                        //Debug.Log($"Set inventory item: [{inventoryId}]/[{slot}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
 
-                        if (inventory2.IsHotbar(slotId, out int hotbarSlot))
+                        if (inventory2.IsHotbar(slot, out int hotbarSlot))
                         {
                             EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
                             if (hotbarSlot == CurrentSlot) // Updating held item
@@ -2322,7 +2317,7 @@ namespace CraftSharp
         public void OnReceivePlayerEntityId(int entityId)
         {
             clientEntity.Id = entityId;
-            //Debug.Log($"Client entity id received: {entityId}");
+            //Debug.Log($"Player entity Id received: {entityId}");
         }
 
         /// <summary>
@@ -2339,7 +2334,7 @@ namespace CraftSharp
             {
                 // 1.19+ offline server is possible to return different uuid
                 // This will disable custom skin for client player
-                this.uuid = player.Uuid;
+                uuid = player.UUID;
                 // Also update client entity uuid
                 clientEntity.UUID = uuid;
                 Debug.Log($"Updated client uuid: {this.uuid}");
@@ -2347,7 +2342,7 @@ namespace CraftSharp
 
             lock (onlinePlayers)
             {
-                onlinePlayers[player.Uuid] = player;
+                onlinePlayers[player.UUID] = player;
             }
         }
 
@@ -2479,9 +2474,9 @@ namespace CraftSharp
         /// Called when an entity's position changed within 8 block of its previous position.
         /// </summary>
         /// <param name="entityId">Entity Id</param>
-        /// <param name="dx">Delta X</param>
-        /// <param name="dy">Delta Y</param>
-        /// <param name="dz">Delta Z</param>
+        /// <param name="dx">X offset</param>
+        /// <param name="dy">Y offset</param>
+        /// <param name="dz">Z offset</param>
         /// <param name="onGround">Whether the entity is grounded</param>
         public void OnEntityPosition(int entityId, double dx, double dy, double dz, bool onGround)
         {
@@ -2615,14 +2610,14 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called when experience updates
+        /// Called when experience is updated
         /// </summary>
         /// <param name="expBar">Between 0 and 1</param>
         /// <param name="expLevel">Experience level</param>
         /// <param name="totalExp">Total experience</param>
         public void OnSetExperience(float expBar, int expLevel, int totalExp)
         {
-            level = expLevel;
+            experienceLevel = expLevel;
             totalExperience = totalExp;
         }
 
@@ -2651,7 +2646,7 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called when held item change
+        /// Called when held item is changed
         /// </summary>
         /// <param name="slot"> item slot</param>
         public void OnHeldItemChange(byte slot) //
@@ -2684,7 +2679,7 @@ namespace CraftSharp
         /// Received some Title from the server
         /// <param name="action"> 0 = set title, 1 = set subtitle, 3 = set action bar, 4 = set times and display, 4 = hide, 5 = reset</param>
         /// <param name="titleText"> title text</param>
-        /// <param name="subtitleText"> suntitle text</param>
+        /// <param name="subtitleText"> subtitle text</param>
         /// <param name="actionbarText"> action bar text</param>
         /// <param name="fadeIn"> Fade In</param>
         /// <param name="stay"> Stay</param>
@@ -2694,20 +2689,20 @@ namespace CraftSharp
         public void OnTitle(int action, string titleText, string subtitleText, string actionbarText, int fadeIn, int stay, int fadeOut, string json) { }
 
         /// <summary>
-        /// Called when coreboardObjective
+        /// Called when ScoreboardObjective is updated
         /// </summary>
-        /// <param name="objectivename">objective name</param>
+        /// <param name="objectiveName">objective name</param>
         /// <param name="mode">0 to create the scoreboard. 1 to remove the scoreboard. 2 to update the display text.</param>
         /// <param name="objectiveValue">Only if mode is 0 or 2. The text to be displayed for the score</param>
         /// <param name="type">Only if mode is 0 or 2. 0 = "integer", 1 = "hearts".</param>
-        public void OnScoreboardObjective(string objectivename, byte mode, string objectiveValue, int type)
+        public void OnScoreboardObjective(string objectiveName, byte mode, string objectiveValue, int type)
         {
             //string json = objectiveValue;
             //objectiveValue = ChatParser.ParseText(objectiveValue);
         }
 
         /// <summary>
-        /// Called when DisplayScoreboard
+        /// Called when DisplayScoreboard is updated
         /// </summary>
         /// <param name="entityName">The entity whose score this is. For players, this is their username; for other entities, it is their UUID.</param>
         /// <param name="action">0 to create/update an item. 1 to remove an item.</param>
@@ -2721,7 +2716,7 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called when the metadata of an entity changed
+        /// Called when the metadata of an entity changed is received
         /// </summary>
         /// <param name="entityId">Entity Id</param>
         /// <param name="metadata">The metadata of the entity</param>
@@ -2730,7 +2725,7 @@ namespace CraftSharp
             Loom.QueueOnMainThread(() => {
                 var entity = EntityRenderManager.GetEntityRender(entityId);
 
-                if (entity != null)
+                if (entity)
                 {
                     entity.UpdateMetadata(metadata);
                 }
@@ -2740,10 +2735,10 @@ namespace CraftSharp
         /// <summary>
         /// Called when tradeList is received after interacting with villager
         /// </summary>
-        /// <param name="windowId">Window Id</param>
-        /// <param name="trades">List of trades.</param>
-        /// <param name="villagerInfo">Contains Level, Experience, IsRegularVillager and CanRestock .</param>
-        public void OnTradeList(int windowId, List<VillagerTrade> trades, VillagerInfo villagerInfo) { }
+        /// <param name="inventoryId">Inventory Id</param>
+        /// <param name="trades">List of trades</param>
+        /// <param name="villagerInfo">Contains Level, Experience, IsRegularVillager and CanRestock</param>
+        public void OnTradeList(int inventoryId, List<VillagerTrade> trades, VillagerInfo villagerInfo) { }
 
         /// <summary>
         /// Called when another player break block in gamemode 0
@@ -2753,8 +2748,10 @@ namespace CraftSharp
         /// <param name="stage">Destroy stage, maximum 255</param>
         public void OnBlockBreakAnimation(int entityId, BlockLoc blockLoc, byte stage)
         {
+            /*
             var block = ChunkRenderManager.GetBlock(blockLoc);
             var status = stage < 9 ? DiggingStatus.Started : DiggingStatus.Finished;
+            */
         }
 
         /// <summary>
@@ -2784,7 +2781,7 @@ namespace CraftSharp
         /// <param name="newSequenceId">Sequence Id</param>
         public void OnBlockChangeAck(int newSequenceId)
         {
-            this.sequenceId = newSequenceId;
+            sequenceId = newSequenceId;
         }
 
         /// <summary>

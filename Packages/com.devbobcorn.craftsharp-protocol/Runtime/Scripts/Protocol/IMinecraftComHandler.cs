@@ -22,11 +22,11 @@ namespace CraftSharp.Protocol
         int GetServerPort();
         string GetServerHost();
         string GetUsername();
-        Guid GetUserUuid();
-        string GetUserUuidStr();
+        Guid GetUserUUID();
+        string GetUserUUIDStr();
         string GetSessionId();
         string[] GetOnlinePlayers();
-        Dictionary<string, string> GetOnlinePlayersWithUuid();
+        Dictionary<string, string> GetOnlinePlayersWithUUID();
         PlayerInfo? GetPlayerInfo(Guid targetUUID);
         Location GetCurrentLocation();
         IChunkRenderManager GetChunkRenderManager();
@@ -44,8 +44,8 @@ namespace CraftSharp.Protocol
         /// </summary>
         /// <param name="task">Task to run with any type or return value</param>
         /// <returns>Any result returned from task, result type is inferred from the task</returns>
-        /// <example>bool result = InvokeOnNetMainThread(methodThatReturnsAbool);</example>
-        /// <example>bool result = InvokeOnNetMainThread(() => methodThatReturnsAbool(argument));</example>
+        /// <example>bool result = InvokeOnNetMainThread(methodThatReturnsABool);</example>
+        /// <example>bool result = InvokeOnNetMainThread(() => methodThatReturnsABool(argument));</example>
         /// <example>int result = InvokeOnNetMainThread(() => { yourCode(); return 42; });</example>
         /// <typeparam name="T">Type of the return value</typeparam>
         T InvokeOnNetMainThread<T>(Func<T> task);
@@ -86,7 +86,7 @@ namespace CraftSharp.Protocol
         /// Will be called every animations of the hit and place block
         /// </summary>
         /// <param name="entityId">Player Id</param>
-        /// <param name="entityAnimation">0 = LMB, 1 = RMB (RMB Corrent not work)</param>
+        /// <param name="entityAnimation">0 = LMB, 1 = RMB (RMB Currently not working)</param>
         void OnEntityAnimation(int entityId, byte entityAnimation);
 
         /// <summary>
@@ -190,8 +190,8 @@ namespace CraftSharp.Protocol
         /// Called when an entity has spawned
         /// </summary>
         /// <param name="entityId">Entity Id</param>
-        /// <param name="slot">Equipment slot. 0: main hand, 1: off hand, 2–5: armor slot (2: boots, 3: leggings, 4: chestplate, 5: helmet)/param>
-        /// <param name="item">Item/param>
+        /// <param name="slot">Equipment slot. 0: main hand, 1: off hand, 2–5: armor slot (2: boots, 3: leggings, 4: chestplate, 5: helmet)</param>
+        /// <param name="item">Item</param>
         void OnEntityEquipment(int entityId, int slot, ItemStack item);
 
         /// <summary>
@@ -218,13 +218,15 @@ namespace CraftSharp.Protocol
         /// <param name="dy">Y offset</param>
         /// <param name="dz">Z offset</param>
         /// <param name="onGround">TRUE if on ground</param>
-        void OnEntityPosition(int entityId, Double dx, Double dy, Double dz, bool onGround);
+        void OnEntityPosition(int entityId, double dx, double dy, double dz, bool onGround);
 
         /// <summary>
         /// Called when an entity's yaw or pitch changed.
         /// </summary>
         /// <param name="entityId">Entity Id</param>
-        /// <param name="headYaw">New head yaw</param>
+        /// <param name="yaw">New yaw</param>
+        /// <param name="pitch">New pitch</param>
+        /// <param name="onGround">Whether the entity is grounded</param>
         void OnEntityRotation(int entityId, byte yaw, byte pitch, bool onGround);
 
         /// <summary>
@@ -242,14 +244,14 @@ namespace CraftSharp.Protocol
         /// <param name="y">Y</param>
         /// <param name="z">Z</param>
         /// <param name="onGround">TRUE if on ground</param>
-        void OnEntityTeleport(int entityId, Double x, Double y, Double z, bool onGround);
+        void OnEntityTeleport(int entityId, double x, double y, double z, bool onGround);
 
         /// <summary>
         /// Called when additional properties have been received for an entity
         /// </summary>
         /// <param name="entityId">Entity Id</param>
         /// <param name="prop">Dictionary of properties</param>
-        void OnEntityProperties(int entityId, Dictionary<string, Double> prop);
+        void OnEntityProperties(int entityId, Dictionary<string, double> prop);
 
         /// <summary>
         /// Called when the status of an entity have been changed
@@ -266,13 +268,13 @@ namespace CraftSharp.Protocol
         void OnTimeUpdate(long worldAge, long timeOfDay);
 
         /// <summary>
-        /// When received window properties from server.
+        /// When received inventory properties from server.
         /// 
         /// </summary>
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="propertyId">Property Id</param>
         /// <param name="propertyValue">Property Value</param>
-        public void OnWindowProperties(byte inventoryId, short propertyId, short propertyValue);
+        public void OnInventoryProperties(byte inventoryId, short propertyId, short propertyValue);
 
         /// <summary>
         /// Called when inventory items have been received
@@ -280,16 +282,16 @@ namespace CraftSharp.Protocol
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="itemList">Item list</param>
         /// <param name="stateId">State Id</param>
-        void OnWindowItems(byte inventoryId, Dictionary<int, ItemStack> itemList, int stateId);
+        void OnInventoryItems(byte inventoryId, Dictionary<int, ItemStack> itemList, int stateId);
 
         /// <summary>
         /// Called when a single slot has been updated inside an inventory
         /// </summary>
-        /// <param name="inventoryId">Window Id</param>
-        /// <param name="slotId">Slot Id</param>
+        /// <param name="inventoryId">Inventory Id</param>
+        /// <param name="slot">Slot Id</param>
         /// <param name="item">Item (may be null for empty slot)</param>
         /// <param name="stateId">State Id</param>
-        void OnSetSlot(byte inventoryId, short slotId, ItemStack item, int stateId);
+        void OnInventorySlot(byte inventoryId, short slot, ItemStack item, int stateId);
 
         /// <summary>
         /// Called when player health or hunger changed.
@@ -328,15 +330,15 @@ namespace CraftSharp.Protocol
         void OnLatencyUpdate(Guid playerUUID, int latency);
 
         /// <summary>
-        /// Called when Experience bar is updated
+        /// Called when experience is updated
         /// </summary>
-        /// <param name="Experiencebar">Experience bar level</param>
+        /// <param name="expBar">Experience bar level</param>
         /// <param name="expLevel">Player Level</param>
         /// <param name="TotalExperience">Total experience</param>
-        void OnSetExperience(float Experiencebar, int expLevel, int TotalExperience);
+        void OnSetExperience(float expBar, int expLevel, int TotalExperience);
 
         /// <summary>
-        /// Called when client need to change slot.
+        /// Called when held item is changed
         /// </summary>
         /// <remarks>Used for setting player slot after joining game</remarks>
         /// <param name="slot"></param>
@@ -377,16 +379,16 @@ namespace CraftSharp.Protocol
         void OnEntityEffect(int entityId, Effects effect, int amplifier, int duration, byte flags, bool hasFactorData, Dictionary<String, object>? factorCodec);
 
         /// <summary>
-        /// Called when coreboardObjective
+        /// Called when ScoreboardObjective is updated
         /// </summary>
-        /// <param name="objectivename">Objective name</param>
+        /// <param name="objectiveName">Objective name</param>
         /// <param name="mode">0 to create the scoreboard. 1 to remove the scoreboard. 2 to update the display text.</param>
         /// <param name="objectiveValue">Only if mode is 0 or 2. The text to be displayed for the score</param>
         /// <param name="type">Only if mode is 0 or 2. 0 = "integer", 1 = "hearts".</param>
-        void OnScoreboardObjective(string objectivename, byte mode, string objectiveValue, int type);
+        void OnScoreboardObjective(string objectiveName, byte mode, string objectiveValue, int type);
 
         /// <summary>
-        /// Called when DisplayScoreboard
+        /// Called when DisplayScoreboard is updated
         /// </summary>
         /// <param name="entityName">The entity whose score this is. For players, this is their username; for other entities, it is their UUID.</param>
         /// <param name="action">0 to create/update an item. 1 to remove an item.</param>
@@ -399,9 +401,10 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Called when tradeList is received from server
         /// </summary>
-        /// <param name="windowId">Window Id</param>
-        /// <param name="trades">List of trades.</param>
-        void OnTradeList(int windowId, List<VillagerTrade> trades, VillagerInfo villagerInfo);
+        /// <param name="inventoryId">Inventory Id</param>
+        /// <param name="trades">List of trades</param>
+        /// <param name="villagerInfo">Contains Level, Experience, IsRegularVillager and CanRestock</param>
+        void OnTradeList(int inventoryId, List<VillagerTrade> trades, VillagerInfo villagerInfo);
 
         /// <summary>
         /// Called when rain starts or stops
@@ -414,7 +417,7 @@ namespace CraftSharp.Protocol
         /// </summary>
         /// <param name="playerUUID">The player's UUID received from the server</param>
         /// <param name="userName">The player's username received from the server</param>
-        /// <param name="playerProperty">Tuple<Name, Value, Signature(empty if there is no signature)></param>
+        /// <param name="playerProperty">Tuple(Name, Value, Signature(empty if there is no signature))</param>
         public void OnLoginSuccess(Guid playerUUID, string userName, Tuple<string, string, string>[]? playerProperty);
 
     }

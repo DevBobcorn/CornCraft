@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents mouse interactions with an inventory window
     /// </summary>
-    public enum WindowActionType
+    public enum InventoryActionType
     {
         /// <summary>
         /// Left click with mouse on a slot: grab or drop a whole item stack

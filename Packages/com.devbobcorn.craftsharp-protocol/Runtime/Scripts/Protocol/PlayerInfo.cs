@@ -8,7 +8,7 @@ namespace CraftSharp.Protocol
 {
     public class PlayerInfo
     {
-        public readonly Guid Uuid;
+        public readonly Guid UUID;
 
         public readonly string Name;
 
@@ -27,7 +27,7 @@ namespace CraftSharp.Protocol
 
         public int MessageIndex = -1;
 
-        public Guid ChatUuid = Guid.Empty;
+        public Guid ChatUUID = Guid.Empty;
 
         private PublicKey? PublicKey;
 
@@ -37,9 +37,10 @@ namespace CraftSharp.Protocol
 
         private byte[]? precedingSignature;
 
-        public PlayerInfo(Guid uuid, string name, Tuple<string, string, string?>[]? property, int gamemode, int ping, string? displayName, long? timeStamp, byte[]? publicKey, byte[]? signature)
+        public PlayerInfo(Guid uuid, string name, Tuple<string, string, string?>[]? property,
+            int gamemode, int ping, string? displayName, long? timeStamp, byte[]? publicKey, byte[]? signature)
         {
-            Uuid = uuid;
+            UUID = uuid;
             Name = name;
             if (property != null)
                 Property = property;
@@ -67,7 +68,7 @@ namespace CraftSharp.Protocol
         public PlayerInfo(string name, Guid uuid)
         {
             Name = name;
-            Uuid = uuid;
+            UUID = uuid;
             Gamemode = -1;
             Ping = 0;
             lastMessageVerified = true;
@@ -82,26 +83,25 @@ namespace CraftSharp.Protocol
             if (string.IsNullOrEmpty(username))
                 return false;
 
-            foreach (char c in username)
-                if (!((c >= 'a' && c <= 'z')
-                        || (c >= 'A' && c <= 'Z')
-                        || (c >= '0' && c <= '9')
-                        || c == '_') )
-                    return false;
+            if (username.Any(c => c is not 
+                (>= 'a' and <= 'z' or >= 'A' and <= 'Z' or >= '0' and <= '9' or '_')))
+            {
+                return false;
+            }
 
             return username.Length <= 16;
         }
 
         public void ClearPublicKey()
         {
-            ChatUuid = Guid.Empty;
+            ChatUUID = Guid.Empty;
             PublicKey = null;
             KeyExpiresAt = null;
         }
 
-        public void SetPublicKey(Guid chatUuid, long publicKeyExpiryTime, byte[] encodedPublicKey, byte[] publicKeySignature)
+        public void SetPublicKey(Guid chatUUID, long publicKeyExpiryTime, byte[] encodedPublicKey, byte[] publicKeySignature)
         {
-            ChatUuid = chatUuid;
+            ChatUUID = chatUUID;
             KeyExpiresAt = DateTimeOffset.FromUnixTimeMilliseconds(publicKeyExpiryTime).UtcDateTime;
             try
             {
@@ -131,20 +131,18 @@ namespace CraftSharp.Protocol
         /// <param name="timestamp">Timestamp</param>
         /// <param name="salt">Salt</param>
         /// <param name="signature">Message signature</param>
-        /// <returns>Is this message vaild</returns>
+        /// <returns>Is this message valid</returns>
         public bool VerifyMessage(string message, long timestamp, long salt, ref byte[] signature)
         {
             if (PublicKey == null || IsKeyExpired())
                 return false;
-            else
-            {
-                DateTimeOffset timeOffset = DateTimeOffset.FromUnixTimeMilliseconds(timestamp);
+            
+            DateTimeOffset timeOffset = DateTimeOffset.FromUnixTimeMilliseconds(timestamp);
 
-                byte[] saltByte = BitConverter.GetBytes(salt);
-                Array.Reverse(saltByte);
+            byte[] saltByte = BitConverter.GetBytes(salt);
+            Array.Reverse(saltByte);
 
-                return PublicKey.VerifyMessage(message, Uuid, timeOffset, ref saltByte, ref signature);
-            }
+            return PublicKey.VerifyMessage(message, UUID, timeOffset, ref saltByte, ref signature);
         }
 
         /// <summary>
@@ -154,19 +152,19 @@ namespace CraftSharp.Protocol
         /// <param name="timestamp">Timestamp</param>
         /// <param name="salt">Salt</param>
         /// <param name="signature">Message signature</param>
-        /// <param name="precedingSignature">Preceding message signature</param>
+        /// <param name="messagePrecedingSignature">Preceding message signature</param>
         /// <param name="lastSeenMessages">LastSeenMessages</param>
-        /// <returns>Is this message chain vaild</returns>
-        public bool VerifyMessage(string message, long timestamp, long salt, ref byte[] signature, ref byte[]? precedingSignature, LastSeenMessageList lastSeenMessages)
+        /// <returns>Is this message chain valid</returns>
+        public bool VerifyMessage(string message, long timestamp, long salt, ref byte[] signature, ref byte[]? messagePrecedingSignature, LastSeenMessageList lastSeenMessages)
         {
             if (lastMessageVerified == false)
                 return false;
-            if (PublicKey == null || IsKeyExpired() || (this.precedingSignature != null && precedingSignature == null))
+            if (PublicKey == null || IsKeyExpired() || (precedingSignature != null && messagePrecedingSignature == null))
             {
                 lastMessageVerified = false;
                 return false;
             }
-            if (this.precedingSignature != null && !this.precedingSignature.SequenceEqual(precedingSignature!))
+            if (precedingSignature != null && !precedingSignature.SequenceEqual(messagePrecedingSignature!))
             {
                 lastMessageVerified = false;
                 return false;
@@ -177,10 +175,10 @@ namespace CraftSharp.Protocol
             byte[] saltByte = BitConverter.GetBytes(salt);
             Array.Reverse(saltByte);
 
-            bool res = PublicKey.VerifyMessage(message, Uuid, timeOffset, ref saltByte, ref signature, ref precedingSignature, lastSeenMessages);
+            bool res = PublicKey.VerifyMessage(message, UUID, timeOffset, ref saltByte, ref signature, ref messagePrecedingSignature, lastSeenMessages);
 
             lastMessageVerified = res;
-            this.precedingSignature = signature;
+            precedingSignature = signature;
 
             return res;
         }
@@ -188,29 +186,29 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Verify message head - 1.19.1 and 1.19.2
         /// </summary>
-        /// <param name="precedingSignature">Preceding message signature</param>
+        /// <param name="messagePrecedingSignature">Preceding message signature</param>
         /// <param name="headerSignature">Message signature</param>
         /// <param name="bodyDigest">Message body hash</param>
-        /// <returns>Is this message chain vaild</returns>
-        public bool VerifyMessageHead(ref byte[]? precedingSignature, ref byte[] headerSignature, ref byte[] bodyDigest)
+        /// <returns>Is this message chain valid</returns>
+        public bool VerifyMessageHead(ref byte[]? messagePrecedingSignature, ref byte[] headerSignature, ref byte[] bodyDigest)
         {
             if (lastMessageVerified == false)
                 return false;
-            if (PublicKey == null || IsKeyExpired() || (this.precedingSignature != null && precedingSignature == null))
+            if (PublicKey == null || IsKeyExpired() || (precedingSignature != null && messagePrecedingSignature == null))
             {
                 lastMessageVerified = false;
                 return false;
             }
-            if (this.precedingSignature != null && !this.precedingSignature.SequenceEqual(precedingSignature!))
+            if (precedingSignature != null && !precedingSignature.SequenceEqual(messagePrecedingSignature!))
             {
                 lastMessageVerified = false;
                 return false;
             }
 
-            bool res = PublicKey.VerifyHeader(Uuid, ref bodyDigest, ref headerSignature, ref precedingSignature);
+            bool res = PublicKey.VerifyHeader(UUID, ref bodyDigest, ref headerSignature, ref messagePrecedingSignature);
 
             lastMessageVerified = res;
-            this.precedingSignature = headerSignature;
+            precedingSignature = headerSignature;
 
             return res;
         }
@@ -219,13 +217,15 @@ namespace CraftSharp.Protocol
         /// Verify message - 1.19.3 and above
         /// </summary>
         /// <param name="message">Message content</param>
+        /// <param name="playerUUID">Player UUID</param>
+        /// <param name="chatUUID">Chat UUID</param>
+        /// <param name="messageIndex">Message index</param>
         /// <param name="timestamp">Timestamp</param>
         /// <param name="salt">Salt</param>
         /// <param name="signature">Message signature</param>
-        /// <param name="precedingSignature">Preceding message signature</param>
-        /// <param name="lastSeenMessages">LastSeenMessages</param>
-        /// <returns>Is this message chain vaild</returns>
-        public bool VerifyMessage(string message, Guid playerUuid, Guid chatUuid, int messageIndex, long timestamp, long salt, ref byte[] signature, Tuple<int, byte[]?>[] previousMessageSignatures)
+        /// <param name="previousMessageSignatures">Previous message signatures</param>
+        /// <returns>Is this message chain valid</returns>
+        public bool VerifyMessage(string message, Guid playerUUID, Guid chatUUID, int messageIndex, long timestamp, long salt, ref byte[] signature, Tuple<int, byte[]?>[] previousMessageSignatures)
         {
             if (PublicKey == null || IsKeyExpired())
                 return false;

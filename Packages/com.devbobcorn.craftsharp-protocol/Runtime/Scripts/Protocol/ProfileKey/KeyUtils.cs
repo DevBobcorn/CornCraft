@@ -114,7 +114,7 @@ namespace CraftSharp.Protocol.ProfileKey
             return data.ToArray();
         }
 
-        public static byte[] GetSignatureData_1_19_3(string message, Guid playerUuid, Guid chatUuid, int messageIndex, DateTimeOffset timestamp, ref byte[] salt, AcknowledgedMessage[] lastSeenMessages)
+        public static byte[] GetSignatureData_1_19_3(string message, Guid playerUUID, Guid chatUUID, int messageIndex, DateTimeOffset timestamp, ref byte[] salt, AcknowledgedMessage[] lastSeenMessages)
         {
             List<byte> data = new();
 
@@ -123,8 +123,8 @@ namespace CraftSharp.Protocol.ProfileKey
 
             // message link
             // net.minecraft.network.message.MessageLink#update
-            data.AddRange(DataTypes.GetUUID(playerUuid));
-            data.AddRange(DataTypes.GetUUID(chatUuid));
+            data.AddRange(DataTypes.GetUUID(playerUUID));
+            data.AddRange(DataTypes.GetUUID(chatUUID));
             data.AddRange(DataTypes.GetInt(messageIndex));
 
             // message body
@@ -155,7 +155,7 @@ namespace CraftSharp.Protocol.ProfileKey
             return data.ToArray();
         }
 
-        public static byte[] GetSignatureData(string message, DateTimeOffset timestamp, ref byte[] salt, int messageCount, Guid sender, Guid sessionUuid)
+        public static byte[] GetSignatureData(string message, DateTimeOffset timestamp, ref byte[] salt, int messageCount, Guid sender, Guid sessionUUID)
         {
             List<byte> data = new();
 
@@ -165,7 +165,7 @@ namespace CraftSharp.Protocol.ProfileKey
             data.AddRange(unknownInt1);
 
             data.AddRange(sender.ToBigEndianBytes());
-            data.AddRange(sessionUuid.ToBigEndianBytes());
+            data.AddRange(sessionUUID.ToBigEndianBytes());
 
             byte[] msgCountByte = BitConverter.GetBytes(messageCount);
             Array.Reverse(msgCountByte);

@@ -45,13 +45,14 @@ namespace CraftSharp.Protocol
         /// Send a chat message or command to the server
         /// </summary>
         /// <param name="message">Text to send</param>
+        /// <param name="playerKeyPair">Player info</param>
         /// <returns>True if successfully sent</returns>
         bool SendChatMessage(string message, PlayerKeyPair? playerKeyPair = null);
 
         /// <summary>
         /// Send a auto complete request to the server
         /// </summary>
-        /// <param name="message">Text to complete</param>
+        /// <param name="text">Text to complete</param>
         /// <returns>True if request successfully sent</returns>
         bool SendAutoCompleteText(string text);
 
@@ -164,16 +165,16 @@ namespace CraftSharp.Protocol
         bool SendUseItem(int hand, int sequenceId);
 
         /// <summary>
-        /// Send a click window slot packet to the server
+        /// Send a click inventory slot packet to the server
         /// </summary>
-        /// <param name="windowId">Id of the window being clicked</param>
+        /// <param name="inventoryId">Id of the inventory being clicked</param>
         /// <param name="slotId">Id of the clicked slot</param>
         /// <param name="action">Action to perform</param>
         /// <param name="item">Item in the clicked slot</param>
-        /// <param name="changedSlots">Slots that have been changed in this event: List<SlotID, Changed Items> </param>
+        /// <param name="changedSlots">Slots that have been changed in this event: List(SlotId, Changed Items)</param>
         /// <param name="stateId">Inventory's stateId</param>
         /// <returns>True if packet was successfully sent</returns>
-        bool SendWindowAction(int windowId, int slotId, WindowActionType action, ItemStack? item, List<Tuple<short, ItemStack?>> changedSlots, int stateId);
+        bool SendInventoryAction(int inventoryId, int slotId, InventoryActionType action, ItemStack? item, List<Tuple<short, ItemStack?>> changedSlots, int stateId);
 
         /// <summary>
         /// Request Creative Mode item creation into regular/survival Player Inventory
@@ -190,25 +191,28 @@ namespace CraftSharp.Protocol
         /// Plays animation
         /// </summary>
         /// <param name="animation">0 for left arm, 1 for right arm</param>
-        /// <param name="playerid">Player Entity Id</param>
+        /// <param name="playerId">Player Entity Id</param>
         /// <returns>TRUE if item given successfully</returns>
-        bool SendAnimation(int animation, int playerid);
+        bool SendAnimation(int animation, int playerId);
 
         /// <summary>
-        /// Send a close window packet to the server
+        /// Send a close inventory packet to the server
         /// </summary>
-        /// <param name="windowId">Id of the window being closed</param>
-        bool SendCloseWindow(int windowId);
+        /// <param name="inventoryId">Id of the inventory being closed</param>
+        bool SendCloseInventory(int inventoryId);
 
         /// <summary>
         /// Send player block placement packet to the server
         /// </summary>
         /// <param name="hand">0: main hand, 1: off hand</param>
         /// <param name="blockLoc">Location to place block at</param>
+        /// <param name="x">Block x</param>
+        /// <param name="y">Block y</param>
+        /// <param name="z">Block z</param>
         /// <param name="face">Block face</param>
         /// <param name="sequenceId">Sequence ID (use for synchronization)</param>
         /// <returns>True if packet was successfully sent</returns>
-        bool SendPlayerBlockPlacement(int hand, BlockLoc blockLoc,  float x, float y, float z, Direction face, int sequenceId);
+        bool SendPlayerBlockPlacement(int hand, BlockLoc blockLoc, float x, float y, float z, Direction face, int sequenceId);
 
         /// <summary>
         /// Send player blog digging packet to the server. This packet needs to be called at least twice: Once to begin digging, then a second time to finish digging
@@ -217,14 +221,14 @@ namespace CraftSharp.Protocol
         /// <param name="blockLoc">Location</param>
         /// <param name="face">Block face</param>
         /// <param name="sequenceId">Sequence ID (use for synchronization)</param>
-        /// <returns>True if packet was succcessfully sent</returns>
+        /// <returns>True if packet was successfully sent</returns>
         bool SendPlayerDigging(int status, BlockLoc blockLoc, Direction face, int sequenceId);
 
         /// <summary>
         /// Send player action packet to the server.
         /// </summary>
         /// <param name="status">3-6 for various purposes ( https://wiki.vg/Protocol#Player_Action )</param>
-        /// <returns>True if packet was succcessfully sent</returns>
+        /// <returns>True if packet was successfully sent</returns>
         bool SendPlayerAction(int status);
 
         /// <summary>
@@ -235,13 +239,13 @@ namespace CraftSharp.Protocol
         /// <param name="line2">New line 2</param>
         /// <param name="line3">New line 3</param>
         /// <param name="line4">New line 4</param>
-        /// <returns>True if packet was succcessfully sent</returns>
+        /// <returns>True if packet was successfully sent</returns>
         bool SendUpdateSign(Location location, string line1, string line2, string line3, string line4);
 
         /// <summary>
         /// Select villager trade
         /// </summary>
-        /// <param name="selectedSlot">The slot of the trade, starts at 0.</param>
+        /// <param name="selectedSlot">The slot of the trade, starts at 0</param>
         bool SelectTrade(int selectedSlot);
 
         /// <summary>
@@ -257,9 +261,9 @@ namespace CraftSharp.Protocol
         bool SendPlayerSession(PlayerKeyPair? playerKeyPair);
 
         /// <summary>
-        /// Get net main thread ID
+        /// Get net main thread Id
         /// </summary>
-        /// <returns>Net main thread ID</returns>
+        /// <returns>Net main thread Id</returns>
         int GetNetMainThreadId();
     }
 }

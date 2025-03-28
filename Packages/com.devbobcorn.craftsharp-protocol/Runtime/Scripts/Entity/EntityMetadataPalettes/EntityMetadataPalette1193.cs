@@ -22,7 +22,7 @@ namespace CraftSharp
             { 10, EntityMetaDataType.Position },
             { 11, EntityMetaDataType.OptionalPosition },
             { 12, EntityMetaDataType.Direction },
-            { 13, EntityMetaDataType.OptionalUuid },
+            { 13, EntityMetaDataType.OptionalUUID },
             { 14, EntityMetaDataType.OptionalBlockId },
             { 15, EntityMetaDataType.Nbt },
             { 16, EntityMetaDataType.Particle },

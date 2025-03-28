@@ -63,7 +63,7 @@ namespace CraftSharp.Protocol.Handlers
 
         private bool receiveDeclareCommands = false, receivePlayerInfo = false;
         private readonly object MessageSigningLock = new();
-        private Guid chatUuid = Guid.NewGuid();
+        private Guid chatUUID = Guid.NewGuid();
         private int pendingAcknowledgments = 0, messageIndex = 0;
         private LastSeenMessagesCollector lastSeenMessagesCollector;
         private LastSeenMessageList.AcknowledgedMessage? lastReceivedMessage = null;
@@ -712,7 +712,7 @@ namespace CraftSharp.Protocol.Handlers
                         {
                             var message = DataTypes.ReadNextString(packetData);
 
-                            Guid senderUuid;
+                            Guid senderUUID;
                             //Hide system messages or xp bar messages?
                             messageType = DataTypes.ReadNextByte(packetData);
                             if ((messageType == 1 && !ProtocolSettings.DisplaySystemMessages)
@@ -720,10 +720,10 @@ namespace CraftSharp.Protocol.Handlers
                                 break;
 
                             if (protocolVersion >= MC_1_16_5_Version)
-                                senderUuid = DataTypes.ReadNextUUID(packetData);
-                            else senderUuid = Guid.Empty;
+                                senderUUID = DataTypes.ReadNextUUID(packetData);
+                            else senderUUID = Guid.Empty;
 
-                            handler.OnTextReceived(new(message, null, true, messageType, senderUuid));
+                            handler.OnTextReceived(new(message, null, true, messageType, senderUUID));
                         }
                         else if (protocolVersion == MC_1_19_Version) // 1.19
                         {
@@ -738,7 +738,7 @@ namespace CraftSharp.Protocol.Handlers
                                 || (messageType == 2 && !ProtocolSettings.DisplayXpBarMessages))
                                 break;
 
-                            var senderUuid = DataTypes.ReadNextUUID(packetData);
+                            var senderUUID = DataTypes.ReadNextUUID(packetData);
                             var senderDisplayName = ChatParser.ParseText(DataTypes.ReadNextString(packetData));
 
                             bool hasSenderTeamName = DataTypes.ReadNextBool(packetData);
@@ -755,16 +755,16 @@ namespace CraftSharp.Protocol.Handlers
                             bool verifyResult;
                             if (!isOnlineMode)
                                 verifyResult = false;
-                            else if (senderUuid == handler.GetUserUuid())
+                            else if (senderUUID == handler.GetUserUUID())
                                 verifyResult = true;
                             else
                             {
-                                PlayerInfo? player = handler.GetPlayerInfo(senderUuid);
+                                PlayerInfo? player = handler.GetPlayerInfo(senderUUID);
                                 verifyResult = player != null && player.VerifyMessage(signedChat, timestamp, salt,
                                     ref messageSignature);
                             }
 
-                            ChatMessage chat = new(signedChat, true, messageType, senderUuid, unsignedChatContent,
+                            ChatMessage chat = new(signedChat, true, messageType, senderUUID, unsignedChatContent,
                                 senderDisplayName, senderTeamName, timestamp, messageSignature, verifyResult);
                             handler.OnTextReceived(chat);
                         }
@@ -774,7 +774,7 @@ namespace CraftSharp.Protocol.Handlers
                             var precedingSignature = DataTypes.ReadNextBool(packetData)
                                 ? DataTypes.ReadNextByteArray(packetData)
                                 : null;
-                            var senderUuid = DataTypes.ReadNextUUID(packetData);
+                            var senderUUID = DataTypes.ReadNextUUID(packetData);
                             var headerSignature = DataTypes.ReadNextByteArray(packetData);
 
                             var signedChat = DataTypes.ReadNextString(packetData);
@@ -828,7 +828,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             if (string.IsNullOrWhiteSpace(senderDisplayName))
                             {
-                                var player = handler.GetPlayerInfo(senderUuid);
+                                var player = handler.GetPlayerInfo(senderUUID);
                                 if (player != null && (player.DisplayName != null || player.Name != null) &&
                                     string.IsNullOrWhiteSpace(senderDisplayName))
                                 {
@@ -843,11 +843,11 @@ namespace CraftSharp.Protocol.Handlers
                             bool verifyResult;
                             if (!isOnlineMode)
                                 verifyResult = false;
-                            else if (senderUuid == handler.GetUserUuid())
+                            else if (senderUUID == handler.GetUserUUID())
                                 verifyResult = true;
                             else
                             {
-                                var player = handler.GetPlayerInfo(senderUuid);
+                                var player = handler.GetPlayerInfo(senderUUID);
                                 if (player == null || !player.IsMessageChainLegal())
                                     verifyResult = false;
                                 else
@@ -860,7 +860,7 @@ namespace CraftSharp.Protocol.Handlers
                                 }
                             }
 
-                            ChatMessage chat = new(signedChat, false, chatTypeId, senderUuid, unsignedChatContent,
+                            ChatMessage chat = new(signedChat, false, chatTypeId, senderUUID, unsignedChatContent,
                                 senderDisplayName, senderTeamName, timestamp, headerSignature, verifyResult);
                             if (isOnlineMode && !chat.LacksSender())
                                 Acknowledge(chat);
@@ -871,7 +871,7 @@ namespace CraftSharp.Protocol.Handlers
                             // 1.19.3+
                             // Header section
                             // net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket#write
-                            var senderUuid = DataTypes.ReadNextUUID(packetData);
+                            var senderUUID = DataTypes.ReadNextUUID(packetData);
                             var index = DataTypes.ReadNextVarInt(packetData);
                             // Signature is fixed size of 256 bytes
                             var messageSignature = DataTypes.ReadNextBool(packetData)
@@ -930,7 +930,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             if (string.IsNullOrWhiteSpace(senderDisplayName))
                             {
-                                var player = handler.GetPlayerInfo(senderUuid);
+                                var player = handler.GetPlayerInfo(senderUUID);
                                 if (player != null && (player.DisplayName != null || player.Name != null) &&
                                     string.IsNullOrWhiteSpace(senderDisplayName))
                                 {
@@ -947,23 +947,23 @@ namespace CraftSharp.Protocol.Handlers
                                 verifyResult = false;
                             else
                             {
-                                if (senderUuid == handler.GetUserUuid())
+                                if (senderUUID == handler.GetUserUUID())
                                     verifyResult = true;
                                 else
                                 {
-                                    var player = handler.GetPlayerInfo(senderUuid);
+                                    var player = handler.GetPlayerInfo(senderUUID);
                                     if (player == null || !player.IsMessageChainLegal())
                                         verifyResult = false;
                                     else
                                     {
-                                        verifyResult = player.VerifyMessage(message, senderUuid, player.ChatUuid,
+                                        verifyResult = player.VerifyMessage(message, senderUUID, player.ChatUUID,
                                             index, timestamp, salt, ref messageSignature,
                                             previousMessageSignatures);
                                     }
                                 }
                             }
 
-                            ChatMessage chat = new(message, false, chatTypeId, senderUuid, unsignedChatContent,
+                            ChatMessage chat = new(message, false, chatTypeId, senderUUID, unsignedChatContent,
                                 senderDisplayName, senderTeamName, timestamp, messageSignature, verifyResult);
                             lock (MessageSigningLock)
                                 Acknowledge(chat);
@@ -1101,7 +1101,7 @@ namespace CraftSharp.Protocol.Handlers
                         var precedingSignature = DataTypes.ReadNextBool(packetData)
                             ? DataTypes.ReadNextByteArray(packetData)
                             : null;
-                        var senderUuid = DataTypes.ReadNextUUID(packetData);
+                        var senderUUID = DataTypes.ReadNextUUID(packetData);
                         var headerSignature = DataTypes.ReadNextByteArray(packetData);
                         var bodyDigest = DataTypes.ReadNextByteArray(packetData);
 
@@ -1109,11 +1109,11 @@ namespace CraftSharp.Protocol.Handlers
 
                         if (!isOnlineMode)
                             verifyResult = false;
-                        else if (senderUuid == handler.GetUserUuid())
+                        else if (senderUUID == handler.GetUserUUID())
                             verifyResult = true;
                         else
                         {
-                            var player = handler.GetPlayerInfo(senderUuid);
+                            var player = handler.GetPlayerInfo(senderUUID);
 
                             if (player == null || !player.IsMessageChainLegal())
                                 verifyResult = false;
@@ -1566,7 +1566,7 @@ namespace CraftSharp.Protocol.Handlers
                         var numberOfActions = DataTypes.ReadNextVarInt(packetData);
                         for (int i = 0; i < numberOfActions; i++)
                         {
-                            var playerUuid = DataTypes.ReadNextUUID(packetData);
+                            var playerUUID = DataTypes.ReadNextUUID(packetData);
 
                             PlayerInfo player;
                             if ((actionBitset & (1 << 0)) > 0) // Actions bit 0: add player
@@ -1581,15 +1581,15 @@ namespace CraftSharp.Protocol.Handlers
                                         DataTypes.SkipNextString(packetData);
                                 }
 
-                                player = new(name, playerUuid);
+                                player = new(name, playerUUID);
                                 handler.OnPlayerJoin(player);
                             }
                             else
                             {
-                                var playerGet = handler.GetPlayerInfo(playerUuid);
+                                var playerGet = handler.GetPlayerInfo(playerUUID);
                                 if (playerGet == null)
                                 {
-                                    player = new(string.Empty, playerUuid);
+                                    player = new(string.Empty, playerUUID);
                                     handler.OnPlayerJoin(player);
                                 }
                                 else
@@ -1604,16 +1604,16 @@ namespace CraftSharp.Protocol.Handlers
                                 
                                 if (hasSignatureData)
                                 {
-                                    var chatUuid = DataTypes.ReadNextUUID(packetData);
+                                    var chatUUID = DataTypes.ReadNextUUID(packetData);
                                     var publicKeyExpiryTime = DataTypes.ReadNextLong(packetData);
                                     var encodedPublicKey = DataTypes.ReadNextByteArray(packetData);
                                     var publicKeySignature = DataTypes.ReadNextByteArray(packetData);
-                                    player.SetPublicKey(chatUuid, publicKeyExpiryTime, encodedPublicKey,
+                                    player.SetPublicKey(chatUUID, publicKeyExpiryTime, encodedPublicKey,
                                         publicKeySignature);
 
-                                    if (playerUuid == handler.GetUserUuid())
+                                    if (playerUUID == handler.GetUserUUID())
                                     {
-                                        this.chatUuid = chatUuid;
+                                        this.chatUUID = chatUUID;
                                     }
                                 }
                                 else
@@ -1621,7 +1621,7 @@ namespace CraftSharp.Protocol.Handlers
                                     player.ClearPublicKey();
                                 }
 
-                                if (playerUuid == handler.GetUserUuid())
+                                if (playerUUID == handler.GetUserUUID())
                                 {
                                     receivePlayerInfo = true;
                                     if (receiveDeclareCommands)
@@ -1631,7 +1631,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             if ((actionBitset & 1 << 2) > 0) // Actions bit 2: update gamemode
                             {
-                                handler.OnGamemodeUpdate(playerUuid, DataTypes.ReadNextVarInt(packetData));
+                                handler.OnGamemodeUpdate(playerUUID, DataTypes.ReadNextVarInt(packetData));
                             }
 
                             if ((actionBitset & (1 << 3)) > 0) // Actions bit 3: update listed
@@ -1642,7 +1642,7 @@ namespace CraftSharp.Protocol.Handlers
                             if ((actionBitset & (1 << 4)) > 0) // Actions bit 4: update latency
                             {
                                 var latency = DataTypes.ReadNextVarInt(packetData);
-                                handler.OnLatencyUpdate(playerUuid, latency); //Update latency;
+                                handler.OnLatencyUpdate(playerUUID, latency); //Update latency;
                             }
 
                             // Actions bit 5: update display name
@@ -1759,8 +1759,8 @@ namespace CraftSharp.Protocol.Handlers
                     var numberOfLeavePlayers = DataTypes.ReadNextVarInt(packetData);
                     for (int i = 0; i < numberOfLeavePlayers; ++i)
                     {
-                        var playerUuid = DataTypes.ReadNextUUID(packetData);
-                        handler.OnPlayerLeave(playerUuid);
+                        var playerUUID = DataTypes.ReadNextUUID(packetData);
+                        handler.OnPlayerLeave(playerUUID);
                     }
 
                     break;
@@ -1847,7 +1847,7 @@ namespace CraftSharp.Protocol.Handlers
                         if (protocolVersion >= MC_1_17_1_Version) // Carried Item - 1.17.1 and above
                             dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
 
-                        handler.OnWindowItems(windowId, inventorySlots, stateId);
+                        handler.OnInventoryItems(windowId, inventorySlots, stateId);
                     }
                     break;
                 case PacketTypesIn.WindowProperty:
@@ -1855,7 +1855,7 @@ namespace CraftSharp.Protocol.Handlers
                         var containerId = DataTypes.ReadNextByte(packetData);
                         var propertyId = DataTypes.ReadNextShort(packetData);
                         var propertyValue = DataTypes.ReadNextShort(packetData);
-                        handler.OnWindowProperties(containerId, propertyId, propertyValue);
+                        handler.OnInventoryProperties(containerId, propertyId, propertyValue);
                     }
                     break;
                 case PacketTypesIn.SetSlot:
@@ -1866,7 +1866,7 @@ namespace CraftSharp.Protocol.Handlers
                             stateId = DataTypes.ReadNextVarInt(packetData); // State ID - 1.17.1 and above
                         var slotId2 = DataTypes.ReadNextShort(packetData);
                         var item = dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
-                        handler.OnSetSlot(windowId, slotId2, item!, stateId);
+                        handler.OnInventorySlot(windowId, slotId2, item!, stateId);
                     }
                     break;
                 case PacketTypesIn.WindowConfirmation:
@@ -2475,7 +2475,7 @@ namespace CraftSharp.Protocol.Handlers
                 }
             }
 
-            var uuid = handler.GetUserUuid();
+            var uuid = handler.GetUserUUID();
             switch (protocolVersion)
             {
                 case >= MC_1_19_2_Version and < MC_1_20_2_Version:
@@ -2491,7 +2491,7 @@ namespace CraftSharp.Protocol.Handlers
                         break;
                     }
                 case >= MC_1_20_2_Version:
-                    uuid = handler.GetUserUuid();
+                    uuid = handler.GetUserUUID();
 
                     if (uuid == Guid.Empty)
                         uuid = Guid.NewGuid();
@@ -2528,7 +2528,7 @@ namespace CraftSharp.Protocol.Handlers
                             if (protocolVersion >= MC_1_20_6_Version)
                                 shouldAuthenticate = DataTypes.ReadNextBool(packetData);
 
-                            return StartEncryption(accountLower, handler.GetUserUuidStr(),
+                            return StartEncryption(accountLower, handler.GetUserUUIDStr(),
                                 handler.GetSessionId(), token, serverId, serverPublicKey,
                                 playerKeyPair, session, shouldAuthenticate);
                         }
@@ -2950,7 +2950,7 @@ namespace CraftSharp.Protocol.Handlers
                     }
                     else
                     {
-                        Guid uuid = handler.GetUserUuid();
+                        Guid uuid = handler.GetUserUUID();
                         byte[] salt = GenerateSalt();
                         fields.AddRange(salt); // Salt: Long
                         fields.AddRange(DataTypes.GetVarInt(needSigned.Count)); // Signature Length: VarInt
@@ -2965,7 +2965,7 @@ namespace CraftSharp.Protocol.Handlers
                                 sign = playerKeyPair!.PrivateKey.SignMessage(message, uuid, timeNow, ref salt,
                                     acknowledgment_1_19_2!.lastSeen);
                             else // protocolVersion >= MC_1_19_3_Version
-                                sign = playerKeyPair!.PrivateKey.SignMessage(message, uuid, chatUuid, messageIndex++,
+                                sign = playerKeyPair!.PrivateKey.SignMessage(message, uuid, chatUUID, messageIndex++,
                                     timeNow, ref salt, acknowledgment_1_19_3);
 
                             if (protocolVersion <= MC_1_19_2_Version)
@@ -3067,15 +3067,15 @@ namespace CraftSharp.Protocol.Handlers
                             fields.AddRange(salt);
 
                             // Signature Length & Signature: (VarInt) and Byte Array
-                            Guid playerUuid = handler.GetUserUuid();
+                            Guid playerUUID = handler.GetUserUUID();
                             byte[] sign;
                             if (protocolVersion == MC_1_19_Version) // 1.19.1 or lower
-                                sign = playerKeyPair.PrivateKey.SignMessage(message, playerUuid, timeNow, ref salt);
+                                sign = playerKeyPair.PrivateKey.SignMessage(message, playerUUID, timeNow, ref salt);
                             else if (protocolVersion == MC_1_19_2_Version) // 1.19.2
-                                sign = playerKeyPair.PrivateKey.SignMessage(message, playerUuid, timeNow, ref salt,
+                                sign = playerKeyPair.PrivateKey.SignMessage(message, playerUUID, timeNow, ref salt,
                                     acknowledgment_1_19_2!.lastSeen);
                             else // protocolVersion >= MC_1_19_3_Version
-                                sign = playerKeyPair.PrivateKey.SignMessage(message, playerUuid, chatUuid,
+                                sign = playerKeyPair.PrivateKey.SignMessage(message, playerUUID, chatUUID,
                                     messageIndex++, timeNow, ref salt, acknowledgment_1_19_3);
 
                             if (protocolVersion >= MC_1_19_3_Version)
@@ -3468,7 +3468,7 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool SendWindowAction(int windowId, int slotId, WindowActionType action, ItemStack? item, List<Tuple<short, ItemStack?>> changedSlots, int stateId)
+        public bool SendInventoryAction(int inventoryId, int slotId, InventoryActionType action, ItemStack? item, List<Tuple<short, ItemStack?>> changedSlots, int stateId)
         {
             try
             {
@@ -3477,10 +3477,10 @@ namespace CraftSharp.Protocol.Handlers
                 short actionNumber;
                 lock (window_actions)
                 {
-                    if (!window_actions.ContainsKey(windowId))
-                        window_actions[windowId] = 0;
-                    actionNumber = (short)(window_actions[windowId] + 1);
-                    window_actions[windowId] = actionNumber;
+                    if (!window_actions.ContainsKey(inventoryId))
+                        window_actions[inventoryId] = 0;
+                    actionNumber = (short)(window_actions[inventoryId] + 1);
+                    window_actions[inventoryId] = actionNumber;
                 }
 
                 byte button = 0;
@@ -3488,83 +3488,83 @@ namespace CraftSharp.Protocol.Handlers
 
                 switch (action)
                 {
-                    case WindowActionType.LeftClick:
+                    case InventoryActionType.LeftClick:
                         button = 0;
                         break;
-                    case WindowActionType.RightClick:
+                    case InventoryActionType.RightClick:
                         button = 1;
                         break;
-                    case WindowActionType.MiddleClick:
+                    case InventoryActionType.MiddleClick:
                         button = 2;
                         mode = 3;
                         break;
-                    case WindowActionType.ShiftClick:
+                    case InventoryActionType.ShiftClick:
                         button = 0;
                         mode = 1;
                         item = new ItemStack(Item.NULL, 0);
                         break;
-                    case WindowActionType.ShiftRightClick: // Right-shift click uses button 1
+                    case InventoryActionType.ShiftRightClick: // Right-shift click uses button 1
                         button = 1;
                         mode = 1;
                         item = new ItemStack(Item.NULL, 0);
                         break;
-                    case WindowActionType.DropItem:
+                    case InventoryActionType.DropItem:
                         button = 0;
                         mode = 4;
                         item = new ItemStack(Item.NULL, 0);
                         break;
-                    case WindowActionType.DropItemStack:
+                    case InventoryActionType.DropItemStack:
                         button = 1;
                         mode = 4;
                         item = new ItemStack(Item.NULL, 0);
                         break;
-                    case WindowActionType.StartDragLeft:
+                    case InventoryActionType.StartDragLeft:
                         button = 0;
                         mode = 5;
                         item = new ItemStack(Item.NULL, 0);
                         slotId = -999;
                         break;
-                    case WindowActionType.StartDragRight:
+                    case InventoryActionType.StartDragRight:
                         button = 4;
                         mode = 5;
                         item = new ItemStack(Item.NULL, 0);
                         slotId = -999;
                         break;
-                    case WindowActionType.StartDragMiddle:
+                    case InventoryActionType.StartDragMiddle:
                         button = 8;
                         mode = 5;
                         item = new ItemStack(Item.NULL, 0);
                         slotId = -999;
                         break;
-                    case WindowActionType.EndDragLeft:
+                    case InventoryActionType.EndDragLeft:
                         button = 2;
                         mode = 5;
                         item = new ItemStack(Item.NULL, 0);
                         slotId = -999;
                         break;
-                    case WindowActionType.EndDragRight:
+                    case InventoryActionType.EndDragRight:
                         button = 6;
                         mode = 5;
                         item = new ItemStack(Item.NULL, 0);
                         slotId = -999;
                         break;
-                    case WindowActionType.EndDragMiddle:
+                    case InventoryActionType.EndDragMiddle:
                         button = 10;
                         mode = 5;
                         item = new ItemStack(Item.NULL, 0);
                         slotId = -999;
                         break;
-                    case WindowActionType.AddDragLeft:
+                    case InventoryActionType.AddDragLeft:
                         button = 1;
                         mode = 5;
                         item = new ItemStack(Item.NULL, 0);
                         break;
-                    case WindowActionType.AddDragRight:
+                    case InventoryActionType.AddDragRight:
                         button = 5;
                         mode = 5;
                         item = new ItemStack(Item.NULL, 0);
                         break;
-                    case WindowActionType.AddDragMiddle:
+                    case InventoryActionType.AddDragMiddle:
                         button = 9;
                         mode = 5;
                         item = new ItemStack(Item.NULL, 0);
@@ -3573,7 +3573,7 @@ namespace CraftSharp.Protocol.Handlers
 
                 List<byte> packet = new()
                 {
-                    (byte)windowId // Window ID
+                    (byte)inventoryId // Window ID
                 };
 
                 switch (protocolVersion)
@@ -3689,7 +3689,7 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool SendAnimation(int animation, int playerid)
+        public bool SendAnimation(int animation, int playerId)
         {
             try
             {
@@ -3710,16 +3710,16 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool SendCloseWindow(int windowId)
+        public bool SendCloseInventory(int inventoryId)
         {
             try
             {
                 lock (window_actions)
                 {
-                    if (window_actions.ContainsKey(windowId))
-                        window_actions[windowId] = 0;
+                    if (window_actions.ContainsKey(inventoryId))
+                        window_actions[inventoryId] = 0;
                 }
-                SendPacket(PacketTypesOut.CloseWindow, new[] { (byte)windowId });
+                SendPacket(PacketTypesOut.CloseWindow, new[] { (byte)inventoryId });
                 return true;
             }
             catch (SocketException) { return false; }
@@ -3811,14 +3811,14 @@ namespace CraftSharp.Protocol.Handlers
                 {
                     List<byte> packet = new();
 
-                    packet.AddRange(DataTypes.GetUUID(chatUuid));
+                    packet.AddRange(DataTypes.GetUUID(chatUUID));
                     packet.AddRange(DataTypes.GetLong(playerKeyPair.GetExpirationMilliseconds()));
                     packet.AddRange(DataTypes.GetVarInt(playerKeyPair.PublicKey.Key.Length));
                     packet.AddRange(playerKeyPair.PublicKey.Key);
                     packet.AddRange(DataTypes.GetVarInt(playerKeyPair.PublicKey.SignatureV2!.Length));
                     packet.AddRange(playerKeyPair.PublicKey.SignatureV2);
 
-                    Debug.Log($"SendPlayerSession MessageUUID = {chatUuid},  len(PublicKey) = {playerKeyPair.PublicKey.Key.Length}, len(SignatureV2) = {playerKeyPair.PublicKey.SignatureV2!.Length}");
+                    Debug.Log($"SendPlayerSession MessageUUID = {chatUUID},  len(PublicKey) = {playerKeyPair.PublicKey.Key.Length}, len(SignatureV2) = {playerKeyPair.PublicKey.SignatureV2!.Length}");
 
                     SendPacket(PacketTypesOut.PlayerSession, packet);
                     return true;

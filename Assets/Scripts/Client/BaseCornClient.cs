@@ -189,13 +189,17 @@ namespace CraftSharp
         public abstract int GetServerPort();
         public abstract int GetProtocolVersion();
         public abstract string GetUsername();
-        public abstract Guid GetUserUuid();
-        public abstract string GetUserUuidStr();
+        public abstract Guid GetUserUUID();
+        public abstract string GetUserUUIDStr();
         public abstract string GetSessionId();
-        public abstract double GetServerTps();
+        public abstract double GetLatestServerTps();
+        public abstract double GetServerAverageTps();
         public abstract float GetTickMilSec();
         public abstract int GetPacketCount();
         public abstract int GetClientEntityId();
+        public abstract double GetClientFoodSaturation();
+        public abstract double GetClientExperienceLevel();
+        public abstract double GetClientTotalExperience();
         // Retrieve gameplay info
         public abstract IChunkRenderManager GetChunkRenderManager();
         
@@ -208,7 +212,7 @@ namespace CraftSharp
         public abstract int GetOwnLatency();
         public abstract PlayerInfo? GetPlayerInfo(Guid uuid);
         public abstract string[] GetOnlinePlayers();
-        public abstract Dictionary<string, string> GetOnlinePlayersWithUuid();
+        public abstract Dictionary<string, string> GetOnlinePlayersWithUUID();
 
         #endregion
 
@@ -220,24 +224,24 @@ namespace CraftSharp
         public abstract void SendAutoCompleteRequest(string text);
         public abstract bool UseItemOnMainHand();
         public abstract bool UseItemOnOffHand();
-        public abstract bool DoWindowAction(int windowId, int slotId, WindowActionType action);
+        public abstract bool DoInventoryAction(int inventoryId, int slot, InventoryActionType action);
         public abstract bool DoCreativeGive(int slot, Item itemType, int count, Dictionary<string, object>? nbt = null);
         public abstract bool DoAnimation(int playerAnimation);
-        public abstract bool CloseInventory(int windowId);
+        public abstract bool CloseInventory(int inventoryId);
         public abstract bool ClearInventories();
         public abstract bool InteractEntity(int entityId, int type, Hand hand = Hand.MainHand);
         public abstract bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, float x, float y, float z, Hand hand = Hand.MainHand);
         public abstract bool DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status);
         public abstract bool DropItem(bool dropEntireStack);
         public abstract bool SwapItemOnHands();
-        public abstract bool ChangeSlot(short slot);
+        public abstract bool ChangeHotbarSlot(short slot);
 
-        public bool ChangeSlotBy(short offset)
+        public bool ChangeHotbarSlotBy(short offset)
         {
             var index = CurrentSlot + offset;
             while (index < 0) index += 9;
 
-            return ChangeSlot((short) (index % 9));
+            return ChangeHotbarSlot((short) (index % 9));
         }
 
         #endregion

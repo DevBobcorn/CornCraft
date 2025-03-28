@@ -115,7 +115,7 @@ namespace CraftSharp.Protocol
         /// </summary>
         /// <param name="name">Playername</param>
         /// <returns>UUID as string</returns>
-        public static string NameToUuid(string name)
+        public static string NameToUUID(string name)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace CraftSharp.Protocol
         /// </summary>
         /// <param name="uuid">UUID of a player</param>
         /// <returns>Players UUID</returns>
-        public static string UuidToCurrentName(string uuid)
+        public static string UUIDToCurrentName(string uuid)
         {
             // Perform web request
             try
@@ -147,7 +147,7 @@ namespace CraftSharp.Protocol
         /// </summary>
         /// <param name="uuid">UUID of a player</param>
         /// <returns>Name history, as a dictionary</returns>
-        public static Dictionary<string, DateTime> UuidToNameHistory(string uuid)
+        public static Dictionary<string, DateTime> UUIDToNameHistory(string uuid)
         {
             Dictionary<string, DateTime> tempDict = new Dictionary<string, DateTime>();
             List<Json.JSONData> jsonDataList;

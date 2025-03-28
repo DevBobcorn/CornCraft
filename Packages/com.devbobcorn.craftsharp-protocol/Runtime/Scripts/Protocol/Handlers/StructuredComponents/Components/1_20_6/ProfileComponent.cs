@@ -10,7 +10,7 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents.Components._1_20_6
         public bool HasName { get; set; }
         public string? Name { get; set; } = null!;
         public bool HasUniqueId { get; set; }
-        public Guid Uuid { get; set; }
+        public Guid UUID { get; set; }
         public int NumberOfProperties { get; set; }
         public List<ProfileProperty> ProfileProperties { get; set; } = new();
 
@@ -30,7 +30,7 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents.Components._1_20_6
             HasUniqueId = DataTypes.ReadNextBool(data);
 
             if (HasUniqueId)
-                Uuid = DataTypes.ReadNextUUID(data);
+                UUID = DataTypes.ReadNextUUID(data);
 
             NumberOfProperties = DataTypes.ReadNextVarInt(data);
             for (var i = 0; i < NumberOfProperties; i++)
@@ -58,7 +58,7 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents.Components._1_20_6
             }
             
             if (HasUniqueId)
-                data.AddRange(DataTypes.GetUUID(Uuid));
+                data.AddRange(DataTypes.GetUUID(UUID));
 
             if (NumberOfProperties > 0)
             {

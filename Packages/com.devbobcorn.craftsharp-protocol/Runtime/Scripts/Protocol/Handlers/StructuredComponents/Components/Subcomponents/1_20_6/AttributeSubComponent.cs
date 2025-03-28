@@ -8,7 +8,7 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents.Components.Subcompon
     public class AttributeSubComponent : SubComponent
     {
         public int TypeId { get; set; }
-        public Guid Uuid { get; set; }
+        public Guid UUID { get; set; }
         public string? Name { get; set; }
         public double Value { get; set; }
         public int Operation { get; set; }
@@ -23,7 +23,7 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents.Components.Subcompon
         protected override void Parse(Queue<byte> data)
         {
             TypeId = DataTypes.ReadNextVarInt(data);
-            Uuid = DataTypes.ReadNextUUID(data);
+            UUID = DataTypes.ReadNextUUID(data);
             Name = DataTypes.ReadNextString(data);
             Value = DataTypes.ReadNextDouble(data);
             Operation = DataTypes.ReadNextVarInt(data);
@@ -34,7 +34,7 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents.Components.Subcompon
         {
             var data = new List<byte>();
             data.AddRange(DataTypes.GetVarInt(TypeId));
-            data.AddRange(DataTypes.GetUUID(Uuid));
+            data.AddRange(DataTypes.GetUUID(UUID));
             
             if (string.IsNullOrEmpty(Name?.Trim()))
                 throw new ArgumentNullException($"Can not serialize AttributeSubComponent due to Name being null or empty!");

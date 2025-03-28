@@ -75,9 +75,9 @@ namespace CraftSharp.Protocol.ProfileKey
         /// <param name="salt">Salt</param>
         /// <param name="lastSeenMessages">LastSeenMessageList</param>
         /// <returns>Signature data</returns>
-        public byte[] SignMessage(string message, Guid playerUuid, Guid chatUuid, int messageIndex, DateTimeOffset timestamp, ref byte[] salt, AcknowledgedMessage[] lastSeenMessages)
+        public byte[] SignMessage(string message, Guid playerUUID, Guid chatUUID, int messageIndex, DateTimeOffset timestamp, ref byte[] salt, AcknowledgedMessage[] lastSeenMessages)
         {
-            byte[] bodySignData = KeyUtils.GetSignatureData_1_19_3(message, playerUuid, chatUuid, messageIndex, timestamp, ref salt, lastSeenMessages);
+            byte[] bodySignData = KeyUtils.GetSignatureData_1_19_3(message, playerUUID, chatUUID, messageIndex, timestamp, ref salt, lastSeenMessages);
 
             return SignData(bodySignData);
         }

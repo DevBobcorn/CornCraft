@@ -255,31 +255,31 @@ namespace CraftSharp.UI
                 else // Hotbar slot selection
                 {
                     if (mouseScroll < 0F)
-                        game.ChangeSlotBy(1);
+                        game.ChangeHotbarSlotBy(1);
                     else
-                        game.ChangeSlotBy(-1);
+                        game.ChangeHotbarSlotBy(-1);
                 }
             }
             
             // Hotbar slot selection by key
             if (Keyboard.current.digit1Key.wasPressedThisFrame)
-                game.ChangeSlot(0);
+                game.ChangeHotbarSlot(0);
             if (Keyboard.current.digit2Key.wasPressedThisFrame)
-                game.ChangeSlot(1);
+                game.ChangeHotbarSlot(1);
             if (Keyboard.current.digit3Key.wasPressedThisFrame)
-                game.ChangeSlot(2);
+                game.ChangeHotbarSlot(2);
             if (Keyboard.current.digit4Key.wasPressedThisFrame)
-                game.ChangeSlot(3);
+                game.ChangeHotbarSlot(3);
             if (Keyboard.current.digit5Key.wasPressedThisFrame)
-                game.ChangeSlot(4);
+                game.ChangeHotbarSlot(4);
             if (Keyboard.current.digit6Key.wasPressedThisFrame)
-                game.ChangeSlot(5);
+                game.ChangeHotbarSlot(5);
             if (Keyboard.current.digit7Key.wasPressedThisFrame)
-                game.ChangeSlot(6);
+                game.ChangeHotbarSlot(6);
             if (Keyboard.current.digit8Key.wasPressedThisFrame)
-                game.ChangeSlot(7);
+                game.ChangeHotbarSlot(7);
             if (Keyboard.current.digit9Key.wasPressedThisFrame)
-                game.ChangeSlot(8);
+                game.ChangeHotbarSlot(8);
 
             if (Keyboard.current.qKey.wasPressedThisFrame)
             {
