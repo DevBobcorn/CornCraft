@@ -99,7 +99,7 @@ namespace CraftSharp.Inventory
         }
 
         /// <summary>
-        /// Create an empty inventory with T^ype and Items
+        /// Create an empty inventory with Type and Items
         /// </summary>
         /// <param name="type">Inventory Type</param>
         /// <param name="items">Inventory Items (key: slot Id, value: item info)</param>
@@ -219,7 +219,7 @@ namespace CraftSharp.Inventory
         }
 
         /// <summary>
-        /// Check the given slot Id is a hotbar slot and give the hotbar number
+        /// Check if the given slot Id is a hotbar slot and return the hotbar number
         /// </summary>
         /// <param name="slot">Zero-based, 0-8</param>
         /// <returns>True if given slot Id is a hotbar slot</returns>

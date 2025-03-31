@@ -334,8 +334,8 @@ namespace CraftSharp.Protocol
         /// </summary>
         /// <param name="expBar">Experience bar level</param>
         /// <param name="expLevel">Player Level</param>
-        /// <param name="TotalExperience">Total experience</param>
-        void OnSetExperience(float expBar, int expLevel, int TotalExperience);
+        /// <param name="totalExp">Total experience</param>
+        void OnSetExperience(float expBar, int expLevel, int totalExp);
 
         /// <summary>
         /// Called when held item is changed
