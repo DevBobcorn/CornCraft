@@ -24,9 +24,9 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x0F, PacketTypesIn.ClearTiles },                 //
             { 0x10, PacketTypesIn.TabComplete },                // (Wiki name: Command Suggestions Response)
             { 0x11, PacketTypesIn.DeclareCommands },            // (Wiki name: Commands)
-            { 0x12, PacketTypesIn.CloseWindow },                // (Wiki name: Close Container (clientbound))
-            { 0x13, PacketTypesIn.WindowItems },                // (Wiki name: Set Container Content)
-            { 0x14, PacketTypesIn.WindowProperty },             // (Wiki name: Set Container Property)
+            { 0x12, PacketTypesIn.CloseInventory },             // (Wiki name: Close Container (clientbound))
+            { 0x13, PacketTypesIn.InventoryItems },             // (Wiki name: Set Container Content)
+            { 0x14, PacketTypesIn.InventoryProperty },          // (Wiki name: Set Container Property)
             { 0x15, PacketTypesIn.SetSlot },                    // (Wiki name: Set Container Slot)
             { 0x16, PacketTypesIn.SetCooldown },                //
             { 0x17, PacketTypesIn.ChatSuggestions },            // Added in 1.19.1
@@ -55,7 +55,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x2E, PacketTypesIn.EntityRotation },             // (Wiki name: Move Entity Rotation)
             { 0x2F, PacketTypesIn.VehicleMove },                // (Wiki name: Move Vehicle)
             { 0x30, PacketTypesIn.OpenBook },                   //
-            { 0x31, PacketTypesIn.OpenWindow },                 // (Wiki name: Open Screen)
+            { 0x31, PacketTypesIn.OpenInventory },              // (Wiki name: Open Screen)
             { 0x32, PacketTypesIn.OpenSignEditor },             //
             { 0x33, PacketTypesIn.Ping },                       // (Wiki name: Ping (play))
             { 0x34, PacketTypesIn.PingResponse },               // Added in 1.20.2 
@@ -135,9 +135,9 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x09, PacketTypesOut.ClientSettings },              // (Wiki name: Client Information)
             { 0x0A, PacketTypesOut.TabComplete },                 // (Wiki name: Command Suggestions Request)
             { 0x0B, PacketTypesOut.AcknowledgeConfiguration },    // Added in 1.20.2 
-            { 0x0C, PacketTypesOut.ClickWindowButton },           // (Wiki name: Click Container Button)
-            { 0x0D, PacketTypesOut.ClickWindow },                 // (Wiki name: Click Container)
-            { 0x0E, PacketTypesOut.CloseWindow },                 // (Wiki name: Close Container (serverbound))
+            { 0x0C, PacketTypesOut.ClickInventoryButton },        // (Wiki name: Click Container Button)
+            { 0x0D, PacketTypesOut.ClickInventory },              // (Wiki name: Click Container)
+            { 0x0E, PacketTypesOut.CloseInventory },              // (Wiki name: Close Container (serverbound))
             { 0x0F, PacketTypesOut.PluginMessage },               // (Wiki name: Serverbound Plugin Message)
             { 0x10, PacketTypesOut.EditBook },                    //
             { 0x11, PacketTypesOut.EntityNBTRequest },            // (Wiki name: Query Entity Tag)

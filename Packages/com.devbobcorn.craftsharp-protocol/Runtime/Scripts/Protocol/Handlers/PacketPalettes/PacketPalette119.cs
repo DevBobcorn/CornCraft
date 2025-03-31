@@ -22,9 +22,9 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x0D, PacketTypesIn.ClearTiles },                 //
             { 0x0E, PacketTypesIn.TabComplete },                // (Wiki name: Command Suggestions Response)
             { 0x0F, PacketTypesIn.DeclareCommands },            // (Wiki name: Commands)
-            { 0x10, PacketTypesIn.CloseWindow },                // (Wiki name: Close Container (clientbound))
-            { 0x11, PacketTypesIn.WindowItems },                // (Wiki name: Set Container Content)
-            { 0x12, PacketTypesIn.WindowProperty },             // (Wiki name: Set Container Property)
+            { 0x10, PacketTypesIn.CloseInventory },             // (Wiki name: Close Container (clientbound))
+            { 0x11, PacketTypesIn.InventoryItems },             // (Wiki name: Set Container Content)
+            { 0x12, PacketTypesIn.InventoryProperty },          // (Wiki name: Set Container Property)
             { 0x13, PacketTypesIn.SetSlot },                    // (Wiki name: Set Container Slot)
             { 0x14, PacketTypesIn.SetCooldown },                //
             { 0x15, PacketTypesIn.PluginMessage },              // (Wiki name: Plugin Message (clientbound))
@@ -49,7 +49,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x28, PacketTypesIn.EntityRotation },             // (Wiki name: Move Entity Rotation)
             { 0x29, PacketTypesIn.VehicleMove },                // (Wiki name: Move Vehicle)
             { 0x2A, PacketTypesIn.OpenBook },                   //
-            { 0x2B, PacketTypesIn.OpenWindow },                 // (Wiki name: Open Screen)
+            { 0x2B, PacketTypesIn.OpenInventory },              // (Wiki name: Open Screen)
             { 0x2C, PacketTypesIn.OpenSignEditor },             //
             { 0x2D, PacketTypesIn.Ping },                       // (Wiki name: Ping (play))
             { 0x2E, PacketTypesIn.CraftRecipeResponse },        // (Wiki name: Place Ghost Recipe)
@@ -124,9 +124,9 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x06, PacketTypesOut.ClientStatus },                // (Wiki name: Client Command)
             { 0x07, PacketTypesOut.ClientSettings },              // (Wiki name: Client Information)
             { 0x08, PacketTypesOut.TabComplete },                 // (Wiki name: Command Suggestions Request)
-            { 0x09, PacketTypesOut.ClickWindowButton },           // (Wiki name: Click Container Button)
-            { 0x0A, PacketTypesOut.ClickWindow },                 // (Wiki name: Click Container)
-            { 0x0B, PacketTypesOut.CloseWindow },                 // (Wiki name: Close Container (serverbound))
+            { 0x09, PacketTypesOut.ClickInventoryButton },        // (Wiki name: Click Inventory Button)
+            { 0x0A, PacketTypesOut.ClickInventory },              // (Wiki name: Click Inventory)
+            { 0x0B, PacketTypesOut.CloseInventory },              // (Wiki name: Close Inventory (serverbound))
             { 0x0C, PacketTypesOut.PluginMessage },               // (Wiki name: Plugin Message (serverbound))
             { 0x0D, PacketTypesOut.EditBook },                    //
             { 0x0E, PacketTypesOut.EntityNBTRequest },            // (Wiki name: Query Entity Tag)

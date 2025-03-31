@@ -24,9 +24,9 @@ public class PacketPalette1206 : PacketTypePalette
         { 0x0F, PacketTypesIn.ClearTiles },                 //
         { 0x10, PacketTypesIn.TabComplete },                // (Wiki name: Command Suggestions Response)
         { 0x11, PacketTypesIn.DeclareCommands },            // (Wiki name: Commands)
-        { 0x12, PacketTypesIn.CloseWindow },                // (Wiki name: Close Container (clientbound))
-        { 0x13, PacketTypesIn.WindowItems },                // (Wiki name: Set Container Content)
-        { 0x14, PacketTypesIn.WindowProperty },             // (Wiki name: Set Container Property)
+        { 0x12, PacketTypesIn.CloseInventory },             // (Wiki name: Close Container (clientbound))
+        { 0x13, PacketTypesIn.InventoryItems },             // (Wiki name: Set Container Content)
+        { 0x14, PacketTypesIn.InventoryProperty },          // (Wiki name: Set Container Property)
         { 0x15, PacketTypesIn.SetSlot },                    // (Wiki name: Set Container Slot)
         { 0x16, PacketTypesIn.CookieRequest },              // Added in 1.20.6
         { 0x17, PacketTypesIn.SetCooldown },                //
@@ -57,7 +57,7 @@ public class PacketPalette1206 : PacketTypePalette
         { 0x30, PacketTypesIn.EntityRotation },             // (Wiki name: Move Entity Rotation)
         { 0x31, PacketTypesIn.VehicleMove },                // (Wiki name: Move Vehicle)
         { 0x32, PacketTypesIn.OpenBook },                   //
-        { 0x33, PacketTypesIn.OpenWindow },                 // (Wiki name: Open Screen)
+        { 0x33, PacketTypesIn.OpenInventory },              // (Wiki name: Open Screen)
         { 0x34, PacketTypesIn.OpenSignEditor },             //
         { 0x35, PacketTypesIn.Ping },                       // (Wiki name: Ping (play))
         { 0x36, PacketTypesIn.PingResponse },               // Added in 1.20.2 
@@ -145,13 +145,13 @@ public class PacketPalette1206 : PacketTypePalette
         { 0x0A, PacketTypesOut.ClientSettings },              // (Wiki name: Client Information)
         { 0x0B, PacketTypesOut.TabComplete },                 // (Wiki name: Command Suggestions Request)
         { 0x0C, PacketTypesOut.AcknowledgeConfiguration },    // Added in 1.20.2 
-        { 0x0D, PacketTypesOut.ClickWindowButton },           // (Wiki name: Click Container Button)
-        { 0x0E, PacketTypesOut.ClickWindow },                 // (Wiki name: Click Container)
-        { 0x0F, PacketTypesOut.CloseWindow },                 // (Wiki name: Close Container (serverbound))
-        { 0x10, PacketTypesOut.ChangeContainerSlotState },    // Added in 1.20.3
+        { 0x0D, PacketTypesOut.ClickInventoryButton },        // (Wiki name: Click Container Button)
+        { 0x0E, PacketTypesOut.ClickInventory },              // (Wiki name: Click Container)
+        { 0x0F, PacketTypesOut.CloseInventory },              // (Wiki name: Close Container (serverbound))
+        { 0x10, PacketTypesOut.ChangeInventorySlotState },    // Added in 1.20.3
         { 0x11, PacketTypesOut.CookieResponse },              // Added in 1.20.6
         { 0x12, PacketTypesOut.PluginMessage },               // (Wiki name: Serverbound Plugin Message)
-        { 0x13, PacketTypesOut.DebugSampleSubscription },       // Added in 1.20.6
+        { 0x13, PacketTypesOut.DebugSampleSubscription },     // Added in 1.20.6
         { 0x14, PacketTypesOut.EditBook },                    //
         { 0x15, PacketTypesOut.EntityNBTRequest },            // (Wiki name: Query Entity Tag)
         { 0x16, PacketTypesOut.InteractEntity },              // (Wiki name: Interact)

@@ -50,7 +50,7 @@ namespace CraftSharp.Protocol.Handlers
 
         private int compression_threshold = -1;
         private int autocomplete_transaction_id = 0;
-        private readonly Dictionary<int, short> window_actions = new();
+        private readonly Dictionary<int, short> inventoryActions = new();
         private CurrentState currentState = CurrentState.Login;
         private readonly int protocolVersion;
         private int currentDimension;
@@ -1353,7 +1353,7 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.TradeList: // MC 1.14 or greater
                     {
-                        var windowId = DataTypes.ReadNextVarInt(packetData);
+                        var inventoryId = DataTypes.ReadNextVarInt(packetData);
                         int size = DataTypes.ReadNextByte(packetData);
                         List<VillagerTrade> trades = new();
                         for (int tradeId = 0; tradeId < size; tradeId++)
@@ -1368,7 +1368,7 @@ namespace CraftSharp.Protocol.Handlers
                             IsRegularVillager = DataTypes.ReadNextBool(packetData),
                             CanRestock = DataTypes.ReadNextBool(packetData)
                         };
-                        handler.OnTradeList(windowId, trades, villagerInfo);
+                        handler.OnTradeList(inventoryId, trades, villagerInfo);
                     }
                     break;
                 case PacketTypesIn.Title:
@@ -1801,26 +1801,26 @@ namespace CraftSharp.Protocol.Handlers
                 case PacketTypesIn.SetCompression:
                     /* Legacy packet. Used in MC 1.8.X */
                     break;
-                case PacketTypesIn.OpenWindow:
+                case PacketTypesIn.OpenInventory:
                     {
                         // MC 1.14 or greater
-                        var windowId = DataTypes.ReadNextVarInt(packetData);
-                        var windowType = DataTypes.ReadNextVarInt(packetData);
+                        var inventoryId = DataTypes.ReadNextVarInt(packetData);
+                        var inventoryType = DataTypes.ReadNextVarInt(packetData);
                         var title = dataTypes.ReadNextChat(packetData);
-                        var inventory = new Container(windowId, windowType, title);
-                        handler.OnInventoryOpen(windowId, inventory);
+                        var inventory = new BaseInventory(inventoryId, inventoryType, title);
+                        handler.OnInventoryOpen(inventoryId, inventory);
                     }
                     break;
-                case PacketTypesIn.CloseWindow:
+                case PacketTypesIn.CloseInventory:
                     {
-                        var windowId = DataTypes.ReadNextByte(packetData);
-                        lock (window_actions) { window_actions[windowId] = 0; }
-                        handler.OnInventoryClose(windowId);
+                        var inventoryId = DataTypes.ReadNextByte(packetData);
+                        lock (inventoryActions) { inventoryActions[inventoryId] = 0; }
+                        handler.OnInventoryClose(inventoryId);
                     }
                     break;
-                case PacketTypesIn.WindowItems:
+                case PacketTypesIn.InventoryItems:
                     {
-                        var windowId = DataTypes.ReadNextByte(packetData);
+                        var inventoryId = DataTypes.ReadNextByte(packetData);
                         var stateId = -1;
                         var elements = 0;
 
@@ -1847,35 +1847,35 @@ namespace CraftSharp.Protocol.Handlers
                         if (protocolVersion >= MC_1_17_1_Version) // Carried Item - 1.17.1 and above
                             dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
 
-                        handler.OnInventoryItems(windowId, inventorySlots, stateId);
+                        handler.OnInventoryItems(inventoryId, inventorySlots, stateId);
                     }
                     break;
-                case PacketTypesIn.WindowProperty:
+                case PacketTypesIn.InventoryProperty:
                     {
-                        var containerId = DataTypes.ReadNextByte(packetData);
+                        var inventoryId = DataTypes.ReadNextByte(packetData);
                         var propertyId = DataTypes.ReadNextShort(packetData);
                         var propertyValue = DataTypes.ReadNextShort(packetData);
-                        handler.OnInventoryProperties(containerId, propertyId, propertyValue);
+                        handler.OnInventoryProperties(inventoryId, propertyId, propertyValue);
                     }
                     break;
                 case PacketTypesIn.SetSlot:
                     {
-                        var windowId = DataTypes.ReadNextByte(packetData);
+                        var inventoryId = DataTypes.ReadNextByte(packetData);
                         var stateId = -1;
                         if (protocolVersion >= MC_1_17_1_Version)
                             stateId = DataTypes.ReadNextVarInt(packetData); // State ID - 1.17.1 and above
                         var slotId2 = DataTypes.ReadNextShort(packetData);
                         var item = dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
-                        handler.OnInventorySlot(windowId, slotId2, item!, stateId);
+                        handler.OnInventorySlot(inventoryId, slotId2, item!, stateId);
                     }
                     break;
-                case PacketTypesIn.WindowConfirmation:
+                case PacketTypesIn.InventoryConfirmation:
                     {
-                        var windowId = DataTypes.ReadNextByte(packetData);
+                        var inventoryId = DataTypes.ReadNextByte(packetData);
                         var actionId = DataTypes.ReadNextShort(packetData);
                         var accepted = DataTypes.ReadNextBool(packetData);
                         if (!accepted)
-                            SendWindowConfirmation(windowId, actionId, accepted);
+                            SendInventoryConfirmation(inventoryId, actionId, accepted);
                     }
                     break;
                 case PacketTypesIn.RemoveResourcePack:
@@ -3475,12 +3475,11 @@ namespace CraftSharp.Protocol.Handlers
                 var itemPalette = ItemPalette.INSTANCE;
 
                 short actionNumber;
-                lock (window_actions)
+                lock (inventoryActions)
                 {
-                    if (!window_actions.ContainsKey(inventoryId))
-                        window_actions[inventoryId] = 0;
-                    actionNumber = (short)(window_actions[inventoryId] + 1);
-                    window_actions[inventoryId] = actionNumber;
+                    inventoryActions.TryAdd(inventoryId, 0);
+                    actionNumber = (short)(inventoryActions[inventoryId] + 1);
+                    inventoryActions[inventoryId] = actionNumber;
                 }
 
                 byte button = 0;
@@ -3573,7 +3572,7 @@ namespace CraftSharp.Protocol.Handlers
 
                 List<byte> packet = new()
                 {
-                    (byte)inventoryId // Window ID
+                    (byte)inventoryId // Inventory Id
                 };
 
                 switch (protocolVersion)
@@ -3614,7 +3613,7 @@ namespace CraftSharp.Protocol.Handlers
 
                 packet.AddRange(dataTypes.GetItemSlot(item, itemPalette)); // Carried item (Clicked item)
 
-                SendPacket(PacketTypesOut.ClickWindow, packet);
+                SendPacket(PacketTypesOut.ClickInventory, packet);
                 return true;
             }
             catch (SocketException)
@@ -3672,16 +3671,16 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool ClickContainerButton(int windowId, int buttonId)
+        public bool ClickInventoryButton(int inventoryId, int buttonId)
         {
             try
             {
                 var packet = new List<byte>
                 {
-                    (byte)windowId,
+                    (byte)inventoryId,
                     (byte)buttonId
                 };
-                SendPacket(PacketTypesOut.ClickWindowButton, packet);
+                SendPacket(PacketTypesOut.ClickInventoryButton, packet);
                 return true;
             }
             catch (SocketException) { return false; }
@@ -3714,12 +3713,12 @@ namespace CraftSharp.Protocol.Handlers
         {
             try
             {
-                lock (window_actions)
+                lock (inventoryActions)
                 {
-                    if (window_actions.ContainsKey(inventoryId))
-                        window_actions[inventoryId] = 0;
+                    if (inventoryActions.ContainsKey(inventoryId))
+                        inventoryActions[inventoryId] = 0;
                 }
-                SendPacket(PacketTypesOut.CloseWindow, new[] { (byte)inventoryId });
+                SendPacket(PacketTypesOut.CloseInventory, new[] { (byte)inventoryId });
                 return true;
             }
             catch (SocketException) { return false; }
@@ -3754,17 +3753,17 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool SendWindowConfirmation(byte windowId, short actionId, bool accepted)
+        public bool SendInventoryConfirmation(byte inventoryId, short actionId, bool accepted)
         {
             try
             {
                 List<byte> packet = new()
                 {
-                    windowId
+                    inventoryId
                 };
                 packet.AddRange(DataTypes.GetShort(actionId));
                 packet.Add(accepted ? (byte)1 : (byte)0);
-                SendPacket(PacketTypesOut.WindowConfirmation, packet);
+                SendPacket(PacketTypesOut.InventoryConfirmation, packet);
                 return true;
             }
             catch (SocketException) { return false; }

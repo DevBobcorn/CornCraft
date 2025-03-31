@@ -8,16 +8,16 @@
         AcknowledgeConfiguration,    // Added in 1.20.2
         AdvancementTab,              //
         Animation,                   //
-        ChangeContainerSlotState,    // Added in 1.20.3
+        ChangeInventorySlotState,    // Added in 1.20.3
         ChatCommand,                 // Added in 1.19
         ChatMessage,                 //
         ChatPreview,                 // Added in 1.19
         ChunkBatchReceived,          // Added in 1.20.2
-        ClickWindow,                 //
-        ClickWindowButton,           //
+        ClickInventory,                 //
+        ClickInventoryButton,           //
         ClientSettings,              //
         ClientStatus,                //
-        CloseWindow,                 //
+        CloseInventory,                 //
         CraftRecipeRequest,          //
         CreativeInventoryAction,     //
         CookieResponse,              // Added in 1.20.6
@@ -69,6 +69,6 @@
         UpdateStructureBlock,        //
         UseItem,                     //
         VehicleMove,                 //
-        WindowConfirmation,          //
+        InventoryConfirmation,          //
     }
 }

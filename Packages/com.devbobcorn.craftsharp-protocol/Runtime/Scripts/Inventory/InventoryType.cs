@@ -1,7 +1,7 @@
 ﻿namespace CraftSharp.Inventory
 {
     // For MC 1.14 after ONLY
-    public enum ContainerType
+    public enum InventoryType
     {
         Generic_9x1,
         Generic_9x2,

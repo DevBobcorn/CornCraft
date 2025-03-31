@@ -78,7 +78,7 @@ namespace CraftSharp
         private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
         private int foodSaturation, experienceLevel, totalExperience;
-        private readonly Dictionary<int, Container> inventories = new();
+        private readonly Dictionary<int, BaseInventory> inventories = new();
 
         private readonly object movementLock = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
@@ -569,7 +569,7 @@ namespace CraftSharp
         /// <summary>
         /// Get player inventory with a given id
         /// </summary>
-        public override Container? GetInventory(int inventoryId)
+        public override BaseInventory? GetInventory(int inventoryId)
         {
             return inventories.GetValueOrDefault(inventoryId);
         }
@@ -820,14 +820,14 @@ namespace CraftSharp
         /// <summary>
         /// Try to merge a slot
         /// </summary>
-        /// <param name="inventory">The container where the item is located</param>
+        /// <param name="inventory">The inventory where the item is located</param>
         /// <param name="item">Items to be processed</param>
         /// <param name="slot">The item slot to be processed</param>
         /// <param name="curItem">The slot that was put down</param>
         /// <param name="curSlot">The item slot being put down</param>
         /// <param name="changedSlots">Record changes</param>
         /// <returns>Whether to fully merge</returns>
-        private static bool TryMergeSlot(Container inventory, ItemStack item, int slot, ItemStack curItem, int curSlot, List<Tuple<short, ItemStack?>> changedSlots)
+        private static bool TryMergeSlot(BaseInventory inventory, ItemStack item, int slot, ItemStack curItem, int curSlot, List<Tuple<short, ItemStack?>> changedSlots)
         {
             int spaceLeft = curItem.ItemType.StackLimit - curItem.Count;
             if (curItem.ItemType == item.ItemType && spaceLeft > 0)
@@ -857,12 +857,12 @@ namespace CraftSharp
         /// <summary>
         /// Store items in a new slot
         /// </summary>
-        /// <param name="inventory">The container where the item is located</param>
+        /// <param name="inventory">The inventory where the item is located</param>
         /// <param name="item">Items to be processed</param>
         /// <param name="slot">The item slot to be processed</param>
         /// <param name="newSlot">New item slot</param>
         /// <param name="changedSlots">Record changes</param>
-        private static void StoreInNewSlot(Container inventory, ItemStack item, int slot, int newSlot, List<Tuple<short, ItemStack?>> changedSlots)
+        private static void StoreInNewSlot(BaseInventory inventory, ItemStack item, int slot, int newSlot, List<Tuple<short, ItemStack?>> changedSlots)
         {
             ItemStack newItem = new(item.ItemType, item.Count, item.NBT);
             inventory.Items[newSlot] = newItem;
@@ -912,8 +912,8 @@ namespace CraftSharp
             List<Tuple<short, ItemStack?>> changedSlots = new(); // List<Slot Id, Changed Items>
 
             // Update our inventory base on action type
-            Container? inventory = GetInventory(inventoryId);
-            Container playerInventory = GetInventory(0)!;
+            BaseInventory? inventory = GetInventory(inventoryId);
+            BaseInventory playerInventory = GetInventory(0)!;
             if (inventory != null)
             {
                 switch (action)
@@ -1071,7 +1071,7 @@ namespace CraftSharp
 
                             switch (inventory.Type)
                             {
-                                case ContainerType.PlayerInventory:
+                                case InventoryType.PlayerInventory:
                                     if (slot is >= 0 and <= 8 or 45)
                                     {
                                         //if (slot != 0)
@@ -1102,7 +1102,7 @@ namespace CraftSharp
                                         }
                                     }
                                     break;
-                                case ContainerType.Generic_9x1:
+                                case InventoryType.Generic_9x1:
                                     if (slot is >= 0 and <= 8)
                                     {
                                         upper2backpack = true;
@@ -1115,7 +1115,7 @@ namespace CraftSharp
                                         upperEndSlot = 8;
                                     }
                                     break;
-                                case ContainerType.Generic_9x2:
+                                case InventoryType.Generic_9x2:
                                     if (slot is >= 0 and <= 17)
                                     {
                                         upper2backpack = true;
@@ -1128,8 +1128,8 @@ namespace CraftSharp
                                         upperEndSlot = 17;
                                     }
                                     break;
-                                case ContainerType.Generic_9x3:
-                                case ContainerType.ShulkerBox:
+                                case InventoryType.Generic_9x3:
+                                case InventoryType.ShulkerBox:
                                     if (slot is >= 0 and <= 26)
                                     {
                                         upper2backpack = true;
@@ -1142,7 +1142,7 @@ namespace CraftSharp
                                         upperEndSlot = 26;
                                     }
                                     break;
-                                case ContainerType.Generic_9x4:
+                                case InventoryType.Generic_9x4:
                                     if (slot is >= 0 and <= 35)
                                     {
                                         upper2backpack = true;
@@ -1155,7 +1155,7 @@ namespace CraftSharp
                                         upperEndSlot = 35;
                                     }
                                     break;
-                                case ContainerType.Generic_9x5:
+                                case InventoryType.Generic_9x5:
                                     if (slot is >= 0 and <= 44)
                                     {
                                         upper2backpack = true;
@@ -1168,7 +1168,7 @@ namespace CraftSharp
                                         upperEndSlot = 44;
                                     }
                                     break;
-                                case ContainerType.Generic_9x6:
+                                case InventoryType.Generic_9x6:
                                     if (slot is >= 0 and <= 53)
                                     {
                                         upper2backpack = true;
@@ -1181,7 +1181,7 @@ namespace CraftSharp
                                         upperEndSlot = 53;
                                     }
                                     break;
-                                case ContainerType.Generic_3x3:
+                                case InventoryType.Generic_3x3:
                                     if (slot is >= 0 and <= 8)
                                     {
                                         upper2backpack = true;
@@ -1194,7 +1194,7 @@ namespace CraftSharp
                                         upperEndSlot = 8;
                                     }
                                     break;
-                                case ContainerType.Anvil:
+                                case InventoryType.Anvil:
                                     if (slot is >= 0 and <= 2)
                                     {
                                         if (slot is >= 0 and <= 1)
@@ -1209,7 +1209,7 @@ namespace CraftSharp
                                         upperEndSlot = 1;
                                     }
                                     break;
-                                case ContainerType.Beacon:
+                                case InventoryType.Beacon:
                                     /*if (slot == 0)
                                     {
                                         hotbarFirst = false;
@@ -1239,9 +1239,9 @@ namespace CraftSharp
                                         }
                                     }
                                     break;
-                                case ContainerType.BlastFurnace:
-                                case ContainerType.Furnace:
-                                case ContainerType.Smoker:
+                                case InventoryType.BlastFurnace:
+                                case InventoryType.Furnace:
+                                case InventoryType.Smoker:
                                     if (slot is >= 0 and <= 2)
                                     {
                                         if (slot is >= 0 and <= 1)
@@ -1271,7 +1271,7 @@ namespace CraftSharp
                                         }
                                     }
                                     break;
-                                case ContainerType.BrewingStand:
+                                case InventoryType.BrewingStand:
                                     if (slot is >= 0 and <= 3)
                                     {
                                         upper2backpack = true;
@@ -1313,7 +1313,7 @@ namespace CraftSharp
                                         }
                                     }
                                     break;
-                                case ContainerType.Crafting:
+                                case InventoryType.Crafting:
                                     if (slot is >= 0 and <= 9)
                                     {
                                         //if (slot is >= 1 and <= 9)
@@ -1328,7 +1328,7 @@ namespace CraftSharp
                                         upperEndSlot = 9;
                                     }
                                     break;
-                                case ContainerType.Enchantment:
+                                case InventoryType.Enchantment:
                                     if (slot is >= 0 and <= 1)
                                     {
                                         upper2backpack = true;
@@ -1346,7 +1346,7 @@ namespace CraftSharp
                                         upperEndSlot = 0;
                                     }
                                     break;
-                                case ContainerType.Grindstone:
+                                case InventoryType.Grindstone:
                                     if (slot is >= 0 and <= 2)
                                     {
                                         if (slot <= 1)
@@ -1368,7 +1368,7 @@ namespace CraftSharp
                                         upperEndSlot = 1;
                                     }
                                     break;
-                                case ContainerType.Hopper:
+                                case InventoryType.Hopper:
                                     if (slot is >= 0 and <= 4)
                                     {
                                         upper2backpack = true;
@@ -1381,10 +1381,10 @@ namespace CraftSharp
                                         upperEndSlot = 4;
                                     }
                                     break;
-                                case ContainerType.Lectern:
+                                case InventoryType.Lectern:
                                     return false;
                                     // break;
-                                case ContainerType.Loom:
+                                case InventoryType.Loom:
                                     if (slot is >= 0 and <= 3)
                                     {
                                         //if (slot is >= 0 and <= 5)
@@ -1414,7 +1414,7 @@ namespace CraftSharp
                                         }
                                     }
                                     break;
-                                case ContainerType.Merchant:
+                                case InventoryType.Merchant:
                                     if (slot is >= 0 and <= 2)
                                     {
                                         if (slot <= 1)
@@ -1444,7 +1444,7 @@ namespace CraftSharp
                                         }
                                     }
                                     break;
-                                case ContainerType.Cartography:
+                                case InventoryType.Cartography:
                                     if (slot is >= 0 and <= 2)
                                     {
                                         if (slot <= 1)
@@ -1477,7 +1477,7 @@ namespace CraftSharp
                                         }
                                     }
                                     break;
-                                case ContainerType.Stonecutter:
+                                case InventoryType.Stonecutter:
                                     if (slot is >= 0 and <= 1)
                                     {
                                         //if (slot == 0)
@@ -1507,7 +1507,7 @@ namespace CraftSharp
                                         }
                                     }
                                     break;
-                                // TODO: Define more container type here
+                                // TODO: Define more inventory type here
                                 default:
                                     return false;
                             }
@@ -1690,7 +1690,7 @@ namespace CraftSharp
                 return InvokeOnNetMainThread(ClearInventories);
 
             inventories.Clear();
-            inventories[0] = new Container(0, ContainerType.PlayerInventory, "Player Inventory");
+            inventories[0] = new BaseInventory(0, InventoryType.PlayerInventory, "Player Inventory");
             return true;
         }
 
@@ -2114,7 +2114,7 @@ namespace CraftSharp
         /// </summary>
         /// <param name="inventory">The inventory</param>
         /// <param name="inventoryId">Inventory Id</param>
-        public void OnInventoryOpen(int inventoryId, Container inventory)
+        public void OnInventoryOpen(int inventoryId, BaseInventory inventory)
         {
             inventories[inventoryId] = inventory;
 
@@ -2157,7 +2157,7 @@ namespace CraftSharp
         /// <summary>
         /// When received window properties from server.
         /// Used for Furnaces, Enchanting Table, Beacon, Brewing stand, Stone cutter, Loom and Lectern
-        /// More info about: https://wiki.vg/Protocol#Set_Container_Property
+        /// More info about: https://wiki.vg/Protocol#Set_Inventory_Property
         /// </summary>
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="propertyId">Property Id</param>
@@ -2172,7 +2172,7 @@ namespace CraftSharp
 
             inventory.Properties.Add(propertyId, propertyValue);
 
-            if (inventory.Type == ContainerType.Enchantment)
+            if (inventory.Type == InventoryType.Enchantment)
             {
                 // We got the last property for enchantment
                 if (propertyId == 9 && propertyValue != -1)
@@ -2227,10 +2227,10 @@ namespace CraftSharp
         /// <param name="stateId">State Id of inventory</param>
         public void OnInventoryItems(byte inventoryId, Dictionary<int, ItemStack> itemList, int stateId)
         {
-            if (inventories.TryGetValue(inventoryId, out var container))
+            if (inventories.TryGetValue(inventoryId, out var inventory))
             {
-                container.Items = itemList;
-                container.StateId = stateId;
+                inventory.Items = itemList;
+                inventory.StateId = stateId;
                 
                 Loom.QueueOnMainThread(() => {
                     foreach (var (slot, itemStack) in itemList)
@@ -2239,7 +2239,7 @@ namespace CraftSharp
 
                         //Debug.Log($"Set inventory item: [{inventoryId}]/[{pair.Key}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
 
-                        if (container.IsHotbar(slot, out int hotbarSlot))
+                        if (inventory.IsHotbar(slot, out int hotbarSlot))
                         {
                             EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, itemStack));
                             if (hotbarSlot == CurrentSlot) // Updating held item

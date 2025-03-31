@@ -18,9 +18,9 @@ namespace CraftSharp.UI
 
         private bool isActive = false;
 
-        public Container activeInventory = null; // -1 for none
+        public BaseInventory activeInventory = null; // -1 for none
 
-        public void SetActiveInventory(Container inventory)
+        public void SetActiveInventory(BaseInventory inventory)
         {
             EnsureInitialized();
 

@@ -131,7 +131,7 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Called when an inventory is opened
         /// </summary>
-        void OnInventoryOpen(int inventoryId, Container inventory);
+        void OnInventoryOpen(int inventoryId, BaseInventory inventory);
 
         /// <summary>
         /// Called when an inventory is closed
