@@ -1,5 +1,29 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-1171792050670628385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c6e585d9d2317e438a403bbb1965d5e, type: 3}
+  m_Name: StylizedWater3.StylizedWaterRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  transparencyRefraction: 0
+  screenSpaceReflectionSettings:
+    allow: 1
+  allowDirectionalCaustics: 0
+  heightPrePassSettings:
+    enable: 1
+    range: 500
+    cellsPerUnit: 4
+    maxResolution: 4096
+  heightReadbackCS: {fileID: 7200000, guid: 768e0c28dfdbc6b429fd59518fa03f2d, type: 3}
+  heightProcessingShader: {fileID: 4800000, guid: a1cfcf2c2c8140c084fb10845093540e, type: 3}
 --- !u!114 &-408358162207867921
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32,7 +56,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90f480a675b73fa4ebe11bab7b01dc3a, type: 3}
   m_Name: StarRailRendererFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   m_SceneShadowDepthBits: 16
   m_SceneShadowTileResolution: 512
   m_SceneShadowDebugMode: 0
@@ -69,10 +93,10 @@ MonoBehaviour:
     probeSamplingDebugTexture: {fileID: 0}
     probeVolumeBlendStatesCS: {fileID: 0}
   m_RendererFeatures:
-  - {fileID: -408358162207867921}
+  - {fileID: -1171792050670628385}
   - {fileID: 4449293429892402646}
   - {fileID: -403224962210285753}
-  m_RendererFeatureMap: effb77406a3855fad64d3716cd10bf3d47b7e282087567fa
+  m_RendererFeatureMap: df91269d56f5bcefd64d3716cd10bf3d47b7e282087567fa
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}

@@ -914,6 +914,7 @@ namespace CraftSharp
             // Update our inventory base on action type
             BaseInventory? inventory = GetInventory(inventoryId);
             BaseInventory playerInventory = GetInventory(0)!;
+            
             if (inventory != null)
             {
                 switch (action)
@@ -922,8 +923,11 @@ namespace CraftSharp
                         // Check if cursor have item (slot -1)
                         if (playerInventory.Items.ContainsKey(-1))
                         {
-                            // When item on cursor and clicking slot 0, nothing will happen
-                            if (slot == 0) break;
+                            // When item on cursor and clicking crafting output slot, nothing will happen
+                            if (inventory.HasCraftingOutputSlot && slot == inventory.CraftingOutputSlot)
+                            {
+                                break;
+                            }
 
                             // Check target slot also have item?
                             if (inventory.Items.ContainsKey(slot))
@@ -948,13 +952,13 @@ namespace CraftSharp
                                 }
                                 else
                                 {
-                                    // Swap two items
+                                    // Swap two items TODO: Check if this slot accepts cursor item
                                     (inventory.Items[slot], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slot]);
                                 }
                             }
                             else
                             {
-                                // Put cursor item to target
+                                // Put cursor item to target TODO: Check if this slot accepts cursor item
                                 inventory.Items[slot] = playerInventory.Items[-1];
                                 playerInventory.Items.Remove(-1);
                             }
@@ -968,8 +972,11 @@ namespace CraftSharp
                             // Check target slot have item?
                             if (inventory.Items.ContainsKey(slot))
                             {
-                                // When taking item from slot 0, server will update us
-                                if (slot == 0) break;
+                                // When taking item from crafting output slot, server will update us
+                                if (inventory.HasCraftingOutputSlot && slot == inventory.CraftingOutputSlot)
+                                {
+                                    break;
+                                }
 
                                 // Put target slot item to cursor
                                 playerInventory.Items[-1] = inventory.Items[slot];
@@ -983,32 +990,32 @@ namespace CraftSharp
                         // Check if cursor have item (slot -1)
                         if (playerInventory.Items.ContainsKey(-1))
                         {
-                            // When item on cursor and clicking slot 0, nothing will happen
-                            if (slot == 0) break;
+                            // When item on cursor and clicking crafting output slot, nothing will happen
+                            if (inventory.HasCraftingOutputSlot && slot == inventory.CraftingOutputSlot)
+                            {
+                                break;
+                            }
 
                             // Check target slot have item?
                             if (inventory.Items.ContainsKey(slot))
                             {
-                                // Check if both item are the same?
-                                if (inventory.Items[slot].ItemType == playerInventory.Items[-1].ItemType)
+                                // Check if these 2 items are stackable
+                                if (inventory.Items[slot].ItemType == playerInventory.Items[-1].ItemType &&
+                                    inventory.Items[slot].Count < inventory.Items[slot].ItemType.StackLimit)
                                 {
-                                    // Check item stacking
-                                    if (inventory.Items[slot].Count < inventory.Items[slot].ItemType.StackLimit)
-                                    {
-                                        // Drop 1 item count from cursor
-                                        playerInventory.Items[-1].Count--;
-                                        inventory.Items[slot].Count++;
-                                    }
+                                    // Drop 1 item count from cursor
+                                    playerInventory.Items[-1].Count--;
+                                    inventory.Items[slot].Count++;
                                 }
                                 else
                                 {
-                                    // Swap two items
+                                    // Swap two items TODO: Check if this slot accepts cursor item
                                     (inventory.Items[slot], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slot]);
                                 }
                             }
                             else
                             {
-                                // Drop 1 item count from cursor
+                                // Drop 1 item count from cursor TODO: Check if this slot accepts cursor item
                                 var itemTmp = playerInventory.Items[-1];
                                 ItemStack itemClone = new(itemTmp.ItemType, 1, itemTmp.NBT);
                                 inventory.Items[slot] = itemClone;
@@ -1020,9 +1027,9 @@ namespace CraftSharp
                             // Check target slot have item?
                             if (inventory.Items.ContainsKey(slot))
                             {
-                                if (slot == 0)
+                                if (inventory.HasCraftingOutputSlot && slot == inventory.CraftingOutputSlot)
                                 {
-                                    // no matter how many item in slot 0, only 1 will be taken out
+                                    // no matter how many item in crafting output slot, only 1 will be taken out
                                     // Also server will update us
                                     break;
                                 }
@@ -2155,7 +2162,7 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// When received window properties from server.
+        /// When received inventory properties from server.
         /// Used for Furnaces, Enchanting Table, Beacon, Brewing stand, Stone cutter, Loom and Lectern
         /// More info about: https://wiki.vg/Protocol#Set_Inventory_Property
         /// </summary>
