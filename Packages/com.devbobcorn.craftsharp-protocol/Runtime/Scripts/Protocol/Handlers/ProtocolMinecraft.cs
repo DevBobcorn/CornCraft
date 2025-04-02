@@ -1800,7 +1800,7 @@ namespace CraftSharp.Protocol.Handlers
                         var inventoryId = DataTypes.ReadNextVarInt(packetData);
                         var inventoryType = DataTypes.ReadNextVarInt(packetData);
                         var title = dataTypes.ReadNextChat(packetData);
-                        var inventory = new BaseInventory(inventoryId, inventoryType, title);
+                        var inventory = new InventoryData(inventoryId, InventoryTypePalette.INSTANCE.GetByNumId(inventoryType), title);
                         handler.OnInventoryOpen(inventoryId, inventory);
                     }
                     break;

@@ -194,7 +194,7 @@ namespace CraftSharp
             client.DummyOnGamemodeUpdate(Guid.Empty, (int) GameMode.Creative);
 
             // Send initial inventory
-            client.DummyOnInventoryOpen(0, new BaseInventory(InventoryType.PlayerInventory));
+            client.DummyOnInventoryOpen(0, new InventoryData(InventoryType.PLAYER));
 
             if (dataLoaded)
             {

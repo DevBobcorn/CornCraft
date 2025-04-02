@@ -159,6 +159,11 @@ namespace CraftSharp
             Task.Run(() => ParticleTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
+            // Load inventory definitions
+            loadFlag.Finished = false;
+            Task.Run(() => InventoryTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            while (!loadFlag.Finished) yield return null;
+
             // Load resource packs
             var packManager = ResourcePackManager.Instance;
 

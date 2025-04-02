@@ -29,7 +29,7 @@ namespace CraftSharp
         #region Players and Entities
         private bool locationReceived = false;
         private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
-        private readonly Dictionary<int, BaseInventory> inventories = new();
+        private readonly Dictionary<int, InventoryData> inventories = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         #endregion
 
@@ -169,7 +169,7 @@ namespace CraftSharp
         /// <summary>
         /// Get player inventory with a given id
         /// </summary>
-        public override BaseInventory? GetInventory(int inventoryId)
+        public override InventoryData? GetInventory(int inventoryId)
         {
             return inventories.GetValueOrDefault(inventoryId);
         }
@@ -582,15 +582,15 @@ namespace CraftSharp
         /// <summary>
         /// Called when an inventory is opened
         /// </summary>
-        /// <param name="inventory">The inventory</param>
+        /// <param name="inventoryData">The inventory</param>
         /// <param name="inventoryId">Inventory Id</param>
-        public void DummyOnInventoryOpen(int inventoryId, BaseInventory inventory)
+        public void DummyOnInventoryOpen(int inventoryId, InventoryData inventoryData)
         {
-            inventories[inventoryId] = inventory;
+            inventories[inventoryId] = inventoryData;
 
             if (inventoryId != 0)
             {
-                Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventory.Title));
+                Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventoryData.Title));
                 Debug.Log(Translations.Get("extra.inventory_interact"));
             }
         }

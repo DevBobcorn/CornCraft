@@ -203,7 +203,7 @@ namespace CraftSharp
         // Retrieve gameplay info
         public abstract IChunkRenderManager GetChunkRenderManager();
         
-        public abstract BaseInventory? GetInventory(int inventoryId);
+        public abstract InventoryData? GetInventory(int inventoryId);
         public abstract ItemStack? GetActiveItem();
         public abstract Location GetCurrentLocation();
         public abstract Vector3 GetPosition();

@@ -6,7 +6,7 @@ namespace CraftSharp.Inventory
     /// <summary>
     /// Represents a Minecraft inventory (player inventory, chest, etc.)
     /// </summary>
-    public class BaseInventory
+    public class InventoryData
     {
         /// <summary>
         /// Id of the inventory on the server
@@ -45,7 +45,7 @@ namespace CraftSharp.Inventory
         /// <param name="id">Inventory Id</param>
         /// <param name="type">Inventory Type</param>
         /// <param name="title">Inventory Title</param>
-        public BaseInventory(int id, InventoryType type, string title)
+        public InventoryData(int id, InventoryType type, string title)
         {
             Id = id;
             Type = type;
@@ -61,7 +61,7 @@ namespace CraftSharp.Inventory
         /// <param name="type">Inventory Type</param>
         /// <param name="title">Inventory Title</param>
         /// <param name="items">Inventory Items (key: slot Id, value: item info)</param>
-        public BaseInventory(int id, InventoryType type, string title, Dictionary<int, ItemStack> items)
+        public InventoryData(int id, InventoryType type, string title, Dictionary<int, ItemStack> items)
         {
             Id = id;
             Type = type;
@@ -71,25 +71,10 @@ namespace CraftSharp.Inventory
         }
 
         /// <summary>
-        /// Create an empty inventory with Id, Type and Title
-        /// </summary>
-        /// <param name="id">Inventory Id</param>
-        /// <param name="typeId">Inventory Type</param>
-        /// <param name="title">Inventory Title</param>
-        public BaseInventory(int id, int typeId, string title)
-        {
-            Id = id;
-            Type = GetInventoryType(typeId);
-            Title = title;
-            Items = new Dictionary<int, ItemStack>();
-            Properties = new Dictionary<int, short>();
-        }
-
-        /// <summary>
         /// Create an empty inventory with Type
         /// </summary>
         /// <param name="type">Inventory Type</param>
-        public BaseInventory(InventoryType type)
+        public InventoryData(InventoryType type)
         {
             Id = -1;
             Type = type;
@@ -103,50 +88,13 @@ namespace CraftSharp.Inventory
         /// </summary>
         /// <param name="type">Inventory Type</param>
         /// <param name="items">Inventory Items (key: slot Id, value: item info)</param>
-        public BaseInventory(InventoryType type, Dictionary<int, ItemStack> items)
+        public InventoryData(InventoryType type, Dictionary<int, ItemStack> items)
         {
             Id = -1;
             Type = type;
             Title = null;
             Items = items;
             Properties = new Dictionary<int, short>();
-        }
-
-        /// <summary>
-        /// Get inventory type from Type Id
-        /// </summary>
-        /// <param name="typeId">Inventory Type Id</param>
-        /// <returns>Inventory Type</returns>
-        public static InventoryType GetInventoryType(int typeId)
-        {
-            // https://wiki.vg/Inventory didn't state the inventory Id, assume that list start with 0
-            return typeId switch
-            {
-                0  => InventoryType.Generic_9x1,
-                1  => InventoryType.Generic_9x2,
-                2  => InventoryType.Generic_9x3,
-                3  => InventoryType.Generic_9x4,
-                4  => InventoryType.Generic_9x5,
-                5  => InventoryType.Generic_9x6,
-                6  => InventoryType.Generic_3x3,
-                7  => InventoryType.Anvil,
-                8  => InventoryType.Beacon,
-                9  => InventoryType.BlastFurnace,
-                10 => InventoryType.BrewingStand,
-                11 => InventoryType.Crafting,
-                12 => InventoryType.Enchantment,
-                13 => InventoryType.Furnace,
-                14 => InventoryType.Grindstone,
-                15 => InventoryType.Hopper,
-                16 => InventoryType.Lectern,
-                17 => InventoryType.Loom,
-                18 => InventoryType.Merchant,
-                19 => InventoryType.ShulkerBox,
-                20 => InventoryType.Smoker,
-                21 => InventoryType.Cartography,
-                22 => InventoryType.Stonecutter,
-                _  => InventoryType.Unknown,
-            };
         }
 
         /// <summary>
@@ -173,7 +121,7 @@ namespace CraftSharp.Inventory
         public int[] GetEmptySlots()
         {
             var result = new List<int>();
-            for (int i = 0; i < Type.SlotCount(); i++)
+            for (int i = 0; i < Type.SlotCount; i++)
             {
                 result.Add(i);
             }
@@ -190,10 +138,8 @@ namespace CraftSharp.Inventory
         /// <returns>First hotbar slot in this inventory</returns>
         public int GetFirstHotbarSlot()
         {
-            int hotbarStart = Type.SlotCount() - 9;
-            // Remove offhand slot
-            if (Type == InventoryType.PlayerInventory)
-                hotbarStart--;
+            // Reduce hotbar count and append slot count
+            int hotbarStart = Type.SlotCount - 9 - Type.AppendSlotCount;
             
             return hotbarStart;
         }

@@ -78,7 +78,7 @@ namespace CraftSharp
         private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
         private int foodSaturation, experienceLevel, totalExperience;
-        private readonly Dictionary<int, BaseInventory> inventories = new();
+        private readonly Dictionary<int, InventoryData> inventories = new();
 
         private readonly object movementLock = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
@@ -569,7 +569,7 @@ namespace CraftSharp
         /// <summary>
         /// Get player inventory with a given id
         /// </summary>
-        public override BaseInventory? GetInventory(int inventoryId)
+        public override InventoryData? GetInventory(int inventoryId)
         {
             return inventories.GetValueOrDefault(inventoryId);
         }
@@ -820,14 +820,14 @@ namespace CraftSharp
         /// <summary>
         /// Try to merge a slot
         /// </summary>
-        /// <param name="inventory">The inventory where the item is located</param>
+        /// <param name="inventoryData">The inventory where the item is located</param>
         /// <param name="item">Items to be processed</param>
         /// <param name="slot">The item slot to be processed</param>
         /// <param name="curItem">The slot that was put down</param>
         /// <param name="curSlot">The item slot being put down</param>
         /// <param name="changedSlots">Record changes</param>
         /// <returns>Whether to fully merge</returns>
-        private static bool TryMergeSlot(BaseInventory inventory, ItemStack item, int slot, ItemStack curItem, int curSlot, List<Tuple<short, ItemStack?>> changedSlots)
+        private static bool TryMergeSlot(InventoryData inventoryData, ItemStack item, int slot, ItemStack curItem, int curSlot, List<Tuple<short, ItemStack?>> changedSlots)
         {
             int spaceLeft = curItem.ItemType.StackLimit - curItem.Count;
             if (curItem.ItemType == item.ItemType && spaceLeft > 0)
@@ -842,7 +842,7 @@ namespace CraftSharp
                     changedSlots.Add(new Tuple<short, ItemStack?>((short)curSlot, curItem));
                     changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
 
-                    inventory.Items.Remove(slot);
+                    inventoryData.Items.Remove(slot);
                     return true;
                 }
 
@@ -857,16 +857,16 @@ namespace CraftSharp
         /// <summary>
         /// Store items in a new slot
         /// </summary>
-        /// <param name="inventory">The inventory where the item is located</param>
+        /// <param name="inventoryData">The inventory where the item is located</param>
         /// <param name="item">Items to be processed</param>
         /// <param name="slot">The item slot to be processed</param>
         /// <param name="newSlot">New item slot</param>
         /// <param name="changedSlots">Record changes</param>
-        private static void StoreInNewSlot(BaseInventory inventory, ItemStack item, int slot, int newSlot, List<Tuple<short, ItemStack?>> changedSlots)
+        private static void StoreInNewSlot(InventoryData inventoryData, ItemStack item, int slot, int newSlot, List<Tuple<short, ItemStack?>> changedSlots)
         {
             ItemStack newItem = new(item.ItemType, item.Count, item.NBT);
-            inventory.Items[newSlot] = newItem;
-            inventory.Items.Remove(slot);
+            inventoryData.Items[newSlot] = newItem;
+            inventoryData.Items.Remove(slot);
 
             changedSlots.Add(new Tuple<short, ItemStack?>((short)newSlot, newItem));
             changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
@@ -912,55 +912,57 @@ namespace CraftSharp
             List<Tuple<short, ItemStack?>> changedSlots = new(); // List<Slot Id, Changed Items>
 
             // Update our inventory base on action type
-            BaseInventory? inventory = GetInventory(inventoryId);
-            BaseInventory playerInventory = GetInventory(0)!;
+            InventoryData? inventory = GetInventory(inventoryId);
+            InventoryData playerInventoryData = GetInventory(0)!;
             
             if (inventory != null)
             {
+                InventoryType inventoryType = inventory.Type;
+                
                 switch (action)
                 {
                     case InventoryActionType.LeftClick:
                         // Check if cursor have item (slot -1)
-                        if (playerInventory.Items.ContainsKey(-1))
+                        if (playerInventoryData.Items.ContainsKey(-1))
                         {
                             // When item on cursor and clicking crafting output slot, nothing will happen
-                            if (inventory.HasCraftingOutputSlot && slot == inventory.CraftingOutputSlot)
+                            if (inventoryType.HasOutputSlot && slot == inventoryType.OutputSlot)
                             {
-                                break;
+                                break; // TODO: Check output stacking
                             }
 
                             // Check target slot also have item?
                             if (inventory.Items.ContainsKey(slot))
                             {
                                 // Check if both item are the same?
-                                if (inventory.Items[slot].ItemType == playerInventory.Items[-1].ItemType)
+                                if (inventory.Items[slot].ItemType == playerInventoryData.Items[-1].ItemType)
                                 {
                                     int maxCount = inventory.Items[slot].ItemType.StackLimit;
                                     // Check item stacking
-                                    if (inventory.Items[slot].Count + playerInventory.Items[-1].Count <= maxCount)
+                                    if (inventory.Items[slot].Count + playerInventoryData.Items[-1].Count <= maxCount)
                                     {
                                         // Put cursor item to target
-                                        inventory.Items[slot].Count += playerInventory.Items[-1].Count;
-                                        playerInventory.Items.Remove(-1);
+                                        inventory.Items[slot].Count += playerInventoryData.Items[-1].Count;
+                                        playerInventoryData.Items.Remove(-1);
                                     }
                                     else
                                     {
                                         // Leave some item on cursor
-                                        playerInventory.Items[-1].Count -= maxCount - inventory.Items[slot].Count;
+                                        playerInventoryData.Items[-1].Count -= maxCount - inventory.Items[slot].Count;
                                         inventory.Items[slot].Count = maxCount;
                                     }
                                 }
                                 else
                                 {
                                     // Swap two items TODO: Check if this slot accepts cursor item
-                                    (inventory.Items[slot], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slot]);
+                                    (inventory.Items[slot], playerInventoryData.Items[-1]) = (playerInventoryData.Items[-1], inventory.Items[slot]);
                                 }
                             }
                             else
                             {
                                 // Put cursor item to target TODO: Check if this slot accepts cursor item
-                                inventory.Items[slot] = playerInventory.Items[-1];
-                                playerInventory.Items.Remove(-1);
+                                inventory.Items[slot] = playerInventoryData.Items[-1];
+                                playerInventoryData.Items.Remove(-1);
                             }
 
                             changedSlots.Add(inventory.Items.TryGetValue(slot, out var inventoryItem)
@@ -973,13 +975,13 @@ namespace CraftSharp
                             if (inventory.Items.ContainsKey(slot))
                             {
                                 // When taking item from crafting output slot, server will update us
-                                if (inventory.HasCraftingOutputSlot && slot == inventory.CraftingOutputSlot)
+                                if (inventoryType.HasOutputSlot && slot == inventoryType.OutputSlot)
                                 {
                                     break;
                                 }
 
                                 // Put target slot item to cursor
-                                playerInventory.Items[-1] = inventory.Items[slot];
+                                playerInventoryData.Items[-1] = inventory.Items[slot];
                                 inventory.Items.Remove(slot);
 
                                 changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
@@ -988,10 +990,10 @@ namespace CraftSharp
                         break;
                     case InventoryActionType.RightClick:
                         // Check if cursor have item (slot -1)
-                        if (playerInventory.Items.ContainsKey(-1))
+                        if (playerInventoryData.Items.ContainsKey(-1))
                         {
                             // When item on cursor and clicking crafting output slot, nothing will happen
-                            if (inventory.HasCraftingOutputSlot && slot == inventory.CraftingOutputSlot)
+                            if (inventoryType.HasOutputSlot && slot == inventoryType.OutputSlot)
                             {
                                 break;
                             }
@@ -1000,26 +1002,26 @@ namespace CraftSharp
                             if (inventory.Items.ContainsKey(slot))
                             {
                                 // Check if these 2 items are stackable
-                                if (inventory.Items[slot].ItemType == playerInventory.Items[-1].ItemType &&
+                                if (inventory.Items[slot].ItemType == playerInventoryData.Items[-1].ItemType &&
                                     inventory.Items[slot].Count < inventory.Items[slot].ItemType.StackLimit)
                                 {
                                     // Drop 1 item count from cursor
-                                    playerInventory.Items[-1].Count--;
+                                    playerInventoryData.Items[-1].Count--;
                                     inventory.Items[slot].Count++;
                                 }
                                 else
                                 {
                                     // Swap two items TODO: Check if this slot accepts cursor item
-                                    (inventory.Items[slot], playerInventory.Items[-1]) = (playerInventory.Items[-1], inventory.Items[slot]);
+                                    (inventory.Items[slot], playerInventoryData.Items[-1]) = (playerInventoryData.Items[-1], inventory.Items[slot]);
                                 }
                             }
                             else
                             {
                                 // Drop 1 item count from cursor TODO: Check if this slot accepts cursor item
-                                var itemTmp = playerInventory.Items[-1];
+                                var itemTmp = playerInventoryData.Items[-1];
                                 ItemStack itemClone = new(itemTmp.ItemType, 1, itemTmp.NBT);
                                 inventory.Items[slot] = itemClone;
-                                playerInventory.Items[-1].Count--;
+                                playerInventoryData.Items[-1].Count--;
                             }
                         }
                         else
@@ -1027,7 +1029,7 @@ namespace CraftSharp
                             // Check target slot have item?
                             if (inventory.Items.ContainsKey(slot))
                             {
-                                if (inventory.HasCraftingOutputSlot && slot == inventory.CraftingOutputSlot)
+                                if (inventoryType.HasOutputSlot && slot == inventoryType.OutputSlot)
                                 {
                                     // no matter how many item in crafting output slot, only 1 will be taken out
                                     // Also server will update us
@@ -1036,7 +1038,7 @@ namespace CraftSharp
                                 if (inventory.Items[slot].Count == 1)
                                 {
                                     // Only 1 item count. Put it to cursor
-                                    playerInventory.Items[-1] = inventory.Items[slot];
+                                    playerInventoryData.Items[-1] = inventory.Items[slot];
                                     inventory.Items.Remove(slot);
                                 }
                                 else
@@ -1046,14 +1048,14 @@ namespace CraftSharp
                                     {
                                         // Can be evenly divided
                                         var itemTmp = inventory.Items[slot];
-                                        playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, itemTmp.Count / 2, itemTmp.NBT);
+                                        playerInventoryData.Items[-1] = new ItemStack(itemTmp.ItemType, itemTmp.Count / 2, itemTmp.NBT);
                                         inventory.Items[slot].Count = itemTmp.Count / 2;
                                     }
                                     else
                                     {
                                         // Cannot be evenly divided. item count on cursor is always larger than item on inventory
                                         var itemTmp = inventory.Items[slot];
-                                        playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, (itemTmp.Count + 1) / 2, itemTmp.NBT);
+                                        playerInventoryData.Items[-1] = new ItemStack(itemTmp.ItemType, (itemTmp.Count + 1) / 2, itemTmp.NBT);
                                         inventory.Items[slot].Count = (itemTmp.Count - 1) / 2;
                                     }
                                 }
@@ -1065,556 +1067,7 @@ namespace CraftSharp
                         break;
                     case InventoryActionType.ShiftClick:
                     case InventoryActionType.ShiftRightClick:
-                        if (slot == 0) break;
-                        if (item != null)
-                        {
-                            /* Target slot have item */
-
-                            bool lower2upper = false, upper2backpack = false, backpack2hotbar = false; // mutual exclusion
-                            bool hotbarFirst = true; // Used when upper2backpack = true
-                            int upperStartSlot = 9;
-                            int upperEndSlot = 35;
-                            int lowerStartSlot = 36;
-
-                            switch (inventory.Type)
-                            {
-                                case InventoryType.PlayerInventory:
-                                    if (slot is >= 0 and <= 8 or 45)
-                                    {
-                                        //if (slot != 0)
-                                            hotbarFirst = false;
-                                        upper2backpack = true;
-                                        lowerStartSlot = 9;
-                                    }
-                                    /* // Check if wearable
-                                    else if (item != null && false)
-                                    {
-                                        lower2upper = true;
-                                        // upperStartSlot = ?;
-                                        // upperEndSlot = ?;
-                                        // Todo: Distinguish the type of equipment
-                                    } */
-                                    else
-                                    {
-                                        if (slot is >= 9 and <= 35)
-                                        {
-                                            backpack2hotbar = true;
-                                            lowerStartSlot = 36;
-                                        }
-                                        else
-                                        {
-                                            lower2upper = true;
-                                            upperStartSlot = 9;
-                                            upperEndSlot = 35;
-                                        }
-                                    }
-                                    break;
-                                case InventoryType.Generic_9x1:
-                                    if (slot is >= 0 and <= 8)
-                                    {
-                                        upper2backpack = true;
-                                        lowerStartSlot = 9;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 8;
-                                    }
-                                    break;
-                                case InventoryType.Generic_9x2:
-                                    if (slot is >= 0 and <= 17)
-                                    {
-                                        upper2backpack = true;
-                                        lowerStartSlot = 18;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 17;
-                                    }
-                                    break;
-                                case InventoryType.Generic_9x3:
-                                case InventoryType.ShulkerBox:
-                                    if (slot is >= 0 and <= 26)
-                                    {
-                                        upper2backpack = true;
-                                        lowerStartSlot = 27;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 26;
-                                    }
-                                    break;
-                                case InventoryType.Generic_9x4:
-                                    if (slot is >= 0 and <= 35)
-                                    {
-                                        upper2backpack = true;
-                                        lowerStartSlot = 36;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 35;
-                                    }
-                                    break;
-                                case InventoryType.Generic_9x5:
-                                    if (slot is >= 0 and <= 44)
-                                    {
-                                        upper2backpack = true;
-                                        lowerStartSlot = 45;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 44;
-                                    }
-                                    break;
-                                case InventoryType.Generic_9x6:
-                                    if (slot is >= 0 and <= 53)
-                                    {
-                                        upper2backpack = true;
-                                        lowerStartSlot = 54;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 53;
-                                    }
-                                    break;
-                                case InventoryType.Generic_3x3:
-                                    if (slot is >= 0 and <= 8)
-                                    {
-                                        upper2backpack = true;
-                                        lowerStartSlot = 9;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 8;
-                                    }
-                                    break;
-                                case InventoryType.Anvil:
-                                    if (slot is >= 0 and <= 2)
-                                    {
-                                        if (slot is >= 0 and <= 1)
-                                            hotbarFirst = false;
-                                        upper2backpack = true;
-                                        lowerStartSlot = 3;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 1;
-                                    }
-                                    break;
-                                case InventoryType.Beacon:
-                                    /*if (slot == 0)
-                                    {
-                                        hotbarFirst = false;
-                                        upper2backpack = true;
-                                        lowerStartSlot = 1;
-                                    }
-                                    else */
-                                    if (item is { Count: 1 } && BEACON_FUEL_ITEM_IDS
-                                        .Contains(item.ItemType.ItemId) && !inventory.Items.ContainsKey(0))
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 0;
-                                    }
-                                    else
-                                    {
-                                        if (slot is >= 1 and <= 27)
-                                        {
-                                            backpack2hotbar = true;
-                                            lowerStartSlot = 28;
-                                        }
-                                        else
-                                        {
-                                            lower2upper = true;
-                                            upperStartSlot = 1;
-                                            upperEndSlot = 27;
-                                        }
-                                    }
-                                    break;
-                                case InventoryType.BlastFurnace:
-                                case InventoryType.Furnace:
-                                case InventoryType.Smoker:
-                                    if (slot is >= 0 and <= 2)
-                                    {
-                                        if (slot is >= 0 and <= 1)
-                                            hotbarFirst = false;
-                                        upper2backpack = true;
-                                        lowerStartSlot = 3;
-                                    }
-                                    /* // Check if it can be burned
-                                    else if (item != null && false)
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 0;
-                                    } */
-                                    else
-                                    {
-                                        if (slot is >= 3 and <= 29)
-                                        {
-                                            backpack2hotbar = true;
-                                            lowerStartSlot = 30;
-                                        }
-                                        else
-                                        {
-                                            lower2upper = true;
-                                            upperStartSlot = 3;
-                                            upperEndSlot = 29;
-                                        }
-                                    }
-                                    break;
-                                case InventoryType.BrewingStand:
-                                    if (slot is >= 0 and <= 3)
-                                    {
-                                        upper2backpack = true;
-                                        lowerStartSlot = 5;
-                                    }
-                                    else if (item.ItemType.ItemId == BREWING_STAND_FUEL_ITEM_ID)
-                                    {
-                                        lower2upper = true;
-                                        if (!inventory.Items.ContainsKey(4) || inventory.Items[4].Count < 64)
-                                            upperStartSlot = upperEndSlot = 4;
-                                        else
-                                            upperStartSlot = upperEndSlot = 3;
-                                    }
-                                    /* // Check if it can be used for alchemy
-                                    else if (false)
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = upperEndSlot = 3;
-                                    }
-                                    */
-                                    else if (BREWING_STAND_BOTTLE_ITEM_IDS.Contains(item.ItemType.ItemId))
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 2;
-                                    }
-                                    else
-                                    {
-                                        if (slot is >= 5 and <= 31)
-                                        {
-                                            backpack2hotbar = true;
-                                            lowerStartSlot = 32;
-                                        }
-                                        else
-                                        {
-                                            lower2upper = true;
-                                            upperStartSlot = 5;
-                                            upperEndSlot = 31;
-                                        }
-                                    }
-                                    break;
-                                case InventoryType.Crafting:
-                                    if (slot is >= 0 and <= 9)
-                                    {
-                                        //if (slot is >= 1 and <= 9)
-                                            hotbarFirst = false;
-                                        upper2backpack = true;
-                                        lowerStartSlot = 10;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 1;
-                                        upperEndSlot = 9;
-                                    }
-                                    break;
-                                case InventoryType.Enchantment:
-                                    if (slot is >= 0 and <= 1)
-                                    {
-                                        upper2backpack = true;
-                                        lowerStartSlot = 5;
-                                    }
-                                    else if (item.ItemType.ItemId == ENCHANTING_TABLE_FUEL_ITEM_ID)
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = upperEndSlot = 1;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 0;
-                                    }
-                                    break;
-                                case InventoryType.Grindstone:
-                                    if (slot is >= 0 and <= 2)
-                                    {
-                                        if (slot <= 1)
-                                            hotbarFirst = false;
-                                        upper2backpack = true;
-                                        lowerStartSlot = 3;
-                                    }
-                                    /* // Check for availability for grinding
-                                    else if (false)
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 1;
-                                    } */
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 1;
-                                    }
-                                    break;
-                                case InventoryType.Hopper:
-                                    if (slot is >= 0 and <= 4)
-                                    {
-                                        upper2backpack = true;
-                                        lowerStartSlot = 5;
-                                    }
-                                    else
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 4;
-                                    }
-                                    break;
-                                case InventoryType.Lectern:
-                                    return false;
-                                    // break;
-                                case InventoryType.Loom:
-                                    if (slot is >= 0 and <= 3)
-                                    {
-                                        //if (slot is >= 0 and <= 5)
-                                            hotbarFirst = false;
-                                        upper2backpack = true;
-                                        lowerStartSlot = 4;
-                                    }
-                                    /* // Check for availability for staining
-                                    else if (false)
-                                    {
-                                        lower2upper = true;
-                                        // upperStartSlot = ?;
-                                        // upperEndSlot = ?;
-                                    } */
-                                    else
-                                    {
-                                        if (slot is >= 4 and <= 30)
-                                        {
-                                            backpack2hotbar = true;
-                                            lowerStartSlot = 31;
-                                        }
-                                        else
-                                        {
-                                            lower2upper = true;
-                                            upperStartSlot = 4;
-                                            upperEndSlot = 30;
-                                        }
-                                    }
-                                    break;
-                                case InventoryType.Merchant:
-                                    if (slot is >= 0 and <= 2)
-                                    {
-                                        if (slot <= 1)
-                                            hotbarFirst = false;
-                                        upper2backpack = true;
-                                        lowerStartSlot = 3;
-                                    }
-                                    /* // Check for availability for trading
-                                    else if (false)
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 1;
-                                    } */
-                                    else
-                                    {
-                                        if (slot is >= 3 and <= 29)
-                                        {
-                                            backpack2hotbar = true;
-                                            lowerStartSlot = 30;
-                                        }
-                                        else
-                                        {
-                                            lower2upper = true;
-                                            upperStartSlot = 3;
-                                            upperEndSlot = 29;
-                                        }
-                                    }
-                                    break;
-                                case InventoryType.Cartography:
-                                    if (slot is >= 0 and <= 2)
-                                    {
-                                        if (slot <= 1)
-                                            hotbarFirst = false;
-                                        upper2backpack = true;
-                                        lowerStartSlot = 3;
-                                    }
-                                    else if (item.ItemType.ItemId == CARTOGRAPHY_TABLE_FILLED_ITEM_ID)
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = upperEndSlot = 0;
-                                    }
-                                    else if (CARTOGRAPHY_TABLE_EMPTY_ITEM_IDS.Contains(item.ItemType.ItemId))
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = upperEndSlot = 1;
-                                    }
-                                    else
-                                    {
-                                        if (slot is >= 3 and <= 29)
-                                        {
-                                            backpack2hotbar = true;
-                                            lowerStartSlot = 30;
-                                        }
-                                        else
-                                        {
-                                            lower2upper = true;
-                                            upperStartSlot = 3;
-                                            upperEndSlot = 29;
-                                        }
-                                    }
-                                    break;
-                                case InventoryType.Stonecutter:
-                                    if (slot is >= 0 and <= 1)
-                                    {
-                                        //if (slot == 0)
-                                        //    hotbarFirst = false;
-                                        upper2backpack = true;
-                                        lowerStartSlot = 2;
-                                    }
-                                    /* // Check if it is available for stone cutting
-                                    else if (false)
-                                    {
-                                        lower2upper = true;
-                                        upperStartSlot = 0;
-                                        upperEndSlot = 0;
-                                    } */
-                                    else
-                                    {
-                                        if (slot is >= 2 and <= 28)
-                                        {
-                                            backpack2hotbar = true;
-                                            lowerStartSlot = 29;
-                                        }
-                                        else
-                                        {
-                                            lower2upper = true;
-                                            upperStartSlot = 2;
-                                            upperEndSlot = 28;
-                                        }
-                                    }
-                                    break;
-                                // TODO: Define more inventory type here
-                                default:
-                                    return false;
-                            }
-
-                            // Cursor have item or not doesn't matter
-                            // If hotbar already have same item, will put on it first until every stack are full
-                            // If no more same item , will put on the first empty slot (smaller slot id)
-                            // If inventory full, item will not move
-                            int itemCount = inventory.Items[slot].Count;
-                            if (lower2upper)
-                            {
-                                int firstEmptySlot = -1;
-                                for (int i = upperStartSlot; i <= upperEndSlot; ++i)
-                                {
-                                    if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
-                                    {
-                                        if (TryMergeSlot(inventory, item, slot, curItem, i, changedSlots))
-                                            break;
-                                    }
-                                    else if (firstEmptySlot == -1)
-                                        firstEmptySlot = i;
-                                }
-                                if (item.Count > 0)
-                                {
-                                    if (firstEmptySlot != -1)
-                                        StoreInNewSlot(inventory, item, slot, firstEmptySlot, changedSlots);
-                                    else if (item.Count != itemCount)
-                                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, inventory.Items[slot]));
-                                }
-                            }
-                            else if (upper2backpack)
-                            {
-                                int hotbarEnd = lowerStartSlot + 4 * 9 - 1;
-                                if (hotbarFirst)
-                                {
-                                    int lastEmptySlot = -1;
-                                    for (int i = hotbarEnd; i >= lowerStartSlot; --i)
-                                    {
-                                        if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
-                                        {
-                                            if (TryMergeSlot(inventory, item, slot, curItem, i, changedSlots))
-                                                break;
-                                        }
-                                        else if (lastEmptySlot == -1)
-                                            lastEmptySlot = i;
-                                    }
-                                    if (item.Count > 0)
-                                    {
-                                        if (lastEmptySlot != -1)
-                                            StoreInNewSlot(inventory, item, slot, lastEmptySlot, changedSlots);
-                                        else if (item.Count != itemCount)
-                                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, inventory.Items[slot]));
-                                    }
-                                }
-                                else
-                                {
-                                    int firstEmptySlot = -1;
-                                    for (int i = lowerStartSlot; i <= hotbarEnd; ++i)
-                                    {
-                                        if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
-                                        {
-                                            if (TryMergeSlot(inventory, item, slot, curItem, i, changedSlots))
-                                                break;
-                                        }
-                                        else if (firstEmptySlot == -1)
-                                            firstEmptySlot = i;
-                                    }
-                                    if (item.Count > 0)
-                                    {
-                                        if (firstEmptySlot != -1)
-                                            StoreInNewSlot(inventory, item, slot, firstEmptySlot, changedSlots);
-                                        else if (item.Count != itemCount)
-                                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, inventory.Items[slot]));
-                                    }
-                                }
-                            }
-                            else if (backpack2hotbar)
-                            {
-                                int hotbarEnd = lowerStartSlot + 1 * 9 - 1;
-
-                                int firstEmptySlot = -1;
-                                for (int i = lowerStartSlot; i <= hotbarEnd; ++i)
-                                {
-                                    if (inventory.Items.TryGetValue(i, out ItemStack? curItem))
-                                    {
-                                        if (TryMergeSlot(inventory, item, slot, curItem, i, changedSlots))
-                                            break;
-                                    }
-                                    else if (firstEmptySlot == -1)
-                                        firstEmptySlot = i;
-                                }
-                                if (item.Count > 0)
-                                {
-                                    if (firstEmptySlot != -1)
-                                        StoreInNewSlot(inventory, item, slot, firstEmptySlot, changedSlots);
-                                    else if (item.Count != itemCount)
-                                        changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, inventory.Items[slot]));
-                                }
-                            }
-                        }
+                        // TODO: Implement
                         break;
                     case InventoryActionType.DropItem:
                         if (inventory.Items.ContainsKey(slot))
@@ -1697,7 +1150,7 @@ namespace CraftSharp
                 return InvokeOnNetMainThread(ClearInventories);
 
             inventories.Clear();
-            inventories[0] = new BaseInventory(0, InventoryType.PlayerInventory, "Player Inventory");
+            inventories[0] = new InventoryData(0, InventoryType.PLAYER, "Player Inventory");
             return true;
         }
 
@@ -2119,22 +1572,22 @@ namespace CraftSharp
         /// <summary>
         /// Called when an inventory is opened
         /// </summary>
-        /// <param name="inventory">The inventory</param>
+        /// <param name="inventoryData">The inventory</param>
         /// <param name="inventoryId">Inventory Id</param>
-        public void OnInventoryOpen(int inventoryId, BaseInventory inventory)
+        public void OnInventoryOpen(int inventoryId, InventoryData inventoryData)
         {
-            inventories[inventoryId] = inventory;
+            inventories[inventoryId] = inventoryData;
 
             if (inventoryId != 0)
             {
-                Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventory.Title));
+                Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventoryData.Title));
                 //Debug.Log(Translations.Get("extra.inventory_interact"));
 
                 Loom.QueueOnMainThread(() => {
                     // Set inventory id before opening the screen
                     ScreenControl.SetScreenData<InventoryScreen>(screen =>
                     {
-                        screen.SetActiveInventory(inventory);
+                        screen.SetActiveInventory(inventoryData);
                     });
                     ScreenControl.PushScreen<InventoryScreen>();
                 });
@@ -2179,7 +1632,7 @@ namespace CraftSharp
 
             inventory.Properties.Add(propertyId, propertyValue);
 
-            if (inventory.Type == InventoryType.Enchantment)
+            if (inventory.Type == InventoryType.ENCHANTMENT)
             {
                 // We got the last property for enchantment
                 if (propertyId == 9 && propertyValue != -1)

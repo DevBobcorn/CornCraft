@@ -5,12 +5,12 @@ namespace CraftSharp.Event
     public record OpenInventoryEvent : BaseEvent
     {
         public int InventoryId { get; }
-        public BaseInventory Inventory { get; }
+        public InventoryData InventoryData { get; }
 
-        public OpenInventoryEvent(int inventoryId, BaseInventory inventory)
+        public OpenInventoryEvent(int inventoryId, InventoryData inventoryData)
         {
             InventoryId = inventoryId;
-            Inventory = inventory;
+            InventoryData = inventoryData;
         }
     }
 }

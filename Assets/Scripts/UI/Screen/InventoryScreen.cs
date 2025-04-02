@@ -18,15 +18,15 @@ namespace CraftSharp.UI
 
         private bool isActive = false;
 
-        public BaseInventory activeInventory = null; // -1 for none
+        public InventoryData ActiveInventoryData = null; // -1 for none
 
-        public void SetActiveInventory(BaseInventory inventory)
+        public void SetActiveInventory(InventoryData inventoryData)
         {
             EnsureInitialized();
 
-            activeInventory = inventory;
+            ActiveInventoryData = inventoryData;
 
-            inventoryTitleText.text = inventory.Title;
+            inventoryTitleText.text = inventoryData.Title;
         }
 
         public override bool IsActive
@@ -52,12 +52,12 @@ namespace CraftSharp.UI
         private void CloseInventory()
         {
             var client = CornApp.CurrentClient;
-            if (activeInventory is null || client == null) return;
+            if (ActiveInventoryData is null || client == null) return;
 
-            client.CloseInventory(activeInventory.Id);
+            client.CloseInventory(ActiveInventoryData.Id);
             client.ScreenControl.TryPopScreen();
 
-            activeInventory = null;
+            ActiveInventoryData = null;
         }
 
         protected override void Initialize()
