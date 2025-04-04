@@ -35,7 +35,7 @@ namespace CraftSharp.Inventory
 
         /// <summary>
         /// Inventory properties
-        /// Used for Furnaces, Enchanting Table, Beacon, Brewing stand, Stone cutter, Loom and Lectern
+        /// Used for Furnaces, Enchanting Table, Beacon, Brewing Stand, Stone Cutter, Loom and Lectern
         /// </summary>
         public readonly Dictionary<int, short> Properties;
 
@@ -45,55 +45,12 @@ namespace CraftSharp.Inventory
         /// <param name="id">Inventory Id</param>
         /// <param name="type">Inventory Type</param>
         /// <param name="title">Inventory Title</param>
-        public InventoryData(int id, InventoryType type, string title)
+        public InventoryData(int id, InventoryType type, string? title)
         {
             Id = id;
             Type = type;
             Title = title;
             Items = new Dictionary<int, ItemStack>();
-            Properties = new Dictionary<int, short>();
-        }
-
-        /// <summary>
-        /// Create a inventory with Id, Type, Title and Items
-        /// </summary>
-        /// <param name="id">Inventory Id</param>
-        /// <param name="type">Inventory Type</param>
-        /// <param name="title">Inventory Title</param>
-        /// <param name="items">Inventory Items (key: slot Id, value: item info)</param>
-        public InventoryData(int id, InventoryType type, string title, Dictionary<int, ItemStack> items)
-        {
-            Id = id;
-            Type = type;
-            Title = title;
-            Items = items;
-            Properties = new Dictionary<int, short>();
-        }
-
-        /// <summary>
-        /// Create an empty inventory with Type
-        /// </summary>
-        /// <param name="type">Inventory Type</param>
-        public InventoryData(InventoryType type)
-        {
-            Id = -1;
-            Type = type;
-            Title = null;
-            Items = new Dictionary<int, ItemStack>();
-            Properties = new Dictionary<int, short>();
-        }
-
-        /// <summary>
-        /// Create an empty inventory with Type and Items
-        /// </summary>
-        /// <param name="type">Inventory Type</param>
-        /// <param name="items">Inventory Items (key: slot Id, value: item info)</param>
-        public InventoryData(InventoryType type, Dictionary<int, ItemStack> items)
-        {
-            Id = -1;
-            Type = type;
-            Title = null;
-            Items = items;
             Properties = new Dictionary<int, short>();
         }
 
@@ -182,6 +139,11 @@ namespace CraftSharp.Inventory
             }
 
             return null;
+        }
+        
+        public override string ToString()
+        {
+            return "Inventory " + Id + " (" + Type + ")";
         }
     }
 }

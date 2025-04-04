@@ -139,7 +139,7 @@ namespace CraftSharp
                             InjectInventoryType( 4, InventoryType.GENERIC_9x5_ID,   InventoryType.GENERIC_9x5);
                             InjectInventoryType( 5, InventoryType.GENERIC_9x6_ID,   InventoryType.GENERIC_9x6);
                             InjectInventoryType( 6, InventoryType.GENERIC_3x3_ID,   InventoryType.GENERIC_3x3);
-                            InjectInventoryType( 7, InventoryType.CRAFTER_3x3_ID,   InventoryType.CRAFTER_3x3);
+                            InjectInventoryType( 7, InventoryType.CRAFTER_3x3_ID,   InventoryType.CRAFTER_3x3); // Added in 1.20.3
                             InjectInventoryType( 8, InventoryType.ANVIL_ID,         InventoryType.ANVIL);
                             InjectInventoryType( 9, InventoryType.BEACON_ID,        InventoryType.BEACON);
                             InjectInventoryType(10, InventoryType.BLAST_FURNACE_ID, InventoryType.BLAST_FURNACE);
