@@ -54,7 +54,7 @@ namespace CraftSharp.Control
             // Ungrounded, go to falling state
             if (nextState == PlayerStates.AIRBORNE && !info.Grounded)
             {
-                player.StartCrossFadeState(AnimatorEntityRender.FALLING_NAME, 0.2F);
+                player.StartCrossFadeState(AnimatorEntityRender.FALLING_NAME);
             }
         }
 

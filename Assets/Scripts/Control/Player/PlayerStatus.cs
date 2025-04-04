@@ -2,13 +2,6 @@ using UnityEngine;
 
 namespace CraftSharp.Control
 {
-    public enum LiquidStatus
-    {
-        None = 0,
-        Treading,
-        Submerged
-    }
-
     public class PlayerStatus
     {
         // Player data
@@ -32,9 +25,9 @@ namespace CraftSharp.Control
         public bool Grounded  = false;
 
         /// <summary>
-        /// Whether player is grounded (interal use)
+        /// Whether player is grounded (internal use only)
         /// </summary>
-        //public bool GroundedCheck  = false;
+        public bool GroundCheck = false;
 
         /// <summary>
         /// Unused for now

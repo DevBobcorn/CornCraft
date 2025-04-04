@@ -48,8 +48,8 @@ namespace CraftSharp.Control
 
         private void CheckClimbOver(PlayerStatus info, PlayerController player)
         {
-            if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
-                    info.BarrierDistance < player.AbilityConfig.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
+            if (info is { Moving: true, BarrierHeight: > THRESHOLD_CLIMB_UP and < THRESHOLD_CLIMB_1M } &&
+                info.BarrierDistance < player.AbilityConfig.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
             {
                 bool walkUp = info.BarrierHeight < THRESHOLD_WALK_UP;
 
@@ -57,7 +57,7 @@ namespace CraftSharp.Control
                 {
                     if (info.YawDeltaAbs <= 10F) // Trying to moving forward
                     {
-                        // Workround: Use a cooldown value to disable climbing in a short period after landing
+                        // Workaround: Use a cooldown value to disable climbing in a short period after landing
                         if (_timeSinceGrounded > 0.3F)
                         {
                             player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, walkUp, false);
@@ -82,7 +82,7 @@ namespace CraftSharp.Control
                     _jumpConfirmed = true;
 
                     // Makes the character skip ground probing/snapping on its next update
-                    motor.ForceUnground(0.1F);
+                    motor.ForceUnground();
                     // Randomize mirror flag before jumping
                     player.RandomizeMirroredFlag();
 
@@ -135,7 +135,7 @@ namespace CraftSharp.Control
                 bool prevMoving = info.Moving;
                 info.Moving = inputData.Locomotion.Movement.IsPressed();
 
-                // Animation mirror randomation
+                // Animation mirror randomization
                 if (info.Moving != prevMoving)
                 {
                     player.RandomizeMirroredFlag();
@@ -184,7 +184,7 @@ namespace CraftSharp.Control
                     {
                         moveSpeed *= info.Moving ? (info.Sprinting ? 0.8F : 0.35F) : 1F;
                     }
-                    else if (_timeSinceGrounded >= 0F && _timeSinceGrounded < 0.5F)
+                    else if (_timeSinceGrounded is >= 0F and < 0.5F)
                     {
                         moveSpeed *= _timeSinceGrounded / 0.5F;
                     }
@@ -275,24 +275,24 @@ namespace CraftSharp.Control
             _walkToggleRequested = false;
             _sprintRequested = false;
 
-            player.Actions.Interaction.ToggleAimingLock.performed += toggleAimingLockCallback = (context) =>
+            player.Actions.Interaction.ToggleAimingLock.performed += toggleAimingLockCallback = _ =>
             {
                 player.ToggleAimingLock();
             };
 
-            player.Actions.Locomotion.Jump.performed += jumpRequestCallback = (context) =>
+            player.Actions.Locomotion.Jump.performed += jumpRequestCallback = _ =>
             {
                 // Set jump flag
                 _jumpRequested = true;
             };
 
-            player.Actions.Locomotion.WalkToggle.performed += walkToggleRequestCallback = (context) =>
+            player.Actions.Locomotion.WalkToggle.performed += walkToggleRequestCallback = _ =>
             {
                 // Set walk toggle flag
                 _walkToggleRequested = true;
             };
 
-            player.Actions.Locomotion.Sprint.performed += sprintRequestCallback = (context) =>
+            player.Actions.Locomotion.Sprint.performed += sprintRequestCallback = _ =>
             {
                 if (player.IsUsingAimingCamera() && Mathf.Abs(
                     Mathf.DeltaAngle(info.CurrentVisualYaw, info.MovementInputYaw)) > 30F)
@@ -306,16 +306,9 @@ namespace CraftSharp.Control
 
             if (prevState is not ForceMoveState)
             {
-                string stateName;
-
-                if (prevState == PlayerStates.AIRBORNE)
-                {
-                    stateName = AnimatorEntityRender.LANDING_NAME;
-                }
-                else
-                {
-                    stateName = GetEntryAnimatorStateName(info);
-                }
+                var stateName = prevState == PlayerStates.AIRBORNE ?
+                    AnimatorEntityRender.LANDING_NAME :
+                    GetEntryAnimatorStateName(info);
 
                 player.StartCrossFadeState(stateName, 0.1F);
 
@@ -341,7 +334,7 @@ namespace CraftSharp.Control
             if (nextState == PlayerStates.AIRBORNE && !info.Grounded && !_jumpConfirmed)
             {
                 // Make sure it isn't jumping
-                player.StartCrossFadeState(AnimatorEntityRender.FALLING_NAME, 0.2F);
+                player.StartCrossFadeState(AnimatorEntityRender.FALLING_NAME);
             }
 
             // Reset jump confirmation flag

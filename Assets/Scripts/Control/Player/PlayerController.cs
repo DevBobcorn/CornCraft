@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 
 using CraftSharp.Event;
@@ -84,7 +85,7 @@ namespace CraftSharp.Control
         /// <summary>
         /// Player yaw for sending to the server
         /// This yaw value is stored in Minecraft coordinate system.
-        /// Conversion is required when assigning to unity transfom
+        /// Conversion is required when assigning to unity transform
         /// </summary>
         public float MCYaw2Send { get; private set; }
 
@@ -288,7 +289,7 @@ namespace CraftSharp.Control
             EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
 
             // Register gamemode events for updating gamemode
-            gameModeCallback = (e) => SetGameMode(e.GameMode);
+            gameModeCallback = e => SetGameMode(e.GameMode);
             EventManager.Instance.Register(gameModeCallback);
 
             // Initialize player state (idle on start)
@@ -403,7 +404,7 @@ namespace CraftSharp.Control
                 StartForceMoveOperation("Climb over barrier (RootMotion)",
                         new ForceMoveOperation[] {
                                 new(offset, AbilityConfig.ClimbOverMoveTime,
-                                    init: (info, motor, player) =>
+                                    init: (info, _, player) =>
                                     {
                                         player.RandomizeMirroredFlag();
                                         player.StartCrossFadeState(PlayerAbilityConfig.CLIMB_1M, 0.1F);
@@ -411,20 +412,20 @@ namespace CraftSharp.Control
                                         player.UseRootMotion = true;
                                         player.IgnoreAnimatorScale = true;
                                     },
-                                    update: (interval, curTime, inputData, info, motor, player) => false
+                                    update: (_, _, _, _, _, _) => false
                                 ),
                                 new(offset, AbilityConfig.ClimbOverTotalTime - AbilityConfig.ClimbOverMoveTime - AbilityConfig.ClimbOverCheckExit,
-                                    update: (interval, curTime, inputData, info, motor, player) => false
+                                    update: (_, _, _, _, _, _) => false
                                 ),
                                 new(Vector3.zero, AbilityConfig.ClimbOverCheckExit,
-                                    exit: (info, motor, player) =>
+                                    exit: (info, _, player) =>
                                     {
                                         info.Grounded = true;
                                         player.UseRootMotion = false;
                                         info.PlayingRootMotion = false;
                                         StartCrossFadeState(GroundedState.GetEntryAnimatorStateName(info));
                                     },
-                                    update: (interval, curTime, inputData, info, motor, player) =>
+                                    update: (_, _, inputData, info, _, _) =>
                                     {
                                         info.Moving = inputData.Locomotion.Movement.IsPressed();
                                         // Terminate force move action if almost finished and player is eager to move
@@ -437,15 +438,17 @@ namespace CraftSharp.Control
             {
                 var forwardDir = GetMovementOrientation() * Vector3.forward;
                 var offset = forwardDir * barrierDist + barrierHeight * Motor.CharacterUp;
+                
+                Debug.Log($"Barrier height: {barrierHeight}, offset: {offset}");
 
-                StartForceMoveOperation("Climb over barrier (Direct)",
+                StartForceMoveOperation("Climb over barrier (TransformDisplacement)",
                         new ForceMoveOperation[] {
                                 new(offset, barrierHeight * 0.3F,
-                                    exit: (info, motor, player) =>
+                                    exit: (info, _, _) =>
                                     {
                                         info.Grounded = true;
                                     },
-                                    update: (interval, curTime, inputData, info, motor, player) =>
+                                    update: (_, _, inputData, info, _, _) =>
                                     {
                                         info.Moving = inputData.Locomotion.Movement.IsPressed();
                                         // Don't terminate till the time ends
@@ -456,10 +459,10 @@ namespace CraftSharp.Control
             }
         }
 
-        public void StartForceMoveOperation(string name, ForceMoveOperation[] ops)
+        private void StartForceMoveOperation(string stateName, ForceMoveOperation[] ops)
         {
             // Set it as pending state, this will be set as active state upon next logical update
-            pendingState = new ForceMoveState(name, ops);
+            pendingState = new ForceMoveState(stateName, ops);
         }
 
         public void ChangeToState(IPlayerState state)
@@ -575,13 +578,11 @@ namespace CraftSharp.Control
             else if (CurrentState.ShouldExit(Actions!, status))
             {
                 // Try to exit current state and enter another one
-                foreach (var state in PlayerStates.STATES)
+                foreach (var state in PlayerStates.STATES.Where(
+                    state => state != CurrentState && state.ShouldEnter(Actions!, status)))
                 {
-                    if (state != CurrentState && state.ShouldEnter(Actions!, status))
-                    {
-                        ChangeToState(state);
-                        break;
-                    }
+                    ChangeToState(state);
+                    break;
                 }
             }
 
@@ -606,7 +607,7 @@ namespace CraftSharp.Control
             CurrentState.UpdateMain(ref currentVelocity, deltaTime, Actions!, status, Motor, this);
 
             // Broadcast current stamina if changed
-            if (prevStamina != status.StaminaLeft)
+            if (!Mathf.Approximately(prevStamina, status.StaminaLeft))
             {
                 EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, m_AbilityConfig!.MaxStamina));
             }
@@ -643,6 +644,8 @@ namespace CraftSharp.Control
                 MCYaw2Send = Status!.CurrentVisualYaw - 90F; // Coordinate system conversion
                 Pitch2Send = 0F;
             }
+            
+            IsGrounded2Send = Status.GroundCheck;
 
             // Reset root motion deltas
             RootMotionPositionDelta = Vector3.zero;

@@ -22,7 +22,7 @@ namespace CraftSharp.Control
                 bool prevMoving = info.Moving;
                 info.Moving = inputData.Locomotion.Movement.IsPressed();
 
-                // Animation mirror randomation
+                // Animation mirror randomization
                 if (info.Moving != prevMoving)
                 {
                     player.RandomizeMirroredFlag();

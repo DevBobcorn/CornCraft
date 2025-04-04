@@ -35,6 +35,7 @@ namespace CraftSharp.Control
 
             // Grounded state update
             var groundCheck = motor.GroundingStatus.FoundAnyGround;
+            Status.GroundCheck = groundCheck;
             var rayCenter = transform.position + GROUND_RAYCAST_START * motor.CharacterUp;
 
             // > Cast a ray downward from above the player
@@ -100,13 +101,13 @@ namespace CraftSharp.Control
             if (Status.Grounded) // Grounded in last update
             {
                 // Workaround: Extra check to make sure the player is just walking on some bumped surface and happen to leave the ground
-                if (!groundCheck && Status.CenterDownDist > 1.25F && !Status.InLiquid)
+                if (!groundCheck)
                 {
-                    Status.Grounded = false;
+                    Status.Grounded = Status.CenterDownDist <= 1.25F;
                 }
                 else
                 {
-                    Status.Grounded = groundCheck;
+                    Status.Grounded = true;
                 }
             }
             else // Not grounded in last update

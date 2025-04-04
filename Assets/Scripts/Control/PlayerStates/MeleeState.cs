@@ -19,7 +19,7 @@ namespace CraftSharp.Control
             var attackStatus = info.AttackStatus;
             var meleeAttack = attackStatus.CurrentStagedAttack;
 
-            if (meleeAttack == null) // Melee attack data is not assigned, stop it
+            if (!meleeAttack) // Melee attack data is not assigned, stop it
             {
                 info.Attacking = false;
                 attackStatus.AttackStage = -1;

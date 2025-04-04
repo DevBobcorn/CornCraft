@@ -9,7 +9,7 @@ namespace CraftSharp.Control
         /// <summary>
         /// Update before motor calculation. e.g. Force unground for jumping
         /// </summary>
-        public virtual void UpdateBeforeMotor(float interval, PlayerActions inputData,
+        public void UpdateBeforeMotor(float interval, PlayerActions inputData,
                 PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
 
         /// <summary>
@@ -18,17 +18,17 @@ namespace CraftSharp.Control
         public void UpdateMain(ref Vector3 currentVelocity, float interval,
                 PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player);
         
-        public virtual bool IgnoreCollision()
+        public bool IgnoreCollision()
         {
             return false;
         }
 
-        public abstract bool ShouldEnter(PlayerActions inputData, PlayerStatus info);
+        public bool ShouldEnter(PlayerActions inputData, PlayerStatus info);
 
-        public abstract bool ShouldExit(PlayerActions inputData, PlayerStatus info);
+        public bool ShouldExit(PlayerActions inputData, PlayerStatus info);
 
-        public virtual void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
+        public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
 
-        public virtual void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
+        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player) { }
     }
 }

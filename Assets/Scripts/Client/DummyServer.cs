@@ -66,8 +66,8 @@ namespace CraftSharp
             var minChunkYIndex = -Mathf.FloorToInt(World.GetDimensionType().minY / 16F);
             var chunkMask = 1 << minChunkYIndex;
             var emptyLight = new byte[4096 * (chunkColumnSize + 2)];
-            var columnA = new ushort[1][] { new ushort[4096] }; // 4096 * 1
-            var columnB = new ushort[1][] { new ushort[4096] }; // 4096 * 1
+            var columnA = new[] { new ushort[4096] }; // 4096 * 1
+            var columnB = new[] { new ushort[4096] }; // 4096 * 1
 
             Array.Fill(columnA[0], (ushort) 1); // Fill with stone
             Array.Fill(columnB[0], (ushort) 2, 0, 256 * 15); // Fill with granite, except top layer
@@ -103,8 +103,8 @@ namespace CraftSharp
             var minChunkYIndex = -Mathf.FloorToInt(World.GetDimensionType().minY / 16F);
             var chunkMask = 1 << minChunkYIndex;
             var emptyLight = new byte[4096 * (chunkColumnSize + 2)];
-            var columnA = new ushort[1][] { new ushort[4096] }; // 4096 * 1
-            var columnB = new ushort[1][] { new ushort[4096] }; // 4096 * 1
+            var columnA = new[] { new ushort[4096] }; // 4096 * 1
+            var columnB = new[] { new ushort[4096] }; // 4096 * 1
 
             Array.Fill(columnA[0], (ushort) 1); // Fill with stone
             Array.Fill(columnB[0], (ushort) 2, 0, 256 * 15); // Fill with granite, except top layer
@@ -136,7 +136,7 @@ namespace CraftSharp
                     }
                     else
                     {
-                        client.DummyOnTextReceived(new ChatMessage($"{client.GetUsername()}: {text}", client.GetUsername(), false, 0, client.GetUserUUID(), false));
+                        client.DummyOnTextReceived(new ChatMessage($"{client.GetUsername()}: {text}", client.GetUsername(), false, 0, client.GetUserUUID()));
                     }
                 };
 
@@ -151,7 +151,7 @@ namespace CraftSharp
                 }
                 else
                 {
-                    // No data loaded, use playerholder instead
+                    // No data loaded, use placeholder instead
                     placeHolderGround.SetActive(true);
                 }
 
@@ -194,7 +194,7 @@ namespace CraftSharp
             client.DummyOnGamemodeUpdate(Guid.Empty, (int) GameMode.Creative);
 
             // Send initial inventory
-            client.DummyOnInventoryOpen(0, new InventoryData(InventoryType.PLAYER));
+            client.DummyOnInventoryOpen(0, new InventoryData(0, InventoryType.PLAYER, null));
 
             if (dataLoaded)
             {

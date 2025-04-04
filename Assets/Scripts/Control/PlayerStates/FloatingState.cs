@@ -15,18 +15,16 @@ namespace CraftSharp.Control
 
         private void CheckClimbOverInLiquid(PlayerStatus info, PlayerController player)
         {
-            if (info.Moving && info.BarrierHeight > THRESHOLD_CLIMB_UP && info.BarrierHeight < THRESHOLD_CLIMB_1M &&
-                    info.BarrierDistance < player.AbilityConfig.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
+            if (info is { Moving: true, BarrierHeight: > THRESHOLD_CLIMB_UP and < THRESHOLD_CLIMB_1M } &&
+                info.BarrierDistance < player.AbilityConfig.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
             {
-                if (info.BarrierYawAngle < 30F) // Check if available, for high barriers check cooldown and angle
+                if (info is { BarrierYawAngle: < 30F, YawDeltaAbs: <= 10F }) // Check if available, for high barriers check cooldown and angle
+                    // Trying to moving forward
                 {
-                    if (info.YawDeltaAbs <= 10F) // Trying to moving forward
-                    {
-                        player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, false, true);
+                    player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, false, true);
 
-                        // Prevent unground preparation if climbing is successfully initiated, or only timer is not ready
-                        _forceUngroundRequested = false;
-                    }
+                    // Prevent unground preparation if climbing is successfully initiated, or only timer is not ready
+                    _forceUngroundRequested = false;
                 }
             }
         }
@@ -42,7 +40,7 @@ namespace CraftSharp.Control
                     _forceUngroundConfirmed = true;
 
                     // Makes the character skip ground probing/snapping on its next update
-                    motor.ForceUnground(0.1F);
+                    motor.ForceUnground();
                     // Also reset grounded flag
                     info.Grounded = false;
                 }
@@ -75,7 +73,7 @@ namespace CraftSharp.Control
                 bool prevMoving = info.Moving;
                 info.Moving = inputData.Locomotion.Movement.IsPressed();
 
-                // Animation mirror randomation
+                // Animation mirror randomization
                 if (info.Moving != prevMoving)
                 {
                     player.RandomizeMirroredFlag();
