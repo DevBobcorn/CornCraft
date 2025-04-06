@@ -145,7 +145,7 @@ namespace CraftSharp.Control
                 // Update render gameobject layer (do this last to ensure all children are present)
                 foreach (var child in renderObj.GetComponentsInChildren<Transform>())
                 {
-                    child.gameObject.layer = this.gameObject.layer;
+                    child.gameObject.layer = gameObject.layer;
                 }
 
                 var riggedRender = m_PlayerRender as PlayerEntityRiggedRender;
@@ -367,7 +367,7 @@ namespace CraftSharp.Control
             Status.EntityDisabled = false;
 
             // Show entity render
-            if (m_PlayerRender != null)
+            if (m_PlayerRender)
             {
                 m_PlayerRender.gameObject.SetActive(true);
             }
@@ -438,8 +438,6 @@ namespace CraftSharp.Control
             {
                 var forwardDir = GetMovementOrientation() * Vector3.forward;
                 var offset = forwardDir * barrierDist + barrierHeight * Motor.CharacterUp;
-                
-                Debug.Log($"Barrier height: {barrierHeight}, offset: {offset}");
 
                 StartForceMoveOperation("Climb over barrier (TransformDisplacement)",
                         new ForceMoveOperation[] {
@@ -692,7 +690,7 @@ namespace CraftSharp.Control
             MCYaw2Send = mcYaw;
         }
 
-        protected static float GetYawFromVector2(Vector2 direction)
+        private static float GetYawFromVector2(Vector2 direction)
         {
             if (direction.y > 0F)
                 return Mathf.Atan(direction.x / direction.y) * Mathf.Rad2Deg;

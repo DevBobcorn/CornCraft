@@ -27,7 +27,7 @@ namespace CraftSharp.UI
 
         private Animator staminaBarAnimator;
 
-        private bool isActive = false, debugInfo = true;
+        private bool isActive = false, debugInfo = false;
 
         private bool modePanelShown  = false;
         private int selectedMode     = 0;
@@ -104,8 +104,7 @@ namespace CraftSharp.UI
             {
                 staminaBar.CurValue = e.Stamina;
 
-                // ReSharper disable once CompareOfFloatsByEqualityOperator
-                if (staminaBar.MaxValue != e.MaxStamina)
+                if (!Mathf.Approximately(staminaBar.MaxValue, e.MaxStamina))
                 {
                     staminaBar.MaxValue = e.MaxStamina;
                 }
@@ -328,9 +327,9 @@ namespace CraftSharp.UI
         void LateUpdate()
         {
             var game = CornApp.CurrentClient;
-            if (game == null) return;
+            if (!game) return;
             
-            if (game.CameraController != null)
+            if (game.CameraController)
             {
                 var originOffset = game.WorldOriginOffset;
                 var uiCamera = game.UICamera;
