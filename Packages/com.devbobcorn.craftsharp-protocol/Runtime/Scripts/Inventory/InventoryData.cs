@@ -90,6 +90,18 @@ namespace CraftSharp.Inventory
         }
 
         /// <summary>
+        /// Get the slot Id of first backpack slot in this inventory
+        /// </summary>
+        /// <returns>First backpack slot in this inventory</returns>
+        public int GetFirstBackpackSlot()
+        {
+            // Reduce backpack count, hotbar count and append slot count
+            int hotbarStart = Type.SlotCount - 36 - Type.AppendSlotCount;
+            
+            return hotbarStart;
+        }
+        
+        /// <summary>
         /// Get the slot Id of first hotbar slot in this inventory
         /// </summary>
         /// <returns>First hotbar slot in this inventory</returns>

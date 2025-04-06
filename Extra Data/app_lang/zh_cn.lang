@@ -123,6 +123,7 @@ gameplay.interaction.pull_lever=拉动拉杆
 gameplay.interaction.push_button=按下按钮
 gameplay.interaction.craft=合成
 gameplay.interaction.smelt=烧炼
+gameplay.interaction.open_container=打开容器
 gameplay.interaction.default_harvest=破坏 {0}
 gameplay.interaction.axe_harvest=破坏 {0}
 gameplay.interaction.hoe_harvest=破坏 {0}

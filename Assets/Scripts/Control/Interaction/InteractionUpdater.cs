@@ -157,7 +157,9 @@ namespace CraftSharp.Control
                     blockSelectionBox.ClearShape();
                 }
             }
-            
+
+            return;
+
             static Direction GetDirectionFromNormal(Vector3 normal)
             {
                 float absX = Mathf.Abs(normal.x);

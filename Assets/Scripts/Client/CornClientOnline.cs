@@ -1632,7 +1632,7 @@ namespace CraftSharp
 
             inventory.Properties.Add(propertyId, propertyValue);
 
-            if (inventory.Type == InventoryType.ENCHANTMENT)
+            if (inventory.Type.TypeId == InventoryType.ENCHANTMENT_ID)
             {
                 // We got the last property for enchantment
                 if (propertyId == 9 && propertyValue != -1)
@@ -1697,7 +1697,7 @@ namespace CraftSharp
                     {
                         EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slot, itemStack));
 
-                        //Debug.Log($"Set inventory item: [{inventoryId}]/[{pair.Key}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
+                        Debug.Log($"Set inventory item: [{inventoryId}]/[{slot}] to {itemStack?.ItemType.ItemId.ToString() ?? "AIR"}");
 
                         if (inventory.IsHotbar(slot, out int hotbarSlot))
                         {

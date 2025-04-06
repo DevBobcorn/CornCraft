@@ -33,18 +33,18 @@ namespace CraftSharp.UI
             return true;
         }
 
-        private void CloseScreen()
+        private static void CloseScreen()
         {
             var client = CornApp.CurrentClient;
-            if (client == null) return;
+            if (!client) return;
 
             client.ScreenControl.TryPopScreen();
         }
 
-        private void QuitToLogin()
+        private static void QuitToLogin()
         {
             var client = CornApp.CurrentClient;
-            if (client == null) return;
+            if (!client) return;
 
             client.Disconnect();
         }

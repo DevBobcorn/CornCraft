@@ -67,10 +67,10 @@ namespace CraftSharp.UI
             return true;
         }
 
-        private void CloseScreen()
+        private static void CloseScreen()
         {
             var client = CornApp.CurrentClient;
-            if (client == null) return;
+            if (!client) return;
 
             client.ScreenControl.TryPopScreen();
         }
@@ -123,7 +123,7 @@ namespace CraftSharp.UI
             return packetItemObj.GetComponent<PacketItem>();
         }
 
-        private void OnReleasePacketItem(PacketItem packetItem)
+        private static void OnReleasePacketItem(PacketItem packetItem)
         {
             // Hide
             packetItem.gameObject.SetActive(false);

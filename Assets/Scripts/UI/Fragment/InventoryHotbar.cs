@@ -29,7 +29,7 @@ namespace CraftSharp.UI
 
         private void SelectSlot(int slot)
         {
-            if (selectedSlot != null)
+            if (selectedSlot)
             {
                 selectedSlot.DeselectSlot();
             }
@@ -49,7 +49,8 @@ namespace CraftSharp.UI
 
             offhandItemSlot.SetKeyHint("F");
 
-            hotbarUpdateCallback = (e) => {
+            hotbarUpdateCallback = e =>
+            {
                 if (e.HotbarSlot == HOTBAR_LENGTH) // Update offhand slot
                 {
                     offhandItemSlot.UpdateItemStack(e.ItemStack);
@@ -57,7 +58,7 @@ namespace CraftSharp.UI
 
                     hotbarAnimator.SetBool(SHOW_HASH, !offhandIsEmpty);
                 }
-                else if (e.HotbarSlot >= 0 && e.HotbarSlot < HOTBAR_LENGTH) // Update hotbar slot
+                else if (e.HotbarSlot is >= 0 and < HOTBAR_LENGTH) // Update hotbar slot
                 {
                     itemSlots[e.HotbarSlot].UpdateItemStack(e.ItemStack);
                 }
@@ -67,7 +68,8 @@ namespace CraftSharp.UI
                 }
             };
 
-            heldItemChangeCallback = (e) => {
+            heldItemChangeCallback = e =>
+            {
                 SelectSlot(e.HotbarSlot);
             };
 
@@ -93,18 +95,18 @@ namespace CraftSharp.UI
             {
                 float updatedAlpha = 1F;
 
-                for (int i = 0; i < parentCanvasGroups.Length; i++)
+                foreach (var t in parentCanvasGroups)
                 {
-                    if ((!parentCanvasGroups[i].gameObject.activeSelf) || parentCanvasGroups[i].alpha == 0F)
+                    if ((!t.gameObject.activeSelf) || t.alpha == 0F)
                     {
                         updatedAlpha = 0F;
                         break;
                     }
 
-                    updatedAlpha *= parentCanvasGroups[i].alpha;
+                    updatedAlpha *= t.alpha;
                 }
 
-                if (selfAlpha != updatedAlpha)
+                if (!Mathf.Approximately(selfAlpha, updatedAlpha))
                 {
                     UpdateAlpha(updatedAlpha);
                 }

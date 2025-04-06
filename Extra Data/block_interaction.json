@@ -1220,6 +1220,19 @@
         "minecraft:blast_furnace",
         "minecraft:smoker"
       ]
+    },
+    "open_container": {
+      "action": "interact",
+      "hint": "gameplay.interaction.open_container",
+      "reusable": true,
+      "triggers": [
+        "minecraft:chest",
+        "minecraft:barrel",
+        "minecraft:ender_chest",
+        "minecraft:dropper",
+        "minecraft:dispenser",
+        "minecraft:hopper"
+      ]
     }
   }
 }

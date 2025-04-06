@@ -324,7 +324,7 @@ namespace CraftSharp.UI
             }
         }
 
-        void LateUpdate()
+        private void LateUpdate()
         {
             var game = CornApp.CurrentClient;
             if (!game) return;

@@ -30,47 +30,22 @@
         public static readonly ResourceLocation LOOM_ID          = new("loom");              // Loom
         public static readonly ResourceLocation MERCHANT_ID      = new("merchant");          // Villager & Wandering Trader
         public static readonly ResourceLocation SHULKER_BOX_ID   = new("shulker_box");       // Shulker Box
-        public static readonly ResourceLocation SMITHING_OLD_ID  = new("legacy_smithing");   // Smithing Table in 1.16-1.19.3, and in 1.19.4 with 'update_1_20' feature flag disabled
-        public static readonly ResourceLocation SMITHING_ID      = new("smithing");          // Smithing Table in 1.20+, and in 1.19.4 with 'update_1_20' feature flag enabled
+        public static readonly ResourceLocation SMITHING_OLD_ID  = new("legacy_smithing");   // Smithing Table in 1.19.4 with 'update_1_20' feature flag disabled
+        public static readonly ResourceLocation SMITHING_ID      = new("smithing");          // Smithing Table in 1.16~1.19.3 and 1.20+, and in 1.19.4 with 'update_1_20' feature flag enabled
         public static readonly ResourceLocation SMOKER_ID        = new("smoker");            // Smoker
         public static readonly ResourceLocation CARTOGRAPHY_ID   = new("cartography_table"); // Cartography Table
         public static readonly ResourceLocation STONECUTTER_ID   = new("stonecutter");       // Stonecutter
 
-        public static readonly InventoryType PLAYER        = new(PLAYER_ID,        0, 0, 9, true, 1, 0); // Append offhand slot (slot 45)
-        public static readonly InventoryType HORSE_REGULAR = new(HORSE_ID,         0, 0, 2, true, 2, 0);
-        public static readonly InventoryType HORSE_CHESTED = new(HORSE_ID,         5, 3, 2, true, 2, 0);
-        public static readonly InventoryType GENERIC_9x1   = new(GENERIC_9x1_ID,   9, 1);
-        public static readonly InventoryType GENERIC_9x2   = new(GENERIC_9x2_ID,   9, 2);
-        public static readonly InventoryType GENERIC_9x3   = new(GENERIC_9x3_ID,   9, 3);
-        public static readonly InventoryType GENERIC_9x4   = new(GENERIC_9x4_ID,   9, 4);
-        public static readonly InventoryType GENERIC_9x5   = new(GENERIC_9x5_ID,   9, 5);
-        public static readonly InventoryType GENERIC_9x6   = new(GENERIC_9x6_ID,   9, 6);
-        public static readonly InventoryType GENERIC_3x3   = new(GENERIC_3x3_ID,   3, 3);
-        public static readonly InventoryType CRAFTER_3x3   = new(CRAFTER_3x3_ID,   3, 3, 0, true, 1, 45); // Append output preview slot (slot 45)
-        public static readonly InventoryType ANVIL         = new(ANVIL_ID,         0, 0, 3, true, 0, 2);
-        public static readonly InventoryType BEACON        = new(BEACON_ID,        0, 0, 1);
-        public static readonly InventoryType BLAST_FURNACE = new(BLAST_FURNACE_ID, 0, 0, 3, true, 0, 2);
-        public static readonly InventoryType BREWING_STAND = new(BREWING_STAND_ID, 0, 0, 5);
-        public static readonly InventoryType CRAFTING      = new(CRAFTING_ID,      3, 3, 1, true, 0, 0);
-        public static readonly InventoryType ENCHANTMENT   = new(ENCHANTMENT_ID,   0, 0, 2);
-        public static readonly InventoryType FURNACE       = new(FURNACE_ID,       0, 0, 3, true, 0, 2);
-        public static readonly InventoryType GRINDSTONE    = new(GRINDSTONE_ID,    0, 0, 3, true, 0, 2);
-        public static readonly InventoryType HOPPER        = new(HOPPER_ID,        5, 1);
-        public static readonly InventoryType LECTERN       = new(LECTERN_ID,       0, 0);
-        public static readonly InventoryType LOOM          = new(LOOM_ID,          0, 0, 4, true, 0, 3);
-        public static readonly InventoryType MERCHANT      = new(MERCHANT_ID,      0, 0, 3, true, 0, 2);
-        public static readonly InventoryType SHULKER_BOX   = new(SHULKER_BOX_ID,   9, 3); // Basically the same as GENERIC_9x3
-        public static readonly InventoryType SMITHING_OLD  = new(SMITHING_OLD_ID,  0, 0, 3, true, 0, 2);
-        public static readonly InventoryType SMITHING      = new(SMITHING_ID,      0, 0, 4, true, 0, 3);
-        public static readonly InventoryType SMOKER        = new(SMOKER_ID,        0, 0, 3, true, 0, 2);
-        public static readonly InventoryType CARTOGRAPHY   = new(CARTOGRAPHY_ID,   0, 0, 3, true, 0, 2);
-        public static readonly InventoryType STONECUTTER   = new(STONECUTTER_ID,   0, 0, 2, true, 0, 1);
+        public static readonly InventoryType PLAYER        = new(PLAYER_ID,        9, 0, 0, true, true, 1, 0); // Append offhand slot (slot 45)
+        public static readonly InventoryType HORSE_REGULAR = new(HORSE_ID,         2, 0, 0, true, true, 0, -1);
+        public static readonly InventoryType HORSE_CHESTED = new(HORSE_ID,         2, 5, 3, true, true, 0, -1);
         
-        public static readonly InventoryType DUMMY_INVENTORY_TYPE = new(ResourceLocation.INVALID, 0, 0, 0, false);
+        public static readonly InventoryType DUMMY_INVENTORY_TYPE = new(ResourceLocation.INVALID, 0, 0, 0, false, false, 0, -1);
 
         public readonly ResourceLocation TypeId;
         
-        public bool HasBackpackSlots { get; private set; } // 9x3 slots from player backpack + 9x1 hotbar slots
+        public bool HasBackpackSlots { get; private set; } // 9x3 slots from player backpack
+        public bool HasHotbarSlots { get; private set; } // 9x1 hotbar slots
         public byte MainSlotWidth { get; private set; }
         public byte MainSlotHeight { get; private set; }
         
@@ -81,25 +56,28 @@
         
         public int OutputSlot { get; private set; }
         
-        public int SlotCount => PrependSlotCount + MainSlotWidth * MainSlotHeight + (HasBackpackSlots ? 36 : 0) + AppendSlotCount;
+        public int SlotCount => PrependSlotCount + MainSlotWidth * MainSlotHeight +
+                                (HasBackpackSlots ? 27 : 0) + (HasHotbarSlots ? 9 : 0) + AppendSlotCount;
         
         public bool HasOutputSlot => OutputSlot >= 0;
         
-        private InventoryType(ResourceLocation id, byte mainSlotWidth, byte mainSlotHeight,
-            byte prependSlotCount = 0, bool hasBackpackSlots = true, byte appendSlotCount = 0, int outputSlot = -1)
+        public InventoryType(ResourceLocation id, byte prependSlotCount, byte mainSlotWidth, byte mainSlotHeight,
+            bool hasBackpackSlots, bool hasHotbarSlots, byte appendSlotCount, int outputSlot)
         {
             TypeId = id;
-            HasBackpackSlots = hasBackpackSlots;
-            AppendSlotCount = appendSlotCount;
+            
+            PrependSlotCount = prependSlotCount;
             MainSlotWidth = mainSlotWidth;
             MainSlotHeight = mainSlotHeight;
-            PrependSlotCount = prependSlotCount;
+            HasBackpackSlots = hasBackpackSlots;
+            HasHotbarSlots = hasHotbarSlots;
+            AppendSlotCount = appendSlotCount;
             OutputSlot = outputSlot;
         }
 
         public override string ToString()
         {
             return TypeId.ToString();
-        }   
+        }
     }
 }

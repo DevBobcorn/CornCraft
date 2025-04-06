@@ -123,6 +123,7 @@ gameplay.interaction.pull_lever=Pull lever
 gameplay.interaction.push_button=Push button
 gameplay.interaction.craft=Craft
 gameplay.interaction.smelt=Smelt
+gameplay.interaction.open_container=Open Container
 gameplay.interaction.default_harvest=Break {0}
 gameplay.interaction.axe_harvest=Break {0}
 gameplay.interaction.hoe_harvest=Break {0}

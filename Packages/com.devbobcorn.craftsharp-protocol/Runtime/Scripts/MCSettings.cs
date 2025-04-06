@@ -3,7 +3,7 @@ namespace CraftSharp
     public class MCSettings
     {
         public bool Enabled = true;
-        public string Locale = "en_US";
+        public string Locale = "en_us";
         public byte Difficulty = 0;
         public byte RenderDistance = 16;
         public byte ChatMode = 0;
