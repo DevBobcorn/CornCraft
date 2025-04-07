@@ -100,8 +100,8 @@
     },
     "minecraft:smithing": {
         "protocol_id": 20,
-        "prepend_slot_count": 3,
-        "output_slot": 2
+        "prepend_slot_count": 4,
+        "output_slot": 3
     },
     "minecraft:smoker": {
         "protocol_id": 21,

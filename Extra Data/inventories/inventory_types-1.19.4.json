@@ -98,23 +98,28 @@
         "main_slot_width": 9,
         "main_slot_height": 3
     },
-    "minecraft:smithing": {
+    "minecraft:legacy_smithing": {
         "protocol_id": 20,
         "prepend_slot_count": 3,
         "output_slot": 2
     },
-    "minecraft:smoker": {
+    "minecraft:smithing": {
         "protocol_id": 21,
-        "prepend_slot_count": 3,
-        "output_slot": 2
+        "prepend_slot_count": 4,
+        "output_slot": 3
     },
-    "minecraft:cartography_table": {
+    "minecraft:smoker": {
         "protocol_id": 22,
         "prepend_slot_count": 3,
         "output_slot": 2
     },
-    "minecraft:stonecutter": {
+    "minecraft:cartography_table": {
         "protocol_id": 23,
+        "prepend_slot_count": 3,
+        "output_slot": 2
+    },
+    "minecraft:stonecutter": {
+        "protocol_id": 24,
         "prepend_slot_count": 2,
         "output_slot": 1
     }

@@ -34,87 +34,94 @@
         "main_slot_width": 3,
         "main_slot_height": 3
     },
-    "minecraft:anvil": {
+    "minecraft:crafter_3x3": {
         "protocol_id": 7,
+        "main_slot_width": 3,
+        "main_slot_height": 3,
+        "append_slot_count": 1,
+        "output_slot": 45
+    },
+    "minecraft:anvil": {
+        "protocol_id": 8,
         "prepend_slot_count": 3,
         "output_slot": 2
     },
     "minecraft:beacon": {
-        "protocol_id": 8,
+        "protocol_id": 9,
         "prepend_slot_count": 1
     },
     "minecraft:blast_furnace": {
-        "protocol_id": 9,
+        "protocol_id": 10,
         "prepend_slot_count": 3,
         "output_slot": 2
     },
     "minecraft:brewing_stand": {
-        "protocol_id": 10,
+        "protocol_id": 11,
         "prepend_slot_count": 5
     },
     "minecraft:crafting": {
-        "protocol_id": 11,
+        "protocol_id": 12,
         "prepend_slot_count": 1,
         "main_slot_width": 3,
         "main_slot_height": 3,
         "output_slot": 0
     },
     "minecraft:enchantment": {
-        "protocol_id": 12,
+        "protocol_id": 13,
         "prepend_slot_count": 2
     },
     "minecraft:furnace": {
-        "protocol_id": 13,
-        "prepend_slot_count": 3,
-        "output_slot": 2
-    },
-    "minecraft:grindstone": {
         "protocol_id": 14,
         "prepend_slot_count": 3,
         "output_slot": 2
     },
-    "minecraft:hopper": {
+    "minecraft:grindstone": {
         "protocol_id": 15,
+        "prepend_slot_count": 3,
+        "output_slot": 2
+    },
+    "minecraft:hopper": {
+        "protocol_id": 16,
         "main_slot_width": 5,
         "main_slot_height": 1
     },
     "minecraft:lectern": {
-        "protocol_id": 16,
+        "protocol_id": 17,
         "has_backpack_slots": false,
         "has_hotbar_slots": false
     },
     "minecraft:loom": {
-        "protocol_id": 17,
+        "protocol_id": 18,
         "prepend_slot_count": 4,
         "output_slot": 3
     },
     "minecraft:merchant": {
-        "protocol_id": 18,
+        "protocol_id": 19,
         "prepend_slot_count": 3,
         "output_slot": 2
     },
     "minecraft:shulker_box": {
-        "protocol_id": 19,
+        "protocol_id": 20,
         "main_slot_width": 9,
         "main_slot_height": 3
     },
     "minecraft:smithing": {
-        "protocol_id": 20,
-        "prepend_slot_count": 3,
-        "output_slot": 2
+        "protocol_id": 21,
+        "prepend_slot_count": 4,
+        "output_slot": 3
     },
     "minecraft:smoker": {
-        "protocol_id": 21,
-        "prepend_slot_count": 3,
-        "output_slot": 2
-    },
-    "minecraft:cartography_table": {
         "protocol_id": 22,
         "prepend_slot_count": 3,
         "output_slot": 2
     },
-    "minecraft:stonecutter": {
+    "minecraft:cartography_table": {
         "protocol_id": 23,
+        "prepend_slot_count": 3,
+        "output_slot": 2
+    },
+    "minecraft:stonecutter": {
+        "protocol_id": 24,
         "prepend_slot_count": 2,
         "output_slot": 1
     }
