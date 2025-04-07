@@ -96,9 +96,9 @@ namespace CraftSharp.Inventory
         public int GetFirstBackpackSlot()
         {
             // Reduce backpack count, hotbar count and append slot count
-            int hotbarStart = Type.SlotCount - 36 - Type.AppendSlotCount;
+            int backpackStart = Type.SlotCount - 36 - Type.AppendSlotCount;
             
-            return hotbarStart;
+            return backpackStart;
         }
         
         /// <summary>
@@ -112,7 +112,7 @@ namespace CraftSharp.Inventory
             
             return hotbarStart;
         }
-
+        
         /// <summary>
         /// Check the given slot Id is a hotbar slot and give the hotbar number
         /// </summary>

@@ -926,7 +926,7 @@ namespace CraftSharp
                         if (playerInventoryData.Items.ContainsKey(-1))
                         {
                             // When item on cursor and clicking crafting output slot, nothing will happen
-                            if (inventoryType.HasOutputSlot && slot == inventoryType.OutputSlot)
+                            if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
                             {
                                 break; // TODO: Check output stacking
                             }
@@ -975,7 +975,7 @@ namespace CraftSharp
                             if (inventory.Items.ContainsKey(slot))
                             {
                                 // When taking item from crafting output slot, server will update us
-                                if (inventoryType.HasOutputSlot && slot == inventoryType.OutputSlot)
+                                if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
                                 {
                                     break;
                                 }
@@ -993,7 +993,7 @@ namespace CraftSharp
                         if (playerInventoryData.Items.ContainsKey(-1))
                         {
                             // When item on cursor and clicking crafting output slot, nothing will happen
-                            if (inventoryType.HasOutputSlot && slot == inventoryType.OutputSlot)
+                            if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
                             {
                                 break;
                             }
@@ -1029,7 +1029,7 @@ namespace CraftSharp
                             // Check target slot have item?
                             if (inventory.Items.ContainsKey(slot))
                             {
-                                if (inventoryType.HasOutputSlot && slot == inventoryType.OutputSlot)
+                                if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
                                 {
                                     // no matter how many item in crafting output slot, only 1 will be taken out
                                     // Also server will update us

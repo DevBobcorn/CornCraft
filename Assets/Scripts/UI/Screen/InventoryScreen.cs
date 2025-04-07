@@ -21,6 +21,7 @@ namespace CraftSharp.UI
         [SerializeField] private RectTransform listPanel, workPanel, backpackPanel, hotbarPanel;
         [SerializeField] private InventoryItemSlot[] backpackSlots;
         [SerializeField] private InventoryItemSlot[] hotbarSlots;
+        [SerializeField] private float inventorySlotSize = 90F;
 
         private readonly Dictionary<int, InventoryItemSlot> currentSlots = new();
 
@@ -41,16 +42,20 @@ namespace CraftSharp.UI
 
             ActiveInventoryId = inventoryData.Id;
             ActiveInventoryData = inventoryData;
+            
+            var inventoryType = inventoryData.Type;
 
             inventoryTitleText.text = inventoryData.Title;
             Debug.Log($"Set inventory: [{ActiveInventoryId}] {inventoryData.Title}");
             
-            if (inventoryData.Type.TypeId == InventoryType.MERCHANT_ID)
+            if (inventoryType.ListPanelWidth > 0)
             {
                 // TODO: Initialize trade list
                 Debug.Log("Initialize trade list");
                 
                 // Show list panel
+                listPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
+                    inventoryType.ListPanelWidth * inventorySlotSize);
                 listPanel.gameObject.SetActive(true);
             }
             else
@@ -58,8 +63,33 @@ namespace CraftSharp.UI
                 // Hide list panel
                 listPanel.gameObject.SetActive(false);
             }
+            
+            // Update work panel height
+            workPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,
+                inventoryType.WorkPanelHeight * inventorySlotSize);
 
-            if (inventoryData.Type.HasBackpackSlots)
+            // Populate work panel slots
+            for (int i = 0; i < inventoryType.PrependSlotCount; i++)
+            {
+                var slotPos = inventoryType.GetInventorySlotPos(i);
+                
+                currentSlots[i] = createSlot(slotPos.x + 1,
+                    inventoryType.MainSlotHeight - slotPos.y,
+                    $"Slot [{i}] (Work Prepend) [{inventoryType.GetInventorySlotType(i)}]");
+            }
+            
+            var workMainStart = inventoryType.PrependSlotCount;
+            var workMainPosX = inventoryType.MainPosX;
+            var workMainPosY = inventoryType.MainPosY;
+            for (int x = 0, i = 0; x < inventoryType.MainSlotWidth; x++)
+                for (int y = 0; y < inventoryType.MainSlotHeight; y++, i++)
+                {
+                    currentSlots[workMainStart + i] = createSlot(x + workMainPosX + 1,
+                        inventoryType.MainSlotHeight - workMainPosY - y,
+                        $"Slot [{workMainStart + i}] (Work Main)");
+                }
+
+            if (inventoryType.HasBackpackSlots)
             {
                 var backpackStart = inventoryData.GetFirstBackpackSlot();
                 
@@ -77,7 +107,7 @@ namespace CraftSharp.UI
                 backpackPanel.gameObject.SetActive(false);
             }
             
-            if (inventoryData.Type.HasHotbarSlots)
+            if (inventoryType.HasHotbarSlots)
             {
                 var hotbarStart = inventoryData.GetFirstHotbarSlot();
                 
@@ -93,6 +123,30 @@ namespace CraftSharp.UI
             else
             {
                 hotbarPanel.gameObject.SetActive(false);
+            }
+            
+            var workAppendStart = inventoryType.SlotCount - inventoryType.AppendSlotCount;
+            for (int i = workAppendStart; i < workAppendStart + inventoryType.AppendSlotCount; i++)
+            {
+                var slotPos = inventoryType.GetInventorySlotPos(i);
+                
+                currentSlots[i] = createSlot(slotPos.x + 1,
+                    inventoryType.MainSlotHeight - slotPos.y,
+                    $"Slot [{i}] (Work Append) [{inventoryType.GetInventorySlotType(i)}]");
+            }
+
+            return;
+
+            InventoryItemSlot createSlot(int x, int y, string slotName)
+            {
+                var slotObj = Instantiate(inventorySlotPrefab, workPanel);
+                var slot = slotObj.GetComponent<InventoryItemSlot>();
+                
+                slotObj.GetComponent<RectTransform>().anchoredPosition =
+                    new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+                slotObj.name = slotName;
+
+                return slot;
             }
         }
 
@@ -135,6 +189,13 @@ namespace CraftSharp.UI
             {
                 slot.UpdateItemStack(null);
             }
+            
+            // Destroy all slots under work panel
+            foreach (Transform t in workPanel)
+            {
+                Destroy(t.gameObject);
+            }
+            
             currentSlots.Clear();
 
             ActiveInventoryId = -1;
@@ -166,7 +227,6 @@ namespace CraftSharp.UI
 
         public override void UpdateScreen()
         {
-            // Escape key cannot be used here, otherwise it will push pause screen back after poping it
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 CloseInventory();

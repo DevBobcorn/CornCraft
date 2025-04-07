@@ -30,7 +30,7 @@ namespace CraftSharp
         private const string VANILLA_FIX_FILE_NAME = "VanillaFix";
         private const int    VANILLA_FIX_VERSION = 1;
 
-        public BaseCornClient? Client { get; private set; }
+        private BaseCornClient? Client { get; set; }
 
         public static BaseCornClient? CurrentClient => Instance.Client;
         public static void SetCurrentClient(BaseCornClient c) => Instance.Client = c;

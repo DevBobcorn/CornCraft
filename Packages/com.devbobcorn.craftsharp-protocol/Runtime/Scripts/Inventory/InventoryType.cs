@@ -1,4 +1,7 @@
-﻿namespace CraftSharp.Inventory
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+namespace CraftSharp.Inventory
 {
     /// <summary>
     /// Represents a Minecraft Inventory Type
@@ -36,33 +39,94 @@
         public static readonly ResourceLocation CARTOGRAPHY_ID   = new("cartography_table"); // Cartography Table
         public static readonly ResourceLocation STONECUTTER_ID   = new("stonecutter");       // Stonecutter
 
-        public static readonly InventoryType PLAYER        = new(PLAYER_ID,        9, 0, 0, true, true, 1, 0); // Append offhand slot (slot 45)
-        public static readonly InventoryType HORSE_REGULAR = new(HORSE_ID,         2, 0, 0, true, true, 0, -1);
-        public static readonly InventoryType HORSE_CHESTED = new(HORSE_ID,         2, 5, 3, true, true, 0, -1);
+        public static readonly InventoryType PLAYER = new(PLAYER_ID,
+            9, 0, 0, true, true, 1,
+            new()
+            {
+                [0] = new(8, 1, InventorySlotType.Output),
+                [1] = new(5, 2, InventorySlotType.Regular),
+                [2] = new(6, 2, InventorySlotType.Regular),
+                [3] = new(5, 1, InventorySlotType.Regular),
+                [4] = new(6, 1, InventorySlotType.Regular),
+                [5] = new(0, 3, InventorySlotType.Helmet),
+                [6] = new(0, 2, InventorySlotType.Chestplate),
+                [7] = new(0, 1, InventorySlotType.Leggings),
+                [8] = new(0, 0, InventorySlotType.Boots),
+                
+                [45] = new(4, 0, InventorySlotType.Offhand)
+            })
+        {
+            WorkPanelHeight = 4
+        };
         
-        public static readonly InventoryType DUMMY_INVENTORY_TYPE = new(ResourceLocation.INVALID, 0, 0, 0, false, false, 0, -1);
+        public static readonly InventoryType HORSE_REGULAR = new(HORSE_ID,
+            2, 0, 0, true, true, 0,
+            new()
+            {
+                [0] = new(0, 2, InventorySlotType.HorseArmor),
+                [1] = new(0, 2, InventorySlotType.Saddle)
+            })
+        {
+            MainPosX = 4,
+            MainPosY = 0,
+        };
+        public static readonly InventoryType HORSE_CHESTED = new(HORSE_ID,
+            2, 5, 3, true, true, 0,
+            new()
+            {
+                [0] = new(0, 2, InventorySlotType.HorseArmor),
+                [1] = new(0, 2, InventorySlotType.Saddle)
+            })
+        {
+            MainPosX = 4,
+            MainPosY = 0
+        };
+        
+        public static readonly InventoryType DUMMY_INVENTORY_TYPE = new(ResourceLocation.INVALID,
+            0, 0, 0, false, false, 0, new());
 
         public readonly ResourceLocation TypeId;
         
-        public bool HasBackpackSlots { get; private set; } // 9x3 slots from player backpack
-        public bool HasHotbarSlots { get; private set; } // 9x1 hotbar slots
-        public byte MainSlotWidth { get; private set; }
-        public byte MainSlotHeight { get; private set; }
+        public bool HasBackpackSlots { get; } // 9x3 slots from player backpack
+        public bool HasHotbarSlots { get; } // 9x1 hotbar slots
+        public int MainSlotWidth { get; }
+        public int MainSlotHeight { get; }
         
         // Count of special slots (e.g. Crafting output slot or Beacon item slot). Doesn't include offhand slot(it's appended after backpack slots)
-        public byte PrependSlotCount { get; private set; }
+        public int PrependSlotCount { get; }
         // Offhand slot, etc.
-        public byte AppendSlotCount { get; private set; }
-        
-        public int OutputSlot { get; private set; }
-        
+        public int AppendSlotCount { get; }
+
         public int SlotCount => PrependSlotCount + MainSlotWidth * MainSlotHeight +
                                 (HasBackpackSlots ? 27 : 0) + (HasHotbarSlots ? 9 : 0) + AppendSlotCount;
+
+        private readonly Dictionary<int, InventorySlotInfo> extraSlotInfo;
+
+        public record InventorySlotInfo(int PosX, int PosY, InventorySlotType Type)
+        {
+            public int PosX { get; } = PosX;
+            public int PosY { get; } = PosY;
+            public InventorySlotType Type { get; } = Type;
+        }
+
+        public Vector2Int GetInventorySlotPos(int slot)
+        {
+            return extraSlotInfo.TryGetValue(slot, out var slotInfo) ? new(slotInfo.PosX, slotInfo.PosY): Vector2Int.zero;
+        }
         
-        public bool HasOutputSlot => OutputSlot >= 0;
+        public InventorySlotType GetInventorySlotType(int slot)
+        {
+            return extraSlotInfo.TryGetValue(slot, out var slotInfo) ? slotInfo.Type : InventorySlotType.Regular;
+        }
         
-        public InventoryType(ResourceLocation id, byte prependSlotCount, byte mainSlotWidth, byte mainSlotHeight,
-            bool hasBackpackSlots, bool hasHotbarSlots, byte appendSlotCount, int outputSlot)
+        // UI Layout settings
+        public int WorkPanelHeight { get; set; } = 3;
+        public int ListPanelWidth { get; set; } = 0;
+        public int MainPosX { get; set; } = 0;
+        public int MainPosY { get; set; } = 0;
+        
+        public InventoryType(ResourceLocation id, int prependSlotCount, int mainSlotWidth, int mainSlotHeight,
+            bool hasBackpackSlots, bool hasHotbarSlots, int appendSlotCount, Dictionary<int, InventorySlotInfo> extraSlotInfo)
         {
             TypeId = id;
             
@@ -72,7 +136,7 @@
             HasBackpackSlots = hasBackpackSlots;
             HasHotbarSlots = hasHotbarSlots;
             AppendSlotCount = appendSlotCount;
-            OutputSlot = outputSlot;
+            this.extraSlotInfo = extraSlotInfo;
         }
 
         public override string ToString()

@@ -58,7 +58,6 @@ namespace CraftSharp.UI
 
         public override void UpdateScreen()
         {
-            // Escape key cannot be used here, otherwise it will push pause screen back after poping it
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 CloseScreen();

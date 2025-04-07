@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -45,18 +46,40 @@ namespace CraftSharp
                     {
                         var inventoryTypeId = ResourceLocation.FromString(key);
 
-                        var p = inventoryDef.Properties.TryGetValue("prepend_slot_count", out var val) ? byte.Parse(val.StringValue) : (byte) 0;
-                        var a = inventoryDef.Properties.TryGetValue("append_slot_count", out val) ? byte.Parse(val.StringValue) : (byte) 0;
+                        var p = inventoryDef.Properties.TryGetValue("prepend_slot_count", out var val) ? int.Parse(val.StringValue) : 0;
+                        var a = inventoryDef.Properties.TryGetValue("append_slot_count", out val) ? int.Parse(val.StringValue) : 0;
                         
-                        var w = inventoryDef.Properties.TryGetValue("main_slot_width", out val) ? byte.Parse(val.StringValue) : (byte) 0;
-                        var h = inventoryDef.Properties.TryGetValue("main_slot_height", out val) ? byte.Parse(val.StringValue) : (byte) 0;
+                        var w = inventoryDef.Properties.TryGetValue("main_slot_width", out val) ? int.Parse(val.StringValue) : 0;
+                        var h = inventoryDef.Properties.TryGetValue("main_slot_height", out val) ? int.Parse(val.StringValue) : 0;
                         
                         var hb = !inventoryDef.Properties.TryGetValue("has_backpack_slots", out val) || bool.Parse(val.StringValue); // True if not specified
                         var hh = !inventoryDef.Properties.TryGetValue("has_hotbar_slots", out val) || bool.Parse(val.StringValue); // True if not specified
-                        
-                        var o = inventoryDef.Properties.TryGetValue("output_slot", out val) ? int.Parse(val.StringValue) : -1; // -1 means no output slot
 
-                        AddEntry(inventoryTypeId, numId, new InventoryType(inventoryTypeId, p, w, h, hb, hh, a, o));
+                        var slotInfo = new Dictionary<int, InventoryType.InventorySlotInfo>();
+
+                        if (inventoryDef.Properties.TryGetValue("slots", out val))
+                        {
+                            foreach (var (key2, data) in val.Properties)
+                            {
+                                slotInfo[int.Parse(key2)] = getSlotInfo(data);
+                            }
+                        }
+
+                        var t = new InventoryType(inventoryTypeId, p, w, h, hb, hh, a, slotInfo);
+                        
+                        if (inventoryDef.Properties.TryGetValue("work_panel_height", out val))
+                            t.WorkPanelHeight = int.Parse(val.StringValue);
+                        
+                        if (inventoryDef.Properties.TryGetValue("list_panel_width", out val))
+                            t.ListPanelWidth = int.Parse(val.StringValue);
+                        
+                        if (inventoryDef.Properties.TryGetValue("main_pos_x", out val))
+                            t.MainPosX = int.Parse(val.StringValue);
+                        
+                        if (inventoryDef.Properties.TryGetValue("main_pos_y", out val))
+                            t.MainPosY = int.Parse(val.StringValue);
+                        
+                        AddEntry(inventoryTypeId, numId, t);
                     }
                     else
                     {
@@ -73,6 +96,35 @@ namespace CraftSharp
             {
                 FreezeEntries();
                 flag.Finished = true;
+            }
+
+            return;
+
+            static InventoryType.InventorySlotInfo getSlotInfo(Json.JSONData data)
+            {
+                var typeStr = data.Properties.TryGetValue("type", out var val) ? val.StringValue : "regular";
+                var type = typeStr switch
+                {
+                    "regular" => InventorySlotType.Regular,
+                    "output" => InventorySlotType.Output,
+                    "helmet" => InventorySlotType.Helmet,
+                    "chestplate" => InventorySlotType.Chestplate,
+                    "leggings" => InventorySlotType.Leggings,
+                    "boots" => InventorySlotType.Boots,
+                    "offhand" => InventorySlotType.Offhand,
+                    "horse_armor" => InventorySlotType.HorseArmor,
+                    "saddle" => InventorySlotType.Saddle,
+                    "beacon_activation_item" => InventorySlotType.BeaconActivationItem,
+                    "bottle" => InventorySlotType.Bottle,
+                    "smithing_template" => InventorySlotType.SmithingTemplate,
+                    
+                    _ => InventorySlotType.Regular
+                };
+                
+                var x = data.Properties.TryGetValue("pos_x", out val) ? int.Parse(val.StringValue) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ? int.Parse(val.StringValue) : 0;
+
+                return new(x, y, type);
             }
         }
     }
