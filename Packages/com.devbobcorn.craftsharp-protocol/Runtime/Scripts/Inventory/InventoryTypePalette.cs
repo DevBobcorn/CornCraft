@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text;
 using CraftSharp.Inventory;
@@ -26,9 +25,9 @@ namespace CraftSharp
             // Clear loaded stuff...
             ClearEntries();
 
-            var entityTypePath = PathHelper.GetExtraDataFile($"inventories{SP}inventory_types-{dataVersion}.json");
+            var inventoryTypePath = PathHelper.GetExtraDataFile($"inventories{SP}inventory_types-{dataVersion}.json");
 
-            if (!File.Exists(entityTypePath))
+            if (!File.Exists(inventoryTypePath))
             {
                 Debug.LogWarning("Inventory data not complete!");
                 flag.Finished = true;
@@ -38,7 +37,7 @@ namespace CraftSharp
 
             try
             {
-                var inventoryTypes = Json.ParseJson(File.ReadAllText(entityTypePath, Encoding.UTF8));
+                var inventoryTypes = Json.ParseJson(File.ReadAllText(inventoryTypePath, Encoding.UTF8));
 
                 foreach (var (key, inventoryDef) in inventoryTypes.Properties)
                 {

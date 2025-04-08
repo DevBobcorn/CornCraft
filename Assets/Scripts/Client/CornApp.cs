@@ -141,7 +141,7 @@ namespace CraftSharp
 
             // Load interaction definitions AFTER block/blockstate definitions are loaded
             loadFlag.Finished = false;
-            Task.Run(() => InteractionManager.PrepareData(loadFlag));
+            Task.Run(() => InteractionManager.INSTANCE.PrepareData(loadFlag));
             while (!loadFlag.Finished) yield return null;
 
             // Load entity definitions
@@ -226,6 +226,11 @@ namespace CraftSharp
             var s = Path.DirectorySeparatorChar;
             var langFile = PathHelper.GetPackDirectoryNamed(
                     $"vanilla-{resourceVersion}{s}assets{s}minecraft{s}lang{s}{ProtocolSettings.Language}.json");
+            
+            // Load sprite definitions (vanilla doesn't have this)
+            loadFlag.Finished = false;
+            Task.Run(() => SpriteTypePalette.INSTANCE.PrepareData(loadFlag, packManager));
+            while (!loadFlag.Finished) yield return null;
             
             if (!File.Exists(langFile)) // If translation file is not available, try downloading it
             {

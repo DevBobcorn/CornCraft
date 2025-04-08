@@ -12,14 +12,6 @@ namespace CraftSharp.Control
         Interact = 2
     }
 
-    public enum InteractionIconType
-    {
-        Dialog,
-        EnterLocation,
-        Ride,
-        ItemIcon
-    }
-
     public abstract record Interaction(InteractionType Type, string HintKey, string Tag, bool ShowInList)
     {
         public InteractionType Type { get; } = Type;
@@ -29,7 +21,7 @@ namespace CraftSharp.Control
     }
 
     public record TriggerInteraction(
-        InteractionIconType IconType,
+        ResourceLocation IconTypeId,
         ResourceLocation IconItemId,
         bool Reusable,
         InteractionType Type,
@@ -38,7 +30,7 @@ namespace CraftSharp.Control
         bool ShowInList)
         : Interaction(Type, HintKey, Tag, ShowInList)
     {
-        public InteractionIconType IconType { get; } = IconType;
+        public ResourceLocation IconTypeId { get; } = IconTypeId;
         public ResourceLocation IconItemId { get; } = IconItemId;
         public bool Reusable { get; } = Reusable;
     }

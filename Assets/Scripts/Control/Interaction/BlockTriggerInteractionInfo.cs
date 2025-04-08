@@ -11,13 +11,13 @@ namespace CraftSharp.Control
 
         public override string HintKey => Definition.HintKey;
 
-        public InteractionIconType IconType => Definition.IconType;
+        public ResourceLocation IconTypeId => Definition.IconTypeId;
 
         public ResourceLocation IconItemId => Definition.IconItemId;
 
         public BlockTriggerInteractionInfo(int id, Block block, BlockLoc loc, ResourceLocation blockId, TriggerInteraction def) : base(id, block, loc)
         {
-            ParamTexts = new string[] { ChatParser.TranslateString(blockId.GetTranslationKey("block")) };
+            ParamTexts = new[] { ChatParser.TranslateString(blockId.GetTranslationKey("block")) };
             Definition = def;
         }
 

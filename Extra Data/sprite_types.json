@@ -1,0 +1,30 @@
+{
+    "corncraft:item_icon": {
+        "texture_id": "corncraft:icon/blank"
+    },
+    "corncraft:dialog": {
+        "texture_id": "corncraft:icon/dialog"
+    },
+    "corncraft:enter_location": {
+        "texture_id": "corncraft:icon/enter_location"
+    },
+    "corncraft:ride": {
+        "texture_id": "corncraft:icon/ride"
+    },
+
+    "corncraft:empty_armor_slot_helmet": {
+        "texture_id": "minecraft:item/empty_armor_slot_helmet"
+    },
+    "corncraft:empty_armor_slot_chestplate": {
+        "texture_id": "minecraft:item/empty_armor_slot_chestplate"
+    },
+    "corncraft:empty_armor_slot_leggings": {
+        "texture_id": "minecraft:item/empty_armor_slot_leggings"
+    },
+    "corncraft:empty_armor_slot_boots": {
+        "texture_id": "minecraft:item/empty_armor_slot_boots"
+    },
+    "corncraft:empty_armor_slot_shield": {
+        "texture_id": "minecraft:item/empty_armor_slot_shield"
+    }
+}

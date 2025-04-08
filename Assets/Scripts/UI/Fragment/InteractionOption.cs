@@ -19,9 +19,6 @@ namespace CraftSharp.UI
 
         [SerializeField] private GameObject modelObject;
         [SerializeField] private Image optionIconImage;
-        [SerializeField] private Sprite enterLocationSprite;
-        [SerializeField] private Sprite rideSprite;
-        [SerializeField] private Sprite itemIconSprite;
         [SerializeField] private TMP_Text optionHintText;
         [SerializeField] private TMP_Text keyHintText;
         [SerializeField] private MeshFilter itemIconMeshFilter;
@@ -59,27 +56,20 @@ namespace CraftSharp.UI
 
             if (info is BlockTriggerInteractionInfo viewInfo)
             {
-                switch (viewInfo.IconType)
+                var spriteType = SpriteTypePalette.INSTANCE.GetById(viewInfo.IconTypeId);
+
+                optionIconImage.overrideSprite = spriteType.Sprite;
+                if (spriteType.UseItemModel)
                 {
-                    case InteractionIconType.Dialog:
-                        optionIconImage.overrideSprite = null;
-                        usingItemIcon = false;
-                        break;
-                    case InteractionIconType.EnterLocation:
-                        optionIconImage.overrideSprite = enterLocationSprite;
-                        usingItemIcon = false;
-                        break;
-                    case InteractionIconType.Ride:
-                        optionIconImage.overrideSprite = rideSprite;
-                        break;
-                    case InteractionIconType.ItemIcon:
-                        optionIconImage.overrideSprite = itemIconSprite;
-                        // Set up item mesh
-                        UpdateItemMesh(viewInfo.IconItemId);
-                        // Display item mesh
-                        usingItemIcon = true;
-                        ShowItemIcon();
-                        break;
+                    // Set up item mesh
+                    UpdateItemMesh(viewInfo.IconItemId);
+                    // Display item mesh
+                    usingItemIcon = true;
+                    ShowItemIcon();
+                }
+                else
+                {
+                    usingItemIcon = false;
                 }
             }
 

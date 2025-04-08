@@ -208,7 +208,7 @@ namespace CraftSharp.Control
         private void UpdateBlockInteractions(ChunkRenderManager chunksManager)
         {
             var playerBlockLoc = client!.GetCurrentLocation().GetBlockLoc();
-            var table = InteractionManager.InteractionTable;
+            var table = InteractionManager.INSTANCE.InteractionTable;
 
             if (!client) return;
 
@@ -572,7 +572,7 @@ namespace CraftSharp.Control
 
         private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)
         {
-            var definition = InteractionManager.InteractionTable
+            var definition = InteractionManager.INSTANCE.InteractionTable
                 .GetValueOrDefault(block.StateId)?
                 .Get<HarvestInteraction>();
             

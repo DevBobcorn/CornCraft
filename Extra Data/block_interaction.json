@@ -4,6 +4,7 @@
     "default_harvest": {
       "action": "break",
       "hint": "gameplay.interaction.default_harvest",
+      "icon_type_id": "corncraft:dialog",
       "item_action": "none",
       "triggers": [
         "minecraft:beacon",
@@ -133,6 +134,7 @@
     "axe_harvest": {
       "action": "break",
       "hint": "gameplay.interaction.axe_harvest",
+      "icon_type_id": "corncraft:dialog",
       "item_action": "axe",
       "triggers": [
         "minecraft:acacia_hanging_sign",
@@ -479,6 +481,7 @@
     "hoe_harvest": {
       "action": "break",
       "hint": "gameplay.interaction.hoe_harvest",
+      "icon_type_id": "corncraft:dialog",
       "item_action": "hoe",
       "triggers": [
         "minecraft:acacia_leaves",
@@ -515,6 +518,7 @@
     "pickaxe_harvest": {
       "action": "break",
       "hint": "gameplay.interaction.pickaxe_harvest",
+      "icon_type_id": "corncraft:dialog",
       "item_action": "pickaxe",
       "triggers": [
         "minecraft:amethyst_block",
@@ -973,6 +977,7 @@
     "shovel_harvest": {
       "action": "break",
       "hint": "gameplay.interaction.shovel_harvest",
+      "icon_type_id": "corncraft:dialog",
       "item_action": "shovel",
       "triggers": [
         "minecraft:clay",
@@ -1020,7 +1025,7 @@
       "action": "break",
       "hint": "gameplay.interaction.pick_up",
       "predicate": "",
-      "icon_type": "item_icon",
+      "icon_type_id": "corncraft:item_icon",
       "triggers": [
         "minecraft:dandelion",
         "minecraft:poppy",
@@ -1041,7 +1046,7 @@
       "action": "interact",
       "hint": "gameplay.interaction.go_to_bed",
       "predicate": "occupied=false,part=head",
-      "icon_type": "enter_location",
+      "icon_type_id": "corncraft:enter_location",
       "reusable": true,
       "triggers": [
         "minecraft:white_bed",
@@ -1066,7 +1071,7 @@
       "action": "interact",
       "hint": "gameplay.interaction.go_to_bed",
       "predicate": "occupied=false,part=foot",
-      "icon_type": "enter_location",
+      "icon_type_id": "corncraft:enter_location",
       "reusable": true,
       "show_in_list": false,
       "triggers": [
@@ -1092,7 +1097,7 @@
       "action": "interact",
       "hint": "gameplay.interaction.open_door",
       "predicate": "open=false,half=lower",
-      "icon_type": "enter_location",
+      "icon_type_id": "corncraft:enter_location",
       "triggers": [
         "minecraft:oak_door",
         "minecraft:spruce_door",
@@ -1111,7 +1116,7 @@
       "action": "interact",
       "hint": "gameplay.interaction.open_door",
       "predicate": "open=false,half=upper",
-      "icon_type": "enter_location",
+      "icon_type_id": "corncraft:enter_location",
       "show_in_list": false,
       "triggers": [
         "minecraft:oak_door",
@@ -1131,7 +1136,7 @@
       "action": "interact",
       "hint": "gameplay.interaction.close_door",
       "predicate": "open=true,half=lower",
-      "icon_type": "dialog",
+      "icon_type_id": "corncraft:dialog",
       "triggers": [
         "minecraft:oak_door",
         "minecraft:spruce_door",
@@ -1150,7 +1155,7 @@
       "action": "interact",
       "hint": "gameplay.interaction.close_door",
       "predicate": "open=true,half=upper",
-      "icon_type": "dialog",
+      "icon_type_id": "corncraft:dialog",
       "show_in_list": false,
       "triggers": [
         "minecraft:oak_door",
@@ -1170,6 +1175,7 @@
       "action": "interact",
       "hint": "gameplay.interaction.pull_lever",
       "predicate": "powered=false",
+      "icon_type_id": "corncraft:dialog",
       "triggers": [
         "minecraft:lever"
       ]
@@ -1178,6 +1184,7 @@
       "action": "interact",
       "hint": "gameplay.interaction.pull_lever",
       "predicate": "powered=true",
+      "icon_type_id": "corncraft:dialog",
       "triggers": [
         "minecraft:lever"
       ]
@@ -1186,6 +1193,7 @@
       "action": "interact",
       "hint": "gameplay.interaction.push_button",
       "predicate": "powered=false",
+      "icon_type_id": "corncraft:dialog",
       "reusable": true,
       "triggers": [
         "minecraft:stone_button",
@@ -1206,6 +1214,7 @@
     "craft": {
       "action": "interact",
       "hint": "gameplay.interaction.craft",
+      "icon_type_id": "corncraft:dialog",
       "reusable": true,
       "triggers": [
         "minecraft:crafting_table"
@@ -1214,6 +1223,7 @@
     "smelt": {
       "action": "interact",
       "hint": "gameplay.interaction.smelt",
+      "icon_type_id": "corncraft:dialog",
       "reusable": true,
       "triggers": [
         "minecraft:furnace",
@@ -1224,6 +1234,7 @@
     "open_container": {
       "action": "interact",
       "hint": "gameplay.interaction.open_container",
+      "icon_type_id": "corncraft:dialog",
       "reusable": true,
       "triggers": [
         "minecraft:chest",

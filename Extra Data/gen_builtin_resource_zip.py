@@ -2,7 +2,7 @@ import os
 import zipfile
 
 exclude_ext = [
-    '.py', '.zip', '.md', '.csv'
+    '.py', '.zip', '.md', '.csv', '.psd', '.xcf'
 ]
 
 def zipdir(datadir, zipf):
@@ -19,3 +19,6 @@ def zipdir(datadir, zipf):
 # Use CornCraft project root as current work directory
 with zipfile.ZipFile('./Assets/Resources/CornCraftBuiltin.bytes', 'w', zipfile.ZIP_DEFLATED) as zipf:
     zipdir('./Extra Data/', zipf)
+
+with zipfile.ZipFile('./Assets/Resources/VanillaFix.bytes', 'w', zipfile.ZIP_DEFLATED) as zipf:
+    zipdir('./Vanilla Fix Resource/', zipf)

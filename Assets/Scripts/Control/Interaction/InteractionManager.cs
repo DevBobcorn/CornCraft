@@ -10,9 +10,9 @@ namespace CraftSharp.Control
     {
         public static readonly InteractionManager INSTANCE = new();
 
-        public static Dictionary<int, InteractionDefinition> InteractionTable { get; } = new();
+        public Dictionary<int, InteractionDefinition> InteractionTable { get; } = new();
 
-        public static void PrepareData(DataLoadFlag flag)
+        public void PrepareData(DataLoadFlag flag)
         {
             // Block interactions
             var interactionPath = PathHelper.GetExtraDataFile("block_interaction.json");
@@ -63,16 +63,8 @@ namespace CraftSharp.Control
                             : null; 
 
                         // Trigger interaction icon case
-                        InteractionIconType iconType = entryCont.TryGetValue("icon_type", out var type)
-                            ? type.StringValue switch
-                            {
-                                "interact"       => InteractionIconType.Dialog,
-                                "enter_location" => InteractionIconType.EnterLocation,
-                                "item_icon"      => InteractionIconType.ItemIcon,
-
-                                _                => InteractionIconType.Dialog
-                            }
-                            : InteractionIconType.Dialog;
+                        var iconTypeId = entryCont.TryGetValue("icon_type_id", out var icon) ?
+                            ResourceLocation.FromString(icon.StringValue) : ResourceLocation.INVALID;
 
                         var hintKey = entryCont.TryGetValue("hint", out var hint) ? hint.StringValue : null;
 
@@ -105,7 +97,7 @@ namespace CraftSharp.Control
                                     }
                                     else
                                     {
-                                        inters.Add(new TriggerInteraction(iconType, blockId, reusable, interactionType, hintKey, tag, showInList));
+                                        inters.Add(new TriggerInteraction(iconTypeId, blockId, reusable, interactionType, hintKey, tag, showInList));
                                     }
 
                                     if (InteractionTable.TryGetValue(stateId, out var definition))
