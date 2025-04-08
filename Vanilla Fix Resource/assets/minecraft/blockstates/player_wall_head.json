@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "block/head/wall/player"
+		},
+		"facing=east": {
+			"model": "block/head/wall/player",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "block/head/wall/player",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "block/head/wall/player",
+			"y": 270
+		}
+	}
+}

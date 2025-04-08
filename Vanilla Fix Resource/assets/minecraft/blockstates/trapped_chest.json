@@ -1,0 +1,16 @@
+{
+    "variants": {
+		"facing=south,type=single": { "model": "block/trapped_chest" },
+        "facing=west,type=single": { "model": "block/trapped_chest", "y": 90 },
+		"facing=north,type=single": { "model": "block/trapped_chest", "y": 180 },
+        "facing=east,type=single": { "model": "block/trapped_chest", "y": 270 },
+		"facing=south,type=left": { "model": "block/trapped_chest_left" },
+        "facing=west,type=left": { "model": "block/trapped_chest_left", "y": 90 },
+		"facing=north,type=left": { "model": "block/trapped_chest_left", "y": 180 },
+        "facing=east,type=left": { "model": "block/trapped_chest_left", "y": 270 },
+		"facing=south,type=right": { "model": "block/trapped_chest_right" },
+        "facing=west,type=right": { "model": "block/trapped_chest_right", "y": 90 },
+		"facing=north,type=right": { "model": "block/trapped_chest_right", "y": 180 },
+        "facing=east,type=right": { "model": "block/trapped_chest_right", "y": 270 }
+    }
+}

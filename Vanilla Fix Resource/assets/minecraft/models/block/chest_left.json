@@ -1,0 +1,6 @@
+{
+    "parent": "block/chest_left_base",
+    "textures": {
+        "chest": "entity/chest/normal_left"
+    }
+}
