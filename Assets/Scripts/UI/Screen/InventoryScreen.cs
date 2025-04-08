@@ -18,6 +18,7 @@ namespace CraftSharp.UI
         [SerializeField] private Button closeButton;
         [SerializeField] private Animator screenAnimator;
         [SerializeField] private GameObject inventorySlotPrefab;
+        [SerializeField] private GameObject inventorySpritePrefab;
         [SerializeField] private RectTransform listPanel, workPanel, backpackPanel, hotbarPanel;
         [SerializeField] private InventoryItemSlot[] backpackSlots;
         [SerializeField] private InventoryItemSlot[] hotbarSlots;
@@ -67,14 +68,20 @@ namespace CraftSharp.UI
             // Update work panel height
             workPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,
                 inventoryType.WorkPanelHeight * inventorySlotSize);
+            
+            // Populate work panel sprites
+            foreach (var sprite in inventoryType.spriteInfo)
+            {
+                createSprite(sprite.PosX, sprite.PosY,
+                    sprite.Width, sprite.Height, sprite.TypeId);
+            }
 
             // Populate work panel slots
             for (int i = 0; i < inventoryType.PrependSlotCount; i++)
             {
                 var slotPos = inventoryType.GetInventorySlotPos(i);
                 
-                currentSlots[i] = createSlot(slotPos.x + 1,
-                    inventoryType.MainSlotHeight - slotPos.y,
+                currentSlots[i] = createSlot(slotPos.x, slotPos.y,
                     $"Slot [{i}] (Work Prepend) [{inventoryType.GetInventorySlotType(i)}]");
             }
             
@@ -84,8 +91,8 @@ namespace CraftSharp.UI
             for (int x = 0, i = 0; x < inventoryType.MainSlotWidth; x++)
                 for (int y = 0; y < inventoryType.MainSlotHeight; y++, i++)
                 {
-                    currentSlots[workMainStart + i] = createSlot(x + workMainPosX + 1,
-                        inventoryType.MainSlotHeight - workMainPosY - y,
+                    currentSlots[workMainStart + i] = createSlot(x + workMainPosX,
+                        workMainPosY + inventoryType.MainPosY + inventoryType.MainSlotHeight - y - 1,
                         $"Slot [{workMainStart + i}] (Work Main)");
                 }
 
@@ -130,12 +137,27 @@ namespace CraftSharp.UI
             {
                 var slotPos = inventoryType.GetInventorySlotPos(i);
                 
-                currentSlots[i] = createSlot(slotPos.x + 1,
-                    inventoryType.MainSlotHeight - slotPos.y,
+                currentSlots[i] = createSlot(slotPos.x, slotPos.y,
                     $"Slot [{i}] (Work Append) [{inventoryType.GetInventorySlotType(i)}]");
             }
 
             return;
+            
+            void createSprite(int x, int y, int w, int h, ResourceLocation spriteTypeId)
+            {
+                var spriteObj = Instantiate(inventorySpritePrefab, workPanel);//new GameObject($"Sprite {spriteTypeId}");
+                var spriteImage = spriteObj.GetComponent<Image>();
+                var rectTransform = spriteObj.GetComponent<RectTransform>();
+
+                spriteImage.overrideSprite = SpriteTypePalette.INSTANCE.GetById(spriteTypeId).Sprite;
+                
+                rectTransform.anchoredPosition =
+                    new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+                rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
+                rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h * inventorySlotSize);
+                
+                spriteObj.name = $"Sprite [{spriteTypeId}]";
+            }
 
             InventoryItemSlot createSlot(int x, int y, string slotName)
             {
@@ -190,7 +212,7 @@ namespace CraftSharp.UI
                 slot.UpdateItemStack(null);
             }
             
-            // Destroy all slots under work panel
+            // Destroy all sprites and slots under work panel
             foreach (Transform t in workPanel)
             {
                 Destroy(t.gameObject);

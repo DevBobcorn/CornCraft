@@ -446,6 +446,7 @@ MonoBehaviour:
   closeButton: {fileID: 9022822860645150554}
   screenAnimator: {fileID: 421708140080235460}
   inventorySlotPrefab: {fileID: 1333662668710857103, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}
+  inventorySpritePrefab: {fileID: 1333662668710857103, guid: b82bd2acb025a7f489ee66de14323f4f, type: 3}
   listPanel: {fileID: 6488089169064416592}
   workPanel: {fileID: 1331511003286532197}
   backpackPanel: {fileID: 7295928138024989594}

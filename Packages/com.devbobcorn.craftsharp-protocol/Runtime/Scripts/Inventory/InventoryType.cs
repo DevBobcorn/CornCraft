@@ -101,12 +101,25 @@ namespace CraftSharp.Inventory
                                 (HasBackpackSlots ? 27 : 0) + (HasHotbarSlots ? 9 : 0) + AppendSlotCount;
 
         private readonly Dictionary<int, InventorySlotInfo> extraSlotInfo;
+        
+        private readonly List<InventorySlotInfo> slotInfo;
+        
+        public readonly List<InventorySpriteInfo> spriteInfo = new();
 
         public record InventorySlotInfo(int PosX, int PosY, InventorySlotType Type)
         {
             public int PosX { get; } = PosX;
             public int PosY { get; } = PosY;
             public InventorySlotType Type { get; } = Type;
+        }
+        
+        public record InventorySpriteInfo(int PosX, int PosY, int Width, int Height, ResourceLocation TypeId)
+        {
+            public int PosX { get; } = PosX;
+            public int PosY { get; } = PosY;
+            public int Width { get; } = Width;
+            public int Height { get; } = Height;
+            public ResourceLocation TypeId { get; } = TypeId;
         }
 
         public Vector2Int GetInventorySlotPos(int slot)

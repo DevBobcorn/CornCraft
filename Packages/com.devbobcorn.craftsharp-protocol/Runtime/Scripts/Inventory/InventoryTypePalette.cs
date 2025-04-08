@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using CraftSharp.Inventory;
 using UnityEngine;
@@ -66,6 +67,14 @@ namespace CraftSharp
 
                         var t = new InventoryType(inventoryTypeId, p, w, h, hb, hh, a, slotInfo);
                         
+                        if (inventoryDef.Properties.TryGetValue("sprites", out val))
+                        {
+                            foreach (var info in val.DataArray.Select(getSpriteInfo))
+                            {
+                                t.spriteInfo.Add(info);
+                            }
+                        }
+                        
                         if (inventoryDef.Properties.TryGetValue("work_panel_height", out val))
                             t.WorkPanelHeight = int.Parse(val.StringValue);
                         
@@ -124,6 +133,19 @@ namespace CraftSharp
                 var y = data.Properties.TryGetValue("pos_y", out val) ? int.Parse(val.StringValue) : 0;
 
                 return new(x, y, type);
+            }
+            
+            static InventoryType.InventorySpriteInfo getSpriteInfo(Json.JSONData data)
+            {
+                var typeId = data.Properties.TryGetValue("type_id", out var val) ?
+                    ResourceLocation.FromString(val.StringValue) : ResourceLocation.INVALID;
+                
+                var x = data.Properties.TryGetValue("pos_x", out val) ? int.Parse(val.StringValue) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ? int.Parse(val.StringValue) : 0;
+                var w = data.Properties.TryGetValue("width", out val) ? int.Parse(val.StringValue) : 1;
+                var h = data.Properties.TryGetValue("height", out val) ? int.Parse(val.StringValue) : 1;
+
+                return new(x, y, w, h, typeId);
             }
         }
     }

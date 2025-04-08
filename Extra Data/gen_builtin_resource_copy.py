@@ -2,7 +2,7 @@ import os
 import shutil
 
 exclude_ext = [
-    '.py', '.zip', '.md', '.csv', '.psd', '.xcf'
+    '.py', '.zip', '.md', '.csv', '.psd', '.xcf', '.svg'
 ]
 
 user_folder = os.path.expanduser("~")

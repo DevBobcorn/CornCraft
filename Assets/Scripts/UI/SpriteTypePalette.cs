@@ -46,10 +46,11 @@ namespace CraftSharp.UI
                 foreach (var (key, spriteDef) in spriteTypes.Properties)
                 {
                     var spriteTypeId = ResourceLocation.FromString(key);
-                    var u = spriteDef.Properties.TryGetValue("use_item_model", out var val) && bool.Parse(val.StringValue);
+                    var u1 = spriteDef.Properties.TryGetValue("use_item_model", out var val) && bool.Parse(val.StringValue); // False if not specified
+                    var u2 = !spriteDef.Properties.TryGetValue("use_point_filter", out val) || bool.Parse(val.StringValue); // True if not specified
                     var texId = spriteDef.Properties.TryGetValue("texture_id", out val) ? ResourceLocation.FromString(val.StringValue) : ResourceLocation.INVALID;
 
-                    var t = new SpriteType(spriteTypeId, texId, u);
+                    var t = new SpriteType(spriteTypeId, texId, u1);
 
                     Loom.QueueOnMainThread(() =>
                     {
@@ -61,7 +62,7 @@ namespace CraftSharp.UI
                         {
                             texture = new Texture2D(2, 2);
                             texture.LoadImage(File.ReadAllBytes(texturePath));
-                            texture.filterMode = FilterMode.Point; // TODO: Allow customization
+                            texture.filterMode = u2 ? FilterMode.Point : FilterMode.Bilinear;
                         }
                         else
                         {
