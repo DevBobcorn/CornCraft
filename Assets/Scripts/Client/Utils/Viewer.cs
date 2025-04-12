@@ -10,8 +10,8 @@ namespace CraftSharp
         public float sensitivityX = 5F;
         public float sensitivityY = 5F;
         public float moveSpeed = 5F;
-        [SerializeField] private readonly TMP_Text viewerText;
-        [SerializeField] private readonly BlockSelectionBox selectionBox;
+        [SerializeField] private TMP_Text viewerText;
+        [SerializeField] private BlockSelectionBox selectionBox;
 
         private void Update()
         {

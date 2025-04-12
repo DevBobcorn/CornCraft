@@ -1,6 +1,6 @@
 {
     "corncraft:item_icon": {
-        "texture_id": "corncraft:icon/blank",
+        "texture_id": "corncraft:icon/item_icon",
         "use_item_model": true
     },
     "corncraft:dialog": {

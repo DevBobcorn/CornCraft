@@ -372,7 +372,7 @@ namespace CraftSharp
             float startTime = Time.realtimeSinceStartup;
 
             const int start = 0;
-            const int limit = 0;
+            const int limit = 4096;
             int count = 0, width = 64;
             foreach (var pair in packManager.StateModelTable)
             {

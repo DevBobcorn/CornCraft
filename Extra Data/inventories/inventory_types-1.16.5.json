@@ -94,7 +94,9 @@
     "minecraft:hopper": {
         "protocol_id": 15,
         "main_slot_width": 5,
-        "main_slot_height": 1
+        "main_slot_height": 1,
+        "main_pos_x": 2,
+        "main_pos_y": 1
     },
     "minecraft:lectern": {
         "protocol_id": 16,

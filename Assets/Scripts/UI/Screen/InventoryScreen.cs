@@ -92,7 +92,7 @@ namespace CraftSharp.UI
                 for (int y = 0; y < inventoryType.MainSlotHeight; y++, i++)
                 {
                     currentSlots[workMainStart + i] = createSlot(x + workMainPosX,
-                        workMainPosY + inventoryType.MainPosY + inventoryType.MainSlotHeight - y - 1,
+                        workMainPosY + inventoryType.MainSlotHeight - y - 1,
                         $"Slot [{workMainStart + i}] (Work Main)");
                 }
 
