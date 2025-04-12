@@ -14,5 +14,5 @@ with open('template_gen.json') as f:
     txt = f.read()
 
     for color in colors:
-        with open(f'{color}_banner.json', 'w+') as fo:
+        with open(f'{color}_shulker_box.json', 'w+') as fo:
             fo.write(txt.replace('COLOR', color))
