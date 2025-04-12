@@ -27,17 +27,17 @@
       }
     },
     "com.stalomeow.star-rail-npr-shader": {
-      "version": "https://github.com/stalomeow/StarRailNPRShader.git",
+      "version": "https://github.com/DevBobcorn/StarRailNPRShader.git",
       "depth": 0,
       "source": "git",
       "dependencies": {
-        "com.unity.render-pipelines.core": "14.0.10",
-        "com.unity.render-pipelines.universal": "14.0.10",
+        "com.unity.render-pipelines.core": "17.0.3",
+        "com.unity.render-pipelines.universal": "17.0.3",
         "com.unity.burst": "1.8.12",
         "com.unity.mathematics": "1.2.6",
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       },
-      "hash": "bf44567f389834b8be5e3095e5ff507caa8764fb"
+      "hash": "11e5b73d57e289cbe9a0c8c43592445a5b509657"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -55,7 +55,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.burst": {
-      "version": "1.8.19",
+      "version": "1.8.21",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -102,7 +102,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.rider": {
-      "version": "3.0.35",
+      "version": "3.0.36",
       "depth": 0,
       "source": "registry",
       "dependencies": {

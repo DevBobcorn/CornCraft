@@ -56,7 +56,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90f480a675b73fa4ebe11bab7b01dc3a, type: 3}
   m_Name: StarRailRendererFeature
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   m_SceneShadowDepthBits: 16
   m_SceneShadowTileResolution: 512
   m_SceneShadowDebugMode: 0
