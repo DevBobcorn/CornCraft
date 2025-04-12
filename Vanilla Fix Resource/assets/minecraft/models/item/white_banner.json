@@ -1,0 +1,6 @@
+{
+  "parent": "item/template_banner",
+  "textures": {
+    "colour": "minecraft:block/banner/banner_white"
+  }
+}
