@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.Mathematics;
@@ -5,6 +6,8 @@ using TMPro;
 
 using CraftSharp.Rendering;
 using CraftSharp.Resource;
+using CraftSharp.Protocol;
+using System.Linq;
 
 namespace CraftSharp.UI
 {
@@ -24,11 +27,13 @@ namespace CraftSharp.UI
 
         private Animator _slotAnimator;
         private Image _slotImage;
+        private string _slotCursorText = string.Empty;
 
         #nullable enable
 
         // Use null for empty items
         private ItemStack? itemStack = null;
+        private bool cursorTextDirty = false;
 
         private void Awake()
         {
@@ -41,12 +46,49 @@ namespace CraftSharp.UI
             keyHintText.text = keyHint;
         }
 
+        private void UpdateCursorText()
+        {
+            cursorTextDirty = false;
+
+            // Update item cursor text
+            if (itemStack == null || itemStack.ItemType.ItemId == Item.AIR_ID)
+            {
+                _slotCursorText = string.Empty;
+            }
+            else
+            {
+                // Block items might use block translation key
+                _slotCursorText = ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
+                    translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block"));
+                
+                // TODO: Also check item enchantments
+                var rarity = itemStack.ItemType.Rarity;
+                
+                if (rarity != ItemRarity.Common)
+                {
+                    var colorPrefix = rarity switch
+                    {
+                        ItemRarity.Uncommon => "§e", // Yellow
+                        ItemRarity.Rare => "§b", // Aqua
+                        ItemRarity.Epic => "§d", // Light Purple
+                        _ => string.Empty
+                    };
+                    // Make sure TMP color tag is closed
+                    _slotCursorText = TMPConverter.MC2TMP($"{colorPrefix}{_slotCursorText}");
+                }
+                
+                if (itemStack.Lores is not null && itemStack.Lores.Length > 0)
+                    _slotCursorText += '\n' + string.Join("\n", itemStack.Lores.Select(x => x.ToString()));
+            }
+        }
+
         public void UpdateItemStack(ItemStack? newItemStack)
         {
             itemStack = newItemStack;
             // Update item mesh
             UpdateItemMesh();
-            // TODO: Visually emphasize the change
+            
+            cursorTextDirty = true;
         }
 
         #nullable disable
@@ -59,13 +101,43 @@ namespace CraftSharp.UI
         public void SelectSlot()
         {
             _slotImage.overrideSprite = selectedSprite;
-            _slotAnimator.SetBool(SELECTED_HASH, true);
+            if (_slotAnimator)
+                _slotAnimator.SetBool(SELECTED_HASH, true);
+            
+            if (cursorTextDirty)
+            {
+                // Update only when needed
+                UpdateCursorText();
+            }
+            
+            cursorTextHandler?.Invoke(_slotCursorText);
         }
 
         public void DeselectSlot()
         {
             _slotImage.overrideSprite = null;
-            _slotAnimator.SetBool(SELECTED_HASH, false);
+            if (_slotAnimator)
+                _slotAnimator.SetBool(SELECTED_HASH, false);
+            
+            cursorTextHandler?.Invoke(string.Empty);
+        }
+
+        private Action clickHandler;
+        private Action<string> cursorTextHandler;
+
+        public void SetClickHandler(Action handler)
+        {
+            clickHandler = handler;
+        }
+
+        public void SetCursorTextHandler(Action<string> handler)
+        {
+            cursorTextHandler = handler;
+        }
+
+        public void ClickSlot()
+        {
+            clickHandler?.Invoke();
         }
 
         private void UpdateItemMesh()

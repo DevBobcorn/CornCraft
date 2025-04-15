@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using TMPro;
 
 using CraftSharp.Inventory;
+using CraftSharp.Protocol;
 
 namespace CraftSharp.UI
 {
@@ -20,6 +21,9 @@ namespace CraftSharp.UI
         [SerializeField] private GameObject inventorySlotPrefab;
         [SerializeField] private GameObject inventorySpritePrefab;
         [SerializeField] private RectTransform listPanel, workPanel, backpackPanel, hotbarPanel;
+        [SerializeField] private InventoryItemSlot cursorSlot;
+        [SerializeField] private RectTransform cursorTextPanel;
+        [SerializeField] private TMP_Text cursorText;
         [SerializeField] private InventoryItemSlot[] backpackSlots;
         [SerializeField] private InventoryItemSlot[] hotbarSlots;
         [SerializeField] private float inventorySlotSize = 90F;
@@ -81,8 +85,10 @@ namespace CraftSharp.UI
             {
                 var slotPos = inventoryType.GetInventorySlotPos(i);
                 
-                currentSlots[i] = createSlot(slotPos.x, slotPos.y,
+                var newSlot = createSlot(slotPos.x, slotPos.y,
                     $"Slot [{i}] (Work Prepend) [{inventoryType.GetInventorySlotType(i)}]");
+                
+                setupSlot(i, newSlot);
             }
             
             var workMainStart = inventoryType.PrependSlotCount;
@@ -91,9 +97,11 @@ namespace CraftSharp.UI
             for (int x = 0, i = 0; x < inventoryType.MainSlotWidth; x++)
                 for (int y = 0; y < inventoryType.MainSlotHeight; y++, i++)
                 {
-                    currentSlots[workMainStart + i] = createSlot(x + workMainPosX,
+                    var newSlot = createSlot(x + workMainPosX,
                         workMainPosY + inventoryType.MainSlotHeight - y - 1,
                         $"Slot [{workMainStart + i}] (Work Main)");
+                    
+                    setupSlot(workMainStart + i, newSlot);
                 }
 
             if (inventoryType.HasBackpackSlots)
@@ -105,7 +113,8 @@ namespace CraftSharp.UI
                 {
                     backpackSlots[i].UpdateItemStack(inventoryData.Items.GetValueOrDefault(backpackStart + i));
                     backpackSlots[i].gameObject.name = $"Slot [{backpackStart + i}] (Backpack)";
-                    currentSlots[backpackStart + i] = backpackSlots[i];
+                    
+                    setupSlot(backpackStart + i, backpackSlots[i]);
                 }
                 backpackPanel.gameObject.SetActive(true);
             }
@@ -123,7 +132,8 @@ namespace CraftSharp.UI
                 {
                     hotbarSlots[i].UpdateItemStack(inventoryData.Items.GetValueOrDefault(hotbarStart + i));
                     hotbarSlots[i].gameObject.name = $"Slot [{hotbarStart + i}] (Hotbar)";
-                    currentSlots[hotbarStart + i] = hotbarSlots[i];
+
+                    setupSlot(hotbarStart + i, hotbarSlots[i]);
                 }
                 hotbarPanel.gameObject.SetActive(true);
             }
@@ -137,9 +147,17 @@ namespace CraftSharp.UI
             {
                 var slotPos = inventoryType.GetInventorySlotPos(i);
                 
-                currentSlots[i] = createSlot(slotPos.x, slotPos.y,
+                var newSlot = createSlot(slotPos.x, slotPos.y,
                     $"Slot [{i}] (Work Append) [{inventoryType.GetInventorySlotType(i)}]");
+
+                setupSlot(i, newSlot);
             }
+
+            // Initialize cursor slot
+            currentSlots[-1] = cursorSlot;
+            setupSlot(-1, cursorSlot);
+
+            cursorTextPanel.gameObject.SetActive(false);
 
             return;
             
@@ -169,6 +187,29 @@ namespace CraftSharp.UI
                 slotObj.name = slotName;
 
                 return slot;
+            }
+
+            void setupSlot(int slotId, InventoryItemSlot slot)
+            {
+                currentSlots[slotId] = slot;
+
+                slot.SetClickHandler(() =>
+                {
+                    Debug.Log($"Mouse down: {slotId}");
+                });
+
+                slot.SetCursorTextHandler(str =>
+                {
+                    if (string.IsNullOrEmpty(str))
+                    {
+                        cursorTextPanel.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        cursorText.text = str;
+                        cursorTextPanel.gameObject.SetActive(true);
+                    }
+                });
             }
         }
 
@@ -210,6 +251,7 @@ namespace CraftSharp.UI
             foreach (var slot in currentSlots.Values)
             {
                 slot.UpdateItemStack(null);
+                slot.SetClickHandler(null);
             }
             
             // Destroy all sprites and slots under work panel
@@ -253,6 +295,20 @@ namespace CraftSharp.UI
             {
                 CloseInventory();
             }
+
+            var game = CornApp.CurrentClient;
+            if (!game) return;
+
+            // Update cursor slot position
+            var cursorRect = cursorSlot.GetComponent<RectTransform>();
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                transform as RectTransform, Mouse.current.position.value,
+                game.UICamera, out Vector2 newPos);
+            
+            newPos = transform.TransformPoint(newPos);
+
+            // Don't modify z coordinate
+            cursorRect.position = new Vector3(newPos.x, newPos.y, cursorRect.position.z);
         }
     }
 }

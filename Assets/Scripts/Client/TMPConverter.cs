@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -88,7 +87,7 @@ namespace CraftSharp
                         processed.Append(GetTMPCloseTags(formatFlag));
                         
                         // Preserve only the line color bit
-                        formatFlag = formatFlag & (1 << 5);
+                        formatFlag &= (1 << 5);
                     }
                     else
                     {

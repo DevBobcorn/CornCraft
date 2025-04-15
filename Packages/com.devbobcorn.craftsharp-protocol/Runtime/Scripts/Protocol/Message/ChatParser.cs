@@ -249,63 +249,92 @@ namespace CraftSharp.Protocol
                 Debug.Log(Translations.Get("chat.not_found", langFile));
         }
 
+        private static string InterpolateString(string template, List<string> data)
+        {
+            int usingIdx = 0;
+            var result = new StringBuilder();
+            for (int i = 0; i < template.Length; i++)
+            {
+                if (template[i] == '%' && i + 1 < template.Length)
+                {
+                    //Using string or int with %s or %d
+                    if (template[i + 1] == 's' || template[i + 1] == 'd')
+                    {
+                        if (data.Count > usingIdx)
+                        {
+                            result.Append(data[usingIdx]);
+                            usingIdx++;
+                            i += 1;
+                            continue;
+                        }
+                    }
+
+                    //Using specified string or int with %1$s, %2$s...
+                    else if (char.IsDigit(template[i + 1])
+                        && i + 3 < template.Length && template[i + 2] == '$'
+                        && (template[i + 3] == 's' || template[i + 3] == 'd'))
+                    {
+                        int specified_idx = template[i + 1] - '1';
+                        if (data.Count > specified_idx)
+                        {
+                            result.Append(data[specified_idx]);
+                            usingIdx++;
+                            i += 3;
+                            continue;
+                        }
+                    }
+                }
+                result.Append(template[i]);
+            }
+            return result.ToString();
+        }
+
         /// <summary>
         /// Format text using a specific formatting rule.
         /// Example : * %s %s + ["ORelio", "is doing something"] = * ORelio is doing something
         /// </summary>
         /// <param name="rulename">Name of the rule, chosen by the server</param>
-        /// <param name="using_data">Data to be used in the rule</param>
+        /// <param name="usingData">Data to be used in the rule</param>
         /// <returns>Returns the formatted text according to the given data</returns>
-        public static string TranslateString(string rulename, List<string>? using_data = null)
+        public static string TranslateString(string rulename, List<string>? usingData = null)
         {
             if (translationRules.ContainsKey(rulename))
             {
-                if (using_data is not null)
-                {
-                    int using_idx = 0;
-                    string rule = translationRules[rulename];
-                    StringBuilder result = new StringBuilder();
-                    for (int i = 0; i < rule.Length; i++)
-                    {
-                        if (rule[i] == '%' && i + 1 < rule.Length)
-                        {
-                            //Using string or int with %s or %d
-                            if (rule[i + 1] == 's' || rule[i + 1] == 'd')
-                            {
-                                if (using_data.Count > using_idx)
-                                {
-                                    result.Append(using_data[using_idx]);
-                                    using_idx++;
-                                    i += 1;
-                                    continue;
-                                }
-                            }
-
-                            //Using specified string or int with %1$s, %2$s...
-                            else if (char.IsDigit(rule[i + 1])
-                                && i + 3 < rule.Length && rule[i + 2] == '$'
-                                && (rule[i + 3] == 's' || rule[i + 3] == 'd'))
-                            {
-                                int specified_idx = rule[i + 1] - '1';
-                                if (using_data.Count > specified_idx)
-                                {
-                                    result.Append(using_data[specified_idx]);
-                                    using_idx++;
-                                    i += 3;
-                                    continue;
-                                }
-                            }
-                        }
-                        result.Append(rule[i]);
-                    }
-                    return result.ToString();
-                }
+                if (usingData is not null)
+                    return InterpolateString(translationRules[rulename], usingData);
                 else
                     return translationRules[rulename];
                 
             }
             else
-                return using_data is null ? $"[{rulename}]" : $"[{rulename}] {String.Join(" ", using_data)}";
+                return usingData is null ? $"[{rulename}]" : $"[{rulename}] {string.Join(" ", usingData)}";
+        }
+
+        /// <summary>
+        /// Format text using a specific formatting rule.
+        /// Example : * %s %s + ["ORelio", "is doing something"] = * ORelio is doing something
+        /// </summary>
+        /// <param name="rulename">Name of the rule, chosen by the server</param>
+        /// <param name="translated">The formatted text according to the given data</param>
+        /// <param name="usingData">Data to be used in the rule</param>
+        /// <returns></returns>
+        public static bool TryTranslateString(string rulename, out string translated, List<string>? usingData = null)
+        {
+            if (translationRules.ContainsKey(rulename))
+            {
+                if (usingData is not null)
+                    translated = InterpolateString(translationRules[rulename], usingData);
+                else
+                    translated = translationRules[rulename];
+                
+                return true;
+            }
+            else
+            {
+                translated = string.Empty;
+
+                return false;
+            }
         }
 
         /// <summary>
@@ -331,7 +360,7 @@ namespace CraftSharp.Protocol
                         if (clickEvent.Properties.ContainsKey("action")
                             && clickEvent.Properties.ContainsKey("value")
                             && clickEvent.Properties["action"].StringValue == "open_url"
-                            && !String.IsNullOrEmpty(clickEvent.Properties["value"].StringValue))
+                            && !string.IsNullOrEmpty(clickEvent.Properties["value"].StringValue))
                         {
                             links.Add(clickEvent.Properties["value"].StringValue);
                         }
