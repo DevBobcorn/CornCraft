@@ -25,10 +25,11 @@ namespace CraftSharp.Protocol.Session
             "launcher_profiles.json"
         );
 
-        private static FileMonitor? cachemonitor;
+        private static FileMonitor? cacheMonitor;
         private static readonly Dictionary<string, SessionToken> sessions = new();
-        private static readonly Timer updatetimer = new(100);
-        private static readonly List<KeyValuePair<string, SessionToken>> pendingadds = new();
+        private static readonly HashSet<string> offlineNames = new();
+        private static readonly Timer updateTimer = new(100);
+        private static readonly List<KeyValuePair<string, SessionToken>> pendingAdds = new();
         private static readonly BinaryFormatter formatter = new();
 
         /// <summary>
@@ -57,9 +58,9 @@ namespace CraftSharp.Protocol.Session
                 sessions.Add(login, session);
             }
 
-            if (ProtocolSettings.SessionCaching == ProtocolSettings.CacheType.Disk && updatetimer.Enabled == true)
+            if (ProtocolSettings.SessionCaching == ProtocolSettings.CacheType.Disk && updateTimer.Enabled == true)
             {
-                pendingadds.Add(new KeyValuePair<string, SessionToken>(login, session));
+                pendingAdds.Add(new KeyValuePair<string, SessionToken>(login, session));
             }
             else if (ProtocolSettings.SessionCaching == ProtocolSettings.CacheType.Disk)
             {
@@ -77,9 +78,14 @@ namespace CraftSharp.Protocol.Session
             return sessions[login];
         }
 
-        public static string[] GetCachedLogins()
+        public static string[] GetCachedOnlineLogins()
         {
             return sessions.Keys.ToArray();
+        }
+        
+        public static string[] GetCachedOfflineLogins()
+        {
+            return offlineNames.ToArray();
         }
 
         /// <summary>
@@ -88,8 +94,8 @@ namespace CraftSharp.Protocol.Session
         /// <returns>TRUE if session tokens are seeded from file</returns>
         public static bool InitializeDiskCache()
         {
-            cachemonitor = new FileMonitor(PathHelper.GetRootDirectory(), SessionCacheFilePlaintext, new FileSystemEventHandler(OnChanged));
-            updatetimer.Elapsed += HandlePending;
+            cacheMonitor = new FileMonitor(PathHelper.GetRootDirectory(), SessionCacheFilePlaintext, new FileSystemEventHandler(OnChanged));
+            updateTimer.Elapsed += HandlePending;
             return LoadFromDisk();
         }
 
@@ -100,8 +106,8 @@ namespace CraftSharp.Protocol.Session
         /// <param name="e">Event data</param>
         private static void OnChanged(object sender, FileSystemEventArgs e)
         {
-            updatetimer.Stop();
-            updatetimer.Start();
+            updateTimer.Stop();
+            updateTimer.Start();
         }
 
         /// <summary>
@@ -111,13 +117,13 @@ namespace CraftSharp.Protocol.Session
         /// <param name="e">Event data</param>
         private static void HandlePending(object sender, ElapsedEventArgs e)
         {
-            updatetimer.Stop();
+            updateTimer.Stop();
             LoadFromDisk();
 
-            foreach(KeyValuePair<string, SessionToken> pending in pendingadds.ToArray())
+            foreach(KeyValuePair<string, SessionToken> pending in pendingAdds.ToArray())
             {
                 Store(pending.Key, pending.Value);
-                pendingadds.Remove(pending);
+                pendingAdds.Remove(pending);
             }
         }
 
@@ -139,10 +145,10 @@ namespace CraftSharp.Protocol.Session
                 catch (IOException) { /* Failed to read file from disk -- ignoring */ }
                 if (mcSession.Type == Json.JSONData.DataType.Object
                     && mcSession.Properties.ContainsKey("clientToken")
-                    && mcSession.Properties.ContainsKey("authenticationDatabase"))
+                    && mcSession.Properties.TryGetValue("authenticationDatabase", out var authDbProp))
                 {
                     string clientID = mcSession.Properties["clientToken"].StringValue.Replace("-", "");
-                    Dictionary<string, Json.JSONData> sessionItems = mcSession.Properties["authenticationDatabase"].Properties;
+                    Dictionary<string, Json.JSONData> sessionItems = authDbProp.Properties;
                     foreach (string key in sessionItems.Keys)
                     {
                         if (Guid.TryParseExact(key, "N", out Guid _))
@@ -228,8 +234,18 @@ namespace CraftSharp.Protocol.Session
                                 }
                                 catch (InvalidDataException e)
                                 {
-                                    if (ProtocolSettings.DebugMode)
-                                        Debug.Log(Translations.Get("cache.ignore_string", keyValue[1], e.Message));
+                                    string[] fields = keyValue[1].Split(',');
+                                    if (fields.Length > 1)
+                                    {
+                                        offlineNames.Add(fields[1]);
+                                        if (ProtocolSettings.DebugMode)
+                                            Debug.Log(Translations.Get("cache.loaded", fields[1], "(Offline)"));
+                                    }
+                                    else
+                                    {
+                                        if (ProtocolSettings.DebugMode)
+                                            Debug.Log(Translations.Get("cache.ignore_string", keyValue[1], e.Message));
+                                    }
                                 }
                             }
                             else if (ProtocolSettings.DebugMode)
@@ -258,7 +274,7 @@ namespace CraftSharp.Protocol.Session
 
             List<string> sessionCacheLines = new()
             {
-                "# Generated by MCC v" + ProtocolSettings.Version + " - Keep it secret & Edit at own risk!",
+                "# Generated by " + ProtocolSettings.BrandInfo + " - Keep it secret & Edit at own risk!",
                 "# Login=SessionID,PlayerName,UUID,ClientID,RefreshToken,ServerIdhash,ServerPublicKey"
             };
             foreach (KeyValuePair<string, SessionToken> entry in sessions)

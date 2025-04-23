@@ -43,9 +43,10 @@ namespace CraftSharp.UI
         #nullable disable
 
         // Login auto-complete
-        int  usernameIndex =  0;
-        bool namesShown = false;
-        private string[] cachedNames = { }, shownNames = { };
+        private int  usernameIndex =  0;
+        private bool namesShown = false;
+        
+        private string[] cachedOnlineNames = { }, cachedOfflineNames = { }, shownNames = { };
 
         /// <summary>
         /// Load server information in ServerIP and ServerPort variables from a "serverip:port" couple or server alias
@@ -452,10 +453,13 @@ namespace CraftSharp.UI
             }
         }
 
-        private void UpdateUsernamePanel(string message)
+        private void UpdateUsernamePanel(string input)
         {
+            var microsoftLogin = loginDropDown.value == 0;
+            var cachedNames = microsoftLogin ? cachedOnlineNames : cachedOfflineNames;
+            
             shownNames = cachedNames.Where(
-                    login => login != message && login.Contains(message)).ToArray();
+                    login => login != input && login.Contains(input)).ToArray();
 
             RefreshUsernames();
         }
@@ -465,6 +469,14 @@ namespace CraftSharp.UI
             usernameIndex = 0;
             usernamePanel.alpha = 0F;
             namesShown = false;
+        }
+        
+        private void UpdateUsernameDefault()
+        {
+            var microsoftLogin = loginDropDown.value == 0;
+            var cachedNames = microsoftLogin ? cachedOnlineNames : cachedOfflineNames;
+            
+            usernameInput.text = cachedNames.Length > 0 ? cachedNames[0] : string.Empty;
         }
 
         private void UpdateUsernamePlaceholder(int selection)
@@ -532,13 +544,14 @@ namespace CraftSharp.UI
         
         private IEnumerator UpdateLoginMode(int selection)
         {
+            UpdateUsernamePlaceholder(selection);
+            UpdateUsernameDefault();
+            
             // Workaround for UGUI EventSystem click event bug, if the option being clicked is above the login button,
             // it'll trigger a null object exception every frame until the mouse pointer is moved out from the button area
             loginButton.gameObject.SetActive(false);
             yield return new WaitForSecondsRealtime(0.2F);
             loginButton.gameObject.SetActive(true);
-
-            UpdateUsernamePlaceholder(selection);
         }
 
         private IEnumerator EnterGame()
@@ -592,18 +605,22 @@ namespace CraftSharp.UI
                 var cacheLoaded = SessionCache.InitializeDiskCache();
                 if (ProtocolSettings.DebugMode)
                     Debug.Log(Translations.Get(cacheLoaded ? "debug.session_cache_ok" : "debug.session_cache_fail"));
-                
+
                 if (cacheLoaded)
-                    cachedNames = SessionCache.GetCachedLogins();
+                {
+                    cachedOnlineNames = SessionCache.GetCachedOnlineLogins();
+                    cachedOfflineNames = SessionCache.GetCachedOfflineLogins();
+                }
             }
 
             // TODO: Also initialize server with cached values
             serverInput.text = LOCALHOST_ADDRESS;
-            if (cachedNames.Length > 0)
-                usernameInput.text = cachedNames[0];
+            UpdateUsernameDefault();
             
-            loginDropDown.value = 0;
+            loginDropDown.value = 0; // Online by default
             UpdateUsernamePlaceholder(0);
+            if (cachedOnlineNames.Length > 0)
+                usernameInput.text = cachedOnlineNames[0];
 
             // Prepare panels at start
             ShowLoginPanel();
