@@ -93,7 +93,7 @@ namespace CraftSharp.Control
 
                                     if (itemActionType is not null)
                                     {
-                                        inters.Add(new HarvestInteraction(itemActionType.Value, interactionType, hintKey, tag, showInList));
+                                        inters.Add(new HarvestInteraction(iconTypeId, blockId, itemActionType.Value, interactionType, hintKey, tag, showInList));
                                     }
                                     else
                                     {

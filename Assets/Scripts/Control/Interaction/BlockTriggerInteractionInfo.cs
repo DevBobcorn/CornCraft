@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Threading.Tasks;
+
 using CraftSharp.Inventory;
 using CraftSharp.Protocol;
+using CraftSharp.UI;
 
 namespace CraftSharp.Control
 {
-    public sealed class BlockTriggerInteractionInfo : BlockInteractionInfo
+    public sealed class BlockTriggerInteractionInfo : BlockInteractionInfo, IIconProvider
     {
         public TriggerInteraction Definition { get; }
 

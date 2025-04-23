@@ -36,6 +36,8 @@ namespace CraftSharp.Control
     }
 
     public record HarvestInteraction(
+        ResourceLocation IconTypeId,
+        ResourceLocation IconItemId,
         ItemActionType ActionType,
         InteractionType Type,
         string HintKey,
@@ -43,6 +45,8 @@ namespace CraftSharp.Control
         bool ShowInList)
         : Interaction(Type, HintKey, Tag, ShowInList)
     {
+        public ResourceLocation IconTypeId { get; } = IconTypeId;
+        public ResourceLocation IconItemId { get; } = IconItemId;
         public ItemActionType ActionType { get; } = ActionType;
     }
 

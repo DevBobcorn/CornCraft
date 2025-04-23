@@ -54,15 +54,15 @@ namespace CraftSharp.UI
             usingItemIcon = false;
             HideItemIcon();
 
-            if (info is BlockTriggerInteractionInfo viewInfo)
+            if (info is IIconProvider iconProvider)
             {
-                var spriteType = SpriteTypePalette.INSTANCE.GetById(viewInfo.IconTypeId);
+                var spriteType = SpriteTypePalette.INSTANCE.GetById(iconProvider.IconTypeId);
 
                 optionIconImage.overrideSprite = spriteType.Sprite;
                 if (spriteType.UseItemModel)
                 {
                     // Set up item mesh
-                    UpdateItemMesh(viewInfo.IconItemId);
+                    UpdateItemMesh(iconProvider.IconItemId);
                     // Display item mesh
                     usingItemIcon = true;
                     ShowItemIcon();

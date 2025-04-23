@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 using CraftSharp.Event;
+using CraftSharp.UI;
 
 namespace CraftSharp.Control
 {
@@ -16,10 +17,16 @@ namespace CraftSharp.Control
         Paused
     }
 
-    public abstract class HarvestInteractionInfo : BlockInteractionInfo
+    public abstract class HarvestInteractionInfo : BlockInteractionInfo, IIconProvider
     {
         protected readonly Direction direction;
-        protected readonly HarvestInteraction? definition;
+        protected readonly HarvestInteraction definition;
+
+        public override string HintKey => definition.HintKey;
+
+        public ResourceLocation IconTypeId => definition.IconTypeId;
+
+        public ResourceLocation IconItemId => definition.IconItemId;
 
         private float progress = 0F;
 
@@ -33,13 +40,11 @@ namespace CraftSharp.Control
             }
         }
 
-        public override string HintKey => definition?.HintKey ?? string.Empty;
-
         public BlockLoc Location => blockLoc;
 
         public HarvestInteractionState State { get; protected set; } = HarvestInteractionState.InProgress;
 
-        protected HarvestInteractionInfo(int id, Block block, BlockLoc loc, Direction dir, HarvestInteraction? def) : base(id, block, loc)
+        protected HarvestInteractionInfo(int id, Block block, BlockLoc loc, Direction dir, HarvestInteraction def) : base(id, block, loc)
         {
             direction = dir;
             definition = def;
@@ -53,7 +58,7 @@ namespace CraftSharp.Control
         private readonly float duration;
 
         public LocalHarvestInteractionInfo(int id, Block block, BlockLoc loc, Direction dir, ItemStack? tool, float hardness,
-            bool floating, bool grounded, HarvestInteraction? def) : base(id, block, loc, dir, def)
+            bool floating, bool grounded, HarvestInteraction def) : base(id, block, loc, dir, def)
         {
             duration = CalculateDiggingTime(tool, hardness, floating, grounded);
         }
@@ -66,11 +71,11 @@ namespace CraftSharp.Control
             }
 
             var item = itemStack?.ItemType;
-            bool isBestTool = item?.ActionType is not null && definition?.ActionType == item.ActionType;
+            bool isBestTool = item?.ActionType is not null && definition.ActionType == item.ActionType;
 
             ItemTier? tier = null;
 
-            bool canHarvest = definition?.ActionType == ItemActionType.None && item?.TierType is null || // Use hand case
+            bool canHarvest = definition.ActionType == ItemActionType.None && item?.TierType is null || // Use hand case
                               item is { TierType: not null } &&
                               ItemTier.Tiers.TryGetValue(item.TierType.Value, out tier); // Use tool case
 
