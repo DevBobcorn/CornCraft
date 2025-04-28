@@ -1815,7 +1815,7 @@ namespace CraftSharp.Protocol.Handlers
                     {
                         var inventoryId = DataTypes.ReadNextByte(packetData);
                         var stateId = -1;
-                        var elements = 0;
+                        int elements;
 
                         if (protocolVersion >= MC_1_17_1_Version)
                         {
@@ -1826,15 +1826,15 @@ namespace CraftSharp.Protocol.Handlers
                         else
                         {
                             // Elements as Short - 1.17 and below
-                            DataTypes.ReadNextShort(packetData);
+                            elements = DataTypes.ReadNextShort(packetData);
                         }
 
-                        var inventorySlots = new Dictionary<int, ItemStack>();
+                        var inventorySlots = new Dictionary<int, ItemStack?>();
                         for (int slotId = 0; slotId < elements; slotId++)
                         {
                             ItemStack? item1 = dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
-                            if (item1 is not null)
-                                inventorySlots[slotId] = item1;
+                            
+                            inventorySlots[slotId] = item1;
                         }
 
                         if (protocolVersion >= MC_1_17_1_Version) // Carried Item - 1.17.1 and above

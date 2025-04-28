@@ -817,84 +817,13 @@ namespace CraftSharp
             return InvokeOnNetMainThread(() => handler!.SendUseItem(1, sequenceId++));
         }
 
-        /// <summary>
-        /// Try to merge a slot
-        /// </summary>
-        /// <param name="inventoryData">The inventory where the item is located</param>
-        /// <param name="item">Items to be processed</param>
-        /// <param name="slot">The item slot to be processed</param>
-        /// <param name="curItem">The slot that was put down</param>
-        /// <param name="curSlot">The item slot being put down</param>
-        /// <param name="changedSlots">Record changes</param>
-        /// <returns>Whether to fully merge</returns>
-        private static bool TryMergeSlot(InventoryData inventoryData, ItemStack item, int slot, ItemStack curItem, int curSlot, List<Tuple<short, ItemStack?>> changedSlots)
+        private static bool CheckStackable(ItemStack stackA, ItemStack stackB)
         {
-            int spaceLeft = curItem.ItemType.StackLimit - curItem.Count;
-            if (curItem.ItemType == item.ItemType && spaceLeft > 0)
-            {
-                // Put item on that stack
-                if (item.Count <= spaceLeft)
-                {
-                    // Can fit into the stack
-                    item.Count = 0;
-                    curItem.Count += item.Count;
+            if (stackA.ItemType != stackB.ItemType)
+                return false;
 
-                    changedSlots.Add(new Tuple<short, ItemStack?>((short)curSlot, curItem));
-                    changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
-
-                    inventoryData.Items.Remove(slot);
-                    return true;
-                }
-
-                item.Count -= spaceLeft;
-                curItem.Count += spaceLeft;
-
-                changedSlots.Add(new Tuple<short, ItemStack?>((short)curSlot, curItem));
-            }
-            return false;
+            return true;
         }
-
-        /// <summary>
-        /// Store items in a new slot
-        /// </summary>
-        /// <param name="inventoryData">The inventory where the item is located</param>
-        /// <param name="item">Items to be processed</param>
-        /// <param name="slot">The item slot to be processed</param>
-        /// <param name="newSlot">New item slot</param>
-        /// <param name="changedSlots">Record changes</param>
-        private static void StoreInNewSlot(InventoryData inventoryData, ItemStack item, int slot, int newSlot, List<Tuple<short, ItemStack?>> changedSlots)
-        {
-            ItemStack newItem = new(item.ItemType, item.Count, item.NBT);
-            inventoryData.Items[newSlot] = newItem;
-            inventoryData.Items.Remove(slot);
-
-            changedSlots.Add(new Tuple<short, ItemStack?>((short)newSlot, newItem));
-            changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
-        }
-
-        private static readonly HashSet<ResourceLocation> BEACON_FUEL_ITEM_IDS = new()
-        {
-            new ResourceLocation("iron_ingot"), new ResourceLocation("gold_ingot"),
-            new ResourceLocation("emerald"),    new ResourceLocation("diamond"),
-            new ResourceLocation("netherite_ingot")
-        };
-
-        private static readonly ResourceLocation BREWING_STAND_FUEL_ITEM_ID = new("blaze_powder");
-
-        private static readonly HashSet<ResourceLocation> BREWING_STAND_BOTTLE_ITEM_IDS = new()
-        {
-            // Water Bottle's id is also minecraft:potion
-            new ResourceLocation("potion"), new ResourceLocation("glass_bottle")
-        };
-
-        private static readonly ResourceLocation ENCHANTING_TABLE_FUEL_ITEM_ID = new("lapis_lazuli");
-
-        private static readonly HashSet<ResourceLocation> CARTOGRAPHY_TABLE_EMPTY_ITEM_IDS = new()
-        {
-            new ResourceLocation("map"), new ResourceLocation("paper")
-        };
-
-        private static readonly ResourceLocation CARTOGRAPHY_TABLE_FILLED_ITEM_ID = new("filled_map");
 
         /// <summary>
         /// Click a slot in the specified inventory
@@ -913,7 +842,7 @@ namespace CraftSharp
 
             // Update our inventory base on action type
             InventoryData? inventory = GetInventory(inventoryId);
-            InventoryData playerInventoryData = GetInventory(0)!;
+            InventoryData playerInventory = GetInventory(0)!;
             
             if (inventory != null)
             {
@@ -923,142 +852,212 @@ namespace CraftSharp
                 {
                     case InventoryActionType.LeftClick:
                         // Check if cursor have item (slot -1)
-                        if (playerInventoryData.Items.ContainsKey(-1))
+                        if (playerInventory.Items.TryGetValue(-1, out var cursor1))
                         {
-                            // When item on cursor and clicking crafting output slot, nothing will happen
-                            if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                            // Check target slot also have item
+                            if (inventory.Items.TryGetValue(slot, out var target1))
                             {
-                                break; // TODO: Check output stacking
-                            }
-
-                            // Check target slot also have item?
-                            if (inventory.Items.ContainsKey(slot))
-                            {
-                                // Check if both item are the same?
-                                if (inventory.Items[slot].ItemType == playerInventoryData.Items[-1].ItemType)
+                                // Check if items are stackable?
+                                if (CheckStackable(target1, cursor1))
                                 {
-                                    int maxCount = inventory.Items[slot].ItemType.StackLimit;
+                                    int maxCount = target1.ItemType.StackLimit;
+                                    
                                     // Check item stacking
-                                    if (inventory.Items[slot].Count + playerInventoryData.Items[-1].Count <= maxCount)
+                                    if (target1.Count + cursor1.Count <= maxCount)
                                     {
-                                        // Put cursor item to target
-                                        inventory.Items[slot].Count += playerInventoryData.Items[-1].Count;
-                                        playerInventoryData.Items.Remove(-1);
+                                        if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                        {
+                                            // Stack target to cursor
+                                            cursor1.Count += target1.Count;
+                                            inventory.Items.Remove(slot);
+                                            Debug.Log($"[LeftClick] [{slot}] Stack target (output) to cursor [{cursor1}]");
+                                        }
+                                        else
+                                        {
+                                            // Stack cursor to target
+                                            target1.Count += cursor1.Count;
+                                            playerInventory.Items.Remove(-1);
+                                            Debug.Log($"[LeftClick] [{slot}] Stack to target [{target1}]");
+                                        }
                                     }
                                     else
                                     {
-                                        // Leave some item on cursor
-                                        playerInventoryData.Items[-1].Count -= maxCount - inventory.Items[slot].Count;
-                                        inventory.Items[slot].Count = maxCount;
+                                        if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                        {
+                                            Debug.Log($"[LeftClick] [{slot}] Cannot stack target (output) to cursor");
+                                        }
+                                        else
+                                        {
+                                            // Leave some item on cursor
+                                            cursor1.Count -= maxCount - target1.Count;
+                                            target1.Count = maxCount;
+                                            Debug.Log($"[LeftClick] [{slot}] Stack to target [{target1}], and leave some on cursor [{cursor1}]");
+                                        }
                                     }
+                                }
+                                else // No stackable, swap
+                                {
+                                    if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                    {
+                                        Debug.Log($"[LeftClick] [{slot}] Cannot swap target (output) with cursor");
+                                    }
+                                    else
+                                    {
+                                        // Swap two items TODO: Check if this slot accepts cursor item
+                                        (inventory.Items[slot], playerInventory.Items[-1]) = (cursor1, target1);
+                                        Debug.Log($"[LeftClick] [{slot}] Swap target [{target1}] with cursor [{cursor1}]");
+                                    }
+                                }
+                            }
+                            else // Target has no item
+                            {
+                                if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                {
+                                    Debug.Log($"[LeftClick] [{slot}] Cannot put cursor to target (output)");
                                 }
                                 else
                                 {
-                                    // Swap two items TODO: Check if this slot accepts cursor item
-                                    (inventory.Items[slot], playerInventoryData.Items[-1]) = (playerInventoryData.Items[-1], inventory.Items[slot]);
+                                    // Put cursor item to target TODO: Check if this slot accepts cursor item
+                                    inventory.Items[slot] = cursor1;
+                                    playerInventory.Items.Remove(-1);
+                                    Debug.Log($"[LeftClick] [{slot}] Put cursor to target [{inventory.Items[slot]}]");
                                 }
-                            }
-                            else
-                            {
-                                // Put cursor item to target TODO: Check if this slot accepts cursor item
-                                inventory.Items[slot] = playerInventoryData.Items[-1];
-                                playerInventoryData.Items.Remove(-1);
                             }
 
                             changedSlots.Add(inventory.Items.TryGetValue(slot, out var inventoryItem)
                                 ? new Tuple<short, ItemStack?>((short)slot, inventoryItem)
                                 : new Tuple<short, ItemStack?>((short)slot, null));
                         }
-                        else
+                        else // Cursor has no item
                         {
                             // Check target slot have item?
                             if (inventory.Items.ContainsKey(slot))
                             {
-                                // When taking item from crafting output slot, server will update us
-                                if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
-                                {
-                                    break;
-                                }
-
                                 // Put target slot item to cursor
-                                playerInventoryData.Items[-1] = inventory.Items[slot];
+                                playerInventory.Items[-1] = inventory.Items[slot];
                                 inventory.Items.Remove(slot);
-
                                 changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
+                                Debug.Log($"[LeftClick] [{slot}] Put target to cursor [{playerInventory.Items[-1]}]");
+                            }
+                            else // Target has no item
+                            {
+                                Debug.Log($"[LeftClick] [{slot}] Do nothing");
                             }
                         }
                         break;
                     case InventoryActionType.RightClick:
                         // Check if cursor have item (slot -1)
-                        if (playerInventoryData.Items.ContainsKey(-1))
+                        if (playerInventory.Items.TryGetValue(-1, out var cursor2))
                         {
-                            // When item on cursor and clicking crafting output slot, nothing will happen
-                            if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                            // Check target slot also have item
+                            if (inventory.Items.TryGetValue(slot, out var target2))
                             {
-                                break;
-                            }
+                                int maxCount = target2.ItemType.StackLimit;
 
-                            // Check target slot have item?
-                            if (inventory.Items.ContainsKey(slot))
-                            {
                                 // Check if these 2 items are stackable
-                                if (inventory.Items[slot].ItemType == playerInventoryData.Items[-1].ItemType &&
-                                    inventory.Items[slot].Count < inventory.Items[slot].ItemType.StackLimit)
+                                if (CheckStackable(target2, cursor2))
                                 {
-                                    // Drop 1 item count from cursor
-                                    playerInventoryData.Items[-1].Count--;
-                                    inventory.Items[slot].Count++;
-                                }
-                                else
-                                {
-                                    // Swap two items TODO: Check if this slot accepts cursor item
-                                    (inventory.Items[slot], playerInventoryData.Items[-1]) = (playerInventoryData.Items[-1], inventory.Items[slot]);
-                                }
-                            }
-                            else
-                            {
-                                // Drop 1 item count from cursor TODO: Check if this slot accepts cursor item
-                                var itemTmp = playerInventoryData.Items[-1];
-                                ItemStack itemClone = new(itemTmp.ItemType, 1, itemTmp.NBT);
-                                inventory.Items[slot] = itemClone;
-                                playerInventoryData.Items[-1].Count--;
-                            }
-                        }
-                        else
-                        {
-                            // Check target slot have item?
-                            if (inventory.Items.ContainsKey(slot))
-                            {
-                                if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
-                                {
-                                    // no matter how many item in crafting output slot, only 1 will be taken out
-                                    // Also server will update us
-                                    break;
-                                }
-                                if (inventory.Items[slot].Count == 1)
-                                {
-                                    // Only 1 item count. Put it to cursor
-                                    playerInventoryData.Items[-1] = inventory.Items[slot];
-                                    inventory.Items.Remove(slot);
-                                }
-                                else
-                                {
-                                    // Take half of the item stack to cursor
-                                    if (inventory.Items[slot].Count % 2 == 0)
+                                    if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
                                     {
-                                        // Can be evenly divided
-                                        var itemTmp = inventory.Items[slot];
-                                        playerInventoryData.Items[-1] = new ItemStack(itemTmp.ItemType, itemTmp.Count / 2, itemTmp.NBT);
-                                        inventory.Items[slot].Count = itemTmp.Count / 2;
+                                        if (target2.Count + cursor2.Count <= maxCount)
+                                        {
+                                            // Stack target to cursor
+                                            cursor2.Count += target2.Count;
+                                            inventory.Items.Remove(slot);
+                                            Debug.Log($"[RightClick] [{slot}] Stack target (output) to cursor [{cursor2}]");
+                                        }
+                                        else
+                                        {
+                                            Debug.Log($"[RightClick] [{slot}] Target (output) cannot be stacked anymore");
+                                        }
+                                    }
+                                    else if (target2.Count + 1 <= maxCount)
+                                    {
+                                        // Drop 1 item count from cursor
+                                        cursor2.Count--;
+                                        target2.Count++;
+                                        if (cursor2.Count <= 0) playerInventory.Items.Remove(-1);
+                                        Debug.Log($"[RightClick] [{slot}] Drop cursor [{cursor2}] to target[{target2}]");
+                                    }
+                                }
+                                else // No stackable, swap
+                                {
+                                    if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                    {
+                                        Debug.Log($"[RightClick] [{slot}] Cannot swap target (output) with cursor");
                                     }
                                     else
                                     {
-                                        // Cannot be evenly divided. item count on cursor is always larger than item on inventory
-                                        var itemTmp = inventory.Items[slot];
-                                        playerInventoryData.Items[-1] = new ItemStack(itemTmp.ItemType, (itemTmp.Count + 1) / 2, itemTmp.NBT);
-                                        inventory.Items[slot].Count = (itemTmp.Count - 1) / 2;
+                                        // Swap two items TODO: Check if this slot accepts cursor item
+                                        (inventory.Items[slot], playerInventory.Items[-1]) = (cursor2, target2);
+                                        Debug.Log($"[RightClick] [{slot}] Swap target [{target2}] with cursor [{cursor2}]");
                                     }
                                 }
+                            }
+                            else // Target has no item
+                            {
+                                if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                {
+                                    Debug.Log($"[RightClick] [{slot}] Cannot drop 1 cursor to target (output)");
+                                }
+                                else
+                                {
+                                    // Drop 1 item count from cursor TODO: Check if this slot accepts cursor item
+                                    ItemStack itemClone = new(cursor2.ItemType, 1, cursor2.NBT);
+                                    inventory.Items[slot] = itemClone;
+                                    cursor2.Count--;
+                                    if (cursor2.Count <= 0) playerInventory.Items.Remove(-1);
+                                    Debug.Log($"[RightClick] [{slot}] Drop 1 cursor [{cursor2}] to target [{inventory.Items[slot]}]");
+                                }
+                            }
+                        }
+                        else // Cursor has no item
+                        {
+                            // Check target slot have item?
+                            if (inventory.Items.TryGetValue(slot, out var target2))
+                            {
+                                if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                {
+                                    // Put target slot item to cursor
+                                    playerInventory.Items[-1] = inventory.Items[slot];
+                                    inventory.Items.Remove(slot);
+                                    changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
+                                    Debug.Log($"[RightClick] [{slot}] Put target to cursor [{playerInventory.Items[-1]}]");
+                                }
+                                else // Take half
+                                {
+                                    if (target2.Count == 1)
+                                    {
+                                        // Only 1 item count. Put it to cursor
+                                        playerInventory.Items[-1] = inventory.Items[slot];
+                                        inventory.Items.Remove(slot);
+                                        Debug.Log($"[RightClick] [{slot}] Take 1 target [{target2}] to cursor [{cursor2}]");
+                                    }
+                                    else
+                                    {
+                                        // Take half of the item stack to cursor
+                                        if (inventory.Items[slot].Count % 2 == 0)
+                                        {
+                                            // Can be evenly divided
+                                            var itemTmp = inventory.Items[slot];
+                                            playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, itemTmp.Count / 2, itemTmp.NBT);
+                                            inventory.Items[slot].Count = itemTmp.Count / 2;
+                                            Debug.Log($"[RightClick] [{slot}] Take half(even) target [{target2}] to cursor [{cursor2}]");
+                                        }
+                                        else
+                                        {
+                                            // Cannot be evenly divided. item count on cursor is always larger than item on inventory
+                                            var itemTmp = inventory.Items[slot];
+                                            playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, (itemTmp.Count + 1) / 2, itemTmp.NBT);
+                                            inventory.Items[slot].Count = (itemTmp.Count - 1) / 2;
+                                            Debug.Log($"[RightClick] [{slot}] Take half(odd) target [{target2}] to cursor [{cursor2}]");
+                                        }
+                                    }
+                                }
+                            }
+                            else // Target has no item
+                            {
+                                Debug.Log($"[RightClick] [{slot}] Do nothing");
                             }
                         }
 
@@ -1092,6 +1091,14 @@ namespace CraftSharp
                         break;
                 }
             }
+
+            foreach (var (slotId, slotItem) in changedSlots)
+            {
+                EventManager.Instance.BroadcastOnUnityThread(new SlotUpdateEvent(inventoryId, slotId, slotItem));
+            }
+            var cursorItem = playerInventory.Items.GetValueOrDefault(-1);
+            Debug.Log($"Changed slots: {string.Join(", ", changedSlots.Select(x => x.Item1))}, Cursor item: {cursorItem}, Non-empty Slot Count: {inventory?.Items.Count}");
+            EventManager.Instance.BroadcastOnUnityThread(new SlotUpdateEvent(inventoryId, -1, cursorItem));
 
             return handler!.SendInventoryAction(inventoryId, slot, action, item, changedSlots, inventories[inventoryId].StateId);
         }
@@ -1685,11 +1692,18 @@ namespace CraftSharp
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="itemList">Item list, key = slot Id, value = Item information</param>
         /// <param name="stateId">State Id of inventory</param>
-        public void OnInventoryItems(byte inventoryId, Dictionary<int, ItemStack> itemList, int stateId)
+        public void OnInventoryItems(byte inventoryId, Dictionary<int, ItemStack?> itemList, int stateId)
         {
             if (inventories.TryGetValue(inventoryId, out var inventory))
             {
-                inventory.Items = itemList;
+                //Debug.Log($"Slots: [{inventoryId}] [{string.Join(", ", inventory.Items.Keys)}] -> [{string.Join(", ", itemList.Keys)}]");
+                foreach (var (slot, itemStack) in itemList)
+                {
+                    if (itemStack is null)
+                        inventory.Items.Remove(slot);
+                    else
+                        inventory.Items[slot] = itemStack;
+                }
                 inventory.StateId = stateId;
                 
                 Loom.QueueOnMainThread(() => {
@@ -1746,8 +1760,7 @@ namespace CraftSharp
                 {
                     if (item == null || item.IsEmpty)
                     {
-                        if (inventory2.Items.ContainsKey(slot))
-                            inventory2.Items.Remove(slot);
+                        inventory2.Items.Remove(slot);
                     }
                     else inventory2.Items[slot] = item;
 

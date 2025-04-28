@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Unity.Mathematics;
 using TMPro;
@@ -7,7 +9,7 @@ using TMPro;
 using CraftSharp.Rendering;
 using CraftSharp.Resource;
 using CraftSharp.Protocol;
-using System.Linq;
+using CraftSharp.Inventory;
 
 namespace CraftSharp.UI
 {
@@ -122,10 +124,10 @@ namespace CraftSharp.UI
             cursorTextHandler?.Invoke(string.Empty);
         }
 
-        private Action clickHandler;
+        private Action<InventoryActionType> clickHandler;
         private Action<string> cursorTextHandler;
 
-        public void SetClickHandler(Action handler)
+        public void SetClickHandler(Action<InventoryActionType> handler)
         {
             clickHandler = handler;
         }
@@ -135,9 +137,27 @@ namespace CraftSharp.UI
             cursorTextHandler = handler;
         }
 
-        public void ClickSlot()
+        public void ClickSlot(BaseEventData data)
         {
-            clickHandler?.Invoke();
+            if (data is PointerEventData pointerData)
+            {
+                switch (pointerData.button)
+                {
+                    case PointerEventData.InputButton.Left:
+                        clickHandler?.Invoke(InventoryActionType.LeftClick);
+                        break;
+                    case PointerEventData.InputButton.Right:
+                        clickHandler?.Invoke(InventoryActionType.RightClick);
+                        break;
+                    case PointerEventData.InputButton.Middle:
+                        clickHandler?.Invoke(InventoryActionType.MiddleClick);
+                        break;
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Event data is not pointer data!");
+            }
         }
 
         private void UpdateItemMesh()

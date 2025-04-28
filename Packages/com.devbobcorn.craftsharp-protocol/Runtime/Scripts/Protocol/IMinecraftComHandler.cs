@@ -282,7 +282,7 @@ namespace CraftSharp.Protocol
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="itemList">Item list</param>
         /// <param name="stateId">State Id</param>
-        void OnInventoryItems(byte inventoryId, Dictionary<int, ItemStack> itemList, int stateId);
+        void OnInventoryItems(byte inventoryId, Dictionary<int, ItemStack?> itemList, int stateId);
 
         /// <summary>
         /// Called when a single slot has been updated inside an inventory

@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using TMPro;
 
 using CraftSharp.Inventory;
-using CraftSharp.Protocol;
 
 namespace CraftSharp.UI
 {
@@ -44,6 +43,8 @@ namespace CraftSharp.UI
         public void SetActiveInventory(InventoryData inventoryData)
         {
             EnsureInitialized();
+
+            var game = CornApp.CurrentClient;
 
             ActiveInventoryId = inventoryData.Id;
             ActiveInventoryData = inventoryData;
@@ -94,8 +95,8 @@ namespace CraftSharp.UI
             var workMainStart = inventoryType.PrependSlotCount;
             var workMainPosX = inventoryType.MainPosX;
             var workMainPosY = inventoryType.MainPosY;
-            for (int x = 0, i = 0; x < inventoryType.MainSlotWidth; x++)
-                for (int y = 0; y < inventoryType.MainSlotHeight; y++, i++)
+            for (int y = 0, i = 0; y < inventoryType.MainSlotHeight; y++)
+                for (int x = 0; x < inventoryType.MainSlotWidth; x++, i++)
                 {
                     var newSlot = createSlot(x + workMainPosX,
                         workMainPosY + inventoryType.MainSlotHeight - y - 1,
@@ -193,9 +194,9 @@ namespace CraftSharp.UI
             {
                 currentSlots[slotId] = slot;
 
-                slot.SetClickHandler(() =>
+                slot.SetClickHandler(action =>
                 {
-                    Debug.Log($"Mouse down: {slotId}");
+                    game.DoInventoryAction(ActiveInventoryId, slotId, action);
                 });
 
                 slot.SetCursorTextHandler(str =>
@@ -283,6 +284,14 @@ namespace CraftSharp.UI
                     {
                         Debug.LogWarning($"Slot {e.SlotId} is not available!");
                     }
+                }
+                else if (e.InventoryId == 0 && e.SlotId == -1)
+                {
+                    cursorSlot.UpdateItemStack(e.ItemStack);
+                }
+                else
+                {
+                    Debug.Log($"Invalid inventory id: {e.InventoryId}, slot {e.SlotId}");
                 }
             };
             
