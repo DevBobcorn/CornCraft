@@ -31,7 +31,7 @@ namespace CraftSharp.Inventory
         /// <summary>
         /// Inventory items
         /// </summary>
-        public Dictionary<int, ItemStack> Items;
+        public readonly Dictionary<int, ItemStack> Items;
 
         /// <summary>
         /// Inventory properties
@@ -102,6 +102,32 @@ namespace CraftSharp.Inventory
         }
         
         /// <summary>
+        /// Check the given slot Id is a backpack slot and give the backpack number
+        /// </summary>
+        /// <param name="slotId">The slot Id to check</param>
+        /// <param name="backpack">Zero-based, 0-26. -1 if not a backpack</param>
+        /// <returns>True if given slot Id is a backpack slot</returns>
+        public bool IsBackpack(int slotId, out int backpack)
+        {
+            if (!Type.HasBackpackSlots)
+            {
+                backpack = -1;
+                return false;
+            }
+            
+            int backpackStart = GetFirstBackpackSlot();
+
+            if (slotId >= backpackStart && slotId <= backpackStart + 27)
+            {
+                backpack = slotId - backpackStart;
+                return true;
+            }
+            
+            backpack = -1;
+            return false;
+        }
+        
+        /// <summary>
         /// Get the slot Id of first hotbar slot in this inventory
         /// </summary>
         /// <returns>First hotbar slot in this inventory</returns>
@@ -121,6 +147,12 @@ namespace CraftSharp.Inventory
         /// <returns>True if given slot Id is a hotbar slot</returns>
         public bool IsHotbar(int slotId, out int hotbar)
         {
+            if (!Type.HasHotbarSlots)
+            {
+                hotbar = -1;
+                return false;
+            }
+            
             int hotbarStart = GetFirstHotbarSlot();
 
             if (slotId >= hotbarStart && slotId <= hotbarStart + 9)

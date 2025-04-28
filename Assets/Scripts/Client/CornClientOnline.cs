@@ -1092,9 +1092,35 @@ namespace CraftSharp
                 }
             }
 
-            foreach (var (slotId, slotItem) in changedSlots)
+            foreach (var (slotId, slotItem) in changedSlots) // Update local data for each changed slot
             {
                 EventManager.Instance.BroadcastOnUnityThread(new SlotUpdateEvent(inventoryId, slotId, slotItem));
+
+                if (inventory?.IsBackpack(slotId, out var backpackSlot) ?? false) // Update backpack slots in player inventory
+                {
+                    var slotInPlayerInventory = playerInventory.GetFirstBackpackSlot() + backpackSlot;
+                    if (slotItem is null)
+                        playerInventory.Items.Remove(slotInPlayerInventory);
+                    else
+                        playerInventory.Items[slotInPlayerInventory] = slotItem;
+                }
+                
+                if (inventory?.IsHotbar(slotId, out var hotbarSlot) ?? false) // Update hotbar slots in player inventory
+                {
+                    var slotInPlayerInventory = playerInventory.GetFirstHotbarSlot() + hotbarSlot;
+                    if (slotItem is null)
+                        playerInventory.Items.Remove(slotInPlayerInventory);
+                    else
+                        playerInventory.Items[slotInPlayerInventory] = slotItem;
+                    
+                    EventManager.Instance.BroadcastOnUnityThread(new HotbarUpdateEvent(hotbarSlot, slotItem));
+
+                    if (hotbarSlot == CurrentSlot) // The currently held item is updated
+                    {
+                        EventManager.Instance.BroadcastOnUnityThread(new HeldItemChangeEvent(
+                                hotbarSlot, item, PlayerActionHelper.GetItemActionType(item)));
+                    }
+                }
             }
             var cursorItem = playerInventory.Items.GetValueOrDefault(-1);
             Debug.Log($"Changed slots: {string.Join(", ", changedSlots.Select(x => x.Item1))}, Cursor item: {cursorItem}, Non-empty Slot Count: {inventory?.Items.Count}");
