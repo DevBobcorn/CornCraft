@@ -48,6 +48,7 @@ namespace CraftSharp.UI
                     var spriteTypeId = ResourceLocation.FromString(key);
                     var u1 = spriteDef.Properties.TryGetValue("use_item_model", out var val) && bool.Parse(val.StringValue); // False if not specified
                     var u2 = !spriteDef.Properties.TryGetValue("use_point_filter", out val) || bool.Parse(val.StringValue); // True if not specified
+                    var invert = spriteDef.Properties.TryGetValue("invert_color", out val) && bool.Parse(val.StringValue); // False if not specified
                     var texId = spriteDef.Properties.TryGetValue("texture_id", out val) ? ResourceLocation.FromString(val.StringValue) : ResourceLocation.INVALID;
 
                     var t = new SpriteType(spriteTypeId, texId, u1);
@@ -63,6 +64,24 @@ namespace CraftSharp.UI
                             texture = new Texture2D(2, 2);
                             texture.LoadImage(File.ReadAllBytes(texturePath));
                             texture.filterMode = u2 ? FilterMode.Point : FilterMode.Bilinear;
+
+                            if (invert) // Invert all pixel colors
+                            {
+                                var pixels = texture.GetPixels32(); // Read pixel data
+
+                                // Iterate through each pixel
+                                for (int i = 0; i < pixels.Length; i++)
+                                {
+                                    // Invert RGB channels (subtract from 1.0f)
+                                    pixels[i].r = (byte) (255 - pixels[i].r);
+                                    pixels[i].g = (byte) (255 - pixels[i].g);
+                                    pixels[i].b = (byte) (255 - pixels[i].b);
+                                    // Alpha channel (pixels[i].a) remains unchanged
+                                }
+
+                                texture.SetPixels32(pixels); // Apply modified pixel data
+                                texture.Apply(); // Upload changes to the GPU
+                            }
                         }
                         else
                         {

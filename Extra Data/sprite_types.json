@@ -17,19 +17,24 @@
     },
 
     "corncraft:empty_armor_slot_helmet": {
-        "texture_id": "minecraft:item/empty_armor_slot_helmet"
+        "texture_id": "minecraft:item/empty_armor_slot_helmet",
+        "invert_color": true
     },
     "corncraft:empty_armor_slot_chestplate": {
-        "texture_id": "minecraft:item/empty_armor_slot_chestplate"
+        "texture_id": "minecraft:item/empty_armor_slot_chestplate",
+        "invert_color": true
     },
     "corncraft:empty_armor_slot_leggings": {
-        "texture_id": "minecraft:item/empty_armor_slot_leggings"
+        "texture_id": "minecraft:item/empty_armor_slot_leggings",
+        "invert_color": true
     },
     "corncraft:empty_armor_slot_boots": {
-        "texture_id": "minecraft:item/empty_armor_slot_boots"
+        "texture_id": "minecraft:item/empty_armor_slot_boots",
+        "invert_color": true
     },
     "corncraft:empty_armor_slot_shield": {
-        "texture_id": "minecraft:item/empty_armor_slot_shield"
+        "texture_id": "minecraft:item/empty_armor_slot_shield",
+        "invert_color": true
     },
 
     "corncraft:arrow_right": {
