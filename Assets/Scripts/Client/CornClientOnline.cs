@@ -780,7 +780,8 @@ namespace CraftSharp
         /// <returns>TRUE if the item was successfully used</returns>
         public override bool SendEntityAction(EntityActionType entityAction)
         {
-            return InvokeOnNetMainThread(() => handler!.SendEntityAction(clientEntity.Id, (int)entityAction));
+            return InvokeRequired ? InvokeOnNetMainThread(() => SendEntityAction(entityAction)) :
+                handler!.SendEntityAction(clientEntity.Id, (int) entityAction);
         }
 
         /// <summary>
@@ -805,7 +806,7 @@ namespace CraftSharp
         /// <returns>TRUE if the item was successfully used</returns>
         public override bool UseItemOnMainHand()
         {
-            return InvokeOnNetMainThread(() => handler!.SendUseItem(0, sequenceId++));
+            return InvokeRequired ? InvokeOnNetMainThread(UseItemOnMainHand) : handler!.SendUseItem(0, sequenceId++);
         }
 
         /// <summary>
@@ -814,9 +815,31 @@ namespace CraftSharp
         /// <returns>TRUE if the item was successfully used</returns>
         public override bool UseItemOnOffHand()
         {
-            return InvokeOnNetMainThread(() => handler!.SendUseItem(1, sequenceId++));
+            return InvokeRequired ? InvokeOnNetMainThread(UseItemOnOffHand) : handler!.SendUseItem(1, sequenceId++);
         }
 
+        /// <summary>
+        /// Open player inventory, doesn't actually send anything to the server
+        /// </summary>
+        public override void OpenPlayerInventory()
+        {
+            if (InvokeRequired)
+            {
+                InvokeOnNetMainThread(OpenPlayerInventory);
+                return;
+            }
+            
+            var playerInventory = inventories.GetValueOrDefault(0);
+            if (playerInventory is null)
+            {
+                Debug.LogWarning("Player inventory data is not available!");
+            }
+            else
+            {
+                OnInventoryOpen(0, playerInventory);
+            }
+        }
+        
         private static bool CheckStackable(ItemStack stackA, ItemStack stackB)
         {
             if (stackA.ItemType != stackB.ItemType)
@@ -1140,7 +1163,7 @@ namespace CraftSharp
         /// <returns>TRUE if item given successfully</returns>
         public override bool DoCreativeGive(int slot, Item itemType, int count, Dictionary<string, object>? nbt = null)
         {
-            return InvokeOnNetMainThread(() => handler!.SendCreativeInventoryAction(slot, itemType, count, nbt));
+            return InvokeRequired ? InvokeOnNetMainThread(() => DoCreativeGive(slot, itemType, count, nbt)) : handler!.SendCreativeInventoryAction(slot, itemType, count, nbt);
         }
 
         /// <summary>
@@ -1150,7 +1173,7 @@ namespace CraftSharp
         /// <returns>TRUE if animation successfully done</returns>
         public override bool DoAnimation(int playerAnimation)
         {
-            return InvokeOnNetMainThread(() => handler!.SendAnimation(playerAnimation, clientEntity.Id));
+            return InvokeRequired ? InvokeOnNetMainThread(() => DoAnimation(playerAnimation)) : handler!.SendAnimation(playerAnimation, clientEntity.Id);
         }
 
         /// <summary>
@@ -1221,7 +1244,8 @@ namespace CraftSharp
         /// <returns>TRUE if successfully placed</returns>
         public override bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, float x, float y, float z, Hand hand = Hand.MainHand)
         {
-            return InvokeOnNetMainThread(() => handler!.SendPlayerBlockPlacement((int)hand, blockLoc, x, y, z, blockFace, sequenceId++));
+            return InvokeRequired ? InvokeOnNetMainThread(() => PlaceBlock(blockLoc, blockFace, x, y, z)) :
+                handler!.SendPlayerBlockPlacement((int)hand, blockLoc, x, y, z, blockFace, sequenceId++);
         }
 
         /// <summary>
@@ -1342,7 +1366,8 @@ namespace CraftSharp
         public bool UpdateSign(Location location, string line1, string line2, string line3, string line4)
         {
             // TODO Open sign editor first https://wiki.vg/Protocol#Open_Sign_Editor
-            return InvokeOnNetMainThread(() => handler!.SendUpdateSign(location, line1, line2, line3, line4));
+            return InvokeRequired ? InvokeOnNetMainThread(() => UpdateSign(location, line1, line2, line3, line4)) :
+                handler!.SendUpdateSign(location, line1, line2, line3, line4);
         }
 
         /// <summary>
@@ -1351,7 +1376,8 @@ namespace CraftSharp
         /// <param name="selectedSlot">The slot of the trade, starts at 0</param>
         public bool SelectTrade(int selectedSlot)
         {
-            return InvokeOnNetMainThread(() => handler!.SelectTrade(selectedSlot));
+            return InvokeRequired ? InvokeOnNetMainThread(() => SelectTrade(selectedSlot)) :
+                handler!.SelectTrade(selectedSlot);
         }
 
         /// <summary>
@@ -1611,20 +1637,17 @@ namespace CraftSharp
         {
             inventories[inventoryId] = inventoryData;
 
-            if (inventoryId != 0)
-            {
-                Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventoryData.Title));
-                //Debug.Log(Translations.Get("extra.inventory_interact"));
+            Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventoryData.Title));
+            //Debug.Log(Translations.Get("extra.inventory_interact"));
 
-                Loom.QueueOnMainThread(() => {
-                    // Set inventory id before opening the screen
-                    ScreenControl.SetScreenData<InventoryScreen>(screen =>
-                    {
-                        screen.SetActiveInventory(inventoryData);
-                    });
-                    ScreenControl.PushScreen<InventoryScreen>();
+            Loom.QueueOnMainThread(() => {
+                // Set inventory id before opening the screen
+                ScreenControl.SetScreenData<InventoryScreen>(screen =>
+                {
+                    screen.SetActiveInventory(inventoryData);
                 });
-            }
+                ScreenControl.PushScreen<InventoryScreen>();
+            });
         }
 
         /// <summary>

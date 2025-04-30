@@ -346,6 +346,14 @@ namespace CraftSharp
         }
 
         /// <summary>
+        /// Open player inventory, doesn't actually send anything to the server
+        /// </summary>
+        public override void OpenPlayerInventory()
+        {
+            
+        }
+
+        /// <summary>
         /// Click a slot in the specified inventory
         /// </summary>
         /// <returns>TRUE if the slot was successfully clicked</returns>

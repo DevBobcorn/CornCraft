@@ -37,6 +37,7 @@ Key                                                       | Action
 <kbd>Left Shift</kbd>                                     | Move Down in Air
 <kbd>Left Ctrl</kbd>                                      | Toggle Walk/Rush Mode
 <kbd>Mouse Scroll</kbd>                                   | Select Hotbar Slot
+<kbd>E</kbd>                                              | Open Player Inventory
 <kbd>F</kbd>                                              | Swap Items on Hands
 <kbd>R</kbd>                                              | Toggle Camera Focus Lock (if in Grounded State)
 <kbd>X</kbd>                                              | Perform Interaction

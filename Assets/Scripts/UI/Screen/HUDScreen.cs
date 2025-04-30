@@ -289,6 +289,11 @@ namespace CraftSharp.UI
             {
                 game.SwapItemOnHands();
             }
+            
+            if (Keyboard.current.eKey.wasPressedThisFrame)
+            {
+                game.OpenPlayerInventory();
+            }
 
             if (Keyboard.current.slashKey.wasPressedThisFrame)
             {

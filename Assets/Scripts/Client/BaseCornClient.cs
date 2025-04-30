@@ -224,6 +224,7 @@ namespace CraftSharp
         public abstract void SendAutoCompleteRequest(string text);
         public abstract bool UseItemOnMainHand();
         public abstract bool UseItemOnOffHand();
+        public abstract void OpenPlayerInventory();
         public abstract bool DoInventoryAction(int inventoryId, int slot, InventoryActionType action);
         public abstract bool DoCreativeGive(int slot, Item itemType, int count, Dictionary<string, object>? nbt = null);
         public abstract bool DoAnimation(int playerAnimation);

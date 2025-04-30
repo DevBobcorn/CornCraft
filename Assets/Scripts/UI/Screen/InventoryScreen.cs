@@ -31,8 +31,8 @@ namespace CraftSharp.UI
 
         private bool isActive = false;
 
-        public int ActiveInventoryId = -1; // -1 for none
-        public InventoryData ActiveInventoryData = null;
+        private int activeInventoryId = -1; // -1 for none
+        private InventoryData activeInventoryData = null;
         
 #nullable enable
 
@@ -46,13 +46,13 @@ namespace CraftSharp.UI
 
             var game = CornApp.CurrentClient;
 
-            ActiveInventoryId = inventoryData.Id;
-            ActiveInventoryData = inventoryData;
+            activeInventoryId = inventoryData.Id;
+            activeInventoryData = inventoryData;
             
             var inventoryType = inventoryData.Type;
 
             inventoryTitleText.text = inventoryData.Title;
-            Debug.Log($"Set inventory: [{ActiveInventoryId}] {inventoryData.Title}");
+            Debug.Log($"Set inventory: [{activeInventoryId}] {inventoryData.Title}");
             
             if (inventoryType.ListPanelWidth > 0)
             {
@@ -157,6 +157,17 @@ namespace CraftSharp.UI
             // Initialize cursor slot
             currentSlots[-1] = cursorSlot;
             setupSlot(-1, cursorSlot);
+            
+            // Initialize player inventory slots (these won't be sent because client already have them)
+            if (activeInventoryId == 0)
+            {
+                currentSlots[5].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(5)); // Head
+                currentSlots[6].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(6)); // Chest
+                currentSlots[7].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(7)); // Legs
+                currentSlots[8].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(8)); // Feet
+                
+                currentSlots[45].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(45)); // Offhand
+            }
 
             cursorTextPanel.gameObject.SetActive(false);
 
@@ -196,7 +207,8 @@ namespace CraftSharp.UI
 
                 slot.SetClickHandler(action =>
                 {
-                    game.DoInventoryAction(ActiveInventoryId, slotId, action);
+                    if (!game) return;
+                    game.DoInventoryAction(activeInventoryId, slotId, action);
                 });
 
                 slot.SetCursorTextHandler(str =>
@@ -243,9 +255,13 @@ namespace CraftSharp.UI
         private void CloseInventory()
         {
             var client = CornApp.CurrentClient;
-            if (ActiveInventoryData is null || !client) return;
+            if (activeInventoryData is null || !client) return;
 
-            client.CloseInventory(ActiveInventoryId);
+            if (activeInventoryId != 0) // Don't close player inventory
+            {
+                client.CloseInventory(activeInventoryId);
+            }
+            
             client.ScreenControl.TryPopScreen();
             
             // Clear all item slots
@@ -263,8 +279,8 @@ namespace CraftSharp.UI
             
             currentSlots.Clear();
 
-            ActiveInventoryId = -1;
-            ActiveInventoryData = null;
+            activeInventoryId = -1;
+            activeInventoryData = null;
         }
 
         protected override void Initialize()
@@ -274,7 +290,7 @@ namespace CraftSharp.UI
             
             slotUpdateCallback = e =>
             {
-                if (e.InventoryId == ActiveInventoryId)
+                if (e.InventoryId == activeInventoryId)
                 {
                     if (currentSlots.TryGetValue(e.SlotId, out var slot))
                     {
@@ -285,11 +301,7 @@ namespace CraftSharp.UI
                         Debug.LogWarning($"Slot {e.SlotId} is not available!");
                     }
                 }
-                else if (e.InventoryId == 0 && e.SlotId == -1)
-                {
-                    cursorSlot.UpdateItemStack(e.ItemStack);
-                }
-                else
+                else if (e.InventoryId != 0)
                 {
                     Debug.Log($"Invalid inventory id: {e.InventoryId}, slot {e.SlotId}");
                 }
