@@ -43,17 +43,21 @@ namespace CraftSharp.Inventory
             9, 0, 0, true, true, 1,
             new()
             {
-                [0] = new(8, 1, InventorySlotType.Output),
-                [1] = new(5, 2, InventorySlotType.Regular),
-                [2] = new(6, 2, InventorySlotType.Regular),
-                [3] = new(5, 1, InventorySlotType.Regular),
-                [4] = new(6, 1, InventorySlotType.Regular),
-                [5] = new(0, 3, InventorySlotType.Helmet),
-                [6] = new(0, 2, InventorySlotType.Chestplate),
-                [7] = new(0, 1, InventorySlotType.Leggings),
-                [8] = new(0, 0, InventorySlotType.Boots),
-                
-                [45] = new(4, 0, InventorySlotType.Offhand)
+                [0] = new(8, 2, InventorySlotType.Output, null),
+                [1] = new(5, 2.5F, InventorySlotType.Regular, null),
+                [2] = new(6, 2.5F, InventorySlotType.Regular, null),
+                [3] = new(5, 1.5F, InventorySlotType.Regular, null),
+                [4] = new(6, 1.5F, InventorySlotType.Regular, null),
+                [5] = new(0, 3, InventorySlotType.Helmet, ResourceLocation.FromString("corncraft:empty_armor_slot_helmet")),
+                [6] = new(0, 2, InventorySlotType.Chestplate, ResourceLocation.FromString("corncraft:empty_armor_slot_chestplate")),
+                [7] = new(0, 1, InventorySlotType.Leggings, ResourceLocation.FromString("corncraft:empty_armor_slot_leggings")),
+                [8] = new(0, 0, InventorySlotType.Boots, ResourceLocation.FromString("corncraft:empty_armor_slot_boots")),
+
+                [45] = new(4, 0, InventorySlotType.Offhand, ResourceLocation.FromString("corncraft:empty_armor_slot_shield"))
+            },
+            new()
+            {
+                new(7, 2, 1, 1, ResourceLocation.FromString("corncraft:arrow_right"))
             })
         {
             WorkPanelHeight = 4
@@ -63,9 +67,10 @@ namespace CraftSharp.Inventory
             2, 0, 0, true, true, 0,
             new()
             {
-                [0] = new(0, 2, InventorySlotType.HorseArmor),
-                [1] = new(0, 2, InventorySlotType.Saddle)
-            })
+                [0] = new(0, 2, InventorySlotType.HorseArmor, null),
+                [1] = new(0, 2, InventorySlotType.Saddle, null)
+            },
+            new())
         {
             MainPosX = 4,
             MainPosY = 0,
@@ -74,16 +79,17 @@ namespace CraftSharp.Inventory
             2, 5, 3, true, true, 0,
             new()
             {
-                [0] = new(0, 2, InventorySlotType.HorseArmor),
-                [1] = new(0, 2, InventorySlotType.Saddle)
-            })
+                [0] = new(0, 2, InventorySlotType.HorseArmor, null),
+                [1] = new(0, 2, InventorySlotType.Saddle, null)
+            },
+            new())
         {
             MainPosX = 4,
             MainPosY = 0
         };
         
         public static readonly InventoryType DUMMY_INVENTORY_TYPE = new(ResourceLocation.INVALID,
-            0, 0, 0, false, false, 0, new());
+            0, 0, 0, false, false, 0, new(), new());
 
         public readonly ResourceLocation TypeId;
         
@@ -104,42 +110,49 @@ namespace CraftSharp.Inventory
         
         private readonly List<InventorySlotInfo> slotInfo;
         
-        public readonly List<InventorySpriteInfo> spriteInfo = new();
+        public readonly List<InventorySpriteInfo> spriteInfo;
 
-        public record InventorySlotInfo(int PosX, int PosY, InventorySlotType Type)
+        public record InventorySlotInfo(float PosX, float PosY, InventorySlotType Type, ResourceLocation? PlaceholderTypeId)
         {
-            public int PosX { get; } = PosX;
-            public int PosY { get; } = PosY;
+            public float PosX { get; } = PosX;
+            public float PosY { get; } = PosY;
             public InventorySlotType Type { get; } = Type;
+            public ResourceLocation? PlaceholderTypeId { get; } = PlaceholderTypeId;
         }
         
-        public record InventorySpriteInfo(int PosX, int PosY, int Width, int Height, ResourceLocation TypeId)
+        public record InventorySpriteInfo(float PosX, float PosY, int Width, int Height, ResourceLocation TypeId)
         {
-            public int PosX { get; } = PosX;
-            public int PosY { get; } = PosY;
+            public float PosX { get; } = PosX;
+            public float PosY { get; } = PosY;
             public int Width { get; } = Width;
             public int Height { get; } = Height;
             public ResourceLocation TypeId { get; } = TypeId;
         }
 
-        public Vector2Int GetInventorySlotPos(int slot)
+        public Vector2 GetInventorySlotPos(int slot)
         {
-            return extraSlotInfo.TryGetValue(slot, out var slotInfo) ? new(slotInfo.PosX, slotInfo.PosY): Vector2Int.zero;
+            return extraSlotInfo.TryGetValue(slot, out var info) ? new(info.PosX, info.PosY) : Vector2.zero;
+        }
+        
+        public ResourceLocation? GetInventorySlotPlaceholderSpriteTypeId(int slot)
+        {
+            return extraSlotInfo.TryGetValue(slot, out var info) ? info.PlaceholderTypeId : null;
         }
         
         public InventorySlotType GetInventorySlotType(int slot)
         {
-            return extraSlotInfo.TryGetValue(slot, out var slotInfo) ? slotInfo.Type : InventorySlotType.Regular;
+            return extraSlotInfo.TryGetValue(slot, out var info) ? info.Type : InventorySlotType.Regular;
         }
         
         // UI Layout settings
         public int WorkPanelHeight { get; set; } = 3;
         public int ListPanelWidth { get; set; } = 0;
-        public int MainPosX { get; set; } = 0;
-        public int MainPosY { get; set; } = 0;
+        public float MainPosX { get; set; } = 0;
+        public float MainPosY { get; set; } = 0;
         
         public InventoryType(ResourceLocation id, int prependSlotCount, int mainSlotWidth, int mainSlotHeight,
-            bool hasBackpackSlots, bool hasHotbarSlots, int appendSlotCount, Dictionary<int, InventorySlotInfo> extraSlotInfo)
+            bool hasBackpackSlots, bool hasHotbarSlots, int appendSlotCount,
+            Dictionary<int, InventorySlotInfo> extraSlotInfo, List<InventorySpriteInfo> spriteInfo)
         {
             TypeId = id;
             
@@ -150,6 +163,7 @@ namespace CraftSharp.Inventory
             HasHotbarSlots = hasHotbarSlots;
             AppendSlotCount = appendSlotCount;
             this.extraSlotInfo = extraSlotInfo;
+            this.spriteInfo = spriteInfo;
         }
 
         public override string ToString()

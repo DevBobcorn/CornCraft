@@ -24,6 +24,7 @@ namespace CraftSharp.UI
         [SerializeField] private Transform slotCenterRef;
         [SerializeField] private Sprite selectedSprite;
         [SerializeField] private TMP_Text keyHintText;
+        [SerializeField] private Image placeholderImage;
 
         [SerializeField] private float fullItemScale = 60F;
 
@@ -35,6 +36,7 @@ namespace CraftSharp.UI
 
         // Use null for empty items
         private ItemStack? itemStack = null;
+        private bool hasVisibleItem = false;
         private bool cursorTextDirty = false;
 
         private void Awake()
@@ -46,6 +48,16 @@ namespace CraftSharp.UI
         public void SetKeyHint(string keyHint)
         {
             keyHintText.text = keyHint;
+        }
+
+        public void SetPlaceholderSprite(Sprite? sprite)
+        {
+            placeholderImage.sprite = sprite;
+            
+            if (hasVisibleItem)
+                HidePlaceholderImage();
+            else
+                ShowPlaceholderImage();
         }
 
         private void UpdateCursorText()
@@ -124,6 +136,18 @@ namespace CraftSharp.UI
             cursorTextHandler?.Invoke(string.Empty);
         }
 
+        private void ShowPlaceholderImage()
+        {
+            if (!placeholderImage || !placeholderImage.sprite) return;
+            placeholderImage.gameObject.SetActive(true);
+        }
+        
+        private void HidePlaceholderImage()
+        {
+            if (!placeholderImage) return;
+            placeholderImage.gameObject.SetActive(false);
+        }
+        
         private Action<InventoryActionType> clickHandler;
         private Action<string> cursorTextHandler;
 
@@ -164,7 +188,7 @@ namespace CraftSharp.UI
         {
             var result = ItemMeshBuilder.BuildItem(itemStack, true);
 
-            if (result != null) // If build suceeded
+            if (result != null) // If build succeeded
             {
                 itemMeshFilter.sharedMesh = result.Value.mesh;
                 itemMeshRenderer.sharedMaterial = result.Value.material;
@@ -172,7 +196,7 @@ namespace CraftSharp.UI
                 // Handle GUI display transform
                 bool hasGUITransform = result.Value.transforms.TryGetValue(DisplayPosition.GUI, out float3x3 t);
                 // Make use of the debug text
-                itemText.text = itemStack.Count > 1 ? itemStack.Count.ToString() : string.Empty;
+                itemText.text = itemStack!.Count > 1 ? itemStack.Count.ToString() : string.Empty;
 
                 if (hasGUITransform) // Apply specified local transform
                 {
@@ -198,11 +222,17 @@ namespace CraftSharp.UI
                     // Apply local scale
                     modelObject.transform.localScale = Vector3.one;
                 }
+                
+                hasVisibleItem = true;
+                HidePlaceholderImage();
             }
             else // If build failed (item is empty or invalid)
             {
                 itemMeshFilter.sharedMesh = null;
                 itemText.text = string.Empty;
+
+                hasVisibleItem = false;
+                ShowPlaceholderImage();
             }
         }
     }

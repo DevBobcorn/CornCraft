@@ -134,7 +134,7 @@ namespace CraftSharp.UI
         {
             var result = ItemMeshBuilder.BuildItem(new ItemStack(ItemPalette.INSTANCE.GetById(itemId), 1), true);
 
-            if (result != null) // If build suceeded
+            if (result != null) // If build succeeded
             {
                 itemIconMeshFilter.sharedMesh = result.Value.mesh;
                 itemIconMeshRenderer.sharedMaterial = result.Value.material;

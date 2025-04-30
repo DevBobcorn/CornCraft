@@ -27,7 +27,7 @@ namespace CraftSharp.Rendering
                     {
                         var result = ItemMeshBuilder.BuildItem(item, false);
 
-                        if (result != null) // If build suceeded
+                        if (result != null) // If build succeeded
                         {
                             itemMeshFilter.sharedMesh = result.Value.mesh;
                             itemMeshRenderer.sharedMaterial = result.Value.material;

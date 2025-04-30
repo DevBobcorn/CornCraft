@@ -87,6 +87,7 @@ namespace CraftSharp.UI
                 var slotPos = inventoryType.GetInventorySlotPos(i);
                 
                 var newSlot = createSlot(slotPos.x, slotPos.y,
+                    inventoryType.GetInventorySlotPlaceholderSpriteTypeId(i),
                     $"Slot [{i}] (Work Prepend) [{inventoryType.GetInventorySlotType(i)}]");
                 
                 setupSlot(i, newSlot);
@@ -99,7 +100,7 @@ namespace CraftSharp.UI
                 for (int x = 0; x < inventoryType.MainSlotWidth; x++, i++)
                 {
                     var newSlot = createSlot(x + workMainPosX,
-                        workMainPosY + inventoryType.MainSlotHeight - y - 1,
+                        workMainPosY + inventoryType.MainSlotHeight - y - 1, null,
                         $"Slot [{workMainStart + i}] (Work Main)");
                     
                     setupSlot(workMainStart + i, newSlot);
@@ -149,6 +150,7 @@ namespace CraftSharp.UI
                 var slotPos = inventoryType.GetInventorySlotPos(i);
                 
                 var newSlot = createSlot(slotPos.x, slotPos.y,
+                    inventoryType.GetInventorySlotPlaceholderSpriteTypeId(i),
                     $"Slot [{i}] (Work Append) [{inventoryType.GetInventorySlotType(i)}]");
 
                 setupSlot(i, newSlot);
@@ -161,6 +163,11 @@ namespace CraftSharp.UI
             // Initialize player inventory slots (these won't be sent because client already have them)
             if (activeInventoryId == 0)
             {
+                currentSlots[0].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(0)); // Output
+                currentSlots[1].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(1));
+                currentSlots[2].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(2));
+                currentSlots[3].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(3));
+                currentSlots[4].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(4));
                 currentSlots[5].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(5)); // Head
                 currentSlots[6].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(6)); // Chest
                 currentSlots[7].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(7)); // Legs
@@ -173,7 +180,7 @@ namespace CraftSharp.UI
 
             return;
             
-            void createSprite(int x, int y, int w, int h, ResourceLocation spriteTypeId)
+            void createSprite(float x, float y, int w, int h, ResourceLocation spriteTypeId)
             {
                 var spriteObj = Instantiate(inventorySpritePrefab, workPanel);//new GameObject($"Sprite {spriteTypeId}");
                 var spriteImage = spriteObj.GetComponent<Image>();
@@ -189,7 +196,8 @@ namespace CraftSharp.UI
                 spriteObj.name = $"Sprite [{spriteTypeId}]";
             }
 
-            InventoryItemSlot createSlot(int x, int y, string slotName)
+            InventoryItemSlot createSlot(float x, float y,
+                ResourceLocation? placeholderSpriteTypeId, string slotName)
             {
                 var slotObj = Instantiate(inventorySlotPrefab, workPanel);
                 var slot = slotObj.GetComponent<InventoryItemSlot>();
@@ -197,6 +205,13 @@ namespace CraftSharp.UI
                 slotObj.GetComponent<RectTransform>().anchoredPosition =
                     new Vector2(x * inventorySlotSize, y * inventorySlotSize);
                 slotObj.name = slotName;
+
+                if (placeholderSpriteTypeId.HasValue) // Set placeholder sprite
+                {
+                    var placeholderSprite = SpriteTypePalette.INSTANCE.GetById(
+                        placeholderSpriteTypeId.Value).Sprite;
+                    slot.SetPlaceholderSprite(placeholderSprite);
+                }
 
                 return slot;
             }

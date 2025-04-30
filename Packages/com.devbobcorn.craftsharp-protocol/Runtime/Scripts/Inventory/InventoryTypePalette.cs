@@ -56,6 +56,7 @@ namespace CraftSharp
                         var hh = !inventoryDef.Properties.TryGetValue("has_hotbar_slots", out val) || bool.Parse(val.StringValue); // True if not specified
 
                         var slotInfo = new Dictionary<int, InventoryType.InventorySlotInfo>();
+                        var spriteInfo = new List<InventoryType.InventorySpriteInfo>();
 
                         if (inventoryDef.Properties.TryGetValue("slots", out val))
                         {
@@ -64,16 +65,13 @@ namespace CraftSharp
                                 slotInfo[int.Parse(key2)] = getSlotInfo(data);
                             }
                         }
-
-                        var t = new InventoryType(inventoryTypeId, p, w, h, hb, hh, a, slotInfo);
                         
                         if (inventoryDef.Properties.TryGetValue("sprites", out val))
                         {
-                            foreach (var info in val.DataArray.Select(getSpriteInfo))
-                            {
-                                t.spriteInfo.Add(info);
-                            }
+                            spriteInfo.AddRange(val.DataArray.Select(getSpriteInfo));
                         }
+                        
+                        var t = new InventoryType(inventoryTypeId, p, w, h, hb, hh, a, slotInfo, spriteInfo);
                         
                         if (inventoryDef.Properties.TryGetValue("work_panel_height", out val))
                             t.WorkPanelHeight = int.Parse(val.StringValue);
@@ -132,7 +130,10 @@ namespace CraftSharp
                 var x = data.Properties.TryGetValue("pos_x", out val) ? int.Parse(val.StringValue) : 0;
                 var y = data.Properties.TryGetValue("pos_y", out val) ? int.Parse(val.StringValue) : 0;
 
-                return new(x, y, type);
+                ResourceLocation? placeholderTypeId = data.Properties.TryGetValue("placeholder_type_id", out val) ?
+                    ResourceLocation.FromString(val.StringValue) : null;
+                
+                return new(x, y, type, placeholderTypeId);
             }
             
             static InventoryType.InventorySpriteInfo getSpriteInfo(Json.JSONData data)
