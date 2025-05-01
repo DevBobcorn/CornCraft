@@ -43,11 +43,104 @@
     },
     "minecraft:anvil": {
         "protocol_id": 7,
-        "prepend_slot_count": 3
+        "prepend_slot_count": 3,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_iron_hammer",
+                "pos_x": 0.5,
+                "pos_y": 1.5,
+                "width": 2,
+                "height": 2
+            },
+            {
+                "type_id": "corncraft:plus",
+                "pos_x": 2.5,
+                "pos_y": 0
+            },
+            {
+                "type_id": "corncraft:arrow_right",
+                "pos_x": 5.5,
+                "pos_y": 0
+            }
+        ],
+        "slots": {
+            "0": {
+                "pos_x": 1,
+                "pos_y": 0
+            },
+            "1": {
+                "pos_x": 4,
+                "pos_y": 0
+            },
+            "2": {
+                "type": "output",
+                "pos_x": 7,
+                "pos_y": 0
+            }
+        },
+        "work_panel_height": 4
     },
     "minecraft:beacon": {
         "protocol_id": 8,
-        "prepend_slot_count": 1
+        "prepend_slot_count": 1,
+        "append_slot_count": 5,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_background_beacon",
+                "pos_x": 0,
+                "pos_y": 0,
+                "width": 9,
+                "height": 5
+            }
+        ],
+        "slots": {
+            "0": {
+                "type": "beacon_activation_item",
+                "pos_x": 6,
+                "pos_y": 0
+            },
+            "37": {
+                "type": "preview",
+                "preview_item": {
+                    "item_id": "minecraft:netherite_ingot"
+                },
+                "pos_x": 0,
+                "pos_y": 0
+            },
+            "38": {
+                "type": "preview",
+                "preview_item": {
+                    "item_id": "minecraft:emerald"
+                },
+                "pos_x": 1,
+                "pos_y": 0
+            },
+            "39": {
+                "type": "preview",
+                "preview_item": {
+                    "item_id": "minecraft:diamond"
+                },
+                "pos_x": 2,
+                "pos_y": 0
+            },
+            "40": {
+                "type": "preview",
+                "preview_item": {
+                    "item_id": "minecraft:gold_ingot"
+                },
+                "pos_x": 3,
+                "pos_y": 0
+            },
+            "41": {
+                "type": "preview",
+                "preview_item": {
+                    "item_id": "minecraft:iron_ingot"
+                },
+                "pos_x": 4,
+                "pos_y": 0
+            }
+        },
+        "work_panel_height": 5
     },
     "minecraft:blast_furnace": {
         "protocol_id": 9,
@@ -55,7 +148,46 @@
     },
     "minecraft:brewing_stand": {
         "protocol_id": 10,
-        "prepend_slot_count": 5
+        "prepend_slot_count": 5,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_background_brewing",
+                "pos_x": 0,
+                "pos_y": 0,
+                "width": 9,
+                "height": 3
+            }
+        ],
+        "slots": {
+            "0": {
+                "type": "bottle",
+                "pos_x": 2.5,
+                "pos_y": 0.5,
+                "placeholder_type_id": "corncraft:empty_slot_bottle"
+            },
+            "1": {
+                "type": "bottle",
+                "pos_x": 4,
+                "pos_y": 0,
+                "placeholder_type_id": "corncraft:empty_slot_bottle"
+            },
+            "2": {
+                "type": "bottle",
+                "pos_x": 5.5,
+                "pos_y": 0.5,
+                "placeholder_type_id": "corncraft:empty_slot_bottle"
+            },
+            "3": {
+                "pos_x": 4,
+                "pos_y": 2
+            },
+            "4": {
+                "type": "blaze_powder",
+                "pos_x": 1.5,
+                "pos_y": 2.0,
+                "placeholder_type_id": "corncraft:empty_slot_blaze_powder"
+            }
+        }
     },
     "minecraft:crafting": {
         "protocol_id": 11,

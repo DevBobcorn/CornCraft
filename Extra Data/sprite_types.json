@@ -36,9 +36,90 @@
         "texture_id": "minecraft:item/empty_armor_slot_shield",
         "invert_color": true
     },
+    "corncraft:empty_slot_axe": {
+        "texture_id": "minecraft:item/empty_slot_axe",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_pickaxe": {
+        "texture_id": "minecraft:item/empty_slot_pickaxe",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_hoe": {
+        "texture_id": "minecraft:item/empty_slot_hoe",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_shovel": {
+        "texture_id": "minecraft:item/empty_slot_shovel",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_sword": {
+        "texture_id": "minecraft:item/empty_slot_sword",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_amethyst_shard": {
+        "texture_id": "minecraft:item/empty_slot_amethyst_shard",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_diamond": {
+        "texture_id": "minecraft:item/empty_slot_diamond",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_emerald": {
+        "texture_id": "minecraft:item/empty_slot_emerald",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_ingot": {
+        "texture_id": "minecraft:item/empty_slot_ingot",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_lapis_lazuli": {
+        "texture_id": "minecraft:item/empty_slot_lapis_lazuli",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_quartz": {
+        "texture_id": "minecraft:item/empty_slot_quartz",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_redstone_dust": {
+        "texture_id": "minecraft:item/empty_slot_redstone_dust",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_bottle": {
+        "texture_id": "minecraft:item/empty_slot_bottle",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_blaze_powder": {
+        "texture_id": "minecraft:item/empty_slot_blaze_powder",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_smithing_template_armor_trim": {
+        "texture_id": "minecraft:item/empty_slot_smithing_template_armor_trim",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_smithing_template_netherite_upgrade": {
+        "texture_id": "minecraft:item/empty_slot_smithing_template_netherite_upgrade",
+        "invert_color": true
+    },
 
     "corncraft:arrow_right": {
         "texture_id": "corncraft:icon/arrow_right",
         "use_point_filter": false
+    },
+    "corncraft:plus": {
+        "texture_id": "corncraft:icon/plus"
+    },
+
+    "corncraft:gui_background_beacon": {
+        "texture_id": "corncraft:background/background_beacon"
+    },
+    "corncraft:gui_background_brewing": {
+        "texture_id": "corncraft:background/background_brewing"
+    },
+
+    "corncraft:gui_iron_hammer": {
+        "texture_id": "corncraft:icon/gui_iron_hammer"
+    },
+    "corncraft:gui_netherite_hammer": {
+        "texture_id": "corncraft:icon/gui_netherite_hammer"
     }
 }

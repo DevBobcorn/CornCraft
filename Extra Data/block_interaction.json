@@ -1211,38 +1211,215 @@
         "minecraft:polished_blackstone_button"
       ]
     },
-    "craft": {
+    "barrel": {
       "action": "interact",
-      "hint": "gameplay.interaction.craft",
+      "hint": "container.barrel",
       "icon_type_id": "corncraft:dialog",
       "reusable": true,
       "triggers": [
-        "minecraft:crafting_table"
+        "minecraft:barrel"
       ]
     },
-    "smelt": {
+    "beacon": {
       "action": "interact",
-      "hint": "gameplay.interaction.smelt",
+      "hint": "container.beacon",
       "icon_type_id": "corncraft:dialog",
       "reusable": true,
       "triggers": [
-        "minecraft:furnace",
-        "minecraft:blast_furnace",
-        "minecraft:smoker"
+        "minecraft:beacon"
       ]
     },
-    "open_container": {
+    "blast_furnace": {
       "action": "interact",
-      "hint": "gameplay.interaction.open_container",
+      "hint": "container.blast_furnace",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:blast_furnace"
+      ]
+    },
+    "brewing": {
+      "action": "interact",
+      "hint": "container.brewing",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:brewing_stand"
+      ]
+    },
+    "cartography_table": {
+      "action": "interact",
+      "hint": "container.cartography_table",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:cartography_table"
+      ]
+    },
+    "chest": {
+      "action": "interact",
+      "hint": "container.chest",
+      "predicate": "type=single",
       "icon_type_id": "corncraft:dialog",
       "reusable": true,
       "triggers": [
         "minecraft:chest",
-        "minecraft:barrel",
-        "minecraft:ender_chest",
-        "minecraft:dropper",
-        "minecraft:dispenser",
+        "minecraft:trapped_chest"
+      ]
+    },
+    "chest_large": {
+      "action": "interact",
+      "hint": "container.chestDouble",
+      "predicate": "type=left",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:chest",
+        "minecraft:trapped_chest"
+      ]
+    },
+    "crafter": {
+      "action": "interact",
+      "hint": "container.crafter",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:crafter"
+      ]
+    },
+    "dispenser": {
+      "action": "interact",
+      "hint": "container.dispenser",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:dispenser"
+      ]
+    },
+    "dropper": {
+      "action": "interact",
+      "hint": "container.dropper",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:dropper"
+      ]
+    },
+    "enchant": {
+      "action": "interact",
+      "hint": "container.enchant",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:enchanting_table"
+      ]
+    },
+    "enderchest": {
+      "action": "interact",
+      "hint": "container.enderchest",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:ender_chest"
+      ]
+    },
+    "furnace": {
+      "action": "interact",
+      "hint": "container.furnace",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:furnace"
+      ]
+    },
+    "grindstone": {
+      "action": "interact",
+      "hint": "container.grindstone_title",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:grindstone"
+      ]
+    },
+    "hopper": {
+      "action": "interact",
+      "hint": "container.hopper",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
         "minecraft:hopper"
+      ]
+    },
+    "lectern": {
+      "action": "interact",
+      "hint": "container.lectern",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:lectern"
+      ]
+    },
+    "repair": {
+      "action": "interact",
+      "hint": "container.repair",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:anvil",
+        "minecraft:chipped_anvil",
+        "minecraft:damaged_anvil"
+      ]
+    },
+    "shulker_box": {
+      "action": "interact",
+      "hint": "container.shulkerBox",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:shulker_box",
+        "minecraft:black_shulker_box",
+        "minecraft:blue_shulker_box",
+        "minecraft:brown_shulker_box",
+        "minecraft:cyan_shulker_box",
+        "minecraft:gray_shulker_box",
+        "minecraft:green_shulker_box",
+        "minecraft:light_blue_shulker_box",
+        "minecraft:light_gray_shulker_box",
+        "minecraft:lime_shulker_box",
+        "minecraft:magenta_shulker_box",
+        "minecraft:orange_shulker_box",
+        "minecraft:pink_shulker_box",
+        "minecraft:purple_shulker_box",
+        "minecraft:red_shulker_box",
+        "minecraft:white_shulker_box",
+        "minecraft:yellow_shulker_box"
+      ]
+    },
+    "smoker": {
+      "action": "interact",
+      "hint": "container.smoker",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:smoker"
+      ]
+    },
+    "stonecutter": {
+      "action": "interact",
+      "hint": "container.stonecutter",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:stonecutter"
+      ]
+    },
+    "upgrade": {
+      "action": "interact",
+      "hint": "container.upgrade",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:smithing_table"
       ]
     }
   }
