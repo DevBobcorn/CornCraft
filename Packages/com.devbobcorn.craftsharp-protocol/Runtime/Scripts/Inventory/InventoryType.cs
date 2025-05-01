@@ -43,17 +43,17 @@ namespace CraftSharp.Inventory
             9, 0, 0, true, true, 1,
             new()
             {
-                [0] = new(8, 2, InventorySlotType.Output, null),
-                [1] = new(5, 2.5F, InventorySlotType.Regular, null),
-                [2] = new(6, 2.5F, InventorySlotType.Regular, null),
-                [3] = new(5, 1.5F, InventorySlotType.Regular, null),
-                [4] = new(6, 1.5F, InventorySlotType.Regular, null),
-                [5] = new(0, 3, InventorySlotType.Helmet, ResourceLocation.FromString("corncraft:empty_armor_slot_helmet")),
-                [6] = new(0, 2, InventorySlotType.Chestplate, ResourceLocation.FromString("corncraft:empty_armor_slot_chestplate")),
-                [7] = new(0, 1, InventorySlotType.Leggings, ResourceLocation.FromString("corncraft:empty_armor_slot_leggings")),
-                [8] = new(0, 0, InventorySlotType.Boots, ResourceLocation.FromString("corncraft:empty_armor_slot_boots")),
+                [0] = new(8, 2, InventorySlotType.Output, null, null),
+                [1] = new(5, 2.5F, InventorySlotType.Regular, null, null),
+                [2] = new(6, 2.5F, InventorySlotType.Regular, null, null),
+                [3] = new(5, 1.5F, InventorySlotType.Regular, null, null),
+                [4] = new(6, 1.5F, InventorySlotType.Regular, null, null),
+                [5] = new(0, 3, InventorySlotType.Helmet, null, ResourceLocation.FromString("corncraft:empty_armor_slot_helmet")),
+                [6] = new(0, 2, InventorySlotType.Chestplate, null, ResourceLocation.FromString("corncraft:empty_armor_slot_chestplate")),
+                [7] = new(0, 1, InventorySlotType.Leggings, null, ResourceLocation.FromString("corncraft:empty_armor_slot_leggings")),
+                [8] = new(0, 0, InventorySlotType.Boots, null, ResourceLocation.FromString("corncraft:empty_armor_slot_boots")),
 
-                [45] = new(4, 0, InventorySlotType.Offhand, ResourceLocation.FromString("corncraft:empty_armor_slot_shield"))
+                [45] = new(4, 0, InventorySlotType.Offhand, null, ResourceLocation.FromString("corncraft:empty_armor_slot_shield"))
             },
             new()
             {
@@ -67,8 +67,8 @@ namespace CraftSharp.Inventory
             2, 0, 0, true, true, 0,
             new()
             {
-                [0] = new(0, 2, InventorySlotType.HorseArmor, null),
-                [1] = new(0, 2, InventorySlotType.Saddle, null)
+                [0] = new(0, 2, InventorySlotType.HorseArmor, null, null),
+                [1] = new(0, 2, InventorySlotType.Saddle, null, null)
             },
             new())
         {
@@ -79,8 +79,8 @@ namespace CraftSharp.Inventory
             2, 5, 3, true, true, 0,
             new()
             {
-                [0] = new(0, 2, InventorySlotType.HorseArmor, null),
-                [1] = new(0, 2, InventorySlotType.Saddle, null)
+                [0] = new(0, 2, InventorySlotType.HorseArmor, null, null),
+                [1] = new(0, 2, InventorySlotType.Saddle, null, null)
             },
             new())
         {
@@ -112,11 +112,12 @@ namespace CraftSharp.Inventory
         
         public readonly List<InventorySpriteInfo> spriteInfo;
 
-        public record InventorySlotInfo(float PosX, float PosY, InventorySlotType Type, ResourceLocation? PlaceholderTypeId)
+        public record InventorySlotInfo(float PosX, float PosY, InventorySlotType Type, ItemStack PreviewItemStack, ResourceLocation? PlaceholderTypeId)
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
             public InventorySlotType Type { get; } = Type;
+            public ItemStack PreviewItemStack { get; } = PreviewItemStack;
             public ResourceLocation? PlaceholderTypeId { get; } = PlaceholderTypeId;
         }
         
@@ -132,6 +133,11 @@ namespace CraftSharp.Inventory
         public Vector2 GetInventorySlotPos(int slot)
         {
             return extraSlotInfo.TryGetValue(slot, out var info) ? new(info.PosX, info.PosY) : Vector2.zero;
+        }
+        
+        public ItemStack GetInventorySlotPreviewItem(int slot)
+        {
+            return extraSlotInfo.TryGetValue(slot, out var info) ? info.PreviewItemStack : null;
         }
         
         public ResourceLocation? GetInventorySlotPlaceholderSpriteTypeId(int slot)

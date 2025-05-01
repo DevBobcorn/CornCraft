@@ -122,18 +122,35 @@ namespace CraftSharp
                     "saddle" => InventorySlotType.Saddle,
                     "beacon_activation_item" => InventorySlotType.BeaconActivationItem,
                     "bottle" => InventorySlotType.Bottle,
+                    "blaze_powder" => InventorySlotType.BlazePowder,
+                    "lapis_lazuli" => InventorySlotType.LapisLazuli,
                     "smithing_template" => InventorySlotType.SmithingTemplate,
+                    "preview" => InventorySlotType.Preview,
                     
                     _ => InventorySlotType.Regular
                 };
                 
-                var x = data.Properties.TryGetValue("pos_x", out val) ? int.Parse(val.StringValue) : 0;
-                var y = data.Properties.TryGetValue("pos_y", out val) ? int.Parse(val.StringValue) : 0;
+                var x = data.Properties.TryGetValue("pos_x", out val) ? float.Parse(val.StringValue) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ? float.Parse(val.StringValue) : 0;
 
+                ItemStack previewItem = type == InventorySlotType.Preview &&
+                                        data.Properties.TryGetValue("preview_item", out val)
+                                        ? getItemStack(val) : null;
+                
                 ResourceLocation? placeholderTypeId = data.Properties.TryGetValue("placeholder_type_id", out val) ?
                     ResourceLocation.FromString(val.StringValue) : null;
-                
-                return new(x, y, type, placeholderTypeId);
+
+                return new(x, y, type, previewItem, placeholderTypeId);
+            }
+
+            static ItemStack getItemStack(Json.JSONData data)
+            {
+                var typeId = data.Properties.TryGetValue("item_id", out var val) ?
+                    ResourceLocation.FromString(val.StringValue) : ResourceLocation.INVALID;
+                var count = data.Properties.TryGetValue("count", out val) ?
+                    int.Parse(val.StringValue) : 1; // Count is 1 by default
+
+                return new ItemStack(ItemPalette.INSTANCE.GetById(typeId), count);
             }
             
             static InventoryType.InventorySpriteInfo getSpriteInfo(Json.JSONData data)
@@ -141,8 +158,8 @@ namespace CraftSharp
                 var typeId = data.Properties.TryGetValue("type_id", out var val) ?
                     ResourceLocation.FromString(val.StringValue) : ResourceLocation.INVALID;
                 
-                var x = data.Properties.TryGetValue("pos_x", out val) ? int.Parse(val.StringValue) : 0;
-                var y = data.Properties.TryGetValue("pos_y", out val) ? int.Parse(val.StringValue) : 0;
+                var x = data.Properties.TryGetValue("pos_x", out val) ? float.Parse(val.StringValue) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ? float.Parse(val.StringValue) : 0;
                 var w = data.Properties.TryGetValue("width", out val) ? int.Parse(val.StringValue) : 1;
                 var h = data.Properties.TryGetValue("height", out val) ? int.Parse(val.StringValue) : 1;
 

@@ -87,6 +87,7 @@ namespace CraftSharp.UI
                 var slotPos = inventoryType.GetInventorySlotPos(i);
                 
                 var newSlot = createSlot(slotPos.x, slotPos.y,
+                    inventoryType.GetInventorySlotPreviewItem(i),
                     inventoryType.GetInventorySlotPlaceholderSpriteTypeId(i),
                     $"Slot [{i}] (Work Prepend) [{inventoryType.GetInventorySlotType(i)}]");
                 
@@ -100,7 +101,8 @@ namespace CraftSharp.UI
                 for (int x = 0; x < inventoryType.MainSlotWidth; x++, i++)
                 {
                     var newSlot = createSlot(x + workMainPosX,
-                        workMainPosY + inventoryType.MainSlotHeight - y - 1, null,
+                        workMainPosY + inventoryType.MainSlotHeight - y - 1,
+                        null, null,
                         $"Slot [{workMainStart + i}] (Work Main)");
                     
                     setupSlot(workMainStart + i, newSlot);
@@ -150,6 +152,7 @@ namespace CraftSharp.UI
                 var slotPos = inventoryType.GetInventorySlotPos(i);
                 
                 var newSlot = createSlot(slotPos.x, slotPos.y,
+                    inventoryType.GetInventorySlotPreviewItem(i),
                     inventoryType.GetInventorySlotPlaceholderSpriteTypeId(i),
                     $"Slot [{i}] (Work Append) [{inventoryType.GetInventorySlotType(i)}]");
 
@@ -196,7 +199,7 @@ namespace CraftSharp.UI
                 spriteObj.name = $"Sprite [{spriteTypeId}]";
             }
 
-            InventoryItemSlot createSlot(float x, float y,
+            InventoryItemSlot createSlot(float x, float y, ItemStack previewItem,
                 ResourceLocation? placeholderSpriteTypeId, string slotName)
             {
                 var slotObj = Instantiate(inventorySlotPrefab, workPanel);
@@ -211,6 +214,11 @@ namespace CraftSharp.UI
                     var placeholderSprite = SpriteTypePalette.INSTANCE.GetById(
                         placeholderSpriteTypeId.Value).Sprite;
                     slot.SetPlaceholderSprite(placeholderSprite);
+                }
+
+                if (previewItem is not null)
+                {
+                    slot.UpdateItemStack(previewItem);
                 }
 
                 return slot;

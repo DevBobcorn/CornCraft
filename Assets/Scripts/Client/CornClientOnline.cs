@@ -869,7 +869,13 @@ namespace CraftSharp
             
             if (inventory != null)
             {
-                InventoryType inventoryType = inventory.Type;
+                var inventoryType = inventory.Type;
+                var slotType = inventoryType.GetInventorySlotType(slot);
+
+                if (slotType == InventorySlotType.Preview)
+                {
+                    return false; // Not interactable at all
+                }
                 
                 switch (action)
                 {

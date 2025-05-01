@@ -13,6 +13,9 @@ namespace CraftSharp.Inventory
         Saddle,
         BeaconActivationItem,
         Bottle,
+        BlazePowder,
+        LapisLazuli,
         SmithingTemplate,
+        Preview
     }
 }
