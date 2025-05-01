@@ -275,20 +275,20 @@ namespace CraftSharp.UI
                     var blockLoc = blockInfo.BlockLoc;
                     var worldPoint = CoordConvert.MC2Unity(originOffset, blockLoc.ToLocation());
 
+                    // Update interaction hint position
                     var offsetType = ResourcePackManager.Instance.StateModelTable[blockInfo.Block.StateId].OffsetType;
-                    var pointOffset = (Vector3) ChunkRenderBuilder.GetBlockOffsetInBlock(offsetType,
+                    worldPoint += (Vector3) ChunkRenderBuilder.GetBlockOffsetInBlock(offsetType,
                         blockLoc.X >> 4, blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF) + Vector3.one * 0.5F;
 
-                    // Update interaction hint position
-                    var newPos = uiCamera.ViewportToWorldPoint(camControl.GetPointViewportPos(worldPoint + pointOffset));
-
-                    if (newPos.z > 0) // Inside view port
+                    if (IsWorldPointInViewport(camControl.RenderCamera, worldPoint)) // Inside viewport
                     {
+                        var newPos = uiCamera.ViewportToWorldPoint(camControl.GetPointViewportPos(worldPoint));
+
                         // Don't modify z coordinate
                         interactionTargetHint.position = new Vector3(newPos.x, newPos.y, interactionTargetHint.position.z);
                         interactionTargetHintLine.SetPosition(0, interactionTargetHint.position);
                         interactionTargetHintLine.SetPosition(1, selectedOption.KeyHintTransform.position);
-                        
+
                         if (!targetHintShown) ShowTargetHint();
                     }
                     else
@@ -297,6 +297,32 @@ namespace CraftSharp.UI
                     }
                 }
             }
+        }
+
+        private static bool IsWorldPointInViewport(Camera camera, Vector3 worldPoint)
+        {
+            if (!camera)
+            {
+                Debug.LogError("Camera reference is null in IsWorldPointInViewport!");
+                return false;
+            }
+
+            // Convert world point to viewport point
+            Vector3 viewportPoint = camera.WorldToViewportPoint(worldPoint);
+
+            // Check if the x and y coordinates are within the 0-1 range
+            bool isInHorizontalView = viewportPoint.x is >= 0 and <= 1;
+            bool isInVerticalView = viewportPoint.y is >= 0 and <= 1;
+
+            // Check if the z coordinate is positive (in front of the camera)
+            // Note: Points exactly *on* the near clip plane might still render,
+            // but points behind the camera plane (z <= 0) are definitely not visible
+            // from that camera's perspective in a standard projection.
+            bool isForward = viewportPoint.z > 0;
+
+            // The point is in the viewport if it's within the horizontal and vertical
+            // bounds AND in front of the camera.
+            return isInHorizontalView && isInVerticalView && isForward;
         }
 
         public void SelectPrevOption()

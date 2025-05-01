@@ -332,7 +332,7 @@ namespace CraftSharp.UI
         private void LateUpdate()
         {
             var game = CornApp.CurrentClient;
-            if (!game) return;
+            if (!game || !isActive) return;
             
             if (game.CameraController)
             {

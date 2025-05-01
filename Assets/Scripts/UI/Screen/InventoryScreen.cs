@@ -237,7 +237,9 @@ namespace CraftSharp.UI
 
                 slot.SetCursorTextHandler(str =>
                 {
-                    if (string.IsNullOrEmpty(str))
+                    var cursorHasItem = game.GetInventory(0)?.Items.ContainsKey(-1) ?? true;
+
+                    if (string.IsNullOrEmpty(str) || cursorHasItem)
                     {
                         cursorTextPanel.gameObject.SetActive(false);
                     }

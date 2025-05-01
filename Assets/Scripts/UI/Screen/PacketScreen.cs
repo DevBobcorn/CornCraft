@@ -203,10 +203,7 @@ namespace CraftSharp.UI
 
         private void InspectPacketItem(PacketItem packetItem)
         {
-            if (inspectedPacketItem != null)
-            {
-                inspectedPacketItem.DeselectPacket();
-            }
+            inspectedPacketItem?.DeselectPacket();
 
             // Update selection
             inspectedPacketItem = packetItem;
