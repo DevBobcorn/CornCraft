@@ -44,7 +44,7 @@ namespace CraftSharp.Control
     {
         public static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
         private const int MAX_TARGET_DISTANCE = 8;
-        private const int BLOCK_INTERACTION_RADIUS = 3;
+        private const int BLOCK_INTERACTION_RADIUS = 2;
         private const float BLOCK_INTERACTION_RADIUS_SQR = BLOCK_INTERACTION_RADIUS * BLOCK_INTERACTION_RADIUS; // BLOCK_INTERACTION_RADIUS ^ 2
         private const float BLOCK_INTERACTION_RADIUS_SQR_PLUS = (BLOCK_INTERACTION_RADIUS + 0.5F) * (BLOCK_INTERACTION_RADIUS + 0.5F); // (BLOCK_INTERACTION_RADIUS + 0.5f) ^ 2
 

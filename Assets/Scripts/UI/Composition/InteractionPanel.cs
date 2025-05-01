@@ -30,6 +30,7 @@ namespace CraftSharp.UI
         private readonly List<InteractionOption> interactionOptions = new();
 
         private int selectedIndex = 0;
+        private bool targetHintShown = false;
 
         public bool ShouldConsumeMouseScroll => interactionOptions.Count > 1;
 
@@ -128,8 +129,6 @@ namespace CraftSharp.UI
             {
                 option.ShowItemIcon();
             }
-
-            UpdateTargetHintVisibility();
         }
 
         public void HideItemIconsAndTargetHint()
@@ -142,25 +141,13 @@ namespace CraftSharp.UI
             HideTargetHint();
         }
 
-        private void UpdateTargetHintVisibility()
-        {
-            if (selectedIndex >= 0 && selectedIndex < interactionOptions.Count &&
-                    interactionOptions[selectedIndex].interactionInfo is BlockInteractionInfo)
-            {
-                // Fade in interaction hint
-                ShowTargetHint();
-            }
-            else
-            {
-                HideTargetHint();
-            }
-        }
-
         private void ShowTargetHint()
         {
             interactionTargetAnimator.ResetTrigger(SHOW_HASH);
             interactionTargetAnimator.ResetTrigger(HIDE_HASH);
             interactionTargetAnimator.SetTrigger(SHOW_HASH);
+            
+            targetHintShown = true;
         }
 
         private void HideTargetHint()
@@ -168,6 +155,8 @@ namespace CraftSharp.UI
             interactionTargetAnimator.ResetTrigger(SHOW_HASH);
             interactionTargetAnimator.ResetTrigger(HIDE_HASH);
             interactionTargetAnimator.SetTrigger(HIDE_HASH);
+            
+            targetHintShown = false;
         }
 
         private void OnDestroy()
@@ -271,9 +260,7 @@ namespace CraftSharp.UI
 
             if (interactionOptions.Count <= 0)
             {
-                interactionTargetAnimator.ResetTrigger(SHOW_HASH);
-                interactionTargetAnimator.ResetTrigger(HIDE_HASH);
-                interactionTargetAnimator.SetTrigger(HIDE_HASH);
+                HideTargetHint();
             }
         }
 
@@ -295,10 +282,19 @@ namespace CraftSharp.UI
                     // Update interaction hint position
                     var newPos = uiCamera.ViewportToWorldPoint(camControl.GetPointViewportPos(worldPoint + pointOffset));
 
-                    // Don't modify z coordinate
-                    interactionTargetHint.position = new Vector3(newPos.x, newPos.y, interactionTargetHint.position.z);
-                    interactionTargetHintLine.SetPosition(0, interactionTargetHint.position);
-                    interactionTargetHintLine.SetPosition(1, selectedOption.KeyHintTransform.position);
+                    if (newPos.z > 0) // Inside view port
+                    {
+                        // Don't modify z coordinate
+                        interactionTargetHint.position = new Vector3(newPos.x, newPos.y, interactionTargetHint.position.z);
+                        interactionTargetHintLine.SetPosition(0, interactionTargetHint.position);
+                        interactionTargetHintLine.SetPosition(1, selectedOption.KeyHintTransform.position);
+                        
+                        if (!targetHintShown) ShowTargetHint();
+                    }
+                    else
+                    {
+                        if (targetHintShown) HideTargetHint();
+                    }
                 }
             }
         }
@@ -328,8 +324,6 @@ namespace CraftSharp.UI
             {
                 interactionOptions[i].SetSelected(i == selIndex);
             }
-
-            UpdateTargetHintVisibility();
         }
     }
 }
