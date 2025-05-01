@@ -88,7 +88,7 @@ namespace CraftSharp.UI
         public void UpdateKeyHintText(string keyHint)
         {
             // For some special keys, translations are used
-            keyHintText.text = Translations.TryGet(keyHint);
+            keyHintText.text = Translations.Get(keyHint);
         }
 
         public void ShowItemIcon()

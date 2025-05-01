@@ -2,49 +2,33 @@
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using CraftSharp.Protocol;
 using UnityEngine;
 
 namespace CraftSharp
 {
     public static class Translations
     {
-        private static Dictionary<string, string> translations;
-        private static Regex translationKeyRegex = new Regex(@"\(\[(.*?)\]\)", RegexOptions.Compiled); // Extract string inside ([ ])
+        private static readonly Dictionary<string, string> translations;
+        private static readonly Regex translationKeyRegex = new(@"\(\[(.*?)\]\)", RegexOptions.Compiled); // Extract string inside ([ ])
 
         /// <summary>
-        /// Return a tranlation for the requested text. Support string formatting
-        /// </summary>
-        /// <param name="msgName">text identifier</param>
-        /// <returns>returns translation for this identifier</returns>
-        public static string Get(string msgName, params object[] args)
-        {
-            if (translations.ContainsKey(msgName))
-            {
-                if (args.Length > 0)
-                {
-                    return string.Format(translations[msgName], args);
-                }
-                else return translations[msgName];
-            }
-            else
-            {
-                Debug.Log($"Translation key not found: {msgName}");
-            }
-            return msgName.ToUpper();
-        }
-
-        /// <summary>
-        /// Return a tranlation for the requested text. Support string formatting. If not found, return the original text
+        /// Return a translation for the requested text. Support string formatting. If not found, return the original text
         /// </summary>
         /// <param name="msgName">text identifier</param>
         /// <param name="args"></param>
         /// <returns>Translated text or original text if not found</returns>
         /// <remarks>Useful when not sure msgName is a translation mapping key or a normal text</remarks>
-        public static string TryGet(string msgName, params object[] args)
+        public static string Get(string msgName, params object[] args)
         {
             if (translations.ContainsKey(msgName))
-                return Get(msgName, args);
-            else return msgName;
+            {
+                return args.Length > 0 ? string.Format(translations[msgName], args) : translations[msgName];
+            }
+            
+            return ChatParser.TryTranslateString(msgName, out var translated,
+                args.Length > 0 ? args.Select(x => x.ToString()).ToList() : null) ? translated : msgName.ToUpper();
         }
 
         /// <summary>
