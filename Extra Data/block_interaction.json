@@ -1278,6 +1278,18 @@
         "minecraft:trapped_chest"
       ]
     },
+    "chest_large_hidden": {
+      "action": "interact",
+      "hint": "container.chestDouble",
+      "predicate": "type=right",
+      "icon_type_id": "corncraft:dialog",
+      "show_in_list": false,
+      "reusable": true,
+      "triggers": [
+        "minecraft:chest",
+        "minecraft:trapped_chest"
+      ]
+    },
     "crafter": {
       "action": "interact",
       "hint": "container.crafter",
@@ -1285,6 +1297,15 @@
       "reusable": true,
       "triggers": [
         "minecraft:crafter"
+      ]
+    },
+    "crafting": {
+      "action": "interact",
+      "hint": "container.crafting",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:crafting_table"
       ]
     },
     "dispenser": {
