@@ -58,7 +58,7 @@
                 "pos_y": 0
             },
             {
-                "type_id": "corncraft:arrow_right",
+                "type_id": "corncraft:arrow",
                 "pos_x": 5.5,
                 "pos_y": 0
             }
@@ -198,7 +198,7 @@
         "main_pos_y": 0,
         "sprites": [
             {
-                "type_id": "corncraft:arrow_right",
+                "type_id": "corncraft:arrow",
                 "pos_x": 5,
                 "pos_y": 1
             }
@@ -217,7 +217,44 @@
     },
     "minecraft:furnace": {
         "protocol_id": 13,
-        "prepend_slot_count": 3
+        "prepend_slot_count": 3,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_furnace_fire_empty",
+                "pos_x": 2,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:gui_furnace_fire_full",
+                "pos_x": 2,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:arrow_empty",
+                "pos_x": 5,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:arrow",
+                "pos_x": 5,
+                "pos_y": 1
+            }
+        ],
+        "slots": {
+            "0": {
+                "pos_x": 2,
+                "pos_y": 2
+            },
+            "1": {
+                "pos_x": 2,
+                "pos_y": 0
+            },
+            "2": {
+                "type": "output",
+                "pos_x": 7,
+                "pos_y": 1
+            }
+        }
     },
     "minecraft:grindstone": {
         "protocol_id": 14,

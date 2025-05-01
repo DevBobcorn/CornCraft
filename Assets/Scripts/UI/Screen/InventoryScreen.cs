@@ -189,6 +189,7 @@ namespace CraftSharp.UI
                 var spriteImage = spriteObj.GetComponent<Image>();
                 var rectTransform = spriteObj.GetComponent<RectTransform>();
 
+                spriteImage.type = Image.Type.Simple;
                 spriteImage.overrideSprite = SpriteTypePalette.INSTANCE.GetById(spriteTypeId).Sprite;
                 
                 rectTransform.anchoredPosition =

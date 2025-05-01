@@ -58,7 +58,7 @@
                 "pos_y": 0
             },
             {
-                "type_id": "corncraft:arrow_right",
+                "type_id": "corncraft:arrow",
                 "pos_x": 5.5,
                 "pos_y": 0
             }
@@ -198,7 +198,7 @@
         "main_pos_y": 0,
         "sprites": [
             {
-                "type_id": "corncraft:arrow_right",
+                "type_id": "corncraft:arrow",
                 "pos_x": 5,
                 "pos_y": 1
             }

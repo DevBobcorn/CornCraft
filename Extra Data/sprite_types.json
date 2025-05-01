@@ -101,8 +101,12 @@
         "invert_color": true
     },
 
-    "corncraft:arrow_right": {
-        "texture_id": "corncraft:icon/arrow_right",
+    "corncraft:arrow_empty": {
+        "texture_id": "corncraft:icon/arrow_empty",
+        "use_point_filter": false
+    },
+    "corncraft:arrow": {
+        "texture_id": "corncraft:icon/arrow",
         "use_point_filter": false
     },
     "corncraft:plus": {
@@ -121,5 +125,11 @@
     },
     "corncraft:gui_netherite_hammer": {
         "texture_id": "corncraft:icon/gui_netherite_hammer"
+    },
+    "corncraft:gui_furnace_fire_empty": {
+        "texture_id": "corncraft:icon/gui_furnace_fire_empty"
+    },
+    "corncraft:gui_furnace_fire_full": {
+        "texture_id": "corncraft:icon/gui_furnace_fire_full"
     }
 }

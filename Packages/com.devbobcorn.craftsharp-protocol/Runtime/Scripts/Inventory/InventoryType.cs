@@ -57,7 +57,7 @@ namespace CraftSharp.Inventory
             },
             new()
             {
-                new(7, 2, 1, 1, ResourceLocation.FromString("corncraft:arrow_right"))
+                new(7, 2, 1, 1, ResourceLocation.FromString("corncraft:arrow"))
             })
         {
             WorkPanelHeight = 4
