@@ -134,7 +134,7 @@
     "axe_harvest": {
       "action": "break",
       "hint": "gameplay.interaction.axe_harvest",
-      "icon_type_id": "corncraft:dialog",
+      "icon_type_id": "corncraft:empty_slot_axe",
       "item_action": "axe",
       "triggers": [
         "minecraft:acacia_hanging_sign",
@@ -250,6 +250,7 @@
         "minecraft:fern",
         "minecraft:fletching_table",
         "minecraft:glow_lichen",
+        "minecraft:grass",
         "minecraft:short_grass",
         "minecraft:hanging_roots",
         "minecraft:jack_o_lantern",
@@ -481,7 +482,7 @@
     "hoe_harvest": {
       "action": "break",
       "hint": "gameplay.interaction.hoe_harvest",
-      "icon_type_id": "corncraft:dialog",
+      "icon_type_id": "corncraft:empty_slot_hoe",
       "item_action": "hoe",
       "triggers": [
         "minecraft:acacia_leaves",
@@ -518,7 +519,7 @@
     "pickaxe_harvest": {
       "action": "break",
       "hint": "gameplay.interaction.pickaxe_harvest",
-      "icon_type_id": "corncraft:dialog",
+      "icon_type_id": "corncraft:empty_slot_pickaxe",
       "item_action": "pickaxe",
       "triggers": [
         "minecraft:amethyst_block",
@@ -977,7 +978,7 @@
     "shovel_harvest": {
       "action": "break",
       "hint": "gameplay.interaction.shovel_harvest",
-      "icon_type_id": "corncraft:dialog",
+      "icon_type_id": "corncraft:empty_slot_shovel",
       "item_action": "shovel",
       "triggers": [
         "minecraft:clay",
