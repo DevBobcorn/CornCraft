@@ -28,6 +28,8 @@ namespace CraftSharp.UI
         [SerializeField] private float inventorySlotSize = 90F;
 
         private readonly Dictionary<int, InventoryItemSlot> currentSlots = new();
+        // (cur_value_property, max_value_property, sprite_type, sprite_image)
+        private readonly List<(string, string, SpriteType, Image)> currentFilledSprites = new();
 
         private bool isActive = false;
 
@@ -37,6 +39,7 @@ namespace CraftSharp.UI
 #nullable enable
 
         private Action<InventorySlotUpdateEvent>? slotUpdateCallback;
+        private Action<InventoryPropertyUpdateEvent>? propertyUpdateCallback;
 
 #nullable disable
 
@@ -75,10 +78,22 @@ namespace CraftSharp.UI
                 inventoryType.WorkPanelHeight * inventorySlotSize);
             
             // Populate work panel sprites
-            foreach (var sprite in inventoryType.spriteInfo)
+            foreach (var spriteInfo in inventoryType.spriteInfo)
             {
-                createSprite(sprite.PosX, sprite.PosY,
-                    sprite.Width, sprite.Height, sprite.TypeId);
+                var spriteType = SpriteTypePalette.INSTANCE.GetById(spriteInfo.TypeId);
+                var spriteImage = createSprite(spriteInfo.PosX, spriteInfo.PosY,
+                    spriteInfo.Width, spriteInfo.Height, spriteType);
+
+                if (spriteType.ImageType == SpriteType.SpriteImageType.Filled)
+                {
+                    if (spriteInfo.CurFillProperty is null || spriteInfo.MaxFillProperty is null)
+                    {
+                        Debug.LogWarning($"Filled sprite properties for sprite {spriteInfo.TypeId} is not specified!");
+                    }
+                    
+                    // Add it to the list
+                    currentFilledSprites.Add((spriteInfo.CurFillProperty, spriteInfo.MaxFillProperty, spriteType, spriteImage));
+                }
             }
 
             // Populate work panel slots
@@ -183,21 +198,22 @@ namespace CraftSharp.UI
 
             return;
             
-            void createSprite(float x, float y, int w, int h, ResourceLocation spriteTypeId)
+            Image createSprite(float x, float y, int w, int h, SpriteType spriteType)
             {
                 var spriteObj = Instantiate(inventorySpritePrefab, workPanel);//new GameObject($"Sprite {spriteTypeId}");
                 var spriteImage = spriteObj.GetComponent<Image>();
                 var rectTransform = spriteObj.GetComponent<RectTransform>();
 
-                spriteImage.type = Image.Type.Simple;
-                spriteImage.overrideSprite = SpriteTypePalette.INSTANCE.GetById(spriteTypeId).Sprite;
+                SpriteType.SetupSpriteImage(spriteType, spriteImage);
                 
                 rectTransform.anchoredPosition =
                     new Vector2(x * inventorySlotSize, y * inventorySlotSize);
                 rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
                 rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h * inventorySlotSize);
                 
-                spriteObj.name = $"Sprite [{spriteTypeId}]";
+                spriteObj.name = $"Sprite [{spriteType.TypeId}]";
+
+                return spriteImage;
             }
 
             InventoryItemSlot createSlot(float x, float y, ItemStack previewItem,
@@ -237,6 +253,7 @@ namespace CraftSharp.UI
 
                 slot.SetCursorTextHandler(str =>
                 {
+                    if (!game) return;
                     var cursorHasItem = game.GetInventory(0)?.Items.ContainsKey(-1) ?? true;
 
                     if (string.IsNullOrEmpty(str) || cursorHasItem)
@@ -304,6 +321,7 @@ namespace CraftSharp.UI
             }
             
             currentSlots.Clear();
+            currentFilledSprites.Clear();
 
             activeInventoryId = -1;
             activeInventoryData = null;
@@ -327,13 +345,49 @@ namespace CraftSharp.UI
                         Debug.LogWarning($"Slot {e.Slot} is not available!");
                     }
                 }
-                else if (e.InventoryId != 0)
+                else if (e.InventoryId != 0) // Not current inventory, and not player inventory either
                 {
-                    Debug.Log($"Invalid inventory id: {e.InventoryId}, slot {e.Slot}");
+                    Debug.LogWarning($"Invalid inventory id: {e.InventoryId}, slot {e.Slot}");
+                }
+            };
+            
+            propertyUpdateCallback = e =>
+            {
+                if (e.InventoryId == activeInventoryId)
+                {
+                    var propertyName = activeInventoryData.Type.PropertyNames.GetValueOrDefault(e.Property, "unnamed");
+                    
+                    Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
+                    
+                    // Update filled sprites
+                    foreach (var (curPropName, maxPropName, spriteType, spriteImage) in currentFilledSprites)
+                    {
+                        if (curPropName == propertyName || maxPropName == propertyName) // This one needs to be updated
+                        {
+                            if (activeInventoryData.Type.PropertySlots.TryGetValue(curPropName, out var curProp) &&
+                                activeInventoryData.Type.PropertySlots.TryGetValue(maxPropName, out var maxProp))
+                            {
+                                if (activeInventoryData.Properties.TryGetValue(curProp, out var curPropValue) &&
+                                    activeInventoryData.Properties.TryGetValue(maxProp, out var maxPropValue))
+                                {
+                                    SpriteType.UpdateFilledSpriteImage(spriteType, spriteImage, curPropValue, maxPropValue);
+                                }
+                            }
+                            else
+                            {
+                                Debug.LogWarning($"Failed to get property slot for {curPropName} or {maxPropName}, check inventory definition");
+                            }
+                        }
+                    }
+                }
+                else // Not current inventory
+                {
+                    Debug.LogWarning($"Invalid inventory id: {e.InventoryId}, property {e.Property}");
                 }
             };
             
             EventManager.Instance.Register(slotUpdateCallback);
+            EventManager.Instance.Register(propertyUpdateCallback);
         }
 
         public override void UpdateScreen()

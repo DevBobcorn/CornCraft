@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using CraftSharp.Resource;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CraftSharp.UI
 {
@@ -50,8 +51,20 @@ namespace CraftSharp.UI
                     var u2 = !spriteDef.Properties.TryGetValue("use_point_filter", out val) || bool.Parse(val.StringValue); // True if not specified
                     var invert = spriteDef.Properties.TryGetValue("invert_color", out val) && bool.Parse(val.StringValue); // False if not specified
                     var texId = spriteDef.Properties.TryGetValue("texture_id", out val) ? ResourceLocation.FromString(val.StringValue) : ResourceLocation.INVALID;
+                    var imageType = spriteDef.Properties.TryGetValue("image_type", out val) ? SpriteType.GetImageType(val.StringValue) : SpriteType.SpriteImageType.Simple;
 
-                    var t = new SpriteType(spriteTypeId, texId, u1);
+                    var t = new SpriteType(spriteTypeId, texId, imageType, u1);
+                    
+                    // Read type-specific data
+                    if (imageType == SpriteType.SpriteImageType.Filled)
+                    {
+                        t.FillType = spriteDef.Properties.TryGetValue("fill_type", out val) ?
+                            SpriteType.GetFillType(val.StringValue) : SpriteType.SpriteFillType.Left;
+                        t.FillStart = spriteDef.Properties.TryGetValue("fill_start", out val) ?
+                            float.Parse(val.StringValue) : 0F;
+                        t.FillEnd = spriteDef.Properties.TryGetValue("fill_end", out val) ?
+                            float.Parse(val.StringValue) : 1F;
+                    }
 
                     Loom.QueueOnMainThread(() =>
                     {

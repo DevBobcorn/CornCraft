@@ -105,6 +105,12 @@
         "texture_id": "corncraft:icon/arrow_empty",
         "use_point_filter": false
     },
+    "corncraft:arrow_progress": {
+        "texture_id": "corncraft:icon/arrow",
+        "use_point_filter": false,
+        "image_type": "filled",
+        "fill_type": "left"
+    },
     "corncraft:arrow": {
         "texture_id": "corncraft:icon/arrow",
         "use_point_filter": false
@@ -129,7 +135,11 @@
     "corncraft:gui_furnace_fire_empty": {
         "texture_id": "corncraft:icon/gui_furnace_fire_empty"
     },
-    "corncraft:gui_furnace_fire_full": {
-        "texture_id": "corncraft:icon/gui_furnace_fire_full"
+    "corncraft:gui_furnace_fire_progress": {
+        "texture_id": "corncraft:icon/gui_furnace_fire_full",
+        "image_type": "filled",
+        "fill_type": "bottom",
+        "fill_start": 0.16666667,
+        "fill_end": 0.8888889
     }
 }

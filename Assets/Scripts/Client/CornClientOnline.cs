@@ -321,7 +321,8 @@ namespace CraftSharp
                 // Clear world data
                 ChunkRenderManager.ClearChunksData();
                 
-                Loom.QueueOnMainThread(() => {
+                Loom.QueueOnMainThread(() =>
+                {
                     EntityRenderManager.ReloadEntityRenders();
                 });
 
@@ -427,7 +428,8 @@ namespace CraftSharp
             client?.Close();
             client = null;
             
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 // Clear item mesh cache
                 ItemMeshBuilder.ClearMeshCache();
                 
@@ -441,7 +443,8 @@ namespace CraftSharp
         /// </summary>
         public void OnConnectionLost(DisconnectReason reason, string message)
         {
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 // Clear world data
                 ChunkRenderManager.ClearChunksData();
                 EntityRenderManager.ReloadEntityRenders();
@@ -1479,7 +1482,8 @@ namespace CraftSharp
                 ClearInventories();
             }
 
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 ScreenControl.SetLoadingScreen(true);
                 PlayerController.DisablePhysics();
 
@@ -1522,7 +1526,8 @@ namespace CraftSharp
                 {
                     locationReceived = true;
 
-                    Loom.QueueOnMainThread(() => {
+                    Loom.QueueOnMainThread(() =>
+                    {
                         // Update player location
                         PlayerController.SetLocationFromServer(location, mcYaw: yaw);
                         // Force refresh environment collider
@@ -1538,7 +1543,8 @@ namespace CraftSharp
                 }
                 else // Position correction from server
                 {                    
-                    Loom.QueueOnMainThread(() => {
+                    Loom.QueueOnMainThread(() =>
+                    {
                         var delta = PlayerController.transform.position - CoordConvert.MC2Unity(WorldOriginOffset, location);
                         if (delta.magnitude < 8F)
                         {
@@ -1646,7 +1652,8 @@ namespace CraftSharp
             Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventoryData.Title));
             //Debug.Log(Translations.Get("extra.inventory_interact"));
 
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 // Set inventory id before opening the screen
                 ScreenControl.SetScreenData<InventoryScreen>(screen =>
                 {
@@ -1689,10 +1696,7 @@ namespace CraftSharp
             if (!inventories.TryGetValue(inventoryId, out var inventory))
                 return;
 
-            if (inventory.Properties.ContainsKey(propertyId))
-                inventory.Properties.Remove(propertyId);
-
-            inventory.Properties.Add(propertyId, propertyValue);
+            inventory.Properties[propertyId] = propertyValue;
 
             if (inventory.Type.TypeId == InventoryType.ENCHANTMENT_ID)
             {
@@ -1739,6 +1743,11 @@ namespace CraftSharp
                     // TODO: Broadcast enchantment event
                 }
             }
+
+            Loom.QueueOnMainThread(() =>
+            {
+                EventManager.Instance.Broadcast(new InventoryPropertyUpdateEvent(inventoryId, propertyId, propertyValue));
+            });
         }
 
         /// <summary>
@@ -1761,7 +1770,8 @@ namespace CraftSharp
                 }
                 inventory.StateId = stateId;
                 
-                Loom.QueueOnMainThread(() => {
+                Loom.QueueOnMainThread(() =>
+                {
                     foreach (var (slot, itemStack) in itemList)
                     {
                         EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(inventoryId, slot, itemStack));
@@ -1819,7 +1829,8 @@ namespace CraftSharp
                     }
                     else inventory2.Items[slot] = item;
 
-                    Loom.QueueOnMainThread(() => {
+                    Loom.QueueOnMainThread(() =>
+                    {
                         EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(inventoryId, slot, item));
 
                         //Debug.Log($"Set inventory item: [{inventoryId}]/[{slot}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
@@ -1880,15 +1891,9 @@ namespace CraftSharp
         /// <param name="playerUUID">UUID of the player</param>
         public void OnPlayerLeave(Guid playerUUID)
         {
-            //string? username = null;
-
             lock (onlinePlayers)
             {
-                if (onlinePlayers.ContainsKey(playerUUID))
-                {
-                    //username = onlinePlayers[playerUUID].Name;
-                    onlinePlayers.Remove(playerUUID);
-                }
+                onlinePlayers.Remove(playerUUID);
             }
         }
 
@@ -1907,7 +1912,8 @@ namespace CraftSharp
         /// </summary>
         public void OnSpawnEntity(EntityData entity)
         {
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 EntityRenderManager.AddEntityRender(entity);
             });
         }
@@ -1993,7 +1999,8 @@ namespace CraftSharp
         /// </summary>
         public void OnDestroyEntities(int[] entities)
         {
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 EntityRenderManager.RemoveEntityRenders(entities);
             });
         }
@@ -2008,7 +2015,8 @@ namespace CraftSharp
         /// <param name="onGround">Whether the entity is grounded</param>
         public void OnEntityPosition(int entityId, double dx, double dy, double dz, bool onGround)
         {
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 EntityRenderManager.MoveEntityRender(entityId, new(dx, dy, dz));
             });
         }
@@ -2022,7 +2030,8 @@ namespace CraftSharp
         /// <param name="onGround">Whether the entity is grounded</param>
         public void OnEntityRotation(int entityId, byte yaw, byte pitch, bool onGround)
         {
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 EntityRenderManager.RotateEntityRender(entityId, yaw, pitch);
             });
         }
@@ -2034,7 +2043,8 @@ namespace CraftSharp
         /// <param name="headYaw">New head yaw</param>
         public void OnEntityHeadLook(int entityId, byte headYaw)
         {
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 EntityRenderManager.RotateEntityRenderHead(entityId, headYaw);
             });
         }
@@ -2048,14 +2058,16 @@ namespace CraftSharp
         /// <param name="vZ">New z velocity</param>
         public void OnEntityVelocity(int entityId, short vX, short vY, short vZ)
         {
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 EntityRenderManager.SetEntityRenderVelocity(entityId, new(vX / 8000F, vY / 8000F, vZ / 8000F));
             });
         }
 
         public void OnEntityTeleport(int entityId, double X, double Y, double Z, bool onGround)
         {
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 EntityRenderManager.TeleportEntityRender(entityId, new(X, Y, Z));
             });
         }
@@ -2084,7 +2096,8 @@ namespace CraftSharp
             // TimeUpdate sent every server tick hence used as timeout detect
             UpdateKeepAlive();
 
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 EnvironmentManager.SetTime(timeOfDay);
             });
 
@@ -2250,7 +2263,8 @@ namespace CraftSharp
         /// <param name="metadata">The metadata of the entity</param>
         public void OnEntityMetadata(int entityId, Dictionary<int, object?> metadata)
         {
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 var entity = EntityRenderManager.GetEntityRender(entityId);
 
                 if (entity)
@@ -2298,7 +2312,8 @@ namespace CraftSharp
         /// <param name="begin">true if the rain is starting</param>
         public void OnRainChange(bool begin)
         {
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 EnvironmentManager.SetRain(begin);
             });
         }

@@ -148,7 +148,54 @@
     },
     "minecraft:blast_furnace": {
         "protocol_id": 10,
-        "prepend_slot_count": 3
+        "prepend_slot_count": 3,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_furnace_fire_empty",
+                "pos_x": 2,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:gui_furnace_fire_progress",
+                "pos_x": 2,
+                "pos_y": 1,
+                "cur_value_property": "fuel_left",
+                "max_value_property": "maximum_fuel_burn_time"
+            },
+            {
+                "type_id": "corncraft:arrow_empty",
+                "pos_x": 5,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:arrow_progress",
+                "pos_x": 5,
+                "pos_y": 1,
+                "cur_value_property": "progress_arrow",
+                "max_value_property": "maximum_progress"
+            }
+        ],
+        "slots": {
+            "0": {
+                "pos_x": 2,
+                "pos_y": 2
+            },
+            "1": {
+                "pos_x": 2,
+                "pos_y": 0
+            },
+            "2": {
+                "type": "output",
+                "pos_x": 7,
+                "pos_y": 1
+            }
+        },
+        "properties": {
+            "0": "fuel_left",
+            "1": "maximum_fuel_burn_time",
+            "2": "progress_arrow",
+            "3": "maximum_progress"
+        }
     },
     "minecraft:brewing_stand": {
         "protocol_id": 11,
@@ -221,7 +268,54 @@
     },
     "minecraft:furnace": {
         "protocol_id": 14,
-        "prepend_slot_count": 3
+        "prepend_slot_count": 3,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_furnace_fire_empty",
+                "pos_x": 2,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:gui_furnace_fire_progress",
+                "pos_x": 2,
+                "pos_y": 1,
+                "cur_value_property": "fuel_left",
+                "max_value_property": "maximum_fuel_burn_time"
+            },
+            {
+                "type_id": "corncraft:arrow_empty",
+                "pos_x": 5,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:arrow_progress",
+                "pos_x": 5,
+                "pos_y": 1,
+                "cur_value_property": "progress_arrow",
+                "max_value_property": "maximum_progress"
+            }
+        ],
+        "slots": {
+            "0": {
+                "pos_x": 2,
+                "pos_y": 2
+            },
+            "1": {
+                "pos_x": 2,
+                "pos_y": 0
+            },
+            "2": {
+                "type": "output",
+                "pos_x": 7,
+                "pos_y": 1
+            }
+        },
+        "properties": {
+            "0": "fuel_left",
+            "1": "maximum_fuel_burn_time",
+            "2": "progress_arrow",
+            "3": "maximum_progress"
+        }
     },
     "minecraft:grindstone": {
         "protocol_id": 15,
@@ -259,7 +353,54 @@
     },
     "minecraft:smoker": {
         "protocol_id": 22,
-        "prepend_slot_count": 3
+        "prepend_slot_count": 3,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_furnace_fire_empty",
+                "pos_x": 2,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:gui_furnace_fire_progress",
+                "pos_x": 2,
+                "pos_y": 1,
+                "cur_value_property": "fuel_left",
+                "max_value_property": "maximum_fuel_burn_time"
+            },
+            {
+                "type_id": "corncraft:arrow_empty",
+                "pos_x": 5,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:arrow_progress",
+                "pos_x": 5,
+                "pos_y": 1,
+                "cur_value_property": "progress_arrow",
+                "max_value_property": "maximum_progress"
+            }
+        ],
+        "slots": {
+            "0": {
+                "pos_x": 2,
+                "pos_y": 2
+            },
+            "1": {
+                "pos_x": 2,
+                "pos_y": 0
+            },
+            "2": {
+                "type": "output",
+                "pos_x": 7,
+                "pos_y": 1
+            }
+        },
+        "properties": {
+            "0": "fuel_left",
+            "1": "maximum_fuel_burn_time",
+            "2": "progress_arrow",
+            "3": "maximum_progress"
+        }
     },
     "minecraft:cartography_table": {
         "protocol_id": 23,

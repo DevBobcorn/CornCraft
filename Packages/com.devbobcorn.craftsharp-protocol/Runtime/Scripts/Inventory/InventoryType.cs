@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace CraftSharp.Inventory
@@ -112,7 +113,11 @@ namespace CraftSharp.Inventory
         
         public readonly List<InventorySpriteInfo> spriteInfo;
 
-        public record InventorySlotInfo(float PosX, float PosY, InventorySlotType Type, ItemStack PreviewItemStack, ResourceLocation? PlaceholderTypeId)
+        public Dictionary<int, string> PropertyNames = new();
+        public Dictionary<string, int> PropertySlots = new();
+
+        public record InventorySlotInfo(float PosX, float PosY, InventorySlotType Type,
+            ItemStack PreviewItemStack, ResourceLocation? PlaceholderTypeId)
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
@@ -121,13 +126,16 @@ namespace CraftSharp.Inventory
             public ResourceLocation? PlaceholderTypeId { get; } = PlaceholderTypeId;
         }
         
-        public record InventorySpriteInfo(float PosX, float PosY, int Width, int Height, ResourceLocation TypeId)
+        public record InventorySpriteInfo(float PosX, float PosY, int Width, int Height,
+            ResourceLocation TypeId, string CurFillProperty = null, string MaxFillProperty = null)
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
             public int Width { get; } = Width;
             public int Height { get; } = Height;
             public ResourceLocation TypeId { get; } = TypeId;
+            public string CurFillProperty { get; set; } = CurFillProperty;
+            public string MaxFillProperty { get; set; } = MaxFillProperty;
         }
 
         public Vector2 GetInventorySlotPos(int slot)

@@ -84,6 +84,14 @@ namespace CraftSharp
                         
                         if (inventoryDef.Properties.TryGetValue("main_pos_y", out val))
                             t.MainPosY = int.Parse(val.StringValue);
+
+                        if (inventoryDef.Properties.TryGetValue("properties", out val))
+                        {
+                            t.PropertyNames = val.Properties.ToDictionary(
+                                x => int.Parse(x.Key), x => x.Value.StringValue);
+                            t.PropertySlots = val.Properties.ToDictionary(
+                                x => x.Value.StringValue, x => int.Parse(x.Key));
+                        }
                         
                         AddEntry(inventoryTypeId, numId, t);
                     }
@@ -163,7 +171,15 @@ namespace CraftSharp
                 var w = data.Properties.TryGetValue("width", out val) ? int.Parse(val.StringValue) : 1;
                 var h = data.Properties.TryGetValue("height", out val) ? int.Parse(val.StringValue) : 1;
 
-                return new(x, y, w, h, typeId);
+                var spriteInfo = new InventoryType.InventorySpriteInfo(x, y, w, h, typeId);
+
+                if (data.Properties.TryGetValue("cur_value_property", out val))
+                    spriteInfo.CurFillProperty = val.StringValue;
+                
+                if (data.Properties.TryGetValue("max_value_property", out val))
+                    spriteInfo.MaxFillProperty = val.StringValue;
+                
+                return spriteInfo;
             }
         }
     }
