@@ -26,9 +26,9 @@ namespace CraftSharp
         private const int EDITOR_FPS_LIMIT = 60;
 
         public const string CORN_CRAFT_BUILTIN_FILE_NAME = "CornCraftBuiltin";
-        public const int    CORN_CRAFT_BUILTIN_VERSION = 21;
+        public const int    CORN_CRAFT_BUILTIN_VERSION = 22;
         private const string VANILLA_FIX_FILE_NAME = "VanillaFix";
-        private const int    VANILLA_FIX_VERSION = 3;
+        private const int    VANILLA_FIX_VERSION = 4;
 
         private BaseCornClient? Client { get; set; }
 
