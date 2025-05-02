@@ -1123,7 +1123,7 @@ namespace CraftSharp
 
             foreach (var (slotId, slotItem) in changedSlots) // Update local data for each changed slot
             {
-                EventManager.Instance.BroadcastOnUnityThread(new SlotUpdateEvent(inventoryId, slotId, slotItem));
+                EventManager.Instance.BroadcastOnUnityThread(new InventorySlotUpdateEvent(inventoryId, slotId, slotItem));
 
                 if (inventory?.IsBackpack(slotId, out var backpackSlot) ?? false) // Update backpack slots in player inventory
                 {
@@ -1142,18 +1142,18 @@ namespace CraftSharp
                     else
                         playerInventory.Items[slotInPlayerInventory] = slotItem;
                     
-                    EventManager.Instance.BroadcastOnUnityThread(new HotbarUpdateEvent(hotbarSlot, slotItem));
+                    EventManager.Instance.BroadcastOnUnityThread(new HotbarSlotUpdateEvent(hotbarSlot, slotItem));
 
                     if (hotbarSlot == CurrentSlot) // The currently held item is updated
                     {
-                        EventManager.Instance.BroadcastOnUnityThread(new HeldItemChangeEvent(
+                        EventManager.Instance.BroadcastOnUnityThread(new HeldItemUpdateEvent(
                                 hotbarSlot, item, PlayerActionHelper.GetItemActionType(item)));
                     }
                 }
             }
             var cursorItem = playerInventory.Items.GetValueOrDefault(-1);
             Debug.Log($"Changed slots: {string.Join(", ", changedSlots.Select(x => x.Item1))}, Cursor item: {cursorItem}, Non-empty Slot Count: {inventory?.Items.Count}");
-            EventManager.Instance.BroadcastOnUnityThread(new SlotUpdateEvent(inventoryId, -1, cursorItem));
+            EventManager.Instance.BroadcastOnUnityThread(new InventorySlotUpdateEvent(inventoryId, -1, cursorItem));
 
             return handler!.SendInventoryAction(inventoryId, slot, action, item, changedSlots, inventories[inventoryId].StateId);
         }
@@ -1319,9 +1319,9 @@ namespace CraftSharp
                 // update this dropped slot, so we do it manually here.
                 if (protocolVersion >= ProtocolMinecraft.MC_1_17_1_Version)
                 {
-                    EventManager.Instance.Broadcast(new SlotUpdateEvent(0, invSlot, updatedItem));
-                    EventManager.Instance.Broadcast(new HotbarUpdateEvent(CurrentSlot, updatedItem));
-                    EventManager.Instance.Broadcast(new HeldItemChangeEvent(
+                    EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(0, invSlot, updatedItem));
+                    EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(CurrentSlot, updatedItem));
+                    EventManager.Instance.Broadcast(new HeldItemUpdateEvent(
                                         CurrentSlot, updatedItem, PlayerActionHelper.GetItemActionType(updatedItem)));
                 }
             }
@@ -1356,7 +1356,7 @@ namespace CraftSharp
             var curItem = inventories[0].GetHotbarItem(slot);
             // Broad cast hotbar selection change
             EventManager.Instance.BroadcastOnUnityThread(
-                    new HeldItemChangeEvent(CurrentSlot, curItem, PlayerActionHelper.GetItemActionType(curItem)));
+                    new HeldItemUpdateEvent(CurrentSlot, curItem, PlayerActionHelper.GetItemActionType(curItem)));
 
             return handler!.SendHeldItemChange(slot);
         }
@@ -1764,16 +1764,16 @@ namespace CraftSharp
                 Loom.QueueOnMainThread(() => {
                     foreach (var (slot, itemStack) in itemList)
                     {
-                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slot, itemStack));
+                        EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(inventoryId, slot, itemStack));
 
                         Debug.Log($"Set inventory item: [{inventoryId}]/[{slot}] to {itemStack?.ItemType.ItemId.ToString() ?? "AIR"}");
 
                         if (inventory.IsHotbar(slot, out int hotbarSlot))
                         {
-                            EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, itemStack));
+                            EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(hotbarSlot, itemStack));
                             if (hotbarSlot == CurrentSlot) // Updating held item
                             {
-                                EventManager.Instance.Broadcast(new HeldItemChangeEvent(
+                                EventManager.Instance.Broadcast(new HeldItemUpdateEvent(
                                         CurrentSlot, itemStack, PlayerActionHelper.GetItemActionType(itemStack)));
                             }
                         }
@@ -1820,16 +1820,16 @@ namespace CraftSharp
                     else inventory2.Items[slot] = item;
 
                     Loom.QueueOnMainThread(() => {
-                        EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slot, item));
+                        EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(inventoryId, slot, item));
 
                         //Debug.Log($"Set inventory item: [{inventoryId}]/[{slot}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
 
                         if (inventory2.IsHotbar(slot, out int hotbarSlot))
                         {
-                            EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
+                            EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(hotbarSlot, item));
                             if (hotbarSlot == CurrentSlot) // Updating held item
                             {
-                                EventManager.Instance.Broadcast(new HeldItemChangeEvent(
+                                EventManager.Instance.Broadcast(new HeldItemUpdateEvent(
                                         CurrentSlot, item, PlayerActionHelper.GetItemActionType(item)));
                             }
                         }
@@ -2183,7 +2183,7 @@ namespace CraftSharp
             var newItem = inventories[0].GetHotbarItem(slot);
             // Broad cast hotbar selection change
             EventManager.Instance.BroadcastOnUnityThread(
-                    new HeldItemChangeEvent(CurrentSlot, newItem,
+                    new HeldItemUpdateEvent(CurrentSlot, newItem,
                     PlayerActionHelper.GetItemActionType(newItem)));
         }
 

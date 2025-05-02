@@ -1,10 +1,10 @@
 namespace CraftSharp.Event
 {
-    public record TargetBlockLocChangeEvent : BaseEvent
+    public record TargetBlockLocUpdateEvent : BaseEvent
     {
         public BlockLoc? BlockLoc { get; }
 
-        public TargetBlockLocChangeEvent(BlockLoc? blockLoc)
+        public TargetBlockLocUpdateEvent(BlockLoc? blockLoc)
         {
             BlockLoc = blockLoc;
         }

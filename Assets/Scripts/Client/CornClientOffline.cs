@@ -583,7 +583,7 @@ namespace CraftSharp
             var newItem = inventories[0].GetHotbarItem(slot);
             // Broad cast hotbar selection change
             EventManager.Instance.Broadcast(
-                    new HeldItemChangeEvent(CurrentSlot, newItem,
+                    new HeldItemUpdateEvent(CurrentSlot, newItem,
                     PlayerActionHelper.GetItemActionType(newItem)));
         }
 
@@ -642,15 +642,15 @@ namespace CraftSharp
                     }
                     else inventory2.Items[slot] = item;
 
-                    EventManager.Instance.Broadcast(new SlotUpdateEvent(inventoryId, slot, item));
+                    EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(inventoryId, slot, item));
 
                     if (inventory2.IsHotbar(slot, out int hotbarSlot)) // The updated slot is in the hotbar
                     {
-                        EventManager.Instance.Broadcast(new HotbarUpdateEvent(hotbarSlot, item));
+                        EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(hotbarSlot, item));
 
                         if (hotbarSlot == CurrentSlot) // The currently held item is updated
                         {
-                            EventManager.Instance.Broadcast(new HeldItemChangeEvent(
+                            EventManager.Instance.Broadcast(new HeldItemUpdateEvent(
                                     hotbarSlot, item, PlayerActionHelper.GetItemActionType(item)));
                         }
                     }

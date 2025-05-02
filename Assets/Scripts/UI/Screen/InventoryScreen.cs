@@ -36,7 +36,7 @@ namespace CraftSharp.UI
         
 #nullable enable
 
-        private Action<SlotUpdateEvent>? slotUpdateCallback;
+        private Action<InventorySlotUpdateEvent>? slotUpdateCallback;
 
 #nullable disable
 
@@ -318,18 +318,18 @@ namespace CraftSharp.UI
             {
                 if (e.InventoryId == activeInventoryId)
                 {
-                    if (currentSlots.TryGetValue(e.SlotId, out var slot))
+                    if (currentSlots.TryGetValue(e.Slot, out var slot))
                     {
                         slot.UpdateItemStack(e.ItemStack);
                     }
                     else
                     {
-                        Debug.LogWarning($"Slot {e.SlotId} is not available!");
+                        Debug.LogWarning($"Slot {e.Slot} is not available!");
                     }
                 }
                 else if (e.InventoryId != 0)
                 {
-                    Debug.Log($"Invalid inventory id: {e.InventoryId}, slot {e.SlotId}");
+                    Debug.Log($"Invalid inventory id: {e.InventoryId}, slot {e.Slot}");
                 }
             };
             

@@ -73,7 +73,7 @@ namespace CraftSharp.Control
         private CameraController? cameraController;
         private PlayerController? playerController;
 
-        private Action<HeldItemChangeEvent>? heldItemChangeCallback;
+        private Action<HeldItemUpdateEvent>? heldItemChangeCallback;
         private Action<TriggerInteractionExecutionEvent>? triggerInteractionExecutionEvent;
         private Action<HarvestInteractionUpdateEvent>? harvestInteractionUpdateCallback;
 
@@ -134,7 +134,7 @@ namespace CraftSharp.Control
                     TargetBlockLoc = newBlockLoc;
                     blockSelectionBox.transform.position = unityBlockPos;
 
-                    EventManager.Instance.Broadcast(new TargetBlockLocChangeEvent(newBlockLoc));
+                    EventManager.Instance.Broadcast(new TargetBlockLocUpdateEvent(newBlockLoc));
                 }
 
                 // Update shape even if target location is not changed (the block itself may change)
@@ -148,7 +148,7 @@ namespace CraftSharp.Control
                     TargetBlockLoc = null;
                     TargetExactLoc = null;
 
-                    EventManager.Instance.Broadcast(new TargetBlockLocChangeEvent(null));
+                    EventManager.Instance.Broadcast(new TargetBlockLocUpdateEvent(null));
                 }
 
                 // Clear shape if selection box is created
@@ -202,7 +202,7 @@ namespace CraftSharp.Control
             TargetBlockLoc = newBlockLoc;
             blockSelectionBox.transform.position = CoordConvert.MC2Unity(client.WorldOriginOffset, newBlockLoc.ToLocation());
 
-            EventManager.Instance.Broadcast(new TargetBlockLocChangeEvent(newBlockLoc));
+            EventManager.Instance.Broadcast(new TargetBlockLocUpdateEvent(newBlockLoc));
         }
 
         private void UpdateBlockInteractions(ChunkRenderManager chunksManager)

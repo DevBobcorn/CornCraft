@@ -19,8 +19,8 @@ namespace CraftSharp.UI
 
         #nullable enable
 
-        private Action<HotbarUpdateEvent>? hotbarUpdateCallback;
-        private Action<HeldItemChangeEvent>? heldItemChangeCallback;
+        private Action<HotbarSlotUpdateEvent>? hotbarUpdateCallback;
+        private Action<HeldItemUpdateEvent>? heldItemChangeCallback;
 
         #nullable disable
 
