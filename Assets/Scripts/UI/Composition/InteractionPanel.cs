@@ -30,7 +30,7 @@ namespace CraftSharp.UI
         private readonly List<InteractionOption> interactionOptions = new();
 
         private int selectedIndex = 0;
-        private bool targetHintShown = false;
+        private bool targetHintVisible = false;
 
         public bool ShouldConsumeMouseScroll => interactionOptions.Count > 1;
 
@@ -39,7 +39,7 @@ namespace CraftSharp.UI
         private Action<InteractionAddEvent>? addCallback;
         private Action<InteractionRemoveEvent>? removeCallback;
         private Action<HarvestInteractionUpdateEvent>? harvestInteractionUpdateCallback;
-        private Action<TargetBlockLocChangeEvent>? targetBlockLocChangeEvent;
+        private Action<TargetBlockLocUpdateEvent>? targetBlockLocChangeEvent;
 
         public delegate void ItemCountEventHandler(int newCount);
         public event ItemCountEventHandler? OnItemCountChange;
@@ -123,40 +123,24 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(targetBlockLocChangeEvent);
         }
 
-        public void ShowItemIconsAndTargetHint()
+        public void UpdateItemIconsAndTargetHintVisibility(bool visible)
         {
             foreach (var option in interactionOptions)
             {
-                option.ShowItemIcon();
+                option.UpdateItemIconVisibility(visible);
             }
+            
+            if (!visible) // Make sure target hint is hidden
+                UpdateTargetHintVisibility(false);
         }
 
-        public void HideItemIconsAndTargetHint()
-        {
-            foreach (var option in interactionOptions)
-            {
-                option.HideItemIcon();
-            }
-
-            HideTargetHint();
-        }
-
-        private void ShowTargetHint()
+        private void UpdateTargetHintVisibility(bool visible)
         {
             interactionTargetAnimator.ResetTrigger(SHOW_HASH);
             interactionTargetAnimator.ResetTrigger(HIDE_HASH);
-            interactionTargetAnimator.SetTrigger(SHOW_HASH);
+            interactionTargetAnimator.SetTrigger(visible ? SHOW_HASH : HIDE_HASH);
             
-            targetHintShown = true;
-        }
-
-        private void HideTargetHint()
-        {
-            interactionTargetAnimator.ResetTrigger(SHOW_HASH);
-            interactionTargetAnimator.ResetTrigger(HIDE_HASH);
-            interactionTargetAnimator.SetTrigger(HIDE_HASH);
-            
-            targetHintShown = false;
+            targetHintVisible = visible;
         }
 
         private void OnDestroy()
@@ -260,7 +244,7 @@ namespace CraftSharp.UI
 
             if (interactionOptions.Count <= 0)
             {
-                HideTargetHint();
+                UpdateTargetHintVisibility(false);
             }
         }
 
@@ -289,11 +273,11 @@ namespace CraftSharp.UI
                         interactionTargetHintLine.SetPosition(0, interactionTargetHint.position);
                         interactionTargetHintLine.SetPosition(1, selectedOption.KeyHintTransform.position);
 
-                        if (!targetHintShown) ShowTargetHint();
+                        if (!targetHintVisible) UpdateTargetHintVisibility(true);
                     }
                     else
                     {
-                        if (targetHintShown) HideTargetHint();
+                        if (targetHintVisible) UpdateTargetHintVisibility(false);
                     }
                 }
             }

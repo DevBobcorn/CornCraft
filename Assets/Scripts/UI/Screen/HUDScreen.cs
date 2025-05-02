@@ -17,7 +17,7 @@ namespace CraftSharp.UI
 
         // UI controls and objects
         [SerializeField] private TMP_Text latencyText, debugText, modeText;
-        [SerializeField] private Animator modePanelAnimator, crosshairAnimator, statusPanelAnimator;
+        [SerializeField] private Animator modePanelAnimator, crosshairAnimator, statusPanelAnimator, playerPanelAnimator;
         [SerializeField] private Button[] modeButtons = new Button[4];
         [SerializeField] private ValueBar healthBar;
         [SerializeField] private RingValueBar staminaBar;
@@ -44,17 +44,19 @@ namespace CraftSharp.UI
                 isActive = value;
                 
                 screenAnimator.SetBool(SHOW_HASH, isActive);
+                var gamemode = CornApp.CurrentClient?.GameMode ?? GameMode.Spectator;
 
                 if (isActive)
                 {
+                    // Set transition cooldown to prevent HUD screen from being pushed and popped repeatedly
                     transitionCooldown = transitionTime;
-                    // Show 3d items
-                    interactionPanel.ShowItemIconsAndTargetHint();
+                    // Update visibility of item icons on interaction panel
+                    interactionPanel.UpdateItemIconsAndTargetHintVisibility(gamemode != GameMode.Spectator);
                 }
                 else
                 {
-                    // Hide 3d items
-                    interactionPanel.HideItemIconsAndTargetHint();
+                    // Update visibility of item icons on interaction panel
+                    interactionPanel.UpdateItemIconsAndTargetHintVisibility(false);
                 }
             }
 
@@ -80,16 +82,16 @@ namespace CraftSharp.UI
 
             gameModeCallback = e =>
             {
-                var showStatus = e.GameMode switch {
+                var showStatusPanel = e.GameMode switch {
                     GameMode.Survival   => true,
-                    GameMode.Creative   => false,
                     GameMode.Adventure  => true,
-                    GameMode.Spectator  => false,
-
                     _                   => false
                 };
+                var showPlayerPanel = e.GameMode != GameMode.Spectator;
 
-                statusPanelAnimator.SetBool(SHOW_HASH, showStatus);
+                statusPanelAnimator.SetBool(SHOW_HASH, showStatusPanel);
+                playerPanelAnimator.SetBool(SHOW_HASH, showPlayerPanel);
+                interactionPanel.UpdateItemIconsAndTargetHintVisibility(showPlayerPanel);
             };
 
             healthCallback = e =>

@@ -352,7 +352,7 @@ namespace CraftSharp.Control
             Status.EntityDisabled = true;
 
             // Hide entity render
-            if (m_PlayerRender != null)
+            if (m_PlayerRender)
             {
                 m_PlayerRender.gameObject.SetActive(false);
             }
@@ -604,8 +604,8 @@ namespace CraftSharp.Control
             // Update player physics and transform using updated current state
             CurrentState.UpdateMain(ref currentVelocity, deltaTime, Actions!, status, Motor, this);
 
-            // Broadcast current stamina if changed
-            if (!Mathf.Approximately(prevStamina, status.StaminaLeft))
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
+            if (prevStamina != status.StaminaLeft) // Broadcast current stamina if changed
             {
                 EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, m_AbilityConfig!.MaxStamina));
             }

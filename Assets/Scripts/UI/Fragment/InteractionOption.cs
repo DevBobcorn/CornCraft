@@ -52,7 +52,7 @@ namespace CraftSharp.UI
             var hintText = Translations.Get(info.HintKey, paramTexts);
 
             usingItemIcon = false;
-            HideItemIcon();
+            UpdateItemIconVisibility(false);
 
             if (info is IIconProvider iconProvider)
             {
@@ -65,7 +65,7 @@ namespace CraftSharp.UI
                     UpdateItemMesh(iconProvider.IconItemId);
                     // Display item mesh
                     usingItemIcon = true;
-                    ShowItemIcon();
+                    UpdateItemIconVisibility(true);
                 }
                 else
                 {
@@ -91,14 +91,9 @@ namespace CraftSharp.UI
             keyHintText.text = Translations.Get(keyHint);
         }
 
-        public void ShowItemIcon()
+        public void UpdateItemIconVisibility(bool visible)
         {
-            itemIconMeshFilter.gameObject.SetActive(usingItemIcon);
-        }
-
-        public void HideItemIcon()
-        {
-            itemIconMeshFilter.gameObject.SetActive(false);
+            itemIconMeshFilter.gameObject.SetActive(visible && usingItemIcon);
         }
 
         public void SetSelected(bool selected)
