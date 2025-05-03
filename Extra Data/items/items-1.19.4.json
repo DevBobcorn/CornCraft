@@ -2396,7 +2396,8 @@
     "stack_limit": 64,
     "action_type": "block",
     "edible": false,
-    "block": "minecraft:carved_pumpkin"
+    "block": "minecraft:carved_pumpkin",
+    "equipment_slot": "head"
   },
   "minecraft:jack_o_lantern": {
     "protocol_id": 300,
@@ -2404,7 +2405,8 @@
     "stack_limit": 64,
     "action_type": "block",
     "edible": false,
-    "block": "minecraft:jack_o_lantern"
+    "block": "minecraft:jack_o_lantern",
+    "equipment_slot": "head"
   },
   "minecraft:netherrack": {
     "protocol_id": 301,
@@ -5843,7 +5845,8 @@
     "rarity": "uncommon",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "chest"
   },
   "minecraft:oak_boat": {
     "protocol_id": 732,
@@ -5992,7 +5995,8 @@
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "head"
   },
   "minecraft:scute": {
     "protocol_id": 753,
@@ -6450,168 +6454,192 @@
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "head"
   },
   "minecraft:leather_chestplate": {
     "protocol_id": 813,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "chest"
   },
   "minecraft:leather_leggings": {
     "protocol_id": 814,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "legs"
   },
   "minecraft:leather_boots": {
     "protocol_id": 815,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "feet"
   },
   "minecraft:chainmail_helmet": {
     "protocol_id": 816,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "head"
   },
   "minecraft:chainmail_chestplate": {
     "protocol_id": 817,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "chest"
   },
   "minecraft:chainmail_leggings": {
     "protocol_id": 818,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "legs"
   },
   "minecraft:chainmail_boots": {
     "protocol_id": 819,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "feet"
   },
   "minecraft:iron_helmet": {
     "protocol_id": 820,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "head"
   },
   "minecraft:iron_chestplate": {
     "protocol_id": 821,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "chest"
   },
   "minecraft:iron_leggings": {
     "protocol_id": 822,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "legs"
   },
   "minecraft:iron_boots": {
     "protocol_id": 823,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "feet"
   },
   "minecraft:diamond_helmet": {
     "protocol_id": 824,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "head"
   },
   "minecraft:diamond_chestplate": {
     "protocol_id": 825,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "chest"
   },
   "minecraft:diamond_leggings": {
     "protocol_id": 826,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "legs"
   },
   "minecraft:diamond_boots": {
     "protocol_id": 827,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "feet"
   },
   "minecraft:golden_helmet": {
     "protocol_id": 828,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "head"
   },
   "minecraft:golden_chestplate": {
     "protocol_id": 829,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "chest"
   },
   "minecraft:golden_leggings": {
     "protocol_id": 830,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "legs"
   },
   "minecraft:golden_boots": {
     "protocol_id": 831,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "feet"
   },
   "minecraft:netherite_helmet": {
     "protocol_id": 832,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "head"
   },
   "minecraft:netherite_chestplate": {
     "protocol_id": 833,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "chest"
   },
   "minecraft:netherite_leggings": {
     "protocol_id": 834,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "legs"
   },
   "minecraft:netherite_boots": {
     "protocol_id": 835,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "none",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "feet"
   },
   "minecraft:flint": {
     "protocol_id": 836,
@@ -8236,7 +8264,8 @@
     "stack_limit": 64,
     "action_type": "block",
     "edible": false,
-    "block": "minecraft:skeleton_skull"
+    "block": "minecraft:skeleton_skull",
+    "equipment_slot": "head"
   },
   "minecraft:wither_skeleton_skull": {
     "protocol_id": 1054,
@@ -8244,7 +8273,8 @@
     "stack_limit": 64,
     "action_type": "block",
     "edible": false,
-    "block": "minecraft:wither_skeleton_skull"
+    "block": "minecraft:wither_skeleton_skull",
+    "equipment_slot": "head"
   },
   "minecraft:player_head": {
     "protocol_id": 1055,
@@ -8252,7 +8282,8 @@
     "stack_limit": 64,
     "action_type": "block",
     "edible": false,
-    "block": "minecraft:player_head"
+    "block": "minecraft:player_head",
+    "equipment_slot": "head"
   },
   "minecraft:zombie_head": {
     "protocol_id": 1056,
@@ -8260,7 +8291,8 @@
     "stack_limit": 64,
     "action_type": "block",
     "edible": false,
-    "block": "minecraft:zombie_head"
+    "block": "minecraft:zombie_head",
+    "equipment_slot": "head"
   },
   "minecraft:creeper_head": {
     "protocol_id": 1057,
@@ -8268,7 +8300,8 @@
     "stack_limit": 64,
     "action_type": "block",
     "edible": false,
-    "block": "minecraft:creeper_head"
+    "block": "minecraft:creeper_head",
+    "equipment_slot": "head"
   },
   "minecraft:dragon_head": {
     "protocol_id": 1058,
@@ -8276,7 +8309,8 @@
     "stack_limit": 64,
     "action_type": "block",
     "edible": false,
-    "block": "minecraft:dragon_head"
+    "block": "minecraft:dragon_head",
+    "equipment_slot": "head"
   },
   "minecraft:piglin_head": {
     "protocol_id": 1059,
@@ -8284,7 +8318,8 @@
     "stack_limit": 64,
     "action_type": "block",
     "edible": false,
-    "block": "minecraft:piglin_head"
+    "block": "minecraft:piglin_head",
+    "equipment_slot": "head"
   },
   "minecraft:nether_star": {
     "protocol_id": 1060,
@@ -8684,7 +8719,8 @@
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "shield",
-    "edible": false
+    "edible": false,
+    "equipment_slot": "offhand"
   },
   "minecraft:totem_of_undying": {
     "protocol_id": 1112,
