@@ -354,7 +354,8 @@ namespace CraftSharp.UI
                             game.DoInventoryAction(activeInventoryId, dragStartSlot, action);
                         }
                         
-                        if (dragging && !draggedSlots.Contains(slotId) && game.CheckAddDragged(target)) // Add this slot
+                        if (dragging && !draggedSlots.Contains(slotId) &&
+                            game.CheckAddDragged(target, slotType.GetPlacePredicate())) // Add this slot
                         {
                             currentSlots[slotId].Dragged = true;
                             Debug.Log($"Adding {slotId}, Dragged slots: {string.Join(", ", draggedSlots)}");

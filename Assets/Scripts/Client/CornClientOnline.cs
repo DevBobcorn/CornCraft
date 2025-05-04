@@ -85,13 +85,16 @@ namespace CraftSharp
         private readonly Dictionary<int, int> draggedSlots = new(); // And keep track of the initial count of each dragged slot
         private bool dragging = false;
         
-        public override bool CheckAddDragged(ItemStack slotItem)
+        public override bool CheckAddDragged(ItemStack slotItem, Func<ItemStack, bool> slotPredicate)
         {
             if (!dragging || dragStartCursorItemClone is null) return false;
 
-            // If count of original cursor stack is greater than count of dragged slots,
+            // If the count of original cursor stack is greater than the count of dragged slots,
             // then we can still add more dragged slots, making sure each can get at least one item.
             if (dragStartCursorItemClone.Count <= draggedSlots.Count) return false;
+            
+            // If this slot doesn't accept the dragging item, don't add this slot
+            if (!slotPredicate(dragStartCursorItemClone)) return false;
             
             if (slotItem is null) return true;
             
@@ -1955,12 +1958,10 @@ namespace CraftSharp
                     if (item == null || item.IsEmpty)
                     {
                         inventory2.Items.Remove(slot);
-                        Debug.Log($"[OnInventorySlot] Inventory [{inventoryId}] slot [{slot}] removed.");
                     }
                     else
                     {
                         inventory2.Items[slot] = item;
-                        Debug.Log($"[OnInventorySlot] Inventory [{inventoryId}] slot [{slot}] updated to {item}.");
                     }
 
                     Loom.QueueOnMainThread(() =>

@@ -32,7 +32,7 @@ namespace CraftSharp
         private readonly Dictionary<int, InventoryData> inventories = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         
-        public override bool CheckAddDragged(ItemStack slotItem) => false;
+        public override bool CheckAddDragged(ItemStack slotItem, Func<ItemStack, bool> slotPredicate) => false;
         #endregion
 
         private void Start()
