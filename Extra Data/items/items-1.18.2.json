@@ -5334,14 +5334,16 @@
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "food_on_a_stick",
-    "edible": false
+    "edible": false,
+    "max_durability": 25
   },
   "minecraft:warped_fungus_on_a_stick": {
     "protocol_id": 668,
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "food_on_a_stick",
-    "edible": false
+    "edible": false,
+    "max_durability": 100
   },
   "minecraft:elytra": {
     "protocol_id": 669,
@@ -5349,7 +5351,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "chest"
+    "equipment_slot": "chest",
+    "max_durability": 432
   },
   "minecraft:oak_boat": {
     "protocol_id": 670,
@@ -5415,7 +5418,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "head"
+    "equipment_slot": "head",
+    "max_durability": 275
   },
   "minecraft:scute": {
     "protocol_id": 679,
@@ -5429,7 +5433,8 @@
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "lighter",
-    "edible": false
+    "edible": false,
+    "max_durability": 64
   },
   "minecraft:apple": {
     "protocol_id": 681,
@@ -5445,7 +5450,8 @@
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "bow",
-    "edible": false
+    "edible": false,
+    "max_durability": 384
   },
   "minecraft:arrow": {
     "protocol_id": 683,
@@ -5565,7 +5571,8 @@
     "stack_limit": 1,
     "action_type": "sword",
     "edible": false,
-    "tier": "wood"
+    "tier": "wood",
+    "max_durability": 59
   },
   "minecraft:wooden_shovel": {
     "protocol_id": 700,
@@ -5573,7 +5580,8 @@
     "stack_limit": 1,
     "action_type": "shovel",
     "edible": false,
-    "tier": "wood"
+    "tier": "wood",
+    "max_durability": 59
   },
   "minecraft:wooden_pickaxe": {
     "protocol_id": 701,
@@ -5581,7 +5589,8 @@
     "stack_limit": 1,
     "action_type": "pickaxe",
     "edible": false,
-    "tier": "wood"
+    "tier": "wood",
+    "max_durability": 59
   },
   "minecraft:wooden_axe": {
     "protocol_id": 702,
@@ -5589,7 +5598,8 @@
     "stack_limit": 1,
     "action_type": "axe",
     "edible": false,
-    "tier": "wood"
+    "tier": "wood",
+    "max_durability": 59
   },
   "minecraft:wooden_hoe": {
     "protocol_id": 703,
@@ -5597,7 +5607,8 @@
     "stack_limit": 1,
     "action_type": "hoe",
     "edible": false,
-    "tier": "wood"
+    "tier": "wood",
+    "max_durability": 59
   },
   "minecraft:stone_sword": {
     "protocol_id": 704,
@@ -5605,7 +5616,8 @@
     "stack_limit": 1,
     "action_type": "sword",
     "edible": false,
-    "tier": "stone"
+    "tier": "stone",
+    "max_durability": 131
   },
   "minecraft:stone_shovel": {
     "protocol_id": 705,
@@ -5613,7 +5625,8 @@
     "stack_limit": 1,
     "action_type": "shovel",
     "edible": false,
-    "tier": "stone"
+    "tier": "stone",
+    "max_durability": 131
   },
   "minecraft:stone_pickaxe": {
     "protocol_id": 706,
@@ -5621,7 +5634,8 @@
     "stack_limit": 1,
     "action_type": "pickaxe",
     "edible": false,
-    "tier": "stone"
+    "tier": "stone",
+    "max_durability": 131
   },
   "minecraft:stone_axe": {
     "protocol_id": 707,
@@ -5629,7 +5643,8 @@
     "stack_limit": 1,
     "action_type": "axe",
     "edible": false,
-    "tier": "stone"
+    "tier": "stone",
+    "max_durability": 131
   },
   "minecraft:stone_hoe": {
     "protocol_id": 708,
@@ -5637,7 +5652,8 @@
     "stack_limit": 1,
     "action_type": "hoe",
     "edible": false,
-    "tier": "stone"
+    "tier": "stone",
+    "max_durability": 131
   },
   "minecraft:golden_sword": {
     "protocol_id": 709,
@@ -5645,7 +5661,8 @@
     "stack_limit": 1,
     "action_type": "sword",
     "edible": false,
-    "tier": "gold"
+    "tier": "gold",
+    "max_durability": 32
   },
   "minecraft:golden_shovel": {
     "protocol_id": 710,
@@ -5653,7 +5670,8 @@
     "stack_limit": 1,
     "action_type": "shovel",
     "edible": false,
-    "tier": "gold"
+    "tier": "gold",
+    "max_durability": 32
   },
   "minecraft:golden_pickaxe": {
     "protocol_id": 711,
@@ -5661,7 +5679,8 @@
     "stack_limit": 1,
     "action_type": "pickaxe",
     "edible": false,
-    "tier": "gold"
+    "tier": "gold",
+    "max_durability": 32
   },
   "minecraft:golden_axe": {
     "protocol_id": 712,
@@ -5669,7 +5688,8 @@
     "stack_limit": 1,
     "action_type": "axe",
     "edible": false,
-    "tier": "gold"
+    "tier": "gold",
+    "max_durability": 32
   },
   "minecraft:golden_hoe": {
     "protocol_id": 713,
@@ -5677,7 +5697,8 @@
     "stack_limit": 1,
     "action_type": "hoe",
     "edible": false,
-    "tier": "gold"
+    "tier": "gold",
+    "max_durability": 32
   },
   "minecraft:iron_sword": {
     "protocol_id": 714,
@@ -5685,7 +5706,8 @@
     "stack_limit": 1,
     "action_type": "sword",
     "edible": false,
-    "tier": "iron"
+    "tier": "iron",
+    "max_durability": 250
   },
   "minecraft:iron_shovel": {
     "protocol_id": 715,
@@ -5693,7 +5715,8 @@
     "stack_limit": 1,
     "action_type": "shovel",
     "edible": false,
-    "tier": "iron"
+    "tier": "iron",
+    "max_durability": 250
   },
   "minecraft:iron_pickaxe": {
     "protocol_id": 716,
@@ -5701,7 +5724,8 @@
     "stack_limit": 1,
     "action_type": "pickaxe",
     "edible": false,
-    "tier": "iron"
+    "tier": "iron",
+    "max_durability": 250
   },
   "minecraft:iron_axe": {
     "protocol_id": 717,
@@ -5709,7 +5733,8 @@
     "stack_limit": 1,
     "action_type": "axe",
     "edible": false,
-    "tier": "iron"
+    "tier": "iron",
+    "max_durability": 250
   },
   "minecraft:iron_hoe": {
     "protocol_id": 718,
@@ -5717,7 +5742,8 @@
     "stack_limit": 1,
     "action_type": "hoe",
     "edible": false,
-    "tier": "iron"
+    "tier": "iron",
+    "max_durability": 250
   },
   "minecraft:diamond_sword": {
     "protocol_id": 719,
@@ -5725,7 +5751,8 @@
     "stack_limit": 1,
     "action_type": "sword",
     "edible": false,
-    "tier": "diamond"
+    "tier": "diamond",
+    "max_durability": 1561
   },
   "minecraft:diamond_shovel": {
     "protocol_id": 720,
@@ -5733,7 +5760,8 @@
     "stack_limit": 1,
     "action_type": "shovel",
     "edible": false,
-    "tier": "diamond"
+    "tier": "diamond",
+    "max_durability": 1561
   },
   "minecraft:diamond_pickaxe": {
     "protocol_id": 721,
@@ -5741,7 +5769,8 @@
     "stack_limit": 1,
     "action_type": "pickaxe",
     "edible": false,
-    "tier": "diamond"
+    "tier": "diamond",
+    "max_durability": 1561
   },
   "minecraft:diamond_axe": {
     "protocol_id": 722,
@@ -5749,7 +5778,8 @@
     "stack_limit": 1,
     "action_type": "axe",
     "edible": false,
-    "tier": "diamond"
+    "tier": "diamond",
+    "max_durability": 1561
   },
   "minecraft:diamond_hoe": {
     "protocol_id": 723,
@@ -5757,7 +5787,8 @@
     "stack_limit": 1,
     "action_type": "hoe",
     "edible": false,
-    "tier": "diamond"
+    "tier": "diamond",
+    "max_durability": 1561
   },
   "minecraft:netherite_sword": {
     "protocol_id": 724,
@@ -5765,7 +5796,8 @@
     "stack_limit": 1,
     "action_type": "sword",
     "edible": false,
-    "tier": "netherite"
+    "tier": "netherite",
+    "max_durability": 2031
   },
   "minecraft:netherite_shovel": {
     "protocol_id": 725,
@@ -5773,7 +5805,8 @@
     "stack_limit": 1,
     "action_type": "shovel",
     "edible": false,
-    "tier": "netherite"
+    "tier": "netherite",
+    "max_durability": 2031
   },
   "minecraft:netherite_pickaxe": {
     "protocol_id": 726,
@@ -5781,7 +5814,8 @@
     "stack_limit": 1,
     "action_type": "pickaxe",
     "edible": false,
-    "tier": "netherite"
+    "tier": "netherite",
+    "max_durability": 2031
   },
   "minecraft:netherite_axe": {
     "protocol_id": 727,
@@ -5789,7 +5823,8 @@
     "stack_limit": 1,
     "action_type": "axe",
     "edible": false,
-    "tier": "netherite"
+    "tier": "netherite",
+    "max_durability": 2031
   },
   "minecraft:netherite_hoe": {
     "protocol_id": 728,
@@ -5797,7 +5832,8 @@
     "stack_limit": 1,
     "action_type": "hoe",
     "edible": false,
-    "tier": "netherite"
+    "tier": "netherite",
+    "max_durability": 2031
   },
   "minecraft:stick": {
     "protocol_id": 729,
@@ -5874,7 +5910,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "head"
+    "equipment_slot": "head",
+    "max_durability": 55
   },
   "minecraft:leather_chestplate": {
     "protocol_id": 739,
@@ -5882,7 +5919,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "chest"
+    "equipment_slot": "chest",
+    "max_durability": 80
   },
   "minecraft:leather_leggings": {
     "protocol_id": 740,
@@ -5890,7 +5928,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "legs"
+    "equipment_slot": "legs",
+    "max_durability": 75
   },
   "minecraft:leather_boots": {
     "protocol_id": 741,
@@ -5898,7 +5937,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "feet"
+    "equipment_slot": "feet",
+    "max_durability": 65
   },
   "minecraft:chainmail_helmet": {
     "protocol_id": 742,
@@ -5906,7 +5946,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "head"
+    "equipment_slot": "head",
+    "max_durability": 165
   },
   "minecraft:chainmail_chestplate": {
     "protocol_id": 743,
@@ -5914,7 +5955,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "chest"
+    "equipment_slot": "chest",
+    "max_durability": 240
   },
   "minecraft:chainmail_leggings": {
     "protocol_id": 744,
@@ -5922,7 +5964,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "legs"
+    "equipment_slot": "legs",
+    "max_durability": 225
   },
   "minecraft:chainmail_boots": {
     "protocol_id": 745,
@@ -5930,7 +5973,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "feet"
+    "equipment_slot": "feet",
+    "max_durability": 195
   },
   "minecraft:iron_helmet": {
     "protocol_id": 746,
@@ -5938,7 +5982,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "head"
+    "equipment_slot": "head",
+    "max_durability": 165
   },
   "minecraft:iron_chestplate": {
     "protocol_id": 747,
@@ -5946,7 +5991,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "chest"
+    "equipment_slot": "chest",
+    "max_durability": 240
   },
   "minecraft:iron_leggings": {
     "protocol_id": 748,
@@ -5954,7 +6000,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "legs"
+    "equipment_slot": "legs",
+    "max_durability": 225
   },
   "minecraft:iron_boots": {
     "protocol_id": 749,
@@ -5962,7 +6009,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "feet"
+    "equipment_slot": "feet",
+    "max_durability": 195
   },
   "minecraft:diamond_helmet": {
     "protocol_id": 750,
@@ -5970,7 +6018,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "head"
+    "equipment_slot": "head",
+    "max_durability": 363
   },
   "minecraft:diamond_chestplate": {
     "protocol_id": 751,
@@ -5978,7 +6027,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "chest"
+    "equipment_slot": "chest",
+    "max_durability": 528
   },
   "minecraft:diamond_leggings": {
     "protocol_id": 752,
@@ -5986,7 +6036,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "legs"
+    "equipment_slot": "legs",
+    "max_durability": 495
   },
   "minecraft:diamond_boots": {
     "protocol_id": 753,
@@ -5994,7 +6045,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "feet"
+    "equipment_slot": "feet",
+    "max_durability": 429
   },
   "minecraft:golden_helmet": {
     "protocol_id": 754,
@@ -6002,7 +6054,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "head"
+    "equipment_slot": "head",
+    "max_durability": 77
   },
   "minecraft:golden_chestplate": {
     "protocol_id": 755,
@@ -6010,7 +6063,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "chest"
+    "equipment_slot": "chest",
+    "max_durability": 112
   },
   "minecraft:golden_leggings": {
     "protocol_id": 756,
@@ -6018,7 +6072,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "legs"
+    "equipment_slot": "legs",
+    "max_durability": 105
   },
   "minecraft:golden_boots": {
     "protocol_id": 757,
@@ -6026,7 +6081,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "feet"
+    "equipment_slot": "feet",
+    "max_durability": 91
   },
   "minecraft:netherite_helmet": {
     "protocol_id": 758,
@@ -6034,7 +6090,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "head"
+    "equipment_slot": "head",
+    "max_durability": 407
   },
   "minecraft:netherite_chestplate": {
     "protocol_id": 759,
@@ -6042,7 +6099,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "chest"
+    "equipment_slot": "chest",
+    "max_durability": 592
   },
   "minecraft:netherite_leggings": {
     "protocol_id": 760,
@@ -6050,7 +6108,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "legs"
+    "equipment_slot": "legs",
+    "max_durability": 555
   },
   "minecraft:netherite_boots": {
     "protocol_id": 761,
@@ -6058,7 +6117,8 @@
     "stack_limit": 1,
     "action_type": "none",
     "edible": false,
-    "equipment_slot": "feet"
+    "equipment_slot": "feet",
+    "max_durability": 481
   },
   "minecraft:flint": {
     "protocol_id": 762,
@@ -6328,7 +6388,8 @@
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "fishing_rod",
-    "edible": false
+    "edible": false,
+    "max_durability": 64
   },
   "minecraft:clock": {
     "protocol_id": 798,
@@ -6717,7 +6778,8 @@
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "shears",
-    "edible": false
+    "edible": false,
+    "max_durability": 238
   },
   "minecraft:melon_slice": {
     "protocol_id": 849,
@@ -7926,7 +7988,8 @@
     "stack_limit": 1,
     "action_type": "shield",
     "edible": false,
-    "equipment_slot": "offhand"
+    "equipment_slot": "offhand",
+    "max_durability": 336
   },
   "minecraft:totem_of_undying": {
     "protocol_id": 1010,
@@ -8066,7 +8129,8 @@
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "trident",
-    "edible": false
+    "edible": false,
+    "max_durability": 250
   },
   "minecraft:phantom_membrane": {
     "protocol_id": 1030,
@@ -8094,7 +8158,8 @@
     "rarity": "common",
     "stack_limit": 1,
     "action_type": "crossbow",
-    "edible": false
+    "edible": false,
+    "max_durability": 465
   },
   "minecraft:suspicious_stew": {
     "protocol_id": 1034,
