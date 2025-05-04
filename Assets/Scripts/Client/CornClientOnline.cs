@@ -1930,8 +1930,6 @@ namespace CraftSharp
             {
                 inventory.StateId = Mathf.Max(inventory.StateId, stateId);
             }
-            
-            Debug.Log($"[OnInventorySlot] Inventory [{inventoryId}] slot [{slot}] updated to {item}. State id set to {stateId}");
 
             if (dragging) return;
             

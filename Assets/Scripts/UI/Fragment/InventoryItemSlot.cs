@@ -24,11 +24,14 @@ namespace CraftSharp.UI
         [SerializeField] private Sprite selectedSprite, draggedSprite;
         [SerializeField] private TMP_Text keyHintText;
         [SerializeField] private Image placeholderImage;
+        [SerializeField] private Image slotImage;
+        
+        [SerializeField] private RectTransform damageBarTransform;
+        [SerializeField] private Image damageBarFillImage;
 
         [SerializeField] private float fullItemScale = 60F;
 
         private Animator _slotAnimator;
-        private Image _slotImage;
         private string _slotCursorText = string.Empty;
 
         #nullable enable
@@ -47,14 +50,13 @@ namespace CraftSharp.UI
             set
             {
                 dragged = value;
-                _slotImage.overrideSprite = dragged ? draggedSprite : selected ? selectedSprite : null;
+                slotImage.overrideSprite = dragged ? draggedSprite : selected ? selectedSprite : null;
             }
         }
 
         private void Awake()
         {
             _slotAnimator = GetComponent<Animator>();
-            _slotImage = GetComponent<Image>();
         }
 
         public void SetKeyHint(string keyHint)
@@ -111,8 +113,28 @@ namespace CraftSharp.UI
         public void UpdateItemStack(ItemStack? newItemStack)
         {
             itemStack = newItemStack;
+            var newItemType = newItemStack?.ItemType ?? Item.NULL;
+            
             // Update item mesh
             UpdateItemMesh();
+            
+            // Update damage bar image
+            if (!newItemType.IsDepletable)
+            {
+                damageBarTransform.gameObject.SetActive(false);
+            }
+            else
+            {
+                var damage = newItemStack?.Damage ?? 0;
+                var maxDamage = (float) newItemType.MaxDurability; // TODO: Check enchantment
+                
+                damageBarFillImage.fillAmount = Mathf.Clamp01(1F - damage / maxDamage);
+                var hue = Mathf.Lerp(0.33333334F, 0F, damage / maxDamage);
+                damageBarFillImage.color = Color.HSVToRGB(hue, 1f, 1f);
+                
+                Debug.Log($"Damage update: {damage} / {maxDamage}");
+                damageBarTransform.gameObject.SetActive(true);
+            }
             
             cursorTextDirty = true;
         }
@@ -127,7 +149,7 @@ namespace CraftSharp.UI
         public void SelectSlot()
         {
             selected = true;
-            _slotImage.overrideSprite = Dragged ? draggedSprite : selectedSprite;
+            slotImage.overrideSprite = Dragged ? draggedSprite : selectedSprite;
             
             if (_slotAnimator) // For hotbar slots
                 _slotAnimator.SetBool(SELECTED_HASH, true);
@@ -145,7 +167,7 @@ namespace CraftSharp.UI
         public void DeselectSlot()
         {
             selected = false;
-            _slotImage.overrideSprite = Dragged ? draggedSprite : null;
+            slotImage.overrideSprite = Dragged ? draggedSprite : null;
             
             if (_slotAnimator)
                 _slotAnimator.SetBool(SELECTED_HASH, false);
