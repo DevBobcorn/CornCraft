@@ -1893,8 +1893,8 @@ namespace CraftSharp
                 }
 
                 inventory.StateId = Mathf.Max(inventory.StateId, stateId);
-                var slotsText = string.Join(", ", itemList.Select(x => $"[{x.Key}] {x.Value}"));
-                Debug.Log($"[OnInventoryItems] Set inventory [{inventoryId}] items. State id set to {stateId}. Slots: {slotsText}");
+                //var slotsText = string.Join(", ", itemList.Select(x => $"[{x.Key}] {x.Value}"));
+                //Debug.Log($"[OnInventoryItems] Set inventory [{inventoryId}] items. State id set to {stateId}. Slots: {slotsText}");
                 
                 Loom.QueueOnMainThread(() =>
                 {

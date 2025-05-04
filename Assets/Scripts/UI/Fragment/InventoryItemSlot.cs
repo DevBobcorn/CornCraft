@@ -119,20 +119,21 @@ namespace CraftSharp.UI
             UpdateItemMesh();
             
             // Update damage bar image
-            if (!newItemType.IsDepletable)
+            var damage = newItemStack?.Damage ?? 0;
+            
+            if (!newItemType.IsDepletable || damage == 0)
             {
                 damageBarTransform.gameObject.SetActive(false);
             }
             else
             {
-                var damage = newItemStack?.Damage ?? 0;
+                
                 var maxDamage = (float) newItemType.MaxDurability; // TODO: Check enchantment
                 
                 damageBarFillImage.fillAmount = Mathf.Clamp01(1F - damage / maxDamage);
                 var hue = Mathf.Lerp(0.33333334F, 0F, damage / maxDamage);
                 damageBarFillImage.color = Color.HSVToRGB(hue, 1f, 1f);
                 
-                Debug.Log($"Damage update: {damage} / {maxDamage}");
                 damageBarTransform.gameObject.SetActive(true);
             }
             
