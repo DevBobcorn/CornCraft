@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using CraftSharp.Event;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using TMPro;
@@ -39,9 +40,16 @@ namespace CraftSharp.UI
 #nullable enable
 
         private Action<InventorySlotUpdateEvent>? slotUpdateCallback;
+        private Action<InventoryItemsUpdateEvent>? itemsUpdateCallback;
         private Action<InventoryPropertyUpdateEvent>? propertyUpdateCallback;
 
 #nullable disable
+        
+        private bool pointerIsDown = false;
+        private int dragStartSlot = -1;
+        private bool dragging = false;
+        private readonly HashSet<int> draggedSlots = new();
+        private PointerEventData.InputButton mouseButton = PointerEventData.InputButton.Left;
 
         public void SetActiveInventory(InventoryData inventoryData)
         {
@@ -244,11 +252,123 @@ namespace CraftSharp.UI
             void setupSlot(int slotId, InventoryItemSlot slot)
             {
                 currentSlots[slotId] = slot;
+                var slotType = activeInventoryData.Type.GetInventorySlotType(slotId);
 
-                slot.SetClickHandler(action =>
+                slot.SetPointerDownHandler(button =>
                 {
                     if (!game) return;
-                    game.DoInventoryAction(activeInventoryId, slotId, action);
+                    
+                    pointerIsDown = true;
+                    mouseButton = button;
+
+                    var target = activeInventoryData.Items.GetValueOrDefault(slotId);
+                    var cursor = game.GetInventory(0)?.Items.GetValueOrDefault(-1);
+                    
+                    // Draggable slot has to be either empty or have the exact same item as cursor item.
+                    // And also, to start dragging, cursor item shouldn't be empty
+                    var canBeUsedAsDragStart = cursor is not null && cursor.Count > 1 &&
+                        ((target is null && slotType.GetPlacePredicate().Invoke(cursor)) || InventoryData.CheckStackable(target, cursor));
+                    dragStartSlot = canBeUsedAsDragStart ? slotId : -1;
+                });
+                
+                slot.SetPointerUpHandler(button =>
+                {
+                    if (!pointerIsDown || button != mouseButton || !game) return;
+
+                    if (dragging)
+                    {
+                        var action = mouseButton switch
+                        {
+                            PointerEventData.InputButton.Left => InventoryActionType.EndDragLeft,
+                            PointerEventData.InputButton.Right => InventoryActionType.EndDragRight,
+                            PointerEventData.InputButton.Middle => InventoryActionType.EndDragMiddle,
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                        game.DoInventoryAction(activeInventoryId, slotId, action);
+                    }
+                    else // Click
+                    {
+                        var action = mouseButton switch
+                        {
+                            PointerEventData.InputButton.Left => InventoryActionType.LeftClick,
+                            PointerEventData.InputButton.Right => InventoryActionType.RightClick,
+                            PointerEventData.InputButton.Middle => InventoryActionType.MiddleClick,
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                        game.DoInventoryAction(activeInventoryId, slotId, action);
+                    }
+                    
+                    pointerIsDown = false;
+                    dragging = false;
+
+                    foreach (var draggedSlot in draggedSlots)
+                    {
+                        currentSlots[draggedSlot].Dragged = false;
+                    }
+                    
+                    draggedSlots.Clear();
+                });
+                
+                slot.SetSelectHandler(() =>
+                {
+                    if (!game) return;
+                    
+                    if (pointerIsDown)
+                    {
+                        var target = activeInventoryData.Items.GetValueOrDefault(slotId);
+
+                        // Drag start slot has to be either empty or have the exact same item as cursor item.
+                        // And also, to start dragging, cursor item shouldn't be empty
+                        if (dragStartSlot < 0)
+                        {
+                            var cursor = game.GetInventory(0)?.Items.GetValueOrDefault(-1);
+                            if (cursor is not null && cursor.Count > 1 && slotType.GetPlacePredicate().Invoke(cursor) &&
+                                (target is null || InventoryData.CheckStackable(target, cursor)))
+                            {
+                                dragStartSlot = slotId;
+                            }
+                        }
+                        
+                        if (!dragging && dragStartSlot >= 0 && slotId != dragStartSlot) // Start dragging
+                        {
+                            dragging = true;
+                            currentSlots[dragStartSlot].Dragged = true;
+                            draggedSlots.Clear();
+                            draggedSlots.Add(dragStartSlot);
+                            
+                            var action = mouseButton switch
+                            {
+                                PointerEventData.InputButton.Left => InventoryActionType.StartDragLeft,
+                                PointerEventData.InputButton.Right => InventoryActionType.StartDragRight,
+                                PointerEventData.InputButton.Middle => InventoryActionType.StartDragMiddle,
+                                _ => throw new ArgumentOutOfRangeException()
+                            };
+                            game.DoInventoryAction(activeInventoryId, dragStartSlot, action);
+                            action = mouseButton switch
+                            {
+                                PointerEventData.InputButton.Left => InventoryActionType.AddDragLeft,
+                                PointerEventData.InputButton.Right => InventoryActionType.AddDragRight,
+                                PointerEventData.InputButton.Middle => InventoryActionType.AddDragMiddle,
+                                _ => throw new ArgumentOutOfRangeException()
+                            };
+                            game.DoInventoryAction(activeInventoryId, dragStartSlot, action);
+                        }
+                        
+                        if (dragging && !draggedSlots.Contains(slotId) && game.CheckAddDragged(target)) // Add this slot
+                        {
+                            currentSlots[slotId].Dragged = true;
+                            Debug.Log($"Adding {slotId}, Dragged slots: {string.Join(", ", draggedSlots)}");
+                            draggedSlots.Add(slotId);
+                            var action = mouseButton switch
+                            {
+                                PointerEventData.InputButton.Left => InventoryActionType.AddDragLeft,
+                                PointerEventData.InputButton.Right => InventoryActionType.AddDragRight,
+                                PointerEventData.InputButton.Middle => InventoryActionType.AddDragMiddle,
+                                _ => throw new ArgumentOutOfRangeException()
+                            };
+                            game.DoInventoryAction(activeInventoryId, slotId, action);
+                        }
+                    }
                 });
 
                 slot.SetCursorTextHandler(str =>
@@ -283,6 +403,10 @@ namespace CraftSharp.UI
         {
             if (slotUpdateCallback is not null)
                 EventManager.Instance.Unregister(slotUpdateCallback);
+            if (itemsUpdateCallback is not null)
+                EventManager.Instance.Unregister(itemsUpdateCallback);
+            if (propertyUpdateCallback is not null)
+                EventManager.Instance.Unregister(propertyUpdateCallback);
         }
 
         public override bool ReleaseCursor()
@@ -311,7 +435,10 @@ namespace CraftSharp.UI
             foreach (var slot in currentSlots.Values)
             {
                 slot.UpdateItemStack(null);
-                slot.SetClickHandler(null);
+                slot.SetCursorTextHandler(null);
+                slot.SetSelectHandler(null);
+                slot.SetPointerDownHandler(null);
+                slot.SetPointerUpHandler(null);
             }
             
             // Destroy all sprites and slots under work panel
@@ -334,6 +461,9 @@ namespace CraftSharp.UI
             
             slotUpdateCallback = e =>
             {
+                if (!IsActive) return;
+                if (dragging && !e.FromClient) return; // We'll handle this just fine
+                
                 if (e.InventoryId == activeInventoryId)
                 {
                     if (currentSlots.TryGetValue(e.Slot, out var slot))
@@ -345,19 +475,56 @@ namespace CraftSharp.UI
                         Debug.LogWarning($"Slot {e.Slot} is not available!");
                     }
                 }
-                else if (e.InventoryId != 0) // Not current inventory, and not player inventory either
+                else if (e.InventoryId == 0)
                 {
-                    Debug.LogWarning($"Invalid inventory id: {e.InventoryId}, slot {e.Slot}");
+                    if (e.Slot == -1) // Update cursor slot
+                    {
+                        currentSlots[-1].UpdateItemStack(e.ItemStack);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Unhandled update Inventory [0]/[{e.Slot}], Item {e.ItemStack}");
+                    }
+                }
+                else // Not current inventory, and not player inventory either
+                {
+                    Debug.LogWarning($"Invalid Inventory [{e.InventoryId}]/[{e.Slot}], Item {e.ItemStack}");
+                }
+            };
+            
+            itemsUpdateCallback = e =>
+            {
+                if (!IsActive) return;
+                if (dragging) return; // We'll handle this just fine
+                
+                if (e.InventoryId == activeInventoryId)
+                {
+                    foreach (var (slotId, itemStack) in e.Items)
+                    {
+                        if (currentSlots.TryGetValue(slotId, out var slot))
+                        {
+                            slot.UpdateItemStack(itemStack);
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Slot {slotId} is not available!");
+                        }
+                    }
+                }
+                else // Not current inventory
+                {
+                    Debug.LogWarning($"Invalid inventory id: {e.InventoryId}");
                 }
             };
             
             propertyUpdateCallback = e =>
             {
+                if (!IsActive) return;
                 if (e.InventoryId == activeInventoryId)
                 {
                     var propertyName = activeInventoryData.Type.PropertyNames.GetValueOrDefault(e.Property, "unnamed");
                     
-                    Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
+                    //Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
                     
                     // Update filled sprites
                     foreach (var (curPropName, maxPropName, spriteType, spriteImage) in currentFilledSprites)
@@ -387,6 +554,7 @@ namespace CraftSharp.UI
             };
             
             EventManager.Instance.Register(slotUpdateCallback);
+            EventManager.Instance.Register(itemsUpdateCallback);
             EventManager.Instance.Register(propertyUpdateCallback);
         }
 

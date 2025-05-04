@@ -78,7 +78,25 @@ namespace CraftSharp
         private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
         private int foodSaturation, experienceLevel, totalExperience;
+        private int activeInventoryId = -1;
         private readonly Dictionary<int, InventoryData> inventories = new();
+        
+        private ItemStack dragStartCursorItemClone; // Keep a copy of cursor item before drag start
+        private readonly Dictionary<int, int> draggedSlots = new(); // And keep track of the initial count of each dragged slot
+        private bool dragging = false;
+        
+        public override bool CheckAddDragged(ItemStack slotItem)
+        {
+            if (!dragging || dragStartCursorItemClone is null) return false;
+
+            // If count of original cursor stack is greater than count of dragged slots,
+            // then we can still add more dragged slots, making sure each can get at least one item.
+            if (dragStartCursorItemClone.Count <= draggedSlots.Count) return false;
+            
+            if (slotItem is null) return true;
+            
+            return InventoryData.CheckStackable(slotItem, dragStartCursorItemClone);
+        }
 
         private readonly object movementLock = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
@@ -842,28 +860,26 @@ namespace CraftSharp
                 OnInventoryOpen(0, playerInventory);
             }
         }
-        
-        private static bool CheckStackable(ItemStack stackA, ItemStack stackB)
-        {
-            if (stackA.ItemType != stackB.ItemType)
-                return false;
-
-            return true;
-        }
 
         /// <summary>
         /// Click a slot in the specified inventory
         /// </summary>
         /// <returns>TRUE if the slot was successfully clicked</returns>
-        public override bool DoInventoryAction(int inventoryId, int slot, InventoryActionType action)
+        public override bool DoInventoryAction(int inventoryId, int slot, InventoryActionType actionType)
         {
             if (InvokeRequired)
-                return InvokeOnNetMainThread(() => DoInventoryAction(inventoryId, slot, action));
+                return InvokeOnNetMainThread(() => DoInventoryAction(inventoryId, slot, actionType));
 
-            ItemStack? item = null;
-            if (inventories.ContainsKey(inventoryId) && inventories[inventoryId].Items.ContainsKey(slot))
-                item = inventories[inventoryId].Items[slot];
-
+            ItemStack? sendItem = null;
+            //if (inventories.ContainsKey(inventoryId) && inventories[inventoryId].Items.TryGetValue(slot, out var iii))
+            //{
+            //    sendItem = new(iii.ItemType, iii.Count, iii.NBT);
+            //}
+            //if (inventories[0].Items.TryGetValue(slot, out var iii))
+            //{
+            //    sendItem = new(iii.ItemType, iii.Count, iii.NBT);
+            //}
+            
             List<Tuple<short, ItemStack?>> changedSlots = new(); // List<Slot Id, Changed Items>
 
             // Update our inventory base on action type
@@ -879,8 +895,10 @@ namespace CraftSharp
                 {
                     return false; // Not interactable at all
                 }
+
+                var placePredicate = slotType.GetPlacePredicate();
                 
-                switch (action)
+                switch (actionType)
                 {
                     case InventoryActionType.LeftClick:
                         // Check if cursor have item (slot -1)
@@ -890,14 +908,14 @@ namespace CraftSharp
                             if (inventory.Items.TryGetValue(slot, out var target1))
                             {
                                 // Check if items are stackable?
-                                if (CheckStackable(target1, cursor1))
+                                if (InventoryData.CheckStackable(target1, cursor1))
                                 {
                                     int maxCount = target1.ItemType.StackLimit;
                                     
                                     // Check item stacking
                                     if (target1.Count + cursor1.Count <= maxCount)
                                     {
-                                        if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                        if (slotType == InventorySlotType.Output)
                                         {
                                             // Stack target to cursor
                                             cursor1.Count += target1.Count;
@@ -909,12 +927,12 @@ namespace CraftSharp
                                             // Stack cursor to target
                                             target1.Count += cursor1.Count;
                                             playerInventory.Items.Remove(-1);
-                                            Debug.Log($"[LeftClick] [{slot}] Stack to target [{target1}]");
+                                            Debug.Log($"[LeftClick] [{slot}] Stack cursor to target [{target1}]");
                                         }
                                     }
                                     else
                                     {
-                                        if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                        if (slotType == InventorySlotType.Output)
                                         {
                                             Debug.Log($"[LeftClick] [{slot}] Cannot stack target (output) to cursor");
                                         }
@@ -923,19 +941,19 @@ namespace CraftSharp
                                             // Leave some item on cursor
                                             cursor1.Count -= maxCount - target1.Count;
                                             target1.Count = maxCount;
-                                            Debug.Log($"[LeftClick] [{slot}] Stack to target [{target1}], and leave some on cursor [{cursor1}]");
+                                            Debug.Log($"[LeftClick] [{slot}] Stack cursor to target [{target1}], and leave some on cursor [{cursor1}]");
                                         }
                                     }
                                 }
                                 else // No stackable, swap
                                 {
-                                    if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                    if (!placePredicate(cursor1))
                                     {
-                                        Debug.Log($"[LeftClick] [{slot}] Cannot swap target (output) with cursor");
+                                        Debug.Log($"[LeftClick] [{slot}] Cannot swap target with cursor");
                                     }
                                     else
                                     {
-                                        // Swap two items TODO: Check if this slot accepts cursor item
+                                        // Swap two items
                                         (inventory.Items[slot], playerInventory.Items[-1]) = (cursor1, target1);
                                         Debug.Log($"[LeftClick] [{slot}] Swap target [{target1}] with cursor [{cursor1}]");
                                     }
@@ -943,13 +961,13 @@ namespace CraftSharp
                             }
                             else // Target has no item
                             {
-                                if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                if (!placePredicate(cursor1))
                                 {
-                                    Debug.Log($"[LeftClick] [{slot}] Cannot put cursor to target (output)");
+                                    Debug.Log($"[LeftClick] [{slot}] Cannot put cursor to target");
                                 }
                                 else
                                 {
-                                    // Put cursor item to target TODO: Check if this slot accepts cursor item
+                                    // Put cursor item to target
                                     inventory.Items[slot] = cursor1;
                                     playerInventory.Items.Remove(-1);
                                     Debug.Log($"[LeftClick] [{slot}] Put cursor to target [{inventory.Items[slot]}]");
@@ -987,9 +1005,9 @@ namespace CraftSharp
                                 int maxCount = target2.ItemType.StackLimit;
 
                                 // Check if these 2 items are stackable
-                                if (CheckStackable(target2, cursor2))
+                                if (InventoryData.CheckStackable(target2, cursor2))
                                 {
-                                    if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                    if (slotType == InventorySlotType.Output)
                                     {
                                         if (target2.Count + cursor2.Count <= maxCount)
                                         {
@@ -1014,13 +1032,13 @@ namespace CraftSharp
                                 }
                                 else // No stackable, swap
                                 {
-                                    if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                    if (!placePredicate(cursor2))
                                     {
                                         Debug.Log($"[RightClick] [{slot}] Cannot swap target (output) with cursor");
                                     }
                                     else
                                     {
-                                        // Swap two items TODO: Check if this slot accepts cursor item
+                                        // Swap two items
                                         (inventory.Items[slot], playerInventory.Items[-1]) = (cursor2, target2);
                                         Debug.Log($"[RightClick] [{slot}] Swap target [{target2}] with cursor [{cursor2}]");
                                     }
@@ -1028,13 +1046,13 @@ namespace CraftSharp
                             }
                             else // Target has no item
                             {
-                                if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                if (!placePredicate(cursor2))
                                 {
-                                    Debug.Log($"[RightClick] [{slot}] Cannot drop 1 cursor to target (output)");
+                                    Debug.Log($"[RightClick] [{slot}] Cannot drop 1 cursor to target");
                                 }
                                 else
                                 {
-                                    // Drop 1 item count from cursor TODO: Check if this slot accepts cursor item
+                                    // Drop 1 item count from cursor
                                     ItemStack itemClone = new(cursor2.ItemType, 1, cursor2.NBT);
                                     inventory.Items[slot] = itemClone;
                                     cursor2.Count--;
@@ -1050,17 +1068,17 @@ namespace CraftSharp
                             {
                                 if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
                                 {
-                                    // Put target slot item to cursor
+                                    // You can't take half from an output slot, put entire item stack from target to cursor
                                     playerInventory.Items[-1] = inventory.Items[slot];
                                     inventory.Items.Remove(slot);
                                     changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
-                                    Debug.Log($"[RightClick] [{slot}] Put target to cursor [{playerInventory.Items[-1]}]");
+                                    Debug.Log($"[RightClick] [{slot}] Put target (output) to cursor [{playerInventory.Items[-1]}]");
                                 }
-                                else // Take half
+                                else // Take half of the item stack
                                 {
                                     if (target2.Count == 1)
                                     {
-                                        // Only 1 item count. Put it to cursor
+                                        // Only 1 item. Put it to cursor
                                         playerInventory.Items[-1] = inventory.Items[slot];
                                         inventory.Items.Remove(slot);
                                         Debug.Log($"[RightClick] [{slot}] Take 1 target [{target2}] to cursor [{cursor2}]");
@@ -1118,17 +1136,109 @@ namespace CraftSharp
                         inventory.Items.Remove(slot);
                         changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
                         break;
+
+                    case InventoryActionType.StartDragLeft: // Distribute evenly
+                    case InventoryActionType.StartDragRight: // Drop 1 in each
+                        draggedSlots.Clear();
+                        dragStartCursorItemClone = null;
+
+                        // Check if cursor have item (slot -1) and update dragging status
+                        if (playerInventory.Items.TryGetValue(-1, out var cursor7))
+                        {
+                            Debug.Log($"[{actionType}] Start from [{slot}]. Cursor item {cursor7}");
+                            dragStartCursorItemClone = new(cursor7.ItemType, cursor7.Count, cursor7.NBT);
+                            dragging = true;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[{actionType}] Cursor slot shouldn't be empty!");
+                            dragging = false;
+                            return false;
+                        }
+                        break;
+                    case InventoryActionType.AddDragLeft:
+                    case InventoryActionType.AddDragRight:
+                        if (!dragging || draggedSlots.ContainsKey(slot)) return false;
+                        Debug.Log($"[{actionType}] Add dragged slot [{slot}]");
+                        
+                        var target8 = inventory.Items.GetValueOrDefault(slot);
+                        draggedSlots[slot] = target8?.Count ?? 0; // Initial count is 0 if the slot is empty
+                        
+                        var stackMax = dragStartCursorItemClone.ItemType.StackLimit;
+                        var initCursorCount = dragStartCursorItemClone.Count;
+                        
+                        int maxAllocForEachSlot = actionType switch
+                        {
+                            InventoryActionType.AddDragLeft => initCursorCount / draggedSlots.Count,
+                            InventoryActionType.AddDragRight => 1,
+                            _ => throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null)
+                        };
+                        int actualAllocationTotal = 0;
+                        
+                        // Increase item count in each of the dragged slots
+                        foreach (var (draggedSlot, initCount) in draggedSlots)
+                        {
+                            if (stackMax <= initCount) continue; // Full stack already
+                            
+                            int actualAllocation = Mathf.Min(stackMax - initCount, maxAllocForEachSlot);
+                            actualAllocationTotal += actualAllocation;
+                            Debug.Log($"Dragged slot [{draggedSlot}] {initCount} +{actualAllocation} => {initCount + actualAllocation}");
+                            if (inventory.Items.TryGetValue(draggedSlot, out target8))
+                            {
+                                target8.Count = initCount + actualAllocation;
+                            }
+                            else
+                            {
+                                inventory.Items[draggedSlot] = new ItemStack(dragStartCursorItemClone.ItemType, actualAllocation, dragStartCursorItemClone.NBT);
+                            }
+                            changedSlots.Add(new Tuple<short, ItemStack?>((short) draggedSlot, inventory.Items[draggedSlot]));
+                        }
+                        
+                        // And reduce the item count in cursor slot
+                        if (actualAllocationTotal == initCursorCount) // All items put into dragged slots, nothing left on cursor
+                        {
+                            playerInventory.Items.Remove(-1);
+                        }
+                        else if (actualAllocationTotal > initCursorCount) // Emm... We've got a problem here
+                        {
+                            Debug.LogWarning($"[{actionType}] WTF? Allocating {actualAllocationTotal} items out of a total of {dragStartCursorItemClone.Count}!");
+                        }
+                        else if (playerInventory.Items.TryGetValue(-1, out var cursor8)) // Reduce cursor count
+                        {
+                            cursor8.Count = dragStartCursorItemClone.Count - actualAllocationTotal;
+                        }
+                        else // Previous allocation used up all the item, recreate an item stack on cursor
+                        {
+                            playerInventory.Items[-1] = new ItemStack(dragStartCursorItemClone.ItemType, initCursorCount - actualAllocationTotal, dragStartCursorItemClone.NBT);
+                        }
+                        Debug.Log($"Cursor slot {initCursorCount} -{actualAllocationTotal} => {initCursorCount - actualAllocationTotal}");
+                        break;
+                    case InventoryActionType.EndDragLeft:
+                    case InventoryActionType.EndDragRight:
+                        if (!dragging) return false;
+                        dragging = false;
+                        Debug.Log($"[{actionType}] End");
+                        
+                        break;
+                    case InventoryActionType.MiddleClick:
+                    case InventoryActionType.StartDragMiddle:
+                    case InventoryActionType.AddDragMiddle:
+                    case InventoryActionType.EndDragMiddle:
                     default:
-                        Debug.Log($"Inventory action not handled: {action}");
+                        Debug.Log($"Inventory action not handled: {actionType}");
                         break;
                 }
+            }
+            else
+            {
+                return false;
             }
 
             foreach (var (slotId, slotItem) in changedSlots) // Update local data for each changed slot
             {
-                EventManager.Instance.BroadcastOnUnityThread(new InventorySlotUpdateEvent(inventoryId, slotId, slotItem));
+                EventManager.Instance.BroadcastOnUnityThread(new InventorySlotUpdateEvent(inventoryId, slotId, slotItem, true));
 
-                if (inventory?.IsBackpack(slotId, out var backpackSlot) ?? false) // Update backpack slots in player inventory
+                if (inventory.IsBackpack(slotId, out var backpackSlot)) // Update backpack slots in player inventory
                 {
                     var slotInPlayerInventory = playerInventory.GetFirstBackpackSlot() + backpackSlot;
                     if (slotItem is null)
@@ -1137,7 +1247,7 @@ namespace CraftSharp
                         playerInventory.Items[slotInPlayerInventory] = slotItem;
                 }
                 
-                if (inventory?.IsHotbar(slotId, out var hotbarSlot) ?? false) // Update hotbar slots in player inventory
+                if (inventory.IsHotbar(slotId, out var hotbarSlot)) // Update hotbar slots in player inventory
                 {
                     var slotInPlayerInventory = playerInventory.GetFirstHotbarSlot() + hotbarSlot;
                     if (slotItem is null)
@@ -1150,15 +1260,19 @@ namespace CraftSharp
                     if (hotbarSlot == CurrentSlot) // The currently held item is updated
                     {
                         EventManager.Instance.BroadcastOnUnityThread(new HeldItemUpdateEvent(
-                                hotbarSlot, item, PlayerActionHelper.GetItemActionType(item)));
+                                hotbarSlot, slotItem, PlayerActionHelper.GetItemActionType(slotItem)));
                     }
                 }
             }
             var cursorItem = playerInventory.Items.GetValueOrDefault(-1);
-            Debug.Log($"Changed slots: {string.Join(", ", changedSlots.Select(x => x.Item1))}, Cursor item: {cursorItem}, Non-empty Slot Count: {inventory?.Items.Count}");
-            EventManager.Instance.BroadcastOnUnityThread(new InventorySlotUpdateEvent(inventoryId, -1, cursorItem));
+            var stateId = inventory.StateId;
 
-            return handler!.SendInventoryAction(inventoryId, slot, action, item, changedSlots, inventories[inventoryId].StateId);
+            sendItem = cursorItem;
+            
+            //Debug.Log($"Changed slots: {string.Join(", ", changedSlots.Select(x => $"[{x.Item1}] {x.Item2}"))}, Cursor item: {cursorItem}, Send item: {sendItem}, State id: {stateId}");
+            EventManager.Instance.BroadcastOnUnityThread(new InventorySlotUpdateEvent(inventoryId, -1, cursorItem, true));
+
+            return handler!.SendInventoryAction(inventoryId, slot, actionType, sendItem, changedSlots, stateId);
         }
 
         /// <summary>
@@ -1322,7 +1436,7 @@ namespace CraftSharp
                 // update this dropped slot, so we do it manually here.
                 if (protocolVersion >= ProtocolMinecraft.MC_1_17_1_Version)
                 {
-                    EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(0, invSlot, updatedItem));
+                    EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(0, invSlot, updatedItem, true));
                     EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(CurrentSlot, updatedItem));
                     EventManager.Instance.Broadcast(new HeldItemUpdateEvent(
                                         CurrentSlot, updatedItem, PlayerActionHelper.GetItemActionType(updatedItem)));
@@ -1647,10 +1761,10 @@ namespace CraftSharp
         /// <param name="inventoryId">Inventory Id</param>
         public void OnInventoryOpen(int inventoryId, InventoryData inventoryData)
         {
+            activeInventoryId = inventoryId;
             inventories[inventoryId] = inventoryData;
 
             Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventoryData.Title));
-            //Debug.Log(Translations.Get("extra.inventory_interact"));
 
             Loom.QueueOnMainThread(() =>
             {
@@ -1669,6 +1783,12 @@ namespace CraftSharp
         /// <param name="inventoryId">Inventory Id</param>
         public void OnInventoryClose(int inventoryId)
         {
+            if (activeInventoryId != inventoryId)
+            {
+                Debug.LogWarning($"Trying to close inventory [{inventoryId}] while active inventory is [{activeInventoryId}]!");
+            }
+            activeInventoryId = -1;
+            
             if (inventories.ContainsKey(inventoryId))
             {
                 if (inventoryId == 0)
@@ -1768,23 +1888,24 @@ namespace CraftSharp
                     else
                         inventory.Items[slot] = itemStack;
                 }
-                inventory.StateId = stateId;
+
+                inventory.StateId = Mathf.Max(inventory.StateId, stateId);
+                var slotsText = string.Join(", ", itemList.Select(x => $"[{x.Key}] {x.Value}"));
+                Debug.Log($"[OnInventoryItems] Set inventory [{inventoryId}] items. State id set to {stateId}. Slots: {slotsText}");
                 
                 Loom.QueueOnMainThread(() =>
                 {
+                    EventManager.Instance.Broadcast(new InventoryItemsUpdateEvent(inventoryId, itemList));
+
                     foreach (var (slot, itemStack) in itemList)
                     {
-                        EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(inventoryId, slot, itemStack));
-
-                        Debug.Log($"Set inventory item: [{inventoryId}]/[{slot}] to {itemStack?.ItemType.ItemId.ToString() ?? "AIR"}");
-
                         if (inventory.IsHotbar(slot, out int hotbarSlot))
                         {
                             EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(hotbarSlot, itemStack));
                             if (hotbarSlot == CurrentSlot) // Updating held item
                             {
                                 EventManager.Instance.Broadcast(new HeldItemUpdateEvent(
-                                        CurrentSlot, itemStack, PlayerActionHelper.GetItemActionType(itemStack)));
+                                    CurrentSlot, itemStack, PlayerActionHelper.GetItemActionType(itemStack)));
                             }
                         }
                     }
@@ -1799,24 +1920,32 @@ namespace CraftSharp
         /// <param name="slot">Item slot</param>
         /// <param name="item">Item (may be null for empty slot)</param>
         /// <param name="stateId">State Id</param>
-        public void OnInventorySlot(byte inventoryId, short slot, ItemStack? item, int stateId)
+        /// <param name="fromClient">Whether this is sent from client</param>
+        public void OnInventorySlot(byte inventoryId, short slot, ItemStack? item, int stateId, bool fromClient)
         {
             if (inventories.TryGetValue(inventoryId, out var inventory))
-                inventory.StateId = stateId;
+            {
+                inventory.StateId = Mathf.Max(inventory.StateId, stateId);
+            }
+            
+            Debug.Log($"[OnInventorySlot] Inventory [{inventoryId}] slot [{slot}] updated to {item}. State id set to {stateId}");
 
-            // Handle inventoryId -2 - Add item to player inventory without animation
+            if (dragging) return;
+            
+            // Handle inventoryId -2 - Add item to player inventory without animation. State id should be ignored
             if (inventoryId == 254)
                 inventoryId = 0;
-            // Handle cursor item
-            if (inventoryId == 255 && slot == -1)
+
+            if (inventoryId == 255 && slot == -1) // Handle cursor item
             {
-                //inventoryId = 0; // Prevent key not found for some bots relied to this event
                 if (inventories.ContainsKey(0))
                 {
                     if (item != null)
                         inventories[0].Items[-1] = item;
                     else
                         inventories[0].Items.Remove(-1);
+                    
+                    EventManager.Instance.BroadcastOnUnityThread(new InventorySlotUpdateEvent(0, -1, item, fromClient));
                 }
             }
             else
@@ -1826,14 +1955,17 @@ namespace CraftSharp
                     if (item == null || item.IsEmpty)
                     {
                         inventory2.Items.Remove(slot);
+                        Debug.Log($"[OnInventorySlot] Inventory [{inventoryId}] slot [{slot}] removed.");
                     }
-                    else inventory2.Items[slot] = item;
+                    else
+                    {
+                        inventory2.Items[slot] = item;
+                        Debug.Log($"[OnInventorySlot] Inventory [{inventoryId}] slot [{slot}] updated to {item}.");
+                    }
 
                     Loom.QueueOnMainThread(() =>
                     {
-                        EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(inventoryId, slot, item));
-
-                        //Debug.Log($"Set inventory item: [{inventoryId}]/[{slot}] to {item?.ItemType.ItemId.ToString() ?? "AIR"}");
+                        EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(inventoryId, slot, item, fromClient));
 
                         if (inventory2.IsHotbar(slot, out int hotbarSlot))
                         {
@@ -1845,6 +1977,10 @@ namespace CraftSharp
                             }
                         }
                     });
+                }
+                else
+                {
+                    Debug.LogWarning($"Inventory [{inventoryId}] is not available!");
                 }
             }
         }

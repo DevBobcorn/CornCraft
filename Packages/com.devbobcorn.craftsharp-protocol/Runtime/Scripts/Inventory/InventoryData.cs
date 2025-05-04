@@ -53,6 +53,12 @@ namespace CraftSharp.Inventory
             Items = new Dictionary<int, ItemStack>();
             Properties = new Dictionary<int, short>();
         }
+        
+        public static bool CheckStackable(ItemStack stackA, ItemStack stackB)
+        {
+            return stackA.ItemType == stackB.ItemType &&
+                   DictionaryUtil.DeepCompareDictionaries(stackA.NBT, stackB.NBT);
+        }
 
         /// <summary>
         /// Search an item in the inventory

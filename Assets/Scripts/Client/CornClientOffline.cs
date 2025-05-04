@@ -31,6 +31,8 @@ namespace CraftSharp
         private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private readonly Dictionary<int, InventoryData> inventories = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
+        
+        public override bool CheckAddDragged(ItemStack slotItem) => false;
         #endregion
 
         private void Start()
@@ -357,7 +359,7 @@ namespace CraftSharp
         /// Click a slot in the specified inventory
         /// </summary>
         /// <returns>TRUE if the slot was successfully clicked</returns>
-        public override bool DoInventoryAction(int inventoryId, int slot, InventoryActionType action)
+        public override bool DoInventoryAction(int inventoryId, int slot, InventoryActionType actionType)
         {
             return false;
         }
@@ -642,7 +644,7 @@ namespace CraftSharp
                     }
                     else inventory2.Items[slot] = item;
 
-                    EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(inventoryId, slot, item));
+                    EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(inventoryId, slot, item, true));
 
                     if (inventory2.IsHotbar(slot, out int hotbarSlot)) // The updated slot is in the hotbar
                     {

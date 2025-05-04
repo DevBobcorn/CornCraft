@@ -151,6 +151,7 @@ namespace CraftSharp
 
         public GameMode GameMode { get; protected set; } = GameMode.Survival;
         protected byte CurrentSlot { get; set; } = 0;
+        public abstract bool CheckAddDragged(ItemStack slotItem);
 
         public Vector3Int WorldOriginOffset { get; private set; } = Vector3Int.zero;
 
@@ -225,7 +226,7 @@ namespace CraftSharp
         public abstract bool UseItemOnMainHand();
         public abstract bool UseItemOnOffHand();
         public abstract void OpenPlayerInventory();
-        public abstract bool DoInventoryAction(int inventoryId, int slot, InventoryActionType action);
+        public abstract bool DoInventoryAction(int inventoryId, int slot, InventoryActionType actionType);
         public abstract bool DoCreativeGive(int slot, Item itemType, int count, Dictionary<string, object>? nbt = null);
         public abstract bool DoAnimation(int playerAnimation);
         public abstract bool CloseInventory(int inventoryId);

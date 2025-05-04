@@ -291,7 +291,8 @@ namespace CraftSharp.Protocol
         /// <param name="slot">Slot Id</param>
         /// <param name="item">Item (may be null for empty slot)</param>
         /// <param name="stateId">State Id</param>
-        void OnInventorySlot(byte inventoryId, short slot, ItemStack item, int stateId);
+        /// <param name="fromClient">Whether this is sent from client</param>
+        public void OnInventorySlot(byte inventoryId, short slot, ItemStack? item, int stateId, bool fromClient);
 
         /// <summary>
         /// Called when player health or hunger changed.

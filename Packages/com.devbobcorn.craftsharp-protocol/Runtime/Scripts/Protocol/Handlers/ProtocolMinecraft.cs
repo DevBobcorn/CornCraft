@@ -1859,7 +1859,7 @@ namespace CraftSharp.Protocol.Handlers
                             stateId = DataTypes.ReadNextVarInt(packetData); // State ID - 1.17.1 and above
                         var slotId2 = DataTypes.ReadNextShort(packetData);
                         var item = dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
-                        handler.OnInventorySlot(inventoryId, slotId2, item!, stateId);
+                        handler.OnInventorySlot(inventoryId, slotId2, item!, stateId, false);
                     }
                     break;
                 case PacketTypesIn.InventoryConfirmation:

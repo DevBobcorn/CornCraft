@@ -9,7 +9,6 @@ using TMPro;
 using CraftSharp.Rendering;
 using CraftSharp.Resource;
 using CraftSharp.Protocol;
-using CraftSharp.Inventory;
 
 namespace CraftSharp.UI
 {
@@ -22,7 +21,7 @@ namespace CraftSharp.UI
         [SerializeField] private MeshFilter itemMeshFilter;
         [SerializeField] private MeshRenderer itemMeshRenderer;
         [SerializeField] private Transform slotCenterRef;
-        [SerializeField] private Sprite selectedSprite;
+        [SerializeField] private Sprite selectedSprite, draggedSprite;
         [SerializeField] private TMP_Text keyHintText;
         [SerializeField] private Image placeholderImage;
 
@@ -38,6 +37,19 @@ namespace CraftSharp.UI
         private ItemStack? itemStack = null;
         private bool hasVisibleItem = false;
         private bool cursorTextDirty = false;
+
+        private bool selected = false;
+        private bool dragged = false;
+
+        public bool Dragged
+        {
+            get => dragged;
+            set
+            {
+                dragged = value;
+                _slotImage.overrideSprite = dragged ? draggedSprite : selected ? selectedSprite : null;
+            }
+        }
 
         private void Awake()
         {
@@ -114,8 +126,10 @@ namespace CraftSharp.UI
 
         public void SelectSlot()
         {
-            _slotImage.overrideSprite = selectedSprite;
-            if (_slotAnimator)
+            selected = true;
+            _slotImage.overrideSprite = Dragged ? draggedSprite : selectedSprite;
+            
+            if (_slotAnimator) // For hotbar slots
                 _slotAnimator.SetBool(SELECTED_HASH, true);
             
             if (cursorTextDirty)
@@ -125,11 +139,14 @@ namespace CraftSharp.UI
             }
             
             cursorTextHandler?.Invoke(_slotCursorText);
+            selectHandler?.Invoke();
         }
 
         public void DeselectSlot()
         {
-            _slotImage.overrideSprite = null;
+            selected = false;
+            _slotImage.overrideSprite = Dragged ? draggedSprite : null;
+            
             if (_slotAnimator)
                 _slotAnimator.SetBool(SELECTED_HASH, false);
             
@@ -148,35 +165,48 @@ namespace CraftSharp.UI
             placeholderImage.gameObject.SetActive(false);
         }
         
-        private Action<InventoryActionType> clickHandler;
+        private Action<PointerEventData.InputButton> pointerUpHandler;
+        private Action<PointerEventData.InputButton> pointerDownHandler;
         private Action<string> cursorTextHandler;
+        private Action selectHandler;
 
-        public void SetClickHandler(Action<InventoryActionType> handler)
+        public void SetPointerUpHandler(Action<PointerEventData.InputButton> handler)
         {
-            clickHandler = handler;
+            pointerUpHandler = handler;
+        }
+        
+        public void SetPointerDownHandler(Action<PointerEventData.InputButton> handler)
+        {
+            pointerDownHandler = handler;
         }
 
         public void SetCursorTextHandler(Action<string> handler)
         {
             cursorTextHandler = handler;
         }
-
-        public void ClickSlot(BaseEventData data)
+        
+        public void SetSelectHandler(Action handler)
+        {
+            selectHandler = handler;
+        }
+        
+        public void SlotPointerDown(BaseEventData data)
         {
             if (data is PointerEventData pointerData)
             {
-                switch (pointerData.button)
-                {
-                    case PointerEventData.InputButton.Left:
-                        clickHandler?.Invoke(InventoryActionType.LeftClick);
-                        break;
-                    case PointerEventData.InputButton.Right:
-                        clickHandler?.Invoke(InventoryActionType.RightClick);
-                        break;
-                    case PointerEventData.InputButton.Middle:
-                        clickHandler?.Invoke(InventoryActionType.MiddleClick);
-                        break;
-                }
+                pointerDownHandler?.Invoke(pointerData.button);
+            }
+            else
+            {
+                Debug.LogWarning("Event data is not pointer data!");
+            }
+        }
+        
+        public void SlotPointerUp(BaseEventData data)
+        {
+            if (data is PointerEventData pointerData)
+            {
+                pointerUpHandler?.Invoke(pointerData.button);
             }
             else
             {

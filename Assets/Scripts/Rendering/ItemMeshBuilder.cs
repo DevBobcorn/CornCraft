@@ -9,7 +9,7 @@ using CraftSharp.Resource;
 
 namespace CraftSharp.Rendering
 {
-    public class ItemMeshBuilder
+    public static class ItemMeshBuilder
     {
         private static readonly float3 ITEM_CENTER = new(-0.5F, -0.5F, -0.5F);
 
@@ -59,19 +59,15 @@ namespace CraftSharp.Rendering
             var material = CornApp.CurrentClient!.ChunkMaterialManager
                 .GetAtlasMaterial(itemModel.RenderType, useInventoryMaterial);
 
-            if (shouldUseCache && DEFAULT_MESH_CACHE.ContainsKey(itemId))
+            if (shouldUseCache && DEFAULT_MESH_CACHE.TryGetValue(itemId, out var defaultMesh))
             {
-                return (DEFAULT_MESH_CACHE[itemId], material, itemModel.Geometry.DisplayTransforms);
+                return (defaultMesh, material, itemModel.Geometry.DisplayTransforms);
             }
 
             // Make and set mesh...
-            float3[] colors;
 
             var tintFunc = ItemPalette.INSTANCE.GetTintRule(itemId);
-            if (tintFunc is null)
-                colors = new float3[] { new(1F, 0F, 0F), new(0F, 0F, 1F), new(0F, 1F, 0F) };
-            else
-                colors = tintFunc.Invoke(itemStack);
+            var colors = tintFunc is null ? new float3[] { new(1F, 0F, 0F), new(0F, 0F, 1F), new(0F, 1F, 0F) } : tintFunc.Invoke(itemStack);
 
             // TODO Get and build the right geometry (base or override)
             var itemGeometry = itemModel.Geometry;
@@ -82,13 +78,13 @@ namespace CraftSharp.Rendering
             if (shouldUseCache)
             {
                 DEFAULT_MESH_CACHE[itemId] = mesh;
-                return (mesh, material, itemGeometry.DisplayTransforms);
             }
             else
             {
                 UNCACHED_ITEM_MESHES.Add(mesh);
-                return (mesh, material, itemGeometry.DisplayTransforms);
             }
+
+            return (mesh, material, itemGeometry.DisplayTransforms);
         }
 
         /// <summary>
