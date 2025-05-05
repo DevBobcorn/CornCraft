@@ -183,7 +183,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d8b01b662a8cab469f54a7f3459a04e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetImage: {fileID: 3149924699915583116}
   rectTransform: {fileID: 3149924699915583117}
   borderWidth: 5
   cornerRadii: {x: 0, y: 30, z: 0, w: 0}
@@ -285,7 +284,7 @@ MonoBehaviour:
   m_enableAutoSizing: 1
   m_fontSizeMin: 8
   m_fontSizeMax: 20
-  m_fontStyle: 1
+  m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
