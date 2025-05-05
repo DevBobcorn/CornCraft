@@ -6,7 +6,6 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (Image))]
     public class FrameSizeHelper : BaseMeshEffect
     {
-        [SerializeField] private Image targetImage;
         [SerializeField] private RectTransform rectTransform;
 
         [SerializeField] private float borderWidth = 5F;
@@ -27,7 +26,7 @@ namespace CraftSharp.UI
         
         // See https://discussions.unity.com/t/big-problem-with-lacking-materialpropertyblock-for-ui-image/684361/11
         public override void ModifyMesh(VertexHelper vh) {
-            if (!targetImage || !rectTransform)
+            if (!rectTransform)
             {
                 return;
             }

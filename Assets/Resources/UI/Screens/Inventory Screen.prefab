@@ -1049,6 +1049,7 @@ GameObject:
   - component: {fileID: 6470961311423885622}
   - component: {fileID: 6541289732390610114}
   - component: {fileID: 772991332616358181}
+  - component: {fileID: 145911823780566734}
   m_Layer: 5
   m_Name: Cursor Text Panel
   m_TagString: Untagged
@@ -1096,7 +1097,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 50cbd73f955d8f1478dbea51f3f5fa3d, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -1104,7 +1105,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 21fe2547c1a4c584b84fbd1c9c6c7b02, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1141,10 +1142,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 25
-    m_Right: 25
-    m_Top: 20
-    m_Bottom: 20
+    m_Left: 10
+    m_Right: 10
+    m_Top: 5
+    m_Bottom: 5
   m_ChildAlignment: 0
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
@@ -1154,6 +1155,21 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &145911823780566734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8453160685611617310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d8b01b662a8cab469f54a7f3459a04e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rectTransform: {fileID: 1546807143242781322}
+  borderWidth: 5
+  cornerRadii: {x: 0, y: 30, z: 0, w: 0}
 --- !u!1 &8572692006245644427
 GameObject:
   m_ObjectHideFlags: 0
@@ -2596,6 +2612,10 @@ PrefabInstance:
     - target: {fileID: 116644182159741648, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 455464636642461461, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}
+      propertyPath: slotImage
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1333662668710857103, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}
       propertyPath: m_Name

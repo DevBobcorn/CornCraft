@@ -88,7 +88,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d8b01b662a8cab469f54a7f3459a04e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetImage: {fileID: 7394360974756411018}
   rectTransform: {fileID: 8771523588992301714}
   borderWidth: 8
   cornerRadii: {x: 0, y: 40, z: 0, w: 0}
@@ -278,7 +277,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee7e82110441e6d478e8161fde817ebe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barText: {fileID: 0}
+  barText: {fileID: 2755707769151283538}
   textFormat: '{0:0}/{1:0}'
   normalColor: {r: 0, g: 0.5913043, b: 1, a: 1}
   reduceColor: {r: 1, g: 0.19607843, b: 0.31764707, a: 1}
