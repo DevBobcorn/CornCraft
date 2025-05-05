@@ -32,9 +32,9 @@ namespace CraftSharp.UI
             timeLeft = duration;
         }
 
-        public void SetImage(Sprite image)
+        public void SetMaterial(Material material)
         {
-            GetComponentInChildren<Image>().sprite = image;
+            GetComponentInChildren<Image>().material = material;
         }
 
         // Called by animator after hide animation ends...

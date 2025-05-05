@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using UnityEngine;
 
@@ -8,13 +7,17 @@ namespace CraftSharp.UI
 {
     public class NotificationsControl : MonoBehaviour
     {
-        [SerializeField] private GameObject? notificationPrefab;
-        [SerializeField] private RectTransform? container;
-        [SerializeField] private Sprite? notify, success, warning, error;
+        [SerializeField] private GameObject notificationPrefab;
+        [SerializeField] private RectTransform container;
+        [SerializeField] private Material notify, success, warning, error;
 
         private int nextNumeralID = 1;
 
+        #nullable enable
+        
         private Action<NotificationEvent>? showCallback;
+        
+        #nullable disable
 
         private void Start()
         {
@@ -28,16 +31,14 @@ namespace CraftSharp.UI
                 Notification notification = notificationObj.GetComponent<Notification>();
                 notification.SetInfo(nextNumeralID, e.Text, e.Duration);
 
-                var image = e.Type switch {
+                var material = e.Type switch {
                     Notification.Type.Success => success,
                     Notification.Type.Warning => warning,
                     Notification.Type.Error   => error,
-                    Notification.Type.Notify  => notify,
-
                     _                         => notify
                 };
 
-                notification.SetImage(image!);
+                notification.SetMaterial(material);
                 
                 nextNumeralID++;
             };

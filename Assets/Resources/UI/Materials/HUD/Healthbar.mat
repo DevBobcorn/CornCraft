@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: RoundCornerFrame
-  m_Shader: {fileID: 4800000, guid: 1f5143c7637709547aa1577dec2ace57, type: 3}
+  m_Name: Healthbar
+  m_Shader: {fileID: 4800000, guid: b034101536cb4f478a8ccaad96c07b9c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -16,7 +16,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2450
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -37,7 +37,6 @@ Material:
     - _BorderColor: {r: 1, g: 1, b: 1, a: 1}
     - _CornerRadii: {r: 0, g: 40, b: 0, a: 0}
     - _DeltaColor: {r: 0, g: 0.78596354, b: 1, a: 1}
-    - _FillColor: {r: 0, g: 0, b: 0, a: 0.78431374}
     - _Size: {r: 450, g: 36, b: 0, a: 0}
     - _ValueColor: {r: 1, g: 0.54905653, b: 0.75168425, a: 1}
   m_BuildTextureStacks: []
