@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: NotificationError
+  m_Name: Interaction Option
   m_Shader: {fileID: 4800000, guid: 1f5143c7637709547aa1577dec2ace57, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -34,12 +34,12 @@ Material:
     - _FillAmount: 1
     m_Colors:
     - _BarSize: {r: 300, g: 100, b: 0, a: 0}
-    - _BorderColor: {r: 1, g: 0, b: 0.05889511, a: 1}
+    - _BorderColor: {r: 1, g: 1, b: 1, a: 1}
     - _CornerRadii: {r: 0, g: 40, b: 0, a: 0}
-    - _DeltaColor: {r: 0, g: 0.78596354, b: 1, a: 1}
-    - _FillColor: {r: 0.3886792, g: 0, b: 0.0021836369, a: 0.78431374}
+    - _DeltaColor: {r: 0, g: 0.78596354, b: 1, a: 0.78431374}
+    - _FillColor: {r: 0, g: 0, b: 0, a: 0.78431374}
     - _Size: {r: 450, g: 36, b: 0, a: 0}
-    - _ValueColor: {r: 1, g: 0.54905653, b: 0.75168425, a: 1}
+    - _ValueColor: {r: 0.13396224, g: 0.6227384, b: 1, a: 0.78431374}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &353353256494423236
