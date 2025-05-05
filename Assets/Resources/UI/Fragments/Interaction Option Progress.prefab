@@ -415,7 +415,7 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 0.78431374}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
+  m_Maskable: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -441,7 +441,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d8b01b662a8cab469f54a7f3459a04e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetImage: {fileID: 6331162160850734272}
   rectTransform: {fileID: 1985491977873965075}
   borderWidth: 8
   cornerRadii: {x: 0, y: 40, z: 0, w: 0}
@@ -667,9 +666,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 9a0ef97ddfc66f346917a5ebee426409, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
+  m_Maskable: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -707,7 +706,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d8b01b662a8cab469f54a7f3459a04e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetImage: {fileID: 9089865580358473875}
   rectTransform: {fileID: 7096150900489744546}
   borderWidth: 8
   cornerRadii: {x: 0, y: 40, z: 0, w: 0}
