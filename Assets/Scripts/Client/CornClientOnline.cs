@@ -77,7 +77,7 @@ namespace CraftSharp
         private bool locationReceived = false;
         private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
-        private int foodSaturation, experienceLevel, totalExperience;
+        private int currentHunger, experienceLevel, totalExperience;
         private int activeInventoryId = -1;
         private readonly Dictionary<int, InventoryData> inventories = new();
         
@@ -576,7 +576,7 @@ namespace CraftSharp
         public override double GetLatestServerTps() => serverTPS;
         public override int GetPacketCount() => packetCount;
         public override int GetClientEntityId() => clientEntity.Id;
-        public override double GetClientFoodSaturation() => foodSaturation;
+        public override double GetClientFoodSaturation() => currentHunger;
         public override double GetClientExperienceLevel() => experienceLevel;
         public override double GetClientTotalExperience() => totalExperience;
 
@@ -2270,8 +2270,8 @@ namespace CraftSharp
         /// Called when client player's health changed, e.g. getting attack
         /// </summary>
         /// <param name="health">Player current health</param>
-        /// <param name="food">Player current hunger</param>
-        public void OnUpdateHealth(float health, int food)
+        /// <param name="hunger">Player current hunger</param>
+        public void OnUpdateHealth(float health, int hunger)
         {
             bool updateMaxHealth = clientEntity.MaxHealth < health;
 
@@ -2279,10 +2279,13 @@ namespace CraftSharp
                 clientEntity.MaxHealth = health;
             
             clientEntity.Health = health;
-            foodSaturation = food;
+            currentHunger = hunger;
 
             EventManager.Instance.BroadcastOnUnityThread
                     <HealthUpdateEvent>(new(health, updateMaxHealth));
+            
+            EventManager.Instance.BroadcastOnUnityThread
+                    <HungerUpdateEvent>(new(hunger));
         }
 
         /// <summary>
@@ -2295,6 +2298,9 @@ namespace CraftSharp
         {
             experienceLevel = expLevel;
             totalExperience = totalExp;
+            
+            EventManager.Instance.BroadcastOnUnityThread
+                    <ExperienceUpdateEvent>(new(expLevel, totalExp, expBar));
         }
 
         /// <summary>

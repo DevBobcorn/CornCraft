@@ -20,6 +20,8 @@ namespace CraftSharp.UI
         [SerializeField] private Animator modePanelAnimator, crosshairAnimator, statusPanelAnimator, playerPanelAnimator;
         [SerializeField] private Button[] modeButtons = new Button[4];
         [SerializeField] private ValueBar healthBar;
+        [SerializeField] private Image experienceBarFill, hungerBarFill;
+        [SerializeField] private TMP_Text experienceText, hungerText;
         [SerializeField] private RingValueBar staminaBar;
         [SerializeField] private InteractionPanel interactionPanel;
         [SerializeField] private InventoryHotbar inventoryHotbar;
@@ -101,6 +103,18 @@ namespace CraftSharp.UI
 
                 healthBar.CurValue = e.Health * HEALTH_MULTIPLIER;
             };
+            
+            hungerCallback = e =>
+            {
+                hungerText.text = $"{e.Hunger}/20";
+                hungerBarFill.fillAmount = Mathf.Clamp01(e.Hunger / 20F);
+            };
+            
+            experienceCallback = e =>
+            {
+                experienceText.text = $"Lv {e.Level}";
+                experienceBarFill.fillAmount = Mathf.Clamp01(e.LevelUpProgress);
+            };
 
             staminaCallback = e =>
             {
@@ -127,6 +141,8 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(cameraAimCallback);
             EventManager.Instance.Register(gameModeCallback);
             EventManager.Instance.Register(healthCallback);
+            EventManager.Instance.Register(hungerCallback);
+            EventManager.Instance.Register(experienceCallback);
             EventManager.Instance.Register(staminaCallback);
             EventManager.Instance.Register(chatMessageCallback);
 
@@ -149,6 +165,8 @@ namespace CraftSharp.UI
         private Action<CameraAimingEvent>?      cameraAimCallback;
         private Action<GameModeUpdateEvent>?    gameModeCallback;
         private Action<HealthUpdateEvent>?      healthCallback;
+        private Action<HungerUpdateEvent>?      hungerCallback;
+        private Action<ExperienceUpdateEvent>?  experienceCallback;
         private Action<StaminaUpdateEvent>?     staminaCallback;
         private Action<ChatMessageEvent>?       chatMessageCallback;
 
@@ -164,6 +182,12 @@ namespace CraftSharp.UI
             
             if (healthCallback is not null)
                 EventManager.Instance.Unregister(healthCallback);
+            
+            if (hungerCallback is not null)
+                EventManager.Instance.Unregister(hungerCallback);
+            
+            if (experienceCallback is not null)
+                EventManager.Instance.Unregister(experienceCallback);
 
             if (staminaCallback is not null)
                 EventManager.Instance.Unregister(staminaCallback);

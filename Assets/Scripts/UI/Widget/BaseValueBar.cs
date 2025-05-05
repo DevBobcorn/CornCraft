@@ -48,7 +48,8 @@ namespace CraftSharp.UI
 
         protected virtual void Update()
         {
-            if (!Mathf.Approximately(displayValue, curValue))
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
+            if (displayValue != curValue)
             {
                 // Update bar value
                 UpdateValue();
