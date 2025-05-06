@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace CraftSharp.Inventory
@@ -40,58 +39,9 @@ namespace CraftSharp.Inventory
         public static readonly ResourceLocation CARTOGRAPHY_ID   = new("cartography_table"); // Cartography Table
         public static readonly ResourceLocation STONECUTTER_ID   = new("stonecutter");       // Stonecutter
 
-        public static readonly InventoryType PLAYER = new(PLAYER_ID,
-            9, 0, 0, true, true, 1,
-            new()
-            {
-                [0] = new(8, 2, InventorySlotType.Output, null, null),
-                [1] = new(5, 2.5F, InventorySlotType.Regular, null, null),
-                [2] = new(6, 2.5F, InventorySlotType.Regular, null, null),
-                [3] = new(5, 1.5F, InventorySlotType.Regular, null, null),
-                [4] = new(6, 1.5F, InventorySlotType.Regular, null, null),
-                [5] = new(0, 3, InventorySlotType.Helmet, null, ResourceLocation.FromString("corncraft:empty_armor_slot_helmet")),
-                [6] = new(0, 2, InventorySlotType.Chestplate, null, ResourceLocation.FromString("corncraft:empty_armor_slot_chestplate")),
-                [7] = new(0, 1, InventorySlotType.Leggings, null, ResourceLocation.FromString("corncraft:empty_armor_slot_leggings")),
-                [8] = new(0, 0, InventorySlotType.Boots, null, ResourceLocation.FromString("corncraft:empty_armor_slot_boots")),
-
-                [45] = new(4, 0, InventorySlotType.Offhand, null, ResourceLocation.FromString("corncraft:empty_armor_slot_shield"))
-            },
-            new()
-            {
-                new(7, 2, 1, 1, ResourceLocation.FromString("corncraft:arrow"))
-            })
-        {
-            WorkPanelHeight = 4
-        };
-        
-        public static readonly InventoryType HORSE_REGULAR = new(HORSE_ID,
-            2, 0, 0, true, true, 0,
-            new()
-            {
-                [0] = new(0, 2, InventorySlotType.HorseArmor, null, null),
-                [1] = new(0, 2, InventorySlotType.Saddle, null, null)
-            },
-            new())
-        {
-            MainPosX = 4,
-            MainPosY = 0,
-        };
-        public static readonly InventoryType HORSE_CHESTED = new(HORSE_ID,
-            2, 5, 3, true, true, 0,
-            new()
-            {
-                [0] = new(0, 2, InventorySlotType.HorseArmor, null, null),
-                [1] = new(0, 2, InventorySlotType.Saddle, null, null)
-            },
-            new())
-        {
-            MainPosX = 4,
-            MainPosY = 0
-        };
-        
         public static readonly InventoryType DUMMY_INVENTORY_TYPE = new(ResourceLocation.INVALID,
             0, 0, 0, false, false, 0, new(), new());
-
+        
         public readonly ResourceLocation TypeId;
         
         public bool HasBackpackSlots { get; } // 9x3 slots from player backpack
@@ -155,7 +105,8 @@ namespace CraftSharp.Inventory
         
         public InventorySlotType GetInventorySlotType(int slot)
         {
-            return extraSlotInfo.TryGetValue(slot, out var info) ? info.Type : InventorySlotType.Regular;
+            return extraSlotInfo.TryGetValue(slot, out var info) ?
+                info.Type : InventorySlotTypePalette.INSTANCE.GetById(InventorySlotType.SLOT_TYPE_REGULAR_ID);
         }
         
         // UI Layout settings

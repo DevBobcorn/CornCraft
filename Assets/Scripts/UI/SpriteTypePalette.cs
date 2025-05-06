@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading;
 using CraftSharp.Resource;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace CraftSharp.UI
 {
@@ -121,8 +120,6 @@ namespace CraftSharp.UI
                 FreezeEntries();
                 flag.Finished = true;
             }
-
-            return;
         }
 
     }

@@ -116,33 +116,14 @@ namespace CraftSharp
 
             static InventoryType.InventorySlotInfo getSlotInfo(Json.JSONData data)
             {
-                var typeStr = data.Properties.TryGetValue("type", out var val) ? val.StringValue : "regular";
-                var type = typeStr switch
-                {
-                    "regular" => InventorySlotType.Regular,
-                    "output" => InventorySlotType.Output,
-                    "helmet" => InventorySlotType.Helmet,
-                    "chestplate" => InventorySlotType.Chestplate,
-                    "leggings" => InventorySlotType.Leggings,
-                    "boots" => InventorySlotType.Boots,
-                    "offhand" => InventorySlotType.Offhand,
-                    "horse_armor" => InventorySlotType.HorseArmor,
-                    "saddle" => InventorySlotType.Saddle,
-                    "beacon_activation_item" => InventorySlotType.BeaconActivationItem,
-                    "bottle" => InventorySlotType.Bottle,
-                    "blaze_powder" => InventorySlotType.BlazePowder,
-                    "lapis_lazuli" => InventorySlotType.LapisLazuli,
-                    "smithing_template" => InventorySlotType.SmithingTemplate,
-                    "preview" => InventorySlotType.Preview,
-                    
-                    _ => InventorySlotType.Regular
-                };
+                var typeId = data.Properties.TryGetValue("type_id", out var val) ?
+                    ResourceLocation.FromString(val.StringValue) : InventorySlotType.SLOT_TYPE_REGULAR_ID;
+                var type = InventorySlotTypePalette.INSTANCE.GetById(typeId);
                 
                 var x = data.Properties.TryGetValue("pos_x", out val) ? float.Parse(val.StringValue) : 0;
                 var y = data.Properties.TryGetValue("pos_y", out val) ? float.Parse(val.StringValue) : 0;
 
-                ItemStack previewItem = type == InventorySlotType.Preview &&
-                                        data.Properties.TryGetValue("preview_item", out val)
+                ItemStack previewItem = data.Properties.TryGetValue("preview_item", out val)
                                         ? getItemStack(val) : null;
                 
                 ResourceLocation? placeholderTypeId = data.Properties.TryGetValue("placeholder_type_id", out val) ?

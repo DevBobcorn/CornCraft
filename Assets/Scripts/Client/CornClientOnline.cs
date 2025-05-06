@@ -894,12 +894,12 @@ namespace CraftSharp
                 var inventoryType = inventory.Type;
                 var slotType = inventoryType.GetInventorySlotType(slot);
 
-                if (slotType == InventorySlotType.Preview)
+                if (!slotType.Interactable)
                 {
                     return false; // Not interactable at all
                 }
 
-                var placePredicate = slotType.GetPlacePredicate();
+                var placePredicate = slotType.PlacePredicate;
                 
                 switch (actionType)
                 {
@@ -918,7 +918,7 @@ namespace CraftSharp
                                     // Check item stacking
                                     if (target1.Count + cursor1.Count <= maxCount)
                                     {
-                                        if (slotType == InventorySlotType.Output)
+                                        if (slotType.TypeId == InventorySlotType.SLOT_TYPE_OUTPUT_ID)
                                         {
                                             // Stack target to cursor
                                             cursor1.Count += target1.Count;
@@ -935,7 +935,7 @@ namespace CraftSharp
                                     }
                                     else
                                     {
-                                        if (slotType == InventorySlotType.Output)
+                                        if (slotType.TypeId == InventorySlotType.SLOT_TYPE_OUTPUT_ID)
                                         {
                                             Debug.Log($"[LeftClick] [{slot}] Cannot stack target (output) to cursor");
                                         }
@@ -1010,7 +1010,7 @@ namespace CraftSharp
                                 // Check if these 2 items are stackable
                                 if (InventoryData.CheckStackable(target2, cursor2))
                                 {
-                                    if (slotType == InventorySlotType.Output)
+                                    if (slotType.TypeId == InventorySlotType.SLOT_TYPE_OUTPUT_ID)
                                     {
                                         if (target2.Count + cursor2.Count <= maxCount)
                                         {
@@ -1069,7 +1069,7 @@ namespace CraftSharp
                             // Check target slot have item?
                             if (inventory.Items.TryGetValue(slot, out var target2))
                             {
-                                if (inventoryType.GetInventorySlotType(slot) == InventorySlotType.Output)
+                                if (slotType.TypeId == InventorySlotType.SLOT_TYPE_OUTPUT_ID)
                                 {
                                     // You can't take half from an output slot, put entire item stack from target to cursor
                                     playerInventory.Items[-1] = inventory.Items[slot];
@@ -1332,7 +1332,8 @@ namespace CraftSharp
                 return InvokeOnNetMainThread(ClearInventories);
 
             inventories.Clear();
-            inventories[0] = new InventoryData(0, InventoryType.PLAYER, "Player Inventory");
+            inventories[0] = new InventoryData(0, InventorySlotTypePalette.INSTANCE.PLAYER,
+                ChatParser.TranslateString("container.inventory"));
             return true;
         }
 

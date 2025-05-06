@@ -11,6 +11,7 @@ using UnityEngine.SceneManagement;
 
 using CraftSharp.Event;
 using CraftSharp.Control;
+using CraftSharp.Inventory;
 using CraftSharp.Resource;
 using CraftSharp.UI;
 using CraftSharp.Protocol.ProtoDef;
@@ -158,8 +159,13 @@ namespace CraftSharp
             loadFlag.Finished = false;
             Task.Run(() => ParticleTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
-
-            // Load inventory definitions
+            
+            // Load inventory slot definitions (vanilla doesn't have this)
+            loadFlag.Finished = false;
+            Task.Run(() => InventorySlotTypePalette.INSTANCE.PrepareData(loadFlag));
+            while (!loadFlag.Finished) yield return null;
+            
+            // Load inventory definitions AFTER inventory slot definitions are loaded
             loadFlag.Finished = false;
             Task.Run(() => InventoryTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;

@@ -266,8 +266,8 @@ namespace CraftSharp.UI
                     
                     // Draggable slot has to be either empty or have the exact same item as cursor item.
                     // And also, to start dragging, cursor item shouldn't be empty
-                    var canBeUsedAsDragStart = cursor is not null && cursor.Count > 1 &&
-                        ((target is null && slotType.GetPlacePredicate().Invoke(cursor)) || InventoryData.CheckStackable(target, cursor));
+                    var canBeUsedAsDragStart = cursor is not null && cursor.Count > 1 && slotType.PlacePredicate(cursor)
+                                               && (target is null || InventoryData.CheckStackable(target, cursor));
                     dragStartSlot = canBeUsedAsDragStart ? slotId : -1;
                 });
                 
@@ -322,7 +322,7 @@ namespace CraftSharp.UI
                         if (dragStartSlot < 0)
                         {
                             var cursor = game.GetInventory(0)?.Items.GetValueOrDefault(-1);
-                            if (cursor is not null && cursor.Count > 1 && slotType.GetPlacePredicate().Invoke(cursor) &&
+                            if (cursor is not null && cursor.Count > 1 && slotType.PlacePredicate(cursor) &&
                                 (target is null || InventoryData.CheckStackable(target, cursor)))
                             {
                                 dragStartSlot = slotId;
@@ -355,7 +355,7 @@ namespace CraftSharp.UI
                         }
                         
                         if (dragging && !draggedSlots.Contains(slotId) &&
-                            game.CheckAddDragged(target, slotType.GetPlacePredicate())) // Add this slot
+                            game.CheckAddDragged(target, slotType.PlacePredicate)) // Add this slot
                         {
                             currentSlots[slotId].Dragged = true;
                             Debug.Log($"Adding {slotId}, Dragged slots: {string.Join(", ", draggedSlots)}");

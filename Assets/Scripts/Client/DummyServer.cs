@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using CraftSharp.Inventory;
+using CraftSharp.Protocol;
 using CraftSharp.Protocol.Message;
 
 
@@ -57,7 +58,7 @@ namespace CraftSharp
 
         private void DummySendInitialTerrainData()
         {
-            if (client == null || !dataLoaded) return;
+            if (!client || !dataLoaded) return;
 
             var chunkHeight = World.GetDimensionType().height;
             var chunkColumnSize = Mathf.CeilToInt(chunkHeight / (float) Chunk.SIZE);
@@ -84,7 +85,7 @@ namespace CraftSharp
 
         private void DummySendTerrainDataUpdate(int clientChunkX, int clientChunkZ)
         {
-            if (client == null || !dataLoaded) return;
+            if (!client || !dataLoaded) return;
 
             var chunkHeight = World.GetDimensionType().height;
             var chunkColumnSize = Mathf.CeilToInt(chunkHeight / (float) Chunk.SIZE);
@@ -126,7 +127,7 @@ namespace CraftSharp
 
         private void Start()
         {
-            if (client != null)
+            if (client)
             {
                 client.OnDummySendChat += text =>
                 {
@@ -194,7 +195,8 @@ namespace CraftSharp
             client.DummyOnGamemodeUpdate(Guid.Empty, (int) GameMode.Creative);
 
             // Send initial inventory
-            client.DummyOnInventoryOpen(0, new InventoryData(0, InventoryType.PLAYER, null));
+            client.DummyOnInventoryOpen(0, new InventoryData(0, InventorySlotTypePalette.INSTANCE.PLAYER,
+                ChatParser.TranslateString("container.inventory")));
 
             if (dataLoaded)
             {
@@ -208,7 +210,7 @@ namespace CraftSharp
         /// </summary>
         private void FixedUpdate()
         {
-            if (client != null)
+            if (client)
             {
                 if (client.GetPosition().y < -100)
                 {
