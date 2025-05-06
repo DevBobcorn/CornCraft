@@ -1,0 +1,63 @@
+{
+    "minecraft:regular": {
+        "place_predicate": "always"
+    },
+    "minecraft:output": {
+        "place_predicate": "never"
+    },
+    "minecraft:head_item": {
+        "place_predicate": "equipment_slot=head"
+    },
+    "minecraft:chest_item": {
+        "place_predicate": "equipment_slot=chest"
+    },
+    "minecraft:legs_item": {
+        "place_predicate": "equipment_slot=legs"
+    },
+    "minecraft:feet_item": {
+        "place_predicate": "equipment_slot=feet"
+    },
+    "minecraft:offhand_item": {
+        "place_predicate": "always"
+    },
+    "minecraft:horse_armor": {
+        "place_predicate": "id_path_ends_with=_horse_armor"
+    },
+    "minecraft:saddle": {
+        "place_predicate": "id=minecraft:saddle"
+    },
+    "minecraft:beacon_activation_item": {
+        "place_predicate": "id=minecraft:iron_ingot|minecraft:gold_ingot|minecraft:emerald|minecraft:diamond|minecraft:netherite_ingot"
+    },
+    "minecraft:brewing_bottle_item": {
+        "place_predicate": "id=minecraft:potion|minecraft:glass_bottle"
+    },
+    "minecraft:brewing_material_item": {
+        "place_predicate": "always"
+    },
+    "minecraft:brewing_fuel_item": {
+        "place_predicate": "id=minecraft:blaze_powder"
+    },
+    "minecraft:cartography_empty_item": {
+        "place_predicate": "id=minecraft:map|minecraft:paper"
+    },
+    "minecraft:cartography_filled_item": {
+        "place_predicate": "id=minecraft:filled_map"
+    },
+    "minecraft:enchantment_fuel_item": {
+        "place_predicate": "id=minecraft:lapis_lazuli"
+    },
+    "minecraft:smithing_template_item": {
+        "place_predicate": "id_path_ends_with=_smithing_template"
+    },
+    "minecraft:smithing_target_item": {
+        "place_predicate": "always"
+    },
+    "minecraft:smithing_material_item": {
+        "place_predicate": "always"
+    },
+    "minecraft:preview": {
+        "interactable": false,
+        "place_predicate": "never"
+    }
+}

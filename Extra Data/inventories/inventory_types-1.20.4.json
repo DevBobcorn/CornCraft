@@ -77,7 +77,7 @@
                 "pos_y": 0
             },
             "2": {
-                "type": "output",
+                "type_id": "minecraft:output",
                 "pos_x": 7,
                 "pos_y": 0
             }
@@ -99,12 +99,12 @@
         ],
         "slots": {
             "0": {
-                "type": "beacon_activation_item",
+                "type_id": "corncraft:beacon_activation_item",
                 "pos_x": 6,
                 "pos_y": 0
             },
             "37": {
-                "type": "preview",
+                "type_id": "minecraft:preview",
                 "preview_item": {
                     "item_id": "minecraft:netherite_ingot"
                 },
@@ -112,7 +112,7 @@
                 "pos_y": 0
             },
             "38": {
-                "type": "preview",
+                "type_id": "minecraft:preview",
                 "preview_item": {
                     "item_id": "minecraft:emerald"
                 },
@@ -120,7 +120,7 @@
                 "pos_y": 0
             },
             "39": {
-                "type": "preview",
+                "type_id": "minecraft:preview",
                 "preview_item": {
                     "item_id": "minecraft:diamond"
                 },
@@ -128,7 +128,7 @@
                 "pos_y": 0
             },
             "40": {
-                "type": "preview",
+                "type_id": "minecraft:preview",
                 "preview_item": {
                     "item_id": "minecraft:gold_ingot"
                 },
@@ -136,7 +136,7 @@
                 "pos_y": 0
             },
             "41": {
-                "type": "preview",
+                "type_id": "minecraft:preview",
                 "preview_item": {
                     "item_id": "minecraft:iron_ingot"
                 },
@@ -185,7 +185,7 @@
                 "pos_y": 0
             },
             "2": {
-                "type": "output",
+                "type_id": "minecraft:output",
                 "pos_x": 7,
                 "pos_y": 1
             }
@@ -211,29 +211,30 @@
         ],
         "slots": {
             "0": {
-                "type": "bottle",
+                "type_id": "minecraft:brewing_bottle_item",
                 "pos_x": 2.5,
                 "pos_y": 0.5,
                 "placeholder_type_id": "corncraft:empty_slot_bottle"
             },
             "1": {
-                "type": "bottle",
+                "type_id": "minecraft:brewing_bottle_item",
                 "pos_x": 4,
                 "pos_y": 0,
                 "placeholder_type_id": "corncraft:empty_slot_bottle"
             },
             "2": {
-                "type": "bottle",
+                "type_id": "minecraft:brewing_bottle_item",
                 "pos_x": 5.5,
                 "pos_y": 0.5,
                 "placeholder_type_id": "corncraft:empty_slot_bottle"
             },
             "3": {
+                "type_id": "minecraft:brewing_material_item",
                 "pos_x": 4,
                 "pos_y": 2
             },
             "4": {
-                "type": "blaze_powder",
+                "type_id": "minecraft:brewing_fuel_item",
                 "pos_x": 1.5,
                 "pos_y": 2.0,
                 "placeholder_type_id": "corncraft:empty_slot_blaze_powder"
@@ -256,7 +257,7 @@
         ],
         "slots": {
             "0": {
-                "type": "output",
+                "type_id": "minecraft:output",
                 "pos_x": 7,
                 "pos_y": 1
             }
@@ -305,7 +306,7 @@
                 "pos_y": 0
             },
             "2": {
-                "type": "output",
+                "type_id": "minecraft:output",
                 "pos_x": 7,
                 "pos_y": 1
             }
@@ -390,7 +391,7 @@
                 "pos_y": 0
             },
             "2": {
-                "type": "output",
+                "type_id": "minecraft:output",
                 "pos_x": 7,
                 "pos_y": 1
             }
