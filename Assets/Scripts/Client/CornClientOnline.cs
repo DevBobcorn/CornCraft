@@ -1332,7 +1332,7 @@ namespace CraftSharp
                 return InvokeOnNetMainThread(ClearInventories);
 
             inventories.Clear();
-            inventories[0] = new InventoryData(0, InventorySlotTypePalette.INSTANCE.PLAYER,
+            inventories[0] = new InventoryData(0, InventoryTypePalette.INSTANCE.PLAYER,
                 ChatParser.TranslateString("container.inventory"));
             return true;
         }

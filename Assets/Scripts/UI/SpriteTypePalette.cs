@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using CraftSharp.Resource;
@@ -52,7 +55,19 @@ namespace CraftSharp.UI
                     var texId = spriteDef.Properties.TryGetValue("texture_id", out val) ? ResourceLocation.FromString(val.StringValue) : ResourceLocation.INVALID;
                     var imageType = spriteDef.Properties.TryGetValue("image_type", out val) ? SpriteType.GetImageType(val.StringValue) : SpriteType.SpriteImageType.Simple;
 
-                    var t = new SpriteType(spriteTypeId, texId, imageType, u1);
+                    ResourceLocation[] flipbookTexIds;
+                    if (spriteDef.Properties.TryGetValue("flipbook_texture_ids", out val))
+                    {
+                        flipbookTexIds = val.DataArray.Select(x => ResourceLocation.FromString(x.StringValue)).ToArray();
+                    }
+                    else
+                    {
+                        flipbookTexIds = Array.Empty<ResourceLocation>();
+                    }
+                    var flipbookInterval = spriteDef.Properties.TryGetValue("flipbook_interval", out val) ?
+                        float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1F;
+
+                    var t = new SpriteType(spriteTypeId, texId, flipbookTexIds, flipbookInterval, imageType, u1);
                     
                     // Read type-specific data
                     if (imageType == SpriteType.SpriteImageType.Filled)
@@ -60,49 +75,58 @@ namespace CraftSharp.UI
                         t.FillType = spriteDef.Properties.TryGetValue("fill_type", out val) ?
                             SpriteType.GetFillType(val.StringValue) : SpriteType.SpriteFillType.Left;
                         t.FillStart = spriteDef.Properties.TryGetValue("fill_start", out val) ?
-                            float.Parse(val.StringValue) : 0F;
+                            float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0F;
                         t.FillEnd = spriteDef.Properties.TryGetValue("fill_end", out val) ?
-                            float.Parse(val.StringValue) : 1F;
+                            float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1F;
                     }
 
                     Loom.QueueOnMainThread(() =>
                     {
                         textureFlag.Finished = false;
 
-                        Texture2D texture;
-                        
-                        if (textureFileTable.TryGetValue(texId, out var texturePath))
-                        {
-                            texture = new Texture2D(2, 2);
-                            texture.LoadImage(File.ReadAllBytes(texturePath));
-                            texture.filterMode = u2 ? FilterMode.Point : FilterMode.Bilinear;
-
-                            if (invert) // Invert all pixel colors
-                            {
-                                var pixels = texture.GetPixels32(); // Read pixel data
-
-                                // Iterate through each pixel
-                                for (int i = 0; i < pixels.Length; i++)
-                                {
-                                    // Invert RGB channels (subtract from 1.0f)
-                                    pixels[i].r = (byte) (255 - pixels[i].r);
-                                    pixels[i].g = (byte) (255 - pixels[i].g);
-                                    pixels[i].b = (byte) (255 - pixels[i].b);
-                                    // Alpha channel (pixels[i].a) remains unchanged
-                                }
-
-                                texture.SetPixels32(pixels); // Apply modified pixel data
-                                texture.Apply(); // Upload changes to the GPU
-                            }
-                        }
-                        else
-                        {
-                            texture = manager.GetMissingTexture();
-                            texture.filterMode = FilterMode.Point;
-                        }
-                        t.CreateSprite(texture);
+                        t.CreateSprites(loadTexture(textureFileTable, texId),
+                            flipbookTexIds.Select(x => loadTexture(textureFileTable, x)).ToArray());
 
                         textureFlag.Finished = true;
+
+                        return;
+
+                        Texture2D loadTexture(Dictionary<ResourceLocation, string> texFileTable, ResourceLocation texId)
+                        {
+                            Texture2D texture;
+
+                            if (texFileTable.TryGetValue(texId, out var texturePath))
+                            {
+                                texture = new Texture2D(2, 2);
+                                texture.LoadImage(File.ReadAllBytes(texturePath));
+                                texture.filterMode = u2 ? FilterMode.Point : FilterMode.Bilinear;
+
+                                if (invert) // Invert all pixel colors
+                                {
+                                    var pixels = texture.GetPixels32(); // Read pixel data
+
+                                    // Iterate through each pixel
+                                    for (int i = 0; i < pixels.Length; i++)
+                                    {
+                                        // Invert RGB channels (subtract from 1.0f)
+                                        pixels[i].r = (byte)(255 - pixels[i].r);
+                                        pixels[i].g = (byte)(255 - pixels[i].g);
+                                        pixels[i].b = (byte)(255 - pixels[i].b);
+                                        // Alpha channel (pixels[i].a) remains unchanged
+                                    }
+
+                                    texture.SetPixels32(pixels); // Apply modified pixel data
+                                    texture.Apply(); // Upload changes to the GPU
+                                }
+                            }
+                            else
+                            {
+                                texture = manager.GetMissingTexture();
+                                texture.filterMode = FilterMode.Point;
+                            }
+
+                            return texture;
+                        }
                     });
 
                     while (!textureFlag.Finished) { Thread.Sleep(10); }

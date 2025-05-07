@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using CraftSharp.Event;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using TMPro;
 
+using CraftSharp.Event;
 using CraftSharp.Inventory;
 
 namespace CraftSharp.UI
@@ -31,6 +31,8 @@ namespace CraftSharp.UI
         private readonly Dictionary<int, InventoryItemSlot> currentSlots = new();
         // (cur_value_property, max_value_property, sprite_type, sprite_image)
         private readonly List<(string, string, SpriteType, Image)> currentFilledSprites = new();
+        // (flipbook_timer, sprite_type, sprite_image)
+        private readonly List<(SpriteType.FlipbookTimer, SpriteType, Image)> currentFlipbookSprites = new();
 
         private bool isActive = false;
 
@@ -86,7 +88,7 @@ namespace CraftSharp.UI
                 inventoryType.WorkPanelHeight * inventorySlotSize);
             
             // Populate work panel sprites
-            foreach (var spriteInfo in inventoryType.spriteInfo)
+            foreach (var spriteInfo in inventoryType.WorkPanelLayout.SpriteInfo)
             {
                 var spriteType = SpriteTypePalette.INSTANCE.GetById(spriteInfo.TypeId);
                 var spriteImage = createSprite(spriteInfo.PosX, spriteInfo.PosY,
@@ -98,9 +100,14 @@ namespace CraftSharp.UI
                     {
                         Debug.LogWarning($"Filled sprite properties for sprite {spriteInfo.TypeId} is not specified!");
                     }
-                    
                     // Add it to the list
                     currentFilledSprites.Add((spriteInfo.CurFillProperty, spriteInfo.MaxFillProperty, spriteType, spriteImage));
+                }
+                
+                if (spriteType.FlipbookSprites.Length > 0)
+                {
+                    // Add it to the list
+                    currentFlipbookSprites.Add((new(), spriteType, spriteImage));
                 }
             }
 
@@ -206,7 +213,7 @@ namespace CraftSharp.UI
 
             return;
             
-            Image createSprite(float x, float y, int w, int h, SpriteType spriteType)
+            Image createSprite(float x, float y, float w, float h, SpriteType spriteType)
             {
                 var spriteObj = Instantiate(inventorySpritePrefab, workPanel);//new GameObject($"Sprite {spriteTypeId}");
                 var spriteImage = spriteObj.GetComponent<Image>();
@@ -288,10 +295,12 @@ namespace CraftSharp.UI
                     }
                     else // Click
                     {
+                        var shiftIsDown = Keyboard.current.shiftKey.isPressed;
+
                         var action = mouseButton switch
                         {
-                            PointerEventData.InputButton.Left => InventoryActionType.LeftClick,
-                            PointerEventData.InputButton.Right => InventoryActionType.RightClick,
+                            PointerEventData.InputButton.Left => shiftIsDown ? InventoryActionType.ShiftClick : InventoryActionType.LeftClick,
+                            PointerEventData.InputButton.Right => shiftIsDown ? InventoryActionType.ShiftRightClick : InventoryActionType.RightClick,
                             PointerEventData.InputButton.Middle => InventoryActionType.MiddleClick,
                             _ => throw new ArgumentOutOfRangeException()
                         };
@@ -450,6 +459,7 @@ namespace CraftSharp.UI
             
             currentSlots.Clear();
             currentFilledSprites.Clear();
+            currentFlipbookSprites.Clear();
 
             activeInventoryId = -1;
             activeInventoryData = null;
@@ -579,6 +589,23 @@ namespace CraftSharp.UI
 
             // Don't modify z coordinate
             cursorRect.position = new Vector3(newPos.x, newPos.y, cursorRect.position.z);
+
+            if (currentFlipbookSprites.Count > 0) // Update flipbook sprites
+            {
+                foreach (var tuple in currentFlipbookSprites)
+                {
+                    var (timer, spriteType, spriteImage) = tuple;
+                    
+                    timer.Time += Time.deltaTime;
+                    while (timer.Time > spriteType.FlipbookInterval)
+                    {
+                        timer.Time -= spriteType.FlipbookInterval;
+                        timer.Frame = (timer.Frame + 1) % spriteType.FlipbookSprites.Length;
+                    }
+                    
+                    spriteImage.overrideSprite = spriteType.FlipbookSprites[timer.Frame];
+                }
+            }
         }
     }
 }

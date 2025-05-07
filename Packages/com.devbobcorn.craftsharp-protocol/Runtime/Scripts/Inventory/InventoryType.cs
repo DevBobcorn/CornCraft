@@ -57,14 +57,18 @@ namespace CraftSharp.Inventory
         public int SlotCount => PrependSlotCount + MainSlotWidth * MainSlotHeight +
                                 (HasBackpackSlots ? 27 : 0) + (HasHotbarSlots ? 9 : 0) + AppendSlotCount;
 
-        private readonly Dictionary<int, InventorySlotInfo> extraSlotInfo;
-        
-        private readonly List<InventorySlotInfo> slotInfo;
-        
-        public readonly List<InventorySpriteInfo> spriteInfo;
+        public readonly InventoryLayoutInfo WorkPanelLayout;
 
         public Dictionary<int, string> PropertyNames = new();
         public Dictionary<string, int> PropertySlots = new();
+
+        public record InventoryLayoutInfo(
+            Dictionary<int, InventorySlotInfo> SlotInfo,
+            List<InventorySpriteInfo> SpriteInfo)
+        {
+            public Dictionary<int, InventorySlotInfo> SlotInfo { get; } = SlotInfo;
+            public List<InventorySpriteInfo> SpriteInfo { get; } = SpriteInfo;
+        }
 
         public record InventorySlotInfo(float PosX, float PosY, InventorySlotType Type,
             ItemStack PreviewItemStack, ResourceLocation? PlaceholderTypeId)
@@ -76,13 +80,13 @@ namespace CraftSharp.Inventory
             public ResourceLocation? PlaceholderTypeId { get; } = PlaceholderTypeId;
         }
         
-        public record InventorySpriteInfo(float PosX, float PosY, int Width, int Height,
+        public record InventorySpriteInfo(float PosX, float PosY, float Width, float Height,
             ResourceLocation TypeId, string CurFillProperty = null, string MaxFillProperty = null)
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
-            public int Width { get; } = Width;
-            public int Height { get; } = Height;
+            public float Width { get; } = Width;
+            public float Height { get; } = Height;
             public ResourceLocation TypeId { get; } = TypeId;
             public string CurFillProperty { get; set; } = CurFillProperty;
             public string MaxFillProperty { get; set; } = MaxFillProperty;
@@ -90,22 +94,22 @@ namespace CraftSharp.Inventory
 
         public Vector2 GetInventorySlotPos(int slot)
         {
-            return extraSlotInfo.TryGetValue(slot, out var info) ? new(info.PosX, info.PosY) : Vector2.zero;
+            return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? new(info.PosX, info.PosY) : Vector2.zero;
         }
         
         public ItemStack GetInventorySlotPreviewItem(int slot)
         {
-            return extraSlotInfo.TryGetValue(slot, out var info) ? info.PreviewItemStack : null;
+            return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? info.PreviewItemStack : null;
         }
         
         public ResourceLocation? GetInventorySlotPlaceholderSpriteTypeId(int slot)
         {
-            return extraSlotInfo.TryGetValue(slot, out var info) ? info.PlaceholderTypeId : null;
+            return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? info.PlaceholderTypeId : null;
         }
         
         public InventorySlotType GetInventorySlotType(int slot)
         {
-            return extraSlotInfo.TryGetValue(slot, out var info) ?
+            return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ?
                 info.Type : InventorySlotTypePalette.INSTANCE.GetById(InventorySlotType.SLOT_TYPE_REGULAR_ID);
         }
         
@@ -117,7 +121,7 @@ namespace CraftSharp.Inventory
         
         public InventoryType(ResourceLocation id, int prependSlotCount, int mainSlotWidth, int mainSlotHeight,
             bool hasBackpackSlots, bool hasHotbarSlots, int appendSlotCount,
-            Dictionary<int, InventorySlotInfo> extraSlotInfo, List<InventorySpriteInfo> spriteInfo)
+            Dictionary<int, InventorySlotInfo> slotInfo, List<InventorySpriteInfo> spriteInfo)
         {
             TypeId = id;
             
@@ -127,8 +131,7 @@ namespace CraftSharp.Inventory
             HasBackpackSlots = hasBackpackSlots;
             HasHotbarSlots = hasHotbarSlots;
             AppendSlotCount = appendSlotCount;
-            this.extraSlotInfo = extraSlotInfo;
-            this.spriteInfo = spriteInfo;
+            WorkPanelLayout = new(slotInfo, spriteInfo);
         }
 
         public override string ToString()

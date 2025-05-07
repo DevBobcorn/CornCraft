@@ -9,18 +9,25 @@ namespace CraftSharp.UI
     /// </summary>
     public record SpriteType
     {
-        public static readonly SpriteType DUMMY_SPRITE_TYPE = new(ResourceLocation.INVALID, ResourceLocation.INVALID, SpriteImageType.Simple, false);
+        public static readonly SpriteType DUMMY_SPRITE_TYPE = new(ResourceLocation.INVALID, ResourceLocation.INVALID, Array.Empty<ResourceLocation>(), 1F, SpriteImageType.Simple, false);
 
         public readonly ResourceLocation TypeId;
         
         public readonly ResourceLocation TextureId;
+        public readonly ResourceLocation[] FlipbookTextureIds;
         public readonly bool UseItemModel;
+
+        public class FlipbookTimer
+        {
+            public float Time = 0F;
+            public int Frame = 0;
+        }
         
         public enum SpriteImageType
         {
             Simple,
             Filled,
-            Flipbook
+            Sliced
         }
         
         public enum SpriteFillType
@@ -38,7 +45,7 @@ namespace CraftSharp.UI
             {
                 "simple" => SpriteImageType.Simple,
                 "filled" => SpriteImageType.Filled,
-                "flipbook" => SpriteImageType.Flipbook,
+                "sliced" => SpriteImageType.Sliced,
                 
                 _ => SpriteImageType.Simple
             };
@@ -59,6 +66,9 @@ namespace CraftSharp.UI
         }
 
         public Sprite Sprite { get; private set; }
+
+        public Sprite[] FlipbookSprites { get; private set; }
+        public float FlipbookInterval { get; private set; }
         
         public SpriteImageType ImageType { get; set; }
         
@@ -69,16 +79,18 @@ namespace CraftSharp.UI
 
         public static void SetupSpriteImage(SpriteType spriteType, Image spriteImage)
         {
+            spriteImage.sprite = spriteType.Sprite;
+            
             switch (spriteType.ImageType)
             {
                 case SpriteImageType.Simple:
-                case SpriteImageType.Flipbook:
                     spriteImage.type = Image.Type.Simple;
-                    spriteImage.sprite = spriteType.Sprite;
+                    break;
+                case SpriteImageType.Sliced:
+                    spriteImage.type = Image.Type.Sliced;
                     break;
                 case SpriteImageType.Filled:
                     spriteImage.type = Image.Type.Filled;
-                    spriteImage.sprite = spriteType.Sprite;
                     
                     spriteImage.fillMethod = spriteType.FillType switch
                     {
@@ -115,19 +127,33 @@ namespace CraftSharp.UI
             spriteImage.fillAmount = Mathf.Lerp(spriteType.FillStart, spriteType.FillEnd, curValue / (float) maxValue);
         }
         
-        public SpriteType(ResourceLocation id, ResourceLocation textureId, SpriteImageType imageType, bool useItemModel)
+        public SpriteType(ResourceLocation id, ResourceLocation textureId, ResourceLocation[] flipbookTextureIds,
+            float flipbookInterval, SpriteImageType imageType, bool useItemModel)
         {
             TypeId = id;
             
             ImageType = imageType;
             TextureId = textureId;
+            FlipbookTextureIds = flipbookTextureIds;
+            FlipbookInterval = flipbookInterval;
             UseItemModel = useItemModel;
         }
 
-        public void CreateSprite(Texture2D texture)
+        private Sprite CreateSprite(Texture2D texture)
         {
             int w = texture.width, h = texture.height;
-            Sprite = Sprite.Create(texture, new Rect(0, 0, w, h), new(w / 2F, h / 2F));
+            return Sprite.Create(texture, new Rect(0, 0, w, h), new(w / 2F, h / 2F));
+        }
+
+        public void CreateSprites(Texture2D texture, Texture2D[] flipbookTextures)
+        {
+            Sprite = CreateSprite(texture);
+            FlipbookSprites = new Sprite[flipbookTextures.Length];
+
+            for (int i = 0; i < flipbookTextures.Length; i++)
+            {
+                FlipbookSprites[i] = CreateSprite(flipbookTextures[i]);
+            }
         }
 
         public override string ToString()

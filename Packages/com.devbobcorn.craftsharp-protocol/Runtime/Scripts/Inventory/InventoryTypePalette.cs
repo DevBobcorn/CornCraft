@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,80 @@ namespace CraftSharp
         public static readonly InventoryTypePalette INSTANCE = new();
         protected override string Name => "InventoryType Palette";
         protected override InventoryType UnknownObject => InventoryType.DUMMY_INVENTORY_TYPE;
+
+        // Builtin inventory types
+        public InventoryType PLAYER { get; private set; } = InventoryType.DUMMY_INVENTORY_TYPE;
+        public InventoryType HORSE_REGULAR { get; private set; } = InventoryType.DUMMY_INVENTORY_TYPE;
+        public InventoryType HORSE_CHESTED { get; private set; } = InventoryType.DUMMY_INVENTORY_TYPE;
+
+        /// <summary>
+        /// Called after inventory slot types are loaded
+        /// </summary>
+        private void RegisterBuiltinInventoryTypes()
+        {
+            PLAYER = new(InventoryType.PLAYER_ID,
+                9, 0, 0, true, true, 1,
+                new()
+                {
+                    [0] = new(8, 2, getType(InventorySlotType.SLOT_TYPE_OUTPUT_ID), null, null),
+                    [1] = new(5, 2.5F, getType(InventorySlotType.SLOT_TYPE_REGULAR_ID), null, null),
+                    [2] = new(6, 2.5F, getType(InventorySlotType.SLOT_TYPE_REGULAR_ID), null, null),
+                    [3] = new(5, 1.5F, getType(InventorySlotType.SLOT_TYPE_REGULAR_ID), null, null),
+                    [4] = new(6, 1.5F, getType(InventorySlotType.SLOT_TYPE_REGULAR_ID), null, null),
+                    [5] = new(0, 3, getType(InventorySlotType.SLOT_TYPE_HEAD_ID), null,
+                        ResourceLocation.FromString("corncraft:empty_armor_slot_helmet")),
+                    [6] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_CHEST_ID), null,
+                        ResourceLocation.FromString("corncraft:empty_armor_slot_chestplate")),
+                    [7] = new(0, 1, getType(InventorySlotType.SLOT_TYPE_LEGS_ID), null,
+                        ResourceLocation.FromString("corncraft:empty_armor_slot_leggings")),
+                    [8] = new(0, 0, getType(InventorySlotType.SLOT_TYPE_FEET_ID), null,
+                        ResourceLocation.FromString("corncraft:empty_armor_slot_boots")),
+
+                    [45] = new(4, 0, getType(InventorySlotType.SLOT_TYPE_OFFHAND_ID), null,
+                        ResourceLocation.FromString("corncraft:empty_armor_slot_shield"))
+                },
+                new()
+                {
+                    new(7, 2, 1, 1, ResourceLocation.FromString("corncraft:arrow"))
+                })
+            {
+                WorkPanelHeight = 4
+            };
+
+            HORSE_REGULAR = new(InventoryType.HORSE_ID,
+                2, 0, 0, true, true, 0,
+                new()
+                {
+                    [0] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_HORSE_ARMOR_ID), null, null),
+                    [1] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_SADDLE_ID), null, null)
+                },
+                new())
+            {
+                MainPosX = 4,
+                MainPosY = 0,
+            };
+
+            HORSE_CHESTED = new(InventoryType.HORSE_ID,
+                2, 5, 3, true, true, 0,
+                new()
+                {
+                    [0] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_HORSE_ARMOR_ID), null, null),
+                    [1] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_SADDLE_ID), null, null)
+                },
+                new())
+            {
+                MainPosX = 4,
+                MainPosY = 0
+            };
+
+            return;
+
+            static InventorySlotType getType(ResourceLocation typeId)
+            {
+                return InventorySlotTypePalette.INSTANCE.GetById(typeId);
+            }
+        }
+
 
         /// <summary>
         /// Load inventory data from external files.
@@ -100,6 +175,9 @@ namespace CraftSharp
                         Debug.LogWarning($"Invalid numeral inventory type key [{key}]");
                     }
                 }
+
+                // Register builtin inventory types
+                RegisterBuiltinInventoryTypes();
             }
             catch (Exception e)
             {
@@ -120,8 +198,10 @@ namespace CraftSharp
                     ResourceLocation.FromString(val.StringValue) : InventorySlotType.SLOT_TYPE_REGULAR_ID;
                 var type = InventorySlotTypePalette.INSTANCE.GetById(typeId);
                 
-                var x = data.Properties.TryGetValue("pos_x", out val) ? float.Parse(val.StringValue) : 0;
-                var y = data.Properties.TryGetValue("pos_y", out val) ? float.Parse(val.StringValue) : 0;
+                var x = data.Properties.TryGetValue("pos_x", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
 
                 ItemStack previewItem = data.Properties.TryGetValue("preview_item", out val)
                                         ? getItemStack(val) : null;
@@ -147,10 +227,10 @@ namespace CraftSharp
                 var typeId = data.Properties.TryGetValue("type_id", out var val) ?
                     ResourceLocation.FromString(val.StringValue) : ResourceLocation.INVALID;
                 
-                var x = data.Properties.TryGetValue("pos_x", out val) ? float.Parse(val.StringValue) : 0;
-                var y = data.Properties.TryGetValue("pos_y", out val) ? float.Parse(val.StringValue) : 0;
-                var w = data.Properties.TryGetValue("width", out val) ? int.Parse(val.StringValue) : 1;
-                var h = data.Properties.TryGetValue("height", out val) ? int.Parse(val.StringValue) : 1;
+                var x = data.Properties.TryGetValue("pos_x", out val) ? float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ? float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var w = data.Properties.TryGetValue("width", out val) ? float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
+                var h = data.Properties.TryGetValue("height", out val) ? float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
 
                 var spriteInfo = new InventoryType.InventorySpriteInfo(x, y, w, h, typeId);
 
