@@ -32,7 +32,7 @@ namespace CraftSharp
 
         protected float GetBlockOffset(int posInFragment)
         {
-            return Random.Range(0F, posInFragment / (bridgeConnectionLength + bridgeBodyLength)) * 0.2F + posInFragment * 0.2F;
+            return Random.Range(0F, (float) posInFragment / (bridgeConnectionLength + bridgeBodyLength)) * 0.2F + posInFragment * 0.2F;
         }
 
         private float GetRailBlockOffset(int posInFragment)

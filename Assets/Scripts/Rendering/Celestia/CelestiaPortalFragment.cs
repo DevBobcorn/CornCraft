@@ -10,6 +10,8 @@ namespace CraftSharp
 {
     public class CelestiaPortalFragment : CelestiaBridgeFragment
     {
+        private static readonly int EMISSION_TIME = Shader.PropertyToID("_EmissionTime");
+        
         [SerializeField] private float portalOffset = 0.5F;
         [SerializeField] private int portalWidth  = 3;
         [SerializeField] private int portalHeight = 5;
@@ -178,7 +180,7 @@ namespace CraftSharp
                 // Prototype and other portal blocks share the same
                 // material instance
                 portalBlockPrototype.GetComponent<MeshRenderer>().sharedMaterial
-                        .SetFloat("_EmissionTime", emissionTime);
+                        .SetFloat(EMISSION_TIME, emissionTime);
             }
 
             foreach (var (portalBlock, speed) in portalBlocks)
