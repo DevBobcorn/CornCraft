@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace CraftSharp.Inventory
@@ -40,7 +43,7 @@ namespace CraftSharp.Inventory
         public static readonly ResourceLocation STONECUTTER_ID   = new("stonecutter");       // Stonecutter
 
         public static readonly InventoryType DUMMY_INVENTORY_TYPE = new(ResourceLocation.INVALID,
-            0, 0, 0, false, false, 0, new(), new());
+                0, 0, 0, false, false, 0, new(new(), new(), new(), new(), new()));
         
         public readonly ResourceLocation TypeId;
         
@@ -63,11 +66,62 @@ namespace CraftSharp.Inventory
         public Dictionary<string, int> PropertySlots = new();
 
         public record InventoryLayoutInfo(
+            List<InventorySpriteInfo> SpriteInfo,
             Dictionary<int, InventorySlotInfo> SlotInfo,
-            List<InventorySpriteInfo> SpriteInfo)
+            Dictionary<int, InventoryInputInfo> InputInfo,
+            List<InventoryLabelInfo> LabelInfo,
+            Dictionary<int, InventoryButtonInfo> ButtonInfo)
         {
-            public Dictionary<int, InventorySlotInfo> SlotInfo { get; } = SlotInfo;
             public List<InventorySpriteInfo> SpriteInfo { get; } = SpriteInfo;
+            public Dictionary<int, InventorySlotInfo> SlotInfo { get; } = SlotInfo;
+            public Dictionary<int, InventoryInputInfo> InputInfo { get; } = InputInfo;
+            public List<InventoryLabelInfo> LabelInfo { get; } = LabelInfo;
+            public Dictionary<int, InventoryButtonInfo> ButtonInfo { get; } = ButtonInfo;
+
+            public static InventoryLayoutInfo FromJson(Json.JSONData data)
+            {
+                var slotInfo = new Dictionary<int, InventorySlotInfo>();
+                var inputInfo = new Dictionary<int, InventoryInputInfo>();
+                var labelInfo = new List<InventoryLabelInfo>();
+                var buttonInfo = new Dictionary<int, InventoryButtonInfo>();
+                var spriteInfo = new List<InventorySpriteInfo>();
+
+                if (data.Properties.TryGetValue("slots", out var val))
+                {
+                    foreach (var (key, propVal) in val.Properties)
+                    {
+                        slotInfo[int.Parse(key)] = InventorySlotInfo.FromJson(propVal);
+                    }
+                }
+
+                if (data.Properties.TryGetValue("inputs", out val))
+                {
+                    foreach (var (key, propVal) in val.Properties)
+                    {
+                        inputInfo[int.Parse(key)] = InventoryInputInfo.FromJson(propVal);
+                    }
+                }
+
+                if (data.Properties.TryGetValue("labels", out val))
+                {
+                    labelInfo.AddRange(val.DataArray.Select(InventoryLabelInfo.FromJson));
+                }
+
+                if (data.Properties.TryGetValue("buttons", out val))
+                {
+                    foreach (var (key, propVal) in val.Properties)
+                    {
+                        buttonInfo[int.Parse(key)] = InventoryButtonInfo.FromJson(propVal);
+                    }
+                }
+                
+                if (data.Properties.TryGetValue("sprites", out val))
+                {
+                    spriteInfo.AddRange(val.DataArray.Select(InventorySpriteInfo.FromJson));
+                }
+
+                return new(spriteInfo, slotInfo, inputInfo, labelInfo, buttonInfo);
+            }
         }
 
         public record InventorySlotInfo(float PosX, float PosY, InventorySlotType Type,
@@ -78,6 +132,36 @@ namespace CraftSharp.Inventory
             public InventorySlotType Type { get; } = Type;
             public ItemStack PreviewItemStack { get; } = PreviewItemStack;
             public ResourceLocation? PlaceholderTypeId { get; } = PlaceholderTypeId;
+
+            private static ItemStack ItemStackFromJson(Json.JSONData data)
+            {
+                var typeId = data.Properties.TryGetValue("item_id", out var val) ?
+                    ResourceLocation.FromString(val.StringValue) : ResourceLocation.INVALID;
+                var count = data.Properties.TryGetValue("count", out val) ?
+                    int.Parse(val.StringValue) : 1; // Count is 1 by default
+
+                return new ItemStack(ItemPalette.INSTANCE.GetById(typeId), count);
+            }
+
+            public static InventorySlotInfo FromJson(Json.JSONData data)
+            {
+                var typeId = data.Properties.TryGetValue("type_id", out var val) ?
+                    ResourceLocation.FromString(val.StringValue) : InventorySlotType.SLOT_TYPE_REGULAR_ID;
+                var type = InventorySlotTypePalette.INSTANCE.GetById(typeId);
+                
+                var x = data.Properties.TryGetValue("pos_x", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+
+                ItemStack previewItem = data.Properties.TryGetValue("preview_item", out val)
+                                        ? ItemStackFromJson(val) : null;
+                
+                ResourceLocation? placeholderTypeId = data.Properties.TryGetValue("placeholder_type_id", out val) ?
+                    ResourceLocation.FromString(val.StringValue) : null;
+
+                return new(x, y, type, previewItem, placeholderTypeId);
+            }
         }
         
         public record InventorySpriteInfo(float PosX, float PosY, float Width, float Height,
@@ -90,6 +174,122 @@ namespace CraftSharp.Inventory
             public ResourceLocation TypeId { get; } = TypeId;
             public string CurFillProperty { get; set; } = CurFillProperty;
             public string MaxFillProperty { get; set; } = MaxFillProperty;
+
+            public static InventorySpriteInfo FromJson(Json.JSONData data)
+            {
+                var typeId = data.Properties.TryGetValue("type_id", out var val) ?
+                    ResourceLocation.FromString(val.StringValue) : ResourceLocation.INVALID;
+                
+                var x = data.Properties.TryGetValue("pos_x", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var w = data.Properties.TryGetValue("width", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
+                var h = data.Properties.TryGetValue("height", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
+
+                var spriteInfo = new InventoryType.InventorySpriteInfo(x, y, w, h, typeId);
+
+                if (data.Properties.TryGetValue("cur_value_property", out val))
+                    spriteInfo.CurFillProperty = val.StringValue;
+                
+                if (data.Properties.TryGetValue("max_value_property", out val))
+                    spriteInfo.MaxFillProperty = val.StringValue;
+                
+                return spriteInfo;
+            }
+        }
+
+        public record InventoryInputInfo(float PosX, float PosY, float Width, string PlaceholderTranslationKey)
+        {
+            public float PosX { get; } = PosX;
+            public float PosY { get; } = PosY;
+            public float Width { get; } = Width;
+            public string PlaceholderTranslationKey { get; } = PlaceholderTranslationKey;
+
+            public static InventoryInputInfo FromJson(Json.JSONData data)
+            {
+                var translationKey = data.Properties.TryGetValue("translation_key", out var val) ?
+                    val.StringValue : "Placeholder Text";
+
+                var x = data.Properties.TryGetValue("pos_x", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var w = data.Properties.TryGetValue("width", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 5;
+                
+                return new(x, y, w, translationKey);
+            }
+        }
+
+        public enum LabelAlignment
+        {
+            Left, Center, Right
+        }
+
+        public static LabelAlignment GetLabelAlignment(string alignmentName)
+        {
+            return alignmentName switch
+            {
+                "left" => LabelAlignment.Left,
+                "center" => LabelAlignment.Center,
+                "right" => LabelAlignment.Right,
+                _ => throw new InvalidDataException($"Label alignment {alignmentName} is not defined!")
+            };
+        }
+
+        public record InventoryLabelInfo(float PosX, float PosY, float Width, LabelAlignment Alignment, string TextTranslationKey)
+        {
+            public float PosX { get; } = PosX;
+            public float PosY { get; } = PosY;
+            public float Width { get; } = Width;
+            public LabelAlignment Alignment { get; } = Alignment;
+            public string TextTranslationKey { get; } = TextTranslationKey;
+
+            public static InventoryLabelInfo FromJson(Json.JSONData data)
+            {
+                var translationKey = data.Properties.TryGetValue("translation_key", out var val) ?
+                    val.StringValue : "Label Text";
+
+                var x = data.Properties.TryGetValue("pos_x", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var w = data.Properties.TryGetValue("width", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 6;
+                var alignment = data.Properties.TryGetValue("alignment", out val) ?
+                    GetLabelAlignment(val.StringValue) : LabelAlignment.Left;
+                
+                return new(x, y, w, alignment, translationKey);
+            }
+        }
+
+        public record InventoryButtonInfo(float PosX, float PosY, float Width, float Height, InventoryLayoutInfo LayoutInfo)
+        {
+            public float PosX { get; } = PosX;
+            public float PosY { get; } = PosY;
+            public float Width { get; } = Width;
+            public float Height { get; } = Height;
+            public InventoryLayoutInfo LayoutInfo { get; } = LayoutInfo;
+
+            public static InventoryButtonInfo FromJson(Json.JSONData data)
+            {
+                var buttonLayout = data.Properties.TryGetValue("layout", out var val) ?
+                    InventoryLayoutInfo.FromJson(val) : new InventoryLayoutInfo(new(), new(), new(), new(), new());
+                
+                var x = data.Properties.TryGetValue("pos_x", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var w = data.Properties.TryGetValue("width", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
+                var h = data.Properties.TryGetValue("height", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
+                
+                return new InventoryButtonInfo(x, y, w, h, buttonLayout);
+            }
         }
 
         public Vector2 GetInventorySlotPos(int slot)
@@ -120,8 +320,7 @@ namespace CraftSharp.Inventory
         public float MainPosY { get; set; } = 0;
         
         public InventoryType(ResourceLocation id, int prependSlotCount, int mainSlotWidth, int mainSlotHeight,
-            bool hasBackpackSlots, bool hasHotbarSlots, int appendSlotCount,
-            Dictionary<int, InventorySlotInfo> slotInfo, List<InventorySpriteInfo> spriteInfo)
+            bool hasBackpackSlots, bool hasHotbarSlots, int appendSlotCount, InventoryLayoutInfo workPanelLayout)
         {
             TypeId = id;
             
@@ -131,7 +330,7 @@ namespace CraftSharp.Inventory
             HasBackpackSlots = hasBackpackSlots;
             HasHotbarSlots = hasHotbarSlots;
             AppendSlotCount = appendSlotCount;
-            WorkPanelLayout = new(slotInfo, spriteInfo);
+            WorkPanelLayout = workPanelLayout;
         }
 
         public override string ToString()
