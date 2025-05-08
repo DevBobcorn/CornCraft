@@ -447,6 +447,9 @@ MonoBehaviour:
   closeButton: {fileID: 9022822860645150554}
   screenAnimator: {fileID: 421708140080235460}
   inventorySlotPrefab: {fileID: 1333662668710857103, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}
+  inventoryInputPrefab: {fileID: 950981851846432770, guid: 16d28b14424146c45bde8ddd1978a507, type: 3}
+  inventoryLabelPrefab: {fileID: 2616949570820885239, guid: 69dd008bf9dd6d84982e3e4fa0475fa1, type: 3}
+  inventoryButtonPrefab: {fileID: 5928234479986686403, guid: 9cf94b8ea09d3e749b1714750b9ce96a, type: 3}
   inventorySpritePrefab: {fileID: 1333662668710857103, guid: b82bd2acb025a7f489ee66de14323f4f, type: 3}
   listPanel: {fileID: 6488089169064416592}
   workPanel: {fileID: 1331511003286532197}

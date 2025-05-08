@@ -19,6 +19,9 @@ namespace CraftSharp.UI
         [SerializeField] private Button closeButton;
         [SerializeField] private Animator screenAnimator;
         [SerializeField] private GameObject inventorySlotPrefab;
+        [SerializeField] private GameObject inventoryInputPrefab;
+        [SerializeField] private GameObject inventoryLabelPrefab;
+        [SerializeField] private GameObject inventoryButtonPrefab;
         [SerializeField] private GameObject inventorySpritePrefab;
         [SerializeField] private RectTransform listPanel, workPanel, backpackPanel, hotbarPanel;
         [SerializeField] private InventoryItemSlot cursorSlot;
