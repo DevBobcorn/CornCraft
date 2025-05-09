@@ -366,7 +366,7 @@ namespace CraftSharp.UI
             foreach (var spriteInfo in layoutInfo.SpriteInfo)
             {
                 var spriteType = SpriteTypePalette.INSTANCE.GetById(spriteInfo.TypeId);
-                CreateSprite(workPanel, spriteInfo.PosX, spriteInfo.PosY, spriteInfo.Width, spriteInfo.Height,
+                CreateSprite(parent, spriteInfo.PosX, spriteInfo.PosY, spriteInfo.Width, spriteInfo.Height,
                     spriteType, spriteInfo.CurFillProperty, spriteInfo.MaxFillProperty);
             }
 
@@ -485,7 +485,11 @@ namespace CraftSharp.UI
                 currentFilledSprites.Add((curFillProp, maxFillProp, spriteType, spriteImage));
             }
             
-            if (spriteType.FlipbookSprites.Length > 0)
+            if (spriteType.FlipbookSprites is null)
+            {
+                Debug.LogWarning($"Flipbook sprite for {spriteType.TypeId} is null!");
+            }
+            else if (spriteType.FlipbookSprites.Length > 0)
             {
                 // Add it to the list
                 currentFlipbookSprites.Add((new(), spriteType, spriteImage));

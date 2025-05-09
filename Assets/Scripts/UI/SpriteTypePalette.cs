@@ -46,6 +46,14 @@ namespace CraftSharp.UI
 
                 DataLoadFlag textureFlag = new();
 
+                Loom.QueueOnMainThread(() =>
+                {
+                    var texture = manager.GetMissingTexture();
+                    texture.filterMode = FilterMode.Point;
+
+                    SpriteType.DUMMY_SPRITE_TYPE.CreateSprites(texture, new Texture2D[] { });
+                });
+
                 foreach (var (key, spriteDef) in spriteTypes.Properties)
                 {
                     var spriteTypeId = ResourceLocation.FromString(key);
@@ -118,12 +126,12 @@ namespace CraftSharp.UI
                                     texture.SetPixels32(pixels); // Apply modified pixel data
                                     texture.Apply(); // Upload changes to the GPU
                                 }
+
+                                return texture;
                             }
-                            else
-                            {
-                                texture = manager.GetMissingTexture();
-                                texture.filterMode = FilterMode.Point;
-                            }
+
+                            texture = manager.GetMissingTexture();
+                            texture.filterMode = FilterMode.Point;
 
                             return texture;
                         }
