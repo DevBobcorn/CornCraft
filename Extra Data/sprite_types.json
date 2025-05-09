@@ -118,14 +118,39 @@
     "corncraft:plus": {
         "texture_id": "corncraft:icon/plus"
     },
+    "corncraft:check": {
+        "texture_id": "corncraft:icon/check",
+        "use_point_filter": false
+    },
+    "corncraft:cross": {
+        "texture_id": "corncraft:icon/cross",
+        "use_point_filter": false
+    },
 
+    "corncraft:gui_mob_effect_speed": {
+        "texture_id": "minecraft:mob_effect/speed"
+    },
+    "corncraft:gui_mob_effect_haste": {
+        "texture_id": "minecraft:mob_effect/haste"
+    },
+    "corncraft:gui_mob_effect_resistance": {
+        "texture_id": "minecraft:mob_effect/resistance"
+    },
+    "corncraft:gui_mob_effect_jump_boost": {
+        "texture_id": "minecraft:mob_effect/jump_boost"
+    },
+    "corncraft:gui_mob_effect_strength": {
+        "texture_id": "minecraft:mob_effect/strength"
+    },
+    "corncraft:gui_mob_effect_regeneration": {
+        "texture_id": "minecraft:mob_effect/regeneration"
+    },
     "corncraft:gui_background_beacon": {
         "texture_id": "corncraft:background/background_beacon"
     },
     "corncraft:gui_background_brewing": {
         "texture_id": "corncraft:background/background_brewing"
     },
-
     "corncraft:gui_iron_hammer": {
         "texture_id": "corncraft:icon/gui_iron_hammer"
     },
