@@ -276,10 +276,9 @@ namespace CraftSharp.Inventory
 
             public static InventoryButtonInfo FromJson(Json.JSONData data)
             {
-                var buttonLayout = data.Properties.TryGetValue("layout", out var val) ?
-                    InventoryLayoutInfo.FromJson(val) : new InventoryLayoutInfo(new(), new(), new(), new(), new());
+                var buttonLayout = InventoryLayoutInfo.FromJson(data);
                 
-                var x = data.Properties.TryGetValue("pos_x", out val) ?
+                var x = data.Properties.TryGetValue("pos_x", out var val) ?
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
                 var y = data.Properties.TryGetValue("pos_y", out val) ?
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
