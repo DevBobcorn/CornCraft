@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -32,6 +33,9 @@ namespace CraftSharp.UI
         [SerializeField] private float inventorySlotSize = 90F;
 
         private readonly Dictionary<int, InventoryItemSlot> currentSlots = new();
+        private readonly Dictionary<int, InventoryInput> currentInputs = new();
+        private readonly Dictionary<int, InventoryButton> currentButtons = new();
+
         // (cur_value_property, max_value_property, sprite_type, sprite_image)
         private readonly List<(string, string, SpriteType, Image)> currentFilledSprites = new();
         // (flipbook_timer, sprite_type, sprite_image)
@@ -59,8 +63,6 @@ namespace CraftSharp.UI
         public void SetActiveInventory(InventoryData inventoryData)
         {
             EnsureInitialized();
-
-            var game = CornApp.CurrentClient;
 
             activeInventoryId = inventoryData.Id;
             activeInventoryData = inventoryData;
@@ -90,41 +92,17 @@ namespace CraftSharp.UI
             workPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,
                 inventoryType.WorkPanelHeight * inventorySlotSize);
             
-            // Populate work panel sprites
-            foreach (var spriteInfo in inventoryType.WorkPanelLayout.SpriteInfo)
-            {
-                var spriteType = SpriteTypePalette.INSTANCE.GetById(spriteInfo.TypeId);
-                var spriteImage = createSprite(spriteInfo.PosX, spriteInfo.PosY,
-                    spriteInfo.Width, spriteInfo.Height, spriteType);
-
-                if (spriteType.ImageType == SpriteType.SpriteImageType.Filled)
-                {
-                    if (spriteInfo.CurFillProperty is null || spriteInfo.MaxFillProperty is null)
-                    {
-                        Debug.LogWarning($"Filled sprite properties for sprite {spriteInfo.TypeId} is not specified!");
-                    }
-                    // Add it to the list
-                    currentFilledSprites.Add((spriteInfo.CurFillProperty, spriteInfo.MaxFillProperty, spriteType, spriteImage));
-                }
-                
-                if (spriteType.FlipbookSprites.Length > 0)
-                {
-                    // Add it to the list
-                    currentFlipbookSprites.Add((new(), spriteType, spriteImage));
-                }
-            }
+            // Populate work panel controls, except slots
+            CreateLayout(workPanel, inventoryType.WorkPanelLayout, false);
 
             // Populate work panel slots
             for (int i = 0; i < inventoryType.PrependSlotCount; i++)
             {
                 var slotPos = inventoryType.GetInventorySlotPos(i);
                 
-                var newSlot = createSlot(slotPos.x, slotPos.y,
-                    inventoryType.GetInventorySlotPreviewItem(i),
+                CreateSlot(workPanel, i, slotPos.x, slotPos.y, inventoryType.GetInventorySlotPreviewItem(i),
                     inventoryType.GetInventorySlotPlaceholderSpriteTypeId(i),
                     $"Slot [{i}] (Work Prepend) [{inventoryType.GetInventorySlotType(i)}]");
-                
-                setupSlot(i, newSlot);
             }
             
             var workMainStart = inventoryType.PrependSlotCount;
@@ -133,12 +111,9 @@ namespace CraftSharp.UI
             for (int y = 0, i = 0; y < inventoryType.MainSlotHeight; y++)
                 for (int x = 0; x < inventoryType.MainSlotWidth; x++, i++)
                 {
-                    var newSlot = createSlot(x + workMainPosX,
+                    CreateSlot(workPanel, workMainStart + i, x + workMainPosX,
                         workMainPosY + inventoryType.MainSlotHeight - y - 1,
-                        null, null,
-                        $"Slot [{workMainStart + i}] (Work Main)");
-                    
-                    setupSlot(workMainStart + i, newSlot);
+                        null, null, $"Slot [{workMainStart + i}] (Work Main)");
                 }
 
             if (inventoryType.HasBackpackSlots)
@@ -151,7 +126,7 @@ namespace CraftSharp.UI
                     backpackSlots[i].UpdateItemStack(inventoryData.Items.GetValueOrDefault(backpackStart + i));
                     backpackSlots[i].gameObject.name = $"Slot [{backpackStart + i}] (Backpack)";
                     
-                    setupSlot(backpackStart + i, backpackSlots[i]);
+                    SetupSlot(backpackStart + i, backpackSlots[i]);
                 }
                 backpackPanel.gameObject.SetActive(true);
             }
@@ -170,7 +145,7 @@ namespace CraftSharp.UI
                     hotbarSlots[i].UpdateItemStack(inventoryData.Items.GetValueOrDefault(hotbarStart + i));
                     hotbarSlots[i].gameObject.name = $"Slot [{hotbarStart + i}] (Hotbar)";
 
-                    setupSlot(hotbarStart + i, hotbarSlots[i]);
+                    SetupSlot(hotbarStart + i, hotbarSlots[i]);
                 }
                 hotbarPanel.gameObject.SetActive(true);
             }
@@ -184,17 +159,14 @@ namespace CraftSharp.UI
             {
                 var slotPos = inventoryType.GetInventorySlotPos(i);
                 
-                var newSlot = createSlot(slotPos.x, slotPos.y,
-                    inventoryType.GetInventorySlotPreviewItem(i),
+                CreateSlot(workPanel, i, slotPos.x, slotPos.y, inventoryType.GetInventorySlotPreviewItem(i),
                     inventoryType.GetInventorySlotPlaceholderSpriteTypeId(i),
                     $"Slot [{i}] (Work Append) [{inventoryType.GetInventorySlotType(i)}]");
-
-                setupSlot(i, newSlot);
             }
 
             // Initialize cursor slot
             currentSlots[-1] = cursorSlot;
-            setupSlot(-1, cursorSlot);
+            SetupSlot(-1, cursorSlot);
             
             // Initialize player inventory slots (these won't be sent because client already have them)
             if (activeInventoryId == 0)
@@ -212,194 +184,314 @@ namespace CraftSharp.UI
                 currentSlots[45].UpdateItemStack(activeInventoryData.Items.GetValueOrDefault(45)); // Offhand
             }
 
+            // Hide cursor text
             cursorTextPanel.gameObject.SetActive(false);
+        }
 
-            return;
-            
-            Image createSprite(float x, float y, float w, float h, SpriteType spriteType)
-            {
-                var spriteObj = Instantiate(inventorySpritePrefab, workPanel);//new GameObject($"Sprite {spriteTypeId}");
-                var spriteImage = spriteObj.GetComponent<Image>();
-                var rectTransform = spriteObj.GetComponent<RectTransform>();
-
-                SpriteType.SetupSpriteImage(spriteType, spriteImage);
-                
-                rectTransform.anchoredPosition =
-                    new Vector2(x * inventorySlotSize, y * inventorySlotSize);
-                rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
-                rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h * inventorySlotSize);
-                
-                spriteObj.name = $"Sprite [{spriteType.TypeId}]";
-
-                return spriteImage;
-            }
-
-            InventoryItemSlot createSlot(float x, float y, ItemStack previewItem,
+        private InventoryItemSlot CreateSlot(RectTransform parent, int slotId, float x, float y, ItemStack previewItem,
                 ResourceLocation? placeholderSpriteTypeId, string slotName)
+        {
+            var slotObj = Instantiate(inventorySlotPrefab, parent);
+            var slot = slotObj.GetComponent<InventoryItemSlot>();
+            
+            slotObj.GetComponent<RectTransform>().anchoredPosition =
+                new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+            slotObj.name = slotName;
+
+            if (placeholderSpriteTypeId.HasValue) // Set placeholder sprite
             {
-                var slotObj = Instantiate(inventorySlotPrefab, workPanel);
-                var slot = slotObj.GetComponent<InventoryItemSlot>();
-                
-                slotObj.GetComponent<RectTransform>().anchoredPosition =
-                    new Vector2(x * inventorySlotSize, y * inventorySlotSize);
-                slotObj.name = slotName;
-
-                if (placeholderSpriteTypeId.HasValue) // Set placeholder sprite
-                {
-                    var placeholderSprite = SpriteTypePalette.INSTANCE.GetById(
-                        placeholderSpriteTypeId.Value).Sprite;
-                    slot.SetPlaceholderSprite(placeholderSprite);
-                }
-
-                if (previewItem is not null)
-                {
-                    slot.UpdateItemStack(previewItem);
-                }
-
-                return slot;
+                var placeholderSprite = SpriteTypePalette.INSTANCE.GetById(
+                    placeholderSpriteTypeId.Value).Sprite;
+                slot.SetPlaceholderSprite(placeholderSprite);
             }
 
-            void setupSlot(int slotId, InventoryItemSlot slot)
+            if (previewItem is not null)
             {
-                currentSlots[slotId] = slot;
-                var slotType = activeInventoryData.Type.GetInventorySlotType(slotId);
+                slot.UpdateItemStack(previewItem);
+            }
 
-                slot.SetPointerDownHandler(button =>
+            SetupSlot(slotId, slot);
+
+            return slot;
+        }
+
+        private void SetupSlot(int slotId, InventoryItemSlot slot)
+        {
+            currentSlots[slotId] = slot;
+            var slotType = activeInventoryData.Type.GetInventorySlotType(slotId);
+
+            var game = CornApp.CurrentClient;
+            if (!game) return;
+
+            slot.SetPointerDownHandler(button =>
+            {
+                if (!game) return;
+                
+                pointerIsDown = true;
+                mouseButton = button;
+
+                var target = activeInventoryData.Items.GetValueOrDefault(slotId);
+                var cursor = game.GetInventory(0)?.Items.GetValueOrDefault(-1);
+                
+                // Draggable slot has to be either empty or have the exact same item as cursor item.
+                // And also, to start dragging, cursor item shouldn't be empty
+                var canBeUsedAsDragStart = cursor is not null && cursor.Count > 1 && slotType.PlacePredicate(cursor)
+                                            && (target is null || InventoryData.CheckStackable(target, cursor));
+                dragStartSlot = canBeUsedAsDragStart ? slotId : -1;
+            });
+            
+            slot.SetPointerUpHandler(button =>
+            {
+                if (!pointerIsDown || button != mouseButton || !game) return;
+
+                if (dragging)
                 {
-                    if (!game) return;
-                    
-                    pointerIsDown = true;
-                    mouseButton = button;
+                    var action = mouseButton switch
+                    {
+                        PointerEventData.InputButton.Left => InventoryActionType.EndDragLeft,
+                        PointerEventData.InputButton.Right => InventoryActionType.EndDragRight,
+                        PointerEventData.InputButton.Middle => InventoryActionType.EndDragMiddle,
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                    game.DoInventoryAction(activeInventoryId, slotId, action);
+                }
+                else // Click
+                {
+                    var shiftIsDown = Keyboard.current.shiftKey.isPressed;
 
+                    var action = mouseButton switch
+                    {
+                        PointerEventData.InputButton.Left => shiftIsDown ? InventoryActionType.ShiftClick : InventoryActionType.LeftClick,
+                        PointerEventData.InputButton.Right => shiftIsDown ? InventoryActionType.ShiftRightClick : InventoryActionType.RightClick,
+                        PointerEventData.InputButton.Middle => InventoryActionType.MiddleClick,
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                    game.DoInventoryAction(activeInventoryId, slotId, action);
+                }
+                
+                pointerIsDown = false;
+                dragging = false;
+
+                foreach (var draggedSlot in draggedSlots)
+                {
+                    currentSlots[draggedSlot].Dragged = false;
+                }
+                
+                draggedSlots.Clear();
+            });
+            
+            slot.SetSelectHandler(() =>
+            {
+                if (!game) return;
+                
+                if (pointerIsDown)
+                {
                     var target = activeInventoryData.Items.GetValueOrDefault(slotId);
-                    var cursor = game.GetInventory(0)?.Items.GetValueOrDefault(-1);
-                    
-                    // Draggable slot has to be either empty or have the exact same item as cursor item.
+
+                    // Drag start slot has to be either empty or have the exact same item as cursor item.
                     // And also, to start dragging, cursor item shouldn't be empty
-                    var canBeUsedAsDragStart = cursor is not null && cursor.Count > 1 && slotType.PlacePredicate(cursor)
-                                               && (target is null || InventoryData.CheckStackable(target, cursor));
-                    dragStartSlot = canBeUsedAsDragStart ? slotId : -1;
-                });
-                
-                slot.SetPointerUpHandler(button =>
-                {
-                    if (!pointerIsDown || button != mouseButton || !game) return;
-
-                    if (dragging)
+                    if (dragStartSlot < 0)
                     {
+                        var cursor = game.GetInventory(0)?.Items.GetValueOrDefault(-1);
+                        if (cursor is not null && cursor.Count > 1 && slotType.PlacePredicate(cursor) &&
+                            (target is null || InventoryData.CheckStackable(target, cursor)))
+                        {
+                            dragStartSlot = slotId;
+                        }
+                    }
+                    
+                    if (!dragging && dragStartSlot >= 0 && slotId != dragStartSlot) // Start dragging
+                    {
+                        dragging = true;
+                        currentSlots[dragStartSlot].Dragged = true;
+                        draggedSlots.Clear();
+                        draggedSlots.Add(dragStartSlot);
+                        
                         var action = mouseButton switch
                         {
-                            PointerEventData.InputButton.Left => InventoryActionType.EndDragLeft,
-                            PointerEventData.InputButton.Right => InventoryActionType.EndDragRight,
-                            PointerEventData.InputButton.Middle => InventoryActionType.EndDragMiddle,
+                            PointerEventData.InputButton.Left => InventoryActionType.StartDragLeft,
+                            PointerEventData.InputButton.Right => InventoryActionType.StartDragRight,
+                            PointerEventData.InputButton.Middle => InventoryActionType.StartDragMiddle,
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                        game.DoInventoryAction(activeInventoryId, dragStartSlot, action);
+                        action = mouseButton switch
+                        {
+                            PointerEventData.InputButton.Left => InventoryActionType.AddDragLeft,
+                            PointerEventData.InputButton.Right => InventoryActionType.AddDragRight,
+                            PointerEventData.InputButton.Middle => InventoryActionType.AddDragMiddle,
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                        game.DoInventoryAction(activeInventoryId, dragStartSlot, action);
+                    }
+                    
+                    if (dragging && !draggedSlots.Contains(slotId) &&
+                        game.CheckAddDragged(target, slotType.PlacePredicate)) // Add this slot
+                    {
+                        currentSlots[slotId].Dragged = true;
+                        Debug.Log($"Adding {slotId}, Dragged slots: {string.Join(", ", draggedSlots)}");
+                        draggedSlots.Add(slotId);
+                        var action = mouseButton switch
+                        {
+                            PointerEventData.InputButton.Left => InventoryActionType.AddDragLeft,
+                            PointerEventData.InputButton.Right => InventoryActionType.AddDragRight,
+                            PointerEventData.InputButton.Middle => InventoryActionType.AddDragMiddle,
                             _ => throw new ArgumentOutOfRangeException()
                         };
                         game.DoInventoryAction(activeInventoryId, slotId, action);
                     }
-                    else // Click
-                    {
-                        var shiftIsDown = Keyboard.current.shiftKey.isPressed;
+                }
+            });
 
-                        var action = mouseButton switch
-                        {
-                            PointerEventData.InputButton.Left => shiftIsDown ? InventoryActionType.ShiftClick : InventoryActionType.LeftClick,
-                            PointerEventData.InputButton.Right => shiftIsDown ? InventoryActionType.ShiftRightClick : InventoryActionType.RightClick,
-                            PointerEventData.InputButton.Middle => InventoryActionType.MiddleClick,
-                            _ => throw new ArgumentOutOfRangeException()
-                        };
-                        game.DoInventoryAction(activeInventoryId, slotId, action);
-                    }
-                    
-                    pointerIsDown = false;
-                    dragging = false;
+            slot.SetCursorTextHandler(str =>
+            {
+                if (!game) return;
+                var cursorHasItem = game.GetInventory(0)?.Items.ContainsKey(-1) ?? true;
 
-                    foreach (var draggedSlot in draggedSlots)
-                    {
-                        currentSlots[draggedSlot].Dragged = false;
-                    }
-                    
-                    draggedSlots.Clear();
-                });
-                
-                slot.SetSelectHandler(() =>
+                if (string.IsNullOrEmpty(str) || cursorHasItem)
                 {
-                    if (!game) return;
-                    
-                    if (pointerIsDown)
-                    {
-                        var target = activeInventoryData.Items.GetValueOrDefault(slotId);
-
-                        // Drag start slot has to be either empty or have the exact same item as cursor item.
-                        // And also, to start dragging, cursor item shouldn't be empty
-                        if (dragStartSlot < 0)
-                        {
-                            var cursor = game.GetInventory(0)?.Items.GetValueOrDefault(-1);
-                            if (cursor is not null && cursor.Count > 1 && slotType.PlacePredicate(cursor) &&
-                                (target is null || InventoryData.CheckStackable(target, cursor)))
-                            {
-                                dragStartSlot = slotId;
-                            }
-                        }
-                        
-                        if (!dragging && dragStartSlot >= 0 && slotId != dragStartSlot) // Start dragging
-                        {
-                            dragging = true;
-                            currentSlots[dragStartSlot].Dragged = true;
-                            draggedSlots.Clear();
-                            draggedSlots.Add(dragStartSlot);
-                            
-                            var action = mouseButton switch
-                            {
-                                PointerEventData.InputButton.Left => InventoryActionType.StartDragLeft,
-                                PointerEventData.InputButton.Right => InventoryActionType.StartDragRight,
-                                PointerEventData.InputButton.Middle => InventoryActionType.StartDragMiddle,
-                                _ => throw new ArgumentOutOfRangeException()
-                            };
-                            game.DoInventoryAction(activeInventoryId, dragStartSlot, action);
-                            action = mouseButton switch
-                            {
-                                PointerEventData.InputButton.Left => InventoryActionType.AddDragLeft,
-                                PointerEventData.InputButton.Right => InventoryActionType.AddDragRight,
-                                PointerEventData.InputButton.Middle => InventoryActionType.AddDragMiddle,
-                                _ => throw new ArgumentOutOfRangeException()
-                            };
-                            game.DoInventoryAction(activeInventoryId, dragStartSlot, action);
-                        }
-                        
-                        if (dragging && !draggedSlots.Contains(slotId) &&
-                            game.CheckAddDragged(target, slotType.PlacePredicate)) // Add this slot
-                        {
-                            currentSlots[slotId].Dragged = true;
-                            Debug.Log($"Adding {slotId}, Dragged slots: {string.Join(", ", draggedSlots)}");
-                            draggedSlots.Add(slotId);
-                            var action = mouseButton switch
-                            {
-                                PointerEventData.InputButton.Left => InventoryActionType.AddDragLeft,
-                                PointerEventData.InputButton.Right => InventoryActionType.AddDragRight,
-                                PointerEventData.InputButton.Middle => InventoryActionType.AddDragMiddle,
-                                _ => throw new ArgumentOutOfRangeException()
-                            };
-                            game.DoInventoryAction(activeInventoryId, slotId, action);
-                        }
-                    }
-                });
-
-                slot.SetCursorTextHandler(str =>
+                    cursorTextPanel.gameObject.SetActive(false);
+                }
+                else
                 {
-                    if (!game) return;
-                    var cursorHasItem = game.GetInventory(0)?.Items.ContainsKey(-1) ?? true;
+                    cursorText.text = str;
+                    cursorTextPanel.gameObject.SetActive(true);
+                }
+            });
+        }
 
-                    if (string.IsNullOrEmpty(str) || cursorHasItem)
-                    {
-                        cursorTextPanel.gameObject.SetActive(false);
-                    }
-                    else
-                    {
-                        cursorText.text = str;
-                        cursorTextPanel.gameObject.SetActive(true);
-                    }
-                });
+        private void CreateLayout(RectTransform parent, InventoryType.InventoryLayoutInfo layoutInfo, bool createSlots)
+        {
+            // Populate layout sprites
+            foreach (var spriteInfo in layoutInfo.SpriteInfo)
+            {
+                var spriteType = SpriteTypePalette.INSTANCE.GetById(spriteInfo.TypeId);
+                CreateSprite(workPanel, spriteInfo.PosX, spriteInfo.PosY, spriteInfo.Width, spriteInfo.Height,
+                    spriteType, spriteInfo.CurFillProperty, spriteInfo.MaxFillProperty);
             }
+
+            // Populate layout labels
+            foreach (var labelInfo in layoutInfo.LabelInfo)
+            {
+                CreateLabel(parent, labelInfo.PosX, labelInfo.PosY, labelInfo.Width,
+                    labelInfo.Alignment, labelInfo.TextTranslationKey);
+            }
+
+            // Populate layout inputs
+            foreach (var (inputId, inputInfo) in layoutInfo.InputInfo)
+            {
+                CreateInput(parent, inputId, inputInfo.PosX, inputInfo.PosY,
+                    inputInfo.Width, inputInfo.PlaceholderTranslationKey);
+            }
+
+            // Populate layout buttons
+            foreach (var (buttonId, buttonInfo) in layoutInfo.ButtonInfo)
+            {
+                CreateButton(parent, buttonId, buttonInfo.PosX, buttonInfo.PosY,
+                    buttonInfo.Width, buttonInfo.Height, buttonInfo.LayoutInfo);
+            }
+
+            if (createSlots)
+            {
+                // Populate layout slots
+                foreach (var (slotId, slotInfo) in layoutInfo.SlotInfo)
+                {
+                    CreateSlot(parent, slotId, slotInfo.PosX, slotInfo.PosY, slotInfo.PreviewItemStack,
+                        slotInfo.PlaceholderTypeId, $"Slot [{slotId}] (Nested)");
+                }
+            }
+        }
+
+        private TMP_Text CreateLabel(RectTransform parent, float x, float y, float w, InventoryType.LabelAlignment alignment, string translationKey)
+        {
+            var labelObj = Instantiate(inventoryLabelPrefab, parent);
+            var labelText = labelObj.GetComponent<TMP_Text>();
+            var rectTransform = labelObj.GetComponent<RectTransform>();
+
+            rectTransform.anchoredPosition =
+                new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
+
+            labelText.text = Translations.Get(translationKey);
+            labelText.horizontalAlignment = alignment switch
+            {
+                InventoryType.LabelAlignment.Left => HorizontalAlignmentOptions.Left,
+                InventoryType.LabelAlignment.Center => HorizontalAlignmentOptions.Center,
+                InventoryType.LabelAlignment.Right => HorizontalAlignmentOptions.Right,
+                _ => throw new InvalidDataException($"Label alignment {alignment} is not defined!"),
+            };
+
+            return labelText;
+        }
+
+        private InventoryInput CreateInput(RectTransform parent, int inputId, float x, float y, float w, string translationKey)
+        {
+            var inputObj = Instantiate(inventoryInputPrefab, parent);
+            var input = inputObj.GetComponent<InventoryInput>();
+            var rectTransform = inputObj.GetComponent<RectTransform>();
+
+            rectTransform.anchoredPosition =
+                new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
+
+            input.SetPlaceholderText(Translations.Get(translationKey));
+
+            currentInputs[inputId] = input;
+
+            return input;
+        }
+
+        private InventoryButton CreateButton(RectTransform parent, int buttonId, float x, float y, float w, float h, InventoryType.InventoryLayoutInfo layoutInfo)
+        {
+            var buttonObj = Instantiate(inventoryButtonPrefab, parent);
+            var button = buttonObj.GetComponent<InventoryButton>();
+            var rectTransform = buttonObj.GetComponent<RectTransform>();
+
+            rectTransform.anchoredPosition =
+                new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h * inventorySlotSize);
+
+            // Create nested layout
+            CreateLayout(rectTransform, layoutInfo, true);
+
+            currentButtons[buttonId] = button;
+
+            return button;
+        }
+
+        private Image CreateSprite(RectTransform parent, float x, float y, float w, float h, SpriteType spriteType, string curFillProp, string maxFillProp)
+        {
+            var spriteObj = Instantiate(inventorySpritePrefab, parent);
+            var spriteImage = spriteObj.GetComponent<Image>();
+            var rectTransform = spriteObj.GetComponent<RectTransform>();
+
+            SpriteType.SetupSpriteImage(spriteType, spriteImage);
+            
+            rectTransform.anchoredPosition =
+                new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h * inventorySlotSize);
+            
+            spriteObj.name = $"Sprite [{spriteType.TypeId}]";
+
+            if (spriteType.ImageType == SpriteType.SpriteImageType.Filled)
+            {
+                if (curFillProp is null || maxFillProp is null)
+                {
+                    Debug.LogWarning($"Filled sprite properties for sprite {spriteType.TypeId} is not specified!");
+                }
+                // Add it to the list
+                currentFilledSprites.Add((curFillProp, maxFillProp, spriteType, spriteImage));
+            }
+            
+            if (spriteType.FlipbookSprites.Length > 0)
+            {
+                // Add it to the list
+                currentFlipbookSprites.Add((new(), spriteType, spriteImage));
+            }
+
+            return spriteImage;
         }
 
         public override bool IsActive
