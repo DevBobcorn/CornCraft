@@ -41,16 +41,16 @@ namespace CraftSharp
                         [2] = new(6, 2.5F, getType(InventorySlotType.SLOT_TYPE_REGULAR_ID), null, null),
                         [3] = new(5, 1.5F, getType(InventorySlotType.SLOT_TYPE_REGULAR_ID), null, null),
                         [4] = new(6, 1.5F, getType(InventorySlotType.SLOT_TYPE_REGULAR_ID), null, null),
-                        [5] = new(0, 3, getType(InventorySlotType.SLOT_TYPE_HEAD_ID), null,
+                        [5] = new(0, 3, getType(InventorySlotType.SLOT_TYPE_HEAD_ITEM_ID), null,
                             ResourceLocation.FromString("corncraft:empty_armor_slot_helmet")),
-                        [6] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_CHEST_ID), null,
+                        [6] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_CHEST_ITEM_ID), null,
                             ResourceLocation.FromString("corncraft:empty_armor_slot_chestplate")),
-                        [7] = new(0, 1, getType(InventorySlotType.SLOT_TYPE_LEGS_ID), null,
+                        [7] = new(0, 1, getType(InventorySlotType.SLOT_TYPE_LEGS_ITEM_ID), null,
                             ResourceLocation.FromString("corncraft:empty_armor_slot_leggings")),
-                        [8] = new(0, 0, getType(InventorySlotType.SLOT_TYPE_FEET_ID), null,
+                        [8] = new(0, 0, getType(InventorySlotType.SLOT_TYPE_FEET_ITEM_ID), null,
                             ResourceLocation.FromString("corncraft:empty_armor_slot_boots")),
 
-                        [45] = new(4, 0, getType(InventorySlotType.SLOT_TYPE_OFFHAND_ID), null,
+                        [45] = new(4, 0, getType(InventorySlotType.SLOT_TYPE_OFFHAND_ITEM_ID), null,
                             ResourceLocation.FromString("corncraft:empty_armor_slot_shield"))
                     }, new(), new(), new()
                 ))

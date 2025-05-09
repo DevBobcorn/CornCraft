@@ -126,7 +126,7 @@ gameplay.interaction.axe_harvest=破坏 {0}
 gameplay.interaction.hoe_harvest=破坏 {0}
 gameplay.interaction.pickaxe_harvest=破坏 {0}
 gameplay.interaction.shovel_harvest=破坏 {0}
-gameplay.ui.anvil_input=重命名物品...
+gameplay.ui.anvil_input=重命名...
 
 [keybinding]
 keybinding.mouse.lmb=左键

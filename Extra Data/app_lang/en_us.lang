@@ -126,7 +126,7 @@ gameplay.interaction.axe_harvest=Break {0}
 gameplay.interaction.hoe_harvest=Break {0}
 gameplay.interaction.pickaxe_harvest=Break {0}
 gameplay.interaction.shovel_harvest=Break {0}
-gameplay.ui.anvil_input=Rename item...
+gameplay.ui.anvil_input=Rename...
 
 [keybinding]
 keybinding.mouse.lmb=LMB

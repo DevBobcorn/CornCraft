@@ -44,8 +44,6 @@ namespace CraftSharp.Inventory
                     var inventorySlotTypeId = ResourceLocation.FromString(key);
                     var interactable = !inventorySlotDef.Properties.TryGetValue("interactable", out var val) || bool.Parse(val.StringValue); // True if not specified
 
-                    Debug.Log($"{inventorySlotTypeId} interactable: {interactable}");
-
                     var placePredicateStr = inventorySlotDef.Properties.TryGetValue("place_predicate", out val) ? val.StringValue : "never";
                     
                     Func<ItemStack, bool> placePredicate = placePredicateStr switch
