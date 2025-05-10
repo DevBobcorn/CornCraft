@@ -63,7 +63,7 @@ CornCraft在CDDL-1.0协议下开源，与MCC保持一致。除非特殊说明的
 * [Star Rail NPR Shader](https://github.com/stalomeow/StarRailNPRShader): 作为自定义玩家模型使用的着色器
 * [Minecraft Data](https://github.com/PrismarineJS/minecraft-data): 提供网络数据包预览界面中解析器使用的包体结构定义
 
-更多关于CDDL-1.0的信息可在MCC的[主页](https://github.com/MCCTeam/Minecraft-Console-Client)上查看，协议全文请看[这里](http://opensource.org/licenses/CDDL-1.0)。
+更多关于CDDL-1.0的信息可在MCC的[主页](https://github.com/MCCTeam/Minecraft-Console-Client)上查看，协议全文请看[这里](./LICENSE.md)。
 
 ## > 截图
 ![CornCraft024.png](https://s2.loli.net/2025/05/06/35dEplHtjX9gcP6.png)

@@ -63,7 +63,7 @@ Some other open-source projects/code examples are used in the project, which don
 * [Star Rail NPR Shader](https://github.com/stalomeow/StarRailNPRShader): Anime character shaders for custom player model rendering
 * [Minecraft Data](https://github.com/PrismarineJS/minecraft-data): Protocol data for packet inspection
 
-More information about CDDL-1.0 can be found on MCC's [home page](https://github.com/MCCTeam/Minecraft-Console-Client), in the license section, and the full license can be viewed [here](http://opensource.org/licenses/CDDL-1.0).
+More information about CDDL-1.0 can be found on MCC's [home page](https://github.com/MCCTeam/Minecraft-Console-Client), in the license section, and the full license can be viewed [here](./LICENSE.md).
 
 ## > Screenshots
 ![CornCraft024.png](https://s2.loli.net/2025/05/06/35dEplHtjX9gcP6.png)
