@@ -189,7 +189,7 @@ namespace CraftSharp.Control
             }
         }
 
-        private void UpdateBlockSelectionTo(BlockLoc newBlockLoc)
+        private void UpdateBlockPlacementPrediction(BlockLoc newBlockLoc, ResourceLocation blockId, Direction targetDirection, Direction cameraYawDir, float cameraPitch, bool clickedTopHalf)
         {
             if (!client) return;
 
@@ -199,9 +199,68 @@ namespace CraftSharp.Control
                 blockSelectionBox = Instantiate(blockSelectionFramePrefab)!.GetComponent<BlockSelectionBox>();
                 blockSelectionBox!.transform.SetParent(transform, false);
             }
-            
+
+            var palette = BlockStatePalette.INSTANCE;
+            var propTable = palette.GetBlockProperties(blockId);
+            var predicateProps = palette.GetDefault(blockId).Properties
+                // Make a copy of default property dictionary
+                .ToDictionary(entry => entry.Key, entry => entry.Value);
+
+            if (propTable.TryGetValue("facing", out var possibleValues))
+            {
+                if (possibleValues.Contains("up") && cameraPitch <= -44)
+                {
+                    predicateProps["facing"] = "up";
+                }
+                else if (possibleValues.Contains("down") && cameraPitch >= 44)
+                {
+                    predicateProps["facing"] = "down";
+                }
+                else
+                {
+                    predicateProps["facing"] = cameraYawDir switch
+                    {
+                        Direction.North => "north",
+                        Direction.East => "east",
+                        Direction.South => "south",
+                        Direction.West => "west",
+                        _ => throw new InvalidDataException($"Undefined direction {targetDirection}!")
+                    };
+                }
+            }
+
+            if (propTable.TryGetValue("half", out possibleValues))
+            {
+                if (possibleValues.Contains("lower"))
+                {
+                    predicateProps["half"] = "lower";
+                }
+                else if (possibleValues.Contains("bottom"))
+                {
+                    predicateProps["half"] = clickedTopHalf ? "top" : "bottom";
+                }
+            }
+
+            if (propTable.TryGetValue("axis", out possibleValues))
+            {
+                predicateProps["axis"] = targetDirection switch
+                {
+                    Direction.North => "z",
+                    Direction.East => "x",
+                    Direction.South => "z",
+                    Direction.West => "x",
+                    Direction.Up => possibleValues.Contains("y") ? "y" : (cameraYawDir == Direction.South || cameraYawDir == Direction.North ? "z" : "x"),
+                    Direction.Down => possibleValues.Contains("y") ? "y" : (cameraYawDir == Direction.South || cameraYawDir == Direction.North ? "z" : "x"),
+                    _ => throw new InvalidDataException($"Undefined direction {targetDirection}!")
+                };
+            }
+
+            var (predictedStateId, predictedBlockState) = palette.GetBlockStateWithProperties(blockId, predicateProps);
+            Debug.Log($"Predicted block state: {predictedBlockState}");
+
             TargetBlockLoc = newBlockLoc;
             blockSelectionBox.transform.position = CoordConvert.MC2Unity(client.WorldOriginOffset, newBlockLoc.ToLocation());
+            blockSelectionBox.UpdateShape(predictedBlockState.Shape);
 
             EventManager.Instance.Broadcast(new TargetBlockLocUpdateEvent(newBlockLoc));
         }
@@ -398,12 +457,11 @@ namespace CraftSharp.Control
             });
         }
 
-        private static BlockLoc PlaceBlock(BaseCornClient client, BlockLoc targetBlockLoc, Location targetExactLoc, Direction targetDirection)
+        private static BlockLoc PlaceBlock(BaseCornClient client, BlockLoc targetBlockLoc, float inBlockX, float inBlockY, float inBlockZ, Direction targetDirection)
         {
             var placeBlockLoc = GetPlaceBlockLoc(targetBlockLoc, targetDirection);
-            var inBlockLoc = targetExactLoc - placeBlockLoc.ToLocation();
 
-            client.PlaceBlock(targetBlockLoc, targetDirection, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, Inventory.Hand.MainHand);
+            client.PlaceBlock(targetBlockLoc, targetDirection, inBlockX, inBlockY, inBlockZ, Inventory.Hand.MainHand);
 
             return placeBlockLoc;
         }
@@ -510,19 +568,39 @@ namespace CraftSharp.Control
                             if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
                             {
                                 placeBlockCooldown = 0F;
+                                var inBlockLoc = TargetExactLoc.Value - TargetBlockLoc.Value.ToLocation();
 
                                 // Interact with target block
-                                PlaceBlock(curClient, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
+                                PlaceBlock(curClient, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
                             }
                         }
                         else if (currentActionType == ItemActionType.Block) // Check if holding a block item
                         {
                             if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
                             {
-                                var placeLoc = PlaceBlock(curClient, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
+                                var cameraYaw = curClient.GetCameraYaw();
+                                var cameraPitch = curClient.GetCameraPitch();
+
+                                while (cameraYaw >= 360F) cameraYaw -= 360F;
+                                while (cameraYaw < 0F) cameraYaw += 360F;
+                                var cameraYawDir = cameraYaw switch
+                                {
+                                    > 315  or <=  45 => Direction.East,
+                                    >  45 and <= 135 => Direction.South,
+                                    > 135 and <= 225 => Direction.West,
+                                    > 225 and <= 315 => Direction.North,
+                                    _ => throw new InvalidDataException($"Invalid yaw angle: {cameraYaw}!")
+                                };
+
+                                var inBlockLoc = TargetExactLoc.Value - TargetBlockLoc.Value.ToLocation();
+                                var placeLoc = PlaceBlock(curClient, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
+
+                                inBlockLoc = TargetExactLoc.Value - placeLoc.ToLocation();
+                                Debug.Log($"In block loc: {inBlockLoc}");
+                                var clickedTopHalf = inBlockLoc.Y >= 0.5;
 
                                 placeBlockCooldown = 0F;
-                                UpdateBlockSelectionTo(placeLoc);
+                                UpdateBlockPlacementPrediction(placeLoc, currentItemStack!.ItemType.ItemBlock!.Value, TargetDirection.Value, cameraYawDir, cameraPitch, clickedTopHalf);
                             }
                         }
                     }
@@ -705,10 +783,29 @@ namespace CraftSharp.Control
                     {
                         if (placeBlockCooldown <= PLACE_BLOCK_COOLDOWN) // Cooldown for placing block
                         {
-                            var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, TargetExactLoc.Value, TargetDirection.Value);
+                            var cameraYaw = client.GetCameraYaw();
+                            var cameraPitch = client.GetCameraPitch();
+
+                            while (cameraYaw >= 360F) cameraYaw -= 360F;
+                            while (cameraYaw < 0F) cameraYaw += 360F;
+                            var cameraYawDir = cameraYaw switch
+                            {
+                                > 315  or <=  45 => Direction.East,
+                                >  45 and <= 135 => Direction.South,
+                                > 135 and <= 225 => Direction.West,
+                                > 225 and <= 315 => Direction.North,
+                                _ => throw new InvalidDataException($"Invalid yaw angle: {cameraYaw}!")
+                            };
+
+                            var inBlockLoc = TargetExactLoc.Value - TargetBlockLoc.Value.ToLocation();
+                            var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
+
+                            inBlockLoc = TargetExactLoc.Value - placeLoc.ToLocation();
+                            Debug.Log($"In block loc: {inBlockLoc}");
+                            var clickedTopHalf = inBlockLoc.Y >= 0.5;
 
                             placeBlockCooldown = 0F;
-                            UpdateBlockSelectionTo(placeLoc);
+                            UpdateBlockPlacementPrediction(placeLoc, currentItemStack!.ItemType.ItemBlock!.Value, TargetDirection.Value, cameraYawDir, cameraPitch, clickedTopHalf);
                         }
                     }
                 }

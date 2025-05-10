@@ -111,6 +111,11 @@ namespace CraftSharp.Control
             }
         }
 
+        public override float GetPitch()
+        {
+            return _followPOV!.TiltAxis.Value;
+        }
+
         public override void SetYaw(float yaw)
         {
             if (!_followPOV)

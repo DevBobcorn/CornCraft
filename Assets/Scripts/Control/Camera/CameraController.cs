@@ -156,6 +156,8 @@ namespace CraftSharp.Control
             return renderCamera.transform;
         }
 
+        public abstract float GetPitch();
+
         public abstract float GetYaw();
 
         public abstract void SetYaw(float yaw);

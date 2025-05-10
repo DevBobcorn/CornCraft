@@ -144,6 +144,11 @@ namespace CraftSharp.Control
                 VIEWPORT_CENTER : base.GetTargetViewportPos(offset);
         }
 
+        public override float GetPitch()
+        {
+            return IsAimingOrLocked ? _aimingPOV!.TiltAxis.Value : _followPOV!.TiltAxis.Value;
+        }
+
         public override void SetYaw(float yaw)
         {
             if (!_followPOV)

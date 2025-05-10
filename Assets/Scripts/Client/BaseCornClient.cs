@@ -208,6 +208,8 @@ namespace CraftSharp
         public abstract ItemStack? GetActiveItem();
         public abstract Location GetCurrentLocation();
         public abstract Vector3 GetPosition();
+        public abstract float GetCameraYaw();
+        public abstract float GetCameraPitch();
         public abstract string GetInfoString(bool withDebugInfo);
         public abstract Dictionary<string, int> GetPlayersLatency();
         public abstract int GetOwnLatency();

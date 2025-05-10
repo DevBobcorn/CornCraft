@@ -197,7 +197,24 @@ namespace CraftSharp
         /// </summary>
         public override Vector3 GetPosition()
         {
-            return CoordConvert.MC2Unity(WorldOriginOffset, PlayerController.Location2Send);
+            //return CoordConvert.MC2Unity(PlayerController.Location2Send);
+            return PlayerController.transform.position;
+        }
+
+        /// <summary>
+        /// Get current camera yaw
+        /// </summary>
+        public override float GetCameraYaw()
+        {
+            return CameraController.GetYaw();
+        }
+
+        /// <summary>
+        /// Get current camera pitch
+        /// </summary>
+        public override float GetCameraPitch()
+        {
+            return CameraController.GetPitch();
         }
 
         /// <summary>
