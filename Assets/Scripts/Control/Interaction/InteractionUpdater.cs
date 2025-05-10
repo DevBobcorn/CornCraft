@@ -534,17 +534,42 @@ namespace CraftSharp.Control
             }
         }
 
+        private bool AffectsAttackBehaviour(ItemActionType itemType)
+        {
+            return itemType switch
+            {
+                ItemActionType.Bow => true,
+                ItemActionType.Crossbow => true,
+                ItemActionType.Trident => true,
+                ItemActionType.Shield => true,
+
+                ItemActionType.Shears => true,
+                ItemActionType.Axe => true,
+                ItemActionType.Pickaxe => true,
+                ItemActionType.Sword => true,
+                ItemActionType.Shovel => true,
+                ItemActionType.Hoe => true,
+                ItemActionType.Brush => true,
+
+                _ => false
+            };
+        }
+
         private void Start()
         {
             heldItemChangeCallback = e =>
             {
                 if (playerController)
                 {
-                    // Exit attack state when active item action type is changed
-                    if (currentActionType != e.ActionType)
+                    if (e.HotbarSlotChanged || AffectsAttackBehaviour(e.ActionType) || AffectsAttackBehaviour(currentActionType))
                     {
-                        playerController.Status!.Attacking = false;
+                        // Exit attack state when active item action type is changed
+                        if (currentActionType != e.ActionType)
+                        {
+                            playerController.Status!.Attacking = false;
+                        }
                     }
+                    
                     playerController.ChangeCurrentItem(e.ItemStack, e.ActionType);
                 }
 

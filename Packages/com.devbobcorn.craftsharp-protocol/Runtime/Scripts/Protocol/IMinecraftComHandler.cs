@@ -342,7 +342,7 @@ namespace CraftSharp.Protocol
         /// Called when held item is changed
         /// </summary>
         /// <remarks>Used for setting player slot after joining game</remarks>
-        /// <param name="slot"></param>
+        /// <param name="slot">Selected hotbar slot</param>
         void OnHeldItemChange(byte slot);
 
         /// <summary>
