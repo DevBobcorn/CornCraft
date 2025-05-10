@@ -58,16 +58,15 @@ namespace CraftSharp
             if (moveGlobal.magnitude > 0F)
             {
                 moveGlobal = moveGlobal.normalized;
-                transform.position += moveGlobal * moveSpeed * Time.deltaTime;
+                transform.position += moveSpeed * Time.deltaTime * moveGlobal;
             }
 
-            if (viewerText is not null)
+            if (viewerText != null)
             {
                 var viewRay = Camera.main.ViewportPointToRay(new(0.5F, 0.5F, 0F));
 
-                RaycastHit viewHit;
                 string hitObjectInfo;
-                if (Physics.Raycast(viewRay.origin, viewRay.direction, out viewHit, 10F))
+                if (Physics.Raycast(viewRay.origin, viewRay.direction, out RaycastHit viewHit, 10F))
                 {
                     hitObjectInfo = viewHit.collider.gameObject.name;
 

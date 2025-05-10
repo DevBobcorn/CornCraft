@@ -232,14 +232,14 @@ namespace CraftSharp.Rendering
                                 int layerIndex = ChunkRender.TypeIndex(renderType);
                                 var aoIntensity = 0.2F;
 
-                                var datFormat = BlockGeometry.ExtraVertexData.Light;
+                                var datFormat = BlockGeometry.VertexDataFormat.Color_Light;
                                 if (renderType == RenderType.FOLIAGE)
                                 {
-                                    datFormat = BlockGeometry.ExtraVertexData.Light_BlockNormal;
+                                    datFormat = BlockGeometry.VertexDataFormat.Color_Light_BlockNormal;
                                 }
                                 else if (renderType is RenderType.PLANTS or RenderType.TALL_PLANTS)
                                 {
-                                    datFormat = BlockGeometry.ExtraVertexData.Light_CrossNormal;
+                                    datFormat = BlockGeometry.VertexDataFormat.Color_Light_CrossNormal;
 
                                     aoIntensity = 0.15F;
                                 }

@@ -9,6 +9,7 @@ using CraftSharp.Event;
 using CraftSharp.Rendering;
 using System.IO;
 using System.Threading.Tasks;
+using CraftSharp.Resource;
 
 namespace CraftSharp.Control
 {
@@ -143,7 +144,7 @@ namespace CraftSharp.Control
             else
             {
                 // Update target location if changed
-                if (TargetBlockLoc != null)
+                if (TargetBlockLoc is not null)
                 {
                     TargetBlockLoc = null;
                     TargetExactLoc = null;
@@ -375,6 +376,11 @@ namespace CraftSharp.Control
                 EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(lastHarvestInteractionInfo.Id));
                 
                 lastHarvestInteractionInfo = null;
+
+                if (blockSelectionBox)
+                {
+                    blockSelectionBox.ClearBreakMesh();
+                }
             }
         }
 
@@ -552,8 +558,21 @@ namespace CraftSharp.Control
                 var harvestInteractionInfo = GetInteraction<HarvestInteractionInfo>(e.InteractionId);
                 if (harvestInteractionInfo is not null)
                 {
-                    // Update the process
+                    // Update progress bar
                     harvestInteractionInfo.Progress = e.Progress;
+
+                    // Update box selection
+                    if (blockSelectionBox)
+                    {
+                        if (e.Progress >= 1F) // Digging complete
+                        {
+                            blockSelectionBox.ClearBreakMesh();
+                        }
+                        else
+                        {
+                            blockSelectionBox.UpdateBreakStage(Mathf.Clamp((int) (e.Progress * 10), 0, 9));
+                        }
+                    }
                 }
             };
             EventManager.Instance.Register(harvestInteractionUpdateCallback);
@@ -575,10 +594,11 @@ namespace CraftSharp.Control
             var definition = InteractionManager.INSTANCE.InteractionTable
                 .GetValueOrDefault(block.StateId)?
                 .Get<HarvestInteraction>();
+            var blockState = block.State;
             
             if (definition is null)
             {
-                Debug.LogWarning($"Harvest interaction for {block.State} is not registered.");
+                Debug.LogWarning($"Harvest interaction for {blockState} is not registered.");
                 return;
             }
             
@@ -586,9 +606,18 @@ namespace CraftSharp.Control
             AbortDiggingBlockIfPresent();
 
             lastHarvestInteractionInfo = new LocalHarvestInteractionInfo(interactionId.AllocateID(), block, blockLoc, direction,
-                currentItemStack, block.State.Hardness, status.Floating, status.Grounded, definition);
+                currentItemStack, blockState.Hardness, status.Floating, status.Grounded, definition);
             
             //Debug.Log($"Created {lastHarvestInteractionInfo.GetHashCode()} at {blockLoc}");
+
+            if (blockSelectionBox)
+            {
+                var offsetType = ResourcePackManager.Instance.StateModelTable[block.StateId].OffsetType;
+                var posOffset = ChunkRenderBuilder.GetBlockOffsetInBlock(offsetType,
+                        blockLoc.X >> 4, blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF);
+
+                blockSelectionBox.UpdateBreakMesh(blockState, posOffset, 0b111111, 0);
+            }
 
             AddInteraction(lastHarvestInteractionInfo.Id, lastHarvestInteractionInfo, info =>
             {

@@ -32,7 +32,7 @@ namespace CraftSharp.Rendering
             UNCACHED_ITEM_MESHES.Clear();
         }
 
-        private static bool NBTDontAffectMesh(Dictionary<string, object> nbt)
+        private static bool NBTDoesntAffectMesh(Dictionary<string, object> nbt)
         {
             return nbt.Count == 0;
         }
@@ -49,7 +49,7 @@ namespace CraftSharp.Rendering
             var itemId = itemStack.ItemType.ItemId;
 
             // Use mesh cache if possible
-            var shouldUseCache = itemStack.NBT is null || NBTDontAffectMesh(itemStack.NBT);
+            var shouldUseCache = itemStack.NBT is null || NBTDoesntAffectMesh(itemStack.NBT);
 
             var itemNumId = ItemPalette.INSTANCE.GetNumIdById(itemId);
             packManager.ItemModelTable.TryGetValue(itemNumId, out ItemModel? itemModel);

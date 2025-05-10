@@ -1,3 +1,6 @@
+using CraftSharp.Rendering;
+using CraftSharp.Resource;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace CraftSharp.Control
@@ -8,14 +11,20 @@ namespace CraftSharp.Control
 
         [SerializeField] private Material lineMaterial;
         [SerializeField] private Mesh lineMesh;
+        [SerializeField] private MeshFilter breakMeshFilter;
+        [SerializeField] private MeshRenderer breakMeshRenderer;
 
         private readonly MeshRenderer[] lineMeshRenderers = new MeshRenderer[MAX_AABB_COUNT * 12];
+        private static Texture2DArray destroyTextureArray;
 
 #nullable enable
         private BlockShape? currentBlockShape;
+        private BlockState? currentBlockState;
+        private Mesh? currentBreakMesh;
 #nullable disable
         private int currentBoxCount = 0;
         private int createdBoxCount = 0;
+        private int currentDestroyStage = -1;
 
         private static MaterialPropertyBlock GetLengthPropertyBlock(int axis, float length)
         {
@@ -26,13 +35,31 @@ namespace CraftSharp.Control
             return propBlock;
         }
 
+        private static MaterialPropertyBlock GetBlockBreakPropertyBlock(int destroyStage)
+        {
+            var propBlock = new MaterialPropertyBlock();
+            
+            if (!destroyTextureArray)
+            {
+                destroyTextureArray = ResourcePackManager.Instance.GetDestroyTextureArray();
+            }
+
+            if (destroyTextureArray) // If destroy texture array is present
+            {
+                propBlock.SetTexture("_DestroyTextureArray", destroyTextureArray);
+            }
+            // Add an extra offset to ensure reading at the right depth
+            propBlock.SetFloat("_DestroyStage", destroyStage + 0.1F);
+
+            return propBlock;
+        }
+
         public void UpdateShape(BlockShape blockShape)
         {
             if (currentBlockShape == blockShape) return;
             currentBlockShape = blockShape;
 
             var aabbs = blockShape.AABBs;
-
             var displayedBoxCount = Mathf.Min(aabbs.Length, MAX_AABB_COUNT);
 
             int i = 0;
@@ -116,6 +143,35 @@ namespace CraftSharp.Control
             currentBoxCount = aabbs.Length;
         }
 
+        public void UpdateBreakMesh(BlockState blockState, float3 posOffset, int cullFlags, int stage)
+        {
+            if (currentBlockState == blockState) return;
+            currentBlockState = blockState;
+
+            if (currentBreakMesh) // Take care of previous break mesh
+            {
+                breakMeshFilter.sharedMesh = null;
+                Destroy(currentBreakMesh);
+            }
+
+            if (blockState is not null)
+            {
+                currentBreakMesh = BlockMeshBuilder.BuildBlockBreakMesh(currentBlockState, posOffset, cullFlags);
+                breakMeshFilter.sharedMesh = currentBreakMesh;
+                breakMeshRenderer.SetPropertyBlock(GetBlockBreakPropertyBlock(stage));
+            }
+        }
+
+        public void UpdateBreakStage(int stage)
+        {
+            if (stage == currentDestroyStage || stage < 0 || stage >= ResourcePackManager.DESTROY_TEXTURES.Length)
+            {
+                return;
+            }
+
+            breakMeshRenderer.SetPropertyBlock(GetBlockBreakPropertyBlock(stage));
+        }
+
         public void ClearShape()
         {
             if (currentBlockShape is null) return;
@@ -127,6 +183,19 @@ namespace CraftSharp.Control
             }
 
             currentBoxCount = 0;
+        }
+    
+        public void ClearBreakMesh()
+        {
+            currentBlockState = null;
+
+            if (currentBreakMesh) // Take care of previous break mesh
+            {
+                breakMeshFilter.sharedMesh = null;
+                Destroy(currentBreakMesh);
+            }
+
+            currentDestroyStage = -1;
         }
     }
 }
