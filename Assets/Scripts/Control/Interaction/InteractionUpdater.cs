@@ -271,7 +271,8 @@ namespace CraftSharp.Control
             var (predictedStateId, predictedBlockState) = palette.GetBlockStateWithProperties(blockId, predicateProps);
             //Debug.Log($"Predicted block state: {predictedBlockState}");
 
-            EventManager.Instance.Broadcast(new BlockPredictionEvent(newBlockLoc, predictedStateId));
+            // Doesn't seem to work very well
+            //EventManager.Instance.Broadcast(new BlockPredictionEvent(newBlockLoc, predictedStateId));
 
             TargetBlockLoc = newBlockLoc;
             blockSelectionBox.transform.position = CoordConvert.MC2Unity(client.WorldOriginOffset, newBlockLoc.ToLocation());
