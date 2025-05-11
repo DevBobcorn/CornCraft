@@ -186,7 +186,7 @@ namespace CraftSharp.Rendering
             
         }
 
-        protected virtual void ParticleStart(int idx, ParticleTransform particleTransform, ParticleStateData<T> particleState)
+        protected virtual void ParticleStart(int idx,  ParticleTransform particleTransform, ParticleStateData<T> particleState)
         {
             
         }

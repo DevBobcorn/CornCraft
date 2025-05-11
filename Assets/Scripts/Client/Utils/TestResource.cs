@@ -89,7 +89,7 @@ namespace CraftSharp
                     FluidGeometry.Build(visualBuffer, ref vertexOffset, float3.zero, FluidGeometry.LiquidTextures[1], FLUID_HEIGHTS,
                             cullFlags, DUMMY_BLOCK_VERT_LIGHT, BlockGeometry.DEFAULT_COLOR);
 
-                var color = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, BlockLoc.Zero, state);
+                var color = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, BlockLoc.Zero);
                 geometry.Build(visualBuffer, ref vertexOffset, float3.zero, cullFlags, 0, 0F, DUMMY_BLOCK_VERT_LIGHT, color);
 
                 int triIdxCount = vertexCount / 2 * 3;
@@ -539,14 +539,6 @@ namespace CraftSharp
 
         private void Update()
         {
-            if (ResourcePackManager.Instance.Loaded && UnityEngine.Random.Range(0, 4) == 0)
-            {
-                var stateId = UnityEngine.Random.Range(0, 20);
-                var typeId = ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID);
-
-                EventManager.Instance.Broadcast(new ParticlesEvent(Vector3.up, typeId, new BlockParticleExtraData(stateId), 1));
-            }
-
             if (billBoardTransforms != null)
             {
                 foreach (var t in billBoardTransforms)

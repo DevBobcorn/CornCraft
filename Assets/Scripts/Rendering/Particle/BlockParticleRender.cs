@@ -1,11 +1,11 @@
-﻿using CraftSharp.Resource;
-using UnityEngine;
+﻿using UnityEngine;
+using CraftSharp.Resource;
 
 namespace CraftSharp.Rendering
 {
     [RequireComponent(typeof (MeshRenderer))]
     [RequireComponent(typeof (MeshFilter))]
-    public class BlockParticleRender : ParticleRender<BlockParticleExtraData>
+    public class BlockParticleRender : ParticleRender<BlockParticleExtraDataWithColor>
     {
         private static readonly System.Random random = new();
 
@@ -14,7 +14,7 @@ namespace CraftSharp.Rendering
             
         }
 
-        protected override void ParticleStart(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraData> particleState)
+        protected override void ParticleStart(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraDataWithColor> particleState)
         {
             var isLeaves = false; // TODO: Check with block tag
 
@@ -22,7 +22,8 @@ namespace CraftSharp.Rendering
             particleTransform.Scale = random.Next(80, 120) / 100F;
 
             // Assign particle color
-            particleTransformCol[idx] = new Vector4((float) random.NextDouble(), (float) random.NextDouble(), (float) random.NextDouble(), 1F);
+            var blockColor = particleState.ExtraData.BlockColor;
+            particleTransformCol[idx] = new Vector4(blockColor.x, blockColor.y, blockColor.z, 1F);
 
             float xOfs = random.Next(0, 14) / 16F;
             float yOfs = random.Next(0, 14) / 16F;
@@ -51,14 +52,14 @@ namespace CraftSharp.Rendering
                                             (0.5F + random.Next(1, 150) / 100F) + (isLeaves ? 0F : acc + acc2));
         }
 
-        protected override void ParticleUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraData> particleState)
+        protected override void ParticleUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraDataWithColor> particleState)
         {
             particleState.Velocity.y -= 14F * Time.deltaTime;
 
             particleState.LifeTime -= 1F * Time.deltaTime;
         }
 
-        protected override void ParticlePhysicsUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraData> particleState)
+        protected override void ParticlePhysicsUpdate(int idx, ParticleTransform particleTransform, ParticleStateData<BlockParticleExtraDataWithColor> particleState)
         {
             var velocity = particleState.Velocity;
 

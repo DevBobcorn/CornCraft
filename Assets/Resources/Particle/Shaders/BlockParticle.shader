@@ -82,7 +82,7 @@ Shader "CornShader/Unlit/BlockParticle"
 
 				if (color.a < 0.5) discard;
 
-				//color *= _ColArray[index];
+				color *= _ColArray[index];
 
 				return fixed4(color.xyz, 1);
 			}

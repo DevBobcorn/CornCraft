@@ -502,7 +502,7 @@ namespace CraftSharp
         /// <example>bool result = InvokeOnNetMainThread(() => methodThatReturnsABool(argument));</example>
         /// <example>int result = InvokeOnNetMainThread(() => { yourCode(); return 42; });</example>
         /// <typeparam name="T">Type of the return value</typeparam>
-        public T InvokeOnNetMainThread<T>(Func<T> task)
+        public override T InvokeOnNetMainThread<T>(Func<T> task)
         {
             if (!InvokeRequired)
             {
@@ -524,7 +524,7 @@ namespace CraftSharp
         /// <example>InvokeOnNetMainThread(methodThatReturnsNothing);</example>
         /// <example>InvokeOnNetMainThread(() => methodThatReturnsNothing(argument));</example>
         /// <example>InvokeOnNetMainThread(() => { yourCode(); });</example>
-        public void InvokeOnNetMainThread(Action task)
+        public override void InvokeOnNetMainThread(Action task)
         {
             InvokeOnNetMainThread(() => { task(); return true; });
         }
@@ -581,14 +581,6 @@ namespace CraftSharp
         public override double GetClientTotalExperience() => totalExperience;
 
         public override float GetTickMilSec() => (float)(1000D / averageTPS);
-
-        /// <summary>
-        /// Get current chunk render manager
-        /// </summary>
-        public override IChunkRenderManager GetChunkRenderManager()
-        {
-            return ChunkRenderManager;
-        }
 
         /// <summary>
         /// Get player inventory with a given id

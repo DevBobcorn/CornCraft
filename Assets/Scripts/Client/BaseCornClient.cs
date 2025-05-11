@@ -27,6 +27,7 @@ namespace CraftSharp
         protected BaseEnvironmentManager EnvironmentManager => m_EnvironmentManager;
         public ChunkMaterialManager ChunkMaterialManager => m_ChunkMaterialManager;
         public EntityMaterialManager EntityMaterialManager => m_EntityMaterialManager;
+        public IChunkRenderManager GetChunkRenderManager() => m_ChunkRenderManager;
         
         // Player Fields
         [SerializeField] private PlayerController m_PlayerController;
@@ -182,8 +183,16 @@ namespace CraftSharp
         
         public abstract void Disconnect();
 
+        #region Thread-Invoke: Cross-thread method calls
+
+        public abstract T InvokeOnNetMainThread<T>(Func<T> task);
+
+        public abstract void InvokeOnNetMainThread(Action task);
+
+        #endregion
+
         #region Getters: Retrieve data for use in other methods
-        #nullable enable
+#nullable enable
 
         // Retrieve client connection info
         public abstract string GetServerHost();
@@ -202,8 +211,6 @@ namespace CraftSharp
         public abstract double GetClientExperienceLevel();
         public abstract double GetClientTotalExperience();
         // Retrieve gameplay info
-        public abstract IChunkRenderManager GetChunkRenderManager();
-        
         public abstract InventoryData? GetInventory(int inventoryId);
         public abstract ItemStack? GetActiveItem();
         public abstract Location GetCurrentLocation();

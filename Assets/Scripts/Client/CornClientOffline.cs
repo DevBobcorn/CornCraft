@@ -140,8 +140,22 @@ namespace CraftSharp
             CornApp.BackToLogin();
         }
 
+        #region Thread-Invoke: Cross-thread method calls
+
+        public override T InvokeOnNetMainThread<T>(Func<T> task)
+        {
+            return task.Invoke();
+        }
+
+        public override void InvokeOnNetMainThread(Action task)
+        {
+            task.Invoke();
+        }
+
+        #endregion
+
         #region Getters: Retrieve data for use in other methods
-        #nullable enable
+#nullable enable
 
         // Retrieve client connection info
         public override string GetServerHost() => string.Empty;
@@ -159,14 +173,6 @@ namespace CraftSharp
         public override double GetClientExperienceLevel() => 42;
         public override double GetClientTotalExperience() => 10;
         public override float GetTickMilSec() => 50F;
-
-        /// <summary>
-        /// Get current chunk render manager
-        /// </summary>
-        public override IChunkRenderManager GetChunkRenderManager()
-        {
-            return ChunkRenderManager;
-        }
 
         /// <summary>
         /// Get player inventory with a given id

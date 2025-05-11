@@ -271,6 +271,8 @@ namespace CraftSharp.Control
             var (predictedStateId, predictedBlockState) = palette.GetBlockStateWithProperties(blockId, predicateProps);
             //Debug.Log($"Predicted block state: {predictedBlockState}");
 
+            //EventManager.Instance.Broadcast(new BlockPredictionEvent(newBlockLoc, (ushort) predictedStateId));
+
             TargetBlockLoc = newBlockLoc;
             blockSelectionBox.transform.position = CoordConvert.MC2Unity(client.WorldOriginOffset, newBlockLoc.ToLocation());
             blockSelectionBox.UpdateShape(predictedBlockState.Shape);
@@ -459,15 +461,18 @@ namespace CraftSharp.Control
         private static void InstaBreak(BaseCornClient client, BlockLoc targetBlockLoc, Direction targetDirection)
         {
             var block = client.ChunkRenderManager.GetBlock(targetBlockLoc);
+            var blockColor = client.ChunkRenderManager.GetBlockColor(block.StateId, targetBlockLoc);
 
-            EventManager.Instance.Broadcast(new ParticlesEvent(CoordConvert.MC2Unity(client.WorldOriginOffset, targetBlockLoc.ToCenterLocation()),
-                    ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraData(block.StateId), 16));
-            
             // Send digging packets
             Task.Run(() => {
                 client.DigBlock(targetBlockLoc, targetDirection, DiggingStatus.Started);
                 client.DigBlock(targetBlockLoc, targetDirection, DiggingStatus.Finished);
             });
+
+            //EventManager.Instance.Broadcast(new BlockPredictionEvent(targetBlockLoc, 0));
+
+            EventManager.Instance.Broadcast(new ParticlesEvent(CoordConvert.MC2Unity(client.WorldOriginOffset, targetBlockLoc.ToCenterLocation()),
+                ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraDataWithColor(block.StateId, blockColor), 16));
         }
 
         private static BlockLoc PlaceBlock(BaseCornClient client, BlockLoc targetBlockLoc, float inBlockX, float inBlockY, float inBlockZ, Direction targetDirection)
@@ -670,7 +675,7 @@ namespace CraftSharp.Control
                     // Update box selection
                     if (blockSelectionBox)
                     {
-                        if (e.Progress >= 1F) // Digging complete
+                        if (e.Status == DiggingStatus.Finished || e.Progress >= 1F) // Digging complete
                         {
                             blockSelectionBox.ClearBreakMesh();
                         }
@@ -700,6 +705,11 @@ namespace CraftSharp.Control
             var definition = InteractionManager.INSTANCE.InteractionTable
                 .GetValueOrDefault(block.StateId)?.Get<HarvestInteraction>();
             var blockState = block.State;
+
+            if (blockState.BlockId == BlockState.AIR_ID)
+            {
+                return; // Possibly the other part of a double block
+            }
             
             if (definition is null)
             {

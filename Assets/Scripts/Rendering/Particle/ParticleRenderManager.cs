@@ -36,9 +36,8 @@ namespace CraftSharp.Rendering
             var blockParticleRenderObj = new GameObject("Block Particle Render");
             blockParticleRenderObj.transform.SetParent(transform);
             var blockParticleRender = blockParticleRenderObj.AddComponent<BlockParticleRender>();
-            particleRenders.Add(ParticleExtraDataType.Block, blockParticleRender);
 
-            
+            particleRenders.Add(ParticleExtraDataType.Block, blockParticleRender);
 
             particlesCallback = (e) =>
             {

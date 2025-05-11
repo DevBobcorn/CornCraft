@@ -233,20 +233,6 @@
                 "m_Node": {
                     "m_Id": "f7fe9c7359364e2a9bb17ad11d24d492"
                 },
-                "m_SlotId": 0
-            },
-            "m_InputSlot": {
-                "m_Node": {
-                    "m_Id": "f7a4f5ba1133422baf019a90ce0abf94"
-                },
-                "m_SlotId": 0
-            }
-        },
-        {
-            "m_OutputSlot": {
-                "m_Node": {
-                    "m_Id": "f7fe9c7359364e2a9bb17ad11d24d492"
-                },
                 "m_SlotId": 7
             },
             "m_InputSlot": {
@@ -1469,9 +1455,9 @@
     "m_ShaderOutputName": "BaseColor",
     "m_StageCapability": 2,
     "m_Value": {
-        "x": 0.5,
-        "y": 0.5,
-        "z": 0.5
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
     },
     "m_DefaultValue": {
         "x": 0.5,
@@ -1610,7 +1596,7 @@
     "m_ObjectId": "e0bffedf8b724328b5d781c88dc47ca3",
     "m_Title": "Offset to Prevent Z-Fighting",
     "m_Position": {
-        "x": -776.7999877929688,
+        "x": -776.7999267578125,
         "y": -256.79998779296877
     }
 }

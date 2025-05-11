@@ -359,7 +359,7 @@ namespace CraftSharp.Rendering
         private void AddLightUpdateRequest(int3 chunkPos)
         {
             lightUpdateRequests.Add(chunkPos);
-            lightUpdateUnfinished.Add(chunkPos); // null if task is not created yet
+            lightUpdateUnfinished.Add(chunkPos);
         }
 
         /// <summary>
@@ -386,6 +386,17 @@ namespace CraftSharp.Rendering
         public Block GetBlock(BlockLoc blockLoc)
         {
             return world.GetBlock(blockLoc);
+        }
+
+        /// <summary>
+        /// Get block color at the specified location
+        /// </summary>
+        /// <param name="stateId">Target block state id</param>
+        /// <param name="blockLoc">Location to retrieve block color from</param>
+        /// <returns>Block at specified location or Air if the location is not loaded</returns>
+        public float3 GetBlockColor(int stateId, BlockLoc blockLoc)
+        {
+            return BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, blockLoc);
         }
 
         /// <summary>
@@ -498,7 +509,8 @@ namespace CraftSharp.Rendering
         private int updateTargetMask;
 
         private static void UpdateBuildPriority(Location currentBlockLoc, ChunkRender chunk, int offsetY)
-        {   // Get this chunk's build priority based on its current distance to the player,
+        {
+            // Get this chunk's build priority based on its current distance to the player,
             // a smaller value means a higher priority...
             chunk.Priority = (int)(
                     new Location(chunk.ChunkX * Chunk.SIZE + CHUNK_CENTER, chunk.ChunkYIndex * Chunk.SIZE + CHUNK_CENTER + offsetY,
@@ -920,9 +932,7 @@ namespace CraftSharp.Rendering
             builder.BuildTerrainColliderBoxesAt(world, blockLoc, _worldOriginOffset, terrainBoxColliderGameObject, liquidBoxColliderGameObject, colliderList);
         }
 
-        private Block? AIR_BLOCK_INSTANCE;
-
-        private Action<HarvestInteractionUpdateEvent> toolInteractionCallback;
+        private Action<BlockPredictionEvent> blockPredictionCallback;
 
         private void Awake()
         {
@@ -948,24 +958,19 @@ namespace CraftSharp.Rendering
                 layer = LayerMask.NameToLayer(LIQUID_BOX_COLLIDER_LAYER_NAME)
             };
 
-            toolInteractionCallback = e =>
+            blockPredictionCallback = e =>
             {
-                if (e.Status == Control.DiggingStatus.Finished)
-                {
-                    AIR_BLOCK_INSTANCE ??= new Block(0);
-
-                    // Predict block digging result
-                    SetBlock(e.Location, AIR_BLOCK_INSTANCE.Value); // Get air block
-                }
+                // Make sure to set block from network thread
+                client.InvokeOnNetMainThread(() => SetBlock(e.BlockLoc, new Block(e.BlockStateId)));
             };
 
-            EventManager.Instance.Register(toolInteractionCallback);
+            EventManager.Instance.Register(blockPredictionCallback);
         }
 
         private void OnDestroy()
         {
-            if (toolInteractionCallback is not null)
-                EventManager.Instance.Unregister(toolInteractionCallback);
+            if (blockPredictionCallback is not null)
+                EventManager.Instance.Unregister(blockPredictionCallback);
         }
 
         private void FixedUpdate()
