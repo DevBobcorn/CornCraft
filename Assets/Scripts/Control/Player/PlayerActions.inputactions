@@ -27,7 +27,7 @@
                     "name": "Descend",
                     "type": "Button",
                     "id": "7e768c82-bdc5-47ba-adce-21abaafa845e",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -36,7 +36,7 @@
                     "name": "Ascend",
                     "type": "Button",
                     "id": "9f0912ad-932a-4bd9-8cf7-4da00cdd2acc",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -45,7 +45,7 @@
                     "name": "Sprint",
                     "type": "Button",
                     "id": "e4f2d328-0411-45b8-9fa9-6add9c358811",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -221,6 +221,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Pick Target Item",
+                    "type": "Button",
+                    "id": "2e7f2cd8-8517-4175-90fa-9a552231f6d2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -276,6 +285,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Toggle Aiming Lock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b43061e7-5980-407f-af3b-dd419465222a",
+                    "path": "<Mouse>/middleButton",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pick Target Item",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

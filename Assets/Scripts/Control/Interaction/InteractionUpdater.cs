@@ -49,8 +49,10 @@ namespace CraftSharp.Control
         private const float BLOCK_INTERACTION_RADIUS_SQR = BLOCK_INTERACTION_RADIUS * BLOCK_INTERACTION_RADIUS; // BLOCK_INTERACTION_RADIUS ^ 2
         private const float BLOCK_INTERACTION_RADIUS_SQR_PLUS = (BLOCK_INTERACTION_RADIUS + 0.5F) * (BLOCK_INTERACTION_RADIUS + 0.5F); // (BLOCK_INTERACTION_RADIUS + 0.5f) ^ 2
 
-        private const float INSTA_BREAK_COOLDOWN = -0.3F;
-        private const float PLACE_BLOCK_COOLDOWN = -0.2F;
+        private const float CREATIVE_INSTA_BREAK_COOLDOWN = 0.3F;
+        private const float MINIMUM_INSTA_BREAK_COOLDOWN = 0.05F;
+
+        private const float PLACE_BLOCK_COOLDOWN = 0.2F;
         
         private static readonly List<BlockLoc> validOffsets = ComputeOffsets();
 
@@ -98,7 +100,7 @@ namespace CraftSharp.Control
         {
             if (viewRay is null || !client) return;
 
-            if (placeBlockCooldown > PLACE_BLOCK_COOLDOWN) // Ongoing block placement cooldown
+            if (placeBlockCooldown >= 0F) // Ongoing block placement cooldown
             {
                 // Don't update block selection block location
                 
@@ -189,9 +191,20 @@ namespace CraftSharp.Control
             }
         }
 
-        private void UpdateBlockPlacementPrediction(BlockLoc newBlockLoc, ResourceLocation blockId, Direction targetDirection, Direction cameraYawDir, float cameraPitch, bool clickedTopHalf)
+        private void UpdateBlockPlacementPrediction(BlockLoc newBlockLoc, ResourceLocation blockId, Direction targetDirection, float cameraYaw, float cameraPitch, bool clickedTopHalf)
         {
             if (!client) return;
+
+            while (cameraYaw >= 360F) cameraYaw -= 360F;
+            while (cameraYaw < 0F) cameraYaw += 360F;
+            var cameraYawDir = cameraYaw switch
+            {
+                > 315 or <= 45 => Direction.East,
+                > 45 and <= 135 => Direction.South,
+                > 135 and <= 225 => Direction.West,
+                > 225 and <= 315 => Direction.North,
+                _ => throw new InvalidDataException($"Invalid yaw angle: {cameraYaw}!")
+            };
 
             // Create selection box if not present
             if (!blockSelectionBox)
@@ -256,7 +269,7 @@ namespace CraftSharp.Control
             }
 
             var (predictedStateId, predictedBlockState) = palette.GetBlockStateWithProperties(blockId, predicateProps);
-            Debug.Log($"Predicted block state: {predictedBlockState}");
+            //Debug.Log($"Predicted block state: {predictedBlockState}");
 
             TargetBlockLoc = newBlockLoc;
             blockSelectionBox.transform.position = CoordConvert.MC2Unity(client.WorldOriginOffset, newBlockLoc.ToLocation());
@@ -443,7 +456,7 @@ namespace CraftSharp.Control
             }
         }
 
-        private static void CreativeInstaBreak(BaseCornClient client, BlockLoc targetBlockLoc, Direction targetDirection)
+        private static void InstaBreak(BaseCornClient client, BlockLoc targetBlockLoc, Direction targetDirection)
         {
             var block = client.ChunkRenderManager.GetBlock(targetBlockLoc);
 
@@ -511,15 +524,12 @@ namespace CraftSharp.Control
                 {
                     var status = curPlayerController.Status;
 
-                    if (TargetBlockLoc is not null && TargetDirection is not null &&
-                        curClient.GameMode == GameMode.Creative)
+                    if (TargetBlockLoc is not null && TargetDirection is not null && instaBreakCooldown <= 0F)
                     {
-                        if (instaBreakCooldown < INSTA_BREAK_COOLDOWN)
-                        {
-                            CreativeInstaBreak(curClient, TargetBlockLoc.Value, TargetDirection.Value);
+                        var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
 
-                            instaBreakCooldown = 0F;
-                        }
+                        // Check if we can initiate insta-break (if creative mode or break time is short enough)
+                        StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status, true);
                     }
                     else if (currentActionType == ItemActionType.Sword)
                     {
@@ -565,9 +575,9 @@ namespace CraftSharp.Control
                     {
                         if (blockTriggerInteractionInfos.ContainsKey(TargetBlockLoc.Value)) // Check if target block is interactable
                         {
-                            if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
+                            if (placeBlockCooldown < 0F)
                             {
-                                placeBlockCooldown = 0F;
+                                placeBlockCooldown = PLACE_BLOCK_COOLDOWN;
                                 var inBlockLoc = TargetExactLoc.Value - TargetBlockLoc.Value.ToLocation();
 
                                 // Interact with target block
@@ -576,31 +586,19 @@ namespace CraftSharp.Control
                         }
                         else if (currentActionType == ItemActionType.Block) // Check if holding a block item
                         {
-                            if (placeBlockCooldown < PLACE_BLOCK_COOLDOWN)
+                            if (placeBlockCooldown < 0F)
                             {
                                 var cameraYaw = curClient.GetCameraYaw();
                                 var cameraPitch = curClient.GetCameraPitch();
-
-                                while (cameraYaw >= 360F) cameraYaw -= 360F;
-                                while (cameraYaw < 0F) cameraYaw += 360F;
-                                var cameraYawDir = cameraYaw switch
-                                {
-                                    > 315  or <=  45 => Direction.East,
-                                    >  45 and <= 135 => Direction.South,
-                                    > 135 and <= 225 => Direction.West,
-                                    > 225 and <= 315 => Direction.North,
-                                    _ => throw new InvalidDataException($"Invalid yaw angle: {cameraYaw}!")
-                                };
 
                                 var inBlockLoc = TargetExactLoc.Value - TargetBlockLoc.Value.ToLocation();
                                 var placeLoc = PlaceBlock(curClient, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
 
                                 inBlockLoc = TargetExactLoc.Value - placeLoc.ToLocation();
-                                Debug.Log($"In block loc: {inBlockLoc}");
                                 var clickedTopHalf = inBlockLoc.Y >= 0.5;
 
-                                placeBlockCooldown = 0F;
-                                UpdateBlockPlacementPrediction(placeLoc, currentItemStack!.ItemType.ItemBlock!.Value, TargetDirection.Value, cameraYawDir, cameraPitch, clickedTopHalf);
+                                placeBlockCooldown = PLACE_BLOCK_COOLDOWN;
+                                UpdateBlockPlacementPrediction(placeLoc, currentItemStack!.ItemType.ItemBlock!.Value, TargetDirection.Value, cameraYaw, cameraPitch, clickedTopHalf);
                             }
                         }
                     }
@@ -608,6 +606,11 @@ namespace CraftSharp.Control
                     {
                         curClient.UseItemOnMainHand();
                     }
+                };
+            
+                curPlayerController.Actions.Interaction.PickTargetItem.performed += _ =>
+                {
+                    // TODO: Implement
                 };
             }
         }
@@ -692,11 +695,10 @@ namespace CraftSharp.Control
             EventManager.Instance.Register(triggerInteractionExecutionEvent);
         }
 
-        private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status)
+        private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status, bool instaBreakOnly = false)
         {
             var definition = InteractionManager.INSTANCE.InteractionTable
-                .GetValueOrDefault(block.StateId)?
-                .Get<HarvestInteraction>();
+                .GetValueOrDefault(block.StateId)?.Get<HarvestInteraction>();
             var blockState = block.State;
             
             if (definition is null)
@@ -704,28 +706,63 @@ namespace CraftSharp.Control
                 Debug.LogWarning($"Harvest interaction for {blockState} is not registered.");
                 return;
             }
+
+            if (!client) return;
             
             // Abort previous digging interaction
             AbortDiggingBlockIfPresent();
 
-            lastHarvestInteractionInfo = new LocalHarvestInteractionInfo(interactionId.AllocateID(), block, blockLoc, direction,
-                currentItemStack, blockState.Hardness, status.Floating, status.Grounded, definition);
-            
-            //Debug.Log($"Created {lastHarvestInteractionInfo.GetHashCode()} at {blockLoc}");
-
-            if (blockSelectionBox)
+            if (client.GameMode == GameMode.Creative)
             {
-                var offsetType = ResourcePackManager.Instance.StateModelTable[block.StateId].OffsetType;
-                var posOffset = ChunkRenderBuilder.GetBlockOffsetInBlock(offsetType,
-                        blockLoc.X >> 4, blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF);
+                InstaBreak(client, blockLoc, direction);
+                instaBreakCooldown = CREATIVE_INSTA_BREAK_COOLDOWN;
 
-                blockSelectionBox.UpdateBreakMesh(blockState, posOffset, 0b111111, 0);
+                if (blockSelectionBox)
+                {
+                    blockSelectionBox.ClearBreakMesh();
+                }
+
+                return;
             }
 
-            AddInteraction(lastHarvestInteractionInfo.Id, lastHarvestInteractionInfo, info =>
+            var newHarvestInteractionInfo = new LocalHarvestInteractionInfo(interactionId.AllocateID(), block, blockLoc, direction,
+                currentItemStack, blockState.Hardness, status.Floating, status.Grounded, definition);
+
+            // If this duration is too short, use insta break instead
+            if (newHarvestInteractionInfo.Duration <= CREATIVE_INSTA_BREAK_COOLDOWN)
             {
-                EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, true, true, info));
-            });
+                InstaBreak(client, blockLoc, direction);
+                instaBreakCooldown = Mathf.Max(MINIMUM_INSTA_BREAK_COOLDOWN, newHarvestInteractionInfo.Duration);
+
+                if (blockSelectionBox)
+                {
+                    blockSelectionBox.ClearBreakMesh();
+                }
+            }
+            else // Use regular digging, with a progress bar
+            {
+                if (instaBreakOnly)
+                {
+                    //Debug.Log($"Duration is {newHarvestInteractionInfo.Duration}, can't start insta-break! Target: {blockState}, Hardness: {blockState.Hardness}");
+                    return; // Duration is too long for insta-break, can't do it
+                }
+
+                if (blockSelectionBox)
+                {
+                    var offsetType = ResourcePackManager.Instance.StateModelTable[block.StateId].OffsetType;
+                    var posOffset = ChunkRenderBuilder.GetBlockOffsetInBlock(offsetType,
+                            blockLoc.X >> 4, blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF);
+
+                    blockSelectionBox.UpdateBreakMesh(blockState, posOffset, 0b111111, 0);
+                }
+
+                lastHarvestInteractionInfo = newHarvestInteractionInfo;
+
+                AddInteraction(lastHarvestInteractionInfo.Id, lastHarvestInteractionInfo, info =>
+                {
+                    EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, true, true, info));
+                });
+            }
         }
 
         private void Update()
@@ -760,19 +797,19 @@ namespace CraftSharp.Control
                     }
                     else
                     {
-                        // Not in digging state, abort
-                        AbortDiggingBlockIfPresent();
-                    }
-                    
-                    // Check continuous insta-break
-                    if (client.GameMode == GameMode.Creative &&
-                             playerController.Actions.Interaction.NormalAttack.IsPressed())
-                    {
-                        if (instaBreakCooldown <= INSTA_BREAK_COOLDOWN) // Cooldown for Creative Mode insta-break
+                        // Check continuous insta-break
+                        if (playerController.Actions.Interaction.NormalAttack.IsPressed() && lastHarvestInteractionInfo is null)
                         {
-                            CreativeInstaBreak(client, TargetBlockLoc.Value, TargetDirection.Value);
-
-                            instaBreakCooldown = 0F;
+                            if (instaBreakCooldown <= 0F) // Cooldown for insta-break
+                            {
+                                // Check if we can initiate insta-break (if creative mode or break time is short enough)
+                                StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status, true);
+                            }
+                        }
+                        else
+                        {
+                            // Not in digging state, abort
+                            AbortDiggingBlockIfPresent();
                         }
                     }
                     
@@ -781,31 +818,19 @@ namespace CraftSharp.Control
                         playerController.Actions.Interaction.UseNormalItem.IsPressed() &&
                         !blockTriggerInteractionInfos.ContainsKey(TargetBlockLoc.Value))
                     {
-                        if (placeBlockCooldown <= PLACE_BLOCK_COOLDOWN) // Cooldown for placing block
+                        if (placeBlockCooldown <= 0F) // Cooldown for placing block
                         {
                             var cameraYaw = client.GetCameraYaw();
                             var cameraPitch = client.GetCameraPitch();
-
-                            while (cameraYaw >= 360F) cameraYaw -= 360F;
-                            while (cameraYaw < 0F) cameraYaw += 360F;
-                            var cameraYawDir = cameraYaw switch
-                            {
-                                > 315  or <=  45 => Direction.East,
-                                >  45 and <= 135 => Direction.South,
-                                > 135 and <= 225 => Direction.West,
-                                > 225 and <= 315 => Direction.North,
-                                _ => throw new InvalidDataException($"Invalid yaw angle: {cameraYaw}!")
-                            };
 
                             var inBlockLoc = TargetExactLoc.Value - TargetBlockLoc.Value.ToLocation();
                             var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
 
                             inBlockLoc = TargetExactLoc.Value - placeLoc.ToLocation();
-                            Debug.Log($"In block loc: {inBlockLoc}");
                             var clickedTopHalf = inBlockLoc.Y >= 0.5;
 
-                            placeBlockCooldown = 0F;
-                            UpdateBlockPlacementPrediction(placeLoc, currentItemStack!.ItemType.ItemBlock!.Value, TargetDirection.Value, cameraYawDir, cameraPitch, clickedTopHalf);
+                            placeBlockCooldown = PLACE_BLOCK_COOLDOWN;
+                            UpdateBlockPlacementPrediction(placeLoc, currentItemStack!.ItemType.ItemBlock!.Value, TargetDirection.Value, cameraYaw, cameraPitch, clickedTopHalf);
                         }
                     }
                 }

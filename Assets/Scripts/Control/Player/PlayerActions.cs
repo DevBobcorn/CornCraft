@@ -115,7 +115,7 @@ namespace CraftSharp.Control
                     ""name"": ""Descend"",
                     ""type"": ""Button"",
                     ""id"": ""7e768c82-bdc5-47ba-adce-21abaafa845e"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -124,7 +124,7 @@ namespace CraftSharp.Control
                     ""name"": ""Ascend"",
                     ""type"": ""Button"",
                     ""id"": ""9f0912ad-932a-4bd9-8cf7-4da00cdd2acc"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -133,7 +133,7 @@ namespace CraftSharp.Control
                     ""name"": ""Sprint"",
                     ""type"": ""Button"",
                     ""id"": ""e4f2d328-0411-45b8-9fa9-6add9c358811"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -309,6 +309,15 @@ namespace CraftSharp.Control
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Pick Target Item"",
+                    ""type"": ""Button"",
+                    ""id"": ""2e7f2cd8-8517-4175-90fa-9a552231f6d2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -366,6 +375,17 @@ namespace CraftSharp.Control
                     ""action"": ""Toggle Aiming Lock"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b43061e7-5980-407f-af3b-dd419465222a"",
+                    ""path"": ""<Mouse>/middleButton"",
+                    ""interactions"": ""Tap"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pick Target Item"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -387,6 +407,7 @@ namespace CraftSharp.Control
             m_Interaction_UseChargedItem = m_Interaction.FindAction("Use Charged Item", throwIfNotFound: true);
             m_Interaction_UseNormalItem = m_Interaction.FindAction("Use Normal Item", throwIfNotFound: true);
             m_Interaction_ToggleAimingLock = m_Interaction.FindAction("Toggle Aiming Lock", throwIfNotFound: true);
+            m_Interaction_PickTargetItem = m_Interaction.FindAction("Pick Target Item", throwIfNotFound: true);
         }
 
         ~@PlayerActions()
@@ -624,6 +645,7 @@ namespace CraftSharp.Control
         private readonly InputAction m_Interaction_UseChargedItem;
         private readonly InputAction m_Interaction_UseNormalItem;
         private readonly InputAction m_Interaction_ToggleAimingLock;
+        private readonly InputAction m_Interaction_PickTargetItem;
         /// <summary>
         /// Provides access to input actions defined in input action map "Interaction".
         /// </summary>
@@ -655,6 +677,10 @@ namespace CraftSharp.Control
             /// Provides access to the underlying input action "Interaction/ToggleAimingLock".
             /// </summary>
             public InputAction @ToggleAimingLock => m_Wrapper.m_Interaction_ToggleAimingLock;
+            /// <summary>
+            /// Provides access to the underlying input action "Interaction/PickTargetItem".
+            /// </summary>
+            public InputAction @PickTargetItem => m_Wrapper.m_Interaction_PickTargetItem;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -696,6 +722,9 @@ namespace CraftSharp.Control
                 @ToggleAimingLock.started += instance.OnToggleAimingLock;
                 @ToggleAimingLock.performed += instance.OnToggleAimingLock;
                 @ToggleAimingLock.canceled += instance.OnToggleAimingLock;
+                @PickTargetItem.started += instance.OnPickTargetItem;
+                @PickTargetItem.performed += instance.OnPickTargetItem;
+                @PickTargetItem.canceled += instance.OnPickTargetItem;
             }
 
             /// <summary>
@@ -722,6 +751,9 @@ namespace CraftSharp.Control
                 @ToggleAimingLock.started -= instance.OnToggleAimingLock;
                 @ToggleAimingLock.performed -= instance.OnToggleAimingLock;
                 @ToggleAimingLock.canceled -= instance.OnToggleAimingLock;
+                @PickTargetItem.started -= instance.OnPickTargetItem;
+                @PickTargetItem.performed -= instance.OnPickTargetItem;
+                @PickTargetItem.canceled -= instance.OnPickTargetItem;
             }
 
             /// <summary>
@@ -847,6 +879,13 @@ namespace CraftSharp.Control
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnToggleAimingLock(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Pick Target Item" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnPickTargetItem(InputAction.CallbackContext context);
         }
     }
 }

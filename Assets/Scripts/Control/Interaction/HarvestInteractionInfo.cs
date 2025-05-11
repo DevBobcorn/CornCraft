@@ -56,6 +56,7 @@ namespace CraftSharp.Control
     public sealed class LocalHarvestInteractionInfo : HarvestInteractionInfo
     {
         private readonly float duration;
+        public float Duration => duration;
 
         public LocalHarvestInteractionInfo(int id, Block block, BlockLoc loc, Direction dir, ItemStack? tool, float hardness,
             bool floating, bool grounded, HarvestInteraction def) : base(id, block, loc, dir, def)
@@ -65,7 +66,7 @@ namespace CraftSharp.Control
 
         private float CalculateDiggingTime(ItemStack? itemStack, float hardness, bool underwater, bool onGround)
         {
-            if (hardness <= 0F) // Bedrock or something, takes forever to break
+            if (hardness < 0F) // Bedrock or something, takes forever to break
             {
                 return float.PositiveInfinity;
             }
