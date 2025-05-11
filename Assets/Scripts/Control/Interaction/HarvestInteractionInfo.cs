@@ -163,7 +163,7 @@ namespace CraftSharp.Control
 
             EventManager.Instance.Broadcast(new HarvestInteractionUpdateEvent(Id, block, blockLoc, DiggingStatus.Finished, 1F));
 
-            //EventManager.Instance.Broadcast(new BlockPredictionEvent(blockLoc, 0));
+            EventManager.Instance.Broadcast(new BlockPredictionEvent(blockLoc, 0));
 
             var blockColor = client.ChunkRenderManager.GetBlockColor(block.StateId, blockLoc);
 

@@ -228,11 +228,11 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Get existing ChunkRender, returns null if not present
         /// </summary>
-        private ChunkRender GetChunkRender(int chunkX, int chunkY, int chunkZ)
+        private ChunkRender GetChunkRender(int chunkX, int chunkYIndex, int chunkZ)
         {
             var column = GetChunkRenderColumn(chunkX, chunkZ);
 
-            return column ? column.GetChunkRender(chunkY) : null;
+            return column ? column.GetChunkRender(chunkYIndex) : null;
         }
         #endregion
 
@@ -241,9 +241,9 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Store a chunk, invoked from network thread
         /// </summary>
-        public void StoreChunk(int chunkX, int chunkY, int chunkZ, int chunkColumnSize, Chunk chunk)
+        public void StoreChunk(int chunkX, int chunkYIndex, int chunkZ, int chunkColumnSize, Chunk chunk)
         {
-            world.StoreChunk(chunkX, chunkY, chunkZ, chunkColumnSize, chunk);
+            world.StoreChunk(chunkX, chunkYIndex, chunkZ, chunkColumnSize, chunk);
         }
 
         /// <summary>
@@ -278,9 +278,12 @@ namespace CraftSharp.Rendering
         /// </summary>
         /// <param name="blockLoc">Location to set block to</param>
         /// <param name="block">Block to set</param>
-        public void SetBlock(BlockLoc blockLoc, Block block)
+        /// <param name="doImmediateBuild">Whether to immediately rebuild chunk mesh</param>
+        public void SetBlock(BlockLoc blockLoc, Block block, bool doImmediateBuild = false)
         {
-            var column = GetChunkColumn(blockLoc);
+            var chunkX = blockLoc.GetChunkX();
+            var chunkZ = blockLoc.GetChunkZ();
+            var column = GetChunkColumn(chunkX, chunkZ);
             bool shouldRecalculateLight = false;
 
             if (column != null)
@@ -302,6 +305,41 @@ namespace CraftSharp.Rendering
                 if (BlockEntityTypePalette.INSTANCE.GetBlockEntityForBlock(block.BlockId, out BlockEntityType blockEntityType))
                 {
                     AddBlockEntityRender(blockLoc, blockEntityType);
+                }
+
+                var chunkYIndex = blockLoc.GetChunkYIndex(column.MinimumY);
+                if (doImmediateBuild) // Light is not updated yet, but build the mesh anyway
+                {
+                    var chunkRenderColumn = GetChunkRenderColumn(chunkX, chunkZ);
+                    if (chunkRenderColumn)
+                    {
+                        // Just rebuild the mesh, don't recalculate lighting data yet (do that later)
+                        BuildChunkRenderIfNotEmpty(chunkRenderColumn.GetChunkRender(chunkYIndex));
+
+                        if (blockLoc.GetChunkBlockY() == 0 && chunkYIndex - 1 >= 0) // In the bottom layer of this chunk
+                        {
+                            // Rebuild below, if it isn't empty
+                            BuildChunkRenderIfNotEmpty(chunkRenderColumn.GetChunkRender(chunkYIndex - 1));
+                        }
+                        else if (blockLoc.GetChunkBlockY() == Chunk.SIZE - 1 && (chunkYIndex + 1) * Chunk.SIZE < World.GetDimensionType().height) // In the top layer of this chunk
+                        {
+                            // Rebuild the chunk above, if it isn't empty
+                            BuildChunkRenderIfNotEmpty(chunkRenderColumn.GetChunkRender(chunkYIndex + 1));
+                        }
+                    }
+
+                    if (blockLoc.GetChunkBlockX() == 0) // Check MC X direction neighbors
+                        BuildChunkRenderIfNotEmpty(GetChunkRender(chunkX - 1, chunkYIndex, chunkZ));
+                    else if (blockLoc.GetChunkBlockX() == Chunk.SIZE - 1)
+                        BuildChunkRenderIfNotEmpty(GetChunkRender(chunkX + 1, chunkYIndex, chunkZ));
+
+                    if (blockLoc.GetChunkBlockZ() == 0) // Check MC Z direction neighbors
+                        BuildChunkRenderIfNotEmpty(GetChunkRender(chunkX, chunkYIndex, chunkZ - 1));
+                    else if (blockLoc.GetChunkBlockZ() == Chunk.SIZE - 1)
+                        BuildChunkRenderIfNotEmpty(GetChunkRender(chunkX, chunkYIndex, chunkZ + 1));
+                    
+                    // Update terrain collider
+                    RebuildTerrainBoxColliderAt(blockLoc);
                 }
 
                 if (shouldRecalculateLight)
@@ -749,6 +787,14 @@ namespace CraftSharp.Rendering
             }, chunkRender.TokenSource.Token);
         }
 
+        private void BuildChunkRenderIfNotEmpty(ChunkRender chunkRender)
+        {
+            if (chunkRender) // Not empty(air) chunk
+            {
+                BuildChunkRender(chunkRender);
+            }
+        }
+
         private const int BUILD_COUNT_LIMIT = 6;
         private BlockLoc? lastPlayerBlockLoc;
 
@@ -961,7 +1007,13 @@ namespace CraftSharp.Rendering
             blockPredictionCallback = e =>
             {
                 // Make sure to set block from network thread
-                client.InvokeOnNetMainThread(() => SetBlock(e.BlockLoc, new Block(e.BlockStateId)));
+                client.InvokeOnNetMainThread(() =>
+                {
+                    var block = new Block((ushort) e.BlockStateId);
+                    Debug.Log($"Prediction: {e.BlockLoc} => {block}");
+
+                    SetBlock(e.BlockLoc, block, true);
+                });
             };
 
             EventManager.Instance.Register(blockPredictionCallback);

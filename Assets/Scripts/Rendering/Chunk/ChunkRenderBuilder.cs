@@ -111,7 +111,8 @@ namespace CraftSharp.Rendering
                 }
                 int colliderVertexCount = 0;
 
-                var blocs = data.Blocks;
+                var blocs = data.BlockStates;
+                var stids = data.BlockStateIds;
                 var light = data.Light;
                 var allColors = data.Color;
 
@@ -124,14 +125,13 @@ namespace CraftSharp.Rendering
                     {
                         for (int z = 1; z <= Chunk.SIZE; z++)
                         {
-                            var bloc = data.Blocks[x, y, z];
-                            var state = bloc.State;
-                            var stateId = bloc.StateId;
+                            var state = data.BlockStates[x, y, z];
+                            var stateId = data.BlockStateIds[x, y, z];
 
                             if (state.InLiquid) // Build liquid here
                             {
                                 var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                                int liquidCullFlags = getCullFlags(x, y, z, bloc, neighborCheck);
+                                int liquidCullFlags = getCullFlags(x, y, z, state, neighborCheck);
 
                                 if (liquidCullFlags != 0)
                                 {
@@ -145,7 +145,7 @@ namespace CraftSharp.Rendering
                             // If air-like (air, water block, etc), ignore it...
                             if (state.NoSolidMesh) continue;
                             
-                            int cullFlags = getCullFlags(x, y, z, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
+                            int cullFlags = getCullFlags(x, y, z, state, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
                             
                             if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
@@ -200,14 +200,13 @@ namespace CraftSharp.Rendering
                         for (int z = 1; z <= Chunk.SIZE; z++)
                         {
                             int blocZ = z - 1;
-                            var bloc = data.Blocks[x, y, z];
-                            var state = bloc.State;
-                            var stateId = bloc.StateId;
+                            var state = data.BlockStates[x, y, z];
+                            var stateId = data.BlockStateIds[x, y, z];
 
                             if (state.InLiquid) // Build liquid here
                             {
                                 var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                                int liquidCullFlags = getCullFlags(x, y, z, bloc, neighborCheck);
+                                int liquidCullFlags = getCullFlags(x, y, z, state, neighborCheck);
 
                                 if (liquidCullFlags != 0)
                                 {
@@ -224,7 +223,7 @@ namespace CraftSharp.Rendering
                             // If air-like (air, water block, etc), ignore it...
                             if (state.NoSolidMesh) continue;
                             
-                            int cullFlags = getCullFlags(x, y, z, bloc, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
+                            int cullFlags = getCullFlags(x, y, z, state, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
                             
                             if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
@@ -524,7 +523,7 @@ namespace CraftSharp.Rendering
                     return result.Select(f => f / 8F).ToArray();
                 }
 
-                int getCullFlags(int x, int y, int z, Block self, BlockNeighborCheck check)
+                int getCullFlags(int x, int y, int z, BlockState self, BlockNeighborCheck check)
                 {
                     int cullFlags = 0;
 
@@ -555,7 +554,7 @@ namespace CraftSharp.Rendering
 
                     for (int y_ = 0; y_ < 3; y_++) for (int z_ = 0; z_ < 3; z_++) for (int x_ = 0; x_ < 3; x_++)
                     {
-                        if (stateTable.GetByNumId(blocs[x + x_ - 1, y + y_ - 1, z + z_ - 1].StateId).AmbientOcclusionSolid)
+                        if (stateTable.GetByNumId(stids[x + x_ - 1, y + y_ - 1, z + z_ - 1]).AmbientOcclusionSolid)
                         {
                             result |= 1 << (y_ * 9 + z_ * 3 + x_);
                         }

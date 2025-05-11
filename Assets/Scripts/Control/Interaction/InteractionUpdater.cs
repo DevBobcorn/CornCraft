@@ -271,7 +271,7 @@ namespace CraftSharp.Control
             var (predictedStateId, predictedBlockState) = palette.GetBlockStateWithProperties(blockId, predicateProps);
             //Debug.Log($"Predicted block state: {predictedBlockState}");
 
-            //EventManager.Instance.Broadcast(new BlockPredictionEvent(newBlockLoc, (ushort) predictedStateId));
+            EventManager.Instance.Broadcast(new BlockPredictionEvent(newBlockLoc, predictedStateId));
 
             TargetBlockLoc = newBlockLoc;
             blockSelectionBox.transform.position = CoordConvert.MC2Unity(client.WorldOriginOffset, newBlockLoc.ToLocation());
@@ -469,7 +469,7 @@ namespace CraftSharp.Control
                 client.DigBlock(targetBlockLoc, targetDirection, DiggingStatus.Finished);
             });
 
-            //EventManager.Instance.Broadcast(new BlockPredictionEvent(targetBlockLoc, 0));
+            EventManager.Instance.Broadcast(new BlockPredictionEvent(targetBlockLoc, 0));
 
             EventManager.Instance.Broadcast(new ParticlesEvent(CoordConvert.MC2Unity(client.WorldOriginOffset, targetBlockLoc.ToCenterLocation()),
                 ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraDataWithColor(block.StateId, blockColor), 16));
