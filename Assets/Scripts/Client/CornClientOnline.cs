@@ -921,7 +921,7 @@ namespace CraftSharp
                                 // Check if items are stackable?
                                 if (InventoryData.CheckStackable(target1, cursor1))
                                 {
-                                    int maxCount = target1.ItemType.StackLimit;
+                                    int maxCount = Mathf.Min(target1.ItemType.StackLimit, slotType.MaxCount);
                                     
                                     // Check item stacking
                                     if (target1.Count + cursor1.Count <= maxCount)
@@ -956,9 +956,9 @@ namespace CraftSharp
                                         }
                                     }
                                 }
-                                else // No stackable, swap
+                                else // Not stackable, swap
                                 {
-                                    if (!placePredicate(cursor1))
+                                    if (!placePredicate(cursor1) || cursor1.Count > slotType.MaxCount)
                                     {
                                         Debug.Log($"[LeftClick] [{slot}] Cannot swap target with cursor");
                                     }
@@ -978,10 +978,22 @@ namespace CraftSharp
                                 }
                                 else
                                 {
-                                    // Put cursor item to target
-                                    inventory.Items[slot] = cursor1;
-                                    playerInventory.Items.Remove(-1);
-                                    Debug.Log($"[LeftClick] [{slot}] Put cursor to target [{inventory.Items[slot]}]");
+                                    int maxCount = slotType.MaxCount;
+
+                                    if (cursor1.Count <= maxCount)
+                                    {
+                                        // Put cursor item to target
+                                        inventory.Items[slot] = cursor1;
+                                        playerInventory.Items.Remove(-1);
+                                        Debug.Log($"[LeftClick] [{slot}] Put cursor to target [{inventory.Items[slot]}]");
+                                    }
+                                    else
+                                    {
+                                        // Leave some item on cursor
+                                        cursor1.Count -= maxCount;
+                                        inventory.Items[slot] = new ItemStack(cursor1.ItemType, maxCount, cursor1.NBT);
+                                        Debug.Log($"[LeftClick] [{slot}] Put cursor to target [{target1}], and leave some on cursor [{cursor1}]");
+                                    }
                                 }
                             }
 
@@ -1013,7 +1025,7 @@ namespace CraftSharp
                             // Check target slot also have item
                             if (inventory.Items.TryGetValue(slot, out var target2))
                             {
-                                int maxCount = target2.ItemType.StackLimit;
+                                int maxCount = Mathf.Min(target2.ItemType.StackLimit, slotType.MaxCount);
 
                                 // Check if these 2 items are stackable
                                 if (InventoryData.CheckStackable(target2, cursor2))
@@ -1041,9 +1053,9 @@ namespace CraftSharp
                                         Debug.Log($"[RightClick] [{slot}] Drop cursor [{cursor2}] to target[{target2}]");
                                     }
                                 }
-                                else // No stackable, swap
+                                else // Not stackable, swap
                                 {
-                                    if (!placePredicate(cursor2))
+                                    if (!placePredicate(cursor2) || cursor2.Count > slotType.MaxCount)
                                     {
                                         Debug.Log($"[RightClick] [{slot}] Cannot swap target (output) with cursor");
                                     }
@@ -1057,18 +1069,27 @@ namespace CraftSharp
                             }
                             else // Target has no item
                             {
-                                if (!placePredicate(cursor2))
+                                if (!placePredicate(cursor2) || 1 > slotType.MaxCount)
                                 {
                                     Debug.Log($"[RightClick] [{slot}] Cannot drop 1 cursor to target");
                                 }
                                 else
                                 {
-                                    // Drop 1 item count from cursor
-                                    ItemStack itemClone = new(cursor2.ItemType, 1, cursor2.NBT);
-                                    inventory.Items[slot] = itemClone;
-                                    cursor2.Count--;
-                                    if (cursor2.Count <= 0) playerInventory.Items.Remove(-1);
-                                    Debug.Log($"[RightClick] [{slot}] Drop 1 cursor [{cursor2}] to target [{inventory.Items[slot]}]");
+                                    int maxCount = slotType.MaxCount;
+
+                                    if (1 <= maxCount)
+                                    {
+                                        // Drop 1 item count from cursor
+                                        ItemStack itemClone = new(cursor2.ItemType, 1, cursor2.NBT);
+                                        inventory.Items[slot] = itemClone;
+                                        cursor2.Count--;
+                                        if (cursor2.Count <= 0) playerInventory.Items.Remove(-1);
+                                        Debug.Log($"[RightClick] [{slot}] Drop 1 cursor [{cursor2}] to target [{inventory.Items[slot]}]");
+                                    }
+                                    else
+                                    {
+                                        Debug.Log($"[RightClick] [{slot}] Cannot drop 1 cursor to target");
+                                    }
                                 }
                             }
                         }
@@ -1170,7 +1191,7 @@ namespace CraftSharp
                     case InventoryActionType.AddDragLeft:
                     case InventoryActionType.AddDragRight:
                         if (!dragging || draggedSlots.ContainsKey(slot)) return false;
-                        Debug.Log($"[{actionType}] Add dragged slot [{slot}]");
+                        //Debug.Log($"[{actionType}] Add dragged slot [{slot}]");
                         
                         var target8 = inventory.Items.GetValueOrDefault(slot);
                         draggedSlots[slot] = target8?.Count ?? 0; // Initial count is 0 if the slot is empty

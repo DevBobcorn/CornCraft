@@ -43,7 +43,7 @@ namespace CraftSharp.Inventory
                 {
                     var inventorySlotTypeId = ResourceLocation.FromString(key);
                     var interactable = !inventorySlotDef.Properties.TryGetValue("interactable", out var val) || bool.Parse(val.StringValue); // True if not specified
-
+                    var maxCount = inventorySlotDef.Properties.TryGetValue("max_count", out val) ? int.Parse(val.StringValue) : int.MaxValue;
                     var placePredicateStr = inventorySlotDef.Properties.TryGetValue("place_predicate", out val) ? val.StringValue : "never";
                     
                     Func<ItemStack, bool> placePredicate = placePredicateStr switch
@@ -53,7 +53,7 @@ namespace CraftSharp.Inventory
                         _ => ItemStackPredicate.FromString(placePredicateStr).Check
                     };
 
-                    var t = new InventorySlotType(inventorySlotTypeId, interactable, placePredicate);
+                    var t = new InventorySlotType(inventorySlotTypeId, interactable, maxCount, placePredicate);
                     
                     AddEntry(inventorySlotTypeId, numId++, t);
                 }

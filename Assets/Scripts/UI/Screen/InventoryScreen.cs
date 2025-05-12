@@ -293,7 +293,8 @@ namespace CraftSharp.UI
                     if (dragStartSlot < 0)
                     {
                         var cursor = game.GetInventory(0)?.Items.GetValueOrDefault(-1);
-                        if (cursor is not null && cursor.Count > 1 && slotType.PlacePredicate(cursor) &&
+                        if (cursor is not null && cursor.Count > 1 && slotType.MaxCount == int.MaxValue &&
+                            slotType.PlacePredicate(cursor) &&
                             (target is null || InventoryData.CheckStackable(target, cursor)))
                         {
                             dragStartSlot = slotId;
@@ -325,7 +326,7 @@ namespace CraftSharp.UI
                         game.DoInventoryAction(activeInventoryId, dragStartSlot, action);
                     }
                     
-                    if (dragging && !draggedSlots.Contains(slotId) &&
+                    if (dragging && !draggedSlots.Contains(slotId) && slotType.MaxCount == int.MaxValue &&
                         game.CheckAddDragged(target, slotType.PlacePredicate)) // Add this slot
                     {
                         currentSlots[slotId].Dragged = true;
